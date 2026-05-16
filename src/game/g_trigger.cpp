@@ -488,17 +488,13 @@ void __cdecl G_CheckHitTriggerDamage(
     v13 = (float)(vEnd[1] - vStart[1]);
     v14 = (float)(vEnd[2] - vStart[2]);
 
-    // aislop
-    //_FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
-    //    + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
-    //__asm { fsel      f11, f9, f10, f11 }
+    //_FP9 = -sqrtf(...);                   ; -mag (<= 0)
+    //__asm { fsel      f11, f9, f10, f11 } ; f11 = (-mag >= 0) ? safe : mag
     //v17 = (float)((float)1.0 / (float)_FP11);
-
     {
         float dx = *vEnd - *vStart;
-        float _FP9 = -sqrtf(dx * dx + v14 * v14 + v13 * v13);
-        float _FP11 = (_FP9 > 0.0f) ? _FP9 : 0.0f;
-        v17 = 1.0f / _FP11;
+        float mag = sqrtf(dx * dx + v14 * v14 + v13 * v13);
+        v17 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
     }
 
     v18 = (float)((float)v17 * (float)(*vEnd - *vStart));
@@ -568,20 +564,17 @@ void __cdecl G_GrenadeTouchTriggerDamage(
     v13 = (float)(vEnd[1] - vStart[1]);
     v14 = (float)(vEnd[2] - vStart[2]);
 
-    // aislop
-    //_FP9 = -sqrtf((float)((float)((float)(*vEnd - *vStart) * (float)(*vEnd - *vStart))
-    //    + (float)((float)((float)v14 * (float)v14) + (float)((float)v13 * (float)v13))));
-    //__asm { fsel      f11, f9, f10, f11 }
+    //_FP9 = -sqrtf(...);                   ; -mag (<= 0)
+    //__asm { fsel      f11, f9, f10, f11 } ; f11 = (-mag >= 0) ? safe : mag
     //v17 = (float)((float)1.0 / (float)_FP11);
+    // Same inf-direction bug as G_BulletTouchTriggerDamage above.
     {
-        float _FP9 = -sqrtf(
+        float mag = sqrtf(
             (*vEnd - *vStart) * (*vEnd - *vStart) +
             v14 * v14 +
             v13 * v13
         );
-
-        float _FP11 = (_FP9 > 0.0f) ? _FP9 : 0.0f;
-        v17 = 1.0f / _FP11;
+        v17 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
     }
 
     v18 = (float)((float)v17 * (float)(*vEnd - *vStart));

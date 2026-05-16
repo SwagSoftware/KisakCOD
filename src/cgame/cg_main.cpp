@@ -718,12 +718,11 @@ void __cdecl CG_CopyEntityOrientation(int localClientNum, int entIndex, float *o
 {
     centity_s *Entity; // r3
 
-    if (!origin_out)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 595, 0, "%s", "origin_out");
-    if (!axis_out)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 596, 0, "%s", "axis_out");
+    iassert(origin_out);
+    iassert(axis_out);
+
     Entity = CG_GetEntity(localClientNum, entIndex);
-    *origin_out = Entity->pose.origin[0];
+    origin_out[0] = Entity->pose.origin[0];
     origin_out[1] = Entity->pose.origin[1];
     origin_out[2] = Entity->pose.origin[2];
     AnglesToAxis(Entity->pose.angles, axis_out);
@@ -805,106 +804,65 @@ void __cdecl CG_BoldGameMessage(const char *msg, int flags)
 
 void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t **sound)
 {
-    snd_alias_list_t *v4; // r3
-    snd_alias_list_t **v5; // r11
-    int v6; // ctr
-    snd_alias_list_t *SoundAlias; // r27
-    int i; // r30
-    const char *v9; // r3
-    snd_alias_list_t *SoundAliasNoErrors; // r3
-    char v11[304]; // [sp+50h] [-130h] BYREF
+    snd_alias_list_t *defaultAliasList; // [esp+0h] [ebp-110h]
+    char szAliasName[260]; // [esp+8h] [ebp-108h] BYREF
 
-    if (!pszType)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 700, 0, "%s", "pszType");
+    iassert(pszType);
+
     if (*pszType)
     {
-        snprintf(v11, ARRAYSIZE(v11), "%s_default", pszType);
-        SoundAlias = Com_FindSoundAlias(v11);
-        for (i = 0; i < 29; ++i)
+        snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_default", pszType);
+        defaultAliasList = Com_FindSoundAlias(szAliasName);
+        for (int i = 0; i < 29; ++i)
         {
-            v9 = Com_SurfaceTypeToName(i);
-            snprintf(v11, ARRAYSIZE(v11), "%s_%s", pszType, v9);
-            SoundAliasNoErrors = Com_FindSoundAliasNoErrors(v11);
-            *sound = SoundAliasNoErrors;
-            if (!SoundAliasNoErrors)
-                *sound = SoundAlias;
-            ++sound;
+            snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_%s", pszType, Com_SurfaceTypeToName(i));
+            sound[i] = Com_FindSoundAliasNoErrors(szAliasName);
+            if (!sound[i])
+                sound[i] = defaultAliasList;
         }
     }
     else
     {
-        Com_Printf(9, "WARNING: no alias prefix defined, using default\n");
-        v4 = Com_FindSoundAliasNoErrors("collision_default");
-        v5 = sound;
-        v6 = 29;
-        do
-        {
-            *v5++ = v4;
-            --v6;
-        } while (v6);
+        Com_DPrintf(9, "WARNING: no alias prefix defined, using default\n");
+        defaultAliasList = Com_FindSoundAliasNoErrors("collision_default");
+        for (int i = 0; i < 29; ++i)
+            sound[i] = defaultAliasList;
     }
 }
 
 void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64], int *nclasses)
 {
-    int v6; // r28
-    const char *v7; // r29
-    const char *sndAliasPrefix; // r3
-    int v9; // r10
+    iassert(physPreset);
+    iassert(physPreset->sndAliasPrefix);
+    iassert(nclasses);
+    iassert(classes);
 
-    if (!physPreset)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 729, 0, "%s", "physPreset");
-    if (!physPreset->sndAliasPrefix)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 730, 0, "%s", "physPreset->sndAliasPrefix");
-    if (!nclasses)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 731, 0, "%s", "nclasses");
-    if (!classes)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp", 732, 0, "%s", "classes");
-    v6 = 0;
-    if (*nclasses <= 0)
+    for (int i = 0; i < *nclasses; ++i)
     {
-    LABEL_13:
-        sndAliasPrefix = physPreset->sndAliasPrefix;
-        v9 = *nclasses;
-        physPreset->type = *nclasses;
-        CG_RegisterSurfaceTypeSounds(sndAliasPrefix, cgMedia.physCollisionSound[v9]);
-        I_strncpyz(&(*classes)[64 * *nclasses], physPreset->sndAliasPrefix, 64);
-        ++*nclasses;
-    }
-    else
-    {
-        v7 = (const char *)classes;
-        while (I_stricmp(physPreset->sndAliasPrefix, v7))
+        if (!I_stricmp(physPreset->sndAliasPrefix, &(*classes)[64 * i]))
         {
-            ++v6;
-            v7 += 64;
-            if (v6 >= *nclasses)
-                goto LABEL_13;
+            physPreset->type = i;
+            return;
         }
-        physPreset->type = v6;
     }
+
+    physPreset->type = *nclasses;
+    CG_RegisterSurfaceTypeSounds(physPreset->sndAliasPrefix, cgMedia.physCollisionSound[physPreset->type]);
+    I_strncpyz(&(*classes)[64 * *nclasses], (char *)physPreset->sndAliasPrefix, 64);
+    ++*nclasses;
 }
 
 void CG_RegisterPhysicsSounds_FastFile()
 {
-    int AllXAssetOfType; // r3
-    XAssetHeader *v1; // r30
-    int v2; // r31
-    int v3[4]; // [sp+50h] [-D80h] BYREF
-    XAssetHeader v4[854]; // [sp+60h] [-D70h] BYREF
+    char classes[50][64]; // [esp+0h] [ebp-D60h] BYREF
+    XAssetHeader assets[50]; // [esp+C98h] [ebp-C8h] BYREF
 
-    v3[0] = 0;
-    AllXAssetOfType = DB_GetAllXAssetOfType(ASSET_TYPE_PHYSPRESET, v4, 50);
-    if (AllXAssetOfType > 0)
+    int nclasses = 0;
+    int physPresetCount = DB_GetAllXAssetOfType(ASSET_TYPE_PHYSPRESET, assets, 50);
+    for (int i = 0; i < physPresetCount; ++i)
     {
-        v1 = v4;
-        v2 = AllXAssetOfType;
-        do
-        {
-            CG_AddAudioPhysicsClass(v1->physPreset, (char (*)[64]) & v4[52], v3);
-            --v2;
-            ++v1;
-        } while (v2);
+        PhysPreset *physPreset = assets[i].physPreset;
+        CG_AddAudioPhysicsClass(physPreset, classes, &nclasses);
     }
 }
 
@@ -1251,47 +1209,44 @@ void __cdecl CG_AddFXSoundAlias(int localClientNum, const float *origin, snd_ali
 
 int __cdecl CG_PlaySoundAlias(int localClientNum, SndEntHandle entitynum, const float *origin, snd_alias_list_t *aliasList)
 {
-    const snd_alias_t *v6; // r3
-    snd_alias_t *v7; // r31
-    int v9; // r30
+    const snd_alias_t *alias; // r3
+    int playbackId; // r30
 
-    v6 = Com_PickSoundAliasFromList(aliasList);
-    v7 = (snd_alias_t *)v6;
-    if (!v6)
+    alias = Com_PickSoundAliasFromList(aliasList);
+
+    if (!alias)
         return -1;
-    v9 = SND_PlaySoundAlias(v6, entitynum, origin, 0, SASYS_CGAME);
-    SND_AddLengthNotify(v9, v7, SndLengthNotify_Subtitle);
-    return v9;
+
+    playbackId = SND_PlaySoundAlias(alias, entitynum, origin, 0, SASYS_CGAME);
+    SND_AddLengthNotify(playbackId, alias, SndLengthNotify_Subtitle);
+
+    return playbackId;
 }
 
 int __cdecl CG_PlaySoundAliasByName(int localClientNum, SndEntHandle entitynum, const float *origin, const char *aliasname)
 {
-    const snd_alias_t *v6; // r3
-    snd_alias_t *v7; // r31
-    int v9; // r30
+    const snd_alias_t *alias; // r3
+    int playbackId; // r30
 
-    v6 = CL_PickSoundAlias(aliasname);
-    v7 = (snd_alias_t *)v6;
-    if (!v6)
+    alias = CL_PickSoundAlias(aliasname);
+    if (!alias)
         return -1;
-    v9 = SND_PlaySoundAlias(v6, entitynum, origin, 0, SASYS_CGAME);
-    SND_AddLengthNotify(v9, v7, SndLengthNotify_Subtitle);
-    return v9;
+    playbackId = SND_PlaySoundAlias(alias, entitynum, origin, 0, SASYS_CGAME);
+    SND_AddLengthNotify(playbackId, alias, SndLengthNotify_Subtitle);
+    return playbackId;
 }
 
 int __cdecl CG_PlaySoundAliasAsMasterByName(int localClientNum, SndEntHandle entitynum, const float *origin, const char *aliasname)
 {
-    const snd_alias_t *v6; // r3
-    snd_alias_t *v7; // r31
-    int v9; // r30
+    const snd_alias_t *alias; // r3
+    int playbackId; // r30
 
-    v6 = CL_PickSoundAlias(aliasname);
-    v7 = (snd_alias_t *)v6;
-    if (!v6)
+    alias = CL_PickSoundAlias(aliasname);
+    if (!alias)
         return -1;
-    v9 = SND_PlaySoundAliasAsMaster(v6, entitynum, origin, 0, SASYS_CGAME);
-    SND_AddLengthNotify(v9, v7, SndLengthNotify_Subtitle);
-    return v9;
+    playbackId = SND_PlaySoundAliasAsMaster(alias, entitynum, origin, 0, SASYS_CGAME);
+    SND_AddLengthNotify(playbackId, alias, SndLengthNotify_Subtitle);
+    return playbackId;
 }
 
 void __cdecl CG_LoadHudMenu(int localClientNum)
@@ -1319,40 +1274,14 @@ void __cdecl CG_LoadHudMenu(int localClientNum)
 
 void __cdecl CG_InitViewDimensions(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            917,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgsArray[0].viewX = 0;
-    CL_GetScreenDimensions(&cgsArray[0].viewWidth,&cgsArray[0].viewHeight, &cgsArray[0].viewAspect);
-    if (cgsArray[0].viewWidth <= 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp",
-            1326,
-            1,
-            "%s\n\t(cgs->viewWidth) = %i",
-            "(cgs->viewWidth > 0)",
-            cgsArray[0].viewWidth);
-    if (cgsArray[0].viewHeight <= 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp",
-            1327,
-            1,
-            "%s\n\t(cgs->viewHeight) = %i",
-            "(cgs->viewHeight > 0)",
-            cgsArray[0].viewHeight);
-    if (cgsArray[0].viewAspect <= 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp",
-            1328,
-            1,
-            "%s\n\t(cgs->viewAspect) = %g",
-            "(cgs->viewAspect > 0)",
-            cgsArray[0].viewAspect);
+    cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+
+    cgs->viewX = 0;
+    CL_GetScreenDimensions(&cgs->viewWidth,&cgs->viewHeight, &cgs->viewAspect);
+
+    iassert(cgs->viewWidth > 0);
+    iassert(cgs->viewHeight > 0);
+    iassert(cgs->viewAspect > 0);
 }
 
 const char *__cdecl CG_GetTeamName(team_t team)
@@ -1470,6 +1399,11 @@ void __cdecl CG_InitDof(GfxDepthOfField *dof)
     dof->nearBlur = 6.0;
 }
 
+void __cdecl CL_LoadSoundAliases(const char *loadspec)
+{
+    Com_LoadSoundAliases(loadspec, "all_sp", SASYS_CGAME);
+}
+
 void __cdecl CG_Init(int localClientNum, int savegame)
 {
     const char *ConfigString; // r11
@@ -1477,45 +1411,32 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     int v6; // r8
     int i; // r31
     const char *String; // r3
-    char v9[64]; // [sp+50h] [-470h] BYREF
+    char mapname[64]; // [sp+50h] [-470h] BYREF
     char v10[1072]; // [sp+90h] [-430h] BYREF
 
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            917,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
 
-    memset(&cgsArray[localClientNum], 0, sizeof(cgs_t));
+    memset(cgs, 0, sizeof(cgs_t));
     memset(&cgDC, 0, sizeof(cgDC));
     memset(cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
     memset(&cgArray[0].viewModelPose, 0, sizeof(cgArray[0].viewModelPose));
-    cgArray[0].viewModelPose.eType = 17;
-    cgArray[0].localClientNum = localClientNum;
-    cgArray[0].refdef.dof.nearStart = 0.0;
-    cgArray[0].refdef.dof.nearEnd = 0.0;
-    cgArray[0].refdef.dof.farStart = 5000.0;
-    cgArray[0].refdef.dof.farEnd = 5000.0;
-    cgArray[0].refdef.dof.nearBlur = 6.0;
-    cgArray[0].refdef.dof.farBlur = 0.0;
+
+    cgameGlob->viewModelPose.eType = 17;
+    cgameGlob->localClientNum = localClientNum;
+    cgameGlob->refdef.dof.nearStart = 0.0;
+    cgameGlob->refdef.dof.nearEnd = 0.0;
+    cgameGlob->refdef.dof.farStart = 5000.0;
+    cgameGlob->refdef.dof.farEnd = 5000.0;
+    cgameGlob->refdef.dof.nearBlur = 6.0;
+    cgameGlob->refdef.dof.farBlur = 0.0;
+    
     CG_RegisterDvars();
     Ragdoll_Init();
     Phys_Init();
     CG_DrawInformation(localClientNum);
     SCR_UpdateLoadScreen();
+
     cgMedia.whiteMaterial = Material_RegisterHandle("white", 7);
     cgMedia.friendlyFireMaterial = Material_RegisterHandle("hudfriendlyfire", 7);
     cgMedia.smallDevFont = CL_RegisterFont("fonts/smalldevfont", 1);
@@ -1530,6 +1451,7 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     cgMedia.nightVisionOverlay = 0;
     cgMedia.hudIconNVG = 0;
     cgMedia.nightVisionGoggles = 0;
+
     Material_RegisterHandle("code_warning_soundcpu", 7);
     Material_RegisterHandle("code_warning_snapshotents", 7);
     Material_RegisterHandle("code_warning_maxeffects", 7);
@@ -1537,88 +1459,91 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     Material_RegisterHandle("code_warning_file", 7);
     Material_RegisterHandle("code_warning_fps", 7);
     Material_RegisterHandle("code_warning_serverfps", 7);
+
     CG_InitConsoleCommands();
     CG_InitViewDimensions(localClientNum);
+
     ConfigString = CL_GetConfigString(localClientNum, 2u);
-    v5 = "cod-sp";
-    do
-    {
-        v6 = *(unsigned __int8 *)ConfigString - *(unsigned __int8 *)v5;
-        if (!*ConfigString)
-            break;
-        ++ConfigString;
-        ++v5;
-    } while (!v6);
-    if (v6)
+    if (strcmp(ConfigString, "cod-sp"))
         Com_Error(ERR_DROP, "Client/Server game mismatch");
+
     ProfLoad_Begin("Parse server info");
     CG_ParseServerInfo(localClientNum);
-
-    // MP ADD
-    static bool g_mapLoaded = false; // hacky
-    if (!g_mapLoaded && !IsFastFileLoad())
-    {
-        //CG_LoadingString(localClientNum, "sound aliases");
-        Com_LoadSoundAliases(cgs->mapname, "all", SASYS_CGAME);
-
-        g_mapLoaded = true;
-    }
-    // MP END
-
     CG_SetupWeaponDef(localClientNum);
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
     Menu_Setup(&cgDC);
+
+    if (IsFastFileLoad())
+    {
+        //cgMedia.subtitleStringTable = DB_FindXAssetHeader(ASSET_TYPE_STRINGTABLE, "video/subtitles.csv").stringTable;
+    }
+
     SCR_UpdateLoadScreen();
     ProfLoad_Begin("Load world");
-    LoadWorld(cgsArray[0].mapname, savegame);
+    LoadWorld(cgs->mapname, savegame);
     ProfLoad_End();
     SCR_UpdateLoadScreen();
     CG_ParseSunLight(0);
     SCR_UpdateLoadScreen();
+    CL_LoadSoundAliases(cgs->mapname);
     SCR_UpdateLoadScreen();
     SCR_UpdateLoadScreen();
-    if (I_strnicmp(cgsArray[0].mapname, "maps/", 5))
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_main.cpp",
-            1528,
-            0,
-            "%s",
-            "!I_strnicmp( cgs->mapname, \"maps/\", 5 )");
-    Com_StripExtension(&cgsArray[0].mapname[5], v9);
+
+    iassert(!I_strnicmp(cgs->mapname, "maps/", 5 ));
+    Com_StripExtension(&cgsArray[0].mapname[5], mapname);
+
     ProfLoad_Begin("Init effects system");
     FX_InitSystem(localClientNum);
+    FX_RegisterDefaultEffect();
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
-    CG_RegisterGraphics(localClientNum, v9);
+
+    CG_RegisterGraphics(localClientNum, mapname);
+
     SCR_UpdateLoadScreen();
+
     ProfLoad_Begin("Load hud menus");
     CG_LoadHudMenu(localClientNum);
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
+
     ProfLoad_Begin("Precache script menus");
     for (i = 2551; i < 2583; ++i)
         CG_PrecacheScriptMenu(localClientNum, i);
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
+
     ProfLoad_Begin("Register server materials");
     CG_RegisterServerMaterials(localClientNum);
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
+
     ProfLoad_Begin("Optimize all xmodels");
     CL_FinishLoadingModels();
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
+
     ProfLoad_Begin("Map init");
     CG_MapInit(0);
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
+
     CG_AntiBurnInHUD_RegisterDvars();
     CL_SetADS(localClientNum, 0);
     AimAssist_Init(localClientNum);
+
 #ifndef KISAK_NO_FASTFILES
     CG_ModelPreviewerCreateDevGui(localClientNum);
 #endif
+
     //CG_InitDevguiRumbleGraph(localClientNum); // KISAKTODO
     I_strncpyz(v10, Dvar_GetString("profile"), 1024);
     Dvar_SetFromStringByName("profile", (char*)"");

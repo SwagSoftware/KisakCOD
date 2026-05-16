@@ -957,20 +957,20 @@ bool __cdecl Actor_GrenadeLauncher_CheckPos(
 
     if (vOffset)
     {
-        Actor_Grenade_GetTossFromPosition(self, vStandPos, vOffset, vVelOut);
+        Actor_Grenade_GetTossFromPosition(self, vStandPos, vOffset, vPosOut);
     }
     else
     {
-        vVelOut[0] = vStandPos[0];
-        vVelOut[1] = vStandPos[1];
-        vVelOut[2] = vStandPos[2];
+        vPosOut[0] = vStandPos[0];
+        vPosOut[1] = vStandPos[1];
+        vPosOut[2] = vStandPos[2];
     }
-    dist = Vec2Distance(vVelOut, vTargetPos);
+    dist = Vec2Distance(vPosOut, vTargetPos);
 
     if (dist == 0.0f)
         return 0;
 
-    v17 = (float)((float)((float)((float)((float)((float)(vTargetPos[2] - vVelOut[2])
+    v17 = (float)((float)((float)((float)((float)((float)(vTargetPos[2] - vPosOut[2])
         / (float)((float)speed * (float)speed))
         * (float)(dist * dist))
         * g_gravity->current.value)
@@ -990,16 +990,16 @@ bool __cdecl Actor_GrenadeLauncher_CheckPos(
         * (float)((float)speed * (float)speed))
         / (float)((float)(dist * dist) * g_gravity->current.value));
 
-    FastSinCos(atan(dist), &sinval, &cosval); // KISAKTODO: not 100% sure on sinval here
-    vVelOut[0] = vTargetPos[0] - vVelOut[0];
-    vVelOut[1] = vTargetPos[1] - vVelOut[1];
+    FastSinCos(atan(dist), &sinval, &cosval);
+    vVelOut[0] = vTargetPos[0] - vPosOut[0];
+    vVelOut[1] = vTargetPos[1] - vPosOut[1];
     Vec2Normalize(vVelOut);
 
     vVelOut[0] = (vVelOut[0] * sinval) * speed;
     vVelOut[1] = (vVelOut[1] * sinval) * speed;
     vVelOut[2] = cosval * speed;
 
-    return Actor_Grenade_IsValidTrajectory(self, vVelOut, vVelOut, vTargetPos);
+    return Actor_Grenade_IsValidTrajectory(self, vPosOut, vVelOut, vTargetPos);
 }
 
 int Actor_Grenade_IsSafeTarget(actor_s *self, const float *vTargetPos, unsigned int iWeapID)
@@ -1237,20 +1237,16 @@ bool __cdecl Actor_Grenade_ShouldIgnore(actor_s *self, gentity_s *grenade)
 
 int __cdecl Actor_IsAwareOfGrenade(actor_s *self)
 {
-    int result; // r3
-    __int64 v3; // r10
-
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1515, 0, "%s", "self");
     if (self->grenadeAwareness == 0.0)
         return 0;
     if (!Actor_GetTargetEntity(self))
         return 1;
-    LODWORD(v3) = G_rand();
-    result = 0;
-    if ((float)v3 <= (double)(float)(self->grenadeAwareness * (float)32767.0))
+    int randVal = G_rand();
+    if ((float)randVal <= self->grenadeAwareness * 32767.0f)
         return 1;
-    return result;
+    return 0;
 }
 
 void __cdecl Actor_GrenadePing(actor_s *self, gentity_s *pGrenade)
@@ -1510,10 +1506,9 @@ actor_think_result_t __cdecl Actor_Grenade_ThrowBack(actor_s *self)
                 v3 = self->ent->r.currentOrigin[2];
                 v4 = self->ent->r.currentOrigin[1];
                 v5 = self->ent->r.currentOrigin[0];
-                SL_ConvertToString(self->ent->classname);
                 v6 = va(
                     "ai classname '%s' at (%g %g %g) finished the grenade return script without throwing a grenade",
-                    (const char *)HIDWORD(v5),
+                    SL_ConvertToString(self->ent->classname),
                     v5,
                     v4,
                     v3);

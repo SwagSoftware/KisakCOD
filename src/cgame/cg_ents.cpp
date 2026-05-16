@@ -962,14 +962,11 @@ void __cdecl CG_SetFrameInterpolation(int localClientNum)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp", 488, 0, "%s", "cgameGlob->nextSnap");
         nextSnap = cgArray[0].nextSnap;
     }
-    HIDWORD(v2) = cgArray[0].snap->serverTime;
-    LODWORD(v2) = nextSnap->serverTime - HIDWORD(v2);
-    if ((unsigned int)v2)
+    int snapTime = cgArray[0].snap->serverTime;
+    int snapDelta = nextSnap->serverTime - snapTime;
+    if (snapDelta)
     {
-        v4 = v2;
-        HIDWORD(v3) = cgArray[0].time;
-        LODWORD(v3) = cgArray[0].time - HIDWORD(v2);
-        cgArray[0].frameInterpolation = (float)v3 / (float)v4;
+        cgArray[0].frameInterpolation = (float)(cgArray[0].time - snapTime) / (float)snapDelta;
         if (cgArray[0].frameInterpolation < 0.0)
             cgArray[0].frameInterpolation = 0.0;
     }
@@ -981,13 +978,7 @@ void __cdecl CG_SetFrameInterpolation(int localClientNum)
 
 void __cdecl CG_DObjUpdateInfo(const cg_s *cgameGlob, DObj_s *obj, bool notify)
 {
-    //__int64 v3; // r11
-    //
-    //HIDWORD(v3) = 108040;
-    //LODWORD(v3) = cgameGlob->animFrametime;
-    //DObjUpdateClientInfo(obj, (float)((float)v3 * (float)0.001), (bool)obj);
-
-    DObjUpdateClientInfo(obj, cgameGlob->frametime * 0.001f, notify);
+    DObjUpdateClientInfo(obj, (float)cgameGlob->animFrametime * 0.001f, obj != nullptr);
 }
 
 cpose_t *__cdecl CG_GetPose(int localClientNum, int handle)
@@ -1490,7 +1481,7 @@ void __cdecl CG_InterpolateEntityOrigin(const cg_s *cgameGlob, centity_s *cent)
     BG_EvaluateTrajectory(&cent->nextState.lerp.pos, cgameGlob->nextSnap->serverTime, next);
 
     cent->pose.origin[0] = ((next[0] - current[0]) * frameInterpolation) + current[0];
-    cent->pose.origin[1] = ((next[1] - current[0]) * frameInterpolation) + current[1];
+    cent->pose.origin[1] = ((next[1] - current[1]) * frameInterpolation) + current[1];
     cent->pose.origin[2] = ((next[2] - current[2]) * frameInterpolation) + current[2];
 }
 
@@ -1558,8 +1549,11 @@ void __cdecl CG_CreatePhysicsObject(int localClientNum, centity_s *cent)
             //v16[2] = (float)v9 * (float)((float)1.0 / (float)_FP10);
 
             {
-                float _FP10 = fabsf(v10);  // Replaces fsel logic: ensure _FP10 is positive
-                float reciprocal = 1.0f / _FP10;
+                // PPC: _FP10 = -v10; fsel f10, f10, f11, f1
+                // v10 = sqrtf(...) >= 0, so -v10 <= 0; only >= 0 when v10 == 0.
+                // fsel result picks safe divisor when angular speed is zero (avoids 1/0).
+                // When v10 == 0 trDelta is (0,0,0), so the normalized axis stays (0,0,0).
+                float reciprocal = (v10 > 0.0f) ? (1.0f / v10) : 0.0f;
                 v13 = cent->currentState.apos.trDelta[1] * reciprocal;
                 v16[0] = reciprocal * cent->currentState.apos.trDelta[0];
                 v16[1] = v13;

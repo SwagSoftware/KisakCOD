@@ -132,7 +132,6 @@ void __cdecl R_GetNormalizedColorFromDvar(const dvar_s *dvar, float *outVec)
 
 void __cdecl R_LoadWorld(char *name, int *checksum, int savegame)
 {
-    SunLightParseParams sunParse; // [esp+4h] [ebp-90h] BYREF
     unsigned int reflectionProbeIndex; // [esp+8Ch] [ebp-8h]
     int lightmapIndex; // [esp+90h] [ebp-4h]
 
@@ -145,8 +144,7 @@ void __cdecl R_LoadWorld(char *name, int *checksum, int savegame)
     if (checksum)
         *checksum = rgp.world->checksum;
     R_CopyParseParamsToDvars(&rgp.world->sunParse, savegame);
-    R_CopyParseParamsFromDvars(&sunParse);
-    R_InterpretSunLightParseParams(&sunParse);
+    R_UpdateLightsFromDvars();
     R_FlushSun();
     R_ResetShadowCookies();
     R_InitDynamicData();

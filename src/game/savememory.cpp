@@ -434,17 +434,12 @@ void __cdecl SaveMemory_CreateHeader(
         I_strncpyz(save->header.description, description, 256);
     else
         save->header.description[0] = 0;
-    if (g_entities[0].health
-        && (LODWORD(v41) = g_entities[0].client->pers.maxHealth, (_DWORD)v41)
-        && (HIDWORD(v41) = 100 * g_entities[0].health,
-            v45 = v41,
-            v42 = v44,
-            v44[1] = 100 * g_entities[0].health,
-            v44[0] = (int)(float)((float)*(__int64 *)((char *)&v41 + 4) / (float)v41),
-            v43 = v44[0],
-            v44[0] >= 1))
+    if (g_entities[0].health && g_entities[0].client->pers.maxHealth)
     {
-        if (v44[0] > 100)
+        v43 = (int)((float)(100 * g_entities[0].health) / (float)g_entities[0].client->pers.maxHealth);
+        if (v43 < 1)
+            v43 = 1;
+        else if (v43 > 100)
             v43 = 100;
     }
     else

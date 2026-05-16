@@ -648,25 +648,19 @@ int __cdecl MSG_ReadString(msg_t *msg, char *buffer, int bufsize)
 
 float __cdecl MSG_ReadAngle16(msg_t *msg)
 {
-    __int64 v1; // r11
-    double v2; // fp1
-
-    LODWORD(v1) = msg->readcount;
-    HIDWORD(v1) = v1 + 2;
-    if ((int)v1 + 2 > msg->cursize)
+    int readcount = msg->readcount;
+    int raw;
+    if (readcount + 2 > msg->cursize)
     {
-        v1 = 0x1FFFFFFFFLL;
         msg->overflowed = 1;
+        raw = -1;
     }
     else
     {
-        //LOWORD(v1) = *(_WORD *)&msg->data[v1];
-        v1 = (v1 & 0xFFFF0000) | (*(_WORD *)&msg->data[v1]);
-        msg->readcount = HIDWORD(v1);
-        LODWORD(v1) = (__int16)v1;
+        raw = *(int16_t *)&msg->data[readcount];
+        msg->readcount = readcount + 2;
     }
-    v2 = (float)((float)v1 * (float)0.0054931641);
-    return *((float *)&v2 + 1);
+    return (float)raw * 0.0054931641f;
 }
 
 void __cdecl MSG_ReadData(msg_t *msg, _BYTE *data, int len)
@@ -1333,8 +1327,7 @@ void __cdecl MSG_WriteDeltaField(msg_t *msg, unsigned __int8 *to, const netField
         goto LABEL_2;
     MSG_WriteBits(v5, 1, 1u);
     v11 = (int)v7;
-    LODWORD(v8) = (int)v7;
-    if ((float)v8 == v7)
+    if ((float)v11 == v7)
     {
         v9 = v11 + 4096;
         if (v11 + 4096 >= 0 && v9 < 0x2000)
@@ -1382,8 +1375,7 @@ void __cdecl MSG_ReadDeltaField(msg_t *msg, unsigned __int8 *to, const netField_
     if (!MSG_ReadBits(msg, 1u))
     {
         Bits = MSG_ReadBits(msg, 0xDu) - 4096;
-        LODWORD(v10) = Bits;
-        *(float *)&to[offset] = (float)v10;
+        *(float *)&to[offset] = (float)Bits;
         goto LABEL_12;
     }
     *(unsigned int *)&to[offset] = MSG_ReadBits(msg, 0x20u);
@@ -1522,8 +1514,8 @@ void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, hudelem_s *to, unsigned int count
                     v14 = msg;
                     if (!v15)
                     {
-                        LODWORD(v16) = MSG_ReadBits(msg, 0xDu) - 4096;
-                        *(float *)((char *)&to->type + v13) = (float)v16;
+                        int hudBits = MSG_ReadBits(msg, 0xDu) - 4096;
+                        *(float *)((char *)&to->type + v13) = (float)hudBits;
                         goto LABEL_18;
                     }
                     v17 = 32;
@@ -1699,9 +1691,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
         {
             v13 = *(float *)((char *)&to->commandTime + v11);
             v14 = (int)v13;
-            LODWORD(v12) = (int)v13;
-            *(_QWORD *)v63 = v12;
-            if ((float)v12 == v13 && (unsigned int)(v14 + 4096) < 0x2000)
+            if ((float)v14 == v13 && (unsigned int)(v14 + 4096) < 0x2000)
             {
                 MSG_WriteBits(msg, 0, 1u);
                 MSG_WriteBits(msg, v14 + 4096, 0xDu);
@@ -2247,8 +2237,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
         if (!MSG_ReadBits(msg, 1u))
         {
             Bits = MSG_ReadBits(msg, 0xDu) - 4096;
-            LODWORD(v14) = Bits;
-            *(float *)((char *)&to->commandTime + v11) = (float)v14;
+            *(float *)((char *)&to->commandTime + v11) = (float)Bits;
         LABEL_32:
             if (print)
                 Com_Printf(16, "%s:%i ", (const char *)*(p_bits - 2), Bits);

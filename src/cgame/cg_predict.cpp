@@ -641,59 +641,40 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
         CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, Buf);
         if ((cgArray[0].predictedPlayerState.pm_flags & 0x400) != 0)
             CL_SetStance(localClientNum, CL_STANCE_STAND);
-        if (cg_pmove.viewChange == 0.0
-            || (*(unsigned int *)v21 = cg_pmove.viewChangeTime, cg_pmove.viewChangeTime == cgArray[0].stepViewStart)
+        bool skipSmoothing = cg_pmove.viewChange == 0.0
+            || cg_pmove.viewChangeTime == cgArray[0].stepViewStart
             || cgArray[0].playerTeleported
-            || cgArray[0].predictedPlayerState.pm_type
-            && cgArray[0].predictedPlayerState.pm_type != 2
-            && cgArray[0].predictedPlayerState.pm_type != 3)
+            || (cgArray[0].predictedPlayerState.pm_type
+                && cgArray[0].predictedPlayerState.pm_type != 2
+                && cgArray[0].predictedPlayerState.pm_type != 3);
+
+        float duration = cg_viewZSmoothingTime->current.value * 1000.0f;
+
+        if (!skipSmoothing && I_fabs(cg_pmove.viewChange) >= cg_viewZSmoothingMin->current.value)
         {
-            LODWORD(v30) = cgArray[0].time - cgArray[0].stepViewStart;
-            HIDWORD(v30) = cgArray[0].time - cgArray[0].stepViewStart;
-            v28 = (float)(cg_viewZSmoothingTime->current.value * (float)1000.0);
-            v32 = v30;
-            v29 = v30;
-        }
-        else
-        {
-            if (I_fabs(cg_pmove.viewChange) >= cg_viewZSmoothingMin->current.value)
+            int elapsedSinceStart = cgArray[0].time - cgArray[0].stepViewStart;
+            float carryOver = 0.0f;
+            if ((float)elapsedSinceStart < duration)
             {
-                LODWORD(v20) = cgArray[0].time - cgArray[0].stepViewStart;
-                v22 = 0.0;
-                v23 = (float)(cg_viewZSmoothingTime->current.value * (float)1000.0);
-                if ((float)v20 < v23)
+                int timeOffset = cg_pmove.viewChangeTime - cgArray[0].stepViewStart;
+                if (timeOffset >= 0 && (float)timeOffset < duration)
                 {
-                    *(unsigned int *)&v21[8] = cg_pmove.viewChangeTime - cgArray[0].stepViewStart;
-                    if (cg_pmove.viewChangeTime - cgArray[0].stepViewStart >= 0)
-                    {
-                        *(unsigned int *)&v21[4] = (int)v23;
-                        if (*(int *)&v21[8] < (int)v23)
-                        {
-                            v32 = *(_QWORD *)v21;
-                            v22 = (float)((float)((float)1.0 - (float)((float)*(__int64 *)&v21[4] / (float)*(__int64 *)v21))
-                                * cgArray[0].stepViewChange);
-                        }
-                    }
+                    carryOver = (1.0f - (float)timeOffset / duration) * cgArray[0].stepViewChange;
                 }
-
-                //v24 = (float)(cg_pmove.viewChange + (float)v22);
-                //if (v24 <= 0.0)
-                //    _FP12 = (float)((float)-cg_viewZSmoothingMax->current.value - (float)v24);
-                //else
-                //    _FP12 = (float)((float)v24 - cg_viewZSmoothingMax->current.value);
-                //__asm { fsel      f0, f12, f13, f0 }
-                cgArray[0].stepViewChange = max(cg_pmove.viewChange + v22, cg_viewZSmoothingMax->current.value);
-
-                cgArray[0].stepViewStart = cg_pmove.viewChangeTime;
-                goto LABEL_81;
             }
-            HIDWORD(v27) = cgArray[0].time - cgArray[0].stepViewStart;
-            LODWORD(v27) = cgArray[0].time - cgArray[0].stepViewStart;
-            v28 = (float)(cg_viewZSmoothingTime->current.value * (float)1000.0);
-            v32 = v27;
-            v29 = v27;
+            float clamped = cg_pmove.viewChange + carryOver;
+            float maxAbs = cg_viewZSmoothingMax->current.value;
+            if (clamped > maxAbs)
+                clamped = maxAbs;
+            else if (clamped < -maxAbs)
+                clamped = -maxAbs;
+            cgArray[0].stepViewChange = clamped;
+            cgArray[0].stepViewStart = cg_pmove.viewChangeTime;
+            goto LABEL_81;
         }
-        if ((float)v29 > v28)
+
+        int elapsedNow = cgArray[0].time - cgArray[0].stepViewStart;
+        if ((float)elapsedNow > duration)
             cgArray[0].stepViewChange = 0.0;
     }
 LABEL_81:

@@ -1229,7 +1229,7 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 #ifdef KISAK_MP
     if (ps->pm_type != PM_SPECTATOR && ps->pm_type != PM_INTERMISSION && !cgameGlob->renderingThirdPerson)
 #elif KISAK_SP
-    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_MPVIEWER)
+    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP)
 #endif
     {
         if (cgameGlob->cubemapShot || !cg_drawGun->current.enabled || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
@@ -3079,11 +3079,7 @@ cg_s *__cdecl CG_GetLocalClientGlobalsForEnt(int32_t localClientNum, int32_t ent
 
 void __cdecl CG_GetViewDirection(int32_t localClientNum, int32_t entityNum, float *forward, float *right, float *up)
 {
-    const cg_s *cgameGlob; // [esp+0h] [ebp-10h]
-    uint32_t clientNum; // [esp+Ch] [ebp-4h]
-    const clientInfo_t *ci;
-
-    cgameGlob = CG_GetLocalClientGlobalsForEnt(localClientNum, entityNum);
+    const cg_s *cgameGlob = CG_GetLocalClientGlobalsForEnt(localClientNum, entityNum);
     if (cgameGlob)
     {
         BG_GetPlayerViewDirection(&cgameGlob->predictedPlayerState, forward, right, up);
@@ -3091,7 +3087,8 @@ void __cdecl CG_GetViewDirection(int32_t localClientNum, int32_t entityNum, floa
     else
     {
 #ifdef KISAK_MP
-        clientNum = CG_GetEntity(localClientNum, entityNum)->nextState.clientNum;
+        const clientInfo_t *ci;
+        uint32_t clientNum = CG_GetEntity(localClientNum, entityNum)->nextState.clientNum;
 
         bcassert(clientNum, MAX_CLIENTS);
         ci = &CG_GetLocalClientGlobals(localClientNum)->bgs.clientinfo[clientNum];

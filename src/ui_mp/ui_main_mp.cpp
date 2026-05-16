@@ -4691,12 +4691,6 @@ void __cdecl LAN_LoadCachedServers()
 
 void __cdecl UI_Init(int localClientNum)
 {
-    const char *v1; // eax
-    DvarLimits v2; // [esp-10h] [ebp-24h]
-    bool v3; // [esp+0h] [ebp-14h]
-    MenuList *menuList; // [esp+10h] [ebp-4h]
-    MenuList *menuLista; // [esp+10h] [ebp-4h]
-
     if (localClientNum)
         MyAssertHandler(
             ".\\ui_mp\\ui_main_mp.cpp",
@@ -4715,6 +4709,7 @@ void __cdecl UI_Init(int localClientNum)
     uiInfoArray.allowScriptMenuResponse = 1;
     String_Init();
     Menu_Setup(&uiInfoArray.uiDC);
+
     CL_GetScreenDimensions(&uiInfoArray.uiDC.screenWidth, &uiInfoArray.uiDC.screenHeight, &uiInfoArray.uiDC.screenAspect);
     if (480 * uiInfoArray.uiDC.screenWidth <= 640 * uiInfoArray.uiDC.screenHeight)
         uiInfoArray.uiDC.bias = 0.0;
@@ -4722,33 +4717,29 @@ void __cdecl UI_Init(int localClientNum)
         uiInfoArray.uiDC.bias = ((double)uiInfoArray.uiDC.screenWidth
             - (double)uiInfoArray.uiDC.screenHeight * 1.333333373069763)
         * 0.5;
+
     Sys_Milliseconds();
     UI_GetGameTypesList();
-    if (sharedUiInfo.numGameTypes > 0x20u)
-        MyAssertHandler(
-            ".\\ui_mp\\ui_main_mp.cpp",
-            6138,
-            0,
-            "%s",
-            "sharedUiInfo.numGameTypes <= ARRAY_COUNT( sharedUiInfo.gameTypes )");
-    v2.integer.max = sharedUiInfo.numGameTypes - 1;
-    v2.enumeration.stringCount = 0;
-    ui_netGameType = Dvar_RegisterInt("ui_netGametype", 0, v2, DVAR_ARCHIVE, "Game type");
+
+    iassert(sharedUiInfo.numGameTypes <= ARRAY_COUNT(sharedUiInfo.gameTypes));
+
+    DvarLimits limits; // [esp-10h] [ebp-24h]
+    limits.integer.max = sharedUiInfo.numGameTypes - 1;
+    limits.enumeration.stringCount = 0;
+    ui_netGameType = Dvar_RegisterInt("ui_netGametype", 0, limits, DVAR_ARCHIVE, "Game type");
+
     UI_LoadArenas();
     if (IsFastFileLoad())
     {
-        menuList = UI_LoadMenus((char*)"ui_mp/code.txt", 3);
-        UI_AddMenuList(&uiInfoArray.uiDC, menuList);
+        UI_AddMenuList(&uiInfoArray.uiDC, UI_LoadMenus((char *)"ui_mp/code.txt", 3));
     }
     if (!g_mapname[0] || !IsFastFileLoad())
     {
-        menuLista = UI_LoadMenus((char *)"ui_mp/menus.txt", 3);
-        UI_AddMenuList(&uiInfoArray.uiDC, menuLista);
+        UI_AddMenuList(&uiInfoArray.uiDC, UI_LoadMenus((char *)"ui_mp/menus.txt", 3));
     }
     if (g_mapname[0] && !IsFastFileLoad())
     {
-        v1 = va("maps/mp/%s.csv", g_mapname);
-        UI_MapLoadInfo(v1);
+        UI_MapLoadInfo(va("maps/mp/%s.csv", g_mapname));
     }
     UI_AssetCache();
     Menus_CloseAll(&uiInfoArray.uiDC);
@@ -4760,8 +4751,7 @@ void __cdecl UI_Init(int localClientNum)
     sharedUiInfo.serverHardwareIconList[7] = Material_RegisterHandle("server_hardware_mac_listen", 3);
     LAN_LoadCachedServers(); // cl_ui_xenon_mp.obj
     UI_ServersSort(10, 0);
-    v3 = Dvar_GetFloat("m_pitch") < 0.0;
-    Dvar_SetBoolByName("ui_mousePitch", v3);
+    Dvar_SetBoolByName("ui_mousePitch", Dvar_GetFloat("m_pitch") < 0.0);
     if (ui_netGameType->current.integer >= 0x20u)
         MyAssertHandler(
             ".\\ui_mp\\ui_main_mp.cpp",

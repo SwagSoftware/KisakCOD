@@ -985,11 +985,7 @@ int __cdecl turret_aimat_Sentient_Internal(
             }
             else
             {
-                LODWORD(v13) = missTime;
-                v26 = targetTime - level.time + missTime;
-                v32 = v13;
-                v33 = *(__int64 *)((char *)&v13 - 4);
-                v27 = (float)((float)*(__int64 *)((char *)&v13 - 4) / (float)v13);
+                v27 = (float)(targetTime - level.time + missTime) / (float)missTime;
             }
             v28 = (float)((float)(pTurretInfo->missOffsetNormalized[1] * (float)33.0)
                 + (float)(pTurretInfo->missOffsetNormalized[1] * (float)((float)v27 * (float)30.0)));
@@ -1051,16 +1047,12 @@ int __cdecl turret_aimat_Sentient_Internal(
                 //v25 = (float)((float)1.0 / (float)_FP11);
 
                 {
+
                     float x = pTurretInfo->missOffsetNormalized[0];
                     float y = pTurretInfo->missOffsetNormalized[1];
                     float z = pTurretInfo->missOffsetNormalized[2];
-
                     float mag = sqrtf(x * x + y * y + z * z);
-                    float negMag = -mag;
-
-                    float selected = (negMag >= 0.0f) ? mag : mag;
-
-                    v25 = 1.0f / selected;
+                    v25 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
                 }
 
 
@@ -1167,8 +1159,7 @@ int __cdecl turret_isTargetTooCloseToPlayer(
     //v13 = (float)((float)1.0 / (float)_FP10);
 
     v10 = sqrtf(v9 * v9 + v8 * v8 + v7 * v7);
-    float _FP10 = -v10;
-    v13 = 1.0f / _FP10;
+    v13 = (v10 > 0.0f) ? (1.0f / v10) : 0.0f;
 
     v14 = (float)((float)v13
         * (float)((float)(Player->r.currentOrigin[0]
@@ -1198,9 +1189,8 @@ int __cdecl turret_isTargetTooCloseToPlayer(
     //__asm { fsel      f10, f9, f0, f10 }
     //v24 = (float)((float)1.0 / (float)_FP10);
 
-    float magnitude = sqrt(v19 * v19 + v20 * v20 + v21 * v21);
-    float inverse_magnitude = -magnitude;
-    v24 = (float)((float)1.0 / (float)inverse_magnitude);
+    float magnitude = sqrtf(v19 * v19 + v20 * v20 + v21 * v21);
+    v24 = (magnitude > 0.0f) ? (1.0f / magnitude) : 0.0f;
 
 
     *(double *)&v18 = (float)((float)((float)((float)v24
@@ -1501,14 +1491,12 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
         goto LABEL_51;
     AngleVectors(self->r.currentAngles, v39, 0, 0);
 
-   // aislop (fsel)
-   // _FP12 = -sqrtf(v11);
-   // __asm { fsel      f0, f12, f13, f0 }
-   // v16 = (float)((float)(v39[0] * (float)((float)((float)1.0 / (float)_FP0) * (float)v9))
-   //     + (float)((float)(v39[1] * (float)((float)v8 * (float)((float)1.0 / (float)_FP0)))
-   //         + (float)(v39[2] * (float)((float)v10 * (float)((float)1.0 / (float)_FP0))))) >= (double)pTurretInfo->forwardAngleDot;
-
-    v16 = (pTurretInfo->forwardAngleDot <= (v39[0] * v9 + v39[1] * v8 + v39[2] * v10) / -sqrt(v11));
+    {
+        float range = sqrtf(v11);
+        float invRange = (range > 0.0f) ? (1.0f / range) : 1.0f;
+        float cosAngle = (v39[0] * v9 + v39[1] * v8 + v39[2] * v10) * invRange;
+        v16 = (cosAngle >= (double)pTurretInfo->forwardAngleDot);
+    }
 
     if (pTurretInfo->detachSentient.isDefined())
     {

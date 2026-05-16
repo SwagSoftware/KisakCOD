@@ -1295,7 +1295,11 @@ void __cdecl DB_LogMissingAsset(XAssetType type, const char *name)
     case ASSET_TYPE_SNDDRIVER_GLOBALS:
         return;
     case ASSET_TYPE_WEAPON:
+#ifdef KISAK_SP
+        Com_sprintf(msg, 0x400u, "%s,sp/%s\n", g_assetNames[type], name);
+#else
         Com_sprintf(msg, 0x400u, "%s,mp/%s\n", g_assetNames[type], name);
+#endif
         goto LABEL_4;
     default:
         Com_sprintf(msg, 0x400u, "%s,%s\n", g_assetNames[type], name);

@@ -141,12 +141,12 @@ void __cdecl Actor_AddSuppressionLine(
     
     if (self->sentient->eTeam != pSuppressor->eTeam)
     {
-        //_FP12 = (float)((float)1.0 - (float)(self->suppressionMeter + (float)0.15000001));
-        //__asm { fsel      f0, f12, f0, f13 }
-        //self->suppressionMeter = _FP0;
-
-        float suppression = 1.0f - (self->suppressionMeter + 0.15f);
-        self->suppressionMeter = (suppression >= 0.0f) ? suppression : 0.0f;
+        // PPC: _FP12 = 1 - (meter + 0.15); fsel f0, f12, f0_old, f13
+        // f0_old = (meter + 0.15), f13 = 1.0
+        // fsel(1 - newMeter, newMeter, 1.0) = (newMeter <= 1.0) ? newMeter : 1.0
+        // i.e. self->suppressionMeter = min(meter + 0.15, 1.0)  -- clamp to [<=1].
+        float newMeter = self->suppressionMeter + 0.15f;
+        self->suppressionMeter = (newMeter <= 1.0f) ? newMeter : 1.0f;
         if (!(unsigned __int8)Actor_NearCoverNode(self))
             goto LABEL_29;
         goto LABEL_18;
@@ -246,9 +246,12 @@ void __cdecl Actor_DecaySuppressionLines(actor_s *self)
     }
     else
     {
-        float temp = -(self->suppressionMeter - 0.0099999998f);
-        // Replace fsel: if temp >= 0 then temp else 0
-        self->suppressionMeter = (temp >= 0.0f) ? temp : 0.0f;
+        // PPC: _FP12 = meter - 0.01; fsel f0, f12, f12, fzero
+        // = (meter - 0.01 >= 0) ? (meter - 0.01) : 0  -- decay by 0.01, floor at 0.
+        // BUG: prior port negated (-(meter - 0.01)) which inverted the threshold,
+        // making suppression instantly snap to 0 above 0.01 and oscillate below.
+        float decayed = self->suppressionMeter - 0.01f;
+        self->suppressionMeter = (decayed >= 0.0f) ? decayed : 0.0f;
     }
 
     suppressant = self->Suppressant;

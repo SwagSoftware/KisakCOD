@@ -279,23 +279,19 @@ void __cdecl SetClientOrigin(gentity_s *ent, float *origin)
 //    } while (v2);
 //}
 
-// aislop
-void InitClientDeltaAngles(gclient_s *client)
+void __cdecl InitClientDeltaAngles(gclient_s *client)
 {
-    int i;
-    int *angles = client->pers.cmd.angles;
-    double a2;
+    const int*   cmdAngles    = client->pers.cmd.angles;
+    const float* viewangles   = client->ps.viewangles;
+    float*       delta_angles = client->ps.delta_angles;
 
-    for (i = 0; i < 3; i++, angles++)
+    for (int i = 0; i < 3; ++i)
     {
-        float curr = (float)*angles;
-        float prev = (float)*(angles - 11392);
-        float diff = (curr * 0.0054931641f) - prev;      // 0.0054931641 = 1/182 
-        float turns = -diff * 0.0027777778f;             // 1/360
-        a2 = turns + 0.5;
-        a2 = floor(a2);
-        float frac = turns - a2;
-        client->pers.cmd.angles[i] = frac * 360.0f;
+        const float cmdDeg = (float)cmdAngles[i] * 0.0054931641f;
+        const float diff   = viewangles[i] - cmdDeg;
+        const float turns  = diff * 0.0027777778f;
+        const float frac   = turns - floorf(turns + 0.5f);
+        delta_angles[i]    = frac * 360.0f;
     }
 }
 
@@ -407,8 +403,8 @@ int __cdecl Client_GetPushed(gentity_s *pSelf, gentity_s *pOther)
     double v7; // fp0
     double v8; // fp31
     gclient_s *v9; // r11
-    float v10; // [sp+50h] [-20h] BYREF
-    float v11; // [sp+54h] [-1Ch]
+
+    float pushVec[2]; // [sp+50h] [-20h] BYREF
 
     if ((pOther->r.contents & 0xC000) == 0)
         return 0;
@@ -419,17 +415,17 @@ int __cdecl Client_GetPushed(gentity_s *pSelf, gentity_s *pOther)
         return 1;
     v5 = pOther->r.currentOrigin[1];
     v6 = pSelf->r.currentOrigin[1];
-    v10 = pSelf->r.currentOrigin[0] - pOther->r.currentOrigin[0];
-    v11 = (float)v6 - (float)v5;
-    v7 = (float)((float)(v11 * v11) + (float)(v10 * v10));
+    pushVec[0] = pSelf->r.currentOrigin[0] - pOther->r.currentOrigin[0];
+    pushVec[1] = (float)v6 - (float)v5;
+    v7 = (float)((float)(pushVec[1] * pushVec[1]) + (float)(pushVec[0] * pushVec[0]));
     if (v7 >= 900.0)
         return 0;
     v8 = (float)((float)((float)30.0 - (float)sqrtf(v7)) * (float)20.0);
-    Vec2Normalize(&v10);
+    Vec2Normalize(pushVec);
     v9 = pSelf->client;
     result = 1;
-    v9->ps.velocity[0] = v10 * (float)v8;
-    v9->ps.velocity[1] = v11 * (float)v8;
+    v9->ps.velocity[0] = pushVec[0] * (float)v8;
+    v9->ps.velocity[1] = pushVec[1] * (float)v8;
     return result;
 }
 

@@ -256,14 +256,13 @@ void __cdecl Debug_Frame(int localClientNum)
     int lastFrameIndex; // [esp+0h] [ebp-18h]
     int newEvent; // [esp+4h] [ebp-14h]
     int msec; // [esp+8h] [ebp-10h]
-    bgs_t *oldBgs; // [esp+Ch] [ebp-Ch]
     int minMsec; // [esp+10h] [ebp-8h]
     int newEvent2; // [esp+14h] [ebp-4h]
 
     iassert(Sys_IsMainThread());
 
 #ifdef KISAK_MP
-    oldBgs = bgs;
+    bgs_t *oldBgs = bgs;
     bgs = 0;
 #endif
     IN_Frame();
@@ -647,7 +646,6 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
     jmp_buf * Value; // eax
     va_list va; // [esp+18h] [ebp+10h] BYREF
 
-    iassert(0);
     va_start(va, fmt);
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
     if ((unsigned int)code <= ERR_DROP)
@@ -1252,7 +1250,6 @@ static const char* comInitAllocName = "$init";
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
     int v1; // eax
-    const char* BuildNumber; // eax
     int localClientNum; // [esp+10h] [ebp-Ch]
     int localClientNuma; // [esp+10h] [ebp-Ch]
     char* s; // [esp+14h] [ebp-8h]
@@ -1324,11 +1321,10 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     Cmd_AddCommandInternal("quit", Com_Quit_f, &Com_Quit_f_VAR);
     Cmd_AddCommandInternal("writeconfig", Com_WriteConfig_f, &Com_WriteConfig_f_VAR);
     Cmd_AddCommandInternal("writedefaults", Com_WriteDefaults_f, &Com_WriteDefaults_f_VAR);
-    BuildNumber = getBuildNumber();
 #ifdef KISAK_MP
-    s = va("%s %s build %s %s", "CoD4 MP", "1.0", BuildNumber, CPUSTRING);
+    s = va("%s %s build %s %s", "CoD4 MP", "1.0", getBuildNumber(), CPUSTRING);
 #elif KISAK_SP
-    s = va("%s %s build %s %s", "CoD4", "1.0", BuildNumber, CPUSTRING);
+    s = va("%s %s build %s %s", "CoD4", "1.0", getBuildNumber(), CPUSTRING);
 #endif
     version = Dvar_RegisterString("version", "", DVAR_ROM, "Game version");
     Dvar_SetString(version, s);

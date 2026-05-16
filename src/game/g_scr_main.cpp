@@ -2401,9 +2401,7 @@ void __cdecl ScrCmd_showallparts(scr_entref_t entref)
     ServerDObj = Com_GetServerDObj(Entity->s.number);
     if (!ServerDObj)
         Scr_Error("entity has no model");
-    LODWORD(v3) = 0;
-    v4[0] = v3;
-    v4[1] = v3;
+    memset(v4, 0, sizeof(v4));
     DObjSetHidePartBits(ServerDObj, (const unsigned int *)v4);
 }
 
@@ -3806,90 +3804,65 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
 
 void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
 {
-    gentity_s *Entity; // r31
-    __int64 v2; // r11
-    long double v3; // fp2
-    double v4; // fp31
-    const char *v5; // r6
-    const char *v6; // r3
-    gclient_s *client; // r11
-    __int64 v8; // r11
-    long double v9; // fp2
-    const char *v10; // r3
-    const char *v11; // r8
-    long double v12; // fp2
-    int v13; // r11
-    const char *v14; // r5
-    const char *v15; // r3
-    int v16; // [sp+50h] [-30h]
-
-    Entity = GetEntity(entref);
-    *(double *)&v3 = Scr_GetFloat(0);
-    v4 = *(double *)&v3;
-    if (*(double *)&v3 <= 1.0)
+    gentity_s *Entity = GetEntity(entref);
+    double frac = Scr_GetFloat(0);
+    if (frac <= 1.0)
     {
-        if (*(double *)&v3 <= 0.0)
+        if (frac <= 0.0)
         {
-            if (Entity->targetname)
-                v5 = SL_ConvertToString(Entity->targetname);
-            else
-                v5 = "<not set>";
-            v6 = va((const char *)HIDWORD(v4), LODWORD(v4), Entity->s.number, v5);
-            Scr_Error(v6);
+            const char *name = Entity->targetname
+                ? SL_ConvertToString(Entity->targetname)
+                : "<not set>";
+            const char *err = va(
+                "setNormalHealth frac must be greater than 0 (frac %g, ent %i, name %s)\n",
+                frac, Entity->s.number, name);
+            Scr_Error(err);
         }
     }
     else
     {
-        v4 = 1.0;
+        frac = 1.0;
     }
-    client = Entity->client;
-    if (client)
+
+    int newHealth;
+    if (Entity->client)
     {
-        HIDWORD(v8) = 45900;
-        LODWORD(v8) = client->pers.maxHealth;
-        *(double *)&v3 = (float)((float)((float)v8 * (float)v4) + (float)0.5);
-        v9 = floor(v3);
-        v16 = (int)(float)*(double *)&v9;
-        v10 = va("menu_show_notify \"%i\"", 0);
-        SV_GameSendServerCommand(-1, v10);
-    LABEL_17:
-        v13 = v16;
-        if (v16 < 1)
-            v13 = 1;
-        Entity->health = v13;
-        return;
+        newHealth = (int)((float)Entity->client->pers.maxHealth * (float)frac + 0.5f);
+        SV_GameSendServerCommand(-1, va("menu_show_notify \"%i\"", 0));
     }
-    if (Entity->maxHealth > 0)
+    else if (Entity->maxHealth > 0)
     {
         if (Entity->health <= 0)
         {
-            if (Entity->targetname)
-                v11 = SL_ConvertToString(Entity->targetname);
-            else
-                v11 = "<not set>";
+            const char *name = Entity->targetname
+                ? SL_ConvertToString(Entity->targetname)
+                : "<not set>";
             Com_DPrintf(
                 23,
                 "^2Cannot setNormalHealth on dead entities (health %i, max %i, ent %i, name %s)\n",
                 Entity->health,
                 Entity->maxHealth,
                 Entity->s.number,
-                v11);
+                name);
         }
-        LODWORD(v2) = Entity->maxHealth;
-        *(double *)&v3 = (float)((float)((float)v2 * (float)v4) + (float)0.5);
-        v12 = floor(v3);
-        v16 = (int)(float)*(double *)&v12;
-        goto LABEL_17;
+        newHealth = (int)((float)Entity->maxHealth * (float)frac + 0.5f);
     }
-    if (Entity->targetname)
-        v14 = SL_ConvertToString(Entity->targetname);
     else
-        v14 = "<not set>";
-    v15 = va(
-        "entity's max health must be greater than 0 to call setNormalHealth (ent %i, name %s)\n",
-        Entity->s.number,
-        v14);
-    Scr_Error(v15);
+    {
+        const char *name = Entity->targetname
+            ? SL_ConvertToString(Entity->targetname)
+            : "<not set>";
+        const char *err = va(
+            "entity's max health must be greater than 0 to call setNormalHealth (ent %i, name %s)\n",
+            Entity->s.number,
+            name);
+        Scr_Error(err);
+        return;
+    }
+
+    if (newHealth < 1)
+        newHealth = 1;
+    Entity->health = newHealth;
 }
 
 void __cdecl ScrCmd_DoDamage(scr_entref_t entref)
@@ -5226,14 +5199,7 @@ int Scr_Objective_Current()
 
     NumParam = Scr_GetNumParam();
     v1 = NumParam;
-    v2 = (_QWORD*)v17;
-    LODWORD(v3) = 0;
-    v4 = 8;
-    do
-    {
-        *v2++ = v3;
-        --v4;
-    } while (v4);
+    memset(v17, 0, sizeof(v17));
     v5 = 0;
     if (NumParam > 0)
     {
@@ -5306,14 +5272,7 @@ int Scr_Objective_AdditionalCurrent()
 
     NumParam = Scr_GetNumParam();
     v1 = NumParam;
-    v2 = (_QWORD*)v16;
-    LODWORD(v3) = 0;
-    v4 = 8;
-    do
-    {
-        *v2++ = v3;
-        --v4;
-    } while (v4);
+    memset(v16, 0, sizeof(v16));
     v5 = 0;
     if (NumParam > 0)
     {
@@ -5424,25 +5383,16 @@ void Scr_BulletTrace()
     Scr_AddArrayStringIndexed(scr_const.entity);
     if (v15.fraction >= 1.0)
     {
-        // aislop
-        //_FP9 = -sqrtf((float)((float)((float)(v10 - v7) * (float)(v10 - v7))
-        //    + (float)((float)((float)(v12 - v9) * (float)(v12 - v9))
-        //        + (float)((float)(v11 - v8) * (float)(v11 - v8)))));
-        //__asm { fsel      f11, f9, f10, f11 }
+        //_FP9 = -sqrtf(...);                   ; -mag (<= 0)
+        //__asm { fsel      f11, f9, f10, f11 } ; f11 = (-mag >= 0) ? safe : mag
         //v6 = (float)((float)1.0 / (float)_FP11);
         {
-            // Compute magnitude of vector difference (negated)
-            float mag = -sqrtf(
+            float mag = sqrtf(
                 (v10[0] - v7[0]) * (v10[0] - v7[0]) +
                 (v10[2] - v7[2]) * (v10[2] - v7[2]) +
                 (v10[1] - v7[1]) * (v10[1] - v7[1])
             );
-
-            // Use a fallback (e.g. 1.0f) if mag is negative
-            float safeMag = (mag >= 0.0f) ? mag : 1.0f;
-
-            // Compute inverse magnitude
-            v6 = 1.0f / safeMag;
+            v6 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
         }
 
         v14[0] = (float)v6 * (float)(v10[0] - v7[0]);
@@ -7260,8 +7210,7 @@ void GScr_WeaponFireTime()
     String = Scr_GetString(0);
     WeaponIndexForName = G_GetWeaponIndexForName(String);
     Scr_VerifyWeaponIndex(WeaponIndexForName, String);
-    LODWORD(v2) = BG_GetWeaponDef(WeaponIndexForName)->iFireTime;
-    Scr_AddFloat((float)((float)v2 * (float)0.001));
+    Scr_AddFloat((float)BG_GetWeaponDef(WeaponIndexForName)->iFireTime * 0.001f);
 }
 
 void GScr_WeaponClipSize()
@@ -8068,8 +8017,7 @@ void Scr_PhysicsExplosionSphere()
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
-    LODWORD(v1) = v0->s.eventParm;
-    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
+    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v0->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
 }
@@ -8091,8 +8039,7 @@ void Scr_PhysicsRadiusJolt()
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
-    LODWORD(v1) = v0->s.eventParm;
-    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
+    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v0->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     v3 = &v0->s.lerp.u.turret.gunAngles[1];
     Scr_GetVector(3u, v3);
@@ -8118,8 +8065,7 @@ void Scr_PhysicsRadiusJitter()
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
-    LODWORD(v1) = v0->s.eventParm;
-    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
+    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v0->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
     v3 = Scr_GetFloat(4);
@@ -8145,8 +8091,7 @@ void Scr_PhysicsExplosionCylinder()
     v0->s.lerp.u.turret.gunAngles[0] = Float;
     if (Float < 0.0)
         Scr_ParamError(2u, "Radius is negative");
-    LODWORD(v1) = v0->s.eventParm;
-    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v1)
+    if (v0->s.lerp.u.turret.gunAngles[0] > (double)(float)v0->s.eventParm)
         Scr_Error("Inner radius is outside the outer radius");
     v0->s.lerp.u.turret.gunAngles[1] = Scr_GetFloat(3);
 }
@@ -9674,9 +9619,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
         v8 = (int)(float)*(double *)&v7;
         if (v8 > 0xEA60)
         {
-            LODWORD(v6) = (int)(float)*(double *)&v7;
-            v9 = (float)((float)v6 * (float)0.001);
-            v10 = va((const char *)HIDWORD(v9), LODWORD(v9));
+            v10 = va("Shellshock duration %.3f seconds too long", (float)v8 * 0.001f);
             Scr_ParamError(1u, v10);
         }
         PlayerEntity->client->ps.shellshockIndex = v3;

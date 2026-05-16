@@ -113,10 +113,8 @@ int __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int
 {
     const playerState_s *p_predictedPlayerState; // r30
     int TotalAmmoReserve; // r29
-    __int64 v5; // r10
     int AmmoPlayerMax; // r3
-    int result; // r3
-    double v8; // fp0
+    float maxAmmo;
 
     p_predictedPlayerState = &cgameGlob->predictedPlayerState;
     if (weapIndex)
@@ -129,18 +127,16 @@ int __cdecl CG_CheckPlayerForLowAmmoSpecific(const cg_s *cgameGlob, unsigned int
         AmmoPlayerMax = BG_GetAmmoPlayerMax(p_predictedPlayerState, weapIndex, 0);
         if (AmmoPlayerMax > 999)
         {
-            AmmoPlayerMax = 999;
-            goto LABEL_7;
+            maxAmmo = 999.0f;
         }
-        if (AmmoPlayerMax >= 0)
+        else
         {
-        LABEL_7:
-            LODWORD(v5) = TotalAmmoReserve;
-            v8 = (float)((float)__SPAIR64__(TotalAmmoReserve, AmmoPlayerMax) * (float)0.2);
-            result = 1;
-            if ((float)v5 <= v8)
-                return result;
+            if (AmmoPlayerMax < 0)
+                return 0;
+            maxAmmo = (float)AmmoPlayerMax;
         }
+        // low ammo when reserve has dropped to <= 20% of the player's max
+        return (float)(maxAmmo * 0.2f) >= (float)TotalAmmoReserve;
     }
     return 0;
 }
@@ -507,24 +503,21 @@ float CG_CalcPlayerHealth(const playerState_s *ps)
 
 float __cdecl CG_FadeLowHealthOverlay(const cg_s *cgameGlob)
 {
-    _BYTE v1[12]; // r11 OVERLAPPED
-    double healthOverlayToAlpha; // fp31
-    double v3; // fp1
+    int elapsed = cgameGlob->time - cgameGlob->healthOverlayPulseTime;
+    if (elapsed < 0)
+        elapsed = 0;
+    int duration = cgameGlob->healthOverlayPulseDuration;
 
-    *(unsigned int *)&v1[4] = cgameGlob->time - cgameGlob->healthOverlayPulseTime;
-    if (*(int *)&v1[4] < 0)
-        *(unsigned int *)&v1[4] = 0;
-    *(unsigned int *)&v1[8] = cgameGlob->healthOverlayPulseDuration;
-    if (*(int *)&v1[8] <= 0 || *(int *)&v1[4] >= *(int *)&v1[8])
+    double healthOverlayToAlpha;
+    if (duration <= 0 || elapsed >= duration)
     {
         healthOverlayToAlpha = cgameGlob->healthOverlayToAlpha;
     }
     else
     {
-        *(unsigned int *)v1 = 171060;
-        healthOverlayToAlpha = (float)((float)((float)((float)*(__int64 *)v1 / (float)*(__int64 *)&v1[4])
-            * (float)(cgameGlob->healthOverlayToAlpha - cgameGlob->healthOverlayFromAlpha))
-            + cgameGlob->healthOverlayFromAlpha);
+        healthOverlayToAlpha = ((float)elapsed / (float)duration)
+            * (cgameGlob->healthOverlayToAlpha - cgameGlob->healthOverlayFromAlpha)
+            + cgameGlob->healthOverlayFromAlpha;
     }
     if (healthOverlayToAlpha < 0.0 || healthOverlayToAlpha > 1.0)
         MyAssertHandler(
@@ -532,10 +525,9 @@ float __cdecl CG_FadeLowHealthOverlay(const cg_s *cgameGlob)
             1020,
             0,
             "%s\n\t(curAlpha) = %g",
-            HIDWORD(healthOverlayToAlpha),
-            LODWORD(healthOverlayToAlpha));
-    v3 = healthOverlayToAlpha;
-    return *((float *)&v3 + 1);
+            "(curAlpha >= 0.0f && curAlpha <= 1.0f)",
+            healthOverlayToAlpha);
+    return (float)healthOverlayToAlpha;
 }
 
 void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio)
@@ -595,38 +587,31 @@ void __cdecl CG_PulseLowHealthOverlay(cg_s *cgameGlob, double healthRatio)
                     goto LABEL_16;
                 }
                 v15 = (float)(hud_healthOverlay_phaseThree_toAlphaMultiplier->current.value * (float)healthOverlayToAlpha);
-                //_FP12 = (float)((float)v15 - (float)1.0);
-                //_FP11 = -v15;
-                //__asm { fsel      f13, f12, f13, f0 }
-                //__asm { fsel      f0, f11, f0, f13 }
+                //_FP12 = v15 - 1.0; _FP11 = -v15
+                //fsel f13, f12, f13, f0   ; (v15 >= 1) ? 1.0 : v15           = min(v15, 1.0)
+                //fsel f0,  f11, f0,  f13  ; (v15 <= 0) ? 0.0 : min(v15,1.0)  = clamp(v15, 0, 1)
                 //*p_healthOverlayToAlpha = _FP0;
-
-                *p_healthOverlayToAlpha = CLAMP(v15 - 1.0f, 0.0f, 1.0f);
+                *p_healthOverlayToAlpha = CLAMP(v15, 0.0f, 1.0f);
                 integer = hud_healthOverlay_phaseThree_pulseDuration->current.integer;
                 *p_healthOverlayPulsePhase = 0;
                 goto LABEL_15;
             }
             v9 = 2;
             v21 = (float)(hud_healthOverlay_phaseTwo_toAlphaMultiplier->current.value * (float)healthOverlayToAlpha);
-            //_FP12 = (float)((float)v21 - (float)1.0);
-            //_FP11 = -v21;
-            //__asm { fsel      f13, f12, f13, f0 }
-            //__asm { fsel      f0, f11, f0, f13 }
-            //*p_healthOverlayToAlpha = _FP0;
-            *p_healthOverlayToAlpha = CLAMP(v21 - 1.0f, 0.0f, 1.0f);
+            // Same clamp(v, 0, 1) pattern as phase 3 (see above).
+            *p_healthOverlayToAlpha = CLAMP(v21, 0.0f, 1.0f);
             v26 = hud_healthOverlay_phaseTwo_pulseDuration;
         }
         else
         {
-            //_FP12 = (float)((float)((float)((float)1.0 - (float)((float)healthRatio * (float)0.3f))
-            //    + hud_healthOverlay_phaseOne_toAlphaAdd->current.value)
-            //    - (float)1.0);
-            //_FP11 = -(float)((float)((float)1.0 - (float)((float)healthRatio * (float)0.3f))
-            //    + hud_healthOverlay_phaseOne_toAlphaAdd->current.value);
-            //__asm { fsel      f13, f12, f0, f13 }
-            //__asm { fsel      f0, f11, f0, f13 }
-            //*p_healthOverlayToAlpha = _FP0;
-            *p_healthOverlayToAlpha = CLAMP((1.0f - healthRatio * 0.3f), 0.0f, 1.0f);
+            // Phase 1 clamp: V = (1 - healthRatio*0.3) + hud_healthOverlay_phaseOne_toAlphaAdd
+            //   _FP12 = V - 1; _FP11 = -V
+            //   fsel f13, f12, f0, f13   ; (V >= 1) ? 1.0 : V      = min(V, 1)
+            //   fsel f0,  f11, f0, f13   ; (V <= 0) ? 0.0 : min(V,1) = clamp(V, 0, 1)
+            //   *p_healthOverlayToAlpha = _FP0
+            *p_healthOverlayToAlpha = CLAMP(
+                (1.0f - healthRatio * 0.3f) + hud_healthOverlay_phaseOne_toAlphaAdd->current.value,
+                0.0f, 1.0f);
             v26 = hud_healthOverlay_phaseOne_pulseDuration;
         }
         integer = v26->current.integer;
@@ -1967,20 +1952,19 @@ void __cdecl CG_DrawPlayerAmmoValue(
                         }
                         if (v20)
                         {
-                            v30 = __PAIR64__(cgArray[0].time, cgArray[0].lastClipFlashTime);
-                            if (cgArray[0].lastClipFlashTime > cgArray[0].time
-                                || cgArray[0].lastClipFlashTime + 800 < cgArray[0].time)
+                            int lastFlash = cgArray[0].lastClipFlashTime;
+                            int now = cgArray[0].time;
+                            if (lastFlash > now || lastFlash + 800 < now)
                             {
-                                LODWORD(v30) = cgArray[0].time;
-                                cgArray[0].lastClipFlashTime = cgArray[0].time;
+                                cgArray[0].lastClipFlashTime = now;
+                                lastFlash = now;
                             }
                             tagmat = *((float *)&material->info.drawSurf.packed + 1);
                             v135 = 0.88999999;
-                            LODWORD(v30) = v30 - cgArray[0].time + 800;
                             v136 = 0.18000001;
                             v137 = 0.0099999998;
-                            v128 = HIDWORD(v30);
-                            v138 = (float)v30 * (float)0.00125;
+                            int remaining = lastFlash - now + 800;
+                            v138 = (float)remaining * 0.00125f;
                             if (tagmat < v138)
                                 v138 = tagmat;
                         }

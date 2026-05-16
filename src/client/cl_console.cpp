@@ -1219,10 +1219,6 @@ void __cdecl Con_UpdateNotifyMessageWindow(
 
 int32_t __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
 {
-    float v2; // [esp+8h] [ebp-38h]
-    float v3; // [esp+1Ch] [ebp-24h]
-    float v4; // [esp+30h] [ebp-10h]
-
     if (dest == CON_DEST_MINICON)
     {
         return SnapFloatToInt(con_minicontime->current.value * 1000.0f);
@@ -1233,14 +1229,8 @@ int32_t __cdecl Con_GetDefaultMsgDuration(print_msg_dest_t dest)
     }
     else
     {
-        if (dest < CON_DEST_GAME_FIRST || dest > CON_DEST_GAME4)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                668,
-                0,
-                "%s",
-                "dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST");
-        return SnapFloatToInt(con_gameMsgWindowNLineCount[dest - CON_DEST_GAME_FIRST]->current.value * 1000.0f);
+        iassert(dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST);
+        return SnapFloatToInt(con_gameMsgWindowNMsgTime[dest - CON_DEST_GAME_FIRST]->current.value * 1000.0f);
     }
 }
 

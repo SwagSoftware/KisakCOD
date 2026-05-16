@@ -203,9 +203,14 @@ void __cdecl G_DropActorSpawnersToFloor()
         {
             if (ent->s.eType == ET_ACTOR_SPAWNER)
             {
+                // Snapshot the spawn point BEFORE droptofloor moves it: we want to log
+                // where it was in solid, not where it ended up.
+                float origX = ent->r.currentOrigin[0];
+                float origY = ent->r.currentOrigin[1];
+                float origZ = ent->r.currentOrigin[2];
                 if (Actor_droptofloor(ent))
                 {
-                    Com_Printf(18, "^3Spawner at (%g %g %g) is in solid\n", ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2]);
+                    Com_Printf(18, "^3Spawner at (%g %g %g) is in solid\n", origX, origY, origZ);
                     ent->r.svFlags &= ~1u;
                 }
             }

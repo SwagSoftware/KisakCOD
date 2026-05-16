@@ -276,21 +276,18 @@ float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentien
     const float *velocity = enemy->ent->client->ps.velocity;
 
     float dot =
-        velocity[0] * dx * inv_dist +
+        velocity[0] * dy * inv_dist +
         velocity[2] * dz * inv_dist -
-        velocity[1] * dy * inv_dist;
+        velocity[1] * dx * inv_dist;
 
     float absDot = fabsf(dot);
-    float delta = absDot - 250.0f;
+    float clampedDot = I_fmin(absDot, 250.0f);
 
-    float penalty = (delta >= 0.0f) ? delta : 0.0f;
-    penalty = (-absDot >= 0.0f) ? 0.0f : penalty;
-
-    float accuracy = -(penalty * 0.004f - 1.0f);
+    float accuracy = 1.0f - clampedDot * 0.004f;
 
     if (accuracy >= 0.1f)
     {
-        iassert(accuracy > 0.0f && accuracy <= 1.0f);
+        iassert(accuracy >= 0.0f && accuracy <= 1.0f);
         return accuracy;
     }
 
@@ -351,9 +348,13 @@ float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enem
 
     accuracy = (accuracyFactor * 0.01f);
 
-    iassert(accuracy >= 0.0f && accuracy <= 1.0f); // should be range assert
+    if (accuracy >= 0.1f)
+    {
+        iassert(accuracy >= 0.0f && accuracy <= 1.0f);
+        return accuracy;
+    }
 
-    return accuracy;
+    return 0.1f;
 }
 
 float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accuracyMod)
@@ -414,7 +415,7 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
         Actor_DebugAccuracyMsg(7, "TOTAL   ", accuracy, colorRed);
     }
 
-    iassert(accuracy);
+    iassert(accuracy >= 0.0f);
 
     float dbg = accuracy <= 0.0f ? 0.0f : (accuracy >= 1.0f ? 1.0f : accuracy);
 
@@ -550,19 +551,18 @@ void Actor_HitSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
     else
     {
         iassert(accuracy >= 0.0f && accuracy <= 1.0f);
-        horizMax = -44.0f * (1.0f + 0.5f * (1.0f - accuracy));
-        vertMax = 15.0f * (0.1f + 0.9f * (1.0f - accuracy));
+        horizMax = ((1.0f - accuracy) + 1.0f) * 0.5f * -44.0f;
+        vertMax = ((1.0f - accuracy) * 0.9f + 0.1f) * 15.0f;
     }
 
     // Add randomness
     float rVert = G_crandom() * vertMax;
     float rHoriz = G_random() * horizMax;
 
-    // Compute final forward vector components
     float center = rHoriz + headHeight;
-    wp->forward[0] = wp->up[0] * center + dir[0] * rVert + eyePos[0] - wp->muzzleTrace[0];
-    wp->forward[1] = wp->up[1] * center + dir[1] * rVert + eyePos[1] - wp->muzzleTrace[1];
-    wp->forward[2] = wp->up[2] * center + dir[2] * rVert + eyePos[2] - wp->muzzleTrace[2];
+    wp->forward[0] = wp->up[0] * center + lat[0] * rVert + eyePos[0] - wp->muzzleTrace[0];
+    wp->forward[1] = wp->up[1] * center + lat[1] * rVert + eyePos[1] - wp->muzzleTrace[1];
+    wp->forward[2] = wp->up[2] * center + lat[2] * rVert + eyePos[2] - wp->muzzleTrace[2];
 
     // Renormalize forward vector
     float fwdLenSq = wp->forward[0] * wp->forward[0]
@@ -647,161 +647,91 @@ void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy)
     Actor_HitSentient(wp, self->sentient->targetEnt.ent()->sentient, accuracy);
 }
 
-// some aislop (KISAKTODO: fugly and probably wrong)
 float outerRadius;
 void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
 {
-    gentity_s *ent; // r27
-    float v11; // fp11
-    float invlen; // fp29
-    float v13; // fp28
-    float v14; // fp27
-    float v17; // fp0
-    float v18; // fp26
-    float v19; // fp25
-    float v20; // fp24
-    int sign; // r28
-    float v22; // fp1
-    __int64 v23; // r10
-    float v24; // fp0
-    float HeadHeight; // fp30
-    float v26; // fp1
-    float v27; // fp0
-    float v28; // fp13
-    int v29; // r29
-    float v30; // fp30
-    float v31; // fp1
-    __int64 v32; // r10
-    float v33; // fp0
-    float v34; // fp1
-    float v35; // fp12
-    float v36; // fp0
-    float v37; // fp12
-    float v38; // fp0
-    float v39; // fp11
-    float v40; // fp13
-    float v41; // fp10
-    float v44; // fp0
-    float vec[3];
-    //__int64 v45; // [sp+50h] [-A0h] BYREF
-    //float v46; // [sp+58h] [-98h]
-    float vEyePos[3]; // [sp+60h] [-90h] BYREF // v47
-    //float v48; // [sp+64h] [-8Ch]
-    //float v49; // [sp+68h] [-88h]
-    float crossVec[3]; // [sp+70h] [-80h] BYREF
-    //float v51; // [sp+74h] [-7Ch]
-    //float v52; // [sp+78h] [-78h]
-
-    ent = enemy->ent;
+    gentity_s *ent = enemy->ent;
     if (outerRadius == 6969.0f)
     {
         outerRadius = sqrtf(15.0f * 15.0f * 2.0f * 3.0f);
     }
 
+    float vEyePos[3];
     Sentient_GetEyePosition(enemy, vEyePos);
 
-    //v8 = vEyePos[2] - wp->muzzleTrace[2];
+    float dx = vEyePos[0] - wp->muzzleTrace[0];
+    float dy = vEyePos[1] - wp->muzzleTrace[1];
+    float dz = vEyePos[2] - wp->muzzleTrace[2];
+    float dist = sqrtf(dx * dx + dy * dy + dz * dz);
+    float inv_dist = (dist != 0.0f) ? (1.0f / dist) : 1.0f;
 
-    invlen = 1.0f / (sqrtf((vEyePos[0] - wp->muzzleTrace[0]) * (vEyePos[0] - wp->muzzleTrace[0]) +
-        (vEyePos[2] - wp->muzzleTrace[2]) * (vEyePos[2] - wp->muzzleTrace[2]) +
-        (vEyePos[1] - wp->muzzleTrace[1]) * (vEyePos[1] - wp->muzzleTrace[1])));
+    float dir[3];
+    dir[0] = dx * inv_dist;
+    dir[1] = dy * inv_dist;
+    dir[2] = dz * inv_dist;
 
-    vec[0] = invlen * (vEyePos[0] - wp->muzzleTrace[0]);
-    vec[1] = invlen * (vEyePos[1] - wp->muzzleTrace[1]);
-    vec[2] = invlen * (vEyePos[2] - wp->muzzleTrace[2]);
-
-    Vec3Cross(vec, wp->up, crossVec);
+    float crossVec[3];
+    Vec3Cross(dir, wp->up, crossVec);
 
     float clen = sqrtf(crossVec[0] * crossVec[0] + crossVec[1] * crossVec[1] + crossVec[2] * crossVec[2]);
-    if (clen == 0.0f)
-    {
-        clen = 1.0f;
-    }
+    float inv_clen = (clen != 0.0f) ? (1.0f / clen) : 1.0f;
 
-    float invc = 1.0f / clen;
+    float lat[3];
+    lat[0] = crossVec[0] * inv_clen;
+    lat[1] = crossVec[1] * inv_clen;
+    lat[2] = crossVec[2] * inv_clen;
 
-    float scaled_x = crossVec[0] * invc;
-    float scaled_y = crossVec[1] * invc;
-    float scaled_z = crossVec[2] * invc;
+    const float negOffset = -(15.0f + 1.0f);
 
-    float comp_x = scaled_x;
-    float comp_y = scaled_y;
-    float comp_z = scaled_z;
-
+    float aimPos[3];
     if (ent->client)
     {
+        float signf = (G_random() > 0.5f) ? 1.0f : -1.0f;
+        float r2 = G_random();
+        float lateral = (r2 + 1.0f) * 8.0f * signf;
 
-        // Path A (ent->0x100 != 0)
-        float r1 = G_random();
+        aimPos[0] = lat[0] * lateral + negOffset * dir[0] + vEyePos[0];
+        aimPos[1] = lat[1] * lateral + negOffset * dir[1] + vEyePos[1];
+        aimPos[2] = lat[2] * lateral + negOffset * dir[2] + vEyePos[2];
 
-    // asm used a comparison "fcmpu cr6, f1, 0.5" where f1 was original accuracy
-    // So: if (accuracy > 0.5) sign = +1 else sign = -1
-    int signInt = (accuracy > 0.5f) ? 1 : -1;
+        float headHeight = (float)Sentient_GetHeadHeight(enemy);
+        float r3 = G_random();
+        float vertical = headHeight - r3 * 44.0f;
 
-    float r2 = G_random();
-    // assembly computes a magnitude using playerMaxs[0] and constant multipliers.
-    float base = playerMaxs[0];                    // playerMaxs[0]
-    float magnitude = (r2 + 1.0f) * 8.0f;          // matches asm (rand + 1) * 8.0
-    // compose an aim point by moving the eye by the scaled cross components:
-    float aimX = vEyePos[0] + comp_x * magnitude;
-    float aimY = vEyePos[1] + comp_y * magnitude;
-    float aimZ = vEyePos[2] + comp_z * magnitude;
-
-    // Now asm calls Sentient_GetHeadHeight and then uses that returned value
-    float headHeight = Sentient_GetHeadHeight(enemy);
-
-    // asm: blend = fnmsubs f0, f1, fConst, f30  -> effectively: blend = (r3 * C) - headHeight
-    float r3 = G_random();
-    float blend = (r3 * accuracy) - headHeight;
-
-    // apply blend to first component direction (asm multiplies blend by the first basis vector element)
-    aimX = aimX + blend * wp->gunForward[0];
-
-    // store to wp->forward (asm wrote to wp+0)
-    wp->forward[0] = aimX;
-    wp->forward[1] = aimY;
-    wp->forward[2] = aimZ;
-
+        aimPos[0] += wp->up[0] * vertical;
+        aimPos[1] += wp->up[1] * vertical;
+        aimPos[2] += wp->up[2] * vertical;
     }
     else
     {
-        // Path B (ent->0x100 == 0)
+        float signf = (G_random() > 0.5f) ? 1.0f : -1.0f;
+        float inaccuracy = 1.0f - accuracy;
         float r1 = G_random();
-        // asm computed sign using the original accuracy variable similarly
-        int signInt = (accuracy > 0.5f) ? 1 : -1;
+        float lateral = (r1 * inaccuracy * 10.0f + outerRadius) * signf;
 
-        // asm then used f30 (original accuracy) in later multiplications:
-        // use 'accuracy' here exactly where asm used f30 before it was overwritten
-        float tmpRand = G_random();
-        // fmuls f11, f1, f30  -> tmpRand * accuracy
-        float tmp = tmpRand * accuracy;
+        aimPos[0] = lat[0] * lateral + negOffset * dir[0] + vEyePos[0];
+        aimPos[1] = lat[1] * lateral + negOffset * dir[1] + vEyePos[1];
+        aimPos[2] = lat[2] * lateral + negOffset * dir[2] + vEyePos[2];
 
-        // compute magnitude using tmp and outerR with asm constants:
-        float magnitude = tmp * accuracy + outerRadius;
+        float vertical = G_crandom() * inaccuracy * -22.0f;
 
-        float base = playerMaxs[0];
-        float negBase = -(base + 1.0f); // asm used a negation pattern
-
-        float aimX = vEyePos[0] + comp_x * magnitude;
-        float aimY = vEyePos[1] + comp_y * magnitude;
-        float aimZ = vEyePos[2] + comp_z * magnitude;
-
-        // add some random crandom jitter scaled by accuracy
-        float jitter = G_crandom() * accuracy * outerRadius;
-        aimX = aimX + wp->gunForward[0] * jitter;
-
-        wp->forward[0] = aimX;
-        wp->forward[1] = aimY;
-        wp->forward[2] = aimZ;
+        aimPos[0] += wp->up[0] * vertical;
+        aimPos[1] += wp->up[1] * vertical;
+        aimPos[2] += wp->up[2] * vertical;
     }
 
-    float fx = wp->forward[0], fy = wp->forward[1], fz = wp->forward[2];
-    float lenf = sqrtf(fx * fx + fy * fy + fz * fz);
-    if (lenf == 0.0f) lenf = 1.0f;
-    float invf = 1.0f / lenf;
-    wp->forward[0] = fx * invf;
-    wp->forward[1] = fy * invf;
-    wp->forward[2] = fz * invf;
+    wp->forward[0] = aimPos[0] - wp->muzzleTrace[0];
+    wp->forward[1] = aimPos[1] - wp->muzzleTrace[1];
+    wp->forward[2] = aimPos[2] - wp->muzzleTrace[2];
+
+    float fwdLenSq = wp->forward[0] * wp->forward[0]
+                   + wp->forward[1] * wp->forward[1]
+                   + wp->forward[2] * wp->forward[2];
+    float fwdLen = sqrtf(fwdLenSq);
+    float inv_fwdLen = (fwdLen != 0.0f) ? (1.0f / fwdLen) : 1.0f;
+    wp->forward[0] *= inv_fwdLen;
+    wp->forward[1] *= inv_fwdLen;
+    wp->forward[2] *= inv_fwdLen;
 }
 
 
@@ -866,8 +796,8 @@ void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float 
     float finalZ = wp->up[2] * cr_scale + baseZ;
 
     forward[0] = finalX - wp->muzzleTrace[0];
-    forward[1] = finalX - wp->muzzleTrace[1];
-    forward[2] = finalX - wp->muzzleTrace[2];
+    forward[1] = finalY - wp->muzzleTrace[1];
+    forward[2] = finalZ - wp->muzzleTrace[2];
 
     float flen = sqrtf(forward[0] * forward[0] + forward[1] * forward[1] + forward[2] * forward[2]);
     float finv = 1.0f / flen;
@@ -983,27 +913,19 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
     TargetEntity = Actor_GetTargetEntity(self);
     p_eType = (const float *)&TargetEntity->s.eType;
 
-    if (lastShot)
+    if (posOverride)
     {
-        //_FP9 = -sqrtf((float)((float)((float)(*lastShot - wp.muzzleTrace[0]) * (float)(*lastShot - wp.muzzleTrace[0]))
-        //    + (float)((float)((float)(lastShot[2] - wp.muzzleTrace[2])
-        //        * (float)(lastShot[2] - wp.muzzleTrace[2]))
-        //        + (float)((float)(lastShot[1] - wp.muzzleTrace[1])
-        //            * (float)(lastShot[1] - wp.muzzleTrace[1])))));
-        //__asm { fsel      f11, f9, f10, f11 }
-        //v17 = (float)((float)1.0 / (float)_FP11);
+        const float *pos = *posOverride;
+        float dx = pos[0] - wp.muzzleTrace[0];
+        float dy = pos[1] - wp.muzzleTrace[1];
+        float dz = pos[2] - wp.muzzleTrace[2];
 
-        float dx = *posOverride[0] - wp.muzzleTrace[0];
-        float dy = *posOverride[1] - wp.muzzleTrace[1];
-        float dz = *posOverride[2] - wp.muzzleTrace[2];
-
-        // Compute inverse length of the vector (dx, dy, dz)
         float len = sqrtf(dx * dx + dy * dy + dz * dz);
-        invLen = (len != 0.0f ? 1.0f / len : 0.0f);
+        invLen = (len != 0.0f) ? 1.0f / len : 1.0f;
 
-        wp.forward[0] = invLen * (*posOverride[0] - wp.muzzleTrace[0]);
-        wp.forward[1] = invLen * (*posOverride[1] - wp.muzzleTrace[1]);
-        wp.forward[2] = invLen * (*posOverride[2] - wp.muzzleTrace[2]);
+        wp.forward[0] = invLen * dx;
+        wp.forward[1] = invLen * dy;
+        wp.forward[2] = invLen * dz;
 
         iassert(!IS_NAN((wp.forward)[0]) && !IS_NAN((wp.forward)[1]) && !IS_NAN((wp.forward)[2]));
     }
@@ -1186,14 +1108,12 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
     {
         v16 = direction[2];
 
-        //_FP9 = -sqrtf((float)((float)(*direction * *direction)
-        //    + (float)((float)(direction[2] * direction[2]) + (float)(direction[1] * direction[1]))));
-        //__asm { fsel      f11, f9, f10, f11 }
-        //v19 = (float)((float)1.0 / (float)_FP11);
-
+        //_FP9 = -sqrtf(...);                   ; -mag
+        //__asm { fsel      f11, f9, f10, f11 } ; (mag == 0) ? safe : mag
+        //v19 = 1.0 / _FP11
         x = direction[0], y = direction[1], z = direction[2];
         mag = sqrtf(x * x + y * y + z * z);
-        v19 = 1.0f / mag;
+        v19 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
 
         v20 = (float)(direction[1] * (float)v19);
         wp.forward[0] = (float)v19 * *direction;

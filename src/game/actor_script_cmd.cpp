@@ -435,18 +435,14 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
     v6 = vec[2];
     Sentient_GetEyePosition(v1->sentient, eyePos);
 
-    //_FP12 = -sqrtf((float)((float)((float)((float)v6 - v34) * (float)((float)v6 - v34))
-    //    + (float)((float)((float)((float)v5 - v33) * (float)((float)v5 - v33))
-    //        + (float)((float)((float)v4 - v32) * (float)((float)v4 - v32)))));
-    //__asm { fsel      f13, f12, f31, f13 }
+    //_FP12 = -sqrtf(...);                  ; -len
+    //__asm { fsel      f13, f12, f31, f13 } ; f13 = (-len >= 0) ? safe : len = (len == 0) ? safe : len
     //v9 = (float)((float)1.0 / (float)_FP13);
-
-    // aislop
     {
         float len = sqrtf((v6 - eyePos[2]) * (v6 - eyePos[2])
             + (v5 - eyePos[1]) * (v5 - eyePos[1])
             + (v4 - eyePos[0]) * (v4 - eyePos[0]));
-        v9 = 1.0f / len;
+        v9 = (len > 0.0f) ? (1.0f / len) : 0.0f;
     }
 
     v10 = -(float)((float)v9 * (float)((float)v6 - eyePos[2]));
@@ -752,18 +748,13 @@ void __cdecl ActorCmd_DropWeapon(scr_entref_t entref)
                     + v1->ent->r.currentOrigin[2]))
                 + (float)2.0);
 
-            // aislop
-            //_FP9 = -sqrtf((float)((float)((float)v12 * (float)v12)
-            //    + (float)((float)((float)v11 * (float)v11) + (float)((float)v10 * (float)v10))));
-            //__asm { fsel      f11, f9, f10, f11 }
+            //_FP9 = -sqrtf(...);                  ; -len
+            //__asm { fsel      f11, f9, f10, f11 } ; f11 = (-len >= 0) ? safe : len
             //v15 = (float)((float)1.0 / (float)_FP11);
-
+            // BUG was: previous port fed -len as denominator when len==0, producing 1/0 = inf.
             {
                 float len = sqrtf(v12 * v12 + v11 * v11 + v10 * v10);
-                float neg = -len;
-                // Emulate fsel: if neg >= 0 use neg, else fallback to len (typical PowerPC pattern)
-                float denom = (neg >= 0.0f ? neg : len);
-                v15 = 1.0f / denom;
+                v15 = (len > 0.0f) ? (1.0f / len) : 0.0f;
             }
 
             v16 = (float)((float)(v8->r.currentOrigin[1] - v1->ent->r.currentOrigin[1]) * (float)v15);
@@ -1131,8 +1122,7 @@ void __cdecl ActorCmd_WithinApproxPathDist(scr_entref_t entref)
 
     v1 = Actor_Get(entref);
     Float = Scr_GetFloat(0);
-    LODWORD(v3) = Path_WithinApproxDist(&v1->Path, Float);
-    Scr_AddFloat((float)v3);
+    Scr_AddFloat((float)Path_WithinApproxDist(&v1->Path, Float));
 }
 
 void __cdecl ActorCmd_IsPathDirect(scr_entref_t entref)
@@ -1499,8 +1489,7 @@ bool __cdecl Actor_CheckGrenadeLaunch(actor_s *self, const float *vStartPos, con
         v6 = va("checkgrenadelaunch: invalid weapon for entity %d", self->ent->s.number);
         Scr_Error(v6);
     }
-    LODWORD(v7) = BG_GetWeaponDef(self->ent->s.weapon)->iProjectileSpeed;
-    speed = (float)v7;
+    speed = (float)BG_GetWeaponDef(self->ent->s.weapon)->iProjectileSpeed;
     if (speed <= 0.0)
     {
         v10 = va("checkgrenadelaunch: grenade launcher speed must be > 0");
@@ -2570,15 +2559,20 @@ void __cdecl ActorCmd_SetEntityTarget(scr_entref_t entref)
     {
         Float = Scr_GetFloat(1);
 
-        // aislop
-        //_FP12 = -Float;
-        //v5 = 1.0;
-        //_FP13 = (float)((float)Float - (float)1.0);
-        //__asm { fsel      f11, f13, f0, f1 }
-        //__asm { fsel      f13, f12, f13, f11 }
-        //self->sentient->entityTargetThreat = _FP13;
-
-        self->sentient->entityTargetThreat = (Float >= 0.0f) ? (Float - 1.0f) : 1.0f;
+        // PPC two-fsel clamp:
+        //   _FP12 = -Float
+        //   _FP13 = Float - 1
+        //   f11   = (Float-1 >= 0) ? 1.0 : Float           ; min(Float, 1.0)
+        //   f13   = (-Float  >= 0) ? (Float-1) : f11       ; (Float<=0) ? Float-1 : min(Float,1)
+        // BUG was: prior port flipped condition AND the value, producing 0.0 for Float==1.0
+        // (so setentitytarget(ent, 1.0) never auto-promoted to enemy because the line 2582
+        //  check `entityTargetThreat == 1.0` never matched).
+        if (Float <= 0.0f)
+            self->sentient->entityTargetThreat = Float - 1.0f;
+        else if (Float >= 1.0f)
+            self->sentient->entityTargetThreat = 1.0f;
+        else
+            self->sentient->entityTargetThreat = Float;
     }
     sentient = self->sentient;
     if (sentient->entityTargetThreat == v5)

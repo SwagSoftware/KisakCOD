@@ -809,12 +809,10 @@ void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color
         if (CG_DObjGetWorldTagMatrix(&Entity->pose, ClientDObj, scr_const.tag_body, (float (*)[3])v34, v35))
         {
             WorldDirToScreenPos(localClientNum, v34, screenPos);
-            LODWORD(v7) = WeaponDef->iProjectileSpeed;
-            HIDWORD(v7) = 108032;
-            v28 = v7;
-            v31 = v34[0] * (float)v7;
-            v32 = (float)v7 * v34[1];
-            v33 = v34[2] * (float)v7;
+            float projectileSpeed = (float)WeaponDef->iProjectileSpeed;
+            v31 = v34[0] * projectileSpeed;
+            v32 = projectileSpeed * v34[1];
+            v33 = v34[2] * projectileSpeed;
             v8 = (float)((float)((float)(Entity->currentState.pos.trDelta[1] - Entity->currentState.pos.trDelta[1])
                 * cgArray[0].frameInterpolation)
                 + Entity->currentState.pos.trDelta[1]);

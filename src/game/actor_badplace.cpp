@@ -90,12 +90,10 @@ int __cdecl Path_FindBadPlace(unsigned int name)
 
 badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration)
 {
-    __int64 v2; // r10
     int v5; // r10
     unsigned __int16 *p_name; // r11
     int v7; // r29
     badplace_t *result; // r3
-    double v9; // r5
     int v10; // r11
     unsigned __int8 *p_type; // r10
     const char *v12; // r3
@@ -122,9 +120,9 @@ badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration)
     {
         if (duration < 250)
         {
-            LODWORD(v2) = duration;
-            v9 = (float)((float)v2 * (float)0.001);
-            Com_PrintWarning(18, (const char *)HIDWORD(v9), LODWORD(v9), 0);
+            Com_PrintWarning(18,
+                "WARNING: A badplace was created with duration [%.2f second], which is less than the ping time [%.2f second]\n",
+                duration * 0.001f, 0.25);
         }
     }
     else
@@ -377,14 +375,12 @@ void __cdecl Path_ShutdownBadPlaces()
 
 void __cdecl Actor_Badplace_Ping(actor_s *self)
 {
-    __int64 v2; // r11
-
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_badplace.cpp", 398, 0, "%s", "self");
     if (!self->flashBanged)
     {
-        LODWORD(v2) = G_rand();
-        if ((float)v2 <= (double)(float)(self->badPlaceAwareness * (float)32767.0))
+        int randVal = G_rand();
+        if ((float)randVal <= self->badPlaceAwareness * 32767.0f)
             self->isInBadPlace = 1;
     }
 }

@@ -77,20 +77,25 @@ int G_GetFreeActorCorpseIndex(int reuse)
     float viewDir[3] = { 0 };
     G_GetPlayerViewDirection(playerEnt, &viewDir[0], 0, 0);
 
-    // Normalize view direction's X and Y
+    // Normalize view direction's X and Y. PowerPC fsel selects 1.0 as the divisor
+    // when horizLen is exactly zero (degenerate case: looking straight up/down),
+    // otherwise divides by horizLen to get a unit-length 2D direction.
     float horizLen = sqrtf(viewDir[0] * viewDir[0] + viewDir[1] * viewDir[1]);
-    if (horizLen == 0.0f)
-    {
-        // If horizontal length zero, just use viewDir as is
-        horizLen = 1.0f;
-    }
+    float divisor = (horizLen <= 0.0f) ? 1.0f : horizLen;
+    float reciprocal = 1.0f / divisor;
 
-    float normViewDirX = viewDir[0] / horizLen;
-    float normViewDirY = viewDir[1] / horizLen;
+    float normViewDirX = viewDir[0] * reciprocal;
+    float normViewDirY = viewDir[1] * reciprocal;
     float normViewDirZ = 0.0f;
 
+    // Default: project onto horizontal plane (player looking ~horizontally).
+    bool projectHorizontal = true;
     if (horizLen == 0.0f)
     {
+        // Looking straight up/down: re-read viewDir and use it raw (not normalized);
+        // include the Z component so the dot product accounts for vertical-only views.
+        projectHorizontal = false;
+        G_GetPlayerViewDirection(playerEnt, &viewDir[0], 0, 0);
         normViewDirX = viewDir[0];
         normViewDirY = viewDir[1];
         normViewDirZ = viewDir[2];
@@ -125,8 +130,9 @@ int G_GetFreeActorCorpseIndex(int reuse)
         float dy = corpseEnt->r.currentOrigin[1] - playerEyePos[1];
         float dz = corpseEnt->r.currentOrigin[2] - playerEyePos[2];
 
-        // If horizLen was zero, treat vertical difference as zero for projection
-        if (horizLen == 0.0f)
+        // Collapse to horizontal plane in the normal case; keep full 3D delta only
+        // when the player is looking straight up/down.
+        if (projectHorizontal)
             dz = 0.0f;
 
         // Project vector onto normalized view direction
@@ -577,7 +583,7 @@ float Actor_Orient_LerpWithLimit(float current, float newValue, float delta, flo
     }
     else
     {
-        // Otherwise, move from current toward newValue by 'rate' units, respecting delta’s sign
+        // Otherwise, move from current toward newValue by 'rate' units, respecting deltaï¿½s sign
         float sign = (delta > 0) ? 1.0f : -1.0f;
         return current + sign * rate;
     }

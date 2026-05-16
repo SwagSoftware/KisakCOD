@@ -15,18 +15,16 @@
 #include "turret.h"
 #include <universal/profile.h>
 
-// aislop
 int Actor_SightTrace(actor_s *self, const float *start, const float *end, int passEntNum)
 {
-    float traceStart[3];
     int traceResult[2];
-    const float *traceEnd = end;
+    float adjustedStart[3];
+    const float *secondTraceStart = start;
+    const float *secondTraceEnd = end;
+    int secondTraceFlags;
 
     ++self->iTraceCount;
-
-    gentity_s *ent = self->ent;
-    int entNum = ent->s.number;
-    int traceFlags = 0;
+    int entNum = self->ent->s.number;
 
     if (self->ignoreCloseFoliage)
     {
@@ -36,36 +34,19 @@ int Actor_SightTrace(actor_s *self, const float *start, const float *end, int pa
 
         float distSq = dx * dx + dy * dy + dz * dz;
         float dist = sqrtf(distSq);
-
-        if (dist == 0.0f)
-            return 0;
-
-        float invDist = 1.0f / dist;
-
-        float dirX = dx * invDist;
-        float dirY = dy * invDist;
-        float dirZ = dz * invDist;
+        float invDist = (dist != 0.0f) ? (1.0f / dist) : 1.0f;
 
         float foliageIgnoreDist = ai_foliageIngoreDist->current.value;
+        adjustedStart[0] = start[0] + dx * invDist * foliageIgnoreDist;
+        adjustedStart[1] = start[1] + dy * invDist * foliageIgnoreDist;
+        adjustedStart[2] = start[2] + dz * invDist * foliageIgnoreDist;
 
-        traceStart[0] = start[0] + dirX * foliageIgnoreDist;
-        traceStart[1] = start[1] + dirY * foliageIgnoreDist;
-        traceStart[2] = start[2] + dirZ * foliageIgnoreDist;
-
-        // Use adjusted start position
-        traceEnd = end;
-        traceFlags = 41998339;  // Includes foliage
-        SV_SightTrace(traceResult, traceStart, vec3_origin, vec3_origin, end, entNum, passEntNum, traceFlags);
-
+        SV_SightTrace(traceResult, adjustedStart, vec3_origin, vec3_origin, end, entNum, passEntNum, 41998339);
         if (traceResult[0])
             return 0;
 
-        // Now continue with adjusted start point
-        traceStart[0] = start[0] + dirX * foliageIgnoreDist;
-        traceStart[1] = start[1] + dirY * foliageIgnoreDist;
-        traceStart[2] = start[2] + dirZ * foliageIgnoreDist;
-
-        traceFlags = 41998337;  // Without foliage
+        secondTraceEnd = adjustedStart;
+        secondTraceFlags = 41998337;
     }
     else
     {
@@ -75,15 +56,10 @@ int Actor_SightTrace(actor_s *self, const float *start, const float *end, int pa
 
         float distSq = dx * dx + dy * dy + dz * dz;
         float threshold = ai_foliageIngoreDist->current.value;
-        float thresholdSq = threshold * threshold;
-
-        traceFlags = (distSq >= thresholdSq) ? 41998339 : 41998337;
-        traceStart[0] = start[0];
-        traceStart[1] = start[1];
-        traceStart[2] = start[2];
+        secondTraceFlags = (distSq >= threshold * threshold) ? 41998339 : 41998337;
     }
 
-    SV_SightTrace(traceResult, traceStart, vec3_origin, vec3_origin, traceEnd, entNum, passEntNum, traceFlags);
+    SV_SightTrace(traceResult, secondTraceStart, vec3_origin, vec3_origin, secondTraceEnd, entNum, passEntNum, secondTraceFlags);
 
     if (traceResult[0] || SV_FX_GetVisibility(start, end) < 0.2f)
         return 0;
@@ -489,17 +465,12 @@ int __cdecl Actor_CanSeePointExInternal(
     int ignoreEntityNum,
     float *vViewPos)
 {
-    int result; // r3
-
     iassert(fovDot >= 0);
     iassert(fMaxDistSqrd >= 0.0);
 
-    float eyePos[3];
-    Actor_GetEyePosition(self, eyePos);
-
-    result = PointInFovAndRange(self, eyePos, vPoint, fovDot, fMaxDistSqrd);
+    int result = PointInFovAndRange(self, vViewPos, vPoint, fovDot, fMaxDistSqrd);
     if (result)
-        return Actor_SightTrace(self, eyePos, vPoint, ignoreEntityNum); // KISAKTODO double check args
+        return Actor_SightTrace(self, vViewPos, vPoint, ignoreEntityNum);
     return result;
 }
 
@@ -646,27 +617,24 @@ int __cdecl Actor_CanSeeSentientEx(
     sentient_s *sentient,
     double fovDot,
     double fMaxDistSqrd,
-    int iMaxLatency,
-    int a6,
-    int a7)
+    int iMaxLatency)
 {
-    char *v12; // r9
-    int v13; // r11
+    iassert(self);
+    iassert(sentient);
+    iassert(self->sentient);
+    iassert(self->sentient != sentient);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 470, 0, "%s", "self");
-    if (!sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 471, 0, "%s", "sentient");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 472, 0, "%s", "self->sentient");
-    if (self->sentient == sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_senses.cpp", 473, 0, "%s", "self->sentient != sentient");
-    v12 = (char *)self + 40 * (sentient - level.sentients);
-    v13 = *((unsigned int *)v12 + 526);
-    if (v13 && v13 + a7 >= level.time && v12[2100] && fovDot <= self->fovDot && fMaxDistSqrd <= self->fMaxSightDistSqrd)
+    sentient_info_t *pInfo = &self->sentientInfo[sentient - level.sentients];
+    int iLastUpdateTime = pInfo->VisCache.iLastUpdateTime;
+    if (iLastUpdateTime
+        && iLastUpdateTime + iMaxLatency >= level.time
+        && pInfo->VisCache.bVisible
+        && fovDot <= self->fovDot
+        && fMaxDistSqrd <= self->fMaxSightDistSqrd)
+    {
         return 1;
-    else
-        return Actor_CanSeeEntityEx(self, sentient->ent, fovDot, fMaxDistSqrd);
+    }
+    return Actor_CanSeeEntityEx(self, sentient->ent, fovDot, fMaxDistSqrd);
 }
 
 int __cdecl Actor_CanShootEnemy(actor_s *self)

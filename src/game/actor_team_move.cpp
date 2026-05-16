@@ -560,12 +560,17 @@ void __cdecl Actor_TeamMoveInitializeContext(
     }
     context->fWalkIntervalSqrd = v8;
 
-    //_FP12 = (float)(context->fIntervalSqrd - context->fVelSelfSqrd);
-    //__asm { fsel      f0, f12, f13, f0 }
-    //context->fMaxIntervalSqrd = _FP0;
-
-    float diff = context->fIntervalSqrd - context->fVelSelfSqrd;
-    context->fMaxIntervalSqrd = (diff < 0.0f) ? diff : context->fMaxIntervalSqrd;
+    // PPC: _FP12 = fIntervalSqrd - fVelSelfSqrd
+    //      f13   = fIntervalSqrd; f0 = fVelSelfSqrd (from prior load)
+    //      fsel f0, f12, f13, f0   ; (interval >= vel) ? interval : vel
+    //    = max(fIntervalSqrd, fVelSelfSqrd)
+    // BUG was: prior port wrote a negative diff OR an uninitialized fMaxIntervalSqrd
+    // back to the field, leaving team-move dodge radius garbage.
+    {
+        float interval = context->fIntervalSqrd;
+        float vel = context->fVelSelfSqrd;
+        context->fMaxIntervalSqrd = (interval >= vel) ? interval : vel;
+    }
 
     v11 = self->pPileUpActor || bAllowGoalPileUp && Actor_IsAtGoal(self);
     fMaxIntervalSqrd = context->fMaxIntervalSqrd;

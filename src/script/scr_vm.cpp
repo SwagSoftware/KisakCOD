@@ -1542,10 +1542,10 @@ VariableStackBuffer *__cdecl VM_ArchiveStack()
 
     top = fs.top;
     size = fs.top - fs.startTop;
-    if (size != size)
+    if (size != (unsigned __int16)size)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2768, 0, "%s", "size == (unsigned short)size");
     bufLen = 5 * size + 11;
-    if (bufLen != bufLen)
+    if (bufLen != (unsigned __int16)bufLen)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2770, 0, "%s", "bufLen == (unsigned short)bufLen");
     stackValue = (VariableStackBuffer*) MT_Alloc(bufLen, 1);
     ++scrVarPub.numScriptThreads;

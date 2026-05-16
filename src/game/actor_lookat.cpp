@@ -63,45 +63,28 @@ void __cdecl Actor_SetLookAt(actor_s *self, float *vPosition, double fTurnAccel)
 
 float __cdecl Actor_CurrentLookAtAnimYawMax(actor_s *self)
 {
-    __int64 v1; // r11
-    double v2; // fp1
-    double v3; // fp0
-
-    HIDWORD(v1) = self->lookAtInfo.iLookAtBlendEndTime;
-    LODWORD(v1) = HIDWORD(v1) - level.time;
-    if (HIDWORD(v1) - level.time < 0)
-        LODWORD(v1) = 0;
-    v2 = 0.0;
-    v3 = (float)-(float)((float)(self->lookAtInfo.fLookAtAnimBlendRate * (float)v1) - self->lookAtInfo.fLookAtAnimYawLimit);
-    if (v3 >= 0.0)
-    {
-        v2 = 180.0;
-        if (v3 <= 180.0)
-            v2 = (float)-(float)((float)(self->lookAtInfo.fLookAtAnimBlendRate * (float)v1)
-                - self->lookAtInfo.fLookAtAnimYawLimit);
-    }
-    return *((float *)&v2 + 1);
+    int remaining = self->lookAtInfo.iLookAtBlendEndTime - level.time;
+    if (remaining < 0)
+        remaining = 0;
+    float v3 = self->lookAtInfo.fLookAtAnimYawLimit - self->lookAtInfo.fLookAtAnimBlendRate * (float)remaining;
+    if (v3 < 0.0f)
+        return 0.0f;
+    if (v3 > 180.0f)
+        return 180.0f;
+    return v3;
 }
 
 float __cdecl Actor_CurrentLookAtYawMax(actor_s *self)
 {
-    __int64 v1; // r11
-    double v2; // fp1
-    double v3; // fp0
-
-    HIDWORD(v1) = self->lookAtInfo.iLookAtBlendEndTime;
-    LODWORD(v1) = HIDWORD(v1) - level.time;
-    if (HIDWORD(v1) - level.time < 0)
-        LODWORD(v1) = 0;
-    v2 = 0.0;
-    v3 = (float)-(float)((float)(self->lookAtInfo.fLookAtLimitBlendRate * (float)v1) - self->lookAtInfo.fLookAtYawLimit);
-    if (v3 >= 0.0)
-    {
-        v2 = 180.0;
-        if (v3 <= 180.0)
-            v2 = (float)-(float)((float)(self->lookAtInfo.fLookAtLimitBlendRate * (float)v1) - self->lookAtInfo.fLookAtYawLimit);
-    }
-    return *((float *)&v2 + 1);
+    int remaining = self->lookAtInfo.iLookAtBlendEndTime - level.time;
+    if (remaining < 0)
+        remaining = 0;
+    float v3 = self->lookAtInfo.fLookAtYawLimit - self->lookAtInfo.fLookAtLimitBlendRate * (float)remaining;
+    if (v3 < 0.0f)
+        return 0.0f;
+    if (v3 > 180.0f)
+        return 180.0f;
+    return v3;
 }
 
 void __cdecl Actor_SetLookAtYawLimits(actor_s *self, double fAnimYawLimit, double fYawLimit, double fBlendTime)
@@ -112,35 +95,20 @@ void __cdecl Actor_SetLookAtYawLimits(actor_s *self, double fAnimYawLimit, doubl
 
     if (fAnimYawLimit != self->lookAtInfo.fLookAtAnimYawLimit || fYawLimit != self->lookAtInfo.fLookAtYawLimit)
     {
-        HIDWORD(v4) = self->lookAtInfo.iLookAtBlendEndTime;
-        LODWORD(v4) = HIDWORD(v4) - level.time;
-        if (HIDWORD(v4) - level.time < 0)
-            LODWORD(v4) = 0;
-        v5 = (float)-(float)((float)((float)v4 * self->lookAtInfo.fLookAtAnimBlendRate)
-            - self->lookAtInfo.fLookAtAnimYawLimit);
-        if (v5 >= 0.0)
-        {
-            if (v5 > 180.0)
-                v5 = 180.0;
-        }
-        else
-        {
+        int remaining = self->lookAtInfo.iLookAtBlendEndTime - level.time;
+        if (remaining < 0)
+            remaining = 0;
+        v5 = self->lookAtInfo.fLookAtAnimYawLimit - (float)remaining * self->lookAtInfo.fLookAtAnimBlendRate;
+        if (v5 < 0.0)
             v5 = 0.0;
-        }
+        else if (v5 > 180.0)
+            v5 = 180.0;
         self->lookAtInfo.fLookAtAnimYawLimit = fAnimYawLimit;
-        LODWORD(v4) = HIDWORD(v4) - level.time;
-        if (HIDWORD(v4) - level.time < 0)
-            LODWORD(v4) = 0;
-        v6 = (float)-(float)((float)((float)v4 * self->lookAtInfo.fLookAtLimitBlendRate) - self->lookAtInfo.fLookAtYawLimit);
-        if (v6 >= 0.0)
-        {
-            if (v6 > 180.0)
-                v6 = 180.0;
-        }
-        else
-        {
+        v6 = self->lookAtInfo.fLookAtYawLimit - (float)remaining * self->lookAtInfo.fLookAtLimitBlendRate;
+        if (v6 < 0.0)
             v6 = 0.0;
-        }
+        else if (v6 > 180.0)
+            v6 = 180.0;
         self->lookAtInfo.fLookAtYawLimit = fYawLimit;
         self->lookAtInfo.iLookAtBlendEndTime = level.time - (int)(float)((float)fBlendTime * (float)-1000.0);
         if (fBlendTime == 0.0)

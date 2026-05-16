@@ -795,13 +795,17 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
         if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))
         {
             ps->pm_flags |= PMF_SIGHT_AIMING;
+#ifdef KISAK_MP
             iassert(ps->otherFlags & POF_PLAYER);
+#endif
         }
         else if ((pm->oldcmd.buttons & 0x800) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
         {
             ps->pm_flags |= PMF_SIGHT_AIMING;
             ps->pm_flags |= PMF_PRONEMOVE_OVERRIDDEN;
+#ifdef KISAK_MP
             iassert(ps->otherFlags & POF_PLAYER);
+#endif
         }
     }
 #ifdef KISAK_MP
@@ -812,6 +816,7 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
 #endif
 }
 
+#ifdef KISAK_MP
 bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 {
     bool result; // al
@@ -823,22 +828,21 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 
     switch (ps->pm_type)
     {
-    case 1:
+    case PM_NORMAL_LINKED:
         if (!pml->almostGroundPlane)
             goto LABEL_10;
-        result = 0;
-        break;
-    case 2:
-    case 3:
-    case 4:
-    case 5:
-    case 7:
-    case 8:
+        return false;
+    case PM_NOCLIP:
+    case PM_UFO:
+    case PM_SPECTATOR:
+    case PM_INTERMISSION:
+    case PM_DEAD:
+    case PM_DEAD_LINKED:
         result = 0;
         break;
     default:
     LABEL_10:
-        if ((ps->otherFlags & 4) != 0)
+        if ((ps->otherFlags & POF_PLAYER) != 0)
         {
             weapIndex = BG_GetViewmodelWeaponIndex(ps);
             weapDef = BG_GetWeaponDef(weapIndex);
@@ -888,6 +892,49 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
     }
     return result;
 }
+#elif KISAK_SP
+bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
+{
+    unsigned int viewmodelWeaponIndex; // r3
+    WeaponDef *weapDef; // r3
+    int weaponstate; // r11
+
+    iassert(ps);
+    iassert(pml);
+
+    if (ps->pm_type == PM_NORMAL_LINKED)
+    {
+        if (pml->groundPlane)
+            return false;
+    }
+    else if ((unsigned int)(ps->pm_type - PM_NOCLIP) <= (unsigned int)(PM_DEAD_LINKED - PM_NOCLIP))
+    {
+        return false;
+    }
+
+    viewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(ps);
+    weapDef = BG_GetWeaponDef(viewmodelWeaponIndex);
+    if (!weapDef->aimDownSight)
+        return false;
+
+    weaponstate = ps->weaponstate;
+    if (weaponstate >= WEAPON_OFFHAND_INIT && weaponstate <= WEAPON_OFFHAND_END)
+        return false;
+
+    return weaponstate != WEAPON_MELEE_INIT
+        && weaponstate != WEAPON_MELEE_FIRE
+        && weaponstate != WEAPON_MELEE_END
+        && weaponstate != WEAPON_RAISING
+        && weaponstate != WEAPON_RAISING_ALTSWITCH
+        && weaponstate != WEAPON_DROPPING
+        && weaponstate != WEAPON_DROPPING_QUICK
+        && weaponstate != WEAPON_NIGHTVISION_WEAR
+        && weaponstate != WEAPON_NIGHTVISION_REMOVE
+        && (ps->eFlags & 0x300) == 0 // accurate flag
+        && (ps->weapFlags & 0x20) == 0 // accurate flag
+        && (!weapDef->noAdsWhenMagEmpty || ps->ammoclip[BG_ClipForWeapon(ps->weapon)]);
+}
+#endif
 
 void __cdecl PM_ExitAimDownSight(playerState_s *ps)
 {
@@ -2165,16 +2212,13 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
             weaponRestrictKickTime = ps->weaponRestrictKickTime;
         ps->weaponRestrictKickTime = weaponRestrictKickTime;
     }
+#ifdef KISAK_MP
     if ((ps->weaponstate == WEAPON_RELOADING
         || ps->weaponstate == WEAPON_RELOAD_START
         || ps->weaponstate == WEAPON_RELOAD_END
         || ps->weaponstate == WEAPON_RELOAD_START_INTERUPT
         || ps->weaponstate == WEAPON_RELOADING_INTERUPT)
-#ifdef KISAK_MP
         && (ps->perks & 4) != 0)
-#elif KISAK_SP
-        )
-#endif 
     {
         if (perk_weapReloadMultiplier->current.value == 0.0)
         {
@@ -2190,18 +2234,8 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
         }
     }
     else if ((ps->weaponstate == WEAPON_FIRING
-        || ps->weaponstate == WEAPON_RECHAMBERING
-        || ps->weaponstate == WEAPON_MELEE_INIT
-        || ps->weaponstate == WEAPON_MELEE_FIRE
-        || ps->weaponstate == WEAPON_MELEE_END)
-        && ps->weaponstate != WEAPON_MELEE_INIT
-        && ps->weaponstate != WEAPON_MELEE_FIRE
-        && ps->weaponstate != WEAPON_MELEE_END
-#ifdef KISAK_MP
+        || ps->weaponstate == WEAPON_RECHAMBERING)
         && (ps->perks & 8) != 0)
-#elif KISAK_SP
-        )
-#endif 
     {
         if (perk_weapRateMultiplier->current.value == 0.0)
         {
@@ -2217,6 +2251,7 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
         }
     }
     else
+#endif
     {
         msec = pml->msec;
     }

@@ -513,11 +513,18 @@ void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *c
 #ifdef KISAK_MP
             && cg_crosshairEnemyColor->current.enabled
             && cgameGlob->crosshairClientLastTime - cgameGlob->crosshairClientStartTime >= cg_enemyNameFadeIn->current.integer
+#elif KISAK_SP
+            && cg_crosshairEnemyColor->current.enabled
 #endif
             )
         {
 #ifdef KISAK_MP
             Dvar_GetUnpackedColorByName("g_TeamColor_EnemyTeam", color);
+#elif KISAK_SP
+            // enemy target -> red
+            color[0] = 1.0f;
+            color[1] = 0.25f;
+            color[2] = 0.25f;
 #endif
             goto LABEL_22;
         }
@@ -532,6 +539,11 @@ void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *c
     if (cgameGlob->crosshairClientLastTime - cgameGlob->crosshairClientStartTime < cg_friendlyNameFadeIn->current.integer)
         goto LABEL_21;
     Dvar_GetUnpackedColorByName("g_TeamColor_MyTeam", color);
+#elif KISAK_SP
+    // friendly target -> green
+    color[0] = 0.25f;
+    color[1] = 1.0f;
+    color[2] = 0.25f;
 #endif
 LABEL_22:
     color[3] = alpha * cg_crosshairAlpha->current.value;

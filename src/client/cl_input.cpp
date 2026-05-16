@@ -25,6 +25,61 @@ const dvar_t *cl_anglespeedkey;
 unsigned int frame_msec;
 int old_com_frameTime;
 
+#define KEY_LEFT 0
+#define KEY_RIGHT 1
+#define KEY_FORWARD 2
+#define KEY_BACK 3
+#define KEY_LOOKUP 4
+#define KEY_LOOKDOWN 5
+#define KEY_MOVELEFT 6
+#define KEY_MOVERIGHT 7
+#define KEY_STRAFE 8
+#define KEY_SPEED 9 // in_speed
+#define KEY_MOVEUP 10 // jump
+#define KEY_DOWN 11 // stance-down
+#define KEY_UP 12 // stance-up
+#define KEY_MLOOK 13
+#define KEY_ATTACK 14
+#define KEY_BREATH 15
+#define KEY_FRAG 16
+#define KEY_SMOKE 17
+#define KEY_MELEE 18
+#define KEY_ACTIVATE 19
+#define KEY_RELOAD 20
+#define KEY_USERELOAD 21
+#define KEY_LEANLEFT 22
+#define KEY_LEANRIGHT 23
+#define KEY_PRONE 24
+
+#define KEY_THROW 26
+#define KEY_SPRINT 27
+#define KEY_NIGHTVISION 28
+
+// cmd->buttons bitfield (21 bits, KEY_BIT_COUNT == 21)
+#define BUTTON_ATTACK         (1 <<  0)  // +attack
+#define BUTTON_SPRINT         (1 <<  1)  // kb[KEY_SPRINT]
+#define BUTTON_MELEE          (1 <<  2)  // +melee
+#define BUTTON_USE            (1 <<  3)  // +activate
+#define BUTTON_RELOAD         (1 <<  4)  // +reload
+#define BUTTON_USE_RELOAD     (1 <<  5)  // +usereload (combined-bind)
+#define BUTTON_LEAN_LEFT      (1 <<  6)  // +leanleft
+#define BUTTON_LEAN_RIGHT     (1 <<  7)  // +leanright
+#define BUTTON_PRONE          (1 <<  8)  // +prone (held)
+#define BUTTON_CROUCH         (1 <<  9)  // crouch stance
+#define BUTTON_JUMP           (1 << 10)  // +moveup / +gostand
+#define BUTTON_ADS            (1 << 11)  // +speed in COD (aim-down-sights)
+#define BUTTON_TEMP_STANCE    (1 << 12)  // holding stance key (vs toggled stance)
+#define BUTTON_BREATH         (1 << 13)  // +breath (hold-breath while scoped)
+#define BUTTON_FRAG           (1 << 14)  // +frag
+#define BUTTON_SMOKE          (1 << 15)  // +smoke
+#define BUTTON_LOC_CONFIRM    (1 << 16)  // artillery/location confirm
+#define BUTTON_LOC_CANCEL     (1 << 17)  // artillery/location cancel
+#define BUTTON_NIGHTVISION    (1 << 18)  // +nightvision
+#define BUTTON_THROW          (1 << 19)  // +throw (frag throwback)
+#define BUTTON_LOC_SELECTING  (1 << 20)  // location-selection UI active
+
+#define KEY_BIT_COUNT 21
+
 kbutton_t kb[29];
 
 void __cdecl TRACK_cl_input()
@@ -34,24 +89,17 @@ void __cdecl TRACK_cl_input()
 
 bool __cdecl IN_IsTempProneKeyActive()
 {
-    return kb[24].active;
+    return kb[KEY_PRONE].active;
 }
 
 int __cdecl IN_IsTempStanceKeyActive()
 {
-    unsigned __int8 v0; // r11
-
-    if (kb[24].active)
-        return 1;
-    v0 = 0;
-    if (kb[11].active)
-        return 1;
-    return v0;
+    return kb[KEY_PRONE].active || kb[KEY_DOWN].active;
 }
 
 void IN_MLookDown()
 {
-    kb[13].active = 1;
+    kb[KEY_MLOOK].active = 1;
 }
 
 void __cdecl IN_KeyDown(kbutton_t *b)
@@ -131,408 +179,335 @@ void __cdecl IN_KeyUp(kbutton_t *b)
     }
 }
 
-// local variable allocation has failed, the output may be wrong!
 float __cdecl CL_KeyState(kbutton_t *key)
 {
-    __int64 v1; // r11 OVERLAPPED
-    bool active; // r10
-    unsigned int msec; // r30
-    unsigned int downtime; // r10
-    double v5; // fp1
-
-    active = key->active;
-    msec = key->msec;
+    bool active = key->active;
+    unsigned int msec = key->msec;
     key->msec = 0;
     if (active)
     {
-        downtime = key->downtime;
+        unsigned int downtime = key->downtime;
         if (downtime)
             msec += com_frameTime - downtime;
         else
             msec = com_frameTime;
         key->downtime = com_frameTime;
     }
-    if (msec)
-    {
-        LODWORD(v1) = frame_msec;
-        if (msec < frame_msec)
-        {
-            if (!frame_msec)
-            {
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp", 229, 0, "%s", "frame_msec");
-                LODWORD(v1) = frame_msec;
-            }
-            HIDWORD(v1) = msec;
-            v5 = (float)((float)*(__int64 *)((char *)&v1 + 4) / (float)v1);
-        }
-        else
-        {
-            v5 = 1.0;
-        }
-    }
-    else
-    {
-        v5 = 0.0;
-    }
-    return *((float *)&v5 + 1);
+    if (!msec)
+        return 0.0f;
+    if (msec >= frame_msec)
+        return 1.0f;
+    if (!frame_msec)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp", 229, 0, "%s", "frame_msec");
+    return (float)msec / (float)frame_msec;
 }
 
 void __cdecl CL_SetStance(int localClientNum, StanceState stance)
 {
-    char v3; // r11
-
-    if (kb[24].active || (v3 = 0, kb[11].active))
-        v3 = 1;
-    if (!v3)
-    {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-                555,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+    iassert(localClientNum == 0);
+    if (!IN_IsTempStanceKeyActive())
         clients[0].stance = stance;
-    }
 }
 
 void __cdecl CL_ToggleStance(StanceState preferredStance)
 {
-    char v1; // r11
-    StanceState v2; // r11
-
-    if (kb[24].active || (v1 = 0, kb[11].active))
-        v1 = 1;
-    if (!v1)
-    {
-        v2 = CL_STANCE_STAND;
-        if (clients[0].stance != preferredStance)
-            v2 = preferredStance;
-        clients[0].stance = v2;
-    }
+    if (IN_IsTempStanceKeyActive())
+        return;
+    if (clients[0].stance == preferredStance)
+        clients[0].stance = CL_STANCE_STAND;
+    else
+        clients[0].stance = preferredStance;
 }
 
 void IN_UpDown()
 {
-    char v0; // r11
-    StanceState v1; // r10
-
-    if (cmd_args.nesting >= 8u)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\../qcommon/cmd.h",
-            191,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-    IN_KeyDown(&kb[12]);
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
+    iassert(cmd_args.nesting < CMD_MAX_NESTING);
+    IN_KeyDown(&kb[KEY_UP]);
+    if (IN_IsTempStanceKeyActive())
+        return;
+    switch (clients[0].stance)
     {
-        if (clients[0].stance == CL_STANCE_CROUCH)
-        {
-            v1 = CL_STANCE_STAND;
-        }
-        else
-        {
-            if (clients[0].stance != CL_STANCE_PRONE)
-            {
-                if (clients[0].stance)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp",
-                        279,
-                        1,
-                        "%s",
-                        "cl->stance == CL_STANCE_STAND");
-                IN_KeyDown(&kb[10]);
-                return;
-            }
-            v1 = CL_STANCE_CROUCH;
-        }
-        clients[0].stance = v1;
+    case CL_STANCE_CROUCH:
+        clients[0].stance = CL_STANCE_STAND;
+        break;
+    case CL_STANCE_PRONE:
+        clients[0].stance = CL_STANCE_CROUCH;
+        break;
+    default:
+        iassert(clients[0].stance == CL_STANCE_STAND);
+        IN_KeyDown(&kb[KEY_MOVEUP]);
+        break;
     }
 }
 
 void IN_UpUp()
 {
-    IN_KeyUp(&kb[12]);
-    IN_KeyUp(&kb[10]);
+    IN_KeyUp(&kb[KEY_UP]);
+    IN_KeyUp(&kb[KEY_MOVEUP]);
 }
 
 void IN_DownDown()
 {
-    IN_KeyDown(&kb[11]);
+    IN_KeyDown(&kb[KEY_DOWN]);
 }
 
 void IN_DownUp()
 {
-    IN_KeyUp(&kb[11]);
+    IN_KeyUp(&kb[KEY_DOWN]);
 }
 
 void IN_LeftDown()
 {
-    IN_KeyDown(kb);
+    IN_KeyDown(&kb[KEY_LEFT]);
 }
 
 void IN_LeftUp()
 {
-    IN_KeyUp(kb);
+    IN_KeyUp(&kb[KEY_LEFT]);
 }
 
 void IN_RightDown()
 {
-    IN_KeyDown(&kb[1]);
+    IN_KeyDown(&kb[KEY_RIGHT]);
 }
 
 void IN_RightUp()
 {
-    IN_KeyUp(&kb[1]);
+    IN_KeyUp(&kb[KEY_RIGHT]);
 }
 
 void IN_ForwardDown()
 {
-    IN_KeyDown(&kb[2]);
+    IN_KeyDown(&kb[KEY_FORWARD]);
 }
 
 void IN_ForwardUp()
 {
-    IN_KeyUp(&kb[2]);
+    IN_KeyUp(&kb[KEY_FORWARD]);
 }
 
 void IN_BackDown()
 {
-    IN_KeyDown(&kb[3]);
+    IN_KeyDown(&kb[KEY_BACK]);
 }
 
 void IN_BackUp()
 {
-    IN_KeyUp(&kb[3]);
+    IN_KeyUp(&kb[KEY_BACK]);
 }
 
 void IN_LookupDown()
 {
-    IN_KeyDown(&kb[4]);
+    IN_KeyDown(&kb[KEY_LOOKUP]);
 }
 
 void IN_LookupUp()
 {
-    IN_KeyUp(&kb[4]);
+    IN_KeyUp(&kb[KEY_LOOKUP]);
 }
 
 void IN_LookdownDown()
 {
-    IN_KeyDown(&kb[5]);
+    IN_KeyDown(&kb[KEY_LOOKDOWN]);
 }
 
 void IN_LookdownUp()
 {
-    IN_KeyUp(&kb[5]);
+    IN_KeyUp(&kb[KEY_LOOKDOWN]);
 }
 
 void IN_MoveleftDown()
 {
-    IN_KeyDown(&kb[6]);
+    IN_KeyDown(&kb[KEY_MOVELEFT]);
 }
 
 void IN_MoveleftUp()
 {
-    IN_KeyUp(&kb[6]);
+    IN_KeyUp(&kb[KEY_MOVELEFT]);
 }
 
 void IN_MoverightDown()
 {
-    IN_KeyDown(&kb[7]);
+    IN_KeyDown(&kb[KEY_MOVERIGHT]);
 }
 
 void IN_MoverightUp()
 {
-    IN_KeyUp(&kb[7]);
+    IN_KeyUp(&kb[KEY_MOVERIGHT]);
 }
 
 void IN_SpeedDown()
 {
-    IN_KeyDown(&kb[9]);
+    IN_KeyDown(&kb[KEY_SPEED]);
 }
 
 void IN_SpeedUp()
 {
-    IN_KeyUp(&kb[9]);
+    IN_KeyUp(&kb[KEY_SPEED]);
 }
 
 void IN_StrafeDown()
 {
-    IN_KeyDown(&kb[8]);
+    IN_KeyDown(&kb[KEY_STRAFE]);
 }
 
 void IN_StrafeUp()
 {
-    IN_KeyUp(&kb[8]);
+    IN_KeyUp(&kb[KEY_STRAFE]);
 }
 
 void IN_Attack_Down()
 {
-    IN_KeyDown(&kb[14]);
+    IN_KeyDown(&kb[KEY_ATTACK]);
 }
 
 void IN_Attack_Up()
 {
-    IN_KeyUp(&kb[14]);
+    IN_KeyUp(&kb[KEY_ATTACK]);
 }
 
 void IN_Breath_Down()
 {
-    IN_KeyDown(&kb[15]);
+    IN_KeyDown(&kb[KEY_BREATH]);
 }
 
 void IN_Breath_Up()
 {
-    IN_KeyUp(&kb[15]);
+    IN_KeyUp(&kb[KEY_BREATH]);
 }
 
 void IN_MeleeBreath_Down()
 {
-    IN_KeyDown(&kb[18]);
-    IN_KeyDown(&kb[15]);
+    IN_KeyDown(&kb[KEY_MELEE]);
+    IN_KeyDown(&kb[KEY_BREATH]);
 }
 
 void IN_MeleeBreath_Up()
 {
-    IN_KeyUp(&kb[18]);
-    IN_KeyUp(&kb[15]);
+    IN_KeyUp(&kb[KEY_MELEE]);
+    IN_KeyUp(&kb[KEY_BREATH]);
 }
 
 void IN_Frag_Down()
 {
-    IN_KeyDown(&kb[16]);
+    IN_KeyDown(&kb[KEY_FRAG]);
 }
 
 void IN_Frag_Up()
 {
-    IN_KeyUp(&kb[16]);
+    IN_KeyUp(&kb[KEY_FRAG]);
 }
 
 void IN_Smoke_Down()
 {
-    IN_KeyDown(&kb[17]);
+    IN_KeyDown(&kb[KEY_SMOKE]);
 }
 
 void IN_Smoke_Up()
 {
-    IN_KeyUp(&kb[17]);
+    IN_KeyUp(&kb[KEY_SMOKE]);
 }
 
 void __cdecl IN_BreathSprint_Down()
 {
-    IN_KeyDown(&kb[15]);
-    IN_KeyDown(&kb[27]);
+    IN_KeyDown(&kb[KEY_BREATH]);
+    IN_KeyDown(&kb[KEY_SPRINT]);
 }
 
 void __cdecl IN_BreathSprint_Up()
 {
-    IN_KeyUp(&kb[15]);
-    IN_KeyUp(&kb[27]);
+    IN_KeyUp(&kb[KEY_BREATH]);
+    IN_KeyUp(&kb[KEY_SPRINT]);
 }
 
 void IN_Melee_Down()
 {
-    IN_KeyDown(&kb[18]);
+    IN_KeyDown(&kb[KEY_MELEE]);
 }
 
 void IN_Melee_Up()
 {
-    IN_KeyUp(&kb[18]);
+    IN_KeyUp(&kb[KEY_MELEE]);
 }
 
 void IN_Activate_Down()
 {
-    IN_KeyDown(&kb[19]);
+    IN_KeyDown(&kb[KEY_ACTIVATE]);
 }
 
 void IN_Activate_Up()
 {
-    IN_KeyUp(&kb[19]);
+    IN_KeyUp(&kb[KEY_ACTIVATE]);
 }
 
 void IN_Reload_Down()
 {
-    IN_KeyDown(&kb[20]);
+    IN_KeyDown(&kb[KEY_RELOAD]);
 }
 
 void IN_Reload_Up()
 {
-    IN_KeyUp(&kb[20]);
+    IN_KeyUp(&kb[KEY_RELOAD]);
 }
 
 void IN_UseReload_Down()
 {
-    IN_KeyDown(&kb[21]);
+    IN_KeyDown(&kb[KEY_USERELOAD]);
 }
 
 void IN_UseReload_Up()
 {
-    IN_KeyUp(&kb[21]);
+    IN_KeyUp(&kb[KEY_USERELOAD]);
 }
 
 void IN_LeanLeft_Down()
 {
-    IN_KeyDown(&kb[22]);
+    IN_KeyDown(&kb[KEY_LEANLEFT]);
 }
 
 void IN_LeanLeft_Up()
 {
-    IN_KeyUp(&kb[22]);
+    IN_KeyUp(&kb[KEY_LEANLEFT]);
 }
 
 void IN_LeanRight_Down()
 {
-    IN_KeyDown(&kb[23]);
+    IN_KeyDown(&kb[KEY_LEANRIGHT]);
 }
 
 void IN_LeanRight_Up()
 {
-    IN_KeyUp(&kb[23]);
+    IN_KeyUp(&kb[KEY_LEANRIGHT]);
 }
 
 void IN_Prone_Down()
 {
-    IN_KeyDown(&kb[24]);
+    IN_KeyDown(&kb[KEY_PRONE]);
 }
 
 void IN_Prone_Up()
 {
-    IN_KeyUp(&kb[24]);
+    IN_KeyUp(&kb[KEY_PRONE]);
 }
 
 void IN_Stance_Down()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
-    {
-        clients[0].stanceHeld = 1;
-        clients[0].stancePosition = clients[0].stance;
-        clients[0].stanceTime = com_frameTime;
-        if (clients[0].stance != CL_STANCE_CROUCH)
-            clients[0].stance = CL_STANCE_CROUCH;
-    }
+    if (IN_IsTempStanceKeyActive())
+        return;
+    clients[0].stanceHeld = 1;
+    clients[0].stancePosition = clients[0].stance;
+    clients[0].stanceTime = com_frameTime;
+    if (clients[0].stance != CL_STANCE_CROUCH)
+        clients[0].stance = CL_STANCE_CROUCH;
 }
 
 void IN_Stance_Up()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
-    {
-        if (clients[0].stanceHeld && clients[0].stancePosition == CL_STANCE_CROUCH)
-            clients[0].stance = CL_STANCE_STAND;
-        clients[0].stanceHeld = 0;
-    }
+    if (IN_IsTempStanceKeyActive())
+        return;
+    if (clients[0].stanceHeld && clients[0].stancePosition == CL_STANCE_CROUCH)
+        clients[0].stance = CL_STANCE_STAND;
+    clients[0].stanceHeld = 0;
 }
 
 void __cdecl IN_CenterView()
@@ -629,93 +604,74 @@ void IN_LeaveADS()
 
 void IN_Throw_Down()
 {
-    IN_KeyDown(&kb[26]);
+    IN_KeyDown(&kb[KEY_THROW]);
 }
 
 void IN_Throw_Up()
 {
-    IN_KeyUp(&kb[26]);
+    IN_KeyUp(&kb[KEY_THROW]);
 }
 
 void IN_ToggleADS_Throw_Down()
 {
     IN_ToggleADS();
-    IN_KeyDown(&kb[26]);
+    IN_KeyDown(&kb[KEY_THROW]);
 }
 
 void IN_ToggleADS_Throw_Up()
 {
-    IN_KeyUp(&kb[26]);
+    IN_KeyUp(&kb[KEY_THROW]);
 }
 
 void IN_Speed_Throw_Down()
 {
-    IN_KeyDown(&kb[9]);
-    IN_KeyDown(&kb[26]);
+    IN_KeyDown(&kb[KEY_SPEED]);
+    IN_KeyDown(&kb[KEY_THROW]);
 }
 
 void IN_Speed_Throw_Up()
 {
-    IN_KeyUp(&kb[9]);
-    IN_KeyUp(&kb[26]);
+    IN_KeyUp(&kb[KEY_SPEED]);
+    IN_KeyUp(&kb[KEY_THROW]);
 }
 
 void IN_LowerStance()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
+    if (IN_IsTempStanceKeyActive())
+        return;
+    switch (clients[0].stance)
     {
-        if (clients[0].stance)
-        {
-            if (clients[0].stance == CL_STANCE_CROUCH)
-            {
-                clients[0].stance = CL_STANCE_PRONE;
-            }
-            else if (clients[0].stance != CL_STANCE_PRONE)
-            {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp",
-                    754,
-                    1,
-                    "%s",
-                    "cl->stance == CL_STANCE_PRONE");
-            }
-        }
-        else
-        {
-            clients[0].stance = CL_STANCE_CROUCH;
-        }
+    case CL_STANCE_STAND:
+        clients[0].stance = CL_STANCE_CROUCH;
+        break;
+    case CL_STANCE_CROUCH:
+        clients[0].stance = CL_STANCE_PRONE;
+        break;
+    case CL_STANCE_PRONE:
+        break;
+    default:
+        iassert(clients[0].stance == CL_STANCE_PRONE);
+        break;
     }
 }
 
 void IN_RaiseStance()
 {
-    char v0; // r11
-
-    if (kb[24].active || (v0 = 0, kb[11].active))
-        v0 = 1;
-    if (!v0)
+    if (IN_IsTempStanceKeyActive())
+        return;
+    switch (clients[0].stance)
     {
-        if (clients[0].stance == CL_STANCE_CROUCH)
-        {
-            clients[0].stance = CL_STANCE_STAND;
-        }
-        else if (clients[0].stance == CL_STANCE_PRONE)
-        {
-            clients[0].stance = CL_STANCE_CROUCH;
-        }
-        else if (clients[0].stance)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp",
-                777,
-                1,
-                "%s",
-                "cl->stance == CL_STANCE_STAND");
-        }
+    case CL_STANCE_STAND:
+        break;
+    case CL_STANCE_CROUCH:
+        clients[0].stance = CL_STANCE_STAND;
+        break;
+    case CL_STANCE_PRONE:
+        clients[0].stance = CL_STANCE_CROUCH;
+        break;
+    default:
+        iassert(clients[0].stance == CL_STANCE_STAND);
+        break;
     }
 }
 
@@ -741,79 +697,56 @@ void IN_GoCrouch()
 
 void IN_GoStandDown()
 {
-    char v0; // r11
-
-    IN_KeyDown(&kb[12]);
+    IN_KeyDown(&kb[KEY_UP]);
     if (clients[0].stance)
-    {
-        if (kb[24].active || (v0 = 0, kb[11].active))
-            v0 = 1;
-        if (!v0)
-            clients[0].stance = CL_STANCE_STAND;
-    }
+        CL_SetStance(0, CL_STANCE_STAND);
     else
-    {
-        IN_KeyDown(&kb[10]);
-    }
+        IN_KeyDown(&kb[KEY_MOVEUP]);
 }
 
 void IN_GoStandUp()
 {
-    IN_KeyUp(&kb[12]);
-    IN_KeyUp(&kb[10]);
+    IN_KeyUp(&kb[KEY_UP]);
+    IN_KeyUp(&kb[KEY_MOVEUP]);
 }
 
 void __cdecl IN_SprintDown()
 {
-    IN_KeyDown(&kb[27]);
+    IN_KeyDown(&kb[KEY_SPRINT]);
 }
 
 void __cdecl IN_SprintUp()
 {
-    IN_KeyUp(&kb[27]);
+    IN_KeyUp(&kb[KEY_SPRINT]);
 }
 
 void __cdecl IN_NightVisionDown()
 {
-    IN_KeyDown(&kb[28]);
+    IN_KeyDown(&kb[KEY_NIGHTVISION]);
 }
 
 void __cdecl IN_NightVisionUp()
 {
-    IN_KeyUp(&kb[28]);
+    IN_KeyUp(&kb[KEY_NIGHTVISION]);
 }
 
 void CL_AdjustAngles()
 {
-    __int64 v0; // r10
-    __int64 v1; // r11
-    double v2; // fp13
-    double v3; // fp31
+    float speed;
 
-    HIDWORD(v1) = kb[9].active;
-    LODWORD(v1) = cls.frametime;
-    if (kb[9].active)
-    {
-        LODWORD(v0) = cls.frametime;
-        v2 = (float)(cl_anglespeedkey->current.value * (float)v0);
-    }
+    if (kb[KEY_SPEED].active)
+        speed = 0.001 * cls.frametime * cl_anglespeedkey->current.value;
     else
+        speed = 0.001 * cls.frametime;
+
+    if (!kb[KEY_STRAFE].active)
     {
-        v2 = (float)v1;
+        clients[0].viewangles[YAW] -= speed * cl_yawspeed->current.value * CL_KeyState(&kb[KEY_RIGHT]);
+        clients[0].viewangles[YAW] += speed * cl_yawspeed->current.value * CL_KeyState(&kb[KEY_LEFT]);
     }
-    v3 = (float)((float)v2 * (float)0.001);
-    if (!kb[8].active)
-    {
-        clients[0].viewangles[1] = -(float)((float)((float)(CL_KeyState(&kb[1]) * cl_yawspeed->current.value)
-            * (float)((float)v2 * (float)0.001))
-            - clients[0].viewangles[1]);
-        clients[0].viewangles[1] = (float)((float)(CL_KeyState(kb) * cl_yawspeed->current.value) * (float)v3)
-            + clients[0].viewangles[1];
-    }
-    clients[0].viewangles[0] = -(float)((float)((float)(CL_KeyState(&kb[4]) * cl_pitchspeed->current.value) * (float)v3)
-        - clients[0].viewangles[0]);
-    clients[0].viewangles[0] = (float)((float)(CL_KeyState(&kb[5]) * cl_pitchspeed->current.value) * (float)v3)
-        + clients[0].viewangles[0];
+
+    clients[0].viewangles[PITCH] -= speed * cl_pitchspeed->current.value * CL_KeyState(&kb[KEY_LOOKUP]);
+    clients[0].viewangles[PITCH] += speed * cl_pitchspeed->current.value * CL_KeyState(&kb[KEY_LOOKDOWN]);
 }
 
 void CL_StanceButtonUpdate()
@@ -822,69 +755,52 @@ void CL_StanceButtonUpdate()
 
     if (clients[0].stanceHeld && com_frameTime - clients[0].stanceTime >= cl_stanceHoldTime->current.integer)
     {
+        if (clients[0].stancePosition == CL_STANCE_PRONE)
+            clients[0].stance = CL_STANCE_STAND;
+        else
+            clients[0].stance = CL_STANCE_PRONE;
         clients[0].stanceHeld = 0;
-        //clients[0].stance = (_cntlzw(clients[0].stancePosition - 2) >> 4) & 2 ^ 2;
-        unsigned int val = clients[0].stancePosition - 2;
-        unsigned int isZero = !(val);  // 1 if val == 0, 0 otherwise
-        clients[0].stance = (StanceState)(isZero << 1);  // result is 2 if isZero == 1, then ^ 2 flips it to 0
-        clients[0].stance = (StanceState)((int)clients[0].stance ^ 2);
     }
 }
 
 void __cdecl CL_AddCurrentStanceToCmd(usercmd_s *cmd)
 {
-    unsigned int v2; // r11
-
-    if (clients[0].stance == CL_STANCE_CROUCH)
+    StanceState stance = clients[0].stance;
+    if (stance == CL_STANCE_CROUCH)
     {
-        v2 = __ROL4__(1, 9) & 0x300 | cmd->buttons & 0xFFFFFCFF;
+        cmd->buttons |= BUTTON_CROUCH;
+        cmd->buttons &= ~BUTTON_PRONE;
     }
-    else if (clients[0].stance == CL_STANCE_PRONE)
+    else if (stance == CL_STANCE_PRONE)
     {
-        v2 = cmd->buttons & 0xFFFFFCFF | 0x100;
+        cmd->buttons |= BUTTON_PRONE;
+        cmd->buttons &= ~BUTTON_CROUCH;
     }
     else
     {
-        if (clients[0].stance)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\client\\cl_input.cpp",
-                925,
-                0,
-                "%s",
-                "cl->stance == CL_STANCE_STAND");
-        v2 = cmd->buttons & 0xFFFFFCFF;
+        iassert(stance == CL_STANCE_STAND);
+        cmd->buttons &= ~(BUTTON_PRONE | BUTTON_CROUCH);
     }
-    cmd->buttons = v2;
-    cmd->buttons = v2 & 0xFFFFEFFF;
+    cmd->buttons &= ~BUTTON_TEMP_STANCE;
 }
 
 void __cdecl CL_KeyMove(usercmd_s *cmd)
 {
-    int buttons; // r11
-    unsigned int v4; // r11
-    int v7; // r30
-    int v8; // r30
-    int side; // r30
-    int forward; // r29
-    int up; // r28
-    int v12; // r31
-    int v13; // [sp+54h] [-4Ch]
-    int v14; // [sp+54h] [-4Ch]
-    int v15; // [sp+54h] [-4Ch]
+    int		forward, side, up;
 
-    if (kb[24].active || kb[11].active)
+    if (kb[KEY_PRONE].active || kb[KEY_DOWN].active)
     {
-        if (kb[24].active)
+        if (kb[KEY_PRONE].active)
         {
-            cmd->buttons |= 0x100u;
-            cmd->buttons = cmd->buttons & 0xFFFFFDFF;
+            cmd->buttons |= BUTTON_PRONE;
+            cmd->buttons &= ~BUTTON_CROUCH;
         }
         else
         {
-            cmd->buttons |= 0x200u;
-            cmd->buttons = cmd->buttons & 0xFFFFFEFF;
+            cmd->buttons |= BUTTON_CROUCH;
+            cmd->buttons &= ~BUTTON_PRONE;
         }
-        cmd->buttons |= 0x1000u;
+        cmd->buttons |= BUTTON_TEMP_STANCE;
     }
     else
     {
@@ -892,31 +808,47 @@ void __cdecl CL_KeyMove(usercmd_s *cmd)
         CL_AddCurrentStanceToCmd(cmd);
     }
 
-    if (kb[9].active == !CL_GetLocalClientGlobals(0)->usingAds)
-        cmd->buttons = cmd->buttons | 0x800;
+    if (kb[KEY_SPEED].active != CL_GetLocalClientGlobals(0)->usingAds)
+        cmd->buttons |= BUTTON_ADS;
     else
-        cmd->buttons = cmd->buttons & 0xFFFFF7FF;
+        cmd->buttons &= ~BUTTON_ADS;
 
-    v7 = 0;
-    if (kb[8].active)
+    if (kb[KEY_SPRINT].active || kb[KEY_SPRINT].wasPressed)
     {
-        v13 = (int)(CL_KeyState(&kb[1]) * (float)127.0);
-        v7 = v13 - (int)(CL_KeyState(kb) * (float)127.0);
+        cmd->buttons |= BUTTON_SPRINT;
+        kb[KEY_SPRINT].wasPressed = 0;
     }
-    v8 = v7 - (int)(CL_KeyState(&kb[7]) * (float)-127.0);
-    side = v8 - (int)(CL_KeyState(&kb[6]) * (float)127.0);
-    v14 = (int)(CL_KeyState(&kb[2]) * (float)127.0);
-    forward = v14 - (int)(CL_KeyState(&kb[3]) * (float)127.0);
-    v15 = (int)(CL_KeyState(&kb[23]) * (float)127.0);
-    up = v15 - (int)(CL_KeyState(&kb[22]) * (float)127.0);
-    if (kb[8].active && (cmd->buttons & 2) == 0)
+    else
     {
-        v12 = side - (int)(CL_KeyState(&kb[1]) * (float)-127.0);
-        side = v12 - (int)(CL_KeyState(kb) * (float)127.0);
+        cmd->buttons &= ~BUTTON_SPRINT;
     }
+
+    forward = 0;
+    side = 0;
+    up = 0;
+    if (kb[KEY_STRAFE].active)
+    {
+        side += (int)(CL_KeyState(&kb[KEY_RIGHT]) * 127.0f);
+        side -= (int)(CL_KeyState(&kb[KEY_LEFT])  * 127.0f);
+    }
+    side += (int)(CL_KeyState(&kb[KEY_MOVERIGHT]) * 127.0f);
+    side -= (int)(CL_KeyState(&kb[KEY_MOVELEFT])  * 127.0f);
+
+    forward += (int)(CL_KeyState(&kb[KEY_FORWARD]) * 127.0f);
+    forward -= (int)(CL_KeyState(&kb[KEY_BACK])    * 127.0f);
+
+    up += (int)(CL_KeyState(&kb[KEY_LEANRIGHT]) * 127.0f);
+    up -= (int)(CL_KeyState(&kb[KEY_LEANLEFT])  * 127.0f);
+
+    if (kb[KEY_STRAFE].active && !(cmd->buttons & BUTTON_SPRINT))
+    {
+        side += (int)(CL_KeyState(&kb[KEY_RIGHT]) * 127.0f);
+        side -= (int)(CL_KeyState(&kb[KEY_LEFT])  * 127.0f);
+    }
+
     cmd->forwardmove = ClampChar(forward);
-    cmd->rightmove = ClampChar(side);
-    cmd->upmove = ClampChar(up);
+    cmd->rightmove   = ClampChar(side);
+    cmd->upmove      = ClampChar(up);
 }
 
 int __cdecl CL_AllowInput()
@@ -1014,17 +946,16 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
         cmd->yawmove = ClampChar((int)(float)((float)up * (float)v3) + yawmove);
         v21 = CL_ControllerIndexFromClientNum(0);
         ProfileSettings = Gamer//Profile_GetProfileSettings(v21);
-            HIDWORD(v23) = _cntlzw(clients[0].usingAds);
-        LODWORD(v23) = !ProfileSettings->invertPitch ? -1 : 1;
-        v24 = (float)((float)v23 * (float)v2);
-        if (kb[9].active == ((HIDWORD(v23) >> 5) & 1))
+            int invertSign = ProfileSettings->invertPitch ? 1 : -1;
+        v24 = (float)invertSign * v2;
+        if (kb[KEY_SPEED].active == (clients[0].usingAds == 0))
             cmd->buttons |= 0x800u;
-        if (!kb[3].active)
+        if (!kb[KEY_BACK].active)
         {
-            if (kb[27].active || kb[27].wasPressed)
+            if (kb[KEY_SPRINT].active || kb[KEY_SPRINT].wasPressed)
             {
                 cmd->buttons |= 2u;
-                kb[27].wasPressed = 0;
+                kb[KEY_SPRINT].wasPressed = 0;
             }
             else
             {
@@ -1058,22 +989,20 @@ void __cdecl CL_GamepadMove(usercmd_s *cmd)
 
 void __cdecl CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
 {
-    float v3; // st7
-
     iassert(mx);
     iassert(my);
 
     if (m_filter->current.enabled)
     {
         *mx = (double)(cl->mouseDx[1] + cl->mouseDx[0]) * 0.5f;
-        v3 = (double)(cl->mouseDy[1] + cl->mouseDy[0]) * 0.5f;
+        *my = (double)(cl->mouseDy[1] + cl->mouseDy[0]) * 0.5f;
     }
     else
     {
         *mx = (float)cl->mouseDx[cl->mouseIndex];
-        v3 = (double)cl->mouseDy[cl->mouseIndex];
+        *my = (double)cl->mouseDy[cl->mouseIndex];
     }
-    *my = v3;
+
     cl->mouseIndex ^= 1u;
     cl->mouseDx[cl->mouseIndex] = 0;
     cl->mouseDy[cl->mouseIndex] = 0;
@@ -1096,7 +1025,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
     int rightmove; // r11
     long double v28; // fp2
     int forwardmove; // r10
-    float v30[2]; // [sp+50h] [-60h] BYREF
+    float v30[KEY_FORWARD]; // [sp+50h] [-60h] BYREF
     __int64 v31[6]; // [sp+58h] [-58h] BYREF
 
     CL_GetMouseMovement(clients, v30, (float *)v31, a4, a5, a7);
@@ -1123,8 +1052,8 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
             if ((float)((float)v15 * (float)v12) != 0.0 || (float)((float)v15 * (float)up) != 0.0)
             {
                 HIDWORD(v17) = 0x82000000;
-                LOBYTE(forward) = kb[8].active;
-                if (kb[8].active)
+                LOBYTE(forward) = kb[KEY_STRAFE].active;
+                if (kb[KEY_STRAFE].active)
                 {
                     *(double *)&side = (float)((float)(m_side->current.value * (float)((float)v15 * (float)v12)) + (float)0.5);
                     v18 = floor(side);
@@ -1132,7 +1061,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
                     HIDWORD(v31[0]) = (int)(float)*(double *)&v18;
                     cmd->rightmove = ClampChar(rightmove + HIDWORD(v31[0]));
                     HIDWORD(forward) = frame_msec;
-                    LOBYTE(forward) = kb[8].active;
+                    LOBYTE(forward) = kb[KEY_STRAFE].active;
                 }
                 else
                 {
@@ -1149,7 +1078,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
                     }
                     clients[0].viewangles[1] = clients[0].viewangles[1] - (float)_FP0;
                 }
-                if ((kb[13].active || cl_freelook->current.enabled) && !(_BYTE)forward)
+                if ((kb[KEY_MLOOK].active || cl_freelook->current.enabled) && !(_BYTE)forward)
                 {
                     _FP0 = (float)(m_pitch->current.value * (float)((float)v15 * (float)up));
                     if (clients[0].cgameMaxPitchSpeed != 0.0)
@@ -1218,7 +1147,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
             my = my * accelSensitivity;
             if (mx != 0.0 || my != 0.0)
             {
-                if (kb[8].active)
+                if (kb[KEY_STRAFE].active)
                 {
                     cmd->rightmove = ClampChar(SnapFloatToInt(mx * m_side->current.value) + cmd->rightmove);
                 }
@@ -1243,7 +1172,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
                     }
                     clients[0].viewangles[1] = clients[0].viewangles[1] - delta;
                 }
-                if ((kb[13].active || cl_freelook->current.enabled) && !kb[8].active)
+                if ((kb[KEY_MLOOK].active || cl_freelook->current.enabled) && !kb[KEY_STRAFE].active)
                 {
                     deltaa = m_pitch->current.value * my;
                     if (clients[0].cgameMaxPitchSpeed > 0.0)
@@ -1329,9 +1258,9 @@ void __cdecl CL_CmdButtons(usercmd_s *cmd)
         || clients[0].snap.ps.pm_type == 3
         || (clients[0].snap.ps.eFlags & 0x20000) != 0 && (clients[0].snap.ps.eFlags & 0x80000) == 0)
     {
-        if (kb[12].active || kb[12].wasPressed)
+        if (kb[KEY_UP].active || kb[KEY_UP].wasPressed)
             cmd->buttons |= 0x400u;
-        kb[12].wasPressed = 0;
+        kb[KEY_UP].wasPressed = 0;
     }
     
     if (cmd->buttons >= 0x100000)
@@ -1340,7 +1269,7 @@ void __cdecl CL_CmdButtons(usercmd_s *cmd)
             1394,
             0,
             "%s",
-            "cmd->buttons < (1 << BUTTON_BIT_COUNT)");
+            "cmd->buttons < (1 << KEY_BIT_COUNT)");
 }
 
 void __cdecl CL_SetUsercmdButtonsWeapons(int buttons, int weapon, int offhand)
@@ -1363,7 +1292,7 @@ void __cdecl CL_FinishMove(usercmd_s *cmd)
     cmd->serverTime = clients[0].serverTime;
     cmd->angles[0] = (unsigned __int16)(int)(clients[0].viewangles[0] * (float)182.04445);
     cmd->angles[1] = (unsigned __int16)(int)(clients[0].viewangles[1] * (float)182.04445);
-    cmd->angles[2] = (unsigned __int16)(int)(clients[0].viewangles[2] * (float)182.04445);
+    cmd->angles[KEY_FORWARD] = (unsigned __int16)(int)(clients[0].viewangles[KEY_FORWARD] * (float)182.04445);
     buttons = cmd->buttons;
     cmd->gunPitch = clients[0].cgameUserCmdGunPitch;
     cmd->gunYaw = clients[0].cgameUserCmdGunYaw;
@@ -1797,7 +1726,7 @@ void __cdecl CL_ClearKeys(int localClientNum)
 
 void IN_MLookUp()
 {
-    kb[13].active = 0;
+    kb[KEY_MLOOK].active = 0;
     if (!cl_freelook->current.enabled)
         clients[0].viewangles[0] = -clients[0].snap.ps.delta_angles[0];
 }

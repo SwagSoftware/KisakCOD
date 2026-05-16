@@ -184,26 +184,15 @@ void __cdecl CG_SmoothCameraZ(cg_s *cgameGlob)
                 0,
                 "%s",
                 "cgameGlob->time - cgameGlob->stepViewStart >= 0");
-        LODWORD(v5) = *p_time - *p_stepViewStart;
-        v6 = (int)(float)(cg_viewZSmoothingTime->current.value * (float)1000.0);
-        if ((int)v5 < v6)
-        {
-            if ((int)v5 >= 0)
-            {
-                HIDWORD(v5) = (int)(float)(cg_viewZSmoothingTime->current.value * (float)1000.0);
-                v7 = (float)((float)v5 / (float)*(__int64 *)((char *)&v5 + 4));
-            }
-            else
-            {
-                v7 = 0.0;
-            }
-        }
+        int elapsed = *p_time - *p_stepViewStart;
+        int duration = (int)(cg_viewZSmoothingTime->current.value * 1000.0f);
+        if (elapsed >= duration)
+            v7 = 1.0f;
+        else if (elapsed >= 0)
+            v7 = (float)elapsed / (float)duration;
         else
-        {
-            v7 = 1.0;
-        }
-        cgameGlob->refdef.vieworg[2] = -(float)((float)((float)((float)1.0 - (float)v7) * *p_stepViewChange)
-            - cgameGlob->refdef.vieworg[2]);
+            v7 = 0.0f;
+        cgameGlob->refdef.vieworg[2] -= (1.0f - (float)v7) * (*p_stepViewChange);
     }
 }
 
@@ -212,7 +201,7 @@ void __cdecl CG_KickAngles(cg_s *cgameGlob)
     unsigned int ViewmodelWeaponIndex; // r22
     WeaponDef *WeaponDef; // r23
     int frametime; // r26
-    __int64 v5; // r9
+    int v5; // r9
     int v6; // r31
     float *kickAngles; // r11
     int v8; // r10
@@ -227,14 +216,13 @@ void __cdecl CG_KickAngles(cg_s *cgameGlob)
     frametime = cgameGlob->frametime;
     if (frametime > 0)
     {
-        HIDWORD(v5) = 0x82000000;
         do
         {
             if (frametime <= 5)
                 v6 = frametime;
             else
                 v6 = 5;
-            LODWORD(v5) = v6;
+            v5 = v6;
             kickAngles = cgameGlob->kickAngles;
             v8 = 3;
             do
@@ -386,105 +374,77 @@ float __cdecl CG_GetHorizontalBobFactor(
 
 void __cdecl CG_CalculateView_IdleAngles(cg_s *cgameGlob, float *angles)
 {
-    playerEntity_t *p_playerEntity; // r27
-    unsigned int ViewmodelWeaponIndex; // r28
-    WeaponDef *WeaponDef; // r30
-    __int64 v7; // r9
-    int IsAimDownSightWeapon; // r3
-    long double v9; // fp2
-    __int64 v10; // r11
-    double fIdleProneFactor; // fp0
-    double fHipIdleAmount; // fp10
-    double hipIdleSpeed; // fp11
-    int eFlags; // r11
-    double fLastIdleFactor; // fp13
-    double v16; // fp13
-    double v17; // fp13
-    __int64 v18; // r10
-    double v19; // fp31
-    long double v20; // fp2
-    __int64 v21; // r11
-    long double v22; // fp2
+    playerEntity_t *p_playerEntity = &cgameGlob->playerEntity;
+    unsigned int ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    WeaponDef *weapDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
 
-    p_playerEntity = &cgameGlob->playerEntity;
-    ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
-    WeaponDef = BG_GetWeaponDef(ViewmodelWeaponIndex);
-    if (WeaponDef->overlayReticle)
+    if (!weapDef->overlayReticle)
+        return;
+
+    int IsAimDownSightWeapon = BG_IsAimDownSightWeapon(ViewmodelWeaponIndex);
+    double fIdleProneFactor = 1.0;
+    float fHipIdleAmount;
+    float hipIdleSpeed;
+
+    if (IsAimDownSightWeapon)
     {
-        IsAimDownSightWeapon = BG_IsAimDownSightWeapon(ViewmodelWeaponIndex);
-        HIDWORD(v10) = 108264;
-        fIdleProneFactor = 1.0;
-        if (IsAimDownSightWeapon)
-        {
-            fHipIdleAmount = (float)((float)((float)(WeaponDef->fAdsIdleAmount - WeaponDef->fHipIdleAmount)
-                * cgameGlob->predictedPlayerState.fWeaponPosFrac)
-                + WeaponDef->fHipIdleAmount);
-            hipIdleSpeed = (float)((float)((float)(WeaponDef->adsIdleSpeed - WeaponDef->hipIdleSpeed)
-                * cgameGlob->predictedPlayerState.fWeaponPosFrac)
-                + WeaponDef->hipIdleSpeed);
-        }
-        else if (WeaponDef->fHipIdleAmount == 0.0)
-        {
-            hipIdleSpeed = 1.0;
-            fHipIdleAmount = 80.0;
-        }
-        else
-        {
-            hipIdleSpeed = WeaponDef->hipIdleSpeed;
-            fHipIdleAmount = WeaponDef->fHipIdleAmount;
-        }
-        eFlags = cgameGlob->predictedPlayerEntity.nextState.lerp.eFlags;
-        if ((eFlags & 8) != 0)
-        {
-            fIdleProneFactor = WeaponDef->fIdleProneFactor;
-        }
-        else if ((eFlags & 4) != 0)
-        {
-            fIdleProneFactor = WeaponDef->fIdleCrouchFactor;
-        }
-        if (WeaponDef->overlayReticle == WEAPOVERLAYRETICLE_NONE)
-            goto LABEL_19;
-        if (cgameGlob->predictedPlayerState.fWeaponPosFrac == 0.0)
-            goto LABEL_19;
-        fLastIdleFactor = p_playerEntity->fLastIdleFactor;
-        if (fIdleProneFactor == fLastIdleFactor)
-            goto LABEL_19;
-        if (fIdleProneFactor <= fLastIdleFactor)
-        {
-            LODWORD(v7) = cgameGlob->frametime;
-            v17 = (float)-(float)((float)((float)v7 * (float)0.00050000002) - p_playerEntity->fLastIdleFactor);
-            p_playerEntity->fLastIdleFactor = -(float)((float)((float)v7 * (float)0.00050000002)
-                - p_playerEntity->fLastIdleFactor);
-            if (v17 < fIdleProneFactor)
-                LABEL_18:
-            p_playerEntity->fLastIdleFactor = fIdleProneFactor;
-        }
-        else
-        {
-            LODWORD(v7) = cgameGlob->frametime;
-            v16 = (float)((float)((float)v7 * (float)0.00050000002) + p_playerEntity->fLastIdleFactor);
-            p_playerEntity->fLastIdleFactor = (float)((float)v7 * (float)0.00050000002) + p_playerEntity->fLastIdleFactor;
-            if (v16 > fIdleProneFactor)
-                goto LABEL_18;
-        }
-    LABEL_19:
-        LODWORD(v10) = cgameGlob->frametime;
-        HIDWORD(v18) = 109528;
-        v19 = (float)((float)((float)(p_playerEntity->fLastIdleFactor * (float)fHipIdleAmount)
-            * cgameGlob->predictedPlayerState.fWeaponPosFrac)
-            * cgameGlob->predictedPlayerState.holdBreathScale);
-        LODWORD(v18) = (int)(float)((float)((float)v10 * cgameGlob->predictedPlayerState.holdBreathScale)
-            * (float)hipIdleSpeed)
-            + cgameGlob->weapIdleTime;
-        cgameGlob->weapIdleTime = v18;
-        *(double *)&v9 = (float)((float)v18 * (float)0.00069999998);
-        v20 = sin(v9);
-        angles[1] = (float)((float)((float)*(double *)&v20 * (float)v19) * (float)0.0099999998) + angles[1];
-        LODWORD(v21) = cgameGlob->weapIdleTime;
-        *(double *)&v20 = (float)((float)v21 * (float)0.001);
-        v22 = sin(v20);
-        *angles = (float)((float)((float)*(double *)&v22 * (float)v19) * (float)0.0099999998) + *angles;
+        fHipIdleAmount = (weapDef->fAdsIdleAmount - weapDef->fHipIdleAmount)
+            * cgameGlob->predictedPlayerState.fWeaponPosFrac
+            + weapDef->fHipIdleAmount;
+        hipIdleSpeed = (weapDef->adsIdleSpeed - weapDef->hipIdleSpeed)
+            * cgameGlob->predictedPlayerState.fWeaponPosFrac
+            + weapDef->hipIdleSpeed;
     }
+    else if (weapDef->fHipIdleAmount == 0.0)
+    {
+        hipIdleSpeed = 1.0f;
+        fHipIdleAmount = 80.0f;
+    }
+    else
+    {
+        hipIdleSpeed = weapDef->hipIdleSpeed;
+        fHipIdleAmount = weapDef->fHipIdleAmount;
+    }
+
+    int eFlags = cgameGlob->predictedPlayerEntity.nextState.lerp.eFlags;
+    if ((eFlags & 8) != 0)
+        fIdleProneFactor = weapDef->fIdleProneFactor;
+    else if ((eFlags & 4) != 0)
+        fIdleProneFactor = weapDef->fIdleCrouchFactor;
+
+    float frametime = (float)cgameGlob->frametime;
+
+    if (weapDef->overlayReticle != WEAPOVERLAYRETICLE_NONE
+        && cgameGlob->predictedPlayerState.fWeaponPosFrac != 0.0
+        && fIdleProneFactor != p_playerEntity->fLastIdleFactor)
+    {
+        if (fIdleProneFactor <= p_playerEntity->fLastIdleFactor)
+        {
+            float updated = p_playerEntity->fLastIdleFactor - frametime * 0.0005f;
+            p_playerEntity->fLastIdleFactor = updated;
+            if (updated < fIdleProneFactor)
+                p_playerEntity->fLastIdleFactor = fIdleProneFactor;
+        }
+        else
+        {
+            float updated = p_playerEntity->fLastIdleFactor + frametime * 0.0005f;
+            p_playerEntity->fLastIdleFactor = updated;
+            if (updated > fIdleProneFactor)
+                p_playerEntity->fLastIdleFactor = fIdleProneFactor;
+        }
+    }
+
+    float v19 = p_playerEntity->fLastIdleFactor
+        * fHipIdleAmount
+        * cgameGlob->predictedPlayerState.fWeaponPosFrac
+        * cgameGlob->predictedPlayerState.holdBreathScale;
+
+    cgameGlob->weapIdleTime += (int)(frametime
+        * cgameGlob->predictedPlayerState.holdBreathScale
+        * hipIdleSpeed);
+
+    angles[1] += (float)sin(cgameGlob->weapIdleTime * 0.00069999998) * v19 * 0.0099999998f;
+    angles[0] += (float)sin(cgameGlob->weapIdleTime * 0.001) * v19 * 0.0099999998f;
 }
 
 void __cdecl CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles)
@@ -666,17 +626,9 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     }
 }
 
-// aislop
 float __cdecl CG_GetViewFov(int localClientNum)
 {
-    if (localClientNum != 0) {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910, 0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)", localClientNum
-        );
-    }
+    iassert(localClientNum == 0);
 
     const playerState_s *ps = &cgArray[0].predictedPlayerState;
     unsigned int viewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(ps);
@@ -688,8 +640,7 @@ float __cdecl CG_GetViewFov(int localClientNum)
 
     if (BG_IsAimDownSightWeapon(viewmodelWeaponIndex)) {
         float adsFov = weaponDef->fAdsZoomFov;
-        float fovDelta = adsFov - viewFov;
-        float adjustedFov = (fovDelta < 0.0f) ? viewFov : adsFov;
+        float adjustedFov = (adsFov < viewFov) ? adsFov : viewFov;
 
         float frac = ps->fWeaponPosFrac;
         if (frac == 1.0f) {
@@ -885,11 +836,9 @@ void __cdecl CG_CalcVehicleViewValues(int localClientNum)
                     MatrixTransposeTransformVector(v19, (const mat3x3 &)v23, v29);
                     v6 = Entity->pose.angles[0];
                     v7 = Entity->pose.angles[2];
-                    LODWORD(v8) = cgArray[0].frametime;
-                    v22 = v8;
-                    v9 = (float)-(float)((float)(vehHelicopterHeadSwayOnRollHorz->current.value * (float)v7)
-                        - (float)(vehHelicopterHeadSwayOnYaw->current.value * (float)v5));
-                    v10 = (float)((float)v8 * (float)0.001);
+                    v9 = (float)(vehHelicopterHeadSwayOnYaw->current.value * (float)v5)
+                        - (float)(vehHelicopterHeadSwayOnRollHorz->current.value * (float)v7);
+                    v10 = (float)cgArray[0].frametime * 0.001f;
                     cgArray[0].vehicleViewLockedAngles[0] = DiffTrackAngle(
                         (float)((float)((float)((float)(vehHelicopterHeadSwayOnRollVert->current.value
                             * (float)v7)

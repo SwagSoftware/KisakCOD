@@ -567,51 +567,34 @@ void Actor_FaceEnemyOrMotion(actor_s *self, ai_orient_t *pOrient)
 }
 
 
-// aislop
 void Actor_FaceEnemyOrMotionSidestep(actor_s *self, ai_orient_t *pOrient)
 {
     iassert(self);
     iassert(pOrient);
 
-    // If actor is not moving or has no path, face enemy directly
-    if (!Actor_HasPath(self) ||
-        (self->Physics.vVelocity[0] == 0.0f && self->Physics.vVelocity[1] == 0.0f))
+    if (Actor_HasPath(self)
+        && (self->Physics.vVelocity[0] != 0.0f || self->Physics.vVelocity[1] != 0.0f))
     {
-        Actor_FaceEnemy(self, pOrient);
-        return;
-    }
+        float targetPos[3];
+        Actor_GetTargetPosition(self, targetPos);
 
-    // Otherwise, face in direction of motion toward target (if valid)
-    float targetPos[2];
-    float targetZ;
-    Actor_GetTargetPosition(self, targetPos);
-    targetZ = *(float *)&targetPos[1]; // assuming 3rd value returned into stack after v16
+        float *currentOrigin = self->ent->r.currentOrigin;
 
-    float *currentOrigin = self->ent->r.currentOrigin;
+        float dx = targetPos[0] - currentOrigin[0];
+        float dy = targetPos[1] - currentOrigin[1];
+        float dz = targetPos[2] - currentOrigin[2];
 
-    float dx = targetPos[0] - currentOrigin[0];
-    float dy = targetPos[1] - currentOrigin[1];
-    float dz = targetZ - currentOrigin[2];
+        float lengthSq = dx * dx + dy * dy + dz * dz;
+        float length = sqrtf(lengthSq);
+        float invLength = (length != 0.0f) ? (1.0f / length) : 1.0f;
 
-    float lengthSq = dx * dx + dy * dy + dz * dz;
-    if (lengthSq == 0.0f)
-    {
-        Actor_FaceMotion(self, pOrient);
-        return;
-    }
+        float dir[3] = { dx * invLength, dy * invLength, dz * invLength };
 
-    float invLength = 1.0f / sqrtf(lengthSq);
-    float dir[3] =
-    {
-        dx * invLength,
-        dy * invLength,
-        dz * invLength
-    };
-
-    if (!Path_MayFaceEnemy(&self->Path, dir, currentOrigin))
-    {
-        Actor_FaceMotion(self, pOrient);
-        return;
+        if (!Path_MayFaceEnemy(&self->Path, dir, currentOrigin))
+        {
+            Actor_FaceMotion(self, pOrient);
+            return;
+        }
     }
 
     Actor_FaceEnemy(self, pOrient);

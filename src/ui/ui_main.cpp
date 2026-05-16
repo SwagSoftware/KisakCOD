@@ -17,6 +17,9 @@
 #include <client/cl_scrn.h>
 #include <client/cl_input.h>
 #include <universal/com_sndalias.h>
+#include <universal/com_files.h>
+#include <universal/q_parse.h>
+#include <database/database.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_isSaving;
@@ -585,10 +588,7 @@ void __cdecl UI_UpdateTime(int realtime)
         v2 = uiInfo.previousTimes[0] + uiInfo.previousTimes[1] + uiInfo.previousTimes[2] + uiInfo.previousTimes[3];
         if (!v2)
             v2 = 1;
-        HIDWORD(v3) = 4000;
-        //__twllei(v2, 0);
-        LODWORD(v3) = 4000 / v2;
-        uiInfo.uiDC.FPS = (float)v3;
+        uiInfo.uiDC.FPS = (float)(4000 / v2);
     }
 }
 
@@ -1081,6 +1081,64 @@ void __cdecl UI_CloseMenu(int localClientNum, const char *menuName)
     Menus_CloseByName(&uiInfo.uiDC, menuName);
 }
 
+void __cdecl UI_ParseMenuMaterial(const char *key, char *value)
+{
+    Material *material; // [esp+0h] [ebp-4Ch]
+    char name[68]; // [esp+4h] [ebp-48h] BYREF
+
+    material = Material_RegisterHandle(value, 3);
+    Com_sprintf(name, 0x40u, "$%s", key);
+    I_strlwr(name);
+    Material_Duplicate(material, name);
+}
+
+void __cdecl UI_MapLoadInfo(const char *filename)
+{
+    const char *parse; // [esp+14h] [ebp-118h] BYREF
+    int tokenLen; // [esp+18h] [ebp-114h]
+    char key[256]; // [esp+1Ch] [ebp-110h] BYREF
+    const char *token; // [esp+120h] [ebp-Ch]
+    char *loadfile; // [esp+124h] [ebp-8h] BYREF
+    const char *value; // [esp+128h] [ebp-4h]
+
+    if (*filename)
+    {
+        if (FS_ReadFile(filename, (void **)&loadfile) >= 0)
+        {
+            parse = loadfile;
+            Com_BeginParseSession(filename);
+            Com_SetCSV(1);
+            while (1)
+            {
+                token = (const char *)Com_Parse(&parse);
+                if (!*token)
+                    break;
+                tokenLen = strlen(token) + 1;
+                if ((unsigned int)tokenLen >= 0x100)
+                {
+                    Com_EndParseSession();
+                    Com_Error(ERR_DROP, "key '%s' is %i > %i characters long", key, tokenLen - 1, 255);
+                }
+                memcpy((unsigned __int8 *)key, (unsigned __int8 *)token, tokenLen);
+                value = (const char *)Com_ParseOnLine(&parse);
+                if (!*value)
+                {
+                    Com_EndParseSession();
+                    Com_Error(ERR_DROP, "key '%s' missing value in '%s'\n", key, filename);
+                    break;
+                }
+                UI_ParseMenuMaterial(key, (char *)value);
+            }
+            Com_EndParseSession();
+            FS_FreeFile(loadfile);
+        }
+        else
+        {
+            Com_PrintWarning(13, "WARNING: Could not find '%s'.\n", filename);
+        }
+    }
+}
+
 // local variable allocation has failed, the output may be wrong!
 cmd_function_s UI_OpenMenu_f_VAR;
 cmd_function_s UI_CloseMenu_f_VAR;
@@ -1090,51 +1148,56 @@ void __cdecl UI_Init()
     __int64 v0; // r10 OVERLAPPED
     int v1; // r8
     double v2; // fp0
-    MenuList *Menus; // r3
     MenuList *v4; // r3
 
     memset(&uiInfo, 0, sizeof(uiInfo));
     uiInfo.uiDC.localClientNum = 0;
     g_currentMenuType = UIMENU_NONE;
     g_ingameMenusLoaded = 0;
+
+    // MP ADD
+    if (!IsFastFileLoad())
+    {
+        Com_LoadSoundAliases("menu", "all_sp", SASYS_UI);
+    }
+    // MP END
+
     UI_RegisterDvars();
     uiInfo.allowScriptMenuResponse = 1;
     Cmd_AddCommandInternal("openmenu", (void(__cdecl *)())UI_OpenMenu_f, &UI_OpenMenu_f_VAR);
     Cmd_AddCommandInternal("closemenu", UI_CloseMenu_f, &UI_CloseMenu_f_VAR);
 
-    // MP ADD
-    if (!IsFastFileLoad())
-    {
-        Com_LoadSoundAliases("menu", "all", SASYS_UI);
-    }
-    // MP END
-
     String_Init();
     Menu_Setup(&uiInfo.uiDC);
+
+
     CL_GetScreenDimensions(&uiInfo.uiDC.screenWidth, &uiInfo.uiDC.screenHeight, &uiInfo.uiDC.screenAspect);
-    LODWORD(v0) = uiInfo.uiDC.screenWidth;
     if (480 * uiInfo.uiDC.screenWidth <= 640 * uiInfo.uiDC.screenHeight)
-    {
-        v2 = 0.0;
-    }
+        uiInfo.uiDC.bias = 0.0;
     else
-    {
-        HIDWORD(v0) = uiInfo.uiDC.screenHeight;
-        v1 = 480 * uiInfo.uiDC.screenWidth;
-        v2 = (float)((float)-(float)((float)((float)*(__int64 *)((char *)&v0 + 4) * (float)1.3333334) - (float)v0)
-            * (float)0.5);
-    }
-    uiInfo.uiDC.bias = v2;
+        uiInfo.uiDC.bias = ((double)uiInfo.uiDC.screenWidth
+            - (double)uiInfo.uiDC.screenHeight * 1.333333373069763)
+        * 0.5;
+
     Sys_Milliseconds();
-    Menus = UI_LoadMenus((char*)"ui/code.txt", 3);
-    UI_AddMenuList(&uiInfo.uiDC, Menus);
+
+    if (IsFastFileLoad())
+    {
+        UI_AddMenuList(&uiInfo.uiDC, UI_LoadMenus((char *)"ui/code.txt", 3));
+    }
+
     memset(&ui_saveTimeGlob, 0, sizeof(ui_saveTimeGlob));
     Dvar_SetBool(ui_isSaving, 0);
-    if (!g_mapname[0])
+
+    if (!g_mapname[0] || !IsFastFileLoad())
     {
-        v4 = UI_LoadMenus((char*)"ui/menus.txt", 3);
-        UI_AddMenuList(&uiInfo.uiDC, v4);
+        UI_AddMenuList(&uiInfo.uiDC, UI_LoadMenus((char *)"ui/menus.txt", 3));
     }
+    if (g_mapname[0] && !IsFastFileLoad())
+    {
+        UI_MapLoadInfo(va("maps/%s.csv", g_mapname));
+    }
+
     UI_AssetCache();
     Menus_CloseAll(&uiInfo.uiDC);
     Dvar_RegisterBool("ui_multiplayer", 0, 0x40u, "True if the game is multiplayer");

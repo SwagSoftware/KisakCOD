@@ -388,20 +388,12 @@ static void Bullet_NofifyActor(
     v12 = (float)(start[2] - end[2]);
     v13 = (float)(start[1] - end[1]);
 
-    float _FP6 = -sqrtf((float)((float)((float)v13 * (float)v13)
+    // PPC: _FP6 = -sqrtf(...); fsel f10, f6, f31, f10
+    // fsel(-mag, safe, mag): (mag == 0) ? safe : mag.
+    float mag = sqrtf((float)((float)((float)v13 * (float)v13)
         + (float)((float)((float)v12 * (float)v12)
             + (float)((float)(*start - *end) * (float)(*start - *end)))));
-    float _FP10;
-    if (_FP6 >= 0.0f)
-    {
-        _FP10 = 1.0f;
-    }
-    else
-    {
-        _FP10 = _FP6;
-    }
-    //__asm { fsel      f10, f6, f31, f10 }
-    v16 = (float)((float)1.0 / (float)_FP10);
+    v16 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
 
     v17 = (float)((float)(start[2] - end[2]) * (float)v16);
     v18 = (float)((float)((float)((float)v16 * (float)(start[1] - end[1])) * (float)200.0) + start[1]);

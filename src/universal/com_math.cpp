@@ -420,13 +420,14 @@ float __cdecl Q_acos(float c)
     return 3.1415927f;
 }
 
-char __cdecl ClampChar(int i)
-{
-    if (i < -128)
-        return CHAR_MIN;
-    if (i <= 127)
-        return i;
-    return 127;
+signed char ClampChar(int i) {
+    if (i < -128) {
+        return -128;
+    }
+    if (i > 127) {
+        return 127;
+    }
+    return i;
 }
 
 unsigned __int8 __cdecl DirToByte(const float *dir)

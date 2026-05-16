@@ -52,9 +52,7 @@ int __cdecl Actor_CanSeeSentientEx(
     sentient_s *sentient,
     double fovDot,
     double fMaxDistSqrd,
-    int iMaxLatency,
-    int a6,
-    int a7);
+    int iMaxLatency);
 int __cdecl Actor_CanShootEnemy(actor_s *self);
 int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint);
 int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent);

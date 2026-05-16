@@ -196,11 +196,15 @@ int32_t __cdecl CG_DrawDevString(
     char align,
     Font_s *font)
 {
-    float width; // [esp+28h] [ebp-Ch]
-    float widtha; // [esp+28h] [ebp-Ch]
-    float height; // [esp+2Ch] [ebp-8h]
-    float heighta; // [esp+2Ch] [ebp-8h]
-    int32_t step; // [esp+30h] [ebp-4h]
+    int32_t step;
+
+#ifdef KISAK_SP
+    float effXScale = cg_small_dev_string_fontscale->current.value * xScale;
+    float effYScale = cg_small_dev_string_fontscale->current.value * yScale;
+#else
+    float effXScale = xScale;
+    float effYScale = yScale;
+#endif
 
     if ((align & 3) != 1 && (align & 3) != 2 && (align & 3) != 3)
         MyAssertHandler(
@@ -210,15 +214,10 @@ int32_t __cdecl CG_DrawDevString(
             "%s",
             "(align & CG_ALIGN_X) == CG_ALIGN_LEFT || (align & CG_ALIGN_X) == CG_ALIGN_RIGHT || (align & CG_ALIGN_X) == CG_ALIGN_CENTER");
     if ((align & 3) == 2)
-    {
-        width = (double)R_TextWidth(s, 0, font) * xScale;
-        x = x - width;
-    }
+        x -= (float)R_TextWidth(s, 0, font) * effXScale;
     else if ((align & 3) == 3)
-    {
-        widtha = (double)R_TextWidth(s, 0, font) * xScale;
-        x = x - widtha * 0.5;
-    }
+        x -= (float)R_TextWidth(s, 0, font) * effXScale * 0.5f;
+
     if ((align & 0xC) != 4 && (align & 0xC) != 8 && (align & 0xC) != 0xC)
         MyAssertHandler(
             ".\\cgame\\cg_drawtools.cpp",
@@ -228,17 +227,12 @@ int32_t __cdecl CG_DrawDevString(
             "(align & CG_ALIGN_Y) == CG_ALIGN_TOP || (align & CG_ALIGN_Y) == CG_ALIGN_BOTTOM || (align & CG_ALIGN_Y) == CG_ALIGN_MIDDLE");
     step = R_TextHeight(font);
     if ((align & 0xC) == 4)
-    {
-        height = (double)step * yScale;
-        y = y + height;
-    }
+        y += (float)step * effYScale;
     else if ((align & 0xC) == 0xC)
-    {
-        heighta = (double)step * yScale;
-        y = heighta * 0.5 + y;
-    }
-    CL_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, y, 1, 1, xScale, yScale, color, 0);
-    return step;
+        y += (float)step * effYScale * 0.5f;
+
+    CL_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, y, 1, 1, effXScale, effYScale, color, 0);
+    return (int)((float)step * effYScale);
 }
 
 int32_t __cdecl CG_DrawBigDevString(const ScreenPlacement *scrPlace, float x, float y, char *s, float alpha, char align)

@@ -69,9 +69,8 @@ void __cdecl P_DamageFeedback(gentity_s *player)
 
                 if (v7 > 127)
                     v7 = 127;
-                LODWORD(v8) = v7;
-                v9 = (float)((float)v8 + client->ps.aimSpreadScale);
-                client->ps.aimSpreadScale = (float)v8 + client->ps.aimSpreadScale;
+                v9 = (float)v7 + client->ps.aimSpreadScale;
+                client->ps.aimSpreadScale = v9;
                 if (v9 > 255.0)
                     client->ps.aimSpreadScale = 255.0;
                 if (client->damage_fromWorld)
@@ -456,8 +455,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                 return;
             if (v8 >= 100)
                 break;
-            LODWORD(v6) = client->ps.eventParms[v5 & 3];
-            damage = (float)((float)v6 * (float)0.0099999998);
+            damage = (float)client->ps.eventParms[v5 & 3] * 0.0099999998f;
             if (damage != 0.0)
                 goto LABEL_9;
         LABEL_46:

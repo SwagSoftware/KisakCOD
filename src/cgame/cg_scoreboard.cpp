@@ -282,17 +282,17 @@ void __cdecl CG_DrawObjectiveList(
         v79 = 0.40000001;
         v80 = 0.30000001;
         v81 = 0.30000001;
-        LODWORD(v13) = UI_TextHeight(font, scale);
+        int textHeight = UI_TextHeight(font, scale);
         h = rect->h;
-        v64 = v13;
-        v19 = (float)v13;
+        v64 = textHeight;
+        v19 = (float)textHeight;
         if (v19 <= h)
             v20 = h;
         else
-            v20 = (float)v13;
+            v20 = (float)textHeight;
         y = rect->y;
         textY = 0.0;
-        y = (float)(rect->y - (float)v13);
+        y = rect->y - (float)textHeight;
         //v24 = (Material *)0x82000000; // wtf is this 
         p_icon = &cgArray[0].objectives[0].icon;
         do
@@ -382,17 +382,14 @@ void __cdecl CG_DrawObjectiveList(
             height = (float)((float)textY - (float)y);
             if (height != 0.0)
             {
-                *(double *)&v17 = (float)(scrPlaceView[localClientNum].scaleVirtualToReal[0] + (float)0.5);
-                v40 = floor(v17);
+                int scaledOne = (int)floorf(scrPlaceView[localClientNum].scaleVirtualToReal[0] + 0.5f);
                 w = rect->w;
                 x = rect->x;
-                HIDWORD(v64) = (int)(float)*(double *)&v40;
-                LODWORD(v43) = HIDWORD(v64);
-                v66 = v43;
-                width = (float)v43;
+                v66 = scaledOne;
+                width = (float)scaledOne;
                 x = ScrPlace_ApplyX(
                     &scrPlaceView[localClientNum],
-                    (float)((float)((float)((float)((float)12.0 - (float)v43) * (float)0.5) + (float)w) + (float)x), rect->horzAlign);
+                    ((12.0f - (float)scaledOne) * 0.5f + w) + x, rect->horzAlign);
                 UI_FillRect(&scrPlaceView[localClientNum], x, y, width, height, rect->horzAlign, rect->vertAlign, color);
             }
         }

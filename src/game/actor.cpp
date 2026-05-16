@@ -1476,12 +1476,10 @@ gentity_s *__cdecl Actor_IsKnownEnemyInRegion(
             goto LABEL_21;
         if (level.time - v12 > 10000)
             goto LABEL_21;
-        HIDWORD(v13) = v11->eTeam;
-        if (HIDWORD(v13) == self->sentient->eTeam)
+        if (v11->eTeam == self->sentient->eTeam)
             goto LABEL_21;
         ent = v11->ent;
-        LODWORD(v13) = ent->health;
-        if ((float)v13 == 0.0)
+        if (ent->health == 0)
             goto LABEL_21;
         actor = ent->actor;
         if (actor)
@@ -1712,26 +1710,18 @@ void __cdecl Actor_PathEndActions(actor_s *self)
         {
             self->Path.iPathEndTime = level.time + 500;
         LABEL_25:
-            LODWORD(v10) = self->Path.iPathEndTime - level.time;
-            if ((int)v10 > 0)
+            int remainingTime = self->Path.iPathEndTime - level.time;
+            if (remainingTime > 0)
             {
-                HIDWORD(v10) = 0x82000000;
                 if (self->Physics.bHasGroundPlane)
                     v11 = (float)(1.0 / self->Physics.groundplaneSlope);
                 else
                     v11 = 1.0;
-                self->Physics.vWishDelta[0] = (float)v6
-                    * (float)((float)((float)((float)2.0 - (float)((float)50.0 / (float)v10))
-                        * (float)((float)50.0 / (float)v10))
-                        * (float)v11);
-                self->Physics.vWishDelta[1] = (float)v7
-                    * (float)((float)((float)((float)2.0 - (float)((float)50.0 / (float)v10))
-                        * (float)((float)50.0 / (float)v10))
-                        * (float)v11);
-                self->Physics.vWishDelta[2] = (float)v8
-                    * (float)((float)((float)((float)2.0 - (float)((float)50.0 / (float)v10))
-                        * (float)((float)50.0 / (float)v10))
-                        * (float)v11);
+                float ratio = 50.0f / (float)remainingTime;
+                float factor = (2.0f - ratio) * ratio * (float)v11;
+                self->Physics.vWishDelta[0] = (float)v6 * factor;
+                self->Physics.vWishDelta[1] = (float)v7 * factor;
+                self->Physics.vWishDelta[2] = (float)v8 * factor;
             }
             else
             {

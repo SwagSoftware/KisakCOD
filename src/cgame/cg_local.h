@@ -311,9 +311,11 @@ void __cdecl CG_RegisterItemVisuals(int32_t localClientNum, uint32_t weapIdx);
 void __cdecl CG_RegisterItems(int32_t localClientNum);
 void __cdecl CG_HoldBreathInit(cg_s *cgameGlob);
 void __cdecl CG_UpdateViewModelPose(const DObj_s *obj, int32_t localClientNum);
+#ifdef KISAK_MP
 bool __cdecl CG_IsPlayerCrouching(clientInfo_t *ci, const centity_s *cent);
 bool __cdecl CG_IsPlayerProne(clientInfo_t *ci, const centity_s *cent);
 bool __cdecl CG_IsPlayerADS(clientInfo_t *ci, const centity_s *cent);
+#endif
 void __cdecl CG_GuessSpreadForWeapon(
     int32_t localClientNum,
     const centity_s *cent,

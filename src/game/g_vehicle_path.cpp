@@ -1030,7 +1030,8 @@ void __cdecl G_VehInitPathPos(vehicle_pathpos_t *vpp)
     vpp->switchNode[0].target = 0;
     vpp->switchNode[0].lookAhead = -1.0;
     vpp->switchNode[0].script_linkname = 0;
-    *(unsigned int *)&vpp->switchNode[0].script_noteworthy = 0xFFFF;
+    vpp->switchNode[0].script_noteworthy = 0;
+    vpp->switchNode[0].index = -1;
     vpp->switchNode[0].rotated = 0;
     vpp->switchNode[0].origin[0] = 0.0;
     vpp->switchNode[0].origin[1] = 0.0;
@@ -1049,7 +1050,8 @@ void __cdecl G_VehInitPathPos(vehicle_pathpos_t *vpp)
     vpp->switchNode[1].lookAhead = -1.0;
     vpp->switchNode[1].target = 0;
     vpp->switchNode[1].script_linkname = 0;
-    *(unsigned int *)&vpp->switchNode[1].script_noteworthy = 0xFFFF;
+    vpp->switchNode[1].script_noteworthy = 0;
+    vpp->switchNode[1].index = -1;
     vpp->switchNode[1].rotated = 0;
     vpp->switchNode[1].origin[0] = 0.0;
     vpp->switchNode[1].origin[1] = 0.0;

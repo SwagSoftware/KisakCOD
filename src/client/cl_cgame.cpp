@@ -585,10 +585,10 @@ int __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
 
 void __cdecl LoadWorld(const char *name, int savegame)
 {
-    int v2; // [sp+50h] [-10h] BYREF
+    int checksum; // [sp+50h] [-10h] BYREF
 
-    R_LoadWorld((char*)name, &v2, savegame);
-    SV_SetCheckSum(v2);
+    R_LoadWorld((char*)name, &checksum, savegame);
+    SV_SetCheckSum(checksum);
 }
 
 void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration, int pixelWidth)
@@ -969,13 +969,10 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
             "!CL_GetLocalClientConnection( localClientNum )->serverCommands.header.sent || cls.demoplaying");
     clientUIActives[0].cgameInitCalled = 1;
     CG_Init(localClientNum, savegame);
-    //v8 = Sys_Milliseconds();
-    //HIDWORD(v9) = "erverTime - cgameGlob->time > 0";
-    //LODWORD(v9) = v8 - v4;
     Com_Printf(
         14,
         "CL_InitCGame: %5.2f seconds\n",
-        Sys_Milliseconds() - startTime
+        (double)(Sys_Milliseconds() - startTime) / 1000.0
     );
     R_EndRegistration();
     Con_ClearNotify(0);

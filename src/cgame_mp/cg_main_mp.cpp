@@ -1302,33 +1302,28 @@ void __cdecl CG_RegisterSounds()
 
 void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t **sound)
 {
-    const char *v2; // eax
     snd_alias_list_t *defaultAliasList; // [esp+0h] [ebp-110h]
-    snd_alias_list_t *defaultAliasLista; // [esp+0h] [ebp-110h]
-    int32_t i; // [esp+4h] [ebp-10Ch]
-    int32_t ia; // [esp+4h] [ebp-10Ch]
     char szAliasName[260]; // [esp+8h] [ebp-108h] BYREF
 
-    if (!pszType)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 871, 0, "%s", "pszType");
+    iassert(pszType);
+
     if (*pszType)
     {
         snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_default", pszType);
-        defaultAliasLista = Com_FindSoundAlias(szAliasName);
-        for (ia = 0; ia < 29; ++ia)
+        defaultAliasList = Com_FindSoundAlias(szAliasName);
+        for (int i = 0; i < 29; ++i)
         {
-            v2 = Com_SurfaceTypeToName(ia);
-            snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_%s", pszType, v2);
-            sound[ia] = Com_FindSoundAliasNoErrors(szAliasName);
-            if (!sound[ia])
-                sound[ia] = defaultAliasLista;
+            snprintf(szAliasName, ARRAYSIZE(szAliasName), "%s_%s", pszType, Com_SurfaceTypeToName(i));
+            sound[i] = Com_FindSoundAliasNoErrors(szAliasName);
+            if (!sound[i])
+                sound[i] = defaultAliasList;
         }
     }
     else
     {
         Com_DPrintf(9, "WARNING: no alias prefix defined, using default\n");
         defaultAliasList = Com_FindSoundAliasNoErrors("collision_default");
-        for (i = 0; i < 29; ++i)
+        for (int i = 0; i < 29; ++i)
             sound[i] = defaultAliasList;
     }
 }
@@ -1373,34 +1368,25 @@ void CG_RegisterPhysicsSounds()
 void CG_RegisterPhysicsSounds_FastFile()
 {
     char classes[50][64]; // [esp+0h] [ebp-D60h] BYREF
-    PhysPreset *physPreset; // [esp+C88h] [ebp-D8h]
-    int32_t nclasses; // [esp+C8Ch] [ebp-D4h] BYREF
-    int32_t i; // [esp+C90h] [ebp-D0h]
-    int32_t physPresetCount; // [esp+C94h] [ebp-CCh]
     XAssetHeader assets[50]; // [esp+C98h] [ebp-C8h] BYREF
 
-    nclasses = 0;
-    physPresetCount = DB_GetAllXAssetOfType(ASSET_TYPE_PHYSPRESET, assets, 50);
-    for (i = 0; i < physPresetCount; ++i)
+    int nclasses = 0;
+    int physPresetCount = DB_GetAllXAssetOfType(ASSET_TYPE_PHYSPRESET, assets, 50);
+    for (int i = 0; i < physPresetCount; ++i)
     {
-        physPreset = assets[i].physPreset;
+        PhysPreset *physPreset = assets[i].physPreset;
         CG_AddAudioPhysicsClass(physPreset, classes, &nclasses);
     }
 }
 
 void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64], int32_t *nclasses)
 {
-    int32_t i; // [esp+0h] [ebp-4h]
+    iassert(physPreset);
+    iassert(physPreset->sndAliasPrefix);
+    iassert(nclasses);
+    iassert(classes);
 
-    if (!physPreset)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 900, 0, "%s", "physPreset");
-    if (!physPreset->sndAliasPrefix)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 901, 0, "%s", "physPreset->sndAliasPrefix");
-    if (!nclasses)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 902, 0, "%s", "nclasses");
-    if (!classes)
-        MyAssertHandler(".\\cgame_mp\\cg_main_mp.cpp", 903, 0, "%s", "classes");
-    for (i = 0; i < *nclasses; ++i)
+    for (int i = 0; i < *nclasses; ++i)
     {
         if (!I_stricmp(physPreset->sndAliasPrefix, &(*classes)[64 * i]))
         {
@@ -1408,6 +1394,7 @@ void __cdecl CG_AddAudioPhysicsClass(PhysPreset *physPreset, char (*classes)[64]
             return;
         }
     }
+
     physPreset->type = *nclasses;
     CG_RegisterSurfaceTypeSounds(physPreset->sndAliasPrefix, cgMedia.physCollisionSound[physPreset->type]);
     I_strncpyz(&(*classes)[64 * *nclasses], (char *)physPreset->sndAliasPrefix, 64);
@@ -1705,6 +1692,7 @@ void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t s
     memset(&cgDC[localClientNum], 0, sizeof(UiContext));
     memset(cg_entitiesArray[localClientNum], 0, sizeof(centity_s[1024]));
     memset(cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
+
     cgDC[localClientNum].localClientNum = localClientNum;
     CG_ClearCompassPingData();
     CG_Veh_Init();
@@ -1812,13 +1800,17 @@ void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t s
         g_mapLoaded = 1;
     }
     CG_LoadingString(localClientNum, "game media");
+
     iassert(!I_strnicmp(cgs->mapname, "maps/", 5));
     Com_StripExtension(&cgs->mapname[5], mapname);
+
     ProfLoad_Begin("Init effects system");
     FX_InitSystem(localClientNum);
     FX_RegisterDefaultEffect();
     ProfLoad_End();
+
     SCR_UpdateLoadScreen();
+
     CG_RegisterGraphics(localClientNum, mapname);
     CG_LoadingString(localClientNum, "clients");
     CG_LoadHudMenu(localClientNum);

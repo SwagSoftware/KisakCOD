@@ -5,16 +5,16 @@
 #include "client.h"
 #include <qcommon/msg.h>
 
-struct kbutton_t // sizeof=0x14
-{                                       // ...
-    int down[2];                        // ...
-    unsigned int downtime;
-    unsigned int msec;
-    bool active;                        // ...
-    bool wasPressed;
-    // padding byte
-    // padding byte
-};
+//
+// cl_input
+//
+typedef struct {
+	int			down[2];		// key nums holding it down
+	unsigned	downtime;		// msec timestamp
+	unsigned	msec;			// msec down this frame if both a down and up happened
+	qboolean	active;			// current state
+	qboolean	wasPressed;		// set when down, not cleared when up
+} kbutton_t;
 
 void __cdecl TRACK_cl_input();
 bool __cdecl IN_IsTempProneKeyActive();

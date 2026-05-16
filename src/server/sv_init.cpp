@@ -375,12 +375,54 @@ void SV_SaveSystemInfo()
     dvar_modifiedFlags &= ~4u;
 }
 
+void __cdecl SV_SetExpectedHunkUsage(char *mapname)
+{
+    int handle[2]; // [esp+0h] [ebp-18h] BYREF
+    char *buf; // [esp+8h] [ebp-10h]
+    int len; // [esp+Ch] [ebp-Ch]
+    const char *token; // [esp+10h] [ebp-8h]
+    const char *buftrav; // [esp+14h] [ebp-4h] BYREF
+
+    handle[1] = (int)"hunkusage.dat"; // KISAKTODO: handle fubar?
+    len = FS_FOpenFileByMode((char *)"hunkusage.dat", handle, FS_READ);
+    if (len >= 0)
+    {
+        buf = (char *)Z_Malloc(len + 1, "SV_SetExpectedHunkUsage", 10);
+        memset(buf, 0, len + 1);
+        FS_Read((unsigned char *)buf, len, handle[0]);
+        FS_FCloseFile(handle[0]);
+        buftrav = buf;
+        while (1)
+        {
+            token = Com_Parse(&buftrav)->token;
+            if (!token)
+                MyAssertHandler(".\\server_mp\\sv_init_mp.cpp", 573, 0, "%s", "token");
+            if (!*token)
+                break;
+            if (!I_stricmp(token, mapname))
+            {
+                token = Com_Parse(&buftrav)->token;
+                if (token)
+                {
+                    if (*token)
+                    {
+                        com_expectedHunkUsage = atoi(token);
+                        Z_Free(buf, 10);
+                        return;
+                    }
+                }
+            }
+        }
+        Z_Free(buf, 10);
+    }
+}
+
 void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 {
     int startTime; // r21
     int seed; // r22
     int saveError; // r30
-    SaveGame *v11; // [sp+50h] [-B0h] BYREF
+    SaveGame *save; // [sp+50h] [-B0h] BYREF
     char filename[160]; // [sp+60h] [-A0h] BYREF
 
     Com_SyncThreads();
@@ -391,35 +433,32 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
     if (IsFastFileLoad())
     {
-        char zoneName[64];
-        XZoneInfo zoneInfo;
+        //char zoneName[64];
+        //XZoneInfo zoneInfo;
 
         DB_ResetZoneSize(0);
-        Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
-        zoneInfo.name = zoneName;
-        zoneInfo.allocFlags = 32;
-        zoneInfo.freeFlags = 96;
-        DB_LoadXAssets(&zoneInfo, 1, 0);
+        //Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
+        //zoneInfo.name = zoneName;
+        //zoneInfo.allocFlags = 32;
+        //zoneInfo.freeFlags = 96;
+        //DB_LoadXAssets(&zoneInfo, 1, 0);
     }
     // MP END
 
     CL_InitLoad(mapname);
+    CL_MapLoading(mapname);
+    R_BeginRemoteScreenUpdate();
 
     // MP ADD
-    if (IsFastFileLoad())
-    {
-        DB_SyncXAssets();
-        DB_UpdateDebugZone();
-    }
+    //if (IsFastFileLoad())
+    //{
+    //    DB_SyncXAssets();
+    //    DB_UpdateDebugZone();
+    //}
     // MP END
 
+
     //LSP_LogString(cl_controller_in_use, va("loading map: %s", server));
-    R_BeginRemoteScreenUpdate();
-    if (fs_debug->current.integer == 2)
-        Dvar_SetInt((dvar_s *)fs_debug, 0);
-    //Live_Frame(CL_ControllerIndexFromClientNum(0), 0);
-    
-    //ProfLoad_Activate();
 
     {
         PROF_SCOPED("Clear load game");
@@ -429,16 +468,18 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     
     {
         PROF_SCOPED("Shutdown systems");
-        R_EndRemoteScreenUpdate();
 
         if (true)
         {
-            CL_MapLoading(mapname); // LWSS: move down here (similar to MP)
+            R_EndRemoteScreenUpdate();
             R_BeginRemoteScreenUpdate();
             R_EndRemoteScreenUpdate();
-            //SCR_UpdateLoadScreen(); // NULLSUB
-            CL_ShutdownAll(false);
         }
+
+        //if (!*((_BYTE *)useFastFile + 12))
+        //    Sys_LoadScreenYield();
+
+        CL_ShutdownAll(false);
 
         SV_ShutdownGameProgs();
         SaveMemory_CleanupSaveMemory();
@@ -461,18 +502,24 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
         seed = Sys_MillisecondsRaw();
 
+        //if (!*((_BYTE *)com_dedicated + 12))
         if (true)
             Com_Restart();
         if (!com_sv_running->current.enabled)
             SV_Startup();
+
+        if (!IsFastFileLoad())
+        {
+            Com_GetBspFilename(filename, 64, mapname);
+            SV_SetExpectedHunkUsage(filename);
+        }
     }
 
     // MP ADD
-    srand(Sys_MillisecondsRaw());
-    FS_Restart(0, Sys_Milliseconds() ^ (rand() ^ (rand() << 16)));
+    //srand(Sys_MillisecondsRaw());
+    //FS_Restart(0, Sys_Milliseconds() ^ (rand() ^ (rand() << 16)));
     // MP END
     
-    if (true)
     {
         PROF_SCOPED("After file system restart");
         {
@@ -480,7 +527,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
             CL_StartLoading(mapname);
         }
 
-        if (IsFastFileLoad())
+        if (IsFastFileLoad() && mapname[0])
         {
             PROF_SCOPED("Load fast file");
             SV_LoadLevelAssets(mapname);
@@ -510,10 +557,8 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
     Com_GetBspFilename(filename, 64, mapname);
 
-    // MP ADD
     if (!IsFastFileLoad())
         Com_LoadBsp(filename);
-    // MP END
 
     {
         PROF_SCOPED("Load collision (server)");
@@ -522,28 +567,21 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
     Com_LoadWorld(filename);
 
-    // MP ADD
-    //if (!IsFastFileLoad())
-    //    Com_UnloadBsp();
-    // MP END
-    
-    //Live_SetCurrentMapname(server);
     SCR_UpdateLoadScreen();
+    if (!IsFastFileLoad())
+    {
+        Com_LoadSoundAliases(filename, "all_sp", SASYS_GAME);
+    }
     SCR_UpdateLoadScreen();
+
     SaveMemory_InitializeSaveSystem();
     SaveMemory_ClearDemoSave();
 
-    // MP ADD
-    if (!IsFastFileLoad())
-    {
-        Com_GetBspFilename(filename, 0x40u, mapname);
-        Com_LoadSoundAliases(filename, "all", SASYS_GAME);
-    }
-    // MP END
-
     {
         PROF_SCOPED("Init game");
-        SV_InitGameProgs(seed, savegame, &v11);
+        //sv_FrameTime = -3000;
+        //sv_initialized = 1;
+        SV_InitGameProgs(seed, savegame, &save);
     }
 
     CL_SetSkipRendering(1);
@@ -566,20 +604,33 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     SCR_UpdateLoadScreen();
     {
         PROF_SCOPED("Init client");
-        CL_InitCGame(0, v11 != 0);
+        CL_InitCGame(0, save != 0);
     }
 
     SCR_UpdateLoadScreen();
     {
         PROF_SCOPED("Check load level");
-        SV_CheckLoadLevel(v11);
+        SV_CheckLoadLevel(save);
+        //sv_startTime = com_frametime;
+        //sv_skelTimeStamp = 49;
+        
     }
 
-    SCR_UpdateLoadScreen();
+    
+    if (CL_DemoPlaying())
+    {
+        // KISAKTODO: demo wait loop
+    }
+    else
     {
         PROF_SCOPED("Event loop");
         Com_EventLoop();
+        // KISAKTODO: more funcs here?
     }
+
+    SCR_UpdateLoadScreen();
+
+    //Cbuf_Execute_NextFrame(); ??
 
     SCR_UpdateLoadScreen();
 
@@ -598,15 +649,20 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     }
 
     R_EndRemoteScreenUpdate();
-#ifndef KISAK_NO_FASTFILES
-    DB_SyncXAssets();
-#endif
+
+    if (IsFastFileLoad())
+        DB_SyncXAssets();
+
     //ProfLoad_Deactivate();
-    UI_SetActiveMenu(0, UIMENU_PREGAME);
+    UI_SetActiveMenu(0, UIMENU_PREGAME); // KISAKTODO: uimenu enum should be '5'
+
     if (saveError)
         SV_DisplaySaveErrorUI();
+
     CL_SetActive();
     Com_Printf(15, "Load time: %d msec\n", Sys_Milliseconds() - startTime);
     Com_ResetFrametime();
+
+    Sys_EndLoadThreadPriorities();
 }
 

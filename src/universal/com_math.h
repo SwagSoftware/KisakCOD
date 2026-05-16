@@ -444,7 +444,7 @@ void __cdecl QuatLerp(const float* qa, const float* qb, float frac, float* out);
 void QuatInverse(const float *in, float *out);
 
 // == MISC ==
-char __cdecl ClampChar(int i);
+signed char ClampChar(int i);
 
 void __cdecl ClosestApproachOfTwoLines(
     const float* p1,

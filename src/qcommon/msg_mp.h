@@ -7,7 +7,30 @@
 #include "qcommon.h"
 #include "ent.h"
 
+// LWSS: these are aislop generated, may be inaccurate.
+#define BUTTON_ATTACK         (1 <<  0)  // +attack
+#define BUTTON_SPRINT         (1 <<  1)  // set in CL_KeyMove from kb[KEY_SPRINT=27]
+#define BUTTON_MELEE          (1 <<  2)  // +melee
+#define BUTTON_USE            (1 <<  3)  // +activate
+#define BUTTON_RELOAD         (1 <<  4)  // +reload
+#define BUTTON_USE_RELOAD     (1 <<  5)  // +usereload (combined-bind, distinct from USE/RELOAD)
+#define BUTTON_LEAN_LEFT      (1 <<  6)  // +leanleft
+#define BUTTON_LEAN_RIGHT     (1 <<  7)  // +leanright
+#define BUTTON_PRONE          (1 <<  8)  // +prone (held)
+#define BUTTON_CROUCH         (1 <<  9)  // crouch stance (set by CL_AddCurrentStanceToCmd)
+#define BUTTON_JUMP           (1 << 10)  // +moveup / +gostand
+#define BUTTON_ADS            (1 << 11)  // +speed in COD (aim-down-sights)
+#define BUTTON_TEMP_STANCE    (1 << 12)  // holding stance key (vs toggled stance)
+#define BUTTON_BREATH         (1 << 13)  // +breath (hold-breath while scoped)
+#define BUTTON_FRAG           (1 << 14)  // +frag
+#define BUTTON_SMOKE          (1 << 15)  // +smoke
+#define BUTTON_LOC_CONFIRM    (1 << 16)  // artillery/location confirm
+#define BUTTON_LOC_CANCEL     (1 << 17)  // artillery/location cancel
+#define BUTTON_NIGHTVISION    (1 << 18)  // +nightvision
+#define BUTTON_THROW          (1 << 19)  // +throw (frag throwback)
+#define BUTTON_LOC_SELECTING  (1 << 20)  // location-selection UI active
 #define BUTTON_BIT_COUNT 21
+
 #define MAX_WEAPONS_BITS 7
 #define GENTITYNUM_BITS 10
 

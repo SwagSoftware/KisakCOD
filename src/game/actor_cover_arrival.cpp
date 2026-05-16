@@ -28,12 +28,11 @@ bool __cdecl Actor_CheckCoverLeave(actor_s *self, const float *exitPos)
     wPathLen = self->Path.wPathLen;
     wNegotiationStartNode = wPathLen - 3;
 
-    // aislop
-    //_FP13 = (float)((float)16384.0 - (float)v5);
-    //__asm { fsel      f7, f13, f0, f1 }
-
+    // PowerPC `fsel f7, f13, f0, f1` selects f0 (16384.0) when f13 (= 16384 - v5) >= 0,
+    // else f1 (= v5). Net effect: _FP7 = max(16384.0, v5). Used as the radius² threshold
+    // below.
     float diff = 16384.0f - (float)v5;
-    float _FP7 = (diff >= 0.0f) ? 1.0f : 0.0f;
+    float _FP7 = (diff >= 0.0f) ? 16384.0f : (float)v5;
 
     if (wPathLen - 3 < self->Path.wNegotiationStartNode)
         wNegotiationStartNode = self->Path.wNegotiationStartNode;

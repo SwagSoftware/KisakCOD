@@ -1931,20 +1931,18 @@ void __cdecl MdlPrvSpinYawOffset(double deg)
         + (float)((float)(modPrvCenterOffset->current.vector[2] * modPrvCenterOffset->current.vector[2])
         + (float)(modPrvCenterOffset->current.value * modPrvCenterOffset->current.value))));
 
-    // aislop
-    //_FP10 = -v5;
-    //__asm { fsel      f10, f10, f11, f31 }
-    //v8 = (float)((float)((float)1.0 / (float)_FP10) * modPrvCenterOffset->current.vector[1]);
-    //v13[0] = (float)((float)1.0 / (float)_FP10) * modPrvCenterOffset->current.value;
-
-    float _FP10 = -v5;
-    _FP10 = (_FP10 > 0.0f) ? _FP10 : 0.0f;
-    v8 = (1.0f / _FP10) * modPrvCenterOffset->current.vector[1];
-    v13[0] = (1.0f / _FP10) * modPrvCenterOffset->current.value;
-
+    //_FP10 = -v5;                              ; -mag (<= 0)
+    //__asm { fsel f10, f10, f11, f31 }         ; (-v5 >= 0) ? safe : v5
+    //v8 / v13[0] / v13[2] = (1/_FP10) * vec    ; normalized direction
+    // BUG was: prior port kept _FP10 = -v5 then tested (_FP10 > 0), which is
+    // never true for v5 >= 0, so _FP10 collapsed to 0 and every divide produced
+    // inf — model previewer rotate broke.
+    float invV5 = (v5 > 0.0f) ? (1.0f / v5) : 0.0f;
+    v8 = invV5 * modPrvCenterOffset->current.vector[1];
+    v13[0] = invV5 * modPrvCenterOffset->current.value;
 
     v13[1] = v8;
-    v13[2] = (float)v1 * (float)((float)1.0 / (float)_FP10);
+    v13[2] = (float)v1 * invV5;
     Vec3Rotate(v13, (const mat3x3&)v18, v14);
     v15 = (float)(v14[0] * (float)-v5) + (float)v2;
     v16 = (float)(v14[1] * (float)-v5) + (float)v3;
@@ -1990,9 +1988,8 @@ void __cdecl MdlPrvMoveModel2D(const cg_s *cgGlob, float away, float left)
     lenHorz = sqrtf(forward[0] * forward[0] + forward[1] * forward[1]);
     lenVert = sqrtf(right[0] * right[0] + right[1] * right[1]);
 
-    // Prevent division by zero (replacing fsel)
-    invLenHorz = (1.0f / lenHorz);
-    invLenVert = (1.0f / lenVert);
+    invLenHorz = (lenHorz > 0.0f) ? (1.0f / lenHorz) : 0.0f;
+    invLenVert = (lenVert > 0.0f) ? (1.0f / lenVert) : 0.0f;
 
     // Apply movement to model origin
     g_mdlprv.model.initialOrigin[1] += (invLenVert * right[1] * left) + (invLenHorz * forward[1] * away);

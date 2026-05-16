@@ -2261,24 +2261,16 @@ double __cdecl GetObjectiveFade(const rectDef_s *clipRect, float x, float y, flo
 static float MYFLASHTERM_0 = 45.0f;
 static void NearTargetTextColor(const cg_s *cgameGlob, float *color)
 {
-    __int64 v4; // r11
-    long double v5; // fp2
-    double v6; // fp12
-    double v7; // fp11
-    double v8; // fp10
+    double s = sin((float)cgameGlob->time / (MYFLASHTERM_0 * 3.1415927f));
+    float pulse = ((float)s + 1.0f) * 0.5f;
 
-    HIDWORD(v4) = 108044;
-    LODWORD(v4) = cgameGlob->time;
-    v5 = sin((float)((float)v4 / (float)(MYFLASHTERM_0 * (float)3.1415927)));
-    v6 = color[1];
-    v7 = color[2];
-    v8 = (float)((float)1.0 - color[1]);
-    *color = (float)((float)((float)0.89999998 - *color)
-        * (float)((float)((float)*(double *)&v5 + (float)1.0) * (float)0.5))
-        + *color;
-    color[1] = (float)((float)v8 * (float)((float)((float)*(double *)&v5 + (float)1.0) * (float)0.5)) + (float)v6;
-    color[2] = (float)((float)((float)0.1 - (float)v7) * (float)((float)((float)*(double *)&v5 + (float)1.0) * (float)0.5))
-        + (float)v7;
+    float r = color[0];
+    float g = color[1];
+    float b = color[2];
+
+    color[0] = (0.89999998f - r) * pulse + r;
+    color[1] = (1.0f - g) * pulse + g;
+    color[2] = (0.1f - b) * pulse + b;
 }
 
 static float DistanceToNearestGoal(cg_s *cgameGlob, float *heightDelta)
@@ -2402,13 +2394,11 @@ void CG_CompassDrawGoalDistance(
                 Com_sprintf(txt, 64, "%.0f", v18);
                 v21 = UI_TextWidth(txt, 20, font, scale);
                 v22 = 68 * localClientNum;
-                HIDWORD(v23) = rect->vertAlign;
                 horzAlign = (const float *)rect->horzAlign;
                 y = rect->y;
-                LODWORD(v23) = v21;
-                v27 = (float)v23;
-                v28 = (float)((float)((float)(rect->w - (float)v23) * (float)0.5) + rect->x);
-                v30 = v23;
+                v27 = (float)v21;
+                v28 = (rect->w - (float)v21) * 0.5f + rect->x;
+                v30 = v21;
                 UI_DrawText(&scrPlaceView[localClientNum], txt, 0x7FFFFFFF, font, v28, y, rect->horzAlign, rect->vertAlign, scale, colour, textStyle);
                 UI_DrawText(
                     &scrPlaceView[localClientNum],
@@ -2436,9 +2426,9 @@ void CG_CompassDrawGoalDistance(
                 {
                     Com_sprintf(txt, 64, "Below", LODWORD(v18));
                 }
-                LODWORD(v19) = UI_TextWidth(txt, 20, font, scale);
-                x = (float)((float)((float)(rect->w - (float)v19) * (float)0.5) + rect->x);
-                v30 = v19;
+                int textW = UI_TextWidth(txt, 20, font, scale);
+                x = (rect->w - (float)textW) * 0.5f + rect->x;
+                v30 = textW;
                 NearTargetTextColor(cgArray, colour);
                 UI_DrawText(
                     &scrPlaceView[localClientNum],

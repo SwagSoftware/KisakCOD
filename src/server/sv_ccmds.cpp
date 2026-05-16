@@ -217,16 +217,12 @@ void __cdecl SV_SetValuesFromSkill()
     {
         if (unsignedInt == 1)
         {
-            HIDWORD(v4) = player_healthMedium->current.integer;
-            LODWORD(v4) = HIDWORD(v4);
-            Dvar_SetFloat(sv_player_damageMultiplier, (float)((float)100.0 / (float)v4));
+            Dvar_SetFloat(sv_player_damageMultiplier, 100.0f / (float)player_healthMedium->current.integer);
             v2 = 1000;
         }
         else if (unsignedInt < 3)
         {
-            HIDWORD(v3) = player_healthHard->current.integer;
-            LODWORD(v3) = HIDWORD(v3);
-            Dvar_SetFloat(sv_player_damageMultiplier, (float)((float)100.0 / (float)v3));
+            Dvar_SetFloat(sv_player_damageMultiplier, 100.0f / (float)player_healthHard->current.integer);
             v2 = 100;
         }
         else
@@ -238,17 +234,13 @@ void __cdecl SV_SetValuesFromSkill()
                     0,
                     "%s",
                     "sv_gameskill->current.integer == DIFFICULTY_FU");
-            HIDWORD(v1) = player_healthFu->current.integer;
-            LODWORD(v1) = HIDWORD(v1);
-            Dvar_SetFloat(sv_player_damageMultiplier, (float)((float)100.0 / (float)v1));
+            Dvar_SetFloat(sv_player_damageMultiplier, 100.0f / (float)player_healthFu->current.integer);
             v2 = 100;
         }
     }
     else
     {
-        HIDWORD(v5) = player_healthEasy->current.integer;
-        LODWORD(v5) = HIDWORD(v5);
-        Dvar_SetFloat(sv_player_damageMultiplier, (float)((float)100.0 / (float)v5));
+        Dvar_SetFloat(sv_player_damageMultiplier, 100.0f / (float)player_healthEasy->current.integer);
         v2 = 4000;
     }
     Dvar_SetInt(sv_player_deathInvulnerableTime, v2);

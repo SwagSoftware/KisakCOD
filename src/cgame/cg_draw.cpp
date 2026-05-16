@@ -435,9 +435,8 @@ void __cdecl CG_CheckHudHealthDisplay(int localClientNum)
     {
         if (hud_fade_healthbar->current.value != 0.0 && cgArray[0].healthFadeTime)
         {
-            HIDWORD(v2) = cgArray[0].time - cgArray[0].healthFadeTime;
-            LODWORD(v2) = cgArray[0].time - cgArray[0].healthFadeTime;
-            if ((float)v2 > (double)(float)(hud_fade_healthbar->current.value * (float)1000.0))
+            int elapsed = cgArray[0].time - cgArray[0].healthFadeTime;
+            if ((float)elapsed > hud_fade_healthbar->current.value * 1000.0f)
             {
                 Menus_HideByName(&cgDC, "Health");
                 cgArray[0].healthFadeTime = 0;
@@ -466,9 +465,8 @@ void __cdecl CG_CheckHudAmmoDisplay(int localClientNum)
         CG_MenuShowNotify(localClientNum, 1);
     if (hud_fade_ammodisplay->current.value != 0.0 && cgArray[0].ammoFadeTime)
     {
-        HIDWORD(v2) = cgArray[0].time - cgArray[0].ammoFadeTime;
-        LODWORD(v2) = cgArray[0].time - cgArray[0].ammoFadeTime;
-        if ((float)v2 > (double)(float)(hud_fade_ammodisplay->current.value * (float)1000.0))
+        int elapsed = cgArray[0].time - cgArray[0].ammoFadeTime;
+        if ((float)elapsed > hud_fade_ammodisplay->current.value * 1000.0f)
         {
             Menus_HideByName(&cgDC, "weaponinfo");
             Menus_HideByName(&cgDC, "weaponinfo_lowdef");
@@ -498,9 +496,8 @@ void __cdecl CG_CheckHudCompassDisplay(int localClientNum)
         }
         if (cgArray[0].compassFadeTime)
         {
-            HIDWORD(v2) = cgArray[0].time;
-            LODWORD(v2) = cgArray[0].time - cgArray[0].compassFadeTime;
-            if ((float)v2 > (double)(float)(v1->current.value * (float)1000.0))
+            int elapsed = cgArray[0].time - cgArray[0].compassFadeTime;
+            if ((float)elapsed > v1->current.value * 1000.0f)
             {
                 cgArray[0].compassFadeTime = 0;
                 Menus_HideByName(&cgDC, "Compass");
@@ -527,9 +524,8 @@ void __cdecl CG_CheckHudStanceDisplay(int localClientNum)
         CG_MenuShowNotify(localClientNum, 3);
     if (hud_fade_stance->current.value != 0.0 && cgArray[0].stanceFadeTime)
     {
-        HIDWORD(v3) = cgArray[0].time - cgArray[0].stanceFadeTime;
-        LODWORD(v3) = cgArray[0].time - cgArray[0].stanceFadeTime;
-        if ((float)v3 > (double)(float)(hud_fade_stance->current.value * (float)1000.0))
+        int elapsed = cgArray[0].time - cgArray[0].stanceFadeTime;
+        if ((float)elapsed > hud_fade_stance->current.value * 1000.0f)
         {
             Menus_HideByName(&cgDC, "stance");
             cgArray[0].stanceFadeTime = 0;
@@ -566,9 +562,9 @@ void __cdecl CG_CheckHudSprintDisplay(int localClientNum)
     }
     if (hud_fade_sprint->current.value != 0.0 && cgArray[0].sprintFadeTime)
     {
-        HIDWORD(v3) = cgArray[0].time - cgArray[0].sprintFadeTime;
-        LODWORD(v3) = cgArray[0].time - cgArray[0].sprintFadeTime;
-        if ((float)v3 > (double)(float)(hud_fade_stance->current.value * (float)1000.0))
+        int elapsed = cgArray[0].time - cgArray[0].sprintFadeTime;
+        // KISAKTODO: original compared against hud_fade_stance, not hud_fade_sprint — verify
+        if ((float)elapsed > hud_fade_stance->current.value * 1000.0f)
         {
             Menus_HideByName(&cgDC, "sprintMeter");
             cgArray[0].sprintFadeTime = 0;
@@ -597,9 +593,8 @@ void __cdecl CG_CheckHudOffHandDisplay(int localClientNum)
         }
         if (cgArray[0].offhandFadeTime)
         {
-            HIDWORD(v2) = cgArray[0].time;
-            LODWORD(v2) = cgArray[0].time - cgArray[0].offhandFadeTime;
-            if ((float)v2 > (double)(float)(v1->current.value * (float)1000.0))
+            int elapsed = cgArray[0].time - cgArray[0].offhandFadeTime;
+            if ((float)elapsed > v1->current.value * 1000.0f)
             {
                 cgArray[0].offhandFadeTime = 0;
                 Menus_HideByName(&cgDC, "offhandinfo");
@@ -770,9 +765,9 @@ void __cdecl CG_ScreenBlur(int localClientNum)
         }
         else
         {
-            iassert(scrBlur->timeEnd - scrBlur->timeStart > 0.0f);
+            iassert(scrBlur->timeEnd - scrBlur->timeStart > 0);
             t = (float)(time - scrBlur->timeStart) / (float)(scrBlur->timeEnd - scrBlur->timeStart);
-            iassert(t);
+            iassert(t >= 0.0f && t <= 1.0f);
             end = scrBlur->end;
             blur = ((1.0f - t) * scrBlur->start) + (scrBlur->end * t);
         }

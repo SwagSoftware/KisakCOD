@@ -82,18 +82,16 @@ void __cdecl DebugDrawNodeSelectionOverlay()
                             v5 = (float)(v13 + (float)48.0);
                         }
                         v13 = v5;
-                        HIDWORD(v6) = level.time;
-                        LODWORD(v6) = level.time - debugNodeTimestamp;
-                        v7 = (float)(v4->constant.vOrigin[0] - v14[0]);
-                        v8 = (float)(v4->constant.vOrigin[1] - v14[1]);
-                        v9 = (float)(v4->constant.vOrigin[2] - v14[2]);
-                        v10 = (float)((float)v6 * (float)0.001);
-                        ;
+                        int elapsed = level.time - debugNodeTimestamp;
+                        v7 = v4->constant.vOrigin[0] - v14[0];
+                        v8 = v4->constant.vOrigin[1] - v14[1];
+                        v9 = v4->constant.vOrigin[2] - v14[2];
+                        v10 = (float)elapsed * 0.001f;
                         G_AddDebugString(
                             v12,
                             v1,
-                            (float)((float)sqrtf((float)((float)((float)v8 * (float)v8) + (float)((float)((float)v9 * (float)v9) + (float)((float)v7 * (float)v7)))) * (float)0.0022222223),
-                            va("%s  (%2.1f)", HIDWORD(v10), LODWORD(v10)));
+                            sqrtf(v8 * v8 + v9 * v9 + v7 * v7) * 0.0022222223f,
+                            va("%s  (%2.1f)", v3, (float)v10));
                     }
                     ++v0;
                     ++v2;

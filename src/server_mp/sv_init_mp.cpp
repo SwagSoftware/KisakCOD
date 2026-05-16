@@ -444,7 +444,7 @@ void __cdecl SV_SpawnServer(char *mapname)
             ++i;
             ++client;
         }
-        NET_Sleep(0xFAu);
+        NET_Sleep(250);
     }
     else
     {

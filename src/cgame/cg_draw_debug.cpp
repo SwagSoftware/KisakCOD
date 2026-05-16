@@ -159,7 +159,11 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
         minTime = 1;
     fpsMin = SnapFloatToInt(1000.0f / maxTime);
     fps = SnapFloatToInt(32000.0f / total);
-    v10 = (double)R_TextWidth(" cg ms/frame", 0, cgMedia.smallDevFont) * 1.0;
+#ifdef KISAK_SP
+    v10 = cg_small_dev_string_fontscale->current.value * (R_TextWidth(" cg ms/frame", 0, cgMedia.smallDevFont) * 0.75f);
+#else
+    v10 = R_TextWidth(" cg ms/frame", 0, cgMedia.smallDevFont) * 0.75f;
+#endif
     v8 = (double)(fps - 55) / 10.0;
     v6 = v8 - 1.0;
     if (v6 < 0.0)
@@ -277,8 +281,8 @@ double __cdecl CG_CornerDebugPrint(
     if (cg_drawFPSLabels->current.enabled)
     {
         x = posX - labelWidth;
-        textDelta = CG_DrawDevString(sP, x, posY, 1.0f, 1.1f, text, color, 6, cgMedia.smallDevFont);
-        labelDelta = CG_DrawDevString(sP, x, posY, 1.0f, 1.1f, label, colorWhiteFaded, 5, cgMedia.smallDevFont);
+        textDelta = CG_DrawDevString(sP, x, posY, 0.75f, 0.75f, text, color, 6, cgMedia.smallDevFont);
+        labelDelta = CG_DrawDevString(sP, x, posY, 0.75f, 0.75f, label, colorWhiteFaded, 5, cgMedia.smallDevFont);
         if (textDelta < labelDelta)
             v9 = labelDelta;
         else
@@ -287,7 +291,7 @@ double __cdecl CG_CornerDebugPrint(
     }
     else
     {
-        yDelta = CG_DrawDevString(sP, posX, posY, 1.0f, 1.1f, text, color, 6, cgMedia.smallDevFont);
+        yDelta = CG_DrawDevString(sP, posX, posY, 0.75f, 0.75f, text, color, 6, cgMedia.smallDevFont);
     }
     return (float)((float)yDelta * 0.75f);
 }
@@ -306,11 +310,11 @@ double __cdecl CG_CornerDebugPrintCaption(
     if (cg_drawFPSLabels->current.enabled)
     {
         x = posX - labelWidth;
-        yDelta = CG_DrawDevString(sP, x, posY, 1.0f, 1.1f, text, color, 7, cgMedia.smallDevFont);
+        yDelta = CG_DrawDevString(sP, x, posY, 0.75f, 0.75f, text, color, 7, cgMedia.smallDevFont);
     }
     else
     {
-        yDelta = CG_DrawDevString(sP, posX, posY, 1.0f, 1.1f, text, color, 6, cgMedia.smallDevFont);
+        yDelta = CG_DrawDevString(sP, posX, posY, 0.75f, 0.75f, text, color, 6, cgMedia.smallDevFont);
     }
     return (float)((float)yDelta * 0.75);
 }
@@ -349,7 +353,7 @@ void __cdecl CG_DrawUpperRightDebugInfo(int32_t localClientNum)
     meminfo_t v4; // [sp+50h] [-B0h] BYREF
 
     track_getbasicinfo(&v4);
-    if (CG_GetPredictedPlayerState(localClientNum)->pm_type != PM_MPVIEWER)
+    if (CG_GetPredictedPlayerState(localClientNum)->pm_type != PM_DEAD)
     {
         R_TrackStatistics(0);
 

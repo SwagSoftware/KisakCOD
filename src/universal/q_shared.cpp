@@ -130,16 +130,21 @@ FIXME: make this buffer size safe someday
 */
 char* QDECL va(const char* format, ...) {
     va_list		argptr;
-    static char		string[2][32000];	// in case va is called by nested functions
-    static int		index = 0;
-    char* buf;
+    va_info_t  *info;
+    char       *buf;
+    int         len;
 
-    buf = string[index & 1];
-    index++;
+    info = (va_info_t *)Sys_GetValue(1);
+    buf = info->va_string[info->index];
+    info->index = (info->index + 1) % 2;
 
     va_start(argptr, format);
-    vsprintf(buf, format, argptr);
+    len = _vsnprintf(buf, 1024, format, argptr);
     va_end(argptr);
+
+    buf[1023] = 0;
+    if (len >= 1024)
+        Com_Error(ERR_DROP, "va: too short");
 
     return buf;
 }

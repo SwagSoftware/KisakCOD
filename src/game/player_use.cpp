@@ -264,11 +264,11 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     //v51[2] = v44 + (float)96.0;
 
     {
-        float _FP12 = 192.0f - player_throwbackOuterRadius->current.value;
-        float fsel_input = _FP12;
-
-        // Emulate PowerPC fsel: if fsel_input >= 0, result = fsel_input, else result = fallback (assumed here also fsel_input)
-        float fsel_result = (fsel_input >= 0.0f) ? fsel_input : -fsel_input;
+        // PPC: _FP12 = 192.0f - radius; fsel f31, f12, f13, f0
+        // fsel(192-radius, radius, 192) = (192 >= radius) ? radius : 192 = min(radius, 192)
+        // i.e. clamp player_throwbackOuterRadius to at most 192.0f
+        float radius = player_throwbackOuterRadius->current.value;
+        float searchRadius = (radius <= 192.0f) ? radius : 192.0f;
 
         G_GetPlayerViewOrigin(&client->ps, viewOrigin);
         G_GetPlayerViewDirection(ent, forward, 0, 0);
@@ -281,12 +281,12 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
         maxs[1] = client->ps.origin[1] + 15.0f;
         maxs[2] = client->ps.origin[2] + 70.0f;
 
-        areaMins[0] = viewOrigin[0] - fsel_result;
-        areaMins[1] = viewOrigin[1] - fsel_result;
+        areaMins[0] = viewOrigin[0] - searchRadius;
+        areaMins[1] = viewOrigin[1] - searchRadius;
         areaMins[2] = viewOrigin[2] - 96.0f;
 
-        areaMaxs[0] = viewOrigin[0] + fsel_result;
-        areaMaxs[1] = viewOrigin[1] + fsel_result;
+        areaMaxs[0] = viewOrigin[0] + searchRadius;
+        areaMaxs[1] = viewOrigin[1] + searchRadius;
         areaMaxs[2] = viewOrigin[2] + 96.0f;
     }
 
@@ -362,12 +362,13 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
                     v24 = sqrtf(v23 * v23
                         + (traceEnd[2] - viewOrigin[2]) * (traceEnd[2] - viewOrigin[2])
                         + (traceEnd[1] - viewOrigin[1]) * (traceEnd[1] - viewOrigin[1]));
-                    float neg_v24 = -v24;
 
-                    // Emulate: fsel f11, f10, f29, f31
-                    // meaning: f11 = (neg_v24 >= 0.0f ? f29 : f31)
-                    // Without explicit original values for f29/f31, assume fallback = neg_v24 for simplicity
-                    float denom = neg_v24 >= 0.0f ? neg_v24 : neg_v24;
+                    // PPC: _FP10 = -v24; fsel f11, f10, f29, f31
+                    // fsel(-v24, 1.0, v24): since v24 = sqrtf >= 0, -v24 <= 0, so
+                    //   if v24 == 0: pick 1.0 (safe divisor)
+                    //   if v24 >  0: pick v24 (normal case)
+                    // Standard PPC reciprocal divide-by-zero guard.
+                    float denom = (v24 > 0.0f) ? v24 : 1.0f;
 
                     v26 = v24 > v20;
                     v28 = 1.0f / denom;
@@ -1077,14 +1078,12 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
     traceEnt = Player_UpdateLookAtEntityTrace(&traceresult, start, traceEnd, number, 578873345, prioMap, forward);
     if ((unsigned __int8)Player_CheckAlmostStationary(ent, forward))
     {
-        // aislop
-        //_FP12 = (float)((float)(v39.fraction * (float)15000.0) - ai_playerLOSRange->current.value);
-        //__asm { fsel      f1, f12, f0, f13# dist }
-        //Player_BanNodesInFront(ent, _FP1, v9, &v32, (int)&v35);
-
-        float _FP12 = traceresult.fraction * 15000.0f - ai_playerLOSRange->current.value;
-        float denom = (_FP12 >= 0.0f) ? _FP12 : -_FP12;  // mimics fsel behavior with fallback
-        Player_BanNodesInFront(ent, denom, start, forward);
+        // PPC: _FP12 = trace_distance - LOS_range; fsel f1, f12, f0, f13
+        // fsel(trace - LOS, LOS, trace) = (trace >= LOS) ? LOS : trace = min(trace, LOS)
+        float trace_distance = traceresult.fraction * 15000.0f;
+        float los_range = ai_playerLOSRange->current.value;
+        float dist = (trace_distance >= los_range) ? los_range : trace_distance;
+        Player_BanNodesInFront(ent, dist, start, forward);
     }
     v12 = ent->client;
     if ((v12->ps.pm_flags & 0x10) != 0 && v12->ps.fWeaponPosFrac == 1.0)

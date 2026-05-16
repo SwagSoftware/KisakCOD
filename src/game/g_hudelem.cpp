@@ -1220,30 +1220,29 @@ static const BuiltinMethodDef methods_0[22] =
 #elif KISAK_SP
 static void BG_LerpFontScale(const hudelem_s *elem, int time, float *toScale) // this belongs in bg_misc but is only used here..
 {
-    __int64 v3; // r11 OVERLAPPED
     double v6; // fp31
     double fontScale; // fp0
 
-    LODWORD(v3) = elem->fontScaleTime;
-    HIDWORD(v3) = time - elem->fontScaleStartTime;
-    if ((int)v3 <= 0 || SHIDWORD(v3) >= (int)v3)
+    int duration = elem->fontScaleTime;
+    int elapsed = time - elem->fontScaleStartTime;
+    if (duration <= 0 || elapsed >= duration)
     {
         fontScale = elem->fontScale;
     }
     else
     {
-        if (v3 < 0)
-            HIDWORD(v3) = 0;
-        v6 = (float)((float)*(__int64 *)((char *)&v3 + 4) / (float)v3);
+        if (elapsed < 0)
+            elapsed = 0;
+        v6 = (float)elapsed / (float)duration;
         if (v6 < 0.0 || v6 > 1.0)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\bgame\\bg_misc.cpp",
                 1848,
                 0,
                 "%s\n\t(lerp) = %g",
-                HIDWORD(v6),
-                LODWORD(v6));
-        fontScale = (float)((float)((float)(elem->fontScale - elem->fromFontScale) * (float)v6) + elem->fromFontScale);
+                "(lerp >= 0.0f && lerp <= 1.0f)",
+                v6);
+        fontScale = (elem->fontScale - elem->fromFontScale) * (float)v6 + elem->fromFontScale;
     }
     *toScale = fontScale;
 }

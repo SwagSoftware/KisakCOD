@@ -483,18 +483,13 @@ int __cdecl AimTarget_GetBestTarget(const float *start, const float *viewDir)
             v9 = (float)(currentOrigin[2] - start[2]);
             v10 = (float)(currentOrigin[1] - start[1]);
 
-            //_FP3 = -sqrtf((float)((float)((float)v10 * (float)v10)
-            //    + (float)((float)((float)v9 * (float)v9)
-            //        + (float)((float)(*currentOrigin - *start) * (float)(*currentOrigin - *start)))));
-            //__asm { fsel      f11, f3, f31, f11 }
-            //v13 = (float)((float)1.0 / (float)_FP11);
-
+            //_FP3 = -sqrtf(...);                   ; -mag
+            //__asm { fsel      f11, f3, f31, f11 } ; f11 = (-mag >= 0) ? safe : mag
+            //v13 = 1.0 / _FP11
+            // Sum-of-squares is always >= 0; only need to guard the 1/mag division.
             float dx = currentOrigin[0] - start[0];
-            float temp = v10 * v10 + v9 * v9 + dx * dx;
-
-            float _FP3 = -sqrtf(temp > 0.0f ? temp : 0.0f);
-            float _FP11 = -_FP3;
-            v13 = 1.0f / _FP11;
+            float mag = sqrtf(v10 * v10 + v9 * v9 + dx * dx);
+            v13 = (mag > 0.0f) ? (1.0f / mag) : 0.0f;
 
             if ((float)((float)(*viewDir * (float)((float)v13 * (float)(*currentOrigin - *start)))
                 + (float)((float)(viewDir[2] * (float)((float)(currentOrigin[2] - start[2]) * (float)v13))

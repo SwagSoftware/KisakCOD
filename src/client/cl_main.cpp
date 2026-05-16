@@ -594,6 +594,7 @@ void __cdecl CL_MapLoading_StartCinematic(const char *mapname, float volume)
 
 void __cdecl CL_MapLoading(const char *mapname)
 {
+    // KISAKTODO: (SP): could use more touchups
     if (!clientUIActives[0].isRunning)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 677, 0, "%s", "clUI->isRunning");
     Con_Close(0);

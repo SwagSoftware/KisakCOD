@@ -662,7 +662,7 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
     if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_SPECTATOR)
         goto LABEL_21;
 #elif KISAK_SP
-    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_MPVIEWER)
+    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP)
         goto LABEL_21;
 #endif
 }
@@ -4214,7 +4214,9 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
         && ps->weaponstate != WEAPON_RELOADING_INTERUPT)
     {
         ps->pm_flags |= PMF_WALKING;
+#ifdef KISAK_MP
         iassert((ps->otherFlags & POF_PLAYER) != 0);
+#endif
     }
 }
 

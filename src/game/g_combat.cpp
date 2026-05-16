@@ -679,11 +679,9 @@ void __cdecl G_Damage(
             }
             if (mod != 11)
             {
-                LODWORD(v46) = damage;
                 if ((dflags & 1) != 0)
                 {
                     dmgDvar = player_radiusDamageMultiplier;
-                    v48 = v46;
                 }
                 else
                 {
@@ -691,11 +689,8 @@ void __cdecl G_Damage(
                         dmgDvar = player_meleeDamageMultiplier;
                     else
                         dmgDvar = player_damageMultiplier;
-                    v48 = v46;
                 }
-                //a22 = (int)(float)(dmgDvar->current.value * (float)v48);
-                //damage = a22;
-                damage = (int)(float)(dmgDvar->current.value * (float)v48);
+                damage = (int)(dmgDvar->current.value * (float)damage);
             }
             if (damage <= 0)
             {

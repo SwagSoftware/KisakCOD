@@ -291,31 +291,28 @@ void DebugThreatStringAll(const actor_s *self, sentient_s *enemy, int threat)
 
     iassert(enemy);
 
-    // Compute debug line color based on threat value
-    //float normalized = (float)threat * 0.00014285714f;  // ~1 / 7000
-    float normalized = (float)threat * (1.0f / 7000.0f);  // ~1 / 7000
+    float normalized = (float)threat * (1.0f / 7000.0f);
     float colorValue = fminf(fmaxf(normalized, 0.0f), 1.0f);
-    float color[4] = { (colorValue + 1.0f) * 0.5f, 0.0f, 0.0f, 1.0f };
+    float channel = (colorValue + 1.0f) * 0.5f;
+    float color[4] = { channel, channel, 0.0f, 1.0f };
 
     float start[3];
     float end[3];
-    Sentient_GetDebugEyePosition(self->sentient, start);
+    Sentient_GetDebugEyePosition(self->ent->sentient, start);
     Sentient_GetDebugEyePosition(enemy, end);
 
-    // Draw line between eye positions
     int duration = ai_threatUpdateInterval->current.integer / 50;
     G_DebugLineWithDuration(start, end, color, 0, duration);
 
-    // Print debug threat strings
-    float drawPos[3] = { end[0], end[1], end[2] + 32.0f };
-    for (int i = 0; i < 5; ++i)
+    end[2] += 32.0f;
+    for (int i = 0; i < ARRAYSIZE(g_threatDebugStrings); ++i)
     {
         const char *str = g_threatDebugStrings[i];
         if (str[0])
         {
-            G_AddDebugStringWithDuration(drawPos, color, 0.5f, str, 1); // KISAKTODO: check duration
+            G_AddDebugStringWithDuration(end, color, 0.5f, str, duration);
         }
-        drawPos[2] += 8.0f;
+        end[2] += 8.0f;
     }
 }
 
@@ -662,62 +659,60 @@ int __cdecl Actor_ThreatFlashed(sentient_s *enemy)
     return 200;
 }
 
-// aislop
 int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
 {
     iassert(self);
     iassert(enemy);
 
-    char *info = (char *)self + 40 * (enemy - level.sentients);
-    float *enemyData = (float *)(info + 2100);
+    sentient_info_t *sInfo = &self->sentientInfo[enemy - level.sentients];
 
-    // Pacifist check
     if (self->bPacifist)
     {
-        int lastThreat = ((unsigned int *)info)[528];
-        if (!lastThreat || level.time - lastThreat >= self->iPacifistWait)
+        int lastAttackMeTime = sInfo->iLastAttackMeTime;
+        if (!lastAttackMeTime || level.time - lastAttackMeTime >= self->iPacifistWait)
         {
             DebugThreatStringSimple(self, enemy->ent, "pacifist", colorRed);
             return INT_MIN;
         }
     }
 
-    // Threat bias
     int bias = Actor_GetThreatBias(enemy->iThreatBiasGroupIndex, self->sentient->iThreatBiasGroupIndex);
     if (bias == INT_MIN)
     {
         return INT_MIN;
     }
 
-    // Compute distance to enemy
-    float dx = enemyData[6] - self->ent->r.currentOrigin[0];
-    float dy = enemyData[7] - self->ent->r.currentOrigin[1];
-    float dz = enemyData[8] - self->ent->r.currentOrigin[2];
+    float dx = sInfo->vLastKnownPos[0] - self->ent->r.currentOrigin[0];
+    float dy = sInfo->vLastKnownPos[1] - self->ent->r.currentOrigin[1];
+    float dz = sInfo->vLastKnownPos[2] - self->ent->r.currentOrigin[2];
     float dist = sqrtf(dx * dx + dy * dy + dz * dz);
 
     sentient_s *currentTarget = Actor_GetTargetSentient(self);
-    bool aware = false;
-    int idxDiff = (((uintptr_t)currentTarget - (uintptr_t)enemy) >> 5) & 1;
+    int isCurrentEnemy = (currentTarget == enemy) ? 1 : 0;
+    int isVisible = sInfo->VisCache.bVisible;
 
-    if (enemyData[0] != 0 ||
-        Actor_IsFullyAware(self, enemy, idxDiff))
-    {
-        aware = true;
-    }
+    bool aware = (isVisible != 0) || Actor_IsFullyAware(self, enemy, isCurrentEnemy);
 
-    bool isDamaged =  enemy->ent->health < enemy->ent->maxHealth * 0.8f; // KISAKTODO: double check logic
+    bool isDamaged = enemy->ent->health < enemy->ent->maxHealth * 0.8f;
     bool isPlayer = (enemy->ent->client != NULL);
 
     int proximityFlag = 0;
-    if (!aware && idxDiff != 0 && level.time - ((unsigned int *)info)[4] < 10000)
+    if (!aware && isCurrentEnemy && level.time - sInfo->lastKnownPosTime < 10000)
     {
         proximityFlag = 1;
     }
 
-    // Scariness difference
-    float scarinessMe = Sentient_GetScarinessForDistance(self->sentient, enemy, dist);
-    float scarinessOther = Sentient_GetScarinessForDistance(enemy, self->sentient, dist);
-    float scarinessDiff = aware || idxDiff || proximityFlag ? (scarinessMe - scarinessOther) : 0.0f;
+    float scarinessDiff;
+    if (aware || proximityFlag)
+    {
+        float scarinessMe = Sentient_GetScarinessForDistance(self->sentient, enemy, dist);
+        float scarinessOther = Sentient_GetScarinessForDistance(enemy, self->sentient, dist);
+        scarinessDiff = scarinessMe - scarinessOther;
+    }
+    else
+    {
+        scarinessDiff = 0.0f;
+    }
 
     DebugResetThreatStrings(self);
     if (!g_skipDebugString)
@@ -744,11 +739,11 @@ int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
     }
 
     int threatValue = bias + enemy->iThreatBias;
-    threatValue += Actor_ThreatFromVisibilityAndAwareness((int)enemyData[0], aware, proximityFlag);
+    threatValue += Actor_ThreatFromVisibilityAndAwareness(isVisible, aware, proximityFlag);
     threatValue += Actor_ThreatFromScariness(scarinessDiff);
     threatValue += Actor_ThreatFromDistance(dist);
-    threatValue += Actor_ThreatFromAttackerCount(self, enemy, idxDiff);
-    threatValue += Actor_ThreatBonusForCurrentEnemy(idxDiff, aware, proximityFlag, isPlayer, isDamaged);
+    threatValue += Actor_ThreatFromAttackerCount(self, enemy, isCurrentEnemy);
+    threatValue += Actor_ThreatBonusForCurrentEnemy(isCurrentEnemy, aware, proximityFlag, isPlayer, isDamaged);
 
     if (dist > 256.0f)
     {
@@ -757,7 +752,7 @@ int Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy)
 
     threatValue += Actor_ThreatFlashed(enemy);
 
-    float scaledThreat = threatValue * 0.00014285714f; // scale by ~1/7000
+    float scaledThreat = threatValue * (1.0f / 7000.0f);
 
     if (!g_skipDebugString)
     {
@@ -936,7 +931,6 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
     __int64 v25; // r10
     sentient_s *v26; // r11
     double entityTargetThreat; // fp1
-    double v28; // r4
     const char *v29; // r5
     const char *v30; // r29
     gentity_s *v31; // r3
@@ -960,9 +954,9 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
             Sentient_SetEnemy(self->sentient, 0, 1);
         return;
     }
-    if (sentient->scriptTargetEnt.isDefined()  && self->sentient->entityTargetThreat == 1.0)
+    if (sentient->scriptTargetEnt.isDefined() && self->sentient->entityTargetThreat == 1.0)
     {
-        v3 = va((const char *)0x3FF00000, 0);
+        v3 = va("enemy (%0.3f)", 1.0);
         v4 = self->sentient->scriptTargetEnt.ent();
         DebugThreatStringSimple(self, v4, v3, colorGreen);
         v5 = self->sentient->scriptTargetEnt.ent();
@@ -1049,14 +1043,12 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
         }
         if (self->sentient->scriptTargetEnt.isDefined())
         {
-            LODWORD(v25) = v7;
             v26 = self->sentient;
             entityTargetThreat = v26->entityTargetThreat;
-            if (entityTargetThreat > (float)((float)v25 * (float)0.00014285714))
+            if (entityTargetThreat > (float)v7 * 0.00014285714f)
             {
                 ent = v26->scriptTargetEnt.ent();
-                v28 = self->sentient->entityTargetThreat;
-                v29 = va((const char *)HIDWORD(v28), LODWORD(v28));
+                v29 = va("enemy (%0.3f)", self->sentient->entityTargetThreat);
                 goto LABEL_59;
             }
             v30 = va("enemy (%0.3f)", entityTargetThreat);

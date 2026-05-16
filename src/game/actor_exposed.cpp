@@ -274,7 +274,7 @@ int __cdecl Actor_Exposed_ReacquireStepMove(actor_s *self, double fDist)
             vMovePos[1] = (float)(fScale * vStepDir[1]) + vStartPos[1];
             vMovePos[2] = vStartPos[2];
             float stepheight = self->Physics.prone ? 10.0f : 18.0f;
-            if (Path_PredictionTrace(vStartPos, vMovePos, 1023, self->Physics.iTraceMask | 4, vTraceEndPos, stepheight, 1)
+            if (Path_PredictionTrace(vStartPos, vMovePos, ENTITYNUM_NONE, self->Physics.iTraceMask | 4, vTraceEndPos, stepheight, 1)
                 && Actor_PointAtGoal(vTraceEndPos, &self->codeGoal))
             {
                 Actor_FindPath(self, vTraceEndPos, 0, 0);

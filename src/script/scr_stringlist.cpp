@@ -91,9 +91,9 @@ void SL_AddUserInternal(RefString* refStr, unsigned int user)
 {
 	if (((unsigned __int8)user & refStr->user) == 0)
 	{
-		int str = SL_ConvertFromRefString(refStr);
 		if (scrStringDebugGlob)
 		{
+			int str = SL_ConvertFromRefString(refStr);
 			iassert((scrStringDebugGlob->refCount[str] < 65536));
 			iassert((scrStringDebugGlob->refCount[str] >= 0));
 
@@ -255,13 +255,13 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 	{
 		refStr = GetRefString(entry->u.prev);
 
-		// Check if this string is already stored, if it matches the string at this particular hash lookup, and return existing entry if so
-		if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
+		// Check if this string is already stored, if it matches the string at this particular hash lookup, and return existing entry if so.
+		if (refStr->byteLen == (uint8_t)len && !memcmp(refStr->str, str, len))
 		{
 			SL_AddUserInternal(refStr, user);
 
 			iassert((entry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
-		
+
 			stringValue = entry->u.prev;
 
 			iassert(refStr->str == SL_ConvertToString(stringValue));
@@ -279,7 +279,7 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 
 			refStr = GetRefString(newEntry->u.prev);
 
-			if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
+			if (refStr->byteLen == (uint8_t)len && !memcmp(refStr->str, str, len))
 			{
 				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
 				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
@@ -454,19 +454,19 @@ static unsigned int FindStringOfSize(const char* str, unsigned int len)
 
 	RefString* refStr = GetRefString(entry->u.prev);
 
-	if (refStr->byteLen != len || memcmp(refStr->str, str, len))
+	if (refStr->byteLen != (uint8_t)len || memcmp(refStr->str, str, len))
 	{
 		unsigned int prev = hash;
 		unsigned int newIndex = (unsigned __int16)entry->status_next;
 
-		for (HashEntry* newEntry = &scrStringGlob.hashTable[newIndex]; 
-			newEntry != entry; 
+		for (HashEntry* newEntry = &scrStringGlob.hashTable[newIndex];
+			newEntry != entry;
 			newEntry = &scrStringGlob.hashTable[newIndex])
 		{
 			iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
 			refStr = GetRefString(newEntry->u.prev);
 
-			if (refStr->byteLen == len && !memcmp(refStr->str, str, len))
+			if (refStr->byteLen == (uint8_t)len && !memcmp(refStr->str, str, len))
 			{
 				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
 				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
@@ -566,7 +566,7 @@ unsigned int SL_GetString(const char* str, unsigned int user)
 
 int SL_GetRefStringLen(RefString* refString)
 {
-	int len = refString->byteLen - 1;
+	int len = (uint8_t)(refString->byteLen - 1);
 
 	while (refString->str[len])
 		len += 256;
@@ -659,7 +659,7 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 			{
 				entry->status_next = (unsigned __int16)newEntry->status_next | HASH_STAT_HEAD;
 				entry->u.prev = newEntry->u.prev;
-				scrStringGlob.nextFreeEntry = entry; 
+				scrStringGlob.nextFreeEntry = entry;
 			}
 		}
 		else

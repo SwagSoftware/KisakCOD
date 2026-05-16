@@ -734,12 +734,11 @@ void __cdecl PlayerCmd_getFractionStartAmmo(scr_entref_t entref)
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
     if (Com_BitCheckAssert(client->ps.weapons, WeaponIndexForName, 16)
-        && (WeaponDef = BG_GetWeaponDef(WeaponIndexForName), HIDWORD(v7) = WeaponDef->iStartAmmo, SHIDWORD(v7) >= 1))
+        && (WeaponDef = BG_GetWeaponDef(WeaponIndexForName))->iStartAmmo >= 1)
     {
-        v8 = v1->client;
-        LODWORD(v7) = v8->ps.ammo[WeaponDef->iAmmoIndex];
-        if ((int)v7 >= 1)
-            Scr_AddFloat((float)((float)v7 / (float)*(__int64 *)((char *)&v7 + 4)));
+        int currentAmmo = v1->client->ps.ammo[WeaponDef->iAmmoIndex];
+        if (currentAmmo >= 1)
+            Scr_AddFloat((float)currentAmmo / (float)WeaponDef->iStartAmmo);
         else
             Scr_AddFloat(0.0);
     }
@@ -795,31 +794,31 @@ void __cdecl PlayerCmd_getFractionMaxAmmo(scr_entref_t entref)
         WeaponDef = BG_GetWeaponDef(WeaponIndexForName);
         if (WeaponDef->bClipOnly)
         {
-            HIDWORD(v7) = WeaponDef->iClipSize;
-            if (SHIDWORD(v7) >= 1)
+            int clipSize = WeaponDef->iClipSize;
+            if (clipSize >= 1)
             {
-                v8 = v1->client;
-                LODWORD(v7) = v8->ps.ammoclip[WeaponDef->iClipIndex];
-                if ((int)v7 < 1)
+                int currentClip = v1->client->ps.ammoclip[WeaponDef->iClipIndex];
+                if (currentClip < 1)
                 {
-                LABEL_13:
                     Scr_AddFloat(0.0);
                     return;
                 }
-                goto LABEL_17;
+                Scr_AddFloat((float)currentClip / (float)clipSize);
+                return;
             }
         }
         else
         {
-            HIDWORD(v7) = WeaponDef->iMaxAmmo;
-            if (SHIDWORD(v7) >= 1)
+            int maxAmmo = WeaponDef->iMaxAmmo;
+            if (maxAmmo >= 1)
             {
-                v8 = v1->client;
-                LODWORD(v7) = v8->ps.ammo[WeaponDef->iAmmoIndex];
-                if ((int)v7 < 1)
-                    goto LABEL_13;
-            LABEL_17:
-                Scr_AddFloat((float)((float)v7 / (float)*(__int64 *)((char *)&v7 + 4)));
+                int currentAmmo = v1->client->ps.ammo[WeaponDef->iAmmoIndex];
+                if (currentAmmo < 1)
+                {
+                    Scr_AddFloat(0.0);
+                    return;
+                }
+                Scr_AddFloat((float)currentAmmo / (float)maxAmmo);
                 return;
             }
         }

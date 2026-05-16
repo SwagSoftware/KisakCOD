@@ -403,10 +403,8 @@ void __cdecl CG_CompassDrawActors(
                 else if (beginFadeTime < cgameGlob->time)
                 {
                     compassping_friendlyfiring = cgMedia.compassping_friendlyfiring;
-                    HIDWORD(v27) = cgameGlob->time;
-                    LODWORD(v27) = cgameGlob->time - beginFadeTime;
-                    v70 = v27;
-                    firingFade = (float)((float)1.0 - (float)((float)v27 / (float)v25));
+                    int elapsed = cgameGlob->time - beginFadeTime;
+                    firingFade = 1.0f - (float)elapsed / v25;
                     v75 = firingFade;
                 }
                 else
@@ -459,13 +457,7 @@ void __cdecl CG_CompassDrawActors(
             {
                 v37 = *p_beginFadeTime;
                 value = compassSoundPingFadeTime->current.value;
-                HIDWORD(v39) = (uint32)compassSoundPingFadeTime;
-                LODWORD(v39) = *p_beginFadeTime;
-                v70 = __PAIR64__((unsigned int)compassSoundPingFadeTime, cgameGlob->time);
-                v69 = v39;
-                if (((value * 1000.0f) + v39) >= (double)(float)__SPAIR64__(
-                    (unsigned int)compassSoundPingFadeTime,
-                    cgameGlob->time)
+                if (((float)v37 + value * 1000.0f) >= (float)cgameGlob->time
                     && v37
                     && (!CG_WorldPosToCompass(
                         compassType,
@@ -486,11 +478,8 @@ void __cdecl CG_CompassDrawActors(
                     xy[1] = xy[1] - ((sizeH * 0.5f) - centerY);
                     if (v44 < cgameGlob->time)
                     {
-                        LODWORD(v48) = cgameGlob->time - v44;
-                        HIDWORD(v48) = v48;
-                        v47 = (float)((float)1.0
-                            - (float)((float)v48 / (float)(compassSoundPingFadeTime->current.value * (float)1000.0)));
-                        v68 = v48;
+                        int elapsed = cgameGlob->time - v44;
+                        v47 = 1.0f - (float)elapsed / (compassSoundPingFadeTime->current.value * 1000.0f);
                     }
                     else
                     {

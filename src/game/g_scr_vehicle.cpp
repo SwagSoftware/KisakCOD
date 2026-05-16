@@ -3554,7 +3554,7 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     gentity_s *Vehicle; // r30
     float *p_nodeIdx; // r31
     double v3; // fp12
-    double _FP8; // fp8
+    //double _FP8; // fp8
     double _FP11; // fp11
     double v6; // fp11
     double v7; // fp0
@@ -3564,6 +3564,7 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     float v11; // [sp+50h] [-30h] BYREF
     float vec; // [sp+54h] [-2Ch]
     float v13; // [sp+58h] [-28h]
+    float _FP8;
 
     if (entref.classnum)
     {
@@ -3584,16 +3585,13 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     v11 = p_nodeIdx[167] - Vehicle->r.currentOrigin[0];
     vec = p_nodeIdx[168] - Vehicle->r.currentOrigin[1];
     v3 = (float)(p_nodeIdx[169] - Vehicle->r.currentOrigin[2]);
-    _FP8 = -sqrtf((float)((float)(v11 * v11) + (float)((float)((float)v3 * (float)v3) + (float)(vec * vec))));
-    //__asm { fsel      f11, f8, f10, f11 }
-    if (_FP8 >= 0.0f)
-    {
-        _FP11 = 1.0f;
-    }
-    else
-    {
+    // PPC: _FP8 = -sqrtf(...); fsel f11, f8, f10, f11
+    // fsel(-mag, safe, mag): (mag == 0) ? safe : mag.
+    _FP8 = sqrtf((float)((float)(v11 * v11) + (float)((float)((float)v3 * (float)v3) + (float)(vec * vec))));
+    if (_FP8 > 0.0f)
         _FP11 = _FP8;
-    }
+    else
+        _FP11 = 1.0f;
     v6 = (float)((float)1.0 / (float)_FP11);
     v7 = (float)((float)v6 * v11);
     v11 = (float)v6 * v11;
@@ -3846,22 +3844,20 @@ void CMD_VEH_JoltBody(scr_entref_t entref)
             Scr_ParamError(3u, "Deceleration can't be negative");
     }
     v7 = (float)(Vehicle->r.currentOrigin[2] - vec[2]);
-    float _FP10 = -sqrtf((float)((float)((float)(Vehicle->r.currentOrigin[0] - vec[0])
+    // PPC: _FP10 = -sqrtf(...); fsel f11, f10, f29, f11
+    // fsel(-mag, safe, mag): (mag == 0) ? safe : mag.
+    // BUG was: prior port stored -mag in _FP11, sign-flipping VEH_JoltBody direction.
+    float _FP10 = sqrtf((float)((float)((float)(Vehicle->r.currentOrigin[0] - vec[0])
         * (float)(Vehicle->r.currentOrigin[0] - vec[0]))
         + (float)((float)((float)(Vehicle->r.currentOrigin[2] - vec[2])
             * (float)(Vehicle->r.currentOrigin[2] - vec[2]))
             + (float)((float)(Vehicle->r.currentOrigin[1] - vec[1])
                 * (float)(Vehicle->r.currentOrigin[1] - vec[1])))));
     float _FP11;
-    //__asm { fsel      f11, f10, f29, f11 }
-    if (_FP10 >= 0.0f)
-    {
-        _FP11 = 1.0f;
-    }
-    else
-    {
+    if (_FP10 > 0.0f)
         _FP11 = _FP10;
-    }
+    else
+        _FP11 = 1.0f;
     v10 = (float)((float)1.0 / (float)_FP11);
     v11 = (float)((float)v10 * (float)(Vehicle->r.currentOrigin[0] - vec[0]));
     v15[1] = (float)(Vehicle->r.currentOrigin[1] - vec[1]) * (float)v10;
@@ -4046,29 +4042,23 @@ void CMD_VEH_SetEngineVolume(scr_entref_t entref)
     scr_vehicle = Vehicle->scr_vehicle;
     volume = Scr_GetFloat(0);
 
+    // PPC two-fsel clamp:
+    //   _FP12 = -volume; _FP13 = volume - 1.0
+    //   fsel f13, f13, f0, f1   ; f13 = (volume-1 >= 0) ? 1.0 : volume     = min(volume, 1)
+    //   fsel f31, f12, f0, f13  ; f31 = (-volume >= 0) ? 0.0 : f13         = (volume<=0) ? 0 : min(volume,1)
+    // = clamp(volume, 0, 1)
     _FP12 = -volume;
     _FP13 = (float)((float)volume - (float)1.0);
 
     if (_FP13 >= 0.0f)
-    {
         _FP13 = 1.0f;
-    }
     else
-    {
         _FP13 = volume;
-    }
-    //__asm { fsel      f13, f13, f0, f1 }
 
     if (_FP12 >= 0.0f)
-    {
-        _FP31 = 1.0f;
-    }
+        _FP31 = 0.0f;
     else
-    {
         _FP31 = _FP13;
-    }
-
-    //__asm { fsel      f31, f12, f0, f13 }
 
     if (scr_vehicle->idleSndEnt.isDefined())
     {

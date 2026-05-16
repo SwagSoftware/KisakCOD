@@ -1033,17 +1033,17 @@ void __cdecl CL_VoicePacket(int32_t localClientNum, msg_t *msg);
 bool __cdecl CL_IsPlayerTalking(int32_t localClientNum, int32_t talkingClientIndex);
 
 
+//
 // cl_input
-struct kbutton_t // sizeof=0x14
-{                                       // ...
-    int32_t down[2];                        // ...
-    uint32_t downtime;
-    uint32_t msec;
-    bool active;                        // ...
-    bool wasPressed;
-    // padding byte
-    // padding byte
-};
+//
+typedef struct {
+    int			down[2];		// key nums holding it down
+    unsigned	downtime;		// msec timestamp
+    unsigned	msec;			// msec down this frame if both a down and up happened
+    qboolean	active;			// current state
+    qboolean	wasPressed;		// set when down, not cleared when up
+} kbutton_t;
+
 void __cdecl TRACK_cl_input();
 void __cdecl CL_ShowSystemCursor(BOOL show);
 int32_t __cdecl CL_MouseEvent(int32_t x, int32_t y, int32_t dx, int32_t dy);

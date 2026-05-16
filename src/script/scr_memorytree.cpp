@@ -205,7 +205,6 @@ void MT_FreeIndex(unsigned int nodeNum, int numBytes)
     scrMemTreeGlob.totalAllocBuckets -= 1 << size;
 
     iassert(scrMemTreeDebugGlob.mt_usage[nodeNum]);
-
     iassert((scrMemTreeDebugGlob.mt_usage_size[nodeNum] == size));
 
     scrMemTreeDebugGlob.mt_usage[nodeNum] = 0;

@@ -764,7 +764,6 @@ int __cdecl Actor_Physics(actor_physics_t *pPhys)
 {
     int groundEntNum; // r9
     actor_physics_t *v3; // r29
-    __int64 v5; // r11
     double v6; // fp0
     aiphys_t ePhysicsType; // r11
     int v8; // r3
@@ -796,8 +795,7 @@ int __cdecl Actor_Physics(actor_physics_t *pPhys)
         g_apl.vPrevVelocity[0] = pPhys->vVelocity[0];
         g_apl.vPrevVelocity[1] = pPhys->vVelocity[1];
         g_apl.vPrevVelocity[2] = pPhys->vVelocity[2];
-        LODWORD(v5) = pPhys->iMsec;
-        g_apl.fFrameTime = (float)v5 * (float)0.001;
+        g_apl.fFrameTime = (float)pPhys->iMsec * 0.001f;
         if (pPhys->iMsec <= 0)
         {
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_physics.cpp", 876, 0, "%s", "g_pPhys->iMsec > 0");
