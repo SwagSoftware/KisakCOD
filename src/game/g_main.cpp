@@ -1070,7 +1070,8 @@ void __cdecl G_InitGame(
     int v28; // r4
     const char *v29; // r5
     int v30; // r4
-    int v31[2]; // [sp+50h] [-70h] BYREF
+    //int v31[2]; // [sp+50h] [-70h] BYREF
+    int useLoadedSourceFiles;
     int v32[26]; // [sp+58h] [-68h] BYREF
 
     //a12 = randomSeed;
@@ -1091,11 +1092,11 @@ void __cdecl G_InitGame(
     ProfLoad_End();
     Dvar_SetInt(g_reloading, 0);
     Path_Init(restart);
-    v31[0] = loadScripts == 0;
+    useLoadedSourceFiles = loadScripts == 0;
     SaveMemory_CleanupSaveMemory();
     if (savegame)
     {
-        G_PreLoadGame(checksum, v31, save);
+        G_PreLoadGame(checksum, &useLoadedSourceFiles, save);
     }
     else
     {
@@ -1142,7 +1143,7 @@ void __cdecl G_InitGame(
         }
         G_LoadItems(*save);
     }
-    if (v31[0])
+    if (useLoadedSourceFiles)
     {
         actorBackup = g_scr_data.actorBackup;
     }
@@ -1169,7 +1170,7 @@ void __cdecl G_InitGame(
             "%s",
             "level.actorCorpseCount >= 1 && level.actorCorpseCount <= MAX_ACTOR_CORPSES");
     ProfLoad_Begin("Load scripts and anims");
-    if (!v31[0])
+    if (!useLoadedSourceFiles)
         GScr_LoadScriptsAndAnims();
     if (*save)
     {
@@ -1744,27 +1745,16 @@ void __cdecl G_RunFrameForEntityInternal(gentity_s *ent)
 
 void __cdecl G_RunFrameForEntity(gentity_s *ent)
 {
-    tagInfo_s *tagInfo; // r10
-    const char *v3; // r3
-    const char *v4; // r3
-    const char *v5; // r3
-    const char *v6; // r3
-    const char *v7; // r3
-    const char *v8; // r3
-    scr_vehicle_s *scr_vehicle; // r10
     int v10; // r4
     const char *v11; // r7
     int duration; // r11
-    __int64 v13; // r10
-    _QWORD v14[10]; // [sp+50h] [-50h] BYREF
 
-    if (!ent->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 2374, 0, "%s", "ent->r.inuse");
+    iassert(ent->r.inuse);
+
     if (ent->processedFrame != level.framenum)
     {
-        tagInfo = ent->tagInfo;
         ent->processedFrame = level.framenum;
-        if (tagInfo)
+        if (ent->tagInfo)
         {
             iassert(ent->tagInfo->parent);
             G_RunFrameForEntity(ent->tagInfo->parent);
@@ -1774,72 +1764,61 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
         iassert(ent->r.maxs[1] >= ent->r.mins[1]);
         iassert(ent->r.maxs[2] >= ent->r.mins[2]);
         
-        scr_vehicle = ent->scr_vehicle;
-        if (scr_vehicle)
+        if (ent->scr_vehicle)
         {
-            if ((unsigned int)(scr_vehicle - level.vehicles) >= 0x40)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp",
-                    2403,
-                    0,
-                    "%s",
-                    "(unsigned)( ent->scr_vehicle - level.vehicles ) < MAX_VEHICLES");
-            if (ent->scr_vehicle->entNum != ENTITYNUM_NONE)
-                goto LABEL_24;
-            v10 = 2404;
-            v11 = "ent->scr_vehicle->entNum != ENTITYNUM_NONE";
+            iassert((unsigned)(ent->scr_vehicle - level.vehicles) < MAX_VEHICLES);
+            iassert(ent->scr_vehicle->entNum != ENTITYNUM_NONE);
         }
         else
         {
-            if (ent->s.eType != 11)
-            {
-            LABEL_24:
-                if (ent->snd_wait.notifyString)
-                {
-                    duration = ent->snd_wait.duration;
-                    if (duration < 0)
-                        duration = 5000;
-                    if (level.time - ent->snd_wait.basetime - duration >= 0)
-                    {
-                        Scr_Notify(ent, ent->snd_wait.notifyString, 0);
-                        Scr_SetString(&ent->snd_wait.notifyString, 0);
-                    }
-                }
-                G_RunFrameForEntityInternal(ent);
-                if (ent->s.eType == 14 || (ent->s.lerp.eFlags & 0x800) != 0)
-                    AimTarget_ProcessEntity(ent);
-                if (snd_enableEq->current.enabled)
-                {
-                    switch (ent->s.eType)
-                    {
-                    case 3u:
-                    case 6u:
-                    case 0xAu:
-                    case 0xEu:
-                        G_ApplyEntityEq(ent);
-                        break;
-                    default:
-                        break;
-                    }
-                }
-                if (g_debugLocDamage->current.enabled)
-                {
-                    if (SV_DObjExists(ent))
-                    {
-                        LODWORD(v13) = -1;
-                        v14[0] = v13;
-                        v14[1] = v13;
-                        G_DObjCalcPose(ent, (int *)v14);
-                        SV_XModelDebugBoxes(ent);
-                    }
-                }
-                return;
-            }
-            v10 = 2408;
-            v11 = "ent->s.eType != ET_VEHICLE";
+            iassert(ent->s.eType != ET_VEHICLE);
         }
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", v10, 0, "%s", v11);
-        goto LABEL_24;
+
+        if (ent->s.eType != ET_VEHICLE)
+        {
+            if (ent->snd_wait.notifyString)
+            {
+                duration = ent->snd_wait.duration;
+                if (duration < 0)
+                    duration = 5000;
+                if (level.time - ent->snd_wait.basetime - duration >= 0)
+                {
+                    Scr_Notify(ent, ent->snd_wait.notifyString, 0);
+                    Scr_SetString(&ent->snd_wait.notifyString, 0);
+                }
+            }
+            G_RunFrameForEntityInternal(ent);
+            if (ent->s.eType == ET_ACTOR || (ent->s.lerp.eFlags & 0x800) != 0)
+                AimTarget_ProcessEntity(ent);
+            if (snd_enableEq->current.enabled)
+            {
+                switch (ent->s.eType)
+                {
+                case ET_MISSILE:
+                case ET_SOUND_BLEND:
+                case ET_MG42:
+                case ET_ACTOR:
+                    G_ApplyEntityEq(ent);
+                    break;
+                default:
+                    break;
+                }
+            }
+            if (g_debugLocDamage->current.enabled)
+            {
+                if (SV_DObjExists(ent))
+                {
+                    int partBits[4];
+                    partBits[0] = 0xFFFFFFFF;
+                    partBits[1] = 0xFFFFFFFF;
+                    partBits[2] = 0xFFFFFFFF;
+                    partBits[3] = 0xFFFFFFFF;
+                    G_DObjCalcPose(ent, partBits);
+                    SV_XModelDebugBoxes(ent);
+                }
+            }
+            return;
+        }
     }
 }
 
@@ -2217,7 +2196,7 @@ void __cdecl G_AddDebugStringWithDuration(
     const char *pszText,
     int duration)
 {
-    CL_AddDebugString(xyz, color, scale, pszText, duration, 1);
+    CL_AddDebugString(xyz, color, scale, pszText, 1, duration);
 }
 
 static int lastEntTime;
@@ -2618,15 +2597,11 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
     G_DrawGrenadeHints();
     if (g_listEntity->current.enabled)
     {
-        v39 = 0;
-        p_classname = &g_entities[0].classname;
-        do
+        for (v39 = 0; v39 < MAX_GENTITIES; ++v39)
         {
-            v41 = SL_ConvertToString(*p_classname);
+            v41 = SL_ConvertToString(g_entities[v39].classname);
             Com_Printf(15, "%4i: %s\n", v39, v41);
-            p_classname += 314;
-            ++v39;
-        } while ((int)p_classname < (int)&ai_showFriendlyChains);
+        }
         Dvar_SetBool(g_listEntity, 0);
     }
     ShowEntityInfo();

@@ -803,7 +803,8 @@ void __cdecl Path_InitNodeDynamic(pathnode_t *loadNode)
         p_transient = (pathnode_transient_t *)((char *)p_transient + 4);
         --v5;
     } while (v5);
-    YawVectors(loadNode->constant.fAngle, (float *)loadNode, v7);
+
+    YawVectors(loadNode->constant.fAngle, v7, NULL);
     v6 = v7[1];
     loadNode->constant.forward[0] = v7[0];
     loadNode->constant.forward[1] = v6;
@@ -844,7 +845,8 @@ void __cdecl Path_InitNodesDynamic()
                 p_transient = (pathnode_transient_t *)((char *)p_transient + 4);
                 --v7;
             } while (v7);
-            YawVectors(v3->constant.fAngle, NULL, v8);
+
+            YawVectors(v3->constant.fAngle, v8, NULL);
             v3->constant.forward[0] = v8[0];
             ++v1;
             ++v2;
@@ -865,30 +867,26 @@ void __cdecl Path_DrawDebugNoLinks(const pathnode_t *node, const float (*color)[
     double v5; // fp31
     double v6; // fp30
     double v7; // fp29
-    float v8; // [sp+50h] [-60h] BYREF
-    float v9; // [sp+54h] [-5Ch]
-    float v10; // [sp+58h] [-58h]
-    float v11; // [sp+60h] [-50h] BYREF
-    float v12; // [sp+64h] [-4Ch]
-    float v13; // [sp+68h] [-48h]
+    float startPt[3]; // was v8 (BYREF) + v9 + v10
+    float endPt[3];   // was v11 (BYREF) + v12 + v13
 
     v5 = node->constant.vOrigin[0];
     v6 = node->constant.vOrigin[1];
     v7 = (float)((float)(node->constant.vOrigin[2] + (float)0.0) + (float)1.0);
-    v10 = (float)(node->constant.vOrigin[2] + (float)0.0) + (float)1.0;
-    v8 = (float)v5 + (float)6.9282031;
-    v13 = v7;
-    v9 = (float)v6 + (float)4.0;
-    v11 = (float)v5 - (float)6.9282031;
-    v12 = (float)v6 - (float)4.0;
-    G_DebugLineWithDuration(&v8, &v11, (const float *)color, 0, duration);
-    v8 = (float)v5 - (float)4.0;
-    v9 = (float)v6 + (float)6.9282031;
-    v11 = (float)v5 + (float)4.0;
-    v10 = v7;
-    v12 = (float)v6 - (float)6.9282031;
-    v13 = v7;
-    G_DebugLineWithDuration(&v8, &v11, (const float *)color, 0, duration);
+    startPt[2] = (float)(node->constant.vOrigin[2] + (float)0.0) + (float)1.0;
+    startPt[0] = (float)v5 + (float)6.9282031;
+    endPt[2] = v7;
+    startPt[1] = (float)v6 + (float)4.0;
+    endPt[0] = (float)v5 - (float)6.9282031;
+    endPt[1] = (float)v6 - (float)4.0;
+    G_DebugLineWithDuration(startPt, endPt, (const float *)color, 0, duration);
+    startPt[0] = (float)v5 - (float)4.0;
+    startPt[1] = (float)v6 + (float)6.9282031;
+    endPt[0] = (float)v5 + (float)4.0;
+    startPt[2] = v7;
+    endPt[1] = (float)v6 - (float)6.9282031;
+    endPt[2] = v7;
+    G_DebugLineWithDuration(startPt, endPt, (const float *)color, 0, duration);
 }
 
 
@@ -1110,7 +1108,8 @@ float __cdecl Path_GetDebugStringScale(const float *cameraPos, const float *orig
     {
         v7 = 1.0;
     }
-    return *((float *)&v7 + 1);
+
+    return (float)v7;
 }
 
 void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node)
@@ -1126,9 +1125,7 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node)
     nodeType type; // r11
     float maxs[3]; // [sp+50h] [-70h] BYREF
     float mins[3]; // [sp+60h] [-60h] BYREF
-    float v20; // [sp+70h] [-50h] BYREF
-    float v21; // [sp+74h] [-4Ch]
-    float v22; // [sp+78h] [-48h]
+    float centerPt[3]; // was v20 (BYREF) + v21 + v22
     float v23[6]; // [sp+80h] [-40h] BYREF
 
     mins[0] = -16.0f;
@@ -1149,19 +1146,19 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node)
         v7 = (float)((float)(node->constant.vOrigin[2] + maxs[2]) + (float)(node->constant.vOrigin[2] + mins[2]));
         v8 = (float)((float)((float)(node->constant.vOrigin[1] + maxs[1]) + (float)(node->constant.vOrigin[1] + mins[1]))
             * (float)0.5);
-        v20 = (float)((float)(node->constant.vOrigin[0] + maxs[0]) + (float)(node->constant.vOrigin[0] + mins[0])) * (float)0.5;
-        v21 = v8;
-        v22 = (float)v7 * (float)0.5;
+        centerPt[0] = (float)((float)(node->constant.vOrigin[0] + maxs[0]) + (float)(node->constant.vOrigin[0] + mins[0])) * (float)0.5;
+        centerPt[1] = v8;
+        centerPt[2] = (float)v7 * (float)0.5;
         v9 = sin(v5);
         v10 = *(double *)&v9;
         *(double *)&v9 = v6;
         v11 = (float)v10;
         v12 = cos(v9);
         type = node->constant.type;
-        v23[2] = v22;
-        v23[1] = (float)((float)v11 * maxs[0]) + v21;
-        v23[0] = (float)((float)*(double *)&v12 * maxs[0]) + v20;
-        G_DebugLine(&v20, v23, nodeColorTable[type], 1);
+        v23[2] = centerPt[2];
+        v23[1] = (float)((float)v11 * maxs[0]) + centerPt[1];
+        v23[0] = (float)((float)*(double *)&v12 * maxs[0]) + centerPt[0];
+        G_DebugLine(centerPt, v23, nodeColorTable[type], 1);
     }
 }
 
@@ -1203,11 +1200,8 @@ void __cdecl Path_DrawDebugFindPath(float *vOrigin)
     char *v10; // r3
     const char *v11; // r5
     int v12; // r11
-    float v13; // [sp+50h] [-A0h] BYREF
-    float v14; // [sp+54h] [-9Ch]
-    float v15; // [sp+58h] [-98h] BYREF
-    float v16; // [sp+5Ch] [-94h]
-    float v17; // [sp+60h] [-90h]
+    float dir[2]; // was v13/v14 at [sp+50h]/[sp+54h] BYREF — passed as float* to Vec2Normalize
+    float startPt[3]; // was v15/v16/v17 at [sp+58h]/[sp+5Ch]/[sp+60h] BYREF — passed as float* to G_DebugLine
     float v18[4]; // [sp+68h] [-88h] BYREF
     float v19[6]; // [sp+78h] [-78h] BYREF
 
@@ -1279,22 +1273,22 @@ LABEL_11:
         {
             width = 5000.0;
         }
-        v13 = vStartPos[0] - vGoalPos[0];
-        v14 = vStartPos[1] - vGoalPos[1];
-        Vec2Normalize(&v13);
-        perp[0] = -v14;
-        perp[1] = v13;
+        dir[0] = vStartPos[0] - vGoalPos[0];
+        dir[1] = vStartPos[1] - vGoalPos[1];
+        Vec2Normalize(dir);
+        perp[0] = -dir[1];
+        perp[1] = dir[0];
     }
-    v17 = vGoalPos[2];
-    v15 = vStartPos[0];
-    v16 = vStartPos[1];
-    G_DebugLine(&v15, vGoalPos, colorCyan, 0);
-    v18[2] = v17;
-    v19[2] = v17;
-    v18[0] = (float)(v15 - (float)(perp[1] * (float)5000.0)) + (float)(perp[0] * width);
-    v18[1] = (float)((float)(perp[0] * (float)5000.0) + v16) + (float)(perp[1] * width);
-    v19[0] = (float)((float)(perp[1] * (float)5000.0) + v15) + (float)(perp[0] * width);
-    v19[1] = (float)(v16 - (float)(perp[0] * (float)5000.0)) + (float)(perp[1] * width);
+    startPt[2] = vGoalPos[2];
+    startPt[0] = vStartPos[0];
+    startPt[1] = vStartPos[1];
+    G_DebugLine(startPt, vGoalPos, colorCyan, 0);
+    v18[2] = startPt[2];
+    v19[2] = startPt[2];
+    v18[0] = (float)(startPt[0] - (float)(perp[1] * (float)5000.0)) + (float)(perp[0] * width);
+    v18[1] = (float)((float)(perp[0] * (float)5000.0) + startPt[1]) + (float)(perp[1] * width);
+    v19[0] = (float)((float)(perp[1] * (float)5000.0) + startPt[0]) + (float)(perp[0] * width);
+    v19[1] = (float)(startPt[1] - (float)(perp[0] * (float)5000.0)) + (float)(perp[1] * width);
     G_DebugLine(v18, v19, colorCyan, 0);
     if (Path_FindPathWithWidth((path_t *)g_pPath, TEAM_FREE, vStartPos, vGoalPos, 1, width, perp)
         && Path_Exists((const path_t *)g_pPath))
@@ -2708,7 +2702,9 @@ void Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamFlags, int delta)
     // Compute unit vectors for Yaw
     float arcMidAngle = arc->angle0 + (angleDelta * 0.5f);
     float direction[3], rightVec[3], upVec[3];
-    YawVectors(arc->angle0, arc->origin, 0);
+
+    float startDir[3];
+    YawVectors(arc->angle0, startDir, 0);
     YawVectors(arc->angle1, direction, 0);
     YawVectors(arcMidAngle, rightVec, upVec);
 
@@ -4273,19 +4269,16 @@ failed_node:
         }
     }
 
-    // Extra code from blops. I think technically it is supposed to return 0 here
-    //if (!zombiemode->current.enabled)
-    //    return 0;
-
-    pathnode_t *closestNode = 0;
-    for (int i = 0; i < numNodes; ++i)
-    {
-        node = nodes[i].node;
-        float distSq = Vec3DistanceSq(node->constant.vOrigin, vOrigin);
-        if (distSq < 3.4028235e38)
-            closestNode = node;
-    }
-    return closestNode;
+    // KISAKFIX: kisak port added a "closest node fallback" loop that's not in the
+    // CoD3SP IDA at 0x8227cb20 LABEL_23 (which simply returns 0). Worse, the kisak
+    // loop's `distSq < FLT_MAX` comparison is always true → just stores the LAST
+    // failedNode visited, not the closest. Callers that fall through to here got
+    // a JUNK seed for A* (often a far/unreachable node) → pathfinding chose
+    // nonsensically far nodes or pathed through occupied/banned regions. Match
+    // IDA: when no failedNode passes the sight trace, return 0. The kisak source
+    // comment "I think technically it is supposed to return 0 here" had the right
+    // intuition — restoring it.
+    return 0;
 }
 
 pathnode_t *__cdecl Path_NearestNode(
@@ -4323,15 +4316,16 @@ void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
     int v30[4]; // [sp+60h] [-C40h] BYREF
     pathsort_t v31[260]; // [sp+70h] [-C30h] BYREF
 
+
     v5 = Path_NearestNodeNotCrossPlanes(
         vOrigin,
         v31,
         -1,
         ai_showNodesDist->current.value,
-        (float (*)[2])0x100,
-        0,
-        0,
-        0,
+        NULL,         // vNormal
+        NULL,         // fDist
+        0,            // iPlaneCount
+        v30,          // returnCount (was bogus NULL)
         256,
         NEAREST_NODE_DONT_DO_HEIGHT_CHECK);
     v6 = ai_showNearestNode;

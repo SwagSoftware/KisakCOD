@@ -970,7 +970,6 @@ void __cdecl XAnimCalcNonLoopEnd(
             {
                 scale = -weightScale;
             }
-
             Vec4Mad(start, scale, frameVec.v, start);
         }
         ++animPartIndex;

@@ -2815,7 +2815,7 @@ void __cdecl  RB_RenderThread(unsigned int threadContext)
     while (1)
     {
         Value = Sys_GetValue(2);
-        if (!_setjmp(*(jmp_buf *)Value))
+        if (!setjmp(*(jmp_buf *)Value))
             break;
         Profile_Recover(1);
         if (r_glob.isRenderingRemoteUpdate)

@@ -118,56 +118,48 @@ void __cdecl InitializeAmmo(gentity_s *pSelf, int weaponIndex, unsigned __int8 w
 
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {
-    gentity_s *v1; // r29
-    const char *v2; // r3
-    const char *String; // r31
-    int WeaponIndexForName; // r30
-    gclient_s *client; // r31
-    int v6; // r28
+    gentity_s *pSelf; // r29
+    const char *weaponName; // r31
+    int weaponIndex; // r30
+    playerState_s *ps;
+    int hadWeapon; // r28
     WeaponDef *WeaponDef; // r31
-    unsigned int Int; // r3
-    unsigned __int8 v9; // r31
-    unsigned __int16 v10; // [sp+94h] [+14h]
+    unsigned int weaponModel; // r3
 
-    v10 = entref.entnum;
     if (entref.classnum)
     {
         Scr_ObjectError("not an entity");
-        v1 = 0;
+        pSelf = NULL;
     }
     else
     {
-        if (entref.entnum >= 0x880u)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
-                128,
-                0,
-                "%s",
-                "entref.entnum < MAX_GENTITIES");
-        v1 = &g_entities[v10];
-        if (!v1->client)
+        iassert(entref.entnum < MAX_GENTITIES);
+        pSelf = &g_entities[entref.entnum];
+        if (!pSelf->client)
         {
-            v2 = va("entity %i is not a player", v10);
-            Scr_ObjectError(v2);
+            Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
-    String = Scr_GetString(0);
-    WeaponIndexForName = G_GetWeaponIndexForName(String);
-    Scr_VerifyWeaponIndex(WeaponIndexForName, String);
-    client = v1->client;
-    if (!client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
-    v6 = Com_BitCheckAssert(client->ps.weapons, WeaponIndexForName, 16);
+
+    weaponName = Scr_GetString(0);
+    weaponIndex = G_GetWeaponIndexForName(weaponName);
+    Com_Printf(15, "PlayerCmd_giveWeapon: '%s' index=%d ent=%d\n", weaponName, weaponIndex, entref.entnum);
+    Scr_VerifyWeaponIndex(weaponIndex, weaponName);
+    ps = &pSelf->client->ps;
+    iassert(ps);
+    hadWeapon = Com_BitCheckAssert(ps->weapons, weaponIndex, 16);
+
     if (Scr_GetNumParam() != 2
-        || (WeaponDef = BG_GetWeaponDef(WeaponIndexForName), Int = Scr_GetInt(1), Int > 0xFF)
-        || !WeaponDef->gunXModel[Int])
+        || (WeaponDef = BG_GetWeaponDef(weaponIndex), weaponModel = Scr_GetInt(1), weaponModel > 0xFF)
+        || !WeaponDef->gunXModel[weaponModel])
     {
         //LOBYTE(Int) = 0;
-        Int = 0;
+        weaponModel = 0;
     }
-    v9 = Int;
-    G_GivePlayerWeapon(&v1->client->ps, WeaponIndexForName, v9);
-    InitializeAmmo(v1, WeaponIndexForName, v9, v6);
+
+    G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, weaponModel);
+    InitializeAmmo(pSelf, weaponIndex, weaponModel, hadWeapon);
+    Com_Printf(15, "PlayerCmd_giveWeapon: gave '%s' to player\n", weaponName);
 }
 
 void __cdecl PlayerCmd_takeWeapon(scr_entref_t entref)
@@ -534,11 +526,13 @@ void __cdecl PlayerCmd_switchToWeapon(scr_entref_t entref)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
     if (Com_BitCheckAssert(client->ps.weapons, WeaponIndexForName, 16))
     {
+        Com_Printf(15, "PlayerCmd_switchToWeapon: switching to '%s' index=%d (player has it)\n", String, WeaponIndexForName);
         G_SelectWeaponIndex(v1, WeaponIndexForName);
         Scr_AddBool(1);
     }
     else
     {
+        Com_Printf(15, "PlayerCmd_switchToWeapon: player does NOT have '%s' index=%d (weapons bitmask check failed)\n", String, WeaponIndexForName);
         Scr_AddBool(0);
     }
 }
@@ -1451,6 +1445,7 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t entref)
     if (!String || !*String)
         Scr_ParamError(0, "usage: setviewmodel(<model name>)");
     v5 = G_ModelIndex(v4);
+    Com_Printf(15, "PlayerCmd_SetViewmodel: model='%s' modelIndex=%d ent=%d\n", v4, v5, v6);
     if (v5 != (unsigned __int16)v5)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp",
@@ -1459,6 +1454,7 @@ void __cdecl PlayerCmd_SetViewmodel(scr_entref_t entref)
             "%s",
             "modelIndex == (modelNameIndex_t) modelIndex");
     v1->client->ps.viewmodelIndex = v5;
+    Com_Printf(15, "PlayerCmd_SetViewmodel: set ps.viewmodelIndex=%d (player %d)\n", v5, v6);
 }
 
 void __cdecl PlayerCmd_AllowADS(scr_entref_t entref)
@@ -2424,10 +2420,14 @@ void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t entref)
         }
         Float = Scr_GetFloat(1);
     }
+
+    int priority = 1;
     ConstString = Scr_GetConstString(0);
-    if (ConstString != scr_const.snd_enveffectsprio_level && ConstString != scr_const.snd_enveffectsprio_shellshock)
+    if (ConstString == scr_const.snd_enveffectsprio_shellshock)
+        priority = 2;
+    else if (ConstString != scr_const.snd_enveffectsprio_level)
         Scr_Error("priority must be 'snd_enveffectsprio_level' or 'snd_enveffectsprio_shellshock'\n");
-    v7 = va("deactivatereverb %i %g", HIDWORD(Float), LODWORD(Float));
+    v7 = va("deactivatereverb %i %g", priority, Float);
     SV_GameSendServerCommand(v1, v7);
 }
 
@@ -2473,7 +2473,8 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
         Float = Scr_GetFloat(2);
     }
     String = Scr_GetString(1);
-    G_FindConfigstringIndex(String, 2535, 16, 0, 0);
+
+    int csIndex = G_FindConfigstringIndex(String, 2535, 16, 0, 0);
     ConstString = Scr_GetConstString(0);
     v7 = 2;
     if (ConstString != scr_const.snd_channelvolprio_holdbreath)
@@ -2492,7 +2493,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
                 "priority must be 'snd_channelvolprio_holdbreath', 'snd_channelvolprio_pain', or 'snd_channelvolprio_shellshock'\n");
         }
     }
-    v8 = va("setchannelvol %i %i %g", v7, Float);
+    v8 = va("setchannelvol %i %i %g", v7, csIndex, Float);
     SV_GameSendServerCommand(v1, v8);
 }
 
@@ -2537,15 +2538,16 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t entref)
         }
         Float = Scr_GetFloat(1);
     }
+
+    int priority = 2;
     ConstString = Scr_GetConstString(0);
-    if (ConstString != scr_const.snd_channelvolprio_holdbreath
-        && ConstString != scr_const.snd_channelvolprio_pain
-        && ConstString != scr_const.snd_channelvolprio_shellshock)
-    {
-        Scr_Error(
-            "priority must be 'snd_channelvolprio_holdbreath', 'snd_channelvolprio_pain', or 'snd_channelvolprio_shellshock'\n");
-    }
-    v7 = va("deactivatechannelvol %i %g", HIDWORD(Float), LODWORD(Float));
+    if (ConstString == scr_const.snd_channelvolprio_pain)
+        priority = 3;
+    else if (ConstString == scr_const.snd_channelvolprio_shellshock)
+        priority = 4;
+    else if (ConstString != scr_const.snd_channelvolprio_holdbreath)
+        Scr_Error("priority must be 'snd_channelvolprio_holdbreath', 'snd_channelvolprio_pain', or 'snd_channelvolprio_shellshock'\n");
+    v7 = va("deactivatechannelvol %i %g", priority, Float);
     SV_GameSendServerCommand(v1, v7);
 }
 

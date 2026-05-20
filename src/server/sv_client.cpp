@@ -45,20 +45,18 @@ void __cdecl SV_ClientEnterWorld(client_t *client)
 
 float __cdecl SV_FX_GetVisibility(const float *start, const float *end)
 {
-    double ServerVisibility; // fp31
-    double v3; // fp1
+    float ServerVisibility; // fp31
 
     if (sv.demo.playing)
     {
-        v3 = SV_DemoFxVisibility();
+        return SV_DemoFxVisibility();
     }
     else
     {
         ServerVisibility = FX_GetServerVisibility(start, end);
         SV_RecordFxVisibility(ServerVisibility);
-        v3 = ServerVisibility;
+        return ServerVisibility;
     }
-    return *((float *)&v3 + 1);
 }
 
 void __cdecl SV_ExecuteClientCommand(const char *s)

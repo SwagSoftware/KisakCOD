@@ -74,6 +74,7 @@ const dvar_t *com_dedicated;
 const dvar_t *com_hiDef;
 const dvar_t *com_animCheck;
 const dvar_t *com_developer_script;
+const dvar_t *com_developer_script_abort_on_error;
 const dvar_t *dev_timescale;
 const dvar_t *cl_useMapPreloading;
 const dvar_t *com_maxfps;
@@ -999,10 +1000,16 @@ END:
 
 void __cdecl Com_SetScriptSettings()
 {
+    //Scr_Settings(
+    //    (com_developer->current.integer || com_logfile->current.integer), 
+    //    com_developer_script->current.integer,
+    //    com_developer->current.integer
+    //);
+
     Scr_Settings(
-        (com_developer->current.integer || com_logfile->current.integer), 
+        (com_developer->current.integer || com_logfile->current.integer),
         com_developer_script->current.integer,
-        com_developer->current.integer
+        com_developer_script_abort_on_error->current.integer
     );
 }
 
@@ -1051,15 +1058,14 @@ void __cdecl Com_Init(char* commandLine)
     jmp_buf * v4; // eax
 
     Value = (jmp_buf *)Sys_GetValue(2);
-    //if (_setjmp3(Value, 0))
-    if (_setjmp(*Value))
+
+    if (setjmp(*Value))
     {
         Sys_Error(va("Error during initialization:\n%s\n", com_errorMessage));
     }
     Com_Init_Try_Block_Function(commandLine);
     v3 = (jmp_buf *)Sys_GetValue(2);
-    //if (!_setjmp3(v3, 0))
-    if (!_setjmp(*v3))
+    if (!setjmp(*v3))
         Com_AddStartupCommands();
     if (com_errorEntered)
         Com_ErrorCleanup();
@@ -1071,8 +1077,7 @@ void __cdecl Com_Init(char* commandLine)
 #endif
         {
             v4 = (jmp_buf *)Sys_GetValue(2);
-            //if (_setjmp3(v4, 0))
-            if (_setjmp(*v4))
+            if (setjmp(*v4))
             {
                 Sys_Error(va("Error during initialization:\n%s\n", com_errorMessage));
             }
@@ -1536,6 +1541,7 @@ void Com_InitDvars()
 #endif
     com_developer = Dvar_RegisterInt("developer", 0, 0, 2, DVAR_NOFLAG, "Enable development options");
     com_developer_script = Dvar_RegisterBool("developer_script", 0, DVAR_NOFLAG, "Enable developer script comments");
+    com_developer_script_abort_on_error = Dvar_RegisterBool("developer_script_abort_on_error", 0, DVAR_NOFLAG, "Halt Execution when an error is found in the scripts (Retail does not do this)"); // LWSS ADD
     com_logfile = Dvar_RegisterInt(
         "logfile",
         1,
@@ -2111,8 +2117,8 @@ void __cdecl Com_Frame()
 
     KISAK_NULLSUB();
     Value = Sys_GetValue(2);
-    //if (_setjmp3(Value, 0))
-    if (_setjmp(*(jmp_buf *)Value))
+
+    if (setjmp(*(jmp_buf *)Value))
     {
         Profile_Recover(1);
     }
@@ -2157,8 +2163,7 @@ void Com_StartHunkUsers()
 
     Value = Sys_GetValue(2);
 
-    //if (_setjmp3(Value, 0))
-    if (_setjmp(*(jmp_buf *)Value))
+    if (setjmp(*(jmp_buf *)Value))
         Sys_Error("Error during initialization:\n%s\n", com_errorMessage);
     Com_AssetLoadUI();
     MenuScreen = UI_GetMenuScreen();

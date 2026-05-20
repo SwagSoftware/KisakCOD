@@ -17,6 +17,8 @@
 #include <bgame/bg_local.h>
 #include <bgame/bg_actor_prone.h>
 
+#include <cstddef>
+
 #define ACTOR_STOP_TIME 500
 #define MAX_ACTORS 32
 
@@ -396,6 +398,15 @@ struct actor_s
     const char *pszDebugInfo;
     pathnode_t *pPotentialCoverNode[1000];
 };
+
+// KISAKFIX: actor_s layout must match CoD3SP.exe IDA exactly. Several functions
+// (Actor_UpdateThreat, Actor_UpdateGoalPos, ai_funcs_t dispatches, etc.) compute
+// pointers via raw byte arithmetic that only works if sentientInfo is at offset
+// 0x834 and sentient_info_t is 40 bytes. If a field is added/removed/reordered
+// these asserts will fire and the magic-offset code will silently break.
+static_assert(sizeof(actor_s) == 0x1e90, "actor_s size drift vs CoD3SP IDA");
+static_assert(offsetof(actor_s, sentientInfo) == 0x834, "actor_s.sentientInfo offset drift vs CoD3SP IDA");
+static_assert(sizeof(sentient_info_t) == 0x28, "sentient_info_t size drift vs CoD3SP IDA");
 
 int __cdecl Path_IsValidClaimNode(const pathnode_t *node);
 int __cdecl Path_IsCoverNode(const pathnode_t *node);

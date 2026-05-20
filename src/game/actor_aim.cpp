@@ -185,29 +185,25 @@ float __cdecl Actor_GetWeaponAccuracy(
 
 float __cdecl Actor_GetPlayerStanceAccuracy(const actor_s *self, const sentient_s *enemy)
 {
-    int pm_flags; // r11
-    double v4; // fp1
-
     iassert(self);
     iassert(enemy);
     iassert(enemy->ent);
     iassert(enemy->ent->client);
 
-    pm_flags = enemy->ent->client->ps.pm_flags;
+    int pm_flags = enemy->ent->client->ps.pm_flags;
 
     if ((pm_flags & 1) != 0)
     {
-        v4 = 0.5;
+        return 0.5f;
     }
     else if ((pm_flags & 2) != 0)
     {
-        v4 = 0.75;
+        return 0.75f;
     }
     else
     {
-        v4 = 1.0;
+        return 1.0f;
     }
-    return *((float *)&v4 + 1);
 }
 
 //float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentient_s *enemy)
@@ -1130,7 +1126,7 @@ float __cdecl Sentient_GetScarinessForDistance(sentient_s *self, sentient_s *ene
 {
     unsigned int WeaponIndexForName; // r3
     WeaponDef *weapDef; // r3
-    double AccuracyFraction; // fp1
+    float AccuracyFraction; // fp1
     double value; // fp0
 
     iassert(self);
@@ -1167,7 +1163,8 @@ float __cdecl Sentient_GetScarinessForDistance(sentient_s *self, sentient_s *ene
         }
         AccuracyFraction = (float)((float)value * (float)5.0);
     }
-    return *((float *)&AccuracyFraction + 1);
+
+    return AccuracyFraction;
 }
 
 void __cdecl Actor_GetAccuracyGraphFileName_FastFile(

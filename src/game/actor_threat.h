@@ -51,8 +51,7 @@ void __cdecl DebugThreatNodes(
     pathnode_t *enemyNode,
     const float *color);
 int __cdecl Actor_ThreatFromScariness(double fScariness);
-// local variable allocation has failed, the output may be wrong!
-int __cdecl Actor_ThreatFromDistance(double fDistance);
+int __cdecl Actor_ThreatFromDistance(float fDistance);
 bool __cdecl Actor_IsFullyAware(actor_s *self, sentient_s *enemy, int isCurrentEnemy);
 int __cdecl Actor_ThreatFromVisibilityAndAwareness(int isVisible, int isFullyAware, int friendlyTimingOut);
 int __cdecl Actor_ThreatFromAttackerCount(actor_s *self, sentient_s *enemy, int isCurrentEnemy);
@@ -63,8 +62,7 @@ int __cdecl Actor_UpdateSingleThreat(actor_s *self, sentient_s *enemy);
 void __cdecl Actor_InitThreatUpdateInterval(actor_s *self);
 void Actor_IncrementThreatTime(actor_s *self);
 void __cdecl Actor_CanAttackAll(actor_s *self);
-// local variable allocation has failed, the output may be wrong!
-void __cdecl Actor_SetPotentialThreat(potential_threat_t *self, double yaw);
+void __cdecl Actor_SetPotentialThreat(potential_threat_t *self, float yaw);
 void __cdecl Actor_ClearPotentialThreat(potential_threat_t *self);
 bool __cdecl Actor_GetPotentialThreat(potential_threat_t *self, float *potentialThreatDir);
 void __cdecl Actor_PotentialThreat_Debug(actor_s *self);

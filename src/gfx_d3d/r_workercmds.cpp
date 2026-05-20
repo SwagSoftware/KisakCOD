@@ -484,8 +484,7 @@ void __cdecl  R_WorkerThread()
     void *Value; // eax
 
     Value = Sys_GetValue(2);
-    //if (_setjmp3(Value, 0))
-    if (_setjmp(*(jmp_buf *)Value))
+    if (setjmp(*(jmp_buf *)Value))
         Com_ErrorAbort();
     Profile_Guard(1);
 

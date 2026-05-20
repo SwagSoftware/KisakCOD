@@ -2757,10 +2757,10 @@ void __cdecl XAnimCalcRelDeltaParts(
                 delta.v[2] = toVec.v[2] - fromVec.v[2];
                 delta.v[3] = (float)0.0f - fromVec.v[3];
 
+
                 vec2.v[0] = trans->u.frames.size[0] * delta.v[0] + vec2.v[0];
-                vec2.v[0] = sizeVec_4 * delta.v[1] + vec.v[0];
-                vec2.v[1] = sizeVec_8 * delta.v[2] + vec.v[1];
-                vec2.v[2] = 0.0f * delta.v[3] + vec.v[2];
+                vec2.v[1] = sizeVec_4 * delta.v[1] + vec2.v[1];
+                vec2.v[2] = sizeVec_8 * delta.v[2] + vec2.v[2];
             }
         }
     }
@@ -4108,18 +4108,15 @@ void XAnimFreeAnims(XAnim_s *anims, void(*Free)(void *, int))
 static void XAnimCloneClientAnimInfo(const XAnimInfo *from, XAnimInfo *to)
 {
     iassert(to->animIndex == from->animIndex);
-    //iassert(!from->notifyType);
+
+    iassert(!from->notifyType);
 
     memcpy(&to->state, &from->state, sizeof(to->state));
 
-    to->notifyChild = from->notifyChild;
-    to->notifyIndex = from->notifyIndex;
-    to->notifyName = from->notifyName;
-    to->notifyType = from->notifyType;
-
-    //to->notifyType = 0;
-    //*(_DWORD *)&to->notifyChild = 0xFFFF;
-    //to->notifyName = 0;
+    to->notifyType = 0;
+    to->notifyChild = 0;
+    to->notifyIndex = -1;
+    to->notifyName = 0;
 }
 
 static void XAnimCloneClientAnimTree_r(

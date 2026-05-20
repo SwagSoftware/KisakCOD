@@ -113,7 +113,8 @@ void __cdecl Sentient_GetForwardDir(sentient_s *self, float *vDirOut)
             "self->ent->actor || self->ent->client");
     if (!vDirOut)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 218, 0, "%s", "vDirOut");
-    YawVectors(self->ent->r.currentAngles[1], (float *)self, vDirOut);
+
+    YawVectors(self->ent->r.currentAngles[1], vDirOut, NULL);
 }
 
 void __cdecl Sentient_GetVelocity(const sentient_s *self, float *vVelOut)
@@ -247,7 +248,8 @@ float __cdecl Sentient_GetHeadHeight(const sentient_s *self)
         v2 = 6.0;
     else
         v2 = (float)((float)70.0 - (float)60.0);
-    return *((float *)&v2 + 1);
+    // KISAKFIX: PowerPC hex-rays wrong-half-of-double read; intent is (float)v2.
+    return (float)v2;
 }
 
 void __cdecl Sentient_UpdateActualChainPos(sentient_s *self)

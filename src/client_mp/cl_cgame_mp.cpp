@@ -680,20 +680,19 @@ void __cdecl CL_StartLoading()
 
 void __cdecl CL_SetExpectedHunkUsage(const char *mapname)
 {
-    int32_t handle[2]; // [esp+0h] [ebp-18h] BYREF
+    int32_t handle; // [esp+0h] [ebp-18h] BYREF
     char *buf; // [esp+8h] [ebp-10h]
     int32_t len; // [esp+Ch] [ebp-Ch]
     const char *token; // [esp+10h] [ebp-8h]
     const char *buftrav; // [esp+14h] [ebp-4h] BYREF
 
-    handle[1] = (int)"hunkusage.dat";
-    len = FS_FOpenFileByMode((char*)"hunkusage.dat", handle, FS_READ);
+    len = FS_FOpenFileByMode((char*)"hunkusage.dat", &handle, FS_READ);
     if (len >= 0)
     {
         buf = (char *)Z_Malloc(len + 1, "CL_SetExpectedHunkUsage", 10);
         memset((uint8_t *)buf, 0, len + 1);
-        FS_Read((uint8_t *)buf, len, handle[0]);
-        FS_FCloseFile(handle[0]);
+        FS_Read((uint8_t *)buf, len, handle);
+        FS_FCloseFile(handle);
         buftrav = buf;
         while (1)
         {

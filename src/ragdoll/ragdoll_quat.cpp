@@ -10,10 +10,10 @@ void __cdecl Ragdoll_QuatMul(const float *qa, const float *qb, float *dest)
     iassert( qa != dest && qb != dest );
     w0 = qa[3];
     w1 = qb[3];
-    *dest = w0 * *qb + w1 * *qa + qa[1] * qb[2] - qa[2] * qb[1];
+    dest[0] = w0 * qb[0] + w1 * qa[0] + qa[1] * qb[2] - qa[2] * qb[1];
     dest[1] = w0 * qb[1] + w1 * qa[1] + qa[2] * *qb - *qa * qb[2];
     dest[2] = w0 * qb[2] + w1 * qa[2] + *qa * qb[1] - qa[1] * *qb;
-    dest[3] = w0 * w1 - *qa * *qb - qa[1] * qb[1] - qa[2] * qb[2];
+    dest[3] = w0 * w1 - qa[0] * qb[0] - qa[1] * qb[1] - qa[2] * qb[2];
 }
 
 void __cdecl Ragdoll_QuatMulInvSecond(const float *qa, const float *qb, float *dest)
@@ -26,7 +26,7 @@ void __cdecl Ragdoll_QuatMulInvSecond(const float *qa, const float *qb, float *d
 
 void __cdecl Ragdoll_QuatConjugate(const float *src, float *dest)
 {
-    *dest = -*src;
+    dest[0] = -src[0];
     dest[1] = -src[1];
     dest[2] = -src[2];
     dest[3] = src[3];
@@ -34,14 +34,9 @@ void __cdecl Ragdoll_QuatConjugate(const float *src, float *dest)
 
 void __cdecl Ragdoll_QuatInverse(const float *src, float *dest)
 {
-    const char *v2; // eax
+    iassert(Vec4IsNormalized(src));
 
-    if (!Vec4IsNormalized(src))
-    {
-        v2 = va("%g %g %g %g", *src, src[1], src[2], src[3]);
-        MyAssertHandler(".\\ragdoll\\ragdoll_quat.cpp", 94, 0, "%s\n\t%s", "Vec4IsNormalized( src )", v2);
-    }
-    *dest = -*src;
+    dest[0] = -src[0];
     dest[1] = -src[1];
     dest[2] = -src[2];
     dest[3] = src[3];
@@ -54,14 +49,14 @@ void __cdecl Ragdoll_QuatPointRotate(const float *p, const float *q, float *dest
     float tmp1[4]; // [esp+20h] [ebp-20h] BYREF
     float qInv[4]; // [esp+30h] [ebp-10h] BYREF
 
-    qp[0] = *p;
+    qp[0] = p[0];
     qp[1] = p[1];
     qp[2] = p[2];
     qp[3] = 0.0;
     Ragdoll_QuatInverse(q, qInv);
     Ragdoll_QuatMul(q, qInv, tmp0);
     Ragdoll_QuatMul(tmp0, qp, tmp1);
-    *dest = tmp1[0];
+    dest[0] = tmp1[0];
     dest[1] = tmp1[1];
     dest[2] = tmp1[2];
 }
@@ -138,26 +133,20 @@ void __cdecl Ragdoll_Mat33ToQuat(const float (*axis)[3], float *quat)
 
 void __cdecl Ragdoll_QuatToAxisAngle(const float *quat, float *axisAngle)
 {
-    float v2; // [esp+4h] [ebp-18h]
-    float v3; // [esp+8h] [ebp-14h]
-    float angleMag; // [esp+Ch] [ebp-10h]
-    float halfTheta; // [esp+14h] [ebp-8h]
+    float sinHalfTheta; // [esp+8h] [ebp-14h]
+    float angleMag;     // [esp+Ch] [ebp-10h]
+    float halfTheta;    // [esp+14h] [ebp-8h]
 
     halfTheta = Q_acos(quat[3]);
-    v3 = sin(halfTheta);
-    v2 = I_fabs(v3);
-    if (v2 <= 0.000001)
+    sinHalfTheta = sin(halfTheta);
+    if (I_fabs(sinHalfTheta) <= 0.000001 )
     {
-        *axisAngle = 0.0;
-        axisAngle[1] = 0.0;
-        axisAngle[2] = 0.0;
+        Vec3Clear(axisAngle);
     }
     else
     {
-        angleMag = halfTheta * 2.0 / v3;
-        *axisAngle = *quat * angleMag;
-        axisAngle[1] = quat[1] * angleMag;
-        axisAngle[2] = quat[2] * angleMag;
+        angleMag = halfTheta * 2.0 / sinHalfTheta;
+        Vec3Scale(quat, angleMag, axisAngle);
     }
 }
 

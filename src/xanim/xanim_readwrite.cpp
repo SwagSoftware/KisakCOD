@@ -37,14 +37,15 @@ void __cdecl XAnimSaveAnimInfo(XAnimInfo *info, MemoryFile *memFile)
     MemFile_WriteData(memFile, 2, v5);
     if (info->notifyName)
     {
-        HIBYTE(v5[0]) = 1;
+
+        v5[0] = 1;
         MemFile_WriteData(memFile, 1, v5);
         v4 = SL_ConvertToString(info->notifyName);
         MemFile_WriteCString(memFile, v4);
     }
     else
     {
-        HIBYTE(v5[0]) = 0;
+        v5[0] = 0;
         MemFile_WriteData(memFile, 1, v5);
     }
     MemFile_ArchiveData(memFile, 32, &info->state);

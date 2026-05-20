@@ -555,8 +555,8 @@ void __cdecl CG_AddPlayerWeapon(
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     nextSnap = cgameGlob->nextSnap;
-    v9 = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
 #ifdef KISAK_MP
+    v9 = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
     v8 = v9 && !cgameGlob->renderingThirdPerson;
 #endif
 
@@ -565,7 +565,12 @@ void __cdecl CG_AddPlayerWeapon(
     else
         weaponNum = cent->nextState.weapon;
 
-    if (weaponNum > 0 && (cent->nextState.lerp.eFlags & 0x300) == 0)
+    // KISAKFIX: IDA CG_AddPlayerWeapon (sub_8215C3B8) gates on BOTH
+    // `(eFlags & 0x300) == 0` (not turret) AND `(eFlags & 0x20000) == 0` (not in vehicle).
+    // Kisak port missing the vehicle gate so viewmodel renders while driving.
+    if (weaponNum > 0
+        && (cent->nextState.lerp.eFlags & 0x300) == 0
+        && (cent->nextState.lerp.eFlags & 0x20000) == 0)
     {
         iassert(localClientNum == 0);
         weapInfo = &cg_weaponsArray[0][weaponNum];
@@ -1641,15 +1646,21 @@ void __cdecl CG_NextWeapon_f()
 
 bool __cdecl WeaponCycleAllowed(cg_s *cgameGlob)
 {
+    // KISAKFIX: kisak port had `return (cgameGlob->nextSnap->ps.otherFlags & 4) != 0;`
+    // — wrong field and wrong bit. CoD3SP IDA (sub_8215CA90) actually returns
+    // `((~predictedPlayerState.eFlags >> 17) & 1)` — i.e. allow cycling unless eFlags
+    // bit 17 (0x20000) is set. Also was missing the cg_paused gate.
     if (!cgameGlob)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3240, 0, "%s", "cgameGlob");
     if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0;
-    if (cgameGlob->time - cgameGlob->weaponSelectTime >= cg_weaponCycleDelay->current.integer)
-        return (cgameGlob->nextSnap->ps.otherFlags & 4) != 0;
-    return 0;
+    if (cgameGlob->time - cgameGlob->weaponSelectTime < cg_weaponCycleDelay->current.integer)
+        return 0;
+    if (cg_paused->current.integer)
+        return 0;
+    return (cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0;
 }
 
 void __cdecl CG_PrevWeapon_f()
@@ -1740,9 +1751,9 @@ char __cdecl CycleWeapPrimary(int32_t localClientNum, int32_t cycleForward, int3
     if (!cgameGlob->nextSnap)
         return 0;
 
-    if ((cgameGlob->nextSnap->ps.otherFlags & 4) == 0)
-        return 0;
-
+    // KISAKFIX: kisak port added a bogus `if ((nextSnap->ps.otherFlags & 4) == 0) return 0;`
+    // here — IDA CycleWeapPrimary (sub_8215E838) has NO such gate. Same wrong-bit pattern as
+    // the recent WeaponCycleAllowed fix. Without removing it, weapnext/scroll never cycle.
     if (cgameGlob->predictedPlayerState.pm_type >= PM_DEAD)
         return 0;
 
@@ -1967,6 +1978,10 @@ char __cdecl ToggleWeaponAltMode(int32_t localClientNum)
 
 bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob)
 {
+    // KISAKFIX: same wrong-field bug as WeaponCycleAllowed/CycleWeapPrimary. IDA
+    // ActionSlotUsageAllowed (sub_8215CDB8) gates on `(eFlags & 0x20000) == 0` (in-vehicle
+    // check) and also tests `cg_paused`. Kisak port had `nextSnap->ps.otherFlags & 4` (wrong
+    // field + wrong bit) and was missing the paused gate.
     if (!cgameGlob)
         MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3545, 0, "%s", "cgameGlob");
     if (!cgameGlob->nextSnap)
@@ -1977,7 +1992,9 @@ bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0;
-    return (cgameGlob->nextSnap->ps.otherFlags & 4) != 0;
+    if (cg_paused->current.integer)
+        return 0;
+    return (cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0;
 }
 
 char __cdecl ActionParms(int32_t *slotResult)
@@ -2034,7 +2051,10 @@ void __cdecl CG_EjectWeaponBrass(int32_t localClientNum, const entityState_s *en
         if (ent->weapon < BG_GetNumWeapons())
         {
             nextSnap = CG_GetLocalClientGlobals(localClientNum)->nextSnap;
-            v6 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
+            // KISAKFIX: kisak `(otherFlags & 6) != 0 && ...` is the MP "is local/spectated player"
+            // idiom; SP IDA only tests `ent->number == ps.clientNum`. Determines view-attached
+            // vs world brass FX — wrong test meant view brass never spawned.
+            v6 = ent->number == nextSnap->ps.clientNum;
             weaponDef = BG_GetWeaponDef(ent->weapon);
             if (weaponDef->viewLastShotEjectEffect && weaponDef->worldLastShotEjectEffect && event == 27)
             {
@@ -2243,7 +2263,8 @@ void __cdecl DrawBulletImpacts(
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     nextSnap = cgameGlob->nextSnap;
-    if ((nextSnap->ps.otherFlags & 6) != 0 && ent->nextState.number == nextSnap->ps.clientNum)
+    // KISAKFIX: MP `(otherFlags & 6) != 0 && ...` → SP IDA just `number == clientNum`.
+    if (ent->nextState.number == nextSnap->ps.clientNum)
     {
         weaponNum = BG_GetViewmodelWeaponIndex(ps);
         dobjNumber = CG_WeaponDObjHandle(weaponNum);
@@ -3069,7 +3090,8 @@ cg_s *__cdecl CG_GetLocalClientGlobalsForEnt(int32_t localClientNum, int32_t ent
         {
             nextSnap = cgameGlob->nextSnap;
 
-            if ((nextSnap->ps.otherFlags & 6) != 0 && entityNum == nextSnap->ps.clientNum)
+            // KISAKFIX: MP `(otherFlags & 6) != 0 && ...` → SP IDA just `entityNum == clientNum`.
+            if (entityNum == nextSnap->ps.clientNum)
                 return cgameGlob;
         }
     }
@@ -3450,7 +3472,8 @@ void __cdecl CG_BulletHitEvent_Internal(
         if (cg_marks_ents_player_only->current.enabled)
         {
             nextSnap = cgameGlob->nextSnap;
-            if ((nextSnap->ps.otherFlags & 6) == 0 || sourceEntityNum != nextSnap->ps.clientNum)
+            // KISAKFIX: MP `(otherFlags & 6) == 0 || ...` → SP IDA just `sourceEntityNum != clientNum`.
+            if (sourceEntityNum != nextSnap->ps.clientNum)
                 targetEntityNum = ENTITYNUM_NONE;
         }
         FX_PlayOrientedEffectWithMarkEntity(localClientNum, fx, cgameGlob->time, position, axis, targetEntityNum);
@@ -3545,7 +3568,8 @@ bool __cdecl ShouldSpawnTracer(int32_t localClientNum, int32_t sourceEntityNum)
 
     nextSnap = cgameGlob->nextSnap;
 
-    if ((nextSnap->ps.otherFlags & 6) != 0 && sourceEntityNum == nextSnap->ps.clientNum)
+    // KISAKFIX: MP `(otherFlags & 6) != 0 && ...` → SP IDA just `sourceEntityNum == clientNum`.
+    if (sourceEntityNum == nextSnap->ps.clientNum)
         return 0;
 
     if (CG_PlayerUsingScopedTurret(localClientNum)
@@ -3574,7 +3598,7 @@ void __cdecl CG_BulletHitClientEvent(
     iassert(surfType >= 0 && surfType < SURF_TYPECOUNT);
     iassert(damage >= 0);
 
-    if (event == 42)
+    if (event == EV_BULLET_HIT_CLIENT_SMALL)
     {
         CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitSmallSound[surfType]);
     LABEL_19:
@@ -3589,7 +3613,7 @@ void __cdecl CG_BulletHitClientEvent(
             damage);
         return;
     }
-    if (event == 43)
+    if (event == EV_BULLET_HIT_CLIENT_LARGE)
     {
         CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitLargeSound[surfType]);
         goto LABEL_19;
@@ -3610,7 +3634,8 @@ void __cdecl CG_MeleeBloodEvent(int32_t localClientNum, const centity_s *cent)
     iassert(cent);
 
     nextSnap = CG_GetLocalClientGlobals(localClientNum)->nextSnap;
-    bool isPlayer = (nextSnap->ps.otherFlags & 6) != 0 && cent->nextState.number == nextSnap->ps.clientNum;
+    // KISAKFIX: MP `(otherFlags & 6) != 0 && ...` → SP IDA just `number == clientNum`.
+    bool isPlayer = cent->nextState.number == nextSnap->ps.clientNum;
 
     iassert(isPlayer);
 
@@ -3717,6 +3742,8 @@ void __cdecl CG_SelectWeaponIndex(int32_t localClientNum, uint32_t weaponIndex)
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    Com_Printf(15, "CG_SelectWeaponIndex: localClientNum=%d weaponIndex=%d prevSelect=%d\n",
+        localClientNum, weaponIndex, cgameGlob->weaponSelect);
     cgameGlob->weaponSelectTime = cgameGlob->time;
     if (cgameGlob->weaponSelect != weaponIndex)
     {

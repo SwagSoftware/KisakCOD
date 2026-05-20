@@ -291,8 +291,10 @@ void __cdecl SV_AddServerCommand(client_t *client, const char *cmd)
             0,
             "%s",
             "client->reliableCommands.header.sequence - client->reliableCommands.header.sent < MAX_RELIABLE_COMMANDS");
-    v4 = (unsigned __int8)(HIBYTE(client->reliableCommands.header.sequence) + 1);
+
     ++client->reliableCommands.header.sequence;
+    v4 = (unsigned __int8)client->reliableCommands.header.sequence;
+
     SV_AddReliableCommand(client, v4, cmd);
 }
 

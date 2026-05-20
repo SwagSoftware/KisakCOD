@@ -3145,209 +3145,147 @@ static void PredictBounceMissile(
 
 int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBounce, int *timeAtRest)
 {
-    trajectory_t *p_pos; // r11
-    trajectory_t *v11; // r10
-    int v12; // ctr
-    WeaponDef *weapDef; // r20
-    int time; // r30
-    EntHandle *p_ownerNum; // r24
-    int number; // r11
-    int v17; // r6
-    double fraction; // fp0
-    double v19; // fp12
-    double v20; // fp11
-    double v21; // fp13
-    int v22; // r6
-    int v23; // r6
-    float v28; // [sp+50h] [-420h]
-    float v29; // [sp+50h] [-420h]
-    float end[3]; // [sp+58h] [-418h] BYREF
-    //float v31; // [sp+5Ch] [-414h]
-    //float v32; // [sp+60h] [-410h]
-    float start[3]; // [sp+68h] [-408h] BYREF
-    //float v34; // [sp+6Ch] [-404h]
-    //float v35; // [sp+70h] [-400h]
-    float v36; // [sp+78h] [-3F8h] BYREF
-    float v37; // [sp+7Ch] [-3F4h]
-    float v38; // [sp+80h] [-3F0h]
-    float v39; // [sp+88h] [-3E8h] BYREF
-    float v40; // [sp+8Ch] [-3E4h]
-    float v41; // [sp+90h] [-3E0h]
-    trace_t trace; // [sp+A0h] [-3D0h] BYREF
-    float v43[4]; // [sp+D0h] [-3A0h] BYREF
-    float v44[4]; // [sp+E0h] [-390h] BYREF
-    trajectory_t trajectory; // [sp+F0h] [-380h] BYREF
-    _BYTE v46[628]; // [sp+120h] [-350h] BYREF
+    // BLOPS VERSION - TAKEN FROM BLOPS AND ADJUSTED
+    int v6; // [esp+10h] [ebp-3B8h]
+    int v7; // [esp+14h] [ebp-3B4h]
+    int passEntityNum; // [esp+18h] [ebp-3B0h]
+    trajectory_t pos; // [esp+38h] [ebp-390h] BYREF
+    float origin[3]; // [esp+5Ch] [ebp-36Ch] BYREF
+    gentity_s backupEnt; // [esp+68h] [ebp-360h] BYREF
+    int time; // [esp+360h] [ebp-68h]
+    float endpos[3]; // [esp+364h] [ebp-64h] BYREF
+    trace_t tr; // [esp+370h] [ebp-58h] BYREF
+    float org[3]; // [esp+3ACh] [ebp-1Ch] BYREF
+    const WeaponDef *weapDef; // [esp+3B8h] [ebp-10h]
+    float traceStart[3]; // [esp+3BCh] [ebp-Ch] BYREF
 
-    p_pos = &ent->s.lerp.pos;
-    v11 = &trajectory;
-    v12 = 9;
-    do
-    {
-        v11->trType = p_pos->trType;
-        p_pos = (trajectory_t *)((char *)p_pos + 4);
-        v11 = (trajectory_t *)((char *)v11 + 4);
-        --v12;
-    } while (v12);
-    BG_EvaluateTrajectory(&trajectory, level.time - 50, start);
-    memcpy(v46, ent, sizeof(v46));
+    memcpy(&pos, &ent->s.lerp.pos, sizeof(pos));
+    BG_EvaluateTrajectory(&pos, level.time - 50, org);
+    memcpy(&backupEnt, ent, sizeof(backupEnt));
     *timeAtRest = ent->nextthink;
     weapDef = BG_GetWeaponDef(ent->s.weapon);
-
     iassert(weapDef);
 
-    time = level.time;
-    if (time >= time + duration)
-        goto LABEL_48;
-    p_ownerNum = &ent->r.ownerNum;
-    while (1)
+    *vLandPos = 0.0f;
+    vLandPos[1] = 0.0f;
+    vLandPos[2] = 0.0f;
+
+    for (time = level.time; time < duration + level.time; time += 50)
     {
-        BG_EvaluateTrajectory(&trajectory, time, end);
-        number = p_ownerNum->number;
-        if (p_ownerNum->number && !g_entities[number - 1].r.inuse)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\g_public.h",
-                336,
-                0,
-                "%s\n\t(number - 1) = %i",
-                "(!number || g_entities[number - 1].r.inuse)",
-                number - 1);
-        if (p_ownerNum->number)
-            v17 = ent->r.ownerNum.entnum();
-        else
-            v17 = ENTITYNUM_NONE;
-        G_LocationalTrace(&trace, start, end, v17, ent->clipmask, bulletPriorityMap);
-        if (trace.startsolid)
+        BG_EvaluateTrajectory(&pos, time, origin);
+        //if ( EntHandle::isDefined(&ent->r.ownerNum) )
+        if (ent->r.ownerNum.isDefined())
         {
-            v43[0] = start[0] - end[0];
-            v43[1] = start[1] - end[1];
-            v43[2] = start[2] - end[2];
-            trace.fraction = 0.0;
-            Vec3NormalizeTo(v43, trace.normal);
+            //passEntityNum = EntHandle::entnum(&ent->r.ownerNum);
+            passEntityNum = ent->r.ownerNum.entnum();
+            G_MissileTrace(&tr, org, origin, passEntityNum, ent->clipmask);
         }
-        if (trace.startsolid)
+        else
+        {
+            G_MissileTrace(&tr, org, origin, 1023, ent->clipmask);
+        }
+        if (tr.startsolid)
         {
             if (time != level.time)
-                goto LABEL_46;
-            start[0] = end[0];
-            start[1]= end[1];
-            start[2]= end[2];
-            goto LABEL_36;
-        }
-        if ((trace.surfaceFlags & 0x1F00000) == 0x900000)
-            Missile_PenetrateGlass(&trace, ent, start, end, weapDef->damage, 1);
-        fraction = trace.fraction;
-        v44[0] = 0.5;
-        v44[1] = 0.0;
-        v44[2] = 1.0;
-        v44[3] = 1.0;
-        v19 = (float)((float)((float)(end[1] - start[1]) * trace.fraction) + start[1]);
-        v37 = (float)((float)(end[1] - start[1]) * trace.fraction) + start[1];
-        v20 = (float)((float)((float)(end - start) * trace.fraction) + start[0]);
-        v36 = (float)((float)(end - start) * trace.fraction) + start[0];
-        v21 = (float)((float)((float)(end[2] - start[2]) * trace.fraction) + start[2]);
-        v38 = (float)((float)(end[2] - start[2]) * trace.fraction) + start[2];
-        if (g_debugBullets->current.integer >= 5)
-        {
-            G_DebugLineWithDuration(start, &v36, v44, 1, 1000);
-            fraction = trace.fraction;
-            v21 = v38;
-            v19 = v37;
-            v20 = v36;
-        }
-        start[0] = v20;
-        start[1] = v19;
-        start[2] = v21;
-        if (weapDef->stickiness == WEAPSTICKINESS_ALL)
-        {
-            if (fraction < 1.0)
-            {
-                end[0] = -(float)((float)(trace.normal[0] * 1.5f) - (float)v20);
-                end[1] = -(float)((float)(trace.normal[1] * 1.5f) - (float)v19);
-                end[2] = -(float)((float)(trace.normal[2] * 1.5f) - (float)v21);
-
-                v39 = (float)(trace.normal[0] * 0.135f) + (float)v20;
-                v40 = (float)(trace.normal[1] * 0.135f) + (float)v19;
-                v41 = (float)(trace.normal[2] * 0.135f) + (float)v21;
-                
-                if (ent->r.ownerNum.isDefined())
-                    v22 = ent->r.ownerNum.entnum();
-                else
-                    v22 = ENTITYNUM_NONE;
-                G_MissileTrace(&trace, &v39, end, v22, ent->clipmask);
-                v36 = (float)((float)(end[0] - v39) * trace.fraction) + v39;
-                v37 = (float)((float)(end[1] - v40) * trace.fraction) + v40;
-                v38 = (float)((float)(end[2] - v41) * trace.fraction) + v41;
-                if (trace.fraction == 1.0)
-                    goto LABEL_36;
-                if (Trace_GetEntityHitId(&trace) == ENTITYNUM_WORLD)
-                {
-                    start[0] = (float)(v36 - end[0]) + v36;
-                    start[1] = (float)(v37 - end[1]) + v37;
-                    start[2] = (float)(v38 - end[2]) + v38;
-                }
-                fraction = trace.fraction;
-            }
-        }
-        else if (fraction == 1.0 || fraction < 1.0 && trace.normal[2] > 0.69999999)
-        {
-            v41 = (float)v21 + 0.135f;
-            v39 = v20;
-            v40 = v19;
-
-            end[0] = v20;
-            end[1] = v19;
-            end[2] = (float)v21 - 1.5f;
-
-            if (ent->r.ownerNum.isDefined())
-                v23 = ent->r.ownerNum.entnum();
-            else
-                v23 = ENTITYNUM_NONE;
-            G_MissileTrace(&trace, &v39, end, v23, ent->clipmask);
-            fraction = trace.fraction;
-            v37 = (float)((float)(end[1] - v40) * trace.fraction) + v40;
-            v36 = (float)((float)(end[0] - v39) * trace.fraction) + v39;
-            v38 = (float)((float)(end[2] - v41) * trace.fraction) + v41;
-            if (trace.fraction == 1.0)
                 goto LABEL_36;
-
-            start[1] = (float)((float)(end[1] - v40) * trace.fraction) + v40;
-            start[0] = (float)((float)(end[0] - v39) * trace.fraction) + v39;
-            trajectory.trBase[2] = (float)((float)((float)((float)((float)(end[2] - v41) * trace.fraction) + v41) + (float)1.5) - start[2]) + trajectory.trBase[2];
-            start[2] = (float)((float)((float)(end[2] - v41) * trace.fraction) + v41) + (float)1.5;
+            org[0] = origin[0];
+            org[1] = origin[1];
+            org[2] = origin[2];
         }
-        if (fraction != 1.0)
+        else
         {
-            if ((trace.surfaceFlags & 4) != 0)
+            if ((tr.surfaceFlags & 0x3F00000) == 0x900000)
+                Missile_PenetrateGlass(&tr, ent, org, origin, weapDef->damage, 1);
+            Vec3Lerp(org, origin, tr.fraction, endpos);
+            //DrawMissilePredictDebug(org, endpos);
+            org[0] = endpos[0];
+            org[1] = endpos[1];
+            org[2] = endpos[2];
+            if (weapDef->stickiness == WEAPSTICKINESS_ALL)// || weapDef->stickiness == WEAPSTICKINESS_ALL_NO_SENTIENTS)
             {
-            LABEL_46:
-                memcpy(ent, v46, sizeof(gentity_s));
-                return 0;
+                if (tr.fraction < 1.0)
+                {
+                    traceStart[0] = (float)(0.13500001 * tr.normal[0]) + org[0];
+                    traceStart[1] = (float)(0.13500001 * tr.normal[1]) + org[1];
+                    traceStart[2] = (float)(0.13500001 * tr.normal[2]) + org[2];
+                    origin[0] = (float)(-1.5 * tr.normal[0]) + org[0];
+                    origin[1] = (float)(-1.5 * tr.normal[1]) + org[1];
+                    origin[2] = (float)(-1.5 * tr.normal[2]) + org[2];
+                    //if ( EntHandle::isDefined(&ent->r.ownerNum) )
+                    if (ent->r.ownerNum.isDefined())
+                    {
+                        //v7 = EntHandle::entnum(&ent->r.ownerNum);
+                        v7 = ent->r.ownerNum.entnum();
+                        G_MissileTrace(&tr, traceStart, origin, v7, ent->clipmask);
+                    }
+                    else
+                    {
+                        G_MissileTrace(&tr, traceStart, origin, 1023, ent->clipmask);
+                    }
+                    Vec3Lerp(traceStart, origin, tr.fraction, endpos);
+                    if (tr.fraction != 1.0 && Trace_GetEntityHitId(&tr) == 1022)
+                    {
+                        org[0] = endpos[0] + (float)(endpos[0] - origin[0]);
+                        org[1] = endpos[1] + (float)(endpos[1] - origin[1]);
+                        org[2] = endpos[2] + (float)(endpos[2] - origin[2]);
+                    }
+                }
             }
-            if (!allowBounce)
-                break;
-            if ((ent->s.lerp.eFlags & 0x1000000) == 0)
-                break;
-            PredictBounceMissile(ent, &trajectory, &trace, time, time - (int)(float)((float)fraction * (float)-50.0) - 50, start, &v36);
-            trajectory.trTime = time;
-            if (trajectory.trType == TR_STATIONARY)
-                break;
+            else if (tr.fraction == 1.0 || tr.fraction < 1.0 && tr.normal[2] > 0.69999999)
+            {
+                traceStart[0] = org[0];
+                traceStart[1] = org[1];
+                origin[0] = org[0];
+                origin[1] = org[1];
+                traceStart[2] = org[2] + 0.13500001;
+                origin[2] = org[2] - 1.5;
+                //if ( EntHandle::isDefined(&ent->r.ownerNum) )
+                if (ent->r.ownerNum.isDefined())
+                {
+                    //v6 = EntHandle::entnum(&ent->r.ownerNum);
+                    v6 = ent->r.ownerNum.entnum();
+                    G_MissileTrace(&tr, traceStart, origin, v6, ent->clipmask);
+                }
+                else
+                {
+                    G_MissileTrace(&tr, traceStart, origin, 1023, ent->clipmask);
+                }
+                Vec3Lerp(traceStart, origin, tr.fraction, endpos);
+                if (tr.fraction != 1.0)
+                {
+                    pos.trBase[2] = (float)((float)(endpos[2] + 1.5) - org[2]) + pos.trBase[2];
+                    org[0] = endpos[0];
+                    org[1] = endpos[1];
+                    org[2] = endpos[2] + 1.5;
+                }
+            }
+            if (tr.fraction != 1.0)
+            {
+                if ((tr.surfaceFlags & 4) != 0)
+                {
+                LABEL_36:
+                    memcpy(ent, &backupEnt, sizeof(gentity_s));
+                    return 0;
+                }
+                if (!allowBounce
+                    || (ent->s.lerp.eFlags & 0x1000000) == 0
+                    || (PredictBounceMissile(ent, &pos, &tr, time, time + (int)(float)(50.0 * tr.fraction) - 50, org, endpos),
+                        pos.trTime = time,
+                        !pos.trType))
+                {
+                    *timeAtRest = time;
+                    break;
+                }
+            }
         }
-    LABEL_36:
-        time += 50;
-        if (time >= level.time + duration)
-            goto LABEL_48;
     }
-    *timeAtRest = time;
-LABEL_48:
-    vLandPos[0] = start[0];
-    vLandPos[1] = start[1];
-    vLandPos[2] = start[2];
+    *vLandPos = org[0];
+    vLandPos[1] = org[1];
+    vLandPos[2] = org[2];
 
-    iassert(!IS_NAN((vLandPos)[0]) && !IS_NAN((vLandPos)[1]) && !IS_NAN((vLandPos)[2]));
-   
-    memcpy(ent, v46, sizeof(gentity_s));
+    nanassertvec3(vLandPos);
 
+    memcpy(ent, &backupEnt, sizeof(gentity_s));
     if (allowBounce && (ent->s.lerp.eFlags & 0x1000000) != 0)
         return ent->nextthink;
     else

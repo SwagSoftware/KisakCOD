@@ -82,7 +82,10 @@ int __cdecl Path_FindBadPlace(unsigned int name)
     {
         p_name += 20;
         ++v1;
-        if ((int)p_name >= (int)&playerEyePos[1])
+        // KISAKFIX: IDA SP used `&playerEyePos[1]` as end-of-array sentinel — a magic-
+        // address artifact that only worked because g_badplaces+sizeof was at that VA on
+        // PPC. On x86 playerEyePos and g_badplaces are at unrelated addresses. Use count.
+        if (v1 >= 32)
             return -1;
     }
     return v1;
@@ -107,7 +110,8 @@ badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration)
         {
             p_name += 20;
             ++v5;
-            if ((int)p_name >= (int)&playerEyePos[1])
+            // KISAKFIX: magic-address sentinel — see Path_FindBadPlace.
+            if (v5 >= 32)
             {
                 v5 = -1;
                 break;
@@ -140,7 +144,8 @@ badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration)
     {
         p_type += 40;
         ++v10;
-        if ((int)p_type >= (int)((unsigned __int8 *)&playerEyePos[1] + 2))
+        // KISAKFIX: magic-address sentinel — see Path_FindBadPlace.
+        if (v10 >= 32)
         {
             v12 = va("too many bad places (more than %i)", 32);
             Scr_Error(v12);
@@ -484,7 +489,7 @@ float __cdecl Actor_BadPlace_GetMaximumFleeRadius()
         p_type += 40;
     } while (v0);
     v6 = v2;
-    return *((float *)&v6 + 1);
+    return (float)v6;
 }
 
 int __cdecl Actor_BadPlace_HasPotentialNodeDuplicates(
@@ -602,7 +607,8 @@ void __cdecl Path_RemoveBadPlace(unsigned int name)
     {
         p_name += 20;
         ++v1;
-        if ((int)p_name >= (int)&playerEyePos[1])
+        // KISAKFIX: magic-address sentinel — see Path_FindBadPlace.
+        if (v1 >= 32)
         {
             v1 = -1;
             break;
@@ -741,7 +747,7 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
                 }
             }
             --nodeCount;
-            pNode += 3;
+            ++pNode;
         } while (nodeCount);
 
         if (nodesWritten > 1)
@@ -756,7 +762,7 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
     }
 
     //Profile_EndInternal(0);
-    return 0;
+    return nodesWritten;
 }
 
 int __cdecl Actor_BadPlace_AttemptEscape(actor_s *self)

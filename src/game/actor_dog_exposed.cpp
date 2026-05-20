@@ -327,7 +327,10 @@ float __cdecl Actor_Dog_GetEnemyPos(actor_s *self, sentient_s *enemy, float *ene
     {
         v12 = (float)(self->meleeAttackDist + (float)15.0);
     }
-    return *((float *)&v12 + 1);
+    // KISAKFIX: wrong-half-of-double (see Path_GetPathDir). Returns the
+    // buffered attack distance; +1 cast reads garbage on x86. Dogs misjudge
+    // melee range. Dog-only behavior.
+    return (float)v12;
 }
 
 bool __cdecl Actor_Dog_IsEnemyInAttackRange(actor_s *self, sentient_s *enemy, int *goalPosSet)

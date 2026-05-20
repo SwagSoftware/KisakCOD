@@ -343,20 +343,19 @@ void __cdecl SV_ChangeMaxClients()
 
 void __cdecl SV_SetExpectedHunkUsage(char *mapname)
 {
-    int handle[2]; // [esp+0h] [ebp-18h] BYREF
+    int handle; // [esp+0h] [ebp-18h] BYREF
     char *buf; // [esp+8h] [ebp-10h]
     int len; // [esp+Ch] [ebp-Ch]
     const char *token; // [esp+10h] [ebp-8h]
     const char *buftrav; // [esp+14h] [ebp-4h] BYREF
 
-    handle[1] = (int)"hunkusage.dat"; // KISAKTODO: handle fubar?
-    len = FS_FOpenFileByMode((char*)"hunkusage.dat", handle, FS_READ);
+    len = FS_FOpenFileByMode((char*)"hunkusage.dat", &handle, FS_READ);
     if (len >= 0)
     {
         buf = (char*)Z_Malloc(len + 1, "SV_SetExpectedHunkUsage", 10);
         memset(buf, 0, len + 1);
-        FS_Read((unsigned char*)buf, len, handle[0]);
-        FS_FCloseFile(handle[0]);
+        FS_Read((unsigned char*)buf, len, handle);
+        FS_FCloseFile(handle);
         buftrav = buf;
         while (1)
         {

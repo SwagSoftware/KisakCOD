@@ -126,9 +126,8 @@ void __cdecl G_ActorEnterProne(actor_s *actor, unsigned int iTransTime)
             if (ActorProneFraction < 1.0)
             {
                 prone = actor->ProneInfo.prone;
-                v13[1] = iTransTime;
-                v13[0] = (int)(float)((float)__SPAIR64__(v13, iTransTime) * (float)ActorProneFraction);
-                actor->ProneInfo.iProneTime = level.time - v13[0];
+                int scaled = (int)((float)iTransTime * (float)ActorProneFraction);
+                actor->ProneInfo.iProneTime = level.time - scaled;
                 if (!prone)
                     MyAssertHandler(
                         "c:\\trees\\cod3\\cod3src\\src\\game\\g_actor_prone.cpp",
@@ -193,9 +192,8 @@ void __cdecl G_ActorExitProne(actor_s *actor, unsigned int iTransTime)
         }
         else
         {
-            v7[1] = iTransTime;
-            v7[0] = (int)(float)((float)__SPAIR64__(v7, iTransTime) * BG_GetActorProneFraction(p_ProneInfo, level.time));
-            time = level.time - v7[0];
+            int scaled = (int)((float)iTransTime * BG_GetActorProneFraction(p_ProneInfo, level.time));
+            time = level.time - scaled;
         }
         actor->ProneInfo.iProneTime = time;
         if (!actor->ProneInfo.prone)

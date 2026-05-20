@@ -83,6 +83,7 @@ int __cdecl Path_CompleteLookahead(const path_t *pPath);
 unsigned int __cdecl Path_AttemptedCompleteLookahead(const path_t *pPath);
 bool __cdecl Path_UsesObstacleNegotiation(const path_t *pPath);
 bool __cdecl Path_HasNegotiationNode(const path_t *path);
+bool __cdecl Path_AtEndOrNegotiation(const path_t *pPath);
 unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath);
 void __cdecl Path_GetObstacleNegotiationScript(const path_t *pPath, struct scr_animscript_t *animscript);
 int __cdecl Path_NeedsReevaluation(const path_t *pPath);

@@ -72,7 +72,10 @@ float __cdecl Actor_EventDefaultRadiusSqrd(ai_event_t eType)
     if (!v2)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_events.cpp", 68, 0, "%s", "dvar");
     v3 = (float)(v2->current.value * v2->current.value);
-    return *((float *)&v3 + 1);
+    // KISAKFIX: wrong-half-of-double (see Path_GetPathDir). Returns the default
+    // event-perception distance-squared; +1 cast on x86 reads garbage. Affects
+    // how AI react to footstep / gunshot / grenade event radii.
+    return (float)v3;
 }
 
 float __cdecl Actor_EventDefaultHeightDiff(ai_event_t eType)
@@ -80,7 +83,8 @@ float __cdecl Actor_EventDefaultHeightDiff(ai_event_t eType)
     double defaultHeight; // fp1
 
     defaultHeight = g_ai_event_info[eType].defaultHeight;
-    return *((float *)&defaultHeight + 1);
+    // KISAKFIX: wrong-half-of-double (see Path_GetPathDir).
+    return (float)defaultHeight;
 }
 
 const char *__cdecl Actor_NameForEvent(ai_event_t eType)
@@ -480,7 +484,16 @@ void __cdecl Actor_ReceiveLineEvent(
         }
         v17 = 1;
     LABEL_24:
-        Actor_EventBullet(self, originator, vStart, vEnd, vClosest, fDistSqrd, fRadiusSqrd, DONT_SUPPRESS);
+        // KISAKFIX: kisak hardcoded `DONT_SUPPRESS` here. IDA Actor_ReceiveLineEvent
+        // at 0x821f0340 passes `v17` (PPC asm puts the computed value in r10, the
+        // PARM_SUPPRESSION slot). The two assignments above (`v17 = 0` for
+        // bullet-whizz-by where originator != self->ent, `v17 = 1` for projectile
+        // impact) become live values. With the kisak constant, every enemy bullet
+        // whizzing past an NPC SKIPPED `Actor_AddSuppressionLine` →
+        // NPCs never get suppression-driven duck/take-cover/return-fire reactions to
+        // gunfire. Single largest visible AI regression. Likely cause of
+        // "actor reacts to being shot but doesn't move much".
+        Actor_EventBullet(self, originator, vStart, vEnd, vClosest, fDistSqrd, fRadiusSqrd, (PARM_SUPPRESSION)v17);
         Actor_DumpEvents(self, eType, originator);
         return;
     }
@@ -663,9 +676,9 @@ void __cdecl Actor_BroadcastLineEvent(
     double v33; // fp11
     double v34; // fp0
     double v35; // fp13
-    float v36; // [sp+50h] [-C0h] BYREF
-    float v37; // [sp+54h] [-BCh]
-    float v38; // [sp+58h] [-B8h]
+    // KISAKFIX: IDA had v36/v37/v38 at sp+0x50/0x54/0x58 (consecutive vec3), passed as
+    // &v36 to Actor_ReceiveLineEvent / Actor_EventListener_NotifyToListener. Pack into array.
+    float linePoint[3]; // was v36 (BYREF) + v37 + v38
 
     v7 = teamFlags;
     if (teamFlags > 31)
@@ -721,16 +734,16 @@ void __cdecl Actor_BroadcastLineEvent(
                 v23 = vEnd[1];
                 v24 = vEnd[2];
             }
-            v37 = v23;
-            v36 = v22;
-            v38 = v24;
+            linePoint[1] = v23;
+            linePoint[0] = v22;
+            linePoint[2] = v24;
             v25 = (float)(i->ent->r.currentOrigin[0] - (float)v22);
             v26 = (float)(i->ent->r.currentOrigin[1] - (float)v23);
             v27 = (float)((float)((float)v26 * (float)v26) + (float)((float)v25 * (float)v25));
             if (v27 <= fRadiusSqrd
                 && I_fabs((float)((float)((float)(72.0 + 0.0) * (float)0.5) + (float)(i->ent->r.currentOrigin[2] - (float)v24))) < I_fabs(defaultHeight))
             {
-                Actor_ReceiveLineEvent(i, originator, (ai_event_t)eType, vStart, vEnd, &v36, v27, fRadiusSqrd);
+                Actor_ReceiveLineEvent(i, originator, (ai_event_t)eType, vStart, vEnd, linePoint, v27, fRadiusSqrd);
             }
         }
     }
@@ -756,15 +769,15 @@ void __cdecl Actor_BroadcastLineEvent(
                 v32 = vEnd[1];
                 v33 = vEnd[2];
             }
-            v37 = v32;
-            v36 = v31;
-            v38 = v33;
+            linePoint[1] = v32;
+            linePoint[0] = v31;
+            linePoint[2] = v33;
             v34 = (float)(Entity->r.currentOrigin[0] - (float)v31);
             v35 = (float)(Entity->r.currentOrigin[1] - (float)v32);
             if ((float)((float)((float)v35 * (float)v35) + (float)((float)v34 * (float)v34)) <= fRadiusSqrd
                 && I_fabs((float)(Entity->r.currentOrigin[2] - (float)v33)) < I_fabs(defaultHeight))
             {
-                Actor_EventListener_NotifyToListener(Entity, originator, (ai_event_t)eType, &v36);
+                Actor_EventListener_NotifyToListener(Entity, originator, (ai_event_t)eType, linePoint);
             }
         }
     }

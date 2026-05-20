@@ -82,12 +82,11 @@ bool __cdecl Actor_Grenade_IsValidTrajectory(
     sentient_s *sentient; // r31
     int v36; // [sp+50h] [-130h] BYREF
     float v37; // [sp+54h] [-12Ch]
-    float v38; // [sp+58h] [-128h] BYREF
-    float v39; // [sp+5Ch] [-124h]
-    float v40; // [sp+60h] [-120h]
-    float v41; // [sp+68h] [-118h] BYREF
-    float v42; // [sp+6Ch] [-114h]
-    float v43; // [sp+70h] [-110h]
+    // KISAKFIX: v38/v39/v40 vec3 at sp+0x58..0x60 passed as &v38 to SV_SightTrace /
+    // G_DebugLineWithDuration / G_TraceCapsule. v41/v42/v43 vec3 at sp+0x68..0x70 passed as &v41.
+    // Pack into arrays so address-of-first-element works.
+    float midPos[3]; // was v38 (BYREF) + v39 + v40
+    float farPos[3]; // was v41 (BYREF) + v42 + v43
     float v44[2]; // [sp+78h] [-108h] BYREF
     float v45; // [sp+80h] [-100h]
     float v46[4]; // [sp+88h] [-F8h] BYREF
@@ -211,9 +210,9 @@ LABEL_39:
             v36 = 0;
             if (v9 <= 0.0)
             {
-                v40 = vFrom[2];
-                v38 = v19;
-                v39 = v20;
+                midPos[2] = vFrom[2];
+                midPos[0] = v19;
+                midPos[1] = v20;
             }
             else
             {
@@ -239,12 +238,12 @@ LABEL_39:
                     return 0;
                 v24 = self->ent;
                 v25 = (float)((float)(vVelocity[1] * (float)v9) + vFrom[1]);
-                v38 = (float)(*vVelocity * (float)v9) + *vFrom;
-                v39 = v25;
-                v40 = (float)((float)((float)(g_gravity->current.value * (float)v9) * (float)v9) * (float)v10) + vFrom[2];
-                SV_SightTrace(&v36, v46, v47, v44, &v38, v24->s.number, ENTITYNUM_NONE, 42004625);
+                midPos[0] = (float)(*vVelocity * (float)v9) + *vFrom;
+                midPos[1] = v25;
+                midPos[2] = (float)((float)((float)(g_gravity->current.value * (float)v9) * (float)v9) * (float)v10) + vFrom[2];
+                SV_SightTrace(&v36, v46, v47, v44, midPos, v24->s.number, ENTITYNUM_NONE, 42004625);
                 if (g_drawGrenadeHints->current.integer > 0)
-                    G_DebugLineWithDuration(v46, &v38, colorCyan, 1, 200);
+                    G_DebugLineWithDuration(v46, midPos, colorCyan, 1, 200);
                 if (v36)
                     return 0;
             }
@@ -255,27 +254,27 @@ LABEL_39:
             v28 = (float)((float)(*vVelocity * (float)v18) + *vFrom);
             v45 = (float)v27 + (float)1.0;
             v29 = self->ent;
-            v42 = (float)(vVelocity[1] * (float)v18) + vFrom[1];
-            v41 = v28;
-            v43 = (float)((float)-(float)((float)((float)(g_gravity->current.value * (float)v18) * (float)v10) - vVelocity[2])
+            farPos[1] = (float)(vVelocity[1] * (float)v18) + vFrom[1];
+            farPos[0] = v28;
+            farPos[2] = (float)((float)-(float)((float)((float)(g_gravity->current.value * (float)v18) * (float)v10) - vVelocity[2])
                 * (float)v18)
                 + vFrom[2];
-            SV_SightTrace(&v36, &v38, v47, v44, &v41, v29->s.number, ENTITYNUM_NONE, 42004625);
+            SV_SightTrace(&v36, midPos, v47, v44, farPos, v29->s.number, ENTITYNUM_NONE, 42004625);
             if (g_drawGrenadeHints->current.integer > 0)
-                G_DebugLineWithDuration(&v38, &v41, colorCyan, 1, 200);
+                G_DebugLineWithDuration(midPos, farPos, colorCyan, 1, 200);
             if (!v36)
             {
-                G_TraceCapsule(v48, &v41, v47, v44, vGoal, self->ent->s.number, 42004625);
+                G_TraceCapsule(v48, farPos, v47, v44, vGoal, self->ent->s.number, 42004625);
                 if (g_drawGrenadeHints->current.integer > 0)
-                    G_DebugLineWithDuration(&v41, vGoal, colorCyan, 1, 200);
+                    G_DebugLineWithDuration(farPos, vGoal, colorCyan, 1, 200);
                 if (v48[0].fraction == 1.0)
                     return 1;
                 EntityHitId = Trace_GetEntityHitId(v48);
                 if (EntityHitId == ENTITYNUM_WORLD)
                 {
-                    v31 = (float)((float)((float)((float)(vGoal[1] - v42) * v48[0].fraction) + v42) - vGoal[1]);
-                    v32 = (float)((float)((float)((float)(vGoal[2] - v43) * v48[0].fraction) + v43) - vGoal[2]);
-                    v33 = (float)((float)((float)((float)(*vGoal - v41) * v48[0].fraction) + v41) - *vGoal);
+                    v31 = (float)((float)((float)((float)(vGoal[1] - farPos[1]) * v48[0].fraction) + farPos[1]) - vGoal[1]);
+                    v32 = (float)((float)((float)((float)(vGoal[2] - farPos[2]) * v48[0].fraction) + farPos[2]) - vGoal[2]);
+                    v33 = (float)((float)((float)((float)(*vGoal - farPos[0]) * v48[0].fraction) + farPos[0]) - *vGoal);
                     v34 = (float)((float)((float)v33 * (float)v33)
                         + (float)((float)((float)v32 * (float)v32) + (float)((float)v31 * (float)v31)));
                     if (v34 >= 16.0)
@@ -327,9 +326,8 @@ void __cdecl Actor_Grenade_GetTossPositions(
     int v11; // r11
     double v12; // fp11
     double v13; // fp0
-    float v14; // [sp+50h] [-80h] BYREF
-    float v15; // [sp+54h] [-7Ch]
-    float v16; // [sp+58h] [-78h]
+    // KISAKFIX: v14/v15/v16 vec3 passed as &v14 to G_MissileTrace. Pack into array.
+    float traceStart[3]; // was v14 (BYREF) + v15 + v16
     float v17[4]; // [sp+60h] [-70h] BYREF
     trace_t v18; // [sp+70h] [-60h] BYREF
 
@@ -337,13 +335,13 @@ void __cdecl Actor_Grenade_GetTossPositions(
     if (!weapDef)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 306, 0, "%s", "weapDef");
     v8 = vTargetPos[2];
-    v14 = *vTargetPos;
-    v17[0] = v14;
-    v15 = vTargetPos[1];
-    v16 = (float)v8 + (float)1.0;
-    v17[1] = v15;
+    traceStart[0] = *vTargetPos;
+    v17[0] = traceStart[0];
+    traceStart[1] = vTargetPos[1];
+    traceStart[2] = (float)v8 + (float)1.0;
+    v17[1] = traceStart[1];
     v17[2] = (float)v8 - (float)1.0;
-    G_MissileTrace(&v18, &v14, v17, ENTITYNUM_NONE, 2065);
+    G_MissileTrace(&v18, traceStart, v17, ENTITYNUM_NONE, 2065);
 
     if (v18.fraction == 1.0)
         v9 = 0;
@@ -391,10 +389,10 @@ int __cdecl Actor_Grenade_GetTossPositionsFromHints(
     double v14; // fp0
     double v15; // fp31
     float *v16; // r11
-    float v18; // [sp+50h] [-90h] BYREF
-    float v19; // [sp+54h] [-8Ch]
-    float v20; // [sp+60h] [-80h] BYREF
-    float v21; // [sp+64h] [-7Ch]
+    // KISAKFIX: v18/v19 (sp+0x50/0x54) and v20/v21 (sp+0x60/0x64) are vec2 pairs passed to
+    // Vec2Normalize via &v18 / &v20. Pack into arrays.
+    float dirHintToTarget[2]; // was v18 (BYREF) + v19
+    float dirHintToFrom[2];   // was v20 (BYREF) + v21
 
     //Profile_Begin(351);
     *(double *)&v7 = (float)((float)((float)(ai_debugGrenadeHintArc->current.value * (float)0.5) + (float)180.0)
@@ -419,15 +417,15 @@ int __cdecl Actor_Grenade_GetTossPositionsFromHints(
         if ((float)(v13[1] + 10.0) >= (double)vTargetPos[2])
         {
             v14 = (float)(*v13 - vTargetPos[1]);
-            v18 = *(v13 - 1) - *vTargetPos;
-            v19 = v14;
-            v15 = Vec2Normalize(&v18);
+            dirHintToTarget[0] = *(v13 - 1) - *vTargetPos;
+            dirHintToTarget[1] = v14;
+            v15 = Vec2Normalize(dirHintToTarget);
             if (v15 <= 192.0)
             {
-                v20 = *(v13 - 1) - *vFrom;
-                v21 = *v13 - vFrom[1];
-                Vec2Normalize(&v20);
-                if ((float)((float)(v20 * v18) + (float)(v21 * v19)) <= v9 && v15 < v12)
+                dirHintToFrom[0] = *(v13 - 1) - *vFrom;
+                dirHintToFrom[1] = *v13 - vFrom[1];
+                Vec2Normalize(dirHintToFrom);
+                if ((float)((float)(dirHintToFrom[0] * dirHintToTarget[0]) + (float)(dirHintToFrom[1] * dirHintToTarget[1])) <= v9 && v15 < v12)
                 {
                     v10 = v11;
                     v12 = v15;
@@ -743,9 +741,12 @@ int __cdecl Actor_Grenade_CheckGrenadeHintToss(actor_s *self, float *vFrom, floa
     double v26; // fp31
     double v27; // fp0
     double v28; // fp12
-    float v30; // [sp+58h] [-E8h] BYREF
-    float v31; // [sp+5Ch] [-E4h]
-    float v32; // [sp+60h] [-E0h]
+    // KISAKFIX: v30/v31 vec2 passed as &v30 to Vec2Normalize. v32 is separate z-scalar but
+    // packed in the same group in IDA — keep contiguous to mirror retail.
+    float dir[3]; // was v30 (BYREF) + v31 + v32  ;  dir[0]/dir[1] are the Vec2Normalize input
+    #define v30 dir[0]
+    #define v31 dir[1]
+    #define v32 dir[2]
     float v33[28]; // [sp+68h] [-D8h] BYREF
 
     //Profile_Begin(352);
@@ -814,7 +815,7 @@ int __cdecl Actor_Grenade_CheckGrenadeHintToss(actor_s *self, float *vFrom, floa
         if (v9 >= grenadeHintCount)
             goto LABEL_30;
     }
-    v18 = Vec2Normalize(&v30);
+    v18 = Vec2Normalize(dir);
     v19 = v18;
     if (v18 >= v13)
         goto LABEL_28;
@@ -866,6 +867,9 @@ int __cdecl Actor_Grenade_CheckGrenadeHintToss(actor_s *self, float *vFrom, floa
     //Profile_EndInternal(0);
     return 1;
 }
+#undef v30
+#undef v31
+#undef v32
 
 int __cdecl compare_desperate_hints(float *pe0, float *pe1)
 {
@@ -1169,23 +1173,23 @@ void __cdecl Actor_Grenade_GetPickupPos(actor_s *self, const float *enemyPos, fl
     gentity_s *v8; // r3
     double v9; // fp12
     double v10; // fp11
-    float v11; // [sp+50h] [-40h] BYREF
-    float v12; // [sp+54h] [-3Ch]
-    float v13; // [sp+58h] [-38h]
+    // KISAKFIX: v11/v12 vec2 passed as &v11 to Vec2Normalize. v13 separate scalar.
+    float dir[2]; // was v11 (BYREF) + v12
+    float v13;
 
     iassert(self);
     iassert(enemyPos);
 
     v6 = self->pGrenade.ent();
     v7 = enemyPos[1];
-    v11 = v6->mover.decelTime - *enemyPos;
-    v12 = v6->mover.aDecelTime - (float)v7;
-    Vec2Normalize(&v11);
+    dir[0] = v6->mover.decelTime - *enemyPos;
+    dir[1] = v6->mover.aDecelTime - (float)v7;
+    Vec2Normalize(dir);
     v13 = 0.0;
     v8 = self->pGrenade.ent();
-    v9 = v12;
+    v9 = dir[1];
     v10 = v13;
-    *vGrenadePickupPos = (float)(v11 * (float)29.5) + v8->mover.decelTime;
+    *vGrenadePickupPos = (float)(dir[0] * (float)29.5) + v8->mover.decelTime;
     vGrenadePickupPos[1] = (float)((float)v9 * (float)29.5) + v8->mover.aDecelTime;
     vGrenadePickupPos[2] = (float)((float)v10 * (float)29.5) + v8->mover.speed;
 }
@@ -1198,9 +1202,9 @@ bool __cdecl Actor_Grenade_ShouldIgnore(actor_s *self, gentity_s *grenade)
     double v8; // fp0
     double v9; // fp13
     double v10; // fp12
-    float v11; // [sp+50h] [-40h] BYREF
-    float v12; // [sp+54h] [-3Ch]
-    
+    // KISAKFIX: v11/v12 vec2 passed as &v11 to Vec2Normalize.
+    float dir[2]; // was v11 (BYREF) + v12
+
     iassert(self);
     iassert(self->sentient);
     iassert(grenade);
@@ -1209,10 +1213,10 @@ bool __cdecl Actor_Grenade_ShouldIgnore(actor_s *self, gentity_s *grenade)
         return 0;
 
     ent = self->ent;
-    v11 = grenade->mover.decelTime - self->ent->r.currentOrigin[0];
-    v12 = grenade->mover.aDecelTime - ent->r.currentOrigin[1];
-    Vec2Normalize(&v11);
-    v5 = (float)((float)(self->Path.lookaheadDir[1] * v12) + (float)(self->Path.lookaheadDir[0] * v11));
+    dir[0] = grenade->mover.decelTime - self->ent->r.currentOrigin[0];
+    dir[1] = grenade->mover.aDecelTime - ent->r.currentOrigin[1];
+    Vec2Normalize(dir);
+    v5 = (float)((float)(self->Path.lookaheadDir[1] * dir[1]) + (float)(self->Path.lookaheadDir[0] * dir[0]));
     if (v5 < 0.0)
         return 1;
     if (grenade->parent.isDefined())
@@ -2279,9 +2283,8 @@ actor_think_result_t __cdecl Actor_Grenade_Acquire(actor_s *self)
     gentity_s *v3; // r30
     gentity_s *ent; // r30
     gentity_s *v6; // r3
-    float v7; // [sp+50h] [-40h] BYREF
-    float v8; // [sp+54h] [-3Ch]
-    float v9; // [sp+58h] [-38h]
+    // KISAKFIX: v7/v8/v9 vec3 passed as &v7 to Actor_FaceVector.
+    float dir[3]; // was v7 (BYREF) + v8 + v9
 
     iassert(self);
     iassert(self->pGrenade.isDefined());
@@ -2353,11 +2356,11 @@ actor_think_result_t __cdecl Actor_Grenade_Acquire(actor_s *self)
         }
         ent = self->ent;
         v6 = self->pGrenade.ent();
-        v7 = v6->mover.decelTime - ent->r.currentOrigin[0];
-        v8 = v6->mover.aDecelTime - ent->r.currentOrigin[1];
-        v9 = v6->mover.speed - ent->r.currentOrigin[2];
-        if ((float)((float)(v7 * v7) + (float)(v8 * v8)) >= 1.0)
-            Actor_FaceVector(&self->CodeOrient, &v7);
+        dir[0] = v6->mover.decelTime - ent->r.currentOrigin[0];
+        dir[1] = v6->mover.aDecelTime - ent->r.currentOrigin[1];
+        dir[2] = v6->mover.speed - ent->r.currentOrigin[2];
+        if ((float)((float)(dir[0] * dir[0]) + (float)(dir[1] * dir[1])) >= 1.0)
+            Actor_FaceVector(&self->CodeOrient, dir);
         Actor_SetOrientMode(self, AI_ORIENT_DONT_CHANGE);
         self->ScriptOrient.eMode = AI_ORIENT_INVALID;
         if (self->pGrenade.ent()->item[1].ammoCount <= level.time)

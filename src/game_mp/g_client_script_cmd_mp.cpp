@@ -12,7 +12,7 @@
 
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {
-    int32_t v2; // eax
+    int32_t wasGivenWeapon; // eax
     int32_t weaponModel; // [esp+0h] [ebp-60h]
     gentity_s *pSelf; // [esp+4h] [ebp-5Ch]
     const char *weaponName; // [esp+8h] [ebp-58h]
@@ -29,21 +29,20 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
     }
     else
     {
-        if (entref.entnum >= 0x400u)
-            MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 111, 0, "%s", "entref.entnum < MAX_GENTITIES");
+        iassert(entref.entnum < MAX_GENTITIES);
         pSelf = &g_entities[entref.entnum];
         if (!pSelf->client)
         {
             Scr_ObjectError(va("entity %i is not a player", entref.entnum));
         }
     }
+
     weaponName = Scr_GetString(0);
     weaponIndex = G_GetWeaponIndexForName(weaponName);
-    if (!pSelf->client)
-        MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 117, 0, "%s", "pSelf->client");
+
+    iassert(pSelf->client);
     ps = &pSelf->client->ps;
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+    iassert(ps);
     hadWeapon = Com_BitCheckAssert(ps->weapons, weaponIndex, 16);
     if (Scr_GetNumParam() == 2)
     {
@@ -52,7 +51,7 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
         if ((uint32_t)weaponModel >= 0x100)
         {
             LOBYTE(weaponModel) = 0;
-            v2 = G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, 0);
+            wasGivenWeapon = G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, 0);
             goto LABEL_20;
         }
         if (!weapDef->gunXModel[weaponModel])
@@ -62,9 +61,9 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
     {
         LOBYTE(weaponModel) = 0;
     }
-    v2 = G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, weaponModel);
+    wasGivenWeapon = G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, weaponModel);
 LABEL_20:
-    if (v2)
+    if (wasGivenWeapon)
     {
         _snprintf(svcmd, 0x40u, "%c \"%i\"", 74, 1);
         svcmd[63] = 0;

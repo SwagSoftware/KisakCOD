@@ -151,7 +151,12 @@ float __cdecl Actor_TeamMoveDeltaCorrection(actor_s *self, double fVelSelfSqrd)
         v2 = (float)((float)fVelSelfSqrd * (float)0.010000001);
     else
         v2 = 0.0;
-    return *((float *)&v2 + 1);
+    // KISAKFIX: wrong-half-of-double (see Path_GetPathDir / Sentient_GetScarinessForDistance).
+    // IDA AIPHYS port at 0x82213808 tail `fmr f1, fNN` returns the float in v2;
+    // `*((float*)&v2+1)` reads bytes 4-7 of the IEEE-754 double on x86 LE = garbage.
+    // Function is currently unreferenced (inlined at Actor_TeamMoveInitializeContext) but
+    // fix preserved so future re-use doesn't regress.
+    return (float)v2;
 }
 
 void __cdecl Actor_AddToList(int *dodgeEntities, int *dodgeEntityCount, int arraysz, actor_s *pOtherActor)

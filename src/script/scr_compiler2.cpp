@@ -3436,7 +3436,9 @@ void EmitAnimation(sval_u anim, sval_u sourcePos)
 	AddOpcodePos(sourcePos.sourcePosValue, SOURCE_TYPE_BREAKPOINT);
 	EmitCodepos((const char *)0xFFFFFFFF);
 
-	Scr_EmitAnimation((char *)scrCompileGlob.codePos, anim.stringValue, sourcePos.sourcePosValue);
+	if (scrCompilePub.developer_statement != SCR_DEV_IGNORE)
+		Scr_EmitAnimation((char *)scrCompileGlob.codePos, anim.stringValue, sourcePos.sourcePosValue);
+
 	Scr_CompileRemoveRefToString(anim.stringValue);
 }
 

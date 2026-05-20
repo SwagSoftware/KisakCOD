@@ -63,6 +63,11 @@ struct CustomSearchInfo_FindPath
         }
         return dist;
     }
+
+    bool IsGoal(pathnode_t *pCurrent)
+    {
+        return pCurrent == m_pNodeTo;
+    }
 };
 /* 10044 */
 struct CustomSearchInfo_FindPathWithWidth
@@ -70,6 +75,8 @@ struct CustomSearchInfo_FindPathWithWidth
     pathnode_t *m_pNodeTo;
     float width;
     float perp[2];
+
+    bool IsGoal(pathnode_t *pCurrent) { return pCurrent == m_pNodeTo; }
 
     float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
     {
@@ -87,11 +94,14 @@ struct CustomSearchInfo_FindPathWithWidth
 
         v5 = (float)(pSuccessor->constant.vOrigin[0] - vGoalPos[0]);
         v6 = (float)(pSuccessor->constant.vOrigin[1] - vGoalPos[1]);
-        float v7 = exp(a4);
+        // KISAKFIX: IDA decompile declares `long double v7 = exp(a4)` (8 bytes); kisak port
+        // collapsed v7 to float (4 bytes) but kept the `*(double*)&v7` read pattern, which
+        // on x86 reads 4 bytes of v7 + 4 bytes of stack garbage. Use double to match IDA.
+        double v7 = exp(a4);
 
-        pSuccessor->transient.costFactor = v7;
+        pSuccessor->transient.costFactor = (float)v7;
 
-        v8 = (float)((float)sqrtf((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))) * (float)*(double *)&v7);
+        v8 = (float)((float)sqrtf((float)((float)((float)v6 * (float)v6) + (float)((float)v5 * (float)v5))) * (float)v7);
         return v8;
 
         //double v4; // xmm0_8
@@ -200,6 +210,8 @@ struct CustomSearchInfo_FindPathWithLOS
     float m_fWithinDistSqrd;
     float startPos[3];
     float negotiationOverlapCost;
+
+    bool IsGoal(pathnode_t *pCurrent) { return pCurrent == m_pNodeTo; }
 
     float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
     {
@@ -367,6 +379,17 @@ struct CustomSearchInfo_CouldAttack
     {
         return 0.0f;
     }
+
+
+    bool IsGoal(pathnode_t *pCurrent)
+    {
+        if (Path_NodesVisible(pCurrent, m_pNodeTo))
+        {
+            attackNode = pCurrent;
+            return true;
+        }
+        return false;
+    }
 };
 
 /* 10054 */
@@ -376,6 +399,8 @@ struct  CustomSearchInfo_FindPathClosestPossible
     pathnode_t *m_pBestNode;
     pathnode_t *m_pNodeTo;
     float negotiationOverlapCost;
+
+    bool IsGoal(pathnode_t *pCurrent) { return pCurrent == m_pNodeTo; }
 
     float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
     {
@@ -418,10 +443,15 @@ float __cdecl Path_GetPathDir(float *delta, const float *vFrom, const float *vTo
     if (v4 <= 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 60, 0, "%s", "fDist > 0");
     v5 = delta[1];
-    v6 = v4;
     *delta = *delta * (float)((float)1.0 / (float)v4);
     delta[1] = (float)v5 * (float)((float)1.0 / (float)v4);
-    return *((float *)&v6 + 1);
+    // KISAKFIX: IDA pseudocode `return *((float*)&v6 + 1)` is a hex-rays
+    // wrong-half-of-double artifact; the PPC tail was `fmr f1, f31` where
+    // f31 held the sqrt distance. On x86 the +1 cast reads bytes 4-7 of the
+    // IEEE-754 double = garbage. `pt->fOrigLength = Path_GetPathDir(...)`
+    // (called all over path build/rebuild) was getting random values, which
+    // corrupts path lookahead / trim / dodge distance accounting.
+    return (float)v4;
 }
 
 pathnode_t *__cdecl Path_GetNegotiationNode(const path_t *pPath)
@@ -488,7 +518,10 @@ float __cdecl Path_GetDistToPathSegment(const float *vStartPos, const pathpoint_
             "%s",
             "pt->fDir2D[0] || pt->fDir2D[1]");
     v6 = I_fabs((float)((float)(pt->fDir2D[0] * (float)v5) - (float)(pt->fDir2D[1] * (float)v4)));
-    return *((float *)&v6 + 1);
+    // KISAKFIX: wrong-half-of-double (see Path_GetPathDir). IDA tail = perpendicular
+    // distance from start-pos to path-segment direction; the +1 cast reads garbage
+    // on x86. Affects path lookahead, trim, suppression evaluation.
+    return (float)v6;
 }
 
 void __cdecl Path_AddTrimmedAmount(path_t *pPath, const float *vStartPos)
@@ -785,6 +818,13 @@ bool __cdecl Path_HasNegotiationNode(const path_t *path)
     if (!path)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2164, 0, "%s", "pPath");
     return path->wPathLen > 0 && path->wNegotiationStartNode > 0;
+}
+
+bool __cdecl Path_AtEndOrNegotiation(const path_t *pPath)
+{
+    if (!pPath)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2169, 0, "%s", "pPath");
+    return pPath->wPathLen > 0 && pPath->wNegotiationStartNode == pPath->wPathLen - 1;
 }
 
 unsigned int __cdecl Path_AllowsObstacleNegotiation(const path_t *pPath)
@@ -1226,7 +1266,13 @@ bool __cdecl Path_PredictionTrace(
 
             vDown[0] = vTraceEndPos[0];
             vDown[1] = vTraceEndPos[1];
-            vDown[2] = vSource[2] - 48.0f;
+            // KISAKFIX: step-down probe distance must be 72.0 to match SP IDA
+            // (CoD3SP.exe Path_PredictionTrace at 0x821fc438). Kisak's 48 came
+            // from a different port; with it AI cannot validate any move target
+            // whose Z descent exceeds 48 units (stairs/ledges/ramps 48-72 tall
+            // fail the trace and Actor_FindPathToGoalDirect refuses the goal —
+            // NPCs sit on spawn ledges and don't follow the player).
+            vDown[2] = vSource[2] - 72.0f;
 
             G_TraceCapsule(&trace, vSource, traceMin, PREDICTION_TRACE_MAX, vDown, entityIgnore, mask);
             Vec3Lerp(vSource, vDown, trace.fraction, vTraceEndPos);
@@ -1234,7 +1280,7 @@ bool __cdecl Path_PredictionTrace(
             if (vTraceEndPos[2] < vSource[2] || trace.fraction == 1.0 || trace.normal[2] >= 0.7f)
             {
                 vTraceEndPos[2] += stepheight;
-                return I_fabs(((vTraceEndPos[2] + stepheight) - vEndPos[2])) < 48.0f;
+                return I_fabs(((vTraceEndPos[2] + stepheight) - vEndPos[2])) < 72.0f;
             }
             else
             {
@@ -1267,7 +1313,8 @@ bool __cdecl Path_PredictionTrace(
         vSource[1] = vTraceEndPos[1];
         vDown[0] = vTraceEndPos[0];
         vDown[1] = vTraceEndPos[1];
-        vDown[2] = vSource[2] - 48.0f;
+        // KISAKFIX: matches SP IDA step-down (72, not 48). See first site above.
+        vDown[2] = vSource[2] - 72.0f;
         G_TraceCapsule(&trace, vSource, traceMin, PREDICTION_TRACE_MAX, vDown, entityIgnore, mask);
         Vec3Lerp(vSource, vDown, trace.fraction, vTraceEndPos);
         if (vTraceEndPos[2] >= vSource[2] && trace.fraction != 1.0 && trace.normal[2] < 0.7f)
@@ -2047,8 +2094,8 @@ void __cdecl PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathp
 {
     int wPathLen; // r11
     float *vOrigPoint; // r31
-    float v7; // [sp+50h] [-40h] BYREF
-    float v8; // [sp+54h] [-3Ch]
+    // KISAKFIX: v7/v8 at sp+0x50/0x54 passed as &v7 to Vec2Normalize. Pack into float[2].
+    float dir[2]; // was v7 (BYREF) + v8
 
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3199, 0, "%s", "pPath");
@@ -2063,10 +2110,10 @@ void __cdecl PathCalcLookahead_CheckMinLookaheadNodes(path_t *pPath, const pathp
                 "%s",
                 "currentNode < pPath->wPathLen - 2");
         vOrigPoint = pPath->pts[currentNode].vOrigPoint;
-        v7 = *(vOrigPoint - 7) - vOrigPoint[7];
-        v8 = *(vOrigPoint - 6) - vOrigPoint[8];
-        Vec2Normalize(&v7);
-        if ((float)((float)(*(vOrigPoint - 3) * v8) + (float)(*(vOrigPoint - 4) * v7)) >= 0.866
+        dir[0] = *(vOrigPoint - 7) - vOrigPoint[7];
+        dir[1] = *(vOrigPoint - 6) - vOrigPoint[8];
+        Vec2Normalize(dir);
+        if ((float)((float)(*(vOrigPoint - 3) * dir[1]) + (float)(*(vOrigPoint - 4) * dir[0])) >= 0.866
             && (float)((float)(*(vOrigPoint - 3) * vOrigPoint[4]) + (float)(*(vOrigPoint - 4) * vOrigPoint[3])) >= 0.17299999)
         {
             ++pPath->minLookAheadNodes;
@@ -2278,12 +2325,11 @@ void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
     float *v18; // r29
     int v19; // r11
     const float *v20; // r5
-    float v21; // [sp+50h] [-60h] BYREF
-    float v22; // [sp+54h] [-5Ch]
-    float v23; // [sp+58h] [-58h]
-    float v24; // [sp+60h] [-50h] BYREF
-    float v25; // [sp+64h] [-4Ch]
-    float v26; // [sp+68h] [-48h]
+    // KISAKFIX: IDA had v21/v22/v23 at sp+0x50/0x54/0x58 (end vec3) and v24/v25/v26 at
+    // sp+0x60/0x64/0x68 (start vec3). Passed as &v24 / &v21 to G_DebugLine expecting float[3].
+    // Pack into arrays.
+    float endPt[3];   // was v21 (BYREF) + v22 + v23
+    float startPt[3]; // was v24 (BYREF) + v25 + v26
 
     if (pPath->wPathLen)
     {
@@ -2295,35 +2341,35 @@ void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
             v8 = pPath->lookaheadDir[0];
             v9 = pPath->lookaheadDir[1];
             v10 = vStartPos[1];
-            v24 = *vStartPos;
-            v25 = v10;
-            v21 = v24 + (float)((float)v8 * (float)fLookaheadDist);
-            v22 = (float)v10 + (float)((float)v9 * (float)fLookaheadDist);
-            v26 = (float)v7 + (float)16.0;
-            v23 = (float)((float)v7 + (float)v6) + (float)16.0;
-            G_DebugLine(&v24, &v21, colorRed, 0);
+            startPt[0] = *vStartPos;
+            startPt[1] = v10;
+            endPt[0] = startPt[0] + (float)((float)v8 * (float)fLookaheadDist);
+            endPt[1] = (float)v10 + (float)((float)v9 * (float)fLookaheadDist);
+            startPt[2] = (float)v7 + (float)16.0;
+            endPt[2] = (float)((float)v7 + (float)v6) + (float)16.0;
+            G_DebugLine(startPt, endPt, colorRed, 0);
         }
         wPathLen = pPath->wPathLen;
-        v26 = vStartPos[2] + (float)16.0;
+        startPt[2] = vStartPos[2] + (float)16.0;
         v12 = wPathLen;
         v13 = vStartPos[1];
-        v24 = *vStartPos;
-        v25 = v13;
+        startPt[0] = *vStartPos;
+        startPt[1] = v13;
         if (!wPathLen)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3615, 0, "%s", "i");
         v14 = v12 - 1;
         wNegotiationStartNode = pPath->wNegotiationStartNode;
-        v23 = pPath->vCurrPoint[2] + (float)16.0;
+        endPt[2] = pPath->vCurrPoint[2] + (float)16.0;
         v16 = pPath->vCurrPoint[1];
-        v21 = pPath->vCurrPoint[0];
-        v22 = v16;
+        endPt[0] = pPath->vCurrPoint[0];
+        endPt[1] = v16;
         v17 = colorBlue;
         if (v12 - 1 == wNegotiationStartNode - 1)
             v17 = colorCyan;
-        G_DebugLine(&v24, &v21, v17, 0);
-        v24 = v21;
-        v25 = v22;
-        v26 = v23;
+        G_DebugLine(startPt, endPt, v17, 0);
+        startPt[0] = endPt[0];
+        startPt[1] = endPt[1];
+        startPt[2] = endPt[2];
         if (v12 != 1)
         {
             v18 = &pPath->pts[v14].vOrigPoint[2];
@@ -2332,16 +2378,16 @@ void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
                 v18 -= 7;
                 --v14;
                 v19 = pPath->wNegotiationStartNode - 1;
-                v21 = *(v18 - 2);
-                v22 = *(v18 - 1);
+                endPt[0] = *(v18 - 2);
+                endPt[1] = *(v18 - 1);
                 v20 = colorBlue;
-                v23 = *v18 + (float)16.0;
+                endPt[2] = *v18 + (float)16.0;
                 if (v14 == v19)
                     v20 = colorCyan;
-                G_DebugLine(&v24, &v21, v20, 0);
-                v24 = v21;
-                v25 = v22;
-                v26 = v23;
+                G_DebugLine(startPt, endPt, v20, 0);
+                startPt[0] = endPt[0];
+                startPt[1] = endPt[1];
+                startPt[2] = endPt[2];
             } while (v14);
         }
     }
@@ -2567,7 +2613,6 @@ int __cdecl Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg)
     double v7; // fp2
     const char *v8; // r3
     int result; // r3
-    __int64 v10; // r11
 
     if (!pPath)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 4034, 0, "%s", "pPath");
@@ -2627,9 +2672,19 @@ int __cdecl Path_MayFaceEnemy(path_t *pPath, float *vEnemyDir, float *vOrg)
         * (float)48.0)
         - (float)72.0))
     {
-        HIDWORD(v10) = pPath->iPathTime;
-        LODWORD(v10) = level.time - HIDWORD(v10);
-        if ((float)v10 < (double)(float)((float)((float)((float)((float)((float)(pPath->lookaheadDir[1] * vEnemyDir[1])
+        // KISAKFIX: kisak port copied IDA's `__int64 v10` OVERLAPPED hex-rays artifact
+        // verbatim:
+        //   HIDWORD(v10) = pPath->iPathTime;
+        //   LODWORD(v10) = level.time - HIDWORD(v10);
+        //   if ((float)v10 < threshold) return 1;
+        // On x86 LE this builds v10 = (iPathTime << 32) | (level.time - iPathTime) — a
+        // huge int64 that always exceeds the threshold, so `Path_MayFaceEnemy` ALWAYS
+        // falls through to `return result;` (= 0) instead of allowing the AI to face the
+        // enemy during the early-path window. The PPC original holds two values in one
+        // register at different points (the OVERLAPPED int64). On x86 it must be plain
+        // int arithmetic.
+        int pathAge = level.time - pPath->iPathTime;
+        if ((float)pathAge < (double)(float)((float)((float)((float)((float)((float)(pPath->lookaheadDir[1] * vEnemyDir[1])
             + (float)(*vEnemyDir * pPath->lookaheadDir[0]))
             + (float)1.0)
             * (float)0.5)
@@ -2716,7 +2771,7 @@ LABEL_12:
 
     if constexpr (CHECK_NODETO)
     {
-        nodeToCheck = (pCurrent != custom->m_pNodeTo);
+        nodeToCheck = !custom->IsGoal(pCurrent);
     }
 
     if (nodeToCheck)
@@ -2735,18 +2790,18 @@ LABEL_12:
                 goto LABEL_12;
             }
 
-            if constexpr (USE_IGNORE)
-            {
-                if (custom->IgnoreNode(pSuccessor))
-                {
-                    continue;
-                }
-            }
-
             if (/*ignorebadplaces || */ !pCurrent->constant.Links[i].ubBadPlaceCount[eTeam])
             {
                 pSuccessor = Path_ConvertIndexToNode(pCurrent->constant.Links[i].nodeNum);
                 iassert(pSuccessor != pCurrent);
+
+                if constexpr (USE_IGNORE)
+                {
+                    if (custom->IgnoreNode(pSuccessor))
+                    {
+                        continue;
+                    }
+                }
 
                 if ((pCurrent->constant.type != NODE_NEGOTIATION_BEGIN
                         || pSuccessor->constant.type != NODE_NEGOTIATION_END
@@ -3586,10 +3641,10 @@ pathnode_t *__cdecl Path_FindPathFrom(
     bool bAllowNegotiationLinks)
 {
     pathnode_t *result; // r3
-    _BYTE v13[16]; // [sp+50h] [-350h] BYREF
-    pathsort_t v14[69]; // [sp+60h] [-340h] BYREF
+    int nodeCount;
+    pathsort_t v14[64];
 
-    result = Path_NearestNode(vGoalPos, v14, -2, 192.0, (int *)vStartPos, (int)v13, (nearestNodeHeightCheck)64);
+    result = Path_NearestNode(vGoalPos, v14, -2, 192.0f, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
     if (result)
         return (pathnode_t *)Path_FindPathFromTo(
             pPath,
@@ -3747,7 +3802,6 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
     int bAtStart; // r10
     double bestForwardDot; // fp24
     double prevDot; // fp25
-    float *fDir2D; // r31
     float vStartDir[3];
 
     iassert(pPath);
@@ -3789,8 +3843,6 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
         return;
     }
 
-    fDir2D = pPath->pts[i].fDir2D;
-
     float offset[2]; // v33, v34
 
     i = pPath->wPathLen - 2;
@@ -3804,7 +3856,7 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
         if (bAtStart)
             fCurrLength = pPath->fCurrLength;
         else
-            fCurrLength = fDir2D[2];
+            fCurrLength = pt->fOrigLength;
 
         fLength = fCurrLength;
 
@@ -4310,12 +4362,23 @@ int __cdecl Path_AttemptDodge(
         if (startIndex >= maxIndex)
             goto LABEL_103;
 
-        point = &pPath->pts[++startIndex + 1];
+        // KISAKFIX: kisak port had `point = &pPath->pts[++startIndex + 1]` which
+        // pre-incremented startIndex, making `point` start at `pts[orig+2]` (not
+        // IDA's `pts[orig+1]`). After ++point in the loop body, the first checked
+        // node was `pts[orig+3]` — one too far. The final startIndex was also one
+        // too high. IDA Path_AttemptDodge at 0x82201e68:
+        //   v42 = v30 + 1;
+        //   v43 = &pPath->pts[v30 + 1];
+        //   do { ++v43; ++v30; ++v42; }
+        //   while (Vec2DistanceSq(v43->vOrigPoint, vOrg) >= 1406.25 && v42 < v41);
+        // The `v42 < v41` compares the index+1, so the loop-termination check on
+        // x86 should be `startIndex + 1 < maxIndex`.
+        point = &pPath->pts[startIndex + 1];
         do
         {
             ++point;
             ++startIndex;
-        } while (Vec2DistanceSq(point->vOrigPoint, vOrg) >= 1406.25 && startIndex < maxIndex); // KISAKTODO: check startIndex here
+        } while (Vec2DistanceSq(point->vOrigPoint, vOrg) >= 1406.25 && startIndex + 1 < maxIndex);
 
         //a20 = startingIndex;
         //v44 = ai_showDodge->current.color[0];
@@ -4338,7 +4401,13 @@ int __cdecl Path_AttemptDodge(
             if (bCheckLookahead)
             {
                 vDelta[0] = vNewDodgeEnd[0] - vNewDodgeStart[0];
-                vDelta[1] = vNewDodgeEnd[1] = vNewDodgeStart[1];
+                // KISAKFIX: chained-assignment typo. `vDelta[1] = vNewDodgeEnd[1] = vNewDodgeStart[1]`
+                // both CLOBBERS vNewDodgeEnd[1] (used later in this block) and stores the
+                // absolute Y of vNewDodgeStart into vDelta[1] instead of the delta. IDA
+                // Path_AttemptDodge at 0x82201e68 LABEL_103: `v88 = v90 - v93;` (delta Y).
+                // Bug causes Vec2Normalize to return wrong magnitude → erratic >15.0 branch
+                // → AI dodges sideways into walls or skips the dodge entirely.
+                vDelta[1] = vNewDodgeEnd[1] - vNewDodgeStart[1];
 
                 if (Vec2Normalize(vDelta) > 15.0f)
                 {

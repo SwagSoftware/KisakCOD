@@ -1101,8 +1101,13 @@ char __cdecl DynEntCl_EventNeedsProcessed(int32_t localClientNum, int32_t source
     if (CG_GetLocalClientGlobalsForEnt(localClientNum, sourceEntityNum))
     {
         nextSnap = CG_GetLocalClientGlobals(localClientNum)->nextSnap;
+#ifdef KISAK_MP
         if ((nextSnap->ps.otherFlags & 6) == 0 || sourceEntityNum != nextSnap->ps.clientNum)
             return 0;
+#else
+        if (sourceEntityNum != nextSnap->ps.clientNum)
+            return 0;
+#endif
     }
     else if (localClientNum != RETURN_ZERO32())
     {

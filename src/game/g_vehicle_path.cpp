@@ -109,9 +109,8 @@ void __cdecl VP_SetScriptVariable(const char *key, const char *value, vehicle_no
 {
     unsigned int index; // r30
     int type; // [sp+50h] [-40h] BYREF
-    float x; // [sp+58h] [-38h] BYREF
-    float y; // [sp+5Ch] [-34h] BYREF
-    float z; // [sp+60h] [-30h] BYREF
+
+    float vec[3]; // packed x/y/z
 
     index = Scr_FindField(key, &type);
     if (index)
@@ -123,11 +122,11 @@ void __cdecl VP_SetScriptVariable(const char *key, const char *value, vehicle_no
             Scr_SetDynamicEntityField(node->index, 3, index);
             break;
         case 4:
-            x = 0.0;
-            y = 0.0;
-            z = 0.0;
-            sscanf(value, "%f %f %f", &x, &y, &z);
-            Scr_AddVector(&x);
+            vec[0] = 0.0;
+            vec[1] = 0.0;
+            vec[2] = 0.0;
+            sscanf(value, "%f %f %f", &vec[0], &vec[1], &vec[2]);
+            Scr_AddVector(vec);
             Scr_SetDynamicEntityField(node->index, 3, index);
             break;
         case 5:
@@ -577,32 +576,28 @@ LABEL_24:
 
 float __cdecl VP_GetSpeed(const vehicle_pathpos_t *vpp)
 {
-    vehicle_node_t *v1; // r11
+    vehicle_node_t *node; // r11
     int nextIdx; // r9
-    double speed; // fp1
 
-    v1 = &s_nodes[vpp->nodeIdx];
-    nextIdx = v1->nextIdx;
+    node = &s_nodes[vpp->nodeIdx];
+    nextIdx = node->nextIdx;
     if (nextIdx >= 0)
-        speed = (float)((float)((float)(s_nodes[nextIdx].speed - v1->speed) * vpp->frac) + v1->speed);
+        return (((s_nodes[nextIdx].speed - node->speed) * vpp->frac) + node->speed);
     else
-        speed = v1->speed;
-    return *((float *)&speed + 1);
+        return node->speed;
 }
 
 float __cdecl VP_GetLookAhead(const vehicle_pathpos_t *vpp)
 {
-    vehicle_node_t *v1; // r11
+    vehicle_node_t *node; // r11
     int nextIdx; // r9
-    double lookAhead; // fp1
 
-    v1 = &s_nodes[vpp->nodeIdx];
-    nextIdx = v1->nextIdx;
+    node = &s_nodes[vpp->nodeIdx];
+    nextIdx = node->nextIdx;
     if (nextIdx >= 0)
-        lookAhead = (float)((float)((float)(s_nodes[nextIdx].lookAhead - v1->lookAhead) * vpp->frac) + v1->lookAhead);
+        return (((s_nodes[nextIdx].lookAhead - node->lookAhead) * vpp->frac) + node->lookAhead);
     else
-        lookAhead = v1->lookAhead;
-    return *((float *)&lookAhead + 1);
+        return node->lookAhead;
 }
 
 float __cdecl VP_GetSlide(const vehicle_pathpos_t *vpp)
@@ -626,23 +621,23 @@ float __cdecl VP_GetSlide(const vehicle_pathpos_t *vpp)
             if (!v5->rotated)
             {
                 frac = (float)((float)1.0 - vpp->frac);
-                return *((float *)&frac + 1);
+                return (float)frac;
             }
         }
         else if (v5->rotated)
         {
             frac = vpp->frac;
-            return *((float *)&frac + 1);
+            return (float)frac;
         }
     LABEL_12:
         frac = 0.0;
-        return *((float *)&frac + 1);
+        return (float)frac;
     }
     if (!rotated)
         goto LABEL_12;
 LABEL_3:
     frac = 1.0;
-    return *((float *)&frac + 1);
+    return (float)frac;
 }
 
 void __cdecl VP_GetAngles(const vehicle_pathpos_t *vpp, float *angles)
@@ -655,12 +650,8 @@ void __cdecl VP_GetAngles(const vehicle_pathpos_t *vpp, float *angles)
     double v9; // fp31
     long double v10; // fp2
     long double v11; // fp2
-    float v12; // [sp+50h] [-60h] BYREF
-    float v13; // [sp+54h] [-5Ch]
-    float v14; // [sp+58h] [-58h]
-    float v15; // [sp+60h] [-50h] BYREF
-    float v16; // [sp+64h] [-4Ch]
-    float v17; // [sp+68h] [-48h]
+    float anglesEnd[3];   // was v12 (BYREF) + v13 + v14
+    float anglesStart[3]; // was v15 (BYREF) + v16 + v17
 
     v4 = &s_nodes[vpp->nodeIdx];
     nextIdx = v4->nextIdx;
@@ -679,12 +670,12 @@ void __cdecl VP_GetAngles(const vehicle_pathpos_t *vpp, float *angles)
     {
         if (v6->rotated)
         {
-            v15 = v4->angles[0];
-            v16 = v4->angles[1];
-            v17 = v4->angles[2];
-            v12 = v6->angles[0];
-            v13 = v6->angles[1];
-            v14 = v6->angles[2];
+            anglesStart[0] = v4->angles[0];
+            anglesStart[1] = v4->angles[1];
+            anglesStart[2] = v4->angles[2];
+            anglesEnd[0] = v6->angles[0];
+            anglesEnd[1] = v6->angles[1];
+            anglesEnd[2] = v6->angles[2];
             goto LABEL_13;
         }
     }
@@ -694,25 +685,25 @@ void __cdecl VP_GetAngles(const vehicle_pathpos_t *vpp, float *angles)
             return;
         if (v6->rotated)
         {
-            v15 = *angles;
-            v16 = angles[1];
-            v17 = angles[2];
-            v12 = v6->angles[0];
-            v13 = v6->angles[1];
-            v14 = v6->angles[2];
+            anglesStart[0] = *angles;
+            anglesStart[1] = angles[1];
+            anglesStart[2] = angles[2];
+            anglesEnd[0] = v6->angles[0];
+            anglesEnd[1] = v6->angles[1];
+            anglesEnd[2] = v6->angles[2];
             goto LABEL_13;
         }
     }
-    v12 = *angles;
-    v13 = angles[1];
-    v14 = angles[2];
-    v15 = v4->angles[0];
-    v16 = v4->angles[1];
-    v17 = v4->angles[2];
+    anglesEnd[0] = *angles;
+    anglesEnd[1] = angles[1];
+    anglesEnd[2] = angles[2];
+    anglesStart[0] = v4->angles[0];
+    anglesStart[1] = v4->angles[1];
+    anglesStart[2] = v4->angles[2];
 LABEL_13:
     for (i = 0; i < 3; ++i)
     {
-        v8 = LerpAngle(*(float *)((char *)&v15 + i * 4), *(float *)((char *)&v12 + i * 4), vpp->frac);
+        v8 = LerpAngle(anglesStart[i], anglesEnd[i], vpp->frac);
         v9 = (float)((float)v8 * (float)0.0027777778);
         angles[i] = v8;
         *(double *)&v10 = (float)((float)((float)v8 * (float)0.0027777778) + (float)0.5);
@@ -833,8 +824,8 @@ LABEL_15:
     v13 = v7->nextIdx;
     vpp->frac = frac;
     v14 = &s_nodes[nodeIdx];
-    //vpp->endOfPath = _cntlzw(v13) == 0;
-    vpp->endOfPath = v13;
+
+    vpp->endOfPath = (v13 < 0);
     vpp->speed = VP_GetSpeed(vpp);
     vpp->lookAhead = VP_GetLookAhead(vpp);
     vpp->slide = VP_GetSlide(vpp);

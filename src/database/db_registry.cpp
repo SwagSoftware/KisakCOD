@@ -2322,7 +2322,8 @@ void __cdecl  DB_Thread(uint32_t threadContext)
 
     iassert(threadContext == THREAD_CONTEXT_DATABASE);
     Value = (jmp_buf *)Sys_GetValue(2);
-    if (_setjmp(*Value))
+    
+    if (setjmp(*Value))
     {
         Profile_Recover(1);
 #ifdef __llvm__ 

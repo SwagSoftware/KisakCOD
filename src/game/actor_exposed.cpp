@@ -533,14 +533,19 @@ bool Actor_Exposed_CheckStopMovingAndStartCombat(actor_s *self)
     if (self->sentient->pClaimedNode && !Actor_KeepClaimedNode(self))
         return Actor_PointAt(self->ent->r.currentOrigin, self->sentient->pClaimedNode->constant.vOrigin);
 
-    // Compute distance to goal with a fallback to 64 unit offset.
-    float nearDistance = (self->codeGoal.radius * 0.5f) - 64.0f;
-
-    // Clamp the value: if negative, use 0 instead (fsel emulation).
-    float finalDistance = (nearDistance >= 0.0f) ? nearDistance : 0.0f;
-
-    // Check if we're near the goal within the calculated distance.
-    return Actor_PointNearGoal(self->ent->r.currentOrigin, &self->codeGoal, -finalDistance);
+    // KISAKFIX: kisak interpreted the IDA `fsel f0, f12, f13, f0` as
+    // `max(radius*0.5 - 64, 0)`. IDA `Actor_Exposed_CheckStopMovingAndStartCombat`
+    // at 0x821f2488 disasm:
+    //   fmuls f0, f13, f0  ; f0 = radius * 0.5
+    //   lfs   f13, 64.0
+    //   fsubs f12, f0, f13 ; f12 = radius*0.5 - 64    (discriminant)
+    //   fsel  f0, f12, f13, f0 ; if (radius*0.5 - 64 >= 0) ? 64 : radius*0.5
+    // i.e. `buffer = min(radius*0.5, 64.0)`. For radius < 256 the values
+    // diverge: e.g. radius=200, IDA buffer=64, kisak buffer=36 → AI commits to
+    // combat too early on small-radius cover goals.
+    float halfRadius = self->codeGoal.radius * 0.5f;
+    float buffer = (halfRadius >= 64.0f) ? 64.0f : halfRadius;
+    return Actor_PointNearGoal(self->ent->r.currentOrigin, &self->codeGoal, -buffer);
 }
 
 

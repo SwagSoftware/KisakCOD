@@ -154,44 +154,28 @@ int __cdecl CG_CheckPlayerForLowAmmo(const cg_s *cgameGlob)
         return CG_CheckPlayerForLowAmmoSpecific(cgameGlob, cgameGlob->predictedPlayerState.weapon);
 }
 
-// local variable allocation has failed, the output may be wrong!
 int __cdecl CG_CheckPlayerForLowClipSpecific(const cg_s *cgameGlob, unsigned int weapIndex)
 {
-    int v4; // r31
-    WeaponDef *WeaponDef; // r3
-    __int64 v7; // r11 OVERLAPPED
-    int result; // r3
-    double v9; // fp0
+    if (!weapIndex)
+        return 0;
+    if (BG_WeaponIsClipOnly(weapIndex))
+        return 0;
 
-    if (weapIndex)
-    {
-        if (!BG_WeaponIsClipOnly(weapIndex))
-        {
-            v4 = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIndex)];
-            if (v4 >= 0)
-            {
-                if (v4 > 999)
-                    v4 = 999;
-                WeaponDef = BG_GetWeaponDef(weapIndex);
-                LODWORD(v7) = WeaponDef->iClipSize;
-                if ((int)v7 > 999)
-                {
-                    LODWORD(v7) = 999;
-                    goto LABEL_9;
-                }
-                if ((int)v7 > 0)
-                {
-                LABEL_9:
-                    HIDWORD(v7) = v4;
-                    v9 = (float)(WeaponDef->lowAmmoWarningThreshold * (float)v7);
-                    result = 1;
-                    if ((float)*(__int64 *)((char *)&v7 + 4) <= v9)
-                        return result;
-                }
-            }
-        }
-    }
-    return 0;
+    int currentClip = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIndex)];
+    if (currentClip < 0)
+        return 0;
+    if (currentClip > 999)
+        currentClip = 999;
+
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+    int clipSize = weapDef->iClipSize;
+    if (clipSize > 999)
+        clipSize = 999;
+    if (clipSize <= 0)
+        return 0;
+
+    float threshold = weapDef->lowAmmoWarningThreshold * (float)clipSize;
+    return (float)currentClip <= threshold;
 }
 
 int __cdecl CG_CheckPlayerForLowClip(const cg_s *cgameGlob)
@@ -2258,9 +2242,9 @@ if (color[3] != 0.0)
 {
     iassert(cgameGlob->nextSnap);
     cent = CG_GetEntity(localClientNum, cgameGlob->nextSnap->ps.clientNum);
-    if ((cgameGlob->nextSnap->ps.otherFlags & 4) != 0 && cgameGlob->weaponSelect < BG_GetNumWeapons())
-        weapIndex = cgameGlob->weaponSelect;
-    else
+
+    weapIndex = CG_GetSelectedWeaponIndex(cgameGlob);
+    if (!weapIndex)
         weapIndex = cent->nextState.weapon;
     if (weapIndex)
     {
@@ -3138,6 +3122,17 @@ void __cdecl CG_OwnerDraw(
     iassert(ps);
     //iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
 
+    OffhandClass offSecond;
+    if (ps->offhandSecondary)
+    {
+        iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
+        offSecond = OFFHAND_CLASS_FLASH_GRENADE;
+    }
+    else
+    {
+        offSecond = OFFHAND_CLASS_SMOKE_GRENADE;
+    }
+
     rect.x = x;
     rect.y = y;
     rect.w = w;
@@ -3202,20 +3197,28 @@ void __cdecl CG_OwnerDraw(
         CG_DrawPausedMenuLine(localClientNum, &rect, font, scale, color, textStyle);
         break;
     case 103:
-    case 104:
         CG_DrawOffHandIcon(localClientNum, &rect, scale, color, material, OFFHAND_CLASS_FRAG_GRENADE);
         break;
+    case 104:
+        CG_DrawOffHandIcon(localClientNum, &rect, scale, color, material, offSecond);
+        break;
     case 105:
-    case 106:
         CG_DrawOffHandAmmo(localClientNum, &rect, font, scale, color, textStyle, OFFHAND_CLASS_FRAG_GRENADE);
         break;
+    case 106:
+        CG_DrawOffHandAmmo(localClientNum, &rect, font, scale, color, textStyle, offSecond);
+        break;
     case 107:
-    case 108:
         CG_DrawOffHandName(localClientNum, &rect, font, scale, color, textStyle, OFFHAND_CLASS_FRAG_GRENADE);
         break;
+    case 108:
+        CG_DrawOffHandName(localClientNum, &rect, font, scale, color, textStyle, offSecond);
+        break;
     case 109:
-    case 110:
         CG_DrawOffHandHighlight(localClientNum, &rect, scale, color, material, OFFHAND_CLASS_FRAG_GRENADE);
+        break;
+    case 110:
+        CG_DrawOffHandHighlight(localClientNum, &rect, scale, color, material, offSecond);
         break;
     case 112:
         CG_DrawPlayerLowHealthOverlay(localClientNum, &rect, material, color);

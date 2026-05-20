@@ -307,10 +307,14 @@ void __cdecl G_PruneLoadedCorpses()
     int *v8; // r29
     int v9; // r31
     unsigned int entnum; // r7
-    _BYTE v11[24]; // [sp+50h] [-90h] BYREF
-    char v12; // [sp+68h] [-78h] BYREF
+    // KISAKFIX: IDA pseudocode rendered the 64-byte int[16] buffer as `_BYTE v11[24]; char v12`
+    // (stack-slot collapse — v11 ended at sp+0x68, v12 at sp+0x68 was really `&v11[6]`). Kisak
+    // port copied this literally: the QWORD-fill loop writes 64 bytes into v11[24] (UB), and
+    // the "v8 = &v12" read is undefined unless v11/v12 happen to be contiguous. With >6 corpses
+    // on a savegame load, this corrupts stack (return addr, qsort comparator ptr, locals).
+    int corpseIndices[16]; // [sp+50h] BYREF — was: _BYTE v11[24] + char v12
 
-    v0 = (_QWORD*)v11;
+    v0 = (_QWORD*)corpseIndices;
     v1 = 8;
     do
     {
@@ -319,7 +323,7 @@ void __cdecl G_PruneLoadedCorpses()
     } while (v1);
     v2 = 0;
     v3 = 0;
-    v4 = (unsigned int*)v11;
+    v4 = (unsigned int*)corpseIndices;
     p_entnum = &g_scr_data.actorCorpseInfo[0].entnum;
     do
     {
@@ -338,9 +342,9 @@ void __cdecl G_PruneLoadedCorpses()
         iassert(ent);
         iassert(ent->sentient);
         Sentient_GetEyePosition(ent->sentient, playerEyePos);
-        qsort(v11, v2, 4u, (int(__cdecl *)(const void *, const void *))G_PruneCorpsesSortCmp);
+        qsort(corpseIndices, v2, 4u, (int(__cdecl *)(const void *, const void *))G_PruneCorpsesSortCmp);
         v7 = v2 - 6;
-        v8 = (int *)&v12;
+        v8 = &corpseIndices[6]; // was: (int*)&v12 — really &v11[6] after stack-slot fix
         do
         {
             v9 = *v8;
@@ -524,32 +528,40 @@ void __cdecl Actor_GetBodyPlantAngles(
     double v17; // fp31
     double v18; // fp12
     double v19; // fp13
-    float v20; // [sp+50h] [-90h] BYREF
-    float v21; // [sp+54h] [-8Ch]
-    float v22; // [sp+58h] [-88h]
-    float v23; // [sp+60h] [-80h] BYREF
-    float v24; // [sp+64h] [-7Ch]
-    float v25; // [sp+68h] [-78h]
-    float right[4]; // [sp+70h] [-70h] BYREF
-    float v27[4]; // [sp+80h] [-60h] BYREF
+    // KISAKFIX: IDA had v20/v21/v22 at sp+0x50/0x54/0x58 (start vec) and v23/v24/v25 at
+    // sp+0x60/0x64/0x68 (end vec). Both passed as &v20 / &v23 to G_TraceCapsuleComplete
+    // expecting float[3]. Pack into arrays so the address-of-first-element works.
+    float traceStart[3]; // was v20 (BYREF) + v21 + v22
+    float traceEnd[3];   // was v23 (BYREF) + v24 + v25
+    // KISAKFIX: IDA shows two BYREF float[3] locals (var_70/var_60) populated by
+    // a single YawVectors call. On PPC ABI r4 = var_70 (forward output) and
+    // r5 = var_60 (right output). First Actor_SetBodyPlantAngle uses var_70
+    // (forward); second uses var_60 (right). Kisak port called
+    // `YawVectors(fYaw, NULL, right)` — which on x86 cdecl puts the RIGHT vec
+    // into the `right` array and never populates the second slot — then passed
+    // `right` to the first SetBodyPlantAngle (where IDA passes forward) and
+    // `v27` (UNINITIALIZED) to the second (where IDA passes right). Body-plant
+    // angle math is fed wrong vectors.
+    float forward[3];
+    float right[3];
 
     iassert(pfPitch);
 
     v15 = vOrigin[2];
-    v20 = *vOrigin;
-    v23 = v20;
-    v21 = vOrigin[1];
-    v22 = (float)v15 + (float)30.0;
-    v24 = v21;
-    v25 = (float)v15 - (float)30.0;
-    YawVectors(fYaw, NULL, right); // KISAKTODO: "right" might not be right
-    v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, right, pfPitch);
+    traceStart[0] = *vOrigin;
+    traceEnd[0] = traceStart[0];
+    traceStart[1] = vOrigin[1];
+    traceStart[2] = (float)v15 + (float)30.0;
+    traceEnd[1] = traceStart[1];
+    traceEnd[2] = (float)v15 - (float)30.0;
+    YawVectors(fYaw, forward, right);
+    v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, forward, pfPitch);
     if (pfHeight)
     {
         if (fabsf(*pfPitch) >= 30.0)
             *pfHeight = 0.0;
         else
-            v16 = (float)((float)(Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, v27, pfHeight)
+            v16 = (float)((float)(Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, right, pfHeight)
                 + (float)v16)
                 * (float)0.5);
     }
@@ -558,15 +570,15 @@ void __cdecl Actor_GetBodyPlantAngles(
         v17 = (float)((float)v16 - vOrigin[2]);
         if (v17 < 0.0)
         {
-            v20 = *vOrigin;
-            v23 = v20;
+            traceStart[0] = *vOrigin;
+            traceEnd[0] = traceStart[0];
             v18 = vOrigin[2];
             v19 = vOrigin[1];
-            v22 = vOrigin[2];
-            v21 = v19;
-            v24 = v19;
-            v25 = (float)v18 - (float)1.0;
-            if (G_TraceCapsuleComplete(&v20, actorMins, actorMaxs, &v23, (int)iEntNum, iClipMask))
+            traceStart[2] = vOrigin[2];
+            traceStart[1] = v19;
+            traceEnd[1] = v19;
+            traceEnd[2] = (float)v18 - (float)1.0;
+            if (G_TraceCapsuleComplete(traceStart, actorMins, actorMaxs, traceEnd, (int)iEntNum, iClipMask))
                 v17 = 0.0;
         }
         *pfRoll = v17;
@@ -620,6 +632,14 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
         {
             Actor_GetBodyPlantAngles(entNum, clipMask, origin, currentYaw, &pitch, &roll, &height);
 
+            // KISAKFIX: IDA Actor_OrientCorpseToGround at 0x821ea480 uses
+            // `fsel + fmadds` = `current += sign * rate` (rate-limited step toward
+            // target by ±rate). Kisak port wrote `current += diff * rate * sign`
+            // which = `current += |diff| * rate` (always positive, no rate limit)
+            // — overshoots every frame, e.g. typical 20° pitchDiff → 120° jump.
+            // Also body-height rate is 0.6 (not 6.0) and the waist-pitch path was
+            // missing the `* sign` entirely. Result: corpse pitch/waist/height
+            // spasm wildly.
             float pitchDiff = AngleSubtract(pitch, p_proneInfo->fTorsoPitch);
             if (I_fabs(pitchDiff) <= 6.0f)
             {
@@ -628,7 +648,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
             else
             {
                 float sign = (pitchDiff >= 0.0f) ? 1.0f : -1.0f;
-                p_proneInfo->fTorsoPitch += (pitchDiff * 6.0f * sign);
+                p_proneInfo->fTorsoPitch += sign * 6.0f;
             }
 
             float waistPitchDiff = AngleSubtract(roll, p_proneInfo->fWaistPitch);
@@ -639,7 +659,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
             else
             {
                 float sign = (waistPitchDiff >= 0.0f) ? 1.0f : -1.0f;
-                p_proneInfo->fWaistPitch += (waistPitchDiff * 6.0f);
+                p_proneInfo->fWaistPitch += sign * 6.0f;
             }
 
             float heightDiff = height - p_proneInfo->fBodyHeight;
@@ -650,7 +670,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
             else
             {
                 float sign = (heightDiff >= 0.0f) ? 1.0f : -1.0f;
-                p_proneInfo->fBodyHeight += (heightDiff * 6.0f);
+                p_proneInfo->fBodyHeight += sign * 0.60000002f;
             }
         }
         else
@@ -690,6 +710,11 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
         {
             Actor_GetBodyPlantAngles(number, clipMask, currentOrigin, yaw, &pitch, NULL, &height);
 
+            // KISAKFIX: same rate-limited-step bug as Actor_OrientCorpseToGround above.
+            // IDA Actor_OrientPitchToGround at 0x821ea62c uses `current += sign * rate`;
+            // kisak port wrote `current += diff * rate * sign` = `|diff| * rate`.
+            // Affects ALIVE actors with `ProneInfo.orientPitch` set every Think tick —
+            // prone enemies pitch-spasm and float/sink vertically.
             float diff = AngleSubtract(pitch, p_ProneInfo->fTorsoPitch);
             if (I_fabs(diff) <= 6.0)
             {
@@ -698,7 +723,7 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
             else
             {
                 float sign = (diff >= 0.0f) ? 1.0f : -1.0f;
-                p_ProneInfo->fTorsoPitch += (diff * 6.0f * sign);
+                p_ProneInfo->fTorsoPitch += sign * 6.0f;
             }
 
             float delta = height - p_ProneInfo->fBodyHeight;
@@ -709,7 +734,7 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
             else
             {
                 float sign = (delta >= 0.0f) ? 1.0f : -1.0f;
-                p_ProneInfo->fBodyHeight += (delta * 0.6f * sign);
+                p_ProneInfo->fBodyHeight += sign * 0.60000002f;
             }
         }
         else

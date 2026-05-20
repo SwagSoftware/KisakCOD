@@ -221,7 +221,7 @@ gentity_s *__cdecl SelectInitialSpawnPoint(float *origin, float *angles)
         v4 = G_Find(v4, 284, scr_const.info_player_deathmatch);
         if (!v4)
             return SelectSpawnPoint(vec3_origin, origin, angles);
-    }
+        }
     if (SpotWouldTelefrag(v4))
         return SelectSpawnPoint(vec3_origin, origin, angles);
     *origin = v4->r.currentOrigin[0];

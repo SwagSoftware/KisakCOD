@@ -1260,16 +1260,14 @@ void GScr_line()
     float v2[4]; // [sp+50h] [-60h] BYREF
     float v3[4]; // [sp+60h] [-50h] BYREF
     float v4[4]; // [sp+70h] [-40h] BYREF
-    float v5; // [sp+80h] [-30h] BYREF
-    float v6; // [sp+84h] [-2Ch]
-    float v7; // [sp+88h] [-28h]
+    float color[3];
     float Float; // [sp+8Ch] [-24h]
 
     Int = 0;
     v1 = 0;
-    v5 = 1.0;
-    v6 = 1.0;
-    v7 = 1.0;
+    color[0] = 1.0;
+    color[1] = 1.0;
+    color[2] = 1.0;
     Float = 1.0;
     switch (Scr_GetNumParam())
     {
@@ -1289,9 +1287,9 @@ void GScr_line()
         Float = Scr_GetFloat(3);
     LABEL_5:
         Scr_GetVector(2u, v2);
-        v5 = v2[0];
-        v6 = v2[1];
-        v7 = v2[2];
+        color[0] = v2[0];
+        color[1] = v2[1];
+        color[2] = v2[2];
     LABEL_6:
         Scr_GetVector(1u, v3);
         Scr_GetVector(0, v4);
@@ -1300,7 +1298,7 @@ void GScr_line()
         Scr_Error("illegal call to line()");
         break;
     }
-    CL_AddDebugLine(v4, v3, &v5, v1, Int, 1);
+    CL_AddDebugLine(v4, v3, color, v1, Int, 1);
 }
 
 void assertCmd()
@@ -2822,12 +2820,13 @@ void __cdecl ScrCmd_dospawn(scr_entref_t entref)
         v5 = v2->r.currentOrigin[2];
         v6 = v2->r.currentOrigin[1];
         v7 = v2->r.currentOrigin[0];
-        SL_ConvertToString(v2->classname);
+
+        const char *typeName = SL_ConvertToString(v2->classname);
         v8 = va(
             "dospawn can only be called on actor spawners\n"
             "attempted to call dospawn on entity with name '%s' of type '%s' at (%.0f %.0f %.0f)\n",
             v4,
-            (const char *)HIDWORD(v7),
+            typeName,
             v7,
             v6,
             v5);
@@ -2876,12 +2875,12 @@ void __cdecl ScrCmd_StalingradSpawn(scr_entref_t entref)
         v5 = v2->r.currentOrigin[2];
         v6 = v2->r.currentOrigin[1];
         v7 = v2->r.currentOrigin[0];
-        SL_ConvertToString(v2->classname);
+        const char *typeName_sg = SL_ConvertToString(v2->classname);
         v8 = va(
             "dospawn can only be called on actor spawners\n"
             "attempted to call dospawn on entity with name '%s' of type '%s' at (%.0f %.0f %.0f)\n",
             v4,
-            (const char *)HIDWORD(v7),
+            typeName_sg,
             v7,
             v6,
             v5);
@@ -3152,47 +3151,53 @@ void __cdecl ScrCmd_MagicGrenadeManual(scr_entref_t entref)
     }
 }
 
-// aislop
 void __cdecl Scr_BulletSpread()
 {
-    float src[3], dst[3], dir[3], basis[3][3];
-    float spread;
-    float *weaponDef;
-    float magnitude, invMag;
-    float delta[3];
+    float src[3];     // sp+0x60..0x68 in IDA
+    float dst[3];     // sp+0x50..0x58 -- also reused as Bullet_Endpos's end-out
+    weaponParms wp;   // sp+0x70..0xAC -- built inline by IDA (forward+right+up+
+                      // muzzleTrace+gunForward+weapDef, 64 bytes)
 
-    // Get vectors and spread value from script arguments
-    Scr_GetVector(0, src);        // Source point
-    Scr_GetVector(1, dst);        // Destination point
-    spread = Scr_GetFloat(2);     // Spread amount
+    Scr_GetVector(0, src);
+    Scr_GetVector(1, dst);
+    float spread = Scr_GetFloat(2);
 
-    // Compute delta = dst - src
-    delta[0] = dst[0] - src[0];
-    delta[1] = dst[1] - src[1];
-    delta[2] = dst[2] - src[2];
+    wp.weapDef = BG_GetWeaponDef(0);
+    wp.muzzleTrace[0] = src[0];
+    wp.muzzleTrace[1] = src[1];
+    wp.muzzleTrace[2] = src[2];
 
-    // Normalize direction
-    magnitude = sqrtf(delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2]);
-    if (magnitude == 0.0f) {
-        Scr_Error("Zero-length vector in bullet spread calculation.");
-        return;
-    }
+    // Normalized direction src -> dst. IDA uses fsel(-sqrt, 1.0, sqrt) safe
+    // reciprocal -- when |delta|==0 the divisor becomes 1.0 so dir stays (0,0,0)
+    // rather than NaN. No Scr_Error path in the original.
+    float dx = dst[0] - src[0];
+    float dy = dst[1] - src[1];
+    float dz = dst[2] - src[2];
+    float mag = sqrtf(dx * dx + dy * dy + dz * dz);
+    float invMag = (mag > 0.0f) ? (1.0f / mag) : 1.0f;
+    wp.forward[0] = dx * invMag;
+    wp.forward[1] = dy * invMag;
+    wp.forward[2] = dz * invMag;
 
-    invMag = 1.0f / magnitude;
-    dir[0] = delta[0] * invMag;
-    dir[1] = delta[1] * invMag;
-    dir[2] = delta[2] * invMag;
+    // IDA writes the same dir into gunForward (the second-copy stores at
+    // var_20/var_1C/var_18). Kept verbatim because Bullet_Endpos's NaN
+    // asserts cover wp->forward but not wp->gunForward; leaving it
+    // uninitialized would still work but match IDA exactly.
+    wp.gunForward[0] = wp.forward[0];
+    wp.gunForward[1] = wp.forward[1];
+    wp.gunForward[2] = wp.forward[2];
 
-    // Get weapon definition (placeholder index 0 used)
-    weaponDef = (float *)BG_GetWeaponDef(0);
+    // Build the orthonormal basis off of forward. IDA passes &wp.forward as
+    // the input, &wp.right as the right-out, &wp.up as the up-out -- the three
+    // contiguous fields sit at +0/+12/+24 in the struct, exactly the layout
+    // Vec3Basis_LeftHanded(forward, right, up) expects.
+    Vec3Basis_LeftHanded(wp.forward, wp.right, wp.up);
 
-    // Build a left-handed basis for bullet spread
-    Vec3Basis_LeftHanded(dir, basis[0], basis[1]);
+    // Compute spread endpoint. IDA passes wp via the 5th arg; the 4th (dir
+    // writeback) is NULL because Scr_BulletSpread only returns the endpoint,
+    // it doesn't want the final unit-direction written back anywhere.
+    Bullet_Endpos(level.time, spread, dst, NULL, &wp, 8192.0f);
 
-    // Compute the final end position of the bullet
-    Bullet_Endpos(level.time, spread, weaponDef, dst, 0, 8192.0f);
-
-    // Return the final vector to the script
     Scr_AddVector(dst);
 }
 
@@ -5547,7 +5552,7 @@ void Scr_RandomFloatRange()
     v1 = Scr_GetFloat(1);
     if (v1 <= Float)
     {
-        Com_Printf(23, (const char *)HIDWORD(Float), LODWORD(Float), LODWORD(v1));
+        Com_Printf(23, "Scr_RandomFloatRange parms: %d %d ", LODWORD(Float), LODWORD(v1));
         Scr_Error("Scr_RandomFloatRange's second parameter must be greater than the first.\n");
     }
     v2 = G_flrand(Float, v1);
@@ -6202,7 +6207,8 @@ void Scr_SetBlur()
         Scr_ParamError(1u, "Time must be positive");
     if (Float < 0.0)
         Scr_ParamError(0, "Blur value must be greater than 0");
-    v2 = va("scr_blur %i %f %i %i", (int)(float)((float)v1 * (float)1000.0), Float, LODWORD(Float), 0);
+
+    v2 = va("scr_blur %i %f %i %i", (int)(float)((float)v1 * (float)1000.0), Float, 0, 1);
     SV_GameSendServerCommand(-1, v2);
 }
 
@@ -6282,12 +6288,16 @@ void Scr_MusicStop()
 void Scr_SoundFade()
 {
     double Float; // fp31
+    int fadeTimeMs;
     const char *v1; // r3
 
     Float = Scr_GetFloat(0);
+
     if (Scr_GetNumParam() > 1)
-        Scr_GetFloat(1);
-    v1 = va("snd_fade %f %i\n", Float, LODWORD(Float));
+        fadeTimeMs = (int)((float)Scr_GetFloat(1) * 1000.0f);
+    else
+        fadeTimeMs = 0;
+    v1 = va("snd_fade %f %i\n", Float, fadeTimeMs);
     SV_GameSendServerCommand(-1, v1);
 }
 
@@ -8577,12 +8587,13 @@ XAnimTree_s *__cdecl GScr_GetEntAnimTree(gentity_s *ent)
         v3 = ent->r.currentOrigin[2];
         v4 = ent->r.currentOrigin[1];
         v5 = ent->r.currentOrigin[0];
-        SL_ConvertToString(ent->classname);
+
+        const char *classname = SL_ConvertToString(ent->classname);
         EntityTypeName = G_GetEntityTypeName(ent);
         v7 = va(
             "entity of type '%s', classname '%s', origin (%f, %f, %f) does not have an animation tree",
             EntityTypeName,
-            (const char *)HIDWORD(v5),
+            classname,
             v5,
             v4,
             v3);
@@ -8665,12 +8676,14 @@ void __cdecl Scr_AnimRelative(scr_entref_t entref)
         v15 = Entity->r.currentOrigin[2];
         v16 = Entity->r.currentOrigin[1];
         v17 = Entity->r.currentOrigin[0];
-        Sentient_NameForTeam(Entity->sentient->eTeam);
+
+        const char *teamName_8682 = Sentient_NameForTeam(Entity->sentient->eTeam);
         v18 = va(
             "tried to play a scripted animation on a dead AI; entity %i team %s origin %g %g %g targetname %s classname %s\n",
             Entity->s.number,
-            HIDWORD(v17),
-            HIDWORD(v16),
+            teamName_8682,
+            v17,
+            v16,
             v15,
             v13,
             v14);
@@ -8789,22 +8802,22 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
 
     switch (Scr_GetNumParam())
     {
-    case 1:
-        break;
-    case 2:
-        goalWeight = Scr_GetFloat(1);
-        if (goalWeight < 0.0)
-            Scr_ParamError(1, "must set nonnegative weight");
-        break;
-    case 3:
-        goalTime = Scr_GetFloat(2);
-        if (goalTime < 0.0)
-            Scr_ParamError(2, "must set nonnegative goal time");
-        break;
     case 4:
         rate = Scr_GetFloat(3);
         if (rate < 0.0)
             Scr_ParamError(3, "must set nonnegative rate");
+        // fall through
+    case 3:
+        goalTime = Scr_GetFloat(2);
+        if (goalTime < 0.0)
+            Scr_ParamError(2, "must set nonnegative goal time");
+        // fall through
+    case 2:
+        goalWeight = Scr_GetFloat(1);
+        if (goalWeight < 0.0)
+            Scr_ParamError(1, "must set nonnegative weight");
+        // fall through
+    case 1:
         break;
     default:
         Scr_Error("too many parameters");
@@ -8838,20 +8851,10 @@ void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags)
     if (!obj)
         Scr_ObjectError("No model exists.");
 
-    unsigned int notifyType;
-    if (goalWeight <= EQUAL_EPSILON)
-    {
-        notifyType = 0;
-    }
-    else
-    {
-        notifyType = 2;
-    }
-
     if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetCompleteGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, 0, (flags & 2) != 0);
     else
-        error = XAnimSetGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetGoalWeightKnob(obj, anim, goalWeight, goalTime, rate, 0, 0, (flags & 2) != 0);
 
     if (error)
     {
@@ -8903,24 +8906,25 @@ void __cdecl GScr_SetAnimKnobAllInternal(scr_entref_t entref, unsigned int flags
     goalWeight = 1.0;
     goalTime = 0.2;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
+    
     switch (Scr_GetNumParam())
     {
-    case 2:
-        break;
-    case 3:
-        goalWeight = Scr_GetFloat(2);
-        if (goalWeight < 0.0f)
-            Scr_ParamError(2, "must set nonnegative weight");
-        break;
-    case 4:
-        goalTime = Scr_GetFloat(3);
-        if (goalTime < 0.0f)
-            Scr_ParamError(3, "must set nonnegative goal time");
-        break;
     case 5:
         rate = Scr_GetFloat(4);
         if (rate < 0.0f)
             Scr_ParamError(4, "must set nonnegative rate");
+        // fall through
+    case 4:
+        goalTime = Scr_GetFloat(3);
+        if (goalTime < 0.0f)
+            Scr_ParamError(3, "must set nonnegative goal time");
+        // fall through
+    case 3:
+        goalWeight = Scr_GetFloat(2);
+        if (goalWeight < 0.0f)
+            Scr_ParamError(2, "must set nonnegative weight");
+        // fall through
+    case 2:
         break;
     default:
         Scr_Error("incorrect number of parameters");
@@ -8958,22 +8962,11 @@ void __cdecl GScr_SetAnimKnobAllInternal(scr_entref_t entref, unsigned int flags
     obj = Com_GetServerDObj(Entity->s.number);
     if (!obj)
         Scr_ObjectError("No model exists.");
-    
-    unsigned int notifyType;
-
-    if (goalWeight <= EQUAL_EPSILON)
-    {
-        notifyType = 0;
-    }
-    else
-    {
-        notifyType = 2;
-    }
 
     if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetCompleteGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, 0, (flags & 2) != 0);
     else
-        error = XAnimSetGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, 0, (flags & 2) != 0);
 
     if (error)
     {
@@ -9027,22 +9020,22 @@ void __cdecl GScr_SetAnimInternal(scr_entref_t entref, unsigned int flags)
 
     switch (Scr_GetNumParam())
     {
-    case 1:
-        break;
-    case 2:
-        goalWeight = Scr_GetFloat(1);
-        if (goalWeight < 0.0)
-            Scr_ParamError(1, "must set nonnegative weight");
-        break;
-    case 3:
-        goalTime = Scr_GetFloat(2);
-        if (goalTime < 0.0)
-            Scr_ParamError(2, "must set nonnegative goal time");
-        break;
     case 4:
         rate = Scr_GetFloat(3);
         if (rate < 0.0)
             Scr_ParamError(3u, "must set nonnegative rate");
+        // fall through
+    case 3:
+        goalTime = Scr_GetFloat(2);
+        if (goalTime < 0.0)
+            Scr_ParamError(2, "must set nonnegative goal time");
+        // fall through
+    case 2:
+        goalWeight = Scr_GetFloat(1);
+        if (goalWeight < 0.0)
+            Scr_ParamError(1, "must set nonnegative weight");
+        // fall through
+    case 1:
         break;
     default:
         Scr_Error("too many parameters");
@@ -9076,20 +9069,10 @@ void __cdecl GScr_SetAnimInternal(scr_entref_t entref, unsigned int flags)
     if (!obj)
         Scr_ObjectError("No model exists.");
 
-    unsigned int notifyType;
-    if (goalWeight <= EQUAL_EPSILON)
-    {
-        notifyType = 0;
-    }
-    else
-    {
-        notifyType = 2;
-    }
-
     if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeight(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetCompleteGoalWeight(obj, animIndex, goalWeight, goalTime, rate, 0, 0, (flags & 2) != 0);
     else
-        error = XAnimSetGoalWeight(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetGoalWeight(obj, animIndex, goalWeight, goalTime, rate, 0, 0, (flags & 2) != 0);
 
     if (error)
     {
@@ -9176,31 +9159,34 @@ void __cdecl GScr_SetFlaggedAnimKnobInternal(scr_entref_t entref, unsigned int f
     goalWeight = 1.0f;
     goalTime = 0.2f;
     EntAnimTree = GScr_GetEntAnimTree(Entity);
+    // KISAKFIX: switch needs fall-through. See GScr_SetAnimInternal comment.
     switch (Scr_GetNumParam())
     {
-    case 2:
-        break;
-    case 3:
-        goalWeight = Scr_GetFloat(2);
-        if (goalWeight <= 0.0f)
-            Scr_ParamError(2, "must set positive weight");
-        break;
-    case 4:
-        goalTime = Scr_GetFloat(3);
-        if (goalTime < 0.0f)
-            Scr_ParamError(3, "must set nonnegative goal time");
-        break;
     case 5:
         rate = Scr_GetFloat(4);
         if (rate < 0.0f)
             Scr_ParamError(4, "must set nonnegative rate");
+        // fall through
+    case 4:
+        goalTime = Scr_GetFloat(3);
+        if (goalTime < 0.0f)
+            Scr_ParamError(3, "must set nonnegative goal time");
+        // fall through
+    case 3:
+        goalWeight = Scr_GetFloat(2);
+        if (goalWeight <= 0.0f)
+            Scr_ParamError(2, "must set positive weight");
+        // fall through
+    case 2:
         break;
     default:
         Scr_Error("too many parameters");
     }
 
     animIndex = Scr_GetAnim(1, EntAnimTree).index;
-    if (!Scr_GetConstString(0))
+
+    unsigned int notifyName = Scr_GetConstString(0);
+    if (!notifyName)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 10930, 0, "%s", "notifyName");
     Anims = XAnimGetAnims(EntAnimTree);
     if (!XAnimHasTime(Anims, animIndex))
@@ -9231,20 +9217,10 @@ void __cdecl GScr_SetFlaggedAnimKnobInternal(scr_entref_t entref, unsigned int f
     if (!obj)
         Scr_ObjectError("No model exists.");
 
-    unsigned int notifyType;
-    if (goalWeight <= EQUAL_EPSILON)
-    {
-        notifyType = 0;
-    }
-    else
-    {
-        notifyType = 2;
-    }
-
     if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetCompleteGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, notifyName, 0, (flags & 2) != 0);
     else
-        error = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetGoalWeightKnob(obj, animIndex, goalWeight, goalTime, rate, notifyName, 0, (flags & 2) != 0);
 
     if (error)
     {
@@ -9299,22 +9275,22 @@ void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t entref, unsigned in
 
     switch (Scr_GetNumParam())
     {
-    case 3:
-        break;
-    case 4:
-        goalWeight = Scr_GetFloat(3);
-        if (goalWeight <= 0.0f)
-            Scr_ParamError(3, "must set positive weight");
-        break;
-    case 5:
-        goalTime = Scr_GetFloat(4);
-        if (goalTime < 0.0f)
-            Scr_ParamError(4, "must set nonnegative goal time");
-        break;
     case 6:
         rate = Scr_GetFloat(5);
         if (rate < 0.0f)
             Scr_ParamError(5, "must set nonnegative rate");
+        // fall through
+    case 5:
+        goalTime = Scr_GetFloat(4);
+        if (goalTime < 0.0f)
+            Scr_ParamError(4, "must set nonnegative goal time");
+        // fall through
+    case 4:
+        goalWeight = Scr_GetFloat(3);
+        if (goalWeight <= 0.0f)
+            Scr_ParamError(3, "must set positive weight");
+        // fall through
+    case 3:
         break;
     default:
         Scr_Error(usage);
@@ -9322,7 +9298,9 @@ void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t entref, unsigned in
 
     anim = Scr_GetAnim(2, EntAnimTree);
     rootanim = Scr_GetAnim(1, EntAnimTree);
-    if (!Scr_GetConstString(0))
+
+    unsigned int notifyName = Scr_GetConstString(0);
+    if (!notifyName)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11122, 0, "%s", "notifyName");
     Anims = XAnimGetAnims(EntAnimTree);
 
@@ -9352,21 +9330,11 @@ void __cdecl GScr_SetFlaggedAnimKnobAllInternal(scr_entref_t entref, unsigned in
     if (!obj)
         Scr_ObjectError("No model exists.");
 
-    unsigned int notifyType;
-
-    if (goalWeight <= EQUAL_EPSILON)
-    {
-        notifyType = 0;
-    }
-    else
-    {
-        notifyType = 2;
-    }
 
     if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetCompleteGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, notifyName, 0, (flags & 2) != 0);
     else
-        error = XAnimSetGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, 0, notifyType, (flags & 2) != 0);
+        error = XAnimSetGoalWeightKnobAll(obj, rootanim.index, anim.index, goalWeight, goalTime, rate, notifyName, 0, (flags & 2) != 0);
 
     if (error)
     {
@@ -9475,22 +9443,12 @@ LABEL_9:
 
     int error;
 
-    // lwss add from blops
-    int notifyType;
-    if (goalWeight <= 0.001f)
-    {
-        notifyType = 0;
-    }
-    else
-    {
-        notifyType = 2;
-    }
-    // lwss end
+    const int bRestart = (flags >> 1) & 1;
 
     if ((flags & 1) != 0)
-        error = XAnimSetCompleteGoalWeight(obj, anim, goalWeight, goalTime, rate, notifyName, notifyType, flags & 2 != 0);
+        error = XAnimSetCompleteGoalWeight(obj, anim, goalWeight, goalTime, rate, notifyName, 0, bRestart);
     else
-        error = XAnimSetGoalWeight(obj, anim, goalWeight, goalTime, rate, notifyName, notifyType, flags & 2 != 0);
+        error = XAnimSetGoalWeight(obj, anim, goalWeight, goalTime, rate, notifyName, 0, bRestart);
 
     if (error)
     {
@@ -10723,7 +10681,8 @@ void GScr_SetMiniMap()
 
     if (Scr_GetNumParam() != 5)
         Scr_Error("Expecting 5 arguments");
-    Scr_GetString(0);
+
+    const char *mapName = Scr_GetString(0);
     Float = Scr_GetFloat(1);
     v1 = Scr_GetFloat(2);
     v2 = Scr_GetFloat(3);
@@ -10739,7 +10698,8 @@ void GScr_SetMiniMap()
     }
     level.compassMapUpperLeft[0] = Float;
     level.compassMapUpperLeft[1] = v1;
-    v5 = va("\"%s\" %f %f %f %f", HIDWORD(Float), LODWORD(Float), LODWORD(v1), LODWORD(v2), LODWORD(v3));
+
+    v5 = va("\"%s\" %f %f %f %f", mapName, Float, v1, v2, v3);
     SV_SetConfigstring(1148, v5);
 }
 
@@ -11655,12 +11615,14 @@ void __cdecl ScrCmd_animscriptedInternal(scr_entref_t entref, int bDelayForActor
         v19 = Entity->r.currentOrigin[2];
         v20 = Entity->r.currentOrigin[1];
         v21 = Entity->r.currentOrigin[0];
-        Sentient_NameForTeam(Entity->sentient->eTeam);
+
+        const char *teamName = Sentient_NameForTeam(Entity->sentient->eTeam);
         v22 = va(
             "tried to play a scripted animation on a dead AI; entity %i team %s origin %g %g %g targetname %s classname %s\n",
             Entity->s.number,
-            HIDWORD(v21),
-            HIDWORD(v20),
+            teamName,
+            v21,
+            v20,
             v19,
             v17,
             v18);

@@ -98,7 +98,14 @@ actor_think_result_t __cdecl Actor_Negotiation_Think(actor_s *pSelf)
         pSelf->Physics.vVelocity[0] = 0.0;
         pSelf->Physics.vVelocity[1] = 0.0;
         pSelf->Physics.vVelocity[2] = 0.0;
-        YawVectors2D(pSelf->fDesiredBodyYaw, (float *)HasNegotiationNode, pSelf->prevMoveDir);
+        // KISAKFIX: YawVectors2D body uses r4=forward, r5=right (same PPC-ABI shift
+        // as YawVectors — float yaw consumes the r3 int slot as shadow). IDA's
+        // hex-rays `YawVectors2D(yaw, (float*)HasNegotiationNode, prevMoveDir)` is
+        // a phantom-r3 artifact. The actual call (disasm at 0x82206fa4) sets
+        // r4 = prevMoveDir, r5 = 0. Literal x86 port would corrupt the pathnode_t
+        // pointed to by HasNegotiationNode AND store the right vector in
+        // prevMoveDir instead of the forward.
+        YawVectors2D(pSelf->fDesiredBodyYaw, pSelf->prevMoveDir, NULL);
         Actor_RecalcPath(pSelf);
         Actor_PopState(pSelf);
         return ACTOR_THINK_REPEAT;

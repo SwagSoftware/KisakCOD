@@ -245,36 +245,35 @@ void G_DebugPlane(
     double v18; // fp9
     double v19; // fp13
     double v20; // fp0
-    float v21; // [sp+50h] [-90h] BYREF
-    float v22; // [sp+54h] [-8Ch]
+    float dir[2]; // was v21/v22 at [sp+50h]/[sp+54h] BYREF — passed as float* to Vec2Normalize
     float v23[3]; // [sp+58h] [-88h] BYREF
     float v26[3]; // [sp+68h] [-78h] BYREF
     float v29[3]; // [sp+78h] [-68h] BYREF
     float v32[3]; // [sp+88h] [-58h] BYREF
 
     v14 = (float)(color[1] * normal[1]);
-    v22 = normal[1];
+    dir[1] = normal[1];
     v15 = (float)((float)dist - (float)((float)(*color * *normal) + (float)v14));
-    v21 = *normal;
-    v16 = Vec2Normalize(&v21);
+    dir[0] = *normal;
+    v16 = Vec2Normalize(dir);
     v17 = *color;
     v18 = color[1];
     v32[2] = (float)((float)size * (float)0.5) + color[2];
     v23[2] = v32[2];
     v19 = -(float)((float)v15 / (float)v16);
-    v32[0] = (float)(v21 * (float)((float)v15 / (float)v16)) + (float)v17;
-    v32[1] = (float)(v22 * (float)((float)v15 / (float)v16)) + (float)v18;
-    v23[0] = (float)((float)v19 * v21) + v32[0];
-    v23[1] = (float)((float)v19 * v22) + v32[1];
+    v32[0] = (float)(dir[0] * (float)((float)v15 / (float)v16)) + (float)v17;
+    v32[1] = (float)(dir[1] * (float)((float)v15 / (float)v16)) + (float)v18;
+    v23[0] = (float)((float)v19 * dir[0]) + v32[0];
+    v23[1] = (float)((float)v19 * dir[1]) + v32[1];
     CL_AddDebugLine(v32, v23, color, depthTest, duration, 1);
 
-    v20 = -v22;
+    v20 = -dir[1];
     v26[2] = color[2];
     v23[2] = v26[2];
     v26[0] = (float)((float)((float)size * (float)0.5) * (float)v20) + v32[0];
-    v26[1] = (float)((float)((float)size * (float)0.5) * v21) + v32[1];
+    v26[1] = (float)((float)((float)size * (float)0.5) * dir[0]) + v32[1];
     v23[0] = (float)((float)((float)size * (float)-0.5) * (float)v20) + v32[0];
-    v23[2] = (float)((float)((float)size * (float)-0.5) * v21) + v32[1];
+    v23[2] = (float)((float)((float)size * (float)-0.5) * dir[0]) + v32[1];
     CL_AddDebugLine(v26, v23, color, depthTest, duration, 1);
 
     v26[2] = v26[2] + (float)size;

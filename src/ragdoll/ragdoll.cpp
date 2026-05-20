@@ -41,40 +41,30 @@ void __cdecl TRACK_ragdoll()
 
 void __cdecl Ragdoll_DebugDraw()
 {
-    char *v0; // eax
-    char *v1; // eax
-    RagdollBody *body; // [esp+20h] [ebp-24h]
-    int total; // [esp+24h] [ebp-20h]
-    int i; // [esp+28h] [ebp-1Ch]
-    int states[6]; // [esp+2Ch] [ebp-18h] BYREF
+    if (!ragdoll_debug->current.integer)
+        return;
 
-    if (ragdoll_debug->current.integer)
+    int states[RAGDOLL_NUM_STATES];
+    memset(states, 0, sizeof(states));
+    int total = 0;
+
+    for (int i = 0; i < 32; ++i)
     {
-        memset(states, 0, sizeof(states));
-        total = 0;
-        for (i = 0; i < 32; ++i)
-        {
-            body = &ragdollBodies[i];
-            iassert( body );
-            if (body->references > 0)
-            {
-                if (body->state >= (unsigned int)RAGDOLL_NUM_STATES)
-                    MyAssertHandler(
-                        ".\\ragdoll\\ragdoll.cpp",
-                        107,
-                        0,
-                        "(int)body->state doesn't index RAGDOLL_NUM_STATES\n\t%i not in [0, %i)",
-                        body->state,
-                        6);
-                ++states[body->state];
-                ++total;
-            }
-        }
-        v0 = va("RB Total: %d", total);
-        CG_DrawStringExt(&scrPlaceFull, 0.0, 72.0, v0, colorGreen, 0, 1, 12.0);
-        v1 = va("RB State: %d %d %d %d %d %d", states[0], states[1], states[2], states[3], states[4], states[5]);
-        CG_DrawStringExt(&scrPlaceFull, 0.0, 84.0, v1, colorGreen, 0, 1, 12.0);
+        RagdollBody *body = &ragdollBodies[i];
+        iassert(body);
+        if (body->references <= 0)
+            continue;
+
+        bcassert(body->state, RAGDOLL_NUM_STATES);
+        ++states[body->state];
+        ++total;
     }
+
+    CG_DrawStringExt(&scrPlaceFull, 0.0, 72.0, va("RB Total: %d", total),
+        colorGreen, 0, 1, 12.0);
+    CG_DrawStringExt(&scrPlaceFull, 0.0, 84.0,
+        va("RB State: %d %d %d %d %d %d", states[0], states[1], states[2], states[3], states[4], states[5]),
+        colorGreen, 0, 1, 12.0);
 }
 
 RagdollDef *__cdecl Ragdoll_BodyDef(RagdollBody *body)

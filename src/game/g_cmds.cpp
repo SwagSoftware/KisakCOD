@@ -512,7 +512,8 @@ void __cdecl Cmd_God_f(gentity_s *ent)
         else
             v5 = "GAME_GODMODE_OFF";
         SV_GameSendServerCommand(ent - g_entities, va("print \"%s\"", v5));
-        g_godModeRemoteInputValid = HIBYTE(ent->flags) & 1;
+
+        g_godModeRemoteInputValid = (v4 & FL_GODMODE) != 0;
     }
 }
 
@@ -639,14 +640,12 @@ void __cdecl Cmd_UFO_f(gentity_s *ent)
 void __cdecl Cmd_Kill_f(gentity_s *ent)
 {
     gclient_s *client; // r5
-    gentityFlags_t v2; // r6
 
     if (!g_reloading->current.integer)
     {
         client = ent->client;
-        v2 = ent->flags & ~(FL_GODMODE | FL_DEMI_GODMODE);
         ent->health = 0;
-        ent->flags = v2;
+        ent->flags &= ~(FL_GODMODE | FL_DEMI_GODMODE);
         client->ps.stats[0] = 0;
         player_die(ent, ent, ent, 100000, 12, 0, 0, HITLOC_NONE);
     }
@@ -655,95 +654,71 @@ void __cdecl Cmd_Kill_f(gentity_s *ent)
 void __cdecl Cmd_Where_f(gentity_s *ent)
 {
     gclient_s *client; // r11
-    char *v3; // r3
-    const char *v4; // r3
 
     client = ent->client;
     if (client)
     {
-        v3 = vtos(client->ps.origin);
-        v4 = va("print \"%s\"", v3);
-        SV_GameSendServerCommand(ent - g_entities, v4);
+        SV_GameSendServerCommand(ent - g_entities, va("print \"%s\"", vtos(client->ps.origin)));
     }
 }
 
-const char *aPrintGameUsage_0 = "print \"GAME_USAGE\x15: setviewpos x y z [yaw] [pitch]\"";
 void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
     int ok; // r31
-    int v3; // r3
-    const char *v4; // r4
-    int v5; // r11
-    float *v6; // r31
-    int v7; // r30
-    long double v8; // fp2
-    int v9; // r3
-    long double v10; // fp2
-    long double v11; // fp2
-    float v12; // [sp+50h] [-440h] BYREF
-    float v13; // [sp+54h] [-43Ch]
-    float v14; // [sp+58h] [-438h]
-    float v15[3]; // [sp+60h] [-430h] BYREF
-    //float v16; // [sp+68h] [-428h]
-    char v17[1056]; // [sp+70h] [-420h] BYREF
+    float angles[3]; // was v12 (pitch), v13 (yaw), v14 (roll)
+    float origin[3]; // [sp+60h] [-430h] BYREF
+    char buffer[1056]; // [sp+70h] [-420h] BYREF
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_cmds.cpp", 636, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_cmds.cpp", 637, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->client);
+
     if (level.demoplaying)
     {
-        v3 = SV_DemoCheatsOk();
+        ok = SV_DemoCheatsOk();
     }
     else
     {
         ok = CheatsOkInternal(ent);
         SV_RecordCheatsOk(ok);
-        v3 = ok;
     }
-    if (v3)
-    {
-        if (SV_Cmd_Argc() < 4 || SV_Cmd_Argc() > 6)
-        {
-            v4 = aPrintGameUsage_0;
-            goto LABEL_20;
-        }
-        v5 = 0;
-        v6 = v15;
-        do
-        {
-            v7 = v5 + 1;
-            SV_Cmd_ArgvBuffer(v5 + 1, v17, 1024);
-            v8 = atof(v17);
-            v5 = v7;
-            *v6++ = *(double *)&v8;
-        } while (v7 < 3);
 
-        v15[2] = v15[2] - ent->client->ps.viewHeightCurrent;
-        v12 = 0.0;
-        v13 = 0.0;
-        v14 = 0.0;
-        v9 = SV_Cmd_Argc();
-        if (v9 != 5)
-        {
-            if (v9 != 6)
-            {
-            LABEL_18:
-                TeleportPlayer(ent, v15, &v12);
-                return;
-            }
-            SV_Cmd_ArgvBuffer(5, v17, 1024);
-            v10 = atof(v17);
-            v12 = *(double *)&v10;
-        }
-        SV_Cmd_ArgvBuffer(4, v17, 1024);
-        v11 = atof(v17);
-        v13 = *(double *)&v11;
-        goto LABEL_18;
+    if (!ok)
+    {
+        SV_GameSendServerCommand(ent - g_entities, "print \"GAME_CHEATSNOTENABLED\"");
+        return;
     }
-    v4 = "print \"GAME_CHEATSNOTENABLED\"";
-LABEL_20:
-    SV_GameSendServerCommand(ent - g_entities, v4);
+    if (SV_Cmd_Argc() < 4 || SV_Cmd_Argc() > 6)
+    {
+        SV_GameSendServerCommand(ent - g_entities, "print \"GAME_USAGE\x15: setviewpos x y z [yaw] [pitch]\"");
+        return;
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        SV_Cmd_ArgvBuffer(i + 1, buffer, 1024);
+        origin[i] = atof(buffer);
+    }
+
+    origin[2] = origin[2] - ent->client->ps.viewHeightCurrent;
+    angles[0] = 0.0;
+    angles[1] = 0.0;
+    angles[2] = 0.0;
+
+    if (SV_Cmd_Argc() == 5)
+    {
+        SV_Cmd_ArgvBuffer(4, buffer, 1024);
+        angles[1] = atof(buffer);
+    }
+    else if (SV_Cmd_Argc() == 6)
+    {
+        SV_Cmd_ArgvBuffer(5, buffer, 1024);
+        angles[0] = atof(buffer);
+        SV_Cmd_ArgvBuffer(4, buffer, 1024);
+        angles[1] = atof(buffer);
+    }
+
+    Com_Printf(15, "Cmd_SetViewpos_f: origin=(%g %g %g) angles=(pitch=%g yaw=%g roll=%g)\n", origin[0], origin[1], origin[2], angles[0], angles[1], angles[2]);
+    TeleportPlayer(ent, origin, angles);
 }
 
 const char *aPrintGameUsage = "print \"GAME_USAGE\x15: jumptonode nodenum\n\"";

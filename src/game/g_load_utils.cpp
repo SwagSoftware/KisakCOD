@@ -138,15 +138,26 @@ unsigned int __cdecl G_NewString(const char *string)
     return SL_GetString(str, 0);
 }
 
-char str[8][32];
-int32_t index;
+/*
+=============
+VectorToString
+
+This is just a convenience function
+for printing vectors
+=============
+*/
 char *__cdecl vtos(const float *v)
 {
-    char *s; // [esp+0h] [ebp-4h]
+    static	int		index;
+    static	char	str[8][32];
+    char *s;
 
+    // use an array so that multiple vtos won't collide
     s = str[index];
-    index = ((_BYTE)index + 1) & 7;
-    Com_sprintf(s, 0x20u, "(%i %i %i)", (int)*v, (int)v[1], (int)v[2]);
+    index = (index + 1) & 7;
+
+    Com_sprintf(s, 32, "(%i %i %i)", (int)v[0], (int)v[1], (int)v[2]);
+
     return s;
 }
 

@@ -721,8 +721,12 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
             Com_Printf(0, "ent %i: %s = %i\n", pSelf->ent->s.number, pField->name, pBase[pField->ofs]);
             return;
         case F_FLOAT:
-            v9 = *(float *)&pBase[pField->ofs];
-            Com_Printf(0, "ent %i: %s = %g\n", pSelf->ent->s.number, (const char *)HIDWORD(v9), v9);
+            // KISAKFIX: IDA hex-rays `(const char*)HIDWORD(v9)` is a PPC double-pass
+            // artifact. Disasm at 0x821f3f90 case 3: r4=fmt, r5=number, r6=pField->name,
+            // double via f1+stack. Literal x86 port treats HIDWORD(v9) as a %s pointer
+            // → garbage deref → crash on every `ai <ent> <floatField>` console command.
+            Com_Printf(0, "ent %i: %s = %g\n", pSelf->ent->s.number, pField->name,
+                       *(float *)&pBase[pField->ofs]);
             return;
         case F_STRING:
             ofs = pField->ofs;
@@ -733,10 +737,15 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
             Com_Printf(0, "ent %i: %s = %s\n", number, pField->name, v11);
             return;
         case F_VECTOR:
+            // KISAKFIX: kisak port dropped `pField->name` from the arg list. IDA disasm
+            // at 0x821f4004 case 5 passes 6 args (fmt, num, name, v0, v1, v2). Missing
+            // name argument shifted `*(float*)&pBase[ofs]` into the `%s` slot — crash
+            // on every `ai <ent> <vectorField>` console command.
             Com_Printf(
                 0,
                 "ent %i: %s = %g %g %g\n",
                 pSelf->ent->s.number,
+                pField->name,
                 *(float *)&pBase[pField->ofs],
                 *(float *)&pBase[pField->ofs + 4],
                 *(float *)&pBase[pField->ofs + 8]);

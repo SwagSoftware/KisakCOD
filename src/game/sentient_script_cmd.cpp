@@ -82,14 +82,14 @@ void SentientCmd_CreateThreatBiasGroup()
 void SentientCmd_ThreatBiasGroupExists()
 {
     unsigned int ConstString; // r3
-    unsigned int ThreatBiasGroupIndex; // r3
+    int ThreatBiasGroupIndex; // r3
 
     if (Scr_GetNumParam() != 1)
         Scr_ParamError(0, "threatbiasgroupexists [name]");
     ConstString = Scr_GetConstString(0);
-    ThreatBiasGroupIndex = Actor_FindThreatBiasGroupIndex(ConstString);
-    //Scr_AddBool(_cntlzw(ThreatBiasGroupIndex) != 0);
-    Scr_AddBool((bool)ThreatBiasGroupIndex);
+    ThreatBiasGroupIndex = (int)Actor_FindThreatBiasGroupIndex(ConstString);
+
+    Scr_AddBool(ThreatBiasGroupIndex >= 0);
 }
 
 void SentientCmd_GetThreatBias()

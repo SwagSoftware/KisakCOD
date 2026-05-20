@@ -550,9 +550,39 @@ int Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, dou
     sentient = ent->sentient;
     if (sentient)
     {
-        pInfo = &self->sentientInfo[(uintptr_t)sentient - (uintptr_t)level.sentients];
+        // KISAKFIX: kisak cast both pointers to uintptr_t and subtracted, which
+        // yields a *byte* difference (multiple of sizeof(sentient_s)=116). Used
+        // as an index into sentientInfo[33] (40-byte entries) it shoots far
+        // past the array for every non-zero sentient index — Actor_UpdateVisCache
+        // then writes through this `pInfo` into random fields of actor_s, so the
+        // player (sentient_s ≠ level.sentients[0]) is never marked visible.
+        // IDA uses plain pointer arithmetic which the compiler divides by 116.
+        pInfo = &self->sentientInfo[sentient - level.sentients];
         Sentient_GetEyePosition(sentient, vDestPos);
+        // KISAKFIX: kisak deleted the turret fast-path. IDA Actor_CanSeeEntityEx at
+        // 0x82210228 inside `if (sentient)`:
+        //   if (Actor_IsUsingTurret(self)) {
+        //     if (turret_CanTargetPoint || turret_CanTargetSentient) goto LABEL_19; // skip GetEyePosition
+        //     if (level.time - lastKnownPosTime >= 1000 && Vec2DistSq >= 262144) return 0; // stale + far bail
+        //   }
+        //   Actor_GetEyePosition(self, vViewPos);
+        // Without this: turret-mounted NPCs can't use the turret's view origin for
+        // LOS, and they never bail on stale + far targets.
+        if (Actor_IsUsingTurret(self))
+        {
+            float localAngles[2];
+            if (turret_CanTargetPoint(self->pTurret, vDestPos, vViewPos, localAngles)
+             || turret_CanTargetSentient(self->pTurret, sentient, vDestPos, vViewPos, localAngles))
+            {
+                // skip Actor_GetEyePosition — vViewPos already has turret view origin
+                goto LABEL_19;
+            }
+            if (level.time - pInfo->lastKnownPosTime >= 1000
+             && Vec2DistanceSq(vDestPos, self->ent->r.currentOrigin) >= 262144.0f)
+                return 0;
+        }
         Actor_GetEyePosition(self, vViewPos);
+    LABEL_19:
         fovDotUse = fovDot;
         targetSentient = Actor_GetTargetSentient(self);
 
@@ -595,7 +625,13 @@ int Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, dou
     if (!bVisible)
         return 0;
 
-    if (ent->actor)
+    // KISAKFIX: kisak missed the turret gate. IDA Actor_CanSeeEntityEx:
+    //   if (ent->actor && !Actor_IsUsingTurret(self) && !Actor_IsUsingTurret(ent->actor))
+    //     { ... mutual viscache update ... }
+    // Without the gate, a turret operator's viscache for the other side gets
+    // stale bVisible/iLastUpdateTime, corrupting that actor's threat picker the
+    // next frame.
+    if (ent->actor && !Actor_IsUsingTurret(self) && !Actor_IsUsingTurret(ent->actor))
     {
         bOtherVisible = 1;
         iassert(ent->sentient);
@@ -775,7 +811,12 @@ void __cdecl Actor_UpdateSight(actor_s *self)
 
             if (fDistSqrd != 0.0f)
             {
-                int v4 = level.time - self->sentientInfo[(uintptr_t)sentient - (uintptr_t)level.sentients].VisCache.iLastUpdateTime - 100;
+                // KISAKFIX: same byte-vs-element-index bug as in Actor_CanSeeEntityEx.
+                // Cast-to-uintptr subtraction yields a byte difference (multiple of 116);
+                // plain pointer arithmetic divides by sizeof(sentient_s) to give a real
+                // index. Garbage iLastUpdateTime → garbage `staleness` metric → every
+                // non-#0 sentient ends up at the bottom of the priority queue.
+                int v4 = level.time - self->sentientInfo[sentient - level.sentients].VisCache.iLastUpdateTime - 100;
                 float v2 = (float)(v4 & ~(v4 >> 31));
                 float v1 = I_rsqrt(fDistSqrd);
 

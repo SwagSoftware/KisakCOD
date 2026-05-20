@@ -245,12 +245,9 @@ void __cdecl DebugResetThreatStrings(const actor_s *self)
     if (ai_debugThreatSelection->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
     {
         g_skipDebugString = 0;
-        v2 = g_threatDebugStrings[0];
-        do
-        {
-            *v2 = 0;
-            v2 += 64;
-        } while ((int)v2 < (int)&g_skipDebugString);
+
+        for (int i = 0; i < 10; ++i)
+            g_threatDebugStrings[i][0] = 0;
     }
     else
     {
@@ -415,32 +412,21 @@ int __cdecl Actor_ThreatFromScariness(double fScariness)
     return v2;
 }
 
-// local variable allocation has failed, the output may be wrong!
-int __cdecl Actor_ThreatFromDistance(double fDistance)
+int __cdecl Actor_ThreatFromDistance(float fDistance)
 {
-    long double v3; // fp2
-    long double v4; // fp2
-    int v5; // r31
-    const char *v6; // r3
+    int threat;
+    float diff;
 
-    if (fDistance < 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_threat.cpp", 486, 0, "%s", "fDistance >= 0");
-    if (fDistance >= 2500.0)
+    iassert(fDistance >= 0);
+
+    if (fDistance >= 2500.0f)
         return 0;
-    *(double *)&v3 = (float)((float)((float)(AI_THREAT_DISTANCE_RATE * (float)((float)2500.0 - (float)fDistance))
-        * (float)((float)2500.0 - (float)fDistance))
-        + (float)0.5);
-    v4 = floor(v3);
-    v5 = (int)(float)*(double *)&v4;
-    v6 = va("%d (%0.1f)", v5, fDistance);
-    if (!g_skipDebugString)
-    {
-        if (v6)
-            snprintf(g_threatDebugStrings[8], ARRAYSIZE(g_threatDebugStrings[8]), "%s %s", g_threatDebugLabels[8], v6);
-        else
-            g_threatDebugStrings[8][0] = 0;
-    }
-    return v5;
+
+    diff = 2500.0f - fDistance;
+    threat = (int)floorf(AI_THREAT_DISTANCE_RATE * diff * diff + 0.5f);
+
+    DebugSetThreatStringFromString(TDS_DIST_THREAT, va("%d (%0.1f)", threat, fDistance));
+    return threat;
 }
 
 bool __cdecl Actor_IsFullyAware(actor_s *self, sentient_s *enemy, int isCurrentEnemy)
@@ -830,22 +816,12 @@ void __cdecl Actor_CanAttackAll(actor_s *self)
     }
 }
 
-// local variable allocation has failed, the output may be wrong!
-void __cdecl Actor_SetPotentialThreat(potential_threat_t *self, double yaw)
+void __cdecl Actor_SetPotentialThreat(potential_threat_t *self, float yaw)
 {
-    double v3; // fp31
-    long double v4; // fp2
-    long double v5; // fp2
-    long double v6; // fp2
-
-    v3 = (float)((float)yaw * (float)0.017453292);
     self->isEnabled = 1;
-    *(double *)&v4 = v3;
-    v5 = cos(v4);
-    self->direction[0] = *(double *)&v5;
-    *(double *)&v5 = v3;
-    v6 = sin(v5);
-    self->direction[1] = *(double *)&v6;
+
+    self->direction[0] = cos(DEG2RAD(yaw));
+    self->direction[1] = sin(DEG2RAD(yaw));
 }
 
 void __cdecl Actor_ClearPotentialThreat(potential_threat_t *self)
@@ -916,11 +892,8 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
     bool IsUsingTurret; // r16
     bool v11; // r22
     sentient_s *i; // r29
-    gentity_s **v13; // r30
     const char *v14; // r5
-    gentity_s *v15; // r11
     bool v16; // r10
-    gentity_s *v17; // r11
     char v18; // r11
     bool v19; // zf
     unsigned __int8 v20; // r11
@@ -974,22 +947,30 @@ void __cdecl Actor_UpdateThreat(actor_s *self)
         v11 = IsUsingTurret;
         for (i = Sentient_FirstSentient(v9); i; i = Sentient_NextSentient(i, v9))
         {
-            v13 = &self->ent + 10 * (i - level.sentients);
-            if ((int)v13[529] > 0)
+            // KISAKFIX: kisak port copied hex-rays magic byte offsets verbatim
+            // (`v13 = &self->ent + 10 * (i - level.sentients); v13[527..530]`). The
+            // arithmetic only resolves to the right sentient_info_t fields if the
+            // kisak actor_s layout matches IDA's exactly. Replaced with typed
+            // accesses so this works regardless of struct drift.
+            sentient_info_t *pInfo;
+            int iLastVisTime;
+            int iLastAttackMeTime;
+            pInfo = &self->sentientInfo[i - level.sentients];
+            if (pInfo->lastKnownPosTime > 0)
             {
                 if ((i->ent->flags & 4) != 0 || Actor_CheckIgnore(self->sentient, i))
                     goto LABEL_50;
                 v16 = 1;
                 if (!IsUsingTurret)
                 {
-                    v15 = v13[527];
-                    if (!v15 || level.time - (int)v15 >= 10000)
+                    iLastVisTime = pInfo->VisCache.iLastVisTime;
+                    if (!iLastVisTime || level.time - iLastVisTime >= 10000)
                         v16 = 0;
                 }
-                v17 = v13[528];
-                if (!v17 || (v19 = level.time - (int)v17 < 10000, v18 = 1, !v19))
+                iLastAttackMeTime = pInfo->iLastAttackMeTime;
+                if (!iLastAttackMeTime || (v19 = level.time - iLastAttackMeTime < 10000, v18 = 1, !v19))
                     v18 = 0;
-                if (!v16 && !v18 || (v20 = 1, (int)v13[530] > level.time))
+                if (!v16 && !v18 || (v20 = 1, pInfo->attackTime > level.time))
                     v20 = 0;
                 v21 = v20;
                 v22 = v20;

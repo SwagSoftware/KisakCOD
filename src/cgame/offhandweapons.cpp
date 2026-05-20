@@ -121,7 +121,18 @@ int32_t __cdecl GetBestOffhand(const playerState_s *predictedPlayerState, int32_
 
 bool __cdecl IsOffHandDisplayVisible(const cg_s *cgameGlob)
 {
+#ifdef KISAK_MP
     return cgameGlob->predictedPlayerState.pm_type < PM_DEAD && (cgameGlob->predictedPlayerState.weapFlags & 0x80) == 0;
+#elif KISAK_SP
+    if (cgameGlob->predictedPlayerState.pm_type >= PM_DEAD)
+        return false;
+    if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
+        return false;
+    int eFlags = cgameGlob->predictedPlayerState.eFlags;
+    if ((eFlags & 0x20000) != 0 && (eFlags & 0x80000) == 0)
+        return false;
+    return !CG_IsHudHidden() && cgameGlob->offhandFadeTime != 0;
+#endif
 }
 
 void __cdecl CG_DrawOffHandHighlight(

@@ -3198,22 +3198,22 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     if ((pm->cmd.buttons & 0x1000) == 0)
                                         BG_AddPredictableEventToPlayerstate(8u, 2u, ps);
                                 }
-#ifdef KISAK_MP
                                 else
                                 {
+#ifdef KISAK_MP
                                     BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_CROUCH, 0, 0);
+#endif
                                     ps->pm_flags &= ~PMF_PRONE;
                                     ps->pm_flags |= PMF_DUCKED;
                                 }
-#endif
                             }
-#ifdef KISAK_MP
                             else
                             {
+#ifdef KISAK_MP
                                 BG_AnimScriptEvent(ps, ANIM_ET_STAND_TO_CROUCH, 0, 0);
+#endif
                                 ps->pm_flags |= PMF_DUCKED;
                             }
-#endif
                         }
                         else if ((ps->pm_flags & PMF_PRONE) != 0)
                         {
@@ -3247,13 +3247,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     ps->pm_flags |= PMF_DUCKED;
                                 }
                             }
-#ifdef KISAK_MP
                             else
                             {
+#ifdef KISAK_MP
                                 BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_STAND, 0, 0);
+#endif
                                 ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
                             }
-#endif
                         }
                         else if ((ps->pm_flags & PMF_DUCKED) != 0)
                         {
@@ -3270,13 +3270,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 if ((pm->cmd.buttons & 0x1000) == 0)
                                     BG_AddPredictableEventToPlayerstate(7u, 1u, ps);
                             }
-#ifdef KISAK_MP
                             else
                             {
+#ifdef KISAK_MP
                                 BG_AnimScriptEvent(ps, ANIM_ET_CROUCH_TO_STAND, 0, 0);
+#endif
                                 ps->pm_flags &= ~PMF_DUCKED;
                             }
-#endif
                         }
                     }
                     else if (PlayerProneAllowed(pm))

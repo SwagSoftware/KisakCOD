@@ -238,7 +238,12 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     int v18; // r25
     unsigned int ChildAt; // r28
     int v20; // r30
-    __int64 v21; // r11
+    // KISAKFIX: was `__int64 v21` (OVERLAPPED int64) — kisak port wrote `LODWORD(v21) = X`
+    // then read `(float)v21`, which on x86 converts 8 bytes (4 real + 4 garbage HIDWORD)
+    // to float. PPC used `extsw r11, r30` to sign-extend int32→int64 before `fcfid`, so
+    // the int64 detour was an artifact of PPC's int-to-float instruction; on x86 int32→float
+    // directly. Turret-AI anim child index computed from garbage every tick.
+    int v21; // r11
     const char *v22; // r3
     double v23; // fp0
     int v24; // r30
@@ -298,17 +303,24 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     //float v78; // [sp+54h] [-21Ch]
     //float v79; // [sp+58h] [-218h]
     DObjAnimMat *v80; // [sp+5Ch] [-214h]
-    float v81; // [sp+60h] [-210h] BYREF
-    float v82; // [sp+64h] [-20Ch]
-    float v83; // [sp+68h] [-208h]
+    // KISAKFIX: v81/v82/v83 vec3 → G_ReduceOriginError(&v81). v85/v86/v87 vec3 → AxisToAngles(&v85),
+    // AnglesSubtract(..., &v85), G_ReduceAnglesError(&v85). v88/v89 vec2 → Vec2Normalize(&v88).
+    // v90/v91 vec2 → Vec2Normalize(&v90). Pack into arrays.
+    float originDelta[3]; // was v81 (BYREF) + v82 + v83
     scr_const_t *v84; // [sp+6Ch] [-204h]
-    float v85; // [sp+70h] [-200h] BYREF
-    float v86; // [sp+74h] [-1FCh]
-    float v87; // [sp+78h] [-1F8h]
-    float v88; // [sp+80h] [-1F0h] BYREF
-    float v89; // [sp+84h] [-1ECh]
-    float v90; // [sp+88h] [-1E8h] BYREF
-    float v91; // [sp+8Ch] [-1E4h]
+    float anglesNew[3];   // was v85 (BYREF) + v86 + v87
+    float dirEnt[2];      // was v88 (BYREF) + v89
+    float dirTurret[2];   // was v90 (BYREF) + v91
+    #define v81 originDelta[0]
+    #define v82 originDelta[1]
+    #define v83 originDelta[2]
+    #define v85 anglesNew[0]
+    #define v86 anglesNew[1]
+    #define v87 anglesNew[2]
+    #define v88 dirEnt[0]
+    #define v89 dirEnt[1]
+    #define v90 dirTurret[0]
+    #define v91 dirTurret[1]
     int v92; // [sp+90h] [-1E0h]
     float v93[2]; // [sp+98h] [-1D8h] BYREF
     const gentity_s *pTurret; // [sp+A0h] [-1D0h]
@@ -404,12 +416,12 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
                 0,
                 "%s",
                 "weapDef->fAnimHorRotateInc");
-        LODWORD(v21) = v20;
+        v21 = v20;
         v23 = (float)((float)((float)v21 * (float)0.5) + (float)((float)v7 / WeaponDef->fAnimHorRotateInc));
         v99 = v21;
         if (v23 >= 0.0)
         {
-            LODWORD(v21) = v20 - 1;
+            v21 = v20 - 1;
             v98 = v21;
             if (v23 >= (float)v21)
                 v23 = (float)v21;
@@ -420,7 +432,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         }
         v92 = (int)v23;
         v24 = (int)v23;
-        LODWORD(v21) = (int)v23;
+        v21 = (int)v23;
         v95 = v21;
         v25 = (float)((float)v23 - (float)v21);
         v26 = XAnimGetChildAt(Anims, ChildAt, (int)v23);
@@ -519,8 +531,8 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         v91 = v54[6] - v62->trans[2];
         v88 = v90;
         v89 = (float)(ent->tagInfo->axis[3][2] - trans[2]) - v62->trans[2];
-        Vec2Normalize(&v90);
-        Vec2Normalize(&v88);
+        Vec2Normalize(dirTurret);
+        Vec2Normalize(dirEnt);
         *(double *)&v64 = (float)((float)(v89 * v91) + (float)(v88 * v90));
         if (*(double *)&v64 >= 0.0)
         {
@@ -581,7 +593,7 @@ LABEL_60:
     v101[10] = v34->r.currentOrigin[1];
     v101[11] = v34->r.currentOrigin[2];
     MatrixMultiply43((const mat4x3&)v100, (const mat4x3&)v101, (mat4x3&)v102);
-    AxisToAngles((const mat3x3&)v102, &v85);
+    AxisToAngles((const mat3x3&)v102, anglesNew);
     v81 = v102[9];
     v82 = v102[10];
     v83 = v102[11];
@@ -609,11 +621,11 @@ LABEL_60:
             pTurretInfo->originError[0] = ent->r.currentOrigin[0] - v81;
             pTurretInfo->originError[1] = ent->r.currentOrigin[1] - v82;
             pTurretInfo->originError[2] = ent->r.currentOrigin[2] - v83;
-            AnglesSubtract(ent->r.currentAngles, &v85, pTurretInfo->anglesError);
+            AnglesSubtract(ent->r.currentAngles, anglesNew, pTurretInfo->anglesError);
         }
     }
-    G_ReduceOriginError(&v81, pTurretInfo->originError, 3.0);
-    G_ReduceAnglesError(&v85, pTurretInfo->anglesError, 27.0);
+    G_ReduceOriginError(originDelta, pTurretInfo->originError, 3.0);
+    G_ReduceAnglesError(anglesNew, pTurretInfo->anglesError, 27.0);
     ent->r.currentAngles[0] = v85;
     ent->r.currentAngles[1] = v86;
     ent->r.currentAngles[2] = v87;
@@ -852,6 +864,16 @@ LABEL_53:
     Actor_SetState(self, AIS_EXPOSED);
     return ACTOR_THINK_REPEAT;
 }
+#undef v81
+#undef v82
+#undef v83
+#undef v85
+#undef v86
+#undef v87
+#undef v88
+#undef v89
+#undef v90
+#undef v91
 
 void __cdecl Actor_Turret_Pain(
     actor_s *self,

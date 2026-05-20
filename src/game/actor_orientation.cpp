@@ -220,9 +220,8 @@ void __cdecl Actor_SetAnglesToLikelyEnemyPath(actor_s *self)
 {
     const pathnode_t *faceLikelyEnemyPathNode; // r10
     gentity_s *ent; // r11
-    float v4; // [sp+50h] [-30h] BYREF
-    float v5; // [sp+54h] [-2Ch]
-    float v6; // [sp+58h] [-28h]
+    // KISAKFIX: v4/v5/v6 vec3 passed as &v4 to vectoangles. Pack into array.
+    float toEnemy[3]; // was v4 (BYREF) + v5 + v6
 
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_orientation.cpp", 265, 0, "%s", "self");
@@ -235,10 +234,10 @@ void __cdecl Actor_SetAnglesToLikelyEnemyPath(actor_s *self)
             "self->faceLikelyEnemyPathNode");
     faceLikelyEnemyPathNode = self->faceLikelyEnemyPathNode;
     ent = self->ent;
-    v4 = faceLikelyEnemyPathNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
-    v5 = faceLikelyEnemyPathNode->constant.vOrigin[1] - ent->r.currentOrigin[1];
-    v6 = faceLikelyEnemyPathNode->constant.vOrigin[2] - ent->r.currentOrigin[2];
-    if ((float)((float)(v5 * v5) + (float)(v4 * v4)) < 1.0)
+    toEnemy[0] = faceLikelyEnemyPathNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
+    toEnemy[1] = faceLikelyEnemyPathNode->constant.vOrigin[1] - ent->r.currentOrigin[1];
+    toEnemy[2] = faceLikelyEnemyPathNode->constant.vOrigin[2] - ent->r.currentOrigin[2];
+    if ((float)((float)(toEnemy[1] * toEnemy[1]) + (float)(toEnemy[0] * toEnemy[0])) < 1.0)
     {
         self->anglesToLikelyEnemyPath[0] = ent->r.currentAngles[0];
         self->anglesToLikelyEnemyPath[1] = ent->r.currentAngles[1];
@@ -246,7 +245,7 @@ void __cdecl Actor_SetAnglesToLikelyEnemyPath(actor_s *self)
     }
     else
     {
-        vectoangles(&v4, self->anglesToLikelyEnemyPath);
+        vectoangles(toEnemy, self->anglesToLikelyEnemyPath);
     }
 }
 
@@ -375,91 +374,73 @@ void __cdecl Actor_FaceLikelyEnemyPath(actor_s *self, ai_orient_t *pOrient)
     }
 }
 
-// local variable allocation has failed, the output may be wrong!
 void __cdecl Actor_FaceEnemy(actor_s *self, ai_orient_t *pOrient)
 {
-    actor_s *v4; // r3
-    bool v5; // zf
-    sentient_s *TargetSentient; // r3
-    sentient_s *v7; // r28
-    sentient_info_t *v8; // r30
-    gentity_s *ent; // r11
-    double v10; // fp0
-    double v11; // fp13
-    double v12; // fp12
-    __int64 v13; // r9 OVERLAPPED
-    int iPathTime; // r10
-    const pathnode_t *FacingNode; // r3
-    gentity_s *v16; // r11
-    gentity_s *v17; // r11
-    float targetPos[3]; // [sp+60h] [-40h] BYREF // v18
-
     iassert(self);
     iassert(self->sentient);
 
-    v5 = Actor_GetTargetEntity(self) != 0;
-    v4 = self;
-    if (!v5)
-        goto LABEL_6;
-    TargetSentient = Actor_GetTargetSentient(self);
-    v7 = TargetSentient;
-    if (!TargetSentient)
-        goto LABEL_19;
-    v8 = &self->sentientInfo[TargetSentient - level.sentients];
-    if (v8->VisCache.bVisible)
-        goto LABEL_19;
-    if (self->species)
+    if (!Actor_GetTargetEntity(self))
     {
-        ent = self->ent;
-        v10 = (float)(self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[0] - self->ent->r.currentOrigin[0]);
-        targetPos[0] = self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[0] - self->ent->r.currentOrigin[0];
-        v11 = (float)(self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[1] - ent->r.currentOrigin[1]);
-        targetPos[1] = self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[1] - ent->r.currentOrigin[1];
-        v12 = (float)(self->sentientInfo[TargetSentient - level.sentients].vLastKnownPos[2] - ent->r.currentOrigin[2]);
-        goto LABEL_20;
-    }
-    v4 = self;
-    if (!v8->VisCache.iLastVisTime)
-    {
-    LABEL_6:
-        Actor_FaceLikelyEnemyPath(v4, pOrient);
-        return;
-    }
-    if (Actor_HasPath(self))
-    {
-        iPathTime = self->Path.iPathTime;
-        LODWORD(v13) = level.time;
-        if ((float)((float)*(__int64 *)((char *)&v13 - 4) + (float)300.0) < (double)(float)v13
-            && level.time - v8->VisCache.iLastVisTime > 500)
-        {
-            FacingNode = Path_FindFacingNode(self->sentient, v7, v8);
-            if (FacingNode)
-            {
-                v16 = self->ent;
-                v10 = (float)(FacingNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0]);
-                targetPos[0] = FacingNode->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
-                v11 = (float)(FacingNode->constant.vOrigin[1] - v16->r.currentOrigin[1]);
-                targetPos[1] = FacingNode->constant.vOrigin[1] - v16->r.currentOrigin[1];
-                v12 = (float)(FacingNode->constant.vOrigin[2] - v16->r.currentOrigin[2]);
-                goto LABEL_20;
-            }
-        }
-    LABEL_19:
-        Actor_GetTargetPosition(self, targetPos);
-        v17 = self->ent;
-        v10 = (float)(targetPos[0] - self->ent->r.currentOrigin[0]);
-        targetPos[0] = targetPos[0] - self->ent->r.currentOrigin[0];
-        v11 = (float)(targetPos[1] - v17->r.currentOrigin[1]);
-        targetPos[1] = targetPos[1] - v17->r.currentOrigin[1];
-        v12 = (float)(targetPos[2] - v17->r.currentOrigin[2]);
-    LABEL_20:
-        targetPos[2] = v12;
-        if ((float)((float)((float)v10 * (float)v10) + (float)((float)v11 * (float)v11)) >= 1.0)
-            Actor_FaceVector(pOrient, targetPos);
-        return;
-    }
-    if (level.time - v8->VisCache.iLastVisTime >= 10000)
         Actor_FaceLikelyEnemyPath(self, pOrient);
+        return;
+    }
+
+    sentient_s *enemy = Actor_GetTargetSentient(self);
+    sentient_info_t *info = enemy ? &self->sentientInfo[enemy - level.sentients] : NULL;
+
+    float v[3];  // world-space facing target; converted to delta below
+
+    if (!enemy || info->VisCache.bVisible)
+    {
+        Actor_GetTargetPosition(self, v);
+    }
+    else if (self->species != AI_SPECIES_HUMAN)
+    {
+        // Non-human (dog): face last-known enemy pos.
+        v[0] = info->vLastKnownPos[0];
+        v[1] = info->vLastKnownPos[1];
+        v[2] = info->vLastKnownPos[2];
+    }
+    else if (!info->VisCache.iLastVisTime)
+    {
+        // Human, never seen the enemy: fall back to likely-enemy-path.
+        Actor_FaceLikelyEnemyPath(self, pOrient);
+        return;
+    }
+    else if (Actor_HasPath(self))
+    {
+        const pathnode_t *facingNode = NULL;
+        if ((float)self->Path.iPathTime + 300.0f < (float)level.time
+            && level.time - info->VisCache.iLastVisTime > 500)
+        {
+            facingNode = Path_FindFacingNode(self->sentient, enemy, info);
+        }
+
+        if (facingNode)
+        {
+            v[0] = facingNode->constant.vOrigin[0];
+            v[1] = facingNode->constant.vOrigin[1];
+            v[2] = facingNode->constant.vOrigin[2];
+        }
+        else
+        {
+            Actor_GetTargetPosition(self, v);
+        }
+    }
+    else
+    {
+        // No path. Long LOS loss -> likely-enemy-path; otherwise leave alone.
+        if (level.time - info->VisCache.iLastVisTime >= 10000)
+            Actor_FaceLikelyEnemyPath(self, pOrient);
+        return;
+    }
+
+    const float *currentOrigin = self->ent->r.currentOrigin;
+    v[0] -= currentOrigin[0];
+    v[1] -= currentOrigin[1];
+    v[2] -= currentOrigin[2];
+    if ((v[0] * v[0]) + (v[1] * v[1]) >= 1.0f)
+        Actor_FaceVector(pOrient, v);
 }
 
 // aislop
@@ -507,63 +488,45 @@ void Actor_FaceEnemyOrMotion(actor_s *self, ai_orient_t *pOrient)
     iassert(self);
     iassert(pOrient);
 
-    // If actor is not moving or doesn't have a path, face enemy directly
-    if (!Actor_HasPath(self) ||
-        (self->Physics.vVelocity[0] == 0.0f && self->Physics.vVelocity[1] == 0.0f))
+    // SP IDA sub_82207F80. Stationary / no path -> always face enemy.
+    if (!Actor_HasPath(self)
+        || (self->Physics.vVelocity[0] == 0.0f && self->Physics.vVelocity[1] == 0.0f))
     {
         Actor_FaceEnemy(self, pOrient);
         return;
     }
 
-    // Check whether there's an enemy target, it's visible, and within range
+    // No enemy or can't see one -> face the direction we're moving.
     if (!Actor_GetTargetEntity(self) || !Actor_CanSeeEnemy(self))
     {
         Actor_FaceMotion(self, pOrient);
         return;
     }
 
-    float targetPos[3];
-    Actor_GetTargetPosition(self, targetPos);
-
-    float *origin = self->ent->r.currentOrigin;
-
-    float dx = targetPos[0] - origin[0];
-    float dy = targetPos[1] - origin[1];
-    float dz = targetPos[2] - origin[2];
-
-    float distSq = dx * dx + dy * dy + dz * dz;
-
-    // If target is farther than 350 units (squared: 122500), just face motion
-    if (distSq > 122500.0f)
+    // Enemy farther than 350 units (350^2 = 122500) -> face motion. Avoids
+    // making the actor visibly snap his head around at long range while sprinting.
+    float vEnemyPos[3];
+    Actor_GetTargetPosition(self, vEnemyPos);
+    if (Vec3DistanceSq(self->ent->r.currentOrigin, vEnemyPos) > 122500.0f)
     {
         Actor_FaceMotion(self, pOrient);
         return;
     }
 
-    float length = sqrtf(distSq);
-
-    if (length == 0.0f)
-    {
-        Actor_FaceMotion(self, pOrient);
-        return;
-    }
-
-    float invLen = 1.0f / length;
-
-    float dir[3] =
-    {
-        dx * invLen,
-        dy * invLen,
-        dz * invLen
+    // In range. Ask the pather whether facing the enemy is compatible with the
+    // current path (i.e. won't make the actor turn so far he can't keep moving).
+    float *currentOrigin = self->ent->r.currentOrigin;
+    float vEnemyDir[3] = {
+        vEnemyPos[0] - currentOrigin[0],
+        vEnemyPos[1] - currentOrigin[1],
+        vEnemyPos[2] - currentOrigin[2],
     };
+    Vec3Normalize(vEnemyDir);  // SP IDA inlines the same safe 1/sqrt via fsel
 
-    if (!Path_MayFaceEnemy(&self->Path, dir, origin))
-    {
+    if (Path_MayFaceEnemy(&self->Path, vEnemyDir, currentOrigin))
+        Actor_FaceEnemy(self, pOrient);
+    else
         Actor_FaceMotion(self, pOrient);
-        return;
-    }
-
-    Actor_FaceEnemy(self, pOrient);
 }
 
 

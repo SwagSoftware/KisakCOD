@@ -192,8 +192,8 @@ int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
     {
         ++v4;
         ++v3;
-        //if ((int)v4 >= (int)WeaponStateNames_110)
-        if ((int)v4 >= ARRAY_COUNT(WeaponStateNames)) // KISAKTODO: double check
+
+        if (v3 >= ARRAY_COUNT(modNames))
         {
             Scr_ParamError(scrParam, va("Unknown means of death \"%s\"\n", SL_ConvertToString(ConstString)));
             return 0;
@@ -232,9 +232,7 @@ void __cdecl player_die(
     gclient_s *v26; // r30
     const char *v27; // r3
     const char *v28; // r3
-    float v29; // [sp+50h] [-70h] BYREF
-    float v30; // [sp+54h] [-6Ch]
-    float v31; // [sp+58h] [-68h]
+    float vel[3];
     float v32[24]; // [sp+60h] [-60h] BYREF
 
     client = self->client;
@@ -242,13 +240,13 @@ void __cdecl player_die(
     {
         if (client->ps.grenadeTimeLeft)
         {
-            v29 = G_crandom();
-            v30 = G_crandom();
+            vel[0] = G_crandom();
+            vel[1] = G_crandom();
             v15 = G_crandom();
             v16 = self->client;
-            v29 = v29 * (float)160.0;
-            v30 = v30 * (float)160.0;
-            v31 = (float)v15 * (float)160.0;
+            vel[0] = vel[0] * (float)160.0;
+            vel[1] = vel[1] * (float)160.0;
+            vel[2] = (float)v15 * (float)160.0;
             v32[0] = self->r.currentOrigin[0];
             v32[2] = self->r.currentOrigin[2] + (float)40.0;
             v32[1] = self->r.currentOrigin[1];
@@ -256,7 +254,7 @@ void __cdecl player_die(
                 offHandIndex = v16->ps.offHandIndex;
             else
                 offHandIndex = v16->ps.weapon;
-            G_FireGrenade(self, v32, &v29, offHandIndex, v16->ps.weaponmodels[offHandIndex], 1, v16->ps.grenadeTimeLeft);
+            G_FireGrenade(self, v32, vel, offHandIndex, v16->ps.weaponmodels[offHandIndex], 1, v16->ps.grenadeTimeLeft);
         }
         WeaponDef = BG_GetWeaponDef(iWeapon);
         p_szInternalName = &WeaponDef->szInternalName;
@@ -329,21 +327,18 @@ void __cdecl player_die(
 
 float __cdecl G_GetWeaponHitLocationMultiplier(unsigned int hitLoc, unsigned int weapon)
 {
-    WeaponDef *WeaponDef; // r3
-    double v5; // fp1
+    WeaponDef *weapDef; // r3
 
-    if (hitLoc > 0x12)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp",
-            389,
-            0,
-            "%s",
-            "(hitLoc >= HITLOC_NONE) && (hitLoc < HITLOC_NUM)");
-    if (weapon && (WeaponDef = BG_GetWeaponDef(weapon)) != 0 && WeaponDef->weapType == WEAPTYPE_BULLET)
-        v5 = WeaponDef->locationDamageMultipliers[hitLoc];
+    iassert((hitLoc >= HITLOC_NONE) && (hitLoc < HITLOC_NUM));
+
+    if (weapon && (weapDef = BG_GetWeaponDef(weapon)) != 0 && weapDef->weapType == WEAPTYPE_BULLET)
+    {
+        return weapDef->locationDamageMultipliers[hitLoc];
+    }
     else
-        v5 = g_fHitLocDamageMult[hitLoc];
-    return *((float *)&v5 + 1);
+    {
+        return g_fHitLocDamageMult[hitLoc];
+    }
 }
 
 void __cdecl handleDeathInvulnerability(gentity_s *targ, int prevHealth, int mod)
@@ -960,7 +955,7 @@ int __cdecl G_CanRadiusDamageFromPos(
 
                 float dir[3];
 
-                if (coneAngleCos != -1.0f && contentMask)
+                if (coneAngleCos != -1.0f && coneDirection)
                 {
                     dir[0] = dest[i][0] - centerPos[0];
                     dir[1] = dest[i][1] - centerPos[1];
@@ -970,9 +965,7 @@ int __cdecl G_CanRadiusDamageFromPos(
                     float dist = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
                     if (dist > 0.0001f)
                     {
-                        const float *coneDir = coneDirection;
-
-                        float dot = (dir[0] * coneDir[0] + dir[1] * coneDir[1] + dir[2] * coneDir[2]) / dist;
+                        float dot = (dir[0] * coneDirection[0] + dir[1] * coneDirection[1] + dir[2] * coneDirection[2]) / dist;
                         if (dot < coneAngleCos)
                         {
                             success = false;
@@ -991,11 +984,11 @@ int __cdecl G_CanRadiusDamageFromPos(
         }
 
         int hits = 0;
-        for (int i = 0; i < 5; ++i) 
+        for (int i = 0; i < 5; ++i)
         {
             bool withinCone = true;
 
-            if (coneAngleCos != -1.0f && contentMask) 
+            if (coneAngleCos != -1.0f && coneDirection)
             {
                 float dx = dest[i][0] - centerPos[0];
                 float dy = dest[i][1] - centerPos[1];
@@ -1003,19 +996,19 @@ int __cdecl G_CanRadiusDamageFromPos(
 
                 float len = sqrtf(dx * dx + dy * dy + dz * dz);
 
-                if (len > 0.0001f) 
+                if (len > 0.0001f)
                 {
                     float invLen = 1.0f / len;
 
-                    float dot = 
-                        ((float *)contentMask)[0] * dx * invLen +
-                        ((float *)contentMask)[1] * dy * invLen +
-                        ((float *)contentMask)[2] * dz * invLen;
+                    float dot =
+                        coneDirection[0] * dx * invLen +
+                        coneDirection[1] * dy * invLen +
+                        coneDirection[2] * dz * invLen;
 
                     if (dot < coneAngleCos)
                         withinCone = false;
                 }
-                else 
+                else
                 {
                     withinCone = false;
                 }
@@ -1147,9 +1140,8 @@ int __cdecl G_CanRadiusDamageFromPos(
         
         for (int i = 0; i < 5; i++)
         {
-            if (coneAngleCos == -1.0 || !contentMask)
+            if (coneAngleCos == -1.0 || !coneDirection)
             {
-                // Skip the cone angle/content mask check
                 if (G_LocationalTracePassed(centerPos, dest[i], targ->s.number, inflictorNum, contentMask, 0))
                     break;
             }
@@ -1162,9 +1154,9 @@ int __cdecl G_CanRadiusDamageFromPos(
                 float len = sqrtf(dx * dx + dy * dy + dz * dz);
                 float invLen = (len > 0.0001f) ? (1.0f / len) : 0.0f;
 
-                float dot = (*(float *)contentMask * (dx * invLen)) +
-                    (*(float *)(contentMask + 8) * (dz * invLen)) +
-                    (*(float *)(contentMask + 4) * (dy * invLen));
+                float dot = coneDirection[0] * (dx * invLen) +
+                            coneDirection[1] * (dy * invLen) +
+                            coneDirection[2] * (dz * invLen);
 
                 if (dot >= coneAngleCos)
                 {
@@ -1174,7 +1166,7 @@ int __cdecl G_CanRadiusDamageFromPos(
             }
         }
 
-        return 0; // i > 5 
+        return 0; // i > 5
     }
 
     return 1;
@@ -1262,55 +1254,34 @@ void __cdecl AddScrTeamName(team_t team)
 
 float __cdecl G_GetRadiusDamageDistanceSquared(float *damageOrigin, gentity_s *ent)
 {
-    double v4; // fp12
-    double v5; // fp13
-    double v6; // fp0
-    float *v7; // r11
-    int v8; // r8
-    float *absmax; // r10
-    int v10; // r9
-    double v11; // fp0
-    double v12; // fp1
-    float v14[6]; // [sp+50h] [-30h] BYREF
+    float v[3]; // [esp+Ch] [ebp-Ch]
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1301, 0, "%s", "ent");
+    iassert(ent);
     if (ent->r.bmodel)
     {
-        v7 = damageOrigin;
-        v8 = (char *)v14 - (char *)damageOrigin;
-        absmax = ent->r.absmax;
-        v10 = 3;
-        do
+        for (int i = 0; i < 3; ++i)
         {
-            v11 = *v7;
-            if (v11 >= *(absmax - 3))
+            if (ent->r.absmin[i] <= damageOrigin[i])
             {
-                if (v11 <= *absmax)
-                    *(float *)((char *)v7 + v8) = 0.0;
+                if (damageOrigin[i] <= ent->r.absmax[i])
+                    v[i] = 0.0f;
                 else
-                    *(float *)((char *)v7 + v8) = *v7 - *absmax;
+                    v[i] = damageOrigin[i] - ent->r.absmax[i];
             }
             else
             {
-                *(float *)((char *)v7 + v8) = *(absmax - 3) - *v7;
+                v[i] = ent->r.absmin[i] - damageOrigin[i];
             }
-            --v10;
-            ++v7;
-            ++absmax;
-        } while (v10);
-        v6 = v14[2];
-        v5 = v14[1];
-        v4 = v14[0];
+        }
     }
     else
     {
-        v4 = (float)(ent->r.currentOrigin[0] - *damageOrigin);
-        v5 = (float)(ent->r.currentOrigin[1] - damageOrigin[1]);
-        v6 = (float)(ent->r.currentOrigin[2] - damageOrigin[2]);
+        v[0] = ent->r.currentOrigin[0] - damageOrigin[0];
+        v[1] = ent->r.currentOrigin[1] - damageOrigin[1];
+        v[2] = ent->r.currentOrigin[2] - damageOrigin[2];
     }
-    v12 = (float)((float)((float)v5 * (float)v5) + (float)((float)((float)v4 * (float)v4) + (float)((float)v6 * (float)v6)));
-    return *((float *)&v12 + 1);
+
+    return Vec3LengthSq(v);
 }
 
 bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gentity_s *ent)
@@ -1321,8 +1292,7 @@ bool __cdecl G_WithinDamageRadius(float *damageOrigin, double radiusSquared, gen
 
 bool __cdecl G_ClientFlashbanged(gclient_s *client)
 {
-    if (!client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1436, 0, "%s", "client");
+    iassert(client);
     return (client->ps.pm_flags & 0x10000) != 0
         && level.time < client->ps.shellshockDuration + client->ps.shellshockTime
         && BG_GetShellshockParms(client->ps.shellshockIndex)->screenBlend.type == SHELLSHOCK_VIEWTYPE_FLASHED;
@@ -1330,8 +1300,7 @@ bool __cdecl G_ClientFlashbanged(gclient_s *client)
 
 int __cdecl G_GetHitLocationString(unsigned int hitLoc)
 {
-    if (hitLoc >= 0x13)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 1459, 0, "%s", "(unsigned)hitLoc < HITLOC_NUM");
+    iassert((unsigned)hitLoc < HITLOC_NUM);
     return g_HitLocConstNames[hitLoc];
 }
 
@@ -1372,13 +1341,10 @@ void __cdecl FlashbangBlastEnt(
     double v16; // fp29
     double v17; // fp30
     actor_s *actor; // r3
-    double v19; // fp13
     double v20; // fp31
-    float v21; // [sp+50h] [-80h] BYREF
-    float v22; // [sp+54h] [-7Ch]
-    float v23; // [sp+58h] [-78h]
-    float v24[4]; // [sp+60h] [-70h] BYREF
-    float v25[14]; // [sp+70h] [-60h] BYREF
+    float toEnt[3]; 
+    float origin[4]; // [sp+60h] [-70h] BYREF
+    float forward[14]; // [sp+70h] [-60h] BYREF
 
     if (ent->takedamage)
     {
@@ -1394,8 +1360,8 @@ void __cdecl FlashbangBlastEnt(
                     v17 = 1.0;
                 if (ent->client)
                 {
-                    G_GetPlayerViewDirection(ent, v25, 0, 0);
-                    G_GetPlayerViewOrigin(&ent->client->ps, v24);
+                    G_GetPlayerViewDirection(ent, forward, NULL, NULL);
+                    G_GetPlayerViewOrigin(&ent->client->ps, origin);
                     Actor_ClearAllSuppressionFromEnemySentient(ent->sentient);
                 }
                 else
@@ -1403,23 +1369,19 @@ void __cdecl FlashbangBlastEnt(
                     actor = ent->actor;
                     if (actor)
                     {
-                        Actor_GetEyeDirection(actor, v25);
-                        Actor_GetEyePosition(ent->actor, v24);
+                        Actor_GetEyeDirection(actor, forward);
+                        Actor_GetEyePosition(ent->actor, origin);
                     }
                     else
                     {
-                        AngleVectors(ent->r.currentAngles, v25, 0, 0);
-                        G_EntityCentroid(ent, v24);
+                        AngleVectors(ent->r.currentAngles, forward, 0, 0);
+                        G_EntityCentroid(ent, origin);
                     }
                 }
-                v19 = (float)(blastOrigin[1] - v24[1]);
-                v21 = *blastOrigin - v24[0];
-                v22 = v19;
-                v23 = blastOrigin[2] - v24[2];
-                Vec3NormalizeFast(&v21);
-                v20 = (float)((float)((float)((float)(v21 * v25[0]) + (float)((float)(v25[2] * v23) + (float)(v25[1] * v22)))
-                    + (float)1.0)
-                    * (float)0.5);
+                Vec3Sub(blastOrigin, origin, toEnt);
+                Vec3NormalizeFast(toEnt);
+                float toDotForward = Vec3Dot(toEnt, forward);
+                v20 = (toDotForward + 1.0f) * 0.5f;
                 AddScrTeamName(team);
                 if (attacker)
                     Scr_AddEntity(attacker);

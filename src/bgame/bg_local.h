@@ -1802,7 +1802,10 @@ extern const dvar_t *bg_shock_screenBlurBlendTime;
 extern const dvar_t *player_dmgtimer_flinchTime;
 extern const dvar_t *player_move_factor_on_torso;
 extern const dvar_t *bg_shock_screenBlurBlendFadeTime;
+#ifdef KISAK_MP
 extern const dvar_t *animscript_debug;
+extern const dvar_t *anim_debugSpeeds;
+#endif
 extern const dvar_t *player_adsExitDelay;
 extern const dvar_t *bg_shock_soundDryLevel;
 extern const dvar_t *bg_swingSpeed;
@@ -1874,7 +1877,6 @@ extern const dvar_t *bg_bobAmplitudeDucked;
 extern const dvar_t *player_strafeSpeedScale;
 extern const dvar_t *bg_shock_soundRoomType;
 extern const dvar_t *player_breath_hold_time;
-extern const dvar_t *anim_debugSpeeds;
 extern const dvar_t *bg_ladder_yawcap;
 extern const dvar_t *bg_shock_screenFlashShotFadeTime;
 extern const dvar_t *bg_shock_soundModEndDelay;

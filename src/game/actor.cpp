@@ -32,6 +32,7 @@
 #include "actor_lookat.h"
 #include "actor_corpse.h"
 #include "g_actor_prone.h"
+#include <universal/profile.h>
 
 const char *animModeNames[10] =
 {
@@ -855,38 +856,24 @@ void __cdecl Actor_GetTargetLookPosition(actor_s *self, float *position)
 
 void __cdecl Actor_InitMove(actor_s *self)
 {
-    gentity_s *ent; // r11
-    int number; // r7
-    gentity_s *v4; // r11
-    gentity_s *v5; // r11
+    iassert(self);
+    iassert(self->ent);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2367, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2368, 0, "%s", "self->ent");
     memset(&self->Physics, 0, sizeof(self->Physics));
-    self->Physics.vOrigin[0] = 0.0;
-    self->Physics.vOrigin[1] = 0.0;
-    self->Physics.vOrigin[2] = 0.0;
-    ent = self->ent;
-    number = self->ent->s.number;
+    Vec3Clear(self->Physics.vOrigin);
+
     self->Physics.ePhysicsType = AIPHYS_BAD;
     self->Physics.iMsec = 50;
     self->Physics.bIsAlive = 1;
-    self->Physics.iEntNum = number;
-    if (ent->health <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 2377, 0, "%s", "self->ent->health > 0");
-    v4 = self->ent;
+    self->Physics.iEntNum = self->ent->s.number;
+
+    iassert(self->ent->health > 0);
+
     self->Physics.iHitEntnum = ENTITYNUM_NONE;
     self->Physics.iTraceMask = 42074129;
     self->Physics.groundEntNum = ENTITYNUM_WORLD;
-    self->Physics.vMins[0] = v4->r.mins[0];
-    self->Physics.vMins[1] = v4->r.mins[1];
-    self->Physics.vMins[2] = v4->r.mins[2];
-    v5 = self->ent;
-    self->Physics.vMaxs[0] = self->ent->r.maxs[0];
-    self->Physics.vMaxs[1] = v5->r.maxs[1];
-    self->Physics.vMaxs[2] = v5->r.maxs[2];
+    Vec3Copy(self->ent->r.mins, self->Physics.vMins);
+    Vec3Copy(self->ent->r.maxs, self->Physics.vMaxs);
 }
 
 bool __cdecl Actor_IsDodgeEntity(actor_s *self, int entnum)
@@ -2131,12 +2118,10 @@ float __cdecl Path_UpdateMomentum(actor_s *self, float *vWishDir, double fMoveDi
     double leanAmount; // fp0
     double v7; // fp12
     double value; // fp0
-    double v9; // fp1
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5225, 0, "%s", "self");
-    if (!vWishDir)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5226, 0, "%s", "vWishDir");
+    iassert(self);
+    iassert(vWishDir);
+
     if (fMoveDist > 15.0)
     {
         Path_UpdateLeanAmount(self, vWishDir);
@@ -2155,10 +2140,11 @@ float __cdecl Path_UpdateMomentum(actor_s *self, float *vWishDir, double fMoveDi
         vWishDir[1] = (float)((float)(self->prevMoveDir[1] - (float)v7) * (float)value) + (float)v7;
         Vec2Normalize(vWishDir);
     }
-    v9 = fMoveDist;
-    self->prevMoveDir[0] = *vWishDir;
+
+    self->prevMoveDir[0] = vWishDir[0];
     self->prevMoveDir[1] = vWishDir[1];
-    return *((float *)&v9 + 1);
+
+    return fMoveDist;
 }
 
 bool __cdecl Path_UseMomentum(actor_s *self)
@@ -2225,25 +2211,15 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     }
     if (self->sideMove != 0.0 && !Path_CompleteLookahead(pPath))
     {
-        vNewDir[1] = perp[1];
-        vNewDir[2] = (-perp[0]);
-        vNewDir[0] = pPath->fLookaheadDist;
-        maxSideMove[0] = vNewDir[0] * perp[0];
-        maxSideMove[1] = vNewDir[0] * perp[1];
-        vEndPos[2] = pPath->fLookaheadDist * 0.5f;
-        vEndPos[1] = self->sideMove;
-        vEndPos[0] = (-vEndPos[1]);
+        float sideClamp = pPath->fLookaheadDist * 0.5f;
+        float absSide = fabsf(self->sideMove);
+        if (sideClamp > absSide)
+            sideClamp = absSide;
+        if (self->sideMove < 0.0f)
+            sideClamp = -sideClamp;
 
-        if (vEndPos[2] > -vEndPos[1])
-            vEndPos[2] = vEndPos[0];
-
-        if (self->sideMove < 0.0)
-            vEndPos[2] = -vEndPos[2];
-
-        vNewDir[1] = vEndPos[2] * vNewDir[1];
-        vNewDir[2] = vEndPos[2] * vNewDir[2];
-        maxSideMove[0] = maxSideMove[0] + vNewDir[1];
-        maxSideMove[1] = maxSideMove[1] + vNewDir[2];
+        maxSideMove[0] = pPath->fLookaheadDist * perp[0] + sideClamp * perp[1];
+        maxSideMove[1] = pPath->fLookaheadDist * perp[1] + sideClamp * (-perp[0]);
         Vec2Normalize(maxSideMove);
         dot[0] = (60.0f * maxSideMove[0]) + vWishDir[0];
         dot[1] = (60.0f * maxSideMove[1]) + vWishDir[1];
@@ -2262,13 +2238,7 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     if (lookAheadLen < 0.000001f)
         lookAheadLen = 0.000001f;
 
-    //__libm_sse2_log(v4);
-    //__libm_sse2_exp(v5);
-
-    lookAheadLen = log(lookAheadLen);
-    lookAheadLen = exp(lookAheadLen);
-
-    calculatedLen = 0.333 * lookAheadLen;
+    calculatedLen = exp(0.333 * log(lookAheadLen));
 
     if (calculatedLen < 0.6f)
         calculatedLen = 0.6f;
@@ -2286,7 +2256,7 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     self->Physics.vWishDelta[2] = fMoveDist * perp[2];
 
     self->moveHistory[moveHistoryIndex][0] = vLookDir[0];
-    self->moveHistory[moveHistoryIndex][0] = vLookDir[1];
+    self->moveHistory[moveHistoryIndex][1] = vLookDir[1];
 
     Actor_UpdateMoveHistory(self);
 }
@@ -3183,121 +3153,45 @@ void __cdecl Actor_UpdateCloseEnt(actor_s *self)
 actor_think_result_t __cdecl Actor_CallThink(actor_s *self)
 {
     unsigned int stateLevel; // r7
-    ai_state_t v3; // r8
-    actor_think_result_t v4; // r27
-    int wPathLen; // r11
+    actor_think_result_t eThinkResult; // r27
     double fCurrLength; // fp1
     double v7; // fp2
     const char *v8; // r3
-    int *v9; // r11
     float *v10; // r11
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1225, 0, "%s", "self");
-    if (!self->sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1226, 0, "%s", "self->sentient");
+    iassert(self);
+    iassert(self->sentient);
     stateLevel = self->stateLevel;
-    if (stateLevel >= 5)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            1227,
-            0,
-            "self->stateLevel doesn't index ARRAY_COUNT( self->eState )\n\t%i not in [0, %i)",
-            stateLevel,
-            5);
-    v3 = self->eState[self->stateLevel];
-    if (!AIFuncTable[self->species][v3].pfnThink)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            1228,
-            0,
-            "%s\n\t(self->eState[self->stateLevel]) = %i",
-            "(AIFuncTable[self->species][self->eState[self->stateLevel]].pfnThink)",
-            v3);
+    bcassert(self->stateLevel, ARRAY_COUNT(self->eState));
+    iassert(AIFuncTable[self->species][self->eState[self->stateLevel]].pfnThink);
+
     Actor_ValidateReacquireNodes(self);
     if (self->transitionCount)
     {
         Actor_ThinkStateTransitions(self);
-        if (self->transitionCount)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 1240, 0, "%s", "self->transitionCount == 0");
+        iassert(self->transitionCount == 0);
     }
     Actor_UpdateCloseEnt(self);
-    v4 = AIFuncTable[self->species][self->eState[self->stateLevel]].pfnThink(self);
-    if ((unsigned int)v4 > ACTOR_THINK_MOVE_TO_BODY_QUEUE)
+
+    eThinkResult = AIFuncTable[self->species][self->eState[self->stateLevel]].pfnThink(self);
+    if ((unsigned int)eThinkResult > ACTOR_THINK_MOVE_TO_BODY_QUEUE)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
             1247,
             0,
             "%s",
             "eThinkResult == ACTOR_THINK || eThinkResult == ACTOR_THINK_REPEAT || eThinkResult == ACTOR_THINK_MOVE_TO_BODY_QUEUE");
-    wPathLen = self->Path.wPathLen;
-    if (wPathLen > 1)
-    {
-        fCurrLength = self->Path.fCurrLength;
-        v7 = *(float *)&self->Physics.iTouchEnts[7 * wPathLen + 29];
-        if (fCurrLength > v7)
-        {
-            v8 = va((const char *)HIDWORD(fCurrLength), LODWORD(fCurrLength), LODWORD(v7));
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-                1249,
-                0,
-                "%s\n\t%s",
-                "self->Path.wPathLen <= 1 || self->Path.fCurrLength <= self->Path.pts[self->Path.wPathLen - 2].fOrigLength",
-                v8);
-        }
-    }
-    if (Path_HasNegotiationNode(&self->Path))
-    {
-        v9 = (int *)((char *)self + 28 * self->Path.wNegotiationStartNode);
-        if (v9[205] < 0 || v9[198] < 0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-                1250,
-                0,
-                "%s",
-                "!Path_HasNegotiationNode( &self->Path ) || (self->Path.pts[self->Path.wNegotiationStartNode].iNodeNum >= 0 && se"
-                "lf->Path.pts[self->Path.wNegotiationStartNode - 1].iNodeNum >= 0)");
-    }
-    if (self->Path.wPathLen)
-    {
-        if (self->Path.wNegotiationStartNode == self->Path.wPathLen - 1)
-        {
-            v10 = (float *)((char *)self + 28 * self->Path.wNegotiationStartNode);
-            if (v10[199] != self->Path.vCurrPoint[0]
-                || v10[200] != self->Path.vCurrPoint[1]
-                || v10[201] != self->Path.vCurrPoint[2])
-            {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-                    1251,
-                    0,
-                    "%s",
-                    "!self->Path.wPathLen || !Path_AtEndOrNegotiation( &self->Path ) || Vec3Compare( self->Path.pts[self->Path.wNeg"
-                    "otiationStartNode].vOrigPoint, self->Path.vCurrPoint )");
-            }
-        }
-    }
-    if (self->Path.wPathLen && self->Path.lookaheadNextNode >= self->Path.wPathLen)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            1252,
-            0,
-            "%s",
-            "!self->Path.wPathLen || (self->Path.lookaheadNextNode < self->Path.wPathLen)");
-    if (self->Path.wPathLen
-        && self->Path.fLookaheadDistToNextNode != 0.0
-        && self->Path.lookaheadNextNode >= self->Path.wPathLen - 1)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp",
-            1253,
-            0,
-            "%s",
-            "!self->Path.wPathLen || !self->Path.fLookaheadDistToNextNode || (self->Path.lookaheadNextNode < self->Path.wPathLen - 1)");
-    }
+
+    iassert(self->Path.wPathLen <= 1 || self->Path.fCurrLength <= self->Path.pts[self->Path.wPathLen - 2].fOrigLength);
+    iassert(!Path_HasNegotiationNode(&self->Path) || (self->Path.pts[self->Path.wNegotiationStartNode].iNodeNum >= 0 
+        && self->Path.pts[self->Path.wNegotiationStartNode - 1].iNodeNum >= 0));
+
+    iassert(!self->Path.wPathLen || !Path_AtEndOrNegotiation(&self->Path) || Vec3Compare(self->Path.pts[self->Path.wNegotiationStartNode].vOrigPoint, self->Path.vCurrPoint));
+    iassert(!self->Path.wPathLen || (self->Path.lookaheadNextNode < self->Path.wPathLen));
+    iassert(!self->Path.wPathLen || !self->Path.fLookaheadDistToNextNode || (self->Path.lookaheadNextNode < self->Path.wPathLen - 1));
+
     Actor_ValidateReacquireNodes(self);
-    return v4;
+    return eThinkResult;
 }
 
 int endTime;
@@ -4706,7 +4600,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
         yawChange = 0.0;
     LABEL_33:
         if (ai_debugAnimDeltas->current.integer == ent->s.number)
-            Com_Printf(18, (const char *)HIDWORD(yawChange), LODWORD(yawChange));
+            Com_Printf(18, "yawChange = %g\n", yawChange);
         if (yawChange != 0.0)
             Actor_ChangeAngles(self, 0.0, yawChange);
         Actor_DecideOrientation(self);
@@ -4760,8 +4654,7 @@ void __cdecl Actor_UpdateGoalPos(actor_s *self)
     double v3; // fp31
     double v4; // fp30
     double v5; // fp29
-    sentient_s *TargetSentient; // r27
-    float *v7; // r11
+    sentient_s *enemy; // r27
     double pathEnemyFightDist; // fp1
     sentient_s *sentient; // r28
     pathnode_t *pDesiredChainPos; // r11
@@ -4832,13 +4725,16 @@ void __cdecl Actor_UpdateGoalPos(actor_s *self)
         fRadius = self->scriptGoal.radius;
         goto LABEL_24;
     }
-    TargetSentient = Actor_GetTargetSentient(self);
-    if (!TargetSentient)
+    enemy = Actor_GetTargetSentient(self);
+    if (!enemy)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5606, 0, "%s", "enemy");
-    v7 = (float *)((char *)self + 40 * (TargetSentient - level.sentients));
-    p_codeGoal->pos[0] = v7[531];
-    self->codeGoal.pos[1] = v7[532];
-    self->codeGoal.pos[2] = v7[533];
+
+    {
+        sentient_info_t *pInfo = &self->sentientInfo[enemy - level.sentients];
+        p_codeGoal->pos[0] = pInfo->vLastKnownPos[0];
+        self->codeGoal.pos[1] = pInfo->vLastKnownPos[1];
+        self->codeGoal.pos[2] = pInfo->vLastKnownPos[2];
+    }
     self->codeGoalSrc = AI_GOAL_SRC_ENEMY;
     pathEnemyFightDist = self->pathEnemyFightDist;
     self->codeGoal.node = 0;
@@ -5058,24 +4954,21 @@ void __cdecl Actor_CheckNotify(actor_s *self)
 void __cdecl Actor_Think(gentity_s *self)
 {
     int callThinkCounter; // r27
-    int time; // r11
     actor_s *actor; // r26
     const char *v5; // r3
     int v7; // r8
     actor_think_result_t thinkresult; // r25
-    float *sentient; // r11
-    float *currentOrigin; // r30
     int v11; // r10
-    bool v12; // r27
+    bool originChanged; // r27
     int v13; // r11
     char v14; // r11
-    bool v15; // zf
-    char v16; // r28
-    actor_s *v21; // r11
-    long double v22; // fp2
+    bool anglesChanged; // zf
+    char updateProne; // r28
 
     callThinkCounter = 0;
-    //Profile_Begin(224);
+    
+    PROF_SCOPED("Actor_Think");
+
     if (g_ai->current.enabled)
     {
         iassert(self);
@@ -5108,85 +5001,81 @@ void __cdecl Actor_Think(gentity_s *self)
                 iassert(callThinkCounter < ACTOR_CALL_THINK_REPEAT_MAX);
             } while (thinkresult == ACTOR_THINK_REPEAT);
 
-            sentient = (float *)actor->sentient;
-            currentOrigin = self->r.currentOrigin;
-            if (self->r.currentOrigin[0] != sentient[5]
-                || self->r.currentOrigin[1] != sentient[6]
-                || (v11 = 1, self->r.currentOrigin[2] != sentient[7]))
-            {
-                v11 = 0;
-            }
-            sentient[5] = *currentOrigin;
-            v12 = v11 == 0;
-            sentient[6] = self->r.currentOrigin[1];
-            sentient[7] = self->r.currentOrigin[2];
+            originChanged = !(self->r.currentOrigin[0] == actor->sentient->oldOrigin[0]
+                           && self->r.currentOrigin[1] == actor->sentient->oldOrigin[1]
+                           && self->r.currentOrigin[2] == actor->sentient->oldOrigin[2]);
+
+            Vec3Copy(self->r.currentOrigin, actor->sentient->oldOrigin);
+
             self->s.lerp.pos.trType = (unsigned __int8)Com_IsRagdollTrajectory(&self->s.lerp.pos) == 0
                 ? TR_INTERPOLATE
                 : TR_RAGDOLL_INTERPOLATE;
-            self->s.lerp.pos.trBase[0] = *currentOrigin;
-            self->s.lerp.pos.trBase[1] = self->r.currentOrigin[1];
-            self->s.lerp.pos.trBase[2] = self->r.currentOrigin[2];
-            if (self->r.currentAngles[0] != self->s.lerp.apos.trBase[0]
-                || self->r.currentAngles[1] != self->s.lerp.apos.trBase[1]
-                || (v13 = 1, self->r.currentAngles[2] != self->s.lerp.apos.trBase[2]))
-            {
-                v13 = 0;
-            }
-            if (v12 || (v15 = v13 != 0, v14 = 0, !v15))
-                v14 = 1;
-            v16 = v14;
+            Vec3Copy(self->r.currentOrigin, self->s.lerp.pos.trBase);
+
+            anglesChanged = !(self->r.currentAngles[0] == self->s.lerp.apos.trBase[0]
+                && self->r.currentAngles[1] == self->s.lerp.apos.trBase[1]
+                && self->r.currentAngles[2] == self->s.lerp.apos.trBase[2]);
+
+            updateProne = originChanged || anglesChanged;
+
             self->s.lerp.apos.trType = (unsigned __int8)Com_IsRagdollTrajectory(&self->s.lerp.apos) == 0
                 ? TR_INTERPOLATE
                 : TR_RAGDOLL_INTERPOLATE;
-            self->s.lerp.apos.trBase[0] = self->r.currentAngles[0];
-            self->s.lerp.apos.trBase[1] = self->r.currentAngles[1];
-            self->s.lerp.apos.trBase[2] = self->r.currentAngles[2];
-            if (v12)
+            Vec3Copy(self->r.currentAngles, self->s.lerp.apos.trBase);
+
+            if (originChanged)
             {
                 SV_LinkEntity(self);
                 Actor_PostPhysics(&actor->Physics);
             }
-            if (Sentient_NearestNodeDirty(actor->sentient, v12))
+
+            if (Sentient_NearestNodeDirty(actor->sentient, originChanged))
                 Sentient_InvalidateNearestNode(actor->sentient);
+
             Sentient_BanNearNodes(actor->sentient);
+
             if (BG_ActorIsProne(&actor->ProneInfo, level.time))
             {
-                if (v16)
+                if (updateProne)
                     Actor_UpdateProneInformation(actor, 1);
             }
             else
             {
                 actor->Physics.prone = 0;
             }
+
             Actor_UpdateLookAt(actor);
+
             if (actor->delayedDeath && !Actor_InScriptedState(actor))
                 G_Damage(self, 0, 0, 0, self->r.currentOrigin, self->health + 1, 0, 0, 0xFFFFFFFF, HITLOC_HEAD, 0, 0);
-            v21 = self->actor;
-            if (v21->Physics.bIsAlive && !v21->ignoreTriggers)
+
+            if (self->actor->Physics.bIsAlive && !self->actor->ignoreTriggers)
                 G_DoTouchTriggers(self);
+
             if (thinkresult != ACTOR_THINK_MOVE_TO_BODY_QUEUE)
                 Actor_CheckNotify(actor);
-            v22 = acos(actor->fovDot);
-            self->s.lerp.u.turret.gunAngles[0] = (float)*(double *)&v22 * (float)57.295776;
-            self->s.lerp.u.turret.gunAngles[1] = sqrtf(actor->fMaxSightDistSqrd);
+
+            self->s.lerp.u.actor.visionFov = RAD2DEG(acos(actor->fovDot));
+            self->s.lerp.u.actor.visionDist = sqrtf(actor->fMaxSightDistSqrd);
             if (thinkresult != ACTOR_THINK_MOVE_TO_BODY_QUEUE || Actor_BecomeCorpse(self))
             {
-                time = level.time;
-                goto LABEL_68;
+                self->nextthink = level.time + 50;
+            }
+            else
+            {
+                G_FreeEntity(self);
             }
         }
         else
         {
             Com_Printf(18, "^3Deleting AI without a model.\n");
+            G_FreeEntity(self);
         }
-        G_FreeEntity(self);
-        //Profile_EndInternal(0);
-        return;
     }
-    time = level.time;
-LABEL_68:
-    self->nextthink = time + 50;
-    //Profile_EndInternal(0);
+    else // if ( g_ai->current.enabled )
+    {
+        self->nextthink = level.time + 50;
+    }
 }
 
 int __cdecl Actor_PhysicsAndDodge(actor_s *self)
@@ -5387,7 +5276,6 @@ void __cdecl Actor_DoMove(actor_s *self)
 
     float forward[3];
     float right[3];
-    float vOrigin[3];
 
     bool bSuccess;
 
@@ -5413,20 +5301,20 @@ void __cdecl Actor_DoMove(actor_s *self)
     {
         YawVectors(self->fDesiredBodyYaw, forward, right);
 
-        float wishdelta_1 = self->Physics.vWishDelta[1];
-        float wishdelta_2 = self->Physics.vWishDelta[2];
+        float wishdelta[3];
+        Vec3Copy(self->Physics.vWishDelta, wishdelta);
 
-        self->Physics.vWishDelta[0] = forward[0] * self->Physics.vWishDelta[0];
-        self->Physics.vWishDelta[1] = forward[1] * self->Physics.vWishDelta[0];
-        self->Physics.vWishDelta[2] = forward[2] * self->Physics.vWishDelta[0];
+        Vec3Scale(forward, wishdelta[0], self->Physics.vWishDelta);
 
-        self->Physics.vWishDelta[0] = (-wishdelta_1) * right[0] + self->Physics.vWishDelta[0];
-        self->Physics.vWishDelta[1] = (-wishdelta_1) * right[1] + self->Physics.vWishDelta[1];
-        self->Physics.vWishDelta[2] = (-wishdelta_1) * right[2] + self->Physics.vWishDelta[2];
-        self->Physics.vWishDelta[2] += wishdelta_2;
+        self->Physics.vWishDelta[0] += ((-(wishdelta[1])) * right[0]);
+        self->Physics.vWishDelta[1] += ((-(wishdelta[1])) * right[1]);
+        self->Physics.vWishDelta[2] += ((-(wishdelta[1])) * right[2]);
+
+        self->Physics.vWishDelta[2] += wishdelta[2];
     }
 
     self->Physics.fGravity = g_gravity->current.value;
+
     if (self->eAnimMode != AI_ANIM_MOVE_CODE
         || !self->moveMode
         || !Actor_HasPath(self)
@@ -5443,9 +5331,9 @@ void __cdecl Actor_DoMove(actor_s *self)
         LABEL_41:
             if (!bSuccess)
             {
-                vOrigin[0] = self->ent->r.currentOrigin[0];
-                vOrigin[1] = self->ent->r.currentOrigin[1];
-                vOrigin[2] = self->ent->r.currentOrigin[2];
+                float vOrigin[3];
+                Vec3Copy(self->ent->r.currentOrigin, vOrigin);
+
                 iNodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, 384.0, 128.0, nodes, 64, -1);
                 node = 0;
                 bestDist = FLT_MAX;
@@ -5476,10 +5364,8 @@ void __cdecl Actor_DoMove(actor_s *self)
                     {
                         deltaHeight = 8.0f;
                     }
-                    self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
-                    self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
-                    self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
-                    self->Physics.vOrigin[2] = self->Physics.vOrigin[2] + deltaHeight;
+                    Vec3Copy(self->ent->r.currentOrigin, self->Physics.vOrigin);
+                    self->Physics.vOrigin[2] += deltaHeight;
                     self->Physics.vVelocity[2] = 0.0f;
                 }
             }
@@ -5511,189 +5397,20 @@ void __cdecl Actor_DoMove(actor_s *self)
     }
     if (!bSuccess)
     {
-        self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0] + self->Physics.vWishDelta[0];
-        self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1] + self->Physics.vWishDelta[1];
-        self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2] + self->Physics.vWishDelta[2];
+        Vec3Add(self->ent->r.currentOrigin, self->Physics.vWishDelta, self->Physics.vOrigin);
         self->Physics.vVelocity[2] = 0.0f;
-        self->Path.wDodgeEntity = 1023;
+        self->Path.wDodgeEntity = ENTITYNUM_NONE;
+
         if (self->Path.fLookaheadAmount < 64.0)
             self->Path.fLookaheadAmount = 64.0f;
     }
+
 LABEL_67:
-    self->ent->r.currentOrigin[0] = self->Physics.vOrigin[0];
-    self->ent->r.currentOrigin[1] = self->Physics.vOrigin[1];
-    self->ent->r.currentOrigin[2] = self->Physics.vOrigin[2];
+    Vec3Copy(self->Physics.vOrigin, self->ent->r.currentOrigin);
     self->Physics.ePhysicsType = AIPHYS_BAD;
     self->ent->s.groundEntityNum = self->Physics.groundEntNum;
     if (oldGroundEntNum != self->Physics.groundEntNum)
         Scr_Notify(self->ent, scr_const.groundEntChanged, 0);
-
-    /*
-    eAnimMode = self->eAnimMode;
-    self->Physics.fGravity = g_gravity->current.value;
-    if (eAnimMode == AI_ANIM_MOVE_CODE
-        && self->moveMode
-        && Actor_HasPath(self)
-        && !self->pCloseEnt.isDefined())
-    {
-    try_path:
-        if (!Actor_PhysicsAndDodge(self)
-            || self->Path.lookaheadDir[2] > 4.0
-            && self->Physics.vWishDelta[2] > 0.0
-            && self->Physics.vOrigin[2] <= (double)self->ent->r.currentOrigin[2]
-            || (sentient = self->sentient, sentient->bNearestNodeBad)
-            && (Sentient_InvalidateNearestNode(sentient), Sentient_NearestNode(self->sentient),
-                self->sentient->bNearestNodeBad))
-        {
-            v13 = self->ent;
-            self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0] + self->Physics.vWishDelta[0];
-            self->Physics.vOrigin[1] = v13->r.currentOrigin[1] + self->Physics.vWishDelta[1];
-            self->Physics.vOrigin[2] = v13->r.currentOrigin[2] + self->Physics.vWishDelta[2];
-            fLookaheadAmount = self->Path.fLookaheadAmount;
-            self->Path.wDodgeEntity = ENTITYNUM_NONE;
-            self->Physics.vVelocity[2] = 0.0;
-            if (fLookaheadAmount < 64.0)
-                self->Path.fLookaheadAmount = 64.0;
-        }
-        goto LABEL_60;
-    }
-    if (Actor_ShouldMoveAwayFromCloseEnt(self))
-    {
-        if (Actor_PhysicsMoveAway(self))
-            goto LABEL_60;
-        if (self->eAnimMode == AI_ANIM_MOVE_CODE && Actor_HasPath(self))
-            goto try_path;
-    }
-    else
-    {
-        self->ent->flags &= ~(FL_DODGE_LEFT | FL_DODGE_RIGHT);
-        self->Physics.vOrigin[0] = self->ent->r.currentOrigin[0];
-        self->Physics.vOrigin[1] = self->ent->r.currentOrigin[1];
-        self->Physics.vOrigin[2] = self->ent->r.currentOrigin[2];
-        if (Actor_Physics(&self->Physics))
-            goto LABEL_60;
-    }
-    //Profile_Begin(232);
-    currentOrigin = self->ent->r.currentOrigin;
-    v17 = *currentOrigin;
-    v18 = self->ent->r.currentOrigin[1];
-    v19 = self->ent->r.currentOrigin[2];
-    v22 = Path_NodesInCylinder(currentOrigin, 384.0, 128.0, v21, v20, (int)v60);
-    v23 = 0;
-    v24 = 0;
-    v25 = FLT_MAX;
-    if (v22 >= 4)
-    {
-        v26 = &v61;
-        v27 = ((unsigned int)(v22 - 4) >> 2) + 1;
-        v24 = 4 * v27;
-        do
-        {
-            v28 = (float *)*((unsigned int *)v26 - 3);
-            v29 = (float)(v28[6] - (float)v18);
-            v30 = (float)(v28[7] - (float)v19);
-            v31 = (float)(v28[5] - (float)v17);
-            v32 = (float)((float)((float)v31 * (float)v31)
-                + (float)((float)((float)v30 * (float)v30) + (float)((float)v29 * (float)v29)));
-            if (v25 >= v32)
-            {
-                v25 = v32;
-                v23 = *((unsigned int *)v26 - 3);
-            }
-            v33 = (float)(*(float *)(*(unsigned int *)v26 + 24) - (float)v18);
-            v34 = (float)(*(float *)(*(unsigned int *)v26 + 28) - (float)v19);
-            v35 = (float)(*(float *)(*(unsigned int *)v26 + 20) - (float)v17);
-            v36 = (float)((float)((float)v35 * (float)v35)
-                + (float)((float)((float)v34 * (float)v34) + (float)((float)v33 * (float)v33)));
-            if (v25 >= v36)
-            {
-                v25 = v36;
-                v23 = *(unsigned int *)v26;
-            }
-            v37 = (float *)*((unsigned int *)v26 + 3);
-            v38 = (float)(v37[6] - (float)v18);
-            v39 = (float)(v37[7] - (float)v19);
-            v40 = (float)(v37[5] - (float)v17);
-            v41 = (float)((float)((float)v40 * (float)v40)
-                + (float)((float)((float)v39 * (float)v39) + (float)((float)v38 * (float)v38)));
-            if (v25 >= v41)
-            {
-                v25 = v41;
-                v23 = *((unsigned int *)v26 + 3);
-            }
-            v42 = (float *)*((unsigned int *)v26 + 6);
-            v43 = (float)(v42[6] - (float)v18);
-            v44 = (float)(v42[7] - (float)v19);
-            v45 = (float)(v42[5] - (float)v17);
-            v46 = (float)((float)((float)v45 * (float)v45)
-                + (float)((float)((float)v44 * (float)v44) + (float)((float)v43 * (float)v43)));
-            if (v25 >= v46)
-            {
-                v25 = v46;
-                v23 = *((unsigned int *)v26 + 6);
-            }
-            --v27;
-            v26 += 48;
-        } while (v27);
-    }
-    if (v24 < v22)
-    {
-        v47 = v22 - v24;
-        v48 = &v60[3 * v24];
-        do
-        {
-            v49 = (float)(*(float *)(*v48 + 24) - (float)v18);
-            v50 = (float)(*(float *)(*v48 + 28) - (float)v19);
-            v51 = (float)(*(float *)(*v48 + 20) - (float)v17);
-            v52 = (float)((float)((float)v51 * (float)v51)
-                + (float)((float)((float)v50 * (float)v50) + (float)((float)v49 * (float)v49)));
-            if (v25 >= v52)
-            {
-                v25 = v52;
-                v23 = *v48;
-            }
-            --v47;
-            v48 += 3;
-        } while (v47);
-    }
-    //Profile_EndInternal(0);
-    if (v23)
-    {
-        v53 = self->ent;
-        v54 = (float)(*(float *)(v23 + 28) - self->ent->r.currentOrigin[2]);
-        if (v54 <= 8.0)
-        {
-            if (v54 < 0.0)
-            {
-                if (v54 >= -18.0)
-                    v54 = 0.0;
-                else
-                    v54 = -8.0;
-            }
-        }
-        else
-        {
-            v54 = 8.0;
-        }
-        self->Physics.vOrigin[0] = v53->r.currentOrigin[0];
-        self->Physics.vOrigin[1] = v53->r.currentOrigin[1];
-        v55 = v53->r.currentOrigin[2];
-        self->Physics.vOrigin[2] = v53->r.currentOrigin[2];
-        self->Physics.vVelocity[2] = 0.0;
-        self->Physics.vOrigin[2] = (float)v55 + (float)v54;
-    }
-LABEL_60:
-    v56 = self->ent;
-    v56->r.currentOrigin[0] = self->Physics.vOrigin[0];
-    v56->r.currentOrigin[1] = self->Physics.vOrigin[1];
-    v56->r.currentOrigin[2] = self->Physics.vOrigin[2];
-    v57 = self->ent;
-    v58 = self->Physics.groundEntNum;
-    self->Physics.ePhysicsType = AIPHYS_BAD;
-    v57->s.groundEntityNum = v58;
-    if (groundEntNum != self->Physics.groundEntNum)
-        Scr_Notify(self->ent, scr_const.groundEntChanged, 0);
-*/
 }
 
 bool __cdecl Actor_IsAtGoal(actor_s *self)
@@ -6260,11 +5977,9 @@ void __cdecl Actor_UpdateOriginAndAngles(actor_s *self)
 {
     gentity_s *ent; // r28
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4866, 0, "%s", "self");
+    iassert(self);
     ent = self->ent;
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 4868, 0, "%s", "ent");
+    iassert(ent);
     if (self->eAnimMode != AI_ANIM_NOPHYSICS)
     {
         if (ent->tagInfo)

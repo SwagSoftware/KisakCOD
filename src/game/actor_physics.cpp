@@ -165,9 +165,15 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
         LABEL_66:
             if (gravity)
             {
+                // KISAKFIX: kisak port copy-pasted the X line three times. IDA
+                // `AIPhys_SlideMove` at 0x82208928 restores all three velocity
+                // components from the saved vEndVelocity. Y/Z lost meant every
+                // gravity slide-move that hit iMaxBumps or trace.fraction==1.0
+                // had the saved Y/Z velocity dropped — AI drifts sideways /
+                // refuses to fall / sticks to slopes / floats after bumps.
                 g_pPhys->vVelocity[0] = vEndVelocity[0];
-                g_pPhys->vVelocity[0] = vEndVelocity[0];
-                g_pPhys->vVelocity[0] = vEndVelocity[0];
+                g_pPhys->vVelocity[1] = vEndVelocity[1];
+                g_pPhys->vVelocity[2] = vEndVelocity[2];
             }
             return (SlideMoveResult)(iBumpCount != 0);
         }

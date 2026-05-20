@@ -154,27 +154,25 @@ gentity_s *__cdecl G_SpawnSoundBlend()
 
 void __cdecl G_SetSoundBlend(gentity_s *ent, unsigned __int16 alias0, unsigned __int16 alias1, double lerp)
 {
-    if (!ent->r.inuse)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 311, 0, "%s", "ent->r.inuse");
-    if (ent->s.eType != 6)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_misc.cpp", 312, 0, "%s", "ent->s.eType == ET_SOUND_BLEND");
-    ent->s.lerp.u.turret.gunAngles[0] = lerp;
+    iassert(ent->r.inuse);
+    iassert(ent->s.eType == ET_SOUND_BLEND);
+
+    ent->s.lerp.u.soundBlend.lerp = lerp;
+
     ent->s.eventParms[0] = alias0;
     ent->s.eventParms[1] = alias1;
+
     SV_LinkEntity(ent);
 }
 
 void __cdecl G_SetSoundBlendVolumeScale(gentity_s *ent, double scale)
 {
-    ent->s.lerp.u.turret.gunAngles[1] = scale;
+    ent->s.lerp.u.soundBlend.volumeScale = scale;
 }
 
 float __cdecl G_GetSoundBlendVolumeScale(gentity_s *ent)
 {
-    double v1; // fp1
-
-    v1 = ent->s.lerp.u.turret.gunAngles[1];
-    return *((float *)&v1 + 1);
+    return ent->s.lerp.u.soundBlend.volumeScale;
 }
 
 void __cdecl EntinfoPosAndScale(gentity_s *self, float *source, float *pos, float *textScale, float *dist)

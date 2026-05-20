@@ -3561,9 +3561,7 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     double v8; // fp13
     double v9; // fp12
     double v10; // fp0
-    float v11; // [sp+50h] [-30h] BYREF
-    float vec; // [sp+54h] [-2Ch]
-    float v13; // [sp+58h] [-28h]
+    float dir[3];
     float _FP8;
 
     if (entref.classnum)
@@ -3577,36 +3575,36 @@ void CMD_VEH_SetSpeedImmediate(scr_entref_t entref)
     }
     p_nodeIdx = (float *)&Vehicle->scr_vehicle->pathPos.nodeIdx;
     CMD_VEH_Script_SetSpeed(Vehicle);
-    v11 = 0.0;
-    vec = 0.0;
-    v13 = 0.0;
+    dir[0] = 0.0;
+    dir[1] = 0.0;
+    dir[2] = 0.0;
     if (p_nodeIdx[150] <= 0.0 && p_nodeIdx[167] == 0.0 && p_nodeIdx[168] == 0.0 && p_nodeIdx[169] == 0.0)
         goto LABEL_11;
-    v11 = p_nodeIdx[167] - Vehicle->r.currentOrigin[0];
-    vec = p_nodeIdx[168] - Vehicle->r.currentOrigin[1];
+    dir[0] = p_nodeIdx[167] - Vehicle->r.currentOrigin[0];
+    dir[1] = p_nodeIdx[168] - Vehicle->r.currentOrigin[1];
     v3 = (float)(p_nodeIdx[169] - Vehicle->r.currentOrigin[2]);
     // PPC: _FP8 = -sqrtf(...); fsel f11, f8, f10, f11
     // fsel(-mag, safe, mag): (mag == 0) ? safe : mag.
-    _FP8 = sqrtf((float)((float)(v11 * v11) + (float)((float)((float)v3 * (float)v3) + (float)(vec * vec))));
+    _FP8 = sqrtf((float)((float)(dir[0] * dir[0]) + (float)((float)((float)v3 * (float)v3) + (float)(dir[1] * dir[1]))));
     if (_FP8 > 0.0f)
         _FP11 = _FP8;
     else
         _FP11 = 1.0f;
     v6 = (float)((float)1.0 / (float)_FP11);
-    v7 = (float)((float)v6 * v11);
-    v11 = (float)v6 * v11;
-    v8 = (float)(vec * (float)v6);
-    vec = vec * (float)v6;
+    v7 = (float)((float)v6 * dir[0]);
+    dir[0] = (float)v6 * dir[0];
+    v8 = (float)(dir[1] * (float)v6);
+    dir[1] = dir[1] * (float)v6;
     v9 = (float)((float)v3 * (float)v6);
-    v13 = v9;
+    dir[2] = v9;
     if (v7 == 0.0 && v8 == 0.0 && v9 == 0.0)
         LABEL_11:
-    AngleVectors(Vehicle->r.currentAngles, &v11, 0, 0);
+    AngleVectors(Vehicle->r.currentAngles, dir, 0, 0);
     v10 = p_nodeIdx[146];
     p_nodeIdx[150] = p_nodeIdx[146];
-    p_nodeIdx[71] = (float)v10 * v11;
-    p_nodeIdx[72] = vec * (float)v10;
-    p_nodeIdx[73] = v13 * (float)v10;
+    p_nodeIdx[71] = (float)v10 * dir[0];
+    p_nodeIdx[72] = dir[1] * (float)v10;
+    p_nodeIdx[73] = dir[2] * (float)v10;
 }
 
 void CMD_VEH_GetGoalSpeedMPH(scr_entref_t entref)
@@ -5143,10 +5141,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
     double v31; // [sp+18h] [-98h]
     double v32; // [sp+18h] [-98h]
     double v33; // [sp+20h] [-90h]
-    float v34; // [sp+50h] [-60h] BYREF
-    float v35; // [sp+54h] [-5Ch]
-    float v36; // [sp+58h] [-58h]
-
+    float debugPos[3]; 
     misc_EntInfo(self, source);
     iassert(self);
     currentOrigin = self->r.currentOrigin;
@@ -5170,20 +5165,20 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                     v11 = colorMagenta;
                 else
                     v11 = colorBlack;
-                v34 = scr_vehicle->goalPosition[0];
-                v35 = scr_vehicle->goalPosition[1];
-                v36 = scr_vehicle->goalPosition[2] + (float)16.0;
-                G_DebugLine(self->r.currentOrigin, &v34, v11, 0);
-                G_DebugCircle(&v34, 64.0, v11, 0, 1, 0);
+                debugPos[0] = scr_vehicle->goalPosition[0];
+                debugPos[1] = scr_vehicle->goalPosition[1];
+                debugPos[2] = scr_vehicle->goalPosition[2] + (float)16.0;
+                G_DebugLine(self->r.currentOrigin, debugPos,v11, 0);
+                G_DebugCircle(debugPos, 64.0, v11, 0, 1, 0);
             }
-            v34 = scr_vehicle->phys.vel[0] + *currentOrigin;
-            v35 = self->r.currentOrigin[1] + scr_vehicle->phys.vel[1];
-            v36 = self->r.currentOrigin[2] + scr_vehicle->phys.vel[2];
-            G_DebugLine(self->r.currentOrigin, &v34, colorBlue, 0);
-            v34 = (float)(scr_vehicle->phys.accel[0] * (float)5.0) + *currentOrigin;
-            v35 = (float)(scr_vehicle->phys.accel[1] * (float)5.0) + self->r.currentOrigin[1];
-            v36 = (float)(scr_vehicle->phys.accel[2] * (float)5.0) + self->r.currentOrigin[2];
-            G_DebugLine(self->r.currentOrigin, &v34, colorRed, 0);
+            debugPos[0] = scr_vehicle->phys.vel[0] + *currentOrigin;
+            debugPos[1] = self->r.currentOrigin[1] + scr_vehicle->phys.vel[1];
+            debugPos[2] = self->r.currentOrigin[2] + scr_vehicle->phys.vel[2];
+            G_DebugLine(self->r.currentOrigin, debugPos,colorBlue, 0);
+            debugPos[0] = (float)(scr_vehicle->phys.accel[0] * (float)5.0) + *currentOrigin;
+            debugPos[1] = (float)(scr_vehicle->phys.accel[1] * (float)5.0) + self->r.currentOrigin[1];
+            debugPos[2] = (float)(scr_vehicle->phys.accel[2] * (float)5.0) + self->r.currentOrigin[2];
+            G_DebugLine(self->r.currentOrigin, debugPos,colorRed, 0);
             if (scr_vehicle->lookAtEnt.isDefined())
             {
                 v13 = scr_vehicle->lookAtEnt.ent();
@@ -5207,14 +5202,14 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                 (const char *)HIDWORD(v31),
                 LODWORD(v31),
                 (unsigned int)COERCE_UNSIGNED_INT64((float)(scr_vehicle->manualSpeed * (float)0.05681818)));
-            G_AddDebugString(&v34, colorLtGrey, v14, v17);
+            G_AddDebugString(debugPos, colorLtGrey, v14,v17);
             v18 = (float)(scr_vehicle->manualDecel * (float)0.05681818);
             v36 = v36 - (float)((float)v14 * (float)12.0);
             v32 = sqrtf((float)((float)(scr_vehicle->phys.accel[2] * scr_vehicle->phys.accel[2])
                 + (float)((float)(scr_vehicle->phys.accel[0] * scr_vehicle->phys.accel[0])
                     + (float)(scr_vehicle->phys.accel[1] * scr_vehicle->phys.accel[1]))));
             va((const char *)HIDWORD(v32), LODWORD(v32), v18);
-            G_AddDebugString(&v34, colorLtGrey, v14, v19);
+            G_AddDebugString(debugPos, colorLtGrey, v14,v19);
             v20 = (float)(self->r.currentOrigin[1] - scr_vehicle->goalPosition[1]);
             v21 = (float)(self->r.currentOrigin[2] - scr_vehicle->goalPosition[2]);
             v33 = self->r.currentOrigin[1];
@@ -5224,19 +5219,19 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                 + (float)((float)((float)v21 * (float)v21) + (float)((float)v20 * (float)v20))));
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va((const char *)HIDWORD(v22), LODWORD(v22), LODWORD(v33), HIDWORD(v23), LODWORD(v23));
-            G_AddDebugString(&v34, colorLtGrey, v14, v24);
+            G_AddDebugString(debugPos, colorLtGrey, v14,v24);
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1])),
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1]),
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.maxAngleVel[1]));
-            G_AddDebugString(&v34, colorLtGrey, v14, v25);
+            G_AddDebugString(debugPos, colorLtGrey, v14,v25);
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel)),
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel),
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawDecel));
-            G_AddDebugString(&v34, colorLtGrey, v14, v26);
+            G_AddDebugString(debugPos, colorLtGrey, v14,v26);
             if (scr_vehicle->hasTargetYaw)
             {
                 v36 = v36 - (float)((float)v14 * (float)12.0);
@@ -5244,7 +5239,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw)),
                     (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw),
                     (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
-                G_AddDebugString(&v34, colorLtGrey, v14, v27);
+                G_AddDebugString(debugPos, colorLtGrey, v14,v27);
             }
             if (scr_vehicle->hasGoalYaw)
             {
@@ -5253,7 +5248,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw)),
                     (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw),
                     (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
-                G_AddDebugString(&v34, colorLtGrey, v14, v28);
+                G_AddDebugString(debugPos, colorLtGrey, v14,v28);
             }
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
@@ -5261,11 +5256,11 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius),
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverSpeed),
                 (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverAccel));
-            G_AddDebugString(&v34, colorLtGrey, v14, v29);
+            G_AddDebugString(debugPos, colorLtGrey, v14,v29);
             if (scr_vehicle->stopAtGoal)
             {
                 v36 = v36 - (float)((float)v14 * (float)12.0);
-                G_AddDebugString(&v34, colorLtGrey, v14, v30);
+                G_AddDebugString(debugPos, colorLtGrey, v14,v30);
             }
 #endif
         }

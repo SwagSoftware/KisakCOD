@@ -21,15 +21,15 @@ void __cdecl LocalToWorldOriginAndAngles(
     float *angles)
 {
     double v8; // fp1
-    float (*v9)[3]; // r3
-    float v10[4][3]; // [sp+50h] [-80h] BYREF
-    float v11[6][3]; // [sp+80h] [-50h] BYREF
+
+    float v10[4][3]; // [sp+50h] [-80h] BYREF — YawToAxis output / MatrixMultiply in1
+    float v11[6][3]; // [sp+80h] [-50h] BYREF — MatrixMultiply output
 
     MatrixTransformVector43(trans, (const mat4x3&)matrix, origin);
     v8 = RotationToYaw(rot);
-    YawToAxis(v8, (mat3x3&)v9);
-    MatrixMultiply((const mat3x3&)v10, (const mat3x3&)matrix, (mat3x3&)v11);
-    AxisToAngles((const mat3x3&)v11, angles);
+    YawToAxis(v8, (mat3x3&)*v10);
+    MatrixMultiply((const mat3x3&)*v10, (const mat3x3&)matrix, (mat3x3&)*v11);
+    AxisToAngles((const mat3x3&)*v11, angles);
 }
 
 void __cdecl CalcDeltaOriginAndAngles(
@@ -66,16 +66,16 @@ void __cdecl GetDeltaOriginAndAngles(
     float *angles)
 {
     double v10; // fp1
-    float (*v11)[3]; // r3
-    float v12[16]; // [sp+50h] [-A0h] BYREF
-    float v13[8][3]; // [sp+90h] [-60h] BYREF
+
+    float v12[16]; // [sp+50h] [-A0h] BYREF — rot at v12[0..3], yawAxis at v12[4..12]
+    float v13[8][3]; // [sp+90h] [-60h] BYREF — MatrixMultiply output
 
     XAnimGetAbsDelta(anims, anim, v12, trans, 1.0);
     MatrixTransformVector43(trans, (const mat4x3&)matrix, origin);
     v10 = RotationToYaw(v12);
-    YawToAxis(v10, (mat3x3&)v11);
-    MatrixMultiply((const mat3x3&)v12[4], (const mat3x3&)matrix, (mat3x3&)v13);
-    AxisToAngles((const mat3x3&)v13, angles);
+    YawToAxis(v10, (mat3x3&)v12[4]);
+    MatrixMultiply((const mat3x3&)v12[4], (const mat3x3&)matrix, (mat3x3&)*v13);
+    AxisToAngles((const mat3x3&)*v13, angles);
 }
 
 void __cdecl G_Animscripted_DeathPlant(
@@ -85,83 +85,69 @@ void __cdecl G_Animscripted_DeathPlant(
     float *origin,
     const float *angles)
 {
-    double v8; // fp12
     animscripted_s *scripted; // r31
     int number; // r8
-    double fraction; // fp0
-    double v14; // fp0
-    double v15; // fp1
-    float (*v16)[3]; // r3
+    float fraction; // fp0
     int v17; // r8
     double v18; // fp0
     float *pPitch; // r6
     int num; // r3
-    float v21; // [sp+50h] [-160h] BYREF
-    float v22; // [sp+54h] [-15Ch]
-    float v23; // [sp+58h] [-158h]
-    float v24; // [sp+60h] [-150h] BYREF
-    float v25; // [sp+64h] [-14Ch]
-    float v26; // [sp+68h] [-148h]
-    float v27; // [sp+70h] [-140h] BYREF
-    float yaw; // [sp+74h] [-13Ch]
-    float v29; // [sp+78h] [-138h]
+    float traceStart[3]; // was v21 (BYREF) + v22 + v23
+    float traceEnd[3];   // was v24 (BYREF) + v25 + v26
+    float anglesV[3];    // was v27 (BYREF) + yaw + v29
     float trans[3]; // [sp+80h] [-130h] BYREF
-    //float v31; // [sp+84h] [-12Ch]
-    //float v32; // [sp+88h] [-128h]
     float vOrigin[4]; // [sp+90h] [-120h] BYREF
     float transformedPos[3]; // [sp+A0h] [-110h] BYREF
-    //float v35; // [sp+A4h] [-10Ch]
-    //float v36; // [sp+A8h] [-108h]
-    float v37[4]; // [sp+B0h] [-100h] BYREF
-    trace_t v38[2]; // [sp+C0h] [-F0h] BYREF
-    float v39[4][3]; // [sp+120h] [-90h] BYREF
+    float rot[4]; // [sp+B0h] [-100h] BYREF
+    trace_t trace; // [sp+C0h] [-F0h] BYREF
+    mat3x3 newMat;
 
-    v21 = *origin;
-    v24 = v21;
-    v8 = origin[2];
     scripted = ent->scripted;
     number = ent->s.number;
-    v22 = origin[1];
-    v23 = (float)v8 + (float)36.0;
-    v25 = v22;
-    v26 = (float)v8 - (float)18.0;
-    G_TraceCapsule(v38, &v21, actorMins, actorMaxs, &v24, number, 8519697);
-    if (v38[0].allsolid || (fraction = v38[0].fraction, v38[0].fraction >= 1.0))
+
+    traceStart[0] = origin[0];
+    traceStart[1] = origin[1];
+    traceStart[2] = origin[2] + 36.0f;
+
+    traceEnd[0] = origin[0];
+    traceEnd[1] = origin[1];
+    traceEnd[2] = origin[2] - 18.0f;
+
+    G_TraceCapsule(&trace, traceStart, actorMins, actorMaxs, traceEnd, number, 8519697);
+
+    if (trace.allsolid || (fraction = trace.fraction, trace.fraction >= 1.0))
     {
-        scripted->axis[3][0] = *origin;
+        scripted->axis[3][0] = origin[0];
         scripted->axis[3][1] = origin[1];
-        v14 = origin[2];
+        scripted->axis[3][2] = origin[2];
     }
     else
     {
-        scripted->axis[3][0] = (float)((float)(v24 - v21) * v38[0].fraction) + v21;
-        scripted->axis[3][1] = (float)((float)(v25 - v22) * (float)fraction) + v22;
-        v14 = (float)((float)((float)(v26 - v23) * (float)fraction) + v23);
+        scripted->axis[3][0] = ((traceEnd[0] - traceStart[0]) * trace.fraction) + traceStart[0];
+        scripted->axis[3][1] = ((traceEnd[1] - traceStart[1]) * fraction) + traceStart[1];
+        scripted->axis[3][2] = (((traceEnd[2] - traceStart[2]) * fraction) + traceStart[2]);
     }
-    scripted->axis[3][2] = v14;
     scripted->fHeightOfs = 0.0;
-    yaw = angles[1];
-    v29 = angles[2];
-    v27 = 0.0;
-    AnglesToAxis(&v27, scripted->axis);
-    XAnimGetAbsDelta(anims, anim, v37, trans, 1.0);
+    anglesV[1] = angles[1];
+    anglesV[2] = angles[2];
+    anglesV[0] = 0.0;
+    AnglesToAxis(anglesV, scripted->axis);
+    XAnimGetAbsDelta(anims, anim, rot, trans, 1.0);
     MatrixTransformVector43(trans, scripted->axis, transformedPos);
-    v15 = RotationToYaw(v37);
-    YawToAxis(v15, (mat3x3&)v16);
-    MatrixMultiply((const mat3x3&)v38[1].normal, (const mat3x3&)scripted->axis, (mat3x3&)v39);
-    AxisToAngles((const mat3x3&)v39, &v27);
-    v21 = transformedPos[0];
-    v24 = transformedPos[0];
+    mat3x3 yawAxis;
+    YawToAxis(RotationToYaw(rot), yawAxis);
+    MatrixMultiply(yawAxis, (const mat3x3&)scripted->axis, newMat);
+    AxisToAngles(newMat, anglesV);
+    traceStart[0] = transformedPos[0];
+    traceEnd[0] = transformedPos[0];
     v17 = ent->s.number;
-    v22 = transformedPos[1];
-    v25 = transformedPos[1];
-    //v18 = (float)((float)sqrtf((float)((float)(v30 * v30) + (float)((float)(v31 * v31) + (float)(v32 * v32))))
-    v18 = (float)((float)sqrtf((float)((float)(trans[0] * trans[0]) + (float)((float)(trans[1] * trans[1]) + (float)(trans[2] * trans[2]))))
-        + (float)128.0);
-    v23 = (float)v18 + transformedPos[2];
-    v26 = transformedPos[2] - (float)v18;
-    G_TraceCapsule(v38, &v21, actorMins, actorMaxs, &v24, v17, 8519697);
-    if (v38[0].allsolid || v38[0].fraction >= 1.0)
+    traceStart[1] = transformedPos[1];
+    traceEnd[1] = transformedPos[1];
+    v18 = Vec3Length(trans) + 128.0f;
+    traceStart[2] = (float)v18 + transformedPos[2];
+    traceEnd[2] = transformedPos[2] - (float)v18;
+    G_TraceCapsule(&trace, traceStart, actorMins, actorMaxs, traceEnd, v17, 8519697);
+    if (trace.allsolid || trace.fraction >= 1.0)
     {
         scripted->fEndPitch = 0.0;
         scripted->fEndRoll = 0.0;
@@ -169,10 +155,10 @@ void __cdecl G_Animscripted_DeathPlant(
     else
     {
         num = ent->s.number;
-        vOrigin[0] = (float)((float)(v24 - v21) * v38[0].fraction) + v21;
-        vOrigin[1] = (float)((float)(v25 - v22) * v38[0].fraction) + v22;
-        vOrigin[2] = (float)((float)(v26 - v23) * v38[0].fraction) + v23;
-        Actor_GetBodyPlantAngles(num, 8519697, vOrigin, yaw, &scripted->fEndPitch, &scripted->fEndRoll, NULL);
+        vOrigin[0] = (float)((float)(traceEnd[0] - traceStart[0]) * trace.fraction) + traceStart[0];
+        vOrigin[1] = (float)((float)(traceEnd[1] - traceStart[1]) * trace.fraction) + traceStart[1];
+        vOrigin[2] = (float)((float)(traceEnd[2] - traceStart[2]) * trace.fraction) + traceStart[2];
+        Actor_GetBodyPlantAngles(num, 8519697, vOrigin, anglesV[1], &scripted->fEndPitch, &scripted->fEndRoll, NULL);
     }
     if (XAnimGetLength(anims, anim) >= 1.0)
         scripted->fOrientLerp = 0.0;
@@ -384,53 +370,39 @@ void __cdecl G_AnimScripted_Think_DeathPlant(gentity_s *ent, XAnimTree_s *tree, 
 {
     animscripted_s *scripted; // r30
     int number; // r8
-    double v8; // fp12
-    double v9; // fp0
-    double v10; // fp13
-    double v12; // fp11
-    double v13; // fp13
-    double v14; // fp12
-    double v15; // fp0
-    double fOrientLerp; // fp1
-    double v17; // fp0
-    float v18; // [sp+50h] [-80h] BYREF
-    float v19; // [sp+54h] [-7Ch]
-    float v20; // [sp+58h] [-78h]
-    float v21; // [sp+60h] [-70h] BYREF
-    float v22; // [sp+64h] [-6Ch]
-    float v23; // [sp+68h] [-68h]
-    trace_t v24; // [sp+70h] [-60h] BYREF
+    float fOrientLerp; // fp1
+
+    float traceStart[3]; // was v18 (BYREF) + v19 + v20
+    float traceEnd[3];   // was v21 (BYREF) + v22 + v23
+    trace_t trace; // [sp+70h] [-60h] BYREF
 
     scripted = ent->scripted;
     number = ent->s.number;
-    v8 = origin[2];
-    v9 = *origin;
-    v10 = origin[1];
-    v18 = *origin;
-    v19 = v10;
-    v20 = v8;
-    v12 = (float)(scripted->fHeightOfs + (float)v8);
-    v21 = v9;
-    v22 = v10;
-    v23 = v8;
-    v20 = (float)v12 + (float)18.0;
-    v23 = (float)(scripted->fHeightOfs - (float)18.0) + (float)v8;
-    G_TraceCapsule(&v24, &v18, actorMins, actorMaxs, &v21, number, 8519697);
-    if (!v24.allsolid && v24.fraction < 1.0)
+
+    Vec3Copy(origin, traceStart);
+    Vec3Copy(origin, traceEnd);
+
+    traceStart[2] = scripted->fHeightOfs + origin[2] + 18.0f;
+    traceEnd[2] = (float)(scripted->fHeightOfs - (float)18.0) + (float)origin[2];
+
+    G_TraceCapsule(&trace, traceStart, actorMins, actorMaxs, traceEnd, number, 8519697);
+    if (!trace.allsolid && trace.fraction < 1.0)
     {
-        v13 = (float)((float)((float)(v23 - v20) * v24.fraction) + v20);
-        v14 = (float)((float)((float)(v21 - v18) * v24.fraction) + v18);
-        v15 = (float)((float)((float)(v22 - v19) * v24.fraction) + v19);
-        scripted->fHeightOfs = (float)((float)((float)(v23 - v20) * v24.fraction) + v20) - origin[2];
-        origin[2] = v13;
-        *origin = v14;
-        origin[1] = v15;
+        scripted->fHeightOfs = (((traceEnd[2] - traceStart[2]) * trace.fraction) + traceStart[2]) - origin[2];
+
+        float delta[3];
+        delta[0] = traceEnd[0] - traceStart[0];
+        delta[1] = traceEnd[1] - traceStart[1];
+        delta[2] = traceEnd[2] - traceStart[2];
+        Vec3Mad(traceStart, trace.fraction, delta, origin);
+        //origin[0] = (((traceEnd[0] - traceStart[0]) * trace.fraction) + traceStart[0]);
+        //origin[1] = (((traceEnd[1] - traceStart[1]) * trace.fraction) + traceStart[1]);
+        //origin[2] = (((traceEnd[2] - traceStart[2]) * trace.fraction) + traceStart[2]);
     }
     if (scripted->fOrientLerp >= 0.0)
     {
-        v17 = (float)(scripted->fOrientLerp + (float)0.050000001);
-        scripted->fOrientLerp = scripted->fOrientLerp + (float)0.050000001;
-        if (v17 > 1.0)
+        scripted->fOrientLerp = scripted->fOrientLerp + 0.05f;
+        if (scripted->fOrientLerp > 1.0)
             scripted->fOrientLerp = 1.0;
         fOrientLerp = scripted->fOrientLerp;
     }
@@ -438,8 +410,8 @@ void __cdecl G_AnimScripted_Think_DeathPlant(gentity_s *ent, XAnimTree_s *tree, 
     {
         fOrientLerp = XAnimGetTime(tree, scripted->anim);
     }
-    *angles = (float)(scripted->fEndPitch * (float)fOrientLerp) + *angles;
-    angles[2] = (float)(scripted->fEndRoll * (float)fOrientLerp) + angles[2];
+    angles[0] = (scripted->fEndPitch * fOrientLerp) + angles[0];
+    angles[2] = (scripted->fEndRoll * fOrientLerp) + angles[2];
 }
 
 void __cdecl G_AnimScripted_UpdateEntityOriginAndAngles(gentity_s *ent, float *origin, const float *angles)

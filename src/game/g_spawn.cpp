@@ -219,9 +219,9 @@ void __cdecl G_DuplicateEntityFields(gentity_s *dest, const gentity_s *source)
 
     for (f = fields_1; f->name; ++f)
     {
+        iassert(f->ofs <= sizeof(gentity_s));
         switch (f->type)
         {
-            iassert(f->ofs <= sizeof(gentity_s)); // lwss add
         case F_INT:
             *(int *)((char *)dest + f->ofs) = *(int *)((char *)source + f->ofs);
             break;
@@ -288,108 +288,67 @@ void(__cdecl *__cdecl G_FindSpawnFunc(const char *classname, const SpawnFuncEntr
 
 void __cdecl G_PrintBadModelMessage(gentity_s *ent)
 {
-    unsigned int v2; // r3
-    double v3; // fp31
-    double v4; // fp30
-    double v5; // fp29
+    iassert(ent);
 
-    if (!ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 415, 0, "%s", "ent");
-    if (ent->model)
+    if (ent->model && G_XModelBad(ent->model))
     {
-        if (G_XModelBad(ent->model))
-        {
-            v2 = G_ModelName(ent->model);
-            SL_ConvertToString(v2);
-            v3 = ent->r.currentOrigin[2];
-            v4 = ent->r.currentOrigin[1];
-            v5 = ent->r.currentOrigin[0];
-            SL_ConvertToString(ent->classname);
-            Com_PrintError(
-                1,
-                "Error: '%s' at ( %.0f %.0f %.0f ) uses missing model '%s'\n",
-                (const char *)HIDWORD(v5),
-                v5,
-                v4,
-                v3,
-                (const char *)HIDWORD(v4));
-        }
+        const char *modelName = SL_ConvertToString(G_ModelName(ent->model));
+        const char *className = SL_ConvertToString(ent->classname);
+        Com_PrintError(
+            1,
+            "Error: '%s' at ( %.0f %.0f %.0f ) uses missing model '%s'\n",
+            className,
+            ent->r.currentOrigin[0],
+            ent->r.currentOrigin[1],
+            ent->r.currentOrigin[2],
+            modelName);
     }
 }
 
 int __cdecl G_CallSpawnEntity(gentity_s *ent)
 {
-    const char *v3; // r30
-    const gitem_s *ItemForClassname; // r4
-    int v5; // r6
-    const SpawnFuncEntry *v6; // r7
-    const char *classname; // r10
-    const char *v8; // r11
-    int v9; // r8
-    void(__cdecl * callback)(gentity_s *); // r31
+    const char *classname;
+    const gitem_s *item;
+    void(__cdecl * spawnFunc)(gentity_s *);
 
     if (level.spawnVar.spawnVarsValid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 518, 1, "%s", "!level.spawnVar.spawnVarsValid");
-    if (ent->classname)
-    {
-        v3 = SL_ConvertToString(ent->classname);
-        if (strncmp(v3, "actor_", 6u))
-        {
-            ItemForClassname = G_GetItemForClassname(v3, 0);
-            if (ItemForClassname)
-            {
-                G_SpawnItem(ent, ItemForClassname);
-                return 1;
-            }
-            else
-            {
-                v5 = 0;
-                v6 = s_bspOrDynamicSpawns;
-                while (1)
-                {
-                    classname = v6->classname;
-                    v8 = v3;
-                    do
-                    {
-                        v9 = *(unsigned __int8 *)v8 - *(unsigned __int8 *)classname;
-                        if (!*v8)
-                            break;
-                        ++v8;
-                        ++classname;
-                    } while (!v9);
-                    if (!v9)
-                        break;
-                    ++v6;
-                    ++v5;
-                    if ((int)v6 >= (int)"Tried to set a read only entity field")
-                        goto LABEL_17;
-                }
-                callback = s_bspOrDynamicSpawns[v5].callback;
-                if (!callback)
-                {
-                LABEL_17:
-                    Com_Printf(15, "%s cannot be spawned dynamically\n", v3);
-                    return 0;
-                }
-                if (callback == G_FreeEntity)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 549, 0, "%s", "spawnFunc != G_FreeEntity");
-                callback(ent);
-                if (!ent->r.inuse)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 551, 0, "%s", "ent->r.inuse");
-                return 1;
-            }
-        }
-        else
-        {
-            Com_Error(ERR_DROP, "cannot spawn AI directly; use spawners instead");
-            return 0;
-        }
-    }
-    else
+
+    if (!ent->classname)
     {
         Com_Printf(15, "G_CallSpawnEntity: NULL classname\n");
         return 0;
     }
+
+    classname = SL_ConvertToString(ent->classname);
+    if (!strncmp(classname, "actor_", 6u))
+    {
+        Com_Error(ERR_DROP, "cannot spawn AI directly; use spawners instead");
+        return 0;
+    }
+
+    item = G_GetItemForClassname(classname, 0);
+    if (item)
+    {
+        G_SpawnItem(ent, item);
+        return 1;
+    }
+
+    spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, ARRAY_COUNT(s_bspOrDynamicSpawns));
+
+    if (!spawnFunc)
+    {
+        Com_Printf(15, "%s cannot be spawned dynamically\n", classname);
+        return 0;
+    }
+
+    iassert(spawnFunc != G_FreeEntity);
+
+    spawnFunc(ent);
+
+    iassert(ent->r.inuse);
+
+    return 1;
 }
 
 void __cdecl GScr_AddFieldsForEntity()
@@ -720,7 +679,7 @@ void __cdecl Scr_GetGenericEntArray(unsigned int offset, unsigned int name)
     v6 = g_entities;
     for (i = level.num_entities; v5 < i; ++v6)
     {
-        if (v6->r.inuse && *(_WORD *)(&v6->s.eType + v4->ofs) && *(unsigned __int16 *)(&v6->s.eType + v4->ofs) == name)
+        if (v6->r.inuse && *(_WORD *)((char *)v6 + v4->ofs) && *(unsigned __int16 *)((char *)v6 + v4->ofs) == name)
         {
             Scr_AddEntity(v6);
             Scr_AddArray();
@@ -821,9 +780,9 @@ void __cdecl SP_worldspawn()
     {
         SV_SetConfigstring(1147, northyaw);
 
-        float v3 = atof(northyaw) * 0.017453292f;
-        level.compassNorth[1] = sin(v3);
-        level.compassNorth[0] = cos(v3);;
+        float yaw = DEG2RAD(atof(northyaw));
+        level.compassNorth[1] = sin(yaw);
+        level.compassNorth[0] = cos(yaw);
     }
     else
     {
@@ -853,14 +812,14 @@ void __cdecl SP_worldspawn()
     sscanf(sunColor, "%g %g %g", &color[0], &color[1], &color[2]);
     ColorNormalize(color, color);
 
-    //_FP13 = -(float)((float)((float)v11 - (float)v7) * (float)((float)1.0 - (float)v9));
-    //__asm { fsel      f0, f13, f27, f0 }
-    //level.mapSunColor[0] = color[0] * (float)_FP0;
-    //level.mapSunColor[1] = color[1] * (float)_FP0;
-    //level.mapSunColor[2] = color[2] * (float)_FP0;
-
+    Com_Printf(15, "SP_worldspawn: sunlight=%g ambient=%g diffuse=%g\n", sunlight, ambient, diffuse);
     float scale = (sunlight - ambient) * (1.0f - diffuse);
-    scale = (scale < 0.0f) ? 1.0f : scale;
+    Com_Printf(15, "SP_worldspawn: raw scale=%g\n", scale);
+    if (scale <= 0.0f)
+        scale = 0.0f;
+    Com_Printf(15, "SP_worldspawn: final scale=%g sunColor=(%g %g %g) -> mapSunColor=(%g %g %g)\n",
+        scale, color[0], color[1], color[2],
+        color[0] * scale, color[1] * scale, color[2] * scale);
 
     level.mapSunColor[0] = color[0] * scale;
     level.mapSunColor[1] = color[1] * scale;
@@ -905,7 +864,7 @@ void __cdecl G_LoadStructs()
         } while (!v4);
         if (!v4)
             G_SpawnStruct();
-    }
+        }
     G_ResetEntityParsePoint();
 }
 

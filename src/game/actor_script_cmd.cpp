@@ -826,9 +826,9 @@ int __cdecl MayMove_CheckFriendlyFire(actor_s *self, float *start, const float *
     float *v11; // r9
     float *i; // r11
     double v14; // fp13
-    float v15; // [sp+50h] [-80h] BYREF
-    float v16; // [sp+54h] [-7Ch]
-    float v17; // [sp+58h] [-78h]
+    // KISAKFIX: v15/v16 vec2 passed as &v15 to Vec2Normalize. v17 separate scalar.
+    float dir[2]; // was v15 (BYREF) + v16
+    float v17;
     float v18[4]; // [sp+60h] [-70h] BYREF
     float v19[4]; // [sp+70h] [-60h] BYREF
     float v20[4]; // [sp+80h] [-50h] BYREF
@@ -836,13 +836,13 @@ int __cdecl MayMove_CheckFriendlyFire(actor_s *self, float *start, const float *
 
     if (!Actor_IsMoveSuppressed(self))
         return 0;
-    v15 = *end - *start;
-    v16 = end[1] - start[1];
-    v6 = Vec2Normalize(&v15);
+    dir[0] = *end - *start;
+    dir[1] = end[1] - start[1];
+    v6 = Vec2Normalize(dir);
     v17 = end[2];
-    v7 = (float)((float)(v16 * (float)((float)v6 + (float)30.0)) + start[1]);
-    v15 = (float)(v15 * (float)((float)v6 + (float)30.0)) + *start;
-    v16 = v7;
+    v7 = (float)((float)(dir[1] * (float)((float)v6 + (float)30.0)) + start[1]);
+    dir[0] = (float)(dir[0] * (float)((float)v6 + (float)30.0)) + *start;
+    dir[1] = v7;
     MoveOnlySuppressionPlanes = Actor_GetMoveOnlySuppressionPlanes(self, v21, v20);
     v9 = 0;
     if (MoveOnlySuppressionPlanes <= 0)
@@ -851,7 +851,7 @@ int __cdecl MayMove_CheckFriendlyFire(actor_s *self, float *start, const float *
     v11 = v20;
     for (i = v21[0];
         (float)((float)(*v11 - (float)((float)(i[1] * start[1]) + (float)(*i * *start)))
-            * (float)(*v11 - (float)((float)(*i * v15) + (float)(i[1] * v16)))) >= 0.0;
+            * (float)(*v11 - (float)((float)(*i * dir[0]) + (float)(i[1] * dir[1])))) >= 0.0;
         i += 2)
     {
         ++v9;
@@ -864,8 +864,8 @@ int __cdecl MayMove_CheckFriendlyFire(actor_s *self, float *start, const float *
         v14 = start[2];
         v18[0] = *start;
         v18[1] = v10;
-        v19[0] = v15;
-        v19[1] = v16;
+        v19[0] = dir[0];
+        v19[1] = dir[1];
         v18[2] = (float)v14 + (float)32.0;
         v19[2] = v17 + (float)32.0;
         G_DebugLineWithDuration(v18, v19, colorYellow, 0, 100);
@@ -895,8 +895,14 @@ int __cdecl MayMove_TraceCheck(actor_s *self, float *vStart, float *vEnd, int al
     vPointLow[1] = vEnd[1];
     vPointLow[2] = vEnd[2];
 
-    vPointHigh[2] += 48.0;
-    vPointLow[2] -= 48.0;
+    // KISAKFIX: kisak port used 48.0 here; IDA `MayMove_TraceCheck` at 0x8220b760
+    // shows `v22 = (float)v11 + (float)72.0; v19 = (float)v11 - (float)72.0;`.
+    // Same pattern class as the already-fixed `Path_PredictionTrace 48→72` step.
+    // With 48 here, GSC `mayMoveToPoint`/`mayMoveFromPointToPoint` rejected legitimate
+    // moves whose Z range exceeded 48 but stayed within 72 — AI scripts spuriously
+    // refused to walk to valid points.
+    vPointHigh[2] += 72.0;
+    vPointLow[2] -= 72.0;
 
     G_TraceCapsule(&results, vPointHigh, vec3_origin, vec3_origin, vPointLow, self->ent->s.number, self->Physics.iTraceMask | 0x6000);
 
@@ -919,11 +925,13 @@ int __cdecl MayMove_TraceCheck(actor_s *self, float *vStart, float *vEnd, int al
             DEBUGMAYMOVE(vEnd, vPointLow, colorOrange, DEBUGMAYMOVE_NOT_LIFTED);
             return 0;
         }
+        // KISAKFIX: kisak used `| 0x8004`; IDA shows `| 0x4004`. Wrong content-mask bit
+        // caused Path_PredictionTrace to test against the wrong collision contents.
         else if (Path_PredictionTrace(
             vStart,
             vEnd,
             self->ent->s.number,
-            self->Physics.iTraceMask | 0x8004,
+            self->Physics.iTraceMask | 0x4004,
             vTraceEndPos,
             stepheight,
             allowStartSolid))
@@ -1043,6 +1051,11 @@ void __cdecl ActorCmd_Teleport(scr_entref_t entref)
     if (Scr_GetNumParam() > 1)
     {
         Scr_GetVector(1, vAngles);
+        // KISAKFIX: IDA `v2 = v10;` was dropped during port. Without it the
+        // `if (angles)` block below is never entered when the GSC caller passes
+        // an angles argument, so `actor teleport(pos, ang)` ignored the angles
+        // and Actor_SetDesiredAngles/SetLookAngles never fired.
+        angles = vAngles;
     }
     distSquared = Vec3DistanceSq(vSpawnPos, ent->r.currentOrigin);
 
@@ -1731,9 +1744,8 @@ void __cdecl ActorCmd_OrientMode(scr_entref_t entref)
     unsigned int ConstString; // r3
     double Float; // fp1
     gentity_s *ent; // r11
-    float v5; // [sp+50h] [-50h] BYREF
-    float v6; // [sp+54h] [-4Ch]
-    float v7; // [sp+58h] [-48h]
+    // KISAKFIX: v5/v6/v7 vec3 passed as &v5 to Actor_FaceVector.
+    float facePoint[3]; // was v5 (BYREF) + v6 + v7
     float v8[4]; // [sp+60h] [-40h] BYREF
     float v9[6]; // [sp+70h] [-30h] BYREF
 
@@ -1778,12 +1790,12 @@ void __cdecl ActorCmd_OrientMode(scr_entref_t entref)
     {
         Scr_GetVector(1u, v9);
         ent = v1->ent;
-        v5 = v9[0] - v1->ent->r.currentOrigin[0];
-        v6 = v9[1] - ent->r.currentOrigin[1];
-        v7 = v9[2] - ent->r.currentOrigin[2];
+        facePoint[0] = v9[0] - v1->ent->r.currentOrigin[0];
+        facePoint[1] = v9[1] - ent->r.currentOrigin[1];
+        facePoint[2] = v9[2] - ent->r.currentOrigin[2];
         v1->ScriptOrient.eMode = AI_ORIENT_DONT_CHANGE;
-        if ((float)((float)(v5 * v5) + (float)(v6 * v6)) >= 1.0)
-            Actor_FaceVector(&v1->ScriptOrient, &v5);
+        if ((float)((float)(facePoint[0] * facePoint[0]) + (float)(facePoint[1] * facePoint[1])) >= 1.0)
+            Actor_FaceVector(&v1->ScriptOrient, facePoint);
     }
     else if (ConstString == scr_const.face_default)
     {
@@ -2674,7 +2686,15 @@ void __cdecl ActorCmd_SetEngagementMinDist(scr_entref_t entref)
     v1->engageMinFalloffDist = Float;
     if (Float > engageMinDist)
     {
-        v4 = va((const char *)HIDWORD(engageMinDist), LODWORD(engageMinDist), LODWORD(Float));
+        // KISAKFIX: IDA hex-rays `va((const char*)HIDWORD(engageMinDist), LODWORD(engageMinDist), LODWORD(Float))`
+        // is a PPC-ABI varargs artifact. Disasm at 0x8220eaf8 shows
+        //   addi r3, r11, "Min dist falloff must be <= min dist. [%f < %f]"
+        //   ld   r4, [engageMinDist]   ; double as 64-bit
+        //   ld   r5, [Float]           ; double as 64-bit
+        //   bl   va
+        // On x86 cdecl, faithful port is `va(fmt, engageMinDist, Float)`. The kisak
+        // literal port treats HIDWORD(double) as the format string pointer → crash.
+        v4 = va("Min dist falloff must be <= min dist. [%f < %f]", engageMinDist, Float);
         Scr_Error(v4);
     }
 }
@@ -2693,7 +2713,10 @@ void __cdecl ActorCmd_SetEngagementMaxDist(scr_entref_t entref)
     v1->engageMaxFalloffDist = Float;
     if (Float < engageMaxDist)
     {
-        v4 = va((const char *)HIDWORD(engageMaxDist), LODWORD(engageMaxDist), LODWORD(Float));
+        // KISAKFIX: PPC-ABI varargs artifact (see SetEngagementMinDist).
+        // IDA disasm at 0x8220eb70 calls
+        //   va("Max dist falloff must be >= max dist. [%f > %f]", engageMaxDist, Float)
+        v4 = va("Max dist falloff must be >= max dist. [%f > %f]", engageMaxDist, Float);
         Scr_Error(v4);
     }
 }

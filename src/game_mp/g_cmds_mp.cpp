@@ -771,12 +771,7 @@ void __cdecl G_SayTo(
 
 void __cdecl Cmd_Where_f(gentity_s *ent)
 {
-    char *v1; // eax
-    const char *v2; // eax
-
-    v1 = vtos(ent->r.currentOrigin);
-    v2 = va("%c \"\x15\x25\x73\x0a\x22", 101, v1);
-    SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v2);
+    SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"\x15%s\n\"", vtos(ent->r.currentOrigin)));
 }
 
 void __cdecl Cmd_CallVote_f(gentity_s *ent)
@@ -1104,52 +1099,47 @@ const char aCGameUsage[] = "%c \"GAME_USAGE"; // idb
 
 void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
-    const char *v1; // eax
-    const char *v2; // eax
-    long double v3; // st7
-    int32_t v4; // [esp+0h] [ebp-424h]
     char buffer[1024]; // [esp+4h] [ebp-420h] BYREF
     float origin[3]; // [esp+408h] [ebp-1Ch] BYREF
     float angles[3]; // [esp+414h] [ebp-10h] BYREF
-    int32_t i; // [esp+420h] [ebp-4h]
 
-    if (!ent)
-        MyAssertHandler(".\\game_mp\\g_cmds_mp.cpp", 1372, 0, "%s", "ent");
-    if (!ent->client)
-        MyAssertHandler(".\\game_mp\\g_cmds_mp.cpp", 1373, 0, "%s", "ent->client");
+    iassert(ent);
+    iassert(ent->client);
+
     if (!g_cheats->current.enabled)
     {
-        v1 = va("%c \"GAME_CHEATSNOTENABLED\"", 101);
-        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v1);
+        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"GAME_CHEATSNOTENABLED\"", 101));
         return;
     }
     if (SV_Cmd_Argc() < 4 || SV_Cmd_Argc() > 6)
     {
-        v2 = va(aCGameUsage, 101);
-        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v2);
+        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va(aCGameUsage, 101));
         return;
     }
-    for (i = 0; i < 3; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         SV_Cmd_ArgvBuffer(i + 1, buffer, 1024);
-        v3 = atof(buffer);
-        origin[i] = v3;
+        origin[i] = atof(buffer);
     }
+
     origin[2] = origin[2] - ent->client->ps.viewHeightCurrent;
     angles[0] = 0.0;
     angles[1] = 0.0;
     angles[2] = 0.0;
-    v4 = SV_Cmd_Argc();
-    if (v4 == 5)
-        goto LABEL_16;
-    if (v4 == 6)
+
+    if (SV_Cmd_Argc() == 5)
     {
-        SV_Cmd_ArgvBuffer(5, buffer, 1024);
-        angles[0] = atof(buffer);
-    LABEL_16:
         SV_Cmd_ArgvBuffer(4, buffer, 1024);
         angles[1] = atof(buffer);
     }
+    else if (SV_Cmd_Argc() == 6)
+    {
+        SV_Cmd_ArgvBuffer(5, buffer, 1024);
+        angles[0] = atof(buffer);
+        SV_Cmd_ArgvBuffer(4, buffer, 1024);
+        angles[1] = atof(buffer);
+    }
+
     TeleportPlayer(ent, origin, angles);
 }
 

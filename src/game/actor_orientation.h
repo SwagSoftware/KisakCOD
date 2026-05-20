@@ -18,7 +18,6 @@ void __cdecl Actor_FaceMotion(actor_s *self, ai_orient_t *pOrient);
 void __cdecl Actor_SetAnglesToLikelyEnemyPath(actor_s *self);
 const pathnode_t *__cdecl Actor_GetAnglesToLikelyEnemyPath(actor_s *self);
 void __cdecl Actor_FaceLikelyEnemyPath(actor_s *self, ai_orient_t *pOrient);
-// local variable allocation has failed, the output may be wrong!
 void __cdecl Actor_FaceEnemy(actor_s *self, ai_orient_t *pOrient);
 int __cdecl Actor_FaceGoodShootPos(actor_s *self, ai_orient_t *pOrient);
 void __cdecl Actor_FaceEnemyOrMotion(actor_s *self, ai_orient_t *pOrient);

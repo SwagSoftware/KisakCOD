@@ -67,7 +67,10 @@ const dvar_t *bg_shock_screenBlurBlendTime;
 const dvar_t *player_dmgtimer_flinchTime;
 const dvar_t *player_move_factor_on_torso;
 const dvar_t *bg_shock_screenBlurBlendFadeTime;
+#ifdef KISAK_MP
 const dvar_t *animscript_debug;
+const dvar_t *anim_debugSpeeds;
+#endif
 const dvar_t *player_adsExitDelay;
 const dvar_t *bg_shock_soundDryLevel;
 const dvar_t *bg_swingSpeed;
@@ -139,7 +142,6 @@ const dvar_t *bg_bobAmplitudeDucked;
 const dvar_t *player_strafeSpeedScale;
 const dvar_t *bg_shock_soundRoomType;
 const dvar_t *player_breath_hold_time;
-const dvar_t *anim_debugSpeeds;
 const dvar_t *bg_ladder_yawcap;
 const dvar_t *bg_shock_screenFlashShotFadeTime;
 const dvar_t *bg_shock_soundModEndDelay;
@@ -754,8 +756,10 @@ void __cdecl BG_RegisterDvars()
         DVAR_CHEAT | DVAR_TEMP,
         "Use animations to turn a player's model in multiplayer");
     xanim_debug = Dvar_RegisterBool("xanim_debug", false, DVAR_NOFLAG, "Turn on Xanim Debugging information");
+#ifdef KISAK_MP
     animscript_debug = Dvar_RegisterBool("animscript_debug", false, DVAR_NOFLAG, "Turn on animscript debugging information");
     anim_debugSpeeds = Dvar_RegisterBool("anim_debugSpeeds", false, DVAR_NOFLAG, "Print out animation speed information");
+#endif
     mincb.value.max = FLT_MAX;
     mincb.value.min = 0.0f;
     player_dmgtimer_timePerPoint = Dvar_RegisterFloat(

@@ -97,7 +97,8 @@ void __cdecl Turret_FillWeaponParms(const gentity_s *ent, const gentity_s *activ
         angles[1] = ent->r.currentAngles[1] + ent->s.lerp.u.turret.gunAngles[1];
         angles[2] = ent->r.currentAngles[2];
 
-        AngleVectors(tagMat, wp->forward, wp->right, wp->up);
+
+        AngleVectors(angles, wp->forward, wp->right, wp->up);
         wp->gunForward[0] = tagMat[0];
         wp->gunForward[1] = tagMat[1];
         wp->gunForward[2] = tagMat[2];
@@ -890,9 +891,9 @@ LABEL_15:
 int __cdecl turret_aimat_vector(gentity_s *self, float *origin, int bShoot, float *desiredAngles)
 {
     int result; // r3
-    float v9; // [sp+50h] [-40h] BYREF
+    float vSource[3];
 
-    if (turret_CanTargetPoint(self, origin, &v9, desiredAngles))
+    if (turret_CanTargetPoint(self, origin, vSource, desiredAngles))
     {
         turret_aimat_vector_internal(self, origin, bShoot, desiredAngles);
         return 1;
@@ -955,11 +956,11 @@ int __cdecl turret_aimat_Sentient_Internal(
     double v27; // fp13
     double v28; // fp12
     double v29; // fp0
-    float v30; // [sp+50h] [-D0h] BYREF
-    float v31; // [sp+54h] [-CCh]
+
+    float dir[2]; // was v30 (BYREF) + v31
     __int64 v32; // [sp+58h] [-C8h]
-    __int64 v33; // [sp+60h] [-C0h] BYREF
-    float v34; // [sp+68h] [-B8h]
+
+    float aimPos[3]; // was v33 (BYREF __int64) + v34 (float)
     float targetPos[3]; // [sp+70h] [-B0h] BYREF
     //float v36; // [sp+74h] [-ACh]
     //float v37; // [sp+78h] [-A8h]
@@ -968,7 +969,7 @@ int __cdecl turret_aimat_Sentient_Internal(
     if (missTime < 0)
         MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 935, 0, "%s", "missTime >= 0");
     turret_SetTargetEnt(self, enemy->ent);
-    if (!turret_CanTargetSentient(self, enemy, targetPos, (float *)&v33, desiredAngles))
+    if (!turret_CanTargetSentient(self, enemy, targetPos, aimPos, desiredAngles))
         return 0;
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
@@ -991,12 +992,12 @@ int __cdecl turret_aimat_Sentient_Internal(
                 + (float)(pTurretInfo->missOffsetNormalized[1] * (float)((float)v27 * (float)30.0)));
             v29 = (float)((float)(pTurretInfo->missOffsetNormalized[2] * (float)33.0)
                 + (float)(pTurretInfo->missOffsetNormalized[2] * (float)((float)v27 * (float)30.0)));
-            *(float *)&v33 = (float)((float)(pTurretInfo->missOffsetNormalized[0] * (float)33.0)
+            aimPos[0] = (float)((float)(pTurretInfo->missOffsetNormalized[0] * (float)33.0)
                 + (float)((float)((float)v27 * (float)30.0) * pTurretInfo->missOffsetNormalized[0]))
                 + targetPos[0];
-            *((float *)&v33 + 1) = (float)v28 + targetPos[1];
-            v34 = (float)v29 + targetPos[2];
-            if (turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles))
+            aimPos[1] = (float)v28 + targetPos[1];
+            aimPos[2] = (float)v29 + targetPos[2];
+            if (turret_aimat_vector(self, aimPos, bShoot, desiredAngles))
                 return 1;
         }
         else
@@ -1004,14 +1005,14 @@ int __cdecl turret_aimat_Sentient_Internal(
             pTurretInfo->flags = HIDWORD(v13) | 8;
             if (!G_DObjGetWorldTagMatrix(self, scr_const.tag_aim, (float (*)[3])v38))
                 return 0;
-            v30 = targetPos[1] - v38[10];
-            v31 = v38[9] - targetPos[0];
-            Vec2Normalize(&v30);
-            v14 = (float)(v30 * (float)63.0);
-            v15 = (float)(v31 * (float)63.0);
-            v16 = (float)((float)(v38[1] * (float)(v31 * (float)63.0)) + (float)(v38[0] * (float)(v30 * (float)63.0)));
-            v31 = v31 * (float)63.0;
-            v30 = v30 * (float)63.0;
+            dir[0] = targetPos[1] - v38[10];
+            dir[1] = v38[9] - targetPos[0];
+            Vec2Normalize(dir);
+            v14 = (float)(dir[0] * (float)63.0);
+            v15 = (float)(dir[1] * (float)63.0);
+            v16 = (float)((float)(v38[1] * (float)(dir[1] * (float)63.0)) + (float)(v38[0] * (float)(dir[0] * (float)63.0)));
+            dir[1] *= 63.0f;
+            dir[0] *= 63.0f;
             if (v16 < 0.0)
             {
                 v17 = (float)(targetPos[0] - (float)v14);
@@ -1023,12 +1024,12 @@ int __cdecl turret_aimat_Sentient_Internal(
                 v18 = (float)((float)v15 + targetPos[1]);
             }
             ent = enemy->ent;
-            *((float *)&v33 + 1) = v18;
-            *(float *)&v33 = v17;
+            aimPos[0] = v17;
+            aimPos[1] = v18;
             v20 = ent->r.currentOrigin[2];
-            v34 = ent->r.currentOrigin[2];
-            if (turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles)
-                || (v20 = targetPos[2], v34 = targetPos[2], turret_aimat_vector(self, (float *)&v33, bShoot, desiredAngles)))
+            aimPos[2] = ent->r.currentOrigin[2];
+            if (turret_aimat_vector(self, aimPos, bShoot, desiredAngles)
+                || (v20 = targetPos[2], aimPos[2] = targetPos[2], turret_aimat_vector(self, aimPos, bShoot, desiredAngles)))
             {
                 result = 1;
                 pTurretInfo->missOffsetNormalized[0] = (float)v17 - targetPos[0];

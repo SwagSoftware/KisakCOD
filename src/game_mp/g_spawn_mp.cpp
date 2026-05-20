@@ -75,41 +75,38 @@ int32_t __cdecl G_CallSpawnEntity(gentity_s *ent)
     void(__cdecl * spawnFunc)(gentity_s *); // [esp+4h] [ebp-8h]
     const char *classname; // [esp+8h] [ebp-4h]
 
-    if (level.spawnVar.spawnVarsValid)
-        MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 489, 1, "%s", "!level.spawnVar.spawnVarsValid");
-    if (ent->classname)
-    {
-        classname = SL_ConvertToString(ent->classname);
-        item = G_GetItemForClassname(classname, 0);
-        if (item)
-        {
-            G_SpawnItem(ent, item);
-            return 1;
-        }
-        else
-        {
-            spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, 6);
-            if (spawnFunc)
-            {
-                if (spawnFunc == G_FreeEntity)
-                    MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 513, 0, "%s", "spawnFunc != G_FreeEntity");
-                spawnFunc(ent);
-                if (!ent->r.inuse)
-                    MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 515, 0, "%s", "ent->r.inuse");
-                return 1;
-            }
-            else
-            {
-                Com_Printf(15, "%s cannot be spawned dynamically\n", classname);
-                return 0;
-            }
-        }
-    }
-    else
+    iassert(!level.spawnVar.spawnVarsValid);
+
+    if (!ent->classname)
     {
         Com_Printf(15, "G_CallSpawnEntity: NULL classname\n");
         return 0;
     }
+
+    classname = SL_ConvertToString(ent->classname);
+    item = G_GetItemForClassname(classname, 0);
+    if (item)
+    {
+        G_SpawnItem(ent, item);
+        return 1;
+    }
+
+    spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, ARRAY_COUNT(s_bspOrDynamicSpawns));
+
+    if (!spawnFunc)
+    {
+        Com_Printf(15, "%s cannot be spawned dynamically\n", classname);
+        return 0;
+    }
+
+    iassert(spawnFunc != G_FreeEntity);
+
+    spawnFunc(ent);
+
+    iassert(ent->r.inuse);
+
+    return 1;
+
 }
 
 const gitem_s *__cdecl G_GetItemForClassname(const char *classname, uint8_t model)
@@ -623,42 +620,41 @@ void __cdecl Scr_GetEntArray()
 
 void __cdecl SP_worldspawn()
 {
-    char *v0; // eax
-    float v1; // [esp+4h] [ebp-14h]
-    float value; // [esp+8h] [ebp-10h]
-    float v3; // [esp+10h] [ebp-8h]
+    float yaw; // [esp+10h] [ebp-8h]
     const char *s; // [esp+14h] [ebp-4h] BYREF
 
     G_LevelSpawnString("classname", "", &s);
+
     if (I_stricmp(s, "worldspawn"))
         Com_Error(ERR_DROP, "SP_worldspawn: The first entity isn't worldspawn");
+
     SV_SetConfigstring(2, (char*)"cod");
     G_LevelSpawnString("ambienttrack", "", &s);
+
     if (*s)
     {
-        v0 = va("n\\%s", s);
-        SV_SetConfigstring(821, v0);
+        SV_SetConfigstring(821, va("n\\%s", s));
     }
     else
     {
         SV_SetConfigstring(821, (char *)"");
     }
+
     G_LevelSpawnString("message", "", &s);
     SV_SetConfigstring(3, (char *)s);
     SV_SetConfigstring(10, (char *)g_motd->current.integer);
     G_LevelSpawnString("gravity", "800", &s);
-    if (!g_gravity)
-        MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 1123, 0, "%s", "g_gravity");
-    value = atof(s);
-    Dvar_SetFloat((dvar_s *)g_gravity, value);
+
+    iassert(g_gravity);
+
+    Dvar_SetFloat((dvar_s *)g_gravity, atof(s));
     G_LevelSpawnString("northyaw", "", &s);
     if (*s)
     {
         SV_SetConfigstring(822, (char *)s);
-        v1 = atof(s);
-        v3 = v1 * 0.01745329238474369;
-        level.compassNorth[0] = cos(v3);
-        level.compassNorth[1] = sin(v3);
+        yaw = DEG2RAD(atof(s));
+        level.compassNorth[0] = cos(yaw);
+        level.compassNorth[1] = sin(yaw);
     }
     else
     {

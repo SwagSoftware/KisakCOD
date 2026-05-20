@@ -544,10 +544,11 @@ float __cdecl Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node
     gentity_s *TargetEntity; // r29
     gentity_s *ent; // r11
     double v7; // fp13
-    float v9; // [sp+50h] [-30h] BYREF
-    float v10; // [sp+54h] [-2Ch]
-    float v11; // [sp+58h] [-28h] BYREF
-    float v12; // [sp+5Ch] [-24h]
+    // KISAKFIX: IDA had v9/v10 at sp+0x50/0x54 (consecutive) and v11/v12 at sp+0x58/0x5C,
+    // both passed as &v9 / &v11 to Vec2Normalize expecting float[2]. C/C++ doesn't guarantee
+    // separate locals are contiguous — pack into arrays.
+    float dirToTarget[2];  // was v9 (BYREF) + v10
+    float dirToNode[2];    // was v11 (BYREF) + v12
 
     TargetEntity = Actor_GetTargetEntity(self);
 
@@ -559,15 +560,15 @@ float __cdecl Actor_Cover_ScoreOnTargetDir(actor_s *self, const pathnode_t *node
         }
         else
         {
-            v9 = TargetEntity->r.currentOrigin[0] - node->constant.vOrigin[0];
-            v10 = TargetEntity->r.currentOrigin[1] - node->constant.vOrigin[1];
-            Vec2Normalize(&v9);
+            dirToTarget[0] = TargetEntity->r.currentOrigin[0] - node->constant.vOrigin[0];
+            dirToTarget[1] = TargetEntity->r.currentOrigin[1] - node->constant.vOrigin[1];
+            Vec2Normalize(dirToTarget);
             ent = self->ent;
             v7 = node->constant.vOrigin[1];
-            v11 = node->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
-            v12 = (float)v7 - ent->r.currentOrigin[1];
-            Vec2Normalize(&v11);
-            return (float)((float)((float)((float)(v11 * v9) + (float)(v12 * v10)) + (float)1.0) * (float)0.5);
+            dirToNode[0] = node->constant.vOrigin[0] - self->ent->r.currentOrigin[0];
+            dirToNode[1] = (float)v7 - ent->r.currentOrigin[1];
+            Vec2Normalize(dirToNode);
+            return (float)((float)((float)((float)(dirToNode[0] * dirToTarget[0]) + (float)(dirToNode[1] * dirToTarget[1])) + (float)1.0) * (float)0.5);
         }
     }
 

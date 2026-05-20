@@ -8,6 +8,8 @@
 
 #include <bgame/bg_public.h>
 
+#define MAX_VEHICLES 64
+
 enum loading_t : __int32
 {
 	LOADING_DONE = 0x0,

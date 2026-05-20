@@ -81,7 +81,6 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
     float p_4d; // [esp+Ch] [ebp-148h]
     float p_4e; // [esp+Ch] [ebp-148h]
     float p_4f; // [esp+Ch] [ebp-148h]
-    bool v23; // [esp+ACh] [ebp-A8h]
     snapshot_s *v24; // [esp+B0h] [ebp-A4h]
     snapshot_s *v25; // [esp+B4h] [ebp-A0h]
     snapshot_s *v26; // [esp+B8h] [ebp-9Ch]
@@ -126,8 +125,12 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
         ent = &cent->nextState;
         eventParm = cent->nextState.eventParm;
         nextSnap = cgameGlob->nextSnap;
-        v23 = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
-        isPlayerView = v23;
+
+#ifdef KISAK_SP
+        isPlayerView = (cent->nextState.eType == ET_PLAYER);
+#elif KISAK_MP
+        isPlayerView = (nextSnap->ps.otherFlags & 6) != 0 && ent->number == nextSnap->ps.clientNum;
+#endif
 
         if (cg_debugEvents->current.enabled)
             Com_Printf(21, "ent:%3i  event:%3i ", ent->number, event);
@@ -169,9 +172,9 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
         if (event > EV_LANDING_FIRST && event < EV_LANDING_LAST)
         {
             if (isPlayerView)
-                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.landSound[event - 19] + offset));
+                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.landSoundPlayer[event - EV_LANDING_FIRST] + offset));
             else
-                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.stepProneSoundPlayer[event - 19] + offset));
+                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.landSound[event - EV_LANDING_FIRST] + offset));
             if (clientNum == cgameGlob->predictedPlayerState.clientNum)
             {
                 cgameGlob->landChange = 0.0 - (double)eventParm;
@@ -181,9 +184,9 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
         else if (event > EV_LANDING_PAIN_FIRST && event < EV_LANDING_PAIN_LAST)
         {
             if (isPlayerView)
-                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.landSound[event - 48] + offset));
+                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.landSoundPlayer[event - EV_LANDING_PAIN_FIRST] + offset));
             else
-                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.stepProneSoundPlayer[event - 48] + offset));
+                CG_PlayEntitySoundAlias(localClientNum, ent->number, *(&cgMedia.landSound[event - EV_LANDING_PAIN_FIRST] + offset));
             CG_PlayEntitySoundAlias(localClientNum, ent->number, cgMedia.landDmgSound);
             if (clientNum == cgameGlob->predictedPlayerState.clientNum)
             {
@@ -880,28 +883,23 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 return;
 #endif
             case EV_NO_FRAG_GRENADE_HINT:
-                v28 = cgameGlob->nextSnap;
-                if ((v28->ps.otherFlags & 6) != 0 && ent->number == v28->ps.clientNum)
+                if (isPlayerView)
                     CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_NO_AMMO_FRAG_GRENADE);
                 return;
             case EV_NO_SPECIAL_GRENADE_HINT:
-                v27 = cgameGlob->nextSnap;
-                if ((v27->ps.otherFlags & 6) != 0 && ent->number == v27->ps.clientNum)
+                if (isPlayerView)
                     CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_NO_AMMO_SPECIAL_GRENADE);
                 return;
             case EV_TARGET_TOO_CLOSE_HINT:
-                v26 = cgameGlob->nextSnap;
-                if ((v26->ps.otherFlags & 6) != 0 && ent->number == v26->ps.clientNum)
+                if (isPlayerView)
                     CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_TARGET_TOO_CLOSE);
                 return;
             case EV_TARGET_NOT_ENOUGH_CLEARANCE:
-                v25 = cgameGlob->nextSnap;
-                if ((v25->ps.otherFlags & 6) != 0 && ent->number == v25->ps.clientNum)
+                if (isPlayerView)
                     CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_NOT_ENOUGH_CLEARANCE);
                 return;
             case EV_LOCKON_REQUIRED_HINT:
-                v24 = cgameGlob->nextSnap;
-                if ((v24->ps.otherFlags & 6) != 0 && ent->number == v24->ps.clientNum)
+                if (isPlayerView)
                     CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_LOCKON_REQUIRED);
                 return;
             case EV_FOOTSTEP_SPRINT:

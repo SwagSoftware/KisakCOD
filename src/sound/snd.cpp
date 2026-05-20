@@ -859,19 +859,20 @@ char __cdecl SND_AddLengthNotify(int playbackId, const snd_alias_t *lengthNotify
 
 void __cdecl DoLengthNotify(int msec, const snd_alias_t *lengthNotifyData, SndLengthId id)
 {
-    const char *v3; // eax
-
-    if (id)
+#ifdef KISAK_SP
+    if (id == SndLengthNotify_Script)
     {
-        if (id == SndLengthNotify_Subtitle)
-        {
-            CG_SubtitleSndLengthNotify(msec, lengthNotifyData);
-        }
-        else if (!alwaysfails)
-        {
-            v3 = va("Unknown snd length notify id: %i\n", id);
-            MyAssertHandler(".\\snd.cpp", 762, 0, v3);
-        }
+        CG_ScriptNotifySndLengthNotify(msec, (void *)lengthNotifyData);
+    }
+    else 
+#endif
+    if (id == SndLengthNotify_Subtitle)
+    {
+        CG_SubtitleSndLengthNotify(msec, lengthNotifyData);
+    }
+    else if (!alwaysfails)
+    {
+        MyAssertHandler(".\\snd.cpp", 762, 0, va("Unknown snd length notify id: %i\n", id));
     }
 }
 

@@ -2169,23 +2169,21 @@ bool __cdecl SV_ReadPacket(int framePos)
 
 float __cdecl SV_DemoFxVisibility()
 {
-    double v0; // fp1
     double Float; // fp31
 
-    if (!sv.demo.playing)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_demo.cpp", 1425, 0, "%s", "sv.demo.playing");
+    iassert(sv.demo.playing);
+
     if (sv.demo.readType == 1)
     {
         Float = MSG_ReadFloat(&sv.demo.msg);
         SV_ReadNextDemoType();
-        v0 = Float;
+        return Float;
     }
     else
     {
         SV_EndDemo(1);
-        v0 = 0.0;
+        return 0.0f;
     }
-    return *((float *)&v0 + 1);
 }
 
 int __cdecl SV_DemoCheatsOk()
