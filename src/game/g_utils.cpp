@@ -983,14 +983,15 @@ void __cdecl G_CheckDObjUpdate(gentity_s *ent)
     unsigned __int16 v11; // [sp+50h] [-190h] BYREF
     unsigned __int16 v12; // [sp+52h] [-18Eh] BYREF
     XAnimTree_s *v13; // [sp+54h] [-18Ch] BYREF
-    DObjModel_s v14; // [sp+60h] [-180h] BYREF
+
+    DObjModel_s v14[DOBJ_MAX_SUBMODELS]; // [sp+60h] [-180h] BYREF
     char v15; // [sp+6Ch] [-174h] BYREF
 
     ServerDObj = Com_GetServerDObj(ent->s.number);
     model = ent->model;
     if (ent->model)
     {
-        DObjGetCreateParms(ServerDObj, &v14, &v11, &v13, &v12);
+        DObjGetCreateParms(ServerDObj, v14, &v11, &v13, &v12);
         if (ent->s.lerp.u.actor.species)
         {
             pAnimTree = ent->pAnimTree;
@@ -1021,34 +1022,34 @@ void __cdecl G_CheckDObjUpdate(gentity_s *ent)
         v6 = G_GetModel(model);
         if (!v6)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 812, 0, "%s", "model");
-        if (v14.model != v6)
+        if (v14[0].model != v6)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                 815,
                 0,
                 "%s",
                 "dobjModels[numModels].model == model");
-        if (v14.boneName)
+        if (v14[0].boneName)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                 816,
                 0,
                 "%s",
                 "!dobjModels[numModels].boneName");
-        if (v14.ignoreCollision)
+        if (v14[0].ignoreCollision)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                 817,
                 0,
                 "%s",
                 "!dobjModels[numModels].ignoreCollision");
+
         v7 = 1;
-        v8 = (XModel **)&v15;
         attachTagNames = ent->attachTagNames;
         do
         {
-            v10 = *(attachTagNames - 31);
-            if (!*(attachTagNames - 31))
+            v10 = *(attachTagNames - 31);  // == ent->attachModelNames[i]
+            if (!v10)
                 break;
             if (v7 >= 32)
                 MyAssertHandler(
@@ -1059,25 +1060,24 @@ void __cdecl G_CheckDObjUpdate(gentity_s *ent)
                     "numModels < DOBJ_MAX_SUBMODELS");
             if (v7 >= v11)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 827, 0, "%s", "numModels < modelCount");
-            if (*(v8 - 1) != G_GetModel(v10))
+            if (v14[v7].model != G_GetModel(v10))
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                     828,
                     0,
                     "%s",
                     "dobjModels[numModels].model == G_GetModel( modelIndex )");
-            if (!*(v8 - 1))
+            if (!v14[v7].model)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 829, 0, "%s", "dobjModels[numModels].model");
             if (!*attachTagNames)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 830, 0, "%s", "ent->attachTagNames[i]");
-            if (*(_WORD *)v8 && *(unsigned __int16 *)v8 != *attachTagNames)
+            if (v14[v7].boneName && v14[v7].boneName != *attachTagNames)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
                     831,
                     0,
                     "%s",
                     "!dobjModels[numModels].boneName || (dobjModels[numModels].boneName == ent->attachTagNames[i] )");
-            //if (*((_BYTE *)v8 + 2) != ((_cntlzw((1 << (v7 - 1)) & ent->attachIgnoreCollision) & 0x20) == 0))
             //    MyAssertHandler(
             //        "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
             //        832,
@@ -1086,7 +1086,6 @@ void __cdecl G_CheckDObjUpdate(gentity_s *ent)
             //        "dobjModels[numModels].ignoreCollision == ((ent->attachIgnoreCollision & (1 << i)) != 0)");
             ++v7;
             ++attachTagNames;
-            v8 += 2;
         } while (v7 - 1 < 31);
         if (v7 != v11)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 836, 0, "%s", "numModels == modelCount");

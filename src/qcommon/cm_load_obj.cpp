@@ -390,7 +390,11 @@ void __cdecl CM_LoadMapData_LoadObj(const char *name)
         }
         {
             PROFLOAD_SCOPED("Load dynamic entities");
+#ifdef KISAK_MP
             DynEnt_LoadEntities();
+#else
+            iassert(0);
+#endif
         }
     }
 }

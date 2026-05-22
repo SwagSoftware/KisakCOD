@@ -15,7 +15,7 @@ static bool g_compress;
 #define CODE_LEN_MASK 63
 
 static byte g_cacheBuffer[CODE_LEN_MASK + 2];
-static byte g_saveBuffer[0x2000];
+static byte g_saveBuffer[8192];
 
 static int streamModeThread;
 static MemFileMode streamMode;
@@ -154,7 +154,7 @@ double MemFile_ReadFloat(MemoryFile* memFile)
     return value;
 }
 
-#define SAVE_SEGMENT_COUNT 7
+#define SAVE_SEGMENT_COUNT 8
 
 // KISAKTODO cleaning this up is going to be such a headache
 
@@ -166,6 +166,8 @@ void MemFile_StartSegment(MemoryFile* memFile, int index)
     if (memFile->memoryOverflow)
         return;
 
+    int lastSegmentIndex = memFile->segmentIndex;
+
     // if we already have a segment, end it and check for overflow again
     if (memFile->segmentIndex >= 0)
     {
@@ -176,8 +178,6 @@ void MemFile_StartSegment(MemoryFile* memFile, int index)
     }
 
     // start new segment, for real this time.
-    int lastSegmentIndex = memFile->segmentIndex;
-
     memFile->segmentIndex = index;
     if (index >= 0)
     {
@@ -816,6 +816,7 @@ const char* __cdecl MemFile_ReadCString(MemoryFile* memFile)
             memFile->bytesUsed,
             0,
             memFile->bufferSize);
+
     string = g_saveBuffer;
     while (1)
     {
@@ -824,9 +825,10 @@ const char* __cdecl MemFile_ReadCString(MemoryFile* memFile)
             return "";
         if (!*string)
             break;
-        if (++string >= (unsigned __int8*)&g_nonZeroCount)
+        if (++string >= &g_saveBuffer[8191])
             Com_Error(ERR_DROP, "Trying to read corrupted file");
     }
+
     return (const char*)g_saveBuffer;
 }
 

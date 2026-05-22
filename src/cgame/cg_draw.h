@@ -107,7 +107,7 @@ void __cdecl CG_DrawFadeInCinematic(int localClientNum);
 void __cdecl CG_DrawFriendOverlay(int localClientNum);
 void __cdecl CG_DrawPaused(int localClientNum);
 void __cdecl CG_AlterTimescale(int localClientNum, int time, double startScale, double endScale);
-void __cdecl CG_UpdateTimeScale(cg_s *cgameGlob);
+void __cdecl CG_UpdateTimeScale(int localClientNum);
 void __cdecl DrawFontTest(int localClientNum);
 void __cdecl DrawViewmodelInfo(int localClientNum);
 void __cdecl CG_Draw2D(int localClientNum);

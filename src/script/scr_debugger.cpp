@@ -3360,3 +3360,9 @@ void __cdecl Scr_DrawScript()
     Scr_DrawCurrentFilename();
     Con_DrawConsole(0);
 }
+
+void Scr_UpdateRemoteDebugger()
+{
+    iassert(Sys_IsMainThread());
+
+}

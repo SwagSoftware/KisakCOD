@@ -932,4 +932,14 @@ void Sys_SetSaveHistoryEvent()
 {
     SetEvent(g_saveHistoryEvent);
 }
+
+void Sys_WaitForSaveHistory()
+{
+    WaitForSingleObject(g_saveHistoryEvent, INFINITE);
+}
+
+void Sys_SetSaveHistoryDoneEvent()
+{
+    SetEvent(g_saveHistoryDoneEvent);
+}
 #endif

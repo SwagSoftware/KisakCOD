@@ -2105,6 +2105,10 @@ void __cdecl Com_AssetLoadUI()
 void __cdecl Com_CheckSyncFrame()
 {
     iassert( Sys_IsMainThread() );
+#ifdef KISAK_SP
+    SV_WaitSaveGame();
+#endif
+    Scr_UpdateRemoteDebugger();
     DB_Update();
 }
 

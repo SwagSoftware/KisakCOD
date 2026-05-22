@@ -194,7 +194,7 @@ void __cdecl SV_Init()
     const char *v0; // r5
     unsigned __int16 v1; // r4
 
-    //Memcard_InitializeSystem(); KISAKSAVE KISAKMEMCARD
+    Memcard_InitializeSystem();
     SaveDevice_Init();
     SV_AddOperatorCommands();
     sv_gameskill = Dvar_RegisterInt("g_gameskill", 1, 0, 3, 0x64u, "Game skill level");

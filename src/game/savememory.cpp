@@ -9,6 +9,7 @@
 #include <bgame/bg_public.h>
 #include <server/server.h>
 #include <server/sv_game.h>
+#include "savedevice.h"     // OpenDevice/CloseDevice/ReadFromDevice/WriteSaveToDevice
 
 struct __declspec(align(4)) SaveMemoryGlob
 {
@@ -129,6 +130,8 @@ void __cdecl SaveMemory_AllocateTempMemory(SaveGame *save, int size, void *buffe
     if (save->saveState)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 257, 0, "%s", "save->saveState == MEMCLEAR");
     save->saveState = SAVING;
+    if (buffer && size > 0)
+        memset(buffer, 0, (size_t)size);
     MemFile_InitForWriting(&save->memFile, size, (byte*)buffer, 0, 0);
     if (!save->memFile.buffer)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 262, 0, "%s", "save->memFile.buffer");
@@ -460,47 +463,16 @@ const SaveHeader *__cdecl SaveMemory_GetHeader(SaveGame *save)
     return &save->header;
 }
 
+
 void *__cdecl SaveMemory_ReadLoadFromDevice(
     const char *filename,
     int checksum,
-    int useLoadedSourceFiles,
+    int /*useLoadedSourceFiles*/,
     SaveGame **save)
 {
-    // KISAKSAVE
-#if 0
-    __int64 v7; // r10
-    __int64 v8; // r8
-    __int64 v9; // r6
-    __int64 v10; // r10
-    __int64 v11; // r8
-    __int64 v12; // r8
-    __int64 v13; // r10
-    __int64 v14; // r6
-    __int64 v15; // r8
-    __int64 v16; // r10
-    __int64 v17; // r8
-    __int64 v18; // r10
-    int v19; // r3
-    __int64 v20; // r6
-    __int64 v21; // r10
-    __int64 v22; // r8
-    const dvar_s *v23; // r3
-    __int64 v24; // r6
-    __int64 v25; // r10
-    __int64 v26; // r8
-    int v28; // [sp+8h] [-4E8h]
-    int v29; // [sp+Ch] [-4E4h]
-    int v30; // [sp+10h] [-4E0h]
-    int v31; // [sp+14h] [-4DCh]
-    int v32; // [sp+18h] [-4D8h]
-    int v33; // [sp+1Ch] [-4D4h]
-    int v34; // [sp+20h] [-4D0h]
-    int v35; // [sp+24h] [-4CCh]
-    void *v36; // [sp+50h] [-4A0h] BYREF
-    unsigned int v37[292]; // [sp+60h] [-490h] BYREF
-
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 706, 0, "%s", "save");
+
     memset(&saveMemoryGlob.game0, 0, sizeof(saveMemoryGlob.game0));
     saveMemoryGlob.game0.isUsingGlobalBuffer = 1;
     memset(&saveMemoryGlob.game1, 0, sizeof(saveMemoryGlob.game1));
@@ -511,114 +483,77 @@ void *__cdecl SaveMemory_ReadLoadFromDevice(
     saveMemoryGlob.game1.memFile.bufferSize = 1572864;
     saveMemoryGlob.committedGameSave = &saveMemoryGlob.game0;
     saveMemoryGlob.currentGameSave = &saveMemoryGlob.game1;
-    HIBYTE(v37[4]) = 1;
-    if (OpenDevice(filename, &v36) < 0)
+
+    SaveHeader header;
+    void *fileHandle = 0;
+    if (OpenDevice(filename, &fileHandle) < 0)
     {
-        CloseDevice(v36);
-        G_SaveError(
-            ERR_DROP,
-            SAVE_ERROR_MISSING_DEVICE,
-            __SPAIR64__(&unk_82042DB4, (unsigned int)filename),
-            v8,
-            v7,
-            v28,
-            v29,
-            v30,
-            v31,
-            v32,
-            v33,
-            v34,
-            v35);
+        CloseDevice(fileHandle);
+        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE,
+            "Could not open savegame '%s'", filename);
+        return 0;
     }
-    if (ReadFromDevice(v37, 1108, v36) != 1108)
+    if (ReadFromDevice(&header, sizeof(SaveHeader), fileHandle) != (int)sizeof(SaveHeader))
     {
-        CloseDevice(v36);
-        HIDWORD(v9) = &unk_82042D9C;
-        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v9, v11, v10, v28, v29, v30, v31, v32, v33, v34, v35);
+        CloseDevice(fileHandle);
+        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE,
+            "Failed to read savegame header");
+        return 0;
     }
-    if (v37[0] != 287)
+    if (header.saveVersion != 287)
     {
-        CloseDevice(v36);
-        HIDWORD(v12) = v37[0];
-        HIDWORD(v13) = &v37[72];
-        HIDWORD(v14) = &unk_82042D58;
-        LODWORD(v12) = 287;
-        LODWORD(v14) = &v37[248];
-        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE, v14, v12, v13, v28, v29, v30, v31, v32, v33, v34, v35);
+        CloseDevice(fileHandle);
+        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE,
+            "Savegame '%s' has bad version %d (expected %d, build %s)",
+            header.filename, header.saveVersion, 287, header.buildNumber);
+        return 0;
     }
-    if (v37[276] > 1572864)
+    if ((unsigned int)header.bodySize > 1572864u)
     {
-        CloseDevice(v36);
-        HIDWORD(v15) = v37[276];
-        LODWORD(v15) = 1572864;
-        G_SaveError(
-            ERR_DROP,
-            SAVE_ERROR_CORRUPT_SAVE,
-            __SPAIR64__(&unk_82042CF0, (unsigned int)filename),
-            v15,
-            v16,
-            v28,
-            v29,
-            v30,
-            v31,
-            v32,
-            v33,
-            v34,
-            v35);
+        CloseDevice(fileHandle);
+        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE,
+            "Savegame '%s' body too large: %d > %d", filename, header.bodySize, 1572864);
+        return 0;
     }
-    if (BYTE1(v37[266]))
+    if (header.demoPlayback)
     {
         *save = &saveMemoryGlob.demo;
         SaveMemory_FreeMemory(&saveMemoryGlob.demo);
-        SaveMemory_AllocateHeapMemory(*save, v37[276]);
+        SaveMemory_AllocateHeapMemory(*save, header.bodySize);
     }
     else
     {
-        if (v37[276] > 1572864)
+        if ((unsigned int)header.bodySize > 1572864u)
         {
-            CloseDevice(v36);
-            HIDWORD(v17) = v37[276];
-            LODWORD(v17) = 1572864;
-            G_SaveError(
-                ERR_DROP,
-                SAVE_ERROR_CORRUPT_SAVE,
-                __SPAIR64__(&unk_82042C78, (unsigned int)filename),
-                v17,
-                v18,
-                v28,
-                v29,
-                v30,
-                v31,
-                v32,
-                v33,
-                v34,
-                v35);
+            CloseDevice(fileHandle);
+            G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE,
+                "Savegame '%s' body too large for game slot: %d > %d",
+                filename, header.bodySize, 1572864);
+            return 0;
         }
         *save = saveMemoryGlob.committedGameSave;
     }
-    v19 = ReadFromDevice((*save)->memFile.buffer, v37[276], v36);
-    if (v19 != v37[276])
+    int bytesRead = ReadFromDevice((*save)->memFile.buffer, header.bodySize, fileHandle);
+    if (bytesRead != header.bodySize)
     {
-        CloseDevice(v36);
-        HIDWORD(v20) = &unk_82042D9C;
-        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v20, v22, v21, v28, v29, v30, v31, v32, v33, v34, v35);
+        CloseDevice(fileHandle);
+        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE,
+            "Failed to read savegame body");
+        return 0;
     }
-    v23 = Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
-    Dvar_SetString(v23, (const char *)&v37[104]);
-    Com_Printf(10, "Save game build number: %s\n", (const char *)&v37[72]);
-    if (v37[1] != checksum)
+    const dvar_s *uiCampaign = Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
+    Dvar_SetString(uiCampaign, header.campaign);
+    Com_Printf(10, "Save game build number: %s\n", header.buildNumber);
+    if (header.gameCheckSum != checksum)
     {
-        CloseDevice(v36);
-        LODWORD(v24) = &v37[72];
-        HIDWORD(v24) = &unk_82042C18;
-        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE, v24, v26, v25, v28, v29, v30, v31, v32, v33, v34, v35);
+        CloseDevice(fileHandle);
+        G_SaveError(ERR_DROP, SAVE_ERROR_CORRUPT_SAVE,
+            "Savegame build '%s' checksum mismatch", header.buildNumber);
+        return 0;
     }
     (*save)->isWrittenToDevice = 0;
-    memcpy(&(*save)->header, v37, sizeof((*save)->header));
-    return v36;
-#else
-    return NULL;
-#endif
+    memcpy(&(*save)->header, &header, sizeof((*save)->header));
+    return fileHandle;
 }
 
 bool __cdecl SaveMemory_IsRecentlyLoaded()
@@ -739,13 +674,8 @@ SaveGame *__cdecl SaveMemory_GetLastCommittedSave()
 
 int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
 {
-    SaveBufferState saveState; // r11
-    int v4; // r29
-    int v5; // r30
-    int v6; // r3
-
     iassert(save);
-    saveState = save->saveState;
+    SaveBufferState saveState = save->saveState;
     if (saveState == AWAITING_COMMIT || saveState == COMMITTED)
     {
         if (save->memFile.bufferSize != save->header.bodySize)
@@ -759,15 +689,14 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 896, 0, "%s", "save->memFile.buffer");
         if (save->isWrittenToDevice)
             Com_Printf(10, "** Save was already written to a device; it is being saved again.  This is not an error.\n");
-        v4 = Sys_Milliseconds();
-        //v5 = WriteSaveToDevice(save->memFile.buffer, &save->header, save->suppressPlayerNotify); // KISAKSAVE
-        v6 = Sys_Milliseconds();
-        Com_Printf(10, "time to write: %i  ms\n", v6 - v4);
-        //if (!v5)
-        //    save->isWrittenToDevice = 1;
+        int t0 = Sys_Milliseconds();
+        int writeResult = WriteSaveToDevice(save->memFile.buffer, &save->header, save->suppressPlayerNotify);
+        int t1 = Sys_Milliseconds();
+        Com_Printf(10, "time to write: %i  ms\n", t1 - t0);
+        if (!writeResult)
+            save->isWrittenToDevice = 1;
         SaveMemory_FinalizeSaveCommit(save);
-        //return v5;
-        return 0;
+        return writeResult;
     }
     else
     {

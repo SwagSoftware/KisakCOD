@@ -193,7 +193,7 @@ void __cdecl ActorScr_SetSpecies(actor_s *pSelf, const actor_fields_s *pField)
         if (type == *g_AISpeciesNames[i])
         {
             pSelf->species = (AISpecies)i;
-            pSelf->ent->s.lerp.u.loopFx.period = (unsigned __int8)i;
+            pSelf->ent->s.lerp.u.actor.species = (unsigned __int8)i;
             G_DObjUpdate(pSelf->ent);
             return;
         }

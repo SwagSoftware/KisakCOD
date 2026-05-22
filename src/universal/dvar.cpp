@@ -11,6 +11,7 @@
 #include <win32/win_net.h>
 #include <devgui/devgui.h>
 #include "com_math.h"
+#include "memfile.h"        // Dvar_Save/LoadDvars
 
 #include <algorithm>
 
@@ -2971,130 +2972,97 @@ int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvar
 #ifdef KISAK_SP
 void Dvar_SaveDvars(MemoryFile *memFile, unsigned __int16 filter)
 {
-#if 0 // KISAKSAVE
-    char v7; // cr34
-    int v8; // r19
-    const char ***v9; // r20
-    const char **i; // r29
-    const char *v11; // r11
-    int v13; // r31
-    const char *v14; // r30
-    const char *v15; // r11
-    int v17; // r31
-    _DWORD v18[36]; // [sp+50h] [-90h] BYREF
+    InterlockedIncrement(&g_dvarCritSect.readCount);
+    while (g_dvarCritSect.writeCount)
+        NET_Sleep(0);
 
-    _R11 = &dword_83B19CF8;
-    do
+    int writeBuf;
+    for (int bucket = 0; bucket < 256; ++bucket)
     {
-        __asm
+        for (dvar_s *var = dvarHashTable[bucket]; var; var = var->hashNext)
         {
-            mfmsr     r9
-            mtmsree   r13
-            lwarx     r10, (dword_83B19CF8 - 0x83B19CF8), r11
-        }
-        ++_R10;
-        __asm
-        {
-            stwcx.r10, (dword_83B19CF8 - 0x83B19CF8), r11
-            mtmsree   r9
-        }
-    } while (!v7);
-    while (dword_83B19CFC)
-        ;
-    __lwsync();
-    v8 = 256;
-    v9 = (const char ***)dvarHashTable;
-    do
-    {
-        for (i = *v9; i; i = (const char **)i[17])
-        {
-            if (((_WORD)i[2] & filter) != 0)
+            if ((var->flags & filter) == 0)
+                continue;
+
+            iassert(var->name);
+
+            const char *namePtr = var->name;
+            while (*(unsigned char *)namePtr++)
+                ;
+            int nameLen = (int)(namePtr - var->name - 1);
+            if (nameLen >= 1024)
             {
-                if (!*i)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\universal\\dvar.cpp", 2286, 0, "%s", "var->name");
-                v11 = *i;
-                while (*(unsigned __int8 *)v11++)
-                    ;
-                v13 = v11 - *i - 1;
-                if (v13 >= 1024)
-                {
-                    Com_PrintError(16, "ERROR: Truncating dvar name '%s' in save game\n", *i);
-                    v13 = 1023;
-                }
-                v18[0] = v13;
-                MemFile_WriteData(memFile, 4, v18);
-                MemFile_WriteData(memFile, v13, *i);
-                v14 = Dvar_ValueToString((const dvar_s *)i[3], (DvarValue *)i[5]);
-                if (!v14)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\universal\\dvar.cpp",
-                        2297,
-                        0,
-                        "%s\n\t(var->name) = %s",
-                        "(stringValue)",
-                        *i);
-                v15 = v14;
-                while (*(unsigned __int8 *)v15++)
-                    ;
-                v17 = v15 - v14 - 1;
-                if (v17 >= 1024)
-                {
-                    Com_PrintError(16, "ERROR: Truncating dvar value '%s' for dvar '%s' in save game\n", v14, *i);
-                    v17 = 1023;
-                }
-                v18[0] = v17;
-                MemFile_WriteData(memFile, 4, v18);
-                MemFile_WriteData(memFile, v17, v14);
+                Com_PrintError(16, "ERROR: Truncating dvar name '%s' in save game\n", var->name);
+                nameLen = 1023;
             }
+            writeBuf = nameLen;
+            MemFile_WriteData(memFile, 4, &writeBuf);
+            MemFile_WriteData(memFile, nameLen, var->name);
+
+            const char *stringValue = Dvar_ValueToString(var, var->current);
+            iassert(stringValue);
+            const char *valuePtr = stringValue;
+            while (*(unsigned char *)valuePtr++)
+                ;
+            int valueLen = (int)(valuePtr - stringValue - 1);
+            if (valueLen >= 1024)
+            {
+                Com_PrintError(16, "ERROR: Truncating dvar value '%s' for dvar '%s' in save game\n", stringValue, var->name);
+                valueLen = 1023;
+            }
+            writeBuf = valueLen;
+            MemFile_WriteData(memFile, 4, &writeBuf);
+            MemFile_WriteData(memFile, valueLen, stringValue);
         }
-        --v8;
-        ++v9;
-    } while (v8);
-    v18[0] = -1;
-    MemFile_WriteData(memFile, 4, v18);
-    Sys_UnlockRead((FastCriticalSection *)&dword_83B19CF8);
-#endif 
+    }
+    writeBuf = -1;
+    MemFile_WriteData(memFile, 4, &writeBuf);
+
+    if (g_dvarCritSect.readCount <= 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\src\\universal\\../qcommon/threads_interlock.h",
+            76,
+            0,
+            "%s",
+            "critSect->readCount > 0");
+    InterlockedDecrement(&g_dvarCritSect.readCount);
 }
 
 void Dvar_LoadDvars(MemoryFile *memFile)
 {
-#if 0 // KISAKSAVE
-    int i; // r31
-    int v3; // r31
-    dvar_s *MalleableVar; // r3
-    DvarValue *v5; // r3
-    int v6; // [sp+50h] [-850h] BYREF
-    int v7[3]; // [sp+54h] [-84Ch] BYREF
-    DvarValue v8; // [sp+60h] [-840h] BYREF
-    char v9[1024]; // [sp+70h] [-830h] BYREF
-    char v10[1072]; // [sp+470h] [-430h] BYREF
+    int nameLen;
+    int valueLenBuf[3];
+    DvarValue parsedValue;
+    char valueBuf[1024];
+    char nameBuf[1072];
 
-    MemFile_ReadData(memFile, 4, &v6);
-    for (i = v6; v6 >= 0; i = v6)
+    MemFile_ReadData(memFile, 4, (unsigned char *)&nameLen);
+    while (nameLen >= 0)
     {
-        if (i >= 1024)
+        if (nameLen >= 1024)
             Com_Error(ERR_DROP, "SAVE_STRING_MAX_SIZE exceeded in save game");
-        MemFile_ReadData(memFile, i, v10);
-        v10[i] = 0;
-        MemFile_ReadData(memFile, 4, v7);
-        v3 = v7[0];
-        if (v7[0] >= 1024)
+        MemFile_ReadData(memFile, nameLen, (unsigned char *)nameBuf);
+        nameBuf[nameLen] = 0;
+
+        MemFile_ReadData(memFile, 4, (unsigned char *)valueLenBuf);
+        int valueLen = valueLenBuf[0];
+        if (valueLen >= 1024)
             Com_Error(ERR_DROP, "SAVE_STRING_MAX_SIZE exceeded in save game");
-        MemFile_ReadData(memFile, v3, v9);
-        v9[v3] = 0;
-        MalleableVar = Dvar_FindMalleableVar(v10);
-        if (MalleableVar)
+        MemFile_ReadData(memFile, valueLen, (unsigned char *)valueBuf);
+        valueBuf[valueLen] = 0;
+
+        dvar_s *malleableVar = Dvar_FindMalleableVar(nameBuf);
+        if (malleableVar)
         {
-            v5 = Dvar_StringToValue(&v8, MalleableVar->type, (const DvarLimits *)MalleableVar->domain.enumeration.strings, v9);
-            Dvar_SetVariant((dvar_s *)v5->integer, (DvarValue *)LODWORD(v5->vector[2]), SLODWORD(v5->vector[3]));
+            Dvar_StringToValue(&parsedValue, malleableVar->type, malleableVar->domain, valueBuf);
+            Dvar_SetVariant(malleableVar, parsedValue, DVAR_SOURCE_EXTERNAL);
         }
         else
         {
-            Dvar_RegisterString(v10, v9, 0x4000u, "External Dvar");
+            Dvar_RegisterString(nameBuf, valueBuf, 0x4000u, "External Dvar");
         }
-        MemFile_ReadData(memFile, 4, &v6);
+        MemFile_ReadData(memFile, 4, (unsigned char *)&nameLen);
     }
-#endif
 }
 
 #endif // KISAK_SP

@@ -20,134 +20,85 @@ SentientGlobals glob;
 
 sentient_s *__cdecl Sentient_Alloc()
 {
-    sentient_s *sentients; // r11
-    int v1; // r10
-    sentient_s *i; // r31
-    sentient_s *result; // r3
+    iassert(level.sentients != NULL);
 
-    sentients = level.sentients;
-    if (!level.sentients)
+    for ( int i = 0; i < MAX_SENTIENTS; ++i )
     {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 39, 0, "%s", "level.sentients != NULL");
-        sentients = level.sentients;
-    }
-    v1 = 0;
-    for (i = sentients; i->inuse; ++i)
-    {
-        if (++v1 >= 33)
+        sentient_s *pSentient = &level.sentients[i];
+        if ( !pSentient->inuse )
         {
-            Com_DPrintf(15, "Sentient allocation failed\n");
-            return 0;
+            memset(pSentient, 0, sizeof(sentient_s));
+            pSentient->inuse = 1;
+            return pSentient;
         }
     }
-    memset(i, 0, sizeof(sentient_s));
-    result = i;
-    i->inuse = 1;
-    return result;
+
+    Com_DPrintf(15, "Sentient allocation failed\n");
+    return 0;
 }
 
 void __cdecl Sentient_DissociateSentient(sentient_s *self, sentient_s *other, team_t eOtherTeam)
 {
-    actor_s *actor; // r30
-    gclient_s *client; // r11
-    int *meleeAttackerSpot; // r11
-    int v9; // r9
+    iassert(self);
+    iassert(self != other);
+    iassert(other);
+    iassert(other->eTeam == TEAM_DEAD);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 156, 0, "%s", "self");
-    if (self == other)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 157, 0, "%s", "self != other");
-    if (!other)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 158, 0, "%s", "other");
-    if (other->eTeam != TEAM_DEAD)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 159, 0, "%s", "other->eTeam == TEAM_DEAD");
-    actor = self->ent->actor;
+    actor_s *actor = self->ent->actor;
     if (actor)
-        Actor_DissociateSentient(self->ent->actor, other, eOtherTeam);
-    client = self->ent->client;
+        Actor_DissociateSentient(actor, other, eOtherTeam);
+
+    gclient_s *client = self->ent->client;
     if (client && client->ps.throwBackGrenadeOwner == other->ent->s.number)
         client->ps.throwBackGrenadeOwner = ENTITYNUM_WORLD;
+
     if (self->targetEnt.isDefined() && self->targetEnt.ent()->sentient == other && actor)
         actor->lastEnemySightPosValid = 0;
-    meleeAttackerSpot = self->meleeAttackerSpot;
-    v9 = 4;
-    do
+
+    for (int i = 0; i < 4; ++i)
     {
-        if (*meleeAttackerSpot)
+        if (self->meleeAttackerSpot[i])
         {
-            if (*meleeAttackerSpot == other->ent->s.number)
-                *meleeAttackerSpot = 0;
+            if (self->meleeAttackerSpot[i] == other->ent->s.number)
+                self->meleeAttackerSpot[i] = 0;
         }
-        --v9;
-        ++meleeAttackerSpot;
-    } while (v9);
+    }
 }
 
 void __cdecl Sentient_GetOrigin(const sentient_s *self, float *vOriginOut)
 {
-    gentity_s *ent; // r11
-
     iassert(self);
     iassert(self->ent);
     iassert(self->ent->actor || self->ent->client);
     iassert(vOriginOut);
 
-    ent = self->ent;
-    vOriginOut[0] = ent->r.currentOrigin[0];
-    vOriginOut[1] = ent->r.currentOrigin[1];
-    vOriginOut[2] = ent->r.currentOrigin[2];
+    Vec3Copy(self->ent->r.currentOrigin, vOriginOut);
 }
 
 void __cdecl Sentient_GetForwardDir(sentient_s *self, float *vDirOut)
 {
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 215, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 216, 0, "%s", "self->ent");
-    if (!self->ent->actor && !self->ent->client)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp",
-            217,
-            0,
-            "%s",
-            "self->ent->actor || self->ent->client");
-    if (!vDirOut)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 218, 0, "%s", "vDirOut");
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->ent->actor || self->ent->client);
+    iassert(vDirOut);
 
-    YawVectors(self->ent->r.currentAngles[1], vDirOut, NULL);
+    YawVectors(self->ent->r.currentAngles[YAW], vDirOut, NULL);
 }
 
 void __cdecl Sentient_GetVelocity(const sentient_s *self, float *vVelOut)
 {
-    actor_s *actor; // r11
-    gclient_s *client; // r11
+    iassert(self);
+    iassert(self->ent);
+    iassert(self->ent->actor || self->ent->client);
+    iassert(vVelOut);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 233, 0, "%s", "self");
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 234, 0, "%s", "self->ent");
-    if (!self->ent->actor && !self->ent->client)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp",
-            235,
-            0,
-            "%s",
-            "self->ent->actor || self->ent->client");
-    if (!vVelOut)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 236, 0, "%s", "vVelOut");
-    actor = self->ent->actor;
-    if (actor)
+    if (self->ent->actor)
     {
-        *vVelOut = actor->Physics.vVelocity[0];
-        vVelOut[1] = actor->Physics.vVelocity[1];
-        vVelOut[2] = actor->Physics.vVelocity[2];
+        Vec3Copy(self->ent->actor->Physics.vVelocity, vVelOut);
     }
     else
     {
-        client = self->ent->client;
-        *vVelOut = client->ps.velocity[0];
-        vVelOut[1] = client->ps.velocity[1];
-        vVelOut[2] = client->ps.velocity[2];
+        Vec3Copy(self->ent->client->ps.velocity, vVelOut);
     }
 }
 
@@ -191,16 +142,13 @@ void __cdecl Sentient_GetCentroid(sentient_s *self, float *vCentroidOut)
 
 void __cdecl Sentient_GetEyePosition(const sentient_s *self, float *vEyePosOut)
 {
-    actor_s *actor; // r3
-
     iassert(self);
     iassert(self->ent);
     iassert(self->ent->actor || self->ent->client);
     iassert(vEyePosOut);
 
-    actor = self->ent->actor;
-    if (actor)
-        Actor_GetEyePosition(actor, vEyePosOut);
+    if (self->ent->actor)
+        Actor_GetEyePosition(self->ent->actor, vEyePosOut);
     else
         G_GetPlayerViewOrigin(&self->ent->client->ps, vEyePosOut);
 }
@@ -825,53 +773,29 @@ void __cdecl Sentient_Dissociate(sentient_s *self)
 
 void __cdecl Sentient_Free(sentient_s *sentient)
 {
-    sentient_s *sentients; // r11
-    gentity_s *ent; // r28
-    int i; // r31
-    actor_s *v5; // r3
+    iassert(sentient);
+    iassert(level.sentients);
+    iassert(sentient >= level.sentients && sentient < level.sentients + MAX_SENTIENTS);
+    iassert(&level.sentients[sentient - level.sentients] == sentient);
+    iassert(sentient->ent);
+    iassert(sentient->ent->actor == NULL);
 
-    if (!sentient)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 73, 0, "%s", "sentient");
-    sentients = level.sentients;
-    if (!level.sentients)
+    for (int i = 0; i < MAX_ACTORS; ++i)
     {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 74, 0, "%s", "level.sentients");
-        sentients = level.sentients;
+        actor_s *pActor = &level.actors[i];
+        if (pActor->inuse)
+        {
+            if (pActor->pPileUpEnt == sentient->ent)
+                Actor_ClearPileUp(pActor);
+        }
     }
-    if (sentient < sentients || sentient >= &sentients[33])
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp",
-            75,
-            0,
-            "%s",
-            "sentient >= level.sentients && sentient < level.sentients + MAX_SENTIENTS");
-        sentients = level.sentients;
-    }
-    if (&sentients[sentient - sentients] != sentient)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp",
-            76,
-            0,
-            "%s",
-            "&level.sentients[sentient - level.sentients] == sentient");
-    if (!sentient->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 77, 0, "%s", "sentient->ent");
-    if (sentient->ent->actor)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\sentient.cpp", 78, 0, "%s", "sentient->ent->actor == NULL");
-    ent = sentient->ent;
-    for (i = 0; i < 32; ++i)
-    {
-        v5 = &level.actors[i];
-        if (level.actors[i].inuse && v5->pPileUpEnt == ent)
-            Actor_ClearPileUp(v5);
-    }
+
     G_FreeEntityRefs(sentient->ent);
     Sentient_Dissociate(sentient);
     sentient->ent->sentient = 0;
     SentientHandleDissociate(sentient);
     Scr_FreeSentientFields(sentient);
-    memset(sentient, 240, sizeof(sentient_s));
+    memset(sentient, 0xF0, sizeof(sentient_s));
     sentient->inuse = 0;
 }
 

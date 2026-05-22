@@ -1398,7 +1398,8 @@ void __cdecl G_CheckReloadStatus()
             G_LoadNextMap();
         }
     }
-    if (level.absoluteReloadDelayTime && level.absoluteReloadDelayTime - Sys_Milliseconds() < 0)
+
+    if (level.absoluteReloadDelayTime && (int)(level.absoluteReloadDelayTime - Sys_Milliseconds()) < 0)
     {
         if (!g_reloading->current.integer)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_main.cpp", 1833, 0, "%s", "g_reloading->current.integer");

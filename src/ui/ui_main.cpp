@@ -20,6 +20,7 @@
 #include <universal/com_files.h>
 #include <universal/q_parse.h>
 #include <database/database.h>
+#include <qcommon/com_playerprofile.h>
 
 const dvar_t *ui_showList;
 const dvar_t *ui_isSaving;
@@ -41,6 +42,10 @@ const dvar_t *ui_savegame;
 const dvar_t *ui_drawCrosshairNames;
 const dvar_t *ui_borderLowLightScale;
 const dvar_t *ui_campaign;
+
+const dvar_t *ui_playerProfileCount;
+const dvar_t *ui_playerProfileSelected;
+const dvar_t *ui_playerProfileNameNew;
 
 static char g_mapname[64];
 static char g_gametype[64];
@@ -88,6 +93,23 @@ void UI_RegisterDvars()
         "Meant to be set by script and referenced by menu files to determine if minimap should be drawn.");
     ui_isSaving = Dvar_RegisterBool("ui_isSaving", 0, 0x40u, "True if the game is currently saving");
     ui_saveMessageMinTime = Dvar_RegisterFloat("ui_saveMessageMinTime", 1.0, 0.0, 3.0, 0, "Minumum time for the save message to be on screen in seconds");
+    ui_playerProfileCount = Dvar_RegisterInt(
+        "ui_playerProfileCount",
+        0,
+        0x80000000,
+        0x7FFFFFFF,
+        0x40u,
+        "Number of player profiles");
+    ui_playerProfileSelected = Dvar_RegisterString(
+        "ui_playerProfileSelected",
+        "",
+        0x40u,
+        "Currently selected player profile");
+    ui_playerProfileNameNew = Dvar_RegisterString(
+        "ui_playerProfileNameNew",
+        "",
+        0,
+        "New player profile");
     ui_borderLowLightScale = Dvar_RegisterFloat("ui_borderLowLightScale", 0.6f, 0.0, 1.0, 0, "Scales the border color for the lowlight color on certain UI borders");
     ui_cinematicsTimestamp = Dvar_RegisterBool("ui_cinematicsTimestamp", 0, 0, "Shows cinematics timestamp on subtitle UI elements.");
 }
@@ -982,10 +1004,11 @@ void __cdecl UI_OverrideCursorPos(int localClientNum, itemDef_s *item)
 
 int __cdecl UI_FeederCount(int localClientNum, float feederID)
 {
-    //if (feederID == 30.0)
-    //    return LB_FeederCount(localClientNum);
-    //else
-        return 0;
+    if (feederID == 16.0f)
+        return uiInfo.savegameCount;
+    if (feederID == 24.0f)
+        return uiInfo.playerProfileCount;
+    return 0;
 }
 
 const char *__cdecl UI_FeederItemText(
@@ -996,11 +1019,35 @@ const char *__cdecl UI_FeederItemText(
     unsigned int column,
     Material **handle)
 {
-    //*a7 = 0;
-    //if (feederID == 30.0)
-    //    return (char *)LB_FeederItemText(localClientNum, column, (int)handle, a7);
-    //else
-    //    return "";
+    *handle = 0;
+
+    if (feederID == 16.0f)
+    {
+        if (index < 0 || index >= uiInfo.savegameCount)
+            return "";
+        int slotIdx = uiInfo.savegameStatus.displaySavegames[index];
+        if (slotIdx < 0 || slotIdx >= uiInfo.savegameCount)
+            return "";
+        const SavegameInfo &slot = uiInfo.savegameList[slotIdx];
+        switch (column)
+        {
+        case 0: return slot.savegameName ? slot.savegameName : "";
+        case 1: return slot.mapName      ? slot.mapName      : "";
+        case 2: return slot.date         ? slot.date         : "";
+        case 3: return slot.time         ? slot.time         : "";
+        default: return slot.savegameName ? slot.savegameName : "";
+        }
+    }
+
+    if (feederID == 24.0f)
+    {
+        if (index < 0 || index >= uiInfo.playerProfileCount)
+            return "";
+        int nameIdx = uiInfo.playerProfileStatus.displayProfile[index];
+        if (nameIdx < 0 || nameIdx >= uiInfo.playerProfileCount)
+            return "";
+        return uiInfo.playerProfileName[nameIdx] ? uiInfo.playerProfileName[nameIdx] : "";
+    }
 
     return "";
 }
@@ -1031,8 +1078,33 @@ void __cdecl UI_FeederItemColor(
 
 void __cdecl UI_FeederSelection(int localClientNum, float feederID, int index)
 {
-    //if (feederID == 30.0)
-    //    LB_FeederSelection(localClientNum, a4);
+    if (feederID == 16.0f)
+    {
+        if (index < 0 || index >= uiInfo.savegameCount)
+            return;
+        int slotIdx = uiInfo.savegameStatus.displaySavegames[index];
+        if (slotIdx < 0 || slotIdx >= uiInfo.savegameCount)
+            return;
+        const char *file = uiInfo.savegameList[slotIdx].savegameFile;
+        if (!file)
+            return;
+        I_strncpyz(uiInfo.savegameName, file, sizeof(uiInfo.savegameName));
+        Dvar_SetString((dvar_s *)ui_savegame, (char *)file);
+        return;
+    }
+
+    if (feederID == 24.0f)
+    {
+        if (index < 0 || index >= uiInfo.playerProfileCount)
+            return;
+        int nameIdx = uiInfo.playerProfileStatus.displayProfile[index];
+        if (nameIdx < 0 || nameIdx >= uiInfo.playerProfileCount)
+            return;
+        const char *name = uiInfo.playerProfileName[nameIdx];
+        if (name)
+            Dvar_SetString((dvar_s *)ui_playerProfileSelected, (char *)name);
+        return;
+    }
 }
 
 const char *__cdecl UI_GetSavegameInfo()
@@ -1786,86 +1858,462 @@ void __cdecl UI_SavegameSort(int column, int force)
     }
 }
 
+void __cdecl UI_LoadSavegames(int /*unused*/)
+{
+    int saveCount = 0;
+    const char **saveFiles = FS_ListFiles("save", "svg", FS_LIST_ALL, &saveCount);
+
+    uiInfo.savegameCount = 0;
+    if (saveFiles)
+    {
+        for (int i = 0; i < saveCount && uiInfo.savegameCount < 512; ++i)
+        {
+            const char *fileName = saveFiles[i];
+            if (!fileName || !*fileName)
+                continue;
+
+            char nameBuf[64];
+            I_strncpyz(nameBuf, fileName, sizeof(nameBuf));
+            size_t len = strlen(nameBuf);
+            if (len >= 4 && !I_stricmp(nameBuf + len - 4, ".svg"))
+                nameBuf[len - 4] = 0;
+
+            int idx = uiInfo.savegameCount++;
+            uiInfo.savegameList[idx].savegameFile = String_Alloc(nameBuf);
+            uiInfo.savegameList[idx].savegameName = String_Alloc(nameBuf);
+            uiInfo.savegameList[idx].imageName = 0;
+            uiInfo.savegameList[idx].mapName = 0;
+            uiInfo.savegameList[idx].savegameInfoText = 0;
+            uiInfo.savegameList[idx].time = 0;
+            uiInfo.savegameList[idx].date = 0;
+            memset(&uiInfo.savegameList[idx].tm, 0, sizeof(uiInfo.savegameList[idx].tm));
+            uiInfo.savegameStatus.displaySavegames[idx] = idx;
+        }
+        FS_FreeFileList(saveFiles);
+    }
+
+    if (uiInfo.savegameCount)
+    {
+        uiInfo.savegameStatus.sortDir = 1;
+        UI_SavegameSort(uiInfo.savegameStatus.sortKey, 1);
+    }
+    else
+    {
+        Dvar_SetString(ui_savegame, "");
+        uiInfo.savegameName[0] = 0;
+        strcpy(uiInfo.savegameInfo, "EXE_NOSAVEGAMES");
+    }
+}
+
+void __cdecl UI_DelSavegame()
+{
+    if (uiInfo.savegameCount <= 0 || !uiInfo.savegameName[0])
+        return;
+
+    int displayIdx = UI_SavegameIndexFromFilename(uiInfo.savegameName);
+    if (displayIdx < 0)
+        return;
+    int slotIdx = uiInfo.savegameStatus.displaySavegames[displayIdx];
+    if (slotIdx < 0 || slotIdx >= uiInfo.savegameCount)
+        return;
+
+    const char *file = uiInfo.savegameList[slotIdx].savegameFile;
+    if (!file)
+        return;
+
+    char path[64];
+    Com_sprintf(path, sizeof(path), "save/%s.svg", file);
+    if (FS_Delete(path))
+    {
+        Com_Printf(13, "Deleted savegame: %s.svg\n", file);
+        Com_sprintf(path, sizeof(path), "save/%s.jpg", file);
+        FS_Delete(path);
+        UI_LoadSavegames(0);
+    }
+    else
+    {
+        Com_Printf(13, "Unable to delete savegame: %s.svg\n", file);
+    }
+}
+
+int __cdecl UI_GetPlayerProfileListIndexFromName(const char *name)
+{
+    unsigned int nameIndex; // [esp+4h] [ebp-8h]
+    int profileIndex; // [esp+8h] [ebp-4h]
+
+    uiInfo_s *uiInfo = &::uiInfo;
+    iassert(name);
+
+    for (profileIndex = 0; profileIndex < uiInfo->playerProfileCount; ++profileIndex)
+    {
+        nameIndex = uiInfo->playerProfileStatus.displayProfile[profileIndex];
+        bcassert(nameIndex, uiInfo->playerProfileCount);
+
+        if (!I_stricmp(name, uiInfo->playerProfileName[nameIndex]))
+            return profileIndex;
+    }
+
+    return -1;
+}
+
+static int UI_PlayerProfilesQsortCompare(const void *a, const void *b)
+{
+    int result; // [esp+0h] [ebp-10h]
+
+    unsigned int *arg1 = (unsigned int *)a;
+    unsigned int *arg2 = (unsigned int *)b;
+
+    iassert(arg1);
+    iassert(arg2);
+
+    if (*arg1 == *arg2)
+        return 0;
+
+    result = I_stricmp(uiInfo.playerProfileName[*arg1], uiInfo.playerProfileName[*arg2]);
+    if (uiInfo.playerProfileStatus.sortDir)
+        return result;
+    else
+        return -result;
+}
+
+void __cdecl UI_SelectPlayerProfileIndex(int index)
+{
+    for (int menuIndex = uiInfo.uiDC.openMenuCount - 1; menuIndex >= 0; --menuIndex)
+    {
+        if (Window_IsVisible(0, &uiInfo.uiDC.menuStack[menuIndex]->window))
+            Menu_SetFeederSelection(&uiInfo.uiDC, uiInfo.uiDC.menuStack[menuIndex], 24, index, 0);
+    }
+}
+
+void __cdecl UI_SortPlayerProfiles(int selectIndex)
+{
+    if (uiInfo.playerProfileCount)
+    {
+        for (int profileIndex = 0; profileIndex < uiInfo.playerProfileCount; ++profileIndex)
+            uiInfo.playerProfileStatus.displayProfile[profileIndex] = profileIndex;
+        qsort(
+            uiInfo.playerProfileStatus.displayProfile,
+            uiInfo.playerProfileCount,
+            sizeof(int),
+            UI_PlayerProfilesQsortCompare);
+        UI_SelectPlayerProfileIndex(selectIndex);
+    }
+}
+
+void UI_AddPlayerProfiles()
+{
+    const char **profileList; // [esp+0h] [ebp-10h]
+    int profileCount; // [esp+4h] [ebp-Ch] BYREF
+    uiInfo_s *uiInfo; // [esp+8h] [ebp-8h]
+    int profileIndex; // [esp+Ch] [ebp-4h]
+
+    uiInfo = &::uiInfo;
+    uiInfo->playerProfileCount = 0;
+    uiInfo->playerProfileStatus.sortDir = 1;
+    profileList = FS_ListFiles("profiles", "/", FS_LIST_ALL, &profileCount);
+
+    for (profileIndex = 0; profileIndex < profileCount; ++profileIndex)
+    {
+        uiInfo->playerProfileName[uiInfo->playerProfileCount++] = String_Alloc(profileList[profileIndex]);
+    }
+
+    FS_FreeFileList(profileList);
+    UI_SortPlayerProfiles(0);
+    Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
+}
+
+void UI_CreatePlayerProfile()
+{
+    char name[32]; // [esp+14h] [ebp-2Ch] BYREF
+    int curSelected; // [esp+38h] [ebp-8h]
+    int profileIndex; // [esp+3Ch] [ebp-4h]
+
+    if (strlen(ui_playerProfileNameNew->current.string))
+    {
+        I_strncpyz(name, (char *)ui_playerProfileNameNew->current.integer, 32);
+        Dvar_SetString((dvar_s *)ui_playerProfileNameNew, (char *)"");
+
+        uiInfo_s *uiInfo = &::uiInfo;
+        if (uiInfo->playerProfileCount == 64)
+        {
+            Menus_OpenByName(&uiInfo->uiDC, "profile_create_too_many_popmenu");
+        }
+        else
+        {
+            for (profileIndex = 0; profileIndex < uiInfo->playerProfileCount; ++profileIndex)
+            {
+                if (!I_stricmp(name, uiInfo->playerProfileName[profileIndex]))
+                {
+                    Menus_OpenByName(&uiInfo->uiDC, "profile_exists_popmenu");
+                    return;
+                }
+            }
+            if (Com_NewPlayerProfile(name))
+            {
+                uiInfo->playerProfileName[uiInfo->playerProfileCount++] = String_Alloc(name);
+                UI_SortPlayerProfiles(0);
+                Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
+                curSelected = UI_GetPlayerProfileListIndexFromName(name);
+                bcassert(curSelected, uiInfo->playerProfileCount);
+                UI_SelectPlayerProfileIndex(curSelected);
+            }
+            else
+            {
+                Menus_OpenByName(&uiInfo->uiDC, "profile_create_fail_popmenu");
+            }
+        }
+    }
+}
+
+void UI_DeletePlayerProfile()
+{
+    unsigned int curSelected; // [esp+8h] [ebp-8h]
+    unsigned int nameIndex; // [esp+Ch] [ebp-4h]
+
+    uiInfo_s *uiInfo = &::uiInfo;
+
+    if (uiInfo->playerProfileCount)
+    {
+        iassert(ui_playerProfileSelected);
+        if (Com_DeletePlayerProfile(ui_playerProfileSelected->current.string))
+        {
+            curSelected = UI_GetPlayerProfileListIndexFromName(ui_playerProfileSelected->current.string);
+            bcassert(curSelected, uiInfo->playerProfileCount);
+
+            nameIndex = uiInfo->playerProfileStatus.displayProfile[curSelected];
+            bcassert(nameIndex, uiInfo->playerProfileCount);
+            iassert(!I_stricmp(uiInfo->playerProfileName[nameIndex], ui_playerProfileSelected->current.string));
+
+            if (--uiInfo->playerProfileCount)
+            {
+                uiInfo->playerProfileName[nameIndex] = uiInfo->playerProfileName[uiInfo->playerProfileCount];
+                if (curSelected == uiInfo->playerProfileCount)
+                    --curSelected;
+                UI_SortPlayerProfiles(curSelected);
+            }
+            else
+            {
+                Dvar_SetString((dvar_s *)ui_playerProfileSelected, (char *)"");
+            }
+            Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
+        }
+        else
+        {
+            Menus_OpenByName(&uiInfo->uiDC, "profile_delete_fail_popmenu");
+        }
+    }
+}
+
+void __cdecl UI_LoadPlayerProfile(int localClientNum)
+{
+    iassert(ui_playerProfileSelected);
+
+    if (com_playerProfile
+        && !I_stricmp(ui_playerProfileSelected->current.string, com_playerProfile->current.string))
+        return;
+
+    if (ui_playerProfileSelected->current.string[0])
+        Com_ChangePlayerProfile(localClientNum, (char *)ui_playerProfileSelected->current.string);
+}
+
+void UI_SelectActivePlayerProfile()
+{
+    if (!com_playerProfile)
+        return;
+
+    int selIndex = UI_GetPlayerProfileListIndexFromName(com_playerProfile->current.string);
+    if (selIndex >= 0 && selIndex < uiInfo.playerProfileCount)
+        UI_SelectPlayerProfileIndex(selIndex);
+}
+
 void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char *actualScript)
 {
-    int v6; // r31
-    char *v7; // r11
-    int v8; // ctr
-    const char *VariantString; // r3
-    int v10; // r3
-    int Int; // r3
-    char v12[16]; // [sp+50h] [-14B0h] BYREF
-    char v13[1024]; // [sp+60h] [-14A0h] BYREF
-    char v14[128]; // [sp+460h] [-10A0h] BYREF
-    char v15[32]; // [sp+4E0h] [-1020h] BYREF
-    char v16[1024]; // [sp+8E0h] [-C20h] BYREF
-    char v17[1024]; // [sp+CE0h] [-820h] BYREF
-    char v18[1056]; // [sp+10E0h] [-420h] BYREF
+    char v10[16];                  // mis_difficulty char scratch
+    char missionDifficulty[128];
+    char v15[32];                  // small parse scratch
+    char out[1024];                // parsed script name
+    char dvarName[1024];           // openMenuOnDvar scratch
+    char testValue[1024];          // openMenuOnDvar scratch
+    char menuName[1056];           // openMenuOnDvar scratch
 
-    if (!String_Parse(args, v13, 1024))
+    if (!String_Parse(args, out, sizeof(out)))
         return;
-    if (!I_stricmp(v13, "clearError"))
+
+    if (!I_stricmp(out, "clearError"))
     {
         Dvar_SetStringByName("com_errorMessage", "");
         Dvar_SetBoolByName("com_isNotice", 0);
         return;
     }
-    if (!I_stricmp(v13, "loadMissionDifficultyOffset"))
+
+    if (!I_stricmp(out, "loadMissionDifficultyOffset"))
     {
-        //if (String_Parse(args, v15, 1024))
         if (String_Parse(args, v15, sizeof(v15)))
         {
-            v6 = atol(v15);
-            v7 = v14;
-            v8 = 16;
-            do
-            {
-                *(_QWORD *)v7 = 0x1000000000LL;
-                v7 += 8;
-                --v8;
-            } while (v8);
-            VariantString = Dvar_GetVariantString("mis_difficulty");
-            I_strncpyz(v14, VariantString, 128);
-            if (v6 >= 128)
+            int offset = atol(v15);
+            memset(missionDifficulty, 0, sizeof(missionDifficulty));
+            const char *VariantString = Dvar_GetVariantString("mis_difficulty");
+            I_strncpyz(missionDifficulty, VariantString, sizeof(missionDifficulty));
+            if (offset >= (int)sizeof(missionDifficulty))
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\ui\\ui_main.cpp",
                     1700,
                     0,
                     "%s",
                     "offset < static_cast< int >( sizeof( missionDifficulty ) )");
-            I_strncpyz(v12, &v14[v6], 2);
-            Dvar_SetStringByName("ui_level", v12);
+            I_strncpyz(v10, &missionDifficulty[offset], 2);
+            Dvar_SetStringByName("ui_level", v10);
         }
         return;
     }
-    if (!I_stricmp(v13, "playerstart"))
+
+    if (!I_stricmp(out, "LoadSaveGames"))
+    {
+        UI_LoadSavegames(0);
+        return;
+    }
+
+    if (!I_stricmp(out, "Loadgame"))
+    {
+        if (uiInfo.savegameName[0])
+        {
+            int displayIdx = UI_SavegameIndexFromFilename(uiInfo.savegameName);
+            if (displayIdx >= 0)
+            {
+                int slotIdx = uiInfo.savegameStatus.displaySavegames[displayIdx];
+                if (slotIdx >= 0 && slotIdx < uiInfo.savegameCount)
+                {
+                    Cbuf_AddText(0, va("loadgame %s\n", uiInfo.savegameList[slotIdx].savegameFile));
+                    Menus_CloseAll(&uiInfo.uiDC);
+                }
+            }
+        }
+        return;
+    }
+
+    if (!I_stricmp(out, "Savegame"))
+    {
+        if (uiInfo.savegameName[0]
+            && UI_SavegameIndexFromFilename(uiInfo.savegameName) >= 0)
+        {
+            Menus_OpenByName(&uiInfo.uiDC, "save_overwrite_popmenu");
+        }
+        else
+        {
+            Menus_OpenByName(&uiInfo.uiDC, "save_name_popmenu");
+        }
+        return;
+    }
+
+    if (!I_stricmp(out, "forcesave"))
+    {
+        Menus_CloseAll(&uiInfo.uiDC);
+        Cbuf_AddText(0, "savegame_lastcommit\n");
+        return;
+    }
+
+    if (!I_stricmp(out, "DelSavegame"))
+    {
+        UI_DelSavegame();
+        return;
+    }
+
+    if (!I_stricmp(out, "SavegameSort"))
+    {
+        char column[16];
+        if (String_Parse(args, column, sizeof(column)))
+        {
+            int col = atol(column);
+            if (uiInfo.savegameStatus.sortKey == col)
+                uiInfo.savegameStatus.sortDir = !uiInfo.savegameStatus.sortDir;
+            UI_SavegameSort(col, 1);
+        }
+        return;
+    }
+
+
+    if (!I_stricmp(out, "addPlayerProfiles"))
+    {
+        UI_AddPlayerProfiles();
+        return;
+    }
+
+    if (!I_stricmp(out, "sortPlayerProfiles"))
+    {
+        uiInfo.playerProfileStatus.sortDir = !uiInfo.playerProfileStatus.sortDir;
+        UI_SortPlayerProfiles(0);
+        return;
+    }
+
+    if (!I_stricmp(out, "selectActivePlayerProfile"))
+    {
+        UI_SelectActivePlayerProfile();
+        return;
+    }
+
+    if (!I_stricmp(out, "createPlayerProfile"))
+    {
+        UI_CreatePlayerProfile();
+        return;
+    }
+
+    if (!I_stricmp(out, "deletePlayerProfile"))
+    {
+        UI_DeletePlayerProfile();
+        return;
+    }
+
+    if (!I_stricmp(out, "loadPlayerProfile"))
+    {
+        UI_LoadPlayerProfile(localClientNum);
+        return;
+    }
+
+    if (!I_stricmp(out, "playerstart"))
     {
         UI_PlayerStart();
         return;
     }
-    if (!I_stricmp(v13, "Quit"))
+
+    if (!I_stricmp(out, "LoadMods") || !I_stricmp(out, "RunMod"))
     {
-        v10 = CL_ControllerIndexFromClientNum(0);
-        Cmd_ExecuteSingleCommand(0, v10, (char*)"quit");
+        Com_DPrintf(13, "UI: %s ignored — SP has no mod list infrastructure\n", out);
         return;
     }
-    if (!I_stricmp(v13, "Controls"))
+
+    if (!I_stricmp(out, "ClearMods"))
+    {
+        Dvar_SetStringByName("fs_game", "");
+        Cbuf_AddText(0, "vid_restart\n");
+        return;
+    }
+
+    if (!I_stricmp(out, "Quit"))
+    {
+        int controllerIndex = CL_ControllerIndexFromClientNum(0);
+        Cmd_ExecuteSingleCommand(0, controllerIndex, (char *)"quit");
+        return;
+    }
+
+    if (!I_stricmp(out, "Controls"))
     {
         Dvar_SetIntByName("cl_paused", 1);
-        Key_SetCatcher(0, 16);
+        CL_SetActive();
         Menus_CloseAll(&uiInfo.uiDC);
         Menus_OpenByName(&uiInfo.uiDC, "setup_menu2");
         return;
     }
-    if (!I_stricmp(v13, "Leave"))
+
+    if (!I_stricmp(out, "Leave"))
     {
         Cbuf_AddText(0, "disconnect\n");
-        Key_SetCatcher(0, 16);
+        CL_SetActive();
         Menus_CloseAll(&uiInfo.uiDC);
         Menus_OpenByName(&uiInfo.uiDC, "main");
         return;
     }
-    if (!I_stricmp(v13, "closeingame"))
+
+    if (!I_stricmp(out, "closeingame"))
     {
         Key_RemoveCatcher(localClientNum, -17);
         Key_ClearStates(localClientNum);
@@ -1873,70 +2321,76 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
         Menus_CloseAll(&uiInfo.uiDC);
         return;
     }
-    if (!I_stricmp(v13, "update"))
+
+    if (!I_stricmp(out, "update"))
     {
-        if (String_Parse(args, v15, 1024))
+        if (String_Parse(args, v15, sizeof(v15)))
             UI_Update(v15);
         return;
     }
-    if (!I_stricmp(v13, "startSingleplayer") || !I_stricmp(v13, "startMultiplayer"))
+
+    if (!I_stricmp(out, "startSingleplayer") || !I_stricmp(out, "startMultiplayer"))
     {
         Cbuf_AddText(0, "startMultiplayer\n");
         return;
     }
-    if (!I_stricmp(v13, "getLanguage"))
+
+    if (!I_stricmp(out, "getLanguage"))
     {
-        Int = Dvar_GetInt("loc_language");
-        Dvar_SetIntByName("ui_language", Int);
-    LABEL_29:
+        int locLang = Dvar_GetInt("loc_language");
+        Dvar_SetIntByName("ui_language", locLang);
         UI_VerifyLanguage();
         return;
     }
-    if (!I_stricmp(v13, "verifyLanguage"))
-        goto LABEL_29;
-    if (I_stricmp(v13, "saveComplete"))
+
+    if (!I_stricmp(out, "verifyLanguage"))
     {
-        if (I_stricmp(v13, "saveRevert"))
-        {
-            if (I_stricmp(v13, "openMenuOnDvar") && I_stricmp(v13, "openMenuOnDvarNot"))
-            {
-                if (I_stricmp(v13, "closeMenuOnDvar") && I_stricmp(v13, "closeMenuOnDvarNot"))
-                {
-                    if (I_stricmp(v13, "RefreshLeaderboards"))
-                    {
-                        if (I_stricmp(v13, "ViewGamerCard"))
-                        {
-                            Com_Printf(13, "unknown UI script %s in block:\n%s\n", v13, actualScript);
-                        }
-                        else
-                        {
-                            //LB_OnSelect(localClientNum);
-                        }
-                    }
-                    else
-                    {
-                        //LB_ForceRefresh();
-                    }
-                }
-                else if ((unsigned __int8)UI_GetOpenOrCloseMenuOnDvarArgs(args, v13, v16, v17, v18))
-                {
-                    UI_CloseMenuOnDvar(v13, v18, v16, v17);
-                }
-            }
-            else if ((unsigned __int8)UI_GetOpenOrCloseMenuOnDvarArgs(args, v13, v16, v17, v18))
-            {
-                UI_OpenMenuOnDvar(v13, v18, v16, v17);
-            }
-        }
-        else
-        {
-            UI_SaveRevert();
-        }
+        UI_VerifyLanguage();
+        return;
     }
-    else
+
+    if (!I_stricmp(out, "updateLanguage"))
+    {
+        int newLang = Dvar_GetInt("ui_language");
+        Dvar_SetIntByName("loc_language", newLang);
+        UI_VerifyLanguage();
+        Cbuf_AddText(0, "vid_restart\n");
+        return;
+    }
+
+    if (!I_stricmp(out, "saveComplete"))
     {
         UI_SaveComplete();
+        return;
     }
+
+    if (!I_stricmp(out, "saveRevert"))
+    {
+        UI_SaveRevert();
+        return;
+    }
+
+    if (!I_stricmp(out, "openMenuOnDvar") || !I_stricmp(out, "openMenuOnDvarNot"))
+    {
+        if ((unsigned __int8)UI_GetOpenOrCloseMenuOnDvarArgs(args, out, dvarName, testValue, menuName))
+            UI_OpenMenuOnDvar(out, menuName, dvarName, testValue);
+        return;
+    }
+
+    if (!I_stricmp(out, "closeMenuOnDvar") || !I_stricmp(out, "closeMenuOnDvarNot"))
+    {
+        if ((unsigned __int8)UI_GetOpenOrCloseMenuOnDvarArgs(args, out, dvarName, testValue, menuName))
+            UI_CloseMenuOnDvar(out, menuName, dvarName, testValue);
+        return;
+    }
+
+    if (!I_stricmp(out, "setRecommended"))
+    {
+        Com_SetRecommended(localClientNum, 1);
+        return;
+    }
+
+    Com_Printf(13, "unknown UI script %s in block:\n%s\n", out, actualScript);
 }
 
 int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)

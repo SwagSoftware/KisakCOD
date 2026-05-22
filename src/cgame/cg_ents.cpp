@@ -2087,34 +2087,34 @@ void __cdecl CG_LoadEntity(unsigned int entnum, SaveGame *save)
 
 void __cdecl CG_SaveEntities(SaveGame *save)
 {
-    int v1; // r7
+    int entityIndex; // r7
     int v3; // r31
     unsigned int v4[16]; // [sp+50h] [-40h] BYREF
 
-    v1 = 0;
+    entityIndex = 0;
     v4[0] = 0;
     do
     {
-        v3 = v1;
-        if ((unsigned int)v1 >= 0x880)
+        v3 = entityIndex;
+        if ((unsigned int)entityIndex >= 0x880)
         {
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
                 932,
                 0,
                 "entityIndex doesn't index MAX_GENTITIES\n\t%i not in [0, %i)",
-                v1,
+                entityIndex,
                 2176);
-            v1 = v4[0];
+            entityIndex = v4[0];
         }
         if (cg_entitiesArray[0][v3].nextValid)
         {
             SaveMemory_SaveWrite(v4, 4, save);
             CG_SaveEntity(v4[0], save);
-            v1 = v4[0];
+            entityIndex = v4[0];
         }
-        v4[0] = ++v1;
-    } while (v1 < 2176);
+        v4[0] = ++entityIndex;
+    } while (entityIndex < 2176);
     v4[0] = -1;
     SaveMemory_SaveWrite(v4, 4, save);
 }
@@ -2122,18 +2122,18 @@ void __cdecl CG_SaveEntities(SaveGame *save)
 void __cdecl CG_LoadEntities(SaveGame *save)
 {
     signed int i; // r5
-    unsigned int v3[2]; // [sp+50h] [-20h] BYREF
+    int entityIndex; // [sp+50h] [-20h] BYREF
 
-    SaveMemory_LoadRead(v3, 4, save);
-    for (i = v3[0]; v3[0] >= 0; i = v3[0])
+    SaveMemory_LoadRead(&entityIndex, 4, save);
+    for (i = entityIndex; entityIndex >= 0; i = entityIndex)
     {
-        if (i >= 2176)
+        if (i >= MAX_GENTITIES)
         {
-            Com_Error(ERR_DROP, "G_LoadGame: entitynum out of range (%i, MAX = %i)", i, 2176);
-            i = v3[0];
+            Com_Error(ERR_DROP, "G_LoadGame: entitynum out of range (%i, MAX = %i)", i, MAX_GENTITIES);
+            i = entityIndex;
         }
         CG_LoadEntity(i, save);
-        SaveMemory_LoadRead(v3, 4, save);
+        SaveMemory_LoadRead(&entityIndex, 4, save);
     }
 }
 

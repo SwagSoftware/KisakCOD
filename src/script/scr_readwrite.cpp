@@ -8,6 +8,7 @@
 #include "scr_vm.h"
 #include "scr_parsetree.h"
 #include <game/savedevice.h>
+#include <universal/com_files.h>  // FS_Write for SaveMemory_SaveWriteImmediate
 
 static unsigned int g_idHistoryIndex;
 static short idHistory[16];
@@ -285,8 +286,8 @@ void WriteId(unsigned int id, unsigned int opcode, MemoryFile *memFile)
             "%s\n\t(historyIndex) = %i",
             "(!(historyIndex & 7))",
             v7);
-    //HIBYTE(v9[0]) = v7 + opcode;
-    v9[0] = (v9[0] & 0x00FF) | ((uint16_t)(v7 + opcode) << 8);
+
+    v9[0] = (v9[0] & 0xFF00) | (uint8_t)(v7 + opcode);
     MemFile_WriteData(memFile, 1, v9);
     if (!v7)
     {
@@ -346,8 +347,8 @@ void __cdecl WriteStack(const VariableStackBuffer *stackBuf, MemoryFile *memFile
     MemFile_WriteData(memFile, 2, v10);
     WriteCodepos(stackBuf->pos, memFile);
     WriteId(stackBuf->localId, 0, memFile);
-    //HIBYTE(v10[0]) = stackBuf->time;
-    v10[0] = (v10[0] & 0x00FF) | (stackBuf->time << 8);
+
+    v10[0] = (v10[0] & 0xFF00) | (uint8_t)stackBuf->time;
     MemFile_WriteData(memFile, 1, v10);
     v5 = v4;
     buf = stackBuf->buf;
@@ -475,40 +476,47 @@ void __cdecl Scr_DoLoadEntryInternal(VariableValue *value, MemoryFile *memFile)
 
 int __cdecl Scr_DoLoadEntry(VariableValue *value, bool isArray, MemoryFile *memFile)
 {
-    int v5; // r30
-    MemoryFile *v6; // r3
-    int v7; // r31
-    int result; // r3
-    unsigned __int8 v9; // [sp+50h] [-20h] BYREF
-    _BYTE v10[3]; // [sp+51h] [-1Fh] BYREF
-    int v11; // [sp+54h] [-1Ch] BYREF
+
+    int result;
+    unsigned __int8 byte0;
+    unsigned __int8 byte1;
+    unsigned __int8 byte2;
+    unsigned int header = 0;
+    unsigned __int16 header2 = 0;
+    int header4 = 0;
 
     Scr_DoLoadEntryInternal(value, memFile);
     if (isArray)
     {
-        MemFile_ReadData(memFile, 1, (unsigned char*)&v11);
-        switch (HIBYTE(v11) & 7)
+        MemFile_ReadData(memFile, 1, (unsigned char *)&header);
+        unsigned int tag = header & 0xFF;
+        switch (tag & 7)
         {
         case 0:
             result = 0x800000;
             break;
         case 1:
-            MemFile_ReadData(memFile, 1, (unsigned char *)&v11);
-            result = SHIBYTE(v11) + 0x800000;
+        {
+            unsigned int byteRead = 0;
+            MemFile_ReadData(memFile, 1, (unsigned char *)&byteRead);
+            result = (int)(__int8)byteRead + 0x800000;
             break;
+        }
         case 2:
-            MemFile_ReadData(memFile, 2, (unsigned char *)&v11);
-            result = SHIWORD(v11) + 0x800000;
+            header2 = 0;
+            MemFile_ReadData(memFile, 2, (unsigned char *)&header2);
+            result = (int)(__int16)header2 + 0x800000;
             break;
         case 3:
-            MemFile_ReadData(memFile, 4, (unsigned char *)&v11);
-            result = v11 + 0x800000;
+            header4 = 0;
+            MemFile_ReadData(memFile, 4, (unsigned char *)&header4);
+            result = header4 + 0x800000;
             break;
         case 4:
             result = (unsigned __int16)Scr_ReadString(memFile);
             break;
         case 5:
-            result = Scr_ReadId(memFile, HIBYTE(v11)) + 0x10000;
+            result = Scr_ReadId(memFile, tag) + 0x10000;
             break;
         default:
             if (!alwaysfails)
@@ -519,13 +527,11 @@ int __cdecl Scr_DoLoadEntry(VariableValue *value, bool isArray, MemoryFile *memF
     }
     else
     {
-        MemFile_ReadData(memFile, 1, &v9);
-        v5 = v9;
-        MemFile_ReadData(memFile, 1, v10);
-        v6 = memFile;
-        v7 = v10[0];
-        MemFile_ReadData(v6, 1, (unsigned char *)&v11);
-        return ((__ROL4__(HIBYTE(v11), 8) + v7) << 8) + v5;
+
+        MemFile_ReadData(memFile, 1, &byte0);
+        MemFile_ReadData(memFile, 1, &byte1);
+        MemFile_ReadData(memFile, 1, &byte2);
+        return (((unsigned int)byte2) << 16) | (((unsigned int)byte1) << 8) | byte0;
     }
     return result;
 }
@@ -567,85 +573,85 @@ unsigned int __cdecl Scr_ConvertThreadFromLoad(unsigned __int16 handle)
 
 void __cdecl Scr_DoLoadObjectInfo(unsigned __int16 parentId, MemoryFile *memFile)
 {
-    unsigned int v2; // r19
-    VariableValueInternal *parentValue; // r31
-    int v5; // r30
-    unsigned int v6; // r3
-    VariableValueInternal_w w; // r11
-    int v8; // r3
-    VariableValueInternal_w v9; // r11
-    unsigned int v10; // r29
-    unsigned int v11; // r11
-    bool v12; // r29
-    int v13; // r24
-    int v14; // r31
-    VariableValueInternal *entryValue; // r30
-    unsigned int v16; // r4
-    __int64 v17; // r3
-    int v18; // r11
-    int type; // r31
-    int v20; // r11
-    __int64 v21; // [sp+50h] [-90h] BYREF
-    VariableValue value; // [sp+58h] [-88h] BYREF
+
+
+    unsigned int v2;
+    VariableValueInternal *parentValue;
+    int v5;
+    bool v12;
+    int v13;
+    unsigned int v14;
+    VariableValueInternal *entryValue;
+    int v18;
+    int type;
+    int v20;
+    unsigned int header;       // 1-byte read scratch
+    unsigned int header4;      // 4-byte read scratch
+    unsigned __int16 header2;  // 2-byte read scratch
+    VariableValue value;
 
     v2 = parentId;
     parentValue = &scrVarGlob.variableList[parentId + 1];
 
     iassert((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
     iassert(IsObject(parentValue));
-    MemFile_ReadData(memFile, 1, (unsigned char*)&v21);
 
-    switch (HIBYTE(v21) & 7)
+    header = 0;
+    MemFile_ReadData(memFile, 1, (unsigned char *)&header);
+    unsigned int headerByte = header & 0xFF;
+
+    switch (headerByte & 7)
     {
     case 1:
         v5 = 14;
-        parentValue->u.o.u.size = Scr_ReadId(memFile, HIBYTE(v21));
+        parentValue->u.o.u.size = Scr_ReadId(memFile, headerByte);
         break;
     case 2:
         v5 = 15;
-        v6 = Scr_ReadId(memFile, HIBYTE(v21));
-        w = parentValue->w;
-        parentValue->u.o.u.entnum = v6;
+        parentValue->u.o.u.entnum = Scr_ReadId(memFile, headerByte);
         iassert(!(parentValue->w.notifyName & VAR_NAME_HIGH_MASK));
         parentValue->w.type |= (Scr_ReadOptionalString(memFile) << 8) & 0xFFFF00;
         break;
     case 3:
         v5 = 16;
-        v8 = Scr_ReadId(memFile, HIBYTE(v21));
-        v9 = parentValue->w;
-        parentValue->u.o.u.entnum = v8;
+        parentValue->u.o.u.entnum = Scr_ReadId(memFile, headerByte);
         iassert(!(parentValue->w.waitTime & VAR_NAME_HIGH_MASK));
-        MemFile_ReadData(memFile, 4, (unsigned char*)&v21);
-        parentValue->w.type |= HIDWORD(v21) << 8;
+        header4 = 0;
+        MemFile_ReadData(memFile, 4, (unsigned char *)&header4);
+        parentValue->w.type |= header4 << 8;
         break;
     case 4:
+    {
         v5 = 17;
-        parentValue->u.o.u.size = Scr_ReadId(memFile, HIBYTE(v21));
-        MemFile_ReadData(memFile, 1, (unsigned char *)&v21);
-        v10 = HIBYTE(v21);
+        parentValue->u.o.u.size = Scr_ReadId(memFile, headerByte);
+        unsigned int header_b = 0;
+        MemFile_ReadData(memFile, 1, (unsigned char *)&header_b);
+        unsigned int byte2 = header_b & 0xFF;
         iassert(!(parentValue->w.parentLocalId & VAR_NAME_HIGH_MASK));
-        parentValue->w.type |= Scr_ReadId(memFile, v10) << 8;
+        parentValue->w.type |= Scr_ReadId(memFile, byte2) << 8;
         break;
+    }
     case 5:
         v5 = 19;
-        parentValue->u.o.u.size = Scr_ReadId(memFile, HIBYTE(v21));
+        parentValue->u.o.u.size = Scr_ReadId(memFile, headerByte);
         break;
     default:
-        v5 = HIBYTE(v21) >> 3;
+        v5 = headerByte >> 3;
         if (v5 == 20)
         {
-            MemFile_ReadData(memFile, 2, (unsigned char *)&v21);
-            v11 = parentValue->w.classnum & 0xFFFFFF00;
-            parentValue->u.o.u.size = HIWORD(v21);
-            if (v11)
+            header2 = 0;
+            MemFile_ReadData(memFile, 2, (unsigned char *)&header2);
+            parentValue->u.o.u.size = header2;
+            if (parentValue->w.classnum & VAR_NAME_HIGH_MASK)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp",
                     827,
                     0,
                     "%s",
                     "!(parentValue->w.classnum & VAR_NAME_HIGH_MASK)");
-            MemFile_ReadData(memFile, 2, (unsigned char *)&v21);
-            parentValue->w.type |= SHIWORD(v21) << 8;
+            header2 = 0;
+            MemFile_ReadData(memFile, 2, (unsigned char *)&header2);
+            parentValue->w.type |= ((int)(__int16)header2) << 8;
         }
         else if (v5 == 21)
         {
@@ -657,20 +663,20 @@ void __cdecl Scr_DoLoadObjectInfo(unsigned __int16 parentId, MemoryFile *memFile
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp", 837, 0, "%s", "!(type & ~VAR_MASK)");
     v12 = v5 == 21;
     parentValue->w.type = parentValue->w.type & 0xFFFFFFE0 | v5;
-    MemFile_ReadData(memFile, 2, (unsigned char *)&v21);
-    if (HIWORD(v21))
+
+    header2 = 0;
+    MemFile_ReadData(memFile, 2, (unsigned char *)&header2);
+    if (header2)
     {
-        v13 = HIWORD(v21);
+        v13 = header2;
         do
         {
             v14 = Scr_DoLoadEntry(&value, v12, memFile);
-            entryValue = &scrVarGlob.variableList[GetVariable(v2, (unsigned int)v14) + VARIABLELIST_CHILD_BEGIN];
+            entryValue = &scrVarGlob.variableList[GetVariable(v2, v14) + VARIABLELIST_CHILD_BEGIN];
             if (v12)
             {
-                //LODWORD(v17) = Scr_GetArrayIndexValue(v14).u.intValue;
-                //v21 = v17;
                 VariableValue val = Scr_GetArrayIndexValue(v14);
-                RemoveRefToValue(&val);
+                RemoveRefToValue(val.type, val.u);
             }
             v18 = entryValue->w.status & 0x60;
             if (!v18 || v18 == 96)
@@ -1054,99 +1060,81 @@ static bool Scr_IsVariableBreakpoint(unsigned int id)
 
 static void CheckReferenceRange(unsigned int begin, unsigned int end)
 {
-#if 0
-    signed int parentValue; // r20
-    signed int parentType; // r23
-    VariableValueInternal::<unnamed_tag> *p_u; // r27
-    VariableValueInternal::<unnamed_tag> entryValue; // r11
-    unsigned int ParentLocalId; // r3
-    int v7; // r10
-    unsigned int i; // r28
-    unsigned int v9; // r4
-    int v10; // r2
-    int v11; // r10
-    unsigned __int8 *v12; // r8
-    int v13; // r9
-    int v14; // r7
-    int v15; // r10
+    if ((int)(end - begin) <= 1)
+        return;
 
-    parentValue = end - begin;
-    parentType = 1;
-    if ((int)(end - begin) > 1)
+    for (unsigned int parentType = 1; (int)parentType < (int)(end - begin); ++parentType)
     {
-        p_u = &scrVarGlob.variableList[begin + 1].u;
-        do
+        VariableValueInternal *entry = &scrVarGlob.variableList[begin + parentType];
+        unsigned int status = entry->w.status;
+        if ((status & 0x60) == 0)
+            continue;
+
+        switch (status & 0x1F)
         {
-            entryValue = p_u[1];
-            if ((entryValue.o.u.size & 0x60) != 0)
+        case 1: // VAR_POINTER
+            ++scrVarDebugPub->refCount[entry->u.u.intValue];
+            break;
+
+        case 0xA: // VAR_STACK
+        {
+            VariableStackBuffer *sb = entry->u.u.stackValue;
+            if (!sb->localId)
+                MyAssertHandler(
+                    "c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp",
+                    271,
+                    0,
+                    "%s",
+                    "entryValue->u.u.stackValue->localId");
+            ++scrVarDebugPub->refCount[sb->localId];
+            unsigned __int8 *p = (unsigned __int8 *)&sb->buf[0];
+            unsigned int count = sb->size;
+            while (count)
             {
-                switch (entryValue.o.u.size & 0x1F)
-                {
-                case 1:
-                    ++scrVarDebugPub->refCount[p_u->u.intValue];
-                    break;
-                case 0xA:
-                    if (!*(_WORD *)(p_u->u.intValue + 8))
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp",
-                            271,
-                            0,
-                            "%s",
-                            "entryValue->u.u.stackValue->localId");
-                    v11 = 2 * (*(unsigned __int16 *)(p_u->u.intValue + 8) + 0x38000);
-                    ++*(_WORD *)((char *)scrVarDebugPub->varUsage + v11);
-                    v12 = (unsigned __int8 *)(p_u->u.intValue + 11);
-                    v13 = *(unsigned __int16 *)(p_u->u.intValue + 4);
-                    if (*(_WORD *)(p_u->u.intValue + 4))
-                    {
-                        do
-                        {
-                            v14 = *v12;
-                            --v13;
-                            v15 = *(_DWORD *)(v12 + 1);
-                            v12 += 5;
-                            if (v14 == 1)
-                                ++scrVarDebugPub->refCount[v15];
-                        } while (v13);
-                    }
-                    break;
-                case 0xE:
-                case 0xF:
-                case 0x10:
-                case 0x13:
-                    goto LABEL_7;
-                case 0x11:
-                    ParentLocalId = GetParentLocalId(parentType);
-                    ++scrVarDebugPub->refCount[ParentLocalId];
-                LABEL_7:
-                    v7 = 2 * (p_u->o.u.size + 0x38000);
-                    ++*(_WORD *)((char *)scrVarDebugPub->varUsage + v7);
-                    break;
-                case 0x15:
-                    for (i = FindFirstSibling(parentType); i; i = FindNextSibling(i))
-                    {
-                        if (IsObject(&scrVarGlob.variableList[i + 32770]))
-                            MyAssertHandler(
-                                "c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp",
-                                261,
-                                0,
-                                "%s",
-                                "!IsObject( entryValue2 )");
-                        if (Scr_GetArrayIndexValue(
-                            (VariableValue *)((unsigned int)scrVarGlob.variableList[i + 32770].w.u.intValue >> 8),
-                            v9) == (VariableValue *)1)
-                            ++scrVarDebugPub->refCount[v10];
-                    }
-                    break;
-                default:
-                    break;
-                }
+                unsigned int entryType = *p;
+                unsigned int entryVal = *(unsigned int *)(p + 1);
+                p += 5;
+                --count;
+                if (entryType == 1) // VAR_POINTER
+                    ++scrVarDebugPub->refCount[entryVal];
             }
-            ++parentType;
-            p_u += 4;
-        } while (parentType < parentValue);
+            break;
+        }
+
+        case 0xE:
+        case 0xF:
+        case 0x10:
+        case 0x13:
+            ++scrVarDebugPub->refCount[entry->u.o.u.size];
+            break;
+
+        case 0x11: // VAR_*_THREAD with parent
+            ++scrVarDebugPub->refCount[GetParentLocalId(parentType)];
+            ++scrVarDebugPub->refCount[entry->u.o.u.size];
+            break;
+
+        case 0x15: // VAR_*_ARRAY (sibling iteration)
+            for (unsigned int i = FindFirstSibling(parentType); i; i = FindNextSibling(i))
+            {
+                VariableValueInternal *child = &scrVarGlob.variableList[i + VARIABLELIST_CHILD_BEGIN];
+                if (IsObject(child))
+                    MyAssertHandler(
+                        "c:\\trees\\cod3\\cod3src\\src\\script\\scr_variable.cpp",
+                        261,
+                        0,
+                        "%s",
+                        "!IsObject( entryValue2 )");
+
+                VariableValue val = Scr_GetArrayIndexValue(child->w.status >> 8);
+                if (val.type == 1) // VAR_POINTER
+                    ++scrVarDebugPub->refCount[val.u.intValue];
+            }
+            break;
+
+        default:
+            break;
+        }
     }
-#endif
 }
 
 static int CheckReferences()
@@ -1181,7 +1169,7 @@ static int CheckReferences()
         (j->status & 0x60) == 0
         || (j->type & 0x1Fu) < 0xE
         || *(_WORD *)((char *)scrVarDebugPub->varUsage + v3)
-        && *(unsigned __int16 *)((char *)scrVarDebugPub->varUsage + v3) == j[-1].status + 1;
+        && *(unsigned __int16 *)((char *)scrVarDebugPub->varUsage + v3) == (unsigned __int16)j[-1].status + 1;
         j += 4)
     {
         v4 += 16;
@@ -1289,7 +1277,7 @@ void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile
         case 6u:
             v22 = MemFile_GetUsedSize(memFile);
             //ProfMem_Begin("int", v22);
-            v31[0] = u->intValue;
+            v31[0] = (unsigned int)(uintptr_t)u;
             MemFile_WriteData(memFile, 4, v31);
             v23 = MemFile_GetUsedSize(memFile);
             //ProfMem_End(v23);
@@ -1306,7 +1294,7 @@ void __cdecl DoSaveEntryInternal(unsigned int type, VariableUnion *u, MemoryFile
             //ProfMem_End(v25);
             break;
         case 0xBu:
-            v31[0] = u->intValue;
+            v31[0] = (unsigned int)(uintptr_t)u;
             MemFile_WriteData(memFile, 4, v31);
             break;
         default:
@@ -1325,59 +1313,51 @@ void __cdecl Scr_SaveSource(MemoryFile *memFile)
 
 void __cdecl SaveMemory_SaveWriteImmediate(const void *buffer, unsigned int len, SaveImmediate *save)
 {
-    //WriteToMemoryCardFile(save->f, buffer, len); // KISAKSAVE
+    if (!save || !save->f || !buffer || !len)
+        return;
+    int handle = (int)(intptr_t)save->f;
+    FS_Write((const char *)buffer, len, handle);
 }
 
 void __cdecl Scr_SaveSourceImmediate(SaveImmediate *save)
 {
-    // KISAKSAVE
-#if 0
-    int parentValue; // r9
-    unsigned int sourceBufferLookupLen; // r11
-    bool *p_archive; // r10
-    unsigned int entryValue; // r28
-    int v6; // r29
-    SourceBufferInfo *v7; // r31
-    signed int len; // r5
-    int v9; // [sp+50h] [-40h] BYREF
+    if (!scrVarPub.developer)
+        return;
 
-    if (scrVarPub.developer)
+    int archivedCount = 0;
+    int countOut = 0;
+    unsigned int sourceBufferLookupLen = scrParserPub.sourceBufferLookupLen;
+    if (sourceBufferLookupLen)
     {
-        parentValue = 0;
-        v9 = 0;
-        sourceBufferLookupLen = scrParserPub.sourceBufferLookupLen;
-        if (scrParserPub.sourceBufferLookupLen)
+        bool *p_archive = &scrParserPub.sourceBufferLookup->archive;
+        do
         {
-            p_archive = &scrParserPub.sourceBufferLookup->archive;
-            do
-            {
-                if (*p_archive)
-                    v9 = ++parentValue;
-                --sourceBufferLookupLen;
-                p_archive += 44;
-            } while (sourceBufferLookupLen);
-        }
-        WriteToMemoryCardFile(save->f, &v9, 4u);
-        entryValue = 0;
-        if (scrParserPub.sourceBufferLookupLen)
-        {
-            v6 = 0;
-            do
-            {
-                v7 = &scrParserPub.sourceBufferLookup[v6];
-                if (scrParserPub.sourceBufferLookup[v6].archive)
-                {
-                    WriteToMemoryCardFile(save->f, &v7->len, 4u);
-                    len = v7->len;
-                    if (len > 0)
-                        WriteToMemoryCardFile(save->f, v7->sourceBuf, len);
-                }
-                ++entryValue;
-                ++v6;
-            } while (entryValue < scrParserPub.sourceBufferLookupLen);
-        }
+            if (*p_archive)
+                countOut = ++archivedCount;
+            --sourceBufferLookupLen;
+            p_archive += 44;  // sizeof(SourceBufferInfo) per IDA stride
+        } while (sourceBufferLookupLen);
     }
-#endif
+    SaveMemory_SaveWriteImmediate(&countOut, 4u, save);
+
+    unsigned int i = 0;
+    if (scrParserPub.sourceBufferLookupLen)
+    {
+        int idx = 0;
+        do
+        {
+            SourceBufferInfo *info = &scrParserPub.sourceBufferLookup[idx];
+            if (scrParserPub.sourceBufferLookup[idx].archive)
+            {
+                SaveMemory_SaveWriteImmediate(&info->len, 4u, save);
+                int len = info->len;
+                if (len > 0)
+                    SaveMemory_SaveWriteImmediate(info->sourceBuf, (unsigned int)len, save);
+            }
+            ++i;
+            ++idx;
+        } while (i < scrParserPub.sourceBufferLookupLen);
+    }
 }
 
 void __cdecl Scr_LoadSource(MemoryFile *memFile, void *fileHandle)
@@ -1556,14 +1536,11 @@ void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray
                 "%s\n\t(name) = %i",
                 "(!(name & 0xFF000000))",
                 name);
-        //HIBYTE(v27[0]) = (_BYTE)name;
-        v27[0] = (v27[0] & 0x00FFFFFF) | (((uint32_t)((uint8_t)name) & 0xFF) << 24);
+        v27[0] = (v27[0] & 0xFFFFFF00) | ((uint8_t)name);
         MemFile_WriteData(memFile, 1, v27);
-        //HIBYTE(v27[0]) = BYTE2(name);
-        v27[0] = (v27[0] & 0x00FFFFFF) | (((uint32_t)(((uint32_t)name >> 16) & 0xFF)) << 24);
+        v27[0] = (v27[0] & 0xFFFFFF00) | (((uint32_t)name >> 8) & 0xFF);
         MemFile_WriteData(memFile, 1, v27);
-        //HIBYTE(v27[0]) = BYTE1(name);
-        v27[0] = (v27[0] & 0x00FFFFFF) | (((uint32_t)(((uint32_t)name >> 8) & 0xFF)) << 24);
+        v27[0] = (v27[0] & 0xFFFFFF00) | (((uint32_t)name >> 16) & 0xFF);
         MemFile_WriteData(memFile, 1, v27);
         v13 = MemFile_GetUsedSize(memFile);
         //ProfMem_End(v13);
@@ -1571,89 +1548,58 @@ void __cdecl DoSaveEntry(VariableValue *value, VariableValue *name, bool isArray
         //ProfMem_End(v14);
         return;
     }
-    VariableValue val = Scr_GetArrayIndexValue((unsigned int)name);
-    ArrayIndexValue = &val;
-    v28 = *(_QWORD *)&ArrayIndexValue;
-    if (ArrayIndexValue == (VariableValue *)1)
+    VariableValue arrVal = Scr_GetArrayIndexValue((unsigned int)name);
+    if (arrVal.type == 1)
     {
-        WriteId(HIDWORD(v28), 5u, memFile);
-    LABEL_23:
-        v26 = MemFile_GetUsedSize(memFile);
-        //ProfMem_End(v26);
+        WriteId(arrVal.u.intValue, 5u, memFile);
         return;
     }
-    if (ArrayIndexValue == (VariableValue *)2)
+    if (arrVal.type == 2)
     {
-        v22 = MemFile_GetUsedSize(memFile);
-        //ProfMem_Begin("string array index", v22);
-        //HIBYTE(v27[0]) = 4;
-        v27[0] = (v27[0] & 0x00FFFFFF) | (4 << 24);
+        v27[0] = (v27[0] & 0xFFFFFF00) | 4;
         MemFile_WriteData(memFile, 1, v27);
-        v23 = SL_ConvertToString(HIDWORD(v28) & 0xFFFF);
+        v23 = SL_ConvertToString((unsigned int)arrVal.u.intValue & 0xFFFF);
         MemFile_WriteCString(memFile, v23);
-        v24 = MemFile_GetUsedSize(memFile);
-        //ProfMem_End(v24);
-        v25 = MemFile_GetUsedSize(memFile);
-        //ProfMem_End(v25);
         return;
     }
-    if (ArrayIndexValue != (VariableValue *)6)
+    if (arrVal.type != 6)
     {
         if (!alwaysfails)
-        {
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp", 449, 1, "bad case");
-            v16 = MemFile_GetUsedSize(memFile);
-            //ProfMem_End(v16);
-            return;
-        }
-        goto LABEL_23;
+        return;
     }
-    v17 = HIDWORD(v28);
-    if (HIDWORD(v28))
+    v17 = arrVal.u.intValue;
+    if (v17)
     {
-        if (SHIDWORD(v28) < -128 || SHIDWORD(v28) >= 128)
+        if (v17 < -128 || v17 >= 128)
         {
-            if (SHIDWORD(v28) < -32768 || SHIDWORD(v28) >= 0x8000)
+            if (v17 < -32768 || v17 >= 0x8000)
             {
-                //HIBYTE(v27[0]) = 3;
-                v27[0] = (v27[0] & 0x00FFFFFF) | (3 << 24);
+                v27[0] = (v27[0] & 0xFFFFFF00) | 3;
                 MemFile_WriteData(memFile, 1, v27);
                 v27[0] = v17;
                 MemFile_WriteData(memFile, 4, v27);
-                v21 = MemFile_GetUsedSize(memFile);
-                //ProfMem_End(v21);
             }
             else
             {
-                //HIBYTE(v27[0]) = 2;
-                v27[0] = (v27[0] & 0x00FFFFFF) | (2 << 24);
+                v27[0] = (v27[0] & 0xFFFFFF00) | 2;
                 MemFile_WriteData(memFile, 1, v27);
-                //HIWORD(v27[0]) = v17;
-                v27[0] = (v27[0] & 0x0000FFFF) | ((uint32_t)(v17 & 0xFFFF) << 16);
+                v27[0] = (v27[0] & 0xFFFF0000) | ((uint32_t)v17 & 0xFFFF);
                 MemFile_WriteData(memFile, 2, v27);
-                v20 = MemFile_GetUsedSize(memFile);
-                //ProfMem_End(v20);
             }
         }
         else
         {
-            //HIBYTE(v27[0]) = 1;
-            v27[0] = (v27[0] & 0x00FFFFFF) | ((1 & 0xFF) << 24);
+            v27[0] = (v27[0] & 0xFFFFFF00) | 1;
             MemFile_WriteData(memFile, 1, v27);
-            //HIBYTE(v27[0]) = v17;
-            v27[0] = (v27[0] & 0x00FFFFFF) | ((v17 & 0xFF) << 24);
+            v27[0] = (v27[0] & 0xFFFFFF00) | ((uint32_t)v17 & 0xFF);
             MemFile_WriteData(memFile, 1, v27);
-            v19 = MemFile_GetUsedSize(memFile);
-            //ProfMem_End(v19);
         }
     }
     else
     {
-        //HIBYTE(v27[0]) = 0;
-        v27[0] = v27[0] & 0x00FFFFFF;
+        v27[0] = v27[0] & 0xFFFFFF00;
         MemFile_WriteData(memFile, 1, v27);
-        v18 = MemFile_GetUsedSize(memFile);
-        //ProfMem_End(v18);
     }
 }
 
@@ -1681,13 +1627,16 @@ void __cdecl AddSaveObjectChildren(unsigned int parentId)
         entryValue = (VariableValueInternal *)((char *)&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN]
             + __ROL4__(scrVarGlob.variableList[i + VARIABLELIST_CHILD_BEGIN].hash.id, 4));
         iassert(!IsObject(entryValue));
-        if (parentType == VAR_ARRAY
-            && (v7 = Scr_GetArrayIndexValue(((unsigned int)entryValue->w.status >> 8)).u.intValue, v7 == 1)
-            && v7
-            && !scrVarPub.saveIdMap[v7])
+        if (parentType == VAR_ARRAY)
         {
-            scrVarPub.saveIdMap[v7] = ++scrVarPub.savecount;
-            *(unsigned __int16 *)((char *)scrVarPub.saveIdMapRev + __ROL4__(scrVarPub.savecount, 1)) = v7;
+            VariableValue arrVal = Scr_GetArrayIndexValue((unsigned int)entryValue->w.status >> 8);
+            if (arrVal.type == 1 // VAR_POINTER
+                && arrVal.u.intValue
+                && !scrVarPub.saveIdMap[arrVal.u.intValue])
+            {
+                scrVarPub.saveIdMap[arrVal.u.intValue] = ++scrVarPub.savecount;
+                scrVarPub.saveIdMapRev[scrVarPub.savecount] = (unsigned __int16)arrVal.u.intValue;
+            }
         }
         u = entryValue->u;
         v9 = entryValue->w.type & 0x1F;
@@ -1696,7 +1645,7 @@ void __cdecl AddSaveObjectChildren(unsigned int parentId)
             if (u.u.intValue && !scrVarPub.saveIdMap[u.u.intValue])
             {
                 scrVarPub.saveIdMap[u.u.intValue] = ++scrVarPub.savecount;
-                *(unsigned __int16 *)((char *)scrVarPub.saveIdMapRev + __ROL4__(scrVarPub.savecount, 1)) = u.o.u.size;
+                scrVarPub.saveIdMapRev[scrVarPub.savecount] = (unsigned __int16)u.u.intValue;
             }
         }
         else if (v9 == 10)
@@ -1817,20 +1766,16 @@ void __cdecl DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile)
         WriteId(v4->u.o.u.size, 5u, memFile);
         goto LABEL_14;
     case 20:
-        //HIBYTE(v18[0].u.floatValue) = -96;
-        v18[0].u.floatValue = (v18[0].u.intValue & 0x00FFFFFF) | ((uint32_t)((-96) & 0xFF) << 24);
+        v18[0].u.intValue = (v18[0].u.intValue & 0xFFFFFF00) | (uint8_t)(-96);
         MemFile_WriteData(memFile, 1, v18);
-        //HIWORD(v18[0].u.floatValue) = v4->u.o.u.size;
-        v18[0].u.floatValue = (v18[0].u.intValue & 0x0000FFFF) | ((uint32_t)(v4->u.o.u.size & 0xFFFF) << 16);
+        v18[0].u.intValue = (v18[0].u.intValue & 0xFFFF0000) | (v4->u.o.u.size & 0xFFFF);
         MemFile_WriteData(memFile, 2, v18);
         v8 = 2;
-        //HIWORD(v18[0].u.floatValue) = (unsigned int)v4->w.u.intValue >> 8;
-        v18[0].u.floatValue = (v18[0].u.intValue & 0x0000FFFF) | ((uint32_t)(((unsigned int)v4->w.status >> 8) & 0xFFFF) << 16);
+        v18[0].u.intValue = (v18[0].u.intValue & 0xFFFF0000) | (((unsigned int)v4->w.status >> 8) & 0xFFFF);
         goto LABEL_13;
     default:
         v8 = 1;
-        //HIBYTE(v18[0].u.floatValue) = 8 * v5;
-        v18[0].u.floatValue = (v18[0].u.intValue & 0x00FFFFFF) | ((uint32_t)((8 * v5) & 0xFF) << 24);
+        v18[0].u.intValue = (v18[0].u.intValue & 0xFFFFFF00) | ((uint32_t)(8 * v5) & 0xFF);
     LABEL_13:
         MemFile_WriteData(memFile, v8, v18);
     LABEL_14:
@@ -1840,8 +1785,7 @@ void __cdecl DoSaveObjectInfo(unsigned int parentId, MemoryFile *memFile)
         v11 = 0;
         for (i = FindFirstSibling(parentId); i; i = FindNextSibling(i))
             ++v11;
-        //HIWORD(v18[0].u.floatValue) = v11;
-        v18[0].u.floatValue = (v18[0].u.intValue & 0x0000FFFF) | ((uint32_t)(v11 & 0xFFFF) << 16);
+        v18[0].u.intValue = (v18[0].u.intValue & 0xFFFF0000) | ((uint32_t)v11 & 0xFFFF);
         MemFile_WriteData(memFile, 2, v18);
         for (j = FindLastSibling(parentId); j; j = FindPrevSibling(j))
         {
@@ -1915,8 +1859,7 @@ void __cdecl Scr_SavePost(MemoryFile *memFile)
     g_idHistoryIndex = 0;
     v8[0] = scrVarPub.time;
     MemFile_WriteData(memFile, 4, v8);
-    //HIWORD(v8[0]) = scrVarPub.savecount;
-    v8[0] = (v8[0] & 0x0000FFFF) | ((uint32_t)(scrVarPub.savecount & 0xFFFF) << 16);
+    v8[0] = (v8[0] & 0xFFFF0000) | ((uint32_t)scrVarPub.savecount & 0xFFFF);
     MemFile_WriteData(memFile, 2, v8);
     UsedSize = MemFile_GetUsedSize(memFile);
     //ProfMem_Begin("DoSaveObjectInfo", UsedSize);

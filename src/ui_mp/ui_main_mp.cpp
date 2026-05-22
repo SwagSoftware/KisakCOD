@@ -1998,39 +1998,34 @@ void UI_CreatePlayerProfile()
     {
         I_strncpyz(name, (char *)ui_playerProfileNameNew->current.integer, 32);
         Dvar_SetString((dvar_s *)ui_playerProfileNameNew, (char *)"");
-        if (uiInfoArray.playerProfileCount == 64)
+
+        uiInfo_s *uiInfo = &uiInfoArray;
+        if (uiInfo->playerProfileCount == 64)
         {
-            Menus_OpenByName(&uiInfoArray.uiDC, "profile_create_too_many_popmenu");
+            Menus_OpenByName(&uiInfo->uiDC, "profile_create_too_many_popmenu");
         }
         else
         {
-            for (profileIndex = 0; profileIndex < uiInfoArray.playerProfileCount; ++profileIndex)
+            for (profileIndex = 0; profileIndex < uiInfo->playerProfileCount; ++profileIndex)
             {
-                if (!I_stricmp(name, uiInfoArray.playerProfileName[profileIndex]))
+                if (!I_stricmp(name, uiInfo->playerProfileName[profileIndex]))
                 {
-                    Menus_OpenByName(&uiInfoArray.uiDC, "profile_exists_popmenu");
+                    Menus_OpenByName(&uiInfo->uiDC, "profile_exists_popmenu");
                     return;
                 }
             }
             if (Com_NewPlayerProfile(name))
             {
-                uiInfoArray.playerProfileName[uiInfoArray.playerProfileCount++] = String_Alloc(name);
+                uiInfo->playerProfileName[uiInfo->playerProfileCount++] = String_Alloc(name);
                 UI_SortPlayerProfiles(0);
-                Dvar_SetInt(ui_playerProfileCount, uiInfoArray.playerProfileCount);
+                Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
                 curSelected = UI_GetPlayerProfileListIndexFromName(name);
-                if ((unsigned int)curSelected >= uiInfoArray.playerProfileCount)
-                    MyAssertHandler(
-                        ".\\ui_mp\\ui_main_mp.cpp",
-                        2241,
-                        0,
-                        "curSelected doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
-                        curSelected,
-                        uiInfoArray.playerProfileCount);
+                bcassert(curSelected, uiInfo->playerProfileCount);
                 UI_SelectPlayerProfileIndex(curSelected);
             }
             else
             {
-                Menus_OpenByName(&uiInfoArray.uiDC, "profile_create_fail_popmenu");
+                Menus_OpenByName(&uiInfo->uiDC, "profile_create_fail_popmenu");
             }
         }
     }
@@ -2038,21 +2033,21 @@ void UI_CreatePlayerProfile()
 
 void UI_AddPlayerProfiles()
 {
-    const char *v0; // eax
     const char **profileList; // [esp+0h] [ebp-10h]
     int profileCount; // [esp+4h] [ebp-Ch] BYREF
     uiInfo_s *uiInfo; // [esp+8h] [ebp-8h]
     int profileIndex; // [esp+Ch] [ebp-4h]
 
     uiInfo = &uiInfoArray;
-    uiInfoArray.playerProfileCount = 0;
+    uiInfo->playerProfileCount = 0;
     uiInfo->playerProfileStatus.sortDir = 1;
     profileList = FS_ListFiles("profiles", "/", FS_LIST_ALL, &profileCount);
+
     for (profileIndex = 0; profileIndex < profileCount; ++profileIndex)
     {
-        v0 = String_Alloc(profileList[profileIndex]);
-        uiInfo->playerProfileName[uiInfo->playerProfileCount++] = v0;
+        uiInfo->playerProfileName[uiInfo->playerProfileCount++] = String_Alloc(profileList[profileIndex]);
     }
+
     FS_FreeFileList(profileList);
     UI_SortPlayerProfiles(0);
     Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
@@ -2339,10 +2334,10 @@ int __cdecl UI_CheckExecKey(int localClientNum, int key)
 
 void __cdecl UI_LoadPlayerProfile(int localClientNum)
 {
-    if (!ui_playerProfileSelected)
-        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2289, 0, "%s", "ui_playerProfileSelected");
-    if (*(_BYTE *)ui_playerProfileSelected->current.integer)
-        Com_ChangePlayerProfile(localClientNum, (char *)ui_playerProfileSelected->current.integer);
+    iassert(ui_playerProfileSelected);
+
+    if (ui_playerProfileSelected->current.string[0])
+        Com_ChangePlayerProfile(localClientNum, (char *)ui_playerProfileSelected->current.string);
 }
 
 void __cdecl UI_Update(const char *name)
@@ -2398,9 +2393,7 @@ void __cdecl UI_Update(const char *name)
 
 void UI_SelectActivePlayerProfile()
 {
-    int selIndex; // [esp+0h] [ebp-4h]
-
-    selIndex = UI_GetPlayerProfileListIndexFromName(com_playerProfile->current.string);
+    int selIndex = UI_GetPlayerProfileListIndexFromName(com_playerProfile->current.string);
     if (selIndex >= 0 && selIndex < uiInfoArray.playerProfileCount)
         UI_SelectPlayerProfileIndex(selIndex);
 }
@@ -2543,22 +2536,18 @@ int __cdecl UI_GetPlayerProfileListIndexFromName(const char *name)
     unsigned int nameIndex; // [esp+4h] [ebp-8h]
     int profileIndex; // [esp+8h] [ebp-4h]
 
-    if (!name)
-        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2090, 0, "%s", "name");
-    for (profileIndex = 0; profileIndex < uiInfoArray.playerProfileCount; ++profileIndex)
+    uiInfo_s *uiInfo = &uiInfoArray;
+    iassert(name);
+
+    for (profileIndex = 0; profileIndex < uiInfo->playerProfileCount; ++profileIndex)
     {
-        nameIndex = uiInfoArray.playerProfileStatus.displayProfile[profileIndex];
-        if (nameIndex >= uiInfoArray.playerProfileCount)
-            MyAssertHandler(
-                ".\\ui_mp\\ui_main_mp.cpp",
-                2096,
-                0,
-                "nameIndex doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
-                nameIndex,
-                uiInfoArray.playerProfileCount);
-        if (!I_stricmp(name, uiInfoArray.playerProfileName[nameIndex]))
+        nameIndex = uiInfo->playerProfileStatus.displayProfile[profileIndex];
+        bcassert(nameIndex, uiInfo->playerProfileCount);
+        
+        if (!I_stricmp(name, uiInfo->playerProfileName[nameIndex]))
             return profileIndex;
     }
+
     return -1;
 }
 
@@ -2593,16 +2582,19 @@ const char *UI_LoadMods()
     return result;
 }
 
-int __cdecl UI_PlayerProfilesQsortCompare(_DWORD *arg1, _DWORD *arg2)
+static int UI_PlayerProfilesQsortCompare(const void *a, const void *b)
 {
     int result; // [esp+0h] [ebp-10h]
 
-    if (!arg1)
-        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2111, 0, "%s", "arg1");
-    if (!arg2)
-        MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2112, 0, "%s", "arg2");
+    unsigned int *arg1 = (unsigned int *)a;
+    unsigned int *arg2 = (unsigned int *)b;
+
+    iassert(arg1);
+    iassert(arg2);
+
     if (*arg1 == *arg2)
         return 0;
+
     result = I_stricmp(uiInfoArray.playerProfileName[*arg1], uiInfoArray.playerProfileName[*arg2]);
     if (uiInfoArray.playerProfileStatus.sortDir)
         return result;
@@ -2612,9 +2604,7 @@ int __cdecl UI_PlayerProfilesQsortCompare(_DWORD *arg1, _DWORD *arg2)
 
 void __cdecl UI_SelectPlayerProfileIndex(int index)
 {
-    int menuIndex; // [esp+8h] [ebp-4h]
-
-    for (menuIndex = uiInfoArray.uiDC.openMenuCount - 1; menuIndex >= 0; --menuIndex)
+    for (int menuIndex = uiInfoArray.uiDC.openMenuCount - 1; menuIndex >= 0; --menuIndex)
     {
         if (Window_IsVisible(0, &uiInfoArray.uiDC.menuStack[menuIndex]->window))
             Menu_SetFeederSelection(&uiInfoArray.uiDC, uiInfoArray.uiDC.menuStack[menuIndex], 24, index, 0);
@@ -2632,57 +2622,35 @@ void __cdecl UI_SortPlayerProfiles(int selectIndex)
         qsort(
             uiInfoArray.playerProfileStatus.displayProfile,
             uiInfoArray.playerProfileCount,
-            4u,
-            (int(__cdecl *)(const void *, const void *))UI_PlayerProfilesQsortCompare);
+            sizeof(int),
+            UI_PlayerProfilesQsortCompare);
         UI_SelectPlayerProfileIndex(selectIndex);
     }
 }
 
 void UI_DeletePlayerProfile()
 {
-    const char *v0; // eax
     unsigned int curSelected; // [esp+8h] [ebp-8h]
     unsigned int nameIndex; // [esp+Ch] [ebp-4h]
 
-    if (uiInfoArray.playerProfileCount)
+    uiInfo_s *uiInfo = &uiInfoArray;
+
+    if (uiInfo->playerProfileCount)
     {
-        if (!ui_playerProfileSelected)
-            MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 2257, 0, "%s", "ui_playerProfileSelected");
+        iassert(ui_playerProfileSelected);
         if (Com_DeletePlayerProfile(ui_playerProfileSelected->current.string))
         {
             curSelected = UI_GetPlayerProfileListIndexFromName(ui_playerProfileSelected->current.string);
-            if (curSelected >= uiInfoArray.playerProfileCount)
-                MyAssertHandler(
-                    ".\\ui_mp\\ui_main_mp.cpp",
-                    2265,
-                    0,
-                    "curSelected doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
-                    curSelected,
-                    uiInfoArray.playerProfileCount);
-            nameIndex = uiInfoArray.playerProfileStatus.displayProfile[curSelected];
-            if (nameIndex >= uiInfoArray.playerProfileCount)
-                MyAssertHandler(
-                    ".\\ui_mp\\ui_main_mp.cpp",
-                    2268,
-                    0,
-                    "nameIndex doesn't index uiInfo->playerProfileCount\n\t%i not in [0, %i)",
-                    nameIndex,
-                    uiInfoArray.playerProfileCount);
-            if (I_stricmp(uiInfoArray.playerProfileName[nameIndex], ui_playerProfileSelected->current.string))
+            bcassert(curSelected, uiInfo->playerProfileCount);
+            
+            nameIndex = uiInfo->playerProfileStatus.displayProfile[curSelected];
+            bcassert(nameIndex, uiInfo->playerProfileCount);
+            iassert(!I_stricmp(uiInfo->playerProfileName[nameIndex], ui_playerProfileSelected->current.string));
+
+            if (--uiInfo->playerProfileCount)
             {
-                v0 = va("%s != %s", uiInfoArray.playerProfileName[nameIndex], ui_playerProfileSelected->current.string);
-                MyAssertHandler(
-                    ".\\ui_mp\\ui_main_mp.cpp",
-                    2269,
-                    0,
-                    "%s\n\t%s",
-                    "!I_stricmp( uiInfo->playerProfileName[nameIndex], ui_playerProfileSelected->current.string )",
-                    v0);
-            }
-            if (--uiInfoArray.playerProfileCount)
-            {
-                uiInfoArray.playerProfileName[nameIndex] = uiInfoArray.playerProfileName[uiInfoArray.playerProfileCount];
-                if (curSelected == uiInfoArray.playerProfileCount)
+                uiInfo->playerProfileName[nameIndex] = uiInfo->playerProfileName[uiInfo->playerProfileCount];
+                if (curSelected == uiInfo->playerProfileCount)
                     --curSelected;
                 UI_SortPlayerProfiles(curSelected);
             }
@@ -2690,11 +2658,11 @@ void UI_DeletePlayerProfile()
             {
                 Dvar_SetString((dvar_s *)ui_playerProfileSelected, (char *)"");
             }
-            Dvar_SetInt(ui_playerProfileCount, uiInfoArray.playerProfileCount);
+            Dvar_SetInt(ui_playerProfileCount, uiInfo->playerProfileCount);
         }
         else
         {
-            Menus_OpenByName(&uiInfoArray.uiDC, "profile_delete_fail_popmenu");
+            Menus_OpenByName(&uiInfo->uiDC, "profile_delete_fail_popmenu");
         }
     }
 }

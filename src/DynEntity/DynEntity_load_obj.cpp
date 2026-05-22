@@ -337,6 +337,7 @@ uint8_t *__cdecl DynEnt_Alloc(int32_t count, int32_t size)
     return buf;
 }
 
+#ifdef KISAK_MP
 void __cdecl DynEnt_LoadEntities()
 {
     char *v0; // eax
@@ -605,6 +606,35 @@ void __cdecl DynEnt_LoadEntities()
         }
     }
 }
+#endif // KISAK_MP
+
+#ifdef KISAK_SP
+void __cdecl DynEnt_LoadEntities(MemoryFile *memFile)
+{
+    iassert(memFile);
+    for (int drawType = 0; drawType < 2; ++drawType)
+    {
+        uint16_t count = 0;
+        MemFile_ReadData(memFile, sizeof(count), (unsigned __int8 *)&count);
+        cm.dynEntCount[drawType] = count;
+        if (count == 0)
+            continue;
+
+        MemFile_ReadData(memFile, sizeof(DynEntityPose) * count, (unsigned __int8 *)cm.dynEntPoseList[drawType]);
+        MemFile_ReadData(memFile, sizeof(DynEntityClient) * count, (unsigned __int8 *)cm.dynEntClientList[drawType]);
+
+        for (uint16_t dynEntId = 0; dynEntId < count; ++dynEntId)
+        {
+            uint8_t hasPhys = 0;
+            MemFile_ReadData(memFile, 1, &hasPhys);
+            if (hasPhys)
+                cm.dynEntClientList[drawType][dynEntId].physObjId = (uintptr_t)Phys_ObjLoad(PHYS_WORLD_DYNENT, memFile);
+            else
+                cm.dynEntClientList[drawType][dynEntId].physObjId = 0;
+        }
+    }
+}
+#endif // KISAK_SP
 
 const DynEntityProps *__cdecl DynEnt_GetEntityProps(DynEntityType dynEntType)
 {

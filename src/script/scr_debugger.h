@@ -334,6 +334,8 @@ void Scr_EnableBreakpoints(bool enable);
 bool Scr_CanDrawScript();
 void __cdecl Scr_DrawScript();
 
+void Scr_UpdateRemoteDebugger();
+
 extern scrDebuggerGlob_t scrDebuggerGlob;
 extern Scr_Breakpoint g_breakpoints[128];
 extern Scr_Breakpoint *g_breakpointsHead;

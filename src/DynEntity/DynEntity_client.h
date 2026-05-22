@@ -273,7 +273,12 @@ struct DynEntityCreateParams // sizeof=0x1C0
 };
 static_assert(sizeof(DynEntityCreateParams) == 0x1C0);
 
+#ifdef KISAK_MP
 void __cdecl DynEnt_LoadEntities();
+#endif
+#ifdef KISAK_SP
+void __cdecl DynEnt_LoadEntities(struct MemoryFile *memFile);
+#endif
 const DynEntityProps *__cdecl DynEnt_GetEntityProps(DynEntityType dynEntType);
 uint16_t __cdecl DynEnt_GetId(const DynEntityDef *dynEntDef, DynEntityDrawType drawType);
 uint16_t __cdecl DynEnt_GetEntityCount(DynEntityCollType collType);

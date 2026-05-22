@@ -104,6 +104,8 @@ void Sys_SetServerTimeout(int timeout);
 bool Sys_WaitForSaveHistoryDone();
 int Sys_SpawnServerDemoThread(void(*function)(unsigned int));
 void Sys_SetSaveHistoryEvent();
+void Sys_WaitForSaveHistory();
+void Sys_SetSaveHistoryDoneEvent();
 #endif
 
 

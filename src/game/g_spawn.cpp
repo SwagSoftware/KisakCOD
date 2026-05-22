@@ -458,23 +458,16 @@ gentity_s *__cdecl Scr_GetEntity(unsigned int index)
 
 void __cdecl Scr_FreeHudElem(game_hudelem_s *hud)
 {
-    unsigned int v2; // r31
-
     iassert(hud);
-    v2 = hud - g_hudelems;
-    if (v2 >= 0x100)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp",
-            919,
-            0,
-            "hud - g_hudelems doesn't index MAX_HUDELEMS_TOTAL\n\t%i not in [0, %i)",
-            v2,
-            256);
-    if (hud->elem.type == HE_TYPE_FREE)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 920, 0, "%s", "hud->elem.type != HE_TYPE_FREE");
-    Scr_NotifyNum(v2, 1u, scr_const.death, 0);
+
+    unsigned int hudIndex = hud - g_hudelems;
+
+    bcassert(hud - g_hudelems, MAX_HUDELEMS_TOTAL);
+    iassert(hud->elem.type != HE_TYPE_FREE);
+
+    Scr_NotifyNum(hudIndex, 1u, scr_const.death, 0);
     Scr_FreeHudElemConstStrings(hud);
-    Scr_FreeEntityNum(v2, 1u);
+    Scr_FreeEntityNum(hudIndex, 1u);
 }
 
 void __cdecl Scr_AddHudElem(game_hudelem_s *hud)

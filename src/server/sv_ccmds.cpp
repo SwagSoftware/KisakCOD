@@ -272,43 +272,25 @@ void SV_DifficultyFu()
 
 int __cdecl ReadSaveHeader(const char *filename, SaveHeader *header)
 {
-// KISAKSAVE
-    //int v5; // r31
-    //void *v6; // [sp+50h] [-20h] BYREF
-    //
-    //if (!filename)
-    //    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 143, 0, "%s", "filename");
-    //MemCard_SetUseDevDrive(g_useDevSaveArea);
-    //if (OpenDevice(filename, &v6) >= 0)
-    //{
-    //    v5 = ReadFromDevice(header, 1108, v6);
-    //    CloseDevice(v6);
-    //    MemCard_SetUseDevDrive(0);
-    //    if (v5 == 1108)
-    //    {
-    //        if (header->saveVersion == 287)
-    //        {
-    //            return 1;
-    //        }
-    //        else
-    //        {
-    //            Com_Printf(15, "Bad save version %d, expecting %d\n", header->saveVersion, 287);
-    //            return 0;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        Com_Printf(15, "Bad save read.\n");
-    //        return 0;
-    //    }
-    //}
-    //else
-    //{
-    //    MemCard_SetUseDevDrive(0);
-    //    Com_Printf(15, "Can't find savegame %s\n", filename);
-    //    return 0;
-    //}
-    Com_Printf(15, "##KISAKSAVE n");
+    if (!filename)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_ccmds.cpp", 143, 0, "%s", "filename");
+
+    void *fileHandle = 0;
+    if (OpenDevice(filename, &fileHandle) >= 0)
+    {
+        int bytesRead = ReadFromDevice(header, (int)sizeof(SaveHeader), fileHandle);
+        CloseDevice(fileHandle);
+        if (bytesRead == (int)sizeof(SaveHeader))
+        {
+            if (header->saveVersion == 287)
+                return 1;
+            Com_Printf(15, "Bad save version %d, expecting %d\n", header->saveVersion, 287);
+            return 0;
+        }
+        Com_Printf(15, "Bad save read.\n");
+        return 0;
+    }
+    Com_Printf(15, "Can't find savegame %s\n", filename);
     return 0;
 }
 
@@ -628,108 +610,55 @@ void __cdecl SV_LoadGame_f()
 
 void __cdecl SV_ForceSelectSaveDevice_f()
 {
-    // KISAKSAVE?
-    //int v0; // r31
     //
-    //v0 = CL_ControllerIndexFromClientNum(0);
-    //if (GamerProfile_IsProfileLoggedIn(v0) )
-    //{
-    //    UI_ShowReadingSaveDevicePopup();
-    //    Memcard_SelectSaveDevice(v0, 1, 1572864);
-    //    UI_HideReadingSaveDevicePopup();
-    //}
+    bool exists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+    Dvar_SetBool(sv_saveGameAvailable, exists);
 }
 
 void __cdecl SV_SelectSaveDevice_f()
 {
-    // KISAKSAVE?
-    //int v0; // r30
-    //bool v1; // r3
     //
-    //v0 = CL_ControllerIndexFromClientNum(0);
-    //Dvar_SetBool(sv_saveGameAvailable, 0);
-    //if (GamerProfile_IsProfileLoggedIn(v0) )
-    //    {
-    //      if (CL_IsLocalClientInGame(0))
-    //      {
-    //        Com_Printf(
-    //          0,
-    //          "select_save_device is not available while a game is running - use force_select_save_device instead\n");
-    //      }
-    //      else
-    //      {
-    //        UI_ShowReadingSaveDevicePopup();
-    //        if (Memcard_IsDeviceAvailable(v0))
-    //        {
-    //          v1 = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
-    //          Dvar_SetBool(sv_saveGameAvailable, v1);
-    //        }
-    //        else
-    //        {
-    //          Memcard_SelectSaveDevice(v0, 0, 1572864);
-    //          Memcard_WaitForSaveDeviceSelection();
-    //        }
-    //        UI_HideReadingSaveDevicePopup();
-    //      }
-    //    }
+    Dvar_SetBool(sv_saveGameAvailable, 0);
+    if (CL_IsLocalClientInGame(0))
+    {
+        Com_Printf(0,
+            "select_save_device is not available while a game is running - use force_select_save_device instead\n");
+        return;
+    }
+    bool exists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+    Dvar_SetBool(sv_saveGameAvailable, exists);
 }
 
 void __cdecl CheckSaveExists(const char *filename)
 {
-    // KISAKSAVE
-    //__int64 v2; // r10
-    //__int64 v3; // r8
-    //__int64 v4; // r6
-    //int v5; // [sp+8h] [-58h]
-    //int v6; // [sp+Ch] [-54h]
-    //int v7; // [sp+10h] [-50h]
-    //int v8; // [sp+14h] [-4Ch]
-    //int v9; // [sp+18h] [-48h]
-    //int v10; // [sp+1Ch] [-44h]
-    //int v11; // [sp+20h] [-40h]
-    //int v12; // [sp+24h] [-3Ch]
-    //
-    //if (!(unsigned __int8)SaveMemory_IsCommittedSaveAvailable(filename, sv.checksum) && !SaveExists(filename))
-    //{
-    //    HIDWORD(v4) = &unk_8207A214;
-    //    sv_save_filename[0] = 0;
-    //    sv_map_restart = 0;
-    //    LODWORD(v2) = &g_msgBuf[632];
-    //    sv_loadScripts = 0;
-    //    G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v4, v3, v2, v5, v6, v7, v8, v9, v10, v11, v12);
-    //}
+    if (!SaveMemory_IsCommittedSaveAvailable(filename, sv.checksum)
+        && !SaveExists(filename))
+    {
+        sv_save_filename[0] = 0;
+        sv_map_restart = 0;
+        sv_loadScripts = 0;
+        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE,
+            "Save '%s' not available", filename ? filename : "(null)");
+    }
 }
 
 void __cdecl SV_LoadGameContinue_f()
 {
-    // KISAKSAVE
-    //__int64 v0; // r10
-    //__int64 v1; // r8
-    //__int64 v2; // r6
-    //int v3; // [sp+8h] [-58h]
-    //int v4; // [sp+Ch] [-54h]
-    //int v5; // [sp+10h] [-50h]
-    //int v6; // [sp+14h] [-4Ch]
-    //int v7; // [sp+18h] [-48h]
-    //int v8; // [sp+1Ch] [-44h]
-    //int v9; // [sp+20h] [-40h]
-    //int v10; // [sp+24h] [-3Ch]
-    //
-    //if (SV_IsDemoPlaying() && SV_DemoHasMark())
-    //{
-    //    SV_DemoRestart_f();
-    //}
-    //else
-    //{
-    //    g_useDevSaveArea = 0;
-    //    I_strncpyz(sv_save_filename, CONSOLE_DEFAULT_SAVE_NAME, 64);
-    //    CheckSaveExists(sv_save_filename);
-    //    if (!com_sv_running->current.enabled && !SV_CheckLoadGame())
-    //    {
-    //        HIDWORD(v2) = &unk_8207A214;
-    //        G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, v2, v1, v0, v3, v4, v5, v6, v7, v8, v9, v10);
-    //    }
-    //}
+
+    if (SV_IsDemoPlaying() && SV_DemoHasMark())
+    {
+        SV_DemoRestart_f();
+    }
+    else
+    {
+        g_useDevSaveArea = 0;
+        I_strncpyz(sv_save_filename, CONSOLE_DEFAULT_SAVE_NAME, 64);
+        CheckSaveExists(sv_save_filename);
+        if (!com_sv_running->current.enabled && !SV_CheckLoadGame())
+        {
+            G_SaveError(ERR_DROP, SAVE_ERROR_MISSING_DEVICE, "%s", "Save device missing");
+        }
+    }
 }
 
 // attributes: thunk

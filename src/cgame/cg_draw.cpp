@@ -948,65 +948,38 @@ void __cdecl CG_DrawPaused(int localClientNum)
 
 void __cdecl CG_AlterTimescale(int localClientNum, int time, double startScale, double endScale)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    cgArray[0].timeScaleTimeStart = Sys_Milliseconds();
-    cgArray[0].timeScaleTimeEnd = cgArray[0].timeScaleTimeStart + time;
-    cgArray[0].timeScaleStart = startScale;
-    cgArray[0].timeScaleEnd = endScale;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    cgameGlob->timeScaleTimeStart = Sys_Milliseconds();
+    cgameGlob->timeScaleTimeEnd = cgArray[0].timeScaleTimeStart + time;
+    cgameGlob->timeScaleStart = startScale;
+    cgameGlob->timeScaleEnd = endScale;
 }
 
-void __cdecl CG_UpdateTimeScale(cg_s *cgameGlob)
+void __cdecl CG_UpdateTimeScale(int localClientNum)
 {
-    int v2; // r3
-    int v3; // r29
-    int *p_timeScaleTimeStart; // r28
-    __int64 v5; // r11
-    int *p_timeScaleTimeEnd; // r30
-    int v7[4]; // r11
-    double timeScaleEnd; // fp1
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    v2 = Sys_Milliseconds();
-    v3 = v2;
-    p_timeScaleTimeStart = &cgameGlob->timeScaleTimeStart;
-    HIDWORD(v5) = cgameGlob->timeScaleTimeStart;
-    if (HIDWORD(v5) && SHIDWORD(v5) < v2)
+    int currentTime = Sys_Milliseconds();
+    int startTime = cgameGlob->timeScaleTimeStart;
+
+    if (!startTime || currentTime <= startTime)
+        return;
+
+    int endTime = cgameGlob->timeScaleTimeEnd;
+    if (currentTime >= endTime)
     {
-        p_timeScaleTimeEnd = &cgameGlob->timeScaleTimeEnd;
-        LODWORD(v5) = cgameGlob->timeScaleTimeEnd;
-        if (v2 >= (int)v5)
-        {
-            *p_timeScaleTimeStart = 0;
-            timeScaleEnd = cgameGlob->timeScaleEnd;
-            *p_timeScaleTimeEnd = 0;
-            Com_SetTimeScale(timeScaleEnd);
-        }
-        else
-        {
-            LODWORD(v5) = v5 - HIDWORD(v5);
-            if ((float)v5 <= 0.0)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_draw.cpp",
-                    828,
-                    0,
-                    "%s",
-                    "cgameGlob->timeScaleTimeEnd - cgameGlob->timeScaleTimeStart > 0.0f");
-            v7[1] = *p_timeScaleTimeEnd;
-            v7[2] = v3 - *p_timeScaleTimeStart;
-            v7[3] = *p_timeScaleTimeEnd - *p_timeScaleTimeStart;
-            Com_SetTimeScale((float)((float)((float)((float)1.0
-                - (float)((float)*(__int64 *)&v7[1] / (float)*(__int64 *)&v7[2]))
-                * cgameGlob->timeScaleStart)
-                + (float)(cgameGlob->timeScaleEnd
-                    * (float)((float)*(__int64 *)&v7[1] / (float)*(__int64 *)&v7[2]))));
-        }
+        cgameGlob->timeScaleTimeStart = 0;
+        cgameGlob->timeScaleTimeEnd = 0;
+        Com_SetTimeScale(cgameGlob->timeScaleEnd);
+        return;
     }
+
+    int duration = endTime - startTime;
+    iassert(duration > 0);
+    int elapsed = currentTime - startTime;
+    float t = (float)elapsed / (float)duration;
+    Com_SetTimeScale((1.0f - t) * cgameGlob->timeScaleStart + t * cgameGlob->timeScaleEnd);
 }
 
 const char strButtons[17] =
@@ -1212,15 +1185,10 @@ void __cdecl CG_Draw2D(int localClientNum)
     snapshot_s *nextSnap; // r29
     int integer; // r11
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    CG_UpdateTimeScale(cgArray);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+
+    CG_UpdateTimeScale(localClientNum);
+
     if (cgArray[0].predictedPlayerState.pm_type != 4 && cgArray[0].cubemapShot == CUBEMAPSHOT_NONE)
     {
         nextSnap = cgArray[0].nextSnap;
