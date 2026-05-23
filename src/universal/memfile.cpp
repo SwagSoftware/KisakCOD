@@ -763,16 +763,19 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* d
     if (cacheSize <= 4)
         MyAssertHandler(".\\universal\\memfile.cpp", 732, 0, "%s\n\t(cacheSize) = %i", "(cacheSize > 4)", cacheSize);
     cacheSizea = cacheSize - 3;
+
     if (memFile->compress)
     {
-        vassert(g_cacheBuffer[cacheSize + 1] == 0 && g_cacheBuffer[cacheSize + 2] == 0, "g_cacheBuffer[cacheSize + 1] == %d, g_cacheBuffer[cacheSize + 2] == %d", g_cacheBuffer[cacheSize + 1], g_cacheBuffer[cacheSize + 2]);
+        vassert(g_cacheBuffer[cacheSize - 2] == 0 && g_cacheBuffer[cacheSize - 1] == 0,
+            "g_cacheBuffer[cacheSize - 2] == %d, g_cacheBuffer[cacheSize - 1] == %d",
+            g_cacheBuffer[cacheSize - 2], g_cacheBuffer[cacheSize - 1]);
         moveByte = g_cacheBuffer[cacheSizea];
     }
     else
     {
-        vassert(memFile->buffer[memFile->bytesUsed + cacheSize + 1] == 0 && memFile->buffer[memFile->bytesUsed + cacheSize + 2] == 0,
-            "memFile->buffer[memFile->bytesUsed + cacheSize + 1] == %d, memFile->buffer[memFile->bytesUsed + cacheSize + 2] == %d",
-            memFile->buffer[memFile->bytesUsed + cacheSize + 1], memFile->buffer[memFile->bytesUsed + cacheSize + 2]);
+        vassert(memFile->buffer[memFile->bytesUsed + cacheSize - 2] == 0 && memFile->buffer[memFile->bytesUsed + cacheSize - 1] == 0,
+            "memFile->buffer[memFile->bytesUsed + cacheSize - 2] == %d, memFile->buffer[memFile->bytesUsed + cacheSize - 1] == %d",
+            memFile->buffer[memFile->bytesUsed + cacheSize - 2], memFile->buffer[memFile->bytesUsed + cacheSize - 1]);
 
         moveByte = memFile->buffer[cacheSizea + memFile->bytesUsed];
     }

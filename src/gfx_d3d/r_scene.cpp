@@ -1829,12 +1829,9 @@ void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *scene
 
 void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParms)
 {
-    const DvarValue *p_current; // [esp+Ch] [ebp-10h]
-    int v3; // [esp+14h] [ebp-8h]
-    float desaturationScale; // [esp+18h] [ebp-4h]
-
     iassert( viewInfo );
     iassert( sceneParms );
+
     if (r_filmUseTweaks->current.enabled)
     {
         viewInfo->film.enabled = r_filmTweakEnable->current.enabled;
@@ -1842,26 +1839,23 @@ void __cdecl R_SetFilmInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
         viewInfo->film.brightness = r_filmTweakBrightness->current.value;
         viewInfo->film.desaturation = r_filmTweakDesaturation->current.value;
         viewInfo->film.invert = r_filmTweakInvert->current.enabled;
-        //v3 = LODWORD(r_lightTweakSunDirection.vector[1]) + 12;
-        //viewInfo->film.tintLight[0] = *(float *)(LODWORD(r_lightTweakSunDirection.vector[1]) + 12);
-        //viewInfo->film.tintLight[1] = *(float *)(v3 + 4);
-        //viewInfo->film.tintLight[2] = *(float *)(v3 + 8);
-        viewInfo->film.tintLight[0] = r_lightTweakSunDirection->current.vector[0];
-        viewInfo->film.tintLight[1] = r_lightTweakSunDirection->current.vector[1];
-        viewInfo->film.tintLight[2] = r_lightTweakSunDirection->current.vector[2];
-        p_current = &r_filmTweakDarkTint->current;
+        viewInfo->film.tintLight[0] = r_filmTweakLightTint->current.vector[0];
+        viewInfo->film.tintLight[1] = r_filmTweakLightTint->current.vector[1];
+        viewInfo->film.tintLight[2] = r_filmTweakLightTint->current.vector[2];
         viewInfo->film.tintDark[0] = r_filmTweakDarkTint->current.value;
-        viewInfo->film.tintDark[1] = p_current->vector[1];
-        viewInfo->film.tintDark[2] = p_current->vector[2];
+        viewInfo->film.tintDark[1] = r_filmTweakDarkTint->current.vector[1];
+        viewInfo->film.tintDark[2] = r_filmTweakDarkTint->current.vector[2];
     }
     else
     {
         memcpy(&viewInfo->film, &sceneParms->film, sizeof(viewInfo->film));
     }
-    desaturationScale = (1.0 - viewInfo->film.desaturation) * r_desaturation->current.value + viewInfo->film.desaturation;
+
+    float desaturationScale = (1.0 - viewInfo->film.desaturation) * r_desaturation->current.value + viewInfo->film.desaturation;
     viewInfo->film.desaturation = viewInfo->film.desaturation * desaturationScale;
     viewInfo->film.contrast = viewInfo->film.contrast * r_contrast->current.value;
     viewInfo->film.brightness = viewInfo->film.brightness + r_brightness->current.value;
+
     R_UpdateColorManipulation(viewInfo);
 }
 

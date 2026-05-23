@@ -1422,12 +1422,12 @@ void CG_ModPrvLightSetupModified()
 
 bool __cdecl CG_ModPrvAnyLightValuesChanged()
 {
-    return *(_BYTE *)(modPrvSunDirection + 11)
-        || *(_BYTE *)(modPrvSunColor + 11)
-        || *(_BYTE *)(modPrvSunLight + 11)
-        || *(_BYTE *)(modPrvSunDiffuseColor + 11)
-        || *(_BYTE *)(modPrvSunDiffuseFraction + 11)
-        || *(_BYTE *)(modPrvAmbientColor + 11)
+    return modPrvSunDirection->modified
+        || modPrvSunColor->modified
+        || modPrvSunLight->modified
+        || modPrvSunDiffuseColor->modified
+        || modPrvSunDiffuseFraction->modified
+        || modPrvAmbientColor->modified
         || modPrvAmbientScale->modified;
 }
 

@@ -501,7 +501,14 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 return;
 #endif
             case EV_BULLET_HIT:
+#ifdef KISAK_SP
+                iassert(ent->eventParm == 0);
+                dir[0] = ent->lerp.apos.trBase[0];
+                dir[1] = ent->lerp.apos.trBase[1];
+                dir[2] = ent->lerp.apos.trBase[2];
+#else
                 ByteToDir(ent->eventParm, dir);
+#endif
                 CG_BulletHitEvent(
                     localClientNum,
                     ent->otherEntityNum,
