@@ -170,7 +170,7 @@ void __cdecl PM_playerTrace(
     }
 }
 
-void __cdecl PM_AddEvent(playerState_s *ps, uint32_t newEvent)
+void __cdecl PM_AddEvent(playerState_s *ps, entity_event_t newEvent)
 {
     BG_AddPredictableEventToPlayerstate(newEvent, 0, ps);
 }
@@ -397,8 +397,6 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
 
 void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char iNewBobCycle, int32_t bFootStep)
 {
-    uint32_t v5; // eax
-    uint32_t v6; // [esp+4h] [ebp-70h]
     float mins[3] = { 0 }; // [esp+14h] [ebp-60h] BYREF
     float vEnd[3] = { 0 }; // [esp+20h] [ebp-54h] BYREF
     int32_t iClipMask; // [esp+2Ch] [ebp-48h]
@@ -442,33 +440,31 @@ void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char i
                 iSurfaceType = (trace.surfaceFlags & 0x1F00000) >> 20;
                 if (trace.fraction == 1.0 || !iSurfaceType)
                     iSurfaceType = 21;
-                BG_AddPredictableEventToPlayerstate(0x49u, iSurfaceType, ps);
+                BG_AddPredictableEventToPlayerstate(EV_FOOTSTEP_RUN, iSurfaceType, ps);
             }
         }
         else if (bFootStep)
         {
-            v6 = PM_GroundSurfaceType(pml);
-            v5 = PM_FootstepType(ps, pml);
-            BG_AddPredictableEventToPlayerstate(v5, v6, ps);
+            BG_AddPredictableEventToPlayerstate(PM_FootstepType(ps, pml), PM_GroundSurfaceType(pml), ps);
         }
     }
 }
 
-int32_t __cdecl PM_FootstepType(playerState_s *ps, pml_t *pml)
+entity_event_t PM_FootstepType(playerState_s *ps, pml_t *pml)
 {
     if (!PM_GroundSurfaceType(pml))
-        return 0;
+        return EV_NONE;
 
     if ((ps->pm_flags & PMF_PRONE) != 0)
-        return 75;
+        return EV_FOOTSTEP_PRONE;
 
     if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0)
-        return 74;
+        return EV_FOOTSTEP_WALK;
 
     if (PM_IsSprinting(ps))
-        return 72;
+        return EV_FOOTSTEP_SPRINT;
 
-    return 73;
+    return EV_FOOTSTEP_RUN;
 }
 
 bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
@@ -1169,13 +1165,13 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
                     50.0);
             if (!v2)
             {
-                BG_AddPredictableEventToPlayerstate(7u, 0, ps);
+                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
                 ps->pm_flags |= PMF_NO_PRONE;
             }
         }
         else if (pml->groundPlane && !pml->groundTrace.walkable)
         {
-            BG_AddPredictableEventToPlayerstate(7u, 0, ps);
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
         }
         if (pml->groundPlane)
         {
@@ -2773,10 +2769,6 @@ void __cdecl PM_GroundTrace(pmove_t *pm, pml_t *pml)
 
 void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
 {
-    uint32_t v2; // eax
-    uint32_t v3; // eax
-    uint32_t v4; // eax
-    uint32_t v5; // eax
     int32_t v6; // [esp+8h] [ebp-50h]
     float v7; // [esp+Ch] [ebp-4Ch]
     int32_t v8; // [esp+18h] [ebp-40h]
@@ -2888,8 +2880,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
                 ps->pm_flags |= PMF_TIME_HARDLANDING;
                 Vec3Scale(ps->velocity, fSpeedMult, ps->velocity);
             }
-            v2 = PM_DamageLandingForSurface(pml);
-            BG_AddPredictableEventToPlayerstate(v2, damage, ps);
+            BG_AddPredictableEventToPlayerstate(PM_DamageLandingForSurface(pml), damage, ps);
         }
         else if (fallHeight > 4.0f)
         {
@@ -2897,57 +2888,55 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
             {
                 if (fallHeight >= 12.0f)
                 {
-                    Vec3Scale(ps->velocity, 0.67000002f, ps->velocity);
-                    v5 = PM_HardLandingForSurface(pml);
-                    BG_AddPredictableEventToPlayerstate(v5, viewDip, ps);
+                    Vec3Scale(ps->velocity, 0.67f, ps->velocity);
+                    BG_AddPredictableEventToPlayerstate(PM_HardLandingForSurface(pml), viewDip, ps);
                 }
                 else
                 {
-                    v4 = PM_MediumLandingForSurface(pml);
-                    BG_AddPredictableEventToPlayerstate(v4, surfaceType, ps);
+                    BG_AddPredictableEventToPlayerstate(PM_MediumLandingForSurface(pml), surfaceType, ps);
                 }
             }
             else
             {
-                v3 = PM_LightLandingForSurface(pml);
-                BG_AddPredictableEventToPlayerstate(v3, surfaceType, ps);
+                BG_AddPredictableEventToPlayerstate(PM_LightLandingForSurface(pml), surfaceType, ps);
             }
         }
     }
 }
 
-int32_t __cdecl PM_LightLandingForSurface(pml_t *pml)
+entity_event_t __cdecl PM_LightLandingForSurface(pml_t *pml)
 {
     if (PM_GroundSurfaceType(pml))
-        return 74;
+        return EV_FOOTSTEP_WALK;
     else
-        return 0;
+        return EV_NONE;
 }
 
-int32_t __cdecl PM_MediumLandingForSurface(pml_t *pml)
+entity_event_t __cdecl PM_MediumLandingForSurface(pml_t *pml)
 {
     if (PM_GroundSurfaceType(pml))
-        return 73;
+        return EV_FOOTSTEP_RUN;
     else
-        return 0;
+        return EV_NONE;
 }
 
-uint32_t __cdecl PM_HardLandingForSurface(pml_t *pml)
+entity_event_t __cdecl PM_HardLandingForSurface(pml_t *pml)
 {
     uint32_t iSurfType = PM_GroundSurfaceType(pml); // [esp+0h] [ebp-4h]
     if (iSurfType)
-        return iSurfType + 77;
+        return (entity_event_t)(EV_LANDING_FIRST + iSurfType);
     else
-        return 0;
+        return EV_NONE;
 }
 
-uint32_t __cdecl PM_DamageLandingForSurface(pml_t *pml)
+entity_event_t __cdecl PM_DamageLandingForSurface(pml_t *pml)
 {
     uint32_t iSurfType = PM_GroundSurfaceType(pml); // [esp+0h] [ebp-4h]
+
     if (iSurfType)
-        return iSurfType + 106;
+        return (entity_event_t)(EV_LANDING_PAIN_FIRST + iSurfType);
     else
-        return 0;
+        return EV_NONE;
 }
 
 int32_t __cdecl PM_CorrectAllSolid(pmove_t *pm, pml_t *pml, trace_t *trace)
@@ -3101,7 +3090,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         if ((pm->cmd.buttons & 0x100) != 0)
         {
             pm->cmd.buttons &= ~0x100u;
-            BG_AddPredictableEventToPlayerstate(6, 0, ps);
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
         }
         ps->viewHeightTarget = 0;
         ps->viewHeightCurrent = 0.0;
@@ -3129,7 +3118,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         {
             ps->viewHeightTarget = 60;
             ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
-            BG_AddPredictableEventToPlayerstate(6u, 0, ps);
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
         else if ((ps->pm_flags & PMF_SPRINTING) != 0)
@@ -3137,7 +3126,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             ps->viewHeightTarget = 60;
             ps->eFlags &= 0xFFFFFFF3;
             ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
-            BG_AddPredictableEventToPlayerstate(6u, 0, ps);
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
             PM_ViewHeightAdjust(pm, pml);
         }
         else
@@ -3176,7 +3165,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     if ((ps->pm_flags & PMF_LADDER) != 0 && (pm->cmd.buttons & 0x300) != 0)
                     {
                         pm->cmd.buttons &= 0xFFFFFCFF;
-                        BG_AddPredictableEventToPlayerstate(6u, 0, ps);
+                        BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
                     }
                     if ((pm->cmd.buttons & 0x100) == 0 || (ps->pm_flags & PMF_RESPAWNED) != 0)
                     {
@@ -3196,7 +3185,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 if (trace.allsolid)
                                 {
                                     if ((pm->cmd.buttons & 0x1000) == 0)
-                                        BG_AddPredictableEventToPlayerstate(8u, 2u, ps);
+                                        BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_PRONE, 2u, ps);
                                 }
                                 else
                                 {
@@ -3239,7 +3228,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 if (trace.allsolid)
                                 {
                                     if ((pm->cmd.buttons & 0x1000) == 0)
-                                        BG_AddPredictableEventToPlayerstate(8u, 1u, ps);
+                                        BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_PRONE, 1u, ps);
                                 }
                                 else
                                 {
@@ -3268,7 +3257,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             if (trace.allsolid)
                             {
                                 if ((pm->cmd.buttons & 0x1000) == 0)
-                                    BG_AddPredictableEventToPlayerstate(7u, 1u, ps);
+                                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 1u, ps);
                             }
                             else
                             {
@@ -3290,9 +3279,9 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         if ((pm->cmd.buttons & 0x1000) == 0)
                         {
                             if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & PMF_DUCKED) != 0)
-                                BG_AddPredictableEventToPlayerstate(7u, 0, ps);
+                                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
                             else
-                                BG_AddPredictableEventToPlayerstate(6u, 0, ps);
+                                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
                         }
                     }
                 }
@@ -4119,7 +4108,7 @@ void __cdecl PM_FoliageSounds(pmove_t *pm)
             PM_playerTrace(pm, &trace, ps->origin, mins, maxs, ps->origin, ps->clientNum, 2);
             if (trace.startsolid)
             {
-                PM_AddEvent(ps, 1u);
+                PM_AddEvent(ps, EV_FOLIAGE_SOUND);
                 ps->foliageSoundTime = pm->cmd.serverTime;
             }
         }
@@ -4578,8 +4567,6 @@ void __cdecl PM_MeleeChargeUpdate(pmove_t *pm, pml_t *pml)
 
 void __cdecl TurretNVGTrigger(pmove_t *pm)
 {
-     
-
     iassert(pm);
     playerState_s* ps = pm->ps; // [esp+8h] [ebp-4h]
     iassert(ps);
@@ -4589,12 +4576,12 @@ void __cdecl TurretNVGTrigger(pmove_t *pm)
         if ((ps->weapFlags & 0x40) != 0)
         {
             ps->weapFlags &= ~0x40u;
-            PM_AddEvent(ps, 0x41u);
+            PM_AddEvent(ps, EV_NIGHTVISION_REMOVE);
         }
         else
         {
             ps->weapFlags |= 0x40u;
-            PM_AddEvent(ps, 0x40u);
+            PM_AddEvent(ps, EV_NIGHTVISION_WEAR);
         }
     }
 }

@@ -938,7 +938,7 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 
 void __cdecl PM_ExitAimDownSight(playerState_s *ps)
 {
-    PM_AddEvent(ps, 0xEu);
+    PM_AddEvent(ps, EV_RESET_ADS);
     ps->pm_flags &= ~PMF_SIGHT_AIMING;
 }
 
@@ -1523,7 +1523,7 @@ int32_t __cdecl PM_Weapon_CheckForRechamber(playerState_s *ps, int32_t delayedAc
                 if (delayedAction)
                 {
                     Com_BitClearAssert(ps->weaponrechamber, ps->weapon, 16);
-                    PM_AddEvent(ps, 0x1Du);
+                    PM_AddEvent(ps, EV_EJECT_BRASS);
                     if (ps->weaponTime)
                         return 1;
                 }
@@ -1552,7 +1552,7 @@ int32_t __cdecl PM_Weapon_CheckForRechamber(playerState_s *ps, int32_t delayedAc
                         ps->weaponDelay = weapDef->iRechamberBoltTime;
                     else
                         ps->weaponDelay = 1;
-                    PM_AddEvent(ps, 0x1Cu);
+                    PM_AddEvent(ps, EV_RECHAMBER_WEAPON);
                 }
             }
         }
@@ -1689,9 +1689,9 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
             if (oldweapon)
             {
                 if (firstequip)
-                    PM_AddEvent(ps, 0x16u);
+                    PM_AddEvent(ps, EV_FIRST_RAISE_WEAPON);
                 else
-                    PM_AddEvent(ps, 0x15u);
+                    PM_AddEvent(ps, EV_RAISE_WEAPON);
 #ifdef KISAK_MP
                 BG_AnimScriptEvent(ps, ANIM_ET_RAISEWEAPON, 0, 0);
 #endif
@@ -1781,7 +1781,7 @@ void __cdecl PM_Weapon_FinishReloadStart(pmove_t *pm, int32_t delayedAction)
                 ps->weaponstate = WEAPON_RELOAD_END;
                 PM_StartWeaponAnim(ps, 16);
                 ps->weaponTime = weapDef->iReloadEndTime;
-                PM_AddEvent(ps, 0x12u);
+                PM_AddEvent(ps, EV_RELOAD_END);
             }
             else
             {
@@ -1805,13 +1805,13 @@ void __cdecl PM_SetReloadingState(playerState_s *ps)
     {
         PM_StartWeaponAnim(ps, 13);
         ps->weaponTime = weapDef->iReloadTime;
-        PM_AddEvent(ps, 0xFu);
+        PM_AddEvent(ps, EV_RELOAD);
     }
     else
     {
         PM_StartWeaponAnim(ps, 14);
         ps->weaponTime = weapDef->iReloadEmptyTime;
-        PM_AddEvent(ps, 0x10u);
+        PM_AddEvent(ps, EV_RELOAD_FROM_EMPTY);
     }
     if (ps->weaponstate == WEAPON_RELOAD_START_INTERUPT)
         ps->weaponstate = WEAPON_RELOADING_INTERUPT;
@@ -1921,7 +1921,7 @@ void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps)
         return;
     }
     Com_BitClearAssert(ps->weaponrechamber, ps->weapon, 16);
-    PM_AddEvent(ps, 0x1Du);
+    PM_AddEvent(ps, EV_EJECT_BRASS);
     if (ps->weaponstate != 9 && ps->weaponstate != 10 || weapDef->iReloadStartAddTime)
     {
         if (ps->weaponTime)
@@ -1985,7 +1985,7 @@ void __cdecl PM_ReloadClip(playerState_s *ps)
         {
             ps->ammo[ammo] -= ammoAdd;
             ps->ammoclip[clip] += ammoAdd;
-            PM_AddEvent(ps, 0x14u);
+            PM_AddEvent(ps, EV_RELOAD_ADDAMMO);
         }
     }
 }
@@ -2020,7 +2020,7 @@ void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction)
                 ps->weaponstate = WEAPON_RELOAD_END;
                 PM_StartWeaponAnim(ps, 16);
                 ps->weaponTime = weapDef->iReloadEndTime;
-                PM_AddEvent(ps, 0x12u);
+                PM_AddEvent(ps, EV_RELOAD_END);
             }
             else
             {
@@ -2137,14 +2137,14 @@ void __cdecl PM_BeginWeaponReload(playerState_s *ps)
             BG_AnimScriptEvent(ps, ANIM_ET_RELOAD, 0, 1);
 #endif
         ps->weaponShotCount = 0;
-        PM_AddEvent(ps, 0xEu);
-        PM_AddEvent(ps, 0x13u);
+        PM_AddEvent(ps, EV_RESET_ADS);
+        PM_AddEvent(ps, EV_RELOAD_START_NOTIFY);
         if (weapDef->bSegmentedReload && weapDef->iReloadStartTime)
         {
             PM_StartWeaponAnim(ps, 15);
             ps->weaponTime = weapDef->iReloadStartTime;
             ps->weaponstate = WEAPON_RELOAD_START;
-            PM_AddEvent(ps, 0x11u);
+            PM_AddEvent(ps, EV_RELOAD_START);
             PM_SetWeaponReloadAddAmmoDelay(ps);
         }
         else
@@ -2438,7 +2438,7 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                 || ps->weaponstate == WEAPON_RELOAD_START_INTERUPT
                 || ps->weaponstate == WEAPON_RELOADING_INTERUPT)
             {
-                BG_AddPredictableEventToPlayerstate(2u, ps->weaponstate, ps);
+                BG_AddPredictableEventToPlayerstate(EV_STOP_WEAPON_SOUND, ps->weaponstate, ps);
             }
             ps->weaponDelay = 0;
             oldweapon = ps->weapon;
@@ -2463,12 +2463,12 @@ void __cdecl PM_BeginWeaponChange(playerState_s *ps, uint32_t newweapon, bool qu
                 ps->grenadeTimeLeft = 0;
                 if (altswitch)
                 {
-                    PM_AddEvent(ps, 0x18u);
+                    PM_AddEvent(ps, EV_WEAPON_ALT);
                     PM_StartWeaponAnim(ps, 17);
                 }
                 else
                 {
-                    PM_AddEvent(ps, 0x17u);
+                    PM_AddEvent(ps, EV_PUTAWAY_WEAPON);
                     if ((ps->pm_flags & PMF_SPRINTING) == 0)
                     {
                         if (noammo)
@@ -2576,9 +2576,9 @@ void __cdecl PM_Weapon_FireWeapon(playerState_s *ps, int32_t delayedAction)
                 ps->weaponTime = weapDef->iFireTime;
             PM_Weapon_SetFPSFireAnim(ps);
             if (PM_WeaponClipEmpty(ps))
-                PM_AddEvent(ps, 0x1Bu);
+                PM_AddEvent(ps, EV_FIRE_WEAPON_LASTSHOT);
             else
-                PM_AddEvent(ps, 0x1Au);
+                PM_AddEvent(ps, EV_FIRE_WEAPON);
             PM_HoldBreathFire(ps);
             PM_Weapon_AddFiringAimSpreadScale(ps);
             BG_SwitchWeaponsIfEmpty(ps);
@@ -2633,7 +2633,7 @@ void __cdecl BG_SwitchWeaponsIfEmpty(playerState_s *ps)
         && !ps->ammo[BG_AmmoForWeapon(ps->weapon)]
             && !BG_GetWeaponDef(ps->weapon)->hasDetonator)
     {
-        PM_AddEvent(ps, 0xBu);
+        PM_AddEvent(ps, EV_NOAMMO);
     }
 }
 
@@ -2671,7 +2671,7 @@ void __cdecl PM_Weapon_StartFiring(playerState_s *ps, int32_t delayedAction)
     {
         ps->grenadeTimeLeft = weapDef->fuseTime;
         PM_StartWeaponAnim(ps, 26);
-        BG_AddPredictableEventToPlayerstate(0x19u, ps->weapon, ps);
+        BG_AddPredictableEventToPlayerstate(EV_PULLBACK_WEAPON, ps->weapon, ps);
     }
     ps->weaponDelay = weapDef->iHoldFireTime;
     ps->weaponTime = 0;
@@ -2715,7 +2715,7 @@ int __cdecl PM_Weapon_CheckFiringAmmo(playerState_s *ps)
 
     reloadingW = ammoNeeded <= ps->ammo[v1];
     if (weapDef->weapType != WEAPTYPE_GRENADE && ammoNeeded > ps->ammo[v1])
-        PM_AddEvent(ps, 0xBu);
+        PM_AddEvent(ps, EV_NOAMMO);
 
     if (reloadingW)
     {
@@ -2788,7 +2788,7 @@ void __cdecl PM_Weapon_MeleeFire(playerState_s *ps)
 
     BG_GetWeaponDef(ps->weapon);
     ps->weaponstate = WEAPON_MELEE_FIRE;
-    PM_AddEvent(ps, 0x1Fu);
+    PM_AddEvent(ps, EV_FIRE_MELEE);
     PM_SetProneMovementOverride(ps);
 }
 
@@ -2868,7 +2868,7 @@ void __cdecl PM_Weapon_MeleeInit(playerState_s *ps)
     }
 #endif
     ps->weaponstate = WEAPON_MELEE_INIT;
-    PM_AddEvent(ps, 0x1Eu);
+    PM_AddEvent(ps, EV_MELEE_SWIPE);
     PM_SetProneMovementOverride(ps);
 }
 
@@ -2896,7 +2896,7 @@ void __cdecl PM_Weapon_OffHandPrepare(playerState_s *ps)
     }
     else
     {
-        BG_AddPredictableEventToPlayerstate(0x20u, ps->offHandIndex, ps);
+        BG_AddPredictableEventToPlayerstate(EV_PREP_OFFHAND, ps->offHandIndex, ps);
         PM_StartWeaponAnim(ps, 26);
     }
     PM_SetProneMovementOverride(ps);
@@ -2959,13 +2959,13 @@ void __cdecl PM_Weapon_OffHand(pmove_t *pm)
     iassert(ps->offHandIndex != WP_NONE);
 
     BG_GetWeaponDef(ps->offHandIndex);
-    BG_AddPredictableEventToPlayerstate(0x21u, ps->offHandIndex, ps);
+    BG_AddPredictableEventToPlayerstate(EV_USE_OFFHAND, ps->offHandIndex, ps);
     if (!BG_ThrowingBackGrenade(ps))
     {
         if (BG_WeaponAmmo(ps, ps->offHandIndex))
             PM_WeaponUseAmmo(ps, ps->offHandIndex, 1);
         else
-            PM_AddEvent(ps, 0xDu);
+            PM_AddEvent(ps, EV_EMPTY_OFFHAND);
     }
     ps->weaponstate = WEAPON_OFFHAND;
     ps->weapFlags |= 2u;
@@ -3076,7 +3076,7 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
 
         if (offHandIndex)
         {
-            BG_AddPredictableEventToPlayerstate(0x22u, offHandIndex, ps);
+            BG_AddPredictableEventToPlayerstate(EV_SWITCH_OFFHAND, offHandIndex, ps);
             ps->offHandIndex = offHandIndex;
             pWeapDef3 = BG_GetWeaponDef(ps->offHandIndex);
             pWeapDef4 = pWeapDef3;
@@ -3123,14 +3123,14 @@ void __cdecl PM_SendEmtpyOffhandEvent(playerState_s *ps, OffhandClass offhandCla
 {
     iassert(ps);
 
-    PM_AddEvent(ps, 0xDu);
+    PM_AddEvent(ps, EV_EMPTY_OFFHAND);
     
     if (BG_GetFirstEquippedOffhand(ps, offhandClass))
     {
         if (offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
-            PM_AddEvent(ps, 0x43u);
+            PM_AddEvent(ps, EV_NO_FRAG_GRENADE_HINT);
         else
-            PM_AddEvent(ps, 0x44u);
+            PM_AddEvent(ps, EV_NO_SPECIAL_GRENADE_HINT);
     }
 }
 
@@ -3182,7 +3182,7 @@ char __cdecl PM_UpdateGrenadeThrow(playerState_s *ps, pml_t *pml)
         return 0;
 
     ps->grenadeTimeLeft = -1;
-    BG_AddPredictableEventToPlayerstate(0x3Eu, ps->offHandIndex, ps);
+    BG_AddPredictableEventToPlayerstate(EV_GRENADE_SUICIDE, ps->offHandIndex, ps);
 
     if (!BG_ThrowingBackGrenade(ps))
         PM_WeaponUseAmmo(ps, weapIndex, 1);
@@ -3287,7 +3287,7 @@ void __cdecl PM_Detonate(playerState_s *ps, int32_t delayedAction)
     iassert(ps);
 
     if (delayedAction && ps->weapon)
-        PM_AddEvent(ps, 0x3Fu);
+        PM_AddEvent(ps, EV_DETONATE);
     else
         PM_Weapon_Idle(ps);
 }
@@ -3307,12 +3307,12 @@ void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm)
         if ((ps->weapFlags & 0x40) != 0)
         {
             ps->weapFlags &= ~0x40u;
-            PM_AddEvent(ps, 0x41u);
+            PM_AddEvent(ps, EV_NIGHTVISION_REMOVE);
         }
         else
         {
             ps->weapFlags |= 0x40u;
-            PM_AddEvent(ps, 0x40u);
+            PM_AddEvent(ps, EV_NIGHTVISION_WEAR);
         }
     }
 }

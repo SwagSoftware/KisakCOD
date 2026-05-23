@@ -1357,7 +1357,7 @@ gentity_s *__cdecl G_TempEntity(const float *origin, int event)
     return e;
 }
 
-void __cdecl G_AddPredictableEvent(gentity_s *ent, unsigned int event, unsigned int eventParm)
+void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm)
 {
     if (ent->client)
         BG_AddPredictableEventToPlayerstate(event, eventParm, &ent->client->ps);

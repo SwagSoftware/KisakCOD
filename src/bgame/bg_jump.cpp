@@ -325,13 +325,13 @@ void __cdecl Jump_AddSurfaceEvent(playerState_s *ps, pml_t *pml)
 
     if ((ps->pm_flags & PMF_LADDER) != 0)
     {
-        BG_AddPredictableEventToPlayerstate(0x4Cu, 0x15u, ps);
+        BG_AddPredictableEventToPlayerstate(EV_JUMP, 0x15u, ps);
     }
     else
     {
         surfType = PM_GroundSurfaceType(pml);
         if (surfType)
-            BG_AddPredictableEventToPlayerstate(0x4Cu, surfType, ps);
+            BG_AddPredictableEventToPlayerstate(EV_JUMP, surfType, ps);
     }
 }
 

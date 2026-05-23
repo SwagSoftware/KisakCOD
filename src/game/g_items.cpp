@@ -124,13 +124,13 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
     const char *szInternalName; // [esp-4h] [ebp-60h]
     gitem_s *item; // [esp+0h] [ebp-5Ch]
     char cleanname[68]; // [esp+4h] [ebp-58h] BYREF
-    int32_t pickupEvent; // [esp+50h] [ebp-Ch] BYREF
+    entity_event_t pickupEvent; // [esp+50h] [ebp-Ch] BYREF
     int32_t pickedUp; // [esp+54h] [ebp-8h]
     int32_t weapIndex; // [esp+58h] [ebp-4h]
 
     if (ent->active)
     {
-        pickupEvent = 0;
+        pickupEvent = EV_NONE;
         ent->active = 0;
         if (other->client)
         {
@@ -150,7 +150,7 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
 #endif
                     iassert(item);  
                     iassert(item->giType == IT_WEAPON);
-                    pickedUp = WeaponPickup(ent, other, &pickupEvent, touched);
+                    pickedUp = WeaponPickup(ent, other, (int32_t*)&pickupEvent, touched);
 
 #ifdef KISAK_MP
                     if (pickupEvent)

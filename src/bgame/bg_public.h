@@ -94,10 +94,15 @@ enum entity_event_t : __int32
     EV_FOOTSTEP_WALK = 0x4A,
     EV_FOOTSTEP_PRONE = 0x4B,
     EV_JUMP = 0x4C,
-    EV_LANDING_FIRST = 0x4D,
-    EV_LANDING_LAST = 0x69,
-    EV_LANDING_PAIN_FIRST = 0x6A,
-    EV_LANDING_PAIN_LAST = 0x86,
+
+    EV_LANDING_FIRST = 0x4D, // 77
+    //...28 surface types
+    EV_LANDING_LAST = 0x69,  // 105
+
+    EV_LANDING_PAIN_FIRST = 0x6A, // 106
+    //...28 surface types
+    EV_LANDING_PAIN_LAST = 0x86,  // 134
+
     EV_MAX_EVENTS = 0x87,
 };
 #elif KISAK_SP

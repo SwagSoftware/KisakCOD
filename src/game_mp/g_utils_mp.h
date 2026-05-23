@@ -4,6 +4,8 @@
 
 #define MAX_MODELS 512
 
+enum entity_event_t : __int32;
+
 void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
 void __cdecl TRACK_g_utils();
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg);
@@ -61,7 +63,7 @@ void __cdecl G_FreeEntityDelay(gentity_s *ed);
 void __cdecl G_BroadcastEntity(gentity_s *ent);
 void __cdecl G_FreeEntityAfterEvent(gentity_s *ent);
 gentity_s *__cdecl G_TempEntity(const float *origin, int event);
-void __cdecl G_AddPredictableEvent(gentity_s *ent, unsigned int event, unsigned int eventParm);
+void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm);
 void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm);
 void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int8 index);
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList);

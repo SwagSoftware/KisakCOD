@@ -390,7 +390,7 @@ void __cdecl CG_TouchItem(cg_s *cgameGlob, centity_s *cent)
                 cent->nextState.lerp.eFlags |= 0x20u;
                 cent->miscTime = cgameGlob->time;
                 BG_AddPredictableEventToPlayerstate(
-                    9u,
+                    EV_ITEM_PICKUP,
                     cent->nextState.index.brushmodel % 128,
                     &cgameGlob->predictedPlayerState);
             }

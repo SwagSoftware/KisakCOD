@@ -769,7 +769,7 @@ void __cdecl G_BroadcastEntity(gentity_s *ent);
 void __cdecl G_FreeEntityAfterEvent(gentity_s *ent);
 int __cdecl G_SaveFreeEntities(unsigned __int8 *buf);
 void __cdecl G_LoadFreeEntities(unsigned __int8 *buf);
-void __cdecl G_AddPredictableEvent(gentity_s *ent, int event, unsigned int eventParm);
+void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm);
 void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm);
 void __cdecl G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigned int notifyString, int stoppable);
 void __cdecl G_PlaySoundAliasWithNotify(

@@ -1788,7 +1788,7 @@ void __cdecl PlayerCmd_HideViewmodel(scr_entref_t entref)
     p_ps = &v2->client->ps;
     weaponstate = p_ps->weaponstate;
     if (weaponstate == 7 || weaponstate == 9 || weaponstate == 11 || weaponstate == 10 || weaponstate == 8)
-        BG_AddPredictableEventToPlayerstate(2, weaponstate, p_ps);
+        BG_AddPredictableEventToPlayerstate(EV_STOP_WEAPON_SOUND, weaponstate, p_ps);
     PM_ResetWeaponState(p_ps);
     SV_GameSendServerCommand(v1, "hideViewModel");
 }

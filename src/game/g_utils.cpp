@@ -1936,7 +1936,7 @@ void __cdecl G_LoadFreeEntities(unsigned __int8 *buf)
     }
 }
 
-void __cdecl G_AddPredictableEvent(gentity_s *ent, int event, unsigned int eventParm)
+void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm)
 {
     gclient_s *client; // r5
 

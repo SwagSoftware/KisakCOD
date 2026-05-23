@@ -340,41 +340,41 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
 
     switch (event)
     {
-    case 19:
+    case EV_RELOAD_START_NOTIFY:
         iassert(ent->client);
         Scr_Notify(ent, scr_const.reload_start, 0);
         break;
-    case 20:
+    case EV_RELOAD_ADDAMMO:
         iassert(ent->client);
         Scr_Notify(ent, scr_const.reload, 0);
         break;
-    case 25:
-    case 32:
+    case EV_PULLBACK_WEAPON:
+    case EV_PREP_OFFHAND:
         iassert(ent->client);
         NotifyGrenadePullback(ent, eventParm);
         break;
-    case 26:
-    case 27:
-    case 38:
+    case EV_FIRE_WEAPON:
+    case EV_FIRE_WEAPON_LASTSHOT:
+    case EV_FIRE_WEAPON_MG42:
         if (g_antilag->current.enabled)
             FireWeapon(ent, client->lastServerTime);
         else
             FireWeapon(ent, level.time);
         break;
-    case 31:
+    case EV_FIRE_MELEE:
         if (g_antilag->current.enabled)
             FireWeaponMelee(ent, client->lastServerTime);
         else
             FireWeaponMelee(ent, level.time);
         break;
-    case 33:
+    case EV_USE_OFFHAND:
         G_UseOffHand(ent);
         break;
-    case 34:
+    case EV_SWITCH_OFFHAND:
         if (ent->client->ps.cursorHintEntIndex && BG_GetWeaponDef(eventParm)->offhandClass == OFFHAND_CLASS_FRAG_GRENADE)
             AttemptLiveGrenadePickup(ent);
         break;
-    case 62:
+    case EV_GRENADE_SUICIDE:
         if (ent->client && (ent->flags & 3) == 0)
         {
             ent->health = 0;
@@ -390,7 +390,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
             }
         }
         break;
-    case 63:
+    case EV_DETONATE:
         iassert(ent->client);
         Scr_Notify(ent, scr_const.detonate, 0);
         break;

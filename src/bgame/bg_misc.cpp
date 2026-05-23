@@ -1369,7 +1369,7 @@ void __cdecl BG_EvaluateTrajectoryDelta(const trajectory_t *tr, int32_t atTime, 
     }
 }
 
-void __cdecl BG_AddPredictableEventToPlayerstate(uint32_t newEvent, uint32_t eventParm, playerState_s *ps)
+void __cdecl BG_AddPredictableEventToPlayerstate(entity_event_t newEvent, uint32_t eventParm, playerState_s *ps)
 {
     if (newEvent)
     {

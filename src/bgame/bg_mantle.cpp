@@ -596,7 +596,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
         mstate = &ps->mantleState;
         ps->mantleState.flags &= ~8u;
         if ((mstate->flags & 2) != 0)
-            BG_AddPredictableEventToPlayerstate(7, 0, ps);
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
         UpLength = Mantle_GetUpLength(mstate);
         mantleLength = Mantle_GetOverLength(mstate) + UpLength;
         prevTime = mstate->timer;
@@ -628,7 +628,7 @@ void __cdecl Mantle_Move(pmove_t *pm, playerState_s *ps, pml_t *pml)
 
             if ((mstate->flags & 4) != 0)
             {
-                BG_AddPredictableEventToPlayerstate(6, 0, ps);
+                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
                 ps->eFlags &= ~0x8000u;
             }
             mstate->flags |= 0x10u;
