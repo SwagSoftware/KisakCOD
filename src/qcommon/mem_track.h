@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define MAX_MEM_TRACK 1024
 #define MAX_HUNK_TRACK 0x80000

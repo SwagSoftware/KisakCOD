@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 //#include "r_material.h"
 
 struct Glyph // sizeof=0x18

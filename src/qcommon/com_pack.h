@@ -1,6 +1,7 @@
 #pragma once
 
 #include <universal/com_math.h>
+#include <cstdint>
 
 struct PackedTexCoords // sizeof=0x4
 {                                       // ...

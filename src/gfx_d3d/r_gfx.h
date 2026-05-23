@@ -4,6 +4,7 @@
 
 #include <universal/com_math.h>
 #include <qcommon/com_pack.h>
+#include <cstdint>
 
 struct Material;
 struct XModel;

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct MD4_CTX // sizeof=0x58
 {                                       // ...

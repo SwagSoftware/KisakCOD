@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define CMD_MAX_NESTING 8
 

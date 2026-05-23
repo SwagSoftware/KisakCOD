@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct PhysicalMemoryAllocation // sizeof=0x8
 {                                       // ...

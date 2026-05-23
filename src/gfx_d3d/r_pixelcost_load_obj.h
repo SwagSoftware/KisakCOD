@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 void __cdecl R_PixelCost_PrintColorCodeKey();
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "scr_stringlist.h"
-
+#include <cstdint>
 
 struct OpcodeLookup // sizeof=0x18
 {

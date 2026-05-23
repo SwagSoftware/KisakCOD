@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define MIN_WORLD_COORD -131072.0f
 

@@ -3,6 +3,7 @@
 #include <universal/assertive.h>
 
 #include <math.h>
+#include <cstdint>
 
 #define EQUAL_EPSILON 0.001f
 #define ZERO_EPSILON 0.000001f

@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct nodetype // sizeof=0x14
 {                                       // ...

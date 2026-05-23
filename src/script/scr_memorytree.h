@@ -1,6 +1,5 @@
 #pragma once
-
-
+#include <cstdint>
 
 struct MemoryNode // sizeof=0xC
 {                                       // XREF: scrMemTreeGlob_t/r
