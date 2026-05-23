@@ -12,7 +12,7 @@ char *ui_arenaInfos[64];
 
 int __cdecl UI_ParseInfos(const char *buf, int max, char **infos)
 {
-    unsigned __int8 *v3; // eax
+    uint8_t *v3; // eax
     char v5; // [esp+3h] [ebp-865h]
     char *v6; // [esp+8h] [ebp-860h]
     char *v7; // [esp+Ch] [ebp-85Ch]
@@ -157,7 +157,7 @@ const char *UI_LoadArenasFromFile_LoadObj()
         {
             if (len < 0x2000)
             {
-                FS_Read((unsigned __int8 *)buffer, len, f);
+                FS_Read((uint8_t *)buffer, len, f);
                 buffer[len] = 0;
                 FS_FCloseFile(f);
                 ui_numArenas += UI_ParseInfos(buffer, 64 - ui_numArenas, &ui_arenaInfos[ui_numArenas]);

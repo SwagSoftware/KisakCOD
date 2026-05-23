@@ -245,8 +245,8 @@ struct CStringEdPackage // sizeof=0x78
         std::string *p_m_strCurrentEntryRef_ParseOnly; // eax
         bool v9; // zf
         char v10; // al
-        unsigned __int8 *v11; // edi
-        unsigned __int8 *i; // esi
+        uint8_t *v11; // edi
+        uint8_t *i; // esi
         unsigned int v13; // esi
         std::string *v14; // eax
         std::string *v15; // eax
@@ -317,7 +317,7 @@ struct CStringEdPackage // sizeof=0x78
                         else
                         {
                             v10 = v7[5];
-                            v11 = (unsigned __int8 *)(v7 + 5);
+                            v11 = (uint8_t *)(v7 + 5);
                             for (i = v11; v10; v10 = *++i)
                             {
                                 if (v10 == 32)
@@ -510,8 +510,8 @@ void __cdecl SE_Init();
 void __cdecl SE_ShutDown();
 char *__cdecl SE_LoadLanguage(bool forceEnglish);
 char *__cdecl SE_GetFoundFile(std::string *strResult);
-unsigned __int8 *__cdecl SE_LoadFileData(const char *psFileName);
-void __cdecl SE_FreeFileDataAfterLoad(unsigned __int8 *psLoadedFile);
+uint8_t *__cdecl SE_LoadFileData(const char *psFileName);
+void __cdecl SE_FreeFileDataAfterLoad(uint8_t *psLoadedFile);
 int __cdecl SE_BuildFileList(
     const char *psStartDir,
     std::string *strResults);

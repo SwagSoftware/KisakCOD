@@ -32,8 +32,8 @@ struct DiskLeaf_Version14 // sizeof=0x24
 struct DiskCollPartition // sizeof=0xC
 {
     unsigned __int16 checkStamp;
-    unsigned __int8 triCount;
-    unsigned __int8 borderCount;
+    uint8_t triCount;
+    uint8_t borderCount;
     int firstTriIndex;
     int firstBorderIndex;
 };
@@ -138,16 +138,16 @@ void __cdecl CM_InitStaticModel(cStaticModel_s *staticModel, float *origin, floa
     }
 }
 
-unsigned __int8 *__cdecl CM_Hunk_AllocXModel(unsigned int size)
+uint8_t *__cdecl CM_Hunk_AllocXModel(unsigned int size)
 {
     return Hunk_Alloc(size, "CM_Hunk_AllocXModel", 21);
 }
-unsigned __int8 *__cdecl CM_Hunk_AllocXModelColl(unsigned int size)
+uint8_t *__cdecl CM_Hunk_AllocXModelColl(unsigned int size)
 {
     return Hunk_Alloc(size, "CM_Hunk_AllocXModelColl", 27);
 }
 
-unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type)
+uint8_t *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type)
 {
     return Hunk_Alloc(size, name, type);
 }
@@ -418,7 +418,7 @@ void __cdecl CMod_LoadPlanes()
     char v2; // [esp+Ch] [ebp-20h]
     cplane_s *out; // [esp+10h] [ebp-1Ch]
     unsigned int planeIter; // [esp+14h] [ebp-18h]
-    unsigned __int8 bits; // [esp+1Fh] [ebp-Dh]
+    uint8_t bits; // [esp+1Fh] [ebp-Dh]
     char *in; // [esp+20h] [ebp-Ch] // KISAKTODO: assign struct type
     unsigned int axisIter; // [esp+24h] [ebp-8h]
     unsigned int count; // [esp+28h] [ebp-4h] BYREF
@@ -1004,7 +1004,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
     int nodeOffset; // [esp+20h] [ebp-58h]
     float testDist; // [esp+24h] [ebp-54h] BYREF
     int numLeafBrushesChild; // [esp+28h] [ebp-50h]
-    unsigned __int8 testAxis; // [esp+2Fh] [ebp-49h]
+    uint8_t testAxis; // [esp+2Fh] [ebp-49h]
     int k; // [esp+30h] [ebp-48h]
     float dist; // [esp+34h] [ebp-44h]
     float range; // [esp+38h] [ebp-40h]
@@ -1249,22 +1249,22 @@ void CMod_LoadBrushes()
     cbrushside_t *outSides; // [esp+Ch] [ebp-5Ch]
     cbrush_t *outBrush; // [esp+10h] [ebp-58h]
     const dbrush_t *inBrush; // [esp+14h] [ebp-54h]
-    const unsigned __int8 *inEdgeCountsBase; // [esp+18h] [ebp-50h]
+    const uint8_t *inEdgeCountsBase; // [esp+18h] [ebp-50h]
     unsigned int allocSizeSides; // [esp+1Ch] [ebp-4Ch]
     unsigned int brushCount; // [esp+20h] [ebp-48h] BYREF
     float sign; // [esp+24h] [ebp-44h]
     const dbrushside_t *inSides; // [esp+28h] [ebp-40h]
     int countAllocatedBrushes; // [esp+2Ch] [ebp-3Ch]
-    const unsigned __int8 *inEdgeCounts; // [esp+30h] [ebp-38h]
+    const uint8_t *inEdgeCounts; // [esp+30h] [ebp-38h]
     unsigned int allocSizeEdges; // [esp+34h] [ebp-34h]
-    unsigned __int8 *outEdges; // [esp+38h] [ebp-30h]
+    uint8_t *outEdges; // [esp+38h] [ebp-30h]
     unsigned int materialNum; // [esp+3Ch] [ebp-2Ch]
     unsigned int allocSizeBrushes; // [esp+40h] [ebp-28h]
     int edgeOffset; // [esp+44h] [ebp-24h]
     unsigned int axisIter; // [esp+48h] [ebp-20h]
     int index; // [esp+4Ch] [ebp-1Ch]
     int num; // [esp+50h] [ebp-18h]
-    const unsigned __int8 *inEdges; // [esp+54h] [ebp-14h]
+    const uint8_t *inEdges; // [esp+54h] [ebp-14h]
     unsigned int sideEdgeCountsCount; // [esp+58h] [ebp-10h] BYREF
     unsigned int sideIter; // [esp+5Ch] [ebp-Ch]
     unsigned int sidesCount; // [esp+60h] [ebp-8h] BYREF

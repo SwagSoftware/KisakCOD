@@ -238,7 +238,7 @@ void __cdecl R_ParseColorCorrectionData(const char *buf, const char *filename)
 
 void R_LoadColorCorrectionData()
 {
-    unsigned __int8 *filebuf; // [esp+4h] [ebp-Ch]
+    uint8_t *filebuf; // [esp+4h] [ebp-Ch]
     int fileSize; // [esp+8h] [ebp-8h]
     int f; // [esp+Ch] [ebp-4h] BYREF
 
@@ -246,7 +246,7 @@ void R_LoadColorCorrectionData()
     if (fileSize >= 0)
     {
         Hunk_CheckTempMemoryHighClear();
-        filebuf = (unsigned __int8 *)Hunk_AllocateTempMemoryHigh(fileSize + 1, "R_LoadColorCorrectionData");
+        filebuf = (uint8_t *)Hunk_AllocateTempMemoryHigh(fileSize + 1, "R_LoadColorCorrectionData");
         FS_Read(filebuf, fileSize, f);
         FS_FCloseFile(f);
         filebuf[fileSize] = 0;
@@ -297,7 +297,7 @@ const ColorCorrectionData *__cdecl R_FindColorCorrectionData(const char *name)
 
 const float colorIntensityScale[3] = { 0.114f, 0.587f, 0.299f };
 
-void __cdecl R_ColorCorrectBGRAPixel(const ColorCorrectionData *ccd, const unsigned __int8 *from, unsigned __int8 *to)
+void __cdecl R_ColorCorrectBGRAPixel(const ColorCorrectionData *ccd, const uint8_t *from, uint8_t *to)
 {
     float v3; // [esp+18h] [ebp-64h]
     float v4; // [esp+1Ch] [ebp-60h]
@@ -372,8 +372,8 @@ void __cdecl R_ColorCorrectBGRAPixel(const ColorCorrectionData *ccd, const unsig
 
 void __cdecl R_CopyBlockFromBgraToPixelColorWithColorCorrection(
     const ColorCorrectionData *colorCorrectionData,
-    unsigned __int8 *to,
-    const unsigned __int8 *from,
+    uint8_t *to,
+    const uint8_t *from,
     unsigned int blockSize)
 {
     unsigned int offset; // [esp+0h] [ebp-4h]
@@ -388,11 +388,11 @@ void __cdecl R_CopyBlockFromBgraToPixelColorWithColorCorrection(
     } while (offset != blockSize);
 }
 
-GfxImage *__cdecl R_GenerateReflectionImageFromRawData(const unsigned __int8 *rawPixels, int probeIndex)
+GfxImage *__cdecl R_GenerateReflectionImageFromRawData(const uint8_t *rawPixels, int probeIndex)
 {
     char *v2; // eax
     int v4; // [esp+0h] [ebp-188h]
-    const unsigned __int8 *pixels[6][15]; // [esp+8h] [ebp-180h] BYREF
+    const uint8_t *pixels[6][15]; // [esp+8h] [ebp-180h] BYREF
     int imgIndex; // [esp+170h] [ebp-18h]
     int mipmapLevelSize; // [esp+174h] [ebp-14h]
     GfxImage *reflectionImage; // [esp+178h] [ebp-10h]
@@ -442,14 +442,14 @@ void __cdecl R_GenerateReflectionImages(
     const ColorCorrectionData *ColorCorrectionData; // eax
     GfxReflectionProbe *v5; // [esp+0h] [ebp-14h]
     const DiskGfxReflectionProbe *v6; // [esp+4h] [ebp-10h]
-    unsigned __int8 *pixels; // [esp+Ch] [ebp-8h]
+    uint8_t *pixels; // [esp+Ch] [ebp-8h]
     int probeIndex; // [esp+10h] [ebp-4h]
 
     if (!s_numColorCorrectionDataEntries)
         R_LoadColorCorrectionData();
     if (!s_numColorCorrectionDataEntries)
         R_CreateDefaultColorCorrectionEntry();
-    pixels = (unsigned __int8 *)Hunk_AllocateTempMemory(131064, "R_GenerateReflectionImages");
+    pixels = (uint8_t *)Hunk_AllocateTempMemory(131064, "R_GenerateReflectionImages");
     for (probeIndex = 0; probeIndex < probeCount; ++probeIndex)
     {
         ColorCorrectionData = R_FindColorCorrectionData(probeRawData[probeIndex].colorCorrectionFilename);

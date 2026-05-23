@@ -8,14 +8,14 @@
 struct DiskGfxReflectionProbe11 // sizeof=0x20004
 {
     float origin[3];
-    unsigned __int8 pixels[131064];
+    uint8_t pixels[131064];
 };
 
 struct DiskGfxReflectionProbe // sizeof=0x20044
 {                                       // ...
     float origin[3];                    // ...
     char colorCorrectionFilename[64];   // ...
-    unsigned __int8 pixels[131064];     // ...
+    uint8_t pixels[131064];     // ...
 };
 
 struct ColorCorrectionData // sizeof=0x54

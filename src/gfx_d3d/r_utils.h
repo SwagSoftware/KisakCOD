@@ -120,7 +120,7 @@ int __cdecl R_PickMaterial(
     unsigned int charLimit);
 double __cdecl FresnelTerm(float n0, float n1, float cosIncidentAngle);
 char __cdecl R_GetClearColor(float *unpackedRgba);
-void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to);
+void __cdecl Byte4UnpackBgra(const uint8_t *from, float *to);
 
 
 // r_state_utils
@@ -139,7 +139,7 @@ int __cdecl R_PickMaterial(
     unsigned int charLimit);
 double __cdecl FresnelTerm(float n0, float n1, float cosIncidentAngle);
 char __cdecl R_GetClearColor(float *unpackedRgba);
-void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to);
+void __cdecl Byte4UnpackBgra(const uint8_t *from, float *to);
 
 void __cdecl R_SetShadowLookupMatrix(GfxCmdBufSourceState *source, const GfxMatrix *matrix);
 void __cdecl R_Set2D(GfxCmdBufSourceState *source);

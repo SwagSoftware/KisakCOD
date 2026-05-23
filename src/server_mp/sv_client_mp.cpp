@@ -384,7 +384,7 @@ void __cdecl SV_SetClientStat(int clientNum, int index, unsigned int value)
     {
         if (value >= 0x100)
             MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 342, 0, "%s", "value >= 0 && value <= 255");
-        if (v4->stats[index + 4] != (unsigned __int8)value)
+        if (v4->stats[index + 4] != (uint8_t)value)
         {
             v4->stats[index + 4] = value;
         LABEL_16:
@@ -516,7 +516,7 @@ void __cdecl SV_UnbanClient(char *name)
             if (unban)
             {
                 ++found;
-                memmove((unsigned __int8 *)line, (unsigned __int8 *)text, fileSize - (text - file) + 1);
+                memmove((uint8_t *)line, (uint8_t *)text, fileSize - (text - file) + 1);
                 fileSize -= text - line;
                 text = line;
             }
@@ -757,7 +757,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
         clients->reliableAcknowledge = 0;
         clients->reliableSequence = 0;
     gotnewcl:
-        memset((unsigned __int8 *)newcl, 0, sizeof(client_t));
+        memset((uint8_t *)newcl, 0, sizeof(client_t));
         clientNum = newcl - svs.clients;
         ent = SV_GentityNum(clientNum);
         newcl->gentity = ent;
@@ -1017,7 +1017,7 @@ void __cdecl SV_DelayDropClient(client_t *drop, const char *reason)
     }
 }
 
-unsigned __int8 msgBuffer_0[131072];
+uint8_t msgBuffer_0[131072];
 void __cdecl SV_SendClientGameState(client_t *client)
 {
     int configStringCount; // [esp+38h] [ebp-16Ch]
@@ -1164,7 +1164,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
             "%s\n\t(clientNum) = %i",
             "(clientNum >= 0 && clientNum < 64)",
             clientNum);
-    memset((unsigned __int8 *)&nullstate, 0, sizeof(nullstate));
+    memset((uint8_t *)&nullstate, 0, sizeof(nullstate));
     for (start = 0; start < 1024; ++start)
     {
         base = &sv.svEntities[start].baseline.s;
@@ -1572,7 +1572,7 @@ int __cdecl SV_ProcessClientCommands(client_t *cl, msg_t *msg, int fromOldServer
     return 0;
 }
 
-unsigned __int8 msgCompressed_buf_0[2048];
+uint8_t msgCompressed_buf_0[2048];
 void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
 {
     msg_t v2; // [esp+60h] [ebp-54h] BYREF

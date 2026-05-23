@@ -62,12 +62,12 @@ struct __declspec(align(4)) LerpEntityStateActor
 {
     float visionFov;
     float visionDist;
-    unsigned __int8 species;
+    uint8_t species;
 };
 #endif
 struct LerpEntityStatePrimaryLight // sizeof=0x14
 {                                       // XREF: LerpEntityStateTypeUnion/r
-    unsigned __int8 colorAndExp[4];
+    uint8_t colorAndExp[4];
     float intensity;
     float radius;
     float cosHalfFovOuter;
@@ -257,9 +257,9 @@ struct archivedEntity_s // sizeof=0x118
 
 union entityState_s_tag
 {
-    unsigned __int8 scale;
-    unsigned __int8 eventParm2;
-    unsigned __int8 vehicleCompassType;
+    uint8_t scale;
+    uint8_t eventParm2;
+    uint8_t vehicleCompassType;
 };
 
 union entityState_s_type_index
@@ -273,9 +273,9 @@ union entityState_s_type_index
 struct entityState_s
 {
     entityType_t eType; // entityType_t
-    unsigned __int8 surfType;
-    unsigned __int8 weapon;
-    unsigned __int8 weaponModel;
+    uint8_t surfType;
+    uint8_t weapon;
+    uint8_t weaponModel;
     entityState_s_tag un1;
     LerpEntityState lerp;
     unsigned int eventParm;
@@ -288,7 +288,7 @@ struct entityState_s
     int time2;
     int solid;
     int eventSequence;
-    unsigned __int8 events[4];
+    uint8_t events[4];
     unsigned int eventParms[4];
     _BYTE un2[4];
 };

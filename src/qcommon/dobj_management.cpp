@@ -18,7 +18,7 @@ static int com_lastDObjIndex;
 
 // LWSS: used in SP (KISAKTODO: could MP use this?)
 static __int16 clientObjMapBuffered[CLIENT_DOBJ_HANDLE_MAX];
-static unsigned __int8 serverObjDirty[272];
+static uint8_t serverObjDirty[272];
 
 void __cdecl TRACK_dobj_management()
 {

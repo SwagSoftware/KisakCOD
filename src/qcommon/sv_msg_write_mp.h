@@ -106,8 +106,8 @@ void __cdecl MSG_WriteOriginFloat(const int clientNum, msg_t *msg, int bits, dou
 void __cdecl MSG_WriteOriginZFloat(const int clientNum, msg_t *msg, double value, double oldValue);
 bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s* snapInfo, int bits, const int* fromF, const int* toF);
 void __cdecl MSG_WriteLastChangedField(msg_t* msg, int lastChangedFieldNum, unsigned int numFields);
-void __cdecl MSG_WriteEventNum(int clientNum, msg_t* msg, unsigned __int8 eventNum);
-void __cdecl MSG_WriteEventParam(int clientNum, msg_t* msg, unsigned __int8 eventParam);
+void __cdecl MSG_WriteEventNum(int clientNum, msg_t* msg, uint8_t eventNum);
+void __cdecl MSG_WriteEventParam(int clientNum, msg_t* msg, uint8_t eventParam);
 PacketEntityType __cdecl MSG_GetPacketEntityTypeForEType(int eType);
 unsigned int __cdecl MSG_GetBitCount(int bits, bool* estimate, int from, int to);
 void __cdecl MSG_WriteEntity(
@@ -120,7 +120,7 @@ void __cdecl MSG_WriteEntity(
 void __cdecl MSG_WriteEntityRemoval(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
-    unsigned __int8* from,
+    uint8_t* from,
     int indexBits,
     bool changeBit);
 void __cdecl MSG_WriteEntityDeltaForEType(
@@ -135,8 +135,8 @@ int __cdecl MSG_WriteEntityDelta(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    const unsigned __int8* from,
-    const unsigned __int8* to,
+    const uint8_t* from,
+    const uint8_t* to,
     int force,
     int numFields,
     int indexBits,
@@ -145,8 +145,8 @@ void __cdecl MSG_WriteDeltaField(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    const unsigned __int8* from,
-    const unsigned __int8* to,
+    const uint8_t* from,
+    const uint8_t* to,
     const NetField* field,
     int fieldNum,
     bool forceSend);
@@ -165,8 +165,8 @@ int __cdecl MSG_WriteDeltaStruct(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    unsigned __int8* from,
-    unsigned __int8* to,
+    uint8_t* from,
+    uint8_t* to,
     int force,
     int numFields,
     int indexBits,
@@ -195,8 +195,8 @@ void __cdecl MSG_WriteDeltaFields(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    unsigned __int8* from,
-    unsigned __int8* to,
+    uint8_t* from,
+    uint8_t* to,
     int force,
     int numFields,
     const NetField* stateFields);

@@ -396,7 +396,7 @@ int __cdecl yylex()
 	int yy_next_buffer; // [esp+0h] [ebp-24h]
 	int yy_next_state; // [esp+8h] [ebp-1Ch]
 	int yy_amount_of_matched_text; // [esp+Ch] [ebp-18h]
-	unsigned __int8 yy_c; // [esp+13h] [ebp-11h]
+	uint8_t yy_c; // [esp+13h] [ebp-11h]
 	unsigned char *yy_bp; // [esp+14h] [ebp-10h]
 	int yy_current_state; // [esp+18h] [ebp-Ch]
 	int yy_act; // [esp+1Ch] [ebp-8h]

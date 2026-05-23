@@ -13,14 +13,14 @@ scrMemTreeGlob_t scrMemTreeGlob;
 
 struct scrMemTreeDebugGlob_t // sizeof=0x20000
 {                                       // ...
-    unsigned __int8 mt_usage[MEMORY_NODE_COUNT];    // ...
-    unsigned __int8 mt_usage_size[MEMORY_NODE_COUNT]; // ...
+    uint8_t mt_usage[MEMORY_NODE_COUNT];    // ...
+    uint8_t mt_usage_size[MEMORY_NODE_COUNT]; // ...
 };
 scrMemTreeDebugGlob_t scrMemTreeDebugGlob = { 0 };
 
 static void MT_InitBits(void)
 {
-    unsigned __int8 bits; // [esp+0h] [ebp-Ch]
+    uint8_t bits; // [esp+0h] [ebp-Ch]
     int temp; // [esp+4h] [ebp-8h]
 
     for (int i = 0; i < NUM_BUCKETS; ++i)

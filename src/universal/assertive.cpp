@@ -96,7 +96,7 @@ HINSTANCE__* __cdecl GetModuleBase(char* name)
     }
     if (nameIndex >= 0 && name[nameIndex] == 46)
         nameLength = nameIndex;
-    memcpy((unsigned __int8*)moduleName, (unsigned __int8*)name, nameLength);
+    memcpy((uint8_t*)moduleName, (uint8_t*)name, nameLength);
     strcpy(&moduleName[nameLength], ".exe");
     moduleHandle = GetModuleHandleA(moduleName);
     if (moduleHandle)
@@ -117,7 +117,7 @@ char __cdecl ReadLine(FILE* fp)
     {
         flush = 0;
         lineBufferEndPos -= lineBufferStartPos;
-        memmove((unsigned __int8*)lineBuffer, (unsigned __int8*)&lineBuffer[lineBufferStartPos], lineBufferEndPos);
+        memmove((uint8_t*)lineBuffer, (uint8_t*)&lineBuffer[lineBufferStartPos], lineBufferEndPos);
         lineBufferStartPos = 0;
     retry_18:
         lineBufferEndPos += fread(&lineBuffer[lineBufferEndPos], 1u, 256 - lineBufferEndPos - 1, fp);
@@ -536,7 +536,7 @@ int __cdecl DoStackTrace(char* msg, int nIgnore)
     int* reg_ebp; // [esp+4h] [ebp-10h]
     int i; // [esp+10h] [ebp-4h]
 
-    memset((unsigned __int8*)g_assertAddress, 0, sizeof(g_assertAddress));
+    memset((uint8_t*)g_assertAddress, 0, sizeof(g_assertAddress));
     g_assertAddressCount = 0;
     reg_ebp = 0;
     __asm {

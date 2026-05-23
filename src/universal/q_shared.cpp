@@ -77,8 +77,8 @@ int I_strnicmp(const char* s0, const char* s1, int n)
 
     do
     {
-        c0 = *(unsigned __int8*)s0;
-        c1 = *(unsigned __int8*)s1;
+        c0 = *(uint8_t*)s0;
+        c1 = *(uint8_t*)s1;
         ++s0;
         ++s1;
         if (!n--)
@@ -167,9 +167,9 @@ void __cdecl TRACK_q_shared()
     TRACK_STATIC_ARR(value1, 10);
 }
 
-unsigned __int8 __cdecl ColorIndex(unsigned __int8 c)
+uint8_t __cdecl ColorIndex(uint8_t c)
 {
-    if ((unsigned __int8)(c - 48) >= 0xAu)
+    if ((uint8_t)(c - 48) >= 0xAu)
         return 7;
     else
         return c - 48;
@@ -211,10 +211,10 @@ void __cdecl Com_AssembleFilepath(char *folder, char *name, char *extension, cha
     v5 = strlen(extension);
     if ((int)(v5 + v6 + v7) >= maxCharCount)
         Com_Error(ERR_DROP, "filepath '%s%s%s' is longer than %i characters", folder, name, extension, maxCharCount - 1);
-    memcpy((unsigned __int8 *)path, (unsigned __int8 *)folder, v7);
+    memcpy((uint8_t *)path, (uint8_t *)folder, v7);
     patha = &path[v7];
-    memcpy((unsigned __int8 *)patha, (unsigned __int8 *)name, v6);
-    memcpy((unsigned __int8 *)&patha[v6], (unsigned __int8 *)extension, v5 + 1);
+    memcpy((uint8_t *)patha, (uint8_t *)name, v6);
+    memcpy((uint8_t *)&patha[v6], (uint8_t *)extension, v5 + 1);
 }
 
 const char *__cdecl Com_GetExtensionSubString(const char *filename)
@@ -267,7 +267,7 @@ void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *
 
 int __cdecl ShortSwap(__int16 l)
 {
-    return HIBYTE(l) + ((unsigned __int8)l << 8);
+    return HIBYTE(l) + ((uint8_t)l << 8);
 }
 
 __int16 __cdecl ShortNoSwap(__int16 l)
@@ -277,7 +277,7 @@ __int16 __cdecl ShortNoSwap(__int16 l)
 
 int __cdecl LongSwap(int l)
 {
-    return HIBYTE(l) + (BYTE2(l) << 8) + (BYTE1(l) << 16) + ((unsigned __int8)l << 24);
+    return HIBYTE(l) + (BYTE2(l) << 8) + (BYTE1(l) << 16) + ((uint8_t)l << 24);
 }
 
 unsigned __int64 __cdecl Long64Swap(unsigned __int64 l)
@@ -289,7 +289,7 @@ unsigned __int64 __cdecl Long64Swap(unsigned __int64 l)
         + ((unsigned __int64)BYTE3(l) << 32)
         + ((unsigned __int64)BYTE2(l) << 40)
         + ((unsigned __int64)BYTE1(l) << 48)
-        + ((unsigned __int64)(unsigned __int8)l << 56);
+        + ((unsigned __int64)(uint8_t)l << 56);
 }
 
 unsigned __int64 __cdecl Long64NoSwap(unsigned __int64 ll)
@@ -502,7 +502,7 @@ char *__cdecl I_CleanStr(char *string)
     return string;
 }
 
-unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character)
+uint8_t __cdecl I_CleanChar(uint8_t character)
 {
     if (character == 146)
         return 39;
@@ -938,13 +938,13 @@ void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value
 }
 
 bool __cdecl ParseConfigStringToStruct(
-    unsigned __int8 *pStruct,
+    uint8_t *pStruct,
     const cspField_t *pFieldList,
     int iNumFields,
     char *pszBuffer,
     int iMaxFieldTypes,
-    int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
-    void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *))
+    int(__cdecl *parseSpecialFieldType)(uint8_t *, const char *, const int),
+    void(__cdecl *parseStrcpy)(uint8_t *, const char *))
 {
     return ParseConfigStringToStructCustomSize(
         pStruct,
@@ -957,13 +957,13 @@ bool __cdecl ParseConfigStringToStruct(
 }
 
 bool __cdecl ParseConfigStringToStructCustomSize(
-    unsigned __int8 *pStruct,
+    uint8_t *pStruct,
     const cspField_t *pFieldList,
     int iNumFields,
     char *pszBuffer,
     int iMaxFieldTypes,
-    int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
-    void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *))
+    int(__cdecl *parseSpecialFieldType)(uint8_t *, const char *, const int),
+    void(__cdecl *parseStrcpy)(uint8_t *, const char *))
 {
     int v7; // eax
     int v8; // eax

@@ -82,13 +82,13 @@ struct snd_listener // sizeof=0x38
 struct MssSoundCOD4 // sizeof=0x28
 {
     _AILSOUNDINFO_COD4 info;
-    unsigned __int8 *data;
+    uint8_t *data;
 };
 // LWSS END
 //struct MssSound // sizeof=0x2C
 //{                                       // ...
 //    _AILSOUNDINFO info;
-//    unsigned __int8 *data;
+//    uint8_t *data;
 //};
 struct LoadedSound // sizeof=0x2C
 {                                       // ...
@@ -121,8 +121,8 @@ union SoundFileRef // sizeof=0x8
 };
 struct SoundFile // sizeof=0xC
 {
-    unsigned __int8 type;
-    unsigned __int8 exists;
+    uint8_t type;
+    uint8_t exists;
     // padding byte
     // padding byte
     SoundFileRef u;
@@ -302,7 +302,7 @@ struct snd_overlay_info_t // sizeof=0x110
 
 struct snd_local_t_restore// sizeof=0x4008
 {                                       // ...
-    unsigned __int8 buffer[16384];
+    uint8_t buffer[16384];
     int size;                           // ...
     bool compress;                      // ...
     // padding byte

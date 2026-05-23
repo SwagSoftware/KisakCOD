@@ -4,7 +4,7 @@
 
 int bloc;
 
-int __cdecl get_bit(const unsigned __int8 *fin)
+int __cdecl get_bit(const uint8_t *fin)
 {
     int t; // [esp+0h] [ebp-4h]
 
@@ -13,7 +13,7 @@ int __cdecl get_bit(const unsigned __int8 *fin)
     return t;
 }
 
-void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const unsigned __int8 *fin, int *offset)
+void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const uint8_t *fin, int *offset)
 {
     bloc = *offset;
     while (node && node->symbol == 257)
@@ -34,7 +34,7 @@ void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const unsigned __int8 *
     }
 }
 
-void __cdecl huffman_send(nodetype *node, nodetype *child, unsigned __int8 *fout)
+void __cdecl huffman_send(nodetype *node, nodetype *child, uint8_t *fout)
 {
     if (node->parent)
         huffman_send(node->parent, node, fout);
@@ -47,7 +47,7 @@ void __cdecl huffman_send(nodetype *node, nodetype *child, unsigned __int8 *fout
     }
 }
 
-void __cdecl add_bit(char bit, unsigned __int8 *fout)
+void __cdecl add_bit(char bit, uint8_t *fout)
 {
     if ((bloc & 7) == 0)
         fout[bloc >> 3] = 0;
@@ -76,7 +76,7 @@ int __cdecl Huff_bitCount(huff_t *huff, unsigned int ch)
     return huffman_bitCountForNode(huff->loc[ch], 0);
 }
 
-void __cdecl Huff_offsetTransmit(huff_t *huff, int ch, unsigned __int8 *fout, int *offset)
+void __cdecl Huff_offsetTransmit(huff_t *huff, int ch, uint8_t *fout, int *offset)
 {
     bloc = *offset;
     huffman_send(huff->loc[ch], 0, fout);

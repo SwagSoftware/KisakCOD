@@ -83,7 +83,7 @@ struct VariableStackBuffer // sizeof=0xC
     unsigned __int16 size;
     unsigned __int16 bufLen;
     unsigned __int16 localId;
-    unsigned __int8 time;
+    uint8_t time;
     char buf[1];
 };
 static_assert(sizeof(VariableStackBuffer) == 0xC);

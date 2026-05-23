@@ -300,7 +300,7 @@ void __cdecl Phys_GetWindingForBrushFace2(
     int side2; // [esp+FCh] [ebp-14h]
     int edgeCount; // [esp+100h] [ebp-10h]
     int side1; // [esp+104h] [ebp-Ch]
-    unsigned __int8 *edges; // [esp+108h] [ebp-8h]
+    uint8_t *edges; // [esp+108h] [ebp-8h]
     unsigned int nonAxialSideIndex; // [esp+10Ch] [ebp-4h]
 
     iassert(brush);
@@ -1238,7 +1238,7 @@ char __cdecl Phys_DoesPolyIntersectBox(const Poly *poly, const objInfo *info)
     if (poly->ptCount > 0x100)
         MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 1180, 0, "%s", "poly->ptCount <= ARRAY_COUNT( clippedPts )");
     clippedPtsCount = poly->ptCount;
-    memcpy((unsigned __int8 *)clippedPts, (unsigned __int8 *)poly->pts, 12 * clippedPtsCount);
+    memcpy((uint8_t *)clippedPts, (uint8_t *)poly->pts, 12 * clippedPtsCount);
     for (axis = 0; axis < 3; ++axis)
     {
         testPlane[0] = info->R[axis][0];
@@ -1595,7 +1595,7 @@ void __cdecl Phys_GetWindingForBrushFace(
     int side2; // [esp+ECh] [ebp-14h]
     int edgeCount; // [esp+F0h] [ebp-10h]
     int side1; // [esp+F4h] [ebp-Ch]
-    unsigned __int8 *edges; // [esp+F8h] [ebp-8h]
+    uint8_t *edges; // [esp+F8h] [ebp-8h]
     unsigned int nonAxialSideIndex; // [esp+FCh] [ebp-4h]
 
     if (!brush)
@@ -2036,7 +2036,7 @@ char __cdecl Phys_DoesPolyIntersectOrientedBrush(
     if (poly->ptCount > 0x100)
         MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 1526, 0, "%s", "poly->ptCount <= ARRAY_COUNT( clippedPts )");
     clippedPtsCount = poly->ptCount;
-    memcpy((unsigned __int8 *)clippedPts, (unsigned __int8 *)poly->pts, 12 * clippedPtsCount);
+    memcpy((uint8_t *)clippedPts, (uint8_t *)poly->pts, 12 * clippedPtsCount);
     for (sideIndex = 0; sideIndex < brushSides; ++sideIndex)
     {
         clippedPtsCount = Phys_ClipPolyAgainstPlane(
@@ -2678,12 +2678,12 @@ int __cdecl CircularRemoveRange(float (*xyz)[3], int pointCount, int begin, int 
     if (begin >= end)
     {
         if (xyz != (float (*)[3]) & (*xyz)[3 * end])
-            memmove((unsigned __int8 *)xyz, (unsigned __int8 *)&(*xyz)[3 * end], 12 * (begin - end + 1));
+            memmove((uint8_t *)xyz, (uint8_t *)&(*xyz)[3 * end], 12 * (begin - end + 1));
         return begin - end + 1;
     }
     else
     {
-        memmove((unsigned __int8 *)&(*xyz)[3 * begin + 3], (unsigned __int8 *)&(*xyz)[3 * end], 12 * (pointCount - end));
+        memmove((uint8_t *)&(*xyz)[3 * begin + 3], (uint8_t *)&(*xyz)[3 * end], 12 * (pointCount - end));
         return pointCount - end + begin + 1;
     }
 }
@@ -2696,8 +2696,8 @@ void __cdecl InsertPoint(float (*xyz)[3], int pointCount, int maxPoints, int ins
 
     if (insertAfter + 1 != pointCount)
         memmove(
-            (unsigned __int8 *)&(*xyz)[3 * insertAfter + 6],
-            (unsigned __int8 *)&(*xyz)[3 * insertAfter + 3],
+            (uint8_t *)&(*xyz)[3 * insertAfter + 6],
+            (uint8_t *)&(*xyz)[3 * insertAfter + 3],
             12 * (pointCount - insertAfter - 1));
 }
 

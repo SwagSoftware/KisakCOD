@@ -79,8 +79,8 @@ static unsigned int __cdecl Com_AddPointToHull(
 {
     iassert(newIndex <= hullPointCount);
     memmove(
-        (unsigned __int8 *)&hullOrder[newIndex + 1],
-        (unsigned __int8 *)&hullOrder[newIndex],
+        (uint8_t *)&hullOrder[newIndex + 1],
+        (uint8_t *)&hullOrder[newIndex],
         4 * (hullPointCount - newIndex));
     hullOrder[newIndex] = pointIndex;
     return hullPointCount + 1;

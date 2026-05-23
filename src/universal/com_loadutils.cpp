@@ -41,13 +41,13 @@ char *__cdecl Com_LoadInfoString_LoadObj(char *fileName, const char *fileDesc, c
     if (fileLen < 0)
         Com_Error(ERR_DROP, "Could not load %s [%s]", fileDesc, fileName);
     v5 = strlen(ident);
-    FS_Read((unsigned __int8 *)loadBuffer, v5, fileHandle);
+    FS_Read((uint8_t *)loadBuffer, v5, fileHandle);
     loadBuffer[v5] = 0;
     if (strncmp(loadBuffer, ident, v5))
         Com_Error(ERR_DROP, "File [%s] is not a %s", fileName, fileDesc);
     if ((int)(fileLen - v5) >= 0x2000)
         Com_Error(ERR_DROP, "File [%s] is too long of a %s to parse", fileName, fileDesc);
-    FS_Read((unsigned __int8 *)loadBuffer, fileLen - v5, fileHandle);
+    FS_Read((uint8_t *)loadBuffer, fileLen - v5, fileHandle);
     loadBuffer[fileLen - v5] = 0;
     FS_FCloseFile(fileHandle);
     return loadBuffer;

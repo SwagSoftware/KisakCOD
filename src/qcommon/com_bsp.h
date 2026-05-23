@@ -7,8 +7,8 @@
 struct DiskPrimaryLight_Version16 // sizeof=0x60
 {
     unsigned __int16 falloffStart;
-    unsigned __int8 falloffSizeLessOne;
-    unsigned __int8 type;
+    uint8_t falloffSizeLessOne;
+    uint8_t type;
     float color[3];
     float dir[3];
     float origin[3];
@@ -20,9 +20,9 @@ struct DiskPrimaryLight_Version16 // sizeof=0x60
 };
 struct DiskPrimaryLight // sizeof=0x80
 {
-    unsigned __int8 type;
-    unsigned __int8 canUseShadowMap;
-    unsigned __int8 unused[2];
+    uint8_t type;
+    uint8_t canUseShadowMap;
+    uint8_t unused[2];
     float color[3];
     float dir[3];
     float origin[3];
@@ -148,7 +148,7 @@ char *__cdecl Com_ValidateBspLumpData(
     unsigned int *count);
 unsigned int __cdecl Com_GetBspVersion();
 
-int __cdecl Com_BlockChecksumKey32(const unsigned __int8 *data, unsigned int length, unsigned int initialCrc);
+int __cdecl Com_BlockChecksumKey32(const uint8_t *data, unsigned int length, unsigned int initialCrc);
 char *__cdecl Com_EntityString(int *numEntityChars);
 
 void __cdecl Com_LoadWorld(char *name);

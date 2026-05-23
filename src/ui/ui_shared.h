@@ -1146,7 +1146,7 @@ int __cdecl Item_IsEditFieldDef(itemDef_s *item);
 listBoxDef_s *__cdecl Item_GetListBoxDef(itemDef_s *item);
 editFieldDef_s *__cdecl Item_GetEditFieldDef(itemDef_s *item);
 multiDef_s *__cdecl Item_GetMultiDef(itemDef_s *item);
-unsigned __int8 *__cdecl UI_Alloc(unsigned int size, int alignment);
+uint8_t *__cdecl UI_Alloc(unsigned int size, int alignment);
 void __cdecl String_Init();
 const char *__cdecl String_Alloc(const char *p);
 int __cdecl hashForString(const char *str);
@@ -1595,7 +1595,7 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
         Scr_WatchElement_s *element,
         bool force,
         bool overwrite,
-        unsigned __int8 breakpointType,
+        uint8_t breakpointType,
         bool user);
 
     void RunToCursor();
@@ -1614,11 +1614,11 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
         char *codePos,
         int builtinIndex,
         Scr_WatchElement_s *element,
-        unsigned __int8 type);
+        uint8_t type);
 
     bool AddBreakpointAtSourcePos(
         Scr_WatchElement_s *element,
-        unsigned __int8 breakpointType,
+        uint8_t breakpointType,
         bool user,
         struct Scr_Breakpoint **pBreakpoint,
         unsigned int startSourcePos,
@@ -1628,7 +1628,7 @@ struct Scr_ScriptWindow : UI_LinesComponent // sizeof=0x3C
         Scr_WatchElement_s *element,
         bool force,
         bool overwrite,
-        unsigned __int8 breakpointType,
+        uint8_t breakpointType,
         bool user);
 };
 
@@ -1739,9 +1739,9 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
     Scr_WatchElement_s *CloneElement(Scr_WatchElement_s *element);
     void CloneSelectedElement();
 
-    void ToggleBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type);
-    void ToggleBreakpointInternal(Scr_WatchElement_s *element, unsigned __int8 type);
-    void ToggleWatchElementBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type);
+    void ToggleBreakpoint(Scr_WatchElement_s *element, uint8_t type);
+    void ToggleBreakpointInternal(Scr_WatchElement_s *element, uint8_t type);
+    void ToggleWatchElementBreakpoint(Scr_WatchElement_s *element, uint8_t type);
 
     Scr_WatchElement_s *GetSelectedElement();
     Scr_WatchElement_s *GetSelectedElement_r(Scr_WatchElement_s *element, int *currentline);
@@ -1759,7 +1759,7 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
 
     Scr_WatchElement_s *AddBreakpoint(
         Scr_WatchElement_s *element,
-        unsigned __int8 type);
+        uint8_t type);
     Scr_WatchElement_s *RemoveBreakpoint(Scr_WatchElement_s *element);
 
     void SetSelectedElement(Scr_WatchElement_s *selElement, bool user);
@@ -1793,7 +1793,7 @@ struct Scr_ScriptWatch : UI_LinesComponent // sizeof=0x34
         Scr_WatchElement_s *element,
         const char *text,
         bool overwrite,
-        unsigned __int8 breakpointType,
+        uint8_t breakpointType,
         bool user);
 
     void PasteElement();

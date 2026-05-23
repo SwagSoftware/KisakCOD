@@ -278,7 +278,7 @@ void __cdecl Com_SyncThreads();
 void __cdecl Com_InitDObj();
 void __cdecl Com_ShutdownDObj();
 void Com_InitHunkMemory();
-unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
+uint8_t *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
 
 #ifdef KISAK_SP
 void Com_ResetFrametime();
@@ -374,26 +374,26 @@ const char *__cdecl Dvar_DisplayableValue(const dvar_s *dvar);
 const char *__cdecl Dvar_ValueToString(const dvar_s *dvar, DvarValue value);
 const char *__cdecl Dvar_DisplayableResetValue(const dvar_s *dvar);
 const char *__cdecl Dvar_DisplayableLatchedValue(const dvar_s *dvar);
-char __cdecl Dvar_ValueInDomain(unsigned __int8 type, DvarValue value, DvarLimits domain);
+char __cdecl Dvar_ValueInDomain(uint8_t type, DvarValue value, DvarLimits domain);
 char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min, float max);
 const char *Dvar_DomainToString_GetLines(
-    unsigned __int8 type,
+    uint8_t type,
     DvarLimits *domain,
     char *outBuffer,
     unsigned int outBufferLen,
     int *outLineCount);
 void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen);
 
-void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain);
+void __cdecl Dvar_PrintDomain(uint8_t type, DvarLimits domain);
 bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar);
-int __cdecl Dvar_ValuesEqual(unsigned __int8 type, DvarValue val0, DvarValue val1);
+int __cdecl Dvar_ValuesEqual(uint8_t type, DvarValue val0, DvarValue val1);
 const dvar_s *__cdecl Dvar_FindVar(const char *dvarName);
 void __cdecl Dvar_ClearModified(dvar_s *dvar);
 void __cdecl Dvar_SetModified(dvar_s *dvar);
 void __cdecl Dvar_UpdateEnumDomain(dvar_s *dvar, const char **stringTable);
 DvarValue *__cdecl Dvar_ClampValueToDomain(
     DvarValue *result,
-    unsigned __int8 type,
+    uint8_t type,
     DvarValue value,
     DvarValue resetValue,
     DvarLimits domain);
@@ -407,7 +407,7 @@ double __cdecl Dvar_StringToFloat(const char *string);
 const char *__cdecl Dvar_GetString(const char *dvarName);
 const char *__cdecl Dvar_GetVariantString(const char *dvarName);
 void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor);
-void __cdecl Dvar_StringToColor(const char *string, unsigned __int8 *color);
+void __cdecl Dvar_StringToColor(const char *string, uint8_t *color);
 void __cdecl Dvar_GetUnpackedColorByName(const char *dvarName, float *expandedColor);
 void __cdecl Dvar_Shutdown();
 void __cdecl Dvar_FreeNameString(const char *name);
@@ -429,13 +429,13 @@ void __cdecl Dvar_ClearLatchedValue(dvar_s *dvar);
 void __cdecl Dvar_ReinterpretDvar(
     dvar_s *dvar,
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue value,
     DvarLimits domain);
 const dvar_s *__cdecl Dvar_RegisterNew(
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue value,
     DvarLimits domain,
@@ -443,7 +443,7 @@ const dvar_s *__cdecl Dvar_RegisterNew(
 void __cdecl Dvar_Reregister(
     dvar_s *dvar,
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue resetValue,
     DvarLimits domain,
@@ -455,7 +455,7 @@ const dvar_s *__cdecl Dvar_RegisterBool(
     const char *description);
 const dvar_s *__cdecl Dvar_RegisterVariant(
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue value,
     DvarLimits domain,
@@ -463,11 +463,11 @@ const dvar_s *__cdecl Dvar_RegisterVariant(
 void __cdecl Dvar_MakeExplicitType(
     dvar_s *dvar,
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue resetValue,
     DvarLimits domain);
-DvarValue *__cdecl Dvar_StringToValue(DvarValue *result, unsigned __int8 type, DvarLimits domain, const char *string);
+DvarValue *__cdecl Dvar_StringToValue(DvarValue *result, uint8_t type, DvarLimits domain, const char *string);
 void __cdecl Dvar_StringToVec2(const char *string, float *vector);
 void __cdecl Dvar_StringToVec3(const char *string, float *vector);
 void __cdecl Dvar_StringToVec4(const char *string, float *vector);
@@ -800,7 +800,7 @@ struct pointtrace_t // sizeof=0x34
     const IgnoreEntParams *ignoreEntParams; // ...
     int contentmask;                    // ...
     int bLocational;                    // ...
-    unsigned __int8 *priorityMap;       // ...
+    uint8_t *priorityMap;       // ...
 };
 struct moveclip_t // sizeof=0x54
 {
@@ -1030,7 +1030,7 @@ int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, unsigned __int1
 int __cdecl CM_PointContents(const float *p, unsigned int model);
 int __cdecl CM_PointContentsLeafBrushNode_r(const float *p, cLeafBrushNode_s *node);
 int __cdecl CM_TransformedPointContents(const float *p, unsigned int model, const float *origin, const float *angles);
-unsigned __int8 *__cdecl CM_ClusterPVS(int cluster);
+uint8_t *__cdecl CM_ClusterPVS(int cluster);
 
 // cm_world
 struct areaParms_t // sizeof=0x18
@@ -1064,7 +1064,7 @@ struct sightpointtrace_t // sizeof=0x2C
     int passEntityNum[2];               // ...
     int contentmask;                    // ...
     int locational;                     // ...
-    unsigned __int8 *priorityMap;       // ...
+    uint8_t *priorityMap;       // ...
 };
 void __cdecl TRACK_cm_world();
 void __cdecl CM_LinkWorld();
@@ -1121,9 +1121,9 @@ int __cdecl CM_PointSightTraceToEntities_r(
     const float *p1,
     const float *p2);
 
-int CM_SaveWorld(unsigned __int8 *buf);
+int CM_SaveWorld(uint8_t *buf);
 void CM_ValidateWorld();
-void CM_LoadWorld(unsigned __int8 *buf);
+void CM_LoadWorld(uint8_t *buf);
 void CM_UnlockTree();
 
 // cm_load
@@ -1244,7 +1244,7 @@ struct clipMap_t // sizeof=0x11C
     unsigned int numBrushSides;         // ...
     struct cbrushside_t *brushsides;           // ...
     unsigned int numBrushEdges;         // ...
-    unsigned __int8 *brushEdges;        // ...
+    uint8_t *brushEdges;        // ...
     unsigned int numNodes;              // ...
     struct cNode_t *nodes;                     // ...
     unsigned int numLeafs;              // ...
@@ -1259,7 +1259,7 @@ struct clipMap_t // sizeof=0x11C
     float (*verts)[3];                  // ...
     int triCount;                       // ...
     unsigned __int16 *triIndices;       // ...
-    unsigned __int8 *triEdgeIsWalkable; // ...
+    uint8_t *triEdgeIsWalkable; // ...
     int borderCount;                    // ...
     struct CollisionBorder *borders;           // ...
     int partitionCount;                 // ...
@@ -1274,7 +1274,7 @@ struct clipMap_t // sizeof=0x11C
     struct cbrush_t *brushes;                  // ...
     int numClusters;                    // ...
     int clusterBytes;                   // ...
-    unsigned __int8 *visibility;        // ...
+    uint8_t *visibility;        // ...
     int vised;                          // ...
     struct MapEnts *mapEnts;                   // ...
     struct cbrush_t *box_brush;                // ...

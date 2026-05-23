@@ -6,9 +6,9 @@ struct Glyph // sizeof=0x18
     unsigned __int16 letter;
     char x0;
     char y0;
-    unsigned __int8 dx;
-    unsigned __int8 pixelWidth;
-    unsigned __int8 pixelHeight;
+    uint8_t dx;
+    uint8_t pixelWidth;
+    uint8_t pixelHeight;
     // padding byte
     float s0;
     float t0;

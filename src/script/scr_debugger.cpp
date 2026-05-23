@@ -168,7 +168,7 @@ void __thiscall Scr_ScriptWindow::GetSourcePos(unsigned int *start, unsigned int
 
 bool __thiscall Scr_ScriptWindow::AddBreakpointAtSourcePos(
     Scr_WatchElement_s *element,
-    unsigned __int8 breakpointType,
+    uint8_t breakpointType,
     bool user,
     Scr_Breakpoint **pBreakpoint,
     unsigned int startSourcePos,
@@ -180,7 +180,7 @@ bool __thiscall Scr_ScriptWindow::AddBreakpointAtSourcePos(
     int builtinIndex; // [esp+Ch] [ebp-18h]
     bool success; // [esp+1Bh] [ebp-9h]
     char *codePos; // [esp+1Ch] [ebp-8h]
-    unsigned __int8 *codePosa; // [esp+1Ch] [ebp-8h]
+    uint8_t *codePosa; // [esp+1Ch] [ebp-8h]
     unsigned int sourcePos; // [esp+20h] [ebp-4h] BYREF
 
     builtinIndex = -1;
@@ -252,7 +252,7 @@ void __thiscall Scr_ScriptWindow::AddBreakpoint(
     char *codePos,
     int builtinIndex,
     Scr_WatchElement_s *element,
-    unsigned __int8 type)
+    uint8_t type)
 {
     Scr_Breakpoint *breakpoint; // [esp+8h] [ebp-8h]
     Scr_Breakpoint *newBreakpoint; // [esp+Ch] [ebp-4h]
@@ -285,7 +285,7 @@ void __thiscall Scr_ScriptWindow::ToggleBreakpointInternal(
     Scr_WatchElement_s *element,
     bool force,
     bool overwrite,
-    unsigned __int8 breakpointType,
+    uint8_t breakpointType,
     bool user)
 {
     Scr_Breakpoint *breakpoint; // [esp+8h] [ebp-24h]
@@ -641,7 +641,7 @@ void __cdecl Scr_KeyEvent(int key)
     }
 }
 
-void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos)
+void __cdecl Scr_AddManualBreakpoint(uint8_t *codePos)
 {
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 506, 0, "%s", "!Sys_IsRemoteDebugClient()");
@@ -649,7 +649,7 @@ void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 509, 0, "%s", "codePos");
     if (*codePos == 135 || *codePos == 137)
     {
-        if ((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos != codePos)
+        if ((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos != codePos)
             MyAssertHandler(
                 ".\\script\\scr_debugger.cpp",
                 513,
@@ -671,15 +671,15 @@ void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos)
     }
 }
 
-void __cdecl Scr_AddBreakpoint(const unsigned __int8 *codePos)
+void __cdecl Scr_AddBreakpoint(const uint8_t *codePos)
 {
-    unsigned __int8 *breakpoint; // [esp+0h] [ebp-4h]
+    uint8_t *breakpoint; // [esp+0h] [ebp-4h]
 
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 457, 0, "%s", "!Sys_IsRemoteDebugClient()");
     if (*codePos == 127)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 460, 0, "%s", "*codePos != OP_NOP");
-    breakpoint = (unsigned __int8 *)Scr_FindBreakpointInfo((const char *)codePos);
+    breakpoint = (uint8_t *)Scr_FindBreakpointInfo((const char *)codePos);
     if (*breakpoint != 127)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 462, 0, "%s", "*breakpoint == OP_NOP");
     *breakpoint = *codePos;
@@ -731,7 +731,7 @@ Scr_WatchElement_s *__cdecl Scr_ReadElement()
 
 void __cdecl Scr_FreeLineBreakpoint(Scr_Breakpoint *breakpoint, bool deleteElement)
 {
-    unsigned __int8 breakpointType; // [esp+7h] [ebp-9h]
+    uint8_t breakpointType; // [esp+7h] [ebp-9h]
     Scr_Breakpoint **pBreakpoint; // [esp+8h] [ebp-8h]
     Scr_WatchElement_s *element; // [esp+Ch] [ebp-4h]
 
@@ -750,7 +750,7 @@ void __cdecl Scr_FreeLineBreakpoint(Scr_Breakpoint *breakpoint, bool deleteEleme
     {
         if (!breakpoint->codePos)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 1051, 0, "%s", "breakpoint->codePos");
-        Scr_RemoveManualBreakpoint((unsigned __int8 *)breakpoint->codePos);
+        Scr_RemoveManualBreakpoint((uint8_t *)breakpoint->codePos);
     }
     if (pBreakpoint != breakpoint->prev)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 1057, 0, "%s", "pBreakpoint == breakpoint->prev");
@@ -760,11 +760,11 @@ void __cdecl Scr_FreeLineBreakpoint(Scr_Breakpoint *breakpoint, bool deleteEleme
     Scr_FreeBreakpoint(breakpoint);
 }
 
-void __cdecl Scr_RemoveManualBreakpoint(unsigned __int8 *codePos)
+void __cdecl Scr_RemoveManualBreakpoint(uint8_t *codePos)
 {
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 540, 0, "%s", "!Sys_IsRemoteDebugClient()");
-    if ((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos == codePos
+    if ((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos == codePos
         && scrDebuggerGlob.nextBreakpointCodePosMasked)
     {
         scrDebuggerGlob.nextBreakpointCodePosMasked = 0;
@@ -781,13 +781,13 @@ void __cdecl Scr_RemoveManualBreakpoint(unsigned __int8 *codePos)
     }
 }
 
-void __cdecl Scr_RemoveBreakpoint(unsigned __int8 *codePos)
+void __cdecl Scr_RemoveBreakpoint(uint8_t *codePos)
 {
-    unsigned __int8 *breakpoint; // [esp+0h] [ebp-4h]
+    uint8_t *breakpoint; // [esp+0h] [ebp-4h]
 
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 482, 0, "%s", "!Sys_IsRemoteDebugClient()");
-    breakpoint = (unsigned __int8 *)Scr_FindBreakpointInfo((const char *)codePos);
+    breakpoint = (uint8_t *)Scr_FindBreakpointInfo((const char *)codePos);
     if (*breakpoint == 127)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 486, 0, "%s", "*breakpoint != OP_NOP");
     *codePos = *breakpoint;
@@ -835,7 +835,7 @@ void __cdecl Scr_SetTempBreakpoint(char *codePos, unsigned int threadId)
         if (scrDebuggerGlob.killThreadCodePos)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 1560, 0, "%s", "!scrDebuggerGlob.killThreadCodePos");
         scrDebuggerGlob.nextBreakpointCodePos = codePos;
-        Scr_AddManualBreakpoint((unsigned __int8 *)codePos);
+        Scr_AddManualBreakpoint((uint8_t *)codePos);
         scrDebuggerGlob.prevBreakpointLineNum = scrDebuggerGlob.breakpointPos.lineNum;
         scrDebuggerGlob.nextBreakpointThreadId = threadId;
     }
@@ -1007,11 +1007,11 @@ void __cdecl Scr_PostSetText(Scr_WatchElement_s *element)
 {
     int v1; // [esp+18h] [ebp-14Ch]
     int v2; // [esp+2Ch] [ebp-138h]
-    unsigned __int8 ObjectType; // [esp+44h] [ebp-120h]
+    uint8_t ObjectType; // [esp+44h] [ebp-120h]
     unsigned int bufferIndex; // [esp+48h] [ebp-11Ch]
     char valueText[264]; // [esp+4Ch] [ebp-118h] BYREF
     bool directObject; // [esp+15Ah] [ebp-Ah]
-    unsigned __int8 type; // [esp+15Bh] [ebp-9h]
+    uint8_t type; // [esp+15Bh] [ebp-9h]
     const char *codePos; // [esp+15Ch] [ebp-8h]
     unsigned int sourcePos; // [esp+160h] [ebp-4h]
 
@@ -1204,7 +1204,7 @@ Scr_WatchElement_s *__cdecl Scr_CreateWatchElement(char *text, Scr_WatchElement_
     Scr_WatchElement_s *element; // [esp+0h] [ebp-4h]
 
     element = (Scr_WatchElement_s *)Scr_AllocDebugMem(100, name);
-    memset((unsigned __int8 *)element, 0, sizeof(Scr_WatchElement_s));
+    memset((uint8_t *)element, 0, sizeof(Scr_WatchElement_s));
     element->valueText = CopyString((char *)"");
     element->refText = CopyString(text);
     element->next = *prevElem;
@@ -1307,7 +1307,7 @@ void __cdecl Scr_SpecialBreakpoint(VariableValue *top, char *pos, unsigned int l
     scrVmPub.outparamcount = 0;
     if (scrDebuggerGlob.nextBreakpointCodePos)
     {
-        Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos);
+        Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos);
         scrDebuggerGlob.nextBreakpointCodePos = 0;
     }
     if (Scr_AllowBreakpoint(pos))
@@ -1349,14 +1349,14 @@ Scr_OpcodeList_s *Scr_UnbreakAllAssignmentPos()
         scrDebuggerGlob.assignBreakpointSet = 0;
         for (opcodeElement = scrDebuggerGlob.assignHead; opcodeElement; opcodeElement = result)
         {
-            Scr_RemoveAssignmentBreakpoint((unsigned __int8 *)opcodeElement->codePos);
+            Scr_RemoveAssignmentBreakpoint((uint8_t *)opcodeElement->codePos);
             result = opcodeElement->next;
         }
     }
     return result;
 }
 
-void __cdecl Scr_RemoveAssignmentBreakpoint(unsigned __int8 *codePos)
+void __cdecl Scr_RemoveAssignmentBreakpoint(uint8_t *codePos)
 {
     if (*codePos == 136)
     {
@@ -1488,14 +1488,14 @@ Scr_OpcodeList_s *Scr_BreakOnAllAssignmentPos()
         scrDebuggerGlob.objectId = 1;
         for (opcodeElement = scrDebuggerGlob.assignHead; opcodeElement; opcodeElement = result)
         {
-            Scr_AddAssignmentBreakpoint((unsigned __int8 *)opcodeElement->codePos);
+            Scr_AddAssignmentBreakpoint((uint8_t *)opcodeElement->codePos);
             result = opcodeElement->next;
         }
     }
     return result;
 }
 
-void __cdecl Scr_AddAssignmentBreakpoint(unsigned __int8 *codePos)
+void __cdecl Scr_AddAssignmentBreakpoint(uint8_t *codePos)
 {
     if (*codePos == 135)
     {
@@ -1563,7 +1563,7 @@ void __cdecl Scr_InitDebuggerMain()
         if (!Sys_IsRemoteDebugClient())
         {
             scrDebuggerGlob.variableBreakpoints = (Scr_WatchElementDoubleNode_t **)Hunk_AllocDebugMem(393216);// , "scrDebuggerGlob.variableBreakpoints");
-            memset((unsigned __int8 *)scrDebuggerGlob.variableBreakpoints, 0, 0x60000u);
+            memset((uint8_t *)scrDebuggerGlob.variableBreakpoints, 0, 0x60000u);
             scrDebuggerGlob.assignHead = 0;
             scrDebuggerGlob.assignHeadCodePos = 0;
             scrDebuggerGlob.disableBreakpoints = 0;
@@ -1617,7 +1617,7 @@ void __cdecl Scr_InitDebugger()
         if (!Sys_IsRemoteDebugClient())
         {
             scrDebuggerGlob.breakpoints = (char *)Hunk_AllocDebugMem(scrCompilePub.programLen);// , "scrDebuggerGlob.breakpoints");
-            memset((unsigned __int8 *)scrDebuggerGlob.breakpoints, 0x7Fu, scrCompilePub.programLen);
+            memset((uint8_t *)scrDebuggerGlob.breakpoints, 0x7Fu, scrCompilePub.programLen);
         }
         //Scr_ScriptList::Init(&scrDebuggerGlob.scriptList);
         scrDebuggerGlob.scriptList.Init();
@@ -1747,12 +1747,12 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
             {
                 if (scrDebuggerGlob.nextBreakpointCodePos)
                 {
-                    Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos);
+                    Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos);
                     scrDebuggerGlob.nextBreakpointCodePos = 0;
                 }
                 if (scrDebuggerGlob.killThreadCodePos)
                 {
-                    Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.killThreadCodePos);
+                    Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.killThreadCodePos);
                     scrDebuggerGlob.killThreadCodePos = 0;
                 }
                 if (scrDebuggerGlob.breakpointCount)
@@ -2005,7 +2005,7 @@ int __cdecl Scr_HitBreakpoint(VariableValue *top, char *pos, unsigned int localI
     if (scrDebuggerGlob.atBreakpoint)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 8836, 0, "%s", "!scrDebuggerGlob.atBreakpoint");
     codePos = pos - 1;
-    opcode = (unsigned __int8)*Scr_FindBreakpointInfo(pos - 1);
+    opcode = (uint8_t)*Scr_FindBreakpointInfo(pos - 1);
     hitStepBreakpoint = 0;
     existsBreakpoint = 0;
     if (scrDebuggerGlob.nextBreakpointCodePos == pos - 1)
@@ -2024,7 +2024,7 @@ int __cdecl Scr_HitBreakpoint(VariableValue *top, char *pos, unsigned int localI
         {
             if (scrDebuggerGlob.killThreadCodePos != codePos)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 8861, 0, "%s", "scrDebuggerGlob.killThreadCodePos == codePos");
-            Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.killThreadCodePos);
+            Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.killThreadCodePos);
             scrDebuggerGlob.killThreadCodePos = 0;
             existsBreakpoint = 1;
         }
@@ -2054,7 +2054,7 @@ int __cdecl Scr_HitBreakpoint(VariableValue *top, char *pos, unsigned int localI
         return opcode;
     if (scrDebuggerGlob.nextBreakpointCodePos)
     {
-        Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos);
+        Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos);
         scrDebuggerGlob.nextBreakpointCodePos = 0;
     }
     if (!Scr_AllowBreakpoint(pos))
@@ -2246,13 +2246,13 @@ void __cdecl Scr_DebugKillThread(unsigned int threadId, const char *codePos)
                             0,
                             "%s",
                             "scrDebuggerGlob.killThreadCodePos == scrVmPub.function_frame->fs.pos");
-                    Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.killThreadCodePos);
+                    Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.killThreadCodePos);
                     scrDebuggerGlob.killThreadCodePos = 0;
                 }
                 if (scrDebuggerGlob.nextBreakpointCodePos)
-                    Scr_RemoveManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos);
+                    Scr_RemoveManualBreakpoint((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos);
                 scrDebuggerGlob.nextBreakpointCodePos = (char *)scrVmPub.function_frame->fs.pos;
-                Scr_AddManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.nextBreakpointCodePos);
+                Scr_AddManualBreakpoint((uint8_t *)scrDebuggerGlob.nextBreakpointCodePos);
                 scrDebuggerGlob.prevBreakpointLineNum = -1;
                 scrDebuggerGlob.nextBreakpointThreadId = scrVmPub.function_frame->fs.localId;
             }
@@ -2279,7 +2279,7 @@ void __cdecl Scr_DebugTerminateThread(int topThread)
             if (*scrVmPub.function_frame->fs.pos != 135 && *scrVmPub.function_frame->fs.pos != 137)
             {
                 scrDebuggerGlob.killThreadCodePos = (char *)scrVmPub.function_frame->fs.pos;
-                Scr_AddManualBreakpoint((unsigned __int8 *)scrDebuggerGlob.killThreadCodePos);
+                Scr_AddManualBreakpoint((uint8_t *)scrDebuggerGlob.killThreadCodePos);
             }
         }
     }
@@ -2462,7 +2462,7 @@ int __cdecl Scr_UpdateDebugSocket()
 void Scr_ToggleBreakpointRemote()
 {
     bool overwrite; // [esp+5h] [ebp-Fh]
-    unsigned __int8 breakpointType; // [esp+6h] [ebp-Eh]
+    uint8_t breakpointType; // [esp+6h] [ebp-Eh]
     bool force; // [esp+7h] [ebp-Dh]
     Scr_ScriptWindow *scriptWindow; // [esp+8h] [ebp-Ch]
     bool user; // [esp+Fh] [ebp-5h]
@@ -2718,7 +2718,7 @@ void Scr_SetChildCountRemote()
     oldElements = parentElement->childArrayHead;
     oldChildCount = parentElement->childCount;
     newElements = (Scr_WatchElement_s *)Scr_AllocDebugMem(100 * count, "Scr_SetChildCountRemote");
-    memset((unsigned __int8 *)newElements, 0, 100 * count);
+    memset((uint8_t *)newElements, 0, 100 * count);
     oldIndex = 0;
     newIndex = 0;
     for (nameIndex = 0; nameIndex < count; ++nameIndex)
@@ -2819,7 +2819,7 @@ void Scr_CloneElementRemote()
 
 void Scr_ToggleWatchElementBreakpointRemote()
 {
-    unsigned __int8 type; // [esp+3h] [ebp-5h]
+    uint8_t type; // [esp+3h] [ebp-5h]
     Scr_WatchElement_s *element; // [esp+4h] [ebp-4h]
 
     element = Scr_ReadElement();
@@ -3113,7 +3113,7 @@ retry_15:
             }
         }
     }
-    opcode = (unsigned __int8)*Scr_FindBreakpointInfo(pos - 1);
+    opcode = (uint8_t)*Scr_FindBreakpointInfo(pos - 1);
     switch (opcode)
     {
     case 0:
@@ -3198,8 +3198,8 @@ retry_15:
         if (scrVarPub.evaluate)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9731, 0, "%s", "!scrVarPub.evaluate");
         scrVarPub.evaluate = 1;
-        //scrDebuggerGlob.objectId = *(unsigned int *)&Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]) + 1;
-        //scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-(unsigned __int8)*pos]).next + 1; // KISAKTODO: shitty
+        //scrDebuggerGlob.objectId = *(unsigned int *)&Scr_EvalVariableObject(scrVmPub.localVars[-(uint8_t)*pos]) + 1;
+        //scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-(uint8_t)*pos]).next + 1; // KISAKTODO: shitty
         scrDebuggerGlob.objectId = Scr_EvalVariableObject(scrVmPub.localVars[-*pos]) + 1;
         if (!scrVarPub.evaluate)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9734, 0, "%s", "scrVarPub.evaluate");

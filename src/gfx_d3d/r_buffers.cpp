@@ -118,13 +118,13 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
     return 0;
 }
 
-void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, unsigned __int8 *bufferData, int sizeInBytes)
+void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, uint8_t *bufferData, int sizeInBytes)
 {
-    unsigned __int8 *v3; // eax
+    uint8_t *v3; // eax
 
     if (r_loadForRenderer->current.enabled && bufferData)
     {
-        v3 = (unsigned __int8 *)R_AllocStaticVertexBuffer(vb, sizeInBytes);
+        v3 = (uint8_t *)R_AllocStaticVertexBuffer(vb, sizeInBytes);
         memcpy(v3, bufferData, sizeInBytes);
         R_FinishStaticVertexBuffer(*vb);
     }
@@ -136,12 +136,12 @@ void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, unsigned __int8 *buf
 
 void __cdecl R_InitDynamicVertexBufferState(GfxVertexBufferState *vb, int bytes)
 {
-    unsigned __int8 *verts; // [esp+0h] [ebp-4h]
+    uint8_t *verts; // [esp+0h] [ebp-4h]
 
     iassert( vb );
     vb->used = 0;
     vb->total = bytes;
-    verts = (unsigned __int8 *)R_AllocDynamicVertexBuffer(&vb->buffer, bytes);
+    verts = (uint8_t *)R_AllocDynamicVertexBuffer(&vb->buffer, bytes);
     iassert( verts == NULL );
     vb->verts = verts;
 }

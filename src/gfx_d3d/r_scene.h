@@ -65,7 +65,7 @@ struct GfxSceneEntity // sizeof=0x7C // (SP/MP same)
     unsigned __int16 entnum;
     const DObj_s *obj;
     GfxSceneEntityInfo info;
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t reflectionProbeIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -99,7 +99,7 @@ struct GfxSceneModel // sizeof=0x48
     float radius;
     unsigned __int16 *cachedLightingHandle;
     float lightingOrigin[3];
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t reflectionProbeIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -110,7 +110,7 @@ struct GfxSceneBrush // sizeof=0x28
     unsigned __int16 entnum;
     const GfxBrushModel *bmodel;
     GfxPlacement placement;
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t reflectionProbeIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -125,7 +125,7 @@ union GfxEntCellRefInfo // sizeof=0x4
 struct GfxSceneDpvs // sizeof=0x38
 {                                       // ...
     unsigned int localClientNum;        // ...
-    unsigned __int8 *entVisData[7];     // ...
+    uint8_t *entVisData[7];     // ...
     unsigned __int16 *sceneXModelIndex; // ...
     unsigned __int16 *sceneDObjIndex;   // ...
     GfxEntCellRefInfo *entInfo[4];      // ...
@@ -186,13 +186,13 @@ struct __declspec(align(64)) GfxScene // sizeof=0x154D00
     unsigned int *entOverflowedDrawBuf; // ...
     volatile unsigned int sceneDObjCount;        // ...
     GfxSceneEntity sceneDObj[512];      // ...
-    unsigned __int8 sceneDObjVisData[7][512]; // ...
+    uint8_t sceneDObjVisData[7][512]; // ...
     volatile unsigned int sceneModelCount;       // ...
     GfxSceneModel sceneModel[1024];     // ...
-    unsigned __int8 sceneModelVisData[7][1024]; // ...
+    uint8_t sceneModelVisData[7][1024]; // ...
     volatile unsigned int sceneBrushCount;       // ...
     GfxSceneBrush sceneBrush[512];      // ...
-    unsigned __int8 sceneBrushVisData[3][512]; // ...
+    uint8_t sceneBrushVisData[3][512]; // ...
     unsigned int sceneDynModelCount;    // ...
     unsigned int sceneDynBrushCount;    // ...
     DpvsPlane shadowFarPlane[2];        // ...
@@ -241,7 +241,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     float *origin,
     unsigned __int16 gfxEntIndex,
     unsigned int lightingHandle,
-    unsigned __int8 primaryLightIndex,
+    uint8_t primaryLightIndex,
     char isShadowReceiver,
     int depthHack,
     GfxDrawSurf **drawSurfs,
@@ -257,7 +257,7 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
 void __cdecl R_AddDObjSurfacesCamera(
     GfxSceneEntity *sceneEnt,
     __int16 lightingHandle,
-    unsigned __int8 primaryLightIndex,
+    uint8_t primaryLightIndex,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs);
 GfxDrawSurf *__cdecl R_AddDObjSurfaces(
@@ -273,7 +273,7 @@ void __cdecl R_ClearScene(unsigned int localClientNum);
 unsigned int __cdecl R_GetLocalClientNum();
 void __cdecl R_SetLodOrigin(const refdef_s *refdef);
 void R_UpdateFrameFog();
-unsigned __int8 __cdecl LerpByte(unsigned __int8 from, unsigned __int8 to, float frac);
+uint8_t __cdecl LerpByte(uint8_t from, uint8_t to, float frac);
 void __cdecl R_SetViewParmsForScene(const refdef_s *refdef, GfxViewParms *viewParms);
 void __cdecl R_SetupProjection(float tanHalfFovX, float tanHalfFovY, GfxViewParms *viewParms);
 bool R_UpdateFrameSun();

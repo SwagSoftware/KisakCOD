@@ -22,7 +22,7 @@ void __cdecl UILocalVar_Shutdown(UILocalVarContext *context)
             FreeString(context->table[hash].name);
         }
     }
-    memset((unsigned __int8 *)context, 0, sizeof(UILocalVarContext));
+    memset((uint8_t *)context, 0, sizeof(UILocalVarContext));
 }
 
 UILocalVarContext *__cdecl UILocalVar_Find(UILocalVarContext *context, const char *name)
@@ -51,7 +51,7 @@ char __cdecl UILocalVar_FindLocation(UILocalVarContext *context, const char *nam
             *hashForName = hash;
             return 1;
         }
-        hash = (unsigned __int8)(hash + 1);
+        hash = (uint8_t)(hash + 1);
     } while (hash != initialHash);
     *hashForName = hash;
     return 0;
@@ -65,7 +65,7 @@ unsigned int __cdecl UILocalVar_HashName(const char *name)
     hash = 0;
     for (i = 0; name[i]; ++i)
         hash += (i + 119) * name[i];
-    return (unsigned __int8)(hash + HIBYTE(hash));
+    return (uint8_t)(hash + HIBYTE(hash));
 }
 
 UILocalVarContext *__cdecl UILocalVar_FindOrCreate(UILocalVarContext *context, char *name)

@@ -95,8 +95,8 @@ void __cdecl RB_Draw3DInternal(const GfxViewInfo *viewInfo)
     else
     {
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-        memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-        memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+        memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+        memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
@@ -130,8 +130,8 @@ void __cdecl RB_EndSceneRendering(GfxCmdBufContext context, const GfxCmdBufInput
     R_HW_InsertFence((IDirect3DQuery9 **)&backEndData->endFence);
     R_InitCmdBufSourceState(context.source, input, 0);
     memcpy(context.state, &gfxCmdBufState, sizeof(GfxCmdBufState));
-    memset((unsigned __int8 *)context.state->vertexShaderConstState, 0, sizeof(context.state->vertexShaderConstState));
-    memset((unsigned __int8 *)context.state->pixelShaderConstState, 0, sizeof(context.state->pixelShaderConstState));
+    memset((uint8_t *)context.state->vertexShaderConstState, 0, sizeof(context.state->vertexShaderConstState));
+    memset((uint8_t *)context.state->pixelShaderConstState, 0, sizeof(context.state->pixelShaderConstState));
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_BeginView(&gfxCmdBufSourceState, &viewInfo->sceneDef, &viewInfo->viewParms);
     R_SetViewportStruct(&gfxCmdBufSourceState, &viewInfo->sceneViewport);
@@ -156,8 +156,8 @@ void __cdecl RB_EndSceneRendering(GfxCmdBufContext context, const GfxCmdBufInput
 void __cdecl R_SetAndClearSceneTarget(const GfxViewport *viewport)
 {
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-    memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-    memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
     KISAK_NULLSUB();
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
@@ -350,8 +350,8 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     ShadowType dynamicShadowType; // [esp+54h] [ebp-1Ch]
     int isRenderingFullScreen; // [esp+58h] [ebp-18h]
     float clearColor[4]; // [esp+5Ch] [ebp-14h] BYREF
-    unsigned __int8 whichToClearForScene; // [esp+6Eh] [ebp-2h]
-    unsigned __int8 whichToClearForSetup; // [esp+6Fh] [ebp-1h]
+    uint8_t whichToClearForScene; // [esp+6Eh] [ebp-2h]
+    uint8_t whichToClearForSetup; // [esp+6Fh] [ebp-1h]
     int savedregs; // [esp+70h] [ebp+0h] BYREF
 
     data = backEndData;
@@ -418,8 +418,8 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     iassert(viewInfo->isRenderingFullScreen == isRenderingFullScreen);
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-    memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-    memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
     R_BeginView(&gfxCmdBufSourceState, &viewInfo->sceneDef, &viewInfo->viewParms);

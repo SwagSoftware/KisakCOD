@@ -38,7 +38,7 @@ union GfxColor // sizeof=0x4
         packed = i;
     }
     unsigned int packed;
-    unsigned __int8 array[4];
+    uint8_t array[4];
 };
 
 struct GfxPackedVertex // sizeof=0x20
@@ -70,7 +70,7 @@ struct GfxVertexBufferState // sizeof=0x10
     volatile unsigned int used;
     int total;
     IDirect3DVertexBuffer9* buffer;     // ...
-    unsigned __int8* verts;
+    uint8_t* verts;
 };
 
 struct GfxMeshData // sizeof=0x20
@@ -180,7 +180,7 @@ struct Picmip // sizeof=0x2
         platform[0] = i;
         platform[1] = i;
     }
-    unsigned __int8 platform[2];        // ...
+    uint8_t platform[2];        // ...
 };
 
 struct CardMemory // sizeof=0x8
@@ -188,15 +188,15 @@ struct CardMemory // sizeof=0x8
     int platform[2];                    // ...
 };
 
-#define OFFSET_TO_GfxImageLoadDef_DATA sizeof(unsigned __int8) + sizeof(unsigned __int8) + sizeof(__int16) + sizeof(__int16) + sizeof(__int16) + sizeof(_D3DFORMAT) + sizeof(int)
+#define OFFSET_TO_GfxImageLoadDef_DATA sizeof(uint8_t) + sizeof(uint8_t) + sizeof(__int16) + sizeof(__int16) + sizeof(__int16) + sizeof(_D3DFORMAT) + sizeof(int)
 struct GfxImageLoadDef // sizeof=0x14
 {
-    unsigned __int8 levelCount;
-    unsigned __int8 flags;
+    uint8_t levelCount;
+    uint8_t flags;
     __int16 dimensions[3];
     _D3DFORMAT format;
     int resourceSize;
-    unsigned __int8 data[4]; // data extends beyond 4... '4' is to force alignment
+    uint8_t data[4]; // data extends beyond 4... '4' is to force alignment
 };
 
 union GfxTexture // sizeof=0x4
@@ -214,8 +214,8 @@ struct GfxImage // sizeof=0x24
     GfxTexture texture;
     Picmip picmip;
     bool noPicmip;
-    unsigned __int8 semantic;
-    unsigned __int8 track;
+    uint8_t semantic;
+    uint8_t track;
     // padding byte
     // padding byte
     // padding byte
@@ -223,7 +223,7 @@ struct GfxImage // sizeof=0x24
     unsigned __int16 width;
     unsigned __int16 height;
     unsigned __int16 depth;
-    unsigned __int8 category;
+    uint8_t category;
     bool delayLoadPixels;
     const char* name;
 };
@@ -244,7 +244,7 @@ struct GfxBuffers // sizeof=0x2400A0
     GfxIndexBufferState dynamicIndexBufferPool[1]; // ...
     GfxIndexBufferState* dynamicIndexBuffer; // ...
     GfxVertexBufferState skinnedCacheVbPool[2]; // ...
-    unsigned __int8* skinnedCacheLockAddr; // ...
+    uint8_t* skinnedCacheLockAddr; // ...
     GfxVertexBufferState dynamicVertexBufferPool[1]; // ...
     GfxVertexBufferState* dynamicVertexBuffer; // ...
     IDirect3DVertexBuffer9* particleCloudVertexBuffer; // ...
@@ -263,7 +263,7 @@ struct GfxBuffers // sizeof=0x2400A0
 struct GfxPointVertex // sizeof=0x10
 {                                       // ...
     float xyz[3];
-    unsigned __int8 color[4];           // ...
+    uint8_t color[4];           // ...
 };
 
 
@@ -278,10 +278,10 @@ struct GfxSurface // sizeof=0x30
 {                                       // ...
     srfTriangles_t tris;
     Material* material;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
-    unsigned __int8 primaryLightIndex;
-    unsigned __int8 flags;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
+    uint8_t primaryLightIndex;
+    uint8_t flags;
     float bounds[2][3];
 };
 
@@ -306,10 +306,10 @@ struct GfxStaticModelDrawInst // sizeof=0x4C
     GfxPackedPlacement placement;
     XModel* model;
     unsigned __int16 smodelCacheIndex[4];
-    unsigned __int8 reflectionProbeIndex;
-    unsigned __int8 primaryLightIndex;
+    uint8_t reflectionProbeIndex;
+    uint8_t primaryLightIndex;
     unsigned __int16 lightingHandle;
-    unsigned __int8 flags;
+    uint8_t flags;
     // padding byte
     // padding byte
     // padding byte
@@ -367,8 +367,8 @@ struct GfxWorldDpvsStatic // sizeof=0x68
     unsigned int emissiveSurfsEnd;      // ...
     unsigned int smodelVisDataCount;    // ...
     unsigned int surfaceVisDataCount;   // ...
-    unsigned __int8* smodelVisData[3];  // ...
-    unsigned __int8* surfaceVisData[3]; // ... [1] = CSM Parition Near, [2] = CSM Parition Far
+    uint8_t* smodelVisData[3];  // ...
+    uint8_t* surfaceVisData[3]; // ... [1] = CSM Parition Near, [2] = CSM Parition Far
     unsigned int* lodData;              // ...
     unsigned __int16* sortedSurfIndex;  // ...
     GfxStaticModelInst* smodelInsts;    // ...
@@ -414,7 +414,7 @@ struct GfxWorldVertexData // sizeof=0x8
 
 struct GfxWorldVertexLayerData // sizeof=0x8
 {                                       // ...
-    unsigned __int8* data;              // ...
+    uint8_t* data;              // ...
     IDirect3DVertexBuffer9* layerVb;    // ...
 };
 
@@ -437,7 +437,7 @@ struct SunLightParseParams // sizeof=0x80
 struct GfxLightImage // sizeof=0x8
 {                                       // ...
     GfxImage* image;
-    unsigned __int8 samplerState;
+    uint8_t samplerState;
     // padding byte
     // padding byte
     // padding byte
@@ -452,9 +452,9 @@ struct GfxLightDef // sizeof=0x10
 
 struct GfxLight // sizeof=0x40
 {                                       // ...
-    unsigned __int8 type;
-    unsigned __int8 canUseShadowMap;
-    unsigned __int8 unused[2];
+    uint8_t type;
+    uint8_t canUseShadowMap;
+    uint8_t unused[2];
     float color[3];
     float dir[3];
     float origin[3];
@@ -500,8 +500,8 @@ struct GfxPortalWritable // sizeof=0xC
 {
     bool isQueued;
     bool isAncestor;
-    unsigned __int8 recursionDepth;
-    unsigned __int8 hullPointCount;
+    uint8_t recursionDepth;
+    uint8_t hullPointCount;
     float (*hullPoints)[2];
     GfxPortal* queuedParent;
 };
@@ -509,8 +509,8 @@ struct GfxPortalWritable // sizeof=0xC
 struct DpvsPlane // sizeof=0x14
 {                                       // ...
     float coeffs[4];                    // ...
-    unsigned __int8 side[3];            // ...
-    unsigned __int8 pad;
+    uint8_t side[3];            // ...
+    uint8_t pad;
 };
 
 struct GfxCell;
@@ -521,7 +521,7 @@ struct GfxPortal // sizeof=0x44
     DpvsPlane plane;
     GfxCell* cell;
     float (*vertices)[3];
-    unsigned __int8 vertexCount;
+    uint8_t vertexCount;
     // padding byte
     // padding byte
     // padding byte
@@ -538,11 +538,11 @@ struct GfxCell // sizeof=0x38
     GfxPortal* portals;
     int cullGroupCount;
     int* cullGroups;
-    unsigned __int8 reflectionProbeCount;
+    uint8_t reflectionProbeCount;
     // padding byte
     // padding byte
     // padding byte
-    unsigned __int8* reflectionProbes;
+    uint8_t* reflectionProbes;
 };
 
 struct GfxLightmapArray // sizeof=0x8
@@ -554,8 +554,8 @@ struct GfxLightmapArray // sizeof=0x8
 struct GfxLightGridEntry // sizeof=0x4
 {                                       // ...
     unsigned __int16 colorsIndex;
-    unsigned __int8 primaryLightIndex;  // ...
-    unsigned __int8 needsTrace;
+    uint8_t primaryLightIndex;  // ...
+    uint8_t needsTrace;
 };
 
 struct GfxLightGridRow // sizeof=0xC
@@ -569,7 +569,7 @@ struct GfxLightGridRow // sizeof=0xC
 
 struct GfxLightGridColors // sizeof=0xA8
 {                                       // ...
-    unsigned __int8 rgb[56][3];
+    uint8_t rgb[56][3];
 };
 
 struct GfxLightGrid // sizeof=0x38
@@ -585,7 +585,7 @@ struct GfxLightGrid // sizeof=0x38
     unsigned int colAxis;               // ...
     unsigned __int16* rowDataStart;     // ...
     unsigned int rawRowDataSize;        // ...
-    unsigned __int8* rawRowData;        // ...
+    uint8_t* rawRowData;        // ...
     unsigned int entryCount;            // ...
     GfxLightGridEntry* entries;         // ...
     unsigned int colorCount;            // ...

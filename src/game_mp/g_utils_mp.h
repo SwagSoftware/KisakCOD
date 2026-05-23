@@ -65,7 +65,7 @@ void __cdecl G_FreeEntityAfterEvent(gentity_s *ent);
 gentity_s *__cdecl G_TempEntity(const float *origin, int event);
 void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm);
 void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm);
-void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int8 index);
+void __cdecl G_PlaySoundAlias(gentity_s *ent, uint8_t index);
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList);
 void __cdecl G_SetOrigin(gentity_s *ent, const float *origin);
 void __cdecl G_SetAngle(gentity_s *ent, const float *angle);

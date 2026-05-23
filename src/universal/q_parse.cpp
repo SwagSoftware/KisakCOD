@@ -491,7 +491,7 @@ parseInfo_t *__cdecl Com_ParseExt(const char **data_p, int allowLineBreaks)
                 ;
             if (j == l)
             {
-                memcpy((unsigned __int8 *)pi, (unsigned __int8 *)*punc, l);
+                memcpy((uint8_t *)pi, (uint8_t *)*punc, l);
                 pi->token[l] = 0;
                 data += l;
                 *data_p = data;

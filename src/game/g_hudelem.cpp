@@ -1524,8 +1524,8 @@ void HudElem_UpdateClient(gclient_s *client)
     //        do
     //        {
     //            type_high = HIBYTE(v10->type);
-    //            v12 = (unsigned __int8)*v9 - type_high;
-    //            if ((unsigned __int8)*v9 != type_high)
+    //            v12 = (uint8_t)*v9 - type_high;
+    //            if ((uint8_t)*v9 != type_high)
     //                break;
     //            ++v9;
     //            v10 = (hudelem_s *)((char *)v10 + 1);

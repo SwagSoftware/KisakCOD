@@ -562,7 +562,7 @@ void  R_GenerateWorldOutdoorLookupMatrix(
 const GfxImage *__cdecl R_GetTextureFromCode(
     GfxCmdBufSourceState *source,
     MaterialTextureSource codeTexture,
-    unsigned __int8 *samplerState)
+    uint8_t *samplerState)
 {
     const char *v3; // eax
 
@@ -1126,7 +1126,7 @@ void __cdecl R_HW_SetBlend(
                     "device->SetRenderState( D3DRS_DESTBLEND, s_blendTable[(stateBits0 >> GFXS0_DSTBLEND_RGB_SHIFT) & GFXS_BLEND_MASK] )\n");
             v14 = device->SetRenderState(
                 D3DRS_DESTBLEND,
-                s_blendTable_30[(unsigned __int8)stateBits0 >> 4]);
+                s_blendTable_30[(uint8_t)stateBits0 >> 4]);
             if (v14 < 0)
             {
                 do
@@ -1225,7 +1225,7 @@ void __cdecl R_SetAlphaTestFunction(GfxCmdBufState *state, __int16 stateBits0)
     const char *v3; // eax
     int v4; // [esp+0h] [ebp-14h]
     int hr; // [esp+4h] [ebp-10h]
-    unsigned __int8 ref; // [esp+Bh] [ebp-9h]
+    uint8_t ref; // [esp+Bh] [ebp-9h]
     IDirect3DDevice9 *device; // [esp+Ch] [ebp-8h]
     unsigned int function; // [esp+10h] [ebp-4h]
 
@@ -1429,7 +1429,7 @@ void __cdecl R_HW_SetDepthTestFunction(IDirect3DDevice9 *device, char stateBits1
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint(
                 "device->SetRenderState( D3DRS_ZFUNC, s_depthTestTable[(stateBits1 & GFXS1_DEPTHTEST_MASK) >> GFXS1_DEPTHTEST_SHIFT] )\n");
-        hr = device->SetRenderState(D3DRS_ZFUNC, s_depthTestTable_30[(unsigned __int8)(stateBits1 & 0xC) >> 2]);
+        hr = device->SetRenderState(D3DRS_ZFUNC, s_depthTestTable_30[(uint8_t)(stateBits1 & 0xC) >> 2]);
         if (hr < 0)
         {
             do
@@ -1706,7 +1706,7 @@ void __cdecl R_HW_SetBackStencilFunc(IDirect3DDevice9 *device, unsigned int sten
 void __cdecl R_SetSampler(
     GfxCmdBufContext context,
     unsigned int samplerIndex,
-    unsigned __int8 samplerState,
+    uint8_t samplerState,
     const GfxImage *image)
 {
     unsigned int decodedSamplerState; // [esp+Ch] [ebp-4h]
@@ -1812,9 +1812,9 @@ unsigned int __cdecl R_HW_SetSamplerState(
     }
     if ((_BYTE)diffSamplerState)
     {
-        if ((unsigned __int8)samplerState <= 1u)
+        if ((uint8_t)samplerState <= 1u)
         {
-            finalSamplerState = (unsigned __int8)oldSamplerState | samplerState & 0xFFFFFF00;
+            finalSamplerState = (uint8_t)oldSamplerState | samplerState & 0xFFFFFF00;
         }
         else
         {
@@ -1825,7 +1825,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
                 v16 = device->SetSamplerState(
                     samplerIndex,
                     D3DSAMP_MAXANISOTROPY,
-                    (unsigned __int8)samplerState);
+                    (uint8_t)samplerState);
                 if (v16 < 0)
                 {
                     do
@@ -1941,7 +1941,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
     return finalSamplerState;
 }
 
-unsigned int __cdecl R_DecodeSamplerState(unsigned __int8 samplerState)
+unsigned int __cdecl R_DecodeSamplerState(uint8_t samplerState)
 {
     unsigned int tableIndex; // [esp+0h] [ebp-8h]
 
@@ -1955,7 +1955,7 @@ unsigned int __cdecl R_DecodeSamplerState(unsigned __int8 samplerState)
             | ((samplerState & 0x80) << 18);
 }
 
-void __cdecl R_SetSamplerState(GfxCmdBufState *state, unsigned int samplerIndex, unsigned __int8 samplerState)
+void __cdecl R_SetSamplerState(GfxCmdBufState *state, unsigned int samplerIndex, uint8_t samplerState)
 {
     unsigned int decodedSamplerState; // [esp+8h] [ebp-4h]
 
@@ -2391,10 +2391,10 @@ void __cdecl R_UpdateStatsTarget(int newTargetId)
 
 void __cdecl R_ClearScreenInternal(
     IDirect3DDevice9 *device,
-    unsigned __int8 whichToClear,
+    uint8_t whichToClear,
     const float *color,
     float depth,
-    unsigned __int8 stencil,
+    uint8_t stencil,
     const GfxViewport *viewport)
 {
     const char *v6; // eax
@@ -2424,7 +2424,7 @@ void __cdecl R_ClearScreenInternal(
     iassert( whichToClear );
     iassert( color );
     //iassert( depth not in [0.0f, 1.0f]\n\t%g not in [%g, %g] );
-    Byte4PackVertexColor(color, (unsigned __int8 *)&nativeColor);
+    Byte4PackVertexColor(color, (uint8_t *)&nativeColor);
     iassert( !viewport );
     do
     {
@@ -2457,10 +2457,10 @@ void __cdecl R_ClearScreenInternal(
 
 void __cdecl R_ClearScreen(
     IDirect3DDevice9 *device,
-    unsigned __int8 whichToClear,
+    uint8_t whichToClear,
     const float *color,
     float depth,
-    unsigned __int8 stencil,
+    uint8_t stencil,
     const GfxViewport *viewport)
 {
     iassert( whichToClear );

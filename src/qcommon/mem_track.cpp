@@ -453,8 +453,8 @@ void track_init()
     mem_track_t* mem_track; // [esp+0h] [ebp-4h]
 
     InitializeCriticalSection(&g_crit);
-    memset((unsigned __int8*)&g_info, 0, sizeof(g_info));
-    memset((unsigned __int8*)&g_virtualMemInfo, 0, sizeof(g_virtualMemInfo));
+    memset((uint8_t*)&g_info, 0, sizeof(g_info));
+    memset((uint8_t*)&g_virtualMemInfo, 0, sizeof(g_virtualMemInfo));
     for (g_mem_track_count = 0; g_mem_track_count < 37; ++g_mem_track_count)
     {
         mem_track = &g_mem_track[g_mem_track_count];
@@ -640,7 +640,7 @@ void __cdecl track_getbasicinfo(meminfo_t* info)
 
     iassert( info );
     EnterCriticalSection(&g_crit);
-    memset((unsigned __int8*)info, 0, sizeof(meminfo_t));
+    memset((uint8_t*)info, 0, sizeof(meminfo_t));
     //MinSpecImageMemory = R_GetMinSpecImageMemory(); // KISAKTODO
     MinSpecImageMemory = 1337;
     track_addbasicinfo(info, 35, MinSpecImageMemory);
@@ -692,7 +692,7 @@ void __cdecl track_PrintInfo()
     int minSpecImageMemory; // [esp+10Ch] [ebp-4h]
 
     EnterCriticalSection(&g_crit);
-    memset((unsigned __int8*)&info, 0, sizeof(info));
+    memset((uint8_t*)&info, 0, sizeof(info));
     minSpecImageMemory = 0;
     minSpecImageMemory = R_GetMinSpecImageMemory();
     len2 = g_hunklow_track_count + g_hunk_track_count + g_mem_track_count;
@@ -1082,9 +1082,9 @@ double __cdecl ConvertToMB(int bytes)
 
 int __cdecl mem_track_compare(unsigned int *elem1, unsigned int *elem2)
 {
-    if (*((unsigned __int8 *)elem1 + 16) < (int)*((unsigned __int8 *)elem2 + 16))
+    if (*((uint8_t *)elem1 + 16) < (int)*((uint8_t *)elem2 + 16))
         return -1;
-    if (*((unsigned __int8 *)elem1 + 16) <= (int)*((unsigned __int8 *)elem2 + 16))
+    if (*((uint8_t *)elem1 + 16) <= (int)*((uint8_t *)elem2 + 16))
         return elem1[2] - elem2[2];
     return 1;
 }

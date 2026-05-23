@@ -4,8 +4,8 @@
 struct GfxModelSurfaceInfo // sizeof=0xC
 {                                       // ...
     const struct DObjAnimMat *baseMat;
-    unsigned __int8 boneIndex;
-    unsigned __int8 boneCount;
+    uint8_t boneIndex;
+    uint8_t boneCount;
     unsigned __int16 gfxEntIndex;
     unsigned __int16 lightingHandle;
     // padding byte

@@ -22,7 +22,7 @@ const float standardFrustumSidePlanes[4][4] =
 
 int s_lmapPixelsUsedForFalloff;
 
-void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColors, GfxLightGridColors *modernColors)
+void __cdecl R_ModernizeLegacyLightGridColors(const uint8_t *legacyColors, GfxLightGridColors *modernColors)
 {
     float v2; // [esp+18h] [ebp-BCh]
     float scale; // [esp+1Ch] [ebp-B8h]
@@ -224,15 +224,15 @@ void R_LoadLightGridRowData()
     }
 }
 
-unsigned __int8 *R_LoadLightGridEntries()
+uint8_t *R_LoadLightGridEntries()
 {
-    unsigned __int8 *result; // eax
+    uint8_t *result; // eax
     GfxLightGridEntry *out; // [esp+0h] [ebp-Ch]
     unsigned int entryIndex; // [esp+4h] [ebp-8h]
     char *in; // [esp+8h] [ebp-4h]
 
     in = Com_GetBspLump(LUMP_LIGHTGRIDENTRIES, 4u, &s_world.lightGrid.entryCount);
-    result = (unsigned __int8 *)Hunk_Alloc(4 * s_world.lightGrid.entryCount, "R_LoadLightGridPoints", 20);
+    result = (uint8_t *)Hunk_Alloc(4 * s_world.lightGrid.entryCount, "R_LoadLightGridPoints", 20);
     s_world.lightGrid.entries = (GfxLightGridEntry *)result;
     out = (GfxLightGridEntry *)result;
     entryIndex = 0;
@@ -644,7 +644,7 @@ char __cdecl R_EncodeLightGrid_Version15(const AnnotatedLightGridPoint *pointsAr
 
 void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
 {
-    unsigned __int8 v1; // [esp+14h] [ebp-2E4h]
+    uint8_t v1; // [esp+14h] [ebp-2E4h]
     unsigned int dstEntryIndex; // [esp+1D8h] [ebp-120h]
     unsigned int bestDefaultScore; // [esp+1DCh] [ebp-11Ch]
     GfxLightGridColors swapColors; // [esp+1E0h] [ebp-118h] BYREF
@@ -652,7 +652,7 @@ void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
     AnnotatedLightGridPoint *points; // [esp+294h] [ebp-64h]
     unsigned int entryIndex; // [esp+298h] [ebp-60h]
     unsigned int *defaultScore; // [esp+29Ch] [ebp-5Ch]
-    unsigned __int8 needsTrace; // [esp+2A3h] [ebp-55h]
+    uint8_t needsTrace; // [esp+2A3h] [ebp-55h]
     unsigned int cornerIndex; // [esp+2A4h] [ebp-54h]
     const GfxLightGridEntry_Version15 *diskEntries; // [esp+2A8h] [ebp-50h]
     unsigned int colorsIndex; // [esp+2ACh] [ebp-4Ch]
@@ -665,7 +665,7 @@ void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
     unsigned int diskCellIndex; // [esp+2D0h] [ebp-28h]
     const DiskGfxCell_Version14 *diskCellsV14; // [esp+2D4h] [ebp-24h]
     float worldMins[3]; // [esp+2D8h] [ebp-20h] BYREF
-    unsigned __int8 needsTraceSwizzle[2][8]; // [esp+2E4h] [ebp-14h] BYREF
+    uint8_t needsTraceSwizzle[2][8]; // [esp+2E4h] [ebp-14h] BYREF
 
     *(uint64*)&needsTraceSwizzle[0][0] = 0x703050106020400LL;
     *(uint64*)&needsTraceSwizzle[1][0] = 0x705030106040200LL;
@@ -863,10 +863,10 @@ void __cdecl R_AllocateFalloffSpaceInLightmaps(GfxLightDef *def)
     s_lmapPixelsUsedForFalloff += pixelsNeeded;
 }
 
-unsigned __int8 *__cdecl R_LoadLightImage(unsigned __int8 *readPos, GfxLightImage *lightImage)
+uint8_t *__cdecl R_LoadLightImage(uint8_t *readPos, GfxLightImage *lightImage)
 {
     unsigned int v3; // [esp+0h] [ebp-18h]
-    unsigned __int8 *readPosa; // [esp+20h] [ebp+8h]
+    uint8_t *readPosa; // [esp+20h] [ebp+8h]
 
     lightImage->samplerState = *readPos;
     readPosa = readPos + 1;
@@ -885,9 +885,9 @@ GfxLightDef *__cdecl R_LoadLightDef(const char *name)
     const char *v4; // [esp+Ch] [ebp-28h]
     char *filename; // [esp+20h] [ebp-14h]
     GfxLightDef *def; // [esp+24h] [ebp-10h]
-    unsigned __int8 *file; // [esp+28h] [ebp-Ch] BYREF
+    uint8_t *file; // [esp+28h] [ebp-Ch] BYREF
     int fileSize; // [esp+2Ch] [ebp-8h]
-    const unsigned __int8 *readPos; // [esp+30h] [ebp-4h]
+    const uint8_t *readPos; // [esp+30h] [ebp-4h]
 
     iassert( name );
     filename = va("lights/%s", name);

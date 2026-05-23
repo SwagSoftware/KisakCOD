@@ -1301,7 +1301,7 @@ void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalI
         }
         else
         {
-            RemoveRefToValue(*(unsigned __int8*)buf, (VariableUnion)u);
+            RemoveRefToValue(*(uint8_t*)buf, (VariableUnion)u);
         }
     }
     if (localId != endLocalId)
@@ -1476,7 +1476,7 @@ void __cdecl VM_TrimStack(unsigned int startLocalId, VariableStackBuffer* stackV
         }
         else
         {
-            RemoveRefToValue(*(unsigned __int8*)buf, u);
+            RemoveRefToValue(*(uint8_t*)buf, u);
         }
     }
     iassert(startLocalId == localId);
@@ -3715,7 +3715,7 @@ void __cdecl Scr_InitSystem(int sys)
     if (scrVarPub.varUsagePos)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4326, 0, "%s", "!scrVarPub.varUsagePos");
     scrVarPub.varUsagePos = "<script init variable>";
-    memset((unsigned __int8*)scrVmDebugPub.profileEnable, 0, sizeof(scrVmDebugPub.profileEnable));
+    memset((uint8_t*)scrVmDebugPub.profileEnable, 0, sizeof(scrVmDebugPub.profileEnable));
     scrVarPub.timeArrayId = AllocObject();
     if (scrVarDebugPub)
         ++scrVarDebugPub->extRefCount[scrVarPub.timeArrayId];
@@ -3742,7 +3742,7 @@ void __cdecl Scr_InitSystem(int sys)
     scrVarPub.varUsagePos = 0;
 }
 
-void __cdecl Scr_ShutdownSystem(unsigned __int8 sys, int bComplete)
+void __cdecl Scr_ShutdownSystem(uint8_t sys, int bComplete)
 {
     VariableValueInternal_u Object; // eax
     VariableValueInternal_u v3; // eax

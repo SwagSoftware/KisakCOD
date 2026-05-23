@@ -108,7 +108,7 @@ struct SoundFileInfo // sizeof=0x8
 
 struct SoundAliasGlobals // sizeof=0x2858
 {                                       // ...
-    unsigned __int8 initialized[3];     // ...
+    uint8_t initialized[3];     // ...
     // padding byte
     DevGraph curveDevGraphs[16];        // ...
     int randSeed;                       // ...
@@ -156,12 +156,12 @@ struct snd_alias_build_s // sizeof=0x19C
     float lfePercentage;
     float centerPercentage;
     int startDelay;
-    unsigned __int8 bLooping;
-    unsigned __int8 bMaster;
-    unsigned __int8 bSlave;
-    unsigned __int8 bFullDryLevel;
-    unsigned __int8 bNoWetLevel;
-    unsigned __int8 bRandomLooping;
+    uint8_t bLooping;
+    uint8_t bMaster;
+    uint8_t bSlave;
+    uint8_t bFullDryLevel;
+    uint8_t bNoWetLevel;
+    uint8_t bRandomLooping;
     bool error;                         // ...
     bool keep;                          // ...
     snd_alias_build_s *pSameSoundFile;

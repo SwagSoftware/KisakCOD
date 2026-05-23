@@ -40,7 +40,7 @@ int __cdecl GetMinBitCountForNum(unsigned int num)
     return 32 - (v2 ^ 0x1F);
 }
 
-void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length)
+void __cdecl MSG_Init(msg_t *buf, uint8_t *data, int length)
 {
     if (!msgInit)
         MSG_InitHuffman();
@@ -51,7 +51,7 @@ void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length)
     buf->maxsize = length;
 }
 
-void __cdecl MSG_InitReadOnly(msg_t *buf, unsigned __int8 *data, int length)
+void __cdecl MSG_InitReadOnly(msg_t *buf, uint8_t *data, int length)
 {
     iassert( data );
     if (!msgInit)
@@ -64,7 +64,7 @@ void __cdecl MSG_InitReadOnly(msg_t *buf, unsigned __int8 *data, int length)
     buf->splitSize = 0;
 }
 
-void __cdecl MSG_InitReadOnlySplit(msg_t *buf, unsigned __int8 *data, int length, unsigned __int8 *data2, int length2)
+void __cdecl MSG_InitReadOnlySplit(msg_t *buf, uint8_t *data, int length, uint8_t *data2, int length2)
 {
     iassert( data );
     iassert( data2 );
@@ -215,7 +215,7 @@ int __cdecl MSG_ReadBit(msg_t *msg)
     return (Byte >> bit) & 1;
 }
 
-int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const unsigned __int8 *from, unsigned __int8 *to, int size)
+int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_t *to, int size)
 {
     int bit; // [esp+0h] [ebp-8h] BYREF
     int i; // [esp+4h] [ebp-4h]
@@ -236,10 +236,10 @@ int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const unsigned __int8 *from
     return (bit + 7) >> 3;
 }
 
-int __cdecl MSG_ReadBitsCompress(const unsigned __int8 *from, unsigned __int8 *to, int size)
+int __cdecl MSG_ReadBitsCompress(const uint8_t *from, uint8_t *to, int size)
 {
     int bit; // [esp+0h] [ebp-14h] BYREF
-    unsigned __int8 *data; // [esp+4h] [ebp-10h]
+    uint8_t *data; // [esp+4h] [ebp-10h]
     int bits; // [esp+8h] [ebp-Ch]
     int i; // [esp+Ch] [ebp-8h]
     int get; // [esp+10h] [ebp-4h] BYREF
@@ -256,7 +256,7 @@ int __cdecl MSG_ReadBitsCompress(const unsigned __int8 *from, unsigned __int8 *t
     return data - to;
 }
 
-void __cdecl MSG_WriteByte(msg_t *msg, unsigned __int8 c)
+void __cdecl MSG_WriteByte(msg_t *msg, uint8_t c)
 {
     iassert( !msg->readOnly );
     if (msg->cursize >= msg->maxsize)
@@ -265,7 +265,7 @@ void __cdecl MSG_WriteByte(msg_t *msg, unsigned __int8 c)
         msg->data[msg->cursize++] = c;
 }
 
-void __cdecl MSG_WriteData(msg_t *buf, unsigned __int8 *data, unsigned int length)
+void __cdecl MSG_WriteData(msg_t *buf, uint8_t *data, unsigned int length)
 {
     int newsize; // [esp+0h] [ebp-4h]
 
@@ -318,7 +318,7 @@ void __cdecl MSG_WriteLong(msg_t *msg, int c)
 
 void __cdecl MSG_WriteString(msg_t *sb, const char *s)
 {
-    unsigned __int8 v2; // al
+    uint8_t v2; // al
     int l; // [esp+10h] [ebp-40Ch]
     char string[1024]; // [esp+14h] [ebp-408h] BYREF
     int i; // [esp+418h] [ebp-4h]
@@ -334,18 +334,18 @@ void __cdecl MSG_WriteString(msg_t *sb, const char *s)
             string[i] = v2;
         }
         string[i] = 0;
-        MSG_WriteData(sb, (unsigned __int8 *)string, l + 1);
+        MSG_WriteData(sb, (uint8_t *)string, l + 1);
     }
     else
     {
         Com_Printf(16, "MSG_WriteString: MAX_STRING_CHARS");
-        MSG_WriteData(sb, (unsigned __int8 *)"", 1u);
+        MSG_WriteData(sb, (uint8_t *)"", 1u);
     }
 }
 
 void __cdecl MSG_WriteBigString(msg_t *sb, char *s)
 {
-    unsigned __int8 v2; // al
+    uint8_t v2; // al
     int v3; // [esp+10h] [ebp-200Ch]
     char dest[8192]; // [esp+14h] [ebp-2008h] BYREF
     int i; // [esp+2018h] [ebp-4h]
@@ -361,12 +361,12 @@ void __cdecl MSG_WriteBigString(msg_t *sb, char *s)
             v2 = I_CleanChar(dest[i]);
             dest[i] = v2;
         }
-        MSG_WriteData(sb, (unsigned __int8 *)dest, v3 + 1);
+        MSG_WriteData(sb, (uint8_t *)dest, v3 + 1);
     }
     else
     {
         Com_Printf(16, "MSG_WriteString: BIG_INFO_STRING");
-        MSG_WriteData(sb, (unsigned __int8 *)"", 1u);
+        MSG_WriteData(sb, (uint8_t *)"", 1u);
     }
 }
 
@@ -520,7 +520,7 @@ double __cdecl MSG_ReadAngle16(msg_t *msg)
     return (float)((double)MSG_ReadShort(msg) * 0.0054931640625);
 }
 
-void __cdecl MSG_ReadData(msg_t *msg, unsigned __int8 *data, int len)
+void __cdecl MSG_ReadData(msg_t *msg, uint8_t *data, int len)
 {
     int newcount; // [esp+0h] [ebp-8h]
     signed int cursize; // [esp+4h] [ebp-4h]
@@ -601,10 +601,10 @@ void __cdecl MSG_WriteDeltaKeyByte(msg_t *msg, char key, char oldV, char newV)
     }
 }
 
-int __cdecl MSG_ReadDeltaKeyByte(msg_t *msg, unsigned __int8 key, int oldV)
+int __cdecl MSG_ReadDeltaKeyByte(msg_t *msg, uint8_t key, int oldV)
 {
     if (MSG_ReadBit(msg))
-        return key ^ (unsigned __int8)MSG_ReadByte(msg);
+        return key ^ (uint8_t)MSG_ReadByte(msg);
     else
         return oldV;
 }
@@ -1480,7 +1480,7 @@ int __cdecl MSG_ReadDeltaStruct(
     }
     else
     {
-        memcpy((unsigned __int8 *)to, (unsigned __int8 *)from, 4 * numFields + 4);
+        memcpy((uint8_t *)to, (uint8_t *)from, 4 * numFields + 4);
         return 0;
     }
 }
@@ -1492,7 +1492,7 @@ int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clien
     if (!from)
     {
         from = &dummy;
-        memset((unsigned __int8 *)&dummy, 0, sizeof(dummy));
+        memset((uint8_t *)&dummy, 0, sizeof(dummy));
     }
     return MSG_ReadDeltaStruct(
         msg,
@@ -1592,7 +1592,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     int Short; // eax
     int v7; // eax
     objectiveState_t v8; // eax
-    unsigned __int8 Byte; // al
+    uint8_t Byte; // al
     clientActive_t *LocalClientGlobals; // [esp+1Ch] [ebp-2F9Ch]
     int i; // [esp+20h] [ebp-2F98h]
     int k; // [esp+20h] [ebp-2F98h]
@@ -1602,7 +1602,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     int *v19; // [esp+2FACh] [ebp-Ch]
     bool lc; // [esp+2FB3h] [ebp-5h]
 
-    unsigned __int8 dst[sizeof(playerState_s) + 8]; // [esp+38h] [ebp-2F80h] BYREF
+    uint8_t dst[sizeof(playerState_s) + 8]; // [esp+38h] [ebp-2F80h] BYREF
 
     if (!from)
     {

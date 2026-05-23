@@ -155,8 +155,8 @@ struct GfxCmdStretchPic // sizeof=0x2C
 struct GfxCmdClearScreen // sizeof=0x1C
 {
     GfxCmdHeader header;
-    unsigned __int8 whichToClear;
-    unsigned __int8 stencil;
+    uint8_t whichToClear;
+    uint8_t stencil;
     // padding byte
     // padding byte
     float depth;
@@ -207,7 +207,7 @@ struct StateBitsTable // sizeof=0x8
 
 struct GfxCmdArray // sizeof=0x10
 {                                       // ...
-    unsigned __int8 *cmds;              // ...
+    uint8_t *cmds;              // ...
     int usedTotal;
     int usedCritical;
     GfxCmdHeader *lastCmd;
@@ -266,7 +266,7 @@ struct GfxParticleCloud // sizeof=0x40
 union PackedLightingCoords // sizeof=0x4
 {                                       // ...
     unsigned int packed;
-    unsigned __int8 array[4];
+    uint8_t array[4];
 };
 struct GfxSModelCachedVertex // sizeof=0x20
 {                                       // ...
@@ -280,9 +280,9 @@ struct GfxSModelCachedVertex // sizeof=0x20
 struct GfxModelLightingPatch // sizeof=0x28
 {                                       // ...
     unsigned __int16 modelLightingIndex;
-    unsigned __int8 primaryLightWeight;
-    unsigned __int8 colorsCount;
-    unsigned __int8 groundLighting[4];
+    uint8_t primaryLightWeight;
+    uint8_t colorsCount;
+    uint8_t groundLighting[4];
     unsigned __int16 colorsWeight[8];
     unsigned __int16 colorsIndex[8];
 };
@@ -295,8 +295,8 @@ struct FxMarkMeshData // sizeof=0x10
     unsigned int triCount;
     unsigned __int16 *indices;
     unsigned __int16 modelIndex;
-    unsigned __int8 modelTypeAndSurf;
-    unsigned __int8 pad0;
+    uint8_t modelTypeAndSurf;
+    uint8_t pad0;
     unsigned int pad1;
 };
 
@@ -405,8 +405,8 @@ struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
 {                                       // ...
     GfxViewParms shadowViewParms;
     GfxMatrix lookupMatrix;
-    unsigned __int8 shadowableLightIndex;
-    unsigned __int8 pad[3];
+    uint8_t shadowableLightIndex;
+    uint8_t pad[3];
     const GfxLight* light;
     float fade;
     GfxDrawSurfListInfo info;
@@ -436,7 +436,7 @@ struct __declspec(align(8)) GfxCmdBufInput // sizeof=0x430
 {                                       // ...
     float consts[58][4];
     const GfxImage* codeImages[27];     // ...
-    unsigned __int8 codeImageSamplerStates[27]; // ...
+    uint8_t codeImageSamplerStates[27]; // ...
     // padding byte
     const GfxBackEndData* data;         // ...
     // padding byte
@@ -515,11 +515,11 @@ const struct GfxViewInfo // sizeof=0x67B0
 };
 const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
 {                                       // ...
-    unsigned __int8 surfsBuffer[0x20000];
+    uint8_t surfsBuffer[0x20000];
     FxCodeMeshData codeMeshes[2048];
     unsigned int primDrawSurfsBuf[65536]; // ...
     GfxViewParms viewParms[28];
-    unsigned __int8 primaryLightTechType[13][256];
+    uint8_t primaryLightTechType[13][256];
     float codeMeshArgs[256][4];
     GfxParticleCloud clouds[256];
     GfxDrawSurf drawSurfs[32768];
@@ -545,7 +545,7 @@ const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
     GfxMeshData markMesh;
     GfxVertexBufferState *skinnedCacheVb;
     IDirect3DQuery9 *endFence;
-    unsigned __int8 *tempSkinBuf;
+    uint8_t *tempSkinBuf;
     volatile long tempSkinPos;
     IDirect3DIndexBuffer9 *preTessIb;
     int viewParmCount;
@@ -797,7 +797,7 @@ void R_SetOutdoorFeatherConst();
 void __cdecl R_SetInputCodeConstant(GfxCmdBufInput *input, CodeConstant constant, float x, float y, float z, float w);
 void R_EnvMapOverrideConstants();
 void __cdecl R_EndFrame();
-void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, unsigned __int8 stencil);
+void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, uint8_t stencil);
 void __cdecl R_AddCmdSaveScreen(unsigned int screenTimerId);
 void __cdecl R_AddCmdSaveScreenSection(
     float viewX,

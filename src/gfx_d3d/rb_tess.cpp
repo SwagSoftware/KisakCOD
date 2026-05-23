@@ -108,7 +108,7 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     const GfxBackEndData *data; // [esp+50h] [ebp-40h]
     const FxCodeMeshData *codeMesh; // [esp+58h] [ebp-38h]
     unsigned int drawSurfIndex; // [esp+5Ch] [ebp-34h]
-    unsigned __int8 *indices; // [esp+68h] [ebp-28h]
+    uint8_t *indices; // [esp+68h] [ebp-28h]
     unsigned int argCount; // [esp+6Ch] [ebp-24h]
     const GfxDrawSurf *drawSurfList; // [esp+70h] [ebp-20h]
     GfxDrawPrimArgs args; // [esp+74h] [ebp-1Ch] BYREF
@@ -175,7 +175,7 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
         }
         if (argCount
             || data->codeMeshes[drawSurf.fields.objectId].argCount
-            || &indices[6 * args.triCount] != (unsigned __int8 *)data->codeMeshes[drawSurf.fields.objectId].indices)
+            || &indices[6 * args.triCount] != (uint8_t *)data->codeMeshes[drawSurf.fields.objectId].indices)
         {
             if (args.triCount)
             {
@@ -183,7 +183,7 @@ unsigned int __cdecl R_TessCodeMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                 R_DrawIndexedPrimitive(&context.state->prim, &args);
                 args.triCount = 0;
             }
-            indices = (unsigned __int8 *)data->codeMeshes[drawSurf.fields.objectId].indices;
+            indices = (uint8_t *)data->codeMeshes[drawSurf.fields.objectId].indices;
             R_TessCodeMeshList_AddCodeMeshArgs(context.source, data, codeMesh);
             R_SetupPassPerObjectArgs(context);
             R_SetupPassPerPrimArgs(context);
@@ -279,7 +279,7 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
     GfxDrawSurf drawSurfSubMask; // [esp+7Ch] [ebp-48h]
     MaterialTechniqueType baseTechType; // [esp+84h] [ebp-40h]
     unsigned int drawSurfIndex; // [esp+88h] [ebp-3Ch]
-    unsigned __int8 *indices; // [esp+94h] [ebp-30h]
+    uint8_t *indices; // [esp+94h] [ebp-30h]
     MaterialVertexDeclType declType; // [esp+98h] [ebp-2Ch]
     const FxMarkMeshData *markMesh; // [esp+9Ch] [ebp-28h]
     const FxMarkMeshData *markMesha; // [esp+9Ch] [ebp-28h]
@@ -412,7 +412,7 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                     "&markMesh->indices[0] >= &data->markMesh.indices[0] && &markMesh->indices[markMesh->triCount * 3] <= &data->ma"
                     "rkMesh.indices[GFX_MARK_MESH_INDEX_LIMIT]");
             }
-            if (&indices[6 * args.triCount] != (unsigned __int8 *)markMesha->indices)
+            if (&indices[6 * args.triCount] != (uint8_t *)markMesha->indices)
             {
                 if (args.triCount)
                 {
@@ -421,7 +421,7 @@ unsigned int __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, Gfx
                     R_DrawIndexedPrimitive(&context.state->prim, &args);
                     args.triCount = 0;
                 }
-                indices = (unsigned __int8 *)markMesha->indices;
+                indices = (uint8_t *)markMesha->indices;
             }
             args.triCount += markMesha->triCount;
             g_frameStatsCur.fxIndexCount += 3 * markMesha->triCount;
@@ -544,7 +544,7 @@ void __cdecl R_SetParticleCloudConstants(GfxCmdBufSourceState *source, const Gfx
     particleCloudMatrix[2] = viewAxis[1][0];
     particleCloudMatrix[3] = viewAxis[1][1];
     R_SetCodeConstantFromVec4(source, CONST_SRC_CODE_PARTICLE_CLOUD_MATRIX, particleCloudMatrix);
-    Byte4UnpackBgra((const unsigned __int8 *)&cloud->color, particleColor);
+    Byte4UnpackBgra((const uint8_t *)&cloud->color, particleColor);
     R_SetCodeConstantFromVec4(source, CONST_SRC_CODE_PARTICLE_CLOUD_COLOR, particleColor);
 }
 
@@ -846,7 +846,7 @@ void __cdecl R_DrawXModelSkinnedUncached(GfxCmdBufContext context, XSurface *xsu
     args.triCount = XSurfaceGetNumTris(xsurf);
     args.vertexCount = XSurfaceGetNumVerts(xsurf);
     g_frameStatsCur.geoIndexCount += 3 * args.triCount;
-    args.baseIndex = R_SetIndexData(&context.state->prim, (unsigned __int8 *)xsurf->triIndices, args.triCount);
+    args.baseIndex = R_SetIndexData(&context.state->prim, (uint8_t *)xsurf->triIndices, args.triCount);
     R_CheckVertexDataOverflow(32 * args.vertexCount);
     vertexOffset = R_SetVertexData(context.state, skinnedVert, args.vertexCount, 32);
     vb = gfxBuf.dynamicVertexBuffer->buffer;
@@ -1554,7 +1554,7 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
             R_SetupPassPerPrimArgs(context);
             args.baseIndex = R_SetIndexData(
                 &context.state->prim,
-                (unsigned __int8 *)&rgp.world->indices[tris->baseIndex],
+                (uint8_t *)&rgp.world->indices[tris->baseIndex],
                 args.triCount);
             R_DrawIndexedPrimitive(&context.state->prim, &args);
             if (prepassContext.state)
@@ -1563,7 +1563,7 @@ unsigned int __cdecl R_TessBModel(const GfxDrawSurfListArgs *listArgs, GfxCmdBuf
                 R_SetupPassPerPrimArgs(prepassContext);
                 args.baseIndex = R_SetIndexData(
                     &prepassContext.state->prim,
-                    (unsigned __int8 *)&rgp.world->indices[tris->baseIndex],
+                    (uint8_t *)&rgp.world->indices[tris->baseIndex],
                     args.triCount);
                 R_DrawIndexedPrimitive(&prepassContext.state->prim, &args);
             }

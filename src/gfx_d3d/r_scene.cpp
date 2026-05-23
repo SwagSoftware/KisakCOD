@@ -433,7 +433,7 @@ void __cdecl R_AddBModelSurfacesCamera(
             drawSurfs[region]->fields.objectId = surfId;
             drawSurfs[region]->fields.primaryLightIndex = bspSurf->primaryLightIndex;
 
-            //LODWORD(drawSurf) = ((unsigned __int8)reflectionProbeIndex << 16) // reflectionProbeIndex
+            //LODWORD(drawSurf) = ((uint8_t)reflectionProbeIndex << 16) // reflectionProbeIndex
             //    | ((bspSurf->lightmapIndex & 0x1F) << 24) // customIndex
             //    | (unsigned __int16)surfId // objectId
             //    | *(unsigned int *)&material->info.drawSurf.fields & 0xE0000000; // copy upper 3 bits of LODWORD
@@ -509,7 +509,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     float *origin,
     unsigned __int16 gfxEntIndex,
     unsigned int lightingHandle,
-    unsigned __int8 primaryLightIndex,
+    uint8_t primaryLightIndex,
     char isShadowReceiver,
     int depthHack,
     GfxDrawSurf **drawSurfs,
@@ -742,7 +742,7 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
 void __cdecl R_AddDObjSurfacesCamera(
     GfxSceneEntity *sceneEnt,
     __int16 lightingHandle,
-    unsigned __int8 primaryLightIndex,
+    uint8_t primaryLightIndex,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs)
 {
@@ -1107,7 +1107,7 @@ void __cdecl R_ClearScene(unsigned int localClientNum)
     Com_Memset((unsigned int *)&scene.sceneModel[0].info, 0, 72 * scene.sceneModelCount);
     Com_Memset((unsigned int *)&scene.sceneBrush[0].info.surfId, 0, 40 * scene.sceneBrushCount);
     scene.addedLightCount = 0;
-    memset((unsigned __int8 *)scene.drawSurfCount, 0, sizeof(scene.drawSurfCount));
+    memset((uint8_t *)scene.drawSurfCount, 0, sizeof(scene.drawSurfCount));
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
         Com_Memset((unsigned int *)scene.sceneModelVisData[viewIndex], 1, scene.sceneModelCount);
     scene.sceneDObjCount = 0;
@@ -1196,7 +1196,7 @@ void R_UpdateFrameFog()
     }
 }
 
-unsigned __int8 __cdecl LerpByte(unsigned __int8 from, unsigned __int8 to, float frac)
+uint8_t __cdecl LerpByte(uint8_t from, uint8_t to, float frac)
 {
     return (int)((double)from + (double)(to - from) * frac);
 }
@@ -1205,7 +1205,7 @@ void __cdecl R_SetViewParmsForScene(const refdef_s *refdef, GfxViewParms *viewPa
 {
     float DefaultNearClip; // [esp+Ch] [ebp-24h]
 
-    memset((unsigned __int8 *)viewParms, 0, sizeof(GfxViewParms));
+    memset((uint8_t *)viewParms, 0, sizeof(GfxViewParms));
     viewParms->origin[0] = refdef->vieworg[0];
     viewParms->origin[1] = refdef->vieworg[1];
     viewParms->origin[2] = refdef->vieworg[2];
@@ -1640,7 +1640,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
     R_DrawAllSceneEnt(viewInfo);
     R_WaitWorkerCmdsOfType(WRKCMD_SKIN_ENT_DELAYED);
     sceneEntCmd.viewInfo = viewInfo;
-    R_AddWorkerCmd(WRKCMD_ADD_SCENE_ENT, (unsigned __int8 *)&sceneEntCmd);
+    R_AddWorkerCmd(WRKCMD_ADD_SCENE_ENT, (uint8_t *)&sceneEntCmd);
     R_SortAllStaticModelSurfacesCamera();
     visibleLightCount = R_GetVisibleDLights(visibleLights);
     R_GetLightSurfs(visibleLightCount, visibleLights);
@@ -1665,7 +1665,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
             data[1] = (unsigned int)viewParmsDraw;
             data[2] = (unsigned int)&viewInfo->shadowCookieList;
             data[3] = viewInfo->localClientNum;
-            R_AddWorkerCmd(WRKCMD_SHADOW_COOKIE, (unsigned __int8 *)data);
+            R_AddWorkerCmd(WRKCMD_SHADOW_COOKIE, (uint8_t *)data);
         }
     }
     R_SetAllStaticModelLighting();
@@ -2011,7 +2011,7 @@ void R_GenerateMarkVertsForDynamicModels()
 {
     GfxSceneModel *sceneModel; // [esp+4h] [ebp-24h]
     int dobjIndex; // [esp+8h] [ebp-20h]
-    unsigned __int8 reflectionProbeIndex; // [esp+Fh] [ebp-19h]
+    uint8_t reflectionProbeIndex; // [esp+Fh] [ebp-19h]
     unsigned int indexCount; // [esp+10h] [ebp-18h] BYREF
     int brushModelIndex; // [esp+14h] [ebp-14h]
     unsigned __int16 entnum; // [esp+18h] [ebp-10h]

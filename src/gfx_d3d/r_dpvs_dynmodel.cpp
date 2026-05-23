@@ -8,7 +8,7 @@ void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsDynamicCellCmd *dat
     unsigned int planeCount; // [esp+0h] [ebp-28h]
     const DpvsPlane *planes; // [esp+4h] [ebp-24h]
     unsigned int dynEntClientWordCount; // [esp+8h] [ebp-20h]
-    unsigned __int8 *dynEntVisData; // [esp+10h] [ebp-18h]
+    uint8_t *dynEntVisData; // [esp+10h] [ebp-18h]
     unsigned int *dynEntCellBits; // [esp+14h] [ebp-14h]
     DynEntityPose *dynModelList; // [esp+18h] [ebp-10h]
     GfxWorldDpvsDynamic *worldDpvsDyn; // [esp+24h] [ebp-4h]
@@ -34,7 +34,7 @@ void __cdecl R_CullDynModelInCell(
     DynEntityPose *dynModelList,
     const DpvsPlane *planes,
     int planeCount,
-    unsigned __int8 *dynEntVisData)
+    uint8_t *dynEntVisData)
 {
     DWORD v7; // eax
     int v8; // [esp+4h] [ebp-28h]

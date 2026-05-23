@@ -9,7 +9,7 @@ void *__cdecl R_AllocDynamicVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeIn
 void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInBytes);
 void *__cdecl R_AllocDynamicIndexBuffer(IDirect3DIndexBuffer9 **ib, unsigned int sizeInBytes);
 void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInBytes);
-void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, unsigned __int8 *bufferData, int sizeInBytes);
+void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, uint8_t *bufferData, int sizeInBytes);
 void __cdecl R_InitDynamicVertexBufferState(GfxVertexBufferState *vb, int bytes);
 void __cdecl R_InitDynamicIndexBufferState(GfxIndexBufferState *ib, int indexCount);
 void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount);

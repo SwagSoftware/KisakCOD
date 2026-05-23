@@ -46,7 +46,7 @@ static int generateHashValue(const char* fname)
     int hash = 0;
     for (int i = 0; fname[i]; ++i)
         hash += tolower(fname[i]) * (i + 119);
-    return (unsigned __int8)hash;
+    return (uint8_t)hash;
 }
 
 int __cdecl Dvar_Command()
@@ -475,7 +475,7 @@ const char *__cdecl Dvar_DisplayableLatchedValue(const dvar_s *dvar)
     return Dvar_ValueToString(dvar, dvar->latched);
 }
 
-char __cdecl Dvar_ValueInDomain(unsigned __int8 type, DvarValue value, DvarLimits domain)
+char __cdecl Dvar_ValueInDomain(uint8_t type, DvarValue value, DvarLimits domain)
 {
     char result; // al
     const char *v4; // eax
@@ -542,7 +542,7 @@ char __cdecl Dvar_VectorInDomain(const float *vector, int components, float min,
 }
 
 const char *__cdecl Dvar_DomainToString_Internal(
-    unsigned __int8 type,
+    uint8_t type,
     DvarLimits domain,
     char *outBuffer,
     unsigned int outBufferLen,
@@ -665,7 +665,7 @@ const char *__cdecl Dvar_DomainToString_Internal(
 }
 
 const char *__cdecl Dvar_DomainToString(
-    unsigned __int8 type,
+    uint8_t type,
     DvarLimits *domain,
     char *outBuffer,
     unsigned int outBufferLen)
@@ -709,7 +709,7 @@ void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *
 }
 
 const char *Dvar_DomainToString_GetLines(
-    unsigned __int8 type,
+    uint8_t type,
     DvarLimits *domain,
     char *outBuffer,
     unsigned int outBufferLen,
@@ -720,7 +720,7 @@ const char *Dvar_DomainToString_GetLines(
     return Dvar_DomainToString_Internal(type, *domain, outBuffer, outBufferLen, outLineCount);
 }
 
-void __cdecl Dvar_PrintDomain(unsigned __int8 type, DvarLimits domain)
+void __cdecl Dvar_PrintDomain(uint8_t type, DvarLimits domain)
 {
     //const char *v2; // eax
     //__int64 v3; // [esp-8h] [ebp-410h]
@@ -739,7 +739,7 @@ bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar)
     return Dvar_ValuesEqual(dvar->type, dvar->current, dvar->latched) == 0;
 }
 
-int __cdecl Dvar_ValuesEqual(unsigned __int8 type, DvarValue val0, DvarValue val1)
+int __cdecl Dvar_ValuesEqual(uint8_t type, DvarValue val0, DvarValue val1)
 {
     int result; // eax
     const char *v4; // eax
@@ -890,7 +890,7 @@ void __cdecl Dvar_UpdateEnumDomain(dvar_s *dvar, const char **stringTable)
 
 DvarValue *__cdecl Dvar_ClampValueToDomain(
     DvarValue *result,
-    unsigned __int8 type,
+    uint8_t type,
     DvarValue value,
     DvarValue resetValue,
     DvarLimits domain)
@@ -1103,7 +1103,7 @@ const char *__cdecl Dvar_GetVariantString(const char *dvarName)
 
 void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor)
 {
-    unsigned __int8 color[4]; // [esp+10h] [ebp-4h] BYREF
+    uint8_t color[4]; // [esp+10h] [ebp-4h] BYREF
 
     if (!dvar)
         MyAssertHandler(".\\universal\\dvar.cpp", 1230, 0, "%s", "dvar");
@@ -1125,7 +1125,7 @@ void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor)
     expandedColor[3] = (double)color[3] * 0.003921568859368563;
 }
 
-void __cdecl Dvar_StringToColor(const char *string, unsigned __int8 *color)
+void __cdecl Dvar_StringToColor(const char *string, uint8_t *color)
 {
     float colorVec[4]; // [esp+90h] [ebp-10h] BYREF
 
@@ -1188,7 +1188,7 @@ void __cdecl Dvar_Shutdown()
     dvar_cheats = 0;
     dvar_modifiedFlags = 0;
     isDvarSystemActive = 0;
-    memset((unsigned __int8 *)dvarHashTable, 0, sizeof(dvarHashTable));
+    memset((uint8_t *)dvarHashTable, 0, sizeof(dvarHashTable));
     Sys_UnlockWrite(&g_dvarCritSect);
 }
 
@@ -1358,7 +1358,7 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
         return;
     }
     if (dvar->domainFunc
-        && !((unsigned __int8(__cdecl *)(dvar_s *, int, unsigned int, unsigned int, unsigned int))dvar->domainFunc)(
+        && !((uint8_t(__cdecl *)(dvar_s *, int, unsigned int, unsigned int, unsigned int))dvar->domainFunc)(
             dvar,
             value.integer,
             LODWORD(value.vector[1]),
@@ -1557,7 +1557,7 @@ const dvar_s *__cdecl Dvar_RegisterBool(
 
 const dvar_s *__cdecl Dvar_RegisterNew(
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue value,
     DvarLimits domain,
@@ -1673,7 +1673,7 @@ void __cdecl Dvar_PerformUnregistration(dvar_s *dvar)
 void __cdecl Dvar_ReinterpretDvar(
     dvar_s *dvar,
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue value,
     DvarLimits domain)
@@ -1697,7 +1697,7 @@ void __cdecl Dvar_ReinterpretDvar(
 void __cdecl Dvar_Reregister(
     dvar_s *dvar,
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue resetValue,
     DvarLimits domain,
@@ -1764,7 +1764,7 @@ void __cdecl Dvar_Reregister(
 
 const dvar_s *__cdecl Dvar_RegisterVariant(
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue value,
     DvarLimits domain,
@@ -1790,7 +1790,7 @@ const dvar_s *__cdecl Dvar_RegisterVariant(
 void __cdecl Dvar_MakeExplicitType(
     dvar_s *dvar,
     const char *dvarName,
-    unsigned __int8 type,
+    uint8_t type,
     unsigned __int16 flags,
     DvarValue resetValue,
     DvarLimits domain)
@@ -1844,7 +1844,7 @@ void __cdecl Dvar_MakeExplicitType(
         FreeString(castValue.string);
 }
 
-DvarValue *__cdecl Dvar_StringToValue(DvarValue *result, unsigned __int8 type, DvarLimits domain, const char *string)
+DvarValue *__cdecl Dvar_StringToValue(DvarValue *result, uint8_t type, DvarLimits domain, const char *string)
 {
     const char *v4; // eax
     DvarValue value; // [esp+4h] [ebp-14h] BYREF
@@ -1878,7 +1878,7 @@ DvarValue *__cdecl Dvar_StringToValue(DvarValue *result, unsigned __int8 type, D
         value.integer = (int)string;
         break;
     case 8u:
-        Dvar_StringToColor(string, (unsigned __int8 *)&value);
+        Dvar_StringToColor(string, (uint8_t *)&value);
         break;
     default:
         if (!alwaysfails)
@@ -2740,7 +2740,7 @@ void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *
     dvar->domainFunc = customFunc;
     if (customFunc)
     {
-        if (!((unsigned __int8(__cdecl *)(dvar_s *, int, unsigned int, unsigned int, unsigned int))dvar->domainFunc)(
+        if (!((uint8_t(__cdecl *)(dvar_s *, int, unsigned int, unsigned int, unsigned int))dvar->domainFunc)(
             dvar,
             dvar->current.integer,
             LODWORD(dvar->current.vector[1]),
@@ -2907,7 +2907,7 @@ int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars,
 int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, char *filename)
 {
     const char *v4; // eax
-    unsigned __int8 dst[16388]; // [esp+0h] [ebp-4018h] BYREF
+    uint8_t dst[16388]; // [esp+0h] [ebp-4018h] BYREF
     unsigned int i; // [esp+4008h] [ebp-10h]
     char *s0; // [esp+400Ch] [ebp-Ch]
     dvar_s *dvar; // [esp+4010h] [ebp-8h]

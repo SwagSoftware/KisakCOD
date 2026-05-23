@@ -725,7 +725,7 @@ void __cdecl SND_DisconnectListener(int localClientNum)
             "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
             localClientNum,
             1);
-    memset((unsigned __int8 *)&g_snd.listeners[localClientNum], 0, sizeof(g_snd.listeners[localClientNum]));
+    memset((uint8_t *)&g_snd.listeners[localClientNum], 0, sizeof(g_snd.listeners[localClientNum]));
 }
 
 void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *origin, const float (*axis)[3])
@@ -3368,7 +3368,7 @@ void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
     {
         closestId = -1;
         closestIdDotProd = -2.0;
-        memset((unsigned __int8 *)dst, 0, 0x1200u);
+        memset((uint8_t *)dst, 0, 0x1200u);
         for (index = 8; index < g_snd.max_3D_channels + 8; ++index)
         {
             if (!SND_Is3DChannelFree(index))
@@ -3957,7 +3957,7 @@ void __cdecl SND_Shutdown()
         Com_UnloadSoundAliases(SASYS_CGAME);
         Com_UnloadSoundAliases(SASYS_UI);
         SND_ShutdownDriver();
-        memset((unsigned __int8 *)&g_snd, 0, sizeof(g_snd));
+        memset((uint8_t *)&g_snd, 0, sizeof(g_snd));
         Cmd_RemoveCommand("snd_setEnvironmentEffects");
         Cmd_RemoveCommand("snd_deactivateEnvironmentEffects");
         Cmd_RemoveCommand("snd_playLocal");
@@ -3973,7 +3973,7 @@ void __cdecl SND_Shutdown()
 void __cdecl SND_ShutdownChannels()
 {
     SND_StopSounds(SND_STOP_ALL);
-    memset((unsigned __int8 *)g_snd.chaninfo, 0, sizeof(g_snd.chaninfo));
+    memset((uint8_t *)g_snd.chaninfo, 0, sizeof(g_snd.chaninfo));
 }
 
 void __cdecl SND_ErrorCleanup()
@@ -4072,7 +4072,7 @@ void __cdecl SND_SaveChanInfo(const snd_channel_info_t *chaninfo, MemoryFile *me
             "%s\n\t(chaninfo->sndEnt.handle) = %i",
             "(chaninfo->sndEnt.handle == (chaninfo->sndEnt.handle & 0xFFFF))",
             chaninfo->sndEnt.field.entIndex);
-    if (chaninfo->entchannel != (unsigned __int8)chaninfo->entchannel)
+    if (chaninfo->entchannel != (uint8_t)chaninfo->entchannel)
         MyAssertHandler(
             ".\\snd.cpp",
             3895,
@@ -4223,14 +4223,14 @@ void __cdecl SND_Restore(MemoryFile *memFile)
     if (g_snd.Initialized2d)
     {
         for (i = 1; i < 4; ++i)
-            MemFile_ReadData(memFile, 772, (unsigned __int8 *)&g_snd.channelVolGroups[i]);
+            MemFile_ReadData(memFile, 772, (uint8_t *)&g_snd.channelVolGroups[i]);
         for (ia = 0; ia < 4; ++ia)
         {
             if (g_snd.channelVolGroups[ia].active)
                 g_snd.channelvol = &g_snd.channelVolGroups[ia];
         }
         for (ib = 1; ib < 3; ++ib)
-            MemFile_ReadData(memFile, 32, (unsigned __int8 *)&g_snd.envEffects[ib]);
+            MemFile_ReadData(memFile, 32, (uint8_t *)&g_snd.envEffects[ib]);
         SND_RestoreEq(memFile);
         for (ic = 0; ic < 3; ++ic)
         {
@@ -4238,7 +4238,7 @@ void __cdecl SND_Restore(MemoryFile *memFile)
                 g_snd.effect = &g_snd.envEffects[ic];
         }
         SND_SetRoomtype(g_snd.effect->roomtype);
-        MemFile_ReadData(memFile, 8, (unsigned __int8 *)g_snd.background);
+        MemFile_ReadData(memFile, 8, (uint8_t *)g_snd.background);
         while (SND_Restore3DChannel(memFile))
             ;
         while (SND_Restore2DChannel(memFile))
@@ -4271,7 +4271,7 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
     if (!alias1)
         MyAssertHandler(".\\snd.cpp", 3964, 0, "%s", "alias1");
     SND_RestoreChanInfo(&chaninfo, memFile);
-    MemFile_ReadData(memFile, 24, (unsigned __int8 *)&info);
+    MemFile_ReadData(memFile, 24, (uint8_t *)&info);
     if (alias0->soundFile->type != (alias0->flags & 0xC0) >> 6)
         MyAssertHandler(".\\snd.cpp", 3969, 0, "%s", "alias0->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias0->flags )");
     if (alias1->soundFile->type != (alias1->flags & 0xC0) >> 6)
@@ -4333,7 +4333,7 @@ snd_alias_t *__cdecl SND_RestoreSoundAlias(MemoryFile *memFile)
     name = MemFile_ReadCString(memFile);
     if (!*name)
         return 0;
-    MemFile_ReadData(memFile, 2, (unsigned __int8 *)p);
+    MemFile_ReadData(memFile, 2, (uint8_t *)p);
     p[2] = p[0];
     alias = SND_GetAliasWithOffset(name, p[0]);
     if (!alias)
@@ -4345,12 +4345,12 @@ void __cdecl SND_RestoreChanInfo(snd_channel_info_t *chaninfo, MemoryFile *memFi
 {
     int v2; // [esp+2Ch] [ebp-10h] BYREF
     int v3; // [esp+30h] [ebp-Ch] BYREF
-    unsigned __int8 v4; // [esp+35h] [ebp-7h] BYREF
-    unsigned __int8 v5; // [esp+36h] [ebp-6h] BYREF
-    unsigned __int8 v6; // [esp+37h] [ebp-5h] BYREF
-    unsigned __int8 p[4]; // [esp+38h] [ebp-4h] BYREF
+    uint8_t v4; // [esp+35h] [ebp-7h] BYREF
+    uint8_t v5; // [esp+36h] [ebp-6h] BYREF
+    uint8_t v6; // [esp+37h] [ebp-5h] BYREF
+    uint8_t p[4]; // [esp+38h] [ebp-4h] BYREF
 
-    memset((unsigned __int8 *)chaninfo, 0, sizeof(snd_channel_info_t));
+    memset((uint8_t *)chaninfo, 0, sizeof(snd_channel_info_t));
     MemFile_ReadData(memFile, 2, p);
     chaninfo->sndEnt.field.entIndex = *(unsigned __int16 *)p;
     MemFile_ReadData(memFile, 1, &v6);
@@ -4359,9 +4359,9 @@ void __cdecl SND_RestoreChanInfo(snd_channel_info_t *chaninfo, MemoryFile *memFi
     chaninfo->master = v5 != 0;
     MemFile_ReadData(memFile, 1, &v4);
     chaninfo->timescale = v4 != 0;
-    MemFile_ReadData(memFile, 4, (unsigned __int8 *)&v3);
+    MemFile_ReadData(memFile, 4, (uint8_t *)&v3);
     chaninfo->startDelay = v3;
-    MemFile_ReadData(memFile, 4, (unsigned __int8 *)&v2);
+    MemFile_ReadData(memFile, 4, (uint8_t *)&v2);
     chaninfo->startTime = v2;
     chaninfo->basevolume = MemFile_ReadFloat(memFile);
     chaninfo->lerp = MemFile_ReadFloat(memFile);
@@ -4375,7 +4375,7 @@ void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInf
 {
     snd_alias_t *v2; // eax
     void *v3; // [esp+4h] [ebp-14h] BYREF
-    unsigned __int8 v4; // [esp+Bh] [ebp-Dh] BYREF
+    uint8_t v4; // [esp+Bh] [ebp-Dh] BYREF
     int p; // [esp+Ch] [ebp-Ch] BYREF
     int i; // [esp+10h] [ebp-8h]
     SndLengthId id; // [esp+14h] [ebp-4h]
@@ -4384,7 +4384,7 @@ void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInf
         MyAssertHandler(".\\snd.cpp", 3855, 0, "%s", "info");
     if (!memFile)
         MyAssertHandler(".\\snd.cpp", 3856, 0, "%s", "memFile");
-    MemFile_ReadData(memFile, 4, (unsigned __int8 *)&p);
+    MemFile_ReadData(memFile, 4, (uint8_t *)&p);
     info->count = p;
     if (info->count >= 4u)
         MyAssertHandler(
@@ -4413,7 +4413,7 @@ void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInf
             }
             else
             {
-                MemFile_ReadData(memFile, 4, (unsigned __int8 *)&v3);
+                MemFile_ReadData(memFile, 4, (uint8_t *)&v3);
                 info->data[i] = v3;
             }
         }
@@ -4438,7 +4438,7 @@ char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
     if (!alias1)
         MyAssertHandler(".\\snd.cpp", 4045, 0, "%s", "alias1");
     SND_RestoreChanInfo(&chaninfo, memFile);
-    MemFile_ReadData(memFile, 16, (unsigned __int8 *)&info);
+    MemFile_ReadData(memFile, 16, (uint8_t *)&info);
     if (alias0->soundFile->type != (alias0->flags & 0xC0) >> 6)
         MyAssertHandler(".\\snd.cpp", 4050, 0, "%s", "alias0->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias0->flags )");
     if (alias1->soundFile->type != (alias1->flags & 0xC0) >> 6)
@@ -4508,7 +4508,7 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
     if (!alias1)
         MyAssertHandler(".\\snd.cpp", 4144, 0, "%s", "alias1");
     SND_RestoreChanInfo(&chaninfo, memFile);
-    MemFile_ReadData(memFile, 32, (unsigned __int8 *)&info);
+    MemFile_ReadData(memFile, 32, (uint8_t *)&info);
     if ((alias0->flags & 0xC0) >> 6 == 2
         && (alias1->flags & 0xC0) >> 6 == 2
         && SND_ValidateSoundAliasBlend(alias0, alias1, 0))

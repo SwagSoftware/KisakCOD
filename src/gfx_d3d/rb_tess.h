@@ -19,8 +19,8 @@ struct GfxReadCmdBuf // sizeof=0x4
 
 struct GfxStaticModelPreTessSurf_s // sizeof=0x4
 {                                       // ...
-    unsigned __int8 surfIndex;
-    unsigned __int8 lod;
+    uint8_t surfIndex;
+    uint8_t lod;
     unsigned __int16 cachedIndex;
 };
 union GfxStaticModelPreTessSurf // sizeof=0x4

@@ -747,7 +747,7 @@ int __cdecl PS_ReadToken(script_s *script, token_s *token)
     }
     script->lastscript_p = script->script_p;
     script->lastline = script->line;
-    memset((unsigned __int8 *)token, 0, sizeof(token_s));
+    memset((uint8_t *)token, 0, sizeof(token_s));
     script->whitespace_p = script->script_p;
     token->whitespace_p = script->script_p;
     if (!PS_ReadWhiteSpace(script))
@@ -1314,11 +1314,11 @@ void __cdecl StripDoubleQuotes(char *string)
         string[strlen(string) - 1] = 0;
 }
 
-unsigned __int8 *__cdecl GetClearedMemory(unsigned int size)
+uint8_t *__cdecl GetClearedMemory(unsigned int size)
 {
-    unsigned __int8 *ptr; // [esp+0h] [ebp-4h]
+    uint8_t *ptr; // [esp+0h] [ebp-4h]
 
-    ptr = (unsigned __int8 *)GetMemory(size);
+    ptr = (uint8_t *)GetMemory(size);
     memset(ptr, 0, size);
     return ptr;
 }
@@ -1332,7 +1332,7 @@ void __cdecl PS_CreatePunctuationTable(script_s *script, punctuation_s *punctuat
 
     if (!script->punctuationtable)
         script->punctuationtable = (punctuation_s **)GetMemory(0x400u);
-    memset((unsigned __int8 *)script->punctuationtable, 0, 0x400u);
+    memset((uint8_t *)script->punctuationtable, 0, 0x400u);
     for (i = 0; punctuations[i].p; ++i)
     {
         newp = &punctuations[i];
@@ -1400,7 +1400,7 @@ script_s *__cdecl LoadScriptFile(const char *filename)
     buffer->line = 1;
     buffer->lastline = 1;
     SetScriptPunctuations(buffer);
-    FS_Read((unsigned __int8 *)buffer->buffer, length, fp);
+    FS_Read((uint8_t *)buffer->buffer, length, fp);
     FS_FCloseFile(fp);
     buffer->length = Com_Compress(buffer->buffer);
     return buffer;
@@ -1768,7 +1768,7 @@ script_s *__cdecl LoadScriptMemory(char *ptr, int length, const char *name)
     buffer->line = 1;
     buffer->lastline = 1;
     SetScriptPunctuations(buffer);
-    memcpy((unsigned __int8 *)buffer->buffer, (unsigned __int8 *)ptr, length);
+    memcpy((uint8_t *)buffer->buffer, (uint8_t *)ptr, length);
     return buffer;
 }
 
@@ -1782,7 +1782,7 @@ define_s *__cdecl PC_DefineFromString(char *string)
     int res; // [esp+4F4h] [ebp-4h]
 
     script = LoadScriptMemory(string, strlen(string), "*extern");
-    memset((unsigned __int8 *)&src, 0, sizeof(src));
+    memset((uint8_t *)&src, 0, sizeof(src));
     strncpy(src.filename, "*extern", 0x40u);
     src.scriptstack = script;
     src.definehash = (define_s **)GetClearedMemory(0x1000u);
@@ -3709,10 +3709,10 @@ bool __cdecl Eval_EvaluationStep(Eval *eval)
             length[0] = strlen((const char *)eval->opStack[4 * eval->valStackPos + 1018]);
             length[1] = strlen((const char *)eval->opStack[4 * eval->valStackPos + 1022]);
             s = (char *)malloc(length[0] + length[1] + 1);
-            memcpy((unsigned __int8 *)s, (unsigned __int8 *)eval->opStack[4 * eval->valStackPos + 1018], length[0]);
+            memcpy((uint8_t *)s, (uint8_t *)eval->opStack[4 * eval->valStackPos + 1018], length[0]);
             memcpy(
-                (unsigned __int8 *)&s[length[0]],
-                (unsigned __int8 *)eval->opStack[4 * eval->valStackPos + 1022],
+                (uint8_t *)&s[length[0]],
+                (uint8_t *)eval->opStack[4 * eval->valStackPos + 1022],
                 length[1] + 1);
             free((void *)eval->opStack[4 * eval->valStackPos + 1018]);
             free((void *)eval->opStack[4 * eval->valStackPos + 1022]);
@@ -4344,7 +4344,7 @@ int __cdecl PC_Script_Parse(int handle, const char **out)
     char dst[5120]; // [esp+30h] [ebp-1818h] BYREF
     pc_token_s pc_token; // [esp+1430h] [ebp-418h] BYREF
 
-    memset((unsigned __int8 *)dst, 0, sizeof(dst));
+    memset((uint8_t *)dst, 0, sizeof(dst));
     if (!PC_ReadTokenHandle(handle, &pc_token))
         return 0;
     if (I_stricmp(pc_token.string, "{"))
@@ -4845,7 +4845,7 @@ int __cdecl MenuParse_fadeCycle(menuDef_t *menu, int handle)
 
 void __cdecl Window_Init(windowDef_t *w)
 {
-    memset((unsigned __int8 *)w, 0, sizeof(windowDef_t));
+    memset((uint8_t *)w, 0, sizeof(windowDef_t));
     w->borderSize = 1.0;
     w->foreColor[3] = 1.0;
     w->foreColor[2] = 1.0;
@@ -4855,7 +4855,7 @@ void __cdecl Window_Init(windowDef_t *w)
 
 void __cdecl Item_Init(itemDef_s *item, int imageTrack)
 {
-    memset((unsigned __int8 *)item, 0, sizeof(itemDef_s));
+    memset((uint8_t *)item, 0, sizeof(itemDef_s));
     item->textscale = 0.55000001f;
     item->imageTrack = imageTrack;
     Window_Init(&item->window);
@@ -4869,7 +4869,7 @@ int __cdecl KeywordHash_Key_256_3855_(const char *keyword)
     hash = 0;
     for (i = 0; keyword[i]; ++i)
         hash += (i + 3855) * tolower(keyword[i]);
-    return (unsigned __int8)(hash + BYTE1(hash));
+    return (uint8_t)(hash + BYTE1(hash));
 }
 
 const KeywordHashEntry<itemDef_s, 256, 3855> *__cdecl KeywordHash_Find_itemDef_s_256_3855_(
@@ -4977,7 +4977,7 @@ int __cdecl MenuParse_execKey(menuDef_t *menu, int handle)
 
     if (!PC_Char_Parse(handle, &keyname))
         return 0;
-    keyindex = (unsigned __int8)keyname;
+    keyindex = (uint8_t)keyname;
     if (!PC_Script_Parse(handle, &action))
         return 0;
     handler = (ItemKeyHandler *)UI_Alloc(0xCu, 4);
@@ -5098,7 +5098,7 @@ char *__cdecl UI_FileText(char *fileName)
         return 0;
     if (len < 0x1000)
     {
-        FS_Read((unsigned __int8 *)menuBuf1, len, f);
+        FS_Read((uint8_t *)menuBuf1, len, f);
         menuBuf1[len] = 0;
         FS_FCloseFile(f);
         return menuBuf1;
@@ -5763,7 +5763,7 @@ int __cdecl ItemParse_execKey(itemDef_s *item, int handle)
 
     if (!PC_Char_Parse(handle, &keyname))
         return 0;
-    keyindex = (unsigned __int8)keyname;
+    keyindex = (uint8_t)keyname;
     if (!PC_Script_Parse(handle, &action))
         return 0;
     handler = (ItemKeyHandler *)UI_Alloc(0xCu, 4);
@@ -6095,7 +6095,7 @@ char __cdecl KeywordHash_IsValidSeed_itemDef_s_256_3855_(
     int count,
     int seed)
 {
-    unsigned __int8 used[260]; // [esp+0h] [ebp-110h] BYREF
+    uint8_t used[260]; // [esp+0h] [ebp-110h] BYREF
     int hash; // [esp+108h] [ebp-8h]
     int index; // [esp+10Ch] [ebp-4h]
 
@@ -6154,7 +6154,7 @@ void __cdecl KeywordHash_Validate_itemDef_s_256_3855_(const KeywordHashEntry<ite
 void __cdecl Item_SetupKeywordHash()
 {
     KeywordHash_Validate_itemDef_s_256_3855_(itemParseKeywords, 71);
-    memset((unsigned __int8 *)itemParseKeywordHash, 0, sizeof(itemParseKeywordHash));
+    memset((uint8_t *)itemParseKeywordHash, 0, sizeof(itemParseKeywordHash));
     for (int i = 0; i < 71; ++i)
         KeywordHash_Add_itemDef_s_256_3855_(itemParseKeywordHash, &itemParseKeywords[i]);
 }
@@ -6164,7 +6164,7 @@ char __cdecl KeywordHash_IsValidSeed_menuDef_t_128_128_(
     int count,
     int seed)
 {
-    unsigned __int8 used[132]; // [esp+0h] [ebp-90h] BYREF
+    uint8_t used[132]; // [esp+0h] [ebp-90h] BYREF
     int hash; // [esp+88h] [ebp-8h]
     int index; // [esp+8Ch] [ebp-4h]
 
@@ -6234,14 +6234,14 @@ void __cdecl KeywordHash_Add_menuDef_t_128_128_(
 void __cdecl Menu_SetupKeywordHash()
 {
     KeywordHash_Validate_menuDef_t_128_128_(menuParseKeywords, 36);
-    memset((unsigned __int8 *)menuParseKeywordHash, 0, sizeof(menuParseKeywordHash));
+    memset((uint8_t *)menuParseKeywordHash, 0, sizeof(menuParseKeywordHash));
     for (int i = 0; i < 36; ++i)
         KeywordHash_Add_menuDef_t_128_128_(menuParseKeywordHash, &menuParseKeywords[i]);
 }
 
 void __cdecl Menu_Init(menuDef_t *menu, int imageTrack)
 {
-    memset((unsigned __int8 *)menu, 0, sizeof(menuDef_t));
+    memset((uint8_t *)menu, 0, sizeof(menuDef_t));
     Menu_SetCursorItem(0, menu, -1);
     menu->fadeAmount = g_load_0.loadAssets.fadeAmount;
     menu->fadeInAmount = g_load_0.loadAssets.fadeInAmount;
@@ -6280,7 +6280,7 @@ int __cdecl Menu_Parse(int handle, menuDef_t *menu)
         {
             do
             {
-                memset((unsigned __int8 *)&token, 0, sizeof(token));
+                memset((uint8_t *)&token, 0, sizeof(token));
                 if (!PC_ReadTokenHandle(handle, &token))
                 {
                     PC_SourceError(handle, (char*)"end of file inside menu\n");
@@ -6307,7 +6307,7 @@ void __cdecl Menu_PostParse(menuDef_t *menu)
         MyAssertHandler(".\\ui\\ui_shared_obj.cpp", 2653, 0, "%s", "menu");
     size = 4 * menu->itemCount;
     menu->items = (itemDef_s **)UI_Alloc(size, 4);
-    memcpy((unsigned __int8 *)menu->items, (unsigned __int8 *)g_load_0.items, size);
+    memcpy((uint8_t *)menu->items, (uint8_t *)g_load_0.items, size);
     if (menu->fullScreen)
     {
         menu->window.rect.x = 0.0;
@@ -6447,7 +6447,7 @@ char __cdecl UI_ParseMenuInternal(char *menuFile, int imageTrack)
 
 MenuList *__cdecl UI_LoadMenu_LoadObj(char *menuFile, int imageTrack)
 {
-    memset((unsigned __int8 *)&g_load_0, 0, sizeof(g_load_0));
+    memset((uint8_t *)&g_load_0, 0, sizeof(g_load_0));
     g_load_0.menuList.menus = g_load_0.menus;
     if (!UI_ParseMenuInternal(menuFile, imageTrack))
     {
@@ -6484,7 +6484,7 @@ MenuList *__cdecl UI_LoadMenus_LoadObj(char *menuFile, int imageTrack)
     const char *token; // [esp+8h] [ebp-8h]
     const char *p; // [esp+Ch] [ebp-4h] BYREF
 
-    memset((unsigned __int8 *)&g_load_0, 0, sizeof(g_load_0));
+    memset((uint8_t *)&g_load_0, 0, sizeof(g_load_0));
     g_load_0.menuList.menus = g_load_0.menus;
     len = FS_FOpenFileByMode(menuFile, &f, FS_READ);
     if (!f)
@@ -6499,7 +6499,7 @@ MenuList *__cdecl UI_LoadMenus_LoadObj(char *menuFile, int imageTrack)
         FS_FCloseFile(f);
         Com_Error(ERR_DROP, "^1menu file too large: %s is %i, max allowed is %i", menuFile, len, 0x8000);
     }
-    FS_Read((unsigned __int8 *)menuBuf, len, f);
+    FS_Read((uint8_t *)menuBuf, len, f);
     menuBuf[len] = 0;
     FS_FCloseFile(f);
     Com_Compress(menuBuf);

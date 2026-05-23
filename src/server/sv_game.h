@@ -42,8 +42,8 @@ void __cdecl SV_LocateGameData(
     int sizeofGameClient);
 void __cdecl SV_GetUsercmd(int clientNum, usercmd_s *cmd);
 XModel *__cdecl SV_XModelGet(char *name);
-unsigned __int8 *__cdecl SV_AllocXModelPrecache(unsigned int size);
-unsigned __int8 *__cdecl SV_AllocXModelPrecacheColl(unsigned int size);
+uint8_t *__cdecl SV_AllocXModelPrecache(unsigned int size);
+uint8_t *__cdecl SV_AllocXModelPrecacheColl(unsigned int size);
 void __cdecl SV_DObjDumpInfo(gentity_s *ent);
 void __cdecl SV_ResetSkeletonCache();
 bool __cdecl SV_DObjCreateSkelForBone(DObj_s *obj, int boneIndex);

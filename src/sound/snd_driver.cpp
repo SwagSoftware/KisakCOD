@@ -1193,7 +1193,7 @@ void __cdecl SND_RestoreEq(MemoryFile *memFile)
         for (band = 0; band < 3; ++band)
         {
             for (entchannel = 0; entchannel < 64; ++entchannel)
-                MemFile_ReadData(memFile, 20, (unsigned __int8 *)&milesGlob.eq[eqIndex].params[band][entchannel]);
+                MemFile_ReadData(memFile, 20, (uint8_t *)&milesGlob.eq[eqIndex].params[band][entchannel]);
         }
     }
 }
@@ -1216,7 +1216,7 @@ void __cdecl SND_PrintEqParams()
             for (band = 0; band < 3; ++band)
             {
                 v0 = (float *)&milesGlob.eq[eqIndex].params[band][entchannel];
-                if ((unsigned __int8)*((unsigned int *)v0 + 4))
+                if ((uint8_t)*((unsigned int *)v0 + 4))
                     Com_Printf(9, "\t%i %s %f Hz %f dB %f q\n", band, snd_eqTypeStrings[*(unsigned int *)v0], v0[2], v0[1], v0[3]);
             }
         }

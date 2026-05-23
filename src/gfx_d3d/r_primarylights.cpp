@@ -607,14 +607,14 @@ void __cdecl R_LinkDynEntToPrimaryLights(
     }
     if (drawType == DYNENT_DRAW_MODEL)
     {
-        if (bestPrimaryLightIndex != (unsigned __int8)bestPrimaryLightIndex)
+        if (bestPrimaryLightIndex != (uint8_t)bestPrimaryLightIndex)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
                 281,
                 0,
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 bestPrimaryLightIndex,
-                (unsigned __int8)bestPrimaryLightIndex);
+                (uint8_t)bestPrimaryLightIndex);
         rgp.world->nonSunPrimaryLightForModelDynEnt[dynEntId] = bestPrimaryLightIndex;
     }
 }

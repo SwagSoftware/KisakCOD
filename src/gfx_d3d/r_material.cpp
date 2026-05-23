@@ -279,7 +279,7 @@ void __cdecl TRACK_r_material()
     track_static_alloc_internal((void *)s_builtInMaterials, 400, "s_builtInMaterials", 18);
 }
 
-unsigned __int8 *__cdecl Material_Alloc(unsigned int size)
+uint8_t *__cdecl Material_Alloc(unsigned int size)
 {
     return Hunk_Alloc(size, "Material_Alloc", 22);
 }
@@ -825,7 +825,7 @@ void __cdecl Material_Init()
 {
     if (!IsFastFileLoad())
     {
-        memset((unsigned __int8 *)&materialGlobals, 0, sizeof(materialGlobals));
+        memset((uint8_t *)&materialGlobals, 0, sizeof(materialGlobals));
         Material_PreLoadAllShaderText();
     }
     Material_LoadBuiltIn(s_builtInMaterials, 50);
@@ -835,8 +835,8 @@ void __cdecl Material_Init()
 void __cdecl Material_Shutdown()
 {
     Material_FreeAll();
-    memset((unsigned __int8 *)&materialGlobals, 0, sizeof(materialGlobals));
-    memset((unsigned __int8 *)rg.materialHashTable, 0, sizeof(rg.materialHashTable));
+    memset((uint8_t *)&materialGlobals, 0, sizeof(materialGlobals));
+    memset((uint8_t *)rg.materialHashTable, 0, sizeof(rg.materialHashTable));
     rgp.materialCount = 0;
 }
 

@@ -1188,7 +1188,7 @@ void __cdecl MSG_WriteLastChangedField(msg_t *msg, int lastChangedFieldNum, unsi
     MSG_WriteBits(msg, lastChangedFieldNum, idealBits);
 }
 
-void __cdecl MSG_WriteEventNum(int clientNum, msg_t *msg, unsigned __int8 eventNum)
+void __cdecl MSG_WriteEventNum(int clientNum, msg_t *msg, uint8_t eventNum)
 {
     iassert( !msg->readOnly );
     SV_PacketDataIsData(clientNum, msg);
@@ -1196,7 +1196,7 @@ void __cdecl MSG_WriteEventNum(int clientNum, msg_t *msg, unsigned __int8 eventN
     SV_PacketDataIsUnknown(clientNum, msg);
 }
 
-void __cdecl MSG_WriteEventParam(int clientNum, msg_t *msg, unsigned __int8 eventParam)
+void __cdecl MSG_WriteEventParam(int clientNum, msg_t *msg, uint8_t eventParam)
 {
     iassert( !msg->readOnly );
     SV_PacketDataIsData(clientNum, msg);
@@ -1298,7 +1298,7 @@ unsigned int __cdecl MSG_GetBitCount(int bits, bool *estimate, int from, int to)
             *estimate = 0;
             if ((from & 0xFFFFFF00) == (to & 0xFFFFFF00))
             {
-                if (((_BYTE)from || (unsigned __int8)to != 255) && ((unsigned __int8)from != 255 || (_BYTE)to))
+                if (((_BYTE)from || (uint8_t)to != 255) && ((uint8_t)from != 255 || (_BYTE)to))
                     return 7;
                 else
                     return 2;
@@ -1379,14 +1379,14 @@ void __cdecl MSG_WriteEntity(
             Com_Printf(15, "Removing entity %i - object is type %i (%s)\n", from->number, from->eType, EntityTypeName);
         }
         snapInfo->packetEntityType = MSG_GetPacketEntityTypeForEType(from->eType);
-        MSG_WriteEntityRemoval(snapInfo, msg, (unsigned __int8 *)from, 10, 0);
+        MSG_WriteEntityRemoval(snapInfo, msg, (uint8_t *)from, 10, 0);
     }
 }
 
 void __cdecl MSG_WriteEntityRemoval(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
-    unsigned __int8 *from,
+    uint8_t *from,
     int indexBits,
     bool changeBit)
 {
@@ -1426,8 +1426,8 @@ void __cdecl MSG_WriteEntityDeltaForEType(
         snapInfo,
         msg,
         time,
-        (const unsigned __int8 *)from,
-        (const unsigned __int8 *)to,
+        (const uint8_t *)from,
+        (const uint8_t *)to,
         force,
         fieldList->count,
         10,
@@ -1453,8 +1453,8 @@ int __cdecl MSG_WriteEntityDelta(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    const unsigned __int8 *from,
-    const unsigned __int8 *to,
+    const uint8_t *from,
+    const uint8_t *to,
     int force,
     int numFields,
     int indexBits,
@@ -1553,8 +1553,8 @@ void __cdecl MSG_WriteDeltaField(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    const unsigned __int8 *from,
-    const unsigned __int8 *to,
+    const uint8_t *from,
+    const uint8_t *to,
     const NetField *field,
     int fieldNum,
     bool forceSend)
@@ -1574,7 +1574,7 @@ void __cdecl MSG_WriteDeltaField(
     int trunc; // [esp+50h] [ebp-2Ch]
     int oldTrunc; // [esp+54h] [ebp-28h]
     const int *toF; // [esp+58h] [ebp-24h]
-    unsigned __int8 *b; // [esp+5Ch] [ebp-20h]
+    uint8_t *b; // [esp+5Ch] [ebp-20h]
     float oldFloat; // [esp+60h] [ebp-1Ch]
     int bits; // [esp+64h] [ebp-18h]
     const int *fromF; // [esp+68h] [ebp-14h]
@@ -1800,8 +1800,8 @@ void __cdecl MSG_WriteDeltaField(
         }
         toColor = (const hudelem_color_t *)toF;
         fromColor = (const hudelem_color_t *)fromF;
-        if ((*((unsigned __int8 *)fromF + 3) != 255 || *((_BYTE *)toF + 3))
-            && (*((_BYTE *)fromF + 3) || *((unsigned __int8 *)toF + 3) != 255)
+        if ((*((uint8_t *)fromF + 3) != 255 || *((_BYTE *)toF + 3))
+            && (*((_BYTE *)fromF + 3) || *((uint8_t *)toF + 3) != 255)
             || memcmp(fromF, toF, 3u))
         {
             MSG_WriteBit0(msg);
@@ -1839,8 +1839,8 @@ void __cdecl MSG_WriteDeltaField(
                 SV_PacketDataIsLargeFloat(snapInfo->clientNum, msg);
                 value = *fromF ^ *toF;
                 MSG_WriteLong(msg, value);
-                b = (unsigned __int8 *)&value;
-                bits = Huff_bitCount(&msgHuff.compressDecompress, (unsigned __int8)value);
+                b = (uint8_t *)&value;
+                bits = Huff_bitCount(&msgHuff.compressDecompress, (uint8_t)value);
                 v9 = Huff_bitCount(&msgHuff.compressDecompress, b[1]);
                 bits += v9;
                 v10 = Huff_bitCount(&msgHuff.compressDecompress, b[2]);
@@ -2023,8 +2023,8 @@ void __cdecl MSG_WriteDeltaArchivedEntity(
         snapInfo,
         msg,
         time,
-        (unsigned __int8 *)from,
-        (unsigned __int8 *)to,
+        (uint8_t *)from,
+        (uint8_t *)to,
         force,
         69,
         10,
@@ -2036,8 +2036,8 @@ int __cdecl MSG_WriteDeltaStruct(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    unsigned __int8 *from,
-    unsigned __int8 *to,
+    uint8_t *from,
+    uint8_t *to,
     int force,
     int numFields,
     int indexBits,
@@ -2153,7 +2153,7 @@ void __cdecl MSG_WriteDeltaClient(
     if (!from)
     {
         from = &dummy;
-        memset((unsigned __int8 *)&dummy, 0, sizeof(dummy));
+        memset((uint8_t *)&dummy, 0, sizeof(dummy));
     }
     if (to)
     {
@@ -2163,8 +2163,8 @@ void __cdecl MSG_WriteDeltaClient(
             snapInfo,
             msg,
             time,
-            (unsigned __int8 *)from,
-            (unsigned __int8 *)to,
+            (uint8_t *)from,
+            (uint8_t *)to,
             force,
             24,
             6,
@@ -2179,7 +2179,7 @@ void __cdecl MSG_WriteDeltaClient(
     else
     {
         snapInfo->packetEntityType = ANALYZE_DATATYPE_ENTITYTYPE_CLIENTSTATE;
-        MSG_WriteEntityRemoval(snapInfo, msg, (unsigned __int8 *)from, 6, 1);
+        MSG_WriteEntityRemoval(snapInfo, msg, (uint8_t *)from, 6, 1);
     }
 }
 
@@ -2201,7 +2201,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     float v13; // [esp+60h] [ebp-2FA4h]
     int lastChangedFieldNum; // [esp+64h] [ebp-2FA0h]
     int v15; // [esp+68h] [ebp-2F9Ch]
-    unsigned __int8 dst[sizeof(playerState_s)]; // [esp+6Ch] [ebp-2F98h] BYREF
+    uint8_t dst[sizeof(playerState_s)]; // [esp+6Ch] [ebp-2F98h] BYREF
     int value; // [esp+2FD8h] [ebp-2Ch]
     int c[4]; // [esp+2FDCh] [ebp-28h]
     int v19; // [esp+2FECh] [ebp-18h]
@@ -2292,8 +2292,8 @@ void __cdecl MSG_WriteDeltaPlayerstate(
                     snapInfo,
                     msg,
                     time,
-                    (const unsigned __int8 *)from,
-                    (const unsigned __int8 *)to,
+                    (const uint8_t *)from,
+                    (const uint8_t *)to,
                     field,
                     fieldNum,
                     0);
@@ -2302,8 +2302,8 @@ void __cdecl MSG_WriteDeltaPlayerstate(
                     snapInfo,
                     msg,
                     time,
-                    (const unsigned __int8 *)from,
-                    (const unsigned __int8 *)to,
+                    (const uint8_t *)from,
+                    (const uint8_t *)to,
                     field,
                     fieldNum,
                     1);
@@ -2475,8 +2475,8 @@ void __cdecl MSG_WriteDeltaPlayerstate(
                 snapInfo,
                 msg,
                 time,
-                (unsigned __int8 *)&from->objective[fieldNum],
-                (unsigned __int8 *)&to->objective[fieldNum],
+                (uint8_t *)&from->objective[fieldNum],
+                (uint8_t *)&to->objective[fieldNum],
                 0,
                 6,
                 objectiveFields);
@@ -2570,8 +2570,8 @@ void __cdecl MSG_WriteDeltaFields(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    unsigned __int8 *from,
-    unsigned __int8 *to,
+    uint8_t *from,
+    uint8_t *to,
     int force,
     int numFields,
     const NetField *stateFields)
@@ -2747,8 +2747,8 @@ void __cdecl MSG_WriteDeltaHudElems(
                 snapInfo,
                 msg,
                 time,
-                (const unsigned __int8 *)&from[i],
-                (const unsigned __int8 *)&to[i],
+                (const uint8_t *)&from[i],
+                (const uint8_t *)&to[i],
                 &hudElemFields[j],
                 j,
                 0);

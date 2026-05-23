@@ -137,7 +137,7 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
     if (localName && remoteName)
     {
         DL_InitDownload();
-        access = (char *)HTParse((unsigned __int8 *)remoteName, (unsigned __int8 *)"", 16);
+        access = (char *)HTParse((uint8_t *)remoteName, (uint8_t *)"", 16);
         if (!_stricmp(access, "ftp"))
         {
             dl_is_ftp = 1;
@@ -150,13 +150,13 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
         }
         dl_request = (_HTRequest *)HTRequest_new();
         if (!_stricmp(access, "http")
-            && (login = (char *)HTParse((unsigned __int8 *)remoteName, (unsigned __int8 *)"", 8),
-                path = (char *)HTParse((unsigned __int8 *)remoteName, (unsigned __int8 *)"", 5),
-                strchr((unsigned __int8 *)login, 0x40u),
+            && (login = (char *)HTParse((uint8_t *)remoteName, (uint8_t *)"", 8),
+                path = (char *)HTParse((uint8_t *)remoteName, (uint8_t *)"", 5),
+                strchr((uint8_t *)login, 0x40u),
                 (ptr = v3) != 0))
         {
             *ptr = 0;
-            strchr((unsigned __int8 *)login, 0x3Au);
+            strchr((uint8_t *)login, 0x3Au);
             passwd = v4;
             if (v4)
             {
@@ -165,8 +165,8 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
             }
             HTUnEscape(login);
             basic = (_HTBasic *)HTBasic_new();
-            HTSACopy((void **)&basic->uid, (unsigned __int8 *)login);
-            HTSACopy((void **)&basic->pw, (unsigned __int8 *)passwd);
+            HTSACopy((void **)&basic->uid, (uint8_t *)login);
+            HTSACopy((void **)&basic->pw, (uint8_t *)passwd);
             basic_credentials((int)dl_request, (int)basic);
             HTBasic_delete((void **)&basic->uid);
             url = (char *)HTMemory_malloc(strlen(ptr + 1) + strlen(path) + 8);
@@ -179,19 +179,19 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
         }
         else
         {
-            HTSACopy((void **)&url, (unsigned __int8 *)remoteName);
+            HTSACopy((void **)&url, (uint8_t *)remoteName);
         }
         HTMemory_free(access);
         access = 0;
         FS_CreatePath(localName);
-        if (HTLoadToFile((unsigned __int8 *)url, (int)dl_request, localName) == 1)
+        if (HTLoadToFile((uint8_t *)url, (int)dl_request, localName) == 1)
         {
             HTMemory_free(url);
             url = 0;
-            access = (char *)HTParse((unsigned __int8 *)remoteName, (unsigned __int8 *)"", 16);
-            login = (char *)HTParse((unsigned __int8 *)remoteName, (unsigned __int8 *)"", 8);
-            path = (char *)HTParse((unsigned __int8 *)remoteName, (unsigned __int8 *)"", 5);
-            strchr((unsigned __int8 *)login, 0x40u);
+            access = (char *)HTParse((uint8_t *)remoteName, (uint8_t *)"", 16);
+            login = (char *)HTParse((uint8_t *)remoteName, (uint8_t *)"", 8);
+            path = (char *)HTParse((uint8_t *)remoteName, (uint8_t *)"", 5);
+            strchr((uint8_t *)login, 0x40u);
             ptr = v5;
             if (v5)
                 Com_sprintf(legacyHacks.cl_downloadName, 0x40u, "%s://*:*%s%s", access, ptr, path);

@@ -30,7 +30,7 @@ int __cdecl SEH_GetLocalizedTokenReference(
     msgLocErrType_t errType);
 bool __cdecl Taiwanese_ValidBig5Code(__int16 uiCode);
 bool __cdecl Japanese_ValidShiftJISCode(unsigned int _iHi, unsigned int _iLo);
-bool __cdecl Chinese_ValidGBCode(unsigned __int8 _iHi, unsigned __int8 _iLo);
+bool __cdecl Chinese_ValidGBCode(uint8_t _iHi, uint8_t _iLo);
 unsigned int __cdecl SEH_DecodeLetter(
     unsigned int firstChar,
     unsigned int secondChar,

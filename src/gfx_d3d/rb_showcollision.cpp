@@ -39,7 +39,7 @@ void __cdecl RB_ShowCollision(const GfxViewParms *viewParms)
 {
     char v1; // [esp+8h] [ebp-98h]
     char v2; // [esp+Ch] [ebp-94h]
-    unsigned __int8 v3; // [esp+10h] [ebp-90h]
+    uint8_t v3; // [esp+10h] [ebp-90h]
     int contentMask; // [esp+18h] [ebp-88h]
     cplane_s frustumPlanes[6]; // [esp+20h] [ebp-80h] BYREF
 
@@ -85,7 +85,7 @@ void __cdecl BuildFrustumPlanes(const GfxViewParms *viewParms, cplane_s *frustum
 {
     char v2; // [esp+0h] [ebp-84h]
     char v3; // [esp+4h] [ebp-80h]
-    unsigned __int8 v4; // [esp+8h] [ebp-7Ch]
+    uint8_t v4; // [esp+8h] [ebp-7Ch]
     cplane_s *v5; // [esp+Ch] [ebp-78h]
     DpvsPlane *v6; // [esp+10h] [ebp-74h]
     DpvsPlane dpvsFrustumPlanes[5]; // [esp+14h] [ebp-70h] BYREF

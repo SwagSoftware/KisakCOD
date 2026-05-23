@@ -4816,9 +4816,9 @@ void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool la
 	bool bOldCanBreak; // [esp+Fh] [ebp-15h]
 	char *nextPos1; // [esp+10h] [ebp-14h]
 	CaseStatementInfo *caseStatement; // [esp+14h] [ebp-10h]
-	unsigned __int8 *pos1; // [esp+18h] [ebp-Ch]
+	uint8_t *pos1; // [esp+18h] [ebp-Ch]
 	signed int num; // [esp+1Ch] [ebp-8h]
-	unsigned __int8 *pos2; // [esp+20h] [ebp-4h]
+	uint8_t *pos2; // [esp+20h] [ebp-4h]
 
 	oldCaseStatement = scrCompileGlob.currentCaseStatement;
 	bOldCanBreak = scrCompileGlob.bCanBreak;

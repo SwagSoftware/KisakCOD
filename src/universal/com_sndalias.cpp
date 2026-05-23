@@ -708,7 +708,7 @@ void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
         {
             *(&g_sa.soundFileInfo[-4].count + 3 * system) = 0;
             g_sa.aliasInfo[system].count = 0;
-            memset((unsigned __int8 *)g_sa.hash, 0, 4 * g_sa.hashSize);
+            memset((uint8_t *)g_sa.hash, 0, 4 * g_sa.hashSize);
             g_sa.hashUsed = 0;
         }
         else if (g_sa.aliasInfo[system].count)

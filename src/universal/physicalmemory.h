@@ -14,13 +14,13 @@ struct PhysicalMemoryPrim // sizeof=0x10C
 };
 struct PhysicalMemory // sizeof=0x21C
 {                                       // ...
-    unsigned __int8 *buf;
+    uint8_t *buf;
     PhysicalMemoryPrim prim[2];         // ...
 };
 
 void __cdecl PMem_Init();
 void __cdecl PMem_DumpMemStats();
-void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, unsigned __int8 *memory, unsigned int memorySize);
+void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, uint8_t *memory, unsigned int memorySize);
 void __cdecl PMem_BeginAlloc(const char *name, unsigned int allocType);
 void __cdecl PMem_BeginAllocInPrim(PhysicalMemoryPrim *prim, const char *name);
 void __cdecl PMem_EndAlloc(const char *name, unsigned int allocType);
@@ -29,7 +29,7 @@ void __cdecl PMem_Free(const char *name, unsigned int allocType);
 void __cdecl PMem_FreeInPrim(PhysicalMemoryPrim *prim, const char *name);
 void __cdecl PMem_FreeIndex(PhysicalMemoryPrim *prim, unsigned int allocIndex);
 int __cdecl PMem_GetOverAllocatedSize();
-unsigned __int8 *__cdecl PMem_Alloc(
+uint8_t *__cdecl PMem_Alloc(
     unsigned int size,
     unsigned int alignment,
     unsigned int type,

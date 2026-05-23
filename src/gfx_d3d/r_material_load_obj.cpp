@@ -739,7 +739,7 @@ bool __cdecl Material_UsingTechnique(unsigned int techType)
 }
 
 char __cdecl Material_HasMatchingParameter(
-    unsigned __int8 find,
+    uint8_t find,
     const ShaderVaryingDef *paramTable,
     unsigned int paramCount)
 {
@@ -754,7 +754,7 @@ char __cdecl Material_HasMatchingParameter(
 }
 
 char __cdecl Material_HasMatchingParameter_BuggySdkWorkaround(
-    unsigned __int8 find,
+    uint8_t find,
     const ShaderVaryingDef *paramTable,
     unsigned int paramCount)
 {
@@ -1059,7 +1059,7 @@ bool __cdecl Material_ParseRuleSetValue(
 MaterialStateMapRuleSet *__cdecl Material_AssembleRuleSet(int ruleCount, MaterialStateMapRule *rules)
 {
     int stateBitsIndex; // [esp+0h] [ebp-Ch]
-    unsigned __int8 *ruleSet; // [esp+4h] [ebp-8h]
+    uint8_t *ruleSet; // [esp+4h] [ebp-8h]
     int ruleIndex; // [esp+8h] [ebp-4h]
 
     ruleSet = Material_Alloc(32 * ruleCount + 4);
@@ -1254,7 +1254,7 @@ bool __cdecl Material_LoadPassStateMap(const char **text, MaterialStateMap **sta
     }
 }
 
-unsigned __int8 __cdecl Material_ParseShaderVersion(const char **text)
+uint8_t __cdecl Material_ParseShaderVersion(const char **text)
 {
     float versionNumber; // [esp+Ch] [ebp-4h]
 
@@ -1763,7 +1763,7 @@ static bool Material_FindCachedShader2(unsigned int *shaderLen, void **cachedSha
 static bool Material_CopyTextToDXBuffer2(unsigned int shaderHash, ID3DXBuffer **shader, const char *targetprefix)
 {
     const char *v3; // eax
-    unsigned __int8 *v5; // eax
+    uint8_t *v5; // eax
     int hr; // [esp+0h] [ebp-4h]
 
     char buffer[260];
@@ -1792,10 +1792,10 @@ static bool Material_CopyTextToDXBuffer2(unsigned int shaderHash, ID3DXBuffer **
 }
 #endif
 
-char __cdecl Material_CopyTextToDXBuffer(unsigned __int8 *cachedShader, unsigned int shaderLen, ID3DXBuffer **shader)
+char __cdecl Material_CopyTextToDXBuffer(uint8_t *cachedShader, unsigned int shaderLen, ID3DXBuffer **shader)
 {
     const char *v3; // eax
-    unsigned __int8 *v5; // eax
+    uint8_t *v5; // eax
     int hr; // [esp+0h] [ebp-4h]
 
     hr = D3DXCreateBuffer(shaderLen, shader);
@@ -2120,7 +2120,7 @@ MaterialVertexShader *__cdecl Material_LoadVertexShader(char *shaderName, int sh
 
 MaterialVertexShader *__cdecl Material_RegisterVertexShader(
     char *shaderName,
-    unsigned __int8 shaderVersion,
+    uint8_t shaderVersion,
     GfxRenderer renderer)
 {
     unsigned int hashIndex; // [esp+0h] [ebp-Ch] BYREF
@@ -2150,7 +2150,7 @@ char __cdecl Material_LoadPassVertexShader(
     unsigned int *argCount,
     MaterialShaderArgument *args)
 {
-    unsigned __int8 shaderVersion; // [esp+3h] [ebp-Dh]
+    uint8_t shaderVersion; // [esp+3h] [ebp-Dh]
     char *shaderName; // [esp+8h] [ebp-8h]
     MaterialVertexShader *mtlShader; // [esp+Ch] [ebp-4h]
 
@@ -2214,7 +2214,7 @@ int __cdecl Material_GetArgUpdateFrequency(const MaterialShaderArgument *arg)
     }
 }
 
-unsigned __int8 __cdecl Material_CountArgsWithUpdateFrequency(
+uint8_t __cdecl Material_CountArgsWithUpdateFrequency(
     MaterialUpdateFrequency updateFreq,
     const MaterialShaderArgument *args,
     unsigned int argCount,
@@ -2320,7 +2320,7 @@ MaterialPixelShader *__cdecl Material_LoadPixelShader(char *shaderName, int shad
 
 MaterialPixelShader *__cdecl Material_RegisterPixelShader(
     char *shaderName,
-    unsigned __int8 shaderVersion,
+    uint8_t shaderVersion,
     GfxRenderer renderer)
 {
     unsigned int hashIndex; // [esp+0h] [ebp-Ch] BYREF
@@ -3211,7 +3211,7 @@ const char *__cdecl Material_RegisterString(char *string)
 {
     const char *v1; // eax
     unsigned int v3; // [esp+0h] [ebp-34h]
-    unsigned __int8 *buffer; // [esp+24h] [ebp-10h]
+    uint8_t *buffer; // [esp+24h] [ebp-10h]
     unsigned int hash; // [esp+28h] [ebp-Ch]
     unsigned int hashIndex; // [esp+2Ch] [ebp-8h]
 
@@ -3577,7 +3577,7 @@ char __cdecl Material_ParseShaderArguments(
     return 0;
 }
 
-unsigned __int8 __cdecl Material_GetStreamDestForSemantic(const _D3DXSEMANTIC *semantic)
+uint8_t __cdecl Material_GetStreamDestForSemantic(const _D3DXSEMANTIC *semantic)
 {
     unsigned int v1; // eax
 
@@ -3710,7 +3710,7 @@ char __cdecl Material_LoadPassPixelShader(
     unsigned int *argCount,
     MaterialShaderArgument *args)
 {
-    unsigned __int8 shaderVersion; // [esp+3h] [ebp-Dh]
+    uint8_t shaderVersion; // [esp+3h] [ebp-Dh]
     parseInfo_t *shaderName; // [esp+8h] [ebp-8h]
     MaterialPixelShader *mtlShader; // [esp+Ch] [ebp-4h]
 
@@ -3763,7 +3763,7 @@ bool __cdecl Material_ParseIndex(const char **text, int indexCount, int *index)
     return Material_MatchToken(text, "]");
 }
 
-char __cdecl Material_StreamDestForName(const char **text, const char *destName, unsigned __int8 *dest)
+char __cdecl Material_StreamDestForName(const char **text, const char *destName, uint8_t *dest)
 {
     int index; // [esp+50h] [ebp-4h] BYREF
 
@@ -3808,7 +3808,7 @@ char __cdecl Material_StreamDestForName(const char **text, const char *destName,
     }
 }
 
-const char *__cdecl Material_NameForStreamDest(unsigned __int8 dest)
+const char *__cdecl Material_NameForStreamDest(uint8_t dest)
 {
     const char *result; // eax
     const char *v2; // eax
@@ -3864,10 +3864,10 @@ const char *__cdecl Material_NameForStreamDest(unsigned __int8 dest)
 }
 
 char __cdecl Material_ResourceDestForStreamDest(
-    unsigned __int8 streamDest,
+    uint8_t streamDest,
     ShaderVaryingDef *inputTable,
     unsigned int inputCount,
-    unsigned __int8 *resourceDest)
+    uint8_t *resourceDest)
 {
     const char *v5; // eax
     unsigned int inputIndex; // [esp+0h] [ebp-4h]
@@ -3896,7 +3896,7 @@ char __cdecl Material_ResourceDestForStreamDest(
     }
 }
 
-char __cdecl Material_StreamSourceForName(const char **text, const char *sourceName, unsigned __int8 *source)
+char __cdecl Material_StreamSourceForName(const char **text, const char *sourceName, uint8_t *source)
 {
     int index; // [esp+78h] [ebp-4h] BYREF
 
@@ -4044,13 +4044,13 @@ char __cdecl Material_LoadPassVertexDecl(
     unsigned int inputCount,
     MaterialPass *pass)
 {
-    unsigned __int8 source; // [esp+16h] [ebp-3Ah] BYREF
-    unsigned __int8 resourceDest; // [esp+17h] [ebp-39h] BYREF
+    uint8_t source; // [esp+16h] [ebp-3Ah] BYREF
+    uint8_t resourceDest; // [esp+17h] [ebp-39h] BYREF
     int insertIndex; // [esp+18h] [ebp-38h]
     bool existing; // [esp+1Fh] [ebp-31h] BYREF
     const char *token; // [esp+20h] [ebp-30h]
     int routingIndex; // [esp+24h] [ebp-2Ch]
-    unsigned __int8 dest[2]; // [esp+2Ah] [ebp-26h] BYREF
+    uint8_t dest[2]; // [esp+2Ah] [ebp-26h] BYREF
     MaterialStreamRouting routing[16]; // [esp+2Ch] [ebp-24h] BYREF
 
     for (routingIndex = 0; ; ++routingIndex)
@@ -4234,7 +4234,7 @@ bool __cdecl Material_LoadPass(
 
 MaterialTechnique *__cdecl Material_LoadTechnique(char *name, GfxRenderer renderer)
 {
-    unsigned __int8 *technique; // [esp+24h] [ebp-1A0h]
+    uint8_t *technique; // [esp+24h] [ebp-1A0h]
     int stateMapSize; // [esp+28h] [ebp-19Ch]
     MaterialStateMap *stateMap[4]; // [esp+2Ch] [ebp-198h] BYREF
     char filename[260]; // [esp+3Ch] [ebp-188h] BYREF
@@ -4662,7 +4662,7 @@ Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name)
     unsigned int v3; // [esp+8h] [ebp-30h]
     const char *nameBackup; // [esp+18h] [ebp-20h]
     Material *mtlNewa; // [esp+1Ch] [ebp-1Ch]
-    unsigned __int8 *mtlNew; // [esp+1Ch] [ebp-1Ch]
+    uint8_t *mtlNew; // [esp+1Ch] [ebp-1Ch]
     int constantTableSize; // [esp+24h] [ebp-14h]
     unsigned __int16 hashIndex[3]; // [esp+28h] [ebp-10h] BYREF
     bool exists; // [esp+2Fh] [ebp-9h] BYREF
@@ -4687,21 +4687,21 @@ Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name)
         mtlNew = Material_Alloc(v3 + 81);
         memcpy(mtlNew, mtlCopy, 0x50u);
         *(_DWORD *)mtlNew = (uint32)mtlNew + 80;
-        memcpy(*(unsigned __int8 **)mtlNew, (unsigned __int8 *)name, v3 + 1);
+        memcpy(*(uint8_t **)mtlNew, (uint8_t *)name, v3 + 1);
         stateBitsTableSize = 8 * mtlCopy->stateBitsCount;
         *((_DWORD *)mtlNew + 19) = (uint32)Material_Alloc(stateBitsTableSize);
-        memcpy(*((unsigned __int8 **)mtlNew + 19), (unsigned __int8 *)mtlCopy->stateBitsTable, stateBitsTableSize);
+        memcpy(*((uint8_t **)mtlNew + 19), (uint8_t *)mtlCopy->stateBitsTable, stateBitsTableSize);
         if (mtlCopy->textureTable)
         {
             textureTableSize = 12 * mtlCopy->textureCount;
             *((_DWORD *)mtlNew + 17) = (uint32)Material_Alloc(textureTableSize);
-            memcpy(*((unsigned __int8 **)mtlNew + 17), (unsigned __int8 *)mtlCopy->textureTable, textureTableSize);
+            memcpy(*((uint8_t **)mtlNew + 17), (uint8_t *)mtlCopy->textureTable, textureTableSize);
         }
         if (mtlCopy->constantTable)
         {
             constantTableSize = 32 * mtlCopy->constantCount;
             *((_DWORD *)mtlNew + 18) = (uint32)Material_Alloc(constantTableSize);
-            memcpy(*((unsigned __int8 **)mtlNew + 18), (unsigned __int8 *)mtlCopy->constantTable, constantTableSize);
+            memcpy(*((uint8_t **)mtlNew + 18), (uint8_t *)mtlCopy->constantTable, constantTableSize);
         }
         Material_Add((Material *)mtlNew, hashIndex[0]);
         return (Material *)mtlNew;
@@ -4970,7 +4970,7 @@ void __cdecl Material_GetLayeredStateBits(
     }
 }
 
-unsigned __int8 __cdecl Material_AddStateBitsArrayToTable(
+uint8_t __cdecl Material_AddStateBitsArrayToTable(
     const unsigned int (*stateBitsForPass)[2],
     unsigned int passCount,
     unsigned int (*stateBitsTable)[2],
@@ -5002,7 +5002,7 @@ unsigned int __cdecl Material_CreateLayeredStateBitsTable(
     const Material **layerMtl,
     unsigned int layerCount,
     const MaterialTechniqueSet *techSet,
-    unsigned __int8 *stateBitsEntry,
+    uint8_t *stateBitsEntry,
     unsigned int (*stateBitsTable)[2])
 {
     unsigned int techType; // [esp+0h] [ebp-10h]
@@ -5077,33 +5077,33 @@ Material *__cdecl Material_CreateLayered(
     unsigned int layerCount,
     MaterialTechniqueSet *techSet)
 {
-    unsigned __int8 *v4; // edi
+    uint8_t *v4; // edi
     const MaterialTextureDef *v5; // eax
     char v7; // [esp+Bh] [ebp-1ADh]
     MaterialConstantDef *v8; // [esp+Ch] [ebp-1ACh]
     MaterialTextureDef *v9; // [esp+10h] [ebp-1A8h]
     unsigned int v10; // [esp+14h] [ebp-1A4h]
     float *literal; // [esp+24h] [ebp-194h]
-    unsigned __int8 *memory; // [esp+28h] [ebp-190h]
+    uint8_t *memory; // [esp+28h] [ebp-190h]
     unsigned int oredSurfaceTypeBits; // [esp+2Ch] [ebp-18Ch]
     unsigned int texIndex; // [esp+30h] [ebp-188h]
     unsigned int texTableSize; // [esp+34h] [ebp-184h]
-    unsigned __int8 andedGameFlags; // [esp+43h] [ebp-175h]
+    uint8_t andedGameFlags; // [esp+43h] [ebp-175h]
     unsigned int constTableSize; // [esp+44h] [ebp-174h]
     MaterialTextureDef *newTexEntry; // [esp+48h] [ebp-170h]
-    unsigned __int8 oredGameFlags; // [esp+4Fh] [ebp-169h]
+    uint8_t oredGameFlags; // [esp+4Fh] [ebp-169h]
     unsigned int stateBitsTable[34][2]; // [esp+50h] [ebp-168h] BYREF
     const MaterialConstantDef *oldConstTable; // [esp+164h] [ebp-54h]
     unsigned int tintConstNameHash; // [esp+168h] [ebp-50h]
     MaterialConstantDef *newConstEntry; // [esp+16Ch] [ebp-4Ch]
     bool isTintSpecified; // [esp+172h] [ebp-46h]
-    unsigned __int8 constantCount; // [esp+173h] [ebp-45h]
+    uint8_t constantCount; // [esp+173h] [ebp-45h]
     const MaterialTextureDef *oldTexTable; // [esp+174h] [ebp-44h]
-    unsigned __int8 stateBitsEntry[34]; // [esp+178h] [ebp-40h] BYREF
+    uint8_t stateBitsEntry[34]; // [esp+178h] [ebp-40h] BYREF
     Material *newMtl; // [esp+1A0h] [ebp-18h]
     unsigned int layerIndex; // [esp+1A4h] [ebp-14h]
     unsigned int constIndex; // [esp+1A8h] [ebp-10h]
-    unsigned __int8 textureCount; // [esp+1AFh] [ebp-9h]
+    uint8_t textureCount; // [esp+1AFh] [ebp-9h]
     unsigned int stateBitsCount; // [esp+1B0h] [ebp-8h]
     char layerChar; // [esp+1B7h] [ebp-1h]
 
@@ -5500,7 +5500,7 @@ int __cdecl CompareRawMaterialTextures(_DWORD *e0, _DWORD *e1)
 BOOL __cdecl Material_RegisterImage(
     const MaterialRaw *material,
     int imageNameOffset,
-    unsigned __int8 semantic,
+    uint8_t semantic,
     int imageTrack)
 {
     return Image_Register((const char*)material + imageNameOffset, semantic, imageTrack) != 0;
@@ -5794,7 +5794,7 @@ void __cdecl Material_UpdateStateFlags(Material *mtl)
 
 void __cdecl Material_SetStateBits(Material *material, unsigned int (*stateBitsTable)[2], unsigned int stateBitsCount)
 {
-    unsigned __int8 *v3; // [esp+0h] [ebp-4h]
+    uint8_t *v3; // [esp+0h] [ebp-4h]
 
     material->stateBitsCount = stateBitsCount;
     if (stateBitsCount)

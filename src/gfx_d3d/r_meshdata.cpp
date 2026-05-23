@@ -48,7 +48,7 @@ char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int
     return 1;
 }
 
-unsigned __int8 *__cdecl R_GetMeshVerts(GfxMeshData *mesh, unsigned __int16 baseVertex)
+uint8_t *__cdecl R_GetMeshVerts(GfxMeshData *mesh, unsigned __int16 baseVertex)
 {
     return &mesh->vb.verts[mesh->vertSize * baseVertex];
 }
@@ -62,7 +62,7 @@ void __cdecl R_ResetMesh(GfxMeshData *mesh)
 void __cdecl R_BeginMeshVerts(GfxMeshData *mesh)
 {
     iassert( mesh->vb.verts == NULL );
-    mesh->vb.verts = (unsigned __int8 *)R_LockVertexBuffer(
+    mesh->vb.verts = (uint8_t *)R_LockVertexBuffer(
         mesh->vb.buffer,
         0,
         mesh->vb.total,
@@ -155,7 +155,7 @@ void __cdecl R_DrawQuadMesh(GfxCmdBufContext context, const Material *material, 
         R_SetMeshStream(context.state, quadMesh);
         args.vertexCount = 4;
         args.triCount = 2;
-        args.baseIndex = R_SetIndexData(&context.state->prim, (unsigned __int8 *)quadMesh->indices, 2);
+        args.baseIndex = R_SetIndexData(&context.state->prim, (uint8_t *)quadMesh->indices, 2);
         R_SetupPassPerObjectArgs(context);
         R_SetupPassPerPrimArgs(context);
         R_TrackPrims(context.state, GFX_PRIM_STATS_CODE);

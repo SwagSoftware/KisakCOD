@@ -119,7 +119,7 @@ void __cdecl CM_BoxTrace(
     unsigned int model,
     int brushmask)
 {
-    memset((unsigned __int8 *)results, 0, sizeof(trace_t));
+    memset((uint8_t *)results, 0, sizeof(trace_t));
     results->fraction = 1.0;
     CM_Trace(results, start, end, mins, maxs, model, brushmask);
 }
@@ -1586,7 +1586,7 @@ void __cdecl CM_TransformedBoxTraceExternal(
     const float *origin,
     const float *angles)
 {
-    memset((unsigned __int8 *)results, 0, sizeof(trace_t));
+    memset((uint8_t *)results, 0, sizeof(trace_t));
     results->fraction = 1.0;
     CM_TransformedBoxTrace(results, start, end, mins, maxs, model, origin, angles);
 }

@@ -558,7 +558,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     if (!IsFastFileLoad())
         Com_UnloadBsp();
     CM_LinkWorld();
-    sv_serverId_value = (unsigned __int8)(sv_serverId_value + 16);
+    sv_serverId_value = (uint8_t)(sv_serverId_value + 16);
     if ((sv_serverId_value & 0xF0) == 0)
         sv_serverId_value += 16;
     Dvar_SetInt((dvar_s *)sv_serverid, sv_serverId_value);

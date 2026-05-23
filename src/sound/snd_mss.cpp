@@ -208,7 +208,7 @@ bool __cdecl MSS_Startup()
 void MSS_ShutdownCleanup()
 {
   //Com_ClearMemTrack();
-  memset((unsigned __int8 *)&milesGlob, 0, sizeof(milesGlob));
+  memset((uint8_t *)&milesGlob, 0, sizeof(milesGlob));
 }
 
 double __cdecl MSS_GetWetLevel(const snd_alias_t *pAlias)
@@ -309,15 +309,15 @@ int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels)
   return digitalFormat;
 }
 
-unsigned __int8 *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate)
+uint8_t *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate)
 {
   if ( IsFastFileLoad() )
-    return (unsigned __int8 *)((int (__cdecl *)(unsigned int, unsigned int))MSS_Alloc_FastFile)(bytes, rate);
+    return (uint8_t *)((int (__cdecl *)(unsigned int, unsigned int))MSS_Alloc_FastFile)(bytes, rate);
   else
     return MSS_Alloc_LoadObj(bytes, rate);
 }
 
-unsigned __int8 *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate)
+uint8_t *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate)
 {
   int min_Spec_bytes; // [esp+0h] [ebp-4h]
 

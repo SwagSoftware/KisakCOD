@@ -59,7 +59,7 @@ unsigned int __cdecl SL_GetCanonicalString(const char* str)
 
 void SL_BeginLoadScripts()
 {
-    memset((unsigned __int8*)scrCompilePub.canonicalStrings, 0, sizeof(scrCompilePub.canonicalStrings));
+    memset((uint8_t*)scrCompilePub.canonicalStrings, 0, sizeof(scrCompilePub.canonicalStrings));
     scrVarPub.canonicalStrCount = 0;
 }
 
@@ -323,7 +323,7 @@ void __cdecl Scr_EndLoadAnimTrees()
     scrVarPub.varUsagePos = 0;
 }
 
-void __cdecl Scr_FreeScripts(unsigned __int8 sys)
+void __cdecl Scr_FreeScripts(uint8_t sys)
 {
     if (sys != 1)
         MyAssertHandler(".\\script\\scr_main.cpp", 498, 0, "%s", "sys == SCR_SYS_GAME");

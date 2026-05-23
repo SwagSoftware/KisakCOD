@@ -647,9 +647,9 @@ void __cdecl RB_DrawSunFlareCore(float alpha, float sizeIn640x480)
     RB_TessSunBillboard(
         widthInClipSpace,
         heightInClipSpace,
-        (GfxColor)((unsigned __int8)SnapFloatToInt(alpha * 255.0f)
-            | ((unsigned __int8)SnapFloatToInt(alpha * 255.0f) << 8)
-            | ((unsigned __int8)SnapFloatToInt(alpha * 255.0f) << 16)
+        (GfxColor)((uint8_t)SnapFloatToInt(alpha * 255.0f)
+            | ((uint8_t)SnapFloatToInt(alpha * 255.0f) << 8)
+            | ((uint8_t)SnapFloatToInt(alpha * 255.0f) << 16)
             | 0xFF000000));
 }
 

@@ -47,7 +47,7 @@ void __cdecl StatMon_GetStatsArray(const statmonitor_s **array, int *count)
 
 void __cdecl StatMon_Reset()
 {
-    memset((unsigned __int8 *)stats, 0, sizeof(stats));
+    memset((uint8_t *)stats, 0, sizeof(stats));
     statCount = 0;
 }
 

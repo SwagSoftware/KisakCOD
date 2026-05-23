@@ -11,8 +11,8 @@ enum GfxModelLightExtrapolation : __int32
 
 struct GfxLightingInfo // sizeof=0x2
 {                                       // ...
-    unsigned __int8 primaryLightIndex;  // ...
-    unsigned __int8 reflectionProbeIndex; // ...
+    uint8_t primaryLightIndex;  // ...
+    uint8_t reflectionProbeIndex; // ...
 };
 
 
@@ -57,7 +57,7 @@ unsigned int __cdecl R_CalcModelLighting(
 void __cdecl R_BeginAllStaticModelLighting();
 void __cdecl R_SetAllStaticModelLighting();
 void __cdecl R_SetStaticModelLighting(unsigned int smodelIndex);
-void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const unsigned __int8 *groundLighting);
+void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const uint8_t *groundLighting);
 void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source);
 void __cdecl R_SetStaticModelLightingCoordsForSource(unsigned int smodelIndex, GfxCmdBufSourceState *source);
 unsigned int R_SetModelLightingSampleDeltas();

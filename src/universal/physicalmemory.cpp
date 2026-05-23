@@ -12,9 +12,9 @@ int g_overAllocatedSize;
 
 void __cdecl PMem_Init()
 {
-    unsigned __int8 *memory; // [esp+0h] [ebp-4h]
+    uint8_t *memory; // [esp+0h] [ebp-4h]
 
-    memory = (unsigned __int8 *)VirtualAlloc(0, 0x8000000u, 0x1000u, 4u);
+    memory = (uint8_t *)VirtualAlloc(0, 0x8000000u, 0x1000u, 4u);
     PMem_InitPhysicalMemory(&g_mem, memory, 0x8000000u);
 }
 
@@ -51,13 +51,13 @@ void __cdecl PMem_DumpMemStats()
     Com_Printf(16, "------------------------\n");
 }
 
-void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, unsigned __int8 *memory, unsigned int memorySize)
+void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, uint8_t *memory, unsigned int memorySize)
 {
     if (!pmem)
         MyAssertHandler(".\\universal\\physicalmemory.cpp", 277, 0, "%s", "pmem");
     if (!memory)
         MyAssertHandler(".\\universal\\physicalmemory.cpp", 278, 0, "%s", "memory");
-    memset((unsigned __int8 *)pmem, 0, sizeof(PhysicalMemory));
+    memset((uint8_t *)pmem, 0, sizeof(PhysicalMemory));
     pmem->buf = memory;
     pmem->prim[1].pos = memorySize;
 }
@@ -190,7 +190,7 @@ int __cdecl PMem_GetOverAllocatedSize()
     return g_overAllocatedSize;
 }
 
-unsigned __int8 *__cdecl PMem_Alloc(
+uint8_t *__cdecl PMem_Alloc(
     unsigned int size,
     unsigned int alignment,
     unsigned int type,

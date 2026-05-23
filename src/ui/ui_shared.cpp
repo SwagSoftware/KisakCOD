@@ -92,7 +92,7 @@ void Script_SaveGameHide(UiContext *dc, itemDef_s *item, const char **args)
     //v6 = args;
     //v8 = (v7 >> 5)  1;
     //if (String_Parse(v6, v9, 1024))
-    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v9, (unsigned __int8)v8);
+    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v9, (uint8_t)v8);
 
     char parsedName[1024];
     int saveExists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
@@ -128,7 +128,7 @@ void Script_ProfileHide(UiContext *dc, itemDef_s *item, const char **args)
     //v7 = args;
     //v9 = (v8 >> 5) & 1;
     //if (String_Parse(v7, v10, 1024))
-    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v10, (unsigned __int8)v9);
+    //    Menu_ShowItemByName(dc->localClientNum, item->parent, v10, (uint8_t)v9);
 }
 void Script_ProfileShow(UiContext *dc, itemDef_s *item, const char **args)
 {
@@ -2016,7 +2016,7 @@ void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const cha
 void __cdecl Item_RunScript(UiContext *dc, itemDef_s *item, char *s)
 {
     int v3; // [esp+0h] [ebp-1814h]
-    unsigned __int8 dst[5120]; // [esp+4h] [ebp-1810h] BYREF
+    uint8_t dst[5120]; // [esp+4h] [ebp-1810h] BYREF
     char out[1028]; // [esp+1404h] [ebp-410h] BYREF
     unsigned int i; // [esp+180Ch] [ebp-8h]
     const char *p; // [esp+1810h] [ebp-4h] BYREF
@@ -2758,7 +2758,7 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
         return 0;
     if (!item->dvar)
         return 0;
-    memset((unsigned __int8 *)buff, 0, sizeof(buff));
+    memset((uint8_t *)buff, 0, sizeof(buff));
     VariantString = (char *)Dvar_GetVariantString(item->dvar);
     I_strncpyz(buff, VariantString, 1024);
     len = &buff[strlen(buff) + 1] - &buff[1];
@@ -2789,7 +2789,7 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                         "%s\n\t(memMoveCount) = %i",
                         "(memMoveCount > 0 && memMoveCount <= len)",
                         memMoveCount);
-                memmove((unsigned __int8 *)&buff[cursorPos - 1], (unsigned __int8 *)&buff[cursorPos], memMoveCount);
+                memmove((uint8_t *)&buff[cursorPos - 1], (uint8_t *)&buff[cursorPos], memMoveCount);
             }
             Dvar_SetFromStringByName(item->dvar, buff);
             v5 = (char *)Dvar_GetVariantString(item->dvar);
@@ -2831,7 +2831,7 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                     "%s\n\t(memMoveCount) = %i",
                     "(memMoveCount > 0 && memMoveCount <= (len + 1))",
                     memMoveCount);
-            memmove((unsigned __int8 *)&buff[cursorPosa + 1], (unsigned __int8 *)&buff[cursorPosa], memMoveCount);
+            memmove((uint8_t *)&buff[cursorPosa + 1], (uint8_t *)&buff[cursorPosa], memMoveCount);
             goto LABEL_54;
         }
         if (!editPtr->maxChars || item->cursorPos[dc->localClientNum] < editPtr->maxChars)
@@ -2940,7 +2940,7 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                     "%s\n\t(memMoveCount) = %i",
                     "(memMoveCount > 0 && memMoveCount <= len)",
                     memMoveCount);
-            memmove((unsigned __int8 *)&buff[cursorPosb], (unsigned __int8 *)&buff[cursorPosb + 1], memMoveCount);
+            memmove((uint8_t *)&buff[cursorPosb], (uint8_t *)&buff[cursorPosb + 1], memMoveCount);
             Dvar_SetFromStringByName(item->dvar, buff);
         }
         return 1;
@@ -4302,7 +4302,7 @@ void __cdecl DrawWrappedText(
     {
         wrapPosition = R_TextLineWrapPosition(p, 1024, targetLineWidth, font, normalizedScale);
         len = wrapPosition - p;
-        memcpy((unsigned __int8 *)buff, (unsigned __int8 *)p, wrapPosition - p);
+        memcpy((uint8_t *)buff, (uint8_t *)p, wrapPosition - p);
         buff[len] = 0;
         lineWidth = (float)UI_TextWidth(buff, 0, font, scale);
         if (xAlignMode == 1)

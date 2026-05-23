@@ -595,7 +595,7 @@ void Profile_ResetScriptCounters()
             * *((float *)Sys_GetValue(0) + 20782)
                 + (float)profileScript.cumulative[profileIndex];
     }
-    memset((unsigned __int8 *)&profileScript, 0, 0x1E0u);
+    memset((uint8_t *)&profileScript, 0, 0x1E0u);
 #endif
 }
 

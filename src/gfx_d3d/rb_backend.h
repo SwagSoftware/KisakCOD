@@ -73,8 +73,8 @@ struct GfxCmdDrawLines // sizeof=0x28
 {
     GfxCmdHeader header;
     __int16 lineCount;
-    unsigned __int8 width;
-    unsigned __int8 dimensions;
+    uint8_t width;
+    uint8_t dimensions;
     GfxPointVertex verts[2];
 };
 
@@ -178,7 +178,7 @@ struct GfxCmdStretchRaw // sizeof=0x28
     int h;
     int cols;
     int rows;
-    const unsigned __int8 *data;
+    const uint8_t *data;
     int client;
     int dirty;
 };
@@ -236,7 +236,7 @@ struct GfxCmdBufPrimState // sizeof=0x28
 };
 struct GfxCmdBufState // sizeof=0xA10
 {                                       // ...
-    unsigned __int8 refSamplerState[16];
+    uint8_t refSamplerState[16];
     unsigned int samplerState[16];
     const GfxTexture *samplerTexture[16];
     GfxCmdBufPrimState prim;            // ...
@@ -250,7 +250,7 @@ struct GfxCmdBufState // sizeof=0xA10
     float depthRangeFar;
     unsigned __int64 vertexShaderConstState[32]; // ...
     unsigned __int64 pixelShaderConstState[256]; // ...
-    unsigned __int8 alphaRef;           // ...
+    uint8_t alphaRef;           // ...
     // padding byte
     // padding byte
     // padding byte
@@ -279,8 +279,8 @@ struct GfxCmdDrawPoints // sizeof=0x18
 {
     GfxCmdHeader header;
     __int16 pointCount;
-    unsigned __int8 size;
-    unsigned __int8 dimensions;
+    uint8_t size;
+    uint8_t dimensions;
     GfxPointVertex verts[1];
 };
 
@@ -384,7 +384,7 @@ void __cdecl R_SetVertex4dWithNormal(
     float nz,
     float s,
     float t,
-    const unsigned __int8 *color);
+    const uint8_t *color);
 void __cdecl RB_DrawStretchPic(
     const Material *material,
     float x,
@@ -429,7 +429,7 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawQuadPicCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawFullScreenColoredQuadCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_StretchRawCmd(GfxRenderCommandExecState *execState);
-void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const unsigned __int8 *data);
+void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const uint8_t *data);
 void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState, const GfxDrawSurfListInfo *info);
 unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext);
 void __cdecl R_TessEnd(GfxCmdBufContext context, GfxCmdBufContext prepassContext);
@@ -451,10 +451,10 @@ void __cdecl R_SetVertex4d(
     float w,
     float s,
     float t,
-    const unsigned __int8 *color);
+    const uint8_t *color);
 void __cdecl RB_DrawPoints3D(const GfxCmdDrawPoints *cmd);
 void __cdecl RB_DrawLines2D(int count, int width, const GfxPointVertex *verts);
-void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, float t, const unsigned __int8 *color);
+void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, float t, const uint8_t *color);
 void __cdecl RB_DrawLines3D(int count, int width, const GfxPointVertex *verts, bool depthTest);
 void __cdecl RB_DrawLinesCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawTrianglesCmd(GfxRenderCommandExecState *execState);
@@ -471,7 +471,7 @@ void __cdecl RB_DrawTriangles_Internal(
 void __cdecl RB_DrawProfileCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState);
-void __cdecl RB_LookupColor(unsigned __int8 c, GfxColor *color);
+void __cdecl RB_LookupColor(uint8_t c, GfxColor *color);
 void __cdecl RB_DrawText(const char *text, Font_s *font, float x, float y, GfxColor color);
 void __cdecl DrawText2D(
     const char *text,
@@ -521,7 +521,7 @@ double __cdecl RB_DrawHudIcon(
     unsigned int color);
 void __cdecl RB_DrawCursor(
     const Material *material,
-    unsigned __int8 cursor,
+    uint8_t cursor,
     float x,
     float y,
     float sinAngle,
@@ -561,9 +561,9 @@ void __cdecl GetDecayingLetterInfo(
     int decayTimeElapsed,
     int fxBirthTime,
     int fxDecayDuration,
-    unsigned __int8 alpha,
+    uint8_t alpha,
     bool *resultSkipDrawing,
-    unsigned __int8 *resultAlpha,
+    uint8_t *resultAlpha,
     unsigned int *resultLetter,
     bool *resultDrawExtraFxChar);
 void __cdecl DrawTextFxExtraCharacter(
@@ -576,7 +576,7 @@ void __cdecl DrawTextFxExtraCharacter(
     float sinAngle,
     float cosAngle,
     unsigned int color);
-unsigned __int8 __cdecl ModulateByteColors(unsigned __int8 colorA, unsigned __int8 colorB);
+uint8_t __cdecl ModulateByteColors(uint8_t colorA, uint8_t colorB);
 void __cdecl RB_DrawTextInSpace(
     const char *text,
     Font_s *font,

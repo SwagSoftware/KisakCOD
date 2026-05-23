@@ -17,7 +17,7 @@ int svsHeaderValid;
 //struct serverStaticHeader_t svsHeader 85012680     sv_snapshot_mp.obj
 
 msg_t g_archiveMsg;
-unsigned __int8 tempServerMsgBuf[131072];
+uint8_t tempServerMsgBuf[131072];
 
 void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
 {
@@ -41,7 +41,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
     if (!svsHeaderValid)
         MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 499, 0, "%s", "svsHeaderValid");
     memset(
-        (unsigned __int8 *)currentSnapshotNetworkEntityFieldsChanged,
+        (uint8_t *)currentSnapshotNetworkEntityFieldsChanged,
         0,
         sizeof(currentSnapshotNetworkEntityFieldsChanged));
     if (!client)
@@ -198,7 +198,7 @@ void __cdecl SV_EmitPacketEntities(
     PROF_SCOPED("SV_EmitPacketEntities");
 
     MSG_ClearLastReferencedEntity(msg);
-    memset((unsigned __int8 *)entityFound, 0, sizeof(entityFound));
+    memset((uint8_t *)entityFound, 0, sizeof(entityFound));
     newent = 0;
     newindex = 0;
     oldindex = 0;
@@ -642,7 +642,7 @@ int __cdecl SV_GetArchivedClientInfo(int clientNum, int *pArchiveTime, playerSta
         }
         if (!cachedClient)
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1618, 0, "%s", "cachedClient");
-        memcpy((unsigned __int8 *)ps, (unsigned __int8 *)&cachedClient->ps, sizeof(playerState_s));
+        memcpy((uint8_t *)ps, (uint8_t *)&cachedClient->ps, sizeof(playerState_s));
         memcpy(cs, &cachedClient->cs, sizeof(clientState_s));
         if (ps->commandTime)
             ps->commandTime += deltaTime;
@@ -988,7 +988,7 @@ int __cdecl SV_GetCurrentClientInfo(int clientNum, playerState_s *ps, clientStat
 
 void __cdecl SV_BuildClientSnapshot(client_t *client)
 {
-    unsigned __int8 *v1; // eax
+    uint8_t *v1; // eax
     clientState_s *ClientState; // eax
     int v3; // [esp+18h] [ebp-1154h]
     entityState_s *v4; // [esp+20h] [ebp-114Ch]
@@ -1004,7 +1004,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
     gentity_s *v15; // [esp+1154h] [ebp-18h]
     int i; // [esp+1158h] [ebp-14h]
     int clientNum; // [esp+115Ch] [ebp-10h]
-    unsigned __int8 *dst; // [esp+1160h] [ebp-Ch]
+    uint8_t *dst; // [esp+1160h] [ebp-Ch]
     int v19; // [esp+1164h] [ebp-8h]
     cachedClient_s *v20; // [esp+1168h] [ebp-4h]
     client_t *clients; // [esp+1174h] [ebp+8h]
@@ -1030,8 +1030,8 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                 else
                     v3 = 0;
                 v19 = v3;
-                dst = (unsigned __int8 *)v5;
-                v1 = (unsigned __int8 *)SV_GameClientNum(clientNum);
+                dst = (uint8_t *)v5;
+                v1 = (uint8_t *)SV_GameClientNum(clientNum);
                 memcpy(dst, v1, 0x2F64u);
                 clientNum = *((unsigned int *)dst + 55);
                 if ((unsigned int)clientNum >= 0x400)
@@ -1041,7 +1041,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                 position[2] = *((float *)dst + 9);
                 position[2] = position[2] + *((float *)dst + 70);
                 AddLeanToPosition(position, *((float *)dst + 67), *((float *)dst + 23), 16.0, 20.0);
-                memset((unsigned __int8 *)v12, 0, 0x100u);
+                memset((uint8_t *)v12, 0, 0x100u);
                 if (CachedSnapshot)
                 {
                     SV_AddCachedEntitiesVisibleFromPoint(
@@ -1165,7 +1165,7 @@ void __cdecl SV_AddEntitiesVisibleFromPoint(float *org, int clientNum, snapshotE
     unsigned int leafnum; // [esp+2Ch] [ebp-14h]
     gentity_s *ent; // [esp+30h] [ebp-10h]
     int i; // [esp+34h] [ebp-Ch]
-    unsigned __int8 *clientpvs; // [esp+3Ch] [ebp-4h]
+    uint8_t *clientpvs; // [esp+3Ch] [ebp-4h]
 
     if (!SV_Loaded())
         MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 907, 0, "%s", "SV_Loaded()");
@@ -1261,7 +1261,7 @@ void __cdecl SV_AddCachedEntitiesVisibleFromPoint(
     archivedEntity_s *v13; // [esp+1124h] [ebp-10h]
     int v14; // [esp+1128h] [ebp-Ch]
     int i; // [esp+112Ch] [ebp-8h]
-    unsigned __int8 *v16; // [esp+1130h] [ebp-4h]
+    uint8_t *v16; // [esp+1130h] [ebp-4h]
 
     if (!SV_Loaded())
         MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1027, 0, "%s", "SV_Loaded()");
@@ -1273,7 +1273,7 @@ void __cdecl SV_AddCachedEntitiesVisibleFromPoint(
         fogOpaqueDistSqrd = G_GetFogOpaqueDistSqrd();
         if (fogOpaqueDistSqrd == FLT_MAX)
             fogOpaqueDistSqrd = 0.0;
-        memset((unsigned __int8 *)dst, 0, 0x1000u);
+        memset((uint8_t *)dst, 0, 0x1000u);
         for (e = 0; e < from_num_entities; ++e)
         {
             v13 = &svs.cachedSnapshotEntities[(e + from_first_entity) % 0x4000];
@@ -1311,7 +1311,7 @@ void __cdecl SV_AddArchivedEntToSnapshot(int e, snapshotEntityNumbers_t *eNums)
         eNums->snapshotEntities[eNums->numSnapshotEntities++] = e;
 }
 
-unsigned __int8 svCompressedBuf[131072];
+uint8_t svCompressedBuf[131072];
 void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
 {
     int v2; // [esp+Ch] [ebp-30h]
@@ -1325,7 +1325,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
     *(unsigned int *)svCompressedBuf = *(unsigned int *)msg->data;
     compressedSize = MSG_WriteBitsCompress(
         client->header.state == 4,
-        (const unsigned __int8 *)msg->data + 4,
+        (const uint8_t *)msg->data + 4,
         svCompressedBuf + 4,
         msg->cursize - 4)
         + 4;
@@ -1410,7 +1410,7 @@ int __cdecl SV_RateMsec(client_t *client, int messageSize)
     return 1000 * (messageSize + 48) / rate;
 }
 
-unsigned __int8 tempSnapshotMsgBuf[131072];
+uint8_t tempSnapshotMsgBuf[131072];
 void __cdecl SV_BeginClientSnapshot(client_t *client, msg_t *msg)
 {
     unsigned int clientNum; // [esp+0h] [ebp-4h]
@@ -1851,7 +1851,7 @@ void __cdecl SV_WriteVoiceDataToClient(client_t *client, msg_t *msg)
 
 void __cdecl SV_SendClientVoiceData(client_t *client)
 {
-    unsigned __int8 *msg_buf; // [esp+0h] [ebp-34h]
+    uint8_t *msg_buf; // [esp+0h] [ebp-34h]
     msg_t msg; // [esp+Ch] [ebp-28h] BYREF
 
     LargeLocal msg_buf_large_local(0x20000);
@@ -1907,7 +1907,7 @@ void __cdecl SV_SendClientMessages()
     numclients = 0;
     sv.bpsTotalBytes = 0;
     sv.ubpsTotalBytes = 0;
-    memset((unsigned __int8 *)valid, 0, sizeof(valid));
+    memset((uint8_t *)valid, 0, sizeof(valid));
     maxclients = sv_maxclients->current.integer;
     i = 0;
     c = svs.clients;

@@ -164,12 +164,12 @@ XModel *__cdecl SV_XModelGet(char *name)
         (void *(__cdecl *)(int))SV_AllocXModelPrecacheColl);
 }
 
-unsigned __int8 *__cdecl SV_AllocXModelPrecache(unsigned int size)
+uint8_t *__cdecl SV_AllocXModelPrecache(unsigned int size)
 {
     return Hunk_Alloc(size, "SV_AllocXModelPrecache", 21);
 }
 
-unsigned __int8 *__cdecl SV_AllocXModelPrecacheColl(unsigned int size)
+uint8_t *__cdecl SV_AllocXModelPrecacheColl(unsigned int size)
 {
     return Hunk_Alloc(size, "SV_AllocXModelPrecacheColl", 27);
 }
@@ -274,7 +274,7 @@ void __cdecl SV_DObjInitServerTime(gentity_s *ent, float dtime)
 int __cdecl SV_DObjGetBoneIndex(const gentity_s *ent, unsigned int boneName)
 {
     const DObj_s *obj; // [esp+0h] [ebp-8h]
-    unsigned __int8 index; // [esp+7h] [ebp-1h] BYREF
+    uint8_t index; // [esp+7h] [ebp-1h] BYREF
 
     obj = Com_GetServerDObj(ent->s.number);
     if (!obj)
@@ -703,7 +703,7 @@ bool __cdecl SV_inSnapshot(const float *origin, int iEntityNum)
     unsigned int leafnum; // [esp+14h] [ebp-14h]
     gentity_s *ent; // [esp+18h] [ebp-10h]
     int i; // [esp+1Ch] [ebp-Ch]
-    unsigned __int8 *bitvector; // [esp+20h] [ebp-8h]
+    uint8_t *bitvector; // [esp+20h] [ebp-8h]
 
     ent = SV_GentityNum(iEntityNum);
     if (!ent->r.linked)

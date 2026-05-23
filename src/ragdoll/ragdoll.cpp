@@ -212,7 +212,7 @@ int __cdecl Ragdoll_GetUnusedBody()
 void __cdecl Ragdoll_InitBody(RagdollBody *body)
 {
     iassert( body );
-    memset((unsigned __int8 *)body, 0, sizeof(RagdollBody));
+    memset((uint8_t *)body, 0, sizeof(RagdollBody));
 }
 
 int __cdecl Ragdoll_ReferenceDObjBody(int dobj)
@@ -583,7 +583,7 @@ void __cdecl Ragdoll_Clear_f()
         ragdoll = atoi(v0);
         if (ragdoll < 2)
         {
-            memset((unsigned __int8 *)&ragdollDefs[ragdoll], 0, sizeof(RagdollDef));
+            memset((uint8_t *)&ragdollDefs[ragdoll], 0, sizeof(RagdollDef));
             Ragdoll_ResetBodiesUsingDef();
         }
     }
@@ -997,7 +997,7 @@ void __cdecl Ragdoll_Init()
     {
         if (ragdoll_enable->current.enabled && ragdoll_max_simulating->current.integer < 8)
             Dvar_SetInt((dvar_s *)ragdoll_max_simulating, 8);
-        memset((unsigned __int8 *)ragdollBodies, 0, 0x13A80u);
+        memset((uint8_t *)ragdollBodies, 0, 0x13A80u);
         for (i = 0; i < 2; ++i)
         {
             ragdollDefs[i].bound = 0;

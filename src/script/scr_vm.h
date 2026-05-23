@@ -330,7 +330,7 @@ void __cdecl Scr_AddExecThread(int handle, unsigned int paramcount);
 void __cdecl Scr_FreeThread(unsigned __int16 handle);
 void __cdecl Scr_ExecCode(const char* pos, unsigned int localId);
 void __cdecl Scr_InitSystem(int sys);
-void __cdecl Scr_ShutdownSystem(unsigned __int8 sys, int bComplete);
+void __cdecl Scr_ShutdownSystem(uint8_t sys, int bComplete);
 void __cdecl VM_TerminateTime(unsigned int timeId);
 BOOL __cdecl Scr_IsSystemActive(); // LWSS: Note this has a "system" argument, however it's not used and optimized out in some builds
 int __cdecl Scr_GetInt(unsigned int index);

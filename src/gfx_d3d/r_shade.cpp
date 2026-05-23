@@ -35,13 +35,13 @@ int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
     return gfxBuf.dynamicIndexBuffer->used;
 }
 
-int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount)
+int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, uint8_t *indices, int triCount)
 {
     int baseIndex; // [esp+60h] [ebp-18h]
     int indexDataSize; // [esp+64h] [ebp-14h]
     unsigned int lockFlags; // [esp+68h] [ebp-10h]
     IDirect3DIndexBuffer9 *ib; // [esp+70h] [ebp-8h]
-    unsigned __int8 *bufferData; // [esp+74h] [ebp-4h]
+    uint8_t *bufferData; // [esp+74h] [ebp-4h]
 
     PROF_SCOPED("RB_SetIndexData");
 
@@ -54,13 +54,13 @@ int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, 
     {
         PROF_SCOPED("LockIndexBufferNoOverwrite");
         lockFlags = D3DLOCK_NOOVERWRITE;
-        bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
+        bufferData = (uint8_t *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
     else
     {
         PROF_SCOPED("LockIndexBufferDiscard");
         lockFlags = D3DLOCK_DISCARD;
-        bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
+        bufferData = (uint8_t *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
 
     memcpy(bufferData, indices, indexDataSize);
@@ -552,7 +552,7 @@ void __cdecl R_SetPassShaderObjectArguments(
     const MaterialShaderArgument *arg)
 {
     const GfxImage *image; // [esp+Ch] [ebp-8h]
-    unsigned __int8 samplerState; // [esp+13h] [ebp-1h] BYREF
+    uint8_t samplerState; // [esp+13h] [ebp-1h] BYREF
 
     while (arg->type == MTL_ARG_CODE_VERTEX_CONST)
     {
@@ -662,7 +662,7 @@ void __cdecl R_SetPassShaderStableArguments(
     const GfxImage *image; // [esp+14h] [ebp-14h]
     const Material *material; // [esp+18h] [ebp-10h]
     const MaterialTextureDef *texDef; // [esp+1Ch] [ebp-Ch]
-    unsigned __int8 samplerState; // [esp+23h] [ebp-5h] BYREF
+    uint8_t samplerState; // [esp+23h] [ebp-5h] BYREF
     const MaterialConstantDef *constDef; // [esp+24h] [ebp-4h]
 
     material = context.state->material;

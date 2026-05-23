@@ -33,7 +33,7 @@ struct PhysPresetLite // LWSS add custom struct to adhere to the above field off
     bool tempDefaultToCylinder; // 36
 };
 
-void __cdecl PhysPreset_Strcpy(unsigned __int8 *member, const char *keyValue)
+void __cdecl PhysPreset_Strcpy(uint8_t *member, const char *keyValue)
 {
     char v2; // [esp+3h] [ebp-25h]
     char *v3; // [esp+8h] [ebp-20h]
@@ -78,13 +78,13 @@ PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(
         filelen = FS_FOpenFileByMode(dest, &f, FS_READ);
         if (filelen >= 0)
         {
-            FS_Read((unsigned __int8 *)buffer, len, f);
+            FS_Read((uint8_t *)buffer, len, f);
             buffer[len] = 0;
             if (!strncmp(buffer, last, len))
             {
                 if (filelen - len < 0x2000)
                 {
-                    FS_Read((unsigned __int8 *)buffer, filelen - len, f);
+                    FS_Read((uint8_t *)buffer, filelen - len, f);
                     buffer[filelen - len] = 0;
                     FS_FCloseFile(f);
                     if (Info_Validate(buffer))

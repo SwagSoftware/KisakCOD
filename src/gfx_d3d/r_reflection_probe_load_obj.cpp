@@ -14,7 +14,7 @@ void R_CreateDefaultProbes()
 void R_CreateDefaultProbe()
 {
     DiskGfxReflectionProbe probeRawData; // [esp+4h] [ebp-20058h] BYREF
-    unsigned __int8 *pixels; // [esp+20054h] [ebp-8h]
+    uint8_t *pixels; // [esp+20054h] [ebp-8h]
     int v2; // [esp+20058h] [ebp-4h]
 
     probeRawData.origin[0] = 0.0;

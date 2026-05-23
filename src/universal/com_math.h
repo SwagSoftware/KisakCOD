@@ -17,9 +17,9 @@ struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...
     float dist;
-    unsigned __int8 type;
-    unsigned __int8 signbits;
-    unsigned __int8 pad[2];
+    uint8_t type;
+    uint8_t signbits;
+    uint8_t pad[2];
 };
 
 union PackedUnitVec // sizeof=0x4
@@ -33,7 +33,7 @@ union PackedUnitVec // sizeof=0x4
         return packed;
     }
     unsigned int packed;
-    unsigned __int8 array[4];
+    uint8_t array[4];
 };
 
 using vec2 = float[2];
@@ -211,7 +211,7 @@ float __cdecl ColorNormalize(const float *in, float *out);
 float __cdecl PitchForYawOnNormal(float fYaw, const float* normal);
 
 // == PACKING ==
-unsigned __int8 __cdecl DirToByte(const float *dir);
+uint8_t __cdecl DirToByte(const float *dir);
 void __cdecl ByteToDir(unsigned int b, float *dir);
 
 // == ARCs ==

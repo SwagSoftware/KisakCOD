@@ -891,7 +891,7 @@ void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCu
     char isFieldSet[32]; // [esp+5FCh] [ebp-28h] BYREF
     int iColCount; // [esp+620h] [ebp-4h]
 
-    memset((unsigned __int8 *)&alias, 0, sizeof(alias));
+    memset((uint8_t *)&alias, 0, sizeof(alias));
     Com_sprintf(filename, 0x40u, "soundaliases/%s", sourceFile);
     if (FS_ReadFile(filename, (void **)&file) >= 0)
     {
@@ -1626,7 +1626,7 @@ void __cdecl Com_MakeSoundAliasesPermanent(snd_alias_list_t *aliasInfo, SoundFil
 
 int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo)
 {
-    unsigned __int8 v1; // al
+    uint8_t v1; // al
     char filepath[256]; // [esp+0h] [ebp-110h] BYREF
     int numMissing; // [esp+104h] [ebp-Ch]
     int soundIndex; // [esp+108h] [ebp-8h]

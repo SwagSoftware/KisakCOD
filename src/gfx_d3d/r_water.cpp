@@ -234,7 +234,7 @@ void __cdecl WaterPixelsFromAmplitudes(GfxColor *pixels, complex_s *H, const wat
     }
 }
 
-void __cdecl GenerateMipMaps(_D3DFORMAT format, unsigned __int8 *pixels, water_t *water)
+void __cdecl GenerateMipMaps(_D3DFORMAT format, uint8_t *pixels, water_t *water)
 {
     int srcWidth;
     unsigned int mipIndex;

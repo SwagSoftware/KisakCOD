@@ -1190,7 +1190,7 @@ void __cdecl R_Cinematic_BeginLostDevice()
     Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
 }
 
-void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int height, unsigned __int8 clearValue)
+void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int height, uint8_t clearValue)
 {
     const char *v4; // eax
     HRESULT hr; // [esp+0h] [ebp-Ch]
@@ -1200,7 +1200,7 @@ void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int
     if (hr >= 0)
     {
         iassert( lockedRect.Pitch >= width );
-        memset((unsigned __int8 *)lockedRect.pBits, clearValue, lockedRect.Pitch * height);
+        memset((uint8_t *)lockedRect.pBits, clearValue, lockedRect.Pitch * height);
         texture->UnlockRect(0);
     }
     else

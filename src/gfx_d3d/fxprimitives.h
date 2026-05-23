@@ -35,10 +35,10 @@ struct orientation_t // sizeof=0x30
 
 struct GfxMarkContext // sizeof=0x6
 {                                       // ...
-    unsigned __int8 lmapIndex;          // ...
-    unsigned __int8 primaryLightIndex;  // ...
-    unsigned __int8 reflectionProbeIndex; // ...
-    unsigned __int8 modelTypeAndSurf;   // ...
+    uint8_t lmapIndex;          // ...
+    uint8_t primaryLightIndex;  // ...
+    uint8_t reflectionProbeIndex; // ...
+    uint8_t modelTypeAndSurf;   // ...
     unsigned __int16 modelIndex;        // ...
 };
 
@@ -126,10 +126,10 @@ union FxElem_u // sizeof=0x4
 };
 struct FxElem // sizeof=0x28
 {                                       // ...
-    unsigned __int8 defIndex;
-    unsigned __int8 sequence;
-    unsigned __int8 atRestFraction;
-    unsigned __int8 emitResidual;
+    uint8_t defIndex;
+    uint8_t sequence;
+    uint8_t atRestFraction;
+    uint8_t emitResidual;
     unsigned __int16 nextElemHandleInEffect;
     unsigned __int16 prevElemHandleInEffect;
     int msecBegin;
@@ -163,8 +163,8 @@ struct FxTrailElem // sizeof=0x20
     unsigned __int16 nextTrailElemHandle;
     __int16 baseVelZ;
     char basis[2][3];
-    unsigned __int8 sequence;
-    unsigned __int8 unused;
+    uint8_t sequence;
+    uint8_t unused;
 
     static constexpr size_t HANDLE_SCALE = 4;
 };
@@ -219,7 +219,7 @@ struct FxSystem // sizeof=0xA60
     bool isInitialized;
     bool needsGarbageCollection;
     bool isArchiving;
-    unsigned __int8 localClientNum;
+    uint8_t localClientNum;
     unsigned int restartList[32];
 };
 struct FxMarkPoint // sizeof=0x20
@@ -243,8 +243,8 @@ struct FxTriGroup // sizeof=0x18
 {                                       // ...
     unsigned __int16 indices[2][3];
     GfxMarkContext context;
-    unsigned __int8 triCount;
-    unsigned __int8 unused[1];
+    uint8_t triCount;
+    uint8_t unused[1];
     int next;
 };
 
@@ -263,10 +263,10 @@ struct FxMark // sizeof=0x44
     float origin[3];
     float radius;
     float texCoordAxis[3];
-    unsigned __int8 nativeColor[4];
+    uint8_t nativeColor[4];
     Material *material;
     GfxMarkContext context;
-    unsigned __int8 triCount;
+    uint8_t triCount;
     // padding byte
     unsigned __int16 pointCount;
     // padding byte
@@ -348,12 +348,12 @@ union FxSpawnDef // sizeof=0x8
 };
 struct FxElemAtlas // sizeof=0x8
 {                                       // ...
-    unsigned __int8 behavior;
-    unsigned __int8 index;
-    unsigned __int8 fps;
-    unsigned __int8 loopCount;
-    unsigned __int8 colIndexBits;
-    unsigned __int8 rowIndexBits;
+    uint8_t behavior;
+    uint8_t index;
+    uint8_t fps;
+    uint8_t loopCount;
+    uint8_t colIndexBits;
+    uint8_t rowIndexBits;
     __int16 entryCount;
 };
 struct FxElemVec3Range // sizeof=0x18
@@ -363,7 +363,7 @@ struct FxElemVec3Range // sizeof=0x18
 };
 struct FxElemVisualState // sizeof=0x18
 {                                       // ...
-    unsigned __int8 color[4];
+    uint8_t color[4];
     float rotationDelta;
     float rotationTotal;                // ...
     float size[2];                      // ...
@@ -456,10 +456,10 @@ const struct FxElemDef // sizeof=0xFC
     FxFloatRange gravity;
     FxFloatRange reflectionFactor;
     FxElemAtlas atlas;
-    unsigned __int8 elemType;
-    unsigned __int8 visualCount;
-    unsigned __int8 velIntervalCount;
-    unsigned __int8 visStateIntervalCount;
+    uint8_t elemType;
+    uint8_t visualCount;
+    uint8_t velIntervalCount;
+    uint8_t visStateIntervalCount;
     FxElemVelStateSample *velSamples;
     FxElemVisStateSample *visSamples;
     FxElemDefVisuals visuals;
@@ -471,10 +471,10 @@ const struct FxElemDef // sizeof=0xFC
     FxFloatRange emitDist;
     FxFloatRange emitDistVariance;
     FxTrailDef *trailDef;
-    unsigned __int8 sortOrder;
-    unsigned __int8 lightingFrac;
-    unsigned __int8 useItemClip;
-    unsigned __int8 unused[1];
+    uint8_t sortOrder;
+    uint8_t lightingFrac;
+    uint8_t useItemClip;
+    uint8_t unused[1];
 };
 
 struct FxImpactEntry // sizeof=0x84
@@ -498,7 +498,7 @@ struct FxSystemBuffers // sizeof=0x47480
     FxPool<FxTrailElem> trailElems[MAX_TRAIL_ELEMS];
     FxVisState visState[2];
     unsigned __int16 deferredElems[2048];
-    unsigned __int8 padBuffer[96];
+    uint8_t padBuffer[96];
 };
 
 template<typename ITEM_TYPE, size_t LIMIT>

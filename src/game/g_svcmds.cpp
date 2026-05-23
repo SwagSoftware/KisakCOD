@@ -59,10 +59,10 @@ void __cdecl AddIP(char *str)
 
 int __cdecl StringToFilter(char *s, ipFilter_s *f)
 {
-    unsigned __int8 v3; // al
+    uint8_t v3; // al
     int j; // [esp+0h] [ebp-94h]
-    unsigned __int8 m[4]; // [esp+4h] [ebp-90h]
-    unsigned __int8 b[4]; // [esp+8h] [ebp-8Ch]
+    uint8_t m[4]; // [esp+4h] [ebp-90h]
+    uint8_t b[4]; // [esp+8h] [ebp-8Ch]
     char num[128]; // [esp+Ch] [ebp-88h] BYREF
     int i; // [esp+90h] [ebp-4h]
 
@@ -112,7 +112,7 @@ void UpdateIPBans()
                 &iplist[&iplist[strlen(iplist) + 1] - &iplist[1]],
                 1024 - (&iplist[strlen(iplist) + 1] - &iplist[1]),
                 "%i.%i.%i.%i ",
-                (unsigned __int8)b,
+                (uint8_t)b,
                 BYTE1(b),
                 BYTE2(b),
                 HIBYTE(b));

@@ -69,7 +69,7 @@ void CM_ClearWorld()
     float size_4; // [esp+8h] [ebp-8h]
     unsigned int i; // [esp+Ch] [ebp-4h]
 
-    memset((unsigned __int8 *)&cm_world, 0, sizeof(cm_world));
+    memset((uint8_t *)&cm_world, 0, sizeof(cm_world));
     CM_ModelBounds(0, cm_world.mins, cm_world.maxs);
     cm_world.freeHead = 2;
     for (i = 2; i < 1023; ++i)
@@ -1208,9 +1208,9 @@ int __cdecl CM_PointSightTraceToEntities_r(
     return 0;
 }
 
-int CM_SaveWorld(unsigned __int8 *buf)
+int CM_SaveWorld(uint8_t *buf)
 {
-    unsigned __int8 *v1; // r30
+    uint8_t *v1; // r30
     worldTree_s *p_tree; // r31
 
     if (buf)
@@ -1237,9 +1237,9 @@ void CM_ValidateWorld()
     //DynEnt_ValidateCollWorld();
 }
 
-void CM_LoadWorld(unsigned __int8 *buf)
+void CM_LoadWorld(uint8_t *buf)
 {
-    unsigned __int8 *v2; // r29
+    uint8_t *v2; // r29
     worldTree_s *p_tree; // r31
     void *v4; // r3
 

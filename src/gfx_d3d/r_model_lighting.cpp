@@ -110,24 +110,24 @@ void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, Pack
             modelLightGlob.imageHeight,
             256);
     v3 = xPixel + 2;
-    if (xPixel + 2 != (unsigned __int8)(xPixel + 2))
+    if (xPixel + 2 != (uint8_t)(xPixel + 2))
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
             281,
             0,
             "i == static_cast< Type >( i )\n\t%i, %i",
             v3,
-            (unsigned __int8)v3);
+            (uint8_t)v3);
     packedCoords->array[0] = v3;
     v2 = ((entryIndex >> 4) & 0xFFFFFFFC) + 2 * (0x100 / modelLightGlob.imageHeight);
-    if (v2 != (unsigned __int8)v2)
+    if (v2 != (uint8_t)v2)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
             281,
             0,
             "i == static_cast< Type >( i )\n\t%i, %i",
             v2,
-            (unsigned __int8)v2);
+            (uint8_t)v2);
     packedCoords->array[1] = v2;
     packedCoords->array[2] = 0x80;
     packedCoords->array[3] = 0;
@@ -461,12 +461,12 @@ void __cdecl R_SetStaticModelLighting(unsigned int smodelIndex)
     smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[smodelIndex];
     entryIndex = R_ModelLightingIndexFromHandle(smodelDrawInst->lightingHandle);
     if (smodelInst->groundLighting.packed)
-        R_SetModelGroundLighting(entryIndex, (const unsigned __int8 *)&smodelInst->groundLighting);
+        R_SetModelGroundLighting(entryIndex, (const uint8_t *)&smodelInst->groundLighting);
     else
         R_CalcModelLighting(entryIndex, lightingOrigin, smodelDrawInst->primaryLightIndex, GFX_MODELLIGHT_EXTRAPOLATE);
 }
 
-void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const unsigned __int8 *groundLighting)
+void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const uint8_t *groundLighting)
 {
     GfxModelLightingPatch *patch; // [esp+8h] [ebp-4h]
 
@@ -668,7 +668,7 @@ void __cdecl R_InitStaticModelLighting()
     smodelLightGlob.local.freeableCount = 0;
 }
 
-void __cdecl R_ApplyLightGridColorsPatch(const GfxModelLightingPatch *patch, unsigned __int8 *pixels)
+void __cdecl R_ApplyLightGridColorsPatch(const GfxModelLightingPatch *patch, uint8_t *pixels)
 {
     GfxLightGridColors packed; // [esp+170h] [ebp-A8h] BYREF
 
@@ -694,7 +694,7 @@ void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsig
     int v6; // [esp+8h] [ebp-48h]
     int v7; // [esp+Ch] [ebp-44h]
     int hr; // [esp+10h] [ebp-40h]
-    unsigned __int8 *pixels; // [esp+18h] [ebp-38h]
+    uint8_t *pixels; // [esp+18h] [ebp-38h]
     unsigned int sampleIndex; // [esp+1Ch] [ebp-34h]
     unsigned int patchIter; // [esp+20h] [ebp-30h]
     const GfxModelLightingPatch *patch; // [esp+24h] [ebp-2Ch]

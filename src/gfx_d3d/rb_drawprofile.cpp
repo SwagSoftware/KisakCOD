@@ -105,7 +105,7 @@ void __cdecl RB_DrawProfile()
             modified = 1;
         if (modified)
         {
-            memset((unsigned __int8 *)drawProfGlob.global, 0, sizeof(drawProfGlob.global));
+            memset((uint8_t *)drawProfGlob.global, 0, sizeof(drawProfGlob.global));
             for (profEnum = 0; profEnum < 432; ++profEnum)
                 drawProfGlob.global[profEnum].min.value[0] = -1;
             Dvar_ClearModified((dvar_s*)profile);
@@ -769,7 +769,7 @@ void __cdecl RB_ProfileInit()
     drawProfGlob.fontHeight = (float)R_TextHeight(drawProfGlob.font);
     drawProfGlob.textColor.packed = -1;
     drawProfGlob.labelColor.packed = -256;
-    memset((unsigned __int8 *)drawProfGlob.log, 0, sizeof(drawProfGlob.log));
+    memset((uint8_t *)drawProfGlob.log, 0, sizeof(drawProfGlob.log));
     drawProfGlob.lastSortTime = 0;
 }
 

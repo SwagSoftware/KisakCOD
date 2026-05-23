@@ -316,7 +316,7 @@ void __cdecl R_DrawBspTris(GfxCmdBufPrimState *state, const srfTriangles_t *tris
 
     args.vertexCount = tris->vertexCount;
     args.triCount = triCount;
-    args.baseIndex = R_SetIndexData(state, (unsigned __int8 *)&rgp.world->indices[tris->baseIndex], triCount);
+    args.baseIndex = R_SetIndexData(state, (uint8_t *)&rgp.world->indices[tris->baseIndex], triCount);
     R_DrawIndexedPrimitive(state, &args);
     g_frameStatsCur.geoIndexCount += 3 * triCount;
     iassert( g_primStats );

@@ -438,11 +438,11 @@ void __cdecl FS_BuildOSPathForThread(const char *base, const char *game, const c
         }
         Com_Error(ERR_FATAL, "FS_BuildOSPath: os path length exceeded");
     }
-    memcpy((unsigned __int8 *)ospath, (unsigned __int8 *)base, v7);
+    memcpy((uint8_t *)ospath, (uint8_t *)base, v7);
     ospath[v7] = 47;
-    memcpy((unsigned __int8 *)&ospath[v7 + 1], (unsigned __int8 *)game, v6);
+    memcpy((uint8_t *)&ospath[v7 + 1], (uint8_t *)game, v6);
     ospath[v7 + 1 + v6] = 47;
-    memcpy((unsigned __int8 *)&ospath[v7 + 2 + v6], (unsigned __int8 *)qpath, v5 + 1);
+    memcpy((uint8_t *)&ospath[v7 + 2 + v6], (uint8_t *)qpath, v5 + 1);
     FS_ReplaceSeparators(ospath);
 }
 
@@ -960,11 +960,11 @@ bool __cdecl FS_Delete(const char *filename)
     return remove(ospath) != -1;
 }
 
-unsigned int __cdecl FS_Read(unsigned __int8 *buffer, unsigned int len, int h)
+unsigned int __cdecl FS_Read(uint8_t *buffer, unsigned int len, int h)
 {
     int tries; // [esp+4h] [ebp-14h]
     unsigned int remaining; // [esp+8h] [ebp-10h]
-    unsigned __int8 *buf; // [esp+Ch] [ebp-Ch]
+    uint8_t *buf; // [esp+Ch] [ebp-Ch]
     FILE *f; // [esp+10h] [ebp-8h]
     int read; // [esp+14h] [ebp-4h]
 
@@ -1125,7 +1125,7 @@ int __cdecl FS_Seek(int f, int offset, int origin)
 
 int __cdecl FS_ReadFile(const char *qpath, void **buffer)
 {
-    unsigned __int8 *buf; // [esp+0h] [ebp-Ch]
+    uint8_t *buf; // [esp+0h] [ebp-Ch]
     int len; // [esp+4h] [ebp-8h]
     int h; // [esp+8h] [ebp-4h] BYREF
 
@@ -1138,7 +1138,7 @@ int __cdecl FS_ReadFile(const char *qpath, void **buffer)
         if (buffer)
         {
             ++fs_loadStack;
-            buf = (unsigned __int8 *)FS_AllocMem(len + 1);
+            buf = (uint8_t *)FS_AllocMem(len + 1);
             *buffer = buf;
             FS_Read(buf, len, h);
             buf[len] = 0;
@@ -1305,7 +1305,7 @@ iwd_t *__cdecl FS_LoadZipFile(char *zipfile, char *basename)
     char v3; // [esp+17h] [ebp-1DDh]
     char *name; // [esp+1Ch] [ebp-1D8h]
     char *v5; // [esp+20h] [ebp-1D4h]
-    unsigned __int8 *uf; // [esp+70h] [ebp-184h]
+    uint8_t *uf; // [esp+70h] [ebp-184h]
     char *namePtr; // [esp+74h] [ebp-180h]
     int hash; // [esp+7Ch] [ebp-178h]
     int fs_numHeaderLongs; // [esp+80h] [ebp-174h]
@@ -1394,7 +1394,7 @@ char *__cdecl IwdFileLanguage(const char *pszIwdFileName)
     if (strlen(pszIwdFileName) >= 0xA)
     {
         iCurrChar = 10;
-        memset((unsigned __int8 *)szIwdLanguageName[iString], 0, sizeof(char[64]));
+        memset((uint8_t *)szIwdLanguageName[iString], 0, sizeof(char[64]));
         while (iCurrChar < 64 && pszIwdFileName[iCurrChar] && isalpha(pszIwdFileName[iCurrChar]))
         {
             //*(_BYTE *)((iString << 6) + iCurrChar + 230219974) = pszIwdFileName[iCurrChar];
@@ -2657,7 +2657,7 @@ int __cdecl FS_SV_FOpenFileWrite(const char *filename)
 
 void __cdecl FS_CopyFile(char *fromOSPath, char *toOSPath)
 {
-    unsigned __int8 *buf; // [esp+0h] [ebp-Ch]
+    uint8_t *buf; // [esp+0h] [ebp-Ch]
     int len; // [esp+4h] [ebp-8h]
     FILE *f; // [esp+8h] [ebp-4h]
     FILE *fa; // [esp+8h] [ebp-4h]
@@ -2666,7 +2666,7 @@ void __cdecl FS_CopyFile(char *fromOSPath, char *toOSPath)
     if (f)
     {
         len = FS_FileGetFileSize(f);
-        buf = (unsigned __int8 *)malloc(len);
+        buf = (uint8_t *)malloc(len);
         if (FS_FileRead(buf, len, f) != len)
             Com_Error(ERR_FATAL, "Short read in FS_CopyFile()");
         FS_FileClose(f);

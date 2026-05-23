@@ -537,12 +537,12 @@ void __cdecl trigger_use_shared(gentity_s *self)
                 if (!szConfigString[0])
                 {
                     SV_SetConfigstring(i + 277, (char *)cursorhint);
-                    self->s.un1.scale = (unsigned __int8)i;
+                    self->s.un1.scale = (uint8_t)i;
                     break;
                 }
                 if (!strcmp(cursorhint, szConfigString))
                 {
-                    self->s.un1.scale = (unsigned __int8)i;
+                    self->s.un1.scale = (uint8_t)i;
                     break;
                 }
             }
@@ -627,7 +627,7 @@ void trigger_use_shared(gentity_s *self)
                 v8 = v11;
                 do
                 {
-                    v9 = *(unsigned __int8 *)v7 - (unsigned __int8)*v8;
+                    v9 = *(uint8_t *)v7 - (uint8_t)*v8;
                     if (!*v7)
                         break;
                     ++v7;

@@ -90,11 +90,11 @@ Font_s *__cdecl R_LoadFont(const char *fontName, int imageTrack)
             totalMemSize = fileLen - 16 + 24;
             font = (Font_s *)Hunk_Alloc(totalMemSize, "R_LoadFont", 22);
             variableFontData = (char *)&font[1];
-            FS_Read((unsigned __int8 *)&fontNameOffset, 4u, file);
-            FS_Read((unsigned __int8 *)&font->pixelHeight, 4u, file);
-            FS_Read((unsigned __int8 *)&font->glyphCount, 4u, file);
-            FS_Read((unsigned __int8 *)&materialNameOffset, 4u, file);
-            FS_Read((unsigned __int8 *)variableFontData, varMemSize, file);
+            FS_Read((uint8_t *)&fontNameOffset, 4u, file);
+            FS_Read((uint8_t *)&font->pixelHeight, 4u, file);
+            FS_Read((uint8_t *)&font->glyphCount, 4u, file);
+            FS_Read((uint8_t *)&materialNameOffset, 4u, file);
+            FS_Read((uint8_t *)variableFontData, varMemSize, file);
             FS_FCloseFile(file);
             font->glyphs = (Glyph *)variableFontData;
             font->fontName = &variableFontData[fontNameOffset - 16];

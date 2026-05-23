@@ -115,7 +115,7 @@ void __cdecl Com_LoadBsp(char *filename)
             Com_Error(ERR_DROP, va("EXE_ERR_COULDNT_LOAD %s", filename));
         }
         comBspGlob.header = (BspHeader *)Z_MallocGarbage(comBspGlob.fileSize, "Com_LoadBsp", 10);
-        bytesRead = FS_Read((unsigned __int8 *)comBspGlob.header, comBspGlob.fileSize, h);
+        bytesRead = FS_Read((uint8_t *)comBspGlob.header, comBspGlob.fileSize, h);
         FS_FCloseFile(h);
         if (bytesRead != comBspGlob.fileSize)
         {
@@ -125,7 +125,7 @@ void __cdecl Com_LoadBsp(char *filename)
 
         {
             PROFLOAD_SCOPED("Bsp checksum");
-            comBspGlob.checksum = Com_BlockChecksumKey32((const unsigned __int8 *)comBspGlob.header, comBspGlob.fileSize, 0);
+            comBspGlob.checksum = Com_BlockChecksumKey32((const uint8_t *)comBspGlob.header, comBspGlob.fileSize, 0);
         }
 
         if (Com_BspError())
@@ -138,7 +138,7 @@ void __cdecl Com_LoadBsp(char *filename)
 
     len = strlen(filename);
     iassert((len < (sizeof(comBspGlob.name) / (sizeof(comBspGlob.name[0]) * (sizeof(comBspGlob.name) != 4 || sizeof(comBspGlob.name[0]) <= 4)))));
-    memcpy((unsigned __int8 *)&comBspGlob, (unsigned __int8 *)filename, len + 1);
+    memcpy((uint8_t *)&comBspGlob, (uint8_t *)filename, len + 1);
     iassert( Com_IsBspLoaded() );
 }
 
@@ -198,9 +198,9 @@ char *__cdecl Com_ValidateBspLumpData(
     }
 }
 
-int __cdecl Com_BlockChecksumKey32(const unsigned __int8 *data, unsigned int length, unsigned int initialCrc)
+int __cdecl Com_BlockChecksumKey32(const uint8_t *data, unsigned int length, unsigned int initialCrc)
 {
-    const unsigned __int8 *dataIter; // [esp+8h] [ebp-8h]
+    const uint8_t *dataIter; // [esp+8h] [ebp-8h]
     unsigned int crc; // [esp+Ch] [ebp-4h]
     unsigned int crca; // [esp+Ch] [ebp-4h]
     unsigned int crcb; // [esp+Ch] [ebp-4h]
@@ -212,13 +212,13 @@ int __cdecl Com_BlockChecksumKey32(const unsigned __int8 *data, unsigned int len
     crc = ~initialCrc;
     for (dataIter = data; dataIter != &data[length]; ++dataIter)
     {
-        crca = (-306674912 * (((unsigned __int8)crc ^ *dataIter) & 1)) ^ ((crc ^ *dataIter) >> 1);
+        crca = (-306674912 * (((uint8_t)crc ^ *dataIter) & 1)) ^ ((crc ^ *dataIter) >> 1);
         crcb = (-306674912 * (crca & 1)) ^ (crca >> 1);
         crcc = (-306674912 * (crcb & 1)) ^ (crcb >> 1);
         crcd = (-306674912 * (crcc & 1)) ^ (crcc >> 1);
         crce = (-306674912 * (crcd & 1)) ^ (crcd >> 1);
         crcf = (-306674912 * (crce & 1)) ^ (crce >> 1);
-        crc = (-306674912 * (((unsigned __int8)(32 * (crcf & 1)) ^ (unsigned __int8)(crcf >> 1)) & 1))
+        crc = (-306674912 * (((uint8_t)(32 * (crcf & 1)) ^ (uint8_t)(crcf >> 1)) & 1))
             ^ (((-306674912 * (crcf & 1)) ^ (crcf >> 1)) >> 1);
     }
     return ~crc;
@@ -239,11 +239,11 @@ char *__cdecl Com_EntityString(int *numEntityChars)
 const char *__cdecl Com_GetHunkStringCopy(char *string)
 {
     unsigned int v2; // [esp+0h] [ebp-18h]
-    unsigned __int8 *hunkCopy; // [esp+14h] [ebp-4h]
+    uint8_t *hunkCopy; // [esp+14h] [ebp-4h]
 
     v2 = strlen(string);
     hunkCopy = Hunk_AllocAlign(v2 + 1, 1, "Com_GetLightDefName", 12);
-    memcpy(hunkCopy, (unsigned __int8 *)string, v2 + 1);
+    memcpy(hunkCopy, (uint8_t *)string, v2 + 1);
     return (const char *)hunkCopy;
 }
 
@@ -307,14 +307,14 @@ const DiskPrimaryLight_Version16 *Com_LoadPrimaryLights_Version16()
         out->type = in->type;
         out->canUseShadowMap = 0;
         exponent = in->exponent;
-        if (exponent != (unsigned __int8)exponent)
+        if (exponent != (uint8_t)exponent)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
                 281,
                 0,
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 exponent,
-                (unsigned __int8)exponent);
+                (uint8_t)exponent);
         out->exponent = exponent;
         color = in->color;
         out->color[0] = in->color[0];
@@ -376,14 +376,14 @@ ComPrimaryLight *Com_LoadPrimaryLights()
         out->type = in->type;
         out->canUseShadowMap = in->canUseShadowMap;
         exponent = in->exponent;
-        if (exponent != (unsigned __int8)exponent)
+        if (exponent != (uint8_t)exponent)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
                 281,
                 0,
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 exponent,
-                (unsigned __int8)exponent);
+                (uint8_t)exponent);
         out->exponent = exponent;
         color = in->color;
         out->color[0] = in->color[0];

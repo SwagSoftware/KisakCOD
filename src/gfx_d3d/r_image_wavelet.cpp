@@ -14371,9 +14371,9 @@ void __cdecl TRACK_r_image_wavelet()
 
 void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHeader, const unsigned char *data, _D3DFORMAT format, int bytesPerPixel)
 {
-    unsigned __int8 *from[6]; // [esp+14h] [ebp-88h]
-    unsigned __int8 *pixels[6]; // [esp+2Ch] [ebp-70h]
-    unsigned __int8 *to[6]; // [esp+7Ch] [ebp-20h]
+    uint8_t *from[6]; // [esp+14h] [ebp-88h]
+    uint8_t *pixels[6]; // [esp+2Ch] [ebp-70h]
+    uint8_t *to[6]; // [esp+7Ch] [ebp-20h]
     int sizeForLevel; // [esp+44h] [ebp-58h]
     int width; // [esp+48h] [ebp-54h]
     int height; // [esp+4Ch] [ebp-50h]
@@ -14441,11 +14441,11 @@ void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHe
 }
 
 
-void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode)
+void __cdecl Wavelet_DecompressLevel(uint8_t *src, uint8_t *dst, WaveletDecode *decode)
 {
     bool needsMipDelta;
     int dstChanOffset[4]; // [esp+8h] [ebp-6Ch] BYREF
-    unsigned __int8 *dstChan; // [esp+18h] [ebp-5Ch]
+    uint8_t *dstChan; // [esp+18h] [ebp-5Ch]
     int size; // [esp+1Ch] [ebp-58h]
     int stride; // [esp+20h] [ebp-54h]
     int chanIndex; // [esp+24h] [ebp-50h]
@@ -14604,8 +14604,8 @@ void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decod
     iassert( bitCount > 0 && bitCount <= 16 );
     iassert( decode->bit < 8 );
     decode->value >>= bitCount;
-    decode->value |= ((*((unsigned __int8 *)decode->data + 3) << 24)
-        | (*((unsigned __int8 *)decode->data + 2) << 16)
+    decode->value |= ((*((uint8_t *)decode->data + 3) << 24)
+        | (*((uint8_t *)decode->data + 2) << 16)
         | (unsigned int)*(unsigned __int16 *)decode->data) >> decode->bit << (16 - bitCount);
     decode->bit += bitCount;
     decode->data += (int)decode->bit >> 3;
@@ -14639,14 +14639,14 @@ int __cdecl Wavelet_DecodeValue(
 
 
 void __cdecl Wavelet_AddDeltaToMipmap(
-    unsigned __int8 *inout,
+    uint8_t *inout,
     int size,
     WaveletDecode *decode,
     const int *dstChanOffset)
 {
-    unsigned __int8 v4; // bl
+    uint8_t v4; // bl
     int chanIndex; // [esp+4h] [ebp-8h]
-    unsigned __int8 *value; // [esp+8h] [ebp-4h]
+    uint8_t *value; // [esp+8h] [ebp-4h]
 
     do
     {

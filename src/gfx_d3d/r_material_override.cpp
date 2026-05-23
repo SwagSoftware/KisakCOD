@@ -133,7 +133,7 @@ unsigned int __cdecl Material_ExtendTechniqueSetName(
         nameSoFar[nameLen++] = '_';
     if (tokenLen + nameLen >= 0x40)
         Com_Error(ERR_DROP, "Can't extend techset name '%s' with '%s'; would exceed %i chars", nameSoFar, token, 63);
-    memcpy((unsigned __int8 *)&nameSoFar[nameLen], (unsigned __int8 *)token, tokenLen + 1);
+    memcpy((uint8_t *)&nameSoFar[nameLen], (uint8_t *)token, tokenLen + 1);
     return tokenLen + nameLen;
 }
 

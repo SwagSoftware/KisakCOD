@@ -28,7 +28,7 @@ char *__cdecl FS_GetMapBaseName(char *mapname)
     len = v2;
     if (!I_stricmp(&mapname[v2 - 3], "bsp"))
         len = v2 - 7;
-    memcpy((unsigned __int8 *)basename, (unsigned __int8 *)mapname, len);
+    memcpy((uint8_t *)basename, (uint8_t *)mapname, len);
     basename[len] = 0;
     for (c = 0; c < len; ++c)
     {

@@ -180,7 +180,7 @@ int __cdecl CM_TransformedPointContents(const float *p, unsigned int model, cons
     return CM_PointContents(p_l, model);
 }
 
-unsigned __int8 *__cdecl CM_ClusterPVS(int cluster)
+uint8_t *__cdecl CM_ClusterPVS(int cluster)
 {
     if (!cm.vised)
         return cm.visibility;

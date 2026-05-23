@@ -70,7 +70,7 @@ void __cdecl R_SetLightProperties(
 void __cdecl R_SetCodeImageSamplerState(
     GfxCmdBufSourceState *source,
     MaterialTextureSource codeTexture,
-    unsigned __int8 samplerState)
+    uint8_t samplerState)
 {
     bcassert(codeTexture, TEXTURE_SRC_CODE_COUNT);
     iassert(samplerState & SAMPLER_FILTER_MASK);

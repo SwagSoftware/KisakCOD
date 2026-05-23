@@ -16,7 +16,7 @@ union GfxShaderConstantState // sizeof=0x8
 int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount);
 int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexCount, int stride);
 void __cdecl R_ChangeObjectPlacement(GfxCmdBufSourceState *source, const GfxScaledPlacement *placement);
-int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount);
+int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, uint8_t *indices, int triCount);
 void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context);
 void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const MaterialShaderArgument *routingData);
 void __cdecl R_HW_SetVertexShaderConstant(__int64 device, __int64 data);

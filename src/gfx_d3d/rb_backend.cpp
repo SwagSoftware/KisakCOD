@@ -192,7 +192,7 @@ void __cdecl R_SetVertex4dWithNormal(
     float nz,
     float s,
     float t,
-    const unsigned __int8 *color)
+    const uint8_t *color)
 {
     PackedUnitVec v11; // [esp+28h] [ebp-30h]
 
@@ -631,13 +631,13 @@ void __cdecl RB_StretchRawCmd(GfxRenderCommandExecState *execState)
     execState->cmd = (char*)execState->cmd + cmd->header.byteCount;
 }
 
-void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const unsigned __int8 *data)
+void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const uint8_t *data)
 {
     const char *v7; // eax
     int v8; // [esp+8h] [ebp-34h]
     _D3DLOCKED_RECT lockedRect; // [esp+10h] [ebp-2Ch] BYREF
     IDirect3DSurface9 *rawSurf; // [esp+18h] [ebp-24h] BYREF
-    unsigned __int8 *dest; // [esp+1Ch] [ebp-20h]
+    uint8_t *dest; // [esp+1Ch] [ebp-20h]
     tagRECT dstRect; // [esp+20h] [ebp-1Ch] BYREF
     int colIndex; // [esp+30h] [ebp-Ch]
     int newline; // [esp+34h] [ebp-8h]
@@ -664,7 +664,7 @@ void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const
                 } while (alwaysfails);
             }
         } while (alwaysfails);
-        dest = (unsigned __int8 *)lockedRect.pBits;
+        dest = (uint8_t *)lockedRect.pBits;
         newline = lockedRect.Pitch - 4 * cols;
         for (rowIndex = 0; rowIndex < rows; ++rowIndex)
         {
@@ -960,7 +960,7 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
             cmd->t0,
             s1,
             t1,
-            ((unsigned __int8)SnapFloatToInt(alpha * 255.0f) << 24) | 0xFFFFFF,
+            ((uint8_t)SnapFloatToInt(alpha * 255.0f) << 24) | 0xFFFFFF,
             GFX_PRIM_STATS_CODE);
     }
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
@@ -1003,10 +1003,10 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
         cmd->t0,
         s1,
         t1,
-        ((unsigned __int8)SnapFloatToInt(cmd->intensityScreengrab * 255.0f) << 24)
-        | (unsigned __int8)SnapFloatToInt(cmd->intensityWhiteout * 255.0f)
-        | ((unsigned __int8)SnapFloatToInt(cmd->intensityWhiteout * 255.0f) << 8)
-        | ((unsigned __int8)SnapFloatToInt(cmd->intensityWhiteout * 255.0f) << 16),
+        ((uint8_t)SnapFloatToInt(cmd->intensityScreengrab * 255.0f) << 24)
+        | (uint8_t)SnapFloatToInt(cmd->intensityWhiteout * 255.0f)
+        | ((uint8_t)SnapFloatToInt(cmd->intensityWhiteout * 255.0f) << 8)
+        | ((uint8_t)SnapFloatToInt(cmd->intensityWhiteout * 255.0f) << 16),
         GFX_PRIM_STATS_CODE);
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
@@ -1085,7 +1085,7 @@ void __cdecl R_SetVertex4d(
     float w,
     float s,
     float t,
-    const unsigned __int8 *color)
+    const uint8_t *color)
 {
     vert->xyzw[0] = x;
     vert->xyzw[1] = y;
@@ -1207,7 +1207,7 @@ void __cdecl RB_DrawLines2D(int count, int width, const GfxPointVertex *verts)
     }
 }
 
-void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, float t, const unsigned __int8 *color)
+void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, float t, const uint8_t *color)
 {
     vert->xyzw[0] = x;
     vert->xyzw[1] = y;
@@ -1388,7 +1388,7 @@ void __cdecl RB_DrawTriangles_Internal(
             (*normal)[3 * indexa + 2],
             (*st)[2 * indexa],
             (*st)[2 * indexa + 1],
-            (const unsigned __int8 *)&color[indexa]);
+            (const uint8_t *)&color[indexa]);
     tess.indexCount += indexCount;
     tess.vertexCount += vertexCount;
     RB_EndTessSurface();
@@ -1440,7 +1440,7 @@ GfxColor color_table[8] =
   { 4294925567u },
   { 4294967295u }
 }; // weak
-void __cdecl RB_LookupColor(unsigned __int8 c, GfxColor *color)
+void __cdecl RB_LookupColor(uint8_t c, GfxColor *color)
 {
     GfxColor *p_color_axis; // [esp+8h] [ebp-Ch]
     GfxColor *p_color_allies; // [esp+Ch] [ebp-8h]
@@ -1481,7 +1481,7 @@ void __cdecl RB_DrawText(const char *text, Font_s *font, float x, float y, GfxCo
     DrawText2D(text, x, y, font, 1.0, 1.0, 0.0, 1.0, color, 0x7FFFFFFF, 0, 0, 0, 0.0, color, 0, 0, 0, 0, 0, 0);
 }
 
-const unsigned __int8 MY_ALTCOLOR_TWO[4] = { 0xE6, 0xFF, 0xE6, 0xDC };
+const uint8_t MY_ALTCOLOR_TWO[4] = { 0xE6, 0xFF, 0xE6, 0xDC };
 const float MY_OFFSETS_0[4][2] =
 {
     { -1.0f, 1.0f },
@@ -1543,7 +1543,7 @@ void __cdecl DrawText2D(
     int tempSeed; // [esp+15Ch] [ebp-94h] BYREF
     float iconWidth; // [esp+160h] [ebp-90h]
     GfxColor lookupColor; // [esp+164h] [ebp-8Ch] BYREF
-    const unsigned __int8 *altColorTwo; // [esp+168h] [ebp-88h]
+    const uint8_t *altColorTwo; // [esp+168h] [ebp-88h]
     GfxColor finalColor; // [esp+16Ch] [ebp-84h] BYREF
     bool drawExtraFxChar; // [esp+173h] [ebp-7Dh] BYREF
     const Glyph *glyph; // [esp+174h] [ebp-7Ch]
@@ -1555,7 +1555,7 @@ void __cdecl DrawText2D(
     int extraFxChar; // [esp+18Ch] [ebp-64h]
     float deltaX; // [esp+190h] [ebp-60h]
     unsigned int origLetter; // [esp+194h] [ebp-5Ch]
-    unsigned __int8 fadeAlpha; // [esp+19Bh] [ebp-55h] BYREF
+    uint8_t fadeAlpha; // [esp+19Bh] [ebp-55h] BYREF
     float yRot; // [esp+19Ch] [ebp-54h] BYREF
     int passRandSeed; // [esp+1A0h] [ebp-50h] BYREF
     int maxLengthRemaining; // [esp+1A4h] [ebp-4Ch]
@@ -2053,7 +2053,7 @@ double __cdecl RB_DrawHudIcon(
 
 void __cdecl RB_DrawCursor(
     const Material *material,
-    unsigned __int8 cursor,
+    uint8_t cursor,
     float x,
     float y,
     float sinAngle,
@@ -2231,13 +2231,13 @@ void __cdecl GetDecayingLetterInfo(
     int decayTimeElapsed,
     int fxBirthTime,
     int fxDecayDuration,
-    unsigned __int8 alpha,
+    uint8_t alpha,
     bool *resultSkipDrawing,
-    unsigned __int8 *resultAlpha,
+    uint8_t *resultAlpha,
     unsigned int *resultLetter,
     bool *resultDrawExtraFxChar)
 {
-    unsigned __int8 v11; // [esp+0h] [ebp-48h]
+    uint8_t v11; // [esp+0h] [ebp-48h]
     int v12; // [esp+10h] [ebp-38h]
     float v13; // [esp+18h] [ebp-30h]
     int scrambleSeed; // [esp+28h] [ebp-20h] BYREF
@@ -2304,7 +2304,7 @@ void __cdecl DrawTextFxExtraCharacter(
     RB_DrawStretchPicRotate(material, x, y, w, h, s0, 0.0, s1, 1.0, sinAngle, cosAngle, color, GFX_PRIM_STATS_HUD);
 }
 
-unsigned __int8 __cdecl ModulateByteColors(unsigned __int8 colorA, unsigned __int8 colorB)
+uint8_t __cdecl ModulateByteColors(uint8_t colorA, uint8_t colorB)
 {
     return (int)((double)colorA / 255.0 * ((double)colorB / 255.0) * 255.0);
 }
@@ -2404,19 +2404,19 @@ void __cdecl RB_DrawCharInSpace(
         xyz[2],
         glyph->s0,
         glyph->t0,
-        (const unsigned __int8 *)&unpackedColor);
+        (const uint8_t *)&unpackedColor);
     z = xyz[2] + dx[2];
     y = xyz[1] + dx[1];
     x = *xyz + *dx;
-    R_SetVertex3d(&tess.verts[vertCount + 1], x, y, z, glyph->s1, glyph->t0, (const unsigned __int8 *)&unpackedColor);
+    R_SetVertex3d(&tess.verts[vertCount + 1], x, y, z, glyph->s1, glyph->t0, (const uint8_t *)&unpackedColor);
     v11 = xyz[2] + dx[2] + dy[2];
     v10 = xyz[1] + dx[1] + dy[1];
     v9 = *xyz + *dx + *dy;
-    R_SetVertex3d(&tess.verts[vertCount + 2], v9, v10, v11, glyph->s1, glyph->t1, (const unsigned __int8 *)&unpackedColor);
+    R_SetVertex3d(&tess.verts[vertCount + 2], v9, v10, v11, glyph->s1, glyph->t1, (const uint8_t *)&unpackedColor);
     v8 = xyz[2] + dy[2];
     v7 = xyz[1] + dy[1];
     v6 = *xyz + *dy;
-    R_SetVertex3d(&tess.verts[vertCount + 3], v6, v7, v8, glyph->s0, glyph->t1, (const unsigned __int8 *)&unpackedColor);
+    R_SetVertex3d(&tess.verts[vertCount + 3], v6, v7, v8, glyph->s0, glyph->t1, (const uint8_t *)&unpackedColor);
 }
 
 void __cdecl RB_DrawText2DCmd(GfxRenderCommandExecState *execState)
@@ -2494,7 +2494,7 @@ void __cdecl RB_ProjectionSetCmd(GfxRenderCommandExecState *execState)
 void __cdecl RB_ResetStatTracking()
 {
     RB_Stats_UpdateMaxs(&g_frameStatsCur, &backEnd.frameStatsMax);
-    memset((unsigned __int8 *)&g_frameStatsCur, 0, sizeof(g_frameStatsCur));
+    memset((uint8_t *)&g_frameStatsCur, 0, sizeof(g_frameStatsCur));
     g_viewStats = (GfxViewStats *)&g_frameStatsCur;
 }
 
@@ -2722,8 +2722,8 @@ void __cdecl RB_CallExecuteRenderCommands()
         R_InitCmdBufSourceState(&gfxCmdBufSourceState, &gfxCmdBufInput, 0);
         gfxCmdBufSourceState.input.data = backEndData;
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-        memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-        memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+        memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+        memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
         RB_InitSceneViewport();
@@ -2944,7 +2944,7 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
 
 void __cdecl RB_InitBackendGlobalStructs()
 {
-    memset((unsigned __int8 *)&backEnd, 0, sizeof(backEnd));
+    memset((uint8_t *)&backEnd, 0, sizeof(backEnd));
     RB_InitSceneViewport();
     RB_InitCodeImages();
 }

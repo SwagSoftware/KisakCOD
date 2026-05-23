@@ -3,7 +3,7 @@
 #include <cstring>
 #include <universal/q_shared.h>
 
-unsigned __int8 PADDING[64] =
+uint8_t PADDING[64] =
 {
   128u,
   0u,
@@ -71,7 +71,7 @@ unsigned __int8 PADDING[64] =
   0u
 }; // idb
 
-void __cdecl Encode(unsigned __int8 *output, unsigned int *input, unsigned int len)
+void __cdecl Encode(uint8_t *output, unsigned int *input, unsigned int len)
 {
     unsigned int j; // [esp+0h] [ebp-8h]
     unsigned int i; // [esp+4h] [ebp-4h]
@@ -85,7 +85,7 @@ void __cdecl Encode(unsigned __int8 *output, unsigned int *input, unsigned int l
     }
 }
 
-void __cdecl Decode(unsigned int *output, unsigned __int8 *input, unsigned int len)
+void __cdecl Decode(unsigned int *output, uint8_t *input, unsigned int len)
 {
     unsigned int j; // [esp+0h] [ebp-8h]
     unsigned int i; // [esp+4h] [ebp-4h]
@@ -105,7 +105,7 @@ void __cdecl MD4Init(MD4_CTX *context)
     context->state[3] = 271733878;
 }
 
-void __cdecl MD4Update(MD4_CTX *context, unsigned __int8 *input, unsigned int inputLen)
+void __cdecl MD4Update(MD4_CTX *context, uint8_t *input, unsigned int inputLen)
 {
     unsigned int index; // [esp+4h] [ebp-8h]
     unsigned int i; // [esp+8h] [ebp-4h]
@@ -130,10 +130,10 @@ void __cdecl MD4Update(MD4_CTX *context, unsigned __int8 *input, unsigned int in
     memcpy(&context->buffer[index], &input[i], inputLen - i);
 }
 
-void __cdecl MD4Final(unsigned __int8 *digest, MD4_CTX *context)
+void __cdecl MD4Final(uint8_t *digest, MD4_CTX *context)
 {
     unsigned int v2; // [esp+0h] [ebp-18h]
-    unsigned __int8 bits[8]; // [esp+8h] [ebp-10h] BYREF
+    uint8_t bits[8]; // [esp+8h] [ebp-10h] BYREF
     unsigned int index; // [esp+14h] [ebp-4h]
 
     Encode(bits, context->count, 8u);
@@ -145,10 +145,10 @@ void __cdecl MD4Final(unsigned __int8 *digest, MD4_CTX *context)
     MD4Update(context, PADDING, v2);
     MD4Update(context, bits, 8u);
     Encode(digest, context->state, 0x10u);
-    memset((unsigned __int8 *)context, 0, sizeof(MD4_CTX));
+    memset((uint8_t *)context, 0, sizeof(MD4_CTX));
 }
 
-void __cdecl MD4Transform(unsigned int *state, unsigned __int8 *block)
+void __cdecl MD4Transform(unsigned int *state, uint8_t *block)
 {
     unsigned int c; // [esp+0h] [ebp-50h]
     unsigned int ca; // [esp+0h] [ebp-50h]
@@ -355,17 +355,17 @@ void __cdecl MD4Transform(unsigned int *state, unsigned __int8 *block)
     state[1] += (bw >> 17) | (bw << 15);
     state[2] += cx;
     state[3] += dy;
-    memset((unsigned __int8 *)x, 0, sizeof(x));
+    memset((uint8_t *)x, 0, sizeof(x));
 }
 
 
 
 void __cdecl Com_BlockChecksum128Cat(
-    unsigned __int8 *buffer0,
+    uint8_t *buffer0,
     unsigned int length0,
-    unsigned __int8 *buffer1,
+    uint8_t *buffer1,
     unsigned int length1,
-    unsigned __int8 *outChecksum)
+    uint8_t *outChecksum)
 {
     MD4_CTX ctx; // [esp+0h] [ebp-60h] BYREF
 
@@ -375,7 +375,7 @@ void __cdecl Com_BlockChecksum128Cat(
     MD4Final(outChecksum, &ctx);
 }
 
-void __cdecl Com_BlockChecksum128(unsigned __int8 *buffer, unsigned int length, int key, unsigned __int8 *outChecksum)
+void __cdecl Com_BlockChecksum128(uint8_t *buffer, unsigned int length, int key, uint8_t *outChecksum)
 {
     MD4_CTX ctx; // [esp+0h] [ebp-60h] BYREF
 

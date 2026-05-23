@@ -348,9 +348,9 @@ void R_LoadLightRegions()
     GfxLightRegionAxis *v0; // [esp+8h] [ebp-34h]
     char *diskHulls; // [esp+Ch] [ebp-30h]
     unsigned int hullIter; // [esp+10h] [ebp-2Ch]
-    unsigned __int8 *diskAxes; // [esp+14h] [ebp-28h]
+    uint8_t *diskAxes; // [esp+14h] [ebp-28h]
     unsigned int usedAxisCount; // [esp+18h] [ebp-24h]
-    unsigned __int8 *axes; // [esp+1Ch] [ebp-20h]
+    uint8_t *axes; // [esp+1Ch] [ebp-20h]
     unsigned int hullCount; // [esp+20h] [ebp-1Ch] BYREF
     unsigned int axisCount; // [esp+24h] [ebp-18h] BYREF
     unsigned int regionCount; // [esp+28h] [ebp-14h] BYREF
@@ -694,13 +694,13 @@ void __cdecl R_CopyLightmap(
     int srcWidth,
     int srcHeight,
     int bytesPerPixel,
-    unsigned __int8 *dstImage,
+    uint8_t *dstImage,
     int tileX,
     int tileY,
     int tilesWide)
 {
     int y; // [esp+0h] [ebp-4h]
-    unsigned __int8 *dstImagea; // [esp+1Ch] [ebp+18h]
+    uint8_t *dstImagea; // [esp+1Ch] [ebp+18h]
 
     dstImagea = &dstImage[bytesPerPixel * (srcWidth * tilesWide * srcHeight * tileY + srcWidth * tileX)];
     for (y = 0; y < srcHeight; ++y)
@@ -714,8 +714,8 @@ void __cdecl R_CopyLightmap(
 void __cdecl R_CopyLightDefAttenuationImage(GfxLightDef *def, _DWORD *anonymousConfig)
 {
     int endCount; // [esp+30h] [ebp-7Ch]
-    unsigned __int8 *dstPixel; // [esp+38h] [ebp-74h]
-    unsigned __int8 *dstPixela; // [esp+38h] [ebp-74h]
+    uint8_t *dstPixel; // [esp+38h] [ebp-74h]
+    uint8_t *dstPixela; // [esp+38h] [ebp-74h]
     unsigned int lerp; // [esp+3Ch] [ebp-70h]
     GfxRawPixel *srcPixel; // [esp+40h] [ebp-6Ch]
     GfxRawImage rawImage; // [esp+44h] [ebp-68h] BYREF
@@ -804,16 +804,16 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
     GfxImage *v2; // eax
     char *v3; // eax
     GfxImage *v4; // eax
-    unsigned __int8 *primaryImage; // [esp+8h] [ebp-1C4h]
+    uint8_t *primaryImage; // [esp+8h] [ebp-1C4h]
     int reorder[32]; // [esp+Ch] [ebp-1C0h] BYREF
     int tileIndex; // [esp+8Ch] [ebp-140h]
     int totalImageSize; // [esp+90h] [ebp-13Ch]
-    const unsigned __int8 *buf; // [esp+94h] [ebp-138h]
+    const uint8_t *buf; // [esp+94h] [ebp-138h]
     int width; // [esp+98h] [ebp-134h]
     int height; // [esp+9Ch] [ebp-130h]
-    const unsigned __int8 *buf_p; // [esp+A0h] [ebp-12Ch]
+    const uint8_t *buf_p; // [esp+A0h] [ebp-12Ch]
     r_lightmapGroup_t groupInfo[31]; // [esp+A4h] [ebp-128h] BYREF
-    unsigned __int8 newLmapIndex; // [esp+19Fh] [ebp-2Dh]
+    uint8_t newLmapIndex; // [esp+19Fh] [ebp-2Dh]
     int groupCount; // [esp+1A0h] [ebp-2Ch]
     unsigned int len; // [esp+1A4h] [ebp-28h] BYREF
     int oldLmapBaseIndex; // [esp+1A8h] [ebp-24h]
@@ -821,7 +821,7 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
     int y; // [esp+1B0h] [ebp-1Ch]
     int imageFlags; // [esp+1B4h] [ebp-18h]
     LightDefCopyConfig defCopyCfg; // [esp+1B8h] [ebp-14h] BYREF
-    unsigned __int8 *secondaryImage; // [esp+1C0h] [ebp-Ch]
+    uint8_t *secondaryImage; // [esp+1C0h] [ebp-Ch]
     int oldLmapCount; // [esp+1C4h] [ebp-8h]
     int oldLmapIndex; // [esp+1C8h] [ebp-4h]
 
@@ -835,7 +835,7 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
     if (oldLmapCount)
     {
         totalImageSize = groupInfo[0].highCount * 0x300000 * groupInfo[0].wideCount;
-        primaryImage = (unsigned __int8 *)Hunk_AllocateTempMemory(totalImageSize, "R_LoadLightmaps");
+        primaryImage = (uint8_t *)Hunk_AllocateTempMemory(totalImageSize, "R_LoadLightmaps");
         secondaryImage = &primaryImage[groupInfo[0].highCount * (groupInfo[0].wideCount << 20)];
         buf = (const unsigned char*)Com_GetBspLump(LUMP_LIGHTBYTES, 1u, &len);
         if (load->bspVersion < 7)
@@ -1127,7 +1127,7 @@ void __cdecl R_FinalizeSurfVerts(
         R_SurfCalculateMagicPortalVerts(material, surface, vertsDisk, merge, vertsMem);
 }
 
-unsigned __int8 *__cdecl R_LoadSurfaceAlloc(unsigned int bytes)
+uint8_t *__cdecl R_LoadSurfaceAlloc(unsigned int bytes)
 {
     return Hunk_Alloc(bytes, "R_LoadSurfaces", 20);
 }
@@ -1312,13 +1312,13 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     float v1; // [esp+4h] [ebp-94h]
     PackedUnitVec v2; // [esp+10h] [ebp-88h]
     PackedUnitVec v3; // [esp+14h] [ebp-84h]
-    unsigned __int8 *vertLayerDataMem; // [esp+18h] [ebp-80h]
+    uint8_t *vertLayerDataMem; // [esp+18h] [ebp-80h]
     unsigned int firstSurfIndex; // [esp+1Ch] [ebp-7Ch]
-    unsigned __int8 dummyData[4]; // [esp+20h] [ebp-78h] BYREF
+    uint8_t dummyData[4]; // [esp+20h] [ebp-78h] BYREF
     unsigned int surfIndex; // [esp+24h] [ebp-74h]
     int baseIndex; // [esp+28h] [ebp-70h]
     int lmapIndex; // [esp+2Ch] [ebp-6Ch]
-    const unsigned __int8 *vertLayerDataDisk; // [esp+30h] [ebp-68h]
+    const uint8_t *vertLayerDataDisk; // [esp+30h] [ebp-68h]
     Material *material; // [esp+34h] [ebp-64h]
     srfTriangles_t *tris; // [esp+38h] [ebp-60h]
     float normal[3]; // [esp+3Ch] [ebp-5Ch] BYREF
@@ -1357,7 +1357,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     }
     else
     {
-        vertLayerDataDisk = (const unsigned __int8 *)Com_GetBspLump(LUMP_VERTEX_LAYER_DATA, 1u, &vertLayerDataSize);
+        vertLayerDataDisk = (const uint8_t *)Com_GetBspLump(LUMP_VERTEX_LAYER_DATA, 1u, &vertLayerDataSize);
         if (!vertLayerDataSize)
         {
             vertLayerDataSize = 4;
@@ -1751,8 +1751,8 @@ void __cdecl R_LoadCells(unsigned int bspVersion, TrisType trisType)
                 out->reflectionProbeCount = in[44];
                 if (out->reflectionProbeCount)
                 {
-                    out->reflectionProbes = Hunk_Alloc((unsigned __int8)in[44], "R_LoadCells", 22);
-                    memcpy(out->reflectionProbes, (unsigned __int8 *)in + 45, (unsigned __int8)in[44]);
+                    out->reflectionProbes = Hunk_Alloc((uint8_t)in[44], "R_LoadCells", 22);
+                    memcpy(out->reflectionProbes, (uint8_t *)in + 45, (uint8_t)in[44]);
                 }
                 else
                 {
@@ -2542,7 +2542,7 @@ void __cdecl R_CreateStaticModel(
     float scale,
     GfxStaticModelDrawInst *smodelDrawInst,
     GfxStaticModelInst *smodelInst,
-    unsigned __int8 staticModelFlags)
+    uint8_t staticModelFlags)
 {
     smodelDrawInst->model = model;
     smodelDrawInst->placement.origin[0] = *origin;
@@ -2559,7 +2559,7 @@ void __cdecl R_CreateStaticModel(
     smodelDrawInst->flags = staticModelFlags;
 }
 
-unsigned __int8 __cdecl XModelGetFlags(const XModel *model)
+uint8_t __cdecl XModelGetFlags(const XModel *model)
 {
     return model->flags;
 }
@@ -2570,8 +2570,8 @@ bool __cdecl R_DecodeGroundLighting(
     char *(*spawnVars)[2],
     int spawnVarCount,
     int bspVersion,
-    unsigned __int8 *outPrimaryLightIndex,
-    unsigned __int8 *outValue)
+    uint8_t *outPrimaryLightIndex,
+    uint8_t *outValue)
 {
     unsigned int valueInt[4]; // [esp+0h] [ebp-24h] BYREF
     const char *string; // [esp+10h] [ebp-14h]
@@ -2634,7 +2634,7 @@ static void __cdecl R_LoadMiscModel(char *(*spawnVars)[2], int spawnVarCount, in
     float scale; // [esp+44h] [ebp-38h]
     float lightingOrigin[3]; // [esp+48h] [ebp-34h] BYREF
     float axis[3][3]; // [esp+54h] [ebp-28h] BYREF
-    unsigned __int8 staticModelFlags; // [esp+7Bh] [ebp-1h]
+    uint8_t staticModelFlags; // [esp+7Bh] [ebp-1h]
 
     R_CheckValidStaticModel(spawnVars, spawnVarCount, &model, origin);
     smodelDrawInst = &s_world.dpvs.smodelDrawInsts[s_world.dpvs.smodelCount];
@@ -2803,7 +2803,7 @@ void R_AddAllProbesToAllCells()
 {
     GfxCell *cell; // [esp+0h] [ebp-Ch]
     int cellIndex; // [esp+4h] [ebp-8h]
-    unsigned __int8 reflectionProbeIndex; // [esp+Bh] [ebp-1h]
+    uint8_t reflectionProbeIndex; // [esp+Bh] [ebp-1h]
 
     iassert( s_world.reflectionProbeCount > 0 );
     if (s_world.reflectionProbeCount == 1)
@@ -2863,14 +2863,14 @@ void R_SetStaticModelReflectionProbes()
 void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, int smodelIndex)
 {
     int v3; // [esp+4h] [ebp-30h]
-    unsigned __int8 *children; // [esp+14h] [ebp-20h]
+    uint8_t *children; // [esp+14h] [ebp-20h]
     GfxAabbTree *childTree; // [esp+18h] [ebp-1Ch]
     GfxAabbTree *childTreea; // [esp+18h] [ebp-1Ch]
-    unsigned __int8 *newChildren; // [esp+1Ch] [ebp-18h]
+    uint8_t *newChildren; // [esp+1Ch] [ebp-18h]
     int childIndex; // [esp+20h] [ebp-14h]
     int childIndexa; // [esp+20h] [ebp-14h]
     int childIndexb; // [esp+20h] [ebp-14h]
-    unsigned __int8 *smodelIndexes; // [esp+24h] [ebp-10h]
+    uint8_t *smodelIndexes; // [esp+24h] [ebp-10h]
     GfxStaticModelInst *smodelInst; // [esp+28h] [ebp-Ch]
     int i; // [esp+30h] [ebp-4h]
 
@@ -2880,8 +2880,8 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
             v3 = 2 * tree->smodelIndexCount;
         else
             v3 = 1;
-        smodelIndexes = (unsigned __int8 *)Hunk_AllocateTempMemory(2 * v3, "R_AddModelToCell");
-        memcpy(smodelIndexes, (unsigned __int8 *)tree->smodelIndexes, 2 * tree->smodelIndexCount);
+        smodelIndexes = (uint8_t *)Hunk_AllocateTempMemory(2 * v3, "R_AddModelToCell");
+        memcpy(smodelIndexes, (uint8_t *)tree->smodelIndexes, 2 * tree->smodelIndexCount);
         tree->smodelIndexes = (unsigned __int16 *)smodelIndexes;
     }
     tree->smodelIndexes[tree->smodelIndexCount] = smodelIndex;
@@ -2914,9 +2914,9 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
             if (childIndexa >= tree->childCount)
             {
                 newChildren = Hunk_AllocAlign(44 * (tree->childCount + 1), 4, "R_AddStaticModelToAabbTree_r", 21);
-                children = (unsigned __int8 *)tree + tree->childrenOffset;
+                children = (uint8_t *)tree + tree->childrenOffset;
                 memcpy(newChildren, children, 44 * tree->childCount);
-                tree->childrenOffset = newChildren - (unsigned __int8 *)tree;
+                tree->childrenOffset = newChildren - (uint8_t *)tree;
                 for (childIndexb = 0; childIndexb < tree->childCount; ++childIndexb)
                     *(_DWORD *)&newChildren[44 * childIndexb + 40] = &children[44 * childIndexb
                     + *(_DWORD *)&children[44 * childIndexb + 40]]
@@ -3058,7 +3058,7 @@ void __cdecl R_AllocStaticModels(GfxAabbTree *tree)
 {
     GfxAabbTree *children; // [esp+0h] [ebp-Ch]
     int childIndex; // [esp+4h] [ebp-8h]
-    unsigned __int8 *smodelIndexes; // [esp+8h] [ebp-4h]
+    uint8_t *smodelIndexes; // [esp+8h] [ebp-4h]
 
     if (tree->smodelIndexCount)
     {
@@ -3493,11 +3493,11 @@ void __cdecl R_LoadSun(const char *name, sunflare_t *sun)
         R_LoadSunThroughDvars(sunFile, sun);
 }
 
-unsigned __int8 *R_AllocPrimaryLightBuffers()
+uint8_t *R_AllocPrimaryLightBuffers()
 {
     unsigned __int16 EntityCount; // ax
     unsigned __int16 v1; // ax
-    unsigned __int8 *result; // eax
+    uint8_t *result; // eax
     unsigned int relevantPrimaryLightCount; // [esp+4h] [ebp-Ch]
     unsigned int totalDynEntBits; // [esp+8h] [ebp-8h]
 
@@ -3526,15 +3526,15 @@ unsigned __int8 *R_AllocPrimaryLightBuffers()
     return result;
 }
 
-unsigned __int8 *R_LoadWorldRuntime()
+uint8_t *R_LoadWorldRuntime()
 {
-    unsigned __int8 *v1; // [esp+0h] [ebp-24h]
-    unsigned __int8 *v2; // [esp+4h] [ebp-20h]
-    unsigned __int8 *v3; // [esp+8h] [ebp-1Ch]
-    unsigned __int8 *v4; // [esp+Ch] [ebp-18h]
-    unsigned __int8 *v5; // [esp+10h] [ebp-14h]
-    unsigned __int8 *v6; // [esp+14h] [ebp-10h]
-    unsigned __int8 *v7; // [esp+18h] [ebp-Ch]
+    uint8_t *v1; // [esp+0h] [ebp-24h]
+    uint8_t *v2; // [esp+4h] [ebp-20h]
+    uint8_t *v3; // [esp+8h] [ebp-1Ch]
+    uint8_t *v4; // [esp+Ch] [ebp-18h]
+    uint8_t *v5; // [esp+10h] [ebp-14h]
+    uint8_t *v6; // [esp+14h] [ebp-10h]
+    uint8_t *v7; // [esp+18h] [ebp-Ch]
     unsigned int drawType; // [esp+1Ch] [ebp-8h]
     unsigned int drawTypea; // [esp+1Ch] [ebp-8h]
     int i; // [esp+20h] [ebp-4h]
@@ -3818,7 +3818,7 @@ unsigned int __cdecl R_GetEntryCount(GfxSModelSurfStats *stats)
         return stats->useCount;
 }
 
-unsigned __int8 __cdecl R_AssignSModelCacheIndex(
+uint8_t __cdecl R_AssignSModelCacheIndex(
     char smcAllocBits,
     unsigned int maxEntryCount,
     unsigned int *smcUseCount)
@@ -3872,7 +3872,7 @@ void __cdecl XModelSetSModelCacheForLod(
 
 void __cdecl R_AssignSModelCacheResources(GfxWorld *world)
 {
-    unsigned __int8 v1; // [esp+17Bh] [ebp-2029h]
+    uint8_t v1; // [esp+17Bh] [ebp-2029h]
     XModel *model; // [esp+17Ch] [ebp-2028h]
     unsigned int smcUseCount[4]; // [esp+180h] [ebp-2024h] BYREF
     unsigned int lod; // [esp+190h] [ebp-2014h]

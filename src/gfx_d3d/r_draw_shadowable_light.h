@@ -18,7 +18,7 @@ void __cdecl R_SetLightProperties(
 void __cdecl R_SetCodeImageSamplerState(
     GfxCmdBufSourceState *source,
     MaterialTextureSource codeTexture,
-    unsigned __int8 samplerState);
+    uint8_t samplerState);
 void __cdecl R_SetShadowableLight(
     GfxCmdBufSourceState *source,
     unsigned int shadowableLightIndex,

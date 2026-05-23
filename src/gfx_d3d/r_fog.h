@@ -12,6 +12,6 @@ enum $CF43A0974C3EB2799D9079D7BDE5CE8D : __int32
 };
 
 void __cdecl R_ClearFogs();
-void __cdecl R_SetFogFromServer(float start, unsigned __int8 r, unsigned __int8 g, unsigned __int8 b, float density);
+void __cdecl R_SetFogFromServer(float start, uint8_t r, uint8_t g, uint8_t b, float density);
 void __cdecl R_SwitchFog(unsigned int fogvar, int startTime, int transitionTime);
 void __cdecl R_ArchiveFogState(MemoryFile *memFile);

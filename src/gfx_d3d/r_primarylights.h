@@ -22,7 +22,7 @@ struct GfxCandidateShadowedLight // sizeof=0x8
 
 struct GfxShadowedLightEntry // sizeof=0x8
 {                                       // ...
-    unsigned __int8 shadowableLightIndex;
+    uint8_t shadowableLightIndex;
     bool isFadingOut;
     // padding byte
     // padding byte

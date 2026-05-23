@@ -2372,7 +2372,7 @@ void Scr_DumpScriptThreads(void)
 	VariableValueInternal* entryValue; // [esp+A8h] [ebp-34h]
 	ThreadDebugInfo* pInfo; // [esp+ACh] [ebp-30h]
 	int num; // [esp+B0h] [ebp-2Ch]
-	unsigned __int8 type; // [esp+B7h] [ebp-25h]
+	uint8_t type; // [esp+B7h] [ebp-25h]
 	VariableUnion u; // [esp+B8h] [ebp-24h]
 	int i; // [esp+BCh] [ebp-20h]
 	const VariableStackBuffer* stackBuf; // [esp+C0h] [ebp-1Ch]

@@ -42,8 +42,8 @@ struct DpvsDynamicCellCmd // sizeof=0xC
 {                                       // ...
     const DpvsPlane *planes;            // ...
     unsigned int cellIndex;             // ...
-    unsigned __int8 planeCount;         // ...
-    unsigned __int8 frustumPlaneCount;  // ...
+    uint8_t planeCount;         // ...
+    uint8_t frustumPlaneCount;  // ...
     unsigned __int16 viewIndex;         // ...
 };
 
@@ -51,8 +51,8 @@ struct DpvsStaticCellCmd // sizeof=0xC
 {                                       // ...
     const DpvsPlane *planes;            // ...
     const GfxCell *cell;                // ...
-    unsigned __int8 planeCount;         // ...
-    unsigned __int8 frustumPlaneCount;  // ...
+    uint8_t planeCount;         // ...
+    uint8_t frustumPlaneCount;  // ...
     unsigned __int16 viewIndex;         // ...
 };
 
@@ -62,7 +62,7 @@ struct DpvsEntityCmd // sizeof=0x10
     const DpvsPlane *planes;
     unsigned __int16 planeCount;
     unsigned __int16 cellIndex;
-    unsigned __int8 *entVisData;
+    uint8_t *entVisData;
 };
 
 struct FilterEntInfo // sizeof=0x10
@@ -209,8 +209,8 @@ void __cdecl R_AddWorldSurfacesFrustumOnly();
 void __cdecl R_AddCellSurfacesAndCullGroupsInFrustumDelayed(
     const GfxCell *cell,
     const DpvsPlane *planes,
-    unsigned __int8 planeCount,
-    unsigned __int8 frustumPlaneCount);
+    uint8_t planeCount,
+    uint8_t frustumPlaneCount);
 void __cdecl R_ShowCull();
 void __cdecl R_InitSceneData(int localClientNum);
 void __cdecl DynEntCl_InitFilter();
@@ -266,7 +266,7 @@ void __cdecl R_VisitAllFurtherCells(
     const DpvsPlane *parentPlane,
     const DpvsPlane *planes,
     int planeCount,
-    unsigned __int8 frustumPlaneCount);
+    uint8_t frustumPlaneCount);
 int __cdecl R_GetFurtherCellList_r(
     const GfxCell *cell,
     const DpvsPlane *parentPlane,
@@ -314,7 +314,7 @@ void __cdecl R_CullDynModelInCell(
     DynEntityPose *dynModelList,
     const DpvsPlane *planes,
     int planeCount,
-    unsigned __int8 *dynEntVisData);
+    uint8_t *dynEntVisData);
 
 
 // r_dpvs_sceneent

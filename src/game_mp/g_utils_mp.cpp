@@ -568,10 +568,10 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
     Scr_SetString((unsigned __int16 *)tagInfo + 4, tagName);
     *((unsigned int *)tagInfo + 1) = (unsigned int)parent->tagChildren;
     *((unsigned int *)tagInfo + 3) = index;
-    memset((unsigned __int8 *)tagInfo + 16, 0, 0x30u);
+    memset((uint8_t *)tagInfo + 16, 0, 0x30u);
     parent->tagChildren = ent;
     ent->tagInfo = (tagInfo_s *)tagInfo;
-    memset((unsigned __int8 *)tagInfo + 64, 0, 0x30u);
+    memset((uint8_t *)tagInfo + 64, 0, 0x30u);
     if (ent->client)
     {
         pm_type = ent->client->ps.pm_type;
@@ -1299,7 +1299,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
     if (ed->classname)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1540, 0, "%s", "ed->classname == 0");
     useCount = ed->useCount;
-    memset((unsigned __int8 *)ed, 0, sizeof(gentity_s));
+    memset((uint8_t *)ed, 0, sizeof(gentity_s));
     ed->eventTime = level.time;
     if (ed - level.gentities >= 72)
     {
@@ -1377,19 +1377,19 @@ void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventPa
     {
         ent->client->ps.events[ent->client->ps.eventSequence & 3] = event;
         ent->client->ps.eventParms[ent->client->ps.eventSequence & 3] = eventParm;
-        ent->client->ps.eventSequence = (unsigned __int8)(ent->client->ps.eventSequence + 1);
+        ent->client->ps.eventSequence = (uint8_t)(ent->client->ps.eventSequence + 1);
     }
     else
     {
         ent->s.events[ent->s.eventSequence & 3] = event;
         ent->s.eventParms[ent->s.eventSequence & 3] = eventParm;
-        ent->s.eventSequence = (unsigned __int8)(ent->s.eventSequence + 1);
+        ent->s.eventSequence = (uint8_t)(ent->s.eventSequence + 1);
     }
     ent->eventTime = level.time;
     ent->r.eventTime = level.time;
 }
 
-void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int8 index)
+void __cdecl G_PlaySoundAlias(gentity_s *ent, uint8_t index)
 {
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1760, 0, "%s", "ent");
@@ -1399,7 +1399,7 @@ void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int8 index)
 
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList)
 {
-    unsigned __int8 v2; // al
+    uint8_t v2; // al
 
     v2 = G_SoundAliasIndex((char *)aliasList->aliasName);
     G_PlaySoundAlias(&g_entities[client], v2);

@@ -152,7 +152,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
                         LABEL_36:
                             dpvsEntity.sceneEnt = &scene.sceneDObj[sceneEntIndex];
                             if (sceneEnt->cull.state < 2)
-                                R_AddWorkerCmd(WRKCMD_DPVS_ENTITY, (unsigned __int8 *)&dpvsEntity);
+                                R_AddWorkerCmd(WRKCMD_DPVS_ENTITY, (uint8_t *)&dpvsEntity);
                             else
                                 R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)&dpvsEntity);
                         }

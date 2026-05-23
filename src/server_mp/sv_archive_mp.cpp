@@ -333,12 +333,12 @@ int __cdecl GetFollowPlayerStateLocal(int clientNum, playerState_s *ps)
     if ((*(int *)((_BYTE *)&svsHeader.firstPlayerState->otherFlags + clientNum * svsHeader.clientSize) & 4) != 0)
     {
         memcpy(
-            (unsigned __int8 *)ps,
-            (unsigned __int8 *)svsHeader.firstPlayerState + clientNum * svsHeader.clientSize,
+            (uint8_t *)ps,
+            (uint8_t *)svsHeader.firstPlayerState + clientNum * svsHeader.clientSize,
             sizeof(playerState_s));
         for (index = 0; index < 0x1F && ps->hud.current[index].type; ++index)
         {
-            memset((unsigned __int8 *)&ps->hud.current[index], 0, sizeof(ps->hud.current[index]));
+            memset((uint8_t *)&ps->hud.current[index], 0, sizeof(ps->hud.current[index]));
             if (ps->hud.current[index].type)
                 MyAssertHandler(".\\server_mp\\sv_archive_mp.cpp", 74, 0, "%s", "ps->hud.current[index].type == HE_TYPE_FREE");
         }
@@ -357,7 +357,7 @@ int __cdecl GetFollowPlayerStateLocal(int clientNum, playerState_s *ps)
     }
     else
     {
-        memset((unsigned __int8 *)ps, 0, sizeof(playerState_s));
+        memset((uint8_t *)ps, 0, sizeof(playerState_s));
         return 0;
     }
 }

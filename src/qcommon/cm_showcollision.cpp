@@ -5,7 +5,7 @@
 #include <Windows.h>
 
 
-unsigned __int8 windingPool[12292];
+uint8_t windingPool[12292];
 
 void __cdecl TRACK_cm_showcollision()
 {
@@ -353,7 +353,7 @@ void __cdecl CM_AddExteriorPointToWindingProjected(winding_t *w, float *pt, int 
     iassert( bestIndex >= 0 );
     if (bestSignedArea < -EQUAL_EPSILON)
     {
-        memmove((unsigned __int8 *)w->p[bestIndex + 1], (unsigned __int8 *)w->p[bestIndex], 12 * (w->numpoints - bestIndex));
+        memmove((uint8_t *)w->p[bestIndex + 1], (uint8_t *)w->p[bestIndex], 12 * (w->numpoints - bestIndex));
         v4 = w->p[bestIndex];
         *v4 = *pt;
         v4[1] = pt[1];
@@ -611,7 +611,7 @@ BOOL __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane
     //    Ljmptab[7] = (int)&Lcase7;
     //}
     //signbits = p->signbits;
-    //if ((unsigned __int8)signbits < 8u)
+    //if ((uint8_t)signbits < 8u)
     //    __asm { jmp     Ljmptab[eax * 4] }
     //__debugbreak();
 

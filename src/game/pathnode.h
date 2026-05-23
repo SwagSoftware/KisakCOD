@@ -95,9 +95,9 @@ struct pathlink_s // sizeof=0xC
 {
     float fDist;
     unsigned __int16 nodeNum;
-    unsigned __int8 disconnectCount;
-    unsigned __int8 negotiationLink;
-    unsigned __int8 ubBadPlaceCount[4];
+    uint8_t disconnectCount;
+    uint8_t negotiationLink;
+    uint8_t ubBadPlaceCount[4];
 };
 static_assert(sizeof(pathlink_s) == 12);
 
@@ -210,7 +210,7 @@ struct PathData // sizeof=0x28
     unsigned __int16 *chainNodeForNode;
     unsigned __int16 *nodeForChainNode;
     int visBytes;
-    unsigned __int8 *pathVis;
+    uint8_t *pathVis;
     int nodeTreeCount;
     pathnode_tree_t *nodeTree;
 };

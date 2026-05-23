@@ -30,7 +30,7 @@ struct scr_block_s // sizeof=0x218
     int localVarsCreateCount;
     int localVarsPublicCount;
     int localVarsCount;
-    unsigned __int8 localVarsInitBits[8];
+    uint8_t localVarsInitBits[8];
     scr_localVar_t localVars[LOCAL_VAR_STACK_SIZE];
 };
 static_assert(sizeof(scr_block_s) == 0x218);
@@ -111,10 +111,10 @@ struct Scr_WatchElement_s // sizeof=0x64
     // padding byte
     // padding byte
     unsigned int objectId;
-    unsigned __int8 objectType;
-    unsigned __int8 oldObjectType;
+    uint8_t objectType;
+    uint8_t oldObjectType;
     bool expand;
-    unsigned __int8 breakpointType;
+    uint8_t breakpointType;
     bool hitBreakpoint;
     bool changed;
     bool valueDefined;
@@ -226,15 +226,15 @@ static_assert(sizeof(scrDebuggerGlob_t) == 0x2B8);
 void __cdecl TRACK_scr_debugger();
 void __cdecl Scr_KeyEvent(int key);
 void __cdecl Scr_AddDebugText(char *text);
-void __cdecl Scr_AddManualBreakpoint(unsigned __int8 *codePos);
-void __cdecl Scr_AddBreakpoint(const unsigned __int8 *codePos);
+void __cdecl Scr_AddManualBreakpoint(uint8_t *codePos);
+void __cdecl Scr_AddBreakpoint(const uint8_t *codePos);
 char *__cdecl Scr_FindBreakpointInfo(const char *codePos);
 Scr_Breakpoint *__cdecl Scr_AllocBreakpoint();
 void __cdecl Scr_FreeBreakpoint(Scr_Breakpoint *breakpoint);
 Scr_WatchElement_s *__cdecl Scr_ReadElement();
 void __cdecl Scr_FreeLineBreakpoint(Scr_Breakpoint *breakpoint, bool deleteElement);
-void __cdecl Scr_RemoveManualBreakpoint(unsigned __int8 *codePos);
-void __cdecl Scr_RemoveBreakpoint(unsigned __int8 *codePos);
+void __cdecl Scr_RemoveManualBreakpoint(uint8_t *codePos);
+void __cdecl Scr_RemoveBreakpoint(uint8_t *codePos);
 void __cdecl Scr_WriteElement(Scr_WatchElement_s *element);
 void __cdecl Scr_MonitorCommand(const char *text);
 Scr_WatchElement_s *Scr_ResumeBreakpoints();
@@ -267,10 +267,10 @@ void __cdecl Scr_CheckBreakonNotify(
 void __cdecl Scr_SpecialBreakpoint(VariableValue *top, char *pos, unsigned int localId, int opcode, int type);
 char __cdecl Scr_AllowBreakpoint(char *pos);
 Scr_OpcodeList_s *Scr_UnbreakAllAssignmentPos();
-void __cdecl Scr_RemoveAssignmentBreakpoint(unsigned __int8 *codePos);
+void __cdecl Scr_RemoveAssignmentBreakpoint(uint8_t *codePos);
 bool __cdecl Scr_RefToVariable(unsigned int id, int isObject);
 Scr_OpcodeList_s *Scr_BreakOnAllAssignmentPos();
-void __cdecl Scr_AddAssignmentBreakpoint(unsigned __int8 *codePos);
+void __cdecl Scr_AddAssignmentBreakpoint(uint8_t *codePos);
 void Scr_Step();
 void __cdecl Scr_InitDebuggerMain();
 void __cdecl Scr_ShutdownDebuggerMain();

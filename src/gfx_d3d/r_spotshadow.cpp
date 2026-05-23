@@ -80,7 +80,7 @@ char __cdecl R_AddSpotShadowsForLight(
     ++viewInfo->spotShadowCount;
     light->spotShadowIndex = spotShadowIndex;
 
-    iassert(shadowableLightIndex == (unsigned __int8)shadowableLightIndex);
+    iassert(shadowableLightIndex == (uint8_t)shadowableLightIndex);
 
     viewInfo->spotShadows[spotShadowIndex].shadowableLightIndex = shadowableLightIndex;
     viewInfo->spotShadows[spotShadowIndex].light = light;
@@ -236,7 +236,7 @@ void __cdecl R_AddSpotShadowModelEntities(
             if (entnum != gfxCfg.entnumNone)
             {
                 if (R_IsEntityVisibleToPrimaryLight(localClientNum, entnum, primaryLightIndex))
-                    R_AddWorkerCmd(WRKCMD_SPOT_SHADOW_ENT, (unsigned __int8 *)&cmd);
+                    R_AddWorkerCmd(WRKCMD_SPOT_SHADOW_ENT, (uint8_t *)&cmd);
             }
         }
     }

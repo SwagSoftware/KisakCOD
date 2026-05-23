@@ -36,7 +36,7 @@ void __cdecl R_BoxSurfaces_r(
     unsigned int surfListSize,
     unsigned int *surfCounts,
     unsigned int listCount,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 void __cdecl R_CellSurfaces(
     int cellIndex,
     const float *mins,
@@ -46,7 +46,7 @@ void __cdecl R_CellSurfaces(
     GfxSurface **surfList,
     unsigned int surfListSize,
     unsigned int *surfCount,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 void __cdecl R_AABBTreeSurfaces_r(
     GfxAabbTree *tree,
     const float *mins,
@@ -66,7 +66,7 @@ void __cdecl R_CellSurfacesTwoLists(
     GfxSurface ***surfLists,
     unsigned int surfListSize,
     unsigned int *surfCounts,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 void __cdecl R_AABBTreeSurfacesTwoLists_r(
     GfxAabbTree *tree,
     const float *mins,
@@ -90,7 +90,7 @@ void __cdecl R_BoxStaticModels_r(
     unsigned __int16 *smodelList,
     int smodelListSize,
     int *smodelCount,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 void __cdecl R_CellStaticModels(
     int cellIndex,
     const float *mins,
@@ -99,7 +99,7 @@ void __cdecl R_CellStaticModels(
     unsigned __int16 *smodelList,
     int smodelListSize,
     int *smodelCount,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 void __cdecl R_AABBTreeStaticModels_r(
     GfxAabbTree *tree,
     const float *mins,
@@ -131,7 +131,7 @@ void __cdecl R_CylinderSurfaces_r(
     GfxSurface **surfList,
     unsigned int surfListSize,
     unsigned int *surfCount,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 void __cdecl R_CellCylinderSurfaces(
     int cellIndex,
     const DpvsPlane *planes,
@@ -141,7 +141,7 @@ void __cdecl R_CellCylinderSurfaces(
     GfxSurface **surfList,
     unsigned int surfListSize,
     unsigned int *surfCount,
-    unsigned __int8 *cellBits);
+    uint8_t *cellBits);
 int __cdecl R_OutsideFrustumPlanes(const DpvsPlane *planes, unsigned int planeCount, const float *minmax);
 void __cdecl R_AABBTreeCylinderSurfaces_r(
     GfxAabbTree *tree,

@@ -48,8 +48,8 @@ void __cdecl R_AddDebugPolygon(DebugGlobals *debugGlobalsEntry, const float *col
                 PROF_SCOPED("R_Memcpy");
                 {
                     memcpy(
-                        (unsigned __int8 *)debugGlobalsEntry->verts[debugGlobalsEntry->vertCount],
-                        (unsigned __int8 *)points,
+                        (uint8_t *)debugGlobalsEntry->verts[debugGlobalsEntry->vertCount],
+                        (uint8_t *)points,
                         12 * pointCount);
                 }
 
@@ -175,7 +175,7 @@ void __cdecl R_AddScaledDebugString(
 
 void __cdecl R_InitDebugEntry(DebugGlobals *debugGlobalsEntry)
 {
-    memset((unsigned __int8 *)debugGlobalsEntry, 0, sizeof(DebugGlobals));
+    memset((uint8_t *)debugGlobalsEntry, 0, sizeof(DebugGlobals));
     debugGlobalsEntry->vertLimit = 4096;
     debugGlobalsEntry->polyLimit = 512;
     debugGlobalsEntry->stringLimit = 4096;
@@ -223,8 +223,8 @@ void __cdecl R_TransferDebugGlobals(DebugGlobals *debugGlobalsEntry)
             debugGlobalsEntry->plumes))
     {
         memcpy(
-            (unsigned __int8 *)debugGlobalsEntry->plumes,
-            (unsigned __int8 *)debugGlobals.plumes,
+            (uint8_t *)debugGlobalsEntry->plumes,
+            (uint8_t *)debugGlobals.plumes,
             40 * debugGlobals.plumeCount);
     LABEL_11:
         debugGlobalsEntry->plumeCount = debugGlobals.plumeCount;
@@ -244,7 +244,7 @@ void __cdecl R_CopyDebugStrings(
     int maxStringCount)
 {
     DebugGlobals *dg; // [esp+0h] [ebp-Ch]
-    unsigned __int8 *dest; // [esp+8h] [ebp-4h]
+    uint8_t *dest; // [esp+8h] [ebp-4h]
 
     dg = &frontEndDataOut->debugGlobals;
     if (!clStrings && !svStrings
@@ -252,14 +252,14 @@ void __cdecl R_CopyDebugStrings(
         || (R_DebugAlloc((void **)&frontEndDataOut->debugGlobals.externStrings, maxStringCount << 7, "R_CopyDebugStrings"),
             dg->externStrings))
     {
-        dest = (unsigned __int8 *)dg->externStrings;
+        dest = (uint8_t *)dg->externStrings;
         if (clStrings)
         {
-            memcpy(dest, (unsigned __int8 *)clStrings, clStringCnt << 7);
+            memcpy(dest, (uint8_t *)clStrings, clStringCnt << 7);
             dest += 128 * clStringCnt;
         }
         if (svStrings)
-            memcpy(dest, (unsigned __int8 *)svStrings, svStringCnt << 7);
+            memcpy(dest, (uint8_t *)svStrings, svStringCnt << 7);
         dg->externStringCount = svStringCnt + clStringCnt;
     }
 }
@@ -272,7 +272,7 @@ void __cdecl R_CopyDebugLines(
     int maxLineCount)
 {
     DebugGlobals *dg; // [esp+0h] [ebp-Ch]
-    unsigned __int8 *dest; // [esp+8h] [ebp-4h]
+    uint8_t *dest; // [esp+8h] [ebp-4h]
 
     dg = &frontEndDataOut->debugGlobals;
     if (!clLines && !svLines
@@ -280,14 +280,14 @@ void __cdecl R_CopyDebugLines(
         || (R_DebugAlloc((void **)&frontEndDataOut->debugGlobals.externLines, 44 * maxLineCount, "R_CopyDebugLines"),
             dg->externLines))
     {
-        dest = (unsigned __int8 *)dg->externLines;
+        dest = (uint8_t *)dg->externLines;
         if (clLines)
         {
-            memcpy(dest, (unsigned __int8 *)clLines, 44 * clLineCnt);
+            memcpy(dest, (uint8_t *)clLines, 44 * clLineCnt);
             dest += 44 * clLineCnt;
         }
         if (svLines)
-            memcpy(dest, (unsigned __int8 *)svLines, 44 * svLineCnt);
+            memcpy(dest, (uint8_t *)svLines, 44 * svLineCnt);
         dg->externLineCount = svLineCnt + clLineCnt;
     }
 }

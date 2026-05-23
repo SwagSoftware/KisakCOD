@@ -121,20 +121,20 @@ char __cdecl R_GetClearColor(float *unpackedRgba)
         {
             if (r_clear->current.integer == 3 || (Sys_Milliseconds() & 0x200) == 0)
             {
-                Byte4UnpackRgba((const unsigned __int8 *)&r_clearColor->current, unpackedRgba);
+                Byte4UnpackRgba((const uint8_t *)&r_clearColor->current, unpackedRgba);
                 unpackedRgba[3] = 1.0;
                 return 1;
             }
             else
             {
-                Byte4UnpackRgba((const unsigned __int8 *)&r_clearColor2->current, unpackedRgba);
+                Byte4UnpackRgba((const uint8_t *)&r_clearColor2->current, unpackedRgba);
                 unpackedRgba[3] = 1.0;
                 return 1;
             }
         }
         else
         {
-            Byte4UnpackBgra((const unsigned __int8 *)&rg.fogSettings[2].color, unpackedRgba);
+            Byte4UnpackBgra((const uint8_t *)&rg.fogSettings[2].color, unpackedRgba);
             unpackedRgba[3] = 1.0;
             return 1;
         }
@@ -149,7 +149,7 @@ char __cdecl R_GetClearColor(float *unpackedRgba)
     }
 }
 
-void __cdecl Byte4UnpackBgra(const unsigned __int8 *from, float *to)
+void __cdecl Byte4UnpackBgra(const uint8_t *from, float *to)
 {
     *to = (double)from[2] * 0.003921568859368563;
     to[1] = (double)from[1] * 0.003921568859368563;

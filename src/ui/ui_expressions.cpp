@@ -1377,7 +1377,7 @@ void __cdecl GetPlayerField(int localClientNum, Operand *source, Operand *result
                         else
                         {
                             result->dataType = VAL_INT;
-                            result->internals.intVal = (unsigned __int8)CG_LookingThroughNightVision(localClientNum);
+                            result->internals.intVal = (uint8_t)CG_LookingThroughNightVision(localClientNum);
                             if (uiscript_debug->current.integer)
                                 Com_Printf(13, "player( %s ) = %i\n", source->internals.string, result->internals.intVal);
                         }
@@ -1542,7 +1542,7 @@ void __cdecl GetFlashbanged(int localClientNum, Operand *result)
 void __cdecl GetScoped(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
-    result->internals.intVal = (unsigned __int8)CG_ScopeIsOverlayed(localClientNum);
+    result->internals.intVal = (uint8_t)CG_ScopeIsOverlayed(localClientNum);
     if (uiscript_debug->current.integer)
         Com_Printf(13, "scoped() = %i\n", result->internals.intVal);
 }
@@ -2628,7 +2628,7 @@ Operand *__cdecl EvaluateExpression(int localClientNum, const statement_s *state
     int i; // [esp+14B8h] [ebp-4h]
 
     g_releaseBuildStatement = statement;
-    memset((unsigned __int8 *)&dst, 0, sizeof(dst));
+    memset((uint8_t *)&dst, 0, sizeof(dst));
     opStack.numOperators = 0;
     for (i = 0; i < statement->numEntries; ++i)
     {

@@ -98,9 +98,9 @@ struct BrushWrapper // sizeof=0x50
     unsigned int numsides;
     cbrushside_t *sides;
     __int16 axialMaterialNum[2][3];
-    unsigned __int8 *baseAdjacentSide;
+    uint8_t *baseAdjacentSide;
     __int16 firstAdjacentSideOffsets[2][3];
-    unsigned __int8 edgeCount[2][3];
+    uint8_t edgeCount[2][3];
     // padding byte
     // padding byte
     int totalEdgeCount;

@@ -146,8 +146,8 @@ union MaterialTextureDefRaw_u // sizeof=0x4
 struct MaterialTextureDefRaw // sizeof=0xC
 {
     unsigned int nameOffset;
-    unsigned __int8 samplerState;
-    unsigned __int8 semantic;
+    uint8_t samplerState;
+    uint8_t semantic;
     // padding byte
     // padding byte
     MaterialTextureDefRaw_u u;
@@ -182,8 +182,8 @@ struct ShaderUniformDef // sizeof=0x10
 struct ShaderVaryingDef // sizeof=0x8
 {                                       // ...
     const char *name;
-    unsigned __int8 streamDest;
-    unsigned __int8 resourceDest;
+    uint8_t streamDest;
+    uint8_t resourceDest;
     bool isAssigned;
     // padding byte
 };
@@ -207,8 +207,8 @@ struct MaterialTypeInfo // sizeof=0xC
 
 struct MaterialStreamRouting // sizeof=0x2
 {                                       // ...
-    unsigned __int8 source;             // ...
-    unsigned __int8 dest;               // ...
+    uint8_t source;             // ...
+    uint8_t dest;               // ...
 };
 
 struct MtlStateMapBitName // sizeof=0x8
@@ -242,7 +242,7 @@ struct MaterialVertexStreamRouting // sizeof=0x60
 
 struct MaterialVertexDeclaration // sizeof=0x64
 {                                       // ...
-    unsigned __int8 streamCount;
+    uint8_t streamCount;
     bool hasOptionalSource;
     bool isLoaded;
     // padding byte
@@ -274,8 +274,8 @@ struct MaterialPixelShader // sizeof=0x10
 struct MaterialArgumentCodeConst // sizeof=0x4
 {                                       // ...
     unsigned __int16 index;
-    unsigned __int8 firstRow;
-    unsigned __int8 rowCount;
+    uint8_t firstRow;
+    uint8_t rowCount;
 };
 union MaterialArgumentDef // sizeof=0x4
 {                                       // ...
@@ -295,10 +295,10 @@ struct MaterialPass // sizeof=0x14
     MaterialVertexDeclaration *vertexDecl; // ... // 0
     MaterialVertexShader *vertexShader; // 4
     MaterialPixelShader *pixelShader; // 8
-    unsigned __int8 perPrimArgCount;
-    unsigned __int8 perObjArgCount;
-    unsigned __int8 stableArgCount;
-    unsigned __int8 customSamplerFlags;
+    uint8_t perPrimArgCount;
+    uint8_t perObjArgCount;
+    uint8_t stableArgCount;
+    uint8_t customSamplerFlags;
     MaterialShaderArgument *args;
 };
 
@@ -378,7 +378,7 @@ struct CodeSamplerSource // sizeof=0x14
 struct CodeConstantSource // sizeof=0x14
 {                                       // ...
     const char *name;
-    unsigned __int8 source;
+    uint8_t source;
     // padding byte
     // padding byte
     // padding byte
@@ -419,8 +419,8 @@ struct MaterialTextureDef // sizeof=0xC
     unsigned int nameHash;
     char nameStart;
     char nameEnd;
-    unsigned __int8 samplerState;
-    unsigned __int8 semantic;
+    uint8_t samplerState;
+    uint8_t semantic;
     MaterialTextureDefInfo u;
 };
 
@@ -434,10 +434,10 @@ struct MaterialConstantDef // sizeof=0x20
 struct MaterialInfo // sizeof=0x18
 {                                       // ...
     const char *name;                   // ...
-    unsigned __int8 gameFlags;
-    unsigned __int8 sortKey;
-    unsigned __int8 textureAtlasRowCount; // ...
-    unsigned __int8 textureAtlasColumnCount; // ...
+    uint8_t gameFlags;
+    uint8_t sortKey;
+    uint8_t textureAtlasRowCount; // ...
+    uint8_t textureAtlasColumnCount; // ...
     GfxDrawSurf drawSurf;
     unsigned int surfaceTypeBits;
     unsigned __int16 hashIndex;
@@ -448,9 +448,9 @@ struct MaterialInfo // sizeof=0x18
 struct MaterialTechniqueSet // sizeof=0x94
 {                                       // ...
     const char *name;
-    unsigned __int8 worldVertFormat;
+    uint8_t worldVertFormat;
     bool hasBeenUploaded;
-    unsigned __int8 unused[1];
+    uint8_t unused[1];
     // padding byte
     MaterialTechniqueSet *remappedTechniqueSet;
     MaterialTechnique *techniques[34];
@@ -460,12 +460,12 @@ static_assert(sizeof(MaterialTechniqueSet) == 148);
 struct Material // sizeof=0x50
 {                                       // ...
     MaterialInfo info;
-    unsigned __int8 stateBitsEntry[34];
-    unsigned __int8 textureCount;
-    unsigned __int8 constantCount;
-    unsigned __int8 stateBitsCount;
-    unsigned __int8 stateFlags;
-    unsigned __int8 cameraRegion;
+    uint8_t stateBitsEntry[34];
+    uint8_t textureCount;
+    uint8_t constantCount;
+    uint8_t stateBitsCount;
+    uint8_t stateFlags;
+    uint8_t cameraRegion;
     // padding byte
     MaterialTechniqueSet *techniqueSet;
     MaterialTextureDef *textureTable;
@@ -482,14 +482,14 @@ struct MaterialMemory // sizeof=0x8
 
 struct stream_source_info_t // sizeof=0x3
 {                                       // ...
-    unsigned __int8 Stream;
-    unsigned __int8 Offset;
-    unsigned __int8 Type;
+    uint8_t Stream;
+    uint8_t Offset;
+    uint8_t Type;
 };
 struct stream_dest_info_t // sizeof=0x2
 {                                       // ...
-    unsigned __int8 Usage;
-    unsigned __int8 UsageIndex;
+    uint8_t Usage;
+    uint8_t UsageIndex;
 };
 
 enum MtlTechSetNotFoundBehavior : __int32
@@ -542,13 +542,13 @@ struct MaterialInfoRaw // sizeof=0x28
 {                                       // ...
     unsigned int nameOffset;
     unsigned int refImageNameOffset;
-    unsigned __int8 gameFlags;
-    unsigned __int8 sortKey;
-    unsigned __int8 textureAtlasRowCount;
-    unsigned __int8 textureAtlasColumnCount;
+    uint8_t gameFlags;
+    uint8_t sortKey;
+    uint8_t textureAtlasRowCount;
+    uint8_t textureAtlasColumnCount;
     float maxDeformMove;
-    unsigned __int8 deformFlags;
-    unsigned __int8 usage;
+    uint8_t deformFlags;
+    uint8_t usage;
     unsigned __int16 toolFlags;
     unsigned int locale;
     unsigned __int16 autoTexScaleWidth;
@@ -607,7 +607,7 @@ bool __cdecl IsValidMaterialHandle(Material* const handle);
 
 void __cdecl TRACK_r_material();
 
-unsigned __int8 *__cdecl Material_Alloc(unsigned int size);
+uint8_t *__cdecl Material_Alloc(unsigned int size);
 void __cdecl Load_CreateMaterialPixelShader(GfxPixelShaderLoadDef *loadDef, MaterialPixelShader *mtlShader);
 void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, MaterialVertexShader *mtlShader);
 void __cdecl AssertValidVertexDeclOffsets(const stream_source_info_t *streamTable);
@@ -687,7 +687,7 @@ char __cdecl Material_SetPassShaderArguments_DX(
     MaterialShaderArgument *args);
 
 const char *__cdecl Material_RegisterString(char *string);
-const char *__cdecl Material_NameForStreamDest(unsigned __int8 dest);
+const char *__cdecl Material_NameForStreamDest(uint8_t dest);
 MaterialTechniqueSet *__cdecl Material_RegisterTechniqueSet(const char *name);
 void __cdecl Material_SetMaterialDrawRegion(Material *material);
 char __cdecl Material_Validate(const Material *material);

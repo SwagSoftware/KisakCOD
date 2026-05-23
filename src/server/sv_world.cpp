@@ -867,7 +867,7 @@ void __cdecl SV_Trace(
     const IgnoreEntParams *ignoreEntParams,
     int contentmask,
     int locational,
-    unsigned __int8 *priorityMap,
+    uint8_t *priorityMap,
     int staticmodels)
 {
     gentity_s *v10; // eax
@@ -1055,7 +1055,7 @@ int __cdecl SV_TracePassed(
     int passEntityNum1,
     int contentmask,
     int locational,
-    unsigned __int8 *priorityMap,
+    uint8_t *priorityMap,
     int staticmodels)
 {
     sightclip_t result; // [esp+84h] [ebp-80h] BYREF

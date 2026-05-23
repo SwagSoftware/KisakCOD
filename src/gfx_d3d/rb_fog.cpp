@@ -16,7 +16,7 @@ void __cdecl R_SetFrameFog(GfxCmdBufInput *input)
         data = input->data;
         iassert( data );
         fog = &data->fogSettings;
-        Byte4UnpackBgra((const unsigned __int8 *)&data->fogSettings.color, fogColorVec);
+        Byte4UnpackBgra((const uint8_t *)&data->fogSettings.color, fogColorVec);
         R_SetInputCodeConstantFromVec4(input, CONST_SRC_CODE_FOG_COLOR, fogColorVec);
         parms[0] = 0.0;
         parms[1] = 1.0;

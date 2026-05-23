@@ -17,7 +17,7 @@
 
 struct ShadowReceiverCallback // sizeof=0x4
 {                                       // ...
-    unsigned __int8 *surfaceVisData;    // ...
+    uint8_t *surfaceVisData;    // ...
 };
 struct ShadowCookieGlob // sizeof=0x8
 {                                       // ...
@@ -637,7 +637,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
                         rgp.world->surfaceCount);
                 surfIndex = surfaces[listSurfIndex] - rgp.world->dpvs.surfaces;
                 triSurfList[0] = surfIndex;
-                R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (unsigned __int8 *)triSurfList, 1u, &surfData);
+                R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (uint8_t *)triSurfList, 1u, &surfData);
             }
             R_EndCmdBuf(&surfData.delayedCmdBuf);
             scene.cookie[cookieIndex].drawSurfCount = surfData.drawSurfList.current - scene.cookie[cookieIndex].drawSurfs;

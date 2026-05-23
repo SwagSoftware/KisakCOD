@@ -248,7 +248,7 @@ void __cdecl SV_CullIgnorableServerCommands(client_t *client)
     client->reliableSequence = to - 1;
 }
 
-unsigned __int8 tempServerCommandBuf[131072];
+uint8_t tempServerCommandBuf[131072];
 void SV_SendServerCommand(client_t *cl, svscmd_type type, const char *fmt, ...)
 {
     const char *v3; // eax
@@ -314,7 +314,7 @@ void __cdecl SVC_Status(netadr_t from)
     const char *v3; // eax
     const char *v4; // eax
     char v5; // [esp+3h] [ebp-4861h]
-    unsigned __int8 *v6; // [esp+8h] [ebp-485Ch]
+    uint8_t *v6; // [esp+8h] [ebp-485Ch]
     char *v7; // [esp+Ch] [ebp-4858h]
     int ClientScore; // [esp+20h] [ebp-4844h]
     char v9; // [esp+27h] [ebp-483Dh]
@@ -426,7 +426,7 @@ void __cdecl SVC_GameCompleteStatus(netadr_t from)
     int ping; // [esp-8h] [ebp-C58h]
     const char *name; // [esp-4h] [ebp-C54h]
     char v7; // [esp+3h] [ebp-C4Dh]
-    unsigned __int8 *v8; // [esp+8h] [ebp-C48h]
+    uint8_t *v8; // [esp+8h] [ebp-C48h]
     char *v9; // [esp+Ch] [ebp-C44h]
     char v10; // [esp+23h] [ebp-C2Dh]
     char *v11; // [esp+28h] [ebp-C28h]

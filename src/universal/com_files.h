@@ -37,12 +37,12 @@ struct iwd_t // sizeof=0x324
     char iwdFilename[256];
     char iwdBasename[256];
     char iwdGamename[256];
-    unsigned __int8* handle;
+    uint8_t* handle;
     int checksum;
     int pure_checksum;
     volatile unsigned int hasOpenFile;
     int numfiles;
-    unsigned __int8 referenced;
+    uint8_t referenced;
     // padding byte
     // padding byte
     // padding byte
@@ -114,7 +114,7 @@ int __cdecl FS_FOpenFileReadDatabase(const char *filename, int *file);
 unsigned int __cdecl FS_FOpenFileRead(const char *filename, int *file);
 bool __cdecl FS_Delete(const char *filename);
 int __cdecl FS_FilenameCompare(const char *s1, const char *s2);
-unsigned int __cdecl FS_Read(unsigned __int8 *buffer, unsigned int len, int h);
+unsigned int __cdecl FS_Read(uint8_t *buffer, unsigned int len, int h);
 unsigned int __cdecl FS_Write(const char *buffer, unsigned int len, int h);
 unsigned int __cdecl FS_WriteLog(const char *buffer, unsigned int len, int h);
 void FS_Printf(int h, const char *fmt, ...);

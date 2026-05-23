@@ -87,14 +87,14 @@ char __cdecl R_PreTessBspDrawSurfs(
 
         R_WritePrimDrawSurfInt(&surfData->delayedCmdBuf, simplifiedCount);
         R_WritePrimDrawSurfInt(&surfData->delayedCmdBuf, firstIndex);
-        R_WritePrimDrawSurfData(&surfData->delayedCmdBuf, (unsigned __int8 *)simplifiedList, simplifiedCount);
+        R_WritePrimDrawSurfData(&surfData->delayedCmdBuf, (uint8_t *)simplifiedList, simplifiedCount);
     }
     return 1;
 }
 
 void __cdecl R_AddBspDrawSurfs(
     GfxDrawSurf drawSurf,
-    unsigned __int8 *list,
+    uint8_t *list,
     unsigned int count,
     GfxBspDrawSurfData *surfData)
 {
@@ -131,7 +131,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     GfxDrawSurf drawSurf; // [esp+140h] [ebp-38h]
     GfxDrawSurf prevDrawSurf; // [esp+148h] [ebp-30h]
     unsigned int sortedSurfIndex; // [esp+150h] [ebp-28h]
-    const unsigned __int8* surfaceVisData; // [esp+154h] [ebp-24h]
+    const uint8_t* surfaceVisData; // [esp+154h] [ebp-24h]
     unsigned int triSurfCount; // [esp+158h] [ebp-20h]
     GfxDrawSurf* surfaceMaterials; // [esp+15Ch] [ebp-1Ch]
     GfxBspDrawSurfData surfData; // [esp+160h] [ebp-18h] BYREF
@@ -164,7 +164,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
             if (drawSurf.packed != prevDrawSurf.packed)
             {
                 if (triSurfCount)
-                    R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+                    R_AddBspDrawSurfs(prevDrawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
                 Com_BitSetAssert(scene.shadowableLightIsUsed, drawSurf.fields.primaryLightIndex, 128);
                 prevDrawSurf.fields = drawSurf.fields;
                 triSurfCount = 0;
@@ -175,13 +175,13 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
 
             if (++triSurfCount >= 0x80)
             {
-                R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+                R_AddBspDrawSurfs(drawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
                 triSurfCount = 0;
             }
         }
     }
     if (triSurfCount)
-        R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+        R_AddBspDrawSurfs(prevDrawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     scene.drawSurfCount[stage] = surfData.drawSurfList.current - scene.drawSurfs[stage];
 }
@@ -196,7 +196,7 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
     GfxDrawSurf drawSurf; // [esp+108h] [ebp-40h]
     GfxDrawSurf prevDrawSurf; // [esp+110h] [ebp-38h]
     unsigned int sortedSurfIndex; // [esp+118h] [ebp-30h]
-    const unsigned __int8* surfaceVisData; // [esp+11Ch] [ebp-2Ch]
+    const uint8_t* surfaceVisData; // [esp+11Ch] [ebp-2Ch]
     unsigned int triSurfCount; // [esp+120h] [ebp-28h]
     GfxDrawSurf *surfaceMaterials; // [esp+124h] [ebp-24h]
     GfxBspDrawSurfData surfData; // [esp+128h] [ebp-20h] BYREF
@@ -221,7 +221,7 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
             if (drawSurf.packed != prevDrawSurf.packed)
             {
                 if (triSurfCount)
-                    R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8 *)triSurfList, triSurfCount, &surfData);
+                    R_AddBspDrawSurfs(prevDrawSurf, (uint8_t *)triSurfList, triSurfCount, &surfData);
                 prevDrawSurf.packed = drawSurf.packed;
                 triSurfCount = 0;
             }
@@ -229,13 +229,13 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
             iassert(triSurfList[triSurfCount] == sortedSurfIndex);
             if (++triSurfCount >= 128)
             {
-                R_AddBspDrawSurfs(drawSurf, (unsigned __int8 *)triSurfList, triSurfCount, &surfData);
+                R_AddBspDrawSurfs(drawSurf, (uint8_t *)triSurfList, triSurfCount, &surfData);
                 triSurfCount = 0;
             }
         }
     }
     if (triSurfCount)
-        R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8 *)triSurfList, triSurfCount, &surfData);
+        R_AddBspDrawSurfs(prevDrawSurf, (uint8_t *)triSurfList, triSurfCount, &surfData);
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     drawSurfCount = surfData.drawSurfList.current - scene.drawSurfs[stage];
     scene.drawSurfCount[stage] = drawSurfCount;
@@ -264,7 +264,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     GfxDrawSurf prevDrawSurf; // [esp+14Ch] [ebp-48h]
     unsigned int stage; // [esp+158h] [ebp-3Ch]
     unsigned int sortedSurfIndex; // [esp+15Ch] [ebp-38h]
-    const unsigned __int8 *surfaceVisData; // [esp+160h] [ebp-34h]
+    const uint8_t *surfaceVisData; // [esp+160h] [ebp-34h]
     int hasApproxSunDirChanged; // [esp+164h] [ebp-30h]
     unsigned int triSurfCount; // [esp+168h] [ebp-2Ch]
     GfxDrawSurf *surfaceMaterials; // [esp+16Ch] [ebp-28h]
@@ -306,7 +306,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                     if (drawSurf.packed != prevDrawSurf.packed)
                     {
                         if (triSurfCount)
-                            R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8 *)triSurfList, triSurfCount, &surfData);
+                            R_AddBspDrawSurfs(prevDrawSurf, (uint8_t *)triSurfList, triSurfCount, &surfData);
                         prevDrawSurf.packed = drawSurf.packed;
                         triSurfCount = 0;
                     }
@@ -314,7 +314,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                     iassert(triSurfList[triSurfCount] == sortedSurfIndex);
                     if (++triSurfCount >= 128)
                     {
-                        R_AddBspDrawSurfs(drawSurf, (unsigned __int8 *)triSurfList, triSurfCount, &surfData);
+                        R_AddBspDrawSurfs(drawSurf, (uint8_t *)triSurfList, triSurfCount, &surfData);
                         triSurfCount = 0;
                     }
                 }
@@ -336,7 +336,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                     if (triSurfCount)
                     {
                         iassert( !skipMaterial );
-                        R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+                        R_AddBspDrawSurfs(prevDrawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
                     }
                     prevDrawSurf.fields = drawSurf.fields;
                     skipMaterial = (drawSurf.fields.customIndex == 0);
@@ -348,7 +348,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
                     iassert(triSurfList[triSurfCount] == sortedSurfIndex);
                     if (++triSurfCount >= 0x80)
                     {
-                        R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+                        R_AddBspDrawSurfs(drawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
                         triSurfCount = 0;
                     }
                 }
@@ -358,7 +358,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     if (triSurfCount)
     {
         iassert( !skipMaterial );
-        R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+        R_AddBspDrawSurfs(prevDrawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
     }
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     scene.drawSurfCount[stage] = surfData.drawSurfList.current - scene.drawSurfs[stage];
@@ -400,7 +400,7 @@ void __cdecl R_AddAllBspDrawSurfacesSpotShadow(unsigned int spotShadowIndex, uns
         if (drawSurf.packed != prevDrawSurf.packed)
         {
             if (triSurfCount)
-                R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+                R_AddBspDrawSurfs(prevDrawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
             prevDrawSurf.fields = drawSurf.fields;
             triSurfCount = 0;
         }
@@ -415,12 +415,12 @@ void __cdecl R_AddAllBspDrawSurfacesSpotShadow(unsigned int spotShadowIndex, uns
                 sortedSurfIndex);
         if (++triSurfCount >= 0x80)
         {
-            R_AddBspDrawSurfs(drawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+            R_AddBspDrawSurfs(drawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
             triSurfCount = 0;
         }
     }
     if (triSurfCount)
-        R_AddBspDrawSurfs(prevDrawSurf, (unsigned __int8*)triSurfList, triSurfCount, &surfData);
+        R_AddBspDrawSurfs(prevDrawSurf, (uint8_t*)triSurfList, triSurfCount, &surfData);
     R_EndCmdBuf(&surfData.delayedCmdBuf);
     drawSurfCount = surfData.drawSurfList.current - drawSurfs;
     scene.drawSurfCount[stage] += drawSurfCount;

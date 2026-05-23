@@ -29,37 +29,37 @@ void __cdecl R_ProcessCmd_UpdateFxRemaining(FxCmd *cmd)
         Sys_WaitUpdateNonDependentEffectsCompleted();
     }
     FX_EndUpdate(cmd->localClientNum);
-    R_AddWorkerCmd(WRKCMD_GENERATE_MARK_VERTS, (unsigned __int8 *)cmd);
+    R_AddWorkerCmd(WRKCMD_GENERATE_MARK_VERTS, (uint8_t *)cmd);
     KISAK_NULLSUB();
     FX_AddNonSpriteDrawSurfs(cmd);
     FX_FillGenerateVertsCmd(cmd->localClientNum, &genVertsCmd);
-    R_AddWorkerCmd(WRKCMD_GENERATE_FX_VERTS, (unsigned __int8 *)&genVertsCmd);
+    R_AddWorkerCmd(WRKCMD_GENERATE_FX_VERTS, (uint8_t *)&genVertsCmd);
 }
 
 void __cdecl R_UpdateSpotLightEffect(FxCmd *cmd)
 {
     Sys_ResetUpdateSpotLightEffectEvent();
-    R_AddWorkerCmd(WRKCMD_UPDATE_FX_SPOT_LIGHT, (unsigned __int8 *)cmd);
+    R_AddWorkerCmd(WRKCMD_UPDATE_FX_SPOT_LIGHT, (uint8_t *)cmd);
 }
 
 void __cdecl R_UpdateNonDependentEffects(FxCmd *cmd)
 {
     Sys_ResetUpdateNonDependentEffectsEvent();
-    R_AddWorkerCmd(WRKCMD_UPDATE_FX_NON_DEPENDENT, (unsigned __int8 *)cmd);
+    R_AddWorkerCmd(WRKCMD_UPDATE_FX_NON_DEPENDENT, (uint8_t *)cmd);
 }
 
 void __cdecl R_UpdateRemainingEffects(FxCmd *cmd)
 {
-    R_AddWorkerCmd(WRKCMD_UPDATE_FX_REMAINING, (unsigned __int8 *)cmd);
+    R_AddWorkerCmd(WRKCMD_UPDATE_FX_REMAINING, (uint8_t *)cmd);
 }
 
 void __cdecl R_UpdateXModelBoundsDelayed(GfxSceneEntity *sceneEnt)
 {
-    R_AddWorkerCmd(WRKCMD_BOUNDS_ENT_DELAYED, (unsigned __int8 *)&sceneEnt);
+    R_AddWorkerCmd(WRKCMD_BOUNDS_ENT_DELAYED, (uint8_t *)&sceneEnt);
 }
 
 void __cdecl R_SkinGfxEntityDelayed(GfxSceneEntity *sceneEnt)
 {
-    R_AddWorkerCmd(WRKCMD_SKIN_ENT_DELAYED, (unsigned __int8 *)&sceneEnt);
+    R_AddWorkerCmd(WRKCMD_SKIN_ENT_DELAYED, (uint8_t *)&sceneEnt);
 }
 

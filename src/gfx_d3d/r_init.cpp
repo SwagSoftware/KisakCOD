@@ -2790,7 +2790,7 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
     }
 }
 
-void __cdecl R_GammaCorrect(unsigned __int8 *buffer, int bufSize)
+void __cdecl R_GammaCorrect(uint8_t *buffer, int bufSize)
 {
     int tableIndex; // [esp+0h] [ebp-210h]
     GfxGammaRamp gammaRamp; // [esp+8h] [ebp-208h] BYREF
@@ -3296,12 +3296,12 @@ void __cdecl R_PickRenderer(_D3DCAPS9 *caps)
         8,
         "Pixel shader version is %i.%i\n",
         BYTE1(caps->PixelShaderVersion),
-        (unsigned __int8)caps->PixelShaderVersion);
+        (uint8_t)caps->PixelShaderVersion);
     Com_Printf(
         8,
         "Vertex shader version is %i.%i\n",
         BYTE1(caps->VertexShaderVersion),
-        (unsigned __int8)caps->VertexShaderVersion);
+        (uint8_t)caps->VertexShaderVersion);
     allowedPaths = R_CheckDxCaps(caps);
     rendererChosen = GFX_RENDERER_COUNT;
     for (rendererIter = 0; rendererIter != 2; ++rendererIter)
@@ -3926,7 +3926,7 @@ void __cdecl R_SetD3DPresentParameters(_D3DPRESENT_PARAMETERS_ *d3dpp, const Gfx
     iassert( d3dpp );
     iassert( wndParms );
     R_SetupAntiAliasing(wndParms);
-    memset((unsigned __int8 *)d3dpp, 0, sizeof(_D3DPRESENT_PARAMETERS_));
+    memset((uint8_t *)d3dpp, 0, sizeof(_D3DPRESENT_PARAMETERS_));
     d3dpp->BackBufferWidth = wndParms->displayWidth;
     d3dpp->BackBufferHeight = wndParms->displayHeight;
     d3dpp->BackBufferFormat = D3DFMT_A8R8G8B8;
@@ -4174,8 +4174,8 @@ void R_Register()
 
 void R_InitGlobalStructs()
 {
-    memset((unsigned __int8 *)&rg, 0, sizeof(rg));
-    memset((unsigned __int8 *)&rgp, 0, sizeof(rgp));
+    memset((uint8_t *)&rg, 0, sizeof(rg));
+    memset((uint8_t *)&rgp, 0, sizeof(rgp));
     RB_InitBackendGlobalStructs();
     rg.identityPlacement.base.quat[0] = 0.0;
     rg.identityPlacement.base.quat[1] = 0.0;
@@ -4210,8 +4210,8 @@ void __cdecl R_TrackStatistics(trStatistics_t *stats)
 void __cdecl R_UpdateTeamColors(int team, const float *color_allies, const float *color_axis)
 {
     rg.team = team;
-    Byte4PackRgba(color_allies, (unsigned __int8 *)&rg.color_allies);
-    Byte4PackRgba(color_axis, (unsigned __int8 *)&rg.color_axis);
+    Byte4PackRgba(color_allies, (uint8_t *)&rg.color_allies);
+    Byte4PackRgba(color_axis, (uint8_t *)&rg.color_axis);
 }
 
 void __cdecl R_ConfigureRenderer(const GfxConfiguration *config)

@@ -29,7 +29,7 @@ void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagS
         MyAssertHandler(".\\game\\g_weapon.cpp", 30, 0, "%s", "antilagStore");
     if (g_antilag->current.enabled)
     {
-        memset((unsigned __int8 *)antilagStore, 0, sizeof(AntilagClientStore));
+        memset((uint8_t *)antilagStore, 0, sizeof(AntilagClientStore));
         if (gameTime <= 0)
             MyAssertHandler(".\\game\\g_weapon.cpp", 36, 0, "%s", "gameTime > 0");
         if (level.time - gameTime <= 400 && level.time - gameTime > 1000 / sv_fps->current.integer)
@@ -291,7 +291,7 @@ char __cdecl Melee_Trace(
 gentity_s *__cdecl Weapon_Throw_Grenade(
     gentity_s *ent,
     unsigned int grenType,
-    unsigned __int8 grenModel,
+    uint8_t grenModel,
     weaponParms *wp)
 {
     float scale; // [esp+4h] [ebp-50h]
@@ -344,7 +344,7 @@ gentity_s *__cdecl Weapon_Throw_Grenade(
 gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
     gentity_s *ent,
     unsigned int grenType,
-    unsigned __int8 grenModel,
+    uint8_t grenModel,
     weaponParms *wp)
 {
     float scale; // [esp+4h] [ebp-34h]
@@ -576,7 +576,7 @@ void __cdecl FireWeaponMelee(gentity_s *ent, int gametime)
     }
 }
 
-int __cdecl G_GivePlayerWeapon(playerState_s *pPS, int iWeaponIndex, unsigned __int8 altModelIndex)
+int __cdecl G_GivePlayerWeapon(playerState_s *pPS, int iWeaponIndex, uint8_t altModelIndex)
 {
     int iCurrIndex; // [esp+0h] [ebp-10h]
     int newOffHandIndex; // [esp+4h] [ebp-Ch]

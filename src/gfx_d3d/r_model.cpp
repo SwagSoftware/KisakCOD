@@ -281,7 +281,7 @@ int __cdecl R_SkinXModel(
     XSurface* xsurf; // [esp+38h] [ebp-E4Ch]
     int surfaceIndex; // [esp+40h] [ebp-E44h]
     unsigned __int16* surfPos; // [esp+44h] [ebp-E40h]
-    unsigned __int8 surfBuf[3580]; // [esp+48h] [ebp-E3Ch] BYREF
+    uint8_t surfBuf[3580]; // [esp+48h] [ebp-E3Ch] BYREF
     unsigned int hidePartBits[4]; // [esp+E4Ch] [ebp-38h] BYREF
     //XSurface* surfaces; // [esp+E5Ch] [ebp-28h]
     XSurface* surfaces; // [esp+E60h] [ebp-24h] BYREF

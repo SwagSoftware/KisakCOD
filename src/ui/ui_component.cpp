@@ -293,7 +293,7 @@ Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CloneElement(Scr_WatchElement_s 
 
 void __cdecl Scr_PrintElementText(Scr_WatchElement_s *element, int bufLen, int depth, char *buf)
 {
-    unsigned __int8 objectType; // [esp+30h] [ebp-10h]
+    uint8_t objectType; // [esp+30h] [ebp-10h]
     int threadIdSize; // [esp+34h] [ebp-Ch]
     int len; // [esp+38h] [ebp-8h]
     int lena; // [esp+38h] [ebp-8h]
@@ -683,7 +683,7 @@ void Scr_ScriptWatch::DeleteElementInternal(Scr_WatchElement_s *element)
 
 void __thiscall Scr_ScriptWatch::ToggleWatchElementBreakpoint(
     Scr_WatchElement_s *element,
-    unsigned __int8 type)
+    uint8_t type)
 {
     Scr_WatchElement_s *ElementRoot; // eax
     Scr_WatchElement_s *elementa; // [esp+10h] [ebp+8h]
@@ -708,7 +708,7 @@ void __thiscall Scr_ScriptWatch::ToggleWatchElementBreakpoint(
     }
 }
 
-void Scr_ScriptWatch::ToggleBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type)
+void Scr_ScriptWatch::ToggleBreakpoint(Scr_WatchElement_s *element, uint8_t type)
 {
     if (element)
     {
@@ -728,9 +728,9 @@ void Scr_ScriptWatch::ToggleBreakpoint(Scr_WatchElement_s *element, unsigned __i
 
 void __thiscall Scr_ScriptWatch::ToggleBreakpointInternal(
     Scr_WatchElement_s *element,
-    unsigned __int8 type)
+    uint8_t type)
 {
-    unsigned __int8 breakpointType; // [esp+0h] [ebp-Ch]
+    uint8_t breakpointType; // [esp+0h] [ebp-Ch]
     Scr_Breakpoint *breakpoint; // [esp+8h] [ebp-4h]
 
     if (!element->threadList && !element->endonList)
@@ -1115,7 +1115,7 @@ void Scr_ScriptWatch::FreeWatchElement(Scr_WatchElement_s *element)
     Scr_FreeDebugMem(element);
 }
 
-Scr_WatchElement_s *__thiscall Scr_ScriptWatch::AddBreakpoint(Scr_WatchElement_s *element, unsigned __int8 type)
+Scr_WatchElement_s *__thiscall Scr_ScriptWatch::AddBreakpoint(Scr_WatchElement_s *element, uint8_t type)
 {
     if (element->breakpointType == type)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 7396, 0, "%s", "element->breakpointType != type");
@@ -1900,7 +1900,7 @@ void Scr_ScriptWatch::PasteBreakpointElement(
     Scr_WatchElement_s *element,
     const char *text,
     bool overwrite,
-    unsigned __int8 breakpointType,
+    uint8_t breakpointType,
     bool user)
 {
     unsigned int bufferIndex; // [esp+4h] [ebp-14h]
@@ -1935,7 +1935,7 @@ void Scr_ScriptWatch::PasteBreakpointElement(
     }
 }
 
-static unsigned __int8 __cdecl Scr_GetBreakpointType(const char **pText)
+static uint8_t __cdecl Scr_GetBreakpointType(const char **pText)
 {
     switch (**pText)
     {
@@ -2022,7 +2022,7 @@ void Scr_ScriptWatch::PasteElementInternal(
     bool user)
 {
     Scr_WatchElement_s *newElement; // [esp+8h] [ebp-8h]
-    unsigned __int8 type; // [esp+Fh] [ebp-1h]
+    uint8_t type; // [esp+Fh] [ebp-1h]
 
     type = Scr_GetBreakpointType((const char **)&text);
     if (type < 4 || type > 7)
@@ -2115,7 +2115,7 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
     Scr_WatchElement_s *childElement,
     bool hardcodedField)
 {
-    unsigned __int8 objectType; // [esp+4h] [ebp-18h]
+    uint8_t objectType; // [esp+4h] [ebp-18h]
     VariableValue value; // [esp+14h] [ebp-8h] BYREF
 
     if (Sys_IsRemoteDebugClient())
@@ -2188,13 +2188,13 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
     const char *v3; // eax
     const char *v4; // eax
     const char *CanonicalString; // eax
-    unsigned __int8 v6; // [esp+4h] [ebp-12Ch]
+    uint8_t v6; // [esp+4h] [ebp-12Ch]
     bool v7; // [esp+8h] [ebp-128h]
     int v8; // [esp+Ch] [ebp-124h]
     bool v9; // [esp+10h] [ebp-120h]
     int(__cdecl * v10)(unsigned int *, unsigned int *); // [esp+14h] [ebp-11Ch]
-    unsigned __int8 v11; // [esp+18h] [ebp-118h]
-    unsigned __int8 objectType; // [esp+1Ch] [ebp-114h]
+    uint8_t v11; // [esp+18h] [ebp-118h]
+    uint8_t objectType; // [esp+1Ch] [ebp-114h]
     bool oldHardcodedField; // [esp+2Fh] [ebp-101h]
     char fieldText[136]; // [esp+30h] [ebp-100h] BYREF
     unsigned int hardcodedNames[5]; // [esp+BCh] [ebp-74h] BYREF
@@ -2202,7 +2202,7 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
     unsigned int newIndex; // [esp+D4h] [ebp-5Ch]
     unsigned int oldChildCount; // [esp+D8h] [ebp-58h]
     int(__cdecl * compare)(unsigned int*, unsigned int*); // [esp+DCh] [ebp-54h]
-    unsigned __int8 oldObjectType; // [esp+E2h] [ebp-4Eh]
+    uint8_t oldObjectType; // [esp+E2h] [ebp-4Eh]
     bool isArray; // [esp+E3h] [ebp-4Dh]
     Scr_WatchElement_s *newElements; // [esp+E4h] [ebp-4Ch]
     Scr_WatchElement_s *oldElements; // [esp+E8h] [ebp-48h]
@@ -2945,8 +2945,8 @@ void Scr_AbstractScriptList::DeleteEntryInternal()
     if (this->selectedLine >= 0)
     {
         memmove(
-            (unsigned __int8 *)&this->scriptWindows[this->selectedLine],
-            (unsigned __int8 *)&this->scriptWindows[this->selectedLine + 1],
+            (uint8_t *)&this->scriptWindows[this->selectedLine],
+            (uint8_t *)&this->scriptWindows[this->selectedLine + 1],
             4 * (this->numLines - 1 - this->selectedLine));
         --this->numLines;
         UI_LinesComponent::UpdateHeight();
@@ -3004,7 +3004,7 @@ void Scr_AbstractScriptList::AddEntry(Scr_ScriptWindow *scriptWindow, bool selec
     int newIndex; // [esp+28h] [ebp-10h]
     float newWidth; // [esp+2Ch] [ebp-Ch]
     int i; // [esp+30h] [ebp-8h]
-    unsigned __int8 *newScriptWindows; // [esp+34h] [ebp-4h]
+    uint8_t *newScriptWindows; // [esp+34h] [ebp-4h]
 
     if (select && this->selectedLine >= 0)
         selectedLine = this->selectedLine;
@@ -4054,7 +4054,7 @@ void Scr_ScriptWindow::ToggleBreakpoint(
     Scr_WatchElement_s *element,
     bool force,
     bool overwrite,
-    unsigned __int8 breakpointType,
+    uint8_t breakpointType,
     bool user)
 {
     SourceBufferInfo *sourceBufData; // [esp+4h] [ebp-4h]

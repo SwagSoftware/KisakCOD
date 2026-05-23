@@ -232,7 +232,7 @@ void RB_DrawTessSurface()
     args.vertexCount = tess.vertexCount;
     args.triCount = tess.indexCount / 3;
     iassert(gfxCmdBufState.prim.vertDeclType == VERTDECL_GENERIC);
-    args.baseIndex = R_SetIndexData(&gfxCmdBufState.prim, (unsigned __int8 *)tess.indices, tess.indexCount / 3);
+    args.baseIndex = R_SetIndexData(&gfxCmdBufState.prim, (uint8_t *)tess.indices, tess.indexCount / 3);
     R_DrawTessTechnique(gfxCmdBufContext, &args);
     tess.indexCount = 0;
     tess.vertexCount = 0;

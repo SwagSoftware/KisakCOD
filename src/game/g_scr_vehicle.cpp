@@ -2640,7 +2640,7 @@ void G_UpdateVehicleTags(gentity_s *ent)
     } while ((int)v7 < (int)&s_wheelTags[6]);
 }
 
-int VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int fieldType)
+int VEH_ParseSpecificField(uint8_t *pStruct, const char *pValue, int fieldType)
 {
     if (fieldType == 12)
     {
@@ -2714,11 +2714,11 @@ int __fastcall G_LoadVehicle(const char *name)
     v5 = (char*)name;
     do
     {
-        v6 = *(unsigned __int8 *)v5;
+        v6 = *(uint8_t *)v5;
         (v5++)[(char *)v4 - name] = v6;
     } while (v6);
     if (!ParseConfigStringToStruct(
-        (unsigned __int8 *)v4,
+        (uint8_t *)v4,
         s_vehicleFields,
         33,
         (char*)InfoString,
@@ -4468,7 +4468,7 @@ void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
         v5 = *pName;
         do
         {
-            v6 = (unsigned __int8)*v5 - *(unsigned __int8 *)actionString;
+            v6 = (uint8_t)*v5 - *(uint8_t *)actionString;
             if (!*v5)
                 break;
             ++v5;

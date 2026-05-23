@@ -31,7 +31,7 @@ struct DiskGfxVertex // sizeof=0x44
 {
     float xyz[3];
     float normal[3];
-    unsigned __int8 color[4];
+    uint8_t color[4];
     float texCoord[2];
     float lmapCoord[2];
     float tangent[3];
@@ -61,16 +61,16 @@ struct r_lightmapGroup_t // sizeof=0x8
 };
 struct LightDefCopyConfig // sizeof=0x8
 {                                       // ...
-    unsigned __int8 *dest;              // ...
+    uint8_t *dest;              // ...
     unsigned int zoom;                  // ...
 };
 struct DiskLightRegion // sizeof=0x1
 {
-    unsigned __int8 hullCount;
+    uint8_t hullCount;
 };
 struct r_lightmapMerge_t // sizeof=0x14
 {                                       // ...
-    unsigned __int8 index;
+    uint8_t index;
     // padding byte
     // padding byte
     // padding byte
@@ -81,11 +81,11 @@ struct r_lightmapMerge_t // sizeof=0x14
 struct DiskTriangleSoup // sizeof=0x18
 {
     unsigned __int16 materialIndex;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
-    unsigned __int8 primaryLightIndex;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
+    uint8_t primaryLightIndex;
     bool castsSunShadow;
-    unsigned __int8 unused[2];
+    uint8_t unused[2];
     int vertexLayerData;
     unsigned int firstVertex;
     unsigned __int16 vertexCount;
@@ -96,8 +96,8 @@ struct DiskTriangleSoup // sizeof=0x18
 struct DiskTriangleSoup_Version8 // sizeof=0x10
 {
     unsigned __int16 materialIndex;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
     int firstVertex;
     unsigned __int16 vertexCount;
     unsigned __int16 indexCount;
@@ -107,8 +107,8 @@ struct DiskTriangleSoup_Version8 // sizeof=0x10
 struct DiskTriangleSoup_Version12 // sizeof=0x14
 {
     unsigned __int16 materialIndex;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
     int vertexLayerData;
     int firstVertex;
     unsigned __int16 vertexCount;
@@ -157,7 +157,7 @@ struct GfxWorld // sizeof=0x2DC
     int skySurfCount;                   // ...
     int *skyStartSurfs;                 // ...
     GfxImage *skyImage;                 // ...
-    unsigned __int8 skySamplerState;    // ...
+    uint8_t skySamplerState;    // ...
     // padding byte
     // padding byte
     // padding byte
@@ -197,7 +197,7 @@ struct GfxWorld // sizeof=0x2DC
     struct GfxSceneDynBrush *sceneDynBrush;    // ...
     unsigned int *primaryLightEntityShadowVis; // ...
     unsigned int *primaryLightDynEntShadowVis[2]; // ...
-    unsigned __int8 *nonSunPrimaryLightForModelDynEnt; // ...
+    uint8_t *nonSunPrimaryLightForModelDynEnt; // ...
     struct GfxShadowGeometry *shadowGeom;      // ...
     struct GfxLightRegion *lightRegion;        // ...
     GfxWorldDpvsStatic dpvs;            // ...
@@ -231,7 +231,7 @@ extern GfxWorld s_world;
 extern r_globals_load_t rgl;
 
 // r_bsp_load_obj
-void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColors, GfxLightGridColors *modernColors);
+void __cdecl R_ModernizeLegacyLightGridColors(const uint8_t *legacyColors, GfxLightGridColors *modernColors);
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name);
 void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunParse, GfxLight *sunLight);
 void __cdecl R_SetUpSunLight(const float *sunColor, const float *sunDirection, GfxLight *light);
@@ -258,7 +258,7 @@ struct GfxSModelDrawSurfLightingData // sizeof=0x28
 void __cdecl R_InitBspDrawSurf(GfxBspDrawSurfData *surfData);
 void __cdecl R_AddBspDrawSurfs(
     GfxDrawSurf drawSurf,
-    unsigned __int8 *list,
+    uint8_t *list,
     unsigned int count,
     GfxBspDrawSurfData *surfData);
 void __cdecl R_AddAllBspDrawSurfacesCamera();
@@ -289,4 +289,4 @@ int __cdecl R_AllocDrawSurf(
     GfxDrawSurfList *drawSurfList,
     unsigned int size);
 void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, unsigned int value);
-void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, unsigned __int8 *data, unsigned int count);
+void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, uint8_t *data, unsigned int count);

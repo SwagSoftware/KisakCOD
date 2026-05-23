@@ -840,7 +840,7 @@ void __cdecl Com_StartupVariable(const char* match)
 
 void __cdecl Info_Print(const char* s)
 {
-    unsigned __int8* o; // [esp+0h] [ebp-410h]
+    uint8_t* o; // [esp+0h] [ebp-410h]
     char* oa; // [esp+0h] [ebp-410h]
     char key[512]; // [esp+8h] [ebp-408h] BYREF
     char value[516]; // [esp+208h] [ebp-208h] BYREF
@@ -849,16 +849,16 @@ void __cdecl Info_Print(const char* s)
         ++s;
     while (*s)
     {
-        o = (unsigned __int8*)key;
+        o = (uint8_t*)key;
         while (*s && *s != 92)
             *o++ = *s++;
-        if (o - (unsigned __int8*)key >= 20)
+        if (o - (uint8_t*)key >= 20)
         {
             *o = 0;
         }
         else
         {
-            memset(o, 0x20u, 20 - (o - (unsigned __int8*)key));
+            memset(o, 0x20u, 20 - (o - (uint8_t*)key));
             key[20] = 0;
         }
         Com_Printf(0, "%s", key);
@@ -884,7 +884,7 @@ unsigned int* __cdecl Com_AllocEvent(int size)
 }
 
 #ifdef KISAK_MP
-unsigned __int8 clientCommonMsgBuf[0x20000];
+uint8_t clientCommonMsgBuf[0x20000];
 void __cdecl Com_ClientPacketEvent()
 {
     msg_t netmsg; // [esp+4Ch] [ebp-40h] BYREF
@@ -919,7 +919,7 @@ void __cdecl Com_DispatchClientPacketEvent(netadr_t adr, msg_t* netmsg)
     CL_PacketEvent(NS_CLIENT1, adr, netmsg, Sys_Milliseconds());
 }
 
-unsigned __int8 serverCommonMsgBuf[0x20000];
+uint8_t serverCommonMsgBuf[0x20000];
 void __cdecl Com_ServerPacketEvent()
 {
     msg_t netmsg; // [esp+30h] [ebp-40h] BYREF
@@ -1753,7 +1753,7 @@ static void Com_AttractMode(int localClientNum)
     //        v5 = TopActiveMenuName;
     //        do
     //        {
-    //            v6 = *(unsigned __int8 *)v5 - *(unsigned __int8 *)v4;
+    //            v6 = *(uint8_t *)v5 - *(uint8_t *)v4;
     //            if (!*v5)
     //                break;
     //            ++v5;
@@ -1765,7 +1765,7 @@ static void Com_AttractMode(int localClientNum)
     //        v8 = TopActiveMenuName;
     //        do
     //        {
-    //            v9 = *(unsigned __int8 *)v8 - *(unsigned __int8 *)v7;
+    //            v9 = *(uint8_t *)v8 - *(uint8_t *)v7;
     //            if (!*v8)
     //                break;
     //            ++v8;
@@ -1776,7 +1776,7 @@ static void Com_AttractMode(int localClientNum)
     //        v10 = "main_text";
     //        do
     //        {
-    //            v11 = *(unsigned __int8 *)v3 - *(unsigned __int8 *)v10;
+    //            v11 = *(uint8_t *)v3 - *(uint8_t *)v10;
     //            if (!*v3)
     //                break;
     //            ++v3;
@@ -2208,7 +2208,7 @@ void __cdecl Com_Close()
 
 void __cdecl Field_Clear(field_t* edit)
 {
-    memset((unsigned __int8*)edit->buffer, 0, sizeof(edit->buffer));
+    memset((uint8_t*)edit->buffer, 0, sizeof(edit->buffer));
     edit->cursor = 0;
     edit->scroll = 0;
     edit->drawWidth = 256;

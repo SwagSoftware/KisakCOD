@@ -21,7 +21,7 @@ void __cdecl Image_GetPicmip(const GfxImage *image, Picmip *picmip)
         Image_PicmipForSemantic(image->semantic, picmip);
 }
 
-void __cdecl Image_PicmipForSemantic(unsigned __int8 semantic, Picmip *picmip)
+void __cdecl Image_PicmipForSemantic(uint8_t semantic, Picmip *picmip)
 {
     const char *v2; // eax
     int picmipUsed; // [esp+4h] [ebp-4h]
@@ -104,10 +104,10 @@ int __cdecl Image_SourceBytesPerSlice_PC(_D3DFORMAT format, int width, int heigh
 void __cdecl Image_Upload2D_CopyDataBlock_PC(
     int width,
     int height,
-    unsigned __int8 *src,
+    uint8_t *src,
     _D3DFORMAT format,
     int dstPitch,
-    unsigned __int8 *dst)
+    uint8_t *dst)
 {
     const char *v6; // eax
     const char *v7; // eax
@@ -185,7 +185,7 @@ void __cdecl Image_Upload3D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
     unsigned int mipLevel,
-    unsigned __int8 *src)
+    uint8_t *src)
 {
     const char *v4; // eax
     const char *v5; // eax
@@ -199,7 +199,7 @@ void __cdecl Image_Upload3D_CopyData_PC(
     _D3DLOCKED_BOX lockedBox; // [esp+2Ch] [ebp-18h] BYREF
     int width; // [esp+38h] [ebp-Ch]
     int height; // [esp+3Ch] [ebp-8h]
-    unsigned __int8 *dst; // [esp+40h] [ebp-4h]
+    uint8_t *dst; // [esp+40h] [ebp-4h]
 
     iassert(image);
     iassert(image->mapType == MAPTYPE_3D);
@@ -240,7 +240,7 @@ void __cdecl Image_Upload3D_CopyData_PC(
         }
     } while (alwaysfails);
 
-    dst = (unsigned __int8 *)lockedBox.pBits;
+    dst = (uint8_t *)lockedBox.pBits;
     for (sliceIndex = 0; sliceIndex < v6; ++sliceIndex)
     {
         Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedBox.RowPitch, dst);
@@ -273,7 +273,7 @@ void __cdecl Image_Upload2D_CopyData_PC(
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
     unsigned int mipLevel,
-    unsigned __int8 *src)
+    uint8_t *src)
 {
     const char *v5; // eax
     const char *v6; // eax
@@ -321,7 +321,7 @@ void __cdecl Image_Upload2D_CopyData_PC(
                 } while (alwaysfails);
             }
         } while (alwaysfails);
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (unsigned __int8 *)lockedRect.pBits);
+        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (uint8_t *)lockedRect.pBits);
         do
         {
             if (r_logFile && r_logFile->current.integer)
@@ -366,7 +366,7 @@ void __cdecl Image_Upload2D_CopyData_PC(
                 } while (alwaysfails);
             }
         } while (alwaysfails);
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (unsigned __int8 *)lockedRect.pBits);
+        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (uint8_t *)lockedRect.pBits);
         do
         {
             if (r_logFile && r_logFile->current.integer)

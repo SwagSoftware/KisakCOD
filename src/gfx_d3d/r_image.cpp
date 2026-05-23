@@ -196,7 +196,7 @@ void __cdecl Image_Release(GfxImage *image)
     }
 }
 
-GfxImage *__cdecl Image_AllocProg(int imageProgType, unsigned __int8 category, unsigned __int8 semantic)
+GfxImage *__cdecl Image_AllocProg(int imageProgType, uint8_t category, uint8_t semantic)
 {
     GfxImage *image; // [esp+0h] [ebp-Ch]
     const char *name; // [esp+4h] [ebp-8h]
@@ -417,7 +417,7 @@ GfxImage *__cdecl Image_FindExisting_FastFile(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_IMAGE, name).image;
 }
 
-GfxImage *__cdecl Image_Register(const char *imageName, unsigned __int8 semantic, int imageTrack)
+GfxImage *__cdecl Image_Register(const char *imageName, uint8_t semantic, int imageTrack)
 {
     if (IsFastFileLoad())
         return (GfxImage *)Image_Register_FastFile(imageName);
@@ -482,7 +482,7 @@ void __cdecl Image_UploadData(
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
     unsigned int mipLevel,
-    unsigned __int8 *src)
+    uint8_t *src)
 {
     if (image->mapType != MAPTYPE_CUBE || !mipLevel || gfxMetrics.canMipCubemaps)
     {
@@ -500,12 +500,12 @@ void __cdecl Image_LoadWhite(GfxImage *image)
 
 void __cdecl Image_LoadSolid(
     GfxImage *image,
-    unsigned __int8 r,
-    unsigned __int8 g,
-    unsigned __int8 b,
-    unsigned __int8 a)
+    uint8_t r,
+    uint8_t g,
+    uint8_t b,
+    uint8_t a)
 {
-    unsigned __int8 pic[4]; // [esp+4h] [ebp-4h] BYREF
+    uint8_t pic[4]; // [esp+4h] [ebp-4h] BYREF
 
     *(unsigned int *)pic = (a << 24) | b | (g << 8) | (r << 16);
     Image_Generate2D(image, pic, 1, 1, D3DFMT_A8R8G8B8);
@@ -528,7 +528,7 @@ void __cdecl Image_LoadIdentityNormalMap(GfxImage *image)
 
 void __cdecl Image_LoadBlack3D(GfxImage *image)
 {
-    unsigned __int8 pic[4]; // [esp+4h] [ebp-4h] BYREF
+    uint8_t pic[4]; // [esp+4h] [ebp-4h] BYREF
 
     *(unsigned int *)pic = -16777216;
     Image_Generate3D(image, pic, 1, 1, 1, D3DFMT_A8R8G8B8);
@@ -536,8 +536,8 @@ void __cdecl Image_LoadBlack3D(GfxImage *image)
 
 void __cdecl Image_LoadBlackCube(GfxImage *image)
 {
-    const unsigned __int8 *pic[6][15]; // [esp+4h] [ebp-170h] BYREF
-    unsigned __int8 pixel[4]; // [esp+170h] [ebp-4h] BYREF
+    const uint8_t *pic[6][15]; // [esp+4h] [ebp-170h] BYREF
+    uint8_t pixel[4]; // [esp+170h] [ebp-4h] BYREF
 
     *(unsigned int *)pixel = -16777216;
     pic[0][0] = pixel;
@@ -551,13 +551,13 @@ void __cdecl Image_LoadBlackCube(GfxImage *image)
 
 void __cdecl Image_LoadPixelCostColorCode(GfxImage *image)
 {
-    unsigned __int8 pic[257][4]; // [esp+0h] [ebp-408h] BYREF
+    uint8_t pic[257][4]; // [esp+0h] [ebp-408h] BYREF
 
     RB_PixelCost_BuildColorCodeMap(pic, 256);
     Image_Generate2D(image, pic[0], 256, 1, D3DFMT_X8R8G8B8);
 }
 
-GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack)
+GfxImage *__cdecl Image_LoadBuiltin(char *name, uint8_t semantic, uint8_t imageTrack)
 {
     GfxImage *image; // [esp+14h] [ebp-8h]
     unsigned int tableIndex; // [esp+18h] [ebp-4h]
@@ -582,9 +582,9 @@ GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsign
 void __cdecl Image_Construct(
     char *name,
     int nameSize,
-    unsigned __int8 category,
-    unsigned __int8 semantic,
-    unsigned __int8 imageTrack,
+    uint8_t category,
+    uint8_t semantic,
+    uint8_t imageTrack,
     GfxImage *image)
 {
     iassert(name);
@@ -592,7 +592,7 @@ void __cdecl Image_Construct(
     iassert(image);
     {
         PROF_SCOPED("R_memcpy");
-        memcpy((unsigned __int8 *)image->name, (unsigned __int8 *)name, nameSize);
+        memcpy((uint8_t *)image->name, (uint8_t *)name, nameSize);
     }
     iassert(category != IMG_CATEGORY_UNKNOWN);
     image->category = category;
@@ -616,9 +616,9 @@ int __cdecl Image_GetAvailableHashLocation(const char *name)
 }
 GfxImage *__cdecl Image_Alloc(
     char *name,
-    unsigned __int8 category,
-    unsigned __int8 semantic,
-    unsigned __int8 imageTrack)
+    uint8_t category,
+    uint8_t semantic,
+    uint8_t imageTrack)
 {
     unsigned int v5; // [esp+0h] [ebp-20h]
     GfxImage *image; // [esp+10h] [ebp-10h]
@@ -817,7 +817,7 @@ void __cdecl R_ImageList_f()
     GfxImage *image; // [esp+A0h] [ebp-207Ch]
     int v5; // [esp+A4h] [ebp-2078h]
     bool v6; // [esp+ABh] [ebp-2071h]
-    unsigned __int8 dst[80]; // [esp+ACh] [ebp-2070h] BYREF
+    uint8_t dst[80]; // [esp+ACh] [ebp-2070h] BYREF
     unsigned int v8[2]; // [esp+FCh] [ebp-2020h]
     _D3DFORMAT v9; // [esp+104h] [ebp-2018h]
     unsigned int i; // [esp+108h] [ebp-2014h]
@@ -1006,7 +1006,7 @@ char __cdecl Image_AssignDefaultTexture(GfxImage *image)
 void __cdecl Image_Rebuild(GfxImage *image)
 {
     const char *v1; // eax
-    unsigned __int8 category; // [esp+0h] [ebp-4h]
+    uint8_t category; // [esp+0h] [ebp-4h]
 
     iassert( image );
     iassert( image->category != IMG_CATEGORY_UNKNOWN );

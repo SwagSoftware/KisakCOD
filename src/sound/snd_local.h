@@ -176,8 +176,8 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel);
 void __cdecl MSS_ResumeSample(int i, int frametime);
 _DIG_DRIVER *__cdecl MSS_GetDriver();
 int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels);
-unsigned __int8 *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate);
-unsigned __int8 *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate);
+uint8_t *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate);
+uint8_t *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate);
 unsigned int *__cdecl MSS_Alloc_FastFile(int bytes);
 
 

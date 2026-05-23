@@ -27,7 +27,7 @@ void __cdecl TRACK_rb_state()
 
 void __cdecl RB_SetInitialState()
 {
-    memset((unsigned __int8 *)&gfxCmdBufInput, 0, sizeof(gfxCmdBufInput));
+    memset((uint8_t *)&gfxCmdBufInput, 0, sizeof(gfxCmdBufInput));
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &gfxCmdBufInput, 0);
     gfxCmdBufState.prim.device = dx.device;
     R_SetInitialContextState(dx.device);

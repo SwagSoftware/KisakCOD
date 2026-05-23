@@ -119,7 +119,7 @@ void __cdecl Phys_Init()
 
     if (!physInited)
     {
-        memset((unsigned __int8 *)&physGlob, 0, sizeof(physGlob));
+        memset((uint8_t *)&physGlob, 0, sizeof(physGlob));
         Pool_Init((char *)physGlob.userData, &physGlob.userDataPool, 0x70u, 0x200u);
         ODE_Init();
         for (worldIndex = PHYS_WORLD_DYNENT; worldIndex < PHYS_WORLD_COUNT; ++worldIndex)
@@ -486,7 +486,7 @@ dxBody *__cdecl Phys_CreateBodyFromState(PhysWorld worldIndex, const BodyState *
         userData = (PhysObjUserData *)malloc(sizeof(PhysObjUserData));
 #endif
         iassert(userData);
-        memset((unsigned __int8 *)userData, 0, sizeof(PhysObjUserData));
+        memset((uint8_t *)userData, 0, sizeof(PhysObjUserData));
         dBodySetData(body, userData);
         dBodySetPosition(body, state->position[0], state->position[1], state->position[2]);
         dBodySetLinearVel(body, state->velocity[0], state->velocity[1], state->velocity[2]);
@@ -2465,7 +2465,7 @@ dxBody *__cdecl Phys_ObjLoad(PhysWorld worldIndex, MemoryFile *memFile)
     BodyState state;
 
     iassert(physInited);
-    MemFile_ReadData(memFile, sizeof(BodyState), (unsigned __int8 *)&state);
+    MemFile_ReadData(memFile, sizeof(BodyState), (uint8_t *)&state);
     return Phys_CreateBodyFromState(worldIndex, &state);
 }
 

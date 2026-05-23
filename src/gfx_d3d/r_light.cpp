@@ -22,7 +22,7 @@
 
 struct StaticModelLightCallback // sizeof=0x74
 {                                       // ...
-    unsigned __int8 *smodelVisData;     // ...
+    uint8_t *smodelVisData;     // ...
     float position[3];                  // ...
     float radiusSq;                     // ...
     float planes[6][4];                 // ...
@@ -273,7 +273,7 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     float mins[3]; // [esp+F8h] [ebp-44h] BYREF
     BspOmniLightCallback bspLightCallback; // [esp+104h] [ebp-38h] BYREF
     unsigned int visLightDrawSurfCount; // [esp+118h] [ebp-24h] BYREF
-    unsigned __int8 *surfaceVisData; // [esp+11Ch] [ebp-20h]
+    uint8_t *surfaceVisData; // [esp+11Ch] [ebp-20h]
     GfxSurface **surfaces[1]; // [esp+120h] [ebp-1Ch] BYREF
     float maxs[3]; // [esp+124h] [ebp-18h] BYREF
     GfxDrawSurf *drawSurfs; // [esp+130h] [ebp-Ch]
@@ -327,7 +327,7 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
                     rgp.world->surfaceCount);
             surfIndex = surfaces[0][listSurfIndex] - rgp.world->dpvs.surfaces;
             triSurfList[0] = surfIndex;
-            R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (unsigned __int8 *)triSurfList, 1u, surfData);
+            R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (uint8_t *)triSurfList, 1u, surfData);
         }
         R_EndCmdBuf(&surfData->delayedCmdBuf);
         scene.visLightShadow[lightIndex - 4].drawSurfCount = surfData->drawSurfList.current
@@ -354,7 +354,7 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     unsigned int surfIndex; // [esp+1B8h] [ebp-A8h]
     float mins[3]; // [esp+1BCh] [ebp-A4h] BYREF
     BspSpotLightCallback bspLightCallback; // [esp+1C8h] [ebp-98h] BYREF
-    unsigned __int8 *surfaceVisData; // [esp+230h] [ebp-30h]
+    uint8_t *surfaceVisData; // [esp+230h] [ebp-30h]
     GfxSurface **surfaces[2]; // [esp+234h] [ebp-2Ch] BYREF
     float maxs[3]; // [esp+23Ch] [ebp-24h] BYREF
     GfxDrawSurf *drawSurfs[2]; // [esp+248h] [ebp-18h]
@@ -405,7 +405,7 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
                     rgp.world->surfaceCount);
             surfIndex = surfaces[0][listSurfIndex] - rgp.world->dpvs.surfaces;
             triSurfList[0] = surfIndex;
-            R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (unsigned __int8 *)triSurfList, 1u, surfData);
+            R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (uint8_t *)triSurfList, 1u, surfData);
         }
         R_EndCmdBuf(&surfData->delayedCmdBuf);
         scene.visLightShadow[lightIndex - 4].drawSurfCount = surfData->drawSurfList.current
@@ -438,7 +438,7 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
                     rgp.world->surfaceCount);
             surfIndex = surfaces[1][listSurfIndex] - rgp.world->dpvs.surfaces;
             triSurfList[0] = surfIndex;
-            R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (unsigned __int8 *)triSurfList, 1u, surfData + 1);
+            R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (uint8_t *)triSurfList, 1u, surfData + 1);
         }
         R_EndCmdBuf(&surfData[1].delayedCmdBuf);
         scene.visLightShadow[lightIndex].drawSurfCount = surfData[1].drawSurfList.current
@@ -728,7 +728,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                     drawSurf.fields.surfType = staticModelId.surfType;
                     if (!R_AllocDrawSurf(&surfData.delayedCmdBuf, drawSurf, &surfData.drawSurfList, 3u))
                         break;
-                    R_AddDelayedStaticModelDrawSurf(&surfData.delayedCmdBuf, &surfaces[surfaceIndex], (unsigned __int8*)list, 1u);
+                    R_AddDelayedStaticModelDrawSurf(&surfData.delayedCmdBuf, &surfaces[surfaceIndex], (uint8_t*)list, 1u);
                     if (light->type == 2 && r_spotLightShadows->current.enabled && r_spotLightSModelShadows->current.enabled)
                     {
                         if (!R_AllocDrawSurf(&shadowSurfData.delayedCmdBuf, drawSurf, &shadowSurfData.drawSurfList, 3u))
@@ -736,7 +736,7 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                         R_AddDelayedStaticModelDrawSurf(
                             &shadowSurfData.delayedCmdBuf,
                             &surfaces[surfaceIndex],
-                            (unsigned __int8*)list,
+                            (uint8_t*)list,
                             1u);
                     }
                 }
@@ -799,7 +799,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
     unsigned int sceneEntIndex; // [esp+1E8h] [ebp-24h]
     GfxSceneEntity *sceneEnt; // [esp+1ECh] [ebp-20h]
     GfxSceneBrush *sceneBrush; // [esp+1F0h] [ebp-1Ch]
-    unsigned __int8 *sceneEntVisData; // [esp+1F4h] [ebp-18h]
+    uint8_t *sceneEntVisData; // [esp+1F4h] [ebp-18h]
     int lightIndex; // [esp+1F8h] [ebp-14h]
     GfxSceneDynModel *sceneDynModel; // [esp+1FCh] [ebp-10h]
     float distSq; // [esp+200h] [ebp-Ch]

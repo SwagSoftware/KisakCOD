@@ -150,10 +150,10 @@ void __cdecl R_InitRenderCommands()
     R_InitModelLightingGlobals();
     for (dataIndex = 0; dataIndex < 2; ++dataIndex)
     {
-        g_frontEndCmds[dataIndex].cmds = (unsigned __int8 *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds");
+        g_frontEndCmds[dataIndex].cmds = (uint8_t *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds");
         R_InitDebugEntry(&s_backEndData[dataIndex].debugGlobals);
     }
-    g_debugFrontEndCmds.cmds = (unsigned __int8 *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds (debug)");
+    g_debugFrontEndCmds.cmds = (uint8_t *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds (debug)");
     s_debugFrameGlob.frontEndDataOut.commands = &g_debugFrontEndCmds;
     R_InitSceneBuffers();
     if (frontEndDataOut)
@@ -880,7 +880,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     }
     {
         PROF_SCOPED("R_memcpy");
-        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)text, v13);
+        memcpy((uint8_t *)cmd->text, (uint8_t *)text, v13);
     }
     cmd->text[v13] = 0;
     return cmd;
@@ -940,7 +940,7 @@ char __cdecl SetDrawText2DGlowParms(GfxCmdDrawText2D *cmd, const float *color, c
     scaledGlowColor[1] = glowColor[1] * 0.1000000014901161;
     scaledGlowColor[2] = glowColor[2] * 0.1000000014901161;
     scaledGlowColor[3] = glowColor[3] * color[3];
-    R_ConvertColorToBytes(scaledGlowColor, (unsigned __int8 *)&cmd->glowForceColor);
+    R_ConvertColorToBytes(scaledGlowColor, (uint8_t *)&cmd->glowForceColor);
     return 1;
 }
 
@@ -1067,7 +1067,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawConsoleTextCmd(
     cmd->font = font;
     cmd->xScale = xScale;
     cmd->yScale = yScale;
-    R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+    R_ConvertColorToBytes(color, (uint8_t *)&cmd->color);
     cmd->maxChars = 0x7FFFFFFF;
     cmd->renderFlags = 0;
     switch (style)
@@ -1097,12 +1097,12 @@ void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int 
 
     if (charCount > poolSize - firstChar)
     {
-        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], poolRemaining);
-        memcpy((unsigned __int8 *)&cmd->text[poolRemaining], (unsigned __int8 *)textPool, charCount - poolRemaining);
+        memcpy((uint8_t *)cmd->text, (uint8_t *)&textPool[firstChar], poolRemaining);
+        memcpy((uint8_t *)&cmd->text[poolRemaining], (uint8_t *)textPool, charCount - poolRemaining);
     }
     else
     {
-        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], charCount);
+        memcpy((uint8_t *)cmd->text, (uint8_t *)&textPool[firstChar], charCount);
     }
 
     cmd->text[charCount] = 0;
@@ -1205,7 +1205,7 @@ void __cdecl R_AddCmdDrawQuadPic(const float (*verts)[2], const float *color, Ma
             cmd->verts[cornerIndex][0] = (*verts)[2 * cornerIndex];
             cmd->verts[cornerIndex][1] = (*verts)[2 * cornerIndex + 1];
         }
-        R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+        R_ConvertColorToBytes(color, (uint8_t *)&cmd->color);
     }
 }
 
@@ -1469,7 +1469,7 @@ void __cdecl R_EndFrame()
     }
 }
 
-void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, unsigned __int8 stencil)
+void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, uint8_t stencil)
 {
     GfxCmdClearScreen *cmd; // [esp+Ch] [ebp-4h]
 
@@ -1735,7 +1735,7 @@ void __cdecl R_InitTempSkinBuf()
         data = &s_backEndData[i];
         iassert( !data->tempSkinPos );
         iassert( !data->tempSkinBuf );
-        data->tempSkinBuf = (unsigned __int8 *)Z_VirtualReserve(0x480000);
+        data->tempSkinBuf = (uint8_t *)Z_VirtualReserve(0x480000);
     }
 }
 

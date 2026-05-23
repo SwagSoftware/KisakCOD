@@ -89,7 +89,7 @@ static unsigned int SL_ConvertFromRefString(RefString *refString)
 
 void SL_AddUserInternal(RefString* refStr, unsigned int user)
 {
-	if (((unsigned __int8)user & refStr->user) == 0)
+	if (((uint8_t)user & refStr->user) == 0)
 	{
 		if (scrStringDebugGlob)
 		{
@@ -173,10 +173,10 @@ void SL_ShutdownSystem(unsigned int user)
 
 			RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
 
-			if (((unsigned __int8)user & refStr->user) == 0)
+			if (((uint8_t)user & refStr->user) == 0)
 				break;
 
-			refStr->data = ((unsigned __int8)(~(BYTE)user & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+			refStr->data = ((uint8_t)(~(BYTE)user & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 
 			scrStringGlob.nextFreeEntry = 0;
 			SL_RemoveRefToString(scrStringGlob.hashTable[hash].u.prev);
@@ -214,10 +214,10 @@ void SL_TransferSystem(unsigned int from, unsigned int to)
 		if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != 0)
 		{
 			RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
-			if (((unsigned __int8)from & refStr->user) != 0)
+			if (((uint8_t)from & refStr->user) != 0)
 			{
-				refStr->data = ((unsigned __int8)(~(BYTE)from & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
-				refStr->data = ((unsigned __int8)(to | HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+				refStr->data = ((uint8_t)(~(BYTE)from & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+				refStr->data = ((uint8_t)(to | HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 			}
 		}
 	}
@@ -378,8 +378,8 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 	entry->u.prev = stringValue;
 
 	refStr = GetRefString(stringValue);
-	memcpy((unsigned __int8*)refStr->str, (unsigned __int8*)str, len);
-	refStr->data = ((unsigned __int8)user << 16) | refStr->data & 0xFF00FFFF;
+	memcpy((uint8_t*)refStr->str, (uint8_t*)str, len);
+	refStr->data = ((uint8_t)user << 16) | refStr->data & 0xFF00FFFF;
 	iassert(refStr->user == user);
 	refStr->data = refStr->data & 0xFFFF0000 | 1;
 	refStr->data = (len << 24) | refStr->data & 0xFFFFFF;
@@ -701,12 +701,12 @@ const char* __cdecl SL_DebugConvertToString(unsigned int stringValue)
 	if (!stringValue)
 		return "<NULL>";
 	refString = GetRefString(stringValue);
-	len = (unsigned __int8)(HIBYTE(refString->data) - 1);
+	len = (uint8_t)(HIBYTE(refString->data) - 1);
 	if (refString->str[len])
 		return "<BINARY>";
 	for (i = 0; i < len; ++i)
 	{
-		if (!isprint((unsigned __int8)refString->str[i]))
+		if (!isprint((uint8_t)refString->str[i]))
 			return "<BINARY>";
 	}
 	return refString->str;
@@ -868,7 +868,7 @@ void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from)
 	if (v4)
 		SL_RemoveRefToString(v4);
 	v5 = from;
-	while (*(unsigned __int8 *)v5++)
+	while (*(uint8_t *)v5++)
 		;
 	*to = SL_GetStringOfSize(from, 0, v5 - from, 6);
 }

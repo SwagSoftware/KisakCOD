@@ -845,7 +845,7 @@ int __cdecl UI_GetServerStatusInfo(char *serverAddress, serverStatusInfo_t *info
 
     if (info)
     {
-        memset((unsigned __int8 *)info, 0, sizeof(serverStatusInfo_t));
+        memset((uint8_t *)info, 0, sizeof(serverStatusInfo_t));
         if (LAN_GetServerStatus(serverAddress, info->text, 1024))
         {
             I_strncpyz(info->address, serverAddress, 64);
@@ -1195,7 +1195,7 @@ char *__cdecl GetMenuBuffer_LoadObj(char *filename)
     {
         if (len < 0x8000)
         {
-            FS_Read((unsigned __int8 *)menuBuf2, len, f);
+            FS_Read((uint8_t *)menuBuf2, len, f);
             menuBuf2[len] = 0;
             FS_FCloseFile(f);
             return menuBuf2;
@@ -1445,7 +1445,7 @@ void __cdecl UI_MapLoadInfo(const char *filename)
                     Com_EndParseSession();
                     Com_Error(ERR_DROP, "key '%s' is %i > %i characters long", key, tokenLen - 1, 255);
                 }
-                memcpy((unsigned __int8 *)key, (unsigned __int8 *)token, tokenLen);
+                memcpy((uint8_t *)key, (uint8_t *)token, tokenLen);
                 value = (const char *)Com_ParseOnLine(&parse);
                 if (!*value)
                 {
@@ -4005,7 +4005,7 @@ void __cdecl UI_BuildPlayerList(int localClientNum)
     CL_GetClientState(localClientNum, &state);
     info = CL_GetConfigString(localClientNum, 0);
     count = atoi(Info_ValueForKey(info, "sv_maxclients"));
-    memset((unsigned __int8 *)sharedUiInfo.playerClientNums, 0xFFu, sizeof(sharedUiInfo.playerClientNums));
+    memset((uint8_t *)sharedUiInfo.playerClientNums, 0xFFu, sizeof(sharedUiInfo.playerClientNums));
     sharedUiInfo.playerCount = 0;
     for (n = 0; n < count; ++n)
     {
@@ -4619,24 +4619,24 @@ BOOL __cdecl LAN_LoadCachedServersInternal(int fileIn)
     int version; // [esp+0h] [ebp-8h] BYREF
     int size; // [esp+4h] [ebp-4h] BYREF
 
-    if (FS_Read((unsigned __int8 *)&version, 4u, fileIn) != 4)
+    if (FS_Read((uint8_t *)&version, 4u, fileIn) != 4)
         return 0;
     if (version != 1)
         return 0;
-    if (FS_Read((unsigned __int8 *)&cls.numglobalservers, 4u, fileIn) != 4)
+    if (FS_Read((uint8_t *)&cls.numglobalservers, 4u, fileIn) != 4)
         return 0;
     if (cls.numglobalservers >= 0x4E20u)
         return 0;
-    if (FS_Read((unsigned __int8 *)&cls.numfavoriteservers, 4u, fileIn) != 4)
+    if (FS_Read((uint8_t *)&cls.numfavoriteservers, 4u, fileIn) != 4)
         return 0;
     if (cls.numfavoriteservers >= 0x80u)
         return 0;
-    if (FS_Read((unsigned __int8 *)&size, 4u, fileIn) != 4)
+    if (FS_Read((uint8_t *)&size, 4u, fileIn) != 4)
         return 0;
     if (size != 2978944)
         return 0;
-    if (FS_Read((unsigned __int8 *)cls.globalServers, 0x2D2A80u, fileIn) == 2960000)
-        return FS_Read((unsigned __int8 *)cls.favoriteServers, 0x4A00u, fileIn) == 18944;
+    if (FS_Read((uint8_t *)cls.globalServers, 0x2D2A80u, fileIn) == 2960000)
+        return FS_Read((uint8_t *)cls.favoriteServers, 0x4A00u, fileIn) == 18944;
     return 0;
 }
 
@@ -5897,7 +5897,7 @@ void __cdecl UI_ReplaceConversions(
                 "%s\n\t(sourceStringLength) = %i",
                 "(sourceStringLength > 0)",
                 v5);
-        memset((unsigned __int8 *)outputString, 0, outputStringSize);
+        memset((uint8_t *)outputString, 0, outputStringSize);
         outputStringCounter = 0;
         index = 0;
         while (index < sourceStringLength)

@@ -240,7 +240,7 @@ void  R_GenerateWorldOutdoorLookupMatrix(
 const GfxImage *__cdecl R_GetTextureFromCode(
     GfxCmdBufSourceState *source,
     MaterialTextureSource codeTexture,
-    unsigned __int8 *samplerState);
+    uint8_t *samplerState);
 void __cdecl R_TextureFromCodeError(GfxCmdBufSourceState *source, unsigned int codeTexture);
 const GfxImage *__cdecl R_OverrideGrayscaleImage(const dvar_s *dvar);
 void __cdecl R_SetLightmap(GfxCmdBufContext context, unsigned int lmapIndex);
@@ -283,15 +283,15 @@ void __cdecl R_HW_SetBackStencilFunc(IDirect3DDevice9 *device, unsigned int sten
 void __cdecl R_SetSampler(
     GfxCmdBufContext context,
     unsigned int samplerIndex,
-    unsigned __int8 samplerState,
+    uint8_t samplerState,
     const GfxImage *image);
 unsigned int __cdecl R_HW_SetSamplerState(
     IDirect3DDevice9 *device,
     unsigned int samplerIndex,
     unsigned int samplerState,
     unsigned int oldSamplerState);
-unsigned int __cdecl R_DecodeSamplerState(unsigned __int8 samplerState);
-void __cdecl R_SetSamplerState(GfxCmdBufState *state, unsigned int samplerIndex, unsigned __int8 samplerState);
+unsigned int __cdecl R_DecodeSamplerState(uint8_t samplerState);
+void __cdecl R_SetSamplerState(GfxCmdBufState *state, unsigned int samplerIndex, uint8_t samplerState);
 void __cdecl R_ForceSetBlendState(IDirect3DDevice9 *device, unsigned int stateBits0);
 void __cdecl R_ForceSetStencilState(IDirect3DDevice9 *device, unsigned int stateBits1);
 void __cdecl R_GetViewport(GfxCmdBufSourceState *source, GfxViewport *outViewport);
@@ -309,17 +309,17 @@ void __cdecl R_HW_SetRenderTarget(GfxCmdBufState *state, GfxRenderTargetId newTa
 void __cdecl R_UpdateStatsTarget(int newTargetId);
 void __cdecl R_ClearScreenInternal(
     IDirect3DDevice9 *device,
-    unsigned __int8 whichToClear,
+    uint8_t whichToClear,
     const float *color,
     float depth,
-    unsigned __int8 stencil,
+    uint8_t stencil,
     const GfxViewport *viewport);
 void __cdecl R_ClearScreen(
     IDirect3DDevice9 *device,
-    unsigned __int8 whichToClear,
+    uint8_t whichToClear,
     const float *color,
     float depth,
-    unsigned __int8 stencil,
+    uint8_t stencil,
     const GfxViewport *viewport);
 void __cdecl R_ForceSetPolygonOffset(IDirect3DDevice9 *device, char stateBits1);
 void __cdecl R_HW_SetPolygonOffset(IDirect3DDevice9 *device, float scale, float bias);
