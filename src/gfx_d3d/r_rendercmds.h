@@ -133,8 +133,8 @@ enum FullscreenType : __int32
 
 struct GfxCmdHeader // sizeof=0x4
 {                                       // ...
-    unsigned __int16 id;
-    unsigned __int16 byteCount;
+    uint16_t id;
+    uint16_t byteCount;
 };
 
 struct GfxCmdStretchPic // sizeof=0x2C
@@ -249,9 +249,9 @@ struct GfxCmdDrawText2D // sizeof=0x54
 struct FxCodeMeshData // sizeof=0x10
 {                                       // ...
     unsigned int triCount;
-    unsigned __int16 *indices;
-    unsigned __int16 argOffset;
-    unsigned __int16 argCount;
+    uint16_t *indices;
+    uint16_t argOffset;
+    uint16_t argCount;
     unsigned int pad;
 };
 
@@ -279,12 +279,12 @@ struct GfxSModelCachedVertex // sizeof=0x20
 };
 struct GfxModelLightingPatch // sizeof=0x28
 {                                       // ...
-    unsigned __int16 modelLightingIndex;
+    uint16_t modelLightingIndex;
     uint8_t primaryLightWeight;
     uint8_t colorsCount;
     uint8_t groundLighting[4];
-    unsigned __int16 colorsWeight[8];
-    unsigned __int16 colorsIndex[8];
+    uint16_t colorsWeight[8];
+    uint16_t colorsIndex[8];
 };
 struct GfxBackEndPrimitiveData // sizeof=0x4
 {                                       // ...
@@ -293,8 +293,8 @@ struct GfxBackEndPrimitiveData // sizeof=0x4
 struct FxMarkMeshData // sizeof=0x10
 {                                       // ...
     unsigned int triCount;
-    unsigned __int16 *indices;
-    unsigned __int16 modelIndex;
+    uint16_t *indices;
+    uint16_t modelIndex;
     uint8_t modelTypeAndSurf;
     uint8_t pad0;
     unsigned int pad1;
@@ -525,7 +525,7 @@ const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
     GfxDrawSurf drawSurfs[32768];
     GfxMeshData codeMesh;
     GfxSModelCachedVertex smcPatchVerts[8192];
-    unsigned __int16 smcPatchList[256];
+    uint16_t smcPatchList[256];
     unsigned int smcPatchCount;
     unsigned int smcPatchVertsUsed;
     GfxModelLightingPatch modelLightingPatchList[4096];

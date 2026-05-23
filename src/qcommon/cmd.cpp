@@ -1355,8 +1355,8 @@ void __cdecl SV_Cmd_ArgvBuffer(int32_t  arg, char *buffer, int32_t  bufferLength
 
 struct CmdScriptNotify
 {
-    unsigned __int16 command;
-    unsigned __int16 notify;
+    uint16_t command;
+    uint16_t notify;
 };
 
 int dword_8359AD3C;
@@ -1369,7 +1369,7 @@ void Cmd_RegisterNotification(const char *commandString, const char *notifyStrin
     unsigned int v5; // r26
     unsigned int v6; // r9
     int v7; // r11
-    unsigned __int16 *p_notify; // r10
+    uint16_t *p_notify; // r10
 
     LowercaseString = SL_GetLowercaseString(commandString, 0);
     String = SL_GetString(notifyString, 0);
@@ -1398,7 +1398,7 @@ void Cmd_RegisterNotification(const char *commandString, const char *notifyStrin
             v7 = dword_8359AD3C;
         }
 
-        if (LowercaseString != (unsigned __int16)LowercaseString)
+        if (LowercaseString != (uint16_t)LowercaseString)
         {
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
@@ -1406,11 +1406,11 @@ void Cmd_RegisterNotification(const char *commandString, const char *notifyStrin
                 0,
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 LowercaseString,
-                (unsigned __int16)LowercaseString);
+                (uint16_t)LowercaseString);
             v7 = dword_8359AD3C;
         }
         cmd_notify[v7].command = LowercaseString;
-        if (v5 != (unsigned __int16)v5)
+        if (v5 != (uint16_t)v5)
         {
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
@@ -1418,7 +1418,7 @@ void Cmd_RegisterNotification(const char *commandString, const char *notifyStrin
                 0,
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 v5,
-                (unsigned __int16)v5);
+                (uint16_t)v5);
             v7 = dword_8359AD3C;
         }
         cmd_notify[v7].notify = v5;
@@ -1431,7 +1431,7 @@ void Cmd_CheckNotify()
     unsigned int LowercaseString; // r28
     unsigned int v2; // r11
     unsigned int v3; // r30
-    unsigned __int16 *p_notify; // r31
+    uint16_t *p_notify; // r31
 
     iassert(Sys_IsMainThread());
 
@@ -1467,13 +1467,13 @@ void Cmd_LoadNotifications(MemoryFile *memFile)
 {
     int v2; // r24
     int v3; // r26
-    unsigned __int16 *p_notify; // r30
+    uint16_t *p_notify; // r30
     const char *CString; // r3
     unsigned int String; // r7
-    unsigned __int16 v7; // r31
+    uint16_t v7; // r31
     const char *v8; // r3
     unsigned int v9; // r7
-    unsigned __int16 v10; // r31
+    uint16_t v10; // r31
     int v11; // [sp+50h] [-50h] BYREF
 
     dword_8359AD3C = 0;
@@ -1488,26 +1488,26 @@ void Cmd_LoadNotifications(MemoryFile *memFile)
             CString = MemFile_ReadCString(memFile);
             String = SL_GetString(CString, 0);
             v7 = String;
-            if (String != (unsigned __int16)String)
+            if (String != (uint16_t)String)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
                     281,
                     0,
                     "i == static_cast< Type >( i )\n\t%i, %i",
                     String,
-                    (unsigned __int16)String);
+                    (uint16_t)String);
             *(p_notify - 1) = v7;
             v8 = MemFile_ReadCString(memFile);
             v9 = SL_GetString(v8, 0);
             v10 = v9;
-            if (v9 != (unsigned __int16)v9)
+            if (v9 != (uint16_t)v9)
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
                     281,
                     0,
                     "i == static_cast< Type >( i )\n\t%i, %i",
                     v9,
-                    (unsigned __int16)v9);
+                    (uint16_t)v9);
             --v3;
             *p_notify = v10;
             p_notify += 2;
@@ -1518,7 +1518,7 @@ void Cmd_LoadNotifications(MemoryFile *memFile)
 void Cmd_SaveNotifications(MemoryFile *memFile)
 {
     unsigned int v2; // r30
-    unsigned __int16 *p_notify; // r31
+    uint16_t *p_notify; // r31
     const char *v4; // r3
     const char *v5; // r3
     int v6; // [sp+50h] [-30h] BYREF
@@ -1543,7 +1543,7 @@ void Cmd_SaveNotifications(MemoryFile *memFile)
 void Cmd_UnregisterAllNotifications()
 {
     unsigned int v0; // r30
-    unsigned __int16 *p_notify; // r31
+    uint16_t *p_notify; // r31
 
     iassert(Sys_IsMainThread());
 

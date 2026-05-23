@@ -480,12 +480,12 @@ int __cdecl CL_GetClientName(int localClientNum, int index, char *buf, int size)
         return 0;
     for (i = 0; i < LocalClientGlobals->snap.numClients; ++i)
     {
-        if (LocalClientGlobals->parseClients[((_WORD)i + (unsigned __int16)LocalClientGlobals->snap.parseClientsNum)
+        if (LocalClientGlobals->parseClients[((_WORD)i + (uint16_t)LocalClientGlobals->snap.parseClientsNum)
             & 0x7FF].clientIndex == index)
         {
             I_strncpyz(
                 buf,
-                LocalClientGlobals->parseClients[((_WORD)i + (unsigned __int16)LocalClientGlobals->snap.parseClientsNum) & 0x7FF].name,
+                LocalClientGlobals->parseClients[((_WORD)i + (uint16_t)LocalClientGlobals->snap.parseClientsNum) & 0x7FF].name,
                 size);
             return 1;
         }

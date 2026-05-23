@@ -16,18 +16,18 @@ struct GfxLightingInfo // sizeof=0x2
 };
 
 
-void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out);
-unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle);
+void __cdecl R_SetModelLightingCoords(uint16_t handle, float *out);
+unsigned int __cdecl R_ModelLightingIndexFromHandle(uint16_t handle);
 void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, PackedLightingCoords *packedCoords);
 char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex);
 unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
     float *lightingOrigin,
     unsigned int dynEntId,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut);
 unsigned int __cdecl R_AllocModelLighting(
     float *lightingOrigin,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     unsigned int(__cdecl *GetPrimaryLightCallback)(const void *),
     const void *userData,
     GfxLightingInfo *lightingInfoOut);
@@ -37,7 +37,7 @@ unsigned int __cdecl R_AllocModelLighting_Box(
     float *lightingOrigin,
     const float *boxMins,
     const float *boxMaxs,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut);
 unsigned int __cdecl R_GetPrimaryLightForBoxCallback(const void *userData);
 unsigned int __cdecl R_AllocModelLighting_Sphere(
@@ -45,7 +45,7 @@ unsigned int __cdecl R_AllocModelLighting_Sphere(
     float *lightingOrigin,
     const float *origin,
     float radius,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut);
 unsigned int __cdecl R_GetPrimaryLightForSphereCallback(const void *userData);
 void __cdecl R_ToggleModelLightingFrame();
@@ -58,7 +58,7 @@ void __cdecl R_BeginAllStaticModelLighting();
 void __cdecl R_SetAllStaticModelLighting();
 void __cdecl R_SetStaticModelLighting(unsigned int smodelIndex);
 void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const uint8_t *groundLighting);
-void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source);
+void __cdecl R_SetModelLightingCoordsForSource(uint16_t handle, GfxCmdBufSourceState *source);
 void __cdecl R_SetStaticModelLightingCoordsForSource(unsigned int smodelIndex, GfxCmdBufSourceState *source);
 unsigned int R_SetModelLightingSampleDeltas();
 void __cdecl R_SetModelLightingLookupScale(GfxCmdBufInput *input);

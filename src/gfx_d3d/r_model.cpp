@@ -280,7 +280,7 @@ int __cdecl R_SkinXModel(
     unsigned int startSurfPos; // [esp+2Ch] [ebp-E58h]
     XSurface* xsurf; // [esp+38h] [ebp-E4Ch]
     int surfaceIndex; // [esp+40h] [ebp-E44h]
-    unsigned __int16* surfPos; // [esp+44h] [ebp-E40h]
+    uint16_t* surfPos; // [esp+44h] [ebp-E40h]
     uint8_t surfBuf[3580]; // [esp+48h] [ebp-E3Ch] BYREF
     unsigned int hidePartBits[4]; // [esp+E4Ch] [ebp-38h] BYREF
     //XSurface* surfaces; // [esp+E5Ch] [ebp-28h]
@@ -317,7 +317,7 @@ int __cdecl R_SkinXModel(
     if (obj)
         DObjGetHidePartBits(obj, hidePartBits);
 
-    surfPos = (unsigned __int16*)surfBuf;
+    surfPos = (uint16_t*)surfBuf;
     for (surfaceIndex = 0; surfaceIndex < surfaceCount; ++surfaceIndex)
     {
         xsurf = surfaces + surfaceIndex;

@@ -23,7 +23,7 @@ struct scrAnimGlob_t // sizeof=0x20C
 {                                       // ...
     const char *start;                  // ...
     const char *pos;                    // ...
-    unsigned __int16 using_xanim_lookup[2][MAX_XANIMTREE_NUM]; // ...
+    uint16_t using_xanim_lookup[2][MAX_XANIMTREE_NUM]; // ...
     int bAnimCheck;                     // ...
 };
 static_assert(sizeof(scrAnimGlob_t) == 0x20C);
@@ -40,10 +40,10 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
 int __cdecl Scr_GetAnimTreeSize(unsigned int parentNode);
 void __cdecl ConnectScriptToAnim(
     unsigned int names,
-    unsigned __int16 index,
+    uint16_t index,
     unsigned int filename,
     unsigned int name,
-    unsigned __int16 treeIndex);
+    uint16_t treeIndex);
 int __cdecl Scr_CreateAnimationTree(
     unsigned int parentNode,
     unsigned int names,
@@ -53,7 +53,7 @@ int __cdecl Scr_CreateAnimationTree(
     unsigned int parentIndex,
     unsigned int filename,
     int treeIndex,
-    unsigned __int16 flags);
+    uint16_t flags);
 void __cdecl Scr_CheckAnimsDefined(unsigned int names, unsigned int filename);
 bool __cdecl Scr_LoadAnimTreeInternal(const char *filename, unsigned int parentNode, unsigned int names);
 void __cdecl Scr_AnimTreeParse(const char *pos, unsigned int parentNode, unsigned int names);

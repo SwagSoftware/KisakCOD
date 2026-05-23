@@ -950,7 +950,7 @@ void __cdecl R_HW_SetCullFace(IDirect3DDevice9 *device, __int16 stateBits0)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetRenderState( D3DRS_CULLMODE, s_cullTable[(stateBits0 & GFXS0_CULL_MASK) >> GFXS0_CULL_SHIFT] )\n");
-        hr = device->SetRenderState(D3DRS_CULLMODE, s_cullTable_30[(unsigned __int16)(stateBits0 & 0xC000) >> 14]);
+        hr = device->SetRenderState(D3DRS_CULLMODE, s_cullTable_30[(uint16_t)(stateBits0 & 0xC000) >> 14]);
         if (hr < 0)
         {
             do
@@ -1770,7 +1770,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
             hr = device->SetSamplerState(
                 samplerIndex,
                 D3DSAMP_MINFILTER,
-                (unsigned __int16)(samplerState & 0xF00) >> 8);
+                (uint16_t)(samplerState & 0xF00) >> 8);
             if (hr < 0)
             {
                 do
@@ -1793,7 +1793,7 @@ unsigned int __cdecl R_HW_SetSamplerState(
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MAGFILTER, magFilter )\n");
-            v17 = device->SetSamplerState(samplerIndex, D3DSAMP_MAGFILTER, (unsigned __int16)(samplerState & 0xF000) >> 12);
+            v17 = device->SetSamplerState(samplerIndex, D3DSAMP_MAGFILTER, (uint16_t)(samplerState & 0xF000) >> 12);
             if (v17 < 0)
             {
                 do

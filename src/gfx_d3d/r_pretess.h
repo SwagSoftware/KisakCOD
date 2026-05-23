@@ -8,8 +8,8 @@ enum DrawSurfType : __int32;
 
 struct GfxBspPreTessDrawSurf // sizeof=0x4
 {                                       // ...
-    unsigned __int16 baseSurfIndex;     // ...
-    unsigned __int16 totalTriCount;     // ...
+    uint16_t baseSurfIndex;     // ...
+    uint16_t totalTriCount;     // ...
 };
 
 void __cdecl R_InitDrawSurfListInfo(GfxDrawSurfListInfo *info);
@@ -21,7 +21,7 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
     unsigned int primarySortKey);
 
 
-unsigned __int16 *__cdecl R_AllocPreTessIndices(int count);
+uint16_t *__cdecl R_AllocPreTessIndices(int count);
 
 void __cdecl R_EndPreTess();
 void __cdecl R_BeginPreTess();

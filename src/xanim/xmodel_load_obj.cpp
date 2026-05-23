@@ -486,7 +486,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned char **pos, void *(__cdec
     XVertexInfo1 *vert1Out; // [esp+718h] [ebp-28h]
     int endIndex; // [esp+71Ch] [ebp-24h]
     int i; // [esp+720h] [ebp-20h]
-    unsigned __int16 *vertsBlendOut; // [esp+724h] [ebp-1Ch]
+    uint16_t *vertsBlendOut; // [esp+724h] [ebp-1Ch]
     int triIndex; // [esp+728h] [ebp-18h]
     int vertIndex; // [esp+72Ch] [ebp-14h]
     XVertexInfo0 *vertOut; // [esp+730h] [ebp-10h]
@@ -1213,7 +1213,7 @@ XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(_
     float v13; // [esp+58h] [ebp-161Ch]
     float v14; // [esp+5Ch] [ebp-1618h]
     float v15; // [esp+60h] [ebp-1614h]
-    unsigned __int16 v16; // [esp+64h] [ebp-1610h]
+    uint16_t v16; // [esp+64h] [ebp-1610h]
     unsigned __int8 *pos; // [esp+68h] [ebp-160Ch] BYREF
     int j; // [esp+6Ch] [ebp-1608h]
     int numBones; // [esp+70h] [ebp-1604h]
@@ -1470,7 +1470,7 @@ void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
 
 XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, void *(__cdecl *Alloc)(int))
 {
-    unsigned __int16 prev; // ax
+    uint16_t prev; // ax
     unsigned __int8 *pos; // [esp+30h] [ebp-88h] BYREF
     int numBones; // [esp+34h] [ebp-84h]
     char filename[64]; // [esp+38h] [ebp-80h] BYREF
@@ -1488,7 +1488,7 @@ XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, vo
     int i; // [esp+A8h] [ebp-10h]
     XModelPartsLoad *modelParts; // [esp+ACh] [ebp-Ch]
     bool useBones; // [esp+B3h] [ebp-5h]
-    unsigned __int16 *boneNames; // [esp+B4h] [ebp-4h]
+    uint16_t *boneNames; // [esp+B4h] [ebp-4h]
 
     if (Com_sprintf(filename, 0x40u, "xmodelparts/%s", name) < 0)
     {
@@ -1528,7 +1528,7 @@ XModelPartsLoad *__cdecl XModelPartsLoadFile(XModel *model, const char *name, vo
     numRootBones = Buf_Read<unsigned short>(&pos);
     numBones = numRootBones + numChildBones;
     size = 2 * numBones;
-    boneNames = (unsigned __int16 *)Alloc(2 * numBones);
+    boneNames = (uint16_t *)Alloc(2 * numBones);
     model->memUsage += size;
 
     if (numBones < 128)
@@ -1625,7 +1625,7 @@ XModel *__cdecl XModelLoad(char *name, void *(__cdecl *Alloc)(int), void *(__cde
 static XModelPartsLoad *__cdecl XModelCreateDefaultParts()
 {
     g_default.modelParts.parentList = g_default.parentList;
-    g_default.modelParts.boneNames = (unsigned __int16 *)&g_default;
+    g_default.modelParts.boneNames = (uint16_t *)&g_default;
     g_default.modelParts.quats = 0;
     g_default.modelParts.trans = 0;
     g_default.modelParts.numBones = 1;

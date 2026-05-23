@@ -471,13 +471,13 @@ unsigned int __cdecl R_TessParticleCloudList(const GfxDrawSurfListArgs *listArgs
     }
     drawSurf = info->drawSurfs[listArgs->firstDrawSurfIndex];
     data = commonSource->input.data;
-    if ((unsigned int)(unsigned __int16)drawSurf.fields.objectId >= data->cloudCount)
+    if ((unsigned int)(uint16_t)drawSurf.fields.objectId >= data->cloudCount)
         MyAssertHandler(
             ".\\rb_tess.cpp",
             639,
             0,
             "drawSurf.fields.objectId doesn't index data->cloudCount\n\t%i not in [0, %i)",
-            (unsigned __int16)drawSurf.fields.objectId,
+            (uint16_t)drawSurf.fields.objectId,
             data->cloudCount);
     cloud = &data->clouds[drawSurf.fields.objectId];
     {

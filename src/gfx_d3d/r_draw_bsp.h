@@ -35,7 +35,7 @@ void __cdecl R_DrawTrianglesLit(
 void __cdecl R_DrawBspTris(GfxCmdBufPrimState *state, const srfTriangles_t *tris, unsigned int triCount);
 int __cdecl R_ReadBspDrawSurfs(
     const unsigned int **primDrawSurfPos,
-    const unsigned __int16 **list,
+    const uint16_t **list,
     unsigned int *count);
 void __cdecl R_DrawBspDrawSurfs(const unsigned int *primDrawSurfPos, GfxCmdBufState *state);
 void __cdecl R_DrawTriangles(GfxTrianglesDrawStream *drawStream, GfxCmdBufPrimState *state);

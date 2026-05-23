@@ -135,7 +135,7 @@ void __cdecl R_DrawTrianglesLit(
     unsigned int lightmapSecondaryFlag; // [esp+20h] [ebp-58h]
     unsigned int reflectionProbeFlag; // [esp+24h] [ebp-54h]
     const GfxTexture *lightmapPrimaryTexture; // [esp+28h] [ebp-50h]
-    const unsigned __int16 *list; // [esp+2Ch] [ebp-4Ch] BYREF
+    const uint16_t *list; // [esp+2Ch] [ebp-4Ch] BYREF
     int triCount; // [esp+30h] [ebp-48h]
     unsigned int reflectionProbeIndex; // [esp+34h] [ebp-44h]
     const GfxTexture *reflectionProbeTexture; // [esp+38h] [ebp-40h]
@@ -325,13 +325,13 @@ void __cdecl R_DrawBspTris(GfxCmdBufPrimState *state, const srfTriangles_t *tris
 
 int __cdecl R_ReadBspDrawSurfs(
     const unsigned int **primDrawSurfPos,
-    const unsigned __int16 **list,
+    const uint16_t **list,
     unsigned int *count)
 {
     *count = *(*primDrawSurfPos)++;
     if (!*count)
         return 0;
-    *list = (const unsigned __int16 *)*primDrawSurfPos;
+    *list = (const uint16_t *)*primDrawSurfPos;
     *primDrawSurfPos += (*count + 1) >> 1;
     return 1;
 }
@@ -349,7 +349,7 @@ void __cdecl R_DrawTriangles(GfxTrianglesDrawStream *drawStream, GfxCmdBufPrimSt
     int baseIndex; // [esp+0h] [ebp-28h]
     const GfxSurface *tris; // [esp+8h] [ebp-20h]
     const srfTriangles_t *prevTris; // [esp+Ch] [ebp-1Ch]
-    const unsigned __int16 *list; // [esp+10h] [ebp-18h] BYREF
+    const uint16_t *list; // [esp+10h] [ebp-18h] BYREF
     int triCount; // [esp+14h] [ebp-14h]
     const GfxSurface *bspSurf; // [esp+18h] [ebp-10h]
     unsigned int index; // [esp+1Ch] [ebp-Ch]

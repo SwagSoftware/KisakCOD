@@ -44,8 +44,8 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
     const DpvsPlane *planesEA; // [esp+A0h] [ebp-38h]
     unsigned int cellIndex; // [esp+A4h] [ebp-34h]
     unsigned int viewIndex; // [esp+A8h] [ebp-30h]
-    unsigned __int16 *sceneDObjIndex; // [esp+ACh] [ebp-2Ch]
-    unsigned __int16 *sceneXModelIndex; // [esp+B0h] [ebp-28h]
+    uint16_t *sceneDObjIndex; // [esp+ACh] [ebp-2Ch]
+    uint16_t *sceneXModelIndex; // [esp+B0h] [ebp-28h]
     GfxEntCellRefInfo *entInfo; // [esp+B4h] [ebp-24h]
     unsigned int wordCount; // [esp+B8h] [ebp-20h]
     GfxWorldDpvsPlanes *worldDpvsPlanes; // [esp+BCh] [ebp-1Ch]
@@ -154,7 +154,7 @@ void R_AddCellSceneEntSurfacesInFrustumCmd(GfxWorldDpvsPlanes *data)
                             if (sceneEnt->cull.state < 2)
                                 R_AddWorkerCmd(WRKCMD_DPVS_ENTITY, (uint8_t *)&dpvsEntity);
                             else
-                                R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)&dpvsEntity);
+                                R_AddEntitySurfacesInFrustumCmd((uint16_t *)&dpvsEntity);
                         }
                     }
                 }

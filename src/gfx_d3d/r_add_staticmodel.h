@@ -28,14 +28,14 @@ void __cdecl R_SkinStaticModelsCameraForLod(
 void __cdecl R_SkinStaticModelsCamera(
     const XModel *model,
     uint8_t primaryLightIndex,
-    unsigned __int16 (*staticModelLodList)[4][128],
-    unsigned __int16 (*staticModelLodCount)[4],
+    uint16_t (*staticModelLodList)[4][128],
+    uint16_t (*staticModelLodCount)[4],
     GfxSModelDrawSurfLightingData *surfData);
 void __cdecl R_SkinStaticModelsCameraForSurface(
     const XModel *model,
     uint8_t primaryLightIndex,
-    unsigned __int16 (*staticModelLodList)[128],
-    unsigned __int16 *staticModelLodCount,
+    uint16_t (*staticModelLodList)[128],
+    uint16_t *staticModelLodCount,
     unsigned int surfType,
     GfxSModelDrawSurfLightingData *surfData);
 void __cdecl R_ShowCountsStaticModel(int smodelIndex, int lod);
@@ -54,13 +54,13 @@ void __cdecl R_SkinStaticModelsShadowForLod(
     GfxSModelDrawSurfData *surfData);
 void __cdecl R_SkinStaticModelsShadow(
     const XModel *model,
-    unsigned __int16 (*staticModelLodList)[4][128],
-    unsigned __int16 (*staticModelLodCount)[4],
+    uint16_t (*staticModelLodList)[4][128],
+    uint16_t (*staticModelLodCount)[4],
     GfxSModelDrawSurfData *surfData);
 void __cdecl R_SkinStaticModelsShadowForSurface(
     const XModel *model,
-    unsigned __int16 (*staticModelLodList)[128],
-    unsigned __int16 *staticModelLodCount,
+    uint16_t (*staticModelLodList)[128],
+    uint16_t *staticModelLodCount,
     unsigned int surfType,
     GfxSModelDrawSurfData *surfData);
 void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex, unsigned int primaryLightIndex);

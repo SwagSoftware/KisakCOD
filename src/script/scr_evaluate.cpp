@@ -46,11 +46,11 @@ void __cdecl Scr_ArchiveCanonicalStrings()
     unsigned int stringValuea; // [esp+30h] [ebp-18h]
     unsigned int len; // [esp+34h] [ebp-14h]
     int lena; // [esp+34h] [ebp-14h]
-    unsigned __int16 canonicalStr; // [esp+38h] [ebp-10h]
+    uint16_t canonicalStr; // [esp+38h] [ebp-10h]
     const char *s; // [esp+3Ch] [ebp-Ch]
     char *debugString; // [esp+40h] [ebp-8h]
-    unsigned __int16 i; // [esp+44h] [ebp-4h]
-    unsigned __int16 ia; // [esp+44h] [ebp-4h]
+    uint16_t i; // [esp+44h] [ebp-4h]
+    uint16_t ia; // [esp+44h] [ebp-4h]
 
     len = 0;
     for (stringValue = 0; stringValue < 0x10000; ++stringValue)
@@ -168,7 +168,7 @@ void __cdecl Scr_ShutdownEvaluate()
     KISAK_NULLSUB();
 }
 
-unsigned __int16 __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
+uint16_t __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
 {
     int v2; // [esp+4h] [ebp-24h]
     int low; // [esp+18h] [ebp-10h]
@@ -199,7 +199,7 @@ unsigned __int16 __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
 
 void __cdecl Scr_GetFieldValue(unsigned int objectId, const char *fieldName, int len, char *text)
 {
-    unsigned __int16 v4; // ax
+    uint16_t v4; // ax
     unsigned int stringValue; // [esp+0h] [ebp-Ch]
     VariableValue tempValue; // [esp+4h] [ebp-8h] BYREF
 
@@ -319,7 +319,7 @@ void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int 
         Scr_GetCodePos((const char *)(value->u.intValue - 1), 1u, s, len);
         break;
     case 0xB:
-        intValue = (unsigned __int16)value->u.intValue;
+        intValue = (uint16_t)value->u.intValue;
         Anims = Scr_GetAnims(HIWORD(value->u.intValue));
         AnimDebugName = XAnimGetAnimDebugName(Anims, intValue);
         Com_sprintf(s, len, "%%%s", AnimDebugName);

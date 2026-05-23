@@ -268,7 +268,7 @@ BOOL __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *s
 
 void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData)
 {
-    unsigned __int16 triSurfList[2]; // [esp+F0h] [ebp-4Ch] BYREF
+    uint16_t triSurfList[2]; // [esp+F0h] [ebp-4Ch] BYREF
     unsigned int surfIndex; // [esp+F4h] [ebp-48h]
     float mins[3]; // [esp+F8h] [ebp-44h] BYREF
     BspOmniLightCallback bspLightCallback; // [esp+104h] [ebp-38h] BYREF
@@ -350,7 +350,7 @@ int __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid)
 
 void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData)
 {
-    unsigned __int16 triSurfList[2]; // [esp+1B4h] [ebp-ACh] BYREF
+    uint16_t triSurfList[2]; // [esp+1B4h] [ebp-ACh] BYREF
     unsigned int surfIndex; // [esp+1B8h] [ebp-A8h]
     float mins[3]; // [esp+1BCh] [ebp-A4h] BYREF
     BspSpotLightCallback bspLightCallback; // [esp+1C8h] [ebp-98h] BYREF
@@ -652,10 +652,10 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     const GfxLight* light; // [esp+5Ch] [ebp-858h]
     GfxStaticModelId staticModelId; // [esp+60h] [ebp-854h]
     Material* const* pMaterial; // [esp+64h] [ebp-850h]
-    unsigned __int16 list[2]; // [esp+68h] [ebp-84Ch] BYREF
+    uint16_t list[2]; // [esp+68h] [ebp-84Ch] BYREF
     unsigned int* lodData; // [esp+6Ch] [ebp-848h]
     int lod; // [esp+70h] [ebp-844h]
-    unsigned __int16 smodels[1024]; // [esp+74h] [ebp-840h] BYREF
+    uint16_t smodels[1024]; // [esp+74h] [ebp-840h] BYREF
     float maxs[3]; // [esp+878h] [ebp-3Ch] BYREF
     int smodelCount; // [esp+884h] [ebp-30h]
     XSurface* surfaces; // [esp+888h] [ebp-2Ch] BYREF

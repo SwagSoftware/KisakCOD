@@ -36,7 +36,7 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
     int passEntityNum; // [esp+0h] [ebp-38h]
     trace_t tr; // [esp+4h] [ebp-34h] BYREF
     int mask; // [esp+30h] [ebp-8h]
-    unsigned __int16 hitEntId; // [esp+34h] [ebp-4h]
+    uint16_t hitEntId; // [esp+34h] [ebp-4h]
 
     if (ent->clipmask)
     {

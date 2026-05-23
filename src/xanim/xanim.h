@@ -30,13 +30,13 @@ enum WeapAccuracyType : __int32
 union XAnimIndices // sizeof=0x4
 {                                       // ...
     unsigned __int8 *_1;
-    unsigned __int16 *_2;
+    uint16_t *_2;
     void *data;
 };
 static_assert(sizeof(XAnimIndices) == 4);
 struct XAnimNotifyInfo // sizeof=0x8
 {
-    unsigned __int16 name;
+    uint16_t name;
     // padding byte
     // padding byte
     float time;
@@ -44,7 +44,7 @@ struct XAnimNotifyInfo // sizeof=0x8
 union XAnimDynamicIndices // sizeof=0x2
 {                                       // ...
     unsigned __int8 _1[1];
-    unsigned __int16 _2[1];
+    uint16_t _2[1];
 };
 struct XAnimDeltaPartQuatDataFrames // sizeof=0x8
 {                                       // ...
@@ -57,7 +57,7 @@ struct XAnimDeltaPartQuatDataFrames // sizeof=0x8
 union XAnimDynamicFrames // sizeof=0x4
 {                                       // ...
     unsigned __int8 (*_1)[3];
-    unsigned __int16 (*_2)[3];
+    uint16_t (*_2)[3];
 };
 struct XAnimPartTransFrames // sizeof=0x20
 {                                       // ...
@@ -76,7 +76,7 @@ union XAnimPartTransData // sizeof=0x20
 };
 struct XAnimPartTrans // sizeof=0x24
 {
-    unsigned __int16 size;
+    uint16_t size;
     unsigned __int8 smallTrans;
     // padding byte
     XAnimPartTransData u;
@@ -106,7 +106,7 @@ union XAnimPartQuatData // sizeof=0x8
 };
 struct XAnimPartQuat // sizeof=0xC
 {
-    unsigned __int16 size;
+    uint16_t size;
     // padding byte
     // padding byte
     XAnimPartQuatData u;
@@ -130,7 +130,7 @@ struct XAnimPartTransPtr // sizeof=0x8
 
 struct XAnimDeltaPartQuat // sizeof=0xC
 {
-    unsigned __int16 size;
+    uint16_t size;
     // padding byte
     // padding byte
     XAnimDeltaPartQuatData u;
@@ -149,12 +149,12 @@ struct XAnimTime // sizeof=0xC
 struct XAnimParts // sizeof=0x58
 {                                       // ...
     const char *name;
-    unsigned __int16 dataByteCount;
-    unsigned __int16 dataShortCount;
-    unsigned __int16 dataIntCount;
-    unsigned __int16 randomDataByteCount;
-    unsigned __int16 randomDataIntCount;
-    unsigned __int16 numframes;
+    uint16_t dataByteCount;
+    uint16_t dataShortCount;
+    uint16_t dataIntCount;
+    uint16_t randomDataByteCount;
+    uint16_t randomDataIntCount;
+    uint16_t numframes;
     bool bLoop;
     bool bDelta;
     unsigned __int8 boneCount[10];
@@ -166,7 +166,7 @@ struct XAnimParts // sizeof=0x58
     unsigned int indexCount;
     float framerate;
     float frequency;
-    unsigned __int16 *names;
+    uint16_t *names;
     unsigned __int8 *dataByte;
     __int16 *dataShort;
     int *dataInt;
@@ -181,19 +181,19 @@ static_assert(sizeof(XAnimParts) == 88);
 
 struct XModelNameMap // sizeof=0x4
 {                                       // ...
-    unsigned __int16 name;              // ...
-    unsigned __int16 index;
+    uint16_t name;              // ...
+    uint16_t index;
 };
 
 struct XAnimParent // sizeof=0x4
 {                                       // ...
-    unsigned __int16 flags;
-    unsigned __int16 children;
+    uint16_t flags;
+    uint16_t children;
 };
 struct XAnimEntry // sizeof=0x8
 {                                       // ...
-    unsigned __int16 numAnims;
-    unsigned __int16 parent;
+    uint16_t numAnims;
+    uint16_t parent;
     union //$7F333398CC08E12E110886895274CBFC
     {
         XAnimParts *parts;
@@ -214,14 +214,14 @@ struct XAnimTree_s // sizeof=0x14
     int info_usage;
     volatile long calcRefCount;
     volatile long modifyRefCount;
-    unsigned __int16 children;
+    uint16_t children;
     // padding byte
     // padding byte
 };
 struct mnode_t // sizeof=0x4
 {
-    unsigned __int16 cellIndex;
-    unsigned __int16 rightChildOffset;
+    uint16_t cellIndex;
+    uint16_t rightChildOffset;
 };
 
 struct XAnimState // sizeof=0x20
@@ -242,16 +242,16 @@ struct XAnimState // sizeof=0x20
 
 struct XAnimInfo // sizeof=0x40
 {                                       // ...
-    unsigned __int16 notifyChild;
+    uint16_t notifyChild;
     __int16 notifyIndex;
-    unsigned __int16 notifyName;
-    unsigned __int16 notifyType;
-    unsigned __int16 prev;              // ...
-    unsigned __int16 next;              // ...
-    unsigned __int16 children;          // ...
-    unsigned __int16 parent;            // ...
-    unsigned __int16 animIndex;         // ...
-    unsigned __int16 animToModel;
+    uint16_t notifyName;
+    uint16_t notifyType;
+    uint16_t prev;              // ...
+    uint16_t next;              // ...
+    uint16_t children;          // ...
+    uint16_t parent;            // ...
+    uint16_t animIndex;         // ...
+    uint16_t animToModel;
     bool inuse;                         // ...
     // padding byte
     // padding byte
@@ -290,7 +290,7 @@ struct XAnimNotify_s // sizeof=0xC
 
 struct cStaticModelWritable // sizeof=0x2
 {                                       // ...
-    unsigned __int16 nextModelInWorldSector;
+    uint16_t nextModelInWorldSector;
 };
 struct cStaticModel_s // sizeof=0x50
 {
@@ -317,13 +317,13 @@ struct cNode_t // sizeof=0x8
 
 struct cLeafBrushNodeLeaf_t // sizeof=0x4
 {                                       // ...
-    unsigned __int16* brushes;
+    uint16_t* brushes;
 };
 struct cLeafBrushNodeChildren_t // sizeof=0xC
 {                                       // ...
     float dist;
     float range;
-    unsigned __int16 childOffset[2];
+    uint16_t childOffset[2];
 };
 union cLeafBrushNodeData_t // sizeof=0xC
 {                                       // ...
@@ -364,8 +364,8 @@ struct CollisionAabbTree // sizeof=0x20
 {
     float origin[3];
     float halfSize[3];
-    unsigned __int16 materialIndex;
-    unsigned __int16 childCount;
+    uint16_t materialIndex;
+    uint16_t childCount;
     CollisionAabbTreeIndex u;
 };
 
@@ -440,22 +440,22 @@ struct ComWorld // sizeof=0x10 (SP/MP Same)
 
 struct XModelDrawInfo // sizeof=0x4
 {                                       // ...
-    unsigned __int16 lod;
-    unsigned __int16 surfId;
+    uint16_t lod;
+    uint16_t surfId;
 };
 struct GfxSceneDynModel // sizeof=0x6
 {
     XModelDrawInfo info;
-    unsigned __int16 dynEntId;
+    uint16_t dynEntId;
 };
 struct BModelDrawInfo // sizeof=0x2
 {                                       // ...
-    unsigned __int16 surfId;
+    uint16_t surfId;
 };
 struct GfxSceneDynBrush // sizeof=0x4
 {
     BModelDrawInfo info;
-    unsigned __int16 dynEntId;
+    uint16_t dynEntId;
 };
 
 struct WeaponDef // sizeof=0x878
@@ -467,9 +467,9 @@ struct WeaponDef // sizeof=0x878
     XModel* handXModel;
     const char* szXAnims[33];
     const char* szModeName;
-    unsigned __int16 hideTags[8];
-    unsigned __int16 notetrackSoundMapKeys[16];
-    unsigned __int16 notetrackSoundMapValues[16];
+    uint16_t hideTags[8];
+    uint16_t notetrackSoundMapKeys[16];
+    uint16_t notetrackSoundMapValues[16];
     int playerAnimType;
     weapType_t weapType;
     weapClass_t weapClass;
@@ -1054,9 +1054,9 @@ struct XAssetEntry // sizeof=0x10
     XAsset asset;                       // ...
     unsigned __int8 zoneIndex;
     bool inuse;
-    unsigned __int16 nextHash;
-    unsigned __int16 nextOverride;
-    unsigned __int16 usageFrame;
+    uint16_t nextHash;
+    uint16_t nextOverride;
+    uint16_t usageFrame;
 };
 
 union XAssetEntryPoolEntry // sizeof=0x10
@@ -1128,20 +1128,20 @@ static_assert(sizeof(XFile) == 44);
 
 struct XSurfaceCollisionAabb // sizeof=0xC
 {                                       // ...
-    unsigned __int16 mins[3];
-    unsigned __int16 maxs[3];
+    uint16_t mins[3];
+    uint16_t maxs[3];
 };
 
 struct XSurfaceCollisionNode // sizeof=0x10
 {
     XSurfaceCollisionAabb aabb;
-    unsigned __int16 childBeginIndex;
-    unsigned __int16 childCount;
+    uint16_t childBeginIndex;
+    uint16_t childCount;
 };
 
 struct XSurfaceCollisionLeaf // sizeof=0x2
 {
-    unsigned __int16 triangleBeginIndex;
+    uint16_t triangleBeginIndex;
 };
 
 struct XSurfaceCollisionTree // sizeof=0x28
@@ -1155,10 +1155,10 @@ struct XSurfaceCollisionTree // sizeof=0x28
 };
 struct XRigidVertList // sizeof=0xC
 {                                       // ...
-    unsigned __int16 boneOffset;        // ...
-    unsigned __int16 vertCount;         // ...
-    unsigned __int16 triOffset;         // ...
-    unsigned __int16 triCount;          // ...
+    uint16_t boneOffset;        // ...
+    uint16_t vertCount;         // ...
+    uint16_t triOffset;         // ...
+    uint16_t triCount;          // ...
     XSurfaceCollisionTree *collisionTree;
 };
 static_assert(sizeof(XRigidVertList) == 12);
@@ -1166,7 +1166,7 @@ static_assert(sizeof(XRigidVertList) == 12);
 struct XSurfaceVertexInfo // sizeof=0xC
 {                                       // ...
     __int16 vertCount[4];
-    unsigned __int16 *vertsBlend;
+    uint16_t *vertsBlend;
 };
 static_assert(sizeof(XSurfaceVertexInfo) == 12);
 
@@ -1174,13 +1174,13 @@ struct XSurface // sizeof=0x38
 {
     unsigned __int8 tileMode;
     bool deformed;
-    unsigned __int16 vertCount;
-    unsigned __int16 triCount;
+    uint16_t vertCount;
+    uint16_t triCount;
     unsigned __int8 zoneHandle;
     // padding byte
-    unsigned __int16 baseTriIndex;
-    unsigned __int16 baseVertIndex;
-    unsigned __int16 *triIndices;
+    uint16_t baseTriIndex;
+    uint16_t baseVertIndex;
+    uint16_t *triIndices;
     XSurfaceVertexInfo vertInfo;
     GfxPackedVertex *verts0;
     unsigned int vertListCount;
@@ -1266,7 +1266,7 @@ void __cdecl XAnimUpdateTimeAndNotetrackLeaf(
     float dtime,
     bool bNotify);
 void __cdecl XAnimProcessClientNotify(XAnimInfo* info, float dtime);
-unsigned __int16 __cdecl XAnimGetNextNotifyIndex(const XAnimParts* parts, float time);
+uint16_t __cdecl XAnimGetNextNotifyIndex(const XAnimParts* parts, float time);
 double __cdecl XAnimGetNotifyFracLeaf(const XAnimState* state, const XAnimState* nextState, float time, float dtime);
 void __cdecl XAnimAddClientNotify(unsigned int notetrackName, float frac, unsigned int notifyType);
 void __cdecl XAnimUpdateTimeAndNotetrackSyncSubTree(
@@ -1336,7 +1336,7 @@ void __cdecl XAnimGetRelDelta(
 void __cdecl XAnimGetAbsDelta(const XAnim_s* anims, unsigned int animIndex, float* rot, float* trans, float time);
 unsigned int __cdecl XAnimAllocInfoWithParent(
     XAnimTree_s* tree,
-    unsigned __int16 animToModel,
+    uint16_t animToModel,
     unsigned int animIndex,
     unsigned int parentInfoIndex,
     int after);

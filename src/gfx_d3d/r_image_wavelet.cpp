@@ -4108,7 +4108,7 @@ const WaveletHuffmanDecode waveletDecodeBlue[4096] =
   { -8, 6 },
   { -5, 6 }
 }; // idb
-const unsigned __int16 waveletEncodeBlue[511] =
+const uint16_t waveletEncodeBlue[511] =
 {
   60u,
   60u,
@@ -8721,7 +8721,7 @@ const WaveletHuffmanDecode waveletDecodeRedGreen[4096] =
   { -1, 3 },
   { 0, 2 }
 }; // idb
-const unsigned __int16 waveletEncodeRedGreen[1021] =
+const uint16_t waveletEncodeRedGreen[1021] =
 {
   104u,
   104u,
@@ -13844,7 +13844,7 @@ const WaveletHuffmanDecode waveletDecodeAlpha[4096] =
   { -8, 8 },
   { 0, 1 }
 }; // idb
-const unsigned __int16 waveletEncodeAlpha[511] =
+const uint16_t waveletEncodeAlpha[511] =
 {
   0u,
   0u,
@@ -14599,14 +14599,14 @@ void __cdecl Wavelet_DecompressLevel(uint8_t *src, uint8_t *dst, WaveletDecode *
     }
 }
 
-void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode)
+void __cdecl Wavelet_ConsumeBits(uint16_t bitCount, WaveletDecode *decode)
 {
     iassert( bitCount > 0 && bitCount <= 16 );
     iassert( decode->bit < 8 );
     decode->value >>= bitCount;
     decode->value |= ((*((uint8_t *)decode->data + 3) << 24)
         | (*((uint8_t *)decode->data + 2) << 16)
-        | (unsigned int)*(unsigned __int16 *)decode->data) >> decode->bit << (16 - bitCount);
+        | (unsigned int)*(uint16_t *)decode->data) >> decode->bit << (16 - bitCount);
     decode->bit += bitCount;
     decode->data += (int)decode->bit >> 3;
     decode->bit &= 7u;
@@ -14616,7 +14616,7 @@ void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decod
 
 int __cdecl Wavelet_DecodeValue(
     const WaveletHuffmanDecode *decodeTable,
-    unsigned __int16 bitCount,
+    uint16_t bitCount,
     int bias,
     WaveletDecode *decode)
 {

@@ -258,8 +258,8 @@ void __cdecl R_ShutdownImages()
 
 void __cdecl Image_SetupRenderTarget(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT imageFormat)
 {
     iassert(image);
@@ -273,8 +273,8 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
     unsigned int mipHeight; // [esp+4h] [ebp-5Ch]
     unsigned int mipWidth; // [esp+8h] [ebp-58h]
     _D3DCUBEMAP_FACES v5; // [esp+Ch] [ebp-54h]
-    unsigned __int16 v6; // [esp+14h] [ebp-4Ch]
-    unsigned __int16 v7; // [esp+18h] [ebp-48h]
+    uint16_t v6; // [esp+14h] [ebp-4Ch]
+    uint16_t v7; // [esp+18h] [ebp-48h]
     GfxImageLoadDef *loadDef; // [esp+34h] [ebp-2Ch]
     LONG externalDataSize; // [esp+38h] [ebp-28h]
     signed int mipCount; // [esp+3Ch] [ebp-24h]
@@ -1108,7 +1108,7 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
 
 void __cdecl Image_CreateCubeTexture_PC(
     GfxImage *image,
-    unsigned __int16 edgeLen,
+    uint16_t edgeLen,
     unsigned int mipmapCount,
     _D3DFORMAT imageFormat)
 {
@@ -1157,9 +1157,9 @@ void __cdecl Image_CreateCubeTexture_PC(
 
 void __cdecl Image_Create3DTexture_PC(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
-    unsigned __int16 depth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t depth,
     unsigned int mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat)
@@ -1252,8 +1252,8 @@ void __cdecl Image_UpdatePicmip(GfxImage *image)
 
 void __cdecl Image_Create2DTexture_PC(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     unsigned int mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat)

@@ -38,10 +38,10 @@ struct GfxShadowedLightHistory // sizeof=0x48
 
 struct GfxShadowGeometry // sizeof=0xC
 {
-    unsigned __int16 surfaceCount;
-    unsigned __int16 smodelCount;
-    unsigned __int16 *sortedSurfIndex;
-    unsigned __int16 *smodelIndex;
+    uint16_t surfaceCount;
+    uint16_t smodelCount;
+    uint16_t *sortedSurfIndex;
+    uint16_t *smodelIndex;
 };
 struct GfxLightRegionAxis // sizeof=0x14
 {

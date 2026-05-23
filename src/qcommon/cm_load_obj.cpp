@@ -31,7 +31,7 @@ struct DiskLeaf_Version14 // sizeof=0x24
 
 struct DiskCollPartition // sizeof=0xC
 {
-    unsigned __int16 checkStamp;
+    uint16_t checkStamp;
     uint8_t triCount;
     uint8_t borderCount;
     int firstTriIndex;
@@ -48,8 +48,8 @@ struct DiskCollAabbTree // sizeof=0x20
 {
     float origin[3];
     float halfSize[3];
-    unsigned __int16 materialIndex;
-    unsigned __int16 childCount;
+    uint16_t materialIndex;
+    uint16_t childCount;
     DiskCollAabbTree_u u;
 };
 
@@ -759,10 +759,10 @@ void CMod_LoadVisibility()
     }
 }
 
-unsigned __int16 *CM_InitBoxHull()
+uint16_t *CM_InitBoxHull()
 {
     cLeafBrushNode_s *v0; // eax
-    unsigned __int16 *result; // eax
+    uint16_t *result; // eax
 
     cm.box_brush = &cm.brushes[cm.numBrushes];
     cm.brushes[cm.numBrushes].numsides = 0;
@@ -893,7 +893,7 @@ void CMod_LoadSubmodelBrushNodes()
     char *in; // [esp+10h] [ebp-14h]
     const DiskBrushModel *ina; // [esp+10h] [ebp-14h]
     unsigned int bmodelIndex; // [esp+14h] [ebp-10h]
-    unsigned __int16 *indexes; // [esp+18h] [ebp-Ch]
+    uint16_t *indexes; // [esp+18h] [ebp-Ch]
     unsigned int count; // [esp+1Ch] [ebp-8h] BYREF
     int firstBrush; // [esp+20h] [ebp-4h]
 
@@ -931,7 +931,7 @@ void __cdecl CM_Hunk_ClearTempMemoryHigh()
     Hunk_ClearTempMemoryHigh();
 }
 
-void __cdecl CMod_PartionLeafBrushes(unsigned __int16 *leafBrushes, int numLeafBrushes, cLeaf_t *leaf)
+void __cdecl CMod_PartionLeafBrushes(uint16_t *leafBrushes, int numLeafBrushes, cLeaf_t *leaf)
 {
     int j; // [esp+8h] [ebp-28h]
     int ja; // [esp+8h] [ebp-28h]
@@ -988,7 +988,7 @@ unsigned int __cdecl CM_Hunk_AllocateTempMemoryHigh(int size, const char *name)
 }
 
 cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
-    unsigned __int16 *leafBrushes,
+    uint16_t *leafBrushes,
     int numLeafBrushes,
     const float *mins,
     const float *maxs)
@@ -1014,7 +1014,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
     int len; // [esp+50h] [ebp-28h]
     float childMins[3]; // [esp+54h] [ebp-24h] BYREF
     cLeafBrushNode_s *childNode; // [esp+60h] [ebp-18h]
-    unsigned __int16 *leafBrushesCopy; // [esp+64h] [ebp-14h]
+    uint16_t *leafBrushesCopy; // [esp+64h] [ebp-14h]
     cLeafBrushNode_s *returnNode; // [esp+68h] [ebp-10h]
     int axis; // [esp+6Ch] [ebp-Ch]
     int brushnum; // [esp+70h] [ebp-8h]
@@ -1166,7 +1166,7 @@ cLeafBrushNode_s *__cdecl CMod_AllocLeafBrushNode()
 }
 
 double __cdecl CMod_GetPartitionScore(
-    unsigned __int16 *leafBrushes,
+    uint16_t *leafBrushes,
     int numLeafBrushes,
     int axis,
     const float *mins,
@@ -1523,7 +1523,7 @@ void CMod_LoadLeafBrushNodes_Version14()
 
 void CMod_LoadLeafBrushes()
 {
-    unsigned __int16 *out; // [esp+0h] [ebp-18h]
+    uint16_t *out; // [esp+0h] [ebp-18h]
     unsigned int brushIndex; // [esp+4h] [ebp-14h]
     char *in; // [esp+Ch] [ebp-Ch]
     unsigned int iter; // [esp+10h] [ebp-8h]

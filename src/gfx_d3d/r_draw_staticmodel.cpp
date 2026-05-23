@@ -32,12 +32,12 @@ void __cdecl R_DrawStaticModelDrawSurfLightingNonOptimized(
 {
     const GfxStaticModelDrawInst *smodelDrawInst; // [esp+0h] [ebp-28h]
     GfxStaticModelDrawInst *smodelDrawInsts; // [esp+4h] [ebp-24h]
-    const unsigned __int16 *list; // [esp+8h] [ebp-20h]
+    const uint16_t *list; // [esp+8h] [ebp-20h]
     unsigned int smodelCount; // [esp+Ch] [ebp-1Ch]
     unsigned int index; // [esp+10h] [ebp-18h]
     XSurface *xsurf; // [esp+14h] [ebp-14h]
     GfxDrawPrimArgs args; // [esp+18h] [ebp-10h] BYREF
-    unsigned __int16 lightingHandle; // [esp+24h] [ebp-4h]
+    uint16_t lightingHandle; // [esp+24h] [ebp-4h]
 
     xsurf = drawStream->localSurf;
     R_SetupStaticModelPrim(xsurf, &args, &context.state->prim);
@@ -80,7 +80,7 @@ int __cdecl R_GetNextStaticModelSurf(GfxStaticModelDrawStream *drawStream, XSurf
     primDrawSurfPos = drawStream->primDrawSurfPos;
     drawStream->primDrawSurfPos += ((drawStream->smodelCount + 1) >> 1) + 1;
     xsurf = (XSurface *)*primDrawSurfPos;
-    drawStream->smodelList = (const unsigned __int16 *)(primDrawSurfPos + 1);
+    drawStream->smodelList = (const uint16_t *)(primDrawSurfPos + 1);
     drawStream->localSurf = xsurf;
     g_frameStatsCur.geoIndexCount += 3 * drawStream->smodelCount * xsurf->triCount;
 
@@ -106,7 +106,7 @@ void __cdecl R_DrawStaticModelSurf(const unsigned int *primDrawSurfPos, GfxCmdBu
 void __cdecl R_DrawStaticModelDrawSurfNonOptimized(GfxStaticModelDrawStream *drawStream, GfxCmdBufContext context)
 {
     GfxStaticModelDrawInst *smodelDrawInsts; // [esp+4h] [ebp-20h]
-    const unsigned __int16 *list; // [esp+8h] [ebp-1Ch]
+    const uint16_t *list; // [esp+8h] [ebp-1Ch]
     unsigned int smodelCount; // [esp+Ch] [ebp-18h]
     unsigned int index; // [esp+10h] [ebp-14h]
     XSurface *xsurf; // [esp+14h] [ebp-10h]
@@ -222,7 +222,7 @@ void __cdecl R_DrawStaticModelsCachedDrawSurfLighting(GfxStaticModelDrawStream *
     unsigned int baseIndex; // [esp+4h] [ebp-2Ch]
     unsigned int surfBaseIndex; // [esp+8h] [ebp-28h]
     unsigned int reflectionProbeIndex; // [esp+10h] [ebp-20h] BYREF
-    const unsigned __int16 *list; // [esp+14h] [ebp-1Ch]
+    const uint16_t *list; // [esp+14h] [ebp-1Ch]
     unsigned int smodelCount; // [esp+18h] [ebp-18h]
     unsigned int index; // [esp+1Ch] [ebp-14h]
     const XSurface *xsurf; // [esp+20h] [ebp-10h]
@@ -256,7 +256,7 @@ void __cdecl R_DrawStaticModelsCachedDrawSurf(GfxStaticModelDrawStream *drawStre
     unsigned int copyBaseIndex; // [esp+0h] [ebp-2Ch]
     unsigned int baseIndex; // [esp+4h] [ebp-28h]
     unsigned int surfBaseIndex; // [esp+8h] [ebp-24h]
-    const unsigned __int16 *list; // [esp+10h] [ebp-1Ch]
+    const uint16_t *list; // [esp+10h] [ebp-1Ch]
     unsigned int smodelCount; // [esp+14h] [ebp-18h]
     unsigned int index; // [esp+18h] [ebp-14h]
     const XSurface *xsurf; // [esp+1Ch] [ebp-10h]
@@ -445,7 +445,7 @@ void __cdecl R_SetStaticModelSkinnedPrimArgs(GfxCmdBufPrimState *state, const XS
 
 void __cdecl R_DrawStaticModelSkinnedDrawSurfLighting(
     const GfxStaticModelDrawInst *smodelDrawInst,
-    unsigned __int16 lightingHandle,
+    uint16_t lightingHandle,
     GfxDrawPrimArgs *args,
     GfxCmdBufContext context)
 {
@@ -462,12 +462,12 @@ void __cdecl R_DrawStaticModelsSkinnedDrawSurfLighting(GfxStaticModelDrawStream 
     IDirect3DVertexBuffer9 *vb; // [esp+14h] [ebp-2Ch]
     unsigned int vertexOffset; // [esp+18h] [ebp-28h]
     GfxStaticModelDrawInst *smodelDrawInsts; // [esp+1Ch] [ebp-24h]
-    const unsigned __int16 *list; // [esp+20h] [ebp-20h]
+    const uint16_t *list; // [esp+20h] [ebp-20h]
     unsigned int smodelCount; // [esp+24h] [ebp-1Ch]
     unsigned int index; // [esp+28h] [ebp-18h]
     XSurface *xsurf; // [esp+2Ch] [ebp-14h]
     GfxDrawPrimArgs args; // [esp+30h] [ebp-10h] BYREF
-    unsigned __int16 lightingHandle; // [esp+3Ch] [ebp-4h]
+    uint16_t lightingHandle; // [esp+3Ch] [ebp-4h]
 
     xsurf = drawStream->localSurf;
     R_SetStaticModelSkinnedPrimArgs(&context.state->prim, xsurf, &args);
@@ -517,7 +517,7 @@ void __cdecl R_DrawStaticModelsSkinnedDrawSurf(GfxStaticModelDrawStream *drawStr
     IDirect3DVertexBuffer9 *vb; // [esp+14h] [ebp-28h]
     unsigned int vertexOffset; // [esp+18h] [ebp-24h]
     GfxStaticModelDrawInst *smodelDrawInsts; // [esp+1Ch] [ebp-20h]
-    const unsigned __int16 *list; // [esp+20h] [ebp-1Ch]
+    const uint16_t *list; // [esp+20h] [ebp-1Ch]
     unsigned int smodelCount; // [esp+24h] [ebp-18h]
     unsigned int index; // [esp+28h] [ebp-14h]
     XSurface *xsurf; // [esp+2Ch] [ebp-10h]

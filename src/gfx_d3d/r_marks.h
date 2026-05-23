@@ -80,14 +80,14 @@ int  R_BoxStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize);
 void __cdecl R_BoxStaticModels_r(
     mnode_t *node,
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount,
     uint8_t *cellBits);
@@ -96,7 +96,7 @@ void __cdecl R_CellStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount,
     uint8_t *cellBits);
@@ -105,10 +105,10 @@ void __cdecl R_AABBTreeStaticModels_r(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount);
-void __cdecl R_AddStaticModelToList(int smodelIndex, unsigned __int16 *smodelList, int *smodelCount);
+void __cdecl R_AddStaticModelToList(int smodelIndex, uint16_t *smodelList, int *smodelCount);
 unsigned int  R_CylinderSurfaces(
     const float *start,
     const float *end,
@@ -172,12 +172,12 @@ void __cdecl R_GetMarkFragmentBounds(
     float *mins,
     float *maxs);
 void __cdecl R_GetMarkFragmentClipPlanes(const float *origin, const float (*axis)[3], float radius, float (*planes)[4]);
-char __cdecl R_MarkFragments_AddDObj(MarkInfo *markInfo, DObj_s *dObj, cpose_t *pose, unsigned __int16 entityIndex);
+char __cdecl R_MarkFragments_AddDObj(MarkInfo *markInfo, DObj_s *dObj, cpose_t *pose, uint16_t entityIndex);
 char __cdecl R_MarkFragments_AddBModel(
     MarkInfo *markInfo,
     GfxBrushModel *brushModel,
     cpose_t *pose,
-    unsigned __int16 entityIndex);
+    uint16_t entityIndex);
 void __cdecl R_MarkFragments_Go(
     MarkInfo *markInfo,
     void(__cdecl *callback)(void *, int, FxMarkTri *, int, FxMarkPoint *, const float *, const float *),
@@ -208,7 +208,7 @@ bool __cdecl R_MarkFragment_IsTriangleRejected(
     const float *xyz2);
 void __cdecl R_MarkFragment_SetupWorldClipPoints(
     const GfxWorldVertex *triVerts0,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     FxWorldMarkPoint(*clipPoints)[9]);
 char __cdecl R_MarkFragments_EntBrushes(MarkInfo *markInfo);
 void __cdecl R_Mark_TransformClipPlanes(const float (*inClipPlanes)[4], float (*matrix)[3], float (*outClipPlanes)[4]);

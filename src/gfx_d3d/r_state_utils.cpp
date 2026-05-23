@@ -383,7 +383,7 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MINFILTER, minFilter )\n");
-        hr = device->SetSamplerState(samplerIndex, D3DSAMP_MINFILTER, (unsigned __int16)(samplerState & 0xF00) >> 8);
+        hr = device->SetSamplerState(samplerIndex, D3DSAMP_MINFILTER, (uint16_t)(samplerState & 0xF00) >> 8);
         if (hr < 0)
         {
             do
@@ -406,7 +406,7 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
         v17 = device->SetSamplerState(
             samplerIndex,
             D3DSAMP_MAGFILTER,
-            (unsigned __int16)(samplerState & 0xF000) >> 12);
+            (uint16_t)(samplerState & 0xF000) >> 12);
         if (v17 < 0)
         {
             do

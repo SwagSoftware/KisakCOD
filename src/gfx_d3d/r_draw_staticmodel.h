@@ -9,7 +9,7 @@ struct GfxStaticModelDrawStream // sizeof=0x1C
     unsigned int customSamplerFlags;    // ...
     XSurface *localSurf;
     unsigned int smodelCount;
-    const unsigned __int16 *smodelList;
+    const uint16_t *smodelList;
     unsigned int reflectionProbeIndex;
 };
 

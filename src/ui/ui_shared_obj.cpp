@@ -1020,7 +1020,7 @@ int __cdecl PC_NameHash(char *name)
     hash = 0;
     for (i = 0; name[i]; ++i)
         hash += (i + 119) * name[i];
-    return ((unsigned __int16)(hash >> 20) ^ (unsigned __int16)(hash ^ (hash >> 10))) & 0x3FF;
+    return ((uint16_t)(hash >> 20) ^ (uint16_t)(hash ^ (hash >> 10))) & 0x3FF;
 }
 
 void __cdecl PC_AddDefineToHash(define_s *define, define_s **definehash)

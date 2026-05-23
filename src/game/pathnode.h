@@ -52,10 +52,10 @@ struct NodeTypeToName
 
 struct PathLinkInfo
 {
-    unsigned __int16 from;
-    unsigned __int16 to;
-    unsigned __int16 prev;
-    unsigned __int16 next;
+    uint16_t from;
+    uint16_t to;
+    uint16_t prev;
+    uint16_t next;
 };
 struct pathlocal_t_tag
 {
@@ -94,7 +94,7 @@ struct pathsort_t
 struct pathlink_s // sizeof=0xC
 {
     float fDist;
-    unsigned __int16 nodeNum;
+    uint16_t nodeNum;
     uint8_t disconnectCount;
     uint8_t negotiationLink;
     uint8_t ubBadPlaceCount[4];
@@ -104,12 +104,12 @@ static_assert(sizeof(pathlink_s) == 12);
 struct pathnode_constant_t // sizeof=0x44
 {                                       // ...
     nodeType type;
-    unsigned __int16 spawnflags;
-    unsigned __int16 targetname;
-    unsigned __int16 script_linkName;
-    unsigned __int16 script_noteworthy;
-    unsigned __int16 target;
-    unsigned __int16 animscript;
+    uint16_t spawnflags;
+    uint16_t targetname;
+    uint16_t script_linkName;
+    uint16_t script_noteworthy;
+    uint16_t target;
+    uint16_t animscript;
     int animscriptfunc;
     float vOrigin[3];
     float fAngle;
@@ -120,7 +120,7 @@ struct pathnode_constant_t // sizeof=0x44
     __int16 wChainId;
     __int16 wChainDepth;
     __int16 wChainParent;
-    unsigned __int16 totalLinkCount;
+    uint16_t totalLinkCount;
     pathlink_s *Links;
 };
 
@@ -180,7 +180,7 @@ static_assert(sizeof(pathbasenode_t) == 16);
 struct pathnode_tree_nodes_t // sizeof=0x8
 {                                       // ...
     int nodeCount;
-    unsigned __int16 *nodes;
+    uint16_t *nodes;
 };
 static_assert(sizeof(pathnode_tree_nodes_t) == 8);
 
@@ -207,8 +207,8 @@ struct PathData // sizeof=0x28
     pathnode_t *nodes;
     pathbasenode_t *basenodes;
     unsigned int chainNodeCount;
-    unsigned __int16 *chainNodeForNode;
-    unsigned __int16 *nodeForChainNode;
+    uint16_t *chainNodeForNode;
+    uint16_t *nodeForChainNode;
     int visBytes;
     uint8_t *pathVis;
     int nodeTreeCount;
@@ -233,10 +233,10 @@ void __cdecl Path_NonNegativeFloat(pathnode_t *node, int offset);
 void __cdecl Path_GetType(pathnode_t *node, int offset);
 void __cdecl Scr_SetPathnodeField(unsigned int entnum, unsigned int offset);
 void __cdecl Scr_GetPathnodeField(unsigned int entnum, unsigned int offset);
-void __cdecl PathNode_ClearStringField(unsigned __int16 *destScrString);
+void __cdecl PathNode_ClearStringField(uint16_t *destScrString);
 void __cdecl PathNode_UpdateStringField(
     const char *destKey,
-    unsigned __int16 *destScrString,
+    uint16_t *destScrString,
     const char *key,
     const char *value);
 void __cdecl PathNode_UpdateFloatField(const char *destKey, float *destFloat, const char *key, const char *value);
@@ -289,7 +289,7 @@ int __cdecl Path_ExpandedNodeVisible(const pathnode_t *node0, const pathnode_t *
 pathnode_t *__cdecl Path_FindChainPos(const float *vOrigin, pathnode_t *pPrevChainPos);
 void __cdecl Path_UpdateBestChainNode(pathnode_t *node, pathnode_t **bestNode, unsigned int *foundCount);
 int __cdecl Path_CanSetDesiredChainPos(actor_s *claimer, const pathnode_t *node);
-void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int16 targetname);
+void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, uint16_t targetname);
 pathnode_t *__cdecl Path_FirstNode(int typeFlags);
 pathnode_t *__cdecl Path_NextNode(pathnode_t *prevNode, int typeFlags);
 sentient_s *__cdecl Path_GetNodeOwner(const pathnode_t *node);

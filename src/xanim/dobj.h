@@ -1,7 +1,7 @@
 #pragma once
-
 #include <ode/ode.h>
 #include <qcommon/bitarray.h>
+#include <cstdint>
 
 struct PhysPreset;
 
@@ -22,9 +22,9 @@ struct DObjTrace_s // sizeof=0x1C
     float fraction;                     // ...
     int surfaceflags;                   // ...
     float normal[3];                    // ...
-    unsigned __int16 modelIndex;        // ...
-    unsigned __int16 partName;          // ...
-    unsigned __int16 partGroup;         // ...
+    uint16_t modelIndex;        // ...
+    uint16_t partName;          // ...
+    uint16_t partGroup;         // ...
     // padding byte
     // padding byte
 };
@@ -63,8 +63,8 @@ struct DObjSkelMat // sizeof=0x40
 struct DObj_s // sizeof=0x64
 {
     XAnimTree_s* tree;
-    unsigned __int16 duplicateParts;
-    unsigned __int16 entnum;
+    uint16_t duplicateParts;
+    uint16_t entnum;
     unsigned __int8 duplicatePartsSize;
     unsigned __int8 numModels;
     unsigned __int8 numBones;
@@ -80,7 +80,7 @@ struct DObj_s // sizeof=0x64
 struct DObjModel_s // sizeof=0x8
 {                                       // ...
     XModel* model;                      // ...
-    unsigned __int16 boneName;          // ...
+    uint16_t boneName;          // ...
     bool ignoreCollision;               // ...
     // padding byte
 };
@@ -100,9 +100,9 @@ void __cdecl DObjFree(DObj_s *obj);
 void __cdecl DObjGetCreateParms(
     const DObj_s *obj,
     DObjModel_s *dobjModels,
-    unsigned __int16 *numModels,
+    uint16_t *numModels,
     XAnimTree_s **tree,
-    unsigned __int16 *entnum);
+    uint16_t *entnum);
 void __cdecl DObjArchive(DObj_s *obj);
 void __cdecl DObjUnarchive(DObj_s *obj);
 void __cdecl DObjSkelClear(const DObj_s *obj);

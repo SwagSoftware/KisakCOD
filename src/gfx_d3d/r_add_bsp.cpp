@@ -14,18 +14,18 @@ void __cdecl R_InitBspDrawSurf(GfxBspDrawSurfData* surfData)
 
 char __cdecl R_PreTessBspDrawSurfs(
     GfxDrawSurf drawSurf,
-    const unsigned __int16 *list,
+    const uint16_t *list,
     unsigned int count,
     GfxBspDrawSurfData *surfData)
 {
     int v5; // [esp+1Ch] [ebp-248h]
     unsigned int simplifiedCount; // [esp+34h] [ebp-230h]
-    unsigned __int16 surfIndex; // [esp+38h] [ebp-22Ch]
+    uint16_t surfIndex; // [esp+38h] [ebp-22Ch]
     const GfxSurface *tris; // [esp+3Ch] [ebp-228h]
     unsigned int copyIndex; // [esp+40h] [ebp-224h]
     GfxBspPreTessDrawSurf simplifiedList[128]; // [esp+44h] [ebp-220h] BYREF
     unsigned int lmapIndex; // [esp+244h] [ebp-20h]
-    unsigned __int16 *preTessIndices; // [esp+248h] [ebp-1Ch]
+    uint16_t *preTessIndices; // [esp+248h] [ebp-1Ch]
     unsigned int firstIndex; // [esp+24Ch] [ebp-18h]
     unsigned int triCount; // [esp+250h] [ebp-14h]
     unsigned int reflectionProbeIndex; // [esp+254h] [ebp-10h]
@@ -70,7 +70,7 @@ char __cdecl R_PreTessBspDrawSurfs(
             }
             Com_Memcpy(&preTessIndices[copyIndex], &rgp.world->indices[tris->tris.baseIndex], 6 * tris->tris.triCount);
             copyIndex += 3 * tris->tris.triCount;
-            //v5 = tris->tris.triCount + *((unsigned __int16*)&copyIndex + 2 * simplifiedCount + 1);
+            //v5 = tris->tris.triCount + *((uint16_t*)&copyIndex + 2 * simplifiedCount + 1);
             // TODO(mrsteyk): @Correctness
             iassert(simplifiedCount);
             simplifiedList[simplifiedCount - 1].totalTriCount = truncate_cast<unsigned short>(tris->tris.triCount + simplifiedList[simplifiedCount - 1].totalTriCount);
@@ -102,7 +102,7 @@ void __cdecl R_AddBspDrawSurfs(
 
     iassert(drawSurf.fields.surfType == SF_TRIANGLES);
     v4 = !dx.deviceLost && r_pretess->current.enabled;
-    if (!v4 || !R_PreTessBspDrawSurfs(drawSurf, (const unsigned __int16 *)list, count, surfData))
+    if (!v4 || !R_PreTessBspDrawSurfs(drawSurf, (const uint16_t *)list, count, surfData))
     {
         if (R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurfList, ((count + 1) >> 1) + 1))
         {
@@ -125,7 +125,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     unsigned int maxDrawSurfCount)
 {
     int packed_high; // edx
-    unsigned __int16 triSurfList[128]; // [esp+30h] [ebp-148h] BYREF
+    uint16_t triSurfList[128]; // [esp+30h] [ebp-148h] BYREF
     int debugFastSunShadow; // [esp+138h] [ebp-40h]
     unsigned int* surfaceCastsSunShadow; // [esp+13Ch] [ebp-3Ch]
     GfxDrawSurf drawSurf; // [esp+140h] [ebp-38h]
@@ -192,7 +192,7 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
     unsigned int stage)
 {
     int packed_high; // edx
-    unsigned __int16 triSurfList[128]; // [esp+0h] [ebp-148h] BYREF
+    uint16_t triSurfList[128]; // [esp+0h] [ebp-148h] BYREF
     GfxDrawSurf drawSurf; // [esp+108h] [ebp-40h]
     GfxDrawSurf prevDrawSurf; // [esp+110h] [ebp-38h]
     unsigned int sortedSurfIndex; // [esp+118h] [ebp-30h]
@@ -258,7 +258,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
 {
     int v4; // eax
     int packed_high; // edx
-    unsigned __int16 triSurfList[128]; // [esp+3Ch] [ebp-158h] BYREF
+    uint16_t triSurfList[128]; // [esp+3Ch] [ebp-158h] BYREF
     unsigned int *surfaceCastsSunShadow; // [esp+140h] [ebp-54h]
     GfxDrawSurf drawSurf; // [esp+144h] [ebp-50h]
     GfxDrawSurf prevDrawSurf; // [esp+14Ch] [ebp-48h]
@@ -367,7 +367,7 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
 void __cdecl R_AddAllBspDrawSurfacesSpotShadow(unsigned int spotShadowIndex, unsigned int primaryLightIndex)
 {
     int packed_high; // eax
-    unsigned __int16 triSurfList[128]; // [esp+0h] [ebp-158h] BYREF
+    uint16_t triSurfList[128]; // [esp+0h] [ebp-158h] BYREF
     GfxDrawSurf drawSurf; // [esp+108h] [ebp-50h]
     GfxShadowGeometry* shadowGeom; // [esp+114h] [ebp-44h]
     GfxDrawSurf prevDrawSurf; // [esp+118h] [ebp-40h]

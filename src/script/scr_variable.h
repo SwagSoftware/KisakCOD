@@ -80,9 +80,9 @@ enum var_stat_t
 struct VariableStackBuffer // sizeof=0xC
 {
     const char *pos;
-    unsigned __int16 size;
-    unsigned __int16 bufLen;
-    unsigned __int16 localId;
+    uint16_t size;
+    uint16_t bufLen;
+    uint16_t localId;
     uint8_t time;
     char buf[1];
 };
@@ -132,30 +132,30 @@ static_assert(sizeof(VariableValue) == 0x8);
 
 union ObjectInfo_u // sizeof=0x2
 {                                       // ...
-    unsigned __int16 size;
-    unsigned __int16 entnum;
-    unsigned __int16 nextEntId;
-    unsigned __int16 self;
+    uint16_t size;
+    uint16_t entnum;
+    uint16_t nextEntId;
+    uint16_t self;
 };
 static_assert(sizeof(ObjectInfo_u) == 0x2);
 
 struct ObjectInfo // sizeof=0x4
 {                                       // ...
-    unsigned __int16 refCount;
+    uint16_t refCount;
     ObjectInfo_u u;
 };
 static_assert(sizeof(ObjectInfo) == 0x4);
 
 union Variable_u // sizeof=0x2
 {                                       // ...
-    unsigned __int16 prev;
-    unsigned __int16 prevSibling;
+    uint16_t prev;
+    uint16_t prevSibling;
 };
 static_assert(sizeof(Variable_u) == 0x2);
 
 struct Variable // sizeof=0x4
 {                                       // ...
-    unsigned __int16 id;                // ...
+    uint16_t id;                // ...
     Variable_u u;                       // ...
 };
 static_assert(sizeof(Variable) == 0x4);
@@ -175,7 +175,7 @@ union VariableValueInternal_u // sizeof=0x4
         u.intValue = 0;
     }
 
-    unsigned __int16 next;
+    uint16_t next;
     VariableUnion u;
     ObjectInfo o;
 };
@@ -195,8 +195,8 @@ static_assert(sizeof(VariableValueInternal_w) == 0x4);
 
 union VariableValueInternal_v // sizeof=0x2
 {                                       // ...
-    unsigned __int16 next;
-    unsigned __int16 index;
+    uint16_t next;
+    uint16_t index;
 };
 static_assert(sizeof(VariableValueInternal_v) == 0x2);
 
@@ -206,15 +206,15 @@ struct VariableValueInternal // sizeof=0x10
     VariableValueInternal_u u;          // ...
     VariableValueInternal_w w;          // ...
     VariableValueInternal_v v;          // ...
-    unsigned __int16 nextSibling;       // ...
+    uint16_t nextSibling;       // ...
 };
 static_assert(sizeof(VariableValueInternal) == 0x10);
 
 struct scrVarDebugPub_t // sizeof=0xE0004
 {                                       // ...
     const char* varUsage[0x18000];
-    unsigned __int16 extRefCount[0x8000];
-    unsigned __int16 refCount[0x8000];
+    uint16_t extRefCount[0x8000];
+    uint16_t refCount[0x8000];
     int leakCount[0x18000];
     bool dummy;
     // padding byte
@@ -241,22 +241,22 @@ struct scr_entref_t // sizeof=0x4
         entnum = i;
         classnum = i;
     }
-    unsigned __int16 entnum;            // ...
-    unsigned __int16 classnum;          // ...
+    uint16_t entnum;            // ...
+    uint16_t classnum;          // ...
 };
 static_assert(sizeof(scr_entref_t) == 0x4);
 
 struct scr_classStruct_t // sizeof=0xC
 {
-    scr_classStruct_t(unsigned __int16 _id, unsigned __int16 _entArrayId, char _charID, const char* _name)
+    scr_classStruct_t(uint16_t _id, uint16_t _entArrayId, char _charID, const char* _name)
     {
         id = _id;
         entArrayId = _entArrayId;
         charId = _charID;
         name = _name;
     }
-    unsigned __int16 id;
-    unsigned __int16 entArrayId;
+    uint16_t id;
+    uint16_t entArrayId;
     char charId;
     // padding byte
     // padding byte

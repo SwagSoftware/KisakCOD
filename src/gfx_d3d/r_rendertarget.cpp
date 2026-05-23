@@ -135,8 +135,8 @@ void __cdecl R_InitFullscreenRenderTargetImage(
     RenderTargetUsage usage,
     GfxRenderTarget *renderTarget)
 {
-    unsigned __int16 v6; // [esp+0h] [ebp-20h]
-    unsigned __int16 v7; // [esp+4h] [ebp-1Ch]
+    uint16_t v6; // [esp+0h] [ebp-20h]
+    uint16_t v7; // [esp+4h] [ebp-1Ch]
     int fullscreenWidth; // [esp+18h] [ebp-8h] BYREF
     int fullscreenHeight; // [esp+1Ch] [ebp-4h] BYREF
 
@@ -245,8 +245,8 @@ void __cdecl R_AssignImageToRenderTargetDepthStencil(GfxRenderTargetSurface *sur
 
 void __cdecl R_InitRenderTargetImage(
     int imageProgType,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT format,
     RenderTargetUsage usage,
     GfxRenderTarget *renderTarget)
@@ -283,13 +283,13 @@ void __cdecl R_AssignImageToRenderTargetColor(GfxRenderTargetSurface *surface, G
 
 void __cdecl R_InitShadowmapRenderTarget(
     int imageProgType,
-    unsigned __int16 tileRes,
-    unsigned __int16 tileRowCount,
+    uint16_t tileRes,
+    uint16_t tileRowCount,
     GfxRenderTarget *renderTarget)
 {
     const char *v4; // eax
     const char *v5; // eax
-    unsigned __int16 totalHeight; // [esp+0h] [ebp-10h]
+    uint16_t totalHeight; // [esp+0h] [ebp-10h]
     int hr; // [esp+4h] [ebp-Ch]
     int hra; // [esp+4h] [ebp-Ch]
     RenderTargetUsage usage; // [esp+8h] [ebp-8h]
@@ -358,8 +358,8 @@ void __cdecl R_InitShadowmapRenderTarget(
 
 void __cdecl R_InitAndTrackRenderTargetImage(
     int imageProgType,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT format,
     RenderTargetUsage usage,
     GfxRenderTarget *renderTarget)

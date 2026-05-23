@@ -735,7 +735,7 @@ void __cdecl G_ParseEntityFields(gentity_s *ent)
     G_SetAngle(ent, ent->r.currentAngles);
 }
 
-typedef unsigned __int16 modelNameIndex_t;
+typedef uint16_t modelNameIndex_t;
 void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
 {
     const ent_field_t *f; // [esp+Ch] [ebp-14h]

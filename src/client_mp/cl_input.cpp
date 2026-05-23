@@ -804,14 +804,14 @@ void __cdecl CL_FinishMove(int localClientNum, usercmd_s *cmd)
         serverTime = LocalClientGlobals->serverTime;
     cmd->serverTime = serverTime;
     for (i = 0; i < 3; ++i)
-        cmd->angles[i] = (unsigned __int16)(int)((LocalClientGlobals->viewangles[i] + LocalClientGlobals->cgameKickAngles[i])
+        cmd->angles[i] = (uint16_t)(int)((LocalClientGlobals->viewangles[i] + LocalClientGlobals->cgameKickAngles[i])
             * 182.0444488525391);
     cmd->buttons |= LocalClientGlobals->cgameExtraButtons;
     LocalClientGlobals->cgameExtraButtons = 0;
     if (CG_VehLocalClientDriving(localClientNum))
     {
-        cmd->angles[1] = (unsigned __int16)(int)(LocalClientGlobals->vehicleViewYaw * 182.0444488525391);
-        cmd->angles[0] = (unsigned __int16)(int)(LocalClientGlobals->vehicleViewPitch * 182.0444488525391);
+        cmd->angles[1] = (uint16_t)(int)(LocalClientGlobals->vehicleViewYaw * 182.0444488525391);
+        cmd->angles[0] = (uint16_t)(int)(LocalClientGlobals->vehicleViewPitch * 182.0444488525391);
         cmd->angles[2] = 0;
     }
 }

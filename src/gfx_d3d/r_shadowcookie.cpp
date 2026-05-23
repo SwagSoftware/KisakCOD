@@ -567,7 +567,7 @@ void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, G
 
 void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
 {
-    unsigned __int16 triSurfList[2]; // [esp+A0h] [ebp-64h] BYREF
+    uint16_t triSurfList[2]; // [esp+A0h] [ebp-64h] BYREF
     ShadowCookie *cookie; // [esp+A4h] [ebp-60h]
     unsigned int surfIndex; // [esp+A8h] [ebp-5Ch]
     float start[3]; // [esp+ACh] [ebp-58h] BYREF

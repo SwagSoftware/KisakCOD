@@ -314,20 +314,20 @@ void __cdecl Scr_TerminateWaittillThread(unsigned int localId, unsigned int star
 void __cdecl Scr_CancelNotifyList(unsigned int notifyListOwnerId);
 void __cdecl VM_TrimStack(unsigned int startLocalId, VariableStackBuffer* stackValue, bool fromEndon);
 void __cdecl Scr_CancelWaittill(unsigned int startLocalId);
-unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount);
+uint16_t __cdecl Scr_ExecThread(int handle, unsigned int paramcount);
 unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned int paramcount);
 //unsigned int __cdecl VM_Execute_0();
 unsigned int __cdecl GetDummyObject();
 unsigned int __cdecl GetDummyFieldValue();
 void VM_PrintJumpHistory();
 VariableStackBuffer* __cdecl VM_ArchiveStack();
-unsigned __int16 __cdecl Scr_ExecEntThreadNum(
+uint16_t __cdecl Scr_ExecEntThreadNum(
     unsigned int entnum,
     unsigned int classnum,
     int handle,
     unsigned int paramcount);
 void __cdecl Scr_AddExecThread(int handle, unsigned int paramcount);
-void __cdecl Scr_FreeThread(unsigned __int16 handle);
+void __cdecl Scr_FreeThread(uint16_t handle);
 void __cdecl Scr_ExecCode(const char* pos, unsigned int localId);
 void __cdecl Scr_InitSystem(int sys);
 void __cdecl Scr_ShutdownSystem(uint8_t sys, int bComplete);

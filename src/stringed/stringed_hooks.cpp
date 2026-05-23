@@ -394,7 +394,7 @@ unsigned int __cdecl SEH_DecodeLetter(
             result = secondChar + (firstChar << 8);
             break;
         case 11:
-            if (!Chinese_ValidGBCode((unsigned __int16)(secondChar + ((_WORD)firstChar << 8)) >> 8, secondChar))
+            if (!Chinese_ValidGBCode((uint16_t)(secondChar + ((_WORD)firstChar << 8)) >> 8, secondChar))
                 goto LABEL_28;
             *usedCount = 2;
             if (pbIsTrailingPunctuation)

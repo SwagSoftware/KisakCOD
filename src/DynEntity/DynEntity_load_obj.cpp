@@ -763,7 +763,7 @@ int32_t __cdecl DynEnt_GetXModelUsageCount(const XModel *xModel)
 void DynEnt_SaveEntities(MemoryFile *memFile)
 {
     int v2; // r26
-    unsigned __int16 *dynEntCount; // r27
+    uint16_t *dynEntCount; // r27
     DynEntityClient **dynEntClientList; // r29
     unsigned int v5; // r31
     bool v6; // [sp+50h] [-40h] BYREF
@@ -789,7 +789,7 @@ void DynEnt_SaveEntities(MemoryFile *memFile)
                     MemFile_WriteData(memFile, 1, &v6);
                     if (v6)
                         Phys_ObjSave((dxBody*)(*dynEntClientList)[v5].physObjId, memFile);
-                    v5 = (unsigned __int16)(v5 + 1);
+                    v5 = (uint16_t)(v5 + 1);
                 } while (v5 < *dynEntCount);
             }
         }

@@ -335,9 +335,9 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
     int v9; // [esp+4h] [ebp-7Ch]
     const char* v10; // [esp+38h] [ebp-48h]
     int v11; // [esp+40h] [ebp-40h]
-    unsigned __int16 v12; // [esp+44h] [ebp-3Ch]
-    unsigned __int16 v13; // [esp+54h] [ebp-2Ch]
-    unsigned __int16 v14; // [esp+58h] [ebp-28h]
+    uint16_t v12; // [esp+44h] [ebp-3Ch]
+    uint16_t v13; // [esp+54h] [ebp-2Ch]
+    uint16_t v14; // [esp+58h] [ebp-28h]
     unsigned int caseValue; // [esp+6Ch] [ebp-14h]
     int caseCount; // [esp+74h] [ebp-Ch]
     VariableValue value; // [esp+78h] [ebp-8h] BYREF
@@ -578,7 +578,7 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
             case 98:
                 return (char*)&pos[*(_DWORD*)pos + 4];
             case 99:
-                return (char*)&pos[-*(unsigned __int16*)pos + 2];
+                return (char*)&pos[-*(uint16_t*)pos + 2];
             case 124:
                 posb = &pos[*(_DWORD*)pos + 4];
                 v12 = *(_WORD*)posb;
@@ -603,7 +603,7 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
                     MyAssertHandler(".\\script\\scr_vm.cpp", 2516, 0, "%s", "caseValue");
                 break;
             case 125:
-                return (char*)&pos[8 * *(unsigned __int16*)pos + 2];
+                return (char*)&pos[8 * *(uint16_t*)pos + 2];
             default:
                 if (!alwaysfails)
                 {
@@ -646,7 +646,7 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
 void __cdecl VM_CancelNotify(unsigned int notifyListOwnerId, unsigned int startLocalId)
 {
     unsigned int Variable; // eax
-    unsigned __int16 ThreadNotifyName; // ax
+    uint16_t ThreadNotifyName; // ax
     unsigned int v4; // eax
     unsigned int stringValue; // [esp+0h] [ebp-Ch]
     unsigned int notifyListId; // [esp+4h] [ebp-8h]
@@ -722,7 +722,7 @@ bool __cdecl Scr_IsEndonThread(unsigned int localId)
 
 unsigned int __cdecl Scr_GetWaittillThreadStackId(unsigned int localId, unsigned int startLocalId)
 {
-    unsigned __int16 ThreadNotifyName; // ax
+    uint16_t ThreadNotifyName; // ax
     unsigned int ObjectVariable; // eax
     VariableValueInternal_u Object; // eax
     unsigned int v5; // eax
@@ -1316,7 +1316,7 @@ void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalI
 
 void __cdecl Scr_TerminateWaittillThread(unsigned int localId, unsigned int startLocalId)
 {
-    unsigned __int16 ThreadNotifyName; // ax
+    uint16_t ThreadNotifyName; // ax
     unsigned int ObjectVariable; // eax
     unsigned int v4; // eax
     unsigned int Variable; // eax
@@ -1538,10 +1538,10 @@ VariableStackBuffer *__cdecl VM_ArchiveStack()
 
     top = fs.top;
     size = fs.top - fs.startTop;
-    if (size != (unsigned __int16)size)
+    if (size != (uint16_t)size)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2768, 0, "%s", "size == (unsigned short)size");
     bufLen = 5 * size + 11;
-    if (bufLen != (unsigned __int16)bufLen)
+    if (bufLen != (uint16_t)bufLen)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2770, 0, "%s", "bufLen == (unsigned short)bufLen");
     stackValue = (VariableStackBuffer*) MT_Alloc(bufLen, 1);
     ++scrVarPub.numScriptThreads;
@@ -1583,7 +1583,7 @@ VariableStackBuffer *__cdecl VM_ArchiveStack()
     return stackValue;
 }
 
-unsigned __int16 __cdecl Scr_ExecThread(int handle, unsigned int paramcount)
+uint16_t __cdecl Scr_ExecThread(int handle, unsigned int paramcount)
 {
     unsigned int v2; // eax
     const char *pos; // [esp+34h] [ebp-Ch]
@@ -3561,7 +3561,7 @@ unsigned int __cdecl VM_Execute(unsigned int localId, const char *pos, unsigned 
     }
 }
 
-unsigned __int16 __cdecl Scr_ExecEntThreadNum(
+uint16_t __cdecl Scr_ExecEntThreadNum(
     unsigned int entnum,
     unsigned int classnum,
     int handle,
@@ -3648,7 +3648,7 @@ void __cdecl Scr_AddExecThread(int handle, unsigned int paramcount)
     }
 }
 
-void __cdecl Scr_FreeThread(unsigned __int16 handle)
+void __cdecl Scr_FreeThread(uint16_t handle)
 {
     if (!scrVarPub.timeArrayId)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4236, 0, "%s", "scrVarPub.timeArrayId");

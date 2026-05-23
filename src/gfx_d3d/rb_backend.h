@@ -189,8 +189,8 @@ struct __declspec(align(16)) GfxCmdBufSourceState // sizeof=0xF00
     GfxCmdBufInput input;               // ...
     GfxViewParms viewParms;             // ...
     GfxMatrix shadowLookupMatrix;
-    unsigned __int16 constVersions[90];
-    unsigned __int16 matrixVersions[8];
+    uint16_t constVersions[90];
+    uint16_t matrixVersions[8];
     float eyeOffset[4];                 // ...
     unsigned int shadowableLightForShadowLookupMatrix;
     const GfxScaledPlacement *objectPlacement;
@@ -349,7 +349,7 @@ struct r_backEndGlobals_t // sizeof=0x280
 struct __declspec(align(8)) materialCommands_t // sizeof=0x22A960
 {                                       // ...
     GfxVertex verts[5450];              // ...
-    unsigned __int16 indices[1048576];  // ...
+    uint16_t indices[1048576];  // ...
     MaterialVertexDeclType vertDeclType;
     unsigned int vertexSize;
     int indexCount;                     // ...
@@ -462,7 +462,7 @@ void __cdecl RB_DrawTriangles_Internal(
     const Material *material,
     MaterialTechniqueType techType,
     __int16 indexCount,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     __int16 vertexCount,
     const float (*xyzw)[4],
     const float (*normal)[3],

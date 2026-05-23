@@ -186,7 +186,7 @@ void DrawBrushPoly(int numPoints, float (*points)[3], const float *color)
 void G_DebugDrawBrush_r(cLeafBrushNode_s *node, const float *color)
 {
     int v4; // r30
-    unsigned __int16 *brushes; // r31
+    uint16_t *brushes; // r31
 
     while (1)
     {

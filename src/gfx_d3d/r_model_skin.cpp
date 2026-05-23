@@ -187,7 +187,7 @@ void __cdecl R_SkinXSurfaceWeight(
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *outVerts)
 {
-    const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
+    const uint16_t *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h]
 
     PROF_SCOPED("SkinXSurfaceWeight");
@@ -261,7 +261,7 @@ static void __cdecl MatrixTransformVertexAndBasis(
 
 void __cdecl R_SkinXSurfaceWeight0(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut)
@@ -290,7 +290,7 @@ void __cdecl R_SkinXSurfaceWeight0(
 
 void __cdecl R_SkinXSurfaceWeight1(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut)
@@ -328,7 +328,7 @@ void __cdecl R_SkinXSurfaceWeight1(
 
 void __cdecl R_SkinXSurfaceWeight2(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut)
@@ -374,7 +374,7 @@ void __cdecl R_SkinXSurfaceWeight2(
 
 void __cdecl R_SkinXSurfaceWeight3(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut)

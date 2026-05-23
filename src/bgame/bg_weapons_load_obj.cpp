@@ -992,8 +992,8 @@ snd_alias_list_t **__cdecl BG_RegisterSurfaceTypeSounds(const char *surfaceSound
 
 int __cdecl BG_ParseWeaponDefSpecificFieldType(uint8_t *pStruct, const char *pValue, int iFieldType)
 {
-    unsigned __int16 LowercaseString_DONE; // ax
-    unsigned __int16 v5; // ax
+    uint16_t LowercaseString_DONE; // ax
+    uint16_t v5; // ax
     int result; // eax
     char v7; // [esp+3h] [ebp-91h]
     char *v8; // [esp+8h] [ebp-8Ch]

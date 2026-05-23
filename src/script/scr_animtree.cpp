@@ -199,7 +199,7 @@ void __cdecl Scr_LoadAnimTreeAtIndex(unsigned int index, void *(__cdecl *Alloc)(
 
     iassert(GetVariableName(id) < SL_MAX_STRING_INDEX);
 
-    filenameId = (unsigned __int16)GetVariableName(id);
+    filenameId = (uint16_t)GetVariableName(id);
     fileId = FindObject(id);
     iassert(fileId);
     if (!FindVariable(fileId, 1))
@@ -282,10 +282,10 @@ int __cdecl Scr_GetAnimTreeSize(unsigned int parentNode)
 
 void __cdecl ConnectScriptToAnim(
     unsigned int names,
-    unsigned __int16 index,
+    uint16_t index,
     unsigned int filename,
     unsigned int name,
-    unsigned __int16 treeIndex)
+    uint16_t treeIndex)
 {
     scr_anim_s anim; // [esp+4h] [ebp-14h]
     const char *codePos; // [esp+8h] [ebp-10h]
@@ -324,7 +324,7 @@ int __cdecl Scr_CreateAnimationTree(
     unsigned int parentIndex,
     unsigned int filename,
     int treeIndex,
-    unsigned __int16 flags)
+    uint16_t flags)
 {
     int varFlags; // [esp+0h] [ebp-20h]
     unsigned int node; // [esp+4h] [ebp-1Ch]

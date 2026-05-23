@@ -25,21 +25,21 @@ void __cdecl R_GetFullScreenRes(FullscreenType screenType, int *fullscreenWidth,
 IDirect3DSurface9 *__cdecl R_AssignSingleSampleDepthStencilSurface();
 void __cdecl R_InitRenderTargetImage(
     int imageProgType,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT format,
     RenderTargetUsage usage,
     GfxRenderTarget *renderTarget);
 void __cdecl R_AssignImageToRenderTargetColor(GfxRenderTargetSurface *surface, GfxImage *image);
 void __cdecl R_InitShadowmapRenderTarget(
     int imageProgType,
-    unsigned __int16 tileRes,
-    unsigned __int16 tileRowCount,
+    uint16_t tileRes,
+    uint16_t tileRowCount,
     GfxRenderTarget *renderTarget);
 void __cdecl R_InitAndTrackRenderTargetImage(
     int imageProgType,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT format,
     RenderTargetUsage usage,
     GfxRenderTarget *renderTarget);

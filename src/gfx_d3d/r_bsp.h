@@ -80,7 +80,7 @@ struct r_lightmapMerge_t // sizeof=0x14
 
 struct DiskTriangleSoup // sizeof=0x18
 {
-    unsigned __int16 materialIndex;
+    uint16_t materialIndex;
     uint8_t lightmapIndex;
     uint8_t reflectionProbeIndex;
     uint8_t primaryLightIndex;
@@ -88,31 +88,31 @@ struct DiskTriangleSoup // sizeof=0x18
     uint8_t unused[2];
     int vertexLayerData;
     unsigned int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 indexCount;
+    uint16_t vertexCount;
+    uint16_t indexCount;
     int firstIndex;
 };
 
 struct DiskTriangleSoup_Version8 // sizeof=0x10
 {
-    unsigned __int16 materialIndex;
+    uint16_t materialIndex;
     uint8_t lightmapIndex;
     uint8_t reflectionProbeIndex;
     int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 indexCount;
+    uint16_t vertexCount;
+    uint16_t indexCount;
     int firstIndex;
 };
 
 struct DiskTriangleSoup_Version12 // sizeof=0x14
 {
-    unsigned __int16 materialIndex;
+    uint16_t materialIndex;
     uint8_t lightmapIndex;
     uint8_t reflectionProbeIndex;
     int vertexLayerData;
     int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 indexCount;
+    uint16_t vertexCount;
+    uint16_t indexCount;
     int firstIndex;
 };
 
@@ -148,7 +148,7 @@ struct GfxWorld // sizeof=0x2DC
     int planeCount;                     // ...
     int nodeCount;                      // ...
     int indexCount;                     // ...
-    unsigned __int16 *indices;          // ...
+    uint16_t *indices;          // ...
     int surfaceCount;                   // ...
     GfxWorldStreamInfo streamInfo;
     // padding byte

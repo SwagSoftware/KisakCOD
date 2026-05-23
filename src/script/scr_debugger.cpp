@@ -176,7 +176,7 @@ bool __thiscall Scr_ScriptWindow::AddBreakpointAtSourcePos(
 {
     const char *v8; // eax
     Scr_WatchElement_s *BreakpointElement; // [esp-8h] [ebp-2Ch]
-    unsigned __int16 v11; // [esp+8h] [ebp-1Ch]
+    uint16_t v11; // [esp+8h] [ebp-1Ch]
     int builtinIndex; // [esp+Ch] [ebp-18h]
     bool success; // [esp+1Bh] [ebp-9h]
     char *codePos; // [esp+1Ch] [ebp-8h]

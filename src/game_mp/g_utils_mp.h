@@ -51,7 +51,7 @@ int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, unsigned int tagName, float *po
 DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(gentity_s *ent, int boneIndex);
 void __cdecl G_DObjGetWorldBoneIndexPos(gentity_s *ent, int boneIndex, float *pos);
 void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float (*tagMat)[3]);
-gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match);
+gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, uint16_t match);
 void __cdecl G_InitGentity(gentity_s *e);
 void __cdecl G_PrintEntities();
 gentity_s *__cdecl G_Spawn();
@@ -69,7 +69,7 @@ void __cdecl G_PlaySoundAlias(gentity_s *ent, uint8_t index);
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList);
 void __cdecl G_SetOrigin(gentity_s *ent, const float *origin);
 void __cdecl G_SetAngle(gentity_s *ent, const float *angle);
-void __cdecl G_SetConstString(unsigned __int16 *to, char *from);
+void __cdecl G_SetConstString(uint16_t *to, char *from);
 const char *__cdecl G_GetEntityTypeName(const gentity_s *ent);
 int __cdecl G_rand();
 float __cdecl G_flrand(float min, float max);

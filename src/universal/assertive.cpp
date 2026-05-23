@@ -616,7 +616,7 @@ void __cdecl FixWindowsDesktop()
     DWORD CurrentThreadId; // eax
     HDC__* hdc; // [esp+0h] [ebp-614h]
     _WORD ramp[770]; // [esp+4h] [ebp-610h] BYREF
-    unsigned __int16 i; // [esp+60Ch] [ebp-8h]
+    uint16_t i; // [esp+60Ch] [ebp-8h]
     HWND__* hwndDesktop; // [esp+610h] [ebp-4h]
 
     ChangeDisplaySettingsA(0, 0);

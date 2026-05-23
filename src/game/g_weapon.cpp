@@ -170,7 +170,7 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
     gentity_s *tent; // [esp+1Ch] [ebp-44h]
     float endpos[3]; // [esp+20h] [ebp-40h] BYREF
     trace_t tr; // [esp+2Ch] [ebp-34h] BYREF
-    unsigned __int16 hitEntId; // [esp+58h] [ebp-8h]
+    uint16_t hitEntId; // [esp+58h] [ebp-8h]
     gentity_s *traceEnt; // [esp+5Ch] [ebp-4h]
 
     if (!wp)

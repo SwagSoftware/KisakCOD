@@ -5,7 +5,7 @@
 
 struct ArchivedCanonicalStringInfo // sizeof=0x8
 {
-    unsigned __int16 canonicalStr;
+    uint16_t canonicalStr;
     // padding byte
     // padding byte
     const char *value;
@@ -33,7 +33,7 @@ const char *__cdecl Scr_GetCanonicalString(unsigned int fieldName);
 void __cdecl Scr_InitEvaluate();
 void __cdecl Scr_EndLoadEvaluate();
 void __cdecl Scr_ShutdownEvaluate();
-unsigned __int16 __cdecl Scr_CompileCanonicalString(unsigned int stringValue);
+uint16_t __cdecl Scr_CompileCanonicalString(unsigned int stringValue);
 void __cdecl Scr_GetFieldValue(unsigned int objectId, const char *fieldName, int len, char *text);
 void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int len, char *s);
 void __cdecl Scr_EvalArrayVariable(unsigned int arrayId, VariableValue *value);

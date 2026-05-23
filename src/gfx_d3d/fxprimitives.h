@@ -22,7 +22,7 @@ struct r_double_index_t // sizeof=0x4
     }
     union
     {
-        unsigned __int16 value[2];          // ...
+        uint16_t value[2];          // ...
         unsigned int kisak;
     };
 };
@@ -39,7 +39,7 @@ struct GfxMarkContext // sizeof=0x6
     uint8_t primaryLightIndex;  // ...
     uint8_t reflectionProbeIndex; // ...
     uint8_t modelTypeAndSurf;   // ...
-    unsigned __int16 modelIndex;        // ...
+    uint16_t modelIndex;        // ...
 };
 
 struct FxElemDef;
@@ -76,12 +76,12 @@ struct FxEffect // sizeof=0x80
 {                                       // ...
     const FxEffectDef *def;
     volatile long status;
-    unsigned __int16 firstElemHandle[3];
-    unsigned __int16 firstSortedElemHandle;
-    unsigned __int16 firstTrailHandle;
-    unsigned __int16 randomSeed;
-    unsigned __int16 owner;
-    unsigned __int16 packedLighting;
+    uint16_t firstElemHandle[3];
+    uint16_t firstSortedElemHandle;
+    uint16_t firstTrailHandle;
+    uint16_t randomSeed;
+    uint16_t owner;
+    uint16_t packedLighting;
     FxBoltAndSortOrder boltAndSortOrder;
     volatile long frameCount;
     int msecBegin;
@@ -122,7 +122,7 @@ struct FxSpriteInfo // sizeof=0x10
 union FxElem_u // sizeof=0x4
 {                                       // ...
     float trailTexCoord;
-    unsigned __int16 lightingHandle;
+    uint16_t lightingHandle;
 };
 struct FxElem // sizeof=0x28
 {                                       // ...
@@ -130,8 +130,8 @@ struct FxElem // sizeof=0x28
     uint8_t sequence;
     uint8_t atRestFraction;
     uint8_t emitResidual;
-    unsigned __int16 nextElemHandleInEffect;
-    unsigned __int16 prevElemHandleInEffect;
+    uint16_t nextElemHandleInEffect;
+    uint16_t prevElemHandleInEffect;
     int msecBegin;
     float baseVel[3];
     //$A58BA6DA60295001BBA5E9F807131CF1 ___u8;
@@ -147,9 +147,9 @@ struct FxElem // sizeof=0x28
 };
 struct FxTrail // sizeof=0x8
 {                                       // ...
-    unsigned __int16 nextTrailHandle;   // ...
-    unsigned __int16 firstElemHandle;   // ...
-    unsigned __int16 lastElemHandle;    // ...
+    uint16_t nextTrailHandle;   // ...
+    uint16_t firstElemHandle;   // ...
+    uint16_t lastElemHandle;    // ...
     char defIndex;                      // ...
     char sequence;                      // ...
 
@@ -160,7 +160,7 @@ struct FxTrailElem // sizeof=0x20
     float origin[3];
     float spawnDist;
     int msecBegin;
-    unsigned __int16 nextTrailElemHandle;
+    uint16_t nextTrailElemHandle;
     __int16 baseVelZ;
     char basis[2][3];
     uint8_t sequence;
@@ -171,8 +171,8 @@ struct FxTrailElem // sizeof=0x20
 struct FxVisBlocker // sizeof=0x10
 {                                       // ...
     float origin[3];
-    unsigned __int16 radius;
-    unsigned __int16 visibility;
+    uint16_t radius;
+    uint16_t visibility;
 };
 struct FxVisState // sizeof=0x1010
 {                                       // ...
@@ -189,7 +189,7 @@ struct FxSystem // sizeof=0xA60
     FxPool<FxElem> *elems;
     FxPool<FxTrail> *trails;
     FxPool<FxTrailElem> *trailElems;
-    unsigned __int16 *deferredElems;
+    uint16_t *deferredElems;
     volatile long firstFreeElem;
     volatile long firstFreeTrailElem;
     volatile long firstFreeTrail;
@@ -204,11 +204,11 @@ struct FxSystem // sizeof=0xA60
     volatile long firstActiveEffect;
     volatile long firstNewEffect;
     volatile long firstFreeEffect;
-    unsigned __int16 allEffectHandles[1024];
+    uint16_t allEffectHandles[1024];
     volatile long activeSpotLightEffectCount;
     volatile long activeSpotLightElemCount;
-    unsigned __int16 activeSpotLightEffectHandle;
-    unsigned __int16 activeSpotLightElemHandle;
+    uint16_t activeSpotLightEffectHandle;
+    uint16_t activeSpotLightElemHandle;
     __int16 activeSpotLightBoltDobj;
     // padding byte
     // padding byte
@@ -241,7 +241,7 @@ union FxPointGroupPool // sizeof=0x44
 
 struct FxTriGroup // sizeof=0x18
 {                                       // ...
-    unsigned __int16 indices[2][3];
+    uint16_t indices[2][3];
     GfxMarkContext context;
     uint8_t triCount;
     uint8_t unused[1];
@@ -256,8 +256,8 @@ union FxTriGroupPool // sizeof=0x18
 
 struct FxMark // sizeof=0x44
 {                                       // ...
-    unsigned __int16 prevMark;
-    unsigned __int16 nextMark;
+    uint16_t prevMark;
+    uint16_t nextMark;
     int frameCountDrawn;
     int frameCountAlloced;
     float origin[3];
@@ -268,7 +268,7 @@ struct FxMark // sizeof=0x44
     GfxMarkContext context;
     uint8_t triCount;
     // padding byte
-    unsigned __int16 pointCount;
+    uint16_t pointCount;
     // padding byte
     // padding byte
     int tris;
@@ -277,9 +277,9 @@ struct FxMark // sizeof=0x44
 struct FxMarksSystem // sizeof=0x4801C
 {                                       // ...
     int frameCount;
-    unsigned __int16 firstFreeMarkHandle;
-    unsigned __int16 firstActiveWorldMarkHandle;
-    unsigned __int16 entFirstMarkHandles[1024];
+    uint16_t firstFreeMarkHandle;
+    uint16_t firstActiveWorldMarkHandle;
+    uint16_t entFirstMarkHandles[1024];
     FxTriGroupPool *firstFreeTriGroup;
     FxPointGroupPool *firstFreePointGroup;
     FxMark marks[512];
@@ -287,7 +287,7 @@ struct FxMarksSystem // sizeof=0x4801C
     FxPointGroupPool pointGroups[3072]; // ...
     bool noMarks;
     bool hasCarryIndex;
-    unsigned __int16 carryIndex;
+    uint16_t carryIndex;
     unsigned int allocedMarkCount;
     unsigned int freedMarkCount;
 };
@@ -435,7 +435,7 @@ struct FxTrailDef // sizeof=0x1C
     int vertCount;
     FxTrailVertex *verts;
     int indCount;
-    unsigned __int16 *inds;
+    uint16_t *inds;
 };
 const struct FxElemDef // sizeof=0xFC
 {
@@ -497,7 +497,7 @@ struct FxSystemBuffers // sizeof=0x47480
     FxPool<FxTrail> trails[MAX_TRAILS];
     FxPool<FxTrailElem> trailElems[MAX_TRAIL_ELEMS];
     FxVisState visState[2];
-    unsigned __int16 deferredElems[2048];
+    uint16_t deferredElems[2048];
     uint8_t padBuffer[96];
 };
 

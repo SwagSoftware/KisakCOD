@@ -413,8 +413,8 @@ unsigned int R_EmitDefaultLightGridEntry_Version15()
 char __cdecl R_EmitLightGridBlock_Version15(
     const AnnotatedLightGridPoint *pointsArray,
     signed int runCount,
-    const unsigned __int16 *zSubRange,
-    const unsigned __int16 *zRangeGlobal,
+    const uint16_t *zSubRange,
+    const uint16_t *zRangeGlobal,
     unsigned int beginBlock,
     unsigned int endBlock)
 {
@@ -526,17 +526,17 @@ char __cdecl R_CompressLightGridRow_Version15(
     const AnnotatedLightGridPoint *pointsArray,
     unsigned int beginRow,
     unsigned int endRow,
-    unsigned __int16 *zRangeGlobal)
+    uint16_t *zRangeGlobal)
 {
-    unsigned __int16 run; // [esp+0h] [ebp-2Ch]
-    unsigned __int16 zSubRangeRun[2]; // [esp+4h] [ebp-28h] BYREF
+    uint16_t run; // [esp+0h] [ebp-2Ch]
+    uint16_t zSubRangeRun[2]; // [esp+4h] [ebp-28h] BYREF
     unsigned int beginBlock; // [esp+8h] [ebp-24h]
     GfxLightGridRow rowHeader; // [esp+Ch] [ebp-20h]
-    unsigned __int16 zSubRange[2]; // [esp+18h] [ebp-14h]
+    uint16_t zSubRange[2]; // [esp+18h] [ebp-14h]
     unsigned int beginCol; // [esp+1Ch] [ebp-10h]
     unsigned int endCol; // [esp+20h] [ebp-Ch]
-    unsigned __int16 colRun; // [esp+24h] [ebp-8h]
-    unsigned __int16 col; // [esp+28h] [ebp-4h]
+    uint16_t colRun; // [esp+24h] [ebp-8h]
+    uint16_t col; // [esp+28h] [ebp-4h]
 
     rowHeader.firstEntry = s_world.lightGrid.entryCount;
     rowHeader.colStart = pointsArray[beginRow].pos[s_world.lightGrid.colAxis];
@@ -587,11 +587,11 @@ char __cdecl R_CompressLightGridRow_Version15(
 char __cdecl R_EncodeLightGrid_Version15(const AnnotatedLightGridPoint *pointsArray, unsigned int pointsArrayCount)
 {
     unsigned int pointIndex; // [esp+0h] [ebp-18h]
-    unsigned __int16 zRange[2]; // [esp+4h] [ebp-14h] BYREF
+    uint16_t zRange[2]; // [esp+4h] [ebp-14h] BYREF
     unsigned int pointCount; // [esp+8h] [ebp-10h]
-    unsigned __int16 row; // [esp+Ch] [ebp-Ch]
+    uint16_t row; // [esp+Ch] [ebp-Ch]
     const AnnotatedLightGridPoint *point; // [esp+10h] [ebp-8h]
-    unsigned __int16 rowIndex; // [esp+14h] [ebp-4h]
+    uint16_t rowIndex; // [esp+14h] [ebp-4h]
 
     iassert( s_world.lightGrid.entryCount == 0 );
     for (pointIndex = 0; pointIndex < pointsArrayCount; pointIndex += pointCount)

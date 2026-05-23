@@ -1246,7 +1246,7 @@ int __cdecl NET_StringToAdr(char *s, netadr_t *a)
 {
     char *v3; // eax
     __int16 v4; // ax
-    unsigned __int16 v5; // ax
+    uint16_t v5; // ax
     char base[1024]; // [esp+18h] [ebp-408h] BYREF
     char *port; // [esp+41Ch] [ebp-4h]
 

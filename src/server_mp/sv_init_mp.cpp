@@ -46,7 +46,7 @@ const dvar_t *sv_clientArchive;
 
 void __cdecl SV_SetConfigstring(int index, const char *val)
 {
-    unsigned __int16 v2; // [esp+20h] [ebp-444h]
+    uint16_t v2; // [esp+20h] [ebp-444h]
     client_t *client; // [esp+38h] [ebp-42Ch]
     int maxChunk; // [esp+3Ch] [ebp-428h]
     int remaining; // [esp+40h] [ebp-424h]

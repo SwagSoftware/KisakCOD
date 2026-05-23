@@ -143,7 +143,7 @@ XAnimParts *__cdecl XAnimClone(XAnimParts *fromParts, void *(__cdecl *Alloc)(int
     XAnimNotifyInfo *notify; // [esp+10h] [ebp-10h]
     int i; // [esp+14h] [ebp-Ch]
     __int16 notifyInfoIndex; // [esp+18h] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+1Ch] [ebp-4h]
+    uint16_t *boneNames; // [esp+1Ch] [ebp-4h]
 
     toParts = (XAnimParts*)Alloc(88);
     qmemcpy(toParts, fromParts, sizeof(XAnimParts));
@@ -307,7 +307,7 @@ void __cdecl XAnimFree(XAnimParts *parts)
     XAnimNotifyInfo *notify; // [esp+4h] [ebp-10h]
     int i; // [esp+8h] [ebp-Ch]
     __int16 notifyInfoIndex; // [esp+Ch] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+10h] [ebp-4h]
+    uint16_t *boneNames; // [esp+10h] [ebp-4h]
 
     boneNames = parts->names;
     size = parts->boneCount[9];
@@ -425,7 +425,7 @@ void XAnimResetAnimMap(const DObj_s *obj, unsigned int infoIndex)
 void __cdecl XAnimInitModelMap(XModel* const* models, unsigned int numModels, XModelNameMap* modelMap)
 {
     unsigned int boneIndex; // [esp+0h] [ebp-20h]
-    unsigned __int16 boneName; // [esp+4h] [ebp-1Ch]
+    uint16_t boneName; // [esp+4h] [ebp-1Ch]
     unsigned int hash; // [esp+8h] [ebp-18h]
     XModel* model; // [esp+Ch] [ebp-14h]
     unsigned int boneCount; // [esp+10h] [ebp-10h]
@@ -503,7 +503,7 @@ unsigned int __cdecl XAnimGetAnimMap(const XAnimParts* parts, const XModelNameMa
     unsigned int partIndex; // [esp+Ch] [ebp-B0h]
     unsigned int boneCount; // [esp+10h] [ebp-ACh]
     XAnimToXModel animToModel; // [esp+14h] [ebp-A8h] BYREF
-    unsigned __int16* partNames; // [esp+B4h] [ebp-8h]
+    uint16_t* partNames; // [esp+B4h] [ebp-8h]
     unsigned int partName; // [esp+B8h] [ebp-4h]
 
     if (!parts)
@@ -1370,9 +1370,9 @@ void __cdecl XAnimProcessClientNotify(XAnimInfo* info, float dtime)
     XAnimNotifyInfo* notifyInfo; // [esp+10h] [ebp-10h]
     XAnimNotifyInfo* notifyInfoa; // [esp+10h] [ebp-10h]
     XAnimNotifyInfo* notifyInfob; // [esp+10h] [ebp-10h]
-    unsigned __int16 notifyType; // [esp+14h] [ebp-Ch]
-    unsigned __int16 notifyIndex; // [esp+18h] [ebp-8h]
-    unsigned __int16 notifyIndexa; // [esp+18h] [ebp-8h]
+    uint16_t notifyType; // [esp+14h] [ebp-Ch]
+    uint16_t notifyIndex; // [esp+18h] [ebp-8h]
+    uint16_t notifyIndexa; // [esp+18h] [ebp-8h]
     XAnimParts* parts; // [esp+1Ch] [ebp-4h]
 
     state = &info->state;
@@ -1472,7 +1472,7 @@ void __cdecl XAnimProcessClientNotify(XAnimInfo* info, float dtime)
     }
 }
 
-unsigned __int16 __cdecl XAnimGetNextNotifyIndex(const XAnimParts* parts, float time)
+uint16_t __cdecl XAnimGetNextNotifyIndex(const XAnimParts* parts, float time)
 {
     XAnimNotifyInfo* notifyInfo; // [esp+8h] [ebp-14h]
     XAnimNotifyInfo* bestNotifyInfo; // [esp+Ch] [ebp-10h]
@@ -2697,8 +2697,8 @@ void __cdecl XAnimCalcRelDeltaParts(
     XAnimSimpleRotPos* rotPos,
     int quatIndex)
 {
-    unsigned __int16* v6; // [esp+40h] [ebp-ACh]
-    unsigned __int16* bigTrans; // [esp+44h] [ebp-A8h]
+    uint16_t* v6; // [esp+40h] [ebp-ACh]
+    uint16_t* bigTrans; // [esp+44h] [ebp-A8h]
     unsigned __int8* v8; // [esp+48h] [ebp-A4h]
     unsigned __int8* pSmallTrans; // [esp+4Ch] [ebp-A0h]
     float sizeVec_4; // [esp+54h] [ebp-98h]
@@ -2983,7 +2983,7 @@ void __cdecl XAnimGetAbsDelta(const XAnim_s* anims, unsigned int animIndex, floa
 
 unsigned int __cdecl XAnimAllocInfoWithParent(
     XAnimTree_s* tree,
-    unsigned __int16 animToModel,
+    uint16_t animToModel,
     unsigned int animIndex,
     unsigned int parentInfoIndex,
     int after)
@@ -3100,7 +3100,7 @@ unsigned int __cdecl XAnimAllocInfoWithParent(
 
 unsigned int XAnimAllocInfoIndex(DObj_s *obj, unsigned int animIndex, int after)
 {
-    unsigned __int16 animToModel; // [esp-Ch] [ebp-420h]
+    uint16_t animToModel; // [esp-Ch] [ebp-420h]
     XModelNameMap modelMap[256]; // [esp-8h] [ebp-41Ch] BYREF
     unsigned int parentInfoIndex; // [esp+3F8h] [ebp-1Ch]
     unsigned int parentAnimIndex; // [esp+3FCh] [ebp-18h]
@@ -3281,7 +3281,7 @@ void __cdecl XAnimClearGoalWeightKnobInternal(
     float v6; // [esp+10h] [ebp-30h]
     float v7; // [esp+14h] [ebp-2Ch]
     float v8; // [esp+18h] [ebp-28h]
-    unsigned __int16 children; // [esp+1Eh] [ebp-22h]
+    uint16_t children; // [esp+1Eh] [ebp-22h]
     float blendTime; // [esp+20h] [ebp-20h]
     float weight; // [esp+30h] [ebp-10h]
     float largestWeightDiff; // [esp+34h] [ebp-Ch]
@@ -4249,7 +4249,7 @@ static unsigned int XAnimTransfer_r(
                         if (g_xAnimInfo[toChildInfoIndex].animIndex <= (unsigned int)fromInfo->animIndex)
                             break;
                         XAnimClearTreeGoalWeightsInternal(to, toChildInfoIndex, 0.0, fromInfoIndex);
-                        //toChildInfoIndex = *(unsigned __int16 *)((char *)&g_xAnimInfo[0].prev + v24);
+                        //toChildInfoIndex = *(uint16_t *)((char *)&g_xAnimInfo[0].prev + v24);
                         toChildInfoIndex = g_xAnimInfo[toChildInfoIndex].prev;
                         if (!toChildInfoIndex)
                             goto LABEL_48;

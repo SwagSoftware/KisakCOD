@@ -102,14 +102,14 @@ void __cdecl R_AddShadowSurfaceToPrimaryLight(
     shadowGeom = &world->shadowGeom[primaryLightIndex];
     if (shadowGeom->sortedSurfIndex)
     {
-        if (sortedSurfIndex != (unsigned __int16)sortedSurfIndex)
+        if (sortedSurfIndex != (uint16_t)sortedSurfIndex)
             MyAssertHandler(
                 "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
                 281,
                 0,
                 "i == static_cast< Type >( i )\n\t%i, %i",
                 sortedSurfIndex,
-                (unsigned __int16)sortedSurfIndex);
+                (uint16_t)sortedSurfIndex);
         shadowGeom->sortedSurfIndex[shadowGeom->surfaceCount++] = sortedSurfIndex;
     }
 }
@@ -942,7 +942,7 @@ GfxShadowGeometry *R_AllocShadowGeometryHeaderMemory()
 
 void __cdecl R_LoadSubmodels(TrisType trisType)
 {
-    unsigned __int16 v1; // [esp+4h] [ebp-18h]
+    uint16_t v1; // [esp+4h] [ebp-18h]
     GfxBrushModel *out; // [esp+8h] [ebp-14h]
     DiskBrushModel *in; // [esp+Ch] [ebp-10h]
     int axis; // [esp+10h] [ebp-Ch]
@@ -1136,7 +1136,7 @@ MaterialUsage *__cdecl R_GetMaterialUsageData(Material *material)
 {
     MaterialUsage *materialUsage; // [esp+0h] [ebp-Ch]
     bool exists; // [esp+7h] [ebp-5h] BYREF
-    unsigned __int16 hashIndex; // [esp+8h] [ebp-4h] BYREF
+    uint16_t hashIndex; // [esp+8h] [ebp-4h] BYREF
 
     Material_GetHashIndex(material->info.name, &hashIndex, &exists);
     if (!exists)
@@ -1276,8 +1276,8 @@ void __cdecl R_CalculateOutdoorBounds(GfxBspLoad *load, const DiskTriangleSoup *
 void __cdecl R_CreateMaterialList()
 {
     int memory; // [esp+4h] [ebp-10h]
-    unsigned __int16 hashIndex; // [esp+8h] [ebp-Ch]
-    unsigned __int16 hashIndexa; // [esp+8h] [ebp-Ch]
+    uint16_t hashIndex; // [esp+8h] [ebp-Ch]
+    uint16_t hashIndexa; // [esp+8h] [ebp-Ch]
     MaterialMemory *materialMemory; // [esp+Ch] [ebp-8h]
     int index; // [esp+10h] [ebp-4h]
 
@@ -1327,7 +1327,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     float binormal[3]; // [esp+58h] [ebp-40h] BYREF
     DiskTriangleSoup *diskSurfaces; // [esp+64h] [ebp-34h] BYREF
     unsigned int indexCount; // [esp+68h] [ebp-30h] BYREF
-    const unsigned __int16 *indices; // [esp+6Ch] [ebp-2Ch]
+    const uint16_t *indices; // [esp+6Ch] [ebp-2Ch]
     LumpType lumpType; // [esp+70h] [ebp-28h]
     const DiskGfxVertex *vertsDisk; // [esp+74h] [ebp-24h]
     unsigned int vertCount; // [esp+78h] [ebp-20h] BYREF
@@ -1336,8 +1336,8 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
     GfxWorldVertex *vertsMem; // [esp+84h] [ebp-14h]
     unsigned int vertIndex; // [esp+88h] [ebp-10h]
     unsigned int vertLayerDataSize; // [esp+8Ch] [ebp-Ch] BYREF
-    unsigned __int16 *worldIndices; // [esp+90h] [ebp-8h]
-    unsigned __int16 surfIndexCount; // [esp+94h] [ebp-4h]
+    uint16_t *worldIndices; // [esp+90h] [ebp-8h]
+    uint16_t surfIndexCount; // [esp+94h] [ebp-4h]
 
     iassert( load );
     if (load->bspVersion < 0x16)
@@ -1732,7 +1732,7 @@ void __cdecl R_LoadCells(unsigned int bspVersion, TrisType trisType)
         out->maxs[0] = *((float *)in + 3);
         out->maxs[1] = *((float *)in + 4);
         out->maxs[2] = *((float *)in + 5);
-        out->aabbTree = &rgl.aabbTrees[*(unsigned __int16 *)&in[2 * trisType + 24]];
+        out->aabbTree = &rgl.aabbTrees[*(uint16_t *)&in[2 * trisType + 24]];
         out->portals = (GfxPortal *)(68 * *((_DWORD *)in + 7));
         out->portalCount = *((_DWORD *)in + 8);
         cullGroupCount = *((_DWORD *)in + 10);
@@ -1952,7 +1952,7 @@ void __cdecl R_LoadNodesAndLeafs(unsigned int bspVersion)
     }
     R_SetParentAndCell_r(rgl.nodes);
     s_world.nodeCount = R_CountNodes_r(rgl.nodes);
-    s_world.dpvsPlanes.nodes = (unsigned __int16 *)Hunk_Alloc(16 * s_world.nodeCount, "R_LoadNodesAndLeafs", 22);
+    s_world.dpvsPlanes.nodes = (uint16_t *)Hunk_Alloc(16 * s_world.nodeCount, "R_LoadNodesAndLeafs", 22);
 
     mnode_t *out2 = R_SortNodes_r(rgl.nodes, (mnode_t *)s_world.dpvsPlanes.nodes);
     iassert(reinterpret_cast<ushort *>(out2) - s_world.dpvsPlanes.nodes == s_world.nodeCount);
@@ -2313,11 +2313,11 @@ unsigned int __cdecl R_BuildNoDecalAabbTree_r(GfxAabbTree *tree, unsigned int st
 {
     int startSurfIndexNoDecal; // eax
     int v4; // [esp+0h] [ebp-18h]
-    unsigned __int16 childIter; // [esp+4h] [ebp-14h]
+    uint16_t childIter; // [esp+4h] [ebp-14h]
     GfxAabbTree *children; // [esp+8h] [ebp-10h]
-    unsigned __int16 surfIndex; // [esp+Ch] [ebp-Ch]
-    const unsigned __int16 *srcIndices; // [esp+10h] [ebp-8h]
-    unsigned __int16 surfIter; // [esp+14h] [ebp-4h]
+    uint16_t surfIndex; // [esp+Ch] [ebp-Ch]
+    const uint16_t *srcIndices; // [esp+10h] [ebp-8h]
+    uint16_t surfIter; // [esp+14h] [ebp-4h]
 
     if (startSurfIndex != startSurfIndex)
         MyAssertHandler(
@@ -2882,7 +2882,7 @@ void __cdecl R_AddStaticModelToAabbTree_r(GfxWorld *world, GfxAabbTree *tree, in
             v3 = 1;
         smodelIndexes = (uint8_t *)Hunk_AllocateTempMemory(2 * v3, "R_AddModelToCell");
         memcpy(smodelIndexes, (uint8_t *)tree->smodelIndexes, 2 * tree->smodelIndexCount);
-        tree->smodelIndexes = (unsigned __int16 *)smodelIndexes;
+        tree->smodelIndexes = (uint16_t *)smodelIndexes;
     }
     tree->smodelIndexes[tree->smodelIndexCount] = smodelIndex;
     if (tree->smodelIndexes[tree->smodelIndexCount] != smodelIndex)
@@ -3071,7 +3071,7 @@ void __cdecl R_AllocStaticModels(GfxAabbTree *tree)
         R_AllocStaticModels(&children[childIndex]);
 }
 
-int __cdecl CompareStaticModels(unsigned __int16 *smodel0, unsigned __int16 *smodel1)
+int __cdecl CompareStaticModels(uint16_t *smodel0, uint16_t *smodel1)
 {
     return *smodel0 - *smodel1;
 }
@@ -3080,7 +3080,7 @@ int __cdecl R_SortGfxAabbTreeChildren(
     GfxWorld *world,
     float *mins,
     float *maxs,
-    unsigned __int16 *staticModels,
+    uint16_t *staticModels,
     int staticModelCount)
 {
     GfxStaticModelInst *smodelInst; // [esp+0h] [ebp-14h]
@@ -3129,7 +3129,7 @@ void __cdecl R_SortGfxAabbTree(GfxWorld *world, GfxAabbTree *tree)
     GfxAabbTree *childTree; // [esp+2Ch] [ebp-60h]
     float mins[3]; // [esp+30h] [ebp-5Ch] BYREF
     float childMaxs[3]; // [esp+3Ch] [ebp-50h] BYREF
-    unsigned __int16 *smodelIndexes; // [esp+48h] [ebp-44h]
+    uint16_t *smodelIndexes; // [esp+48h] [ebp-44h]
     int childIndex; // [esp+4Ch] [ebp-40h]
     GfxStaticModelInst *smodelInst; // [esp+50h] [ebp-3Ch]
     float childMins[3]; // [esp+54h] [ebp-38h] BYREF
@@ -3495,8 +3495,8 @@ void __cdecl R_LoadSun(const char *name, sunflare_t *sun)
 
 uint8_t *R_AllocPrimaryLightBuffers()
 {
-    unsigned __int16 EntityCount; // ax
-    unsigned __int16 v1; // ax
+    uint16_t EntityCount; // ax
+    uint16_t v1; // ax
     uint8_t *result; // eax
     unsigned int relevantPrimaryLightCount; // [esp+4h] [ebp-Ch]
     unsigned int totalDynEntBits; // [esp+8h] [ebp-8h]
@@ -3903,7 +3903,7 @@ void __cdecl R_AssignSModelCacheResources(GfxWorld *world)
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name)
 {
     char *FilenameSubString; // eax
-    unsigned __int16 EntityCount; // ax
+    uint16_t EntityCount; // ax
     char v4; // [esp+3h] [ebp-8Dh]
     char *v5; // [esp+8h] [ebp-88h]
     char *v6; // [esp+Ch] [ebp-84h]

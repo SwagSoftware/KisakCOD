@@ -89,7 +89,7 @@ bool Com_ServerDObjDirty(int handle)
 
 DObj_s *__cdecl Com_ClientDObjCreate(
     DObjModel_s *dobjModels,
-    unsigned __int16 numModels,
+    uint16_t numModels,
     XAnimTree_s *tree,
     unsigned int handle,
     int localClientNum)
@@ -183,7 +183,7 @@ void __cdecl Com_ClientDObjClearAllSkel()
 
 DObj_s *__cdecl Com_ServerDObjCreate(
     DObjModel_s *dobjModels,
-    unsigned __int16 numModels,
+    uint16_t numModels,
     XAnimTree_s *tree,
     unsigned int handle)
 {

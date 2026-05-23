@@ -626,7 +626,7 @@ void __cdecl MSG_WriteDeltaKeyShort(msg_t *msg, __int16 key, __int16 oldV, __int
 int __cdecl MSG_ReadDeltaKeyShort(msg_t *msg, __int16 key, int oldV)
 {
     if (MSG_ReadBit(msg))
-        return key ^ (unsigned __int16)MSG_ReadShort(msg);
+        return key ^ (uint16_t)MSG_ReadShort(msg);
     else
         return oldV;
 }
@@ -646,7 +646,7 @@ void __cdecl MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd)
     cmd->weapon = ps->weapon;
     cmd->offHandIndex = ps->offHandIndex;
     for (i = 0; i < 2; ++i)
-        cmd->angles[i] = (unsigned __int16)(int)((ps->viewangles[i] - ps->delta_angles[i]) * 182.0444488525391);
+        cmd->angles[i] = (uint16_t)(int)((ps->viewangles[i] - ps->delta_angles[i]) * 182.0444488525391);
     if ((ps->otherFlags & 4) != 0)
     {
         if ((ps->eFlags & 8) != 0)
@@ -828,13 +828,13 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
         if (MSG_ReadKey(msg, key, 1u))
         {
             to->buttons |= MSG_ReadKey(msg, key, 1u);
-            to->angles[0] = (unsigned __int16)MSG_ReadDeltaKeyShort(msg, key, from->angles[0]);
-            to->angles[1] = (unsigned __int16)MSG_ReadDeltaKeyShort(msg, key, from->angles[1]);
+            to->angles[0] = (uint16_t)MSG_ReadDeltaKeyShort(msg, key, from->angles[0]);
+            to->angles[1] = (uint16_t)MSG_ReadDeltaKeyShort(msg, key, from->angles[1]);
             horFromMovea = MSG_HorMoveTo(from->forwardmove, from->rightmove);
             horToMovea = MSG_ReadDeltaKey(msg, key, horFromMovea, 4u);
             MSG_HorMoveFrom(horToMovea, &to->forwardmove, &to->rightmove);
             keya = to->serverTime ^ key;
-            to->angles[2] = (unsigned __int16)MSG_ReadDeltaKeyShort(msg, keya, from->angles[2]);
+            to->angles[2] = (uint16_t)MSG_ReadDeltaKeyShort(msg, keya, from->angles[2]);
             to->buttons &= 1u;
             to->buttons |= 2 * MSG_ReadDeltaKey(msg, keya, from->buttons >> 1, 0x14u);
             to->weapon = MSG_ReadDeltaKey(msg, keya, from->weapon, 7u);
@@ -849,7 +849,7 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
                 to->meleeChargeYaw = (double)MSG_ReadDeltaKeyShort(
                     msg,
                     keya,
-                    (unsigned __int16)(int)(from->meleeChargeYaw * 182.0444488525391))
+                    (uint16_t)(int)(from->meleeChargeYaw * 182.0444488525391))
                     * 0.0054931640625;
                 to->meleeChargeDist = MSG_ReadDeltaKey(msg, keya, from->meleeChargeDist, 8u);
             }
@@ -873,8 +873,8 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
         {
             keyb = to->serverTime ^ key;
             to->buttons |= MSG_ReadKey(msg, keyb, 1u);
-            to->angles[0] = (unsigned __int16)MSG_ReadDeltaKeyShort(msg, keyb, from->angles[0]);
-            to->angles[1] = (unsigned __int16)MSG_ReadDeltaKeyShort(msg, keyb, from->angles[1]);
+            to->angles[0] = (uint16_t)MSG_ReadDeltaKeyShort(msg, keyb, from->angles[0]);
+            to->angles[1] = (uint16_t)MSG_ReadDeltaKeyShort(msg, keyb, from->angles[1]);
             horFromMove = MSG_HorMoveTo(from->forwardmove, from->rightmove);
             horToMove = MSG_ReadDeltaKey(msg, keyb, horFromMove, 4u);
             MSG_HorMoveFrom(horToMove, &to->forwardmove, &to->rightmove);

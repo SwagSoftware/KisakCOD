@@ -1546,7 +1546,7 @@ void __cdecl Dvar_ClearLatchedValue(dvar_s *dvar)
 const dvar_s *__cdecl Dvar_RegisterBool(
     const char *dvarName,
     bool value,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue dvarValue = {};
@@ -1558,7 +1558,7 @@ const dvar_s *__cdecl Dvar_RegisterBool(
 const dvar_s *__cdecl Dvar_RegisterNew(
     const char *dvarName,
     uint8_t type,
-    unsigned __int16 flags,
+    uint16_t flags,
     DvarValue value,
     DvarLimits domain,
     const char *description)
@@ -1674,7 +1674,7 @@ void __cdecl Dvar_ReinterpretDvar(
     dvar_s *dvar,
     const char *dvarName,
     uint8_t type,
-    unsigned __int16 flags,
+    uint16_t flags,
     DvarValue value,
     DvarLimits domain)
 {
@@ -1698,7 +1698,7 @@ void __cdecl Dvar_Reregister(
     dvar_s *dvar,
     const char *dvarName,
     uint8_t type,
-    unsigned __int16 flags,
+    uint16_t flags,
     DvarValue resetValue,
     DvarLimits domain,
     const char *description)
@@ -1765,7 +1765,7 @@ void __cdecl Dvar_Reregister(
 const dvar_s *__cdecl Dvar_RegisterVariant(
     const char *dvarName,
     uint8_t type,
-    unsigned __int16 flags,
+    uint16_t flags,
     DvarValue value,
     DvarLimits domain,
     const char *description)
@@ -1791,7 +1791,7 @@ void __cdecl Dvar_MakeExplicitType(
     dvar_s *dvar,
     const char *dvarName,
     uint8_t type,
-    unsigned __int16 flags,
+    uint16_t flags,
     DvarValue resetValue,
     DvarLimits domain)
 {
@@ -2021,7 +2021,7 @@ const dvar_s *__cdecl Dvar_RegisterInt(
     const char *dvarName,
     int value,
     DvarLimits min,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue v6 = {};
@@ -2051,7 +2051,7 @@ const dvar_s *__cdecl Dvar_RegisterFloat(
     const char *dvarName,
     float value,
     DvarLimits min,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue v6 = {};
@@ -2064,7 +2064,7 @@ const dvar_s *__cdecl Dvar_RegisterFloat(
     float value,
     float min,
     float max,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue dvarValue = {};
@@ -2082,7 +2082,7 @@ const dvar_s *__cdecl Dvar_RegisterVec2(
     float x,
     float y,
     DvarLimits min,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue v7 = {};
@@ -2097,7 +2097,7 @@ const dvar_s *__cdecl Dvar_RegisterVec3(
     float y,
     float z,
     DvarLimits min,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue v8 = {};
@@ -2114,7 +2114,7 @@ const dvar_s *__cdecl Dvar_RegisterVec3(
     float z,
     float min,
     float max,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarLimits limits;
@@ -2132,7 +2132,7 @@ const dvar_s *__cdecl Dvar_RegisterVec4(
     float z,
     float w,
     DvarLimits min,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue val = {};
@@ -2152,7 +2152,7 @@ const dvar_s *__cdecl Dvar_RegisterVec4(
     float w,
     float minimum,
     float maximum,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarLimits limits;
@@ -2165,7 +2165,7 @@ const dvar_s *__cdecl Dvar_RegisterVec4(
 const dvar_s *__cdecl Dvar_RegisterString(
     const char *dvarName,
     const char *value,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarValue v5 = {};
@@ -2190,7 +2190,7 @@ const dvar_s *__cdecl Dvar_RegisterEnum(
     const char *dvarName,
     const char **valueList,
     int defaultIndex,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     DvarLimits dvarDomain = {};
@@ -2228,7 +2228,7 @@ const dvar_s *__cdecl Dvar_RegisterColor(
     float g,
     float b,
     float a,
-    unsigned __int16 flags,
+    uint16_t flags,
     const char *description)
 {
     float v8; // [esp+0h] [ebp-ACh]
@@ -2860,7 +2860,7 @@ char __cdecl Dvar_AnyLatchedValues()
     return 0;
 }
 
-void __cdecl Dvar_ResetDvars(unsigned __int16 filter, DvarSetSource setSource)
+void __cdecl Dvar_ResetDvars(uint16_t filter, DvarSetSource setSource)
 {
     int dvarIter; // [esp+4h] [ebp-8h]
 
@@ -2970,7 +2970,7 @@ int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvar
 
 
 #ifdef KISAK_SP
-void Dvar_SaveDvars(MemoryFile *memFile, unsigned __int16 filter)
+void Dvar_SaveDvars(MemoryFile *memFile, uint16_t filter)
 {
     InterlockedIncrement(&g_dvarCritSect.readCount);
     while (g_dvarCritSect.writeCount)

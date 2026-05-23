@@ -1256,7 +1256,7 @@ void __cdecl SV_AddCachedEntitiesVisibleFromPoint(
     float fogOpaqueDistSqrd; // [esp+10h] [ebp-1124h]
     unsigned int dst[1025]; // [esp+14h] [ebp-1120h] BYREF
     int v10; // [esp+1018h] [ebp-11Ch]
-    unsigned __int16 list[128]; // [esp+101Ch] [ebp-118h] BYREF
+    uint16_t list[128]; // [esp+101Ch] [ebp-118h] BYREF
     int leafnum; // [esp+1120h] [ebp-14h]
     archivedEntity_s *v13; // [esp+1124h] [ebp-10h]
     int v14; // [esp+1128h] [ebp-Ch]

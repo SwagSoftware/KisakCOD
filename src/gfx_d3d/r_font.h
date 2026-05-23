@@ -4,7 +4,7 @@
 
 struct Glyph // sizeof=0x18
 {
-    unsigned __int16 letter;
+    uint16_t letter;
     char x0;
     char y0;
     uint8_t dx;

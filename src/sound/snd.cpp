@@ -4064,7 +4064,7 @@ void __cdecl SND_SaveChanInfo(const snd_channel_info_t *chaninfo, MemoryFile *me
 
     if (!chaninfo)
         MyAssertHandler(".\\snd.cpp", 3893, 0, "%s", "chaninfo");
-    if (chaninfo->sndEnt.field.entIndex != (unsigned __int16)chaninfo->sndEnt.field.entIndex)
+    if (chaninfo->sndEnt.field.entIndex != (uint16_t)chaninfo->sndEnt.field.entIndex)
         MyAssertHandler(
             ".\\snd.cpp",
             3894,
@@ -4352,7 +4352,7 @@ void __cdecl SND_RestoreChanInfo(snd_channel_info_t *chaninfo, MemoryFile *memFi
 
     memset((uint8_t *)chaninfo, 0, sizeof(snd_channel_info_t));
     MemFile_ReadData(memFile, 2, p);
-    chaninfo->sndEnt.field.entIndex = *(unsigned __int16 *)p;
+    chaninfo->sndEnt.field.entIndex = *(uint16_t *)p;
     MemFile_ReadData(memFile, 1, &v6);
     chaninfo->entchannel = v6;
     MemFile_ReadData(memFile, 1, &v5);

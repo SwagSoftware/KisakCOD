@@ -44,7 +44,7 @@ struct DpvsDynamicCellCmd // sizeof=0xC
     unsigned int cellIndex;             // ...
     uint8_t planeCount;         // ...
     uint8_t frustumPlaneCount;  // ...
-    unsigned __int16 viewIndex;         // ...
+    uint16_t viewIndex;         // ...
 };
 
 struct DpvsStaticCellCmd // sizeof=0xC
@@ -53,15 +53,15 @@ struct DpvsStaticCellCmd // sizeof=0xC
     const GfxCell *cell;                // ...
     uint8_t planeCount;         // ...
     uint8_t frustumPlaneCount;  // ...
-    unsigned __int16 viewIndex;         // ...
+    uint16_t viewIndex;         // ...
 };
 
 struct DpvsEntityCmd // sizeof=0x10
 {                                       // ...
     GfxSceneEntity *sceneEnt;
     const DpvsPlane *planes;
-    unsigned __int16 planeCount;
-    unsigned __int16 cellIndex;
+    uint16_t planeCount;
+    uint16_t cellIndex;
     uint8_t *entVisData;
 };
 
@@ -144,8 +144,8 @@ void __cdecl R_UnfilterDynEntFromCells(unsigned int dynEntId, DynEntityDrawType 
 void __cdecl R_FilterXModelIntoScene(
     const XModel *model,
     const GfxScaledPlacement *placement,
-    unsigned __int16 renderFxFlags,
-    unsigned __int16 *cachedLightingHandle);
+    uint16_t renderFxFlags,
+    uint16_t *cachedLightingHandle);
 void __cdecl R_FilterDObjIntoCells(unsigned int localClientNum, unsigned int entnum, float *origin, float radius);
 void __cdecl R_FilterEntIntoCells_r(FilterEntInfo *entInfo, mnode_t *node, const float *mins, const float *maxs);
 void __cdecl R_AddEntToCell(FilterEntInfo *entInfo, unsigned int cellIndex);
@@ -301,7 +301,7 @@ float __cdecl R_DpvsPlaneMaxSignedDistToBox(const DpvsPlane *plane, const float 
 void R_SetCullDist(float dist);
 
 // r_dpvs_entity
-void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data);
+void __cdecl R_AddEntitySurfacesInFrustumCmd(uint16_t *data);
 bool __cdecl R_BoundsInCell(mnode_t *node, int findCellIndex, const float *mins, const float *maxs);
 bool __cdecl R_BoundsInCell_r(mnode_t *node, int findCellIndex, const float *mins, const float *maxs);
 

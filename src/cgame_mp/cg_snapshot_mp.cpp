@@ -204,7 +204,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
         if ((snap->ps.otherFlags & 6) != 0)
         {
             cent = CG_GetEntity(localClientNum, entnum);
-            cent->nextState.number = (unsigned __int16)entnum;
+            cent->nextState.number = (uint16_t)entnum;
             BG_PlayerStateToEntityState(&snap->ps, &cent->nextState, 0, 0);
             cent->nextValid = 1;
             if (!cgameGlob->mapRestart

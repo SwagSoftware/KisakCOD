@@ -20,7 +20,7 @@
 
 struct // sizeof=0x8
 {                                       // ...
-    unsigned __int16 (*history)[3];     // ...
+    uint16_t (*history)[3];     // ...
     int count;                          // ...
 } s_vc_log;
 
@@ -142,7 +142,7 @@ int __cdecl R_SortedHistoryEntry(int x, int y, int z, GfxSortedHistoryAdd addMod
         return -1;
 }
 
-char __cdecl R_AddSortedHistoryEntry(unsigned __int16 x, unsigned __int16 y, unsigned __int16 z, int pos)
+char __cdecl R_AddSortedHistoryEntry(uint16_t x, uint16_t y, uint16_t z, int pos)
 {
     if (s_vc_log.count < 0x100000)
     {
@@ -267,12 +267,12 @@ void __cdecl R_SetLightGridColors(
 
 void __cdecl R_FixedPointBlendLightGridColors(
     const GfxLightGrid *lightGrid,
-    const unsigned __int16 *colorsIndex,
-    unsigned __int16 *fixedPointWeight,
+    const uint16_t *colorsIndex,
+    uint16_t *fixedPointWeight,
     unsigned int colorsCount,
     GfxLightGridColors *outPacked)
 {
-    unsigned __int16 accumulated[168]; // [esp+18h] [ebp-158h] BYREF
+    uint16_t accumulated[168]; // [esp+18h] [ebp-158h] BYREF
     unsigned int colorsIter; // [esp+16Ch] [ebp-4h]
 
     R_ScaleLightGridColors(&lightGrid->colors[*colorsIndex], *fixedPointWeight, accumulated);
@@ -289,8 +289,8 @@ void __cdecl R_FixedPointBlendLightGridColors(
 
 void __cdecl R_ScaleLightGridColors(
     const GfxLightGridColors *colors,
-    unsigned __int16 fixedPointWeight,
-    unsigned __int16 *scaled)
+    uint16_t fixedPointWeight,
+    uint16_t *scaled)
 {
     unsigned int sampleIter; // [esp+4h] [ebp-4h]
 
@@ -311,8 +311,8 @@ void __cdecl R_ScaleLightGridColors(
 
 void __cdecl R_WeightedAccumulateLightGridColors(
     const GfxLightGridColors *colors,
-    unsigned __int16 fixedPointWeight,
-    unsigned __int16 *accumulated)
+    uint16_t fixedPointWeight,
+    uint16_t *accumulated)
 {
     unsigned int sampleIter; // [esp+4h] [ebp-4h]
 
@@ -331,7 +331,7 @@ void __cdecl R_WeightedAccumulateLightGridColors(
     }
 }
 
-void __cdecl R_PackAccumulatedLightGridColors(const unsigned __int16 *accumulated, GfxLightGridColors *packed)
+void __cdecl R_PackAccumulatedLightGridColors(const uint16_t *accumulated, GfxLightGridColors *packed)
 {
     unsigned int sampleIter; // [esp+4h] [ebp-4h]
 
@@ -339,14 +339,14 @@ void __cdecl R_PackAccumulatedLightGridColors(const unsigned __int16 *accumulate
     {
         unsigned char *rgb = ((unsigned char *)&packed->rgb + sampleIter);
 
-        rgb[0] = (unsigned __int16)(accumulated[sampleIter] + 127) >> 8;
-        rgb[1] = (unsigned __int16)(accumulated[sampleIter + 1] + 127) >> 8;
-        rgb[2] = (unsigned __int16)(accumulated[sampleIter + 2] + 127) >> 8;
-        rgb[3] = (unsigned __int16)(accumulated[sampleIter + 3] + 127) >> 8;
-        rgb[4] = (unsigned __int16)(accumulated[sampleIter + 4] + 127) >> 8;
-        rgb[5] = (unsigned __int16)(accumulated[sampleIter + 5] + 127) >> 8;
-        rgb[6] = (unsigned __int16)(accumulated[sampleIter + 6] + 127) >> 8;
-        rgb[7] = (unsigned __int16)(accumulated[sampleIter + 7] + 127) >> 8;
+        rgb[0] = (uint16_t)(accumulated[sampleIter] + 127) >> 8;
+        rgb[1] = (uint16_t)(accumulated[sampleIter + 1] + 127) >> 8;
+        rgb[2] = (uint16_t)(accumulated[sampleIter + 2] + 127) >> 8;
+        rgb[3] = (uint16_t)(accumulated[sampleIter + 3] + 127) >> 8;
+        rgb[4] = (uint16_t)(accumulated[sampleIter + 4] + 127) >> 8;
+        rgb[5] = (uint16_t)(accumulated[sampleIter + 5] + 127) >> 8;
+        rgb[6] = (uint16_t)(accumulated[sampleIter + 6] + 127) >> 8;
+        rgb[7] = (uint16_t)(accumulated[sampleIter + 7] + 127) >> 8;
     }
 }
 
@@ -869,14 +869,14 @@ unsigned int __cdecl R_GetLightingAtPoint(
     const GfxLightGrid *lightGrid,
     const float *samplePos,
     unsigned int nonSunPrimaryLightIndex,
-    unsigned __int16 dest,
+    uint16_t dest,
     GfxModelLightExtrapolation extrapolateBehavior)
 {
     float v6; // [esp+Ch] [ebp-F4h]
     float cornerWeight[8]; // [esp+68h] [ebp-98h] BYREF
     const GfxLightGridEntry *entry; // [esp+88h] [ebp-78h]
     unsigned int cornerIndex; // [esp+8Ch] [ebp-74h]
-    unsigned __int16 sampleColors[8]; // [esp+90h] [ebp-70h] BYREF
+    uint16_t sampleColors[8]; // [esp+90h] [ebp-70h] BYREF
     unsigned int primaryLightIndex; // [esp+A4h] [ebp-5Ch]
     float primaryVisibleWeight; // [esp+A8h] [ebp-58h]
     const ComPrimaryLight *light; // [esp+ACh] [ebp-54h]
@@ -994,7 +994,7 @@ void __cdecl R_SetLightGridColorsFromIndex(
     const GfxLightGrid *lightGrid,
     unsigned int colorsIndex,
     float primaryLightWeight,
-    unsigned __int16 dest)
+    uint16_t dest)
 {
     GfxModelLightingPatch *patch; // [esp+14h] [ebp-4h]
 
@@ -1013,7 +1013,7 @@ void __cdecl R_BlendAndSetLightGridColors(
     unsigned int colorsCount,
     float primaryLightWeight,
     float weightNormalizeScale,
-    unsigned __int16 dest)
+    uint16_t dest)
 {
     GfxModelLightingPatch *patch; // [esp+28h] [ebp-4h]
 
@@ -1030,10 +1030,10 @@ void __cdecl R_GetLightGridColorsFixedPointBlendWeights(
     const float *colorsWeight,
     unsigned int colorsCount,
     float weightNormalizeScale,
-    unsigned __int16 *fixedPointWeight)
+    uint16_t *fixedPointWeight)
 {
     unsigned int maxWeightIndex; // [esp+Ch] [ebp-Ch]
-    unsigned __int16 fixedPointWeightSum; // [esp+10h] [ebp-8h]
+    uint16_t fixedPointWeightSum; // [esp+10h] [ebp-8h]
     unsigned int colorsIter; // [esp+14h] [ebp-4h]
 
     fixedPointWeightSum = 0;
@@ -1052,7 +1052,7 @@ void __cdecl R_GetLightGridColorsFixedPointBlendWeights(
 
 uint8_t __cdecl R_ExtrapolateLightingAtPoint(
     const GfxLightGrid *lightGrid,
-    unsigned __int16 dest,
+    uint16_t dest,
     GfxModelLightExtrapolation extrapolateBehavior,
     unsigned int defaultGridEntry)
 {
@@ -1072,10 +1072,10 @@ uint8_t __cdecl R_ExtrapolateLightingAtPoint(
 }
 
 unsigned int __cdecl R_AddLightGridSample(
-    unsigned __int16 *sampleColors,
+    uint16_t *sampleColors,
     float *sampleWeight,
     unsigned int sampleCount,
-    unsigned __int16 sampleColorsAdd,
+    uint16_t sampleColorsAdd,
     float sampleWeightAdd)
 {
     unsigned int sampleIndex; // [esp+0h] [ebp-4h]
@@ -1127,7 +1127,7 @@ void __cdecl R_GetAverageLightingAtPoint(const float *samplePos, uint8_t *outCol
     float cornerWeight[8]; // [esp+38h] [ebp-A0h] BYREF
     const GfxLightGridEntry *entry; // [esp+58h] [ebp-80h]
     unsigned int cornerIndex; // [esp+5Ch] [ebp-7Ch]
-    unsigned __int16 sampleColors[8]; // [esp+60h] [ebp-78h] BYREF
+    uint16_t sampleColors[8]; // [esp+60h] [ebp-78h] BYREF
     float weightNormalizeScale; // [esp+74h] [ebp-64h]
     uint8_t primaryLightIndex; // [esp+7Bh] [ebp-5Dh]
     uint8_t colorWithSunAlpha[4]; // [esp+7Ch] [ebp-5Ch] BYREF
@@ -1218,14 +1218,14 @@ LABEL_21:
 
 void __cdecl R_BlendAndAverageLightGridColors(
     const GfxLightGrid *lightGrid,
-    const unsigned __int16 *colorsIndex,
+    const uint16_t *colorsIndex,
     const float *colorsWeight,
     unsigned int colorsCount,
     float primaryLightWeight,
     float weightNormalizeScale,
     uint8_t *outAverage)
 {
-    unsigned __int16 fixedPointWeight[8]; // [esp+184h] [ebp-BCh] BYREF
+    uint16_t fixedPointWeight[8]; // [esp+184h] [ebp-BCh] BYREF
     GfxLightGridColors packed; // [esp+198h] [ebp-A8h] BYREF
 
     R_GetLightGridColorsFixedPointBlendWeights(colorsWeight, colorsCount, weightNormalizeScale, fixedPointWeight);
@@ -1254,14 +1254,14 @@ void __cdecl R_AverageLightGridColors(const GfxLightGridColors *colors, float su
 void __cdecl R_InitLightVisHistory(char *bspName)
 {
     char filename[68]; // [esp+30h] [ebp-50h] BYREF
-    unsigned __int16 (*buffer)[3]; // [esp+78h] [ebp-8h] BYREF
+    uint16_t (*buffer)[3]; // [esp+78h] [ebp-8h] BYREF
     int count; // [esp+7Ch] [ebp-4h]
 
     s_vc_log.history = 0;
     s_vc_log.count = 0;
     if (r_vc_makelog->current.integer)
     {
-        s_vc_log.history = (unsigned __int16 (*)[3])Z_VirtualAlloc(6291456, "R_InitLightVisHistory", 0);
+        s_vc_log.history = (uint16_t (*)[3])Z_VirtualAlloc(6291456, "R_InitLightVisHistory", 0);
         if (r_vc_makelog->current.integer == 2)
         {
             R_LightVisHistoryFilename(bspName, filename);

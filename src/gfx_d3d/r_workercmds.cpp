@@ -320,7 +320,7 @@ void __cdecl R_ProcessWorkerCmdInternal(WorkerCmdType type, void *data)
         R_AddCellDynBrushSurfacesInFrustumCmd((const DpvsDynamicCellCmd *)data);
         break;
     case WRKCMD_DPVS_ENTITY:
-        R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)data);
+        R_AddEntitySurfacesInFrustumCmd((uint16_t *)data);
         break;
     case WRKCMD_ADD_SCENE_ENT:
         R_AddAllSceneEntSurfacesCamera(*(const GfxViewInfo **)data);

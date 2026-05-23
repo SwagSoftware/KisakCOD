@@ -8,7 +8,7 @@
 
 struct AnnotatedLightGridPoint // sizeof=0xA
 {                                       // ...
-    unsigned __int16 pos[3];            // ...
+    uint16_t pos[3];            // ...
     GfxLightGridEntry entry;            // ...
 };
 
@@ -17,7 +17,7 @@ struct GfxLightGridEntry_Version15 // sizeof=0x8
     unsigned int xyzHighBits;
     uint8_t xyzLowBitsAndPrimaryVis;
     uint8_t needsTrace;
-    unsigned __int16 colorsIndex;
+    uint16_t colorsIndex;
 };
 
 struct DiskGfxCell_Version14 // sizeof=0x34
@@ -37,7 +37,7 @@ struct DiskGfxCell // sizeof=0x70
 {
     float mins[3];
     float maxs[3];
-    unsigned __int16 aabbTreeIndex[2];
+    uint16_t aabbTreeIndex[2];
     int firstPortal;
     int portalCount;
     int firstCullGroup;

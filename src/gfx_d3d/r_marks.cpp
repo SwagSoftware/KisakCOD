@@ -423,7 +423,7 @@ int  R_BoxStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize)
 {
     int smodelCount; // [esp-Ch] [ebp-A0h] BYREF
@@ -455,7 +455,7 @@ void __cdecl R_BoxStaticModels_r(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount,
     uint8_t *cellBits)
@@ -491,7 +491,7 @@ void __cdecl R_CellStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount,
     uint8_t *cellBits)
@@ -518,7 +518,7 @@ void __cdecl R_AABBTreeStaticModels_r(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount)
 {
@@ -573,7 +573,7 @@ void __cdecl R_AABBTreeStaticModels_r(
     }
 }
 
-void __cdecl R_AddStaticModelToList(int smodelIndex, unsigned __int16 *smodelList, int *smodelCount)
+void __cdecl R_AddStaticModelToList(int smodelIndex, uint16_t *smodelList, int *smodelCount)
 {
     int listIndex; // [esp+0h] [ebp-4h]
 
@@ -1055,7 +1055,7 @@ void __cdecl R_GetMarkFragmentClipPlanes(const float *origin, const float (*axis
     }
 }
 
-char __cdecl R_MarkFragments_AddDObj(MarkInfo *markInfo, DObj_s *dObj, cpose_t *pose, unsigned __int16 entityIndex)
+char __cdecl R_MarkFragments_AddDObj(MarkInfo *markInfo, DObj_s *dObj, cpose_t *pose, uint16_t entityIndex)
 {
     MarkInfoCollidedDObj *collidedDObj; // [esp+0h] [ebp-4h]
 
@@ -1073,7 +1073,7 @@ char __cdecl R_MarkFragments_AddBModel(
     MarkInfo *markInfo,
     GfxBrushModel *brushModel,
     cpose_t *pose,
-    unsigned __int16 entityIndex)
+    uint16_t entityIndex)
 {
     MarkInfoCollidedBModel *collidedBModel; // [esp+0h] [ebp-4h]
 
@@ -1240,7 +1240,7 @@ bool __cdecl R_MarkFragments_BrushSurface(
     float normal[3][3]; // [esp+264h] [ebp-74h] BYREF
     FxWorldMarkPoint *clipPoint; // [esp+288h] [ebp-50h]
     int pointIndex; // [esp+28Ch] [ebp-4Ch]
-    const unsigned __int16 *indices; // [esp+290h] [ebp-48h]
+    const uint16_t *indices; // [esp+290h] [ebp-48h]
     unsigned int triVerts1Stride; // [esp+294h] [ebp-44h]
     int fragmentPointCount; // [esp+298h] [ebp-40h]
     const GfxWorldVertex *triVert1[3]; // [esp+29Ch] [ebp-3Ch]
@@ -1512,7 +1512,7 @@ bool __cdecl R_MarkFragment_IsTriangleRejected(
 
 void __cdecl R_MarkFragment_SetupWorldClipPoints(
     const GfxWorldVertex *triVerts0,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     FxWorldMarkPoint(*clipPoints)[9])
 {
     FxWorldMarkPoint *v3; // [esp+4h] [ebp-10h]
@@ -1641,7 +1641,7 @@ char __cdecl R_MarkFragments_SceneDObjs(MarkInfo *markInfo)
     unsigned int hidePartBits[4]; // [esp+84h] [ebp-24h] BYREF
     const DObjAnimMat *boneMtxList; // [esp+94h] [ebp-14h] BYREF
     GfxMarkContext markContext; // [esp+98h] [ebp-10h] BYREF
-    unsigned __int16 entnum; // [esp+A0h] [ebp-8h]
+    uint16_t entnum; // [esp+A0h] [ebp-8h]
     int sceneDObjCollidedIndex; // [esp+A4h] [ebp-4h]
 
     PROF_SCOPED("R_MarkFragments_SceneDObjs");
@@ -1774,7 +1774,7 @@ int __cdecl R_AddMarkFragment_1_(
     FxModelMarkPoint(*clipPoints)[9],
     const float (*planes)[4],
     const GfxMarkContext *markContext,
-    unsigned __int16 baseIndex,
+    uint16_t baseIndex,
     int maxTris,
     FxMarkTri *tris,
     int maxPoints,
@@ -1954,7 +1954,7 @@ int __cdecl R_AddMarkFragment_0_(
     FxModelMarkPoint(*clipPoints)[9],
     const float (*planes)[4],
     const GfxMarkContext *markContext,
-    unsigned __int16 baseIndex,
+    uint16_t baseIndex,
     int maxTris,
     FxMarkTri *tris,
     int maxPoints,
@@ -2257,7 +2257,7 @@ char __cdecl R_MarkFragments_StaticModels(MarkInfo *markInfo)
                 smodelDraw->reflectionProbeIndex);
         markContext.primaryLightIndex = smodelDraw->primaryLightIndex;
         markContext.modelIndex = smodelIndex;
-        if ((unsigned __int16)smodelIndex != smodelIndex)
+        if ((uint16_t)smodelIndex != smodelIndex)
             MyAssertHandler(
                 ".\\r_marks.cpp",
                 1812,

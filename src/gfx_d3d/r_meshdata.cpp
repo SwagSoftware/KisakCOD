@@ -34,7 +34,7 @@ char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_in
     return 1;
 }
 
-char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int16 *baseVertex)
+char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, uint16_t *baseVertex)
 {
     volatile unsigned int usedCodeMeshVertBytes; // [esp+8h] [ebp-8h]
 
@@ -48,7 +48,7 @@ char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int
     return 1;
 }
 
-uint8_t *__cdecl R_GetMeshVerts(GfxMeshData *mesh, unsigned __int16 baseVertex)
+uint8_t *__cdecl R_GetMeshVerts(GfxMeshData *mesh, uint16_t baseVertex)
 {
     return &mesh->vb.verts[mesh->vertSize * baseVertex];
 }

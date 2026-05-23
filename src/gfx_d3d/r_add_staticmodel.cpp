@@ -23,7 +23,7 @@ char g_dumpStaticModelFilePath[20] = "staticModelInfo.csv";
 
 char __cdecl R_PreTessStaticModelCachedList(
     const XModel *model,
-    unsigned __int16 *list,
+    uint16_t *list,
     unsigned int count,
     unsigned int lod,
     int surfaceIndex,
@@ -33,10 +33,10 @@ char __cdecl R_PreTessStaticModelCachedList(
 {
     const char *v9; // eax
     unsigned int baseIndex; // [esp+30h] [ebp-28h]
-    unsigned __int16 *preTessIndices; // [esp+38h] [ebp-20h]
+    uint16_t *preTessIndices; // [esp+38h] [ebp-20h]
     unsigned int listIter; // [esp+40h] [ebp-18h]
     unsigned int firstIndex; // [esp+44h] [ebp-14h]
-    unsigned __int16 *dstIndices; // [esp+48h] [ebp-10h]
+    uint16_t *dstIndices; // [esp+48h] [ebp-10h]
     unsigned int preTessSurf; // [esp+4Ch] [ebp-Ch]
     const XSurface *xsurf; // [esp+50h] [ebp-8h]
     unsigned int surfIndexCount; // [esp+54h] [ebp-4h]
@@ -178,7 +178,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     GfxStaticModelDrawInst* inst; // [esp+58h] [ebp-10B4h]
     float scale; // [esp+5Ch] [ebp-10B0h]
     float bias; // [esp+60h] [ebp-10ACh]
-    unsigned __int16 staticModelLodList[4][4][128]{ 0 }; // [esp+64h] [ebp-10A8h] BYREF
+    uint16_t staticModelLodList[4][4][128]{ 0 }; // [esp+64h] [ebp-10A8h] BYREF
     GfxStaticModelDrawInst* smodelDrawInsts; // [esp+1068h] [ebp-A4h]
     float originDist; // [esp+106Ch] [ebp-A0h]
     int currentProbeIndex; // [esp+1070h] [ebp-9Ch]
@@ -186,7 +186,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     uint8_t primaryLightIndex; // [esp+107Bh] [ebp-91h]
     XModel* currentModel; // [esp+107Ch] [ebp-90h]
     int reflectionProbeIndex; // [esp+1084h] [ebp-88h]
-    unsigned __int16* list; // [esp+1088h] [ebp-84h]
+    uint16_t* list; // [esp+1088h] [ebp-84h]
     unsigned int* lodData; // [esp+108Ch] [ebp-80h]
     int lod; // [esp+1090h] [ebp-7Ch]
     unsigned int smodelCount; // [esp+1094h] [ebp-78h]
@@ -195,7 +195,7 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     _BYTE v25[3]; // [esp+10A0h] [ebp-6Ch] BYREF
     uint8_t currentLightIndex; // [esp+10A3h] [ebp-69h]
     float origin[3]; // [esp+10A4h] [ebp-68h] BYREF
-    unsigned __int16 staticModelLodCount[4][4]{ 0 }; // [esp+10B0h] [ebp-5Ch] BYREF
+    uint16_t staticModelLodCount[4][4]{ 0 }; // [esp+10B0h] [ebp-5Ch] BYREF
     GfxSModelDrawSurfLightingData surfData; // [esp+10D4h] [ebp-38h] BYREF
     int allocatedLighting; // [esp+1100h] [ebp-Ch]
     unsigned int entryCount; // [esp+1104h] [ebp-8h]
@@ -388,7 +388,7 @@ void __cdecl R_SkinStaticModelsCameraForLod(
                     !enabled
                     || !R_PreTessStaticModelCachedList(
                         model,
-                        (unsigned __int16 *)list,
+                        (uint16_t *)list,
                         count,
                         lod,
                         surfaceIndex,
@@ -408,8 +408,8 @@ void __cdecl R_SkinStaticModelsCameraForLod(
 void __cdecl R_SkinStaticModelsCamera(
     const XModel *model,
     uint8_t primaryLightIndex,
-    unsigned __int16 (*staticModelLodList)[4][128],
-    unsigned __int16 (*staticModelLodCount)[4],
+    uint16_t (*staticModelLodList)[4][128],
+    uint16_t (*staticModelLodCount)[4],
     GfxSModelDrawSurfLightingData *surfData)
 {
     unsigned int surfTypeIndex; // [esp+0h] [ebp-4h]
@@ -418,7 +418,7 @@ void __cdecl R_SkinStaticModelsCamera(
         R_SkinStaticModelsCameraForSurface(
             model,
             primaryLightIndex,
-            (unsigned __int16 (*)[128])(*staticModelLodList)[4 * surfTypeIndex],
+            (uint16_t (*)[128])(*staticModelLodList)[4 * surfTypeIndex],
             &(*staticModelLodCount)[4 * surfTypeIndex],
             surfTypeIndex + 2,
             surfData);
@@ -427,8 +427,8 @@ void __cdecl R_SkinStaticModelsCamera(
 void __cdecl R_SkinStaticModelsCameraForSurface(
     const XModel *model,
     uint8_t primaryLightIndex,
-    unsigned __int16 (*staticModelLodList)[128],
-    unsigned __int16 *staticModelLodCount,
+    uint16_t (*staticModelLodList)[128],
+    uint16_t *staticModelLodCount,
     unsigned int surfType,
     GfxSModelDrawSurfLightingData *surfData)
 {
@@ -610,14 +610,14 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(unsigned int partitionInd
     XModel* nextModel; // [esp+106Ch] [ebp-7Ch]
     XModel* currentModel; // [esp+1070h] [ebp-78h]
     unsigned int stage; // [esp+1078h] [ebp-70h]
-    unsigned __int16* list; // [esp+107Ch] [ebp-6Ch]
-    unsigned __int16 *count; // [esp+1088h] [ebp-60h]
+    uint16_t* list; // [esp+107Ch] [ebp-6Ch]
+    uint16_t *count; // [esp+1088h] [ebp-60h]
     int lod; // [esp+1080h] [ebp-68h]
     unsigned int smodelCount; // [esp+1084h] [ebp-64h]
     uint8_t* visData; // [esp+108Ch] [ebp-5Ch] BYREF
     float origin[3]; // [esp+1090h] [ebp-58h] BYREF
-    unsigned __int16 staticModelLodCount[4][4]{ 0 }; // [esp+109Ch] [ebp-4Ch] BYREF
-    unsigned __int16 staticModelLodList[4][4][128]{ 0 }; // [esp+60h] [ebp-1088h] BYREF
+    uint16_t staticModelLodCount[4][4]{ 0 }; // [esp+109Ch] [ebp-4Ch] BYREF
+    uint16_t staticModelLodList[4][4][128]{ 0 }; // [esp+60h] [ebp-1088h] BYREF
     GfxSModelDrawSurfData surfData; // [esp+10C0h] [ebp-28h] BYREF
     int allocatedLighting; // [esp+10DCh] [ebp-Ch] // LWSS: guessed name
     unsigned int entryCount; // [esp+10E0h] [ebp-8h]
@@ -793,7 +793,7 @@ void __cdecl R_SkinStaticModelsShadowForLod(
                     !enabled
                     || !R_PreTessStaticModelCachedList(
                         model,
-                        (unsigned __int16 *)list,
+                        (uint16_t *)list,
                         count,
                         lod,
                         surfaceIndex,
@@ -812,8 +812,8 @@ void __cdecl R_SkinStaticModelsShadowForLod(
 
 void __cdecl R_SkinStaticModelsShadow(
     const XModel *model,
-    unsigned __int16 (*staticModelLodList)[4][128],
-    unsigned __int16 (*staticModelLodCount)[4],
+    uint16_t (*staticModelLodList)[4][128],
+    uint16_t (*staticModelLodCount)[4],
     GfxSModelDrawSurfData *surfData)
 {
     unsigned int surfTypeIndex; // [esp+0h] [ebp-4h]
@@ -821,7 +821,7 @@ void __cdecl R_SkinStaticModelsShadow(
     for (surfTypeIndex = 0; surfTypeIndex < 4; ++surfTypeIndex)
         R_SkinStaticModelsShadowForSurface(
             model,
-            (unsigned __int16 (*)[128])(*staticModelLodList)[4 * surfTypeIndex],
+            (uint16_t (*)[128])(*staticModelLodList)[4 * surfTypeIndex],
             &(*staticModelLodCount)[4 * surfTypeIndex],
             surfTypeIndex + 2,
             surfData);
@@ -829,8 +829,8 @@ void __cdecl R_SkinStaticModelsShadow(
 
 void __cdecl R_SkinStaticModelsShadowForSurface(
     const XModel *model,
-    unsigned __int16 (*staticModelLodList)[128],
-    unsigned __int16 *staticModelLodCount,
+    uint16_t (*staticModelLodList)[128],
+    uint16_t *staticModelLodCount,
     unsigned int surfType,
     GfxSModelDrawSurfData *surfData)
 {
@@ -860,7 +860,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
     GfxStaticModelDrawInst* smodelDrawInst; // [esp+24h] [ebp-1094h]
     float scale; // [esp+28h] [ebp-1090h]
     float bias; // [esp+2Ch] [ebp-108Ch]
-    unsigned __int16 staticModelLodList[4][4][128]; // [esp+30h] [ebp-1088h] BYREF
+    uint16_t staticModelLodList[4][4][128]; // [esp+30h] [ebp-1088h] BYREF
     GfxStaticModelDrawInst* smodelDrawInsts; // [esp+1030h] [ebp-88h]
     float v13; // [esp+1034h] [ebp-84h]
     XModel* model; // [esp+1038h] [ebp-80h]
@@ -868,13 +868,13 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
     XModel* v16; // [esp+1040h] [ebp-78h]
     GfxStaticModelId v17; // [esp+1044h] [ebp-74h]
     unsigned int v18; // [esp+1048h] [ebp-70h]
-    unsigned __int16* list; // [esp+104Ch] [ebp-6Ch]
+    uint16_t* list; // [esp+104Ch] [ebp-6Ch]
     int lod; // [esp+1050h] [ebp-68h]
     unsigned int i; // [esp+1054h] [ebp-64h]
     unsigned int smodelCount; // [esp+1058h] [ebp-60h]
     _WORD* v23; // [esp+105Ch] [ebp-5Ch] BYREF
     float a[3]; // [esp+1060h] [ebp-58h] BYREF
-    unsigned __int16 staticModelLodCount[4][4]; // [esp+106Ch] [ebp-4Ch] BYREF
+    uint16_t staticModelLodCount[4][4]; // [esp+106Ch] [ebp-4Ch] BYREF
     GfxSModelDrawSurfData surfData; // [esp+1090h] [ebp-28h] BYREF
     unsigned int v27; // [esp+10ACh] [ebp-Ch]
     unsigned int v28; // [esp+10B0h] [ebp-8h]
@@ -928,7 +928,7 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(unsigned int spotShadowIndex,
                         v17 = StaticModelId;
                         v23 = &staticModelLodCount[StaticModelId.surfType - 2][lod];
                         list = staticModelLodList[StaticModelId.surfType - 2][lod];
-                        v27 = (unsigned __int16)*v23;
+                        v27 = (uint16_t)*v23;
                         list[v27++] = StaticModelId.objectId;
                         if (v27 >= 0x80)
                         {

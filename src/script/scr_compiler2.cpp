@@ -5611,14 +5611,14 @@ void __cdecl ScriptCompile(
 	VariableValueInternal_u *VariableValueAddress_DONE; // esi
 	int j; // [esp+10h] [ebp-48h]
 	VariableValue pos; // [esp+14h] [ebp-44h] BYREF
-	unsigned __int16 filename; // [esp+1Ch] [ebp-3Ch]
+	uint16_t filename; // [esp+1Ch] [ebp-3Ch]
 	PrecacheEntry *precachescript; // [esp+20h] [ebp-38h]
 	int far_function_count; // [esp+24h] [ebp-34h]
 	PrecacheEntry *precachescript2; // [esp+28h] [ebp-30h]
 	unsigned int toThreadId; // [esp+2Ch] [ebp-2Ch]
 	unsigned int toPosId; // [esp+30h] [ebp-28h]
 	unsigned int posId; // [esp+34h] [ebp-24h]
-	unsigned __int16 name; // [esp+38h] [ebp-20h]
+	uint16_t name; // [esp+38h] [ebp-20h]
 	unsigned int threadId; // [esp+3Ch] [ebp-1Ch]
 	PrecacheEntry *precachescriptList; // [esp+40h] [ebp-18h]
 	int i; // [esp+44h] [ebp-14h]

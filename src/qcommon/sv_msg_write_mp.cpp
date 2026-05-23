@@ -1161,7 +1161,7 @@ bool __cdecl MSG_ValuesAreEqual(const SnapshotInfo_s *snapInfo, int bits, const 
     {
     case -100:
     case -87:
-        result = (unsigned __int16)(int)(*(float *)fromF * 182.0444488525391) == (unsigned __int16)(int)(*(float *)toF * 182.0444488525391);
+        result = (uint16_t)(int)(*(float *)fromF * 182.0444488525391) == (uint16_t)(int)(*(float *)toF * 182.0444488525391);
         break;
     case -95:
         result = *fromF / 100 == *toF / 100;

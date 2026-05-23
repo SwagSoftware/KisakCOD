@@ -44,7 +44,7 @@ ucmd_t ucmds[13] =
   { NULL, NULL, 0 }
 }; // idb
 
-unsigned __int16 botport;
+uint16_t botport;
 
 BOOL __cdecl SV_ShouldAuthorizeAddress(netadr_t adr)
 {
@@ -764,7 +764,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
         if (newcl->scriptId)
             MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1074, 0, "%s", "!newcl->scriptId");
         scriptId = Scr_AllocArray();
-        if (scriptId != (unsigned __int16)scriptId)
+        if (scriptId != (uint16_t)scriptId)
             MyAssertHandler(
                 ".\\server_mp\\sv_client_mp.cpp",
                 1077,
@@ -849,7 +849,7 @@ void __cdecl SV_FreeClientScriptPers()
         {
             SV_FreeClientScriptId(clients);
             scriptId = Scr_AllocArray();
-            if (scriptId != (unsigned __int16)scriptId)
+            if (scriptId != (uint16_t)scriptId)
                 MyAssertHandler(
                     ".\\server_mp\\sv_client_mp.cpp",
                     1201,

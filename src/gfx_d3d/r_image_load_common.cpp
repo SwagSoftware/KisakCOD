@@ -410,8 +410,8 @@ void __cdecl Image_GetMipmapResolution(
     int baseWidth,
     int baseHeight,
     int mipmap,
-    unsigned __int16 *mipWidth,
-    unsigned __int16 *mipHeight)
+    uint16_t *mipWidth,
+    uint16_t *mipHeight)
 {
     unsigned int v5; // [esp+0h] [ebp-10h]
     unsigned int v6; // [esp+4h] [ebp-Ch]
@@ -447,8 +447,8 @@ void __cdecl Image_TrackFullscreenTexture(
 {
     unsigned int memory; // [esp+0h] [ebp-18h]
     unsigned int platformHeight; // [esp+4h] [ebp-14h]
-    unsigned __int16 width; // [esp+8h] [ebp-10h] BYREF
-    unsigned __int16 height; // [esp+Ch] [ebp-Ch] BYREF
+    uint16_t width; // [esp+8h] [ebp-10h] BYREF
+    uint16_t height; // [esp+Ch] [ebp-Ch] BYREF
     int platformWidth; // [esp+10h] [ebp-8h]
     int platform; // [esp+14h] [ebp-4h]
 

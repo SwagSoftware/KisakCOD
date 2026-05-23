@@ -36,7 +36,7 @@ VehiclePhysicsBackup s_backup;
 #ifdef KISAK_SP
 __int16 s_numVehicleInfos;
 
-unsigned __int16 *s_flashTags[5] =
+uint16_t *s_flashTags[5] =
 {
     &scr_const.tag_flash,
     &scr_const.tag_flash_11,
@@ -44,7 +44,7 @@ unsigned __int16 *s_flashTags[5] =
     &scr_const.tag_flash_22,
     &scr_const.tag_flash_3
 };
-unsigned __int16 *s_wheelTags[6] =
+uint16_t *s_wheelTags[6] =
 {
     &scr_const.tag_wheel_front_left,
     &scr_const.tag_wheel_front_right,
@@ -2605,10 +2605,10 @@ void G_UpdateVehicleTags(gentity_s *ent)
 {
     scr_vehicle_s *veh; // r30
     int *flash; // r28
-    unsigned __int16 **v4; // r29
+    uint16_t **v4; // r29
     int BoneIndex; // r3
     int *wheel; // r29
-    unsigned __int16 **v7; // r30
+    uint16_t **v7; // r30
     int v8; // r3
 
     iassert(ent);
@@ -2696,7 +2696,7 @@ int __fastcall G_LoadVehicle(const char *name)
     int v6; // r9
     int result; // r3
     double collisionSpeed; // fp12
-    unsigned __int16 *sndIndices; // r30
+    uint16_t *sndIndices; // r30
     double maxSpeed; // fp11
     int v11; // r28
     double engineSndSpeed; // fp10
@@ -2756,7 +2756,7 @@ static int VEH_DObjHasRequiredTags(gentity_s *ent, int infoIdx)
     int type; // r11
     int v4; // r30
     int v5; // r29
-    unsigned __int16 **i; // r31
+    uint16_t **i; // r31
 
     type = s_vehicleInfos[infoIdx].type;
     if (s_vehicleInfos[infoIdx].type && type != 1)
@@ -3477,7 +3477,7 @@ void CMD_VEH_StartPath(scr_entref_t entref)
         Vehicle = VEH_GetVehicle(entref.entnum);
     }
     scr_vehicle = Vehicle->scr_vehicle;
-    if ((unsigned __int16)scr_vehicle->pathPos.nodeIdx >= 0x8000u)
+    if ((uint16_t)scr_vehicle->pathPos.nodeIdx >= 0x8000u)
     {
         v3 = va("Can't start path on a vehicle that hasn't been attached");
         Scr_Error(v3);
@@ -3705,12 +3705,12 @@ void CMD_VEH_SetJitterParams(scr_entref_t entref)
 void VEH_UpdateSounds(gentity_s *ent)
 {
     scr_vehicle_s *scr_vehicle; // r31
-    unsigned __int16 *sndIndices; // r28
+    uint16_t *sndIndices; // r28
     BOOL v4; // r27
     gentity_s *v5; // r3
     double idleSndLerp; // fp1
-    unsigned __int16 v7; // r5
-    unsigned __int16 v8; // r4
+    uint16_t v7; // r5
+    uint16_t v8; // r4
     gentity_s *v9; // r3
     VehicleTurretState turretState; // r10
 
@@ -4488,8 +4488,8 @@ void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
 void G_SaveVehicleInfo(SaveGame *save)
 {
     int v2; // r28
-    unsigned __int16 *sndIndices; // r29
-    unsigned __int16 *v4; // r31
+    uint16_t *sndIndices; // r29
+    uint16_t *v4; // r31
     int v5; // r30
 
     v2 = 0;
@@ -4516,8 +4516,8 @@ void G_SaveVehicleInfo(SaveGame *save)
 void G_LoadVehicleInfo(SaveGame *save)
 {
     int v2; // r28
-    unsigned __int16 *sndIndices; // r29
-    unsigned __int16 *v4; // r31
+    uint16_t *sndIndices; // r29
+    uint16_t *v4; // r31
     int v5; // r30
 
     v2 = 0;

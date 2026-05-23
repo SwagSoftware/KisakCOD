@@ -259,10 +259,10 @@ unsigned int  GetStartLocalId(unsigned int threadId)
 unsigned int  AllocValue(void)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-14h]
-	unsigned __int16 newIndex; // [esp+4h] [ebp-10h]
-	unsigned __int16 next; // [esp+8h] [ebp-Ch]
+	uint16_t newIndex; // [esp+4h] [ebp-10h]
+	uint16_t next; // [esp+8h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+Ch] [ebp-8h]
-	unsigned __int16 index; // [esp+10h] [ebp-4h]
+	uint16_t index; // [esp+10h] [ebp-4h]
 
 	index = scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next;
 
@@ -1360,7 +1360,7 @@ void ClearObject(unsigned int parentId)
 
 void  Scr_RemoveThreadNotifyName(unsigned int startLocalId)
 {
-	unsigned __int16 stringValue; // [esp+0h] [ebp-8h]
+	uint16_t stringValue; // [esp+0h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-4h]
 
 	entryValue = &scrVarGlob.variableList[startLocalId + 1];
@@ -1380,7 +1380,7 @@ void  FreeValue(unsigned int id)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
-	unsigned __int16 index; // [esp+8h] [ebp-4h]
+	uint16_t index; // [esp+8h] [ebp-4h]
 
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
 
@@ -2510,7 +2510,7 @@ void Scr_ShutdownVariables()
 void RemoveRefToObject(unsigned int id)
 {
 	unsigned int classnum; // [esp+0h] [ebp-Ch]
-	unsigned __int16 entArrayId; // [esp+4h] [ebp-8h]
+	uint16_t entArrayId; // [esp+4h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-4h]
 
 	iassert(id >= 1 && id < VARIABLELIST_PARENT_SIZE);
@@ -3354,9 +3354,9 @@ unsigned int FindVariableIndexInternal(unsigned int parentId, unsigned int name)
 unsigned short  AllocVariable(void)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-14h]
-	unsigned __int16 newIndex; // [esp+4h] [ebp-10h]
-	unsigned __int16 next; // [esp+8h] [ebp-Ch]
-	unsigned __int16 index; // [esp+Ch] [ebp-8h]
+	uint16_t newIndex; // [esp+4h] [ebp-10h]
+	uint16_t next; // [esp+8h] [ebp-Ch]
+	uint16_t index; // [esp+Ch] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+10h] [ebp-4h]
 
 	index = scrVarGlob.variableList[1].u.next;
@@ -3724,7 +3724,7 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 	int type; // [esp+34h] [ebp-14h]
 	VariableValueInternal* newEntry; // [esp+38h] [ebp-10h]
 	VariableValue value; // [esp+3Ch] [ebp-Ch]
-	unsigned __int16 id; // [esp+44h] [ebp-4h]
+	uint16_t id; // [esp+44h] [ebp-4h]
 	unsigned int prevSiblingIndex;
 	unsigned int nextSiblingIndex;
 

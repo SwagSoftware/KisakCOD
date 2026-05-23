@@ -494,9 +494,9 @@ Material *__cdecl Material_Register_FastFile(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_MATERIAL, name).material;
 }
 
-void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists)
+void __cdecl Material_GetHashIndex(const char *name, uint16_t *hashIndex, bool *exists)
 {
-    unsigned __int16 beginHashIndex; // [esp+14h] [ebp-4h]
+    uint16_t beginHashIndex; // [esp+14h] [ebp-4h]
 
     iassert( name );
     iassert( hashIndex );
@@ -530,7 +530,7 @@ Material *__cdecl Material_MakeDefault(char *name)
     return Material_Duplicate(rgp.defaultMaterial, name);
 }
 
-void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex)
+void __cdecl Material_Add(Material *material, uint16_t hashIndex)
 {
     unsigned __int64 v2; // rax
     unsigned int v3; // ecx
@@ -557,7 +557,7 @@ Material *__cdecl Material_Register_LoadObj(char *name, int imageTrack)
 {
     Material *material; // [esp+0h] [ebp-Ch]
     bool exists; // [esp+7h] [ebp-5h] BYREF
-    unsigned __int16 hashIndex; // [esp+8h] [ebp-4h] BYREF
+    uint16_t hashIndex; // [esp+8h] [ebp-4h] BYREF
 
     iassert( name );
     iassert( name[0] );
@@ -908,7 +908,7 @@ void __cdecl Material_UpdatePicmipAll()
 Material *__cdecl Material_Find(const char *name)
 {
     Material *material; // [esp+0h] [ebp-Ch]
-    unsigned __int16 hashIndex[3]; // [esp+4h] [ebp-8h] BYREF
+    uint16_t hashIndex[3]; // [esp+4h] [ebp-8h] BYREF
     bool exists; // [esp+Bh] [ebp-1h] BYREF
 
     Material_GetHashIndex(name, hashIndex, &exists);

@@ -279,10 +279,10 @@ struct entityState_s
     entityState_s_tag un1;
     LerpEntityState lerp;
     unsigned int eventParm;
-    unsigned __int16 loopSound;
-    unsigned __int16 number;
-    unsigned __int16 otherEntityNum;
-    unsigned __int16 groundEntityNum;
+    uint16_t loopSound;
+    uint16_t number;
+    uint16_t otherEntityNum;
+    uint16_t groundEntityNum;
     //_BYTE index[2];
     entityState_s_type_index index;
     int time2;

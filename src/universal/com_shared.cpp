@@ -322,7 +322,7 @@ void __cdecl Com_Memset(void *dest_p, const int val, const size_t count)
         v3 = dest;
         v4 = val;
         BYTE1(v4) = val;
-        v5 = (unsigned __int16)v4 + (v4 << 16);
+        v5 = (uint16_t)v4 + (v4 << 16);
         v6 = count;
         if (count >= 4)
         {

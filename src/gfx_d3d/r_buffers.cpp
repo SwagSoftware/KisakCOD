@@ -157,12 +157,12 @@ void __cdecl R_InitDynamicIndexBufferState(GfxIndexBufferState *ib, int indexCou
 
 void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount)
 {
-    unsigned __int16 *indices; // [esp+0h] [ebp-8h]
+    uint16_t *indices; // [esp+0h] [ebp-8h]
 
     iassert( ib );
     ib->used = 0;
     ib->total = indexCount;
-    indices = (unsigned __int16 *)Z_VirtualAlloc(2 * indexCount, "Dynamic Index Buffer", 18);
+    indices = (uint16_t *)Z_VirtualAlloc(2 * indexCount, "Dynamic Index Buffer", 18);
     iassert( indices != NULL );
     ib->indices = indices;
 }
@@ -223,18 +223,18 @@ void __cdecl R_CreateParticleCloudBuffer()
 {
     double *v0; // [esp+10h] [ebp-70h]
     float cornerTexCoords[4][2]; // [esp+14h] [ebp-6Ch] BYREF
-    unsigned __int16 *particleIndicesIter; // [esp+34h] [ebp-4Ch]
+    uint16_t *particleIndicesIter; // [esp+34h] [ebp-4Ch]
     float pos[3]; // [esp+38h] [ebp-48h]
     int particleId; // [esp+44h] [ebp-3Ch]
     int indexSizeInBytes; // [esp+48h] [ebp-38h]
     int xIter; // [esp+4Ch] [ebp-34h]
     int vertSizeInBytes; // [esp+50h] [ebp-30h]
-    unsigned __int16 *particleIndices; // [esp+54h] [ebp-2Ch]
+    uint16_t *particleIndices; // [esp+54h] [ebp-2Ch]
     int yIter; // [esp+58h] [ebp-28h]
     int zIter; // [esp+5Ch] [ebp-24h]
     int cornerIter; // [esp+60h] [ebp-20h]
     GfxPosTexVertex *particleVerts; // [esp+64h] [ebp-1Ch]
-    unsigned __int16 quadIndices[6]; // [esp+68h] [ebp-18h]
+    uint16_t quadIndices[6]; // [esp+68h] [ebp-18h]
     GfxPosTexVertex *particleVertsIter; // [esp+78h] [ebp-8h]
     int indIter; // [esp+7Ch] [ebp-4h]
 
@@ -255,7 +255,7 @@ void __cdecl R_CreateParticleCloudBuffer()
     vertSizeInBytes = 81920;
     indexSizeInBytes = 12288;
     particleVerts = (GfxPosTexVertex *)R_AllocStaticVertexBuffer(&gfxBuf.particleCloudVertexBuffer, 81920);
-    particleIndices = (unsigned __int16 *)R_AllocStaticIndexBuffer(&gfxBuf.particleCloudIndexBuffer, 12288);
+    particleIndices = (uint16_t *)R_AllocStaticIndexBuffer(&gfxBuf.particleCloudIndexBuffer, 12288);
     particleVertsIter = particleVerts;
     particleIndicesIter = particleIndices;
     for (xIter = 0; xIter != 8; ++xIter)

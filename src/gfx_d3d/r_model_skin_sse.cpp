@@ -20,7 +20,7 @@ __m128 sse_encodeScale =
 
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_3_Sse_SkinVertexSimple_1_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     const GfxPackedVertexNormal *srcVertNormals,
@@ -106,7 +106,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_3_Sse_SkinVertexSimple_1_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_1_Sse_SkinVertexSimple_0_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     const GfxPackedVertexNormal *srcVertNormals,
@@ -169,7 +169,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_1_Sse_SkinVertexSimple_0_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_5_Sse_SkinVertexSimple_2_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     const GfxPackedVertexNormal *srcVertNormals,
@@ -279,7 +279,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockInOut_5_Sse_SkinVertexSimple_2_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockInOut_7_Sse_SkinVertexSimple_3_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     const GfxPackedVertexNormal *srcVertNormals,
@@ -415,7 +415,7 @@ void __cdecl R_SkinXSurfaceWeightSseInOut(
     GfxPackedVertexNormal *outVertNormals,
     GfxPackedVertex *outVerts)
 {
-    const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
+    const uint16_t *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h] BYREF
     int savedregs; // [esp+38h] [ebp+0h] BYREF
 
@@ -549,7 +549,7 @@ void __cdecl R_SkinXSurfaceRigidSseInOut(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockOut_1_Sse_SkinVertex_0_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertexNormal *dstVertNormals,
@@ -635,7 +635,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockOut_1_Sse_SkinVertex_0_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockOut_3_Sse_SkinVertex_1_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertexNormal *dstVertNormals,
@@ -746,7 +746,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockOut_3_Sse_SkinVertex_1_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockOut_5_Sse_SkinVertex_2_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertexNormal *dstVertNormals,
@@ -875,7 +875,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlockOut_5_Sse_SkinVertex_2_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlockOut_7_Sse_SkinVertex_3_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertexNormal *dstVertNormals,
@@ -1030,7 +1030,7 @@ void __cdecl R_SkinXSurfaceWeightSseOut(
     GfxPackedVertexNormal *outVertNormals,
     GfxPackedVertex *outVerts)
 {
-    const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
+    const uint16_t *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h] BYREF
 
     PROF_SCOPED("SkinXSurfaceWeight");
@@ -1188,7 +1188,7 @@ void __cdecl R_SkinXSurfaceRigidSseOut(
 
 void __cdecl R_SkinXSurfaceWeightSseBlock_1_Sse_SkinVertex_0_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *dstVerts,
@@ -1270,7 +1270,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlock_1_Sse_SkinVertex_0_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlock_3_Sse_SkinVertex_1_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *dstVerts,
@@ -1376,7 +1376,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlock_3_Sse_SkinVertex_1_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlock_5_Sse_SkinVertex_2_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *dstVerts,
@@ -1501,7 +1501,7 @@ void __cdecl R_SkinXSurfaceWeightSseBlock_5_Sse_SkinVertex_2_(
 
 void __cdecl R_SkinXSurfaceWeightSseBlock_7_Sse_SkinVertex_3_(
     const GfxPackedVertex *srcVerts,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *dstVerts,
@@ -1651,7 +1651,7 @@ void __cdecl R_SkinXSurfaceWeightSse(
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *outVerts)
 {
-    const unsigned __int16 *vertsBlend; // [esp+30h] [ebp-8h]
+    const uint16_t *vertsBlend; // [esp+30h] [ebp-8h]
     int vertIndex; // [esp+34h] [ebp-4h] BYREF
 
     PROF_SCOPED("SkinXSurfaceWeight");

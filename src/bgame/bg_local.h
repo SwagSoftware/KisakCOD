@@ -194,8 +194,8 @@ enum ViewLockTypes : __int32
 
 //struct $6CB7272563F4458FB40A4A5E123C4ABA // sizeof=0x4
 //{                                       // ...
-//    unsigned __int16 index;
-//    unsigned __int16 tree;
+//    uint16_t index;
+//    uint16_t tree;
 //};
 //union $76411D3CC105A18E6E4A61D5A929E310 // sizeof=0x4
 //{                                       // ...
@@ -1194,7 +1194,7 @@ struct CEntActorInfo
 };
 struct cpose_t
 {
-    unsigned __int16 lightingHandle;
+    uint16_t lightingHandle;
     uint8_t eType;
     uint8_t eTypeUnion;
     bool isRagdoll;
@@ -1519,8 +1519,8 @@ struct scr_vehicle_s // sizeof=0x338
     VehicleJitter jitter;
     VehicleHover hover;
     int drawOnCompass;
-    unsigned __int16 lookAtText0;
-    unsigned __int16 lookAtText1;
+    uint16_t lookAtText0;
+    uint16_t lookAtText1;
     int manualMode;
     float manualSpeed;
     float manualAccel;

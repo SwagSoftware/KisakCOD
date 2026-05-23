@@ -396,7 +396,7 @@ void __cdecl G_SetModel(gentity_s *ent, char *modelName)
     if (*modelName)
     {
         modelIndex = G_ModelIndex(modelName);
-        if (modelIndex != (unsigned __int16)modelIndex)
+        if (modelIndex != (uint16_t)modelIndex)
             MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 481, 0, "%s", "modelIndex == (modelNameIndex_t) modelIndex");
         ent->model = modelIndex;
     }
@@ -449,7 +449,7 @@ int __cdecl G_EntAttach(gentity_s *ent, char *modelName, unsigned int tagName, i
     modelIndex = G_ModelIndex(modelName);
     if (!modelIndex)
         return 0;
-    if (modelIndex != (unsigned __int16)modelIndex)
+    if (modelIndex != (uint16_t)modelIndex)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 553, 0, "%s", "modelIndex == (modelNameIndex_t) modelIndex");
     ent->attachModelNames[i] = modelIndex;
     if (ent->attachTagNames[i])
@@ -565,7 +565,7 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
 
     iassert(!tagName || SL_IsLowercaseString(tagName));
     
-    Scr_SetString((unsigned __int16 *)tagInfo + 4, tagName);
+    Scr_SetString((uint16_t *)tagInfo + 4, tagName);
     *((unsigned int *)tagInfo + 1) = (unsigned int)parent->tagChildren;
     *((unsigned int *)tagInfo + 3) = index;
     memset((uint8_t *)tagInfo + 16, 0, 0x30u);
@@ -1095,9 +1095,9 @@ void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float 
     MatrixTransformVector43(mat->trans, ent_axis, &(*tagMat)[9]);
 }
 
-gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
+gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, uint16_t match)
 {
-    unsigned __int16 s; // [esp+0h] [ebp-4h]
+    uint16_t s; // [esp+0h] [ebp-4h]
     gentity_s *froma; // [esp+Ch] [ebp+8h]
 
     if (from)
@@ -1317,7 +1317,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
 
 void __cdecl G_FreeEntityDelay(gentity_s *ed)
 {
-    unsigned __int16 hThread; // [esp+0h] [ebp-4h]
+    uint16_t hThread; // [esp+0h] [ebp-4h]
 
     if (!g_scr_data.delete_)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1570, 0, "%s", "g_scr_data.delete_");
@@ -1438,7 +1438,7 @@ void __cdecl G_SetAngle(gentity_s *ent, const float *angle)
     ent->r.currentAngles[2] = angle[2];
 }
 
-void __cdecl G_SetConstString(unsigned __int16 *to, char *from)
+void __cdecl G_SetConstString(uint16_t *to, char *from)
 {
     Scr_SetString(to, 0);
     *to = SL_GetString(from, 0);

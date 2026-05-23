@@ -72,7 +72,7 @@ void __cdecl CM_StoreLeafs(leafList_s *ll, int nodenum)
     }
 }
 
-int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, unsigned __int16 *list, int listsize, int *lastLeaf)
+int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, uint16_t *list, int listsize, int *lastLeaf)
 {
     leafList_s ll; // [esp+4h] [ebp-2Ch] BYREF
 

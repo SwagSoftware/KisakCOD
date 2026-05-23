@@ -54,15 +54,15 @@ struct cpose_t;
 union GfxSceneEntityInfo // sizeof=0x4
 {                                       // ...
     cpose_t *pose;
-    unsigned __int16 *cachedLightingHandle;
+    uint16_t *cachedLightingHandle;
 };
 struct GfxSceneEntity // sizeof=0x7C // (SP/MP same)
 {                                       // ...
     float lightingOrigin[3];
     GfxScaledPlacement placement;
     GfxSceneEntityCull cull;
-    unsigned __int16 gfxEntIndex;
-    unsigned __int16 entnum;
+    uint16_t gfxEntIndex;
+    uint16_t entnum;
     const DObj_s *obj;
     GfxSceneEntityInfo info;
     uint8_t reflectionProbeIndex;
@@ -94,10 +94,10 @@ struct GfxSceneModel // sizeof=0x48
     const XModel *model;
     const DObj_s *obj;
     GfxScaledPlacement placement;
-    unsigned __int16 gfxEntIndex;
-    unsigned __int16 entnum;
+    uint16_t gfxEntIndex;
+    uint16_t entnum;
     float radius;
-    unsigned __int16 *cachedLightingHandle;
+    uint16_t *cachedLightingHandle;
     float lightingOrigin[3];
     uint8_t reflectionProbeIndex;
     // padding byte
@@ -107,7 +107,7 @@ struct GfxSceneModel // sizeof=0x48
 struct GfxSceneBrush // sizeof=0x28
 {                                       // ...
     BModelDrawInfo info;
-    unsigned __int16 entnum;
+    uint16_t entnum;
     const GfxBrushModel *bmodel;
     GfxPlacement placement;
     uint8_t reflectionProbeIndex;
@@ -126,8 +126,8 @@ struct GfxSceneDpvs // sizeof=0x38
 {                                       // ...
     unsigned int localClientNum;        // ...
     uint8_t *entVisData[7];     // ...
-    unsigned __int16 *sceneXModelIndex; // ...
-    unsigned __int16 *sceneDObjIndex;   // ...
+    uint16_t *sceneXModelIndex; // ...
+    uint16_t *sceneDObjIndex;   // ...
     GfxEntCellRefInfo *entInfo[4];      // ...
 };
 
@@ -209,7 +209,7 @@ void __cdecl R_AddBrushModelToSceneFromAngles(
     const GfxBrushModel *bmodel,
     const float *origin,
     const float *angles,
-    unsigned __int16 entnum);
+    uint16_t entnum);
 void __cdecl R_AddDObjToScene(
     const DObj_s *obj,
     const cpose_t *pose,
@@ -239,7 +239,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     XModelDrawInfo *modelInfo,
     const XModel *model,
     float *origin,
-    unsigned __int16 gfxEntIndex,
+    uint16_t gfxEntIndex,
     unsigned int lightingHandle,
     uint8_t primaryLightIndex,
     char isShadowReceiver,

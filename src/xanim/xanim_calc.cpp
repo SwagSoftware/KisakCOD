@@ -237,7 +237,7 @@ void __cdecl XAnimCalcParts(
     char v48; // [esp+17Fh] [ebp-121h]
     unsigned __int8 *v49; // [esp+180h] [ebp-120h]
     int v50; // [esp+184h] [ebp-11Ch] BYREF
-    unsigned __int16 *v51; // [esp+188h] [ebp-118h]
+    uint16_t *v51; // [esp+188h] [ebp-118h]
     //__int64 v52; // [esp+18Ch] [ebp-114h]
     __int16 v52[4];
     float v53; // [esp+194h] [ebp-10Ch]
@@ -931,7 +931,7 @@ void __cdecl XAnimCalcNonLoopEnd(
         modelPartIndex = animToModel[animPartIndex];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
 
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
 
         if (useSmallIndices)
         {
@@ -981,7 +981,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     {
         modelPartIndex = animToModel[animPartIndex];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
         if (useSmallIndices)
         {
             dataByte += tableSize + 1;
@@ -1082,7 +1082,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     {
         modelPartIndex = animToModel[*dataByte++];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
         if (useSmallIndices)
         {
             dataByte += tableSize + 1;
@@ -1135,7 +1135,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     {
         modelPartIndex = animToModel[*dataByte++];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
 
         if (useSmallIndices)
         {
@@ -1156,9 +1156,9 @@ void __cdecl XAnimCalcNonLoopEnd(
             transWeight = totalRotTrans->transWeight;
             v28 = &randomDataShort[3 * tableSize];
 
-            v41 = (float)(unsigned __int16)v28[0];
-            v42 = (float)(unsigned __int16)v28[1];
-            v43 = (float)(unsigned __int16)v28[2];
+            v41 = (float)(uint16_t)v28[0];
+            v42 = (float)(uint16_t)v28[1];
+            v43 = (float)(uint16_t)v28[2];
             v44 = 0.0;
 
             v45 = *((float *)dataInt + 0);
@@ -1556,8 +1556,8 @@ void XAnim_CalcPosDeltaDuring(
     float v5; // [esp+6Ch] [ebp-94h]
     float v6; // [esp+70h] [ebp-90h]
     float v7; // [esp+74h] [ebp-8Ch]
-    unsigned __int16 *v8; // [esp+7Ch] [ebp-84h]
-    unsigned __int16 *v9; // [esp+80h] [ebp-80h]
+    uint16_t *v8; // [esp+7Ch] [ebp-84h]
+    uint16_t *v9; // [esp+80h] [ebp-80h]
     unsigned __int8 *v10; // [esp+84h] [ebp-7Ch]
     unsigned __int8 *v11; // [esp+88h] [ebp-78h]
     XAnimPartTransData *p_u; // [esp+8Ch] [ebp-74h]

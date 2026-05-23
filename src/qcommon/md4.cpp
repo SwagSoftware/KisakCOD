@@ -92,7 +92,7 @@ void __cdecl Decode(unsigned int *output, uint8_t *input, unsigned int len)
 
     i = 0;
     for (j = 0; j < len; j += 4)
-        output[i++] = (input[j + 3] << 24) | (input[j + 2] << 16) | *(unsigned __int16 *)&input[j];
+        output[i++] = (input[j + 3] << 24) | (input[j + 2] << 16) | *(uint16_t *)&input[j];
 }
 
 void __cdecl MD4Init(MD4_CTX *context)

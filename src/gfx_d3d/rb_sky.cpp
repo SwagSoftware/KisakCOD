@@ -318,7 +318,7 @@ void __cdecl RB_TessSunBillboard(float widthInClipSpace, float heightInClipSpace
 
 GfxVertex *__cdecl RB_SetTessQuad(GfxColor color)
 {
-    unsigned __int16 vertCount; // [esp+10h] [ebp-8h]
+    uint16_t vertCount; // [esp+10h] [ebp-8h]
     GfxVertex *vert; // [esp+14h] [ebp-4h]
 
     iassert( tess.vertexCount == 0 );

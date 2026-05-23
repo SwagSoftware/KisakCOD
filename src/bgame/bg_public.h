@@ -750,8 +750,8 @@ struct missile_ent_t
 
 struct gentity_s_tag
 {
-    unsigned __int16 notifyString;
-    unsigned __int16 index;
+    uint16_t notifyString;
+    uint16_t index;
     uint8_t stoppable;
     int basetime;
     int duration;
@@ -791,10 +791,10 @@ struct TurretInfo
     float anglesError[3];
     float pitchCap;
     int triggerDown;
-    unsigned __int16 fireSnd;
-    unsigned __int16 fireSndPlayer;
-    unsigned __int16 stopSnd;
-    unsigned __int16 stopSndPlayer;
+    uint16_t fireSnd;
+    uint16_t fireSndPlayer;
+    uint16_t stopSnd;
+    uint16_t stopSndPlayer;
 };
 
 struct spawner_ent_t
@@ -933,13 +933,13 @@ struct gentity_s
     uint8_t takedamage;
     uint8_t active;
     uint8_t nopickup;
-    unsigned __int16 model;
+    uint16_t model;
     EntHandler_t handler; // ENT_HANDLER_xxxxx
-    unsigned __int16 classname;
-    unsigned __int16 script_linkName;
-    unsigned __int16 script_noteworthy;
-    unsigned __int16 target;
-    unsigned __int16 targetname;
+    uint16_t classname;
+    uint16_t script_linkName;
+    uint16_t script_noteworthy;
+    uint16_t target;
+    uint16_t targetname;
     unsigned int attachIgnoreCollision;
     int spawnflags;
     gentityFlags_t flags;
@@ -964,15 +964,15 @@ struct gentity_s
         missile_ent_t missile;
     };
     EntHandle missileTargetEnt;
-    unsigned __int16 lookAtText0;
-    unsigned __int16 lookAtText1;
+    uint16_t lookAtText0;
+    uint16_t lookAtText1;
     gentity_s_tag snd_wait;
     tagInfo_s *tagInfo;
     gentity_s *tagChildren;
     struct animscripted_s *scripted;
-    unsigned __int16 attachModelNames[31];
-    unsigned __int16 attachTagNames[31];
-    unsigned __int16 disconnectedLinks;
+    uint16_t attachModelNames[31];
+    uint16_t attachTagNames[31];
+    uint16_t disconnectedLinks;
     int iDisconnectTime;
     float angleLerpRate;
     XAnimTree_s *pAnimTree;

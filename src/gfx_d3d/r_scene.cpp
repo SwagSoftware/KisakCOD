@@ -113,7 +113,7 @@ void __cdecl R_AddBrushModelToSceneFromAngles(
     const GfxBrushModel *bmodel,
     const float *origin,
     const float *angles,
-    unsigned __int16 entnum)
+    uint16_t entnum)
 {
     unsigned int sceneEntIndex; // [esp+4h] [ebp-8h]
     GfxSceneBrush *sceneBrush; // [esp+8h] [ebp-4h]
@@ -216,7 +216,7 @@ void __cdecl R_AddDObjToScene(
                 sceneModel->obj = obj;
                 sceneModel->entnum = entnum;
                 scene.dpvs.sceneXModelIndex[entnum] = sceneEntIndex;
-                sceneModel->cachedLightingHandle = (unsigned __int16 *)LongNoSwap((unsigned int)pose);
+                sceneModel->cachedLightingHandle = (uint16_t *)LongNoSwap((unsigned int)pose);
                 radius = XModelGetRadius(model);
                 CG_GetPoseOrigin(pose, sceneModel->placement.base.origin);
                 CG_GetPoseAngles(pose, angles);
@@ -379,7 +379,7 @@ void __cdecl R_AddBModelSurfacesCamera(
     GfxDrawSurf **lastDrawSurfs,
     unsigned int reflectionProbeIndex)
 {
-    unsigned __int16 surfaceCount; // [esp+4h] [ebp-28h]
+    uint16_t surfaceCount; // [esp+4h] [ebp-28h]
     unsigned int surfId; // [esp+8h] [ebp-24h]
     //unsigned __int64 drawSurf; // [esp+Ch] [ebp-20h]
     const Material *material; // [esp+14h] [ebp-18h]
@@ -435,7 +435,7 @@ void __cdecl R_AddBModelSurfacesCamera(
 
             //LODWORD(drawSurf) = ((uint8_t)reflectionProbeIndex << 16) // reflectionProbeIndex
             //    | ((bspSurf->lightmapIndex & 0x1F) << 24) // customIndex
-            //    | (unsigned __int16)surfId // objectId
+            //    | (uint16_t)surfId // objectId
             //    | *(unsigned int *)&material->info.drawSurf.fields & 0xE0000000; // copy upper 3 bits of LODWORD
 
             //HIDWORD(drawSurf) = (bspSurf->primaryLightIndex << 10) // PrimaryLightIndex
@@ -458,7 +458,7 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
     GfxDrawSurf *drawSurf,
     GfxDrawSurf *lastDrawSurf)
 {
-    unsigned __int16 surfaceCount; // [esp+6h] [ebp-2Ah]
+    uint16_t surfaceCount; // [esp+6h] [ebp-2Ah]
     unsigned int surfId; // [esp+10h] [ebp-20h]
     const Material *material; // [esp+14h] [ebp-1Ch]
     BModelSurface *modelSurf; // [esp+20h] [ebp-10h]
@@ -485,7 +485,7 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
             bcassert(surfId, (1 << MTL_SORT_OBJECT_ID_BITS));
 
             //newDrawSurf_4 = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF/*MINUS surfType*/ | 0x180000;
-            //*(unsigned int *)&drawSurf->fields = (unsigned __int16)surfId | *(unsigned int *)&material->info.drawSurf.fields & 0xFFFF0000;
+            //*(unsigned int *)&drawSurf->fields = (uint16_t)surfId | *(unsigned int *)&material->info.drawSurf.fields & 0xFFFF0000;
             drawSurf->fields.objectId = surfId;
             HIDWORD(drawSurf->packed) = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF/*MINUS surfType*/ | 0x180000; // 0x180000 sets bits 48-49 to 1 (primaryLightIndex?)
             ++drawSurf;
@@ -507,7 +507,7 @@ void __cdecl R_AddXModelSurfacesCamera(
     XModelDrawInfo *modelInfo,
     const XModel *model,
     float *origin,
-    unsigned __int16 gfxEntIndex,
+    uint16_t gfxEntIndex,
     unsigned int lightingHandle,
     uint8_t primaryLightIndex,
     char isShadowReceiver,
@@ -719,7 +719,7 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
                 drawSurf->fields.objectId = surfId;
                 //HIDWORD(newDrawSurf) = ((surfType & 0xF) << 18)  // surfType
                 //    | HIDWORD((*material)->info.drawSurf.packed) & 0xFFC3FFFF; // rest of bits in HIDWORD
-                //LODWORD(newDrawSurf) = (unsigned __int16)surfId  // objectID
+                //LODWORD(newDrawSurf) = (uint16_t)surfId  // objectID
                 //    | *(unsigned int *)&(*material)->info.drawSurf.fields & 0xFFFF0000; // rest of bits in LODWORD
 
                 //drawSurf->packed = newDrawSurf;
@@ -864,7 +864,7 @@ LABEL_15:
                 //    | HIDWORD(drawSurf) & 0xF003FFFF; // all bits except the 10 we just set
                 //LODWORD(drawSurf) = ((isShadowReceiver & 0x1F) << 24) // customIndex
                     //| (sceneEnt->reflectionProbeIndex << 16) & 0xE0FFFFFF
-                    //| (unsigned __int16)surfIda
+                    //| (uint16_t)surfIda
                     //| drawSurf & 0xE0000000; // top 3 bits
                 //HIDWORD(drawSurf) = (primaryLightIndex << 10) | HIDWORD(drawSurf) & 0xFFFC03FF;
 
@@ -984,7 +984,7 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                 drawSurf->packed = newDrawSurf.packed; // LWSS: see explanation below, it basically copies the whole thing and sets a few custom fields.
 
                 drawSurf->fields.objectId = (unsigned short)surfId;
-                //*(unsigned int *)&drawSurf->fields = (unsigned __int16)surfIda  // set lower 16 (objectId)
+                //*(unsigned int *)&drawSurf->fields = (uint16_t)surfIda  // set lower 16 (objectId)
                 //    | *(unsigned int *)&newDrawSurf.fields & 0xFFFF0000; // Copy the higher 2 bytes (bits 16-32)
                 
                 drawSurf->fields.surfType = surfType;
@@ -2014,8 +2014,8 @@ void R_GenerateMarkVertsForDynamicModels()
     uint8_t reflectionProbeIndex; // [esp+Fh] [ebp-19h]
     unsigned int indexCount; // [esp+10h] [ebp-18h] BYREF
     int brushModelIndex; // [esp+14h] [ebp-14h]
-    unsigned __int16 entnum; // [esp+18h] [ebp-10h]
-    unsigned __int16 lightHandle; // [esp+1Ch] [ebp-Ch]
+    uint16_t entnum; // [esp+18h] [ebp-10h]
+    uint16_t lightHandle; // [esp+1Ch] [ebp-Ch]
     int modelIndex; // [esp+20h] [ebp-8h]
     GfxSceneEntity *sceneEntity; // [esp+24h] [ebp-4h]
 

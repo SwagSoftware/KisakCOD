@@ -11,7 +11,7 @@
 #include <cgame/cg_main.h>
 #endif
 
-const unsigned __int16 templateIndices[12] = { 0u, 2u, 1u, 2u, 4u, 1u, 1u, 4u, 3u, 3u, 4u, 5u }; // idb
+const uint16_t templateIndices[12] = { 0u, 2u, 1u, 2u, 4u, 1u, 1u, 4u, 3u, 3u, 4u, 5u }; // idb
 
 static FxBeamInfo g_beamInfo;
 
@@ -57,7 +57,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float alpha; // [esp+114h] [ebp-1A4h]
     float4 wiggleXs; // [esp+118h] [ebp-1A0h]
     int indexPairIter; // [esp+128h] [ebp-190h]
-    unsigned __int16 offset; // [esp+12Ch] [ebp-18Ch]
+    uint16_t offset; // [esp+12Ch] [ebp-18Ch]
     float endRadius; // [esp+130h] [ebp-188h]
     r_double_index_t workingIndex; // [esp+134h] [ebp-184h]
     r_double_index_t *baseIndices; // [esp+138h] [ebp-180h] BYREF
@@ -82,7 +82,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4 tpos0; // [esp+1C0h] [ebp-F8h]
     float4 normDelta; // [esp+1D0h] [ebp-E8h] BYREF
     unsigned int argOffset; // [esp+1E0h] [ebp-D8h] BYREF
-    unsigned __int16 baseVertex; // [esp+1E4h] [ebp-D4h] BYREF
+    uint16_t baseVertex; // [esp+1E4h] [ebp-D4h] BYREF
     float4 perpFlatDelta; // [esp+1E8h] [ebp-D0h] BYREF
     float4 *args; // [esp+1F8h] [ebp-C0h]
     GfxPackedVertex *baseVerts; // [esp+1FCh] [ebp-BCh]

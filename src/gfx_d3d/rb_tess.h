@@ -21,7 +21,7 @@ struct GfxStaticModelPreTessSurf_s // sizeof=0x4
 {                                       // ...
     uint8_t surfIndex;
     uint8_t lod;
-    unsigned __int16 cachedIndex;
+    uint16_t cachedIndex;
 };
 union GfxStaticModelPreTessSurf // sizeof=0x4
 {                                       // ...

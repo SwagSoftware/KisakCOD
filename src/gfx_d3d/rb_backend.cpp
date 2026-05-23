@@ -223,7 +223,7 @@ void __cdecl RB_DrawStretchPic(
     unsigned int color,
     GfxPrimStatsTarget statsTarget)
 {
-    unsigned __int16 vertCount; // [esp+24h] [ebp-4h]
+    uint16_t vertCount; // [esp+24h] [ebp-4h]
 
     iassert(gfxCmdBufSourceState.viewMode == VIEW_MODE_2D);
 
@@ -282,7 +282,7 @@ void __cdecl RB_DrawStretchPicFlipST(
 {
     float v11; // [esp+1Ch] [ebp-Ch]
     float v12; // [esp+20h] [ebp-8h]
-    unsigned __int16 vertCount; // [esp+24h] [ebp-4h]
+    uint16_t vertCount; // [esp+24h] [ebp-4h]
 
     iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(material, TECHNIQUE_UNLIT);
@@ -475,7 +475,7 @@ void __cdecl RB_StretchPicRotateXYCmd(GfxRenderCommandExecState *execState)
     int indexCount; // [esp+5Ch] [ebp-1Ch]
     float midX; // [esp+60h] [ebp-18h]
     float sinAngle; // [esp+64h] [ebp-14h]
-    unsigned __int16 vertCount; // [esp+68h] [ebp-10h]
+    uint16_t vertCount; // [esp+68h] [ebp-10h]
     float midY; // [esp+6Ch] [ebp-Ch]
     const GfxCmdStretchPicRotateXY *cmd; // [esp+70h] [ebp-8h]
     float halfHeight; // [esp+74h] [ebp-4h]
@@ -535,7 +535,7 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState)
     float texS_4; // [esp+44h] [ebp-34h]
     float texS_8; // [esp+48h] [ebp-30h]
     float texS_12; // [esp+4Ch] [ebp-2Ch]
-    unsigned __int16 vertCount; // [esp+50h] [ebp-28h]
+    uint16_t vertCount; // [esp+50h] [ebp-28h]
     float stepT; // [esp+54h] [ebp-24h]
     float stepT_4; // [esp+58h] [ebp-20h]
     const GfxCmdStretchPicRotateST *cmd; // [esp+5Ch] [ebp-1Ch]
@@ -590,7 +590,7 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState)
 void __cdecl RB_DrawQuadPicCmd(GfxRenderCommandExecState *execState)
 {
     int indexCount; // [esp+18h] [ebp-Ch]
-    unsigned __int16 vertCount; // [esp+1Ch] [ebp-8h]
+    uint16_t vertCount; // [esp+1Ch] [ebp-8h]
     const GfxCmdDrawQuadPic *cmd; // [esp+20h] [ebp-4h]
 
     cmd = (const GfxCmdDrawQuadPic *)execState->cmd;
@@ -1358,7 +1358,7 @@ void __cdecl RB_DrawTriangles_Internal(
     const Material *material,
     MaterialTechniqueType techType,
     __int16 indexCount,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     __int16 vertexCount,
     const float (*xyzw)[4],
     const float (*normal)[3],
@@ -1977,7 +1977,7 @@ void __cdecl RB_DrawStretchPicRotate(
     float stepX; // [esp+34h] [ebp-10h]
     float stepX_4; // [esp+38h] [ebp-Ch]
     int indexCount; // [esp+3Ch] [ebp-8h]
-    unsigned __int16 vertCount; // [esp+40h] [ebp-4h]
+    uint16_t vertCount; // [esp+40h] [ebp-4h]
 
     iassert( gfxCmdBufSourceState.viewMode == VIEW_MODE_2D );
     RB_SetTessTechnique(material, TECHNIQUE_UNLIT);
@@ -2380,7 +2380,7 @@ void __cdecl RB_DrawCharInSpace(
     float y; // [esp+34h] [ebp-14h]
     float z; // [esp+38h] [ebp-10h]
     int indexCount; // [esp+3Ch] [ebp-Ch]
-    unsigned __int16 vertCount; // [esp+40h] [ebp-8h]
+    uint16_t vertCount; // [esp+40h] [ebp-8h]
     GfxColor unpackedColor; // [esp+44h] [ebp-4h] BYREF
 
     RB_SetTessTechnique(material, TECHNIQUE_UNLIT);

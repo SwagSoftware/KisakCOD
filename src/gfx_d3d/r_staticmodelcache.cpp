@@ -89,8 +89,8 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
     for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
     {
         xsurf = &surfs[surfIndex];
-        twoBaseOffsets = (unsigned __int16)(cacheBaseVertIndex + xsurf->baseVertIndex)
-            | ((unsigned __int16)(cacheBaseVertIndex + xsurf->baseVertIndex) << 16);
+        twoBaseOffsets = (uint16_t)(cacheBaseVertIndex + xsurf->baseVertIndex)
+            | ((uint16_t)(cacheBaseVertIndex + xsurf->baseVertIndex) << 16);
         twoSrcIndices = (unsigned int *)xsurf->triIndices;
         baseIndex = 3 * xsurf->baseTriIndex + 4 * cacheBaseVertIndex;
         iassert( baseIndex < SMC_MAX_INDEX_IN_CACHE );
@@ -222,7 +222,7 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     return 1;
 }
 
-unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCount)
+uint16_t __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCount)
 {
     static_model_node_list_t *block; // [esp+8h] [ebp-2Ch]
     unsigned int listIndex; // [esp+Ch] [ebp-28h]
@@ -279,7 +279,7 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     return cacheIndex;
 }
 
-unsigned __int16 __cdecl R_CacheStaticModelSurface(
+uint16_t __cdecl R_CacheStaticModelSurface(
     unsigned int smcIndex,
     unsigned int smodelIndex,
     const XModelLodInfo *lodInfo)
@@ -289,8 +289,8 @@ unsigned __int16 __cdecl R_CacheStaticModelSurface(
     static_model_tree_t *treea; // [esp+18h] [ebp-18h]
     GfxCachedSModelSurf *cachedSurf; // [esp+1Ch] [ebp-14h]
     GfxCachedSModelSurf *cachedSurfa; // [esp+1Ch] [ebp-14h]
-    unsigned __int16 cacheIndex; // [esp+24h] [ebp-Ch]
-    unsigned __int16 cacheIndexa; // [esp+24h] [ebp-Ch]
+    uint16_t cacheIndex; // [esp+24h] [ebp-Ch]
+    uint16_t cacheIndexa; // [esp+24h] [ebp-Ch]
     SkinCachedStaticModelCmd skinSmodelCmd; // [esp+28h] [ebp-8h] BYREF
     unsigned int cachedVertsNeeded; // [esp+2Ch] [ebp-4h]
 

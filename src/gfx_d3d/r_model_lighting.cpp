@@ -40,7 +40,7 @@ struct $616C0C4E0125F5DAA7F70C1AB2F0F42D // sizeof=0x6C
 
 struct GfxSmodelLightGlob_s // sizeof=0x6080
 {                                       // ...
-    unsigned __int16 smodelIndex[4096]; // ...
+    uint16_t smodelIndex[4096]; // ...
     unsigned int usedFrameCount[4096];  // ...
     unsigned int entryLimit;            // ...
     unsigned int assignedCount;         // ...
@@ -51,7 +51,7 @@ struct GfxSmodelLightGlob_s // sizeof=0x6080
 };
 struct GfxSmodelLightGlob // sizeof=0xA080
 {                                       // ...
-    unsigned __int16 freeableHandles[4096]; // ...
+    uint16_t freeableHandles[4096]; // ...
     unsigned int lightingBits[2048];    // ...
     GfxSmodelLightGlob_s local; // ...
 };
@@ -76,7 +76,7 @@ GfxSmodelLightGlob smodelLightGlob;
 
 int s_modelLightingSampleDelta[64];
 
-void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out)
+void __cdecl R_SetModelLightingCoords(uint16_t handle, float *out)
 {
     unsigned int entryIndex; // [esp+10h] [ebp-18h]
     float yCoord; // [esp+14h] [ebp-14h]
@@ -133,7 +133,7 @@ void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, Pack
     packedCoords->array[3] = 0;
 }
 
-unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle)
+unsigned int __cdecl R_ModelLightingIndexFromHandle(uint16_t handle)
 {
     iassert(handle && handle <= modelLightGlob.totalEntryLimit);
     return handle - 1;
@@ -141,7 +141,7 @@ unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle)
 
 char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex)
 {
-    unsigned __int16 handle; // [esp+0h] [ebp-10h]
+    uint16_t handle; // [esp+0h] [ebp-10h]
     unsigned int smodelIndexPrev; // [esp+4h] [ebp-Ch]
     unsigned int entryIndex; // [esp+8h] [ebp-8h]
 
@@ -194,7 +194,7 @@ char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, 
 unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
     float *lightingOrigin,
     unsigned int dynEntId,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut)
 {
     return R_AllocModelLighting(
@@ -207,7 +207,7 @@ unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
 
 unsigned int __cdecl R_AllocModelLighting(
     float *lightingOrigin,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     unsigned int(__cdecl *GetPrimaryLightCallback)(const void *),
     const void *userData,
     GfxLightingInfo *lightingInfoOut)
@@ -221,8 +221,8 @@ unsigned int __cdecl R_AllocModelLighting(
     unsigned int usedCount; // [esp+1Ch] [ebp-14h]
     unsigned int usedIndex; // [esp+20h] [ebp-10h]
     unsigned int usedIndexa; // [esp+20h] [ebp-10h]
-    unsigned __int16 lightingHandle; // [esp+28h] [ebp-8h]
-    unsigned __int16 lightingHandlea; // [esp+28h] [ebp-8h]
+    uint16_t lightingHandle; // [esp+28h] [ebp-8h]
+    uint16_t lightingHandlea; // [esp+28h] [ebp-8h]
     unsigned int nonSunPrimaryLightIndex; // [esp+2Ch] [ebp-4h]
 
     iassert( cachedLightingHandle );
@@ -301,7 +301,7 @@ unsigned int __cdecl R_AllocModelLighting_Box(
     float *lightingOrigin,
     const float *boxMins,
     const float *boxMaxs,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut)
 {
     GfxFindLightForBox boxWork; // [esp+0h] [ebp-1Ch] BYREF
@@ -330,7 +330,7 @@ unsigned int __cdecl R_AllocModelLighting_Sphere(
     float *lightingOrigin,
     const float *origin,
     float radius,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut)
 {
     GfxFindLightForSphere sphereWork; // [esp+0h] [ebp-14h] BYREF
@@ -471,20 +471,20 @@ void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const uint8_t *gr
     GfxModelLightingPatch *patch; // [esp+8h] [ebp-4h]
 
     patch = R_BackEndDataAllocAndClearModelLightingPatch(frontEndDataOut);
-    if (entryIndex != (unsigned __int16)entryIndex)
+    if (entryIndex != (uint16_t)entryIndex)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
             281,
             0,
             "i == static_cast< Type >( i )\n\t%i, %i",
             entryIndex,
-            (unsigned __int16)entryIndex);
+            (uint16_t)entryIndex);
     patch->modelLightingIndex = entryIndex;
     iassert( patch->colorsCount == 0 );
     *(unsigned int *)patch->groundLighting = *(unsigned int *)groundLighting;
 }
 
-void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source)
+void __cdecl R_SetModelLightingCoordsForSource(uint16_t handle, GfxCmdBufSourceState *source)
 {
     R_SetModelLightingCoords(handle, source->input.consts[57]);
     R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);

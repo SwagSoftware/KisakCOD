@@ -25,7 +25,7 @@ char __cdecl R_ReserveCodeMeshIndices(int indexCount, r_double_index_t** indices
     return 0;
 }
 
-char __cdecl R_ReserveCodeMeshVerts(int vertCount, unsigned __int16* baseVertex)
+char __cdecl R_ReserveCodeMeshVerts(int vertCount, uint16_t* baseVertex)
 {
     iassert( g_processCodeMesh );
     if (R_ReserveMeshVerts(&frontEndDataOut->codeMesh, vertCount, baseVertex))
@@ -105,7 +105,7 @@ void __cdecl R_AddCodeMeshDrawSurf(
         {
             localCodeMesh = &frontEndDataOut->codeMeshes[codeMeshIndex];
             localCodeMesh->triCount = indexCount / 3;
-            localCodeMesh->indices = (unsigned __int16*)indices;
+            localCodeMesh->indices = (uint16_t*)indices;
             iassert(argCount != 0 || argOffset == 0);
             iassert(argOffset >= 0 && argOffset < 256);
             localCodeMesh->argCount = argCount;
@@ -121,7 +121,7 @@ void __cdecl R_AddCodeMeshDrawSurf(
                 // packed_high = HIDWORD(drawSurf->packed);
 
                 drawSurf->fields.objectId = codeMeshIndex;
-                // LODWORD(drawSurf->packed) = (unsigned __int16)codeMeshIndex | *(_DWORD*)&drawSurf->fields & 0xFFFF0000; // set objectId
+                // LODWORD(drawSurf->packed) = (uint16_t)codeMeshIndex | *(_DWORD*)&drawSurf->fields & 0xFFFF0000; // set objectId
                 // HIDWORD(drawSurf->packed) = packed_high;
                 
                 drawSurf->fields.surfType = SF_CODE_MESH;
@@ -156,7 +156,7 @@ float (*__cdecl R_GetCodeMeshArgs(unsigned int argOffset))[4]
     return (float (*)[4])frontEndDataOut->codeMeshArgs[argOffset];
 }
 
-GfxPackedVertex* __cdecl R_GetCodeMeshVerts(unsigned __int16 baseVertex)
+GfxPackedVertex* __cdecl R_GetCodeMeshVerts(uint16_t baseVertex)
 {
     iassert( g_processCodeMesh );
     return (GfxPackedVertex*)R_GetMeshVerts(&frontEndDataOut->codeMesh, baseVertex);
@@ -199,7 +199,7 @@ char __cdecl R_ReserveMarkMeshIndices(int indexCount, r_double_index_t** indices
     return 0;
 }
 
-char __cdecl R_ReserveMarkMeshVerts(int vertCount, unsigned __int16 *baseVertex)
+char __cdecl R_ReserveMarkMeshVerts(int vertCount, uint16_t *baseVertex)
 {
     iassert( g_processMarkMesh );
     if (R_ReserveMeshVerts(&frontEndDataOut->markMesh, vertCount, baseVertex))
@@ -218,7 +218,7 @@ void __cdecl R_BeginMarkMeshVerts()
 void __cdecl R_AddMarkMeshDrawSurf(
     Material *material,
     const GfxMarkContext *context,
-    unsigned __int16 *indices,
+    uint16_t *indices,
     unsigned int indexCount)
 {
     int packed_high; // edx
@@ -255,7 +255,7 @@ void __cdecl R_AddMarkMeshDrawSurf(
 
                 drawSurf->fields.objectId = markMeshIndex;
                 //packed_high = HIDWORD(drawSurf->packed);
-                //LODWORD(drawSurf->packed) = (unsigned __int16)markMeshIndex | drawSurf->packed & 0xFFFF0000; // set objectId
+                //LODWORD(drawSurf->packed) = (uint16_t)markMeshIndex | drawSurf->packed & 0xFFFF0000; // set objectId
                 //HIDWORD(drawSurf->packed) = packed_high;
 
                 drawSurf->fields.customIndex = context->lmapIndex;
@@ -454,7 +454,7 @@ void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount)
     SortMyShit(drawSurfList, surfCount);
 }
 
-GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex)
+GfxWorldVertex *__cdecl R_GetMarkMeshVerts(uint16_t baseVertex)
 {
     iassert( g_processMarkMesh );
     return (GfxWorldVertex*)R_GetMeshVerts(&frontEndDataOut->markMesh, baseVertex);

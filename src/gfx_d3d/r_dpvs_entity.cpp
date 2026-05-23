@@ -5,7 +5,7 @@
 
 
 
-void __cdecl R_AddEntitySurfacesInFrustumCmd(unsigned __int16 *data)
+void __cdecl R_AddEntitySurfacesInFrustumCmd(uint16_t *data)
 {
     int v1; // [esp+4h] [ebp-28h]
     const DpvsPlane *plane; // [esp+Ch] [ebp-20h]

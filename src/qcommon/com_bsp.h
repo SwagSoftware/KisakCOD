@@ -6,7 +6,7 @@
 
 struct DiskPrimaryLight_Version16 // sizeof=0x60
 {
-    unsigned __int16 falloffStart;
+    uint16_t falloffStart;
     uint8_t falloffSizeLessOne;
     uint8_t type;
     float color[3];

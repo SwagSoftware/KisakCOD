@@ -61,7 +61,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     float *origin; // [esp+A8h] [ebp-12Ch]
     int cluster; // [esp+ACh] [ebp-128h]
     int k; // [esp+B0h] [ebp-124h]
-    unsigned __int16 leafs[128]; // [esp+B4h] [ebp-120h] BYREF
+    uint16_t leafs[128]; // [esp+B4h] [ebp-120h] BYREF
     float *angles; // [esp+1B8h] [ebp-1Ch]
     float absmax[3]; // [esp+1BCh] [ebp-18h] BYREF
     int num_leafs; // [esp+1C8h] [ebp-Ch]
@@ -411,7 +411,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
     const char *v3; // eax
     __int64 v4; // [esp+8h] [ebp-F8h]
     float v5; // [esp+1Ch] [ebp-E4h]
-    unsigned __int16 number; // [esp+22h] [ebp-DEh]
+    uint16_t number; // [esp+22h] [ebp-DEh]
     float v7; // [esp+28h] [ebp-D8h]
     float v8; // [esp+38h] [ebp-C8h]
     float v9; // [esp+3Ch] [ebp-C4h]
@@ -582,7 +582,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
 void __cdecl SV_ClipMoveToEntity(const moveclip_t *clip, svEntity_s *check, trace_t *trace)
 {
     __int64 v3; // [esp-Ch] [ebp-40h]
-    unsigned __int16 number; // [esp+6h] [ebp-2Eh]
+    uint16_t number; // [esp+6h] [ebp-2Eh]
     gentity_s *touch; // [esp+8h] [ebp-2Ch]
     unsigned int clipHandle; // [esp+Ch] [ebp-28h]
     float absmin[3]; // [esp+10h] [ebp-24h] BYREF

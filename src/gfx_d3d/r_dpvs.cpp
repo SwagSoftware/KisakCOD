@@ -204,11 +204,11 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
     int depthHack; // [esp+A0h] [ebp-40h]
     unsigned int sceneEntIndex; // [esp+A4h] [ebp-3Ch]
     GfxSceneEntity *sceneEnt; // [esp+A8h] [ebp-38h]
-    unsigned __int16 *cachedLightingHandle; // [esp+ACh] [ebp-34h]
+    uint16_t *cachedLightingHandle; // [esp+ACh] [ebp-34h]
     int isShadowReceiver; // [esp+B0h] [ebp-30h]
     GfxSceneBrush *sceneBrush; // [esp+B4h] [ebp-2Ch]
     GfxDrawSurf *drawSurfs[3]; // [esp+B8h] [ebp-28h] BYREF
-    unsigned __int16 dynEntId; // [esp+C4h] [ebp-1Ch]
+    uint16_t dynEntId; // [esp+C4h] [ebp-1Ch]
     unsigned int gfxEntIndex; // [esp+C8h] [ebp-18h]
     uint8_t *sceneEntVisData; // [esp+CCh] [ebp-14h]
     GfxSceneDynModel *sceneDynModel; // [esp+D0h] [ebp-10h]
@@ -232,7 +232,7 @@ void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
             {
                 sceneEnt = &scene.sceneDObj[sceneEntIndex];
                 iassert(sceneEnt->cull.state >= CULL_STATE_BOUNDED);
-                cachedLightingHandle = (unsigned __int16 *)LongNoSwap((unsigned int)sceneEnt->info.cachedLightingHandle);
+                cachedLightingHandle = (uint16_t *)LongNoSwap((unsigned int)sceneEnt->info.cachedLightingHandle);
                 lightingHandle = R_AllocModelLighting_Box(
                     viewInfo,
                     sceneEnt->lightingOrigin,
@@ -497,8 +497,8 @@ void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
     unsigned int sceneEntIndexc; // [esp+20h] [ebp-24h]
     unsigned int sceneEntIndexd; // [esp+20h] [ebp-24h]
     GfxSceneBrush *sceneBrush; // [esp+28h] [ebp-1Ch]
-    unsigned __int16 dynEntId; // [esp+2Ch] [ebp-18h]
-    unsigned __int16 dynEntIda; // [esp+2Ch] [ebp-18h]
+    uint16_t dynEntId; // [esp+2Ch] [ebp-18h]
+    uint16_t dynEntIda; // [esp+2Ch] [ebp-18h]
     GfxSceneDynModel *sceneDynModel; // [esp+34h] [ebp-10h]
     GfxBrushModel *bmodel; // [esp+38h] [ebp-Ch]
     signed int drawSurfCount; // [esp+3Ch] [ebp-8h]
@@ -887,7 +887,7 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
 
 int __cdecl R_DrawBModel(BModelDrawInfo *bmodelInfo, const GfxBrushModel *bmodel, const GfxPlacement *placement)
 {
-    unsigned __int16 visibleSurfaceCount; // [esp+Ah] [ebp-26h]
+    uint16_t visibleSurfaceCount; // [esp+Ah] [ebp-26h]
     unsigned int surfId; // [esp+10h] [ebp-20h]
     int startSurfPos; // [esp+14h] [ebp-1Ch]
     GfxScaledPlacement *newPlacement; // [esp+18h] [ebp-18h]
@@ -1099,8 +1099,8 @@ void __cdecl R_UnfilterDynEntFromCells(unsigned int dynEntId, DynEntityDrawType 
 void __cdecl R_FilterXModelIntoScene(
     const XModel *model,
     const GfxScaledPlacement *placement,
-    unsigned __int16 renderFxFlags,
-    unsigned __int16 *cachedLightingHandle)
+    uint16_t renderFxFlags,
+    uint16_t *cachedLightingHandle)
 {
     const char *v4; // eax
     int v5; // [esp+38h] [ebp-3Ch]
@@ -2552,8 +2552,8 @@ void __cdecl R_InitSceneBuffers()
     scene.entOverflowedDrawBuf = (unsigned int *)R_AllocGlobalVariable(gfxCfg.entCount >> 3, "R_InitSceneBuffers");
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
         scene.dpvs.entVisData[viewIndex] = (uint8_t *)R_AllocGlobalVariable(gfxCfg.entCount, "R_InitSceneBuffers");
-    scene.dpvs.sceneXModelIndex = (unsigned __int16 *)R_AllocGlobalVariable(2 * gfxCfg.entCount, "R_InitSceneBuffers");
-    scene.dpvs.sceneDObjIndex = (unsigned __int16 *)R_AllocGlobalVariable(2 * gfxCfg.entCount, "R_InitSceneBuffers");
+    scene.dpvs.sceneXModelIndex = (uint16_t *)R_AllocGlobalVariable(2 * gfxCfg.entCount, "R_InitSceneBuffers");
+    scene.dpvs.sceneDObjIndex = (uint16_t *)R_AllocGlobalVariable(2 * gfxCfg.entCount, "R_InitSceneBuffers");
     for (localClientNum = 0; localClientNum < gfxCfg.maxClientViews; ++localClientNum)
     {
         dpvsGlob.entVisBits[localClientNum] = (unsigned int *)R_AllocGlobalVariable(

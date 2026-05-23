@@ -203,7 +203,7 @@ void __cdecl R_InitDynamicMesh(
     unsigned int vertCount,
     unsigned int vertSize)
 {
-    mesh->indices = (unsigned __int16 *)R_AllocGlobalVariable(2 * indexCount, "R_InitDynamicMesh");
+    mesh->indices = (uint16_t *)R_AllocGlobalVariable(2 * indexCount, "R_InitDynamicMesh");
     mesh->totalIndexCount = indexCount;
     mesh->indexCount = 0;
     mesh->vertSize = vertSize;
@@ -416,7 +416,7 @@ GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes)
             renderCmd);
     iassert( ((bytes & 3) == 0) );
     iassert( (bytes < s_renderCmdBufferSize) );
-    if (bytes != (unsigned __int16)bytes)
+    if (bytes != (uint16_t)bytes)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
             884,

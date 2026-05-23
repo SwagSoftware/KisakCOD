@@ -2765,8 +2765,8 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
     float unitScaleValue; // [esp+8h] [ebp-30h]
     float v2; // [esp+Ch] [ebp-2Ch]
     float v3; // [esp+18h] [ebp-20h]
-    unsigned __int16 adjustedColorValue; // [esp+28h] [ebp-10h]
-    unsigned __int16 colorTableIndex; // [esp+2Ch] [ebp-Ch]
+    uint16_t adjustedColorValue; // [esp+28h] [ebp-10h]
+    uint16_t colorTableIndex; // [esp+2Ch] [ebp-Ch]
     float exponent; // [esp+30h] [ebp-8h]
 
     iassert( gammaRamp );
@@ -2835,7 +2835,7 @@ void __cdecl R_ShutdownStreams()
 void __cdecl R_ShutdownMaterialUsage()
 {
     VertUsage *vertUsage; // [esp+0h] [ebp-Ch]
-    unsigned __int16 hashIndex; // [esp+4h] [ebp-8h]
+    uint16_t hashIndex; // [esp+4h] [ebp-8h]
     VertUsage *nextVertUsage; // [esp+8h] [ebp-4h]
 
     for (hashIndex = 0; hashIndex < ARRAY_COUNT(rg.materialUsage); ++hashIndex)

@@ -15,7 +15,7 @@ union GfxPixelCostKey // sizeof=0x8
 };
 struct GfxPixelCostRecord // sizeof=0x20
 {                                       // ...
-    unsigned __int16 costHistory[12];   // ...
+    uint16_t costHistory[12];   // ...
     GfxPixelCostKey key;                // ...
 };
 
@@ -273,7 +273,7 @@ void __cdecl R_HW_FinishGpu()
 
 void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
 {
-    unsigned __int16 v1; // [esp+10h] [ebp-38h]
+    uint16_t v1; // [esp+10h] [ebp-38h]
     int v2; // [esp+14h] [ebp-34h]
     int v3; // [esp+28h] [ebp-20h]
     int cost; // [esp+40h] [ebp-8h]
@@ -323,7 +323,7 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
 int RB_PixelCost_AccumulateMsec()
 {
     int result; // eax
-    unsigned __int16 v1; // [esp+8h] [ebp-Ch]
+    uint16_t v1; // [esp+8h] [ebp-Ch]
     int v2; // [esp+Ch] [ebp-8h]
     int timeQuantized; // [esp+10h] [ebp-4h]
 

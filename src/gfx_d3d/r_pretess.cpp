@@ -149,9 +149,9 @@ unsigned int __cdecl R_EmitDrawSurfListForKey(
 }
 
 
-unsigned __int16 *__cdecl R_AllocPreTessIndices(int count)
+uint16_t *__cdecl R_AllocPreTessIndices(int count)
 {
-    unsigned __int16 *indices; // [esp+0h] [ebp-4h]
+    uint16_t *indices; // [esp+0h] [ebp-4h]
 
     iassert( gfxBuf.preTessIndexBuffer->indices != NULL );
     iassert( count );
@@ -172,7 +172,7 @@ void __cdecl R_EndPreTess()
 void __cdecl R_BeginPreTess()
 {
     iassert( gfxBuf.preTessIndexBuffer->indices == NULL );
-    gfxBuf.preTessIndexBuffer->indices = (unsigned __int16 *)R_LockIndexBuffer(
+    gfxBuf.preTessIndexBuffer->indices = (uint16_t *)R_LockIndexBuffer(
         gfxBuf.preTessIndexBuffer->buffer,
         0,
         2 * gfxBuf.preTessIndexBuffer->total,

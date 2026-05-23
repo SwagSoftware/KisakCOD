@@ -399,7 +399,7 @@ void MT_AddMemoryNode(int newNode, int size)
     iassert(size >= 0 && size <= MEMORY_NODE_BITS);
 
     parentNode = &scrMemTreeGlob.head[size];
-    node = (unsigned __int16)*parentNode;
+    node = (uint16_t)*parentNode;
 
     if (node)
     {

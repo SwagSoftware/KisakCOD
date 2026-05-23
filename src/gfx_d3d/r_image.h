@@ -135,8 +135,8 @@ void __cdecl Image_Release(GfxImage *image);
 GfxImage *__cdecl Image_AllocProg(int imageProgType, uint8_t category, uint8_t semantic);
 void __cdecl Image_SetupRenderTarget(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT imageFormat);
 void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image);
 GfxImage *__cdecl Image_FindExisting(const char *name);
@@ -186,23 +186,23 @@ void __cdecl Image_UploadData(
 
 void __cdecl Image_CreateCubeTexture_PC(
     GfxImage *image,
-    unsigned __int16 edgeLen,
+    uint16_t edgeLen,
     unsigned int mipmapCount,
     _D3DFORMAT imageFormat);
 
 void __cdecl Image_Create3DTexture_PC(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
-    unsigned __int16 depth,
+    uint16_t width,
+    uint16_t height,
+    uint16_t depth,
     unsigned int mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat);
 
 void __cdecl Image_Create2DTexture_PC(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     unsigned int mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat);
@@ -296,14 +296,14 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
 // r_image_decode
 struct ddscolor_t_s // sizeof=0x2
 {                                       // ...
-    unsigned __int16 b : 5;
-    unsigned __int16 g : 6;
-    unsigned __int16 r : 5;
+    uint16_t b : 5;
+    uint16_t g : 6;
+    uint16_t r : 5;
 };
 union ddscolor_t // sizeof=0x2
 {                                       // ...
     ddscolor_t_s c;
-    unsigned __int16 rgb;
+    uint16_t rgb;
 };
 struct DdsBlock_Dxt1_t // sizeof=0x8
 {                                       // ...
@@ -331,8 +331,8 @@ void __cdecl Image_DecodeWavelet(
 // r_image_wavelet
 struct WaveletDecode // sizeof=0x20
 {                                       // ...
-    unsigned __int16 value;             // ...
-    unsigned __int16 bit;               // ...
+    uint16_t value;             // ...
+    uint16_t bit;               // ...
     const unsigned char *data;                         // ...
     int width;                          // ...
     int height;                         // ...
@@ -351,10 +351,10 @@ void __cdecl Image_LoadWavelet(
     _D3DFORMAT format,
     int bytesPerPixel);
 void __cdecl Wavelet_DecompressLevel(uint8_t *src, uint8_t *dst, WaveletDecode *decode);
-void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode);
+void __cdecl Wavelet_ConsumeBits(uint16_t bitCount, WaveletDecode *decode);
 int __cdecl Wavelet_DecodeValue(
     const struct WaveletHuffmanDecode *decodeTable,
-    unsigned __int16 bitCount,
+    uint16_t bitCount,
     int bias,
     WaveletDecode *decode);
 void __cdecl Wavelet_AddDeltaToMipmap(

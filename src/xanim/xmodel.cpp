@@ -15,7 +15,7 @@ void __cdecl XModelPartsFree(XModelPartsLoad *modelParts)
 {
     int size; // [esp+0h] [ebp-Ch]
     int i; // [esp+4h] [ebp-8h]
-    unsigned __int16 *boneNames; // [esp+8h] [ebp-4h]
+    uint16_t *boneNames; // [esp+8h] [ebp-4h]
 
     iassert(modelParts);
 
@@ -450,10 +450,10 @@ void __cdecl PrefetchArray_GfxPackedVertex_(const GfxPackedVertex *mem, unsigned
 }
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandidatesLocals *locals)
 {
-    unsigned __int16 index; // [esp+1Ch] [ebp-18h]
+    uint16_t index; // [esp+1Ch] [ebp-18h]
     unsigned int vertIter; // [esp+20h] [ebp-14h]
     unsigned int triangleIter; // [esp+24h] [ebp-10h]
-    const unsigned __int16 *indexPtr; // [esp+28h] [ebp-Ch]
+    const uint16_t *indexPtr; // [esp+28h] [ebp-Ch]
     unsigned int triangleCount; // [esp+2Ch] [ebp-8h]
     unsigned int triangleBegin; // [esp+30h] [ebp-4h]
 
@@ -677,7 +677,7 @@ XModel* XModelFindExisting(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_XMODEL, name).model;
 }
 
-unsigned __int16 *XModelBoneNames(XModel *model)
+uint16_t *XModelBoneNames(XModel *model)
 {
     return model->boneNames;
 }

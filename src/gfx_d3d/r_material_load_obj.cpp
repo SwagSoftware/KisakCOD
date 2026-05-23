@@ -1608,7 +1608,7 @@ void __cdecl Material_DeleteDirectory(const char *dirname)
     RemoveDirectoryA(dirname);
 }
 
-void __cdecl Material_SubtractDays(_SYSTEMTIME *sysTime, unsigned __int16 daysOld)
+void __cdecl Material_SubtractDays(_SYSTEMTIME *sysTime, uint16_t daysOld)
 {
     iassert( daysOld <= 20 );
     if (sysTime->wDay <= daysOld)
@@ -1630,7 +1630,7 @@ void __cdecl Material_SubtractDays(_SYSTEMTIME *sysTime, unsigned __int16 daysOl
     }
 }
 
-void __cdecl Material_DeleteOldFilesInDirectory(const char *dirname, unsigned __int16 daysOld)
+void __cdecl Material_DeleteOldFilesInDirectory(const char *dirname, uint16_t daysOld)
 {
     DWORD errorCode; // [esp+0h] [ebp-378h]
     HANDLE handle; // [esp+4h] [ebp-374h]
@@ -2143,7 +2143,7 @@ MaterialVertexShader *__cdecl Material_RegisterVertexShader(
 char __cdecl Material_LoadPassVertexShader(
     const char **text,
     GfxRenderer renderer,
-    unsigned __int16 *techFlags,
+    uint16_t *techFlags,
     ShaderParameterSet *paramSet,
     MaterialPass *pass,
     unsigned int argLimit,
@@ -2410,7 +2410,7 @@ unsigned int __cdecl Material_PrepareToParseShaderArguments(
     return usedCount;
 }
 
-int __cdecl Material_CompareShaderArgumentsForCombining(unsigned __int16 *e0, unsigned __int16 *e1)
+int __cdecl Material_CompareShaderArgumentsForCombining(uint16_t *e0, uint16_t *e1)
 {
     int v3; // [esp+0h] [ebp-18h]
     int v4; // [esp+4h] [ebp-14h]
@@ -2703,7 +2703,7 @@ char __cdecl MaterialAddShaderArgument(
 char __cdecl Material_AddShaderArgumentFromMaterial(
     const char *shaderName,
     char *paramName,
-    unsigned __int16 type,
+    uint16_t type,
     char *name,
     ShaderUniformDef *dest,
     MaterialShaderArgument *arg,
@@ -2727,7 +2727,7 @@ char __cdecl Material_AddShaderArgumentFromMaterial(
 char __cdecl Material_AddShaderArgumentFromLiteral(
     const char *shaderName,
     char *paramName,
-    unsigned __int16 type,
+    uint16_t type,
     const float *literal,
     ShaderUniformDef *dest,
     MaterialShaderArgument *arg,
@@ -2748,7 +2748,7 @@ char __cdecl Material_AddShaderArgumentFromLiteral(
 }
 
 void __cdecl Material_AddShaderArgumentFromCodeSampler(
-    unsigned __int16 type,
+    uint16_t type,
     MaterialTextureSource codeSampler,
     ShaderUniformDef *dest,
     MaterialShaderArgument *arg)
@@ -2761,7 +2761,7 @@ void __cdecl Material_AddShaderArgumentFromCodeSampler(
 char __cdecl Material_AddShaderArgumentFromCodeConst(
     const char *shaderName,
     char *paramName,
-    unsigned __int16 type,
+    uint16_t type,
     unsigned int codeIndex,
     __int16 offset,
     ShaderUniformDef *dest,
@@ -3441,7 +3441,7 @@ char __cdecl Material_ParseShaderArguments(
     MaterialShaderType shaderType,
     ShaderUniformDef *paramTable,
     unsigned int paramCount,
-    unsigned __int16 *techFlags,
+    uint16_t *techFlags,
     unsigned int argLimit,
     unsigned int *argCount,
     MaterialShaderArgument *args)
@@ -3625,7 +3625,7 @@ char __cdecl Material_SetPassShaderArguments_DX(
     const char *shaderName,
     MaterialShaderType shaderType,
     unsigned int *program,
-    unsigned __int16 *techFlags,
+    uint16_t *techFlags,
     ShaderParameterSet *paramSet,
     unsigned int argLimit,
     unsigned int *argCount,
@@ -3703,7 +3703,7 @@ char __cdecl Material_SetPassShaderArguments_DX(
 char __cdecl Material_LoadPassPixelShader(
     const char **text,
     GfxRenderer renderer,
-    unsigned __int16 *techFlags,
+    uint16_t *techFlags,
     ShaderParameterSet *paramSet,
     MaterialPass *pass,
     unsigned int argLimit,
@@ -4110,7 +4110,7 @@ char __cdecl Material_LoadDeclTypes(const char **text, MaterialPass *pass)
 bool __cdecl Material_LoadPass(
     const char **text,
     GfxRenderer renderer,
-    unsigned __int16 *techFlags,
+    uint16_t *techFlags,
     MaterialPass *pass,
     MaterialStateMap **stateMap)
 {
@@ -4240,14 +4240,14 @@ MaterialTechnique *__cdecl Material_LoadTechnique(char *name, GfxRenderer render
     char filename[260]; // [esp+3Ch] [ebp-188h] BYREF
     MaterialVertexDeclaration *vertexDecl; // [esp+144h] [ebp-80h]
     unsigned int nameSize; // [esp+148h] [ebp-7Ch]
-    unsigned __int16 techFlags; // [esp+14Ch] [ebp-78h] BYREF
+    uint16_t techFlags; // [esp+14Ch] [ebp-78h] BYREF
     int fileSize; // [esp+150h] [ebp-74h]
     void *file; // [esp+154h] [ebp-70h] BYREF
     bool error; // [esp+15Bh] [ebp-69h]
     MaterialPass passes[4]; // [esp+15Ch] [ebp-68h] BYREF
     const char *token; // [esp+1ACh] [ebp-18h]
     MaterialStateMap **stateMapForPass; // [esp+1B0h] [ebp-14h]
-    unsigned __int16 passCount; // [esp+1B4h] [ebp-10h]
+    uint16_t passCount; // [esp+1B4h] [ebp-10h]
     const char *formatString; // [esp+1B8h] [ebp-Ch]
     const char *text; // [esp+1BCh] [ebp-8h] BYREF
     int passIndex; // [esp+1C0h] [ebp-4h]
@@ -4664,7 +4664,7 @@ Material *__cdecl Material_Duplicate(Material *mtlCopy, char *name)
     Material *mtlNewa; // [esp+1Ch] [ebp-1Ch]
     uint8_t *mtlNew; // [esp+1Ch] [ebp-1Ch]
     int constantTableSize; // [esp+24h] [ebp-14h]
-    unsigned __int16 hashIndex[3]; // [esp+28h] [ebp-10h] BYREF
+    uint16_t hashIndex[3]; // [esp+28h] [ebp-10h] BYREF
     bool exists; // [esp+2Fh] [ebp-9h] BYREF
     unsigned int textureTableSize; // [esp+30h] [ebp-8h]
     unsigned int stateBitsTableSize; // [esp+34h] [ebp-4h]
@@ -6296,7 +6296,7 @@ int __cdecl R_ComparePixelConsts(const Material **material, const MaterialPass *
 {
     int j; // [esp+0h] [ebp-4ECh]
     GfxShaderConstantBlock pixelLiteralConsts[2]; // [esp+4h] [ebp-4E8h] BYREF
-    unsigned __int16 pixelConsts[2][256]; // [esp+CCh] [ebp-420h] BYREF
+    uint16_t pixelConsts[2][256]; // [esp+CCh] [ebp-420h] BYREF
     unsigned int argCount; // [esp+4D0h] [ebp-1Ch]
     const MaterialShaderArgument *arg; // [esp+4D4h] [ebp-18h]
     int i; // [esp+4D8h] [ebp-14h]

@@ -171,8 +171,8 @@ struct ShaderUniformDef // sizeof=0x10
 {                                       // ...
     ShaderParamType type;
     const char *name;
-    unsigned __int16 index;
-    unsigned __int16 resourceDest;
+    uint16_t index;
+    uint16_t resourceDest;
     bool isTransposed;
     bool isAssigned;
     // padding byte
@@ -273,7 +273,7 @@ struct MaterialPixelShader // sizeof=0x10
 };
 struct MaterialArgumentCodeConst // sizeof=0x4
 {                                       // ...
-    unsigned __int16 index;
+    uint16_t index;
     uint8_t firstRow;
     uint8_t rowCount;
 };
@@ -286,8 +286,8 @@ union MaterialArgumentDef // sizeof=0x4
 };
 struct MaterialShaderArgument // sizeof=0x8
 {                                       // ...
-    unsigned __int16 type; // $74254F2FBB58A9D84A85080F50CF363D
-    unsigned __int16 dest;
+    uint16_t type; // $74254F2FBB58A9D84A85080F50CF363D
+    uint16_t dest;
     MaterialArgumentDef u;
 };
 struct MaterialPass // sizeof=0x14
@@ -305,8 +305,8 @@ struct MaterialPass // sizeof=0x14
 struct MaterialTechnique // sizeof=0x1C
 {
     const char *name;
-    unsigned __int16 flags;
-    unsigned __int16 passCount;
+    uint16_t flags;
+    uint16_t passCount;
     MaterialPass passArray[1];
 };
 struct WaterWritable // sizeof=0x4
@@ -349,13 +349,13 @@ struct ShaderIndexRange // sizeof=0xC
 union ShaderArgumentSource_u // sizeof=0x4
 {                                       // ...
     const float *literalConst;
-    unsigned __int16 codeIndex;
+    uint16_t codeIndex;
     const char *name;
 };
 struct ShaderArgumentSource // sizeof=0x14
 {                                       // ...
     ShaderIndexRange indexRange;
-    unsigned __int16 type;              // ...
+    uint16_t type;              // ...
     // padding byte
     // padding byte
     ShaderArgumentSource_u u; // ...
@@ -440,7 +440,7 @@ struct MaterialInfo // sizeof=0x18
     uint8_t textureAtlasColumnCount; // ...
     GfxDrawSurf drawSurf;
     unsigned int surfaceTypeBits;
-    unsigned __int16 hashIndex;
+    uint16_t hashIndex;
     // padding byte
     // padding byte
 };
@@ -549,10 +549,10 @@ struct MaterialInfoRaw // sizeof=0x28
     float maxDeformMove;
     uint8_t deformFlags;
     uint8_t usage;
-    unsigned __int16 toolFlags;
+    uint16_t toolFlags;
     unsigned int locale;
-    unsigned __int16 autoTexScaleWidth;
-    unsigned __int16 autoTexScaleHeight;
+    uint16_t autoTexScaleWidth;
+    uint16_t autoTexScaleHeight;
     float tessSize;
     int surfaceFlags;
     int contents;
@@ -561,8 +561,8 @@ struct MaterialRaw // sizeof=0x40
 {
     MaterialInfoRaw info;
     unsigned int refStateBits[2];
-    unsigned __int16 textureCount;
-    unsigned __int16 constantCount;
+    uint16_t textureCount;
+    uint16_t constantCount;
     unsigned int techSetNameOffset;
     unsigned int textureTableOffset;
     unsigned int constantTableOffset;
@@ -626,8 +626,8 @@ Material *__cdecl Material_Register_FastFile(const char *name);
 Material *__cdecl Material_Register(const char *name, int imageTrack);
 Material *__cdecl Material_RegisterHandle(const char *name, int imageTrack);
 
-void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists);
-void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex);
+void __cdecl Material_GetHashIndex(const char *name, uint16_t *hashIndex, bool *exists);
+void __cdecl Material_Add(Material *material, uint16_t hashIndex);
 
 void __cdecl R_MaterialList_f();
 int __cdecl R_GetMaterialMemory(Material *material);
@@ -652,7 +652,7 @@ struct GfxMtlFeatureMap // sizeof=0x10
 struct GfxShaderConstantBlock // sizeof=0x64
 {                                       // ...
     unsigned int count;                 // ...
-    unsigned __int16 dest[16];          // ...
+    uint16_t dest[16];          // ...
     const float *value[16];             // ...
 };
 
@@ -680,7 +680,7 @@ char __cdecl Material_SetPassShaderArguments_DX(
     const char *shaderName,
     MaterialShaderType shaderType,
     unsigned int *program,
-    unsigned __int16 *techFlags,
+    uint16_t *techFlags,
     ShaderParameterSet *paramSet,
     unsigned int argLimit,
     unsigned int *argCount,

@@ -7,15 +7,15 @@
 
 struct SkinCachedStaticModelCmd // sizeof=0x4
 {                                       // ...
-    unsigned __int16 cacheIndex;        // ...
-    unsigned __int16 firstPatchVert;    // ...
+    uint16_t cacheIndex;        // ...
+    uint16_t firstPatchVert;    // ...
 };
 
 struct GfxCachedSModelSurf // sizeof=0x8
 {                                       // ...
     unsigned int baseVertIndex;
-    unsigned __int16 lodIndex;
-    unsigned __int16 smodelIndex;
+    uint16_t lodIndex;
+    uint16_t smodelIndex;
 };
 
 struct static_model_tree_list_t // sizeof=0x8
@@ -55,8 +55,8 @@ struct static_model_cache_t // sizeof=0x410E0
 
 struct GfxStaticModelId // sizeof=0x4
 {                                       // ...
-    unsigned __int16 surfType;          // ...
-    unsigned __int16 objectId;          // ...
+    uint16_t surfType;          // ...
+    uint16_t objectId;          // ...
 };
 
 void __cdecl R_InitStaticModelCache();
@@ -69,11 +69,11 @@ GfxStaticModelId __cdecl R_GetStaticModelId(unsigned int smodelIndex, int lod);
 void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lod, unsigned int cacheBaseVertIndex);
 char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex);
 char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listIndex);
-unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCount);
+uint16_t __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCount);
 
 const GfxBackEndData *RB_PatchStaticModelCache();
 
-unsigned __int16 __cdecl R_CacheStaticModelSurface(
+uint16_t __cdecl R_CacheStaticModelSurface(
     unsigned int smcIndex,
     unsigned int smodelIndex,
     const XModelLodInfo *lodInfo);

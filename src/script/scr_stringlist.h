@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define HASH_STAT_FREE      0
 #define HASH_STAT_MOVABLE   0x10000
@@ -122,13 +123,13 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len);
 
 int SL_IsLowercaseString(unsigned int stringValue);
 
-void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);
+void __cdecl Scr_SetString(uint16_t *to, unsigned int from);
 
 unsigned int __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);
 
 unsigned int __cdecl Scr_CreateCanonicalFilename(const char *filename);
 
-void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from);
+void Scr_SetStringFromCharString(uint16_t *to, const char *from);
 unsigned int SL_GetUser(unsigned int stringValue);
 
 unsigned int __cdecl Scr_AllocString(char *s, int sys);

@@ -8,7 +8,7 @@
 
 struct SavedDObjModel // sizeof=0x2
 {                                       // ...
-    unsigned __int16 boneName;
+    uint16_t boneName;
 };
 
 struct SavedDObj // sizeof=0x60
@@ -16,8 +16,8 @@ struct SavedDObj // sizeof=0x60
     SavedDObjModel dobjModels[32];
     XModel **models;                    // ...
     unsigned int ignoreCollision;       // ...
-    unsigned __int16 numModels;         // ...
-    unsigned __int16 entnum;            // ...
+    uint16_t numModels;         // ...
+    uint16_t entnum;            // ...
     XAnimTree_s *tree;                  // ...
     unsigned int hidePartBits[4];       // ...
 };
@@ -433,9 +433,9 @@ void __cdecl DObjFree(DObj_s *obj)
 void __cdecl DObjGetCreateParms(
     const DObj_s *obj,
     DObjModel_s *dobjModels,
-    unsigned __int16 *numModels,
+    uint16_t *numModels,
     XAnimTree_s **tree,
-    unsigned __int16 *entnum)
+    uint16_t *entnum)
 {
     const unsigned __int8 *modelParents; // [esp+0h] [ebp-A8h]
     DObjModel_s *dobjModel; // [esp+4h] [ebp-A4h]
@@ -660,7 +660,7 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     float v11; // [esp+2Ch] [ebp-384h]
     float v12; // [esp+30h] [ebp-380h]
     float v13; // [esp+34h] [ebp-37Ch]
-    unsigned __int16 v14; // [esp+3Ah] [ebp-376h]
+    uint16_t v14; // [esp+3Ah] [ebp-376h]
     float v15; // [esp+6Ch] [ebp-344h]
     float v16; // [esp+70h] [ebp-340h]
     float v17; // [esp+74h] [ebp-33Ch]
@@ -736,7 +736,7 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     float startOffset[3]; // [esp+1E4h] [ebp-1CCh] BYREF
     float dist1; // [esp+1F0h] [ebp-1C0h]
     int hitT; // [esp+1F4h] [ebp-1BCh]
-    unsigned __int16 classificationArray[128]; // [esp+1F8h] [ebp-1B8h]
+    uint16_t classificationArray[128]; // [esp+1F8h] [ebp-1B8h]
     XModel *model; // [esp+2FCh] [ebp-B4h]
     float dist; // [esp+300h] [ebp-B0h]
     unsigned int numModels; // [esp+304h] [ebp-ACh]
@@ -756,7 +756,7 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     float solidHitFrac; // [esp+34Ch] [ebp-64h]
     float dist2; // [esp+350h] [ebp-60h]
     DSkel *skel; // [esp+354h] [ebp-5Ch]
-    unsigned __int16 *names; // [esp+358h] [ebp-58h]
+    uint16_t *names; // [esp+358h] [ebp-58h]
     float leaveFrac; // [esp+35Ch] [ebp-54h]
     int traceHitT; // [esp+360h] [ebp-50h]
     unsigned int lowestPriority; // [esp+364h] [ebp-4Ch]
@@ -764,7 +764,7 @@ void __cdecl DObjTraceline(DObj_s *obj, float *start, float *end, unsigned __int
     int ignoreCollision; // [esp+36Ch] [ebp-44h]
     float axis[3][3]; // [esp+370h] [ebp-40h] BYREF
     XModel **models; // [esp+394h] [ebp-1Ch]
-    unsigned __int16 classification; // [esp+398h] [ebp-18h]
+    uint16_t classification; // [esp+398h] [ebp-18h]
     float center[3]; // [esp+39Ch] [ebp-14h] BYREF
     float hitSign; // [esp+3A8h] [ebp-8h]
     unsigned int currentPriority; // [esp+3ACh] [ebp-4h]
