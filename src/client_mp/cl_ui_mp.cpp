@@ -253,7 +253,7 @@ serverInfo_t *__cdecl LAN_GetServerPtr(int source, unsigned int n)
 
 void __cdecl LAN_CleanHostname(const char *hostName, char *cleanHostName)
 {
-    unsigned __int8 c; // [esp+3h] [ebp-1h]
+    uint8_t c; // [esp+3h] [ebp-1h]
 
     while (1)
     {
@@ -385,7 +385,7 @@ int __cdecl LAN_CompareServers(int source, int sortKey, int sortDir, unsigned in
         return res;
 }
 
-void __cdecl LAN_MarkServerDirty(int source, unsigned int n, unsigned __int8 dirty)
+void __cdecl LAN_MarkServerDirty(int source, unsigned int n, uint8_t dirty)
 {
     serverInfo_t *server; // [esp+8h] [ebp-8h]
     int count; // [esp+Ch] [ebp-4h]

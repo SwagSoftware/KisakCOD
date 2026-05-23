@@ -142,8 +142,8 @@ void __cdecl CL_WritePacket(int localClientNum)
 {
     int v1; // eax
     int v2; // eax
-    unsigned __int8 *v3; // ecx
-    unsigned __int8 *v4; // edx
+    uint8_t *v3; // ecx
+    uint8_t *v4; // edx
     const char *v5; // eax
     int v6; // [esp-Ch] [ebp-8C0h]
     char *v7; // [esp+8h] [ebp-8ACh]
@@ -153,8 +153,8 @@ void __cdecl CL_WritePacket(int localClientNum)
     usercmd_s *oldcmd; // [esp+58h] [ebp-85Ch]
     int compressedSize; // [esp+5Ch] [ebp-858h]
     connstate_t connstate; // [esp+60h] [ebp-854h]
-    unsigned __int8 data[2052]; // [esp+64h] [ebp-850h] BYREF
-    unsigned __int8 (*compressedBuf)[2048]; // [esp+86Ch] [ebp-48h]
+    uint8_t data[2052]; // [esp+64h] [ebp-850h] BYREF
+    uint8_t (*compressedBuf)[2048]; // [esp+86Ch] [ebp-48h]
     msg_t buf; // [esp+870h] [ebp-44h] BYREF
     int oldPacketNum; // [esp+898h] [ebp-1Ch]
     clientConnection_t *clc; // [esp+89Ch] [ebp-18h]
@@ -166,8 +166,8 @@ void __cdecl CL_WritePacket(int localClientNum)
 
     LargeLocal compressedBuf_large_local(2048);
 
-    //compressedBuf = (unsigned __int8 (*)[2048])LargeLocal::GetBuf(&compressedBuf_large_local);
-    compressedBuf = (unsigned __int8 (*)[2048])compressedBuf_large_local.GetBuf();
+    //compressedBuf = (uint8_t (*)[2048])LargeLocal::GetBuf(&compressedBuf_large_local);
+    compressedBuf = (uint8_t (*)[2048])compressedBuf_large_local.GetBuf();
     clc = CL_GetLocalClientConnection(localClientNum);
     if (localClientNum)
         MyAssertHandler(
@@ -246,7 +246,7 @@ void __cdecl CL_WritePacket(int localClientNum)
             }
             for (i = 0; i < count; ++i)
             {
-                cmd = &LocalClientGlobals->cmds[((unsigned __int8)LocalClientGlobals->cmdNumber - (_BYTE)count + (_BYTE)i + 1)
+                cmd = &LocalClientGlobals->cmds[((uint8_t)LocalClientGlobals->cmdNumber - (_BYTE)count + (_BYTE)i + 1)
                     & 0x7F];
                 MSG_WriteDeltaUsercmdKey(&buf, key, oldcmd, cmd);
                 oldcmd = cmd;
@@ -273,7 +273,7 @@ void __cdecl CL_WritePacket(int localClientNum)
 
         // Copy the 9-byte uncompressed message header (CL_ENCODE_START) verbatim
         // before the compressed bit stream begins. Bytes 0-3 + 4-7 as ints, byte 8 raw.
-        v4 = (unsigned __int8 *)compressedBuf;
+        v4 = (uint8_t *)compressedBuf;
         *(unsigned int *)compressedBuf = *(unsigned int *)buf.data;
         *((unsigned int *)v4 + 1) = *((unsigned int *)v3 + 1);
         v4[8] = v3[8];
@@ -281,7 +281,7 @@ void __cdecl CL_WritePacket(int localClientNum)
             Com_Error(ERR_DROP, "Overflow compressed msg buf in CL_WritePacket()");
         compressedSize = MSG_WriteBitsCompress(
             0,
-            (const unsigned __int8 *)buf.data + 9,
+            (const uint8_t *)buf.data + 9,
             &(*compressedBuf)[9],
             buf.cursize - 9)
             + 9;
@@ -295,7 +295,7 @@ void __cdecl CL_WritePacket(int localClientNum)
             v5 = NET_AdrToString(clc->netchan.remoteAddress);
             Com_Printf(14, "%i to %s\n", compressedSize, v5);
         }
-        CL_Netchan_Transmit(&clc->netchan, (unsigned __int8 *)compressedBuf, compressedSize);
+        CL_Netchan_Transmit(&clc->netchan, (uint8_t *)compressedBuf, compressedSize);
         while (clc->netchan.unsentFragments)
             CL_Netchan_TransmitNextFragment(&clc->netchan);
         //LargeLocal::~LargeLocal(&compressedBuf_large_local);
@@ -340,7 +340,7 @@ bool __cdecl CL_ReadyToSendPacket(int localClientNum)
         return 1;
     if (Sys_IsLANAddress(clc->netchan.remoteAddress))
         return 1;
-    oldPacketNum = ((unsigned __int8)clc->netchan.outgoingSequence - 1) & 0x1F;
+    oldPacketNum = ((uint8_t)clc->netchan.outgoingSequence - 1) & 0x1F;
     return cls.realtime - CL_GetLocalClientGlobals(localClientNum)->outPackets[oldPacketNum].p_realtime >= 1000 / cl_maxpackets->current.integer;
 }
 
@@ -1755,6 +1755,6 @@ void __cdecl CL_ShutdownInput()
 
 void __cdecl CL_ClearKeys(int localClientNum)
 {
-    memset((unsigned __int8 *)playersKb[localClientNum], 0, sizeof(kbutton_t[30]));
+    memset((uint8_t *)playersKb[localClientNum], 0, sizeof(kbutton_t[30]));
 }
 

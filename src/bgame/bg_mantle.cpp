@@ -189,7 +189,7 @@ void __cdecl Mantle_Check(pmove_t *pm, pml_t *pml)
             }
             else if (Mantle_FindMantleSurface(pm, pml, &trace, mantleDir))
             {
-                memset((unsigned __int8 *)&mresults, 0, sizeof(mresults));
+                memset((uint8_t *)&mresults, 0, sizeof(mresults));
                 mresults.dir[0] = mantleDir[0];
                 mresults.dir[1] = mantleDir[1];
                 mresults.dir[2] = mantleDir[2];

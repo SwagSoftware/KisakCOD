@@ -615,13 +615,13 @@ void __cdecl DynEnt_LoadEntities(MemoryFile *memFile)
     for (int drawType = 0; drawType < 2; ++drawType)
     {
         uint16_t count = 0;
-        MemFile_ReadData(memFile, sizeof(count), (unsigned __int8 *)&count);
+        MemFile_ReadData(memFile, sizeof(count), (uint8_t *)&count);
         cm.dynEntCount[drawType] = count;
         if (count == 0)
             continue;
 
-        MemFile_ReadData(memFile, sizeof(DynEntityPose) * count, (unsigned __int8 *)cm.dynEntPoseList[drawType]);
-        MemFile_ReadData(memFile, sizeof(DynEntityClient) * count, (unsigned __int8 *)cm.dynEntClientList[drawType]);
+        MemFile_ReadData(memFile, sizeof(DynEntityPose) * count, (uint8_t *)cm.dynEntPoseList[drawType]);
+        MemFile_ReadData(memFile, sizeof(DynEntityClient) * count, (uint8_t *)cm.dynEntClientList[drawType]);
 
         for (uint16_t dynEntId = 0; dynEntId < count; ++dynEntId)
         {

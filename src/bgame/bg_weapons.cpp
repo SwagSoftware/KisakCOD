@@ -94,7 +94,7 @@ void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *dep
         pFieldList[iTypeIndex].iOffset = 4 * iTypeIndex;
         pFieldList[iTypeIndex].iFieldType = 6;
     }
-    if (!ParseConfigStringToStruct((unsigned __int8 *)depthTable, pFieldList, 29, buffer, 0, 0, BG_StringCopy))
+    if (!ParseConfigStringToStruct((uint8_t *)depthTable, pFieldList, 29, buffer, 0, 0, BG_StringCopy))
         Com_Error(ERR_DROP, "Error parsing bullet penetration table [%s].", penetrateType);
 }
 
@@ -626,8 +626,8 @@ int32_t __cdecl BG_GetMaxPickupableAmmo(const playerState_s *ps, uint32_t weapon
     WeaponDef *weapDef; // [esp+218h] [ebp-204h]
     int32_t ammoCounted[128]; // [esp+21Ch] [ebp-200h] BYREF
 
-    memset((unsigned __int8 *)ammoCounted, 0, sizeof(ammoCounted));
-    memset((unsigned __int8 *)clipCounted, 0, sizeof(clipCounted));
+    memset((uint8_t *)ammoCounted, 0, sizeof(ammoCounted));
+    memset((uint8_t *)clipCounted, 0, sizeof(clipCounted));
     weapDef = BG_GetWeaponDef(weaponIndex);
     ammoIndex = BG_AmmoForWeapon(weaponIndex);
     clipIndex = BG_ClipForWeapon(weaponIndex);
@@ -685,8 +685,8 @@ int32_t __cdecl BG_GetTotalAmmoReserve(const playerState_s *ps, uint32_t weaponI
     ammo = 0;
     ammoIndex = BG_AmmoForWeapon(weaponIndex);
     clipIndex = BG_ClipForWeapon(weaponIndex);
-    memset((unsigned __int8 *)ammoCounted, 0, sizeof(ammoCounted));
-    memset((unsigned __int8 *)clipCounted, 0, sizeof(clipCounted));
+    memset((uint8_t *)ammoCounted, 0, sizeof(ammoCounted));
+    memset((uint8_t *)clipCounted, 0, sizeof(clipCounted));
     weapDef = BG_GetWeaponDef(weaponIndex);
     if (weapDef->iSharedAmmoCapIndex < 0)
     {
@@ -1628,7 +1628,7 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
     if (!Com_BitCheckAssert(ps->weapons, newweapon, 16))
         newweapon = 0;
     oldweapon = ps->weapon;
-    ps->weapon = (unsigned __int8)newweapon;
+    ps->weapon = (uint8_t)newweapon;
 
     iassert(ps->weapon == newweapon);
 
@@ -3495,8 +3495,8 @@ void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, floa
 
 float __cdecl BG_GetBobCycle(const playerState_s *ps)
 {
-    return ((float)(unsigned __int8)ps->bobCycle / 255.0 * M_PI 
-        + (float)(unsigned __int8)ps->bobCycle / 255.0 * M_PI + (2.0 * M_PI));
+    return ((float)(uint8_t)ps->bobCycle / 255.0 * M_PI 
+        + (float)(uint8_t)ps->bobCycle / 255.0 * M_PI + (2.0 * M_PI));
 }
 
 float __cdecl BG_GetVerticalBobFactor(const playerState_s *ps, float cycle, float speed, float maxAmp)
@@ -3792,8 +3792,8 @@ void __cdecl BG_CalculateWeaponPosition_BobOffset(weaponState_t *ws, float *angl
     ps = ws->ps;
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
-    fBobCycle = (double)(unsigned __int8)ps->bobCycle / 255.0 * M_PI
-        + (double)(unsigned __int8)ps->bobCycle / 255.0 * M_PI
+    fBobCycle = (double)(uint8_t)ps->bobCycle / 255.0 * M_PI
+        + (double)(uint8_t)ps->bobCycle / 255.0 * M_PI
         + 6.283185482025146;
     cycle = fBobCycle + 0.7853981852531433 + 6.283185482025146;
     speed = ws->xyspeed * 0.1599999964237213;
@@ -4185,8 +4185,8 @@ void __cdecl BG_CalculateView_BobAngles(viewState_t *vs, float *angles)
     weapDef = BG_GetWeaponDef(weapIndex);
     if (weapDef->overlayReticle)
     {
-        fBobCycle = (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
-            + (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
+        fBobCycle = (double)(uint8_t)ps->bobCycle / 255.0 * 3.141592741012573
+            + (double)(uint8_t)ps->bobCycle / 255.0 * 3.141592741012573
             + 6.283185482025146;
         cycle = fBobCycle + 0.7853981852531433 + 6.283185482025146;
         speed = vs->xyspeed * 0.1599999964237213;
@@ -4230,8 +4230,8 @@ void __cdecl BG_CalculateView_Velocity(viewState_t *vs, float *angles)
     weapDef = BG_GetWeaponDef(weapIndex);
     if ((ps->eFlags & 0x300) == 0 && ps->fWeaponPosFrac != 0.0 && weapDef->fAdsViewBobMult != 0.0)
     {
-        fBobCycle = (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
-            + (double)(unsigned __int8)ps->bobCycle / 255.0 * 3.141592741012573
+        fBobCycle = (double)(uint8_t)ps->bobCycle / 255.0 * 3.141592741012573
+            + (double)(uint8_t)ps->bobCycle / 255.0 * 3.141592741012573
             + 6.283185482025146;
         delta = BG_GetVerticalBobFactor(ps, fBobCycle, vs->xyspeed, 45.0);
         deltaa = ps->fWeaponPosFrac * weapDef->fAdsViewBobMult * delta;

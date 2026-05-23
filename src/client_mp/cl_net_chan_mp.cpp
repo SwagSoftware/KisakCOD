@@ -7,7 +7,7 @@
 #include <qcommon/qcommon.h>
 #include <cgame_mp/cg_local_mp.h>
 
-void __cdecl CL_Netchan_Decode(unsigned __int8 *data, int size)
+void __cdecl CL_Netchan_Decode(uint8_t *data, int size)
 {
     int i, index;
     byte key, * string;
@@ -34,7 +34,7 @@ void __cdecl CL_Netchan_Decode(unsigned __int8 *data, int size)
     }
 }
 
-void __cdecl CL_Netchan_Encode(unsigned __int8 *data, int size)
+void __cdecl CL_Netchan_Encode(uint8_t *data, int size)
 {
     int i, index;
     byte key, * string;
@@ -67,7 +67,7 @@ void __cdecl CL_Netchan_TransmitNextFragment(netchan_t *chan)
     Netchan_TransmitNextFragment(chan);
 }
 
-void __cdecl CL_Netchan_Transmit(netchan_t *chan, unsigned __int8 *data, int length)
+void __cdecl CL_Netchan_Transmit(netchan_t *chan, uint8_t *data, int length)
 {
     CL_Netchan_Encode(data + 9, length - 9);
     Netchan_Transmit(chan, length, (char *)data);

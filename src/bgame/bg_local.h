@@ -1069,7 +1069,7 @@ struct playerState_s
     float dofViewmodelStart;
     float dofViewmodelEnd;
     int hudElemLastAssignedSoundID;
-    unsigned __int8 weaponmodels[128];
+    uint8_t weaponmodels[128];
     playerState_s_hud hud;
 };
 #endif
@@ -1195,8 +1195,8 @@ struct CEntActorInfo
 struct cpose_t
 {
     unsigned __int16 lightingHandle;
-    unsigned __int8 eType;
-    unsigned __int8 eTypeUnion;
+    uint8_t eType;
+    uint8_t eTypeUnion;
     bool isRagdoll;
     int ragdollHandle;
     //int physObjId;
@@ -1230,7 +1230,7 @@ struct centity_s // sizeof=0x1DC
     float lightingOrigin[3];
     XAnimTree_s* tree;
 #else
-    unsigned __int8 oldEType;
+    uint8_t oldEType;
     int previousEventSequence;
     float lightingOrigin[3];
 #endif

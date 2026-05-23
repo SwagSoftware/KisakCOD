@@ -197,7 +197,7 @@ void __cdecl CG_RegisterImpactEffectsForDir(char *dir, EffectFile *effectFile, c
             {
                 Hunk_CheckTempMemoryHighClear();
                 buffer = (void *)Hunk_AllocateTempMemoryHigh(len + 1, "CG_RegisterImpactEffects");
-                FS_Read((unsigned __int8 *)buffer, len, f);
+                FS_Read((uint8_t *)buffer, len, f);
                 FS_FCloseFile(f);
                 *((_BYTE *)buffer + len) = 0;
                 Com_BeginParseSession(qpath);
@@ -284,7 +284,7 @@ int __cdecl CG_RegisterImpactEffects_Flesh(
 
 FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname)
 {
-    unsigned __int8 *v1; // eax
+    uint8_t *v1; // eax
     int v2; // eax
     int v3; // eax
     EffectFile effectFile; // [esp+0h] [ebp-688h] BYREF
@@ -296,7 +296,7 @@ FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname)
 
     Hunk_CheckTempMemoryClear();
     listbuf = (char *)Hunk_AllocateTempMemory(0x10000, "CG_RegisterImpactEffects");
-    memset((unsigned __int8 *)&effectFile, 0, sizeof(effectFile));
+    memset((uint8_t *)&effectFile, 0, sizeof(effectFile));
     CG_RegisterImpactEffectsForDir((char*)"fx", &effectFile, listbuf);
     if (mapname)
     {

@@ -2621,7 +2621,7 @@ bool __cdecl CL_ShouldntDrawMessageWindow(int32_t localClientNum)
 #ifdef KISAK_MP
     return CL_GetLocalClientGlobals(localClientNum)->snap.ps.pm_type != PM_INTERMISSION && !CL_ShouldDisplayHud(localClientNum);
 #elif KISAK_SP
-    unsigned __int8 v1; // r11
+    uint8_t v1; // r11
 
     if (localClientNum)
         MyAssertHandler(

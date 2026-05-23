@@ -604,6 +604,6 @@ bool __cdecl CL_IsPlayerMuted(int localClientNum, unsigned int muteClientIndex)
 
 void __cdecl CL_ClearMutedList()
 {
-    memset((unsigned __int8 *)s_playerMute, 0, sizeof(s_playerMute));
+    memset((uint8_t *)s_playerMute, 0, sizeof(s_playerMute));
 }
 

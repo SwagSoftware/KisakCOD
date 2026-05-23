@@ -311,7 +311,7 @@ void __cdecl BG_InitWeaponString(int32_t index, const char *name)
 
 void __cdecl BG_InitWeaponStrings()
 {
-    memset((unsigned __int8 *)weaponStrings, 0, sizeof(weaponStrings));
+    memset((uint8_t *)weaponStrings, 0, sizeof(weaponStrings));
     BG_LoadWeaponStrings();
 }
 
@@ -1279,7 +1279,7 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
 
     if ((es->lerp.eFlags & 0x300) != 0)
     {
-        memset((unsigned __int8 *)info, 0, sizeof(controller_info_t));
+        memset((uint8_t *)info, 0, sizeof(controller_info_t));
     }
     else
     {
@@ -2538,7 +2538,7 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
                                 text_p -= strlen(token);
                                 if (I_strncmp(text_p, token, strlen(token)))
                                     BG_AnimParseError("BG_AnimParseAnimScript: internal error");
-                                memset((unsigned __int8 *)&tempScriptItem, 0, sizeof(tempScriptItem));
+                                memset((uint8_t *)&tempScriptItem, 0, sizeof(tempScriptItem));
                                 v7 = BG_ParseConditions(&text_p, &tempScriptItem);
                                 indexes[indentLevel] = v7;
                                 if (currentScript->numItems >= 128)
@@ -2597,7 +2597,7 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
                                 text_p -= strlen(token);
                                 if (I_strncmp(text_p, token, strlen(token)))
                                     BG_AnimParseError("BG_AnimParseAnimScript: internal error");
-                                memset((unsigned __int8 *)&tempScriptItem, 0, sizeof(tempScriptItem));
+                                memset((uint8_t *)&tempScriptItem, 0, sizeof(tempScriptItem));
                                 v10 = BG_ParseConditions(&text_p, &tempScriptItem);
                                 indexes[indentLevel] = v10;
                                 if (currentScript->numItems >= 128)
@@ -2652,7 +2652,7 @@ void __cdecl BG_AnimParseAnimScript(animScriptData_t *scriptData, loadAnim_t *pL
                                 parseEvent = indexes[indentLevel];
                             }
                         LABEL_101:
-                            memset((unsigned __int8 *)currentScript, 0, sizeof(animScript_t));
+                            memset((uint8_t *)currentScript, 0, sizeof(animScript_t));
                         }
                     }
                     else

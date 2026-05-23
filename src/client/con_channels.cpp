@@ -421,7 +421,7 @@ void Con_SaveChannels(MemoryFile *memFile)
             v6 = v5;
             do
             {
-                v7 = (unsigned __int8)v6->openChannels[0].name[0];
+                v7 = (uint8_t)v6->openChannels[0].name[0];
                 v6 = (PrintChannelGlob *)((char *)v6 + 1);
             } while (v7);
             v9[0] = v4;

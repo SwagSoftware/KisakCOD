@@ -399,7 +399,7 @@ struct __declspec(align(4)) pmove_t
     float xyspeed;
     int viewChangeTime;
     float viewChange;
-    unsigned __int8 handler;
+    uint8_t handler;
 };
 #elif KISAK_MP
 struct pmove_t // sizeof=0x110
@@ -423,7 +423,7 @@ struct pmove_t // sizeof=0x110
     int mantleDuration;                 // ...
     int viewChangeTime;                 // ...
     float viewChange;
-    unsigned __int8 handler;            // ...
+    uint8_t handler;            // ...
     // padding byte
     // padding byte
     // padding byte
@@ -517,11 +517,11 @@ static_assert(sizeof(entityShared_t) == 0x68);
 #elif KISAK_SP
 struct entityShared_t
 {
-    unsigned __int8 linked;
-    unsigned __int8 bmodel;
-    unsigned __int8 svFlags;
-    unsigned __int8 eventType;
-    unsigned __int8 inuse;
+    uint8_t linked;
+    uint8_t bmodel;
+    uint8_t svFlags;
+    uint8_t eventType;
+    uint8_t inuse;
     float mins[3];
     float maxs[3];
     int contents;
@@ -752,7 +752,7 @@ struct gentity_s_tag
 {
     unsigned __int16 notifyString;
     unsigned __int16 index;
-    unsigned __int8 stoppable;
+    uint8_t stoppable;
     int basetime;
     int duration;
 };
@@ -803,7 +803,7 @@ struct spawner_ent_t
     int timestamp;
 };
 
-enum EntHandler_t : unsigned __int8 // (not a real enum name)
+enum EntHandler_t : uint8_t // (not a real enum name)
 {
     ENT_HANDLER_NULL = 0x0,
     ENT_HANDLER_ACTOR_INIT = 0x1,
@@ -929,10 +929,10 @@ struct gentity_s
     sentient_s *sentient;
     struct scr_vehicle_s *scr_vehicle;
     TurretInfo *pTurretInfo;
-    unsigned __int8 physicsObject;
-    unsigned __int8 takedamage;
-    unsigned __int8 active;
-    unsigned __int8 nopickup;
+    uint8_t physicsObject;
+    uint8_t takedamage;
+    uint8_t active;
+    uint8_t nopickup;
     unsigned __int16 model;
     EntHandler_t handler; // ENT_HANDLER_xxxxx
     unsigned __int16 classname;

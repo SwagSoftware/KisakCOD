@@ -662,8 +662,8 @@ void __cdecl AimAssist_AddToTargetList(AimAssistGlobals *aaGlob, const AimScreen
         if (aaGlob->screenTargetCount == 64)
             --aaGlob->screenTargetCount;
         memmove(
-            (unsigned __int8 *)&aaGlob->screenTargets[low + 1],
-            (unsigned __int8 *)&aaGlob->screenTargets[low],
+            (uint8_t *)&aaGlob->screenTargets[low + 1],
+            (uint8_t *)&aaGlob->screenTargets[low],
             52 * (aaGlob->screenTargetCount - low));
         memcpy(&aaGlob->screenTargets[low], screenTarget, sizeof(aaGlob->screenTargets[low]));
         ++aaGlob->screenTargetCount;

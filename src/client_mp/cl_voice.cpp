@@ -7,7 +7,7 @@
 #include <win32/win_local.h>
 #include <server_mp/server_mp.h>
 
-unsigned __int8 tempVoicePacketBuf[2048];
+uint8_t tempVoicePacketBuf[2048];
 voiceCommunication_t cl_voiceCommunication;
 
 void __cdecl CL_WriteVoicePacket(int localClientNum)

@@ -116,7 +116,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
     int entnum; // [esp+220h] [ebp-8h]
     int i; // [esp+224h] [ebp-4h]
 
-    memset((unsigned __int8 *)centInPrevSnapshot, 0, sizeof(centInPrevSnapshot));
+    memset((uint8_t *)centInPrevSnapshot, 0, sizeof(centInPrevSnapshot));
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     if (cgameGlob->nextSnap)
     {
@@ -145,7 +145,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
         CG_SetFrameInterpolation(localClientNum);
         CG_ExecuteNewServerCommands(localClientNum, snap->serverCommandSequence);
         CG_CheckOpenWaitingScriptMenu(localClientNum);
-        memset((unsigned __int8 *)clientIndex, 0, sizeof(clientIndex));
+        memset((uint8_t *)clientIndex, 0, sizeof(clientIndex));
         for (num = 0; num < snap->numClients; ++num)
         {
             clientState = &snap->clients[num];
@@ -215,7 +215,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
                 {
                     if (((cent->nextState.lerp.eFlags ^ cent->currentState.eFlags) & 2) != 0)
                     {
-                        memcpy((unsigned __int8 *)&cgameGlob->snap->ps, (unsigned __int8 *)&snap->ps, sizeof(cgameGlob->snap->ps));
+                        memcpy((uint8_t *)&cgameGlob->snap->ps, (uint8_t *)&snap->ps, sizeof(cgameGlob->snap->ps));
                         CG_ResetEntity(localClientNum, cent, 0);
                         predictedError = cgameGlob->predictedError;
                         cgameGlob->predictedError[0] = 0.0;
@@ -225,7 +225,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
                 }
                 else
                 {
-                    memcpy((unsigned __int8 *)&cgameGlob->snap->ps, (unsigned __int8 *)&snap->ps, sizeof(cgameGlob->snap->ps));
+                    memcpy((uint8_t *)&cgameGlob->snap->ps, (uint8_t *)&snap->ps, sizeof(cgameGlob->snap->ps));
                     CG_ResetEntity(localClientNum, cent, 1);
                     v10 = cgameGlob->predictedError;
                     cgameGlob->predictedError[0] = 0.0;
@@ -237,7 +237,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
             {
                 cgameGlob->playerTeleported = 1;
                 centInPrevSnapshot[cgameGlob->snap->ps.clientNum >> 5] &= ~(0x80000000 >> (cgameGlob->snap->ps.clientNum & 0x1F));
-                memcpy((unsigned __int8 *)&cgameGlob->snap->ps, (unsigned __int8 *)&snap->ps, sizeof(cgameGlob->snap->ps));
+                memcpy((uint8_t *)&cgameGlob->snap->ps, (uint8_t *)&snap->ps, sizeof(cgameGlob->snap->ps));
                 CG_ResetEntity(localClientNum, cent, 1);
                 CG_Respawn(localClientNum);
             }
@@ -252,7 +252,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
             || snap->ps.stats[4] != cgameGlob->snap->ps.stats[4]
             || entnum != cgameGlob->snap->ps.clientNum)
         {
-            memcpy((unsigned __int8 *)&cgameGlob->snap->ps, (unsigned __int8 *)&snap->ps, sizeof(cgameGlob->snap->ps));
+            memcpy((uint8_t *)&cgameGlob->snap->ps, (uint8_t *)&snap->ps, sizeof(cgameGlob->snap->ps));
             CG_Respawn(localClientNum);
         }
         for (num = 0; num < snap->numEntities; ++num)
@@ -663,7 +663,7 @@ void __cdecl CG_TransitionSnapshot(int localClientNum)
         else
         {
             pXAnimTree = cgameGlob->bgs.clientinfo[clientState->clientIndex].pXAnimTree;
-            memset((unsigned __int8 *)ci, 0, sizeof(clientInfo_t));
+            memset((uint8_t *)ci, 0, sizeof(clientInfo_t));
             ci->pXAnimTree = pXAnimTree;
             XAnimClearTree(ci->pXAnimTree);
             CG_SafeDObjFree(localClientNum, clientState->clientIndex);

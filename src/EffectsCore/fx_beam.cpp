@@ -41,7 +41,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float v4; // [esp+30h] [ebp-288h]
     float v5; // [esp+34h] [ebp-284h]
     float v6; // [esp+38h] [ebp-280h]
-    unsigned __int8 v7; // [esp+40h] [ebp-278h]
+    uint8_t v7; // [esp+40h] [ebp-278h]
     int v8; // [esp+44h] [ebp-274h]
     float v9; // [esp+48h] [ebp-270h]
     float4 *v10; // [esp+4Ch] [ebp-26Ch]

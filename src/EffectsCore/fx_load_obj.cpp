@@ -61,7 +61,7 @@ const FxFlagDef s_allFlagDefs[42] =
   { NULL, 0, 0, 0 }
 }; // idb
 
-//unsigned __int8 *__cdecl Hunk_AllocPhysPresetPrecache(int size)
+//uint8_t *__cdecl Hunk_AllocPhysPresetPrecache(int size)
 //{
 //    if (size <= 0)
 //        MyAssertHandler(".\\EffectsCore\\fx_load_obj.cpp", 237, 0, "%s", "size > 0");
@@ -618,7 +618,7 @@ bool __cdecl FX_ParseTrailDef(const char **parse, FxEditorElemDef *edElemDef)
     return 1;
 }
 
-bool __cdecl FX_SetEditorElemType(FxEditorElemDef *edElemDef, unsigned __int8 type)
+bool __cdecl FX_SetEditorElemType(FxEditorElemDef *edElemDef, uint8_t type)
 {
     if (edElemDef->elemType == 11)
     {
@@ -634,7 +634,7 @@ bool __cdecl FX_SetEditorElemType(FxEditorElemDef *edElemDef, unsigned __int8 ty
 
 bool __cdecl FX_ParseAssetArray_FxElemVisuals_32_(
     const char **parse,
-    unsigned __int8 elemType,
+    uint8_t elemType,
     FxEditorElemDef *edElemDef,
     FxElemVisuals(*visualsArray)[32],
     bool(__cdecl *RegisterAsset)(const char *, FxElemVisuals *))
@@ -728,7 +728,7 @@ bool __cdecl FX_ParseTrail(const char **parse, FxEditorElemDef *edElemDef)
 
 bool __cdecl FX_ParseAssetArray_FxElemMarkVisuals_16_(
     const char **parse,
-    unsigned __int8 elemType,
+    uint8_t elemType,
     FxEditorElemDef *edElemDef,
     FxElemMarkVisuals(*visualsArray)[16],
     bool(__cdecl *RegisterAsset)(const char *, FxElemMarkVisuals *))
@@ -949,7 +949,7 @@ char __cdecl FX_ParseEditorElem(int version, const char **parse, FxEditorElemDef
 {
     parseInfo_t *token; // [esp+0h] [ebp-4h]
 
-    memset((unsigned __int8 *)edElemDef, 0, sizeof(FxEditorElemDef));
+    memset((uint8_t *)edElemDef, 0, sizeof(FxEditorElemDef));
     if (edElemDef->flags)
         MyAssertHandler(".\\EffectsCore\\fx_load_obj.cpp", 1072, 0, "%s", "edElemDef->flags == 0");
     if (edElemDef->editorFlags)
@@ -1120,7 +1120,7 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
     v5 = &fx_load.defaultEffect->name[strlen(fx_load.defaultEffect->name) + 1];
     baseBytesNeeded = fx_load.defaultEffect->totalSize - (v5 - fx_load.defaultEffect->name);
     effectDef = (byte *)FX_AllocMem(fx_load.defaultEffect->totalSize - (v5 - (fx_load.defaultEffect->name + 1)) + strlen(name));
-    memcpy(effectDef, (unsigned __int8 *)fx_load.defaultEffect, baseBytesNeeded);
+    memcpy(effectDef, (uint8_t *)fx_load.defaultEffect, baseBytesNeeded);
     *(_DWORD *)effectDef = (_DWORD)&effectDef[baseBytesNeeded];
     v4 = name;
     v3 = *(_BYTE **)effectDef;
@@ -1129,8 +1129,8 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
         v2 = *v4;
         *v3++ = *v4++;
     } while (v2);
-    relocationDistance = effectDef - (unsigned __int8 *)fx_load.defaultEffect;
-    *((_DWORD *)effectDef + 7) += effectDef - (unsigned __int8 *)fx_load.defaultEffect;
+    relocationDistance = effectDef - (uint8_t *)fx_load.defaultEffect;
+    *((_DWORD *)effectDef + 7) += effectDef - (uint8_t *)fx_load.defaultEffect;
     for (elemIndex = 0; elemIndex < *((_DWORD *)effectDef + 5) + *((_DWORD *)effectDef + 4); ++elemIndex)
     {
         v7 = (_DWORD *)(*((_DWORD *)effectDef + 7) + 252 * elemIndex + 180);
