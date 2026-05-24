@@ -26,6 +26,10 @@
 #include <qcommon/net_chan.h>
 #endif
 
+#if !defined(KISAK_WIN_LOCK)
+#include <mutex>
+#endif
+
 void	IN_MouseEvent (int mstate);
 
 void	Sys_CreateConsole( void );
@@ -120,7 +124,12 @@ struct __declspec(align(8)) SysInfo // sizeof=0x260
 
 // LWSS add
 
+#if defined(KISAK_WIN_LOCK)
 extern _RTL_CRITICAL_SECTION s_criticalSections[];
+#else
+extern std::mutex s_criticalSections[];
+#endif
+
 extern int client_state; // LWSS ADD. This looks similar to signonstate
 extern HWND g_splashWnd;
 
