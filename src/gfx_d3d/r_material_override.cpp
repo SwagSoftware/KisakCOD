@@ -32,7 +32,7 @@ const GfxMtlFeatureMap s_materialFeatures[20] =
   { "twk", 32u, 0u, false }
 }; // idb
 
-void __cdecl Material_GetRemappedFeatures_RunTime(unsigned int *mask, unsigned int *value)
+void __cdecl Material_GetRemappedFeatures_RunTime(uint32_t *mask, uint32_t *value)
 {
     iassert( mask );
     iassert( value );
@@ -66,7 +66,7 @@ void __cdecl Material_ForEachTechniqueSet_FastFile(void(__cdecl *callback)(Mater
 
 void __cdecl Material_ForEachTechniqueSet_LoadObj(void(__cdecl *callback)(MaterialTechniqueSet *))
 {
-    unsigned int hashIndex; // [esp+0h] [ebp-8h]
+    uint32_t hashIndex; // [esp+0h] [ebp-8h]
     MaterialTechniqueSet *techSet; // [esp+4h] [ebp-4h]
 
     for (hashIndex = 0; hashIndex < 0x400; ++hashIndex)
@@ -88,9 +88,9 @@ void __cdecl Material_ForEachTechniqueSet(void(__cdecl *callback)(MaterialTechni
 const GfxMtlFeatureMap *__cdecl Material_FindFeature(
     const char *featureName,
     const GfxMtlFeatureMap *featureMap,
-    unsigned int featureCount)
+    uint32_t featureCount)
 {
-    unsigned int featureIndex; // [esp+14h] [ebp-4h]
+    uint32_t featureIndex; // [esp+14h] [ebp-4h]
 
     for (featureIndex = 0; featureIndex < featureCount; ++featureIndex)
     {
@@ -100,9 +100,9 @@ const GfxMtlFeatureMap *__cdecl Material_FindFeature(
     return 0;
 }
 
-unsigned int __cdecl Material_NextTechniqueSetNameToken(const char **parse, char *token)
+uint32_t __cdecl Material_NextTechniqueSetNameToken(const char **parse, char *token)
 {
-    unsigned int tokenLen; // [esp+0h] [ebp-4h]
+    uint32_t tokenLen; // [esp+0h] [ebp-4h]
 
     tokenLen = 0;
     while (**parse)
@@ -122,11 +122,11 @@ unsigned int __cdecl Material_NextTechniqueSetNameToken(const char **parse, char
     return tokenLen;
 }
 
-unsigned int __cdecl Material_ExtendTechniqueSetName(
+uint32_t __cdecl Material_ExtendTechniqueSetName(
     char *nameSoFar,
-    unsigned int nameLen,
+    uint32_t nameLen,
     char *token,
-    unsigned int tokenLen,
+    uint32_t tokenLen,
     bool prependUnderscore)
 {
     if (prependUnderscore)
@@ -140,17 +140,17 @@ unsigned int __cdecl Material_ExtendTechniqueSetName(
 void __cdecl Material_RemapTechniqueSetName(
     const char *techSetName,
     char *remapName,
-    unsigned int remapMask,
-    unsigned int remapValue,
+    uint32_t remapMask,
+    uint32_t remapValue,
     const GfxMtlFeatureMap *featureMap,
-    unsigned int featureCount)
+    uint32_t featureCount)
 {
     bool v6; // [esp+10h] [ebp-6Ch]
-    unsigned int featureIndex; // [esp+14h] [ebp-68h]
+    uint32_t featureIndex; // [esp+14h] [ebp-68h]
     const GfxMtlFeatureMap *feature; // [esp+1Ch] [ebp-60h]
     const GfxMtlFeatureMap *altFeature; // [esp+20h] [ebp-5Ch]
-    unsigned int maskedRemapValue; // [esp+24h] [ebp-58h]
-    unsigned int tokenLen; // [esp+28h] [ebp-54h]
+    uint32_t maskedRemapValue; // [esp+24h] [ebp-58h]
+    uint32_t tokenLen; // [esp+28h] [ebp-54h]
     int remapNameLen; // [esp+2Ch] [ebp-50h]
     const char *parse; // [esp+30h] [ebp-4Ch] BYREF
     char token[68]; // [esp+34h] [ebp-48h] BYREF
@@ -217,7 +217,7 @@ void __cdecl AssertValidRemappedTechniqueSet(MaterialTechniqueSet *techSet)
 {
     const char *v1; // eax
     const char *name; // [esp+4h] [ebp-8h]
-    unsigned int techTypeIter; // [esp+8h] [ebp-4h]
+    uint32_t techTypeIter; // [esp+8h] [ebp-4h]
 
     iassert( techSet );
     iassert( techSet->remappedTechniqueSet );
@@ -281,8 +281,8 @@ void __cdecl Material_RemapTechniqueSet(MaterialTechniqueSet *techSet)
 
 void __cdecl Material_OverrideTechniqueSets()
 {
-    unsigned int remapValue; // [esp+0h] [ebp-8h] BYREF
-    unsigned int remapMask; // [esp+4h] [ebp-4h] BYREF
+    uint32_t remapValue; // [esp+0h] [ebp-8h] BYREF
+    uint32_t remapMask; // [esp+4h] [ebp-4h] BYREF
 
     if (!Sys_IsRenderThread())
     {
@@ -333,9 +333,9 @@ void __cdecl Material_ClearShaderUploadList()
 
 bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *techSet)
 {
-    unsigned int remapValue; // [esp+14h] [ebp-10Ch] BYREF
+    uint32_t remapValue; // [esp+14h] [ebp-10Ch] BYREF
     char remapName[256]; // [esp+18h] [ebp-108h] BYREF
-    unsigned int remapMask; // [esp+11Ch] [ebp-4h] BYREF
+    uint32_t remapMask; // [esp+11Ch] [ebp-4h] BYREF
 
     iassert( techSet );
     Material_GetRemappedFeatures_RunTime(&remapMask, &remapValue);

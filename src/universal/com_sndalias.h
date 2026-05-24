@@ -112,8 +112,8 @@ struct SoundAliasGlobals // sizeof=0x2858
     // padding byte
     DevGraph curveDevGraphs[16];        // ...
     int randSeed;                       // ...
-    unsigned int hashUsed;              // ...
-    unsigned int hashSize;              // ...
+    uint32_t hashUsed;              // ...
+    uint32_t hashSize;              // ...
     snd_alias_list_t **hash;            // ...
     snd_alias_list_t aliasInfo[3];      // ...
     SoundFileInfo soundFileInfo[3];     // ...
@@ -223,7 +223,7 @@ char __cdecl Com_AddAliasList(const char *name, snd_alias_list_t *aliasList);
 void __cdecl Com_InitSoundDevGuiGraphs();
 void Com_InitSoundDevGuiGraphs_LoadObj();
 void Com_InitSoundDevGuiGraphs_FastFile();
-void __cdecl Com_InitSoundAliasHash(unsigned int aliasCount);
+void __cdecl Com_InitSoundAliasHash(uint32_t aliasCount);
 void Com_InitSpeakerMaps();
 void Com_InitDefaultSpeakerMap();
 void Com_InitCurves();
@@ -250,8 +250,8 @@ void __cdecl Com_LoadSoundAliasField(
 void __cdecl Com_LoadSoundAliasDefaults(snd_alias_build_s *alias, const char *sourceFile, const char *loadspec);
 void __cdecl Com_SetChannelMapEntry(
     MSSChannelMap *entry,
-    unsigned int inputChannel,
-    unsigned int outputChannel,
+    uint32_t inputChannel,
+    uint32_t outputChannel,
     float volume);
 
 

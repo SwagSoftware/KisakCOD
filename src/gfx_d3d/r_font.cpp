@@ -13,7 +13,7 @@ const char MYRANDOMCHARS[63] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890"
 };
 
-const Glyph *__cdecl R_GetCharacterGlyph(Font_s *font, unsigned int letter)
+const Glyph *__cdecl R_GetCharacterGlyph(Font_s *font, uint32_t letter)
 {
     Glyph *glyph; // [esp+0h] [ebp-10h]
     int top; // [esp+4h] [ebp-Ch]
@@ -44,7 +44,7 @@ const Glyph *__cdecl R_GetCharacterGlyph(Font_s *font, unsigned int letter)
     }
 }
 
-unsigned int __cdecl R_FontGetRandomLetter(Font_s *font, int seed)
+uint32_t __cdecl R_FontGetRandomLetter(Font_s *font, int seed)
 {
     return MYRANDOMCHARS[RandWithSeed(&seed) % 0x3E];
 }
@@ -155,14 +155,14 @@ double __cdecl R_NormalizedTextScale(Font_s *font, float scale)
     return (float)(scale * 48.0 / (double)font->pixelHeight);
 }
 
-int __cdecl R_LetterWidth(unsigned int letter, Font_s *font)
+int __cdecl R_LetterWidth(uint32_t letter, Font_s *font)
 {
     return R_GetCharacterGlyph(font, letter)->dx;
 }
 
 int __cdecl R_TextWidth(const char *text, int maxChars, Font_s *font)
 {
-    unsigned int letter; // [esp+0h] [ebp-10h]
+    uint32_t letter; // [esp+0h] [ebp-10h]
     int lineWidth; // [esp+4h] [ebp-Ch]
     int maxWidth; // [esp+8h] [ebp-8h]
     int count; // [esp+Ch] [ebp-4h]
@@ -213,7 +213,7 @@ const char *__cdecl R_TextLineWrapPosition(
     const char *preLetterPos; // [esp+10h] [ebp-10h]
     const char *wrapPos; // [esp+14h] [ebp-Ch]
     const char *parsePos; // [esp+18h] [ebp-8h] BYREF
-    unsigned int letter; // [esp+1Ch] [ebp-4h]
+    uint32_t letter; // [esp+1Ch] [ebp-4h]
 
     iassert( text );
     pixelsUsed = 0;
@@ -277,7 +277,7 @@ int __cdecl R_ConsoleTextWidth(const char *textPool, int poolSize, int firstChar
     int indexMask; // [esp+0h] [ebp-18h]
     int parsePos; // [esp+4h] [ebp-14h]
     int width; // [esp+8h] [ebp-10h]
-    unsigned int letter; // [esp+Ch] [ebp-Ch]
+    uint32_t letter; // [esp+Ch] [ebp-Ch]
     int usedCharCount; // [esp+10h] [ebp-8h] BYREF
     int stopPos; // [esp+14h] [ebp-4h]
 

@@ -432,8 +432,8 @@ void __cdecl Com_DvarDumpSingle(const dvar_s *dvar, void *userData)
     const char *v4; // [esp-4h] [ebp-810h]
     char message[2052]; // [esp+4h] [ebp-808h] BYREF
 
-    ++*(unsigned int *)userData;
-    if (!*((unsigned int *)userData + 2) || Com_Filter(*((const char **)userData + 2), (char *)dvar->name, 0))
+    ++*(uint32_t *)userData;
+    if (!*((uint32_t *)userData + 2) || Com_Filter(*((const char **)userData + 2), (char *)dvar->name, 0))
     {
         if (Dvar_HasLatchedValue(dvar))
         {
@@ -446,7 +446,7 @@ void __cdecl Com_DvarDumpSingle(const dvar_s *dvar, void *userData)
             v3 = Dvar_DisplayableValue(dvar);
             Com_sprintf(message, 0x800u, "      %s \"%s\"\n", dvar->name, v3);
         }
-        Com_PrintMessage(*((unsigned int *)userData + 1), message, 0);
+        Com_PrintMessage(*((uint32_t *)userData + 1), message, 0);
     }
 }
 
@@ -691,7 +691,7 @@ void __cdecl Dvar_SetFromLocalizedStr_f()
 void __cdecl Dvar_SetToTime_f()
 {
     const char *v0; // eax
-    unsigned int v1; // eax
+    uint32_t v1; // eax
     const char *v2; // eax
     char *v3; // [esp-4h] [ebp-Ch]
     const char *dvarName; // [esp+4h] [ebp-4h]

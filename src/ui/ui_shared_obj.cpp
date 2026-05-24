@@ -199,11 +199,11 @@ void __cdecl PC_PushScript(source_s *source, script_s *script)
     source->scriptstack = script;
 }
 
-unsigned int *__cdecl GetMemory(unsigned int size)
+uint32_t *__cdecl GetMemory(uint32_t size)
 {
-    unsigned int *ptr; // [esp+4h] [ebp-4h]
+    uint32_t *ptr; // [esp+4h] [ebp-4h]
 
-    ptr = (unsigned int *)Z_Malloc(size + 4, "GetMemory", 10);
+    ptr = (uint32_t *)Z_Malloc(size + 4, "GetMemory", 10);
     if (!ptr)
         return 0;
     *ptr = 0x12345678;
@@ -219,7 +219,7 @@ void __cdecl FreeMemory(char *ptr)
 int numtokens;
 token_s *__cdecl PC_CopyToken(token_s *token)
 {
-    unsigned int *t; // [esp+8h] [ebp-4h]
+    uint32_t *t; // [esp+8h] [ebp-4h]
 
     t = GetMemory(0x430u);
     if (t)
@@ -501,9 +501,9 @@ int __cdecl PS_ReadString(script_s *script, token_s *token, int quote)
     return 1;
 }
 
-void __cdecl NumberValue(char *string, __int16 subtype, unsigned int *intvalue, long double *floatvalue)
+void __cdecl NumberValue(char *string, __int16 subtype, uint32_t *intvalue, long double *floatvalue)
 {
-    unsigned int dotfound; // [esp+40h] [ebp-4h]
+    uint32_t dotfound; // [esp+40h] [ebp-4h]
     char *stringa; // [esp+4Ch] [ebp+8h]
     char *stringb; // [esp+4Ch] [ebp+8h]
     char *stringc; // [esp+4Ch] [ebp+8h]
@@ -718,7 +718,7 @@ int __cdecl PS_ReadName(script_s *script, token_s *token)
 int __cdecl PS_ReadPunctuation(script_s *script, token_s *token)
 {
     punctuation_s *punc; // [esp+10h] [ebp-Ch]
-    unsigned int len; // [esp+14h] [ebp-8h]
+    uint32_t len; // [esp+14h] [ebp-8h]
     char *p; // [esp+18h] [ebp-4h]
 
     for (punc = script->punctuationtable[*script->script_p]; punc; punc = punc->next)
@@ -1314,7 +1314,7 @@ void __cdecl StripDoubleQuotes(char *string)
         string[strlen(string) - 1] = 0;
 }
 
-uint8_t *__cdecl GetClearedMemory(unsigned int size)
+uint8_t *__cdecl GetClearedMemory(uint32_t size)
 {
     uint8_t *ptr; // [esp+0h] [ebp-4h]
 
@@ -1826,7 +1826,7 @@ define_s *__cdecl PC_CopyDefine(source_s *source, define_s *define)
     char v2; // dl
     _BYTE *v4; // [esp+8h] [ebp-28h]
     char *name; // [esp+Ch] [ebp-24h]
-    unsigned int *newdefine; // [esp+20h] [ebp-10h]
+    uint32_t *newdefine; // [esp+20h] [ebp-10h]
     token_s *newtoken; // [esp+24h] [ebp-Ch]
     token_s *newtokena; // [esp+24h] [ebp-Ch]
     token_s *token; // [esp+28h] [ebp-8h]
@@ -1835,7 +1835,7 @@ define_s *__cdecl PC_CopyDefine(source_s *source, define_s *define)
     token_s *lasttokena; // [esp+2Ch] [ebp-4h]
 
     newdefine = GetMemory(strlen(define->name) + 33);
-    *newdefine = (unsigned int)(newdefine + 8);
+    *newdefine = (uint32_t)(newdefine + 8);
     name = define->name;
     v4 = (_BYTE *)*newdefine;
     do
@@ -1857,7 +1857,7 @@ define_s *__cdecl PC_CopyDefine(source_s *source, define_s *define)
         if (lasttoken)
             lasttoken->next = newtoken;
         else
-            newdefine[5] = (unsigned int)newtoken;
+            newdefine[5] = (uint32_t)newtoken;
         lasttoken = newtoken;
     }
     newdefine[4] = 0;
@@ -1869,7 +1869,7 @@ define_s *__cdecl PC_CopyDefine(source_s *source, define_s *define)
         if (lasttokena)
             lasttokena->next = newtokena;
         else
-            newdefine[4] = (unsigned int)newtokena;
+            newdefine[4] = (uint32_t)newtokena;
         lasttokena = newtokena;
     }
     return (define_s *)newdefine;
@@ -4053,7 +4053,7 @@ char __cdecl Eval_PushOperator(Eval *eval, EvalOperatorType op)
     {
         op = EVAL_OP_UNARY_MINUS;
     }
-    if ((unsigned int)op >= EVAL_OP_COUNT)
+    if ((uint32_t)op >= EVAL_OP_COUNT)
         MyAssertHandler(".\\universal\\eval.cpp", 549, 0, "%s", "op >= 0 && op < ARRAY_COUNT( s_precedence )");
     precedence = s_precedence[op];
     while (eval->opStackPos > 0)
@@ -4358,7 +4358,7 @@ int __cdecl PC_Script_Parse(int handle, const char **out)
             *out = String_Alloc(dst);
             return 1;
         }
-        if ((unsigned int)(&pc_token.string[strlen(pc_token.string) + 1]
+        if ((uint32_t)(&pc_token.string[strlen(pc_token.string) + 1]
             - &pc_token.string[1]
             + &dst[strlen(dst) + 1]
             - &dst[1]) > 0x1400)
@@ -4372,7 +4372,7 @@ int __cdecl PC_Script_Parse(int handle, const char **out)
             v3 = va("\"%s\"", pc_token.string);
             I_strncat(dst, 5120, v3);
         }
-        if ((unsigned int)(&dst[strlen(dst) + 1] - &dst[1] + 1) > 0x1400)
+        if ((uint32_t)(&dst[strlen(dst) + 1] - &dst[1] + 1) > 0x1400)
             break;
         I_strncat(dst, 5120, " ");
     }
@@ -4466,7 +4466,7 @@ char *__cdecl GetValueAsString(Operand operand)
 {
     char *result; // [esp+8h] [ebp-4h]
 
-    if ((unsigned int)currentTempOperand_0 >= 4)
+    if ((uint32_t)currentTempOperand_0 >= 4)
         MyAssertHandler(
             ".\\ui\\ui_expressions_obj.cpp",
             106,
@@ -4499,9 +4499,9 @@ void __cdecl Statement_AddEntry(statement_s *statement, expressionEntry *entry)
 
 void __cdecl Statement_AddOperator(statement_s *statement, operationEnum op)
 {
-    unsigned int *v2; // eax
+    uint32_t *v2; // eax
 
-    v2 = (unsigned int*)Z_Malloc(12, "Statement_AddOperator", 34);
+    v2 = (uint32_t*)Z_Malloc(12, "Statement_AddOperator", 34);
     *v2 = 0;
     v2[1] = op;
     Statement_AddEntry(statement, (expressionEntry *)v2);
@@ -4509,9 +4509,9 @@ void __cdecl Statement_AddOperator(statement_s *statement, operationEnum op)
 
 void __cdecl Statement_AddIntOperand(statement_s *statement, int val)
 {
-    unsigned int *v2; // eax
+    uint32_t *v2; // eax
 
-    v2 = (unsigned int*)Z_Malloc(12, "Statement_AddIntOperand", 34);
+    v2 = (uint32_t*)Z_Malloc(12, "Statement_AddIntOperand", 34);
     *v2 = 1;
     v2[1] = 0;
     v2[2] = val;
@@ -4520,9 +4520,9 @@ void __cdecl Statement_AddIntOperand(statement_s *statement, int val)
 
 void __cdecl Statement_AddFloatOperand(statement_s *statement, float val)
 {
-    unsigned int *v2; // eax
+    uint32_t *v2; // eax
 
-    v2 = (unsigned int*)Z_Malloc(12, "Statement_AddFloatOperand", 34);
+    v2 = (uint32_t*)Z_Malloc(12, "Statement_AddFloatOperand", 34);
     *v2 = 1;
     v2[1] = 1;
     *((float *)v2 + 2) = val;
@@ -5090,7 +5090,7 @@ int __cdecl ItemParse_text(itemDef_s *item, int handle)
 
 char *__cdecl UI_FileText(char *fileName)
 {
-    unsigned int len; // [esp+4h] [ebp-8h]
+    uint32_t len; // [esp+4h] [ebp-8h]
     int f; // [esp+8h] [ebp-4h] BYREF
 
     len = FS_FOpenFileByMode(fileName, &f, FS_READ);
@@ -5389,7 +5389,7 @@ int __cdecl ItemParse_align(itemDef_s *item, int handle)
     return PC_Int_Parse(handle, &item->alignment) != 0;
 }
 
-bool __cdecl ItemParse_IsValidTextAlignment(unsigned int textAlignMode)
+bool __cdecl ItemParse_IsValidTextAlignment(uint32_t textAlignMode)
 {
     return textAlignMode < 0x10 && (textAlignMode & 3) != 3;
 }
@@ -6301,7 +6301,7 @@ int __cdecl Menu_Parse(int handle, menuDef_t *menu)
 
 void __cdecl Menu_PostParse(menuDef_t *menu)
 {
-    unsigned int size; // [esp+0h] [ebp-4h]
+    uint32_t size; // [esp+0h] [ebp-4h]
 
     if (!menu)
         MyAssertHandler(".\\ui\\ui_shared_obj.cpp", 2653, 0, "%s", "menu");

@@ -69,7 +69,7 @@ sval_u __cdecl debugger_node3(Enum_t type, sval_u val1, sval_u val2, sval_u val3
 sval_u __cdecl debugger_node4(Enum_t type, sval_u val1, sval_u val2, sval_u val3, sval_u val4);
 
 sval_u __cdecl debugger_prepend_node(sval_u val1, sval_u val2);
-sval_u __cdecl debugger_buffer(Enum_t type, char *buf, unsigned int size, int alignment);
+sval_u __cdecl debugger_buffer(Enum_t type, char *buf, uint32_t size, int alignment);
 sval_u __cdecl debugger_string(Enum_t type, char *s);
 
 

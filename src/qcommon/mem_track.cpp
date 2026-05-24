@@ -731,7 +731,7 @@ void __cdecl track_PrintInfo()
             mem_track->filename = nodea->data.filename;
             mem_track->size = nodea->data.size;
             mem_track->pos = nodea->data.pos;
-            *(unsigned int*)&mem_track->type = *(unsigned int*)&nodea->data.type;
+            *(uint32_t*)&mem_track->type = *(uint32_t*)&nodea->data.type;
             nodea = nodea->next;
             ++mem_track;
         }
@@ -743,7 +743,7 @@ void __cdecl track_PrintInfo()
             mem_track->filename = p_data->filename;
             mem_track->size = p_data->size;
             mem_track->pos = p_data->pos;
-            *(unsigned int*)&mem_track->type = *(unsigned int*)&p_data->type;
+            *(uint32_t*)&mem_track->type = *(uint32_t*)&p_data->type;
             ++i;
             ++mem_track;
         }
@@ -765,7 +765,7 @@ void __cdecl track_PrintInfo()
                     mem_tracka->filename = v1->filename;
                     mem_tracka->size = v1->size;
                     mem_tracka->pos = v1->pos;
-                    *(unsigned int*)&mem_tracka->type = *(unsigned int*)&v1->type;
+                    *(uint32_t*)&mem_tracka->type = *(uint32_t*)&v1->type;
                     break;
                 }
             }
@@ -1080,7 +1080,7 @@ double __cdecl ConvertToMB(int bytes)
     return (float)((double)bytes / 1048576.0);
 }
 
-int __cdecl mem_track_compare(unsigned int *elem1, unsigned int *elem2)
+int __cdecl mem_track_compare(uint32_t *elem1, uint32_t *elem2)
 {
     if (*((uint8_t *)elem1 + 16) < (int)*((uint8_t *)elem2 + 16))
         return -1;

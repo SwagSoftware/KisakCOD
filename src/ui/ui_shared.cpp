@@ -84,7 +84,7 @@ const commandDef_t commandList[42] =
 void Script_SaveGameHide(UiContext *dc, itemDef_s *item, const char **args)
 {
     //const char **v6; // r3
-    //unsigned int v7; // r11
+    //uint32_t v7; // r11
     //int v8; // r31
     //char v9[1056]; // [sp+50h] [-420h] BYREF
     //
@@ -119,7 +119,7 @@ void Script_ProfileHide(UiContext *dc, itemDef_s *item, const char **args)
 {
     //int v6; // r3
     //const char **v7; // r3
-    //unsigned int v8; // r11
+    //uint32_t v8; // r11
     //int v9; // r30
     //char v10[1056]; // [sp+50h] [-420h] BYREF
     //
@@ -317,7 +317,7 @@ void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char 
     int v5; // eax
     int v6; // [esp-8h] [ebp-420h]
     int v7; // [esp-4h] [ebp-41Ch]
-    unsigned int v8; // [esp-4h] [ebp-41Ch]
+    uint32_t v8; // [esp-4h] [ebp-41Ch]
     StringTable *table; // [esp+4h] [ebp-414h] BYREF
     int perkIndex; // [esp+8h] [ebp-410h]
     int statValue; // [esp+Ch] [ebp-40Ch]
@@ -562,7 +562,7 @@ int __cdecl Menu_ItemsMatchingGroup(menuDef_t *menu, char *name)
     wildcard = -1;
     v2 = (int)strstr(name, "*");
     if (v2)
-        wildcard = v2 - (unsigned int)name;
+        wildcard = v2 - (uint32_t)name;
     for (i = 0; i < menu->itemCount; ++i)
     {
         if (wildcard == -1)
@@ -593,7 +593,7 @@ itemDef_s *__cdecl Menu_GetMatchingItemByNumber(menuDef_t *menu, int index, char
     wildcard = -1;
     v3 = (int)strstr(name, "*");
     if (v3)
-        wildcard = v3 - (unsigned int)name;
+        wildcard = v3 - (uint32_t)name;
     for (i = 0; i < menu->itemCount; ++i)
     {
         if (wildcard == -1)
@@ -1007,7 +1007,7 @@ void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const
     int v6; // [esp-8h] [ebp-824h]
     int v7; // [esp-8h] [ebp-824h]
     int v8; // [esp-4h] [ebp-820h]
-    unsigned int v9; // [esp-4h] [ebp-820h]
+    uint32_t v9; // [esp-4h] [ebp-820h]
     char searchValue[1024]; // [esp+4h] [ebp-818h] BYREF
     int statNum; // [esp+404h] [ebp-418h]
     StringTable *table; // [esp+408h] [ebp-414h] BYREF
@@ -1552,7 +1552,7 @@ BOOL __cdecl Menu_HandleMouseMove(UiContext *dc, menuDef_t *menu)
 itemDef_s *__cdecl Menu_FocusFirstSelectableItem(UiContext *dc, menuDef_t *menu)
 {
     int localClientNum; // [esp+8h] [ebp-8h]
-    unsigned int cursor; // [esp+Ch] [ebp-4h]
+    uint32_t cursor; // [esp+Ch] [ebp-4h]
     int cursora; // [esp+Ch] [ebp-4h]
 
     if (Menu_HandleMouseMove(dc, menu))
@@ -2018,7 +2018,7 @@ void __cdecl Item_RunScript(UiContext *dc, itemDef_s *item, char *s)
     int v3; // [esp+0h] [ebp-1814h]
     uint8_t dst[5120]; // [esp+4h] [ebp-1810h] BYREF
     char out[1028]; // [esp+1404h] [ebp-410h] BYREF
-    unsigned int i; // [esp+180Ch] [ebp-8h]
+    uint32_t i; // [esp+180Ch] [ebp-8h]
     const char *p; // [esp+1810h] [ebp-4h] BYREF
 
     memset(dst, 0, sizeof(dst));
@@ -2406,7 +2406,7 @@ void __cdecl Menus_HandleOOBClick(UiContext *dc, menuDef_t *menu, int key, int d
 
 void __cdecl Item_TextField_BeginEdit(int localClientNum, itemDef_s *item)
 {
-    unsigned int v2; // [esp+0h] [ebp-20h]
+    uint32_t v2; // [esp+0h] [ebp-20h]
     editFieldDef_s *editPtr; // [esp+18h] [ebp-8h]
     int i; // [esp+1Ch] [ebp-4h]
 
@@ -6542,7 +6542,7 @@ int __cdecl Menu_Count(UiContext *dc)
     return dc->menuCount;
 }
 
-void __cdecl Menu_PaintAll_BeginVisibleList(char *stringBegin, unsigned int stringSize)
+void __cdecl Menu_PaintAll_BeginVisibleList(char *stringBegin, uint32_t stringSize)
 {
     PROF_SCOPED("Menu_PaintAll_BeginVisibleList");
 
@@ -6551,17 +6551,17 @@ void __cdecl Menu_PaintAll_BeginVisibleList(char *stringBegin, unsigned int stri
     strcpy(VISIBLE_LIST_PREFIX, "ui_showlist: ");
     if (stringSize < 0xE)
         MyAssertHandler(".\\ui\\ui_shared.cpp", 6048, 0, "%s", "stringSize >= sizeof( VISIBLE_LIST_PREFIX )");
-    *(unsigned int *)stringBegin = *(unsigned int *)VISIBLE_LIST_PREFIX;
-    *((unsigned int *)stringBegin + 1) = *(unsigned int *)&VISIBLE_LIST_PREFIX[4];
-    *((unsigned int *)stringBegin + 2) = *(unsigned int *)&VISIBLE_LIST_PREFIX[8];
+    *(uint32_t *)stringBegin = *(uint32_t *)VISIBLE_LIST_PREFIX;
+    *((uint32_t *)stringBegin + 1) = *(uint32_t *)&VISIBLE_LIST_PREFIX[4];
+    *((uint32_t *)stringBegin + 2) = *(uint32_t *)&VISIBLE_LIST_PREFIX[8];
     *((_WORD *)stringBegin + 6) = *(_WORD *)&VISIBLE_LIST_PREFIX[12];
 }
 
-void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, unsigned int stringSize, char *stringToAppend)
+void __cdecl Menu_PaintAll_AppendToVisibleList(char *stringBegin, uint32_t stringSize, char *stringToAppend)
 {
     PROF_SCOPED("Menu_PaintAll_AppendToVisibleList");
 
-    unsigned int v3; // [esp+0h] [ebp-64h]
+    uint32_t v3; // [esp+0h] [ebp-64h]
     std::reverse_iterator<char *> result; // [esp+44h] [ebp-20h] BYREF
     char _Val; // [esp+53h] [ebp-11h] BYREF
     const char *lastNewline; // [esp+54h] [ebp-10h]
@@ -6751,7 +6751,7 @@ void __cdecl UI_AddMenu(UiContext *dc, menuDef_t *menu)
     dc->Menus[dc->menuCount++] = menu;
 }
 
-int __cdecl UI_PlayLocalSoundAliasByName(unsigned int localClientNum, const char *aliasname)
+int __cdecl UI_PlayLocalSoundAliasByName(uint32_t localClientNum, const char *aliasname)
 {
     return SND_PlayLocalSoundAliasByName(localClientNum, aliasname, SASYS_UI);
 }

@@ -793,7 +793,7 @@ void __cdecl G_ParseEntityField(const char *key, char *value, gentity_s *ent)
     }
 }
 
-void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, unsigned int index)
+void __cdecl GScr_SetDynamicEntityField(gentity_s *ent, uint32_t index)
 {
     Scr_SetDynamicEntityField(ent->s.number, 0, index);
 }
@@ -887,7 +887,7 @@ int32_t G_SpawnStruct()
     return result;
 }
 
-void __cdecl Scr_GetObjectField(unsigned int classnum, int entnum, int offset)
+void __cdecl Scr_GetObjectField(uint32_t classnum, int entnum, int offset)
 {
     const char *v3; // eax
 

@@ -10,49 +10,49 @@
 
 struct $D83B18AC5ED51685DB5F92059A920C50 // sizeof=0x4
 {                                       // ...
-    unsigned int baseIndex;             // ...
+    uint32_t baseIndex;             // ...
 };
 
 struct $616C0C4E0125F5DAA7F70C1AB2F0F42D // sizeof=0x6C
 {                                       // ...
     float invImageHeight;               // ...
     $D83B18AC5ED51685DB5F92059A920C50 xmodel; // ...
-    unsigned int totalEntryLimit;       // ...
-    unsigned int entryBitsY;            // ...
-    unsigned int imageHeight;           // ...
+    uint32_t totalEntryLimit;       // ...
+    uint32_t entryBitsY;            // ...
+    uint32_t imageHeight;           // ...
     const GfxEntity *entities;
-    unsigned int modFrameCount;         // ...
+    uint32_t modFrameCount;         // ...
     GfxImage *lightImages[2];           // ...
     GfxImage *image;                    // ...
-    unsigned int xmodelEntryLimit;      // ...
+    uint32_t xmodelEntryLimit;      // ...
     GfxLightingInfo *lightingInfo;      // ...
     float (*lightingOrigins)[3];        // ...
     int allocModelFail;                 // ...
-    unsigned int *pixelFreeBits[4];     // ...
-    unsigned int *prevPrevPixelFreeBits; // ...
-    unsigned int *prevPixelFreeBits;    // ...
-    unsigned int *currPixelFreeBits;    // ...
-    unsigned int pixelFreeBitsSize;     // ...
-    unsigned int pixelFreeBitsWordCount; // ...
-    unsigned int pixelFreeRover;        // ...
+    uint32_t *pixelFreeBits[4];     // ...
+    uint32_t *prevPrevPixelFreeBits; // ...
+    uint32_t *prevPixelFreeBits;    // ...
+    uint32_t *currPixelFreeBits;    // ...
+    uint32_t pixelFreeBitsSize;     // ...
+    uint32_t pixelFreeBitsWordCount; // ...
+    uint32_t pixelFreeRover;        // ...
     _D3DLOCKED_BOX lockedBox;           // ...
 };
 
 struct GfxSmodelLightGlob_s // sizeof=0x6080
 {                                       // ...
     uint16_t smodelIndex[4096]; // ...
-    unsigned int usedFrameCount[4096];  // ...
-    unsigned int entryLimit;            // ...
-    unsigned int assignedCount;         // ...
-    unsigned int freeableCount;         // ...
-    unsigned int frameCount;            // ...
+    uint32_t usedFrameCount[4096];  // ...
+    uint32_t entryLimit;            // ...
+    uint32_t assignedCount;         // ...
+    uint32_t freeableCount;         // ...
+    uint32_t frameCount;            // ...
     int anyNewLighting;                 // ...
-    unsigned int pad[27];
+    uint32_t pad[27];
 };
 struct GfxSmodelLightGlob // sizeof=0xA080
 {                                       // ...
     uint16_t freeableHandles[4096]; // ...
-    unsigned int lightingBits[2048];    // ...
+    uint32_t lightingBits[2048];    // ...
     GfxSmodelLightGlob_s local; // ...
 };
 
@@ -78,7 +78,7 @@ int s_modelLightingSampleDelta[64];
 
 void __cdecl R_SetModelLightingCoords(uint16_t handle, float *out)
 {
-    unsigned int entryIndex; // [esp+10h] [ebp-18h]
+    uint32_t entryIndex; // [esp+10h] [ebp-18h]
     float yCoord; // [esp+14h] [ebp-14h]
     float xCoord; // [esp+24h] [ebp-4h]
 
@@ -91,12 +91,12 @@ void __cdecl R_SetModelLightingCoords(uint16_t handle, float *out)
     out[3] = 1.0;
 }
 
-void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, PackedLightingCoords *packedCoords)
+void __cdecl R_GetPackedStaticModelLightingCoords(uint32_t smodelIndex, PackedLightingCoords *packedCoords)
 {
-    unsigned int v2; // [esp+0h] [ebp-18h]
-    unsigned int v3; // [esp+4h] [ebp-14h]
-    unsigned int entryIndex; // [esp+8h] [ebp-10h]
-    unsigned int xPixel; // [esp+10h] [ebp-8h]
+    uint32_t v2; // [esp+0h] [ebp-18h]
+    uint32_t v3; // [esp+4h] [ebp-14h]
+    uint32_t entryIndex; // [esp+8h] [ebp-10h]
+    uint32_t xPixel; // [esp+10h] [ebp-8h]
 
     entryIndex = R_ModelLightingIndexFromHandle(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle);
     xPixel = 4 * (entryIndex & 0x3F);
@@ -133,17 +133,17 @@ void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, Pack
     packedCoords->array[3] = 0;
 }
 
-unsigned int __cdecl R_ModelLightingIndexFromHandle(uint16_t handle)
+uint32_t __cdecl R_ModelLightingIndexFromHandle(uint16_t handle)
 {
     iassert(handle && handle <= modelLightGlob.totalEntryLimit);
     return handle - 1;
 }
 
-char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex)
+char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, uint32_t smodelIndex)
 {
     uint16_t handle; // [esp+0h] [ebp-10h]
-    unsigned int smodelIndexPrev; // [esp+4h] [ebp-Ch]
-    unsigned int entryIndex; // [esp+8h] [ebp-8h]
+    uint32_t smodelIndexPrev; // [esp+4h] [ebp-Ch]
+    uint32_t entryIndex; // [esp+8h] [ebp-8h]
 
     iassert(rgp.world);
     handle = smodelDrawInst->lightingHandle;
@@ -191,9 +191,9 @@ char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, 
     return 1;
 }
 
-unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
+uint32_t __cdecl R_AllocModelLighting_PrimaryLight(
     float *lightingOrigin,
-    unsigned int dynEntId,
+    uint32_t dynEntId,
     uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut)
 {
@@ -205,10 +205,10 @@ unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
         lightingInfoOut);
 }
 
-unsigned int __cdecl R_AllocModelLighting(
+uint32_t __cdecl R_AllocModelLighting(
     float *lightingOrigin,
     uint16_t *cachedLightingHandle,
-    unsigned int(__cdecl *GetPrimaryLightCallback)(const void *),
+    uint32_t(__cdecl *GetPrimaryLightCallback)(const void *),
     const void *userData,
     GfxLightingInfo *lightingInfoOut)
 {
@@ -216,14 +216,14 @@ unsigned int __cdecl R_AllocModelLighting(
     int v8; // [esp+4h] [ebp-2Ch]
     float *v9; // [esp+8h] [ebp-28h]
     float *v10; // [esp+10h] [ebp-20h]
-    unsigned int pixelFreeRover; // [esp+14h] [ebp-1Ch]
-    unsigned int entryIndex; // [esp+18h] [ebp-18h]
-    unsigned int usedCount; // [esp+1Ch] [ebp-14h]
-    unsigned int usedIndex; // [esp+20h] [ebp-10h]
-    unsigned int usedIndexa; // [esp+20h] [ebp-10h]
+    uint32_t pixelFreeRover; // [esp+14h] [ebp-1Ch]
+    uint32_t entryIndex; // [esp+18h] [ebp-18h]
+    uint32_t usedCount; // [esp+1Ch] [ebp-14h]
+    uint32_t usedIndex; // [esp+20h] [ebp-10h]
+    uint32_t usedIndexa; // [esp+20h] [ebp-10h]
     uint16_t lightingHandle; // [esp+28h] [ebp-8h]
     uint16_t lightingHandlea; // [esp+28h] [ebp-8h]
-    unsigned int nonSunPrimaryLightIndex; // [esp+2Ch] [ebp-4h]
+    uint32_t nonSunPrimaryLightIndex; // [esp+2Ch] [ebp-4h]
 
     iassert( cachedLightingHandle );
     lightingHandle = *cachedLightingHandle;
@@ -290,13 +290,13 @@ unsigned int __cdecl R_AllocModelLighting(
     }
 }
 
-unsigned int __cdecl R_DynEntPrimaryLightCallback(const void *userData)
+uint32_t __cdecl R_DynEntPrimaryLightCallback(const void *userData)
 {
     DWORD *data = (DWORD *)userData;
     return rgp.world->nonSunPrimaryLightForModelDynEnt[*data];
 }
 
-unsigned int __cdecl R_AllocModelLighting_Box(
+uint32_t __cdecl R_AllocModelLighting_Box(
     const GfxViewInfo *viewInfo,
     float *lightingOrigin,
     const float *boxMins,
@@ -318,14 +318,14 @@ unsigned int __cdecl R_AllocModelLighting_Box(
         lightingInfoOut);
 }
 
-unsigned int __cdecl R_GetPrimaryLightForBoxCallback(const void *userData)
+uint32_t __cdecl R_GetPrimaryLightForBoxCallback(const void *userData)
 {
     GfxFindLightForBox *boxWork = (GfxFindLightForBox *)userData;
 
     return R_GetNonSunPrimaryLightForBox(boxWork->viewInfo, boxWork->midPoint, boxWork->halfSize);
 }
 
-unsigned int __cdecl R_AllocModelLighting_Sphere(
+uint32_t __cdecl R_AllocModelLighting_Sphere(
     const GfxViewInfo *viewInfo,
     float *lightingOrigin,
     const float *origin,
@@ -349,7 +349,7 @@ unsigned int __cdecl R_AllocModelLighting_Sphere(
         lightingInfoOut);
 }
 
-unsigned int __cdecl R_GetPrimaryLightForSphereCallback(const void *userData)
+uint32_t __cdecl R_GetPrimaryLightForSphereCallback(const void *userData)
 {
     GfxFindLightForSphere *sphereWork = (GfxFindLightForSphere *)userData;
     
@@ -358,7 +358,7 @@ unsigned int __cdecl R_GetPrimaryLightForSphereCallback(const void *userData)
 
 void __cdecl R_ToggleModelLightingFrame()
 {
-    unsigned int entryIndex; // [esp+0h] [ebp-4h]
+    uint32_t entryIndex; // [esp+0h] [ebp-4h]
 
     ++smodelLightGlob.local.frameCount;
     modelLightGlob.modFrameCount = (modelLightGlob.modFrameCount + 1) % 4;
@@ -375,10 +375,10 @@ void __cdecl R_ToggleModelLightingFrame()
     }
 }
 
-unsigned int __cdecl R_CalcModelLighting(
-    unsigned int entryIndex,
+uint32_t __cdecl R_CalcModelLighting(
+    uint32_t entryIndex,
     const float *lightingOrigin,
-    unsigned int nonSunPrimaryLightIndex,
+    uint32_t nonSunPrimaryLightIndex,
     GfxModelLightExtrapolation extrapolateBehavior)
 {
     KISAK_NULLSUB();
@@ -395,7 +395,7 @@ unsigned int __cdecl R_CalcModelLighting(
 
 void __cdecl R_BeginAllStaticModelLighting()
 {
-    unsigned int size; // [esp+0h] [ebp-4h]
+    uint32_t size; // [esp+0h] [ebp-4h]
 
     iassert( !smodelLightGlob.local.anyNewLighting );
     size = 4 * ((rgp.world->dpvs.smodelCount + 31) >> 5);
@@ -406,10 +406,10 @@ void __cdecl R_BeginAllStaticModelLighting()
 void __cdecl R_SetAllStaticModelLighting()
 {
     DWORD v1; // eax
-    unsigned int wordCount; // [esp+34h] [ebp-18h]
-    unsigned int bits; // [esp+38h] [ebp-14h]
-    unsigned int indexLow; // [esp+40h] [ebp-Ch]
-    unsigned int wordIndex; // [esp+44h] [ebp-8h]
+    uint32_t wordCount; // [esp+34h] [ebp-18h]
+    uint32_t bits; // [esp+38h] [ebp-14h]
+    uint32_t indexLow; // [esp+40h] [ebp-Ch]
+    uint32_t wordIndex; // [esp+44h] [ebp-8h]
 
     if (smodelLightGlob.local.anyNewLighting)
     {
@@ -431,7 +431,7 @@ void __cdecl R_SetAllStaticModelLighting()
                     indexLow = v1 ^ 0x1F;
                     if ((v1 ^ 0x1Fu) >= 0x20)
                         break;
-                    unsigned int bit = (0x80000000 >> indexLow);
+                    uint32_t bit = (0x80000000 >> indexLow);
                     iassert( bits & bit );
                     bits &= ~bit;
                     R_SetStaticModelLighting(indexLow + 32 * wordIndex);
@@ -441,9 +441,9 @@ void __cdecl R_SetAllStaticModelLighting()
     }
 }
 
-void __cdecl R_SetStaticModelLighting(unsigned int smodelIndex)
+void __cdecl R_SetStaticModelLighting(uint32_t smodelIndex)
 {
-    unsigned int entryIndex; // [esp+0h] [ebp-18h]
+    uint32_t entryIndex; // [esp+0h] [ebp-18h]
     const GfxStaticModelDrawInst *smodelDrawInst; // [esp+4h] [ebp-14h]
     const GfxStaticModelInst *smodelInst; // [esp+8h] [ebp-10h]
     float lightingOrigin[3]; // [esp+Ch] [ebp-Ch] BYREF
@@ -466,7 +466,7 @@ void __cdecl R_SetStaticModelLighting(unsigned int smodelIndex)
         R_CalcModelLighting(entryIndex, lightingOrigin, smodelDrawInst->primaryLightIndex, GFX_MODELLIGHT_EXTRAPOLATE);
 }
 
-void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const uint8_t *groundLighting)
+void __cdecl R_SetModelGroundLighting(uint32_t entryIndex, const uint8_t *groundLighting)
 {
     GfxModelLightingPatch *patch; // [esp+8h] [ebp-4h]
 
@@ -481,7 +481,7 @@ void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const uint8_t *gr
             (uint16_t)entryIndex);
     patch->modelLightingIndex = entryIndex;
     iassert( patch->colorsCount == 0 );
-    *(unsigned int *)patch->groundLighting = *(unsigned int *)groundLighting;
+    *(uint32_t *)patch->groundLighting = *(uint32_t *)groundLighting;
 }
 
 void __cdecl R_SetModelLightingCoordsForSource(uint16_t handle, GfxCmdBufSourceState *source)
@@ -490,20 +490,20 @@ void __cdecl R_SetModelLightingCoordsForSource(uint16_t handle, GfxCmdBufSourceS
     R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 
-void __cdecl R_SetStaticModelLightingCoordsForSource(unsigned int smodelIndex, GfxCmdBufSourceState *source)
+void __cdecl R_SetStaticModelLightingCoordsForSource(uint32_t smodelIndex, GfxCmdBufSourceState *source)
 {
     R_SetModelLightingCoords(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle, source->input.consts[57]);
     R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 
 
-unsigned int R_SetModelLightingSampleDeltas()
+uint32_t R_SetModelLightingSampleDeltas()
 {
-    unsigned int result; // eax
-    unsigned int i; // [esp+0h] [ebp-10h]
-    unsigned int sampleIndex; // [esp+4h] [ebp-Ch]
-    unsigned int dz; // [esp+8h] [ebp-8h]
-    unsigned int dy; // [esp+Ch] [ebp-4h]
+    uint32_t result; // eax
+    uint32_t i; // [esp+0h] [ebp-10h]
+    uint32_t sampleIndex; // [esp+4h] [ebp-Ch]
+    uint32_t dz; // [esp+8h] [ebp-8h]
+    uint32_t dy; // [esp+Ch] [ebp-4h]
 
     sampleIndex = 0;
     for (dz = 0; dz < 4; ++dz)
@@ -539,7 +539,7 @@ void __cdecl R_SetupDynamicModelLighting(GfxCmdBufInput *input)
 
 void __cdecl R_ShutdownModelLightingGlobals()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 4; ++i)
         R_FreeGlobalVariable(modelLightGlob.pixelFreeBits[i]);
@@ -550,8 +550,8 @@ void __cdecl R_ShutdownModelLightingGlobals()
 void __cdecl R_InitModelLightingGlobals()
 {
     DWORD v1; // eax
-    unsigned int totalBitsNeeded; // [esp+Ch] [ebp-8h]
-    unsigned int i; // [esp+10h] [ebp-4h]
+    uint32_t totalBitsNeeded; // [esp+Ch] [ebp-8h]
+    uint32_t i; // [esp+10h] [ebp-4h]
 
     modelLightGlob.xmodelEntryLimit = gfxCfg.maxClientViews << 10;
     if (!_BitScanReverse(&v1, gfxCfg.maxClientViews << 10))
@@ -569,7 +569,7 @@ void __cdecl R_InitModelLightingGlobals()
     modelLightGlob.totalEntryLimit = 1 << totalBitsNeeded;
     modelLightGlob.entryBitsY = totalBitsNeeded - 6;
     modelLightGlob.imageHeight = 1 << (totalBitsNeeded - 6 + 2);
-    modelLightGlob.invImageHeight = 1.0 / (double)(unsigned int)(1 << (totalBitsNeeded - 6 + 2));
+    modelLightGlob.invImageHeight = 1.0 / (double)(uint32_t)(1 << (totalBitsNeeded - 6 + 2));
     modelLightGlob.xmodel.baseIndex = smodelLightGlob.local.entryLimit;
 
     iassert(!(modelLightGlob.xmodelEntryLimit & 31));
@@ -579,25 +579,25 @@ void __cdecl R_InitModelLightingGlobals()
     modelLightGlob.lightingOrigins = (float (*)[3])R_AllocModelLightingGlobal(12 * modelLightGlob.xmodelEntryLimit);
 
     for (i = 0; i < 4; ++i)
-        modelLightGlob.pixelFreeBits[i] = (unsigned int *)R_AllocModelLightingGlobal(modelLightGlob.pixelFreeBitsSize);
+        modelLightGlob.pixelFreeBits[i] = (uint32_t *)R_AllocModelLightingGlobal(modelLightGlob.pixelFreeBitsSize);
 
     modelLightGlob.lightingInfo = (GfxLightingInfo *)R_AllocModelLightingGlobal(2 * modelLightGlob.xmodelEntryLimit);
     modelLightGlob.image = modelLightGlob.lightImages[0];
 }
 
-char *__cdecl R_AllocModelLightingGlobal(unsigned int bytes)
+char *__cdecl R_AllocModelLightingGlobal(uint32_t bytes)
 {
     return Z_VirtualAlloc(bytes, "R_AllocModelLightingGlobal", 18);
 }
 
 void __cdecl R_ResetModelLighting()
 {
-    unsigned int v0; // eax
+    uint32_t v0; // eax
     float *v1; // [esp+0h] [ebp-14h]
-    unsigned int entryIndex; // [esp+4h] [ebp-10h]
-    unsigned int usedIndex; // [esp+8h] [ebp-Ch]
-    unsigned int i; // [esp+Ch] [ebp-8h]
-    unsigned int smodelIndex; // [esp+10h] [ebp-4h]
+    uint32_t entryIndex; // [esp+4h] [ebp-10h]
+    uint32_t usedIndex; // [esp+8h] [ebp-Ch]
+    uint32_t i; // [esp+Ch] [ebp-8h]
+    uint32_t smodelIndex; // [esp+10h] [ebp-4h]
 
     for (i = 0; i < 4; ++i)
         Com_Memset(modelLightGlob.pixelFreeBits[i], 255, modelLightGlob.pixelFreeBitsSize);
@@ -688,20 +688,20 @@ void __cdecl R_ApplyLightGridColorsPatch(const GfxModelLightingPatch *patch, uin
     }
 }
 
-void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsigned int patchCount)
+void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, uint32_t patchCount)
 {
-    unsigned int modelLightingIndex; // [esp+4h] [ebp-4Ch]
+    uint32_t modelLightingIndex; // [esp+4h] [ebp-4Ch]
     int v6; // [esp+8h] [ebp-48h]
     int v7; // [esp+Ch] [ebp-44h]
     int hr; // [esp+10h] [ebp-40h]
     uint8_t *pixels; // [esp+18h] [ebp-38h]
-    unsigned int sampleIndex; // [esp+1Ch] [ebp-34h]
-    unsigned int patchIter; // [esp+20h] [ebp-30h]
+    uint32_t sampleIndex; // [esp+1Ch] [ebp-34h]
+    uint32_t patchIter; // [esp+20h] [ebp-30h]
     const GfxModelLightingPatch *patch; // [esp+24h] [ebp-2Ch]
-    unsigned int y0; // [esp+28h] [ebp-28h]
+    uint32_t y0; // [esp+28h] [ebp-28h]
     GfxImage *lightImage; // [esp+2Ch] [ebp-24h]
     _D3DBOX dirtyBox; // [esp+30h] [ebp-20h] BYREF
-    unsigned int lockValue; // [esp+48h] [ebp-8h]
+    uint32_t lockValue; // [esp+48h] [ebp-8h]
     bool useAltUpdate; // [esp+4Fh] [ebp-1h]
 
     if (patchCount)

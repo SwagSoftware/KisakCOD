@@ -143,7 +143,7 @@ void Scr_ScriptWatch::Init()
 
     if (!Scr_ScriptWatch::ReadFromFile())
     {
-        for (i = 0; (unsigned int)i < 5; ++i)
+        for (i = 0; (uint32_t)i < 5; ++i)
         {
             Scr_ScriptWatch::PasteElementInternal(0, (char*)defaultWatchNames[i], 0);
         }
@@ -375,7 +375,7 @@ void Scr_ScriptWatch::Draw_r(Scr_WatchElement_s *element,
     float width,
     float lastHeight,
     int startLine,
-    unsigned int depth,
+    uint32_t depth,
     bool isArray,
     int *currentLine,
     float *currentY,
@@ -411,7 +411,7 @@ void Scr_ScriptWatch::Draw_r(Scr_WatchElement_s *element,
     float color[4]; // [esp+284h] [ebp-28h] BYREF
     float colorDelta[4]; // [esp+294h] [ebp-18h] BYREF
     int deltaTime; // [esp+2A4h] [ebp-8h]
-    unsigned int startCol; // [esp+2A8h] [ebp-4h]
+    uint32_t startCol; // [esp+2A8h] [ebp-4h]
 
     CL_LookupColor(0, 0x37u, colorWhite);
     colorRed[0] = 1.0;
@@ -1188,10 +1188,10 @@ bool UI_LinesComponent::SetSelectedLineFocus(int newSelectedLine, bool user)
 
 void __thiscall Scr_ScriptWatch::DisplayThreadPos(Scr_WatchElement_s *element)
 {
-    unsigned int bufferIndex; // [esp+4h] [ebp-10h]
-    unsigned int lineNum; // [esp+8h] [ebp-Ch]
+    uint32_t bufferIndex; // [esp+4h] [ebp-10h]
+    uint32_t lineNum; // [esp+8h] [ebp-Ch]
     const char *codePos; // [esp+Ch] [ebp-8h]
-    unsigned int sourcePos; // [esp+10h] [ebp-4h]
+    uint32_t sourcePos; // [esp+10h] [ebp-4h]
 
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 7063, 0, "%s", "!Sys_IsRemoteDebugClient()");
@@ -1226,8 +1226,8 @@ Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CreateWatchElement(
 
 Scr_WatchElement_s *__thiscall Scr_ScriptWatch::CreateBreakpointElement(
     Scr_WatchElement_s *element,
-    unsigned int bufferIndex,
-    unsigned int sourcePos,
+    uint32_t bufferIndex,
+    uint32_t sourcePos,
     bool user)
 {
     Scr_WatchElement_s **ElementRef; // eax
@@ -1537,8 +1537,8 @@ bool Scr_ScriptCallStack::KeyEvent(float *point, int key)
 
 bool __thiscall Scr_ScriptCallStack::SetSelectedLineFocus(int newSelectedLine, bool user)
 {
-    unsigned int LineNum; // eax
-    unsigned int bufferIndex; // [esp+4h] [ebp-8h]
+    uint32_t LineNum; // eax
+    uint32_t bufferIndex; // [esp+4h] [ebp-8h]
 
     if (!UI_LinesComponent::SetSelectedLineFocus(newSelectedLine, user))
         return 0;
@@ -1566,7 +1566,7 @@ void Scr_ScriptCallStack::Draw(
     float v8; // [esp+2Ch] [ebp-E4h]
     int currentLine; // [esp+44h] [ebp-CCh]
     float selectColor[4]; // [esp+48h] [ebp-C8h] BYREF
-    unsigned int bufferIndex; // [esp+58h] [ebp-B8h]
+    uint32_t bufferIndex; // [esp+58h] [ebp-B8h]
     int startLine; // [esp+5Ch] [ebp-B4h]
     float startLineFrac; // [esp+60h] [ebp-B0h]
     float currentY; // [esp+64h] [ebp-ACh]
@@ -1574,7 +1574,7 @@ void Scr_ScriptCallStack::Draw(
     float lastHeight; // [esp+6Ch] [ebp-A4h]
     float color[4]; // [esp+70h] [ebp-A0h] BYREF
     char text[136]; // [esp+80h] [ebp-90h] BYREF
-    unsigned int startCol; // [esp+10Ch] [ebp-4h]
+    uint32_t startCol; // [esp+10Ch] [ebp-4h]
 
     UI_Component::DrawPic(x, y, width, height, 0, cls.consoleMaterial);
     CL_LookupColor(0, 0x37u, color);
@@ -1620,7 +1620,7 @@ void Scr_ScriptCallStack::Draw(
 void __thiscall Scr_ScriptCallStack::UpdateStack()
 {
     Scr_SourcePos2_t *pos; // [esp+4h] [ebp-14h]
-    unsigned int index; // [esp+Ch] [ebp-Ch]
+    uint32_t index; // [esp+Ch] [ebp-Ch]
     int i; // [esp+10h] [ebp-8h]
     char *codePos; // [esp+14h] [ebp-4h]
 
@@ -1829,8 +1829,8 @@ bool Scr_OpenScriptList::SetSelectedLineFocus(
     int newSelectedLine,
     bool user)
 {
-    unsigned int sortedIndex; // [esp+4h] [ebp-Ch]
-    unsigned int bufferIndex; // [esp+8h] [ebp-8h]
+    uint32_t sortedIndex; // [esp+4h] [ebp-Ch]
+    uint32_t bufferIndex; // [esp+8h] [ebp-8h]
 
     if (!UI_LinesComponent::SetSelectedLineFocus(newSelectedLine, user))
         return 0;
@@ -1903,7 +1903,7 @@ void Scr_ScriptWatch::PasteBreakpointElement(
     uint8_t breakpointType,
     bool user)
 {
-    unsigned int bufferIndex; // [esp+4h] [ebp-14h]
+    uint32_t bufferIndex; // [esp+4h] [ebp-14h]
     int lineNum; // [esp+8h] [ebp-10h]
     const char *name; // [esp+Ch] [ebp-Ch]
     SourceBufferInfo *sourceBufData; // [esp+10h] [ebp-8h]
@@ -2111,7 +2111,7 @@ void __thiscall Scr_ScriptWatch::LoadSelectedLine(Scr_SelectedLineInfo *info)
 
 bool Scr_ScriptWatch::EvaluateWatchChildElement(
     Scr_WatchElement_s *element,
-    unsigned int fieldName,
+    uint32_t fieldName,
     Scr_WatchElement_s *childElement,
     bool hardcodedField)
 {
@@ -2180,11 +2180,11 @@ bool Scr_ScriptWatch::EvaluateWatchChildElement(
     return Scr_ScriptWatch::PostEvaluateWatchElement(childElement, &value);
 }
 
-int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2);
+int __cdecl CompareThreadIndices(uint32_t *arg1, uint32_t *arg2);
 
 void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
 {
-    unsigned int AllVariableField_DONE; // eax
+    uint32_t AllVariableField_DONE; // eax
     const char *v3; // eax
     const char *v4; // eax
     const char *CanonicalString; // eax
@@ -2192,34 +2192,34 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
     bool v7; // [esp+8h] [ebp-128h]
     int v8; // [esp+Ch] [ebp-124h]
     bool v9; // [esp+10h] [ebp-120h]
-    int(__cdecl * v10)(unsigned int *, unsigned int *); // [esp+14h] [ebp-11Ch]
+    int(__cdecl * v10)(uint32_t *, uint32_t *); // [esp+14h] [ebp-11Ch]
     uint8_t v11; // [esp+18h] [ebp-118h]
     uint8_t objectType; // [esp+1Ch] [ebp-114h]
     bool oldHardcodedField; // [esp+2Fh] [ebp-101h]
     char fieldText[136]; // [esp+30h] [ebp-100h] BYREF
-    unsigned int hardcodedNames[5]; // [esp+BCh] [ebp-74h] BYREF
+    uint32_t hardcodedNames[5]; // [esp+BCh] [ebp-74h] BYREF
     Scr_WatchElement_s *childElement; // [esp+D0h] [ebp-60h]
-    unsigned int newIndex; // [esp+D4h] [ebp-5Ch]
-    unsigned int oldChildCount; // [esp+D8h] [ebp-58h]
-    int(__cdecl * compare)(unsigned int*, unsigned int*); // [esp+DCh] [ebp-54h]
+    uint32_t newIndex; // [esp+D4h] [ebp-5Ch]
+    uint32_t oldChildCount; // [esp+D8h] [ebp-58h]
+    int(__cdecl * compare)(uint32_t*, uint32_t*); // [esp+DCh] [ebp-54h]
     uint8_t oldObjectType; // [esp+E2h] [ebp-4Eh]
     bool isArray; // [esp+E3h] [ebp-4Dh]
     Scr_WatchElement_s *newElements; // [esp+E4h] [ebp-4Ch]
     Scr_WatchElement_s *oldElements; // [esp+E8h] [ebp-48h]
-    unsigned int hardcodedCount; // [esp+ECh] [ebp-44h]
+    uint32_t hardcodedCount; // [esp+ECh] [ebp-44h]
     Scr_WatchElement_s *newElement; // [esp+F0h] [ebp-40h]
     int function_count; // [esp+F4h] [ebp-3Ch]
-    unsigned int objectId; // [esp+F8h] [ebp-38h]
+    uint32_t objectId; // [esp+F8h] [ebp-38h]
     Scr_WatchElement_s *oldElement; // [esp+FCh] [ebp-34h]
     Scr_WatchElement_s **newElementOldRef; // [esp+100h] [ebp-30h]
     int compareResult; // [esp+104h] [ebp-2Ch]
     bool elementChanged; // [esp+10Bh] [ebp-25h]
-    unsigned int threadId; // [esp+10Ch] [ebp-24h]
-    unsigned int oldIndex; // [esp+110h] [ebp-20h]
-    unsigned int *names; // [esp+114h] [ebp-1Ch]
+    uint32_t threadId; // [esp+10Ch] [ebp-24h]
+    uint32_t oldIndex; // [esp+110h] [ebp-20h]
+    uint32_t *names; // [esp+114h] [ebp-1Ch]
     bool hardcodedField; // [esp+11Bh] [ebp-15h]
-    unsigned int nameIndex; // [esp+11Ch] [ebp-14h]
-    unsigned int count; // [esp+120h] [ebp-10h]
+    uint32_t nameIndex; // [esp+11Ch] [ebp-14h]
+    uint32_t count; // [esp+120h] [ebp-10h]
     VariableValue value; // [esp+124h] [ebp-Ch] BYREF
     bool setChildCount; // [esp+12Eh] [ebp-2h]
     bool sameType; // [esp+12Fh] [ebp-1h]
@@ -2544,7 +2544,7 @@ bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
     VariableValue *value)
 {
     int type; // eax
-    unsigned int intValue; // [esp+0h] [ebp-118h]
+    uint32_t intValue; // [esp+0h] [ebp-118h]
     char valueText[268]; // [esp+8h] [ebp-110h] BYREF
 
     if (Sys_IsRemoteDebugClient())
@@ -2587,7 +2587,7 @@ bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
 
 void Scr_ScriptWindow::SetScriptFile(const char *name)
 {
-    unsigned int i; // [esp+8h] [ebp-4h]
+    uint32_t i; // [esp+8h] [ebp-4h]
 
     for (i = 0; i < scrParserPub.sourceBufferLookupLen; ++i)
     {
@@ -2666,7 +2666,7 @@ void Scr_ScriptList::AddFile(const char *filename, Scr_AddFileInfo *info)
 
 void Scr_ScriptList::Init()
 {
-    unsigned int VariableName; // eax
+    uint32_t VariableName; // eax
     const char *v2; // eax
     char filename[64]; // [esp+14h] [ebp-860h] BYREF
     Scr_AddFileInfo info; // [esp+58h] [ebp-81Ch] BYREF
@@ -2674,7 +2674,7 @@ void Scr_ScriptList::Init()
     int numCurrCols; // [esp+68h] [ebp-80Ch]
     const char *scriptWindowsNames[512]; // [esp+6Ch] [ebp-808h] BYREF
     int i; // [esp+86Ch] [ebp-8h]
-    unsigned int id; // [esp+870h] [ebp-4h]
+    uint32_t id; // [esp+870h] [ebp-4h]
 
     Scr_AbstractScriptList::Init();
 
@@ -4083,13 +4083,13 @@ void Scr_ScriptWindow::ToggleBreakpoint(
 
 char *__thiscall Scr_ScriptWindow::GetBreakpointCodePos()
 {
-    unsigned int startSourcePos; // [esp+4h] [ebp-1Ch]
+    uint32_t startSourcePos; // [esp+4h] [ebp-1Ch]
     SourceBufferInfo *sourceBufData; // [esp+8h] [ebp-18h]
     const char *s; // [esp+Ch] [ebp-14h]
     int line; // [esp+10h] [ebp-10h]
     char *codePos; // [esp+14h] [ebp-Ch]
-    unsigned int sourcePos; // [esp+18h] [ebp-8h] BYREF
-    unsigned int endSourcePos; // [esp+1Ch] [ebp-4h]
+    uint32_t sourcePos; // [esp+18h] [ebp-8h] BYREF
+    uint32_t endSourcePos; // [esp+1Ch] [ebp-4h]
 
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 1355, 0, "%s", "!Sys_IsRemoteDebugClient()");
@@ -4199,12 +4199,12 @@ void Scr_ScriptWindow::EnterCallInternal()
     const char *v2; // [esp+4h] [ebp-30h]
     Scr_SourcePos_t pos; // [esp+Ch] [ebp-28h] BYREF
     Scr_Breakpoint *breakpoint; // [esp+18h] [ebp-1Ch]
-    unsigned int startSourcePos; // [esp+1Ch] [ebp-18h] BYREF
+    uint32_t startSourcePos; // [esp+1Ch] [ebp-18h] BYREF
     const char *codePos; // [esp+20h] [ebp-14h]
-    unsigned int sourcePos; // [esp+24h] [ebp-10h] BYREF
+    uint32_t sourcePos; // [esp+24h] [ebp-10h] BYREF
     Scr_Breakpoint **pBreakpoint; // [esp+28h] [ebp-Ch]
     const char *destCodePos; // [esp+2Ch] [ebp-8h]
-    unsigned int endSourcePos; // [esp+30h] [ebp-4h] BYREF
+    uint32_t endSourcePos; // [esp+30h] [ebp-4h] BYREF
 
     if (this->selectedLine < 0)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 1774, 0, "%s", "selectedLine >= 0");

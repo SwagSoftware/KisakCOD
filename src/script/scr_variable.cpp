@@ -58,7 +58,7 @@ int  VariableInfoFunctionCompare(void *p_info1, void *p_info2)
 	return -1;
 }
 
-int __cdecl CompareThreadIndices(unsigned int *arg1, unsigned int *arg2)
+int __cdecl CompareThreadIndices(uint32_t *arg1, uint32_t *arg2)
 {
 	return *arg1 - *arg2;
 }
@@ -103,9 +103,9 @@ void Scr_InitVariables()
 	Scr_InitVariableRange(VARIABLELIST_CHILD_BEGIN, 0x18000u);
 }
 
-void Scr_InitVariableRange(unsigned int begin, unsigned int end)
+void Scr_InitVariableRange(uint32_t begin, uint32_t end)
 {
-	unsigned int index; // [esp+4h] [ebp-8h]
+	uint32_t index; // [esp+4h] [ebp-8h]
 	VariableValueInternal* value = NULL; // [esp+8h] [ebp-4h]
 	VariableValueInternal* valuea; // [esp+8h] [ebp-4h]
 
@@ -145,24 +145,24 @@ void Scr_InitClassMap()
 	}
 }
 
-unsigned int Scr_GetNumScriptVars(void)
+uint32_t Scr_GetNumScriptVars(void)
 {
 	return scrVarPub.numScriptObjects + scrVarPub.numScriptValues;
 }
 
-unsigned int  GetVariableKeyObject(unsigned int id)
+uint32_t  GetVariableKeyObject(uint32_t id)
 {
 	iassert(!IsObject(&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + id]));
 
 	return (scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].w.status >> VAR_NAME_BITS) - SL_MAX_STRING_INDEX;
 }
 
-unsigned int  Scr_GetVarId(unsigned int index)
+uint32_t  Scr_GetVarId(uint32_t index)
 {
 	return scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-void  Scr_SetThreadNotifyName(unsigned int startLocalId, unsigned int stringValue)
+void  Scr_SetThreadNotifyName(uint32_t startLocalId, uint32_t stringValue)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -177,7 +177,7 @@ void  Scr_SetThreadNotifyName(unsigned int startLocalId, unsigned int stringValu
 	entryValue->w.notifyName |= stringValue << VAR_NAME_BITS;
 }
 
-unsigned short  Scr_GetThreadNotifyName(unsigned int startLocalId)
+unsigned short  Scr_GetThreadNotifyName(uint32_t startLocalId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.type & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.type & VAR_MASK) == VAR_NOTIFY_THREAD);
@@ -185,7 +185,7 @@ unsigned short  Scr_GetThreadNotifyName(unsigned int startLocalId)
 	return scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.notifyName >> VAR_NAME_BITS;
 }
 
-void  Scr_SetThreadWaitTime(unsigned int startLocalId, unsigned int waitTime)
+void  Scr_SetThreadWaitTime(uint32_t startLocalId, uint32_t waitTime)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -200,7 +200,7 @@ void  Scr_SetThreadWaitTime(unsigned int startLocalId, unsigned int waitTime)
 	entryValue->w.waitTime |= waitTime << VAR_NAME_BITS;
 }
 
-void  Scr_ClearWaitTime(unsigned int startLocalId)
+void  Scr_ClearWaitTime(uint32_t startLocalId)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -212,7 +212,7 @@ void  Scr_ClearWaitTime(unsigned int startLocalId)
 	entryValue->w.status |= 0xEu;
 }
 
-unsigned int  Scr_GetThreadWaitTime(unsigned int startLocalId)
+uint32_t  Scr_GetThreadWaitTime(uint32_t startLocalId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + startLocalId].w.type & VAR_MASK) == VAR_TIME_THREAD);
@@ -220,7 +220,7 @@ unsigned int  Scr_GetThreadWaitTime(unsigned int startLocalId)
 	return scrVarGlob.variableList[startLocalId + VARIABLELIST_PARENT_BEGIN].w.waitTime >> VAR_NAME_BITS;
 }
 
-unsigned int  GetParentLocalId(unsigned int threadId)
+uint32_t  GetParentLocalId(uint32_t threadId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) == VAR_CHILD_THREAD);
@@ -228,7 +228,7 @@ unsigned int  GetParentLocalId(unsigned int threadId)
 	return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].w.parentLocalId >> VAR_NAME_BITS;
 }
 
-unsigned int  GetSafeParentLocalId(unsigned int threadId)
+uint32_t  GetSafeParentLocalId(uint32_t threadId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) >= VAR_THREAD 
@@ -240,7 +240,7 @@ unsigned int  GetSafeParentLocalId(unsigned int threadId)
 		return 0;
 }
 
-unsigned int  GetStartLocalId(unsigned int threadId)
+uint32_t  GetStartLocalId(uint32_t threadId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) >= VAR_THREAD 
@@ -256,7 +256,7 @@ unsigned int  GetStartLocalId(unsigned int threadId)
 	return threadId;
 }
 
-unsigned int  AllocValue(void)
+uint32_t  AllocValue(void)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-14h]
 	uint16_t newIndex; // [esp+4h] [ebp-10h]
@@ -316,10 +316,10 @@ unsigned int  AllocValue(void)
 	return entry->hash.id;
 }
 
-unsigned int  AllocObject(void)
+uint32_t  AllocObject(void)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	id = AllocVariable();
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN];
@@ -332,11 +332,11 @@ unsigned int  AllocObject(void)
 	return id;
 }
 
-unsigned int  Scr_AllocArray(void)
+uint32_t  Scr_AllocArray(void)
 {
 	const char* varUsagePos; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
-	unsigned int id; // [esp+8h] [ebp-4h]
+	uint32_t id; // [esp+8h] [ebp-4h]
 
 	varUsagePos = scrVarPub.varUsagePos;
 	if (!scrVarPub.varUsagePos)
@@ -355,10 +355,10 @@ unsigned int  Scr_AllocArray(void)
 	return id;
 }
 
-unsigned int  AllocThread(unsigned int self)
+uint32_t  AllocThread(uint32_t self)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	id = AllocVariable();
 
@@ -374,10 +374,10 @@ unsigned int  AllocThread(unsigned int self)
 	return id;
 }
 
-unsigned int  AllocChildThread(unsigned int self, unsigned int parentLocalId)
+uint32_t  AllocChildThread(uint32_t self, uint32_t parentLocalId)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	id = AllocVariable();
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN];
@@ -396,7 +396,7 @@ unsigned int  AllocChildThread(unsigned int self, unsigned int parentLocalId)
 	return id;
 }
 
-unsigned int  Scr_GetSelf(unsigned int threadId)
+uint32_t  Scr_GetSelf(uint32_t threadId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	iassert(((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + threadId].w.type & VAR_MASK) >= VAR_THREAD) &&
@@ -405,7 +405,7 @@ unsigned int  Scr_GetSelf(unsigned int threadId)
 	return scrVarGlob.variableList[threadId + VARIABLELIST_PARENT_BEGIN].u.o.u.self;
 }
 
-void  AddRefToObject(unsigned int id)
+void  AddRefToObject(uint32_t id)
 {
 	iassert(id >= 1 && id < VARIABLELIST_PARENT_SIZE);
 
@@ -424,7 +424,7 @@ void  AddRefToObject(unsigned int id)
 	iassert(scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].u.o.refCount);
 }
 
-void  RemoveRefToEmptyObject(unsigned int id)
+void  RemoveRefToEmptyObject(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -450,7 +450,7 @@ void  RemoveRefToEmptyObject(unsigned int id)
 	}
 }
 
-int  Scr_GetRefCountToObject(unsigned int id)
+int  Scr_GetRefCountToObject(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -508,10 +508,10 @@ void  RemoveRefToVector(float const* vectorValue)
 
 void  AddRefToValue(int type, VariableUnion u)
 {
-	unsigned int value; // [esp+0h] [ebp-4h]
+	uint32_t value; // [esp+0h] [ebp-4h]
 
 	value = type - 1;
-	if ((unsigned int)(type - 1) < 4)
+	if ((uint32_t)(type - 1) < 4)
 	{
 		if (type == 1)
 		{
@@ -556,34 +556,34 @@ void  RemoveRefToValue(int type, VariableUnion u)
 	}
 }
 
-bool  IsValidArrayIndex(unsigned int unsignedValue)
+bool  IsValidArrayIndex(uint32_t unsignedValue)
 {
 	return unsignedValue + 0x7E8000 <= 0xFE7FFF;
 }
 
-unsigned int  GetInternalVariableIndex(unsigned int unsignedValue)
+uint32_t  GetInternalVariableIndex(uint32_t unsignedValue)
 {
 	iassert(IsValidArrayIndex(unsignedValue));
 
 	return (unsignedValue + 0x800000) & 0xFFFFFF;
 }
 
-unsigned int  FindArrayVariable(unsigned int parentId, int intValue)
+uint32_t  FindArrayVariable(uint32_t parentId, int intValue)
 {
 	return scrVarGlob.variableList[FindArrayVariableIndex(parentId, intValue) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  FindVariable(unsigned int parentId, unsigned int unsignedValue)
+uint32_t  FindVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	return scrVarGlob.variableList[FindVariableIndexInternal(parentId, unsignedValue) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  FindObjectVariable(unsigned int parentId, unsigned int id)
+uint32_t  FindObjectVariable(uint32_t parentId, uint32_t id)
 {
 	return scrVarGlob.variableList[FindVariableIndexInternal(parentId, id + 0x10000) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-struct VariableValue  Scr_GetArrayIndexValue(unsigned int name)
+struct VariableValue  Scr_GetArrayIndexValue(uint32_t name)
 {
 	VariableValue value; // [esp+0h] [ebp-8h]
 
@@ -611,7 +611,7 @@ struct VariableValue  Scr_GetArrayIndexValue(unsigned int name)
 	return value;
 }
 
-void  SetVariableValue(unsigned int id, struct VariableValue* value)
+void  SetVariableValue(uint32_t id, struct VariableValue* value)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -632,7 +632,7 @@ void  SetVariableValue(unsigned int id, struct VariableValue* value)
 	entryValue->u.u = value->u;
 }
 
-void  SetNewVariableValue(unsigned int id, struct VariableValue* value)
+void  SetNewVariableValue(uint32_t id, struct VariableValue* value)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -651,7 +651,7 @@ void  SetNewVariableValue(unsigned int id, struct VariableValue* value)
 	entryValue->u.u = value->u;
 }
 
-VariableValueInternal_u* GetVariableValueAddress(unsigned int id)
+VariableValueInternal_u* GetVariableValueAddress(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 	iassert(id);
@@ -663,7 +663,7 @@ VariableValueInternal_u* GetVariableValueAddress(unsigned int id)
 	return &entryValue->u;
 }
 
-void  ClearVariableValue(unsigned int id)
+void  ClearVariableValue(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -681,10 +681,10 @@ void  ClearVariableValue(unsigned int id)
 	iassert((entryValue->w.type & VAR_MASK) == VAR_UNDEFINED);
 }
 
-unsigned int Scr_EvalVariableObject(unsigned int id)
+uint32_t Scr_EvalVariableObject(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int type; // [esp+4h] [ebp-4h]
+	uint32_t type; // [esp+4h] [ebp-4h]
 
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
 
@@ -706,7 +706,7 @@ unsigned int Scr_EvalVariableObject(unsigned int id)
 	return 0;
 }
 
-unsigned int  GetArraySize(unsigned int id)
+uint32_t  GetArraySize(uint32_t id)
 {
 	iassert(id);
 	iassert((scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.status & VAR_MASK) == VAR_ARRAY);
@@ -714,7 +714,7 @@ unsigned int  GetArraySize(unsigned int id)
 	return scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].u.o.u.size;
 }
 
-unsigned int  FindFirstSibling(unsigned int id)
+uint32_t  FindFirstSibling(uint32_t id)
 {
 	iassert(id);
 	iassert(IsObject(&scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN]));
@@ -722,9 +722,9 @@ unsigned int  FindFirstSibling(unsigned int id)
 	return scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].nextSibling;
 }
 
-unsigned int  FindNextSibling(unsigned int id)
+uint32_t  FindNextSibling(uint32_t id)
 {
-	unsigned int childId; // [esp+4h] [ebp-8h]
+	uint32_t childId; // [esp+4h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-4h]
 
 	iassert(id);
@@ -734,7 +734,7 @@ unsigned int  FindNextSibling(unsigned int id)
 	iassert((entryValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	iassert(!IsObject(entryValue));
 
-	unsigned int nextSibling = entryValue->nextSibling;
+	uint32_t nextSibling = entryValue->nextSibling;
 
 	if (!nextSibling)
 		return 0;
@@ -746,11 +746,11 @@ unsigned int  FindNextSibling(unsigned int id)
 	return childId;
 }
 
-unsigned int  FindLastSibling(unsigned int parentId)
+uint32_t  FindLastSibling(uint32_t parentId)
 {
 	VariableValueInternal* parentValue; // [esp+0h] [ebp-10h]
 	VariableValueInternal* parent; // [esp+4h] [ebp-Ch]
-	unsigned int index; // [esp+8h] [ebp-8h]
+	uint32_t index; // [esp+8h] [ebp-8h]
 
 	iassert(parentId);
 	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
@@ -767,19 +767,19 @@ unsigned int  FindLastSibling(unsigned int parentId)
 	return index;
 }
 
-unsigned int  FindPrevSibling(unsigned int index)
+uint32_t  FindPrevSibling(uint32_t index)
 {
 	return scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN].hash.u.prev;
 }
 
-unsigned int  GetVariableName(unsigned int id)
+uint32_t  GetVariableName(uint32_t id)
 {
 	iassert(!IsObject(&scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + id]));
 
 	return scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].w.status >> 8;
 }
 
-unsigned int GetObject(unsigned int id)
+uint32_t GetObject(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -801,7 +801,7 @@ unsigned int GetObject(unsigned int id)
 	return entryValue->u.u.pointerValue;
 }
 
-unsigned int GetArray(unsigned int id)
+uint32_t GetArray(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -822,7 +822,7 @@ unsigned int GetArray(unsigned int id)
 	return entryValue->u.u.pointerValue;
 }
 
-unsigned int FindObject(unsigned int id)
+uint32_t FindObject(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -836,7 +836,7 @@ unsigned int FindObject(unsigned int id)
 	return entryValue->u.u.pointerValue;
 }
 
-bool  IsFieldObject(unsigned int id)
+bool  IsFieldObject(uint32_t id)
 {
 	iassert(id);
 	iassert(IsObject(&scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN]));
@@ -844,7 +844,7 @@ bool  IsFieldObject(unsigned int id)
 	return (scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.status & VAR_MASK) < VAR_ARRAY;
 }
 
-int Scr_IsThreadAlive(unsigned int thread)
+int Scr_IsThreadAlive(uint32_t thread)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-4h]
 
@@ -858,26 +858,26 @@ int Scr_IsThreadAlive(unsigned int thread)
 	return (entryValue->w.status & VAR_MASK) != VAR_DEAD_THREAD;
 }
 
-bool  IsObjectFree(unsigned int id)
+bool  IsObjectFree(uint32_t id)
 {
 	return (scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.status & VAR_STAT_MASK) == 0;
 }
 
-Vartype_t GetValueType(unsigned int id)
+Vartype_t GetValueType(uint32_t id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN + id].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 
 	return (Vartype_t)(scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN].w.status & VAR_MASK);
 }
 
-unsigned int GetObjectType(unsigned int id)
+uint32_t GetObjectType(uint32_t id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + id].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 
 	return scrVarGlob.variableList[id + VARIABLELIST_PARENT_BEGIN].w.type & VAR_MASK;
 }
 
-void  Scr_SetClassMap(unsigned int classnum)
+void  Scr_SetClassMap(uint32_t classnum)
 {
 	iassert(!g_classMap[classnum].entArrayId);
 	iassert(!g_classMap[classnum].id);
@@ -893,9 +893,9 @@ void  Scr_SetClassMap(unsigned int classnum)
 		++scrVarDebugPub->extRefCount[g_classMap[classnum].id];
 }
 
-int Scr_GetOffset(unsigned int classnum, const char* name)
+int Scr_GetOffset(uint32_t classnum, const char* name)
 {
-	unsigned int fieldId;
+	uint32_t fieldId;
 
 	fieldId = FindVariable(g_classMap[classnum].id, SL_ConvertFromString(name));
 
@@ -907,11 +907,11 @@ int Scr_GetOffset(unsigned int classnum, const char* name)
 	return -1;
 }
 
-unsigned int FindEntityId(unsigned int entnum, unsigned int classnum)
+uint32_t FindEntityId(uint32_t entnum, uint32_t classnum)
 {
-	unsigned int entArrayId; // [esp+0h] [ebp-Ch]
+	uint32_t entArrayId; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
-	unsigned int id; // [esp+8h] [ebp-4h]
+	uint32_t id; // [esp+8h] [ebp-4h]
 
 	iassert((unsigned)entnum < (1 << 16));
 
@@ -936,7 +936,7 @@ unsigned int FindEntityId(unsigned int entnum, unsigned int classnum)
 	}
 }
 
-void  SetEmptyArray(unsigned int parentId)
+void  SetEmptyArray(uint32_t parentId)
 {
 	VariableValue tempValue; // [esp+0h] [ebp-8h] BYREF
 
@@ -945,11 +945,11 @@ void  SetEmptyArray(unsigned int parentId)
 	SetVariableValue(parentId, &tempValue);
 }
 
-void  Scr_AddArrayKeys(unsigned int parentId)
+void  Scr_AddArrayKeys(uint32_t parentId)
 {
 	VariableValue ArrayIndexValue_DONE; // rax
 	VariableValueInternal* entryValue; // [esp+18h] [ebp-8h]
-	unsigned int id; // [esp+1Ch] [ebp-4h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
 
 	iassert(parentId);
 	iassert(GetObjectType(parentId) == VAR_ARRAY);
@@ -980,7 +980,7 @@ void  Scr_AddArrayKeys(unsigned int parentId)
 	}
 }
 
-scr_entref_t Scr_GetEntityIdRef(unsigned int entId)
+scr_entref_t Scr_GetEntityIdRef(uint32_t entId)
 {
 	scr_entref_t entref; // [esp+0h] [ebp-8h]
 	VariableValueInternal* entValue; // [esp+4h] [ebp-4h]
@@ -995,11 +995,11 @@ scr_entref_t Scr_GetEntityIdRef(unsigned int entId)
 	return entref;
 }
 
-unsigned int  Scr_FindField(char const* name, int* type)
+uint32_t  Scr_FindField(char const* name, int* type)
 {
 	const char* pos; // [esp+10h] [ebp-Ch]
 	int len; // [esp+14h] [ebp-8h]
-	unsigned int index; // [esp+18h] [ebp-4h]
+	uint32_t index; // [esp+18h] [ebp-4h]
 
 	iassert(scrVarPub.fieldBuffer);
 
@@ -1074,16 +1074,16 @@ int  Scr_GetClassnumForCharId(char charId)
 	return -1;
 }
 
-unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, unsigned int localId)
+uint32_t  Scr_FindAllThreads(uint32_t selfId, uint32_t* threads, uint32_t localId)
 {
 	VariableValueInternal_u Object{ 0 }; // eax
-	unsigned int stackId; // [esp+4h] [ebp-1Ch]
-	unsigned int timeId; // [esp+8h] [ebp-18h]
-	unsigned int notifyListId; // [esp+Ch] [ebp-14h]
-	unsigned int threadId; // [esp+10h] [ebp-10h]
+	uint32_t stackId; // [esp+4h] [ebp-1Ch]
+	uint32_t timeId; // [esp+8h] [ebp-18h]
+	uint32_t notifyListId; // [esp+Ch] [ebp-14h]
+	uint32_t threadId; // [esp+10h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+14h] [ebp-Ch]
 	int count; // [esp+18h] [ebp-8h]
-	unsigned int id; // [esp+1Ch] [ebp-4h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
 
 	count = 0;
 	if (localId && selfId == Scr_GetSelf(localId))
@@ -1097,7 +1097,7 @@ unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, uns
 		entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
 		if ((entryValue->w.status & 0x60) != 0 && (entryValue->w.status & 0x1F) == 0xA)
 		{
-			for (threadId = *(unsigned int*)(entryValue->u.u.intValue + 8);
+			for (threadId = *(uint32_t*)(entryValue->u.u.intValue + 8);
 				threadId;
 				threadId = GetSafeParentLocalId(threadId))
 			{
@@ -1125,7 +1125,7 @@ unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, uns
 			{
 				if (GetValueType(stackId) == 10)
 				{
-					for (threadId = *(unsigned int*)(GetVariableValueAddress(stackId)->u.intValue + 8);
+					for (threadId = *(uint32_t*)(GetVariableValueAddress(stackId)->u.intValue + 8);
 						threadId;
 						threadId = GetSafeParentLocalId(threadId))
 					{
@@ -1144,15 +1144,15 @@ unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, uns
 	return count;
 }
 
-unsigned int  Scr_FindAllEndons(unsigned int threadId, unsigned int* names)
+uint32_t  Scr_FindAllEndons(uint32_t threadId, uint32_t* names)
 {
-	unsigned int localId; // [esp+0h] [ebp-20h]
+	uint32_t localId; // [esp+0h] [ebp-20h]
 	VariableValueInternal_u selfNameId{ 0 }; // [esp+4h] [ebp-1Ch]
-	unsigned int name; // [esp+8h] [ebp-18h]
+	uint32_t name; // [esp+8h] [ebp-18h]
 	VariableValueInternal* threadValue; // [esp+Ch] [ebp-14h]
-	unsigned int count; // [esp+14h] [ebp-Ch]
-	unsigned int id; // [esp+18h] [ebp-8h]
-	unsigned int notifyListEntry; // [esp+1Ch] [ebp-4h]
+	uint32_t count; // [esp+14h] [ebp-Ch]
+	uint32_t id; // [esp+18h] [ebp-8h]
+	uint32_t notifyListEntry; // [esp+1Ch] [ebp-4h]
 
 	iassert(threadId);
 
@@ -1192,10 +1192,10 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 	const char* functionName,
 	int minCount)
 {
-	unsigned int NumScriptVars; // eax
+	uint32_t NumScriptVars; // eax
 	const char* pos; // [esp+0h] [ebp-24h]
 	int(__cdecl * VariableInfoCompareCallBack)(const void*, const void*); // [esp+4h] [ebp-20h]
-	unsigned int index; // [esp+8h] [ebp-1Ch]
+	uint32_t index; // [esp+8h] [ebp-1Ch]
 	VariableDebugInfo* pInfo; // [esp+Ch] [ebp-18h]
 	VariableDebugInfo* pInfoa; // [esp+Ch] [ebp-18h]
 	VariableDebugInfo* pInfob; // [esp+Ch] [ebp-18h]
@@ -1330,9 +1330,9 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 	}
 }
 
-unsigned int  GetVariableIndexInternal(unsigned int parentId, unsigned int name)
+uint32_t  GetVariableIndexInternal(uint32_t parentId, uint32_t name)
 {
-	unsigned int newIndex; // [esp+8h] [ebp-8h]
+	uint32_t newIndex; // [esp+8h] [ebp-8h]
 
 	iassert(parentId);
 	iassert((scrVarGlob.variableList[parentId + 1].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
@@ -1345,7 +1345,7 @@ unsigned int  GetVariableIndexInternal(unsigned int parentId, unsigned int name)
 		return GetNewVariableIndexInternal2(parentId, name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
-void ClearObject(unsigned int parentId)
+void ClearObject(uint32_t parentId)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 	iassert(((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.type & VAR_MASK) != VAR_ENTITY) 
@@ -1358,7 +1358,7 @@ void ClearObject(unsigned int parentId)
 	RemoveRefToEmptyObject(parentId);
 }
 
-void  Scr_RemoveThreadNotifyName(unsigned int startLocalId)
+void  Scr_RemoveThreadNotifyName(uint32_t startLocalId)
 {
 	uint16_t stringValue; // [esp+0h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-4h]
@@ -1376,7 +1376,7 @@ void  Scr_RemoveThreadNotifyName(unsigned int startLocalId)
 	entryValue->w.status |= 0xEu;
 }
 
-void  FreeValue(unsigned int id)
+void  FreeValue(uint32_t id)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
@@ -1422,16 +1422,16 @@ void  FreeValue(unsigned int id)
 	scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next = index;
 }
 
-unsigned int GetArrayVariableIndex(unsigned int parentId, unsigned int unsignedValue)
+uint32_t GetArrayVariableIndex(uint32_t parentId, uint32_t unsignedValue)
 {
 	iassert(IsValidArrayIndex(unsignedValue));
 	return GetVariableIndexInternal(parentId, (unsignedValue + 0x800000) & 0xFFFFFF);
 }
 
-unsigned int  Scr_GetVariableFieldIndex(unsigned int parentId, unsigned int name)
+uint32_t  Scr_GetVariableFieldIndex(uint32_t parentId, uint32_t name)
 {
-	unsigned int index; // [esp+4h] [ebp-8h]
-	unsigned int type; // [esp+8h] [ebp-4h]
+	uint32_t index; // [esp+4h] [ebp-8h]
+	uint32_t type; // [esp+8h] [ebp-4h]
 
 	iassert(parentId);
 	iassert(&scrVarGlob.variableList[parentId + 1]);
@@ -1462,17 +1462,17 @@ unsigned int  Scr_GetVariableFieldIndex(unsigned int parentId, unsigned int name
 	}
 }
 
-unsigned int  Scr_FindAllVariableField(unsigned int parentId, unsigned int* names)
+uint32_t  Scr_FindAllVariableField(uint32_t parentId, uint32_t* names)
 {
-	unsigned int classnum; // [esp+4h] [ebp-1Ch]
+	uint32_t classnum; // [esp+4h] [ebp-1Ch]
 	VariableValueInternal* parentValue; // [esp+8h] [ebp-18h]
-	unsigned int name; // [esp+10h] [ebp-10h]
-	unsigned int namea; // [esp+10h] [ebp-10h]
-	unsigned int nameb; // [esp+10h] [ebp-10h]
-	unsigned int count; // [esp+18h] [ebp-8h]
-	unsigned int id; // [esp+1Ch] [ebp-4h]
-	unsigned int ida; // [esp+1Ch] [ebp-4h]
-	unsigned int idb; // [esp+1Ch] [ebp-4h]
+	uint32_t name; // [esp+10h] [ebp-10h]
+	uint32_t namea; // [esp+10h] [ebp-10h]
+	uint32_t nameb; // [esp+10h] [ebp-10h]
+	uint32_t count; // [esp+18h] [ebp-8h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
+	uint32_t ida; // [esp+1Ch] [ebp-4h]
+	uint32_t idb; // [esp+1Ch] [ebp-4h]
 
 	parentValue = &scrVarGlob.variableList[parentId + 1];
 	iassert((parentValue->w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
@@ -1535,48 +1535,48 @@ unsigned int  Scr_FindAllVariableField(unsigned int parentId, unsigned int* name
 	return count;
 }
 
-unsigned int GetArrayVariable(unsigned int parentId, unsigned int unsignedValue)
+uint32_t GetArrayVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	return scrVarGlob.variableList[GetArrayVariableIndex(parentId, unsignedValue) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  GetNewArrayVariable(unsigned int parentId, unsigned int unsignedValue)
+uint32_t  GetNewArrayVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	return scrVarGlob.variableList[GetNewArrayVariableIndex(parentId, unsignedValue) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  GetVariable(unsigned int parentId, unsigned int unsignedValue)
+uint32_t  GetVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	return scrVarGlob.variableList[GetVariableIndexInternal(parentId, unsignedValue) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  GetNewVariable(unsigned int parentId, unsigned int unsignedValue)
+uint32_t  GetNewVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	return scrVarGlob.variableList[GetNewVariableIndexInternal(parentId, unsignedValue) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  GetObjectVariable(unsigned int parentId, unsigned int id)
+uint32_t  GetObjectVariable(uint32_t parentId, uint32_t id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.type & VAR_MASK) == VAR_ARRAY);
 	return scrVarGlob.variableList[GetVariableIndexInternal(parentId, id + 0x10000) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  GetNewObjectVariable(unsigned int parentId, unsigned int id)
+uint32_t  GetNewObjectVariable(uint32_t parentId, uint32_t id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.type & VAR_MASK) == VAR_ARRAY);
 	return scrVarGlob.variableList[GetNewVariableIndexInternal(parentId, id + 0x10000) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-unsigned int  GetNewObjectVariableReverse(unsigned int parentId, unsigned int id)
+uint32_t  GetNewObjectVariableReverse(uint32_t parentId, uint32_t id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.type & VAR_MASK) == VAR_ARRAY);
 	return scrVarGlob.variableList[GetNewVariableIndexReverseInternal(parentId, id + 0x10000) + VARIABLELIST_CHILD_BEGIN].hash.id;
 }
 
-void  RemoveVariable(unsigned int parentId, unsigned int unsignedValue)
+void  RemoveVariable(uint32_t parentId, uint32_t unsignedValue)
 {
-	unsigned int index; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t index; // [esp+0h] [ebp-8h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	index = FindVariableIndexInternal(parentId, unsignedValue);
 	iassert(index);
@@ -1585,10 +1585,10 @@ void  RemoveVariable(unsigned int parentId, unsigned int unsignedValue)
 	FreeChildValue(parentId, id);
 }
 
-void  RemoveNextVariable(unsigned int parentId)
+void  RemoveNextVariable(uint32_t parentId)
 {
-	unsigned int index; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t index; // [esp+0h] [ebp-8h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.status & VAR_STAT_MASK) != VAR_STAT_FREE);
 
@@ -1605,16 +1605,16 @@ void  RemoveNextVariable(unsigned int parentId)
 	FreeChildValue(parentId, id);
 }
 
-void  RemoveObjectVariable(unsigned int parentId, unsigned int id)
+void  RemoveObjectVariable(uint32_t parentId, uint32_t id)
 {
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId].w.type & VAR_MASK) == VAR_ARRAY);
 	RemoveVariable(parentId, id + 0x10000);
 }
 
-void  SafeRemoveVariable(unsigned int parentId, unsigned int unsignedValue)
+void  SafeRemoveVariable(uint32_t parentId, uint32_t unsignedValue)
 {
-	unsigned int index; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t index; // [esp+0h] [ebp-8h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	index = FindVariableIndexInternal(parentId, unsignedValue);
 	if (index)
@@ -1626,9 +1626,9 @@ void  SafeRemoveVariable(unsigned int parentId, unsigned int unsignedValue)
 	}
 }
 
-void  RemoveVariableValue(unsigned int parentId, unsigned int index)
+void  RemoveVariableValue(uint32_t parentId, uint32_t index)
 {
-	unsigned int id; // [esp+0h] [ebp-4h]
+	uint32_t id; // [esp+0h] [ebp-4h]
 
 	iassert(index);
 	id = scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN].hash.id;
@@ -1638,11 +1638,11 @@ void  RemoveVariableValue(unsigned int parentId, unsigned int index)
 	FreeChildValue(parentId, id);
 }
 
-void  SetVariableEntityFieldValue(unsigned int entId, unsigned int fieldName, VariableValue* value)
+void  SetVariableEntityFieldValue(uint32_t entId, uint32_t fieldName, VariableValue* value)
 {
 	VariableValueInternal* entValue; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
-	unsigned int fieldId; // [esp+8h] [ebp-4h]
+	uint32_t fieldId; // [esp+8h] [ebp-4h]
 
 	iassert(!IsObject(value));
 	iassert(value->type != VAR_STACK);
@@ -1667,7 +1667,7 @@ void  SetVariableEntityFieldValue(unsigned int entId, unsigned int fieldName, Va
 	}
 }
 
-void  SetVariableFieldValue(unsigned int id, VariableValue* value)
+void  SetVariableFieldValue(uint32_t id, VariableValue* value)
 {
 	if (id)
 		SetVariableValue(id, value);
@@ -1675,7 +1675,7 @@ void  SetVariableFieldValue(unsigned int id, VariableValue* value)
 		SetVariableEntityFieldValue(scrVarPub.entId, scrVarPub.entFieldName, value);
 }
 
-VariableValue  Scr_EvalVariable(unsigned int id)
+VariableValue  Scr_EvalVariable(uint32_t id)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-Ch]
 	VariableValue value; // [esp+4h] [ebp-8h] BYREF
@@ -1764,9 +1764,9 @@ bool  Scr_CastString(VariableValue* value)
 void  Scr_CastDebugString(VariableValue* value)
 {
 	const XAnim_s* Anims; // eax
-	unsigned int v2; // eax
-	unsigned int intValue; // [esp-4h] [ebp-18h]
-	unsigned int stringValue; // [esp+8h] [ebp-Ch]
+	uint32_t v2; // eax
+	uint32_t intValue; // [esp-4h] [ebp-18h]
+	uint32_t stringValue; // [esp+8h] [ebp-Ch]
 	char* s; // [esp+10h] [ebp-4h]
 	char* sa; // [esp+10h] [ebp-4h]
 
@@ -1802,13 +1802,13 @@ void  Scr_CastDebugString(VariableValue* value)
 	}
 }
 
-char  Scr_GetEntClassId(unsigned int id) 
+char  Scr_GetEntClassId(uint32_t id) 
 {
 	iassert(GetObjectType(id) == VAR_ENTITY);
 	return g_classMap[scrVarGlob.variableList[id + 1].w.status >> 8].charId;
 }
 
-int  Scr_GetEntNum(unsigned int id)
+int  Scr_GetEntNum(uint32_t id)
 {
 	iassert(GetObjectType(id) == VAR_ENTITY);
 	return scrVarGlob.variableList[id + 1].u.o.u.size;
@@ -1852,9 +1852,9 @@ void  Scr_CastVector(VariableValue* value)
 	value->u.vectorValue = Scr_AllocVector(vec);
 }
 
-unsigned int  Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* value)
+uint32_t  Scr_EvalFieldObject(uint32_t tempVariable, VariableValue* value)
 {
-	unsigned int type; // [esp+0h] [ebp-Ch]
+	uint32_t type; // [esp+0h] [ebp-Ch]
 	VariableValue tempValue; // [esp+4h] [ebp-8h] BYREF
 
 	type = value->type;
@@ -2020,7 +2020,7 @@ void  Scr_EvalPlus(VariableValue* value1, VariableValue* value2)
 	char* v12; // [esp+30h] [ebp-2010h]
 	char* v13; // [esp+34h] [ebp-200Ch]
 	char str[8192]; // [esp+38h] [ebp-2008h] BYREF
-	unsigned int len; // [esp+203Ch] [ebp-4h]
+	uint32_t len; // [esp+203Ch] [ebp-4h]
 
 	Scr_CastWeakerStringPair(value1, value2);
 	iassert(value1->type == value2->type);
@@ -2224,12 +2224,12 @@ void  Scr_EvalMod(VariableValue* value1, VariableValue* value2)
 	}
 }
 
-void  Scr_FreeEntityNum(unsigned int entnum, unsigned int classnum)
+void  Scr_FreeEntityNum(uint32_t entnum, uint32_t classnum)
 {
-	unsigned int entArrayId; // [esp+0h] [ebp-10h]
-	unsigned int entnumId; // [esp+4h] [ebp-Ch]
+	uint32_t entArrayId; // [esp+0h] [ebp-10h]
+	uint32_t entnumId; // [esp+4h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-8h]
-	unsigned int entId; // [esp+Ch] [ebp-4h]
+	uint32_t entId; // [esp+Ch] [ebp-4h]
 
 	if (scrVarPub.bInited)
 	{
@@ -2261,7 +2261,7 @@ void  Scr_FreeEntityNum(unsigned int entnum, unsigned int classnum)
 void Scr_FreeObjects()
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	for (id = 1; id < 0x8000; ++id)
 	{
@@ -2275,12 +2275,12 @@ void Scr_FreeObjects()
 	}
 }
 
-void  Scr_AddClassField(unsigned int classnum, char* name, unsigned int offset)
+void  Scr_AddClassField(uint32_t classnum, char* name, uint32_t offset)
 {
-	unsigned int str; // [esp+0h] [ebp-14h]
-	unsigned int classId; // [esp+4h] [ebp-10h]
+	uint32_t str; // [esp+0h] [ebp-14h]
+	uint32_t classId; // [esp+4h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-Ch]
-	unsigned int fieldId; // [esp+Ch] [ebp-8h]
+	uint32_t fieldId; // [esp+Ch] [ebp-8h]
 	const char* namePos; // [esp+10h] [ebp-4h]
 
 	iassert(offset < (1 << 16));
@@ -2308,12 +2308,12 @@ void  Scr_AddClassField(unsigned int classnum, char* name, unsigned int offset)
 	entryValue->u.u.intValue = offset;
 }
 
-unsigned int  Scr_GetEntityId(unsigned int entnum, unsigned int classnum)
+uint32_t  Scr_GetEntityId(uint32_t entnum, uint32_t classnum)
 {
-	unsigned int entArrayId; // [esp+0h] [ebp-10h]
+	uint32_t entArrayId; // [esp+0h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-Ch]
-	unsigned int entId; // [esp+8h] [ebp-8h]
-	unsigned int id; // [esp+Ch] [ebp-4h]
+	uint32_t entId; // [esp+8h] [ebp-8h]
+	uint32_t id; // [esp+Ch] [ebp-4h]
 
 	iassert((unsigned)entnum < (1 << 16));
 	entArrayId = g_classMap[classnum].entArrayId;
@@ -2360,11 +2360,11 @@ void Scr_DumpScriptThreads(void)
 {
 	double ThreadUsage; // st7
 	double ObjectUsage; // st7
-	unsigned int NumScriptVars; // eax
-	unsigned int NumScriptThreads; // eax
+	uint32_t NumScriptVars; // eax
+	uint32_t NumScriptThreads; // eax
 	int j; // [esp+0h] [ebp-DCh]
 	int ja; // [esp+0h] [ebp-DCh]
-	unsigned int classnum; // [esp+4h] [ebp-D8h]
+	uint32_t classnum; // [esp+4h] [ebp-D8h]
 	const char* pos; // [esp+8h] [ebp-D4h]
 	ThreadDebugInfo info; // [esp+Ch] [ebp-D0h]
 	const char* buf; // [esp+A0h] [ebp-3Ch]
@@ -2376,11 +2376,11 @@ void Scr_DumpScriptThreads(void)
 	VariableUnion u; // [esp+B8h] [ebp-24h]
 	int i; // [esp+BCh] [ebp-20h]
 	const VariableStackBuffer* stackBuf; // [esp+C0h] [ebp-1Ch]
-	unsigned int entId; // [esp+C4h] [ebp-18h]
+	uint32_t entId; // [esp+C4h] [ebp-18h]
 	ThreadDebugInfo* infoArray; // [esp+C8h] [ebp-14h]
 	int count; // [esp+CCh] [ebp-10h]
 	float endonUsage; // [esp+D0h] [ebp-Ch]
-	unsigned int id; // [esp+D4h] [ebp-8h]
+	uint32_t id; // [esp+D4h] [ebp-8h]
 	float varUsage; // [esp+D8h] [ebp-4h]
 
 	num = 0;
@@ -2507,9 +2507,9 @@ void Scr_ShutdownVariables()
 	Scr_CheckLeaks();
 }
 
-void RemoveRefToObject(unsigned int id)
+void RemoveRefToObject(uint32_t id)
 {
-	unsigned int classnum; // [esp+0h] [ebp-Ch]
+	uint32_t classnum; // [esp+0h] [ebp-Ch]
 	uint16_t entArrayId; // [esp+4h] [ebp-8h]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-4h]
 
@@ -2544,11 +2544,11 @@ void RemoveRefToObject(unsigned int id)
 	}
 }
 
-void  ClearVariableField(unsigned int parentId, unsigned int name, VariableValue* value)
+void  ClearVariableField(uint32_t parentId, uint32_t name, VariableValue* value)
 {
-	unsigned int classnum; // [esp+0h] [ebp-10h]
+	uint32_t classnum; // [esp+0h] [ebp-10h]
 	VariableValueInternal* parentValue; // [esp+4h] [ebp-Ch]
-	unsigned int fieldId; // [esp+Ch] [ebp-4h]
+	uint32_t fieldId; // [esp+Ch] [ebp-4h]
 	VariableValue* valuea; // [esp+20h] [ebp+10h]
 
 	iassert(IsObject(&scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId]));
@@ -2580,7 +2580,7 @@ void  ClearVariableField(unsigned int parentId, unsigned int name, VariableValue
 	}
 }
 
-VariableValue Scr_EvalVariableField(unsigned int id)
+VariableValue Scr_EvalVariableField(uint32_t id)
 {
 	if (id)
 		return Scr_EvalVariable(id);
@@ -2771,7 +2771,7 @@ void __cdecl Scr_EvalBinaryOperator(int op, VariableValue *value1, VariableValue
 void  Scr_FreeEntityList(void)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int entId; // [esp+4h] [ebp-4h]
+	uint32_t entId; // [esp+4h] [ebp-4h]
 
 	if (scrVarDebugPub)
 		--scrVarDebugPub->extRefCount[scrVarPub.freeEntList];
@@ -2790,7 +2790,7 @@ void  Scr_FreeEntityList(void)
 	}
 }
 
-void  Scr_RemoveClassMap(unsigned int classnum)
+void  Scr_RemoveClassMap(uint32_t classnum)
 {
 	if (scrVarPub.bInited)
 	{
@@ -2894,13 +2894,13 @@ void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 	}
 }
 
-unsigned int Scr_EvalArrayRef(unsigned int parentId)
+uint32_t Scr_EvalArrayRef(uint32_t parentId)
 {
 	VariableValueInternal* parentValue; // [esp+Ch] [ebp-1Ch]
 	VariableValueInternal* entValue; // [esp+10h] [ebp-18h]
 	VariableValue varValue; // [esp+14h] [ebp-14h]
 	VariableValueInternal* entryValue; // [esp+1Ch] [ebp-Ch]
-	unsigned int fieldId; // [esp+20h] [ebp-8h]
+	uint32_t fieldId; // [esp+20h] [ebp-8h]
 	int id; // [esp+24h] [ebp-4h]
 
 	if (parentId)
@@ -2996,13 +2996,13 @@ unsigned int Scr_EvalArrayRef(unsigned int parentId)
 	return parentValue->u.u.pointerValue;
 }
 
-void  ClearArray(unsigned int parentId, VariableValue* value)
+void  ClearArray(uint32_t parentId, VariableValue* value)
 {
 	VariableValueInternal* parentValue; // [esp+8h] [ebp-1Ch]
 	VariableValueInternal* entValue; // [esp+Ch] [ebp-18h]
 	VariableValue varValue; // [esp+10h] [ebp-14h]
 	VariableValueInternal* entryValue; // [esp+18h] [ebp-Ch]
-	unsigned int fieldId; // [esp+1Ch] [ebp-8h]
+	uint32_t fieldId; // [esp+1Ch] [ebp-8h]
 	VariableUnion id; // [esp+20h] [ebp-4h]
 
 	if (parentId)
@@ -3089,13 +3089,13 @@ void  ClearArray(unsigned int parentId, VariableValue* value)
 	}
 }
 
-void  Scr_FreeValue(unsigned int id)
+void  Scr_FreeValue(uint32_t id)
 {
 	iassert(id);
 	RemoveRefToObject(id);
 }
 
-void  Scr_StopThread(unsigned int threadId)
+void  Scr_StopThread(uint32_t threadId)
 {
 	iassert(threadId);
 	Scr_ClearThread(threadId);
@@ -3103,7 +3103,7 @@ void  Scr_StopThread(unsigned int threadId)
 	AddRefToObject(scrVarPub.levelId);
 }
 
-void  Scr_KillEndonThread(unsigned int threadId)
+void  Scr_KillEndonThread(uint32_t threadId)
 {
 	VariableValueInternal* parentValue; // [esp+0h] [ebp-4h]
 
@@ -3117,9 +3117,9 @@ void  Scr_KillEndonThread(unsigned int threadId)
 	parentValue->w.status |= 0x16u;
 }
 
-VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name)
+VariableValue Scr_FindVariableField(uint32_t parentId, uint32_t name)
 {
-	unsigned int id; // [esp+1Ch] [ebp-4h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
 
 	iassert(parentId);
 	iassert(IsObject(&scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + parentId]));
@@ -3140,15 +3140,15 @@ VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name)
 	return value;
 }
 
-void  Scr_KillThread(unsigned int parentId)
+void  Scr_KillThread(uint32_t parentId)
 {
-	unsigned int ObjectVariable_DONE; // eax
+	uint32_t ObjectVariable_DONE; // eax
 	VariableValueInternal_u* VariableValueAddress_DONE; // eax
 	VariableValueInternal* parentValue; // [esp+0h] [ebp-18h]
-	unsigned int selfNameId; // [esp+4h] [ebp-14h]
-	unsigned int name; // [esp+8h] [ebp-10h]
-	unsigned int id; // [esp+10h] [ebp-8h]
-	unsigned int notifyListEntry; // [esp+14h] [ebp-4h]
+	uint32_t selfNameId; // [esp+4h] [ebp-14h]
+	uint32_t name; // [esp+8h] [ebp-10h]
+	uint32_t id; // [esp+10h] [ebp-8h]
+	uint32_t notifyListEntry; // [esp+14h] [ebp-4h]
 
 	iassert(parentId);
 	parentValue = &scrVarGlob.variableList[parentId + 1];
@@ -3181,7 +3181,7 @@ void  Scr_KillThread(unsigned int parentId)
 	parentValue->w.status |= 0x16u;
 }
 
-void  Scr_CheckLeakRange(unsigned int begin, unsigned int end)
+void  Scr_CheckLeakRange(uint32_t begin, uint32_t end)
 {
 	Variable* entry; // [esp+0h] [ebp-10h]
 	int index; // [esp+8h] [ebp-8h]
@@ -3224,8 +3224,8 @@ void  Scr_CheckLeakRange(unsigned int begin, unsigned int end)
 void  Scr_CheckLeaks(void)
 {
 	bool bLeak; // [esp+3h] [ebp-5h]
-	unsigned int id; // [esp+4h] [ebp-4h]
-	unsigned int ida; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
+	uint32_t ida; // [esp+4h] [ebp-4h]
 
 	if (!scrStringDebugGlob || !scrStringDebugGlob->ignoreLeaks)
 	{
@@ -3304,13 +3304,13 @@ int __cdecl VariableInfoFileLineCompare(_DWORD* info1, _DWORD* info2)
 	if (fileCompare)
 		return fileCompare;
 	else
-		return CompareThreadIndices((unsigned int*)info1, (unsigned int*)info2);
+		return CompareThreadIndices((uint32_t*)info1, (uint32_t*)info2);
 }
 
-unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index)
+uint32_t  FindVariableIndexInternal2(uint32_t name, uint32_t index)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-14h]
-	unsigned int newIndex; // [esp+4h] [ebp-10h]
+	uint32_t newIndex; // [esp+4h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+8h] [ebp-Ch]
 	VariableValueInternal* newEntryValue; // [esp+Ch] [ebp-8h]
 	VariableValueInternal* newEntry; // [esp+10h] [ebp-4h]
@@ -3342,7 +3342,7 @@ unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index)
 	return 0;
 }
 
-unsigned int FindVariableIndexInternal(unsigned int parentId, unsigned int name)
+uint32_t FindVariableIndexInternal(uint32_t parentId, uint32_t name)
 {
 	iassert(parentId);
 	iassert((scrVarGlob.variableList[parentId + 1].w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
@@ -3405,11 +3405,11 @@ unsigned short  AllocVariable(void)
 	return entry->hash.id;
 }
 
-void  FreeVariable(unsigned int id)
+void  FreeVariable(uint32_t id)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+4h] [ebp-8h]
-	unsigned int index; // [esp+8h] [ebp-4h]
+	uint32_t index; // [esp+8h] [ebp-4h]
 
 	iassert(id > 0 && id < VARIABLELIST_PARENT_SIZE);
 
@@ -3444,10 +3444,10 @@ void  FreeVariable(unsigned int id)
 	scrVarGlob.variableList[1].u.next = index;
 }
 
-unsigned int  AllocEntity(unsigned int classnum, unsigned short entnum)
+uint32_t  AllocEntity(uint32_t classnum, unsigned short entnum)
 {
 	VariableValueInternal* entryValue; // [esp+0h] [ebp-8h]
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	id = AllocVariable();
 	entryValue = &scrVarGlob.variableList[id + 1];
@@ -3477,15 +3477,15 @@ float* Scr_AllocVector(void)
 	return result;
 }
 
-unsigned int  FindArrayVariableIndex(unsigned int parentId, unsigned int unsignedValue)
+uint32_t  FindArrayVariableIndex(uint32_t parentId, uint32_t unsignedValue)
 {
 	iassert(IsValidArrayIndex(unsignedValue));
 	return FindVariableIndexInternal(parentId, (unsignedValue + 0x800000) & 0xFFFFFF);
 }
 
-unsigned int  Scr_FindArrayIndex(unsigned int parentId, VariableValue* index)
+uint32_t  Scr_FindArrayIndex(uint32_t parentId, VariableValue* index)
 {
-	unsigned int id; // [esp+0h] [ebp-4h]
+	uint32_t id; // [esp+0h] [ebp-4h]
 
 	if (index->type == VAR_INTEGER)
 	{
@@ -3514,7 +3514,7 @@ unsigned int  Scr_FindArrayIndex(unsigned int parentId, VariableValue* index)
 	}
 }
 
-float  Scr_GetEntryUsage(unsigned int type, VariableUnion u)
+float  Scr_GetEntryUsage(uint32_t type, VariableUnion u)
 {
 	VariableValueInternal* parentValue; // [esp+Ch] [ebp-4h]
 
@@ -3538,10 +3538,10 @@ float  Scr_GetEntryUsage(VariableValueInternal* entryValue)
 	return (float)(Scr_GetEntryUsage(entryValue->w.status & VAR_MASK, entryValue->u.u) + 1.0);
 }
 
-float  Scr_GetObjectUsage(unsigned int parentId)
+float  Scr_GetObjectUsage(uint32_t parentId)
 {
 	float usage; // [esp+4h] [ebp-8h]
-	unsigned int id; // [esp+8h] [ebp-4h]
+	uint32_t id; // [esp+8h] [ebp-4h]
 
 	VariableValueInternal *parentValue = &scrVarGlob.variableList[parentId + 1];
 
@@ -3623,7 +3623,7 @@ void  Scr_AddFieldsForFile(char const* filename)
 	int len; // [esp+80h] [ebp-20h]
 	int size; // [esp+84h] [ebp-1Ch]
 	char* targetPos; // [esp+88h] [ebp-18h]
-	unsigned int index; // [esp+8Ch] [ebp-14h]
+	uint32_t index; // [esp+8Ch] [ebp-14h]
 	int type; // [esp+90h] [ebp-10h]
 	const char* sourcePos; // [esp+94h] [ebp-Ch] BYREF
 	char* token; // [esp+98h] [ebp-8h]
@@ -3711,22 +3711,22 @@ void  Scr_AddFields_FastFile(char const* path, char const* extension)
 	*targetPos = 0;
 }
 
-unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int name, unsigned int index)
+uint32_t  GetNewVariableIndexInternal3(uint32_t parentId, uint32_t name, uint32_t index)
 {
 	VariableValueInternal* parentValue; // [esp+8h] [ebp-40h]
 	VariableValueInternal* entry; // [esp+Ch] [ebp-3Ch]
-	unsigned int newIndex; // [esp+10h] [ebp-38h]
-	unsigned int prevId; // [esp+14h] [ebp-34h]
-	unsigned int next; // [esp+20h] [ebp-28h]
+	uint32_t newIndex; // [esp+10h] [ebp-38h]
+	uint32_t prevId; // [esp+14h] [ebp-34h]
+	uint32_t next; // [esp+20h] [ebp-28h]
 	VariableValueInternal* entryValue; // [esp+24h] [ebp-24h]
-	unsigned int prev; // [esp+2Ch] [ebp-1Ch]
+	uint32_t prev; // [esp+2Ch] [ebp-1Ch]
 	VariableValueInternal* newEntryValue; // [esp+30h] [ebp-18h]
 	int type; // [esp+34h] [ebp-14h]
 	VariableValueInternal* newEntry; // [esp+38h] [ebp-10h]
 	VariableValue value; // [esp+3Ch] [ebp-Ch]
 	uint16_t id; // [esp+44h] [ebp-4h]
-	unsigned int prevSiblingIndex;
-	unsigned int nextSiblingIndex;
+	uint32_t prevSiblingIndex;
+	uint32_t nextSiblingIndex;
 
 	iassert(!(name & ~VAR_NAME_LOW_MASK));
 	entry = &scrVarGlob.variableList[index + VARIABLELIST_CHILD_BEGIN];
@@ -3905,12 +3905,12 @@ unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int n
 	return index;
 }
 
-unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int name, unsigned int index)
+uint32_t  GetNewVariableIndexInternal2(uint32_t parentId, uint32_t name, uint32_t index)
 {
-	unsigned int siblingId; // [esp+0h] [ebp-20h]
+	uint32_t siblingId; // [esp+0h] [ebp-20h]
 	VariableValueInternal* parentValue; // [esp+4h] [ebp-1Ch]
-	unsigned int siblingIndex; // [esp+10h] [ebp-10h]
-	unsigned int id; // [esp+1Ch] [ebp-4h]
+	uint32_t siblingIndex; // [esp+10h] [ebp-10h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
 	VariableValueInternal *entry;
 
 	index = GetNewVariableIndexInternal3(parentId, name, index);
@@ -3939,14 +3939,14 @@ unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int n
 	return index;
 }
 
-unsigned int  GetNewVariableIndexReverseInternal2(unsigned int parentId, unsigned int name, unsigned int index)
+uint32_t  GetNewVariableIndexReverseInternal2(uint32_t parentId, uint32_t name, uint32_t index)
 {
 	VariableValueInternal* parentValue; // [esp+0h] [ebp-20h]
-	unsigned int siblingIndex; // [esp+Ch] [ebp-14h]
+	uint32_t siblingIndex; // [esp+Ch] [ebp-14h]
 	VariableValueInternal* siblingValue; // [esp+10h] [ebp-10h]
 	VariableValueInternal* parent; // [esp+14h] [ebp-Ch]
-	unsigned int id; // [esp+1Ch] [ebp-4h]
-	unsigned int indexa; // [esp+30h] [ebp+10h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
+	uint32_t indexa; // [esp+30h] [ebp+10h]
 
 	indexa = GetNewVariableIndexInternal3(parentId, name, index);
 	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
@@ -3972,25 +3972,25 @@ unsigned int  GetNewVariableIndexReverseInternal2(unsigned int parentId, unsigne
 	return indexa;
 }
 
-unsigned int  GetNewVariableIndexInternal(unsigned int parentId, unsigned int name)
+uint32_t  GetNewVariableIndexInternal(uint32_t parentId, uint32_t name)
 {
 	iassert(!FindVariableIndexInternal(parentId, name));
 	return GetNewVariableIndexInternal2(parentId, name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
-unsigned int  GetNewVariableIndexReverseInternal(unsigned int parentId, unsigned int name)
+uint32_t  GetNewVariableIndexReverseInternal(uint32_t parentId, uint32_t name)
 {
 	iassert(!FindVariableIndexInternal(parentId, name));
 	return GetNewVariableIndexReverseInternal2(parentId, name, (parentId + FACTOR101 * name) % 0xFFFD + 1);
 }
 
-void  MakeVariableExternal(unsigned int index, VariableValueInternal* parentValue)
+void  MakeVariableExternal(uint32_t index, VariableValueInternal* parentValue)
 {
 	VariableValueInternal* entry; // [esp+8h] [ebp-38h]
-	unsigned int oldPrevSiblingIndex; // [esp+Ch] [ebp-34h]
-	unsigned int nextSiblingIndex; // [esp+10h] [ebp-30h]
-	unsigned int prevSiblingIndex; // [esp+14h] [ebp-2Ch]
-	unsigned int oldIndex; // [esp+1Ch] [ebp-24h]
+	uint32_t oldPrevSiblingIndex; // [esp+Ch] [ebp-34h]
+	uint32_t nextSiblingIndex; // [esp+10h] [ebp-30h]
+	uint32_t prevSiblingIndex; // [esp+14h] [ebp-2Ch]
+	uint32_t oldIndex; // [esp+1Ch] [ebp-24h]
 	VariableValueInternal * entryValue; // [esp+20h] [ebp-20h]
 	Variable tempEntry; // [esp+24h] [ebp-1Ch]
 	VariableValueInternal* oldEntry; // [esp+28h] [ebp-18h]
@@ -4059,14 +4059,14 @@ void  MakeVariableExternal(unsigned int index, VariableValueInternal* parentValu
 	entryValue->v.next = index;
 }
 
-void  FreeChildValue(unsigned int parentId, unsigned int id)
+void  FreeChildValue(uint32_t parentId, uint32_t id)
 {
 	VariableValueInternal* entry; // [esp+0h] [ebp-20h]
-	unsigned int nextSiblingIndex; // [esp+4h] [ebp-1Ch]
-	unsigned int prevSiblingIndex; // [esp+8h] [ebp-18h]
-	unsigned int parentIndex; // [esp+Ch] [ebp-14h]
+	uint32_t nextSiblingIndex; // [esp+4h] [ebp-1Ch]
+	uint32_t prevSiblingIndex; // [esp+8h] [ebp-18h]
+	uint32_t parentIndex; // [esp+Ch] [ebp-14h]
 	VariableValueInternal* entryValue; // [esp+10h] [ebp-10h]
-	unsigned int index; // [esp+14h] [ebp-Ch]
+	uint32_t index; // [esp+14h] [ebp-Ch]
 
 	entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
 
@@ -4132,13 +4132,13 @@ void  FreeChildValue(unsigned int parentId, unsigned int id)
 	scrVarGlob.variableList[VARIABLELIST_CHILD_BEGIN].u.next = index;
 }
 
-void  ClearObjectInternal(unsigned int parentId)
+void  ClearObjectInternal(uint32_t parentId)
 {
-	unsigned int nextId; // [esp+0h] [ebp-18h]
-	unsigned int nextSibling; // [esp+4h] [ebp-14h]
+	uint32_t nextId; // [esp+0h] [ebp-18h]
+	uint32_t nextSibling; // [esp+4h] [ebp-14h]
 	VariableValueInternal* parentValue; // [esp+8h] [ebp-10h]
 	VariableValueInternal* entryValue; // [esp+10h] [ebp-8h]
-	unsigned int id; // [esp+14h] [ebp-4h]
+	uint32_t id; // [esp+14h] [ebp-4h]
 
 	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
 	iassert(IsObject(parentValue));
@@ -4170,27 +4170,27 @@ void  ClearObjectInternal(unsigned int parentId)
 	}
 }
 
-unsigned int  GetNewArrayVariableIndex(unsigned int parentId, unsigned int unsignedValue)
+uint32_t  GetNewArrayVariableIndex(uint32_t parentId, uint32_t unsignedValue)
 {
 	iassert(IsValidArrayIndex(unsignedValue));
 
 	return GetNewVariableIndexInternal(parentId, (unsignedValue + 0x800000) & 0xFFFFFF);
 }
 
-void  RemoveArrayVariable(unsigned int parentId, unsigned int unsignedValue)
+void  RemoveArrayVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	iassert(IsValidArrayIndex(unsignedValue));
 
 	RemoveVariable(parentId, (unsignedValue + 0x800000) & 0xFFFFFF);
 }
 
-void  CopyArray(unsigned int parentId, unsigned int newParentId)
+void  CopyArray(uint32_t parentId, uint32_t newParentId)
 {
-	unsigned int nextSibling; // [esp+0h] [ebp-20h]
+	uint32_t nextSibling; // [esp+0h] [ebp-20h]
 	VariableValueInternal* entryValue; // [esp+Ch] [ebp-14h]
 	int type; // [esp+10h] [ebp-10h]
 	VariableValueInternal* newEntryValue; // [esp+14h] [ebp-Ch]
-	unsigned int id; // [esp+1Ch] [ebp-4h]
+	uint32_t id; // [esp+1Ch] [ebp-4h]
 
 	VariableValueInternal *parentValue = &scrVarGlob.variableList[parentId + 1];
 	iassert(IsObject(parentValue));
@@ -4402,10 +4402,10 @@ void  Scr_CastWeakerStringPair(VariableValue* value1, VariableValue* value2)
 		goto LABEL_28;
 	}
 }
-float  Scr_GetEndonUsage(unsigned int parentId)
+float  Scr_GetEndonUsage(uint32_t parentId)
 {
 	VariableValueInternal_u Object; // eax
-	unsigned int id; // [esp+4h] [ebp-4h]
+	uint32_t id; // [esp+4h] [ebp-4h]
 
 	VariableValueInternal *parentValue = &scrVarGlob.variableList[parentId + 1];
 
@@ -4423,7 +4423,7 @@ float  Scr_GetThreadUsage(const VariableStackBuffer* stackBuf, float* endonUsage
 {
 	const char* buf; // [esp+0h] [ebp-18h]
 	const char* bufa; // [esp+0h] [ebp-18h]
-	unsigned int localId; // [esp+4h] [ebp-14h]
+	uint32_t localId; // [esp+4h] [ebp-14h]
 	int size; // [esp+8h] [ebp-10h]
 	float usage; // [esp+Ch] [ebp-Ch]
 	VariableUnion u; // [esp+10h] [ebp-8h]
@@ -4453,12 +4453,12 @@ float  Scr_GetThreadUsage(const VariableStackBuffer* stackBuf, float* endonUsage
 	return usage;
 }
 
-int  Scr_MakeValuePrimitive(unsigned int parentId)
+int  Scr_MakeValuePrimitive(uint32_t parentId)
 {
 	VariableValueInternal* parentValue; // [esp+4h] [ebp-10h]
-	unsigned int name; // [esp+8h] [ebp-Ch]
+	uint32_t name; // [esp+8h] [ebp-Ch]
 	VariableValueInternal* entryValue; // [esp+Ch] [ebp-8h]
-	unsigned int id; // [esp+10h] [ebp-4h]
+	uint32_t id; // [esp+10h] [ebp-4h]
 
 	parentValue = &scrVarGlob.variableList[parentId + 1];
 	iassert((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
@@ -4517,17 +4517,17 @@ int  Scr_MakeValuePrimitive(unsigned int parentId)
 	}
 }
 
-void  SafeRemoveArrayVariable(unsigned int parentId, unsigned int unsignedValue)
+void  SafeRemoveArrayVariable(uint32_t parentId, uint32_t unsignedValue)
 {
 	iassert(IsValidArrayIndex(unsignedValue));
 
 	SafeRemoveVariable(parentId, (unsignedValue + MAX_ARRAYINDEX) & VAR_NAME_LOW_MASK);
 }
 
-VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fieldName)
+VariableValue  Scr_EvalVariableEntityField(uint32_t entId, uint32_t fieldName)
 {
 	VariableValueInternal* entValue; // [esp+8h] [ebp-18h]
-	unsigned int fieldId; // [esp+10h] [ebp-10h]
+	uint32_t fieldId; // [esp+10h] [ebp-10h]
 	VariableValue valuea; // [esp+14h] [ebp-Ch]
 	VariableUnion id; // [esp+1Ch] [ebp-4h]
 
@@ -4536,7 +4536,7 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 	iassert((entValue->w.type & VAR_MASK) == VAR_ENTITY);
 	iassert((entValue->w.classnum >> VAR_NAME_BITS) < CLASS_NUM_COUNT);
 
-	unsigned int classnum = entValue->w.classnum >> VAR_NAME_BITS;
+	uint32_t classnum = entValue->w.classnum >> VAR_NAME_BITS;
 	fieldId = FindArrayVariable(g_classMap[classnum].id, fieldName);
 	if (fieldId)
 	{
@@ -4572,7 +4572,7 @@ VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fiel
 	}
 }
 
-void  Scr_ClearThread(unsigned int parentId)
+void  Scr_ClearThread(uint32_t parentId)
 {
 	VariableValueInternal* parentValue; // [esp+0h] [ebp-4h]
 
@@ -4590,7 +4590,7 @@ void  Scr_ClearThread(unsigned int parentId)
 	RemoveRefToObject(parentValue->u.o.u.size);
 }
 
-void Scr_GetChecksum(unsigned int *checksum)
+void Scr_GetChecksum(uint32_t *checksum)
 {
 	iassert(scrVarPub.endScriptBuffer);
 	iassert(scrVarPub.programBuffer);
@@ -4601,12 +4601,12 @@ void Scr_GetChecksum(unsigned int *checksum)
 	checksum[2] = scrVarPub.endScriptBuffer - scrVarPub.programBuffer;
 }
 
-void CopyEntity(unsigned int parentId, unsigned int newParentId)
+void CopyEntity(uint32_t parentId, uint32_t newParentId)
 {
 	VariableValueInternal *parentValue; // r31
-	unsigned int FirstSibling; // r15
+	uint32_t FirstSibling; // r15
 	VariableValueInternal *entryValue; // r26
-	unsigned int name; // r29
+	uint32_t name; // r29
 	VariableValueInternal *newEntryValue; // r31
 	VariableUnion *intValue; // r4
 
@@ -4623,7 +4623,7 @@ void CopyEntity(unsigned int parentId, unsigned int newParentId)
 	iassert((scrVarGlob.variableList[VARIABLELIST_PARENT_BEGIN + newParentId].w.type & VAR_MASK) == VAR_ENTITY);
 
 
-	for (unsigned int id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
+	for (uint32_t id = FindFirstSibling(parentId); id; id = FindNextSibling(id))
 	{
 		entryValue = &scrVarGlob.variableList[id + VARIABLELIST_CHILD_BEGIN];
 
@@ -4650,9 +4650,9 @@ void CopyEntity(unsigned int parentId, unsigned int newParentId)
 	}
 }
 
-void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum)
+void Scr_CopyEntityNum(int fromEntnum, int toEntnum, uint32_t classnum)
 {
-	unsigned int entID; // r3
+	uint32_t entID; // r3
 
 	entID = FindEntityId(fromEntnum, classnum);
 	if (entID && FindFirstSibling(entID))
@@ -4662,12 +4662,12 @@ void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum)
 	}
 }
 
-int Scr_AddStringSet(unsigned int setId, const char *string)
+int Scr_AddStringSet(uint32_t setId, const char *string)
 {
-	unsigned int LowercaseString; // r31
-	unsigned int VariableIndexInternal; // r10
-	unsigned int v6; // r3
-	unsigned int id; // r31
+	uint32_t LowercaseString; // r31
+	uint32_t VariableIndexInternal; // r10
+	uint32_t v6; // r3
+	uint32_t id; // r31
 	VariableValue v8; // [sp+50h] [-30h] BYREF
 
 	LowercaseString = SL_GetLowercaseString(string, 0);
@@ -4689,12 +4689,12 @@ int Scr_AddStringSet(unsigned int setId, const char *string)
 	}
 }
 
-unsigned int Scr_InitStringSet()
+uint32_t Scr_InitStringSet()
 {
 	return Scr_AllocArray();
 }
 
-void Scr_ShutdownStringSet(unsigned int setId)
+void Scr_ShutdownStringSet(uint32_t setId)
 {
 	RemoveRefToObject(setId);
 }

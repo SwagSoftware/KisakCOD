@@ -261,7 +261,7 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 	int ret; // [esp+20h] [ebp-10h]
 	int protocol; // [esp+24h] [ebp-Ch]
 	int fromlen; // [esp+28h] [ebp-8h] BYREF
-	unsigned int net_socket; // [esp+2Ch] [ebp-4h]
+	uint32_t net_socket; // [esp+2Ch] [ebp-4h]
 
 	for (protocol = 0; protocol < 2; ++protocol)
 	{
@@ -396,7 +396,7 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 	int err; // [esp+0h] [ebp-20h]
 	sockaddr addr; // [esp+4h] [ebp-1Ch] BYREF
 	int ret; // [esp+14h] [ebp-Ch]
-	unsigned int net_socket; // [esp+18h] [ebp-8h]
+	uint32_t net_socket; // [esp+18h] [ebp-8h]
 
 	net_socket = 0;
 	switch (to.type)
@@ -519,7 +519,7 @@ void Sys_ShowIP(void) {
 NET_IPSocket
 ====================
 */
-unsigned int __cdecl NET_IPSocket(const char *net_interface, int port)
+uint32_t __cdecl NET_IPSocket(const char *net_interface, int port)
 {
 	const char *v2; // eax
 	const char *v4; // eax
@@ -528,7 +528,7 @@ unsigned int __cdecl NET_IPSocket(const char *net_interface, int port)
 	sockaddr address; // [esp+0h] [ebp-24h] BYREF
 	int _true; // [esp+18h] [ebp-Ch] BYREF
 	int i; // [esp+1Ch] [ebp-8h] BYREF
-	unsigned int newsocket; // [esp+20h] [ebp-4h]
+	uint32_t newsocket; // [esp+20h] [ebp-4h]
 
 	_true = 1;
 	i = 1;
@@ -597,8 +597,8 @@ void __cdecl NET_OpenSocks(u_short port)
 	const char *v4; // eax
 	const char *v5; // eax
 	const char *v6; // eax
-	unsigned int v7; // [esp+0h] [ebp-8Ch]
-	unsigned int v8; // [esp+10h] [ebp-7Ch]
+	uint32_t v7; // [esp+0h] [ebp-8Ch]
+	uint32_t v8; // [esp+10h] [ebp-7Ch]
 	sockaddr address; // [esp+2Ch] [ebp-60h] BYREF
 	unsigned __int8 buf[64]; // [esp+3Ch] [ebp-50h] BYREF
 	int len; // [esp+80h] [ebp-Ch]
@@ -863,7 +863,7 @@ NET_IPXSocket
 ====================
 */
 // NOTE(mrsteyk): who the fuck has IPX in 21st century? @Cleanup
-unsigned int __cdecl NET_IPXSocket(int port)
+uint32_t __cdecl NET_IPXSocket(int port)
 {
 	const char *v1; // eax
 	const char *v3; // eax
@@ -871,7 +871,7 @@ unsigned int __cdecl NET_IPXSocket(int port)
 	const char *v5; // eax
 	struct sockaddr address; // [esp+0h] [ebp-20h] BYREF
 	int _true; // [esp+18h] [ebp-8h] BYREF
-	unsigned int newsocket; // [esp+1Ch] [ebp-4h]
+	uint32_t newsocket; // [esp+1Ch] [ebp-4h]
 
 	_true = 1;
 	newsocket = socket(6, 2, NSPROTO_IPX);
@@ -1107,7 +1107,7 @@ void __cdecl TRACK_win_net()
 	track_static_alloc_internal(&winsockdata, 400, "winsockdata", 9);
 }
 
-int __cdecl NET_Select(unsigned int socket)
+int __cdecl NET_Select(uint32_t socket)
 {
 	const char* v2; // eax
 	fd_set readfds; // [esp+0h] [ebp-220h] BYREF
@@ -1142,7 +1142,7 @@ int __cdecl NET_Select(unsigned int socket)
 	}
 }
 
-unsigned int __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
+uint32_t __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
 {
 	const char* v3; // eax
 	const char* v5; // eax
@@ -1151,7 +1151,7 @@ unsigned int __cdecl NET_TCPIPSocket(const char* net_interface, int port, int ty
 	sockaddr_in address; // [esp+4h] [ebp-20h] BYREF
 	int err; // [esp+18h] [ebp-Ch]
 	int _true; // [esp+1Ch] [ebp-8h] BYREF
-	unsigned int newsocket; // [esp+20h] [ebp-4h]
+	uint32_t newsocket; // [esp+20h] [ebp-4h]
 
 	_true = 1;
 	if (net_interface)

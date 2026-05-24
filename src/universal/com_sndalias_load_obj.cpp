@@ -155,7 +155,7 @@ void __cdecl Com_LoadSoundAliasDefaults(snd_alias_build_s *alias, const char *so
 
 BOOL __cdecl Com_IsValidName(
     const char *token,
-    unsigned int maxLength,
+    uint32_t maxLength,
     int(__cdecl *validityFunction)(const char *),
     snd_alias_build_s *alias,
     snd_alias_members_t field,
@@ -688,7 +688,7 @@ void __cdecl Com_LoadSoundAliasField(
     char *v16; // [esp+40h] [ebp-40h]
     char *aliasName; // [esp+4Ch] [ebp-34h]
     char *v18; // [esp+50h] [ebp-30h]
-    unsigned int i; // [esp+7Ch] [ebp-4h]
+    uint32_t i; // [esp+7Ch] [ebp-4h]
 
     if (field > SA_ENVELOPPERCENTAGE)
         MyAssertHandler(
@@ -862,7 +862,7 @@ void __cdecl Com_LoadSoundAliasField(
     }
 }
 
-unsigned int *__cdecl Com_AllocateTempSoundMemory(int size, const char *name)
+uint32_t *__cdecl Com_AllocateTempSoundMemory(int size, const char *name)
 {
     return Hunk_AllocateTempMemory(size, name);
 }
@@ -1454,7 +1454,7 @@ void __cdecl Com_MakeSoundAliasesPermanent(snd_alias_list_t *aliasInfo, SoundFil
     char *currentNamea; // [esp+B8h] [ebp-30h]
     char *currentNameb; // [esp+B8h] [ebp-30h]
     char *subtitle; // [esp+BCh] [ebp-2Ch]
-    unsigned int aliasCount; // [esp+C0h] [ebp-28h]
+    uint32_t aliasCount; // [esp+C0h] [ebp-28h]
     snd_alias_build_s *other; // [esp+C4h] [ebp-24h]
     snd_alias_list_t *aliasList; // [esp+C8h] [ebp-20h]
     snd_alias_build_s *build; // [esp+CCh] [ebp-1Ch]
@@ -1464,7 +1464,7 @@ void __cdecl Com_MakeSoundAliasesPermanent(snd_alias_list_t *aliasInfo, SoundFil
     int soundCount; // [esp+D4h] [ebp-14h]
     int bytesCount; // [esp+D8h] [ebp-10h]
     int bytesCounta; // [esp+D8h] [ebp-10h]
-    unsigned int stringBytesCount; // [esp+E0h] [ebp-8h]
+    uint32_t stringBytesCount; // [esp+E0h] [ebp-8h]
 
     soundFileInfo->count = 0;
     aliasInfo->count = 0;
@@ -1729,8 +1729,8 @@ void __cdecl Com_ParseEntChannelFile(const char *buffer)
 
 void __cdecl Com_SetChannelMapEntry(
     MSSChannelMap *entry,
-    unsigned int inputChannel,
-    unsigned int outputChannel,
+    uint32_t inputChannel,
+    uint32_t outputChannel,
     float volume)
 {
     MSSSpeakerLevels *speaker; // [esp+0h] [ebp-4h]

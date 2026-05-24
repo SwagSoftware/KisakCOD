@@ -6,7 +6,7 @@
 
 enum entity_event_t : __int32;
 
-void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum);
+void __cdecl G_SafeDObjFree(uint32_t handle, int unusedLocalClientNum);
 void __cdecl TRACK_g_utils();
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg);
 int __cdecl G_LocalizedStringIndex(char *string);
@@ -15,23 +15,23 @@ int __cdecl G_ModelIndex(const char *name);
 bool __cdecl G_GetModelBounds(int index, float *outMins, float *outMaxs);
 XModel *__cdecl G_GetModel(int index);
 bool __cdecl G_XModelBad(int index);
-unsigned int __cdecl G_ModelName(unsigned int index);
+uint32_t __cdecl G_ModelName(uint32_t index);
 int __cdecl G_TagIndex(char *name);
 int __cdecl G_EffectIndex(char *name);
 int __cdecl G_ShellShockIndex(char *name);
 int __cdecl G_SoundAliasIndex(char *name);
 void __cdecl G_DObjUpdate(gentity_s *ent);
 void __cdecl G_SetModel(gentity_s *ent, char *modelName);
-void __cdecl G_OverrideModel(unsigned int modelIndex, char *defaultModelName);
-int __cdecl G_EntAttach(gentity_s *ent, char *modelName, unsigned int tagName, int ignoreCollision);
-int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagName);
+void __cdecl G_OverrideModel(uint32_t modelIndex, char *defaultModelName);
+int __cdecl G_EntAttach(gentity_s *ent, char *modelName, uint32_t tagName, int ignoreCollision);
+int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, uint32_t tagName);
 void __cdecl G_EntDetachAll(gentity_s *ent);
-int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName);
-int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int tagName);
+int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, uint32_t tagName);
+int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, uint32_t tagName);
 int __cdecl G_EntLinkToWithOffset(
     gentity_s *ent,
     gentity_s *parent,
-    unsigned int tagName,
+    uint32_t tagName,
     const float *originOffset,
     const float *anglesOffset);
 void __cdecl G_EntUnlink(gentity_s *ent);
@@ -45,9 +45,9 @@ void __cdecl G_SafeDObjFree(gentity_s *ent);
 int __cdecl G_DObjUpdateServerTime(gentity_s *ent, int bNotify);
 void __cdecl G_DObjCalcPose(gentity_s *ent, int *partBits);
 void __cdecl G_DObjCalcBone(const gentity_s *ent, int boneIndex);
-DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagName);
-int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, mat4x3 &tagMat);
-int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, unsigned int tagName, float *pos);
+DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, uint32_t tagName);
+int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, uint32_t tagName, mat4x3 &tagMat);
+int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, uint32_t tagName, float *pos);
 DObjAnimMat *__cdecl G_DObjGetLocalBoneIndexMatrix(gentity_s *ent, int boneIndex);
 void __cdecl G_DObjGetWorldBoneIndexPos(gentity_s *ent, int boneIndex, float *pos);
 void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float (*tagMat)[3]);
@@ -63,8 +63,8 @@ void __cdecl G_FreeEntityDelay(gentity_s *ed);
 void __cdecl G_BroadcastEntity(gentity_s *ent);
 void __cdecl G_FreeEntityAfterEvent(gentity_s *ent);
 gentity_s *__cdecl G_TempEntity(const float *origin, int event);
-void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm);
-void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm);
+void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, uint32_t eventParm);
+void __cdecl G_AddEvent(gentity_s *ent, uint32_t event, uint32_t eventParm);
 void __cdecl G_PlaySoundAlias(gentity_s *ent, uint8_t index);
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList);
 void __cdecl G_SetOrigin(gentity_s *ent, const float *origin);

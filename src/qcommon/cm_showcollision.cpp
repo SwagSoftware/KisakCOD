@@ -57,7 +57,7 @@ void __cdecl CM_ShowSingleBrushCollision(
     ptCount = CM_ForEachBrushPlaneIntersection(brush, (float(*)[4])&axialPlanes, &brushPts);
     if (ptCount >= 4)
     {
-        for (sideIndex = 0; (unsigned int)sideIndex < 6; ++sideIndex)
+        for (sideIndex = 0; (uint32_t)sideIndex < 6; ++sideIndex)
         {
             if (CM_BuildBrushWindingForSide(
                 (winding_t *)windingPool,
@@ -66,7 +66,7 @@ void __cdecl CM_ShowSingleBrushCollision(
                 &brushPts,
                 ptCount))
             {
-                drawCollisionPoly(*(unsigned int *)windingPool, (float (*)[3]) & windingPool[4], color);
+                drawCollisionPoly(*(uint32_t *)windingPool, (float (*)[3]) & windingPool[4], color);
             }
         }
         for (sideIndex = 6; sideIndex < brush->numsides + 6; ++sideIndex)
@@ -78,7 +78,7 @@ void __cdecl CM_ShowSingleBrushCollision(
                 &brushPts,
                 ptCount))
             {
-                drawCollisionPoly(*(unsigned int *)windingPool, (float (*)[3]) & windingPool[4], color);
+                drawCollisionPoly(*(uint32_t *)windingPool, (float (*)[3]) & windingPool[4], color);
             }
         }
     }
@@ -185,8 +185,8 @@ int __cdecl CM_AddSimpleBrushPoint(
     cplane_s *plane; // [esp+4h] [ebp-Ch]
     float dist; // [esp+8h] [ebp-8h]
     float dista; // [esp+8h] [ebp-8h]
-    unsigned int sideIndex; // [esp+Ch] [ebp-4h]
-    unsigned int sideIndexa; // [esp+Ch] [ebp-4h]
+    uint32_t sideIndex; // [esp+Ch] [ebp-4h]
+    uint32_t sideIndexa; // [esp+Ch] [ebp-4h]
 
     iassert( brush );
     iassert( brushPts );

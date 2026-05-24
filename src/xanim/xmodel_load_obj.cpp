@@ -24,7 +24,7 @@ XModelSurfs *__cdecl XModelSurfsFindData(const char *name)
 
 void __cdecl XModelReadSurface_BuildCollisionTree(
     XSurface *surface,
-    unsigned int vertListIndex,
+    uint32_t vertListIndex,
     void *(__cdecl *Alloc)(int))
 {
     unsigned __int8 *v3; // eax
@@ -45,13 +45,13 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     float *v18; // [esp+98h] [ebp-100h]
     float *v19; // [esp+9Ch] [ebp-FCh]
     GenericAabbTree *builtNode; // [esp+A0h] [ebp-F8h]
-    unsigned int leafIndex; // [esp+A4h] [ebp-F4h]
+    uint32_t leafIndex; // [esp+A4h] [ebp-F4h]
     float nodeMins[3]; // [esp+A8h] [ebp-F0h] BYREF
     XSurfaceCollisionNode *outNode; // [esp+B4h] [ebp-E4h]
-    unsigned int leafEnd; // [esp+B8h] [ebp-E0h]
+    uint32_t leafEnd; // [esp+B8h] [ebp-E0h]
     float nodeMaxs[3]; // [esp+BCh] [ebp-DCh] BYREF
-    unsigned int allocSize; // [esp+C8h] [ebp-D0h]
-    unsigned int alignedAddr; // [esp+CCh] [ebp-CCh]
+    uint32_t allocSize; // [esp+C8h] [ebp-D0h]
+    uint32_t alignedAddr; // [esp+CCh] [ebp-CCh]
     unsigned __int8 *alloced; // [esp+D0h] [ebp-C8h]
     float combinedVolume; // [esp+D4h] [ebp-C4h]
     float thisVolume; // [esp+D8h] [ebp-C0h]
@@ -62,21 +62,21 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     float triMaxs[3]; // [esp+FCh] [ebp-9Ch] BYREF
     XSurfaceCollisionTree *tree; // [esp+108h] [ebp-90h]
     bool generateLeafsPass; // [esp+10Fh] [ebp-89h]
-    unsigned int nodeIndex; // [esp+110h] [ebp-88h]
-    unsigned int triEndIndex; // [esp+114h] [ebp-84h]
+    uint32_t nodeIndex; // [esp+110h] [ebp-88h]
+    uint32_t triEndIndex; // [esp+114h] [ebp-84h]
     float prevMins[3]; // [esp+118h] [ebp-80h] BYREF
-    unsigned int leafCount; // [esp+124h] [ebp-74h]
+    uint32_t leafCount; // [esp+124h] [ebp-74h]
     GenericAabbTreeOptions options; // [esp+128h] [ebp-70h] BYREF
-    unsigned int nodeCount; // [esp+150h] [ebp-48h]
+    uint32_t nodeCount; // [esp+150h] [ebp-48h]
     float globalMaxs[3]; // [esp+154h] [ebp-44h] BYREF
-    unsigned int triIndex; // [esp+160h] [ebp-38h]
+    uint32_t triIndex; // [esp+160h] [ebp-38h]
     float prevMaxs[3]; // [esp+164h] [ebp-34h] BYREF
     bool lastMergeable; // [esp+173h] [ebp-25h]
     float globalMins[3]; // [esp+174h] [ebp-24h] BYREF
     float globalDelta[3]; // [esp+180h] [ebp-18h] BYREF
-    unsigned int triBeginIndex; // [esp+18Ch] [ebp-Ch]
+    uint32_t triBeginIndex; // [esp+18Ch] [ebp-Ch]
     XRigidVertList *vertList; // [esp+190h] [ebp-8h]
-    unsigned int allocedLeafCount; // [esp+194h] [ebp-4h]
+    uint32_t allocedLeafCount; // [esp+194h] [ebp-4h]
 
     iassert(!surface->deformed);
     iassert(vertListIndex >= 0 && vertListIndex < surface->vertListCount);
@@ -477,7 +477,7 @@ void __cdecl XModelReadSurface(XModel *model, unsigned char **pos, void *(__cdec
     XVertexInfo2 *verts2; // [esp+DCh] [ebp-664h]
     XVertexInfo3 *verts3; // [esp+E0h] [ebp-660h]
     int startTriIndex; // [esp+E4h] [ebp-65Ch]
-    unsigned int vertListIter; // [esp+E8h] [ebp-658h]
+    uint32_t vertListIter; // [esp+E8h] [ebp-658h]
     int localBoneIndex; // [esp+ECh] [ebp-654h]
     int vertListCount; // [esp+F4h] [ebp-64Ch]
     XRigidVertList rigidVertListArray[129]; // [esp+F8h] [ebp-648h] BYREF

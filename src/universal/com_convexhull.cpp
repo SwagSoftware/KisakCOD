@@ -7,9 +7,9 @@
 #include "q_shared.h" // ARRAY_COUNT
 
 
-static void __cdecl Com_TranslatePoints(float (*points)[64][2], unsigned int pointCount, float *offset)
+static void __cdecl Com_TranslatePoints(float (*points)[64][2], uint32_t pointCount, float *offset)
 {
-    unsigned int pointIdx; // [esp+0h] [ebp-4h]
+    uint32_t pointIdx; // [esp+0h] [ebp-4h]
 
     for (pointIdx = 0; pointIdx < pointCount; ++pointIdx)
     {
@@ -18,9 +18,9 @@ static void __cdecl Com_TranslatePoints(float (*points)[64][2], unsigned int poi
     }
 }
 
-static void __cdecl Com_SwapHullPoints(unsigned int *pointOrder, unsigned int pointIndex0, unsigned int pointIndex1)
+static void __cdecl Com_SwapHullPoints(uint32_t *pointOrder, uint32_t pointIndex0, uint32_t pointIndex1)
 {
-    unsigned int swapCache; // [esp+4h] [ebp-4h]
+    uint32_t swapCache; // [esp+4h] [ebp-4h]
 
     swapCache = pointOrder[pointIndex0];
     pointOrder[pointIndex0] = pointOrder[pointIndex1];
@@ -29,13 +29,13 @@ static void __cdecl Com_SwapHullPoints(unsigned int *pointOrder, unsigned int po
 
 static void __cdecl Com_InitialHull(
     const float (*points)[64][2],
-    unsigned int *pointOrder,
-    unsigned int pointCount,
-    unsigned int *hullOrder)
+    uint32_t *pointOrder,
+    uint32_t pointCount,
+    uint32_t *hullOrder)
 {
-    unsigned int maxIndex; // [esp+0h] [ebp-Ch]
-    unsigned int pointIndex; // [esp+4h] [ebp-8h]
-    unsigned int minIndex; // [esp+8h] [ebp-4h]
+    uint32_t maxIndex; // [esp+0h] [ebp-Ch]
+    uint32_t pointIndex; // [esp+4h] [ebp-8h]
+    uint32_t minIndex; // [esp+8h] [ebp-4h]
 
     minIndex = 0;
     maxIndex = 0;
@@ -71,11 +71,11 @@ static void __cdecl Com_InitialHull(
     }
 }
 
-static unsigned int __cdecl Com_AddPointToHull(
-    unsigned int pointIndex,
-    unsigned int newIndex,
-    unsigned int *hullOrder,
-    unsigned int hullPointCount)
+static uint32_t __cdecl Com_AddPointToHull(
+    uint32_t pointIndex,
+    uint32_t newIndex,
+    uint32_t *hullOrder,
+    uint32_t hullPointCount)
 {
     iassert(newIndex <= hullPointCount);
     memmove(
@@ -87,14 +87,14 @@ static unsigned int __cdecl Com_AddPointToHull(
 }
 
 
-unsigned int __cdecl Com_RecursivelyGrowHull(
+uint32_t __cdecl Com_RecursivelyGrowHull(
     const float (*points)[64][2],
-    unsigned int *pointOrder,
-    unsigned int pointCount,
-    unsigned int firstIndex,
-    unsigned int secondIndex,
-    unsigned int *hullOrder,
-    unsigned int hullPointCount)
+    uint32_t *pointOrder,
+    uint32_t pointCount,
+    uint32_t firstIndex,
+    uint32_t secondIndex,
+    uint32_t *hullOrder,
+    uint32_t hullPointCount)
 {
     float *v7; // edx
     float *v8; // ecx
@@ -184,11 +184,11 @@ done_splitting_0:
     );
 }
 
-static unsigned int __cdecl Com_GrowInitialHull(
+static uint32_t __cdecl Com_GrowInitialHull(
     const float (*points)[64][2],
-    unsigned int *pointOrder,
-    unsigned int pointCount,
-    unsigned int *hullOrder)
+    uint32_t *pointOrder,
+    uint32_t pointCount,
+    uint32_t *hullOrder)
 {
     float *v4; // ecx
     float *v5; // ecx
@@ -202,7 +202,7 @@ static unsigned int __cdecl Com_GrowInitialHull(
     float backDist; // [esp+30h] [ebp-10h]
     int backIndex; // [esp+34h] [ebp-Ch]
     float frontDist; // [esp+38h] [ebp-8h]
-    unsigned int hullPointCount; // [esp+3Ch] [ebp-4h]
+    uint32_t hullPointCount; // [esp+3Ch] [ebp-4h]
 
     iassert(pointCount >= 1);
     edgeEq[0] = (float)(*points)[hullOrder[1]][1] - (float)(*points)[*hullOrder][1];
@@ -328,14 +328,14 @@ done_splitting:
     return hullPointCount;
 }
 
-unsigned int __cdecl Com_ConvexHull(float (*points)[2], unsigned int pointCount, float (*hull)[2])
+uint32_t __cdecl Com_ConvexHull(float (*points)[2], uint32_t pointCount, float (*hull)[2])
 {
     float *v4; // [esp+0h] [ebp-218h]
     float *v5; // [esp+4h] [ebp-214h]
-    unsigned int hullOrder[64]; // [esp+8h] [ebp-210h] BYREF
+    uint32_t hullOrder[64]; // [esp+8h] [ebp-210h] BYREF
     float offset[2]; // [esp+108h] [ebp-110h] BYREF
-    unsigned int pointOrder[64]; // [esp+110h] [ebp-108h] BYREF
-    unsigned int hullPointCount; // [esp+214h] [ebp-4h]
+    uint32_t pointOrder[64]; // [esp+110h] [ebp-108h] BYREF
+    uint32_t hullPointCount; // [esp+214h] [ebp-4h]
 
     iassert(pointCount >= 3 && pointCount < ARRAY_COUNT(pointOrder));
     iassert(hull != points);
@@ -352,7 +352,7 @@ unsigned int __cdecl Com_ConvexHull(float (*points)[2], unsigned int pointCount,
     Com_InitialHull(pPoints, pointOrder, pointCount, hullOrder);
     hullPointCount = Com_GrowInitialHull(pPoints, pointOrder, pointCount - 2, hullOrder);
 
-    for (unsigned int hullPointIter = 0; hullPointIter < hullPointCount; ++hullPointIter)
+    for (uint32_t hullPointIter = 0; hullPointIter < hullPointCount; ++hullPointIter)
     {
         v4 = (*pHulls)[hullPointIter];
         v5 = (*pPoints)[hullOrder[hullPointIter]];

@@ -188,10 +188,10 @@ void __cdecl R_LoadDefaultLightGridColors(GfxLightGridColors *colors)
     iassert( basisIndex == GFX_LIGHTGRID_SAMPLE_COUNT );
 }
 
-void __cdecl R_LoadLightGridColors(unsigned int bspVersion)
+void __cdecl R_LoadLightGridColors(uint32_t bspVersion)
 {
     char *rawColorData; // [esp+0h] [ebp-Ch]
-    unsigned int colorIndex; // [esp+8h] [ebp-4h]
+    uint32_t colorIndex; // [esp+8h] [ebp-4h]
 
     rawColorData = Com_GetBspLump(LUMP_LIGHTGRIDCOLORS, bspVersion > 10 ? 168 : 24, &s_world.lightGrid.colorCount);
     s_world.lightGrid.colors = (GfxLightGridColors *)Hunk_Alloc(168 * (s_world.lightGrid.colorCount + 1), "R_LoadLightGridColors", 20);
@@ -228,7 +228,7 @@ uint8_t *R_LoadLightGridEntries()
 {
     uint8_t *result; // eax
     GfxLightGridEntry *out; // [esp+0h] [ebp-Ch]
-    unsigned int entryIndex; // [esp+4h] [ebp-8h]
+    uint32_t entryIndex; // [esp+4h] [ebp-8h]
     char *in; // [esp+8h] [ebp-4h]
 
     in = Com_GetBspLump(LUMP_LIGHTGRIDENTRIES, 4u, &s_world.lightGrid.entryCount);
@@ -251,9 +251,9 @@ uint8_t *R_LoadLightGridEntries()
 
 void __cdecl R_AssertLightGridValid(const GfxLightGrid *lightGrid)
 {
-    unsigned int rowCount; // [esp+0h] [ebp-Ch]
+    uint32_t rowCount; // [esp+0h] [ebp-Ch]
     const GfxLightGridRow *row; // [esp+4h] [ebp-8h]
-    unsigned int rowIndex; // [esp+8h] [ebp-4h]
+    uint32_t rowIndex; // [esp+8h] [ebp-4h]
 
     if (lightGrid->mins[0] > lightGrid->maxs[0])
         MyAssertHandler(
@@ -334,8 +334,8 @@ int R_InitEmptyLightGrid()
 void R_LoadLightGridHeader()
 {
     char *header; // [esp+0h] [ebp-Ch]
-    unsigned int len; // [esp+4h] [ebp-8h] BYREF
-    unsigned int rowCount; // [esp+8h] [ebp-4h]
+    uint32_t len; // [esp+4h] [ebp-8h] BYREF
+    uint32_t rowCount; // [esp+8h] [ebp-4h]
 
     header = Com_GetBspLump(LUMP_LIGHTGRIDHEADER, 1u, &len);
     if (len < 0x14)
@@ -399,9 +399,9 @@ void __cdecl R_EmitLightGridEntry_Version15(const AnnotatedLightGridPoint *point
     s_world.lightGrid.entries[s_world.lightGrid.entryCount++] = point->entry;
 }
 
-unsigned int R_EmitDefaultLightGridEntry_Version15()
+uint32_t R_EmitDefaultLightGridEntry_Version15()
 {
-    unsigned int result; // eax
+    uint32_t result; // eax
 
     s_world.lightGrid.entries[s_world.lightGrid.entryCount].colorsIndex = 0;
     s_world.lightGrid.entries[s_world.lightGrid.entryCount].primaryLightIndex = s_world.lightGrid.sunPrimaryLightIndex;
@@ -415,15 +415,15 @@ char __cdecl R_EmitLightGridBlock_Version15(
     signed int runCount,
     const uint16_t *zSubRange,
     const uint16_t *zRangeGlobal,
-    unsigned int beginBlock,
-    unsigned int endBlock)
+    uint32_t beginBlock,
+    uint32_t endBlock)
 {
     signed int v7; // [esp+0h] [ebp-20h]
     __int16 zBase; // [esp+8h] [ebp-18h]
-    unsigned int zOffset; // [esp+Ch] [ebp-14h]
-    unsigned int height; // [esp+10h] [ebp-10h]
-    unsigned int pointIndex; // [esp+14h] [ebp-Ch]
-    unsigned int colOffset; // [esp+18h] [ebp-8h]
+    uint32_t zOffset; // [esp+Ch] [ebp-14h]
+    uint32_t height; // [esp+10h] [ebp-10h]
+    uint32_t pointIndex; // [esp+14h] [ebp-Ch]
+    uint32_t colOffset; // [esp+18h] [ebp-8h]
     bool zBaseUsesShort; // [esp+1Fh] [ebp-1h]
 
     height = zSubRange[1] - *zSubRange + 1;
@@ -494,7 +494,7 @@ char __cdecl R_EmitLightGridBlock_Version15(
     }
 }
 
-void __cdecl R_EmitEmptyLightGridBlock_Version15(unsigned int emptyCount)
+void __cdecl R_EmitEmptyLightGridBlock_Version15(uint32_t emptyCount)
 {
     while (emptyCount > 0xFF)
     {
@@ -524,17 +524,17 @@ void __cdecl R_EmitEmptyLightGridBlock_Version15(unsigned int emptyCount)
 
 char __cdecl R_CompressLightGridRow_Version15(
     const AnnotatedLightGridPoint *pointsArray,
-    unsigned int beginRow,
-    unsigned int endRow,
+    uint32_t beginRow,
+    uint32_t endRow,
     uint16_t *zRangeGlobal)
 {
     uint16_t run; // [esp+0h] [ebp-2Ch]
     uint16_t zSubRangeRun[2]; // [esp+4h] [ebp-28h] BYREF
-    unsigned int beginBlock; // [esp+8h] [ebp-24h]
+    uint32_t beginBlock; // [esp+8h] [ebp-24h]
     GfxLightGridRow rowHeader; // [esp+Ch] [ebp-20h]
     uint16_t zSubRange[2]; // [esp+18h] [ebp-14h]
-    unsigned int beginCol; // [esp+1Ch] [ebp-10h]
-    unsigned int endCol; // [esp+20h] [ebp-Ch]
+    uint32_t beginCol; // [esp+1Ch] [ebp-10h]
+    uint32_t endCol; // [esp+20h] [ebp-Ch]
     uint16_t colRun; // [esp+24h] [ebp-8h]
     uint16_t col; // [esp+28h] [ebp-4h]
 
@@ -584,11 +584,11 @@ char __cdecl R_CompressLightGridRow_Version15(
     return 1;
 }
 
-char __cdecl R_EncodeLightGrid_Version15(const AnnotatedLightGridPoint *pointsArray, unsigned int pointsArrayCount)
+char __cdecl R_EncodeLightGrid_Version15(const AnnotatedLightGridPoint *pointsArray, uint32_t pointsArrayCount)
 {
-    unsigned int pointIndex; // [esp+0h] [ebp-18h]
+    uint32_t pointIndex; // [esp+0h] [ebp-18h]
     uint16_t zRange[2]; // [esp+4h] [ebp-14h] BYREF
-    unsigned int pointCount; // [esp+8h] [ebp-10h]
+    uint32_t pointCount; // [esp+8h] [ebp-10h]
     uint16_t row; // [esp+Ch] [ebp-Ch]
     const AnnotatedLightGridPoint *point; // [esp+10h] [ebp-8h]
     uint16_t rowIndex; // [esp+14h] [ebp-4h]
@@ -642,27 +642,27 @@ char __cdecl R_EncodeLightGrid_Version15(const AnnotatedLightGridPoint *pointsAr
     return 1;
 }
 
-void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion)
+void __cdecl R_LoadLightGridPoints_Version15(uint32_t bspVersion)
 {
     uint8_t v1; // [esp+14h] [ebp-2E4h]
-    unsigned int dstEntryIndex; // [esp+1D8h] [ebp-120h]
-    unsigned int bestDefaultScore; // [esp+1DCh] [ebp-11Ch]
+    uint32_t dstEntryIndex; // [esp+1D8h] [ebp-120h]
+    uint32_t bestDefaultScore; // [esp+1DCh] [ebp-11Ch]
     GfxLightGridColors swapColors; // [esp+1E0h] [ebp-118h] BYREF
     float worldMaxs[3]; // [esp+288h] [ebp-70h] BYREF
     AnnotatedLightGridPoint *points; // [esp+294h] [ebp-64h]
-    unsigned int entryIndex; // [esp+298h] [ebp-60h]
-    unsigned int *defaultScore; // [esp+29Ch] [ebp-5Ch]
+    uint32_t entryIndex; // [esp+298h] [ebp-60h]
+    uint32_t *defaultScore; // [esp+29Ch] [ebp-5Ch]
     uint8_t needsTrace; // [esp+2A3h] [ebp-55h]
-    unsigned int cornerIndex; // [esp+2A4h] [ebp-54h]
+    uint32_t cornerIndex; // [esp+2A4h] [ebp-54h]
     const GfxLightGridEntry_Version15 *diskEntries; // [esp+2A8h] [ebp-50h]
-    unsigned int colorsIndex; // [esp+2ACh] [ebp-4Ch]
-    unsigned int rowCount; // [esp+2B0h] [ebp-48h]
+    uint32_t colorsIndex; // [esp+2ACh] [ebp-4Ch]
+    uint32_t rowCount; // [esp+2B0h] [ebp-48h]
     const DiskGfxCell *diskCells; // [esp+2B4h] [ebp-44h]
-    unsigned int diskCellCount; // [esp+2B8h] [ebp-40h] BYREF
+    uint32_t diskCellCount; // [esp+2B8h] [ebp-40h] BYREF
     float worldPos[3]; // [esp+2BCh] [ebp-3Ch] BYREF
-    unsigned int entryCount; // [esp+2C8h] [ebp-30h] BYREF
-    unsigned int defaultColorsIndex; // [esp+2CCh] [ebp-2Ch]
-    unsigned int diskCellIndex; // [esp+2D0h] [ebp-28h]
+    uint32_t entryCount; // [esp+2C8h] [ebp-30h] BYREF
+    uint32_t defaultColorsIndex; // [esp+2CCh] [ebp-2Ch]
+    uint32_t diskCellIndex; // [esp+2D0h] [ebp-28h]
     const DiskGfxCell_Version14 *diskCellsV14; // [esp+2D4h] [ebp-24h]
     float worldMins[3]; // [esp+2D8h] [ebp-20h] BYREF
     uint8_t needsTraceSwizzle[2][8]; // [esp+2E4h] [ebp-14h] BYREF
@@ -865,7 +865,7 @@ void __cdecl R_AllocateFalloffSpaceInLightmaps(GfxLightDef *def)
 
 uint8_t *__cdecl R_LoadLightImage(uint8_t *readPos, GfxLightImage *lightImage)
 {
-    unsigned int v3; // [esp+0h] [ebp-18h]
+    uint32_t v3; // [esp+0h] [ebp-18h]
     uint8_t *readPosa; // [esp+20h] [ebp+8h]
 
     lightImage->samplerState = *readPos;

@@ -438,10 +438,10 @@ void Con_SaveChannels(MemoryFile *memFile)
 
 void Con_RestoreChannels(MemoryFile *memFile)
 {
-    unsigned int v2; // r25
+    uint32_t v2; // r25
     int v3; // r30
     int v4; // r31
-    unsigned int v5; // [sp+50h] [-70h] BYREF
+    uint32_t v5; // [sp+50h] [-70h] BYREF
     int v6[3]; // [sp+54h] [-6Ch] BYREF
     char v7[96]; // [sp+60h] [-60h] BYREF
 

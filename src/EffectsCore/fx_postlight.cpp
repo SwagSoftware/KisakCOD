@@ -32,7 +32,7 @@ void __cdecl FX_PostLight_GenerateVerts(FxPostLightInfo *postLightInfoAddr, FxSy
     float posDelta[3]; // [esp+9Ch] [ebp-5Ch] BYREF
     GfxPackedVertex *verts; // [esp+A8h] [ebp-50h]
     r_double_index_t *indices; // [esp+ACh] [ebp-4Ch]
-    unsigned int argOffset; // [esp+B0h] [ebp-48h] BYREF
+    uint32_t argOffset; // [esp+B0h] [ebp-48h] BYREF
     FxPostLight *postLight; // [esp+B4h] [ebp-44h]
     uint16_t baseVertex; // [esp+B8h] [ebp-40h] BYREF
     float (*args)[4]; // [esp+BCh] [ebp-3Ch]

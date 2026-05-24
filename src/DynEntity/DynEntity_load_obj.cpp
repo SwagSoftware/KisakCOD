@@ -765,7 +765,7 @@ void DynEnt_SaveEntities(MemoryFile *memFile)
     int v2; // r26
     uint16_t *dynEntCount; // r27
     DynEntityClient **dynEntClientList; // r29
-    unsigned int v5; // r31
+    uint32_t v5; // r31
     bool v6; // [sp+50h] [-40h] BYREF
 
     iassert(memFile);

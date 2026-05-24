@@ -36,7 +36,7 @@ uint16_t __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *d
     }
 }
 
-unsigned int __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents)
+uint32_t __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents)
 {
     float *v4; // [esp+0h] [ebp-18h]
     cbrush_t *v5; // [esp+4h] [ebp-14h]
@@ -80,12 +80,12 @@ void __cdecl CM_GetBox(cbrush_t **box_brush, cmodel_t **box_model)
     *box_model = value->box_model;
 }
 
-bool __cdecl CM_ClipHandleIsValid(unsigned int handle)
+bool __cdecl CM_ClipHandleIsValid(uint32_t handle)
 {
     return handle < cm.numSubModels || handle == 4095;
 }
 
-cmodel_t *__cdecl CM_ClipHandleToModel(unsigned int handle)
+cmodel_t *__cdecl CM_ClipHandleToModel(uint32_t handle)
 {
     const char *v2; // eax
     cbrush_t *box_brush; // [esp+0h] [ebp-8h] BYREF
@@ -102,7 +102,7 @@ cmodel_t *__cdecl CM_ClipHandleToModel(unsigned int handle)
     return box_model;
 }
 
-int __cdecl CM_ContentsOfModel(unsigned int handle)
+int __cdecl CM_ContentsOfModel(uint32_t handle)
 {
     cmodel_t *v1; // edx
 
@@ -116,7 +116,7 @@ void __cdecl CM_BoxTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask)
 {
     memset((uint8_t *)results, 0, sizeof(trace_t));
@@ -130,7 +130,7 @@ void __cdecl CM_Trace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask)
 {
     const char *v7; // eax
@@ -1482,7 +1482,7 @@ void __cdecl CM_TransformedBoxTraceRotated(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask,
     const float *origin,
     float (*matrix)[3])
@@ -1597,7 +1597,7 @@ int __cdecl CM_BoxSightTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask)
 {
     const char *v7; // eax
@@ -2413,7 +2413,7 @@ int __cdecl CM_TransformedBoxSightTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask,
     const float *origin,
     const float *angles)

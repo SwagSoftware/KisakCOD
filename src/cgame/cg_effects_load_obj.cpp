@@ -39,7 +39,7 @@ char *__cdecl CG_ParseImpactEffects(
     EffectFile *effectFile)
 {
     int v9; // [esp+10h] [ebp-2Ch]
-    unsigned int i; // [esp+20h] [ebp-1Ch]
+    uint32_t i; // [esp+20h] [ebp-1Ch]
     int iEffectType; // [esp+24h] [ebp-18h]
     char *effectName; // [esp+2Ch] [ebp-10h]
     int iFleshType; // [esp+30h] [ebp-Ch]
@@ -170,12 +170,12 @@ void __cdecl CG_RegisterImpactEffectsForDir(char *dir, EffectFile *effectFile, c
 {
     void *base[4097]; // [esp+10h] [ebp-4020h] BYREF
     void *buffer; // [esp+4014h] [ebp-1Ch]
-    unsigned int num; // [esp+4018h] [ebp-18h]
+    uint32_t num; // [esp+4018h] [ebp-18h]
     int len; // [esp+401Ch] [ebp-14h]
     char *v7; // [esp+4020h] [ebp-10h]
     char *qpath; // [esp+4024h] [ebp-Ch]
     int f; // [esp+4028h] [ebp-8h] BYREF
-    unsigned int i; // [esp+402Ch] [ebp-4h]
+    uint32_t i; // [esp+402Ch] [ebp-4h]
 
     num = FS_GetFileList(dir, "csv", FS_LIST_PURE_ONLY, listbuf, 0x10000);
     if (num)
@@ -254,7 +254,7 @@ int __cdecl CG_RegisterImpactEffects_Generic_4_char_const_____cdecl_int__(
     return iBadCount;
 }
 
-const char *__cdecl CG_FleshTypeToName(unsigned int fleshTypeId)
+const char *__cdecl CG_FleshTypeToName(uint32_t fleshTypeId)
 {
     if (fleshTypeId >= 4)
         MyAssertHandler(
@@ -290,7 +290,7 @@ FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname)
     EffectFile effectFile; // [esp+0h] [ebp-688h] BYREF
     char *listbuf; // [esp+630h] [ebp-58h]
     int iBadCount; // [esp+634h] [ebp-54h]
-    unsigned int i; // [esp+638h] [ebp-50h]
+    uint32_t i; // [esp+638h] [ebp-50h]
     FxImpactTable *fx; // [esp+63Ch] [ebp-4Ch]
     char mapdir[68]; // [esp+640h] [ebp-48h] BYREF
 

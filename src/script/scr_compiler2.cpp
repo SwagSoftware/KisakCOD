@@ -15,8 +15,8 @@
 
 #include <universal/profile.h>
 
-void EmitStatement(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block);
-void EmitOpcode(unsigned int op, int offset, int callType);
+void EmitStatement(sval_u val, bool lastStatement, uint32_t endSourcePos, scr_block_s *block);
+void EmitOpcode(uint32_t op, int offset, int callType);
 void Scr_CalcLocalVarsVariableExpressionRef(sval_u expr, scr_block_s *block);
 void Scr_CalcLocalVarsDeveloperStatementList(sval_u val, scr_block_s *block, sval_u *devStatBlock);
 void EmitExpression(sval_u expr, scr_block_s *block);
@@ -26,7 +26,7 @@ bool EmitOrEvalPrimitiveExpression(sval_u expr, VariableCompileValue *constValue
 void EmitExpression(sval_u expr, scr_block_s *block);
 bool EmitOrEvalExpression(sval_u expr, VariableCompileValue *constValue, scr_block_s *block);
 bool EvalExpression(sval_u expr, VariableCompileValue *constValue);
-void EmitStatementList(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block);
+void EmitStatementList(sval_u val, bool lastStatement, uint32_t endSourcePos, scr_block_s *block);
 void EmitPrimitiveExpressionFieldObject(sval_u expr, sval_u sourcePos, scr_block_s *block);
 void EmitVariableExpressionRef(sval_u expr, scr_block_s *block);
 void EmitVariableExpression(sval_u expr, scr_block_s *block);
@@ -292,7 +292,7 @@ void Scr_PopValue()
 EvalIString
 ============
 */
-void EvalIString(unsigned int value, sval_u sourcePos, VariableCompileValue *constValue)
+void EvalIString(uint32_t value, sval_u sourcePos, VariableCompileValue *constValue)
 {
 	iassert(constValue);
 	constValue->value.type = VAR_ISTRING;
@@ -305,7 +305,7 @@ void EvalIString(unsigned int value, sval_u sourcePos, VariableCompileValue *con
 EvalString
 ============
 */
-void EvalString(unsigned int value, sval_u sourcePos, VariableCompileValue *constValue)
+void EvalString(uint32_t value, sval_u sourcePos, VariableCompileValue *constValue)
 {
 	iassert(constValue);
 	constValue->value.type = VAR_STRING;
@@ -322,7 +322,7 @@ void Scr_InitFromChildBlocks(scr_block_s **childBlocks, int childCount, scr_bloc
 {
 	int localVarsCreateCount, childIndex, i;
 	scr_block_s *childBlock;
-	unsigned int name;
+	uint32_t name;
 
 	if (!childCount)
 	{
@@ -381,7 +381,7 @@ void Scr_InitFromChildBlocks(scr_block_s **childBlocks, int childCount, scr_bloc
 Scr_FindLocalVar
 ============
 */
-int Scr_FindLocalVar(scr_block_s *block, int startIndex, unsigned int name)
+int Scr_FindLocalVar(scr_block_s *block, int startIndex, uint32_t name)
 {
 	for (int i = startIndex; i < block->localVarsCount; i++)
 	{
@@ -457,7 +457,7 @@ Scr_AppendChildBlocks
 */
 void Scr_AppendChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s *block)
 {
-	unsigned int name;
+	uint32_t name;
 	int childIndex, i;
 
 	if (!childCount)
@@ -533,7 +533,7 @@ void EmitGetUndefined(sval_u sourcePos)
 Scr_CompileRemoveRefToString
 ============
 */
-void Scr_CompileRemoveRefToString(unsigned int stringValue)
+void Scr_CompileRemoveRefToString(uint32_t stringValue)
 {
 	iassert(stringValue);
 
@@ -550,7 +550,7 @@ void Scr_CompileRemoveRefToString(unsigned int stringValue)
 AddFilePrecache
 ============
 */
-unsigned int AddFilePrecache(unsigned int filename, unsigned int sourcePos, bool include)
+uint32_t AddFilePrecache(uint32_t filename, uint32_t sourcePos, bool include)
 {
 	iassert(scrCompileGlob.precachescriptList);
 
@@ -573,7 +573,7 @@ unsigned int AddFilePrecache(unsigned int filename, unsigned int sourcePos, bool
 CompileTransferRefToString
 ============
 */
-void CompileTransferRefToString(unsigned int stringValue, unsigned char user)
+void CompileTransferRefToString(uint32_t stringValue, unsigned char user)
 {
 	iassert(stringValue);
 
@@ -596,7 +596,7 @@ void CompileTransferRefToString(unsigned int stringValue, unsigned char user)
 EmitCaseStatementInfo
 ============
 */
-void EmitCaseStatementInfo(unsigned int name, sval_u sourcePos)
+void EmitCaseStatementInfo(uint32_t name, sval_u sourcePos)
 {
 	CaseStatementInfo *newCaseStatement;
 
@@ -663,7 +663,7 @@ void ConnectBreakStatements()
 SetThreadPosition
 ============
 */
-void SetThreadPosition(unsigned int posId)
+void SetThreadPosition(uint32_t posId)
 {
 	VariableUnion *value;
 
@@ -710,7 +710,7 @@ int __cdecl AddFunction(int func, const char *name)
 
 	iassert(i == scrCompilePub.func_table_size);
 
-	if ((unsigned int)scrCompilePub.func_table_size >= SCR_FUNC_TABLE_SIZE)
+	if ((uint32_t)scrCompilePub.func_table_size >= SCR_FUNC_TABLE_SIZE)
 	{
 		Com_Error(ERR_DROP, "SCR_FUNC_TABLE_SIZE exceeded");
 	}
@@ -792,7 +792,7 @@ void EmitInclude(sval_u val)
 {
 	iassert(val.node[0].type == ENUM_include);
 
-	unsigned int filename = Scr_CreateCanonicalFilename(SL_ConvertToString(val.node[1].stringValue));
+	uint32_t filename = Scr_CreateCanonicalFilename(SL_ConvertToString(val.node[1].stringValue));
 	Scr_CompileRemoveRefToString(val.node[1].stringValue);
 
 	AddFilePrecache(filename, val.node[2].sourcePosValue, true);
@@ -874,8 +874,8 @@ Scr_TransferBlock
 */
 void Scr_TransferBlock(scr_block_s *from, scr_block_s *to)
 {
-	unsigned int name;
-	unsigned int sourcePos;
+	uint32_t name;
+	uint32_t sourcePos;
 	int i, j;
 
 	iassert(to->localVarsPublicCount <= from->localVarsCount);
@@ -903,9 +903,9 @@ void Scr_TransferBlock(scr_block_s *from, scr_block_s *to)
 
 		while (j > i)
 		{
-			//to->localVars[j] = *(scr_localVar_t *)&to->localVarsInitBits[sizeof(scr_localVar_t) * j + sizeof(unsigned int)];
-			to->localVars[j].name = *(unsigned int*)&to->localVarsInitBits[8 * j];
-			to->localVars[j].sourcePos = *(unsigned int*)&to->localVarsInitBits[8 * j + 4];
+			//to->localVars[j] = *(scr_localVar_t *)&to->localVarsInitBits[sizeof(scr_localVar_t) * j + sizeof(uint32_t)];
+			to->localVars[j].name = *(uint32_t*)&to->localVarsInitBits[8 * j];
+			to->localVars[j].sourcePos = *(uint32_t*)&to->localVarsInitBits[8 * j + 4];
 			j--;
 		}
 
@@ -932,8 +932,8 @@ Scr_MergeChildBlocks
 void Scr_MergeChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s *block)
 {
 	scr_block_s *childBlock;
-	unsigned int name;
-	unsigned int sourcePos;
+	uint32_t name;
+	uint32_t sourcePos;
 	int childIndex, i, j;
 
 	if (!childCount)
@@ -969,9 +969,9 @@ void Scr_MergeChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s
 
 			while (j > i)
 			{
-				//childBlock->localVars[j] = *(scr_localVar_t *)&childBlock->localVarsInitBits[sizeof(scr_localVar_t) * j + sizeof(unsigned int)];
-				childBlock->localVars[j].name = *(unsigned int *)&childBlock->localVarsInitBits[8 * j];
-				childBlock->localVars[j].sourcePos = *(unsigned int *)&childBlock->localVarsInitBits[8 * j + 4];
+				//childBlock->localVars[j] = *(scr_localVar_t *)&childBlock->localVarsInitBits[sizeof(scr_localVar_t) * j + sizeof(uint32_t)];
+				childBlock->localVars[j].name = *(uint32_t *)&childBlock->localVarsInitBits[8 * j];
+				childBlock->localVars[j].sourcePos = *(uint32_t *)&childBlock->localVarsInitBits[8 * j + 4];
 				j--;
 			}
 
@@ -986,7 +986,7 @@ void Scr_MergeChildBlocks(scr_block_s **childBlocks, int childCount, scr_block_s
 Scr_RegisterLocalVar
 ============
 */
-void Scr_RegisterLocalVar(unsigned int name, sval_u sourcePos, scr_block_s *block)
+void Scr_RegisterLocalVar(uint32_t name, sval_u sourcePos, scr_block_s *block)
 {
 	if (block->abortLevel != SCR_ABORT_NONE)
 	{
@@ -1027,7 +1027,7 @@ void EmitCodepos(const char *pos)
 EmitString
 ============
 */
-void EmitString(unsigned int value)
+void EmitString(uint32_t value)
 {
 	scrCompileGlob.codePos = (byte *)TempMallocAlignStrict(sizeof(unsigned short));
 	*(unsigned short *)scrCompileGlob.codePos = value;
@@ -1082,7 +1082,7 @@ void EmitInteger(int value)
 EmitCanonicalString
 ============
 */
-void EmitCanonicalString(unsigned int stringValue)
+void EmitCanonicalString(uint32_t stringValue)
 {
 	iassert(stringValue);
 	scrCompileGlob.codePos = (byte *)TempMallocAlignStrict(sizeof(unsigned short));
@@ -1316,7 +1316,7 @@ void EmitGetVector(const float *value, sval_u sourcePos)
 EmitGetIString
 ============
 */
-void EmitGetIString(unsigned int value, sval_u sourcePos)
+void EmitGetIString(uint32_t value, sval_u sourcePos)
 {
 	EmitOpcode(OP_GetIString, 1, CALL_NONE);
 	AddOpcodePos(sourcePos.stringValue, SOURCE_TYPE_BREAKPOINT);
@@ -1330,7 +1330,7 @@ void EmitGetIString(unsigned int value, sval_u sourcePos)
 EmitGetString
 ============
 */
-void EmitGetString(unsigned int value, sval_u sourcePos)
+void EmitGetString(uint32_t value, sval_u sourcePos)
 {
 	EmitOpcode(OP_GetString, 1, CALL_NONE);
 	AddOpcodePos(sourcePos.stringValue, 1);
@@ -1418,7 +1418,7 @@ void EmitGetInteger(int value, sval_u sourcePos)
 EmitCanonicalStringConst
 ============
 */
-void EmitCanonicalStringConst(unsigned int stringValue)
+void EmitCanonicalStringConst(uint32_t stringValue)
 {
 	bool bConstRefCount = scrCompileGlob.bConstRefCount;
 	scrCompileGlob.bConstRefCount = true;
@@ -1517,9 +1517,9 @@ void EmitValue(VariableCompileValue *constValue)
 EmitOpcode
 ============
 */
-void EmitOpcode(unsigned int op, int offset, int callType)
+void EmitOpcode(uint32_t op, int offset, int callType)
 {
-	unsigned int index;
+	uint32_t index;
 	int value_count, valueIndex;
 	
 	if (scrCompilePub.developer_statement == 3)
@@ -1855,7 +1855,7 @@ EmitCallBuiltinMethodOpcode
 */
 void EmitCallBuiltinMethodOpcode(int param_count, sval_u sourcePos)
 {
-	unsigned int opcode;
+	uint32_t opcode;
 
 	if (param_count > 5)
 	{
@@ -1885,7 +1885,7 @@ EmitCallBuiltinOpcode
 */
 void EmitCallBuiltinOpcode(int param_count, sval_u sourcePos)
 {
-	unsigned int opcode;
+	uint32_t opcode;
 
 	if (param_count > 5)
 		opcode = OP_CallBuiltin;
@@ -2312,7 +2312,7 @@ EmitBoolAndExpression
 void EmitBoolAndExpression(sval_u expr1, sval_u expr2, sval_u expr1sourcePos, sval_u expr2sourcePos, scr_block_s *block)
 {
 	const char *nextPos, *pos;
-	unsigned int offset;
+	uint32_t offset;
 
 	EmitExpression(expr1, block);
 
@@ -2345,7 +2345,7 @@ EmitBoolOrExpression
 void EmitBoolOrExpression(sval_u expr1, sval_u expr2, sval_u expr1sourcePos, sval_u expr2sourcePos, scr_block_s *block)
 {
 	const char *nextPos, *pos;
-	unsigned int offset;
+	uint32_t offset;
 
 	EmitExpression(expr1, block);
 
@@ -2386,7 +2386,7 @@ void EmitArrayVariable(sval_u expr, sval_u index, sval_u sourcePos, sval_u index
 EmitNOP2
 ============
 */
-void EmitNOP2(bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
+void EmitNOP2(bool lastStatement, uint32_t endSourcePos, scr_block_s *block)
 {
 	int checksum = scrVarPub.checksum;
 
@@ -2411,7 +2411,7 @@ EmitDeveloperStatementList
 void EmitDeveloperStatementList(sval_u val, sval_u sourcePos, scr_block_s *block, sval_u *devStatBlock)
 {
 	char *savedPos;
-	unsigned int savedChecksum;
+	uint32_t savedChecksum;
 
 	if (scrCompilePub.developer_statement != SCR_DEV_NO)
 	{
@@ -2516,7 +2516,7 @@ EmitCaseStatement
 */
 void EmitCaseStatement(sval_u expr, sval_u sourcePos)
 {
-	unsigned int name;
+	uint32_t name;
 
 	if (expr.node[0].type == ENUM_integer)
 	{
@@ -2676,9 +2676,9 @@ void Scr_CreateVector(VariableCompileValue *constValue, VariableValue *value)
 SpecifyThreadPosition
 ============
 */
-unsigned int SpecifyThreadPosition(unsigned int posId, unsigned int name, unsigned int sourcePos, int type)
+uint32_t SpecifyThreadPosition(uint32_t posId, uint32_t name, uint32_t sourcePos, int type)
 {
-	unsigned int id;
+	uint32_t id;
 	VariableValue pos;
 
 	id = GetVariable(posId, 1);
@@ -2706,11 +2706,11 @@ unsigned int SpecifyThreadPosition(unsigned int posId, unsigned int name, unsign
 LinkThread
 ============
 */
-void LinkThread(unsigned int threadCountId, VariableValue *pos, bool allowFarCall)
+void LinkThread(uint32_t threadCountId, VariableValue *pos, bool allowFarCall)
 {
 	int type, i;
 	VariableUnion *value;
-	unsigned int valueId, countId;
+	uint32_t valueId, countId;
 	VariableValue count;
 
 	countId = FindVariable(threadCountId, 0);
@@ -2760,7 +2760,7 @@ EmitFunction
 */
 void EmitFunction(sval_u func, sval_u sourcePos)
 {
-	unsigned int threadId, valueId, filename, fileId, posId, countId;
+	uint32_t threadId, valueId, filename, fileId, posId, countId;
 	int scope;
 	VariableValue value, pos, count;
 	bool bExists;
@@ -2894,7 +2894,7 @@ void EmitObject(sval_u expr, sval_u sourcePos)
 	int classnum; // [esp+4h] [ebp-14h]
 	const char *s; // [esp+Ch] [ebp-Ch]
 	int entnum; // [esp+10h] [ebp-8h]
-	unsigned int idValue; // [esp+14h] [ebp-4h]
+	uint32_t idValue; // [esp+14h] [ebp-4h]
 
 	if (scrCompilePub.script_loading)
 	{
@@ -2965,7 +2965,7 @@ void Scr_PushValue(VariableCompileValue *constValue)
 Scr_FindLocalVarIndex
 ============
 */
-int Scr_FindLocalVarIndex(unsigned int name, sval_u sourcePos, bool create, scr_block_s *block)
+int Scr_FindLocalVarIndex(uint32_t name, sval_u sourcePos, bool create, scr_block_s *block)
 {
 	int i;
 
@@ -3052,7 +3052,7 @@ SpecifyThread
 */
 void SpecifyThread(sval_u val)
 {
-	unsigned int posId;
+	uint32_t posId;
 
 	switch (val.node[0].type)
 	{
@@ -3099,7 +3099,7 @@ void SpecifyThread(sval_u val)
 EmitSwitchStatementList
 ============
 */
-void EmitSwitchStatementList(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
+void EmitSwitchStatementList(sval_u val, bool lastStatement, uint32_t endSourcePos, scr_block_s *block)
 {
 	scr_block_s *oldBreakBlock;
 	int *oldBreakChildCount;
@@ -3344,10 +3344,10 @@ bool EvalPrimitiveExpressionList(sval_u exprlist, sval_u sourcePos, VariableComp
 LinkFile
 ============
 */
-void LinkFile(unsigned int fileId)
+void LinkFile(uint32_t fileId)
 {
 	VariableValue pos, emptyValue;
-	unsigned int posId, threadCountId, threadCountPtr;
+	uint32_t posId, threadCountId, threadCountPtr;
 
 	emptyValue.type = VAR_UNDEFINED;
 	emptyValue.u.intValue = 0;
@@ -3897,7 +3897,7 @@ EmitMethod
 void EmitMethod(sval_u expr, sval_u func_name, sval_u params, sval_u methodSourcePos, bool bStatement, scr_block_s *block)
 {
 	VariableValue value;
-	unsigned int methId, name;
+	uint32_t methId, name;
 	char *savedPos = NULL;
 	void (*meth)(scr_entref_t);
 	int type, param_count;
@@ -4020,7 +4020,7 @@ EmitCall
 void EmitCall(sval_u func_name, sval_u params, bool bStatement, scr_block_s *block)
 {
 	VariableValue value;
-	unsigned int funcId, name;
+	uint32_t funcId, name;
 	char *savedPos = NULL;
 	void (*func)();
 	int type, param_count;
@@ -4518,7 +4518,7 @@ void EmitForStatement(sval_u stmt1, sval_u expr, sval_u stmt2, sval_u stmt, sval
 	scr_block_s **breakChildBlocks; // [esp+Ch] [ebp-44h]
 	BreakStatementInfo *oldBreakStatement; // [esp+10h] [ebp-40h]
 	bool constConditional; // [esp+17h] [ebp-39h]
-	unsigned int offset; // [esp+18h] [ebp-38h]
+	uint32_t offset; // [esp+18h] [ebp-38h]
 	bool bOldCanBreak; // [esp+1Eh] [ebp-32h]
 	bool bOldCanContinue; // [esp+1Fh] [ebp-31h]
 	int continueChildCount; // [esp+20h] [ebp-30h] BYREF
@@ -4653,7 +4653,7 @@ void EmitWhileStatement(sval_u expr, sval_u stmt, sval_u sourcePos, sval_u while
 	scr_block_s **breakChildBlocks; // [esp+Ch] [ebp-3Ch]
 	BreakStatementInfo *oldBreakStatement; // [esp+10h] [ebp-38h]
 	bool constConditional; // [esp+17h] [ebp-31h]
-	unsigned int offset; // [esp+18h] [ebp-30h]
+	uint32_t offset; // [esp+18h] [ebp-30h]
 	bool bOldCanBreak; // [esp+1Eh] [ebp-2Ah]
 	bool bOldCanContinue; // [esp+1Fh] [ebp-29h]
 	int *oldContinueChildCount; // [esp+20h] [ebp-28h]
@@ -4808,7 +4808,7 @@ void EmitArrayVariableRef(sval_u expr, sval_u index, sval_u sourcePos, sval_u in
 EmitSwitchStatement
 ============
 */
-void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
+void EmitSwitchStatement(sval_u expr, sval_u stmtlist, sval_u sourcePos, bool lastStatement, uint32_t endSourcePos, scr_block_s *block)
 {
 	CaseStatementInfo *oldCaseStatement; // [esp+0h] [ebp-24h]
 	char *pos3; // [esp+4h] [ebp-20h]
@@ -5011,12 +5011,12 @@ void EmitWaittillStatement(sval_u obj, sval_u exprlist, sval_u sourcePos, sval_u
 EmitIfElseStatement
 ============
 */
-void EmitIfElseStatement(sval_u expr, sval_u stmt1, sval_u stmt2, sval_u sourcePos, sval_u elseSourcePos, bool lastStatement, unsigned int endSourcePos, scr_block_s *block, sval_u *ifStatBlock, sval_u *elseStatBlock)
+void EmitIfElseStatement(sval_u expr, sval_u stmt1, sval_u stmt2, sval_u sourcePos, sval_u elseSourcePos, bool lastStatement, uint32_t endSourcePos, scr_block_s *block, sval_u *ifStatBlock, sval_u *elseStatBlock)
 {
 	int childCount, checksum;
 	scr_block_s *childBlocks[2];
 	const char *pos1, *pos2, *nextPos1, *nextPos2;
-	unsigned int offset;
+	uint32_t offset;
 
 	childCount = 0;
 
@@ -5091,10 +5091,10 @@ void EmitIfElseStatement(sval_u expr, sval_u stmt1, sval_u stmt2, sval_u sourceP
 EmitIfStatement
 ============
 */
-void EmitIfStatement(sval_u expr, sval_u stmt, sval_u sourcePos, bool lastStatement, unsigned int endSourcePos, scr_block_s *block, sval_u *ifStatBlock)
+void EmitIfStatement(sval_u expr, sval_u stmt, sval_u sourcePos, bool lastStatement, uint32_t endSourcePos, scr_block_s *block, sval_u *ifStatBlock)
 {
 	const char *pos, *nextPos;
-	unsigned int offset;
+	uint32_t offset;
 
 	EmitExpression(expr, block);
 	EmitOpcode(OP_JumpOnFalse, -1, CALL_NONE);
@@ -5300,7 +5300,7 @@ void EmitAssignmentStatement(sval_u lhs, sval_u rhs, sval_u sourcePos, sval_u rh
 EmitStatement
 ============
 */
-void EmitStatement(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
+void EmitStatement(sval_u val, bool lastStatement, uint32_t endSourcePos, scr_block_s *block)
 {
 	switch (val.node[0].type)
 	{
@@ -5422,7 +5422,7 @@ void EmitStatement(sval_u val, bool lastStatement, unsigned int endSourcePos, sc
 EmitStatementList
 ============
 */
-void EmitStatementList(sval_u val, bool lastStatement, unsigned int endSourcePos, scr_block_s *block)
+void EmitStatementList(sval_u val, bool lastStatement, uint32_t endSourcePos, scr_block_s *block)
 {
 	sval_u *node, *next_node;
 
@@ -5442,7 +5442,7 @@ void EmitStatementList(sval_u val, bool lastStatement, unsigned int endSourcePos
 EmitThreadInternal
 ============
 */
-void EmitThreadInternal(unsigned int threadId, sval_u val, sval_u sourcePos, sval_u endSourcePos, scr_block_s *block)
+void EmitThreadInternal(uint32_t threadId, sval_u val, sval_u sourcePos, sval_u endSourcePos, scr_block_s *block)
 {
 	scrCompileGlob.threadId = threadId;
 	AddThreadStartOpcodePos(sourcePos.sourcePosValue);
@@ -5476,7 +5476,7 @@ EmitDeveloperThread
 */
 void EmitDeveloperThread(sval_u val, sval_u *stmttblock)
 {
-	unsigned int posId, threadId, savedChecksum;
+	uint32_t posId, threadId, savedChecksum;
 	char *begin_pos;
 
 	iassert(scrCompilePub.developer_statement == SCR_DEV_NO);
@@ -5516,7 +5516,7 @@ EmitNormalThread
 */
 void EmitNormalThread(sval_u val, sval_u *stmttblock)
 {
-	unsigned int posId, threadId;
+	uint32_t posId, threadId;
 
 	InitThread(0);
 
@@ -5602,12 +5602,12 @@ void EmitThreadList(sval_u val)
 
 void __cdecl ScriptCompile(
 	sval_u val,
-	unsigned int fileId,
-	unsigned int scriptId,
+	uint32_t fileId,
+	uint32_t scriptId,
 	PrecacheEntry *entries,
 	int entriesCount)
 {
-	unsigned int Variable_DONE; // eax
+	uint32_t Variable_DONE; // eax
 	VariableValueInternal_u *VariableValueAddress_DONE; // esi
 	int j; // [esp+10h] [ebp-48h]
 	VariableValue pos; // [esp+14h] [ebp-44h] BYREF
@@ -5615,16 +5615,16 @@ void __cdecl ScriptCompile(
 	PrecacheEntry *precachescript; // [esp+20h] [ebp-38h]
 	int far_function_count; // [esp+24h] [ebp-34h]
 	PrecacheEntry *precachescript2; // [esp+28h] [ebp-30h]
-	unsigned int toThreadId; // [esp+2Ch] [ebp-2Ch]
-	unsigned int toPosId; // [esp+30h] [ebp-28h]
-	unsigned int posId; // [esp+34h] [ebp-24h]
+	uint32_t toThreadId; // [esp+2Ch] [ebp-2Ch]
+	uint32_t toPosId; // [esp+30h] [ebp-28h]
+	uint32_t posId; // [esp+34h] [ebp-24h]
 	uint16_t name; // [esp+38h] [ebp-20h]
-	unsigned int threadId; // [esp+3Ch] [ebp-1Ch]
+	uint32_t threadId; // [esp+3Ch] [ebp-1Ch]
 	PrecacheEntry *precachescriptList; // [esp+40h] [ebp-18h]
 	int i; // [esp+44h] [ebp-14h]
-	unsigned int includeFileId; // [esp+48h] [ebp-10h]
+	uint32_t includeFileId; // [esp+48h] [ebp-10h]
 	VariableValue value; // [esp+4Ch] [ebp-Ch] BYREF
-	unsigned int threadPtr; // [esp+54h] [ebp-4h]
+	uint32_t threadPtr; // [esp+54h] [ebp-4h]
 
 	scrCompileGlob.fileId = fileId;
 	scrCompileGlob.bConstRefCount = 0;

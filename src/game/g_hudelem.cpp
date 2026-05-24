@@ -1432,7 +1432,7 @@ void HudElem_UpdateClient(gclient_s *client)
     //game_hudelem_s *v4; // r29
     //int v5; // r28
     //hudelem_s *i; // r31
-    //unsigned int remainder; // r29
+    //uint32_t remainder; // r29
     //hudelem_s *v8; // r31
     //char *v9; // r11
     //hudelem_s *v10; // r10

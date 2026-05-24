@@ -54,8 +54,8 @@ void __cdecl Scr_InitOpcodeLookup()
 
 void __cdecl Scr_ShutdownOpcodeLookup()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
-    unsigned int ia; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
+    uint32_t ia; // [esp+0h] [ebp-4h]
 
     if (scrParserGlob.opcodeLookup)
     {
@@ -86,9 +86,9 @@ void __cdecl Scr_ShutdownOpcodeLookup()
     }
 }
 
-void __cdecl AddOpcodePos(unsigned int sourcePos, int type)
+void __cdecl AddOpcodePos(uint32_t sourcePos, int type)
 {
-    unsigned int sourcePosLookupIndex; // [esp+0h] [ebp-14h]
+    uint32_t sourcePosLookupIndex; // [esp+0h] [ebp-14h]
     OpcodeLookup *opcodeLookup; // [esp+4h] [ebp-10h]
     SourceLookup *sourcePosLookup; // [esp+8h] [ebp-Ch]
     SourceLookup *newSourcePosLookup; // [esp+Ch] [ebp-8h]
@@ -215,7 +215,7 @@ void __cdecl RemoveOpcodePos()
     }
 }
 
-void __cdecl AddThreadStartOpcodePos(unsigned int sourcePos)
+void __cdecl AddThreadStartOpcodePos(uint32_t sourcePos)
 {
     SourceLookup *sourcePosLookup; // [esp+0h] [ebp-4h]
 
@@ -238,17 +238,17 @@ void __cdecl AddThreadStartOpcodePos(unsigned int sourcePos)
 }
 
 const char *__cdecl Scr_GetOpcodePosOfType(
-    unsigned int bufferIndex,
-    unsigned int startSourcePos,
-    unsigned int endSourcePos,
+    uint32_t bufferIndex,
+    uint32_t startSourcePos,
+    uint32_t endSourcePos,
     int type,
-    unsigned int *sourcePos)
+    uint32_t *sourcePos)
 {
     const char *codePos; // [esp+0h] [ebp-34h]
     SourceBufferInfo *v7; // [esp+4h] [ebp-30h]
-    unsigned int j; // [esp+8h] [ebp-2Ch]
+    uint32_t j; // [esp+8h] [ebp-2Ch]
     signed int sourcePosCount; // [esp+10h] [ebp-24h]
-    unsigned int firstSourcePos; // [esp+14h] [ebp-20h]
+    uint32_t firstSourcePos; // [esp+14h] [ebp-20h]
     int k; // [esp+18h] [ebp-1Ch]
     SourceLookup *sourcePosLookup; // [esp+1Ch] [ebp-18h]
     SourceBufferInfo *sourceBufData; // [esp+20h] [ebp-14h]
@@ -309,17 +309,17 @@ const char *__cdecl Scr_GetOpcodePosOfType(
     }
 }
 
-unsigned int __cdecl Scr_GetClosestSourcePosOfType(unsigned int bufferIndex, unsigned int sourcePos, int type)
+uint32_t __cdecl Scr_GetClosestSourcePosOfType(uint32_t bufferIndex, uint32_t sourcePos, int type)
 {
     const char *codePos; // [esp+0h] [ebp-30h]
     SourceBufferInfo *v5; // [esp+4h] [ebp-2Ch]
-    unsigned int j; // [esp+8h] [ebp-28h]
+    uint32_t j; // [esp+8h] [ebp-28h]
     signed int sourcePosCount; // [esp+10h] [ebp-20h]
     int k; // [esp+14h] [ebp-1Ch]
     SourceLookup *sourcePosLookup; // [esp+18h] [ebp-18h]
     SourceBufferInfo *sourceBufData; // [esp+1Ch] [ebp-14h]
     const char *startBufferCodePos; // [esp+20h] [ebp-10h]
-    unsigned int bestSourcePos; // [esp+24h] [ebp-Ch]
+    uint32_t bestSourcePos; // [esp+24h] [ebp-Ch]
     const char *opcodePos; // [esp+28h] [ebp-8h]
 
     iassert(!Sys_IsRemoteDebugClient());
@@ -365,16 +365,16 @@ unsigned int __cdecl Scr_GetClosestSourcePosOfType(unsigned int bufferIndex, uns
     return bestSourcePos;
 }
 
-unsigned int __cdecl Scr_GetPrevSourcePos(const char *codePos, unsigned int index)
+uint32_t __cdecl Scr_GetPrevSourcePos(const char *codePos, uint32_t index)
 {
     return scrParserGlob.sourcePosLookup[index + Scr_GetPrevSourcePosOpcodeLookup(codePos)->sourcePosIndex].sourcePos;
 }
 
 OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos)
 {
-    unsigned int low; // [esp+0h] [ebp-Ch]
-    unsigned int middle; // [esp+4h] [ebp-8h]
-    unsigned int high; // [esp+8h] [ebp-4h]
+    uint32_t low; // [esp+0h] [ebp-Ch]
+    uint32_t middle; // [esp+4h] [ebp-8h]
+    uint32_t high; // [esp+8h] [ebp-4h]
 
     iassert(Scr_IsInOpcodeMemory(codePos));
     iassert(scrParserGlob.opcodeLookup);
@@ -403,7 +403,7 @@ OpcodeLookup *__cdecl Scr_GetPrevSourcePosOpcodeLookup(const char *codePos)
     return 0;
 }
 
-unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourcePos)
+uint32_t __cdecl Scr_GetLineNum(uint32_t bufferIndex, uint32_t sourcePos)
 {
     const char *startLine; // [esp+0h] [ebp-8h] BYREF
     int col; // [esp+4h] [ebp-4h] BYREF
@@ -413,9 +413,9 @@ unsigned int __cdecl Scr_GetLineNum(unsigned int bufferIndex, unsigned int sourc
     return Scr_GetLineNumInternal(scrParserPub.sourceBufferLookup[bufferIndex].sourceBuf, sourcePos, &startLine, &col);
 }
 
-unsigned int __cdecl Scr_GetLineNumInternal(const char *buf, unsigned int sourcePos, const char **startLine, int *col)
+uint32_t __cdecl Scr_GetLineNumInternal(const char *buf, uint32_t sourcePos, const char **startLine, int *col)
 {
-    unsigned int lineNum; // [esp+0h] [ebp-4h]
+    uint32_t lineNum; // [esp+0h] [ebp-4h]
 
     iassert(buf);
 
@@ -435,10 +435,10 @@ unsigned int __cdecl Scr_GetLineNumInternal(const char *buf, unsigned int source
     return lineNum;
 }
 
-unsigned int __cdecl Scr_GetFunctionLineNumInternal(const char *buf, unsigned int sourcePos, const char **startLine)
+uint32_t __cdecl Scr_GetFunctionLineNumInternal(const char *buf, uint32_t sourcePos, const char **startLine)
 {
-    unsigned int lineNum; // [esp+0h] [ebp-Ch]
-    unsigned int functionLine; // [esp+4h] [ebp-8h]
+    uint32_t lineNum; // [esp+0h] [ebp-Ch]
+    uint32_t functionLine; // [esp+4h] [ebp-8h]
     const char *functionStartLine; // [esp+8h] [ebp-4h]
 
     iassert(buf);
@@ -469,7 +469,7 @@ unsigned int __cdecl Scr_GetFunctionLineNumInternal(const char *buf, unsigned in
 int __cdecl Scr_GetSourcePosOfType(const char *codePos, int type, Scr_SourcePos_t *pos)
 {
     OpcodeLookup *SourcePosOpcodeLookup; // [esp+0h] [ebp-Ch]
-    unsigned int index; // [esp+8h] [ebp-4h]
+    uint32_t index; // [esp+8h] [ebp-4h]
 
     if (type)
         SourcePosOpcodeLookup = Scr_GetSourcePosOpcodeLookup(codePos);
@@ -731,13 +731,13 @@ char *__cdecl Scr_ReadFile_FastFile(const char *filename, const char *extFilenam
     }
 }
 
-unsigned int __cdecl Scr_GetSourcePos(
-    unsigned int bufferIndex,
-    unsigned int sourcePos,
+uint32_t __cdecl Scr_GetSourcePos(
+    uint32_t bufferIndex,
+    uint32_t sourcePos,
     char *outBuf,
-    unsigned int outBufLen)
+    uint32_t outBufLen)
 {
-    unsigned int lineNum; // [esp+4h] [ebp-40Ch]
+    uint32_t lineNum; // [esp+4h] [ebp-40Ch]
     char line[1024]; // [esp+8h] [ebp-408h] BYREF
     int col; // [esp+40Ch] [ebp-4h] BYREF
 
@@ -767,10 +767,10 @@ unsigned int __cdecl Scr_GetSourcePos(
     return lineNum;
 }
 
-unsigned int __cdecl Scr_GetLineInfo(const char *buf, unsigned int sourcePos, int *col, char *line)
+uint32_t __cdecl Scr_GetLineInfo(const char *buf, uint32_t sourcePos, int *col, char *line)
 {
     const char *startLine; // [esp+0h] [ebp-8h] BYREF
-    unsigned int lineNum; // [esp+4h] [ebp-4h]
+    uint32_t lineNum; // [esp+4h] [ebp-4h]
 
     lineNum = Scr_GetLineNumInternal(buf, sourcePos, &startLine, col);
     Scr_CopyFormattedLine(line, startLine);
@@ -799,9 +799,9 @@ void __cdecl Scr_CopyFormattedLine(char *line, const char *rawLine)
     line[len] = 0;
 }
 
-unsigned int __cdecl Scr_GetSourceBuffer(const char *codePos)
+uint32_t __cdecl Scr_GetSourceBuffer(const char *codePos)
 {
-    unsigned int bufferIndex; // [esp+0h] [ebp-4h]
+    uint32_t bufferIndex; // [esp+0h] [ebp-4h]
 
     iassert(Scr_IsInOpcodeMemory(codePos));
     iassert(scrParserPub.sourceBufferLookupLen > 0);
@@ -817,12 +817,12 @@ unsigned int __cdecl Scr_GetSourceBuffer(const char *codePos)
     return bufferIndex;
 }
 
-void __cdecl Scr_PrintPrevCodePos(int channel, char *codePos, unsigned int index)
+void __cdecl Scr_PrintPrevCodePos(int channel, char *codePos, uint32_t index)
 {
     char *v3; // eax
-    unsigned int PrevSourcePos; // eax
+    uint32_t PrevSourcePos; // eax
     char *v5; // eax
-    unsigned int bufferIndex; // [esp+0h] [ebp-4h]
+    uint32_t bufferIndex; // [esp+0h] [ebp-4h]
 
     if (!codePos)
     {
@@ -860,12 +860,12 @@ void __cdecl Scr_PrintPrevCodePos(int channel, char *codePos, unsigned int index
     }
 }
 
-void __cdecl Scr_PrintSourcePos(int channel, const char *filename, const char *buf, unsigned int sourcePos)
+void __cdecl Scr_PrintSourcePos(int channel, const char *filename, const char *buf, uint32_t sourcePos)
 {
     char *v4; // eax
     char *v5; // eax
     const char *v6; // [esp+0h] [ebp-418h]
-    unsigned int lineNum; // [esp+4h] [ebp-414h]
+    uint32_t lineNum; // [esp+4h] [ebp-414h]
     char line[1028]; // [esp+8h] [ebp-410h] BYREF
     int i; // [esp+410h] [ebp-8h]
     int col; // [esp+414h] [ebp-4h] BYREF
@@ -901,8 +901,8 @@ const char *__cdecl Scr_PrevCodePosFileName(char *codePos)
 
 const char *__cdecl Scr_PrevCodePosFunctionName(char *codePos)
 {
-    unsigned int PrevSourcePos; // eax
-    unsigned int bufferIndex; // [esp+0h] [ebp-8h]
+    uint32_t PrevSourcePos; // eax
+    uint32_t bufferIndex; // [esp+0h] [ebp-8h]
     const char *startLine; // [esp+4h] [ebp-4h] BYREF
 
     if (!scrVarPub.developer)
@@ -933,9 +933,9 @@ bool __cdecl Scr_PrevCodePosFileNameMatches(char *codePos, const char *fileName)
 
 void __cdecl Scr_PrintPrevCodePosSpreadSheet(int channel, char *codePos, bool summary, bool functionSummary)
 {
-    unsigned int PrevSourcePos; // eax
+    uint32_t PrevSourcePos; // eax
     char *v5; // eax
-    unsigned int bufferIndex; // [esp+0h] [ebp-4h]
+    uint32_t bufferIndex; // [esp+0h] [ebp-4h]
 
     if (!scrVarPub.developer)
         MyAssertHandler(".\\script\\scr_parser.cpp", 1165, 0, "%s", "scrVarPub.developer");
@@ -982,11 +982,11 @@ void __cdecl Scr_PrintPrevCodePosSpreadSheet(int channel, char *codePos, bool su
     }
 }
 
-void __cdecl Scr_PrintSourcePosSpreadSheet(int channel, const char *filename, const char *buf, unsigned int sourcePos)
+void __cdecl Scr_PrintSourcePosSpreadSheet(int channel, const char *filename, const char *buf, uint32_t sourcePos)
 {
     char *v4; // eax
     const char *v5; // [esp+0h] [ebp-410h]
-    unsigned int lineNum; // [esp+4h] [ebp-40Ch]
+    uint32_t lineNum; // [esp+4h] [ebp-40Ch]
     char line[1024]; // [esp+8h] [ebp-408h] BYREF
     int col; // [esp+40Ch] [ebp-4h] BYREF
 
@@ -1005,11 +1005,11 @@ void __cdecl Scr_PrintFunctionPosSpreadSheet(
     int channel,
     const char *filename,
     const char *buf,
-    unsigned int sourcePos)
+    uint32_t sourcePos)
 {
     char *v4; // eax
     const char *v5; // [esp+0h] [ebp-410h]
-    unsigned int lineNum; // [esp+4h] [ebp-40Ch]
+    uint32_t lineNum; // [esp+4h] [ebp-40Ch]
     char line[1028]; // [esp+8h] [ebp-408h] BYREF
 
     if (!filename)
@@ -1023,10 +1023,10 @@ void __cdecl Scr_PrintFunctionPosSpreadSheet(
     Com_PrintMessage(channel, v4, 0);
 }
 
-unsigned int __cdecl Scr_GetFunctionInfo(const char *buf, unsigned int sourcePos, char *line)
+uint32_t __cdecl Scr_GetFunctionInfo(const char *buf, uint32_t sourcePos, char *line)
 {
     const char *startLine; // [esp+0h] [ebp-8h] BYREF
-    unsigned int lineNum; // [esp+4h] [ebp-4h]
+    uint32_t lineNum; // [esp+4h] [ebp-4h]
 
     lineNum = Scr_GetFunctionLineNumInternal(buf, sourcePos, &startLine);
     Scr_CopyFormattedLine(line, startLine);
@@ -1048,7 +1048,7 @@ void __cdecl Scr_PrintSourcePosSummary(int channel, const char *filename)
     Com_PrintMessage(channel, v2, 0);
 }
 
-void __cdecl Scr_GetCodePos(const char *codePos, unsigned int index, char *outBuf, unsigned int outBufLen)
+void __cdecl Scr_GetCodePos(const char *codePos, uint32_t index, char *outBuf, uint32_t outBufLen)
 {
     Scr_SourcePos_t pos; // [esp+0h] [ebp-Ch] BYREF
 
@@ -1067,9 +1067,9 @@ void __cdecl Scr_GetCodePos(const char *codePos, unsigned int index, char *outBu
 
 void __cdecl Scr_GetFileAndLine(const char *codePos, char **filename, int *linenum)
 {
-    unsigned int bufferIndex; // [esp+0h] [ebp-Ch]
+    uint32_t bufferIndex; // [esp+0h] [ebp-Ch]
     OpcodeLookup *opcodeLookup; // [esp+4h] [ebp-8h]
-    unsigned int sourcePos; // [esp+8h] [ebp-4h]
+    uint32_t sourcePos; // [esp+8h] [ebp-4h]
 
     if (!Scr_IsInOpcodeMemory(codePos))
         MyAssertHandler(".\\script\\scr_parser.cpp", 1216, 0, "%s", "Scr_IsInOpcodeMemory( codePos )");
@@ -1090,9 +1090,9 @@ void __cdecl Scr_GetFileAndLine(const char *codePos, char **filename, int *linen
 
 void __cdecl Scr_AddProfileTime(const char *codePos, int time, int builtInTime)
 {
-    unsigned int low; // [esp+0h] [ebp-Ch]
-    unsigned int middle; // [esp+4h] [ebp-8h]
-    unsigned int high; // [esp+8h] [ebp-4h]
+    uint32_t low; // [esp+0h] [ebp-Ch]
+    uint32_t middle; // [esp+4h] [ebp-8h]
+    uint32_t high; // [esp+8h] [ebp-4h]
 
     if (time < 0)
         MyAssertHandler(".\\script\\scr_parser.cpp", 1240, 0, "%s\n\t(time) = %i", "(time >= 0)", time);
@@ -1137,7 +1137,7 @@ void __cdecl Scr_CalcScriptFileProfile()
     int profileTime; // [esp+114h] [ebp-1014h]
     int v4[1025]; // [esp+118h] [ebp-1010h] BYREF
     ProfileScript *Script; // [esp+111Ch] [ebp-Ch]
-    unsigned int i; // [esp+1120h] [ebp-8h]
+    uint32_t i; // [esp+1120h] [ebp-8h]
     int profileBuiltInTime; // [esp+1124h] [ebp-4h]
 
     v4[1024] = 1024;
@@ -1212,7 +1212,7 @@ void __cdecl Scr_CalcAnimscriptProfile(int *total, int *totalNonBuiltIn)
     SourceBufferInfo *srcBuffer; // [esp+4h] [ebp-14h]
     char *codePos; // [esp+8h] [ebp-10h]
     int profileTime; // [esp+Ch] [ebp-Ch]
-    unsigned int i; // [esp+10h] [ebp-8h]
+    uint32_t i; // [esp+10h] [ebp-8h]
     int profileBuiltInTime; // [esp+14h] [ebp-4h]
 
     *total = 0;
@@ -1259,7 +1259,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
     //OpcodeLookup *v2; // ecx
     //const char **v3; // edx
     int v4; // [esp+34h] [ebp-A0h]
-    unsigned int v5; // [esp+38h] [ebp-9Ch]
+    uint32_t v5; // [esp+38h] [ebp-9Ch]
     float v6; // [esp+3Ch] [ebp-98h]
     float v7; // [esp+44h] [ebp-90h]
     float v8; // [esp+4Ch] [ebp-88h]
@@ -1268,11 +1268,11 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
     ProfileScript *profile; // [esp+B4h] [ebp-20h]
     char *name; // [esp+B8h] [ebp-1Ch]
     int time; // [esp+BCh] [ebp-18h]
-    unsigned int maxNameLength; // [esp+C0h] [ebp-14h]
-    unsigned int i; // [esp+C8h] [ebp-Ch]
-    unsigned int ia; // [esp+C8h] [ebp-Ch]
-    unsigned int ib; // [esp+C8h] [ebp-Ch]
-    unsigned int ic; // [esp+C8h] [ebp-Ch]
+    uint32_t maxNameLength; // [esp+C0h] [ebp-14h]
+    uint32_t i; // [esp+C8h] [ebp-Ch]
+    uint32_t ia; // [esp+C8h] [ebp-Ch]
+    uint32_t ib; // [esp+C8h] [ebp-Ch]
+    uint32_t ic; // [esp+C8h] [ebp-Ch]
     OpcodeLookup *sortedOpcodeLookup; // [esp+CCh] [ebp-8h]
     int profileIndex; // [esp+D0h] [ebp-4h]
     int profileIndexa; // [esp+D0h] [ebp-4h]
@@ -1330,7 +1330,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
         for (profileIndexa = 0; profileIndexa < 40; ++profileIndexa)
         {
             v4 = (int)&profile->profileScriptNames[profileIndexa][1];
-            v5 = (unsigned int)&profile->profileScriptNames[profileIndexa][strlen(profile->profileScriptNames[profileIndexa])
+            v5 = (uint32_t)&profile->profileScriptNames[profileIndexa][strlen(profile->profileScriptNames[profileIndexa])
                 + 1];
             if (v5 - v4 > maxNameLength)
                 maxNameLength = v5 - v4;
@@ -1380,7 +1380,7 @@ bool __cdecl Scr_CompareProfileTimes(const OpcodeLookup& opcodeLookup1, const Op
     return opcodeLookup1.profileTime < opcodeLookup2.profileTime;
 }
 
-void CompileError(unsigned int sourcePos, const char *msg, ...)
+void CompileError(uint32_t sourcePos, const char *msg, ...)
 {
     char line[1024]; // [esp+4h] [ebp-808h] BYREF
     char text[1024]; // [esp+404h] [ebp-408h] BYREF
@@ -1455,8 +1455,8 @@ void CompileError2(char *codePos, const char *msg, ...)
 
 void __cdecl Scr_GetTextSourcePos(const char *buf, char *codePos, char *line)
 {
-    unsigned int PrevSourcePos; // eax
-    unsigned int bufferIndex; // [esp+0h] [ebp-8h]
+    uint32_t PrevSourcePos; // eax
+    uint32_t bufferIndex; // [esp+0h] [ebp-8h]
     int col; // [esp+4h] [ebp-4h] BYREF
 
     if (scrVarPub.developer
@@ -1475,7 +1475,7 @@ void __cdecl Scr_GetTextSourcePos(const char *buf, char *codePos, char *line)
     }
 }
 
-void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, const char *dialogMessage)
+void __cdecl RuntimeError(char *codePos, uint32_t index, const char *msg, const char *dialogMessage)
 {
     const char *v4; // [esp+4h] [ebp-Ch]
     bool abort_on_error; // [esp+Fh] [ebp-1h]
@@ -1519,7 +1519,7 @@ void __cdecl RuntimeError(char *codePos, unsigned int index, const char *msg, co
     }
 }
 
-void __cdecl RuntimeErrorInternal(int channel, char *codePos, unsigned int index, const char *msg)
+void __cdecl RuntimeErrorInternal(int channel, char *codePos, uint32_t index, const char *msg)
 {
     int i; // [esp+4h] [ebp-4h]
 

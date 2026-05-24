@@ -1498,7 +1498,7 @@
      R_ReflectionProbeRegisterDvars();
  }
 
- const dvar_t* R_RegisterWorkerThreadDvar(const char *name, unsigned int workerIndex)
+ const dvar_t* R_RegisterWorkerThreadDvar(const char *name, uint32_t workerIndex)
  {
      const char *helpString; // [esp+4h] [ebp-Ch]
      bool defaultState; // [esp+Bh] [ebp-5h]

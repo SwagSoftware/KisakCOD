@@ -52,7 +52,7 @@ void __cdecl RB_TouchAllImages()
     int v2; // [esp+0h] [ebp-201Ch]
     int hr; // [esp+4h] [ebp-2018h]
     bool inScene; // [esp+Bh] [ebp-2011h]
-    unsigned int i; // [esp+Ch] [ebp-2010h]
+    uint32_t i; // [esp+Ch] [ebp-2010h]
     int v6; // [esp+10h] [ebp-200Ch]
     ImageList imageList; // [esp+14h] [ebp-2008h] BYREF
 

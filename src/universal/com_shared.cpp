@@ -181,12 +181,12 @@ int __cdecl Com_RealTime(qtime_s *qtime)
 static void __cdecl Com_Prefetch(const char *s, signed int bytes)
 {
     signed int v3; // ecx
-    unsigned int i; // ecx
+    uint32_t i; // ecx
 
     v3 = bytes;
     if (bytes > 4096)
         v3 = 4096;
-    for (i = (unsigned int)(v3 + 31) >> 5; i; --i)
+    for (i = (uint32_t)(v3 + 31) >> 5; i; --i)
         s += 32;
 }
 
@@ -222,18 +222,18 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
         v6 = (count & 0xFFFFFFE0) - 32;
         do
         {
-            v7 = *(unsigned int *)&src[v6 + 4];
-            *(unsigned int *)&dest[v6] = *(unsigned int *)&src[v6];
-            *(unsigned int *)&dest[v6 + 4] = v7;
-            v8 = *(unsigned int *)&src[v6 + 12];
-            *(unsigned int *)&dest[v6 + 8] = *(unsigned int *)&src[v6 + 8];
-            *(unsigned int *)&dest[v6 + 12] = v8;
-            v9 = *(unsigned int *)&src[v6 + 20];
-            *(unsigned int *)&dest[v6 + 16] = *(unsigned int *)&src[v6 + 16];
-            *(unsigned int *)&dest[v6 + 20] = v9;
-            v10 = *(unsigned int *)&src[v6 + 28];
-            *(unsigned int *)&dest[v6 + 24] = *(unsigned int *)&src[v6 + 24];
-            *(unsigned int *)&dest[v6 + 28] = v10;
+            v7 = *(uint32_t *)&src[v6 + 4];
+            *(uint32_t *)&dest[v6] = *(uint32_t *)&src[v6];
+            *(uint32_t *)&dest[v6 + 4] = v7;
+            v8 = *(uint32_t *)&src[v6 + 12];
+            *(uint32_t *)&dest[v6 + 8] = *(uint32_t *)&src[v6 + 8];
+            *(uint32_t *)&dest[v6 + 12] = v8;
+            v9 = *(uint32_t *)&src[v6 + 20];
+            *(uint32_t *)&dest[v6 + 16] = *(uint32_t *)&src[v6 + 16];
+            *(uint32_t *)&dest[v6 + 20] = v9;
+            v10 = *(uint32_t *)&src[v6 + 28];
+            *(uint32_t *)&dest[v6 + 24] = *(uint32_t *)&src[v6 + 24];
+            *(uint32_t *)&dest[v6 + 28] = v10;
             v11 = v6 < 32;
             v6 -= 32;
         } while (!v11);
@@ -245,28 +245,28 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
         padding_0:
             if (v3 >= 16)
             {
-                *(unsigned int *)v4 = *(unsigned int *)v5;
-                *((unsigned int *)v4 + 1) = *((unsigned int *)v5 + 1);
-                *((unsigned int *)v4 + 2) = *((unsigned int *)v5 + 2);
-                *((unsigned int *)v4 + 3) = *((unsigned int *)v5 + 3);
+                *(uint32_t *)v4 = *(uint32_t *)v5;
+                *((uint32_t *)v4 + 1) = *((uint32_t *)v5 + 1);
+                *((uint32_t *)v4 + 2) = *((uint32_t *)v5 + 2);
+                *((uint32_t *)v4 + 3) = *((uint32_t *)v5 + 3);
                 v3 -= 16;
                 v5 += 16;
                 v4 += 16;
             }
             if (v3 >= 8)
             {
-                *(unsigned int *)v4 = *(unsigned int *)v5;
+                *(uint32_t *)v4 = *(uint32_t *)v5;
                 v3 -= 8;
-                *((unsigned int *)v4 + 1) = *((unsigned int *)v5 + 1);
+                *((uint32_t *)v4 + 1) = *((uint32_t *)v5 + 1);
                 v5 += 8;
                 v4 += 8;
             }
             if (v3 >= 4)
             {
-                v12 = *(unsigned int *)v5;
+                v12 = *(uint32_t *)v5;
                 v5 += 4;
                 v3 -= 4;
-                *(unsigned int *)v4 = v12;
+                *(uint32_t *)v4 = v12;
                 v4 += 4;
             }
             if (v3 < 2)
@@ -290,9 +290,9 @@ void __cdecl Com_Memcpy(void *dest_p, const void *src_p, const size_t count)
 
 void __cdecl Com_Memset(void *dest_p, const int val, const size_t count)
 {
-    unsigned int *dest = (unsigned int *)dest_p;
+    uint32_t *dest = (uint32_t *)dest_p;
 
-    unsigned int *v3; // edx
+    uint32_t *v3; // edx
     int v4; // eax
     int v5; // eax
     int v6; // ecx
@@ -333,7 +333,7 @@ void __cdecl Com_Memset(void *dest_p, const int val, const size_t count)
         if (v6 >= 2)
         {
             *(_WORD *)v3 = v5;
-            v3 = (unsigned int *)((char *)v3 + 2);
+            v3 = (uint32_t *)((char *)v3 + 2);
             v6 -= 2;
         }
         if (v6)

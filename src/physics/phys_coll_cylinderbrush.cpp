@@ -11,18 +11,18 @@ void __cdecl Phys_CollideCylinderWithBrush(const cbrush_t *brush, const objInfo 
     cplane_s *v6; // [esp+34h] [ebp-D24h]
     float plane[4]; // [esp+3Ch] [ebp-D1Ch] BYREF
     float v8; // [esp+4Ch] [ebp-D0Ch]
-    unsigned int j; // [esp+50h] [ebp-D08h]
+    uint32_t j; // [esp+50h] [ebp-D08h]
     float v10; // [esp+54h] [ebp-D04h]
     float v11[6][4]; // [esp+58h] [ebp-D00h] BYREF
     float polyPlane[4]; // [esp+B8h] [ebp-CA0h] BYREF
-    unsigned int newBrushSideIndex; // [esp+C8h] [ebp-C90h]
+    uint32_t newBrushSideIndex; // [esp+C8h] [ebp-C90h]
     int surfaceFlags; // [esp+CCh] [ebp-C8Ch]
     float brushPlane[4]; // [esp+D0h] [ebp-C88h] BYREF
     int brushSideIndex; // [esp+E0h] [ebp-C78h]
     Poly brushPoly; // [esp+E4h] [ebp-C74h] BYREF
     float brushSeparation; // [esp+ECh] [ebp-C6Ch]
     float brushVerts[256][3]; // [esp+F0h] [ebp-C68h] BYREF
-    unsigned int i; // [esp+CF4h] [ebp-64h]
+    uint32_t i; // [esp+CF4h] [ebp-64h]
     float axialPlanes[6][4]; // [esp+CF8h] [ebp-60h] BYREF
 
     if (results->contactCount >= results->maxContacts)
@@ -173,12 +173,12 @@ void __cdecl Phys_CollideCylinderWithFace(
     Results *results)
 {
     float v5; // [esp+10h] [ebp-38h]
-    unsigned int nextVertIndex; // [esp+14h] [ebp-34h]
-    unsigned int nextVertIndexa; // [esp+14h] [ebp-34h]
+    uint32_t nextVertIndex; // [esp+14h] [ebp-34h]
+    uint32_t nextVertIndexa; // [esp+14h] [ebp-34h]
     float edge[3]; // [esp+18h] [ebp-30h] BYREF
     float distanceBodyCenterToPlane; // [esp+24h] [ebp-24h]
     SeparatingAxisInfo axisInfo; // [esp+28h] [ebp-20h] BYREF
-    unsigned int direction; // [esp+3Ch] [ebp-Ch]
+    uint32_t direction; // [esp+3Ch] [ebp-Ch]
     float dot; // [esp+40h] [ebp-8h]
     float distanceCylinderCenterToPlane; // [esp+44h] [ebp-4h]
 
@@ -273,10 +273,10 @@ void __cdecl Phys_PushPolyOutOfCylinderEndcapPlane(
     double v5; // st7
     float v6; // [esp+10h] [ebp-C30h]
     float depth; // [esp+14h] [ebp-C2Ch]
-    unsigned int clippedPolyCount; // [esp+1Ch] [ebp-C24h]
+    uint32_t clippedPolyCount; // [esp+1Ch] [ebp-C24h]
     float clippedPoly[256][3]; // [esp+20h] [ebp-C20h] BYREF
     float dist; // [esp+C24h] [ebp-1Ch]
-    unsigned int ptIndex; // [esp+C28h] [ebp-18h]
+    uint32_t ptIndex; // [esp+C28h] [ebp-18h]
     float negR[3]; // [esp+C2Ch] [ebp-14h] BYREF
     int direction; // [esp+C38h] [ebp-8h]
     float centerDist; // [esp+C3Ch] [ebp-4h]
@@ -307,11 +307,11 @@ void __cdecl Phys_PushPolyOutOfCylinderEndcapPlane(
     }
 }
 
-unsigned int __cdecl Phys_ClipPolygonAgainstCylinderRadius(
+uint32_t __cdecl Phys_ClipPolygonAgainstCylinderRadius(
     const Poly *poly,
     const objInfo *info,
     float (*result)[3],
-    unsigned int maxVerts)
+    uint32_t maxVerts)
 {
     double v4; // st7
     double v6; // st7
@@ -326,13 +326,13 @@ unsigned int __cdecl Phys_ClipPolygonAgainstCylinderRadius(
     float cross[3]; // [esp+34h] [ebp-4Ch] BYREF
     float radiusSq; // [esp+40h] [ebp-40h]
     bool isInsidePrev; // [esp+47h] [ebp-39h]
-    unsigned int currIndex; // [esp+48h] [ebp-38h]
+    uint32_t currIndex; // [esp+48h] [ebp-38h]
     bool isInsideCurrent; // [esp+4Fh] [ebp-31h]
     float intersection[2][3]; // [esp+50h] [ebp-30h] BYREF
     float toPt[3]; // [esp+68h] [ebp-18h] BYREF
-    unsigned int outVertIndex; // [esp+74h] [ebp-Ch]
+    uint32_t outVertIndex; // [esp+74h] [ebp-Ch]
     int direction; // [esp+78h] [ebp-8h]
-    unsigned int lastIndex; // [esp+7Ch] [ebp-4h]
+    uint32_t lastIndex; // [esp+7Ch] [ebp-4h]
 
     if (poly->ptCount <= 2)
         MyAssertHandler(".\\physics\\phys_coll_cylinderbrush.cpp", 96, 0, "%s", "poly->ptCount > 2");
@@ -408,7 +408,7 @@ unsigned int __cdecl Phys_ClipPolygonAgainstCylinderRadius(
     return outVertIndex;
 }
 
-unsigned int __cdecl Phys_ClipLineSegmentAgainstCylinderRadius(
+uint32_t __cdecl Phys_ClipLineSegmentAgainstCylinderRadius(
     const float *pt1,
     const float *pt2,
     const objInfo *info,
@@ -490,11 +490,11 @@ char __cdecl Phys_CylinderFaceTestSeparatingAxes(
     float endcapCenter1[3]; // [esp+54h] [ebp-C34h] BYREF
     float toVert[3]; // [esp+60h] [ebp-C28h] BYREF
     float endcapCenter0[3]; // [esp+6Ch] [ebp-C1Ch] BYREF
-    unsigned int vertIndexNext; // [esp+78h] [ebp-C10h]
-    unsigned int direction; // [esp+7Ch] [ebp-C0Ch]
+    uint32_t vertIndexNext; // [esp+78h] [ebp-C10h]
+    uint32_t direction; // [esp+7Ch] [ebp-C0Ch]
     float edges[256][3]; // [esp+80h] [ebp-C08h] BYREF
-    unsigned int vertIndex; // [esp+C80h] [ebp-8h]
-    unsigned int testAxisNumber; // [esp+C84h] [ebp-4h]
+    uint32_t vertIndex; // [esp+C80h] [ebp-8h]
+    uint32_t testAxisNumber; // [esp+C84h] [ebp-4h]
 
     if (poly->ptCount > 0x100)
         MyAssertHandler(".\\physics\\phys_coll_cylinderbrush.cpp", 373, 0, "%s", "poly->ptCount <= ARRAY_COUNT( edges )");
@@ -618,7 +618,7 @@ char __cdecl Phys_CylinderFaceTestAxis(
     const float *axis,
     float depthEpsilon,
     SeparatingAxisInfo *axisInfo,
-    unsigned int axisNumber,
+    uint32_t axisNumber,
     bool testForRejectionOnly)
 {
     double v8; // st7
@@ -643,9 +643,9 @@ char __cdecl Phys_CylinderFaceTestAxis(
     float cylHalfLengthAlongAxis; // [esp+54h] [ebp-24h]
     float normalizedAxis[3]; // [esp+58h] [ebp-20h] BYREF
     float axisNormalDot; // [esp+64h] [ebp-14h]
-    unsigned int direction; // [esp+68h] [ebp-10h]
+    uint32_t direction; // [esp+68h] [ebp-10h]
     float vertDist; // [esp+6Ch] [ebp-Ch]
-    unsigned int vertIndex; // [esp+70h] [ebp-8h]
+    uint32_t vertIndex; // [esp+70h] [ebp-8h]
     float cylCenterDist; // [esp+74h] [ebp-4h]
 
     if (!Vec3IsNormalized(axis))
@@ -733,7 +733,7 @@ char __cdecl Phys_TestCircleToEdgeAxis(
     const objInfo *info,
     const float *circleCenter,
     SeparatingAxisInfo *axisInfo,
-    unsigned int axisNumber)
+    uint32_t axisNumber)
 {
     float scale; // [esp+10h] [ebp-70h]
     double v10; // [esp+14h] [ebp-6Ch]
@@ -745,7 +745,7 @@ char __cdecl Phys_TestCircleToEdgeAxis(
     float normalizedEdge[3]; // [esp+5Ch] [ebp-24h] BYREF
     float axialLengthOfNormalizedEdge; // [esp+68h] [ebp-18h]
     float distToCirclePlane; // [esp+6Ch] [ebp-14h]
-    unsigned int direction; // [esp+70h] [ebp-10h]
+    uint32_t direction; // [esp+70h] [ebp-10h]
     float clockwiseTestDir[3]; // [esp+74h] [ebp-Ch] BYREF
 
     direction = info->cylDirection - 1;
@@ -792,7 +792,7 @@ void __cdecl Phys_ClipCylinderEdgeToPoly(
     float endcapCenter1[3]; // [esp+24h] [ebp-2Ch] BYREF
     float cylPosTrans[3]; // [esp+30h] [ebp-20h] BYREF
     float endcapCenter0[3]; // [esp+3Ch] [ebp-14h] BYREF
-    unsigned int direction; // [esp+48h] [ebp-8h]
+    uint32_t direction; // [esp+48h] [ebp-8h]
     float dot; // [esp+4Ch] [ebp-4h]
 
     direction = info->cylDirection - 1;
@@ -835,11 +835,11 @@ void __cdecl Phys_PushEdgeAwayFromCylinderCircle(
     float contactPlaneDist; // [esp+1Ch] [ebp-5Ch]
     float depth; // [esp+20h] [ebp-58h]
     float endcapCenter[3]; // [esp+24h] [ebp-54h] BYREF
-    unsigned int contactCount; // [esp+30h] [ebp-48h]
+    uint32_t contactCount; // [esp+30h] [ebp-48h]
     float choppingPlane[4]; // [esp+34h] [ebp-44h] BYREF
-    unsigned int contactIndex; // [esp+44h] [ebp-34h]
+    uint32_t contactIndex; // [esp+44h] [ebp-34h]
     float edgeNormalized[3]; // [esp+48h] [ebp-30h] BYREF
-    unsigned int direction; // [esp+54h] [ebp-24h]
+    uint32_t direction; // [esp+54h] [ebp-24h]
     float length; // [esp+58h] [ebp-20h]
     float dot; // [esp+5Ch] [ebp-1Ch]
     float contactPt[2][3]; // [esp+60h] [ebp-18h] BYREF
@@ -905,7 +905,7 @@ void __cdecl Phys_PushEdgeAwayFromCylinderCircle(
     }
 }
 
-unsigned int __cdecl Phys_IntersectionOfCircleWithPlane(
+uint32_t __cdecl Phys_IntersectionOfCircleWithPlane(
     const float *plane,
     const float *circleCenter,
     const float *circleAxis,
@@ -993,11 +993,11 @@ void __cdecl Phys_ClipCylinderEndcapToPoly(
     float contactNormal[3]; // [esp+50h] [ebp-DCh] BYREF
     float circlePoints[25]; // [esp+5Ch] [ebp-D0h] BYREF
     const float *radius; // [esp+C0h] [ebp-6Ch]
-    unsigned int pointIndex; // [esp+C4h] [ebp-68h]
+    uint32_t pointIndex; // [esp+C4h] [ebp-68h]
     float axis2[3]; // [esp+C8h] [ebp-64h] BYREF
     float axis0[3]; // [esp+D4h] [ebp-58h] BYREF
     float rDotN; // [esp+E0h] [ebp-4Ch]
-    unsigned int direction; // [esp+E4h] [ebp-48h]
+    uint32_t direction; // [esp+E4h] [ebp-48h]
     float lengthSq; // [esp+E8h] [ebp-44h]
     float circleCoords[8][2]; // [esp+ECh] [ebp-40h]
 
@@ -1124,7 +1124,7 @@ double __cdecl Phys_DistanceOfCylinderFromPlane(const float *plane, const objInf
 void __cdecl Phys_CollideCylinderWithTriangleList(
     const unsigned __int16 *a_indices,
     const float (*verts)[3],
-    unsigned int triCount,
+    uint32_t triCount,
     const objInfo *info,
     int surfaceFlags,
     Results *results)
@@ -1137,7 +1137,7 @@ void __cdecl Phys_CollideCylinderWithTriangleList(
     float triPlane[4]; // [esp+E8h] [ebp-24h] BYREF
     float radius; // [esp+F8h] [ebp-14h]
     const unsigned __int16 *indices; // [esp+FCh] [ebp-10h]
-    unsigned int triIndex; // [esp+100h] [ebp-Ch]
+    uint32_t triIndex; // [esp+100h] [ebp-Ch]
     Poly triPoly; // [esp+104h] [ebp-8h] BYREF
 
     triPoly.ptCount = 3;

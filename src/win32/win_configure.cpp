@@ -20,12 +20,12 @@ void Sys_DetectVideoCard(int descLimit, char* description)
     }
 }
 
-unsigned int __cdecl Sys_AddApicIdIfUnique(
-    unsigned int apicId,
-    unsigned int *existingApicId,
-    unsigned int existingCount)
+uint32_t __cdecl Sys_AddApicIdIfUnique(
+    uint32_t apicId,
+    uint32_t *existingApicId,
+    uint32_t existingCount)
 {
-    unsigned int existingIter; // [esp+0h] [ebp-4h]
+    uint32_t existingIter; // [esp+0h] [ebp-4h]
 
     for (existingIter = 0; existingIter < existingCount; ++existingIter)
     {
@@ -56,17 +56,17 @@ void __cdecl Sys_GetPhysicalCpuCount(SysInfo* sysInfo)
     const char* v19; // [esp+20h] [ebp-C8h]
     int v20; // [esp+28h] [ebp-C0h]
     int v21; // [esp+2Ch] [ebp-BCh]
-    unsigned int regEdx; // [esp+30h] [ebp-B8h]
-    unsigned int regEax; // [esp+34h] [ebp-B4h]
-    unsigned int regEbx; // [esp+38h] [ebp-B0h]
+    uint32_t regEdx; // [esp+30h] [ebp-B8h]
+    uint32_t regEax; // [esp+34h] [ebp-B4h]
+    uint32_t regEbx; // [esp+38h] [ebp-B0h]
     void* process; // [esp+3Ch] [ebp-ACh]
-    unsigned int apicId; // [esp+40h] [ebp-A8h]
-    unsigned int logicalPerPhysical; // [esp+44h] [ebp-A4h]
+    uint32_t apicId; // [esp+40h] [ebp-A8h]
+    uint32_t logicalPerPhysical; // [esp+44h] [ebp-A4h]
     DWORD_PTR systemAffinityMask; // [esp+48h] [ebp-A0h] BYREF
-    unsigned int logicalIdMask; // [esp+4Ch] [ebp-9Ch]
+    uint32_t logicalIdMask; // [esp+4Ch] [ebp-9Ch]
     DWORD_PTR processAffinityMask; // [esp+50h] [ebp-98h] BYREF
-    unsigned int testAffinityMask; // [esp+54h] [ebp-94h]
-    unsigned int existingApicId[32]; // [esp+58h] [ebp-90h] BYREF
+    uint32_t testAffinityMask; // [esp+54h] [ebp-94h]
+    uint32_t existingApicId[32]; // [esp+58h] [ebp-90h] BYREF
     _DWORD* v33; // [esp+D8h] [ebp-10h]
     int v34; // [esp+E4h] [ebp-4h]
 
@@ -77,13 +77,13 @@ void __cdecl Sys_GetPhysicalCpuCount(SysInfo* sysInfo)
     while (1)
     {
         v17 = *cpuVendor;
-        v1 = v17 < (unsigned int)*v19;
+        v1 = v17 < (uint32_t)*v19;
         if (v17 != *v19)
             break;
         if (!v17)
             goto LABEL_6;
         v16 = cpuVendor[1];
-        v1 = v16 < (unsigned int)v19[1];
+        v1 = v16 < (uint32_t)v19[1];
         if (v16 != v19[1])
             break;
         cpuVendor += 2;
@@ -167,14 +167,14 @@ LABEL_8:
 
 long double __cdecl Sys_BenchmarkGHz()
 {
-    unsigned int i; // ecx
+    uint32_t i; // ecx
     unsigned __int64 v1; // kr00_8
     int holdrand; // [esp+10h] [ebp-68h]
     float k; // [esp+2Ch] [ebp-4Ch]
     uint64 start; // [esp+30h] [ebp-48h]
     int priority; // [esp+44h] [ebp-34h]
     unsigned __int64 minTime; // [esp+48h] [ebp-30h]
-    unsigned int attempt; // [esp+54h] [ebp-24h]
+    uint32_t attempt; // [esp+54h] [ebp-24h]
     float x; // [esp+68h] [ebp-10h]
     float xa; // [esp+68h] [ebp-10h]
     float y; // [esp+6Ch] [ebp-Ch]
@@ -242,28 +242,28 @@ void __cdecl Sys_DetectCpuVendorAndName(char *vendor, char *name)
 void __cdecl Sys_DetectCpuVendorAndName(char* vendor, char* name)
 {
     int _EAX; // eax
-    unsigned int _EDX; // edx
-    unsigned int _ECX; // ecx
-    unsigned int _EBX; // ebx
-    unsigned int _EAX; // eax
-    unsigned int _EAX; // eax
+    uint32_t _EDX; // edx
+    uint32_t _ECX; // ecx
+    uint32_t _EBX; // ebx
+    uint32_t _EAX; // eax
+    uint32_t _EAX; // eax
     bool v12; // cf
     bool v13; // cf
     int _EAX; // eax
-    unsigned int _EAX; // eax
-    unsigned int _EDX; // edx
-    unsigned int _ECX; // ecx
-    unsigned int _EBX; // ebx
+    uint32_t _EAX; // eax
+    uint32_t _EDX; // edx
+    uint32_t _ECX; // ecx
+    uint32_t _EBX; // ebx
     int _EAX; // eax
-    unsigned int _EAX; // eax
-    unsigned int _EDX; // edx
-    unsigned int _ECX; // ecx
-    unsigned int _EBX; // ebx
+    uint32_t _EAX; // eax
+    uint32_t _EDX; // edx
+    uint32_t _ECX; // ecx
+    uint32_t _EBX; // ebx
     int _EAX; // eax
-    unsigned int _EAX; // eax
-    unsigned int _EDX; // edx
-    unsigned int _ECX; // ecx
-    unsigned int _EBX; // ebx
+    uint32_t _EAX; // eax
+    uint32_t _EDX; // edx
+    uint32_t _ECX; // ecx
+    uint32_t _EBX; // ebx
     _DWORD v29[5]; // [esp+0h] [ebp-90h] BYREF
     int v30; // [esp+14h] [ebp-7Ch]
     unsigned __int8 v31; // [esp+1Ah] [ebp-76h]
@@ -278,7 +278,7 @@ void __cdecl Sys_DetectCpuVendorAndName(char* vendor, char* name)
     const char* v40; // [esp+34h] [ebp-5Ch]
     Sys_DetectCpuVendorAndName::__l2::<unnamed_type_cpuid_desc> cpuid_desc; // [esp+38h] [ebp-58h] BYREF
     Sys_DetectCpuVendorAndName::__l2::<unnamed_type_cpuid_vendor> cpuid_vendor; // [esp+6Ch] [ebp-24h] BYREF
-    unsigned int maxCpuidArg; // [esp+7Ch] [ebp-14h]
+    uint32_t maxCpuidArg; // [esp+7Ch] [ebp-14h]
     _DWORD* v44; // [esp+80h] [ebp-10h]
     int v45; // [esp+8Ch] [ebp-4h]
 
@@ -319,13 +319,13 @@ void __cdecl Sys_DetectCpuVendorAndName(char* vendor, char* name)
         while (1)
         {
             v38 = *v39;
-            v12 = v38 < (unsigned int)*v40;
+            v12 = v38 < (uint32_t)*v40;
             if (v38 != *v40)
                 break;
             if (!v38)
                 goto LABEL_7;
             v37 = v39[1];
-            v12 = v37 < (unsigned int)v40[1];
+            v12 = v37 < (uint32_t)v40[1];
             if (v37 != v40[1])
                 break;
             v39 += 2;
@@ -347,13 +347,13 @@ void __cdecl Sys_DetectCpuVendorAndName(char* vendor, char* name)
             while (1)
             {
                 v32 = *v33;
-                v13 = v32 < (unsigned int)*v34;
+                v13 = v32 < (uint32_t)*v34;
                 if (v32 != *v34)
                     break;
                 if (!v32)
                     goto LABEL_16;
                 v31 = v33[1];
-                v13 = v31 < (unsigned int)v34[1];
+                v13 = v31 < (uint32_t)v34[1];
                 if (v31 != v34[1])
                     break;
                 v33 += 2;

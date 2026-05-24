@@ -72,9 +72,9 @@ struct __declspec(align(128)) pathlocal_t
 {
     PathLinkInfo pathLinkInfoArray[2048];
     int pathLinkInfoArrayInited;
-    unsigned int actualNodeCount;
-    unsigned int extraNodes;
-    unsigned int originErrors;
+    uint32_t actualNodeCount;
+    uint32_t extraNodes;
+    uint32_t originErrors;
     pathlocal_t_tag circle;
 };
 struct pathnodeRange_t
@@ -173,7 +173,7 @@ struct pathnode_t // sizeof=0x80 (SP/MP Same)
 struct pathbasenode_t // sizeof=0x10
 {
     float vOrigin[3];
-    unsigned int type;
+    uint32_t type;
 };
 static_assert(sizeof(pathbasenode_t) == 16);
 
@@ -203,10 +203,10 @@ struct PathData // sizeof=0x28
     {
         memset(this, 0, sizeof(PathData)); // lwss add
     }
-    unsigned int nodeCount;
+    uint32_t nodeCount;
     pathnode_t *nodes;
     pathbasenode_t *basenodes;
-    unsigned int chainNodeCount;
+    uint32_t chainNodeCount;
     uint16_t *chainNodeForNode;
     uint16_t *nodeForChainNode;
     int visBytes;
@@ -231,8 +231,8 @@ bool __cdecl TurretNode_HasTurret(const pathnode_t *node);
 void __cdecl Path_ReadOnly(int offset);
 void __cdecl Path_NonNegativeFloat(pathnode_t *node, int offset);
 void __cdecl Path_GetType(pathnode_t *node, int offset);
-void __cdecl Scr_SetPathnodeField(unsigned int entnum, unsigned int offset);
-void __cdecl Scr_GetPathnodeField(unsigned int entnum, unsigned int offset);
+void __cdecl Scr_SetPathnodeField(uint32_t entnum, uint32_t offset);
+void __cdecl Scr_GetPathnodeField(uint32_t entnum, uint32_t offset);
 void __cdecl PathNode_ClearStringField(uint16_t *destScrString);
 void __cdecl PathNode_UpdateStringField(
     const char *destKey,
@@ -244,12 +244,12 @@ void __cdecl PathNode_OriginMatches(const char *value, const float *nodeOrigin);
 void __cdecl node_droptofloor(pathnode_t *node);
 void __cdecl G_UpdateTrackExtraNodes();
 void __cdecl GScr_AddFieldsForPathnode();
-pathnode_t *__cdecl Scr_GetPathnode(unsigned int index);
+pathnode_t *__cdecl Scr_GetPathnode(uint32_t index);
 void __cdecl G_FreePathnodesScriptInfo();
 bool __cdecl Path_CompareNodesIncreasing(const pathsort_t &ps1, const pathsort_t &ps2);
-unsigned int __cdecl Path_ConvertNodeToIndex(const pathnode_t *node);
-pathnode_t *__cdecl Path_ConvertIndexToNode(unsigned int index);
-unsigned int __cdecl Path_NodeCount();
+uint32_t __cdecl Path_ConvertNodeToIndex(const pathnode_t *node);
+pathnode_t *__cdecl Path_ConvertIndexToNode(uint32_t index);
+uint32_t __cdecl Path_NodeCount();
 void __cdecl Path_Init(int restart);
 int __cdecl NodeVisCacheEntry(int i, int j);
 int __cdecl ExpandedNodeVisCacheEntry(int i, int j);
@@ -270,8 +270,8 @@ int __cdecl Path_NodesInRadius(
     int maxNodes,
     int typeFlags);
 int __cdecl Path_IsDynamicBlockingEntity(gentity_s *ent);
-bool __cdecl Path_IsBadPlaceLink(unsigned int nodeNumFrom, unsigned int nodeNumTo, team_t eTeam);
-unsigned int Path_InitLinkCounts();
+bool __cdecl Path_IsBadPlaceLink(uint32_t nodeNumFrom, uint32_t nodeNumTo, team_t eTeam);
+uint32_t Path_InitLinkCounts();
 void Path_InitLinkInfoArray();
 void __cdecl Path_InitNodeDynamic(pathnode_t *loadNode);
 void __cdecl Path_InitNodesDynamic();
@@ -283,11 +283,11 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node);
 void __cdecl Path_DrawDebugNode(const float *cameraPos, const pathnode_t *node);
 void __cdecl Path_DrawDebugFindPath(float *vOrigin);
 void __cdecl Path_DrawFriendlyChain();
-bool __cdecl Path_IsNodeIndex(const pathnode_t *node, unsigned int nodeIndexToCheck);
+bool __cdecl Path_IsNodeIndex(const pathnode_t *node, uint32_t nodeIndexToCheck);
 int __cdecl Path_NodesVisible(const pathnode_t *node0, const pathnode_t *node1);
 int __cdecl Path_ExpandedNodeVisible(const pathnode_t *node0, const pathnode_t *node1);
 pathnode_t *__cdecl Path_FindChainPos(const float *vOrigin, pathnode_t *pPrevChainPos);
-void __cdecl Path_UpdateBestChainNode(pathnode_t *node, pathnode_t **bestNode, unsigned int *foundCount);
+void __cdecl Path_UpdateBestChainNode(pathnode_t *node, pathnode_t **bestNode, uint32_t *foundCount);
 int __cdecl Path_CanSetDesiredChainPos(actor_s *claimer, const pathnode_t *node);
 void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, uint16_t targetname);
 pathnode_t *__cdecl Path_FirstNode(int typeFlags);
@@ -302,7 +302,7 @@ void __cdecl Path_RevokeClaim(pathnode_t *node, sentient_s *pNewClaimer);
 void __cdecl Path_RelinquishNode(sentient_s *claimer, int timeUntilRelinquished);
 int __cdecl Path_AllowedStancesForNode(pathnode_t *node);
 int __cdecl Path_SaveIndex(const pathnode_t *node);
-pathnode_t *__cdecl Path_LoadNode(unsigned int index);
+pathnode_t *__cdecl Path_LoadNode(uint32_t index);
 void __cdecl Path_ValidateNode(pathnode_t *node);
 void __cdecl Path_ValidateAllNodes();
 void __cdecl Path_CheckLinkLeaks();
@@ -327,7 +327,7 @@ void __cdecl Scr_SetNodePriority();
 void __cdecl Scr_IsNodeOccupied();
 void __cdecl Scr_SetTurretNode();
 void __cdecl Scr_UnsetTurretNode();
-void __cdecl GScr_SetDynamicPathnodeField(pathnode_t *node, unsigned int index);
+void __cdecl GScr_SetDynamicPathnodeField(pathnode_t *node, uint32_t index);
 void __cdecl G_DropPathnodesToFloor();
 void __cdecl Scr_FreePathnode(pathnode_t *node);
 void __cdecl Scr_AddPathnode(pathnode_t *node);

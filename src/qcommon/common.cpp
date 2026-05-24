@@ -58,7 +58,7 @@ int marker_common;
 int com_expectedHunkUsage;
 
 int com_skelTimeStamp;
-unsigned int com_errorPrintsCount;
+uint32_t com_errorPrintsCount;
 float com_timescaleValue;
 //00751450       struct _iobuf* debuglogfile 82f01450     common.obj
 int com_fixedConsolePosition;
@@ -121,7 +121,7 @@ char *com_argv[MAX_NUM_ARGVS + 1];
 
 static char* rd_buffer = NULL;
 static void(QDECL* rd_flush)(char*) = NULL;
-static unsigned int rd_buffersize = 0;
+static uint32_t rd_buffersize = 0;
 
 char com_errorMessage[4096];
 
@@ -253,7 +253,7 @@ int __cdecl Debug_EventLoop(int localClientNum)
 
 void __cdecl Debug_Frame(int localClientNum)
 {
-    unsigned int v1; // edx
+    uint32_t v1; // edx
     int lastFrameIndex; // [esp+0h] [ebp-18h]
     int newEvent; // [esp+4h] [ebp-14h]
     int msec; // [esp+8h] [ebp-10h]
@@ -339,26 +339,26 @@ typedef enum
 
 #define EMMS_INSTRUCTION	__asm emms
 
-void _copyDWord(unsigned int* dest, const unsigned int constant, const unsigned int count) 
+void _copyDWord(uint32_t* dest, const uint32_t constant, const uint32_t count) 
 {
     for (unsigned i = 0; i < count; i++)
         dest[i] = constant;
 }
 
-qboolean Com_Memcmp(const void* src0, const void* src1, const unsigned int count)
+qboolean Com_Memcmp(const void* src0, const void* src1, const uint32_t count)
 {
-	unsigned int i;
+	uint32_t i;
 	// MMX version anyone?
 
 	if (count >= 16)
 	{
-		unsigned int* dw = (unsigned int*)(src0);
-		unsigned int* sw = (unsigned int*)(src1);
+		uint32_t* dw = (uint32_t*)(src0);
+		uint32_t* sw = (uint32_t*)(src1);
 
-		unsigned int nm2 = count / 16;
+		uint32_t nm2 = count / 16;
 		for (i = 0; i < nm2; i += 4)
 		{
-			unsigned int tmp = (dw[i + 0] - sw[i + 0]) | (dw[i + 1] - sw[i + 1]) |
+			uint32_t tmp = (dw[i + 0] - sw[i + 0]) | (dw[i + 1] - sw[i + 1]) |
 				(dw[i + 2] - sw[i + 2]) | (dw[i + 3] - sw[i + 3]);
 			if (tmp)
 				return qfalse;
@@ -376,7 +376,7 @@ qboolean Com_Memcmp(const void* src0, const void* src1, const unsigned int count
 	return qtrue;
 }
 
-void Com_Prefetch(const void* s, const unsigned int bytes, e_prefetch type)
+void Com_Prefetch(const void* s, const uint32_t bytes, e_prefetch type)
 {
 	// write buffer prefetching is performed only if
 	// the processor benefits from it. Read and read/write
@@ -649,7 +649,7 @@ void Com_Error(errorParm_t code, const char* fmt, ...)
 
     va_start(va, fmt);
     Sys_EnterCriticalSection(CRITSECT_COM_ERROR);
-    if ((unsigned int)code <= ERR_DROP)
+    if ((uint32_t)code <= ERR_DROP)
         Com_PrintStackTrace();
     if (com_errorEntered)
         Sys_Error("recursive error after: %s", com_errorMessage);
@@ -878,9 +878,9 @@ void __cdecl Info_Print(const char* s)
     }
 }
 
-unsigned int* __cdecl Com_AllocEvent(int size)
+uint32_t* __cdecl Com_AllocEvent(int size)
 {
-    return (unsigned int *)Z_Malloc(size, "Com_AllocEvent", 10);
+    return (uint32_t *)Z_Malloc(size, "Com_AllocEvent", 10);
 }
 
 #ifdef KISAK_MP
@@ -1115,7 +1115,7 @@ void Com_ErrorCleanup()
     char* v2; // [esp+8h] [ebp-101Ch]
     char* v3; // [esp+Ch] [ebp-1018h]
     char* src; // [esp+14h] [ebp-1010h]
-    unsigned int v5; // [esp+18h] [ebp-100Ch]
+    uint32_t v5; // [esp+18h] [ebp-100Ch]
     char finalmsg[4100]; // [esp+1Ch] [ebp-1008h] BYREF
 
     iassert( Sys_IsMainThread() );
@@ -1258,7 +1258,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     int localClientNum; // [esp+10h] [ebp-Ch]
     int localClientNuma; // [esp+10h] [ebp-Ch]
     char* s; // [esp+14h] [ebp-8h]
-    unsigned int initStartTime; // [esp+18h] [ebp-4h]
+    uint32_t initStartTime; // [esp+18h] [ebp-4h]
 
     Com_Printf(16, "%s %s build %s %s\n", "KisakCoD4", "1.0", CPUSTRING, __DATE__);
     Com_ParseCommandLine(commandLine);
@@ -1422,7 +1422,7 @@ void __cdecl Com_Error_f()
 void __cdecl Com_Freeze_f()
 {
     const char* v0; // eax
-    unsigned int start; // [esp+4h] [ebp-Ch]
+    uint32_t start; // [esp+4h] [ebp-Ch]
     float s; // [esp+Ch] [ebp-4h]
 
     if (Cmd_Argc() == 2)
@@ -2314,9 +2314,9 @@ char __cdecl Com_GetDecimalDelimiter()
         return 46;
 }
 
-void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxlen, unsigned int numDecimalPlaces)
+void __cdecl Com_LocalizedFloatToString(float f, char* buffer, uint32_t maxlen, uint32_t numDecimalPlaces)
 {
-    unsigned int charPos; // [esp+8h] [ebp-8h]
+    uint32_t charPos; // [esp+8h] [ebp-8h]
     char delimiter; // [esp+Fh] [ebp-1h]
 
     _snprintf(buffer, maxlen - 1, "%.*f", numDecimalPlaces, f);

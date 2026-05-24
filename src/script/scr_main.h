@@ -41,19 +41,19 @@ struct scrVarPub_t // sizeof=0x2007C
     bool evaluate;
     const char* error_message;
     int error_index;
-    unsigned int time;
-    unsigned int timeArrayId;
-    unsigned int pauseArrayId;
-    unsigned int levelId;
-    unsigned int gameId;
-    unsigned int animId;
-    unsigned int freeEntList;
-    unsigned int tempVariable;
+    uint32_t time;
+    uint32_t timeArrayId;
+    uint32_t pauseArrayId;
+    uint32_t levelId;
+    uint32_t gameId;
+    uint32_t animId;
+    uint32_t freeEntList;
+    uint32_t tempVariable;
     bool bInited;
     uint16_t savecount;
-    unsigned int checksum;
-    unsigned int entId;
-    unsigned int entFieldName;
+    uint32_t checksum;
+    uint32_t entId;
+    uint32_t entFieldName;
     HunkUser* programHunkUser;
     const char* programBuffer;
     const char* endScriptBuffer;
@@ -63,13 +63,13 @@ struct scrVarPub_t // sizeof=0x2007C
     float scriptProfileMinTime;
     bool bScriptProfileBuiltin;
     float scriptProfileBuiltinMinTime;
-    unsigned int numScriptThreads;
-    unsigned int numScriptValues;
-    unsigned int numScriptObjects;
+    uint32_t numScriptThreads;
+    uint32_t numScriptValues;
+    uint32_t numScriptObjects;
     const char* varUsagePos;
     int ext_threadcount;
     int totalObjectRefCount;
-    volatile unsigned int totalVectorRefCount;
+    volatile uint32_t totalVectorRefCount;
 };
 static_assert(sizeof(scrVarPub_t) == 0x2007C);
 
@@ -78,7 +78,7 @@ struct PrecacheEntry // sizeof=0x8
     uint16_t filename;
     bool include;
     // padding byte
-    unsigned int sourcePos;
+    uint32_t sourcePos;
 };
 static_assert(sizeof(PrecacheEntry) == 0x8);
 
@@ -89,13 +89,13 @@ bool Scr_IsInOpcodeMemory(char const* pos);
 bool Scr_IsIdentifier(char const* token);
 
 int Scr_GetFunctionHandle(char const*, char const*);
-unsigned int SL_TransferToCanonicalString(unsigned int);
-unsigned int SL_GetCanonicalString(char const*);
+uint32_t SL_TransferToCanonicalString(uint32_t);
+uint32_t SL_GetCanonicalString(char const*);
 void Scr_BeginLoadScriptsRemote(void);
 void Scr_BeginLoadAnimTrees(int);
 int Scr_ScanFile(unsigned char*, int);
-unsigned int Scr_LoadScriptInternal(char const*, struct PrecacheEntry*, int);
-unsigned int Scr_LoadScript(char const*);
+uint32_t Scr_LoadScriptInternal(char const*, struct PrecacheEntry*, int);
+uint32_t Scr_LoadScript(char const*);
 void Scr_PostCompileScripts(void);
 void Scr_EndLoadScripts(void);
 void Scr_PrecacheAnimTrees(void* (__cdecl*)(int), int);

@@ -96,9 +96,9 @@ void __cdecl R_AddDebugLine(DebugGlobals *debugGlobalsEntry, const float *start,
 void __cdecl R_AddDebugBox(DebugGlobals *debugGlobalsEntry, const float *mins, const float *maxs, const float *color)
 {
     float v4; // [esp+0h] [ebp-6Ch]
-    unsigned int j; // [esp+4h] [ebp-68h]
-    unsigned int i; // [esp+8h] [ebp-64h]
-    unsigned int ia; // [esp+8h] [ebp-64h]
+    uint32_t j; // [esp+4h] [ebp-68h]
+    uint32_t i; // [esp+8h] [ebp-64h]
+    uint32_t ia; // [esp+8h] [ebp-64h]
     float v[8][3]; // [esp+Ch] [ebp-60h] BYREF
 
     for (i = 0; i < 8; ++i)

@@ -33,19 +33,19 @@ void __cdecl Phys_ComputeMassProperties(
     float v21; // [esp+68h] [ebp-B8h]
     float v22; // [esp+74h] [ebp-ACh]
     float v23; // [esp+7Ch] [ebp-A4h]
-    unsigned int j; // [esp+80h] [ebp-A0h]
+    uint32_t j; // [esp+80h] [ebp-A0h]
     float pointSum[3]; // [esp+84h] [ebp-9Ch] BYREF
-    unsigned int k; // [esp+90h] [ebp-90h]
+    uint32_t k; // [esp+90h] [ebp-90h]
     float halfLengths[3]; // [esp+94h] [ebp-8Ch] BYREF
     float xzDistSq; // [esp+A0h] [ebp-80h]
     float yzDistSq; // [esp+A4h] [ebp-7Ch]
     float xzSum; // [esp+A8h] [ebp-78h]
-    unsigned int pointCount; // [esp+ACh] [ebp-74h]
+    uint32_t pointCount; // [esp+ACh] [ebp-74h]
     dMass mass; // [esp+B0h] [ebp-70h] BYREF
     float dz; // [esp+F8h] [ebp-28h]
     float invPointCount; // [esp+FCh] [ebp-24h]
     float xySum; // [esp+100h] [ebp-20h]
-    unsigned int i; // [esp+104h] [ebp-1Ch]
+    uint32_t i; // [esp+104h] [ebp-1Ch]
     float dy; // [esp+108h] [ebp-18h]
     float yzSum; // [esp+10Ch] [ebp-14h]
     float point[3]; // [esp+110h] [ebp-10h] BYREF
@@ -199,10 +199,10 @@ char __cdecl SkipEpair(char *token, const char **file)
     }
 }
 
-unsigned int __cdecl Xmodel_CountPhysicsCollMapGeoms(const char **file, const char *name)
+uint32_t __cdecl Xmodel_CountPhysicsCollMapGeoms(const char **file, const char *name)
 {
     int CurrentParseLine; // eax
-    unsigned int brushCount; // [esp+B4h] [ebp-8h]
+    uint32_t brushCount; // [esp+B4h] [ebp-8h]
     parseInfo_t *token; // [esp+B8h] [ebp-4h]
     parseInfo_t *tokena; // [esp+B8h] [ebp-4h]
     parseInfo_t *tokenb; // [esp+B8h] [ebp-4h]
@@ -316,8 +316,8 @@ char __cdecl IsBoxInBrush(const float *boxCenter, const float *boxHalfLengths, c
     cplane_s *plane; // [esp+20h] [ebp-10h]
     float dist; // [esp+24h] [ebp-Ch]
     float offset; // [esp+28h] [ebp-8h]
-    unsigned int sideIndex; // [esp+2Ch] [ebp-4h]
-    unsigned int sideIndexa; // [esp+2Ch] [ebp-4h]
+    uint32_t sideIndex; // [esp+2Ch] [ebp-4h]
+    uint32_t sideIndexa; // [esp+2Ch] [ebp-4h]
 
     for (sideIndex = 0; sideIndex < 3; ++sideIndex)
     {
@@ -356,7 +356,7 @@ char __cdecl IsBoxInBox(const float *boxCenter, const float *boxHalfLengths, con
     float dist; // [esp+2Ch] [ebp-18h]
     float orientedBoxDist; // [esp+34h] [ebp-10h]
     float offset; // [esp+38h] [ebp-Ch]
-    unsigned int sideIndex; // [esp+3Ch] [ebp-8h]
+    uint32_t sideIndex; // [esp+3Ch] [ebp-8h]
     float alignedBoxDist; // [esp+40h] [ebp-4h]
 
     if (geom->type != 1)
@@ -391,7 +391,7 @@ char __cdecl IsBoxInCylinder(const float *boxCenter, const float *boxHalfLengths
     float v9; // [esp+14h] [ebp-24h]
     float v10; // [esp+1Ch] [ebp-1Ch]
     float dist; // [esp+28h] [ebp-10h]
-    unsigned int axis; // [esp+2Ch] [ebp-Ch]
+    uint32_t axis; // [esp+2Ch] [ebp-Ch]
     float cylOffset; // [esp+30h] [ebp-8h]
 
     if (geom->type != 4)
@@ -420,7 +420,7 @@ bool __cdecl IsBoxInGeom(const float *boxCenter, const float *boxHalfLengths, co
 {
     int type; // [esp+0h] [ebp-Ch]
     PhysGeomInfo *geomIter; // [esp+4h] [ebp-8h]
-    unsigned int geomIndex; // [esp+8h] [ebp-4h]
+    uint32_t geomIndex; // [esp+8h] [ebp-4h]
 
     geomIndex = 0;
     geomIter = geomList->geoms;
@@ -527,24 +527,24 @@ bool __cdecl Xmodel_ParsePhysicsBox(const char **file, PhysGeomInfo *geom)
 char __cdecl AddBrushBevels(
     float (*planes)[4],
     adjacencyWinding_t *windings,
-    unsigned int *sideCount,
-    unsigned int maxCount,
+    uint32_t *sideCount,
+    uint32_t maxCount,
     const float *mins,
     const float *maxs,
     const char *mapname,
-    unsigned int brushnum)
+    uint32_t brushnum)
 {
     _DWORD *v9; // ecx
     float *v10; // [esp+Ch] [ebp-60h]
     float *v11; // [esp+10h] [ebp-5Ch]
-    unsigned int order; // [esp+18h] [ebp-54h]
+    uint32_t order; // [esp+18h] [ebp-54h]
     float planetemp; // [esp+1Ch] [ebp-50h]
     float planetemp_4; // [esp+20h] [ebp-4Ch]
     float planetemp_8; // [esp+24h] [ebp-48h]
     float planetemp_12; // [esp+28h] [ebp-44h]
     int dir; // [esp+2Ch] [ebp-40h]
-    unsigned int i; // [esp+30h] [ebp-3Ch]
-    unsigned int axis; // [esp+34h] [ebp-38h]
+    uint32_t i; // [esp+30h] [ebp-3Ch]
+    uint32_t axis; // [esp+34h] [ebp-38h]
     adjacencyWinding_t tempWinding; // [esp+38h] [ebp-34h] BYREF
 
     order = 0;
@@ -691,19 +691,19 @@ bool __cdecl PlaneEqual(const float *p1, const float *p2)
 
 char __cdecl RemoveDuplicateBrushPlanes(
     float (*planes)[4],
-    unsigned int *sideCount,
+    uint32_t *sideCount,
     const char *mapname,
-    unsigned int brushnum)
+    uint32_t brushnum)
 {
     float *v5; // [esp+Ch] [ebp-2Ch]
     float *v6; // [esp+10h] [ebp-28h]
     float *v7; // [esp+14h] [ebp-24h]
     float *v8; // [esp+18h] [ebp-20h]
-    unsigned int sideIndexK; // [esp+20h] [ebp-18h]
-    unsigned int sideIndexKa; // [esp+20h] [ebp-18h]
+    uint32_t sideIndexK; // [esp+20h] [ebp-18h]
+    uint32_t sideIndexKa; // [esp+20h] [ebp-18h]
     float negatedNormal[3]; // [esp+24h] [ebp-14h] BYREF
-    unsigned int sideIndexJ; // [esp+30h] [ebp-8h]
-    unsigned int sideIndexI; // [esp+34h] [ebp-4h]
+    uint32_t sideIndexJ; // [esp+30h] [ebp-8h]
+    uint32_t sideIndexI; // [esp+34h] [ebp-4h]
 
     for (sideIndexI = 1; sideIndexI < *sideCount; ++sideIndexI)
     {
@@ -758,8 +758,8 @@ char __cdecl RemoveDuplicateBrushPlanes(
 
 int __cdecl AddSimplePoint(
     const float (*planes)[4],
-    unsigned int planeCount,
-    const unsigned int *planeIndex,
+    uint32_t planeCount,
+    const uint32_t *planeIndex,
     const float *xyz,
     SimplePlaneIntersection *pts,
     int ptCount,
@@ -767,7 +767,7 @@ int __cdecl AddSimplePoint(
 {
     SimplePlaneIntersection *v8; // [esp+0h] [ebp-Ch]
     float dist; // [esp+4h] [ebp-8h]
-    unsigned int sideIndex; // [esp+8h] [ebp-4h]
+    uint32_t sideIndex; // [esp+8h] [ebp-4h]
 
     for (sideIndex = 0; sideIndex < planeCount; ++sideIndex)
     {
@@ -800,17 +800,17 @@ int __cdecl AddSimplePoint(
     }
 }
 
-unsigned int __cdecl GetPlaneIntersections(
+uint32_t __cdecl GetPlaneIntersections(
     const float (*planes)[4],
-    unsigned int planeCount,
+    uint32_t planeCount,
     SimplePlaneIntersection *OutPts,
-    unsigned int maxPtCount)
+    uint32_t maxPtCount)
 {
     const float *plane[3]; // [esp+8h] [ebp-34h] BYREF
-    unsigned int ptCount; // [esp+14h] [ebp-28h]
+    uint32_t ptCount; // [esp+14h] [ebp-28h]
     float xyz[3]; // [esp+18h] [ebp-24h] BYREF
-    unsigned int sideIndex[3]; // [esp+24h] [ebp-18h]
-    unsigned int planeIndex[3]; // [esp+30h] [ebp-Ch] BYREF
+    uint32_t sideIndex[3]; // [esp+24h] [ebp-18h]
+    uint32_t planeIndex[3]; // [esp+30h] [ebp-Ch] BYREF
 
     ptCount = 0;
     for (sideIndex[0] = 0; sideIndex[0] < planeCount - 2; ++sideIndex[0])
@@ -839,7 +839,7 @@ unsigned int __cdecl GetPlaneIntersections(
 char __cdecl Xmodel_ParsePhysicsBrush(
     char **file,
     char *mapname,
-    unsigned int brushCount,
+    uint32_t brushCount,
     PhysGeomInfo *geom,
     void *(__cdecl *Alloc)(int))
 {
@@ -849,21 +849,21 @@ char __cdecl Xmodel_ParsePhysicsBrush(
     float v1[3]; // [esp+34h] [ebp-68DCh] BYREF
     float v2[3]; // [esp+40h] [ebp-68D0h] BYREF
     int order; // [esp+4Ch] [ebp-68C4h]
-    unsigned int sideCount; // [esp+50h] [ebp-68C0h] BYREF
-    unsigned int dir; // [esp+54h] [ebp-68BCh]
+    uint32_t sideCount; // [esp+50h] [ebp-68C0h] BYREF
+    uint32_t dir; // [esp+54h] [ebp-68BCh]
     float mins[3]; // [esp+58h] [ebp-68B8h] BYREF
     int edgeIndex; // [esp+64h] [ebp-68ACh]
     float plane[128]; // [esp+68h] [ebp-68A8h] BYREF
     SimplePlaneIntersection OutPts[1024]; // [esp+268h] [ebp-66A8h] BYREF
     int InPtCount; // [esp+6268h] [ebp-6A8h]
-    unsigned int ptIndex; // [esp+626Ch] [ebp-6A4h]
+    uint32_t ptIndex; // [esp+626Ch] [ebp-6A4h]
     int sideIndex; // [esp+6270h] [ebp-6A0h]
     float maxs[3]; // [esp+6274h] [ebp-69Ch] BYREF
     adjacencyWinding_t windings[32]; // [esp+6280h] [ebp-690h] BYREF
     int v29; // [esp+6900h] [ebp-10h]
     parseInfo_t *v30; // [esp+6904h] [ebp-Ch]
     int totalEdges; // [esp+6908h] [ebp-8h]
-    unsigned int axis; // [esp+690Ch] [ebp-4h]
+    uint32_t axis; // [esp+690Ch] [ebp-4h]
 
     v29 = 32;
 
@@ -1043,7 +1043,7 @@ void __cdecl GetGeomAABB(const PhysGeomInfo *geom, float *mins, float *maxs)
     float range; // [esp+2Ch] [ebp-14h]
     float range_4; // [esp+30h] [ebp-10h]
     float range_8; // [esp+34h] [ebp-Ch]
-    unsigned int axisIndex; // [esp+38h] [ebp-8h]
+    uint32_t axisIndex; // [esp+38h] [ebp-8h]
     float axisRange; // [esp+3Ch] [ebp-4h]
 
     if (geom->brush)
@@ -1097,7 +1097,7 @@ void __cdecl GetGeomAABB(const PhysGeomInfo *geom, float *mins, float *maxs)
 PhysGeomList *__cdecl Xmodel_ParsePhysicsCollMap(
     const char **file,
     char *name,
-    unsigned int geomCount,
+    uint32_t geomCount,
     void *(__cdecl *Alloc)(int))
 {
     int CurrentParseLine; // eax
@@ -1119,7 +1119,7 @@ PhysGeomList *__cdecl Xmodel_ParsePhysicsCollMap(
     PhysGeomList *geomList; // [esp+108h] [ebp-18h]
     float geomMins[3]; // [esp+10Ch] [ebp-14h] BYREF
     const char *token; // [esp+118h] [ebp-8h]
-    unsigned int geomIndex; // [esp+11Ch] [ebp-4h]
+    uint32_t geomIndex; // [esp+11Ch] [ebp-4h]
 
     if (!geomCount)
         MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 840, 0, "%s", "geomCount > 0");
@@ -1302,7 +1302,7 @@ PhysGeomList *__cdecl XModel_LoadPhysicsCollMap(const char *name, void *(__cdecl
     const char *buf; // [esp+404h] [ebp-14h] BYREF
     unsigned __int8 *file; // [esp+408h] [ebp-10h] BYREF
     int fileSize; // [esp+40Ch] [ebp-Ch]
-    unsigned int geomCount; // [esp+410h] [ebp-8h]
+    uint32_t geomCount; // [esp+410h] [ebp-8h]
     PhysGeomList *geomList; // [esp+414h] [ebp-4h]
 
     if (Com_sprintf(filename, 0x400u, "phys_collmaps/%s.map", name) >= 0)

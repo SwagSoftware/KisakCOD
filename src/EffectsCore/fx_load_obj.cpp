@@ -930,8 +930,8 @@ const FxElemField s_elemFields[69] =
 
 bool __cdecl FX_ParseEditorElemField(const char **parse, FxEditorElemDef *edElemDef, const char *token)
 {
-    unsigned int fieldIndex; // [esp+14h] [ebp-4h]
-    unsigned int fieldIndexa; // [esp+14h] [ebp-4h]
+    uint32_t fieldIndex; // [esp+14h] [ebp-4h]
+    uint32_t fieldIndexa; // [esp+14h] [ebp-4h]
 
     for (fieldIndex = 0; fieldIndex < 0x45; ++fieldIndex)
     {
@@ -1075,7 +1075,7 @@ bool __cdecl FX_LoadEditorEffect(const char *name, FxEditorEffectDef *edEffectDe
     }
 }
 
-void* FX_AllocMem(unsigned int size)
+void* FX_AllocMem(uint32_t size)
 {
     return Hunk_AllocAlign(size, 4, "FX_Alloc", 8);
 }
@@ -1095,7 +1095,7 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
     const char *v5; // [esp+2Ch] [ebp-2Ch]
     _DWORD *v6; // [esp+30h] [ebp-28h]
     _DWORD *v7; // [esp+34h] [ebp-24h]
-    unsigned int baseBytesNeeded; // [esp+40h] [ebp-18h]
+    uint32_t baseBytesNeeded; // [esp+40h] [ebp-18h]
     byte *effectDef; // [esp+48h] [ebp-10h]
     int relocationDistance; // [esp+4Ch] [ebp-Ch]
     int elemIndex; // [esp+54h] [ebp-4h]

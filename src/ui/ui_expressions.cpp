@@ -316,7 +316,7 @@ char *__cdecl GetSourceString(Operand operand)
 
     if (operand.dataType == VAL_STRING)
         return (char *)operand.internals.intVal;
-    if ((unsigned int)currentTempOperand >= 0x10)
+    if ((uint32_t)currentTempOperand >= 0x10)
         MyAssertHandler(
             ".\\ui\\ui_expressions.cpp",
             182,
@@ -1057,7 +1057,7 @@ char *__cdecl CopyDvarString(const char *string)
 {
     char *result; // [esp+0h] [ebp-4h]
 
-    if ((unsigned int)currentTempOperand >= 0x10)
+    if ((uint32_t)currentTempOperand >= 0x10)
         MyAssertHandler(
             ".\\ui\\ui_expressions.cpp",
             197,
@@ -1142,7 +1142,7 @@ void __cdecl GetLocalVarStringValue(
     Operand *source,
     Operand *result,
     char *stringBuf,
-    unsigned int size)
+    uint32_t size)
 {
     UILocalVarContext *var; // [esp+0h] [ebp-4h]
 
@@ -2439,13 +2439,13 @@ void __cdecl LocalizeString(OperandList *list, Operand *operandResult)
     char string[1024]; // [esp+20h] [ebp-428h] BYREF
     bool useLocalization; // [esp+427h] [ebp-21h]
     Operand *operand; // [esp+428h] [ebp-20h]
-    unsigned int charIndex; // [esp+42Ch] [ebp-1Ch]
-    unsigned int tokenLen; // [esp+430h] [ebp-18h]
+    uint32_t charIndex; // [esp+42Ch] [ebp-1Ch]
+    uint32_t tokenLen; // [esp+430h] [ebp-18h]
     bool enableLocalization; // [esp+437h] [ebp-11h]
     expDataType type; // [esp+438h] [ebp-10h]
     int parmIndex; // [esp+43Ch] [ebp-Ch]
     const char *token; // [esp+440h] [ebp-8h]
-    unsigned int stringLen; // [esp+444h] [ebp-4h]
+    uint32_t stringLen; // [esp+444h] [ebp-4h]
 
     useLocalization = 1;
     stringLen = 0;

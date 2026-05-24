@@ -8,7 +8,7 @@
 int initialized_1 = 0;
 int sys_timeBase;
 
-unsigned int __cdecl Sys_Milliseconds()
+uint32_t __cdecl Sys_Milliseconds()
 {
     if (!initialized_1)
     {
@@ -18,7 +18,7 @@ unsigned int __cdecl Sys_Milliseconds()
     return timeGetTime() - sys_timeBase;
 }
 
-unsigned int __cdecl Sys_MillisecondsRaw()
+uint32_t __cdecl Sys_MillisecondsRaw()
 {
     return timeGetTime();
 }

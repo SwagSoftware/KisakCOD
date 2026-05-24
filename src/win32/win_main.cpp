@@ -261,11 +261,11 @@ int __cdecl Sys_CheckCrashOrRerun()
 	HWND ActiveWindow; // eax
 	char* v2; // [esp-Ch] [ebp-20h]
 	char* v3; // [esp-8h] [ebp-1Ch]
-	unsigned int procID; // [esp+0h] [ebp-14h] BYREF
+	uint32_t procID; // [esp+0h] [ebp-14h] BYREF
 	int answer; // [esp+4h] [ebp-10h]
 	DWORD byteCount; // [esp+8h] [ebp-Ch] BYREF
 	void* file; // [esp+Ch] [ebp-8h]
-	unsigned int id; // [esp+10h] [ebp-4h] BYREF
+	uint32_t id; // [esp+10h] [ebp-4h] BYREF
 
 	if (!sys_processSemaphoreFile[0])
 		return 1;
@@ -376,7 +376,7 @@ void Sys_SpawnQuitProcess()
 	_STARTUPINFOA dst; // [esp+0h] [ebp-60h] BYREF
 	void* msgBuf; // [esp+48h] [ebp-18h] BYREF
 	_PROCESS_INFORMATION pi; // [esp+4Ch] [ebp-14h] BYREF
-	unsigned int error; // [esp+5Ch] [ebp-4h]
+	uint32_t error; // [esp+5Ch] [ebp-4h]
 
 	if (sys_exitCmdLine[0])
 	{
@@ -480,7 +480,7 @@ int __cdecl Sys_SetClipboardData(const char *text)
 	}
 }
 
-void __cdecl Sys_QueEvent(unsigned int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr)
+void __cdecl Sys_QueEvent(uint32_t time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr)
 {
 	sysEvent_t *ev; // [esp+0h] [ebp-4h]
 

@@ -211,8 +211,8 @@ struct sysEvent_t // sizeof=0x18
 
 struct FastCriticalSection
 {
-	volatile unsigned int readCount;
-	volatile unsigned int writeCount;
+	volatile uint32_t readCount;
+	volatile uint32_t writeCount;
 };
 
 void Sys_InitializeCriticalSections();
@@ -231,7 +231,7 @@ void __cdecl  Sys_Quit();
 void __cdecl Sys_Print(const char *msg);
 char *__cdecl Sys_GetClipboardData();
 int __cdecl Sys_SetClipboardData(const char *text);
-void __cdecl Sys_QueEvent(unsigned int time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr);
+void __cdecl Sys_QueEvent(uint32_t time, sysEventType_t type, int value, int value2, int ptrLength, void *ptr);
 void Sys_ShutdownEvents();
 void __cdecl Sys_LoadingKeepAlive();
 sysEvent_t *__cdecl Sys_GetEvent(sysEvent_t *result);
@@ -266,7 +266,7 @@ double __cdecl Voice_GetVoiceLevel();
 void __cdecl Voice_Playback();
 int __cdecl Voice_GetLocalVoiceData();
 void __cdecl Voice_IncomingVoiceData(unsigned __int8 talker, unsigned __int8 *data, int packetDataSize);
-bool __cdecl Voice_IsClientTalking(unsigned int clientNum);
+bool __cdecl Voice_IsClientTalking(uint32_t clientNum);
 char __cdecl Voice_StartRecording();
 char __cdecl Voice_StopRecording();
 

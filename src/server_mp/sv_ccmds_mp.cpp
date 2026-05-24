@@ -426,7 +426,7 @@ void __cdecl SV_Map_f()
     }
 }
 
-void __cdecl ShowLoadErrorsSummary(const char *mapName, unsigned int count)
+void __cdecl ShowLoadErrorsSummary(const char *mapName, uint32_t count)
 {
     if (com_errorPrintsCount)
     {
@@ -907,7 +907,7 @@ void __cdecl SV_TempBanNum_f()
 void __cdecl SV_Status_f()
 {
     int ClientScore; // eax
-    unsigned int v1; // kr00_4
+    uint32_t v1; // kr00_4
     int j; // [esp+14h] [ebp-1Ch]
     int ja; // [esp+14h] [ebp-1Ch]
     client_t *clients; // [esp+18h] [ebp-18h]
@@ -1066,7 +1066,7 @@ void __cdecl SV_SetPerk_f()
     clientState_s *ClientState; // eax
     client_t *PlayerByName; // [esp+0h] [ebp-18h]
     const char *perkName; // [esp+4h] [ebp-14h]
-    unsigned int perkIndex; // [esp+8h] [ebp-10h]
+    uint32_t perkIndex; // [esp+8h] [ebp-10h]
     int i; // [esp+Ch] [ebp-Ch]
     playerState_s *ps; // [esp+10h] [ebp-8h]
     client_t *clIdx; // [esp+14h] [ebp-4h]
@@ -1081,7 +1081,7 @@ void __cdecl SV_SetPerk_f()
             i = 0;
             for (clIdx = svs.clients; i < sv_maxclients->current.integer && clIdx != PlayerByName; ++clIdx)
                 ++i;
-            if ((unsigned int)i >= sv_maxclients->current.integer)
+            if ((uint32_t)i >= sv_maxclients->current.integer)
                 MyAssertHandler(
                     ".\\server_mp\\sv_ccmds_mp.cpp",
                     1130,
@@ -1136,7 +1136,7 @@ void __cdecl SV_ConSay_f()
 
 void __cdecl SV_AssembleConSayMessage(int firstArg, char *text, int sizeofText)
 {
-    unsigned int textLen; // [esp+10h] [ebp-4h]
+    uint32_t textLen; // [esp+10h] [ebp-4h]
 
     strcpy(text, "console: ");
     textLen = 9;

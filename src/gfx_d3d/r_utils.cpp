@@ -4,10 +4,10 @@
 #include "r_dvars.h"
 #include <universal/surfaceflags.h>
 
-unsigned int __cdecl R_HashAssetName(const char *name)
+uint32_t __cdecl R_HashAssetName(const char *name)
 {
     const char *pos; // [esp+0h] [ebp-8h]
-    unsigned int hash; // [esp+4h] [ebp-4h]
+    uint32_t hash; // [esp+4h] [ebp-4h]
 
     hash = 0;
     for (pos = name; *pos; ++pos)
@@ -19,9 +19,9 @@ unsigned int __cdecl R_HashAssetName(const char *name)
     return hash;
 }
 
-unsigned int __cdecl R_HashString(const char *string)
+uint32_t __cdecl R_HashString(const char *string)
 {
-    unsigned int hash; // [esp+4h] [ebp-4h]
+    uint32_t hash; // [esp+4h] [ebp-4h]
 
     hash = 0;
     while (*string)
@@ -29,7 +29,7 @@ unsigned int __cdecl R_HashString(const char *string)
     return hash;
 }
 
-char *__cdecl R_AllocGlobalVariable(unsigned int bytes, const char *name)
+char *__cdecl R_AllocGlobalVariable(uint32_t bytes, const char *name)
 {
     return Z_VirtualAlloc(bytes, name, 18);
 }
@@ -48,7 +48,7 @@ char __cdecl R_CullPointAndRadius(const float *pt, float radius, const DpvsPlane
     return 0;
 }
 
-void __cdecl R_ConvertColorToBytes(const float *colorFloat, unsigned int *colorBytes)
+void __cdecl R_ConvertColorToBytes(const float *colorFloat, uint32_t *colorBytes)
 {
     if (colorFloat)
         Byte4PackVertexColor(colorFloat, (unsigned char*)colorBytes);

@@ -100,7 +100,7 @@ const char *__cdecl RB_LogTechniqueType(MaterialTechniqueType techType)
     techniqueNames[32] = "TECHNIQUE_DEBUG_BUMPMAP";
     techniqueNames[33] = "TECHNIQUE_DEBUG_BUMPMAP_INSTANCED";
     techniqueNames[34] = "TECHNIQUE_COUNT";
-    if ((unsigned int)techType > TECHNIQUE_COUNT)
+    if ((uint32_t)techType > TECHNIQUE_COUNT)
         MyAssertHandler(
             ".\\rb_logfile.cpp",
             178,
@@ -188,7 +188,7 @@ void __cdecl RB_LogPrintState_0(int stateBits0, int changedBits0)
     RB_LogFromTable("Cull Face", stateBits0, changedBits0, 49152, 0, cullTable, 3);
 }
 
-void __cdecl RB_LogBlend(const char *format, unsigned int blend)
+void __cdecl RB_LogBlend(const char *format, uint32_t blend)
 {
     const char *v2; // eax
     const char *blendNames[14]; // [esp+0h] [ebp-38h]
@@ -220,7 +220,7 @@ void __cdecl RB_LogBlend(const char *format, unsigned int blend)
     RB_LogPrint(v2);
 }
 
-void __cdecl RB_LogBlendOp(const char *format, unsigned int blendOp)
+void __cdecl RB_LogBlendOp(const char *format, uint32_t blendOp)
 {
     const char *v2; // eax
     const char *blendOpNames[6]; // [esp+0h] [ebp-18h]

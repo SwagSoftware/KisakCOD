@@ -13,7 +13,7 @@ struct gentity_s;
 struct IgnoreEntParams;
 struct sightpointtrace_t;
 
-unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
+uint32_t __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
 void __cdecl SV_UnlinkEntity(gentity_s *gEnt);
 void __cdecl SV_LinkEntity(gentity_s *gEnt);
 void __cdecl SnapAngles(float *vAngles);

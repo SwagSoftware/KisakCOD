@@ -50,11 +50,11 @@ void __cdecl G_DebugBox(
 {
     float v7; // [esp+0h] [ebp-94h]
     float v8; // [esp+10h] [ebp-84h]
-    unsigned int j; // [esp+14h] [ebp-80h]
+    uint32_t j; // [esp+14h] [ebp-80h]
     float rotated; // [esp+18h] [ebp-7Ch]
     float rotated_4; // [esp+1Ch] [ebp-78h]
-    unsigned int i; // [esp+24h] [ebp-70h]
-    unsigned int ia; // [esp+24h] [ebp-70h]
+    uint32_t i; // [esp+24h] [ebp-70h]
+    uint32_t ia; // [esp+24h] [ebp-70h]
     float fCos; // [esp+28h] [ebp-6Ch]
     float v[25]; // [esp+2Ch] [ebp-68h] BYREF
     float fSin; // [esp+90h] [ebp-4h]
@@ -126,7 +126,7 @@ void __cdecl G_DebugCircleEx(
     float normal[3]; // [esp+28h] [ebp-E8h] BYREF
     float right[3]; // [esp+34h] [ebp-DCh] BYREF
     float up[3]; // [esp+40h] [ebp-D0h] BYREF
-    unsigned int i; // [esp+4Ch] [ebp-C4h]
+    uint32_t i; // [esp+4Ch] [ebp-C4h]
     float v[16][3]; // [esp+50h] [ebp-C0h] BYREF
 
     Vec3NormalizeTo(dir, normal);
@@ -207,7 +207,7 @@ void G_DebugDrawBrush_r(cLeafBrushNode_s *node, const float *color)
 
 void G_DebugDrawBrushModel(gentity_s *entity, const float *color, int depthTest, int duration)
 {
-    unsigned int v8; // r29
+    uint32_t v8; // r29
     cmodel_t *v9; // r31
 
     iassert(entity);
@@ -303,8 +303,8 @@ void __cdecl G_DebugArc(
     float fAngle; // [esp+10h] [ebp-D4h]
     float fCos; // [esp+14h] [ebp-D0h]
     float fSin; // [esp+18h] [ebp-CCh]
-    unsigned int i; // [esp+1Ch] [ebp-C8h]
-    unsigned int ia; // [esp+1Ch] [ebp-C8h]
+    uint32_t i; // [esp+1Ch] [ebp-C8h]
+    uint32_t ia; // [esp+1Ch] [ebp-C8h]
     float scale; // [esp+20h] [ebp-C4h]
     float v[16][3]; // [esp+24h] [ebp-C0h] BYREF
 

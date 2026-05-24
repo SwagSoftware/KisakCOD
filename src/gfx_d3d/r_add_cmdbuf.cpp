@@ -7,13 +7,13 @@ void __cdecl R_InitDelayedCmdBuf(GfxDelayedCmdBuf *delayedCmdBuf)
     delayedCmdBuf->primDrawSurfPos = -1;
     delayedCmdBuf->primDrawSurfSize = 0;
     delayedCmdBuf->drawSurfKey.packed = 0xFFFFFFFFFFFFFFFF;
-    //*(unsigned int *)&delayedCmdBuf->drawSurfKey.fields = -1;
+    //*(uint32_t *)&delayedCmdBuf->drawSurfKey.fields = -1;
     //HIDWORD(delayedCmdBuf->drawSurfKey.packed) = -1;
 }
 
 void __cdecl R_EndCmdBuf(GfxDelayedCmdBuf *delayedCmdBuf)
 {
-    if ((HIDWORD(delayedCmdBuf->drawSurfKey.packed) & *(unsigned int *)&delayedCmdBuf->drawSurfKey.fields) != -1)
+    if ((HIDWORD(delayedCmdBuf->drawSurfKey.packed) & *(uint32_t *)&delayedCmdBuf->drawSurfKey.fields) != -1)
     {
         if (!delayedCmdBuf->primDrawSurfSize)
             MyAssertHandler(
@@ -23,7 +23,7 @@ void __cdecl R_EndCmdBuf(GfxDelayedCmdBuf *delayedCmdBuf)
                 "%s\n\t(delayedCmdBuf->primDrawSurfSize) = %i",
                 "(delayedCmdBuf->primDrawSurfSize > 0)",
                 delayedCmdBuf->primDrawSurfSize);
-        *(unsigned int *)&delayedCmdBuf->drawSurfKey.fields = -1;
+        *(uint32_t *)&delayedCmdBuf->drawSurfKey.fields = -1;
         HIDWORD(delayedCmdBuf->drawSurfKey.packed) = -1;
         frontEndDataOut->primDrawSurfsBuf[delayedCmdBuf->primDrawSurfPos++] = 0;
         --delayedCmdBuf->primDrawSurfSize;
@@ -34,9 +34,9 @@ int __cdecl R_AllocDrawSurf(
     GfxDelayedCmdBuf *delayedCmdBuf,
     GfxDrawSurf drawSurf,
     GfxDrawSurfList *drawSurfList,
-    unsigned int size)
+    uint32_t size)
 {
-    unsigned int primDrawSurfPos; // [esp+10h] [ebp-4h]
+    uint32_t primDrawSurfPos; // [esp+10h] [ebp-4h]
 
     iassert( (size < (128 * 512)) );
     if (delayedCmdBuf->drawSurfKey.packed != drawSurf.packed)
@@ -64,7 +64,7 @@ int __cdecl R_AllocDrawSurf(
     {
         delayedCmdBuf->drawSurfKey = drawSurf;
         bcassert(primDrawSurfPos, (1 << MTL_SORT_OBJECT_ID_BITS));
-        *(unsigned int *)&drawSurf.fields = (uint16_t)primDrawSurfPos | *(unsigned int *)&drawSurf.fields & 0xFFFF0000;
+        *(uint32_t *)&drawSurf.fields = (uint16_t)primDrawSurfPos | *(uint32_t *)&drawSurf.fields & 0xFFFF0000;
         drawSurfList->current->fields = drawSurf.fields;
         ++drawSurfList->current;
         return 1;
@@ -76,7 +76,7 @@ int __cdecl R_AllocDrawSurf(
     }
 }
 
-void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, unsigned int value)
+void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, uint32_t value)
 {
     iassert( delayedCmdBuf->primDrawSurfSize );
     if (delayedCmdBuf->primDrawSurfPos < 0)
@@ -91,7 +91,7 @@ void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, unsigned in
     frontEndDataOut->primDrawSurfsBuf[delayedCmdBuf->primDrawSurfPos++] = value;
 }
 
-void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, uint8_t *data, unsigned int count)
+void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, uint8_t *data, uint32_t count)
 {
     if (delayedCmdBuf->primDrawSurfSize < count)
         MyAssertHandler(

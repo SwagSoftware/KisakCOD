@@ -43,8 +43,8 @@ enum DxCapsResponse : __int32
 struct DxCapsCheckBits // sizeof=0x14
 {                                       // ...
     int offset;                         // ...
-    unsigned int setBits;               // ...
-    unsigned int clearBits;             // ...
+    uint32_t setBits;               // ...
+    uint32_t clearBits;             // ...
     DxCapsResponse response;            // ...
     const char *msg;                    // ...
 };
@@ -215,8 +215,8 @@ const DxCapsCheckBits s_capsCheckBits[33] =
 struct DxCapsCheckInteger // sizeof=0x14
 {                                       // ...
     int offset;                         // ...
-    unsigned int min;                   // ...
-    unsigned int max;                   // ...
+    uint32_t min;                   // ...
+    uint32_t max;                   // ...
     DxCapsResponse response;            // ...
     const char *msg;                    // ...
 };
@@ -3092,7 +3092,7 @@ int __cdecl R_AddValidRefreshRate(int refreshRate, int rateCount, int *available
     return rateCount + 1;
 }
 
-void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
+void __cdecl R_EnumDisplayModes(uint32_t adapterIndex)
 {
     const char *v1; // eax
     int v2; // eax
@@ -3101,8 +3101,8 @@ void __cdecl R_EnumDisplayModes(unsigned int adapterIndex)
     int resolutionCount; // [esp+4h] [ebp-C2Ch]
     int availableResolutions[256][2]; // [esp+8h] [ebp-C28h] BYREF
     HRESULT hr; // [esp+80Ch] [ebp-424h]
-    unsigned int modeCountReported; // [esp+810h] [ebp-420h]
-    unsigned int modeIndex; // [esp+814h] [ebp-41Ch]
+    uint32_t modeCountReported; // [esp+810h] [ebp-420h]
+    uint32_t modeIndex; // [esp+814h] [ebp-41Ch]
     int resolutionIndex; // [esp+818h] [ebp-418h]
     int defaultRefreshRateIndex; // [esp+81Ch] [ebp-414h]
     int availableRefreshRates[257]; // [esp+820h] [ebp-410h] BYREF
@@ -3246,10 +3246,10 @@ void __cdecl R_RespondToMissingCaps(DxCapsResponse response, const char *msg, in
 
 int __cdecl R_CheckDxCaps(const _D3DCAPS9 *caps)
 {
-    unsigned int integer; // [esp+0h] [ebp-10h]
-    unsigned int checkIndex; // [esp+4h] [ebp-Ch]
-    unsigned int checkIndexa; // [esp+4h] [ebp-Ch]
-    unsigned int bits; // [esp+8h] [ebp-8h]
+    uint32_t integer; // [esp+0h] [ebp-10h]
+    uint32_t checkIndex; // [esp+4h] [ebp-Ch]
+    uint32_t checkIndexa; // [esp+4h] [ebp-Ch]
+    uint32_t bits; // [esp+8h] [ebp-8h]
     int allowedPaths; // [esp+Ch] [ebp-4h] BYREF
 
     allowedPaths = 3;
@@ -3338,7 +3338,7 @@ void __cdecl R_PickRenderer(_D3DCAPS9 *caps)
     Dvar_SetInt((dvar_s *)r_rendererInUse, rendererChosen);
 }
 
-bool __cdecl R_CheckTransparencyMsaa(unsigned int adapterIndex)
+bool __cdecl R_CheckTransparencyMsaa(uint32_t adapterIndex)
 {
     return r_aaSamples->current.integer != 1
         && dx.d3d9->CheckDeviceFormat(
@@ -3350,10 +3350,10 @@ bool __cdecl R_CheckTransparencyMsaa(unsigned int adapterIndex)
             (_D3DFORMAT)1094800211) == 0;
 }
 
-void __cdecl R_StoreDirect3DCaps(unsigned int adapterIndex)
+void __cdecl R_StoreDirect3DCaps(uint32_t adapterIndex)
 {
-    unsigned int MaxUserClipPlanes; // [esp+0h] [ebp-138h]
-    unsigned int MaxTextureHeight; // [esp+4h] [ebp-134h]
+    uint32_t MaxUserClipPlanes; // [esp+0h] [ebp-138h]
+    uint32_t MaxTextureHeight; // [esp+4h] [ebp-134h]
     _D3DCAPS9 caps; // [esp+8h] [ebp-130h] BYREF
 
     R_GetDirect3DCaps(adapterIndex, &caps);
@@ -3387,7 +3387,7 @@ void __cdecl R_StoreDirect3DCaps(unsigned int adapterIndex)
     R_SetShadowmapFormats_DX(adapterIndex);
 }
 
-void __cdecl R_GetDirect3DCaps(unsigned int adapterIndex, _D3DCAPS9 *caps)
+void __cdecl R_GetDirect3DCaps(uint32_t adapterIndex, _D3DCAPS9 *caps)
 {
     const char *v2; // eax
     const char *v3; // eax
@@ -3398,7 +3398,7 @@ void __cdecl R_GetDirect3DCaps(unsigned int adapterIndex, _D3DCAPS9 *caps)
     attempt = 0;
     while (1)
     {
-        //hr = ((int(__thiscall *)(IDirect3D9 *, IDirect3D9 *, unsigned int, int, _D3DCAPS9 *))dx.d3d9->GetDeviceCaps)(
+        //hr = ((int(__thiscall *)(IDirect3D9 *, IDirect3D9 *, uint32_t, int, _D3DCAPS9 *))dx.d3d9->GetDeviceCaps)(
         //    dx.d3d9,
         //    dx.d3d9,
         //    adapterIndex,
@@ -3417,10 +3417,10 @@ void __cdecl R_GetDirect3DCaps(unsigned int adapterIndex, _D3DCAPS9 *caps)
     }
 }
 
-void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex)
+void __cdecl R_SetShadowmapFormats_DX(uint32_t adapterIndex)
 {
     _D3DFORMAT colorFormat; // [esp+0h] [ebp-24h]
-    unsigned int formatIndex; // [esp+4h] [ebp-20h]
+    uint32_t formatIndex; // [esp+4h] [ebp-20h]
     _D3DFORMAT depthFormat; // [esp+8h] [ebp-1Ch]
 
     D3DFORMAT formats[3][2] = {
@@ -3435,7 +3435,7 @@ void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex)
         colorFormat = formats[formatIndex][1];
         bool cond1 = dx.d3d9->CheckDepthStencilMatch(adapterIndex, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, colorFormat, depthFormat);
         bool cond2 = dx.d3d9->CheckDeviceFormat(adapterIndex, D3DDEVTYPE_HAL, D3DFMT_X8R8G8B8, 2, D3DRTYPE_TEXTURE, depthFormat);
-        //if (!((int(__thiscall *)(IDirect3D9 *, IDirect3D9 *, unsigned int, int, int, _D3DFORMAT, _D3DFORMAT))dx.d3d9->CheckDepthStencilMatch)(
+        //if (!((int(__thiscall *)(IDirect3D9 *, IDirect3D9 *, uint32_t, int, int, _D3DFORMAT, _D3DFORMAT))dx.d3d9->CheckDepthStencilMatch)(
         //    dx.d3d9,
         //    dx.d3d9,
         //    adapterIndex,
@@ -3443,7 +3443,7 @@ void __cdecl R_SetShadowmapFormats_DX(unsigned int adapterIndex)
         //    22,
         //    colorFormat,
         //    depthFormat)
-        //    && !((int(__thiscall *)(IDirect3D9 *, IDirect3D9 *, unsigned int, int, int, int, int, _D3DFORMAT))dx.d3d9->CheckDeviceFormat)(
+        //    && !((int(__thiscall *)(IDirect3D9 *, IDirect3D9 *, uint32_t, int, int, int, int, _D3DFORMAT))dx.d3d9->CheckDeviceFormat)(
         //        dx.d3d9,
         //        dx.d3d9,
         //        adapterIndex,
@@ -3508,12 +3508,12 @@ HMONITOR__ *__cdecl R_ChooseMonitor()
     return MonitorFromPoint(pt, 1u);
 }
 
-unsigned int __cdecl R_ChooseAdapter()
+uint32_t __cdecl R_ChooseAdapter()
 {
-    unsigned int foundAdapterIndex; // [esp+14h] [ebp-470h]
-    unsigned int adapterIndex; // [esp+1Ch] [ebp-468h]
+    uint32_t foundAdapterIndex; // [esp+14h] [ebp-470h]
+    uint32_t adapterIndex; // [esp+1Ch] [ebp-468h]
     HMONITOR__ *desiredMonitor; // [esp+20h] [ebp-464h]
-    unsigned int adapterCount; // [esp+24h] [ebp-460h]
+    uint32_t adapterCount; // [esp+24h] [ebp-460h]
     _D3DADAPTER_IDENTIFIER9 id; // [esp+2Ch] [ebp-458h] BYREF
 
     desiredMonitor = R_ChooseMonitor();
@@ -3641,7 +3641,7 @@ char __cdecl R_CreateGameWindow(GfxWindowParms *wndParms)
 void R_LoadGraphicsAssets()
 {
     XZoneInfo zoneInfo[6]{ 0 }; // [esp+0h] [ebp-50h] BYREF
-    unsigned int zoneCount; // [esp+4Ch] [ebp-4h]
+    uint32_t zoneCount; // [esp+4Ch] [ebp-4h]
 
     zoneInfo[0].name = gfxCfg.codeFastFileName;
     zoneInfo[0].allocFlags = 2;
@@ -3717,7 +3717,7 @@ void __cdecl R_FinishAttachingToWindow(const GfxWindowParms *wndParms)
 
 char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
 {
-    unsigned int workerIndex; // [esp+4h] [ebp-4h]
+    uint32_t workerIndex; // [esp+4h] [ebp-4h]
 
     if (!R_CreateDevice(wndParms))
         return 0;
@@ -3826,7 +3826,7 @@ char __cdecl R_CreateForInitOrReset()
 {
     const char *v0; // eax
     int hr; // [esp+8h] [ebp-8h]
-    unsigned int fenceIter; // [esp+Ch] [ebp-4h]
+    uint32_t fenceIter; // [esp+Ch] [ebp-4h]
 
     Com_Printf(8, "Initializing render targets...\n");
     R_InitRenderTargets();
@@ -3895,7 +3895,7 @@ char __cdecl R_CreateDevice(const GfxWindowParms *wndParms)
     _D3DPRESENT_PARAMETERS_ d3dpp; // [esp+0h] [ebp-44h] BYREF
     HWND__ *hwnd; // [esp+38h] [ebp-Ch]
     HRESULT hr; // [esp+3Ch] [ebp-8h]
-    unsigned int behavior; // [esp+40h] [ebp-4h]
+    uint32_t behavior; // [esp+40h] [ebp-4h]
 
     iassert( wndParms );
     iassert( dx.windowCount == 0 );
@@ -4013,7 +4013,7 @@ bool __cdecl R_GetMonitorDimensions(int *width, int *height)
     }
 }
 
-HRESULT __cdecl R_CreateDeviceInternal(HWND__ *hwnd, unsigned int behavior, _D3DPRESENT_PARAMETERS_ *d3dpp)
+HRESULT __cdecl R_CreateDeviceInternal(HWND__ *hwnd, uint32_t behavior, _D3DPRESENT_PARAMETERS_ *d3dpp)
 {
     _D3DDEVTYPE DeviceType; // eax
     _D3DDISPLAYMODE getModeResult; // [esp+4h] [ebp-18h] BYREF
@@ -4080,7 +4080,7 @@ bool __cdecl R_SetCustomResolution(GfxWindowParms *wndParms)
         || wndParms->displayWidth <= monitorWidth && wndParms->displayHeight <= monitorHeight;
 }
 
-const char *__cdecl R_ClosestRefreshRateForMode(unsigned int width, unsigned int height, int refreshRate)
+const char *__cdecl R_ClosestRefreshRateForMode(uint32_t width, uint32_t height, int refreshRate)
 {
     const char *v4; // eax
     int top; // [esp+0h] [ebp-10h]
@@ -4250,7 +4250,7 @@ void R_ReleaseForShutdownOrReset()
     IDirect3DSurface9 *v1; // [esp+4h] [ebp-14h]
     IDirect3DSurface9 *var; // [esp+8h] [ebp-10h]
     IDirect3DSwapChain9 *varCopy; // [esp+Ch] [ebp-Ch]
-    unsigned int fenceIter; // [esp+10h] [ebp-8h]
+    uint32_t fenceIter; // [esp+10h] [ebp-8h]
     int windowIndex; // [esp+14h] [ebp-4h]
 
     for (windowIndex = 0; windowIndex < dx.windowCount; ++windowIndex)

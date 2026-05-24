@@ -216,7 +216,7 @@ void __cdecl Image_DecompressDxt3(uint8_t *block, GfxRawImage *image, int x, int
 void __cdecl Image_DecompressDxt5(uint8_t *block, GfxRawImage *image, int x, int y)
 {
     int i; // [esp+F4h] [ebp-24h]
-    unsigned int used; // [esp+F8h] [ebp-20h]
+    uint32_t used; // [esp+F8h] [ebp-20h]
     int bit; // [esp+FCh] [ebp-1Ch]
     uint8_t a[8]; // [esp+104h] [ebp-14h]
     int dy; // [esp+110h] [ebp-8h]

@@ -63,11 +63,11 @@ void __cdecl Com_UnloadWorld()
         Sys_Error("Cannot unload world while it is in use");
 }
 
-unsigned int Com_FindClosestPrimaryLight(const float *origin)
+uint32_t Com_FindClosestPrimaryLight(const float *origin)
 {
-    unsigned int result; // r3
+    uint32_t result; // r3
     double v3; // fp0
-    unsigned int v4; // r11
+    uint32_t v4; // r11
     float *v5; // r10
     double v6; // fp10
     double v7; // fp8

@@ -14,8 +14,8 @@ static int g_debugReadBytesRemote;
 static int g_debugReadBytesSent;
 static int g_debugWriteBytes;
 
-unsigned int ip_debugSocket[2];
-unsigned int ip_debugServerSocket[2];
+uint32_t ip_debugSocket[2];
+uint32_t ip_debugServerSocket[2];
 
 char *g_debugReadBytes;
 
@@ -150,7 +150,7 @@ void __cdecl Sys_DebugSend(int channel, const char *buf, int len, const char *na
 void __cdecl Sys_WriteDebugSocketData(unsigned __int8 *buffer, int len)
 {
 	int pos; // [esp+0h] [ebp-10h]
-	unsigned int copyLen; // [esp+8h] [ebp-8h]
+	uint32_t copyLen; // [esp+8h] [ebp-8h]
 
 	if (!com_errorEntered && Sys_IsRemoteDebugClient())
 	{
@@ -206,7 +206,7 @@ void __cdecl Sys_EndWriteDebugSocket()
 
 char *__cdecl Sys_ReadDebugSocketString()
 {
-	unsigned int buffer; // [esp+0h] [ebp-100Ch] BYREF
+	uint32_t buffer; // [esp+0h] [ebp-100Ch] BYREF
 	char in[4100]; // [esp+4h] [ebp-1008h] BYREF
 
 	Sys_ReadDebugSocketData((char*)&buffer, 4, 1);

@@ -163,8 +163,8 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
 {
     int v6; // eax
     hitLocation_t partGroup; // [esp+4h] [ebp-5Ch]
-    unsigned int modelIndex; // [esp+8h] [ebp-58h]
-    unsigned int partName; // [esp+Ch] [ebp-54h]
+    uint32_t modelIndex; // [esp+8h] [ebp-58h]
+    uint32_t partName; // [esp+Ch] [ebp-54h]
     bool v10; // [esp+14h] [ebp-4Ch]
     int damage; // [esp+18h] [ebp-48h]
     gentity_s *tent; // [esp+1Ch] [ebp-44h]
@@ -290,7 +290,7 @@ char __cdecl Melee_Trace(
 
 gentity_s *__cdecl Weapon_Throw_Grenade(
     gentity_s *ent,
-    unsigned int grenType,
+    uint32_t grenType,
     uint8_t grenModel,
     weaponParms *wp)
 {
@@ -343,7 +343,7 @@ gentity_s *__cdecl Weapon_Throw_Grenade(
 
 gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
     gentity_s *ent,
-    unsigned int grenType,
+    uint32_t grenType,
     uint8_t grenModel,
     weaponParms *wp)
 {
@@ -380,7 +380,7 @@ gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
 
 gentity_s *__cdecl Weapon_RocketLauncher_Fire(
     gentity_s *ent,
-    unsigned int weaponIndex,
+    uint32_t weaponIndex,
     float spread,
     weaponParms *wp,
     const float *gunVel,
@@ -672,7 +672,7 @@ void __cdecl G_SetupWeaponDef()
     Com_DPrintf(17, "----------------------\n");
 }
 
-unsigned int __cdecl G_GetWeaponIndexForName(const char *name)
+uint32_t __cdecl G_GetWeaponIndexForName(const char *name)
 {
     if (level.initializing)
         return BG_GetWeaponIndexForName(name, G_RegisterWeapon);
@@ -689,7 +689,7 @@ void __cdecl G_SelectWeaponIndex(int clientNum, int iWeaponIndex)
 #endif
 }
 
-void __cdecl G_SetEquippedOffHand(int clientNum, unsigned int offHandIndex)
+void __cdecl G_SetEquippedOffHand(int clientNum, uint32_t offHandIndex)
 {
 #ifdef KISAK_MP
     BG_AssertOffhandIndexOrNone(offHandIndex);

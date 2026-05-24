@@ -23,7 +23,7 @@ animStringItem_t animParseModesStr[6] =
 int numDefines[10] = { 0 };
 char defineStrings[10000] = { 0 };
 animStringItem_t defineStr[10][16];
-unsigned int defineBits[10][16][2];
+uint32_t defineBits[10][16][2];
 animStringItem_t weaponStrings[128] = { 0 };
 
 animStringItem_t animStateStr[2] = { { "COMBAT", -1 }, { NULL, -1 } };
@@ -174,12 +174,12 @@ const char *globalFilename = "mp/playeranim.script";
 bgs_t *bgs = nullptr;
 
 loadAnim_t *g_pLoadAnims = nullptr;
-unsigned int* g_piNumLoadAnims = nullptr;
+uint32_t* g_piNumLoadAnims = nullptr;
 animScriptData_t* globalScriptData = nullptr;
 scriptAnimMoveTypes_t parseMovetype;
 int parseEvent;
 
-unsigned int defineStringsOffset;
+uint32_t defineStringsOffset;
 
 void __cdecl TRACK_bg_animation_mp()
 {
@@ -219,7 +219,7 @@ void BG_AnimParseError(const char *msg, ...)
         Com_Error(ERR_DROP, "%s", text);
     }
 }
-unsigned int __cdecl BG_AnimationIndexForString(const char *string)
+uint32_t __cdecl BG_AnimationIndexForString(const char *string)
 {
     char v2 = 0; // [esp+3h] [ebp-1Dh]
     const char *v4 = nullptr; // [esp+Ch] [ebp-14h]
@@ -2181,7 +2181,7 @@ void __cdecl BG_UpdatePlayerDObj(
 void __cdecl BG_LoadAnim()
 {
     LargeLocal playerAnims_large_local(sizeof(loadAnim_t) * 512); // [esp+0h] [ebp-10h] BYREF
-    unsigned int iNumPlayerAnims; // [esp+8h] [ebp-8h] BYREF
+    uint32_t iNumPlayerAnims; // [esp+8h] [ebp-8h] BYREF
     loadAnim_t *playerAnims; // [esp+Ch] [ebp-4h]
 
     //LargeLocal::LargeLocal(&playerAnims_large_local, 36864);
@@ -2391,7 +2391,7 @@ void __cdecl BG_SetupAnimNoteTypes(animScriptData_t *scriptData)
     int cmdIndex; // [esp+4h] [ebp-14h]
     animScript_t *script; // [esp+8h] [ebp-10h]
     animScriptItem_t *scriptItem; // [esp+Ch] [ebp-Ch]
-    unsigned int animIndex; // [esp+10h] [ebp-8h]
+    uint32_t animIndex; // [esp+10h] [ebp-8h]
     int itemIndex; // [esp+14h] [ebp-4h]
 
     BG_CheckThread();
@@ -2837,7 +2837,7 @@ int __cdecl BG_ParseConditions(const char **text_pp, animScriptItem_t *scriptIte
 {
     animScriptConditionTypes_t type; // [esp+20h] [ebp-14h]
     int conditionIndex; // [esp+24h] [ebp-10h]
-    unsigned int conditionValue[2]; // [esp+28h] [ebp-Ch] BYREF
+    uint32_t conditionValue[2]; // [esp+28h] [ebp-Ch] BYREF
     char *token; // [esp+30h] [ebp-4h]
 
     conditionValue[0] = 0;

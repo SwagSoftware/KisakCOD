@@ -2479,11 +2479,11 @@ gentity_s *G_IsVehicleUnusable(gentity_s *player)
     return result;
 }
 
-bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, unsigned int weapon)
+bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapon)
 {
     vehicle_info_t *v4 = &s_vehicleInfos[ent->scr_vehicle->infoIdx];
     int result;
-    unsigned int damageValue;
+    uint32_t damageValue;
 
     switch (mod)
     {
@@ -2776,7 +2776,7 @@ static void VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
 {
     int VehicleInfoFromName; // r28
     char v5; // r27
-    unsigned int v6; // r3
+    uint32_t v6; // r3
     const char *v7; // r3
 
     VehicleInfoFromName = VEH_GetVehicleInfoFromName("defaultvehicle");
@@ -2921,7 +2921,7 @@ bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player)
     }
     else
     {
-        return ((unsigned int)ent->r.contents >> 21) & 1;
+        return ((uint32_t)ent->r.contents >> 21) & 1;
     }
 }
 
@@ -3424,7 +3424,7 @@ void CMD_VEH_AttachPath(scr_entref_t entref)
 void CMD_VEH_GetAttachPos(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r30
-    unsigned int v2; // r4
+    uint32_t v2; // r4
     scr_vehicle_s *scr_vehicle; // r31
     vehicle_info_t *v4; // r29
     __int16 VehicleNodeIndex; // r3
@@ -3511,7 +3511,7 @@ void CMD_VEH_SetSwitchNode(scr_entref_t entref)
 void CMD_VEH_SetWaitNode(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r11
-    unsigned int v2; // r4
+    uint32_t v2; // r4
     scr_vehicle_s *scr_vehicle; // r31
 
     if (entref.classnum)
@@ -3894,7 +3894,7 @@ void CMD_VEH_GetWheelSurface(scr_entref_t entref)
     gentity_s *Vehicle; // r3
     scr_vehicle_s *scr_vehicle; // r28
     vehicle_info_t *v3; // r30
-    unsigned int ConstString; // r31
+    uint32_t ConstString; // r31
     int v5; // r29
     const char *v6; // r3
     int v7; // r3
@@ -4130,7 +4130,7 @@ void CMD_VEH_MakeVehicleUsable(scr_entref_t entref)
 void CMD_VEH_MakeVehicleUnusable(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r31
-    unsigned int v3; // r10
+    uint32_t v3; // r10
 
     if (entref.classnum)
     {
@@ -4228,8 +4228,8 @@ void CMD_VEH_SetVehicleLookatText(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r11
     scr_vehicle_s *scr_vehicle; // r31
-    unsigned int ConstString; // r3
-    unsigned int ConstIString; // r3
+    uint32_t ConstString; // r3
+    uint32_t ConstIString; // r3
 
     if (entref.classnum)
     {
@@ -4366,7 +4366,7 @@ void CMD_VEH_ForceMaterialSpeed(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r3
     scr_vehicle_s *scr_vehicle; // r31
-    unsigned int v3; // r11
+    uint32_t v3; // r11
     double Float; // fp1
     int flags; // r11
 
@@ -4454,7 +4454,7 @@ const BuiltinMethodDef s_methods[50] =
 void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
 {
     int v1; // r6
-    unsigned int v2; // r5
+    uint32_t v2; // r5
     const BuiltinMethodDef *i; // r7
     const char *actionString; // r10
     const char *v5; // r11
@@ -4993,7 +4993,7 @@ static void VEH_UnlinkPlayer(gentity_s *player)
     scr_vehicle_s *scr_vehicle; // r30
     int detach; // r4
     int eFlags; // r11
-    unsigned int v14; // r11
+    uint32_t v14; // r11
     int v15; // [sp+8h] [-B8h]
     int v16; // [sp+Ch] [-B4h]
     int v17; // [sp+10h] [-B0h]
@@ -5201,7 +5201,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
             va(
                 (const char *)HIDWORD(v31),
                 LODWORD(v31),
-                (unsigned int)COERCE_UNSIGNED_INT64((float)(scr_vehicle->manualSpeed * (float)0.05681818)));
+                (uint32_t)COERCE_UNSIGNED_INT64((float)(scr_vehicle->manualSpeed * (float)0.05681818)));
             G_AddDebugString(debugPos, colorLtGrey, v14,v17);
             v18 = (float)(scr_vehicle->manualDecel * (float)0.05681818);
             v36 = v36 - (float)((float)v14 * (float)12.0);
@@ -5223,22 +5223,22 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1])),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.maxAngleVel[1]));
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1]),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.maxAngleVel[1]));
             G_AddDebugString(debugPos, colorLtGrey, v14,v25);
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel)),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawDecel));
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawDecel));
             G_AddDebugString(debugPos, colorLtGrey, v14,v26);
             if (scr_vehicle->hasTargetYaw)
             {
                 v36 = v36 - (float)((float)v14 * (float)12.0);
                 va(
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw)),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw),
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
                 G_AddDebugString(debugPos, colorLtGrey, v14,v27);
             }
             if (scr_vehicle->hasGoalYaw)
@@ -5246,16 +5246,16 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                 v36 = v36 - (float)((float)v14 * (float)12.0);
                 va(
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw)),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw),
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
                 G_AddDebugString(debugPos, colorLtGrey, v14,v28);
             }
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius)),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverSpeed),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverAccel));
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverSpeed),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverAccel));
             G_AddDebugString(debugPos, colorLtGrey, v14,v29);
             if (scr_vehicle->stopAtGoal)
             {

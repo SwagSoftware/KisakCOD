@@ -6,7 +6,7 @@
 
 BspGlob comBspGlob;
 
-unsigned int __cdecl Com_GetBspVersion()
+uint32_t __cdecl Com_GetBspVersion()
 {
     iassert( Com_IsBspLoaded() );
     return comBspGlob.header->version;
@@ -53,16 +53,16 @@ void __cdecl Com_CleanupBsp()
 
 bool __cdecl Com_BspHasLump(LumpType type)
 {
-    unsigned int count; // [esp+0h] [ebp-4h] BYREF
+    uint32_t count; // [esp+0h] [ebp-4h] BYREF
 
     Com_GetBspLump(type, 1u, &count);
     return count != 0;
 }
 
-char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count)
+char *__cdecl Com_GetBspLump(LumpType type, uint32_t elemSize, uint32_t *count)
 {
-    unsigned int chunkIter; // [esp+0h] [ebp-10h]
-    unsigned int offset; // [esp+4h] [ebp-Ch]
+    uint32_t chunkIter; // [esp+0h] [ebp-10h]
+    uint32_t offset; // [esp+4h] [ebp-Ch]
 
     iassert( Com_IsBspLoaded() );
     if (comBspGlob.header->version > 0x12)
@@ -77,7 +77,7 @@ char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int 
         *count = 0;
         return 0;
     }
-    else if (type < (unsigned int)Com_GetBspLumpCountForVersion(comBspGlob.header->version))
+    else if (type < (uint32_t)Com_GetBspLumpCountForVersion(comBspGlob.header->version))
     {
         return Com_ValidateBspLumpData(
             type,
@@ -100,8 +100,8 @@ bool __cdecl Com_IsBspLoaded()
 
 void __cdecl Com_LoadBsp(char *filename)
 {
-    unsigned int bytesRead; // [esp+18h] [ebp-Ch]
-    unsigned int len; // [esp+1Ch] [ebp-8h]
+    uint32_t bytesRead; // [esp+18h] [ebp-Ch]
+    uint32_t len; // [esp+1Ch] [ebp-8h]
     int h; // [esp+20h] [ebp-4h] BYREF
 
     iassert( filename );
@@ -155,11 +155,11 @@ void __cdecl Com_UnloadBsp()
     iassert( !Com_IsBspLoaded() );
 }
 
-unsigned int lumpsForVersion[13] =
+uint32_t lumpsForVersion[13] =
 { 41u, 41u, 42u, 43u, 43u, 43u, 43u, 44u, 44u, 44u, 46u, 46u, 47u };
 
 
-unsigned int __cdecl Com_GetBspLumpCountForVersion(int version)
+uint32_t __cdecl Com_GetBspLumpCountForVersion(int version)
 {
     if (version < 6 || version > 18)
         MyAssertHandler(
@@ -176,10 +176,10 @@ unsigned int __cdecl Com_GetBspLumpCountForVersion(int version)
 
 char *__cdecl Com_ValidateBspLumpData(
     LumpType type,
-    unsigned int offset,
-    unsigned int length,
-    unsigned int elemSize,
-    unsigned int *count)
+    uint32_t offset,
+    uint32_t length,
+    uint32_t elemSize,
+    uint32_t *count)
 {
     iassert( count );
     if (length)
@@ -198,16 +198,16 @@ char *__cdecl Com_ValidateBspLumpData(
     }
 }
 
-int __cdecl Com_BlockChecksumKey32(const uint8_t *data, unsigned int length, unsigned int initialCrc)
+int __cdecl Com_BlockChecksumKey32(const uint8_t *data, uint32_t length, uint32_t initialCrc)
 {
     const uint8_t *dataIter; // [esp+8h] [ebp-8h]
-    unsigned int crc; // [esp+Ch] [ebp-4h]
-    unsigned int crca; // [esp+Ch] [ebp-4h]
-    unsigned int crcb; // [esp+Ch] [ebp-4h]
-    unsigned int crcc; // [esp+Ch] [ebp-4h]
-    unsigned int crcd; // [esp+Ch] [ebp-4h]
-    unsigned int crce; // [esp+Ch] [ebp-4h]
-    unsigned int crcf; // [esp+Ch] [ebp-4h]
+    uint32_t crc; // [esp+Ch] [ebp-4h]
+    uint32_t crca; // [esp+Ch] [ebp-4h]
+    uint32_t crcb; // [esp+Ch] [ebp-4h]
+    uint32_t crcc; // [esp+Ch] [ebp-4h]
+    uint32_t crcd; // [esp+Ch] [ebp-4h]
+    uint32_t crce; // [esp+Ch] [ebp-4h]
+    uint32_t crcf; // [esp+Ch] [ebp-4h]
 
     crc = ~initialCrc;
     for (dataIter = data; dataIter != &data[length]; ++dataIter)
@@ -227,7 +227,7 @@ int __cdecl Com_BlockChecksumKey32(const uint8_t *data, unsigned int length, uns
 char *__cdecl Com_EntityString(int *numEntityChars)
 {
     char *entityString; // [esp+0h] [ebp-8h]
-    unsigned int count; // [esp+4h] [ebp-4h] BYREF
+    uint32_t count; // [esp+4h] [ebp-4h] BYREF
 
     iassert( Com_IsBspLoaded() );
     entityString = Com_GetBspLump(LUMP_ENTITIES, 1u, &count);
@@ -238,7 +238,7 @@ char *__cdecl Com_EntityString(int *numEntityChars)
 
 const char *__cdecl Com_GetHunkStringCopy(char *string)
 {
-    unsigned int v2; // [esp+0h] [ebp-18h]
+    uint32_t v2; // [esp+0h] [ebp-18h]
     uint8_t *hunkCopy; // [esp+14h] [ebp-4h]
 
     v2 = strlen(string);
@@ -250,9 +250,9 @@ const char *__cdecl Com_GetHunkStringCopy(char *string)
 const char *__cdecl Com_GetLightDefName(
     char *defName,
     const ComPrimaryLight *primaryLights,
-    unsigned int primaryLightCount)
+    uint32_t primaryLightCount)
 {
-    unsigned int primaryLightIndex; // [esp+14h] [ebp-8h]
+    uint32_t primaryLightIndex; // [esp+14h] [ebp-8h]
 
     for (primaryLightIndex = 0; primaryLightIndex < primaryLightCount; ++primaryLightIndex)
     {
@@ -289,9 +289,9 @@ const DiskPrimaryLight_Version16 *Com_LoadPrimaryLights_Version16()
     int exponent; // [esp+18h] [ebp-18h]
     ComPrimaryLight *out; // [esp+1Ch] [ebp-14h]
     const DiskPrimaryLight_Version16 *diskLights; // [esp+20h] [ebp-10h]
-    unsigned int diskLightCount; // [esp+24h] [ebp-Ch] BYREF
+    uint32_t diskLightCount; // [esp+24h] [ebp-Ch] BYREF
     const DiskPrimaryLight_Version16 *in; // [esp+28h] [ebp-8h]
-    unsigned int lightIndex; // [esp+2Ch] [ebp-4h]
+    uint32_t lightIndex; // [esp+2Ch] [ebp-4h]
 
     diskLights = (const DiskPrimaryLight_Version16 *)Com_GetBspLump(LUMP_PRIMARY_LIGHTS, 0x60u, &diskLightCount);
     if (diskLightCount <= 1)
@@ -354,9 +354,9 @@ ComPrimaryLight *Com_LoadPrimaryLights()
     int exponent; // [esp+28h] [ebp-18h]
     ComPrimaryLight *out; // [esp+2Ch] [ebp-14h]
     const DiskPrimaryLight *diskLights; // [esp+30h] [ebp-10h]
-    unsigned int diskLightCount; // [esp+34h] [ebp-Ch] BYREF
+    uint32_t diskLightCount; // [esp+34h] [ebp-Ch] BYREF
     const DiskPrimaryLight *in; // [esp+38h] [ebp-8h]
-    unsigned int lightIndex; // [esp+3Ch] [ebp-4h]
+    uint32_t lightIndex; // [esp+3Ch] [ebp-4h]
 
     if (comBspGlob.header->version <= 0xE)
         return Com_LoadPrimaryLights_Version14();
@@ -460,21 +460,21 @@ void __cdecl Com_ShutdownWorld()
     comWorld.isInUse = 0;
 }
 
-void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size, ComSaveLumpBehavior behavior)
+void __cdecl Com_SaveLump(LumpType type, const void *newLump, uint32_t size, ComSaveLumpBehavior behavior)
 {
     char v4; // [esp+3h] [ebp-535h]
     char *v5; // [esp+8h] [ebp-530h]
     BspGlob *v6; // [esp+Ch] [ebp-52Ch]
     char savedName[68]; // [esp+10h] [ebp-528h] BYREF
-    unsigned int chunkIter; // [esp+58h] [ebp-4E0h]
-    unsigned int zero; // [esp+5Ch] [ebp-4DCh] BYREF
+    uint32_t chunkIter; // [esp+58h] [ebp-4E0h]
+    uint32_t zero; // [esp+5Ch] [ebp-4DCh] BYREF
     BspHeader newHeader; // [esp+60h] [ebp-4D8h] BYREF
-    unsigned int offset; // [esp+394h] [ebp-1A4h]
+    uint32_t offset; // [esp+394h] [ebp-1A4h]
     const BspChunk *chunk; // [esp+398h] [ebp-1A0h]
     bool isNewChunk; // [esp+39Fh] [ebp-199h]
     const void *chunkData[100]; // [esp+3A0h] [ebp-198h]
     int h; // [esp+530h] [ebp-8h]
-    unsigned int zeroCount; // [esp+534h] [ebp-4h]
+    uint32_t zeroCount; // [esp+534h] [ebp-4h]
 
     iassert( Com_IsBspLoaded() );
     iassert( comBspGlob.header->version == BSP_VERSION );

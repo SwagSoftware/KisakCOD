@@ -9,7 +9,7 @@ int __cdecl compare_hudelems(const void *pe0, const void *pe1)
 {
     float delta; // [esp+0h] [ebp-Ch]
 
-    delta = *(float *)(*(unsigned int *)pe0 + 128) - *(float *)(*(unsigned int *)pe1 + 128);
+    delta = *(float *)(*(uint32_t *)pe0 + 128) - *(float *)(*(uint32_t *)pe1 + 128);
     if (delta >= 0.0)
         return delta > 0.0;
     else

@@ -34,7 +34,7 @@ char __cdecl R_ReserveCodeMeshVerts(int vertCount, uint16_t* baseVertex)
     return 0;
 }
 
-char __cdecl R_ReserveCodeMeshArgs(int argCount, unsigned int* argOffsetOut)
+char __cdecl R_ReserveCodeMeshArgs(int argCount, uint32_t* argOffsetOut)
 {
     volatile int oldArgCount; // [esp+8h] [ebp-4h]
 
@@ -42,7 +42,7 @@ char __cdecl R_ReserveCodeMeshArgs(int argCount, unsigned int* argOffsetOut)
     iassert( (argCount >= 0) );
     iassert( argOffsetOut );
     oldArgCount = frontEndDataOut->codeMeshArgsCount;
-    if ((unsigned int)(argCount + oldArgCount) < 0x100)
+    if ((uint32_t)(argCount + oldArgCount) < 0x100)
     {
         *argOffsetOut = oldArgCount;
         InterlockedExchange(&frontEndDataOut->codeMeshArgsCount, argCount + oldArgCount);
@@ -66,7 +66,7 @@ GfxDrawSurf R_GetMaterialInfoPacked(const Material* material)
 }
 
 // KISAKTODO THIS MIGHT BE WRONG?? FIELD IS A RANDOM ASS GUESS, IDA IS NOT BEING HELPFUL
-GfxDrawSurf* __cdecl R_AllocFxDrawSurf(unsigned int region)
+GfxDrawSurf* __cdecl R_AllocFxDrawSurf(uint32_t region)
 {
     int drawSurfCount; // [esp+8h] [ebp-4h]
 
@@ -81,18 +81,18 @@ GfxDrawSurf* __cdecl R_AllocFxDrawSurf(unsigned int region)
 void __cdecl R_AddCodeMeshDrawSurf(
     Material* material,
     r_double_index_t* indices,
-    unsigned int indexCount,
-    unsigned int argOffset,
-    unsigned int argCount,
+    uint32_t indexCount,
+    uint32_t argOffset,
+    uint32_t argCount,
     const char* fxName)
 {
     int packed_high; // ecx
-    unsigned int v7; // edx
+    uint32_t v7; // edx
     int MaterialSortKey; // [esp+20h] [ebp-28h]
     FxCodeMeshData* localCodeMesh; // [esp+30h] [ebp-18h]
     GfxDrawSurf* drawSurf; // [esp+34h] [ebp-14h]
     int region; // [esp+3Ch] [ebp-Ch]
-    unsigned int codeMeshIndex; // [esp+44h] [ebp-4h]
+    uint32_t codeMeshIndex; // [esp+44h] [ebp-4h]
 
     iassert(indexCount);
     iassert(g_processCodeMesh);
@@ -150,7 +150,7 @@ void __cdecl R_AddCodeMeshDrawSurf(
     }
 }
 
-float (*__cdecl R_GetCodeMeshArgs(unsigned int argOffset))[4]
+float (*__cdecl R_GetCodeMeshArgs(uint32_t argOffset))[4]
 {
     iassert( g_processCodeMesh );
     return (float (*)[4])frontEndDataOut->codeMeshArgs[argOffset];
@@ -219,17 +219,17 @@ void __cdecl R_AddMarkMeshDrawSurf(
     Material *material,
     const GfxMarkContext *context,
     uint16_t *indices,
-    unsigned int indexCount)
+    uint32_t indexCount)
 {
     int packed_high; // edx
     unsigned __int64 v5; // rax
     int v6; // ecx
     unsigned __int64 v7; // rax
     int v8; // ecx
-    unsigned int v9; // ecx
+    uint32_t v9; // ecx
     GfxDrawSurf *drawSurf; // [esp+40h] [ebp-14h]
     int region; // [esp+48h] [ebp-Ch]
-    unsigned int markMeshIndex; // [esp+4Ch] [ebp-8h]
+    uint32_t markMeshIndex; // [esp+4Ch] [ebp-8h]
     FxMarkMeshData *markMesh; // [esp+50h] [ebp-4h]
 
     iassert(g_processMarkMesh);
@@ -319,7 +319,7 @@ void __cdecl ShortSort /*ShortSortArray<GfxReverseSortDrawSurfsInterface, GfxDra
         {
             walkKey = walk->packed;
             if (HIDWORD(maxKey) <= HIDWORD(walk->packed)
-                && (HIDWORD(maxKey) < HIDWORD(walkKey) || (unsigned int)maxKey < (unsigned int)walkKey))
+                && (HIDWORD(maxKey) < HIDWORD(walkKey) || (uint32_t)maxKey < (uint32_t)walkKey))
             {
                 maxKey = walk->packed;
                 maxx = walk;
@@ -339,12 +339,12 @@ void __cdecl SortMyShit /*qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSu
 {
     int packed_high; // edx
     GfxDrawSurf *v3; // eax
-    unsigned int v4; // eax
-    unsigned int v5; // ecx
+    uint32_t v4; // eax
+    uint32_t v5; // ecx
     GfxDrawSurf *v6; // edx
     GfxDrawSurf v7; // [esp+4h] [ebp-180h]
-    unsigned int fields; // [esp+Ch] [ebp-178h]
-    unsigned int v9; // [esp+10h] [ebp-174h]
+    uint32_t fields; // [esp+Ch] [ebp-178h]
+    uint32_t v9; // [esp+10h] [ebp-174h]
     GfxDrawSurf v10; // [esp+14h] [ebp-170h]
     GfxDrawSurf v11; // [esp+1Ch] [ebp-168h]
     GfxDrawSurf v12; // [esp+2Ch] [ebp-158h]
@@ -473,8 +473,8 @@ GfxDrawSurf __cdecl R_GetWorldDrawSurf(GfxSurface *worldSurf)
 GfxWorld *R_SetPrimaryLightShadowSurfaces()
 {
     GfxWorld *result; // eax
-    unsigned int surfIndex; // [esp+8h] [ebp-14h]
-    unsigned int primaryLightIndex; // [esp+18h] [ebp-4h]
+    uint32_t surfIndex; // [esp+8h] [ebp-14h]
+    uint32_t primaryLightIndex; // [esp+18h] [ebp-4h]
 
     for (primaryLightIndex = 0; primaryLightIndex < rgp.world->primaryLightCount; ++primaryLightIndex)
         rgp.world->shadowGeom[primaryLightIndex].surfaceCount = 0;
@@ -496,8 +496,8 @@ GfxWorld *R_SetPrimaryLightShadowSurfaces()
 void __cdecl R_SortWorldSurfaces()
 {
     GfxDrawSurf v0; // [esp+Ch] [ebp-20h]
-    unsigned int surfIndex; // [esp+18h] [ebp-14h]
-    unsigned int worldSurfCount; // [esp+24h] [ebp-8h]
+    uint32_t surfIndex; // [esp+18h] [ebp-14h]
+    uint32_t worldSurfCount; // [esp+24h] [ebp-8h]
     GfxSurface *worldSurfArray; // [esp+28h] [ebp-4h]
 
     iassert( rgp.world );
@@ -525,10 +525,10 @@ void __cdecl R_SortWorldSurfaces()
     R_SetPrimaryLightShadowSurfaces();
 }
 
-char __cdecl R_AddParticleCloudDrawSurf(volatile unsigned int cloudIndex, Material *material)
+char __cdecl R_AddParticleCloudDrawSurf(volatile uint32_t cloudIndex, Material *material)
 {
     int packed_high; // ecx
-    unsigned int v4; // edx
+    uint32_t v4; // edx
     int MaterialSortKey; // [esp+20h] [ebp-18h]
     GfxDrawSurf *drawSurf; // [esp+2Ch] [ebp-Ch]
     int region; // [esp+30h] [ebp-8h]

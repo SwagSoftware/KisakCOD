@@ -191,9 +191,9 @@ const char *__cdecl Com_GetFilenameSubString(const char *pathname)
 
 void __cdecl Com_AssembleFilepath(char *folder, char *name, char *extension, char *path, int maxCharCount)
 {
-    unsigned int v5; // [esp+0h] [ebp-3Ch]
-    unsigned int v6; // [esp+10h] [ebp-2Ch]
-    unsigned int v7; // [esp+20h] [ebp-1Ch]
+    uint32_t v5; // [esp+0h] [ebp-3Ch]
+    uint32_t v6; // [esp+10h] [ebp-2Ch]
+    uint32_t v7; // [esp+20h] [ebp-1Ch]
     char *patha; // [esp+50h] [ebp+14h]
 
     if (!folder)
@@ -251,7 +251,7 @@ void __cdecl Com_StripExtension(char *in, char *out)
     *out = 0;
 }
 
-void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *extension)
+void __cdecl Com_DefaultExtension(char *path, uint32_t maxSize, const char *extension)
 {
     char *src; // [esp+10h] [ebp-4Ch]
     char oldPath[68]; // [esp+14h] [ebp-48h] BYREF
@@ -510,7 +510,7 @@ uint8_t __cdecl I_CleanChar(uint8_t character)
         return character;
 }
 
-int Com_sprintf(char *dest, unsigned int size, const char *fmt, ...)
+int Com_sprintf(char *dest, uint32_t size, const char *fmt, ...)
 {
     int result; // eax
     va_list va; // [esp+1Ch] [ebp+14h] BYREF
@@ -525,7 +525,7 @@ int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...)
 {
     int len; // [esp+4h] [ebp-Ch]
     char *destMod; // [esp+8h] [ebp-8h]
-    unsigned int destModSize; // [esp+Ch] [ebp-4h]
+    uint32_t destModSize; // [esp+Ch] [ebp-4h]
     va_list va; // [esp+28h] [ebp+18h] BYREF
 
     va_start(va, fmt);
@@ -1026,11 +1026,11 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     break;
                 case 4:
                     v7 = atoi(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = v7;
+                    *(uint32_t *)&pStruct[v20->iOffset] = v7;
                     break;
                 case 5:
                     v8 = atoi(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = v8 != 0;
+                    *(uint32_t *)&pStruct[v20->iOffset] = v8 != 0;
                     break;
                 case 6:
                     v16 = atof(src);
@@ -1038,7 +1038,7 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     break;
                 case 7:
                     v15 = atof(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
+                    *(uint32_t *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
                     break;
                 case 8:
 #ifdef KISAK_MP
@@ -1046,13 +1046,13 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     {
                         v9 = FX_Register(src);
-                        *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v9;
+                        *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v9;
                     }
                     break;
                 case 9:
                     I_strncpyz(dest, src, 0x2000);
                     v22 = R_RegisterModel(dest);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v22;
+                    *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v22;
                     if (!v22)
                         v18 = 1;
                     break;
@@ -1062,12 +1062,12 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     {
                         v10 = Material_RegisterHandle(src, 0);
-                        *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v10;
+                        *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v10;
                     }
                     break;
                 case 0xB:
                     SoundAlias = Com_FindSoundAlias(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)SoundAlias;
+                    *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)SoundAlias;
                     break;
                 default:
                     if (v20->iFieldType >= 0)
@@ -1139,7 +1139,7 @@ bool __cdecl Com_IsLegacyXModelName(const char *name)
     return !I_strnicmp(name, "xmodel", 6) && (name[6] == 47 || name[6] == 92);
 }
 
-unsigned int __cdecl LongNoSwap(unsigned int color)
+uint32_t __cdecl LongNoSwap(uint32_t color)
 {
     return color;
 }

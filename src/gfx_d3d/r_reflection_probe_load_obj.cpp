@@ -32,12 +32,12 @@ void R_CreateDefaultProbe()
     R_GenerateReflectionImages(s_world.reflectionProbes, &probeRawData, 1, 0);
 }
 
-void __cdecl R_LoadReflectionProbes(unsigned int bspVersion)
+void __cdecl R_LoadReflectionProbes(uint32_t bspVersion)
 {
     char *v1; // eax
     DiskGfxReflectionProbe *v2; // ecx
     const DiskGfxReflectionProbe *reflectionProbeRawData; // [esp+0h] [ebp-10h]
-    unsigned int i; // [esp+4h] [ebp-Ch]
+    uint32_t i; // [esp+4h] [ebp-Ch]
     DiskGfxReflectionProbe *reflectionProbeRawData12; // [esp+8h] [ebp-8h]
     char *reflectionProbeRawData11; // [esp+Ch] [ebp-4h]
 

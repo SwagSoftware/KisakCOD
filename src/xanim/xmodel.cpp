@@ -95,7 +95,7 @@ int __cdecl XModelTraceLine(
     const XModelCollSurf_s *csurf; // [esp+68h] [ebp-18h]
     float hit[3]; // [esp+6Ch] [ebp-14h] BYREF
     float s; // [esp+78h] [ebp-8h]
-    unsigned int i; // [esp+7Ch] [ebp-4h]
+    uint32_t i; // [esp+7Ch] [ebp-4h]
 
     if (model->collLod < 0)
         return -1;
@@ -163,7 +163,7 @@ int __cdecl XModelTraceLine(
 
 int __cdecl XModelTraceLineAnimated(
     const DObj_s *obj,
-    unsigned int modelIndex,
+    uint32_t modelIndex,
     int baseBoneIndex,
     trace_t *results,
     const DObjAnimMat *boneMtxList,
@@ -195,10 +195,10 @@ int __cdecl XModelTraceLineAnimated(
     int globalBoneIndex; // [esp+158h] [ebp-94h]
     float hit[3]; // [esp+15Ch] [ebp-90h] BYREF
     float mat[4][3];
-    unsigned int hidePartBits[4]; // [esp+198h] [ebp-54h] BYREF
+    uint32_t hidePartBits[4]; // [esp+198h] [ebp-54h] BYREF
     const DObjAnimMat *baseMat; // [esp+1A8h] [ebp-44h]
     float s; // [esp+1ACh] [ebp-40h]
-    unsigned int i; // [esp+1B0h] [ebp-3Ch]
+    uint32_t i; // [esp+1B0h] [ebp-3Ch]
     int boneIdx; // [esp+1B4h] [ebp-38h]
     float axis[4][3]; // [esp+1B8h] [ebp-34h] BYREF
     const DObjAnimMat *boneMtx; // [esp+1E8h] [ebp-4h]
@@ -298,15 +298,15 @@ int __cdecl XModelTraceLineAnimated(
 
 void __cdecl XModelTraceLineAnimatedPartBits(
     const DObj_s *obj,
-    unsigned int modelIndex,
+    uint32_t modelIndex,
     int baseBoneIndex,
     int contentmask,
     int *partBits)
 {
     const XModel *model; // [esp+0h] [ebp-24h]
     const XModelCollSurf_s *csurf; // [esp+4h] [ebp-20h]
-    unsigned int hidePartBits[4]; // [esp+Ch] [ebp-18h] BYREF
-    unsigned int i; // [esp+1Ch] [ebp-8h]
+    uint32_t hidePartBits[4]; // [esp+Ch] [ebp-18h] BYREF
+    uint32_t i; // [esp+1Ch] [ebp-8h]
     int boneIdx; // [esp+20h] [ebp-4h]
 
     model = obj->models[modelIndex];
@@ -326,7 +326,7 @@ void __cdecl XModelTraceLineAnimatedPartBits(
     }
 }
 
-void __cdecl PrefetchArray_XSurfaceCollisionNode_(const XSurfaceCollisionNode *mem, unsigned int elementCount)
+void __cdecl PrefetchArray_XSurfaceCollisionNode_(const XSurfaceCollisionNode *mem, uint32_t elementCount)
 {
     const unsigned __int8 *memIter; // [esp+0h] [ebp-8h]
 
@@ -340,7 +340,7 @@ void __cdecl PrefetchArray_XSurfaceCollisionNode_(const XSurfaceCollisionNode *m
 
 char __cdecl XSurfaceVisitTrianglesInAabb(
     const XSurface *surface,
-    unsigned int vertListIndex,
+    uint32_t vertListIndex,
     const float *aabbMins,
     const float *aabbMaxs,
     bool(__cdecl *visitorFunc)(void *, const GfxPackedVertex **, const GfxPackedVertex **),
@@ -428,7 +428,7 @@ void __cdecl XSurfaceVisitTrianglesInAabb_ConvertAabb(
 bool __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidatesLocals *locals)
 {
     const GfxPackedVertex *verts0[3]; // [esp+4h] [ebp-10h] BYREF
-    unsigned int vertIter; // [esp+10h] [ebp-4h]
+    uint32_t vertIter; // [esp+10h] [ebp-4h]
 
     for (vertIter = 0; vertIter != 3; ++vertIter)
         verts0[vertIter] = &locals->inVertices0[locals->vertexQueue[locals->vertexQueueBegin][vertIter]];
@@ -437,7 +437,7 @@ bool __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidat
     return locals->visitorFunc(locals->visitorContext,verts0,verts0);
 }
 
-void __cdecl PrefetchArray_GfxPackedVertex_(const GfxPackedVertex *mem, unsigned int elementCount)
+void __cdecl PrefetchArray_GfxPackedVertex_(const GfxPackedVertex *mem, uint32_t elementCount)
 {
     const unsigned __int8 *memIter; // [esp+0h] [ebp-8h]
 
@@ -451,11 +451,11 @@ void __cdecl PrefetchArray_GfxPackedVertex_(const GfxPackedVertex *mem, unsigned
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandidatesLocals *locals)
 {
     uint16_t index; // [esp+1Ch] [ebp-18h]
-    unsigned int vertIter; // [esp+20h] [ebp-14h]
-    unsigned int triangleIter; // [esp+24h] [ebp-10h]
+    uint32_t vertIter; // [esp+20h] [ebp-14h]
+    uint32_t triangleIter; // [esp+24h] [ebp-10h]
     const uint16_t *indexPtr; // [esp+28h] [ebp-Ch]
-    unsigned int triangleCount; // [esp+2Ch] [ebp-8h]
-    unsigned int triangleBegin; // [esp+30h] [ebp-4h]
+    uint32_t triangleCount; // [esp+2Ch] [ebp-8h]
+    uint32_t triangleBegin; // [esp+30h] [ebp-4h]
 
     triangleBegin = locals->triangleQueue[locals->triangleQueueBegin].beginIndex;
     triangleCount = locals->triangleQueue[locals->triangleQueueBegin].count;
@@ -478,7 +478,7 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandida
     return 1;
 }
 
-void __cdecl PrefetchArray_XSurfaceCollisionLeaf_(const XSurfaceCollisionLeaf *mem, unsigned int elementCount)
+void __cdecl PrefetchArray_XSurfaceCollisionLeaf_(const XSurfaceCollisionLeaf *mem, uint32_t elementCount)
 {
     const unsigned __int8 *memIter; // [esp+0h] [ebp-8h]
 
@@ -495,11 +495,11 @@ void __cdecl PrefetchArray_XSurfaceCollisionLeaf_(const XSurfaceCollisionLeaf *m
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLocals *locals)
 {
     XSurfaceCollisionLeaf *leaf; // [esp+3Ch] [ebp-18h]
-    unsigned int indexCount; // [esp+40h] [ebp-14h]
+    uint32_t indexCount; // [esp+40h] [ebp-14h]
     int indexBeginIndex; // [esp+44h] [ebp-10h]
-    unsigned int leafBeginIndex; // [esp+48h] [ebp-Ch]
-    unsigned int leafIndex; // [esp+4Ch] [ebp-8h]
-    unsigned int leafEndIndex; // [esp+50h] [ebp-4h]
+    uint32_t leafBeginIndex; // [esp+48h] [ebp-Ch]
+    uint32_t leafIndex; // [esp+4Ch] [ebp-8h]
+    uint32_t leafEndIndex; // [esp+50h] [ebp-4h]
 
     leafBeginIndex = locals->leafQueue[locals->leafQueueBegin].beginIndex;
     leafEndIndex = locals->leafQueue[locals->leafQueueBegin].count + leafBeginIndex;
@@ -534,13 +534,13 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLo
 
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessNode(XSurfaceGetTriCandidatesLocals *locals)
 {
-    unsigned int childBeginIndex; // [esp+48h] [ebp-1Ch]
-    unsigned int childCount; // [esp+4Ch] [ebp-18h]
-    unsigned int childCounta; // [esp+4Ch] [ebp-18h]
+    uint32_t childBeginIndex; // [esp+48h] [ebp-1Ch]
+    uint32_t childCount; // [esp+4Ch] [ebp-18h]
+    uint32_t childCounta; // [esp+4Ch] [ebp-18h]
     XSurfaceCollisionNode *node; // [esp+50h] [ebp-14h]
-    unsigned int nodeIndex; // [esp+58h] [ebp-Ch]
-    unsigned int nodeEndIndex; // [esp+5Ch] [ebp-8h]
-    unsigned int nodeBeginIndex; // [esp+60h] [ebp-4h]
+    uint32_t nodeIndex; // [esp+58h] [ebp-Ch]
+    uint32_t nodeEndIndex; // [esp+5Ch] [ebp-8h]
+    uint32_t nodeBeginIndex; // [esp+60h] [ebp-4h]
 
     nodeBeginIndex = locals->nodeQueue[locals->nodeQueueBegin].beginIndex;
     nodeEndIndex = locals->nodeQueue[locals->nodeQueueBegin].count + nodeBeginIndex;
@@ -581,10 +581,10 @@ char __cdecl XSurfaceVisitTrianglesInAabb_ProcessNode(XSurfaceGetTriCandidatesLo
     return 1;
 }
 
-int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned int offset, unsigned __int8 *index)
+int __cdecl XModelGetBoneIndex(const XModel *model, uint32_t name, uint32_t offset, unsigned __int8 *index)
 {
-    unsigned int numBones; // [esp+0h] [ebp-Ch]
-    unsigned int localBoneIndex; // [esp+4h] [ebp-8h]
+    uint32_t numBones; // [esp+0h] [ebp-Ch]
+    uint32_t localBoneIndex; // [esp+4h] [ebp-8h]
     unsigned const __int16 *boneNames; // [esp+8h] [ebp-4h]
    
     iassert(index);

@@ -4,7 +4,7 @@
 #include <qcommon/qcommon.h>
 #include <universal/com_memory.h>
 
-unsigned int __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle)
+uint32_t __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle)
 {
     return (FS_FOpenFileReadStream(pszFilename, (int *)phFileHandle) & 0x80000000) == 0;
 }
@@ -12,7 +12,7 @@ void __stdcall MSS_FileCloseCallback(UINTa hFileHandle)
 {
     FS_FCloseFile(hFileHandle);
 }
-int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, unsigned int type)
+int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, uint32_t type)
 {
     if (type)
     {
@@ -33,7 +33,7 @@ int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, unsigned int t
     }
     return FS_FTell(hFileHandle);
 }
-unsigned int __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, unsigned int bytes)
+uint32_t __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, uint32_t bytes)
 {
     return FS_Read((unsigned char *)pBuffer, bytes, hFileHandle);
 }
@@ -309,15 +309,15 @@ int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels)
   return digitalFormat;
 }
 
-uint8_t *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate)
+uint8_t *__cdecl MSS_Alloc(uint32_t bytes, uint32_t rate)
 {
   if ( IsFastFileLoad() )
-    return (uint8_t *)((int (__cdecl *)(unsigned int, unsigned int))MSS_Alloc_FastFile)(bytes, rate);
+    return (uint8_t *)((int (__cdecl *)(uint32_t, uint32_t))MSS_Alloc_FastFile)(bytes, rate);
   else
     return MSS_Alloc_LoadObj(bytes, rate);
 }
 
-uint8_t *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate)
+uint8_t *__cdecl MSS_Alloc_LoadObj(uint32_t bytes, uint32_t rate)
 {
   int min_Spec_bytes; // [esp+0h] [ebp-4h]
 
@@ -331,8 +331,8 @@ uint8_t *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate)
   return Hunk_Alloc(bytes, "MSS_Alloc", 15);
 }
 
-unsigned int *__cdecl MSS_Alloc_FastFile(int bytes)
+uint32_t *__cdecl MSS_Alloc_FastFile(int bytes)
 {
-  return (unsigned int *)Z_Malloc(bytes, "MSS_Alloc", 15);
+  return (uint32_t *)Z_Malloc(bytes, "MSS_Alloc", 15);
 }
 

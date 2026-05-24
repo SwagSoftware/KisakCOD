@@ -177,7 +177,7 @@ char __cdecl Com_DeletePlayerProfile(const char *profileName)
 void __cdecl Com_InitPlayerProfiles(int localClientNum)
 {
     DvarValue v1; // [esp-10h] [ebp-24h]
-    unsigned int value_4; // [esp+4h] [ebp-10h]
+    uint32_t value_4; // [esp+4h] [ebp-10h]
     __int64 value_8; // [esp+8h] [ebp-Ch]
 
     ui_playerProfileAlreadyChosen = Dvar_RegisterInt(

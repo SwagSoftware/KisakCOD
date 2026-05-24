@@ -15,15 +15,15 @@
 #endif
 #include <gfx_d3d/rb_backend.h>
 
-unsigned int Win_InitThreads();
+uint32_t Win_InitThreads();
 
 
 // NOTE(mrsteyk): keep in mind this is 4 elements long.
 static thread_local void **g_threadLocals;
 
-//static unsigned int s_affinityMaskForProcess;
-//static unsigned int s_cpuCount;
-//static unsigned int s_affinityMaskForCpu[4];
+//static uint32_t s_affinityMaskForProcess;
+//static uint32_t s_cpuCount;
+//static uint32_t s_affinityMaskForCpu[4];
 
 #ifdef KISAK_SP
 int isDoingDatabaseInit;
@@ -39,21 +39,21 @@ void *g_saveHistoryDoneEvent;
 volatile int g_timeout;
 #endif
 
-typedef void (*ThreadFuncFn)(unsigned int);
+typedef void (*ThreadFuncFn)(uint32_t);
 static ThreadFuncFn threadFunc[THREAD_CONTEXT_COUNT];
 
 void *g_threadValues[THREAD_CONTEXT_COUNT][4];
 DWORD threadId[THREAD_CONTEXT_COUNT];
 HANDLE threadHandle[THREAD_CONTEXT_COUNT];
-unsigned int s_affinityMaskForProcess;
-unsigned int s_cpuCount;
-unsigned int s_affinityMaskForCpu[4];
+uint32_t s_affinityMaskForProcess;
+uint32_t s_cpuCount;
+uint32_t s_affinityMaskForCpu[4];
 
 static int g_databaseThreadOwner;
 
 static volatile PVOID smpData;
 
-static volatile unsigned int renderPausedCount;
+static volatile uint32_t renderPausedCount;
 
 static WinThreadLock s_threadLock;
 
@@ -95,7 +95,7 @@ static const char *s_threadNames[THREAD_CONTEXT_COUNT] =
 };
 #endif
 
-unsigned int __cdecl Sys_GetCpuCount()
+uint32_t __cdecl Sys_GetCpuCount()
 {
     return s_cpuCount;
 }
@@ -121,25 +121,25 @@ void __cdecl Sys_InitMainThread()
     pseudoHandle = GetCurrentThread();
     DuplicateHandle(process, pseudoHandle, process, threadHandle, 0, 0, 2);
     Win_InitThreads();
-    //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues;
+    //*(uint32_t*)(*((uint32_t*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues;
     g_threadLocals = g_threadValues[THREAD_CONTEXT_MAIN];
     Com_InitThreadData(0);
 }
 
-unsigned int __cdecl Sys_GetCurrentThreadId()
+uint32_t __cdecl Sys_GetCurrentThreadId()
 {
     return GetCurrentThreadId();
 }
 
 void __cdecl Sys_InitThread(ThreadContext_t threadContext)
 {
-    //*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues[threadContext];
+    //*(uint32_t*)(*((uint32_t*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) = g_threadValues[threadContext];
     g_threadLocals = g_threadValues[threadContext];
     Com_InitThreadData(threadContext);
     Profile_InitContext(threadContext);
 }
 
-char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(unsigned int))
+char __cdecl Sys_SpawnRenderThread(void(__cdecl* function)(uint32_t))
 {
     Sys_CreateEvent(0, 0, &renderPausedEvent);
     Sys_CreateEvent(1, 1, &renderCompletedEvent);
@@ -165,7 +165,7 @@ void __cdecl Sys_CreateEvent(bool manualReset, bool initialState, void** event)
     *event = CreateEventA(0, manualReset, initialState, 0);
 }
 
-void __cdecl Sys_CreateThread(void(__cdecl* function)(unsigned int), ThreadContext_t threadContext)
+void __cdecl Sys_CreateThread(void(__cdecl* function)(uint32_t), ThreadContext_t threadContext)
 {
     iassert( threadFunc[threadContext] == NULL );
     iassert(threadContext < THREAD_CONTEXT_COUNT);
@@ -190,7 +190,7 @@ struct tagTHREADNAME_INFO // sizeof=0x10
 };
 
 // https://learn.microsoft.com/en-us/visualstudio/debugger/tips-for-debugging-threads?view=vs-2022&tabs=csharp
-void __cdecl SetThreadName(unsigned int threadId, const char* threadName)
+void __cdecl SetThreadName(uint32_t threadId, const char* threadName)
 {
     tagTHREADNAME_INFO info; // [esp+10h] [ebp-28h] BYREF
     //CPPEH_RECORD ms_exc; // [esp+20h] [ebp-18h]
@@ -211,7 +211,7 @@ void __cdecl SetThreadName(unsigned int threadId, const char* threadName)
     }
 }
 
-unsigned int __stdcall Sys_ThreadMain(ThreadContext_t threadContext)
+uint32_t __stdcall Sys_ThreadMain(ThreadContext_t threadContext)
 {
     bcassert(threadContext, THREAD_CONTEXT_COUNT);
     iassert(threadFunc[threadContext]);
@@ -228,7 +228,7 @@ static void* resumedDatabaseEvent;
 
 bool dediRenderHack = false;
 
-char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(unsigned int))
+char __cdecl Sys_SpawnDatabaseThread(void(__cdecl* function)(uint32_t))
 {
     Sys_CreateEvent(0, 0, &wakeDatabaseEvent);
     Sys_CreateEvent(1, 1, &databaseCompletedEvent);
@@ -300,13 +300,13 @@ void __cdecl Sys_WaitDatabaseThread()
 
 void __cdecl Sys_WaitForSingleObject(void** event)
 {
-    unsigned int result; // [esp+0h] [ebp-4h]
+    uint32_t result; // [esp+0h] [ebp-4h]
 
     result = WaitForSingleObject(*event, 0xFFFFFFFF);
-    iassert(result == ((((unsigned int)0x00000000L)) + 0));
+    iassert(result == ((((uint32_t)0x00000000L)) + 0));
 }
 
-bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(unsigned int), unsigned int threadIndex)
+bool __cdecl Sys_SpawnWorkerThread(void(__cdecl* function)(uint32_t), uint32_t threadIndex)
 {
     ThreadContext_t threadContext; // [esp+0h] [ebp-4h]
 
@@ -378,7 +378,7 @@ void __cdecl Sys_FrontEndSleep()
     Sys_WaitForSingleObject(&renderPausedEvent);
 }
 
-bool __cdecl Sys_WaitForSingleObjectTimeout(void** event, unsigned int msec)
+bool __cdecl Sys_WaitForSingleObjectTimeout(void** event, uint32_t msec)
 {
     iassert( msec != INFINITE );
     return WaitForSingleObject(*event, msec) == 0;
@@ -480,7 +480,7 @@ void __cdecl Sys_WaitForMainThread()
 
 void __cdecl Sys_StopRenderer()
 {
-    unsigned int newCount; // [esp+0h] [ebp-4h]
+    uint32_t newCount; // [esp+0h] [ebp-4h]
 
     newCount = InterlockedIncrement(&renderPausedCount);
     if (newCount > 1)
@@ -524,13 +524,13 @@ bool Sys_IsServerThread()
 
 void __cdecl Sys_SetValue(int valueIndex, void* data)
 {
-    //*(unsigned int*)(*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex) = data;
+    //*(uint32_t*)(*(uint32_t*)(*((uint32_t*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex) = data;
     g_threadLocals[valueIndex] = data;
 }
 
 void* __cdecl Sys_GetValue(int valueIndex)
 {
-    //return *(void**)(*(unsigned int*)(*((unsigned int*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex);
+    //return *(void**)(*(uint32_t*)(*((uint32_t*)NtCurrentTeb()->ThreadLocalStoragePointer + _tls_index) + 4) + 4 * valueIndex);
     return g_threadLocals[valueIndex];
 }
 
@@ -583,8 +583,8 @@ void __cdecl Sys_ResetUpdateNonDependentEffectsEvent()
 
 void __cdecl Sys_SuspendOtherThreads()
 {
-    unsigned int threadIndex; // [esp+0h] [ebp-8h]
-    unsigned int currentThreadId; // [esp+4h] [ebp-4h]
+    uint32_t threadIndex; // [esp+0h] [ebp-8h]
+    uint32_t currentThreadId; // [esp+4h] [ebp-4h]
 
     currentThreadId = Sys_GetCurrentThreadId();
     for (threadIndex = 0; threadIndex < THREAD_CONTEXT_COUNT; ++threadIndex)
@@ -610,7 +610,7 @@ static void* g_cinematicsThreadOutstandingRequestEvent;
 static void* g_cinematicsHostOutstandingRequestEvent;
 
 
-char __cdecl Sys_SpawnCinematicsThread(void(__cdecl* function)(unsigned int))
+char __cdecl Sys_SpawnCinematicsThread(void(__cdecl* function)(uint32_t))
 {
     Sys_CreateEvent(1, 1, &g_cinematicsThreadOutstandingRequestEvent);
     Sys_CreateEvent(1, 0, &g_cinematicsHostOutstandingRequestEvent);
@@ -621,7 +621,7 @@ char __cdecl Sys_SpawnCinematicsThread(void(__cdecl* function)(unsigned int))
     return 1;
 }
 
-bool __cdecl Sys_WaitForCinematicsThreadOutstandingRequestEventTimeout(unsigned int timeoutMsec)
+bool __cdecl Sys_WaitForCinematicsThreadOutstandingRequestEventTimeout(uint32_t timeoutMsec)
 {
     return Sys_WaitForSingleObjectTimeout(&g_cinematicsThreadOutstandingRequestEvent, timeoutMsec);
 }
@@ -636,7 +636,7 @@ void __cdecl Sys_ResetCinematicsThreadOutstandingRequestEvent()
     Sys_ResetEvent(&g_cinematicsThreadOutstandingRequestEvent);
 }
 
-bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(unsigned int timeoutMsec)
+bool __cdecl Sys_WaitForCinematicsHostOutstandingRequestEventTimeout(uint32_t timeoutMsec)
 {
     return Sys_WaitForSingleObjectTimeout(&g_cinematicsHostOutstandingRequestEvent, timeoutMsec);
 }
@@ -723,7 +723,7 @@ void __cdecl Sys_BeginLoadThreadPriorities()
 }
 
 #ifdef KISAK_SP
-int Sys_WaitStartServer(unsigned int timeout)
+int Sys_WaitStartServer(uint32_t timeout)
 {
     int v2; // r3
     int v3; // r30
@@ -761,7 +761,7 @@ void Sys_ClearClientMessage()
 {
     ResetEvent(clientMessageReceived);
 }
-int Sys_SpawnServerThread(void(*function)(unsigned int))
+int Sys_SpawnServerThread(void(*function)(uint32_t))
 {
     int result; // r3
 
@@ -784,7 +784,7 @@ int Sys_SpawnServerThread(void(*function)(unsigned int))
 }
 void Sys_WaitClientMessageReceived()
 {
-    unsigned int v0; // r8
+    uint32_t v0; // r8
 
     PROF_SCOPED("wait receive msg");
     Sys_WaitForSingleObject(&clientMessageReceived);
@@ -836,7 +836,7 @@ int Sys_ServerTimeout()
                 break;
 
             // linux spergs, use: __sync_bool_compare_and_swap()
-            int oldVal = InterlockedCompareExchange((volatile unsigned int*)&g_timeout, nextTimeout, current);
+            int oldVal = InterlockedCompareExchange((volatile uint32_t*)&g_timeout, nextTimeout, current);
             if (oldVal == current)
             {
                 return 1;
@@ -873,7 +873,7 @@ void Sys_SleepServer()
         Sys_LeaveCriticalSection(CRITSECT_START_SERVER);
     }
 }
-void Sys_Sleep(unsigned int msec)
+void Sys_Sleep(uint32_t msec)
 {
     Sleep(msec);
 }
@@ -911,7 +911,7 @@ bool Sys_WaitForSaveHistoryDone()
     return WaitForSingleObject(g_saveHistoryDoneEvent, 0x7D0u) == 0;
 }
 
-int Sys_SpawnServerDemoThread(void(*function)(unsigned int))
+int Sys_SpawnServerDemoThread(void(*function)(uint32_t))
 {
     int result; // r3
 

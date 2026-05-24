@@ -95,7 +95,7 @@ struct BrushWrapper // sizeof=0x50
     float mins[3];
     int contents;
     float maxs[3];
-    unsigned int numsides;
+    uint32_t numsides;
     cbrushside_t *sides;
     __int16 axialMaterialNum[2][3];
     uint8_t *baseAdjacentSide;
@@ -125,7 +125,7 @@ struct PhysGeomInfo // sizeof=0x44
 
 struct PhysGeomList // sizeof=0x2C
 {
-    unsigned int count;
+    uint32_t count;
     PhysGeomInfo *geoms;
     PhysMass mass;
 };
@@ -185,8 +185,8 @@ struct PhysObjUserData // sizeof=0x70
      float *verts;                       // ...
      int vertStride;
      int vertCount;
-     unsigned int *indices;
-     unsigned int indexCount;
+     uint32_t *indices;
+     uint32_t indexCount;
  };
 
 
@@ -258,11 +258,11 @@ struct PhysGlob // sizeof=0x26508
     PhysStaticArray<dxJointBall, 160> ballArray; // ...
     PhysStaticArray<dxJointAMotor, 160> aMotorArray; // ...
     float gravityDirection[3];          // ...
-    unsigned int physPreviousFrameTimes[10]; // ...
-    unsigned int physPerformanceFrame;  // ...
+    uint32_t physPreviousFrameTimes[10]; // ...
+    uint32_t physPerformanceFrame;  // ...
     float performanceAverage;           // ...
-    unsigned int performanceMintime;    // ...
-    unsigned int performanceMaxtime;    // ...
+    uint32_t performanceMintime;    // ...
+    uint32_t performanceMaxtime;    // ...
 };
 
 struct dContactGeomExt // sizeof=0x30
@@ -383,11 +383,11 @@ void __cdecl Phys_ObjBulletImpact(
     float bulletSpeed,
     float scale);
 void __cdecl Phys_TweakBulletImpact(float *worldPos, float *bulletDir, const float *centerOfMass);
-void __cdecl Phys_PlayCollisionSound(int localClientNum, dxBody *body, unsigned int sndClass, ContactList *contactList);
+void __cdecl Phys_PlayCollisionSound(int localClientNum, dxBody *body, uint32_t sndClass, ContactList *contactList);
 void __cdecl Phys_BodyGetPointVelocity(dxBody *body, float *point, float *outVelocity);
 void __cdecl Phys_DrawDebugText(const ScreenPlacement *scrPlace);
 int __cdecl Phys_DrawDebugTextForWorld(
-    unsigned int worldIndex,
+    uint32_t worldIndex,
     char *worldText,
     float *x,
     float *y,
@@ -396,7 +396,7 @@ int __cdecl Phys_DrawDebugTextForWorld(
 void __cdecl Phys_ObjCountIfActive(dxBody *body);
 void __cdecl dxPostProcessIslands(PhysWorld worldIndex);
 void __cdecl Phys_CheckIfAliveTooLong(dxBody *body);
-int __cdecl Phys_DoBodyOncePerFrame(unsigned int worldIndex, dxBody *body, float deltaT);
+int __cdecl Phys_DoBodyOncePerFrame(uint32_t worldIndex, dxBody *body, float deltaT);
 void __cdecl Phys_GeomUserGetAAContainedBox(dxGeom *geom, float *mins, float *maxs);
 int __cdecl Phys_ObjGetSnapshot(PhysWorld worldIndex, dxBody *id, float *outPos, float (*outMat)[3]);
 void __cdecl Phys_RewindCurrentTime(PhysWorld worldIndex, int timeNow);
@@ -446,7 +446,7 @@ dxJointAMotor *__cdecl Phys_CreateAngularMotor(
     PhysWorld worldIndex,
     dxBody *obj1,
     dxBody *obj2,
-    unsigned int numAxes,
+    uint32_t numAxes,
     const float (*axes)[3],
     const float *motorSpeeds,
     const float *motorFMaxs,
@@ -468,7 +468,7 @@ void Phys_ArchiveState(struct MemoryFile *memFile);
 #endif
 
 // phys_world_collision
-int __cdecl Phys_GetSurfaceFlagsFromBrush(const cbrush_t *brush, unsigned int brushSideIndex);
+int __cdecl Phys_GetSurfaceFlagsFromBrush(const cbrush_t *brush, uint32_t brushSideIndex);
 void __cdecl CM_ForEachBrushInLeafBrushNode_r(
     cLeafBrushNode_s *node,
     const float *mins,
@@ -482,7 +482,7 @@ void __cdecl CM_PositionGeomTestInAabbTree_r(CollisionAabbTree *aabbTree, const 
 bool __cdecl CM_CullBox2(const objInfo *input, const float *origin, const float *halfSize);
 void __cdecl CM_TestGeomInLeaf(cLeaf_t *leaf, const objInfo *input, Results *results);
 void __cdecl CM_TestGeomInLeafBrushNode(cLeaf_t *leaf, const objInfo *input, Results *results);
-void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, unsigned int *userData);
+void __cdecl Phys_TestGeomInBrush(const cbrush_t *brush, uint32_t *userData);
 void __cdecl Phys_TestAgainstEntities(const objInfo *input, Results *results);
 void __cdecl Phys_InitWorldCollision();
 void __cdecl Phys_InitBrushmodelGeomClass();
@@ -514,7 +514,7 @@ enum PolyOrientation : __int32
 struct Poly // sizeof=0x8
 {                                       // ...
     float (*pts)[3];                    // ...
-    unsigned int ptCount;               // ...
+    uint32_t ptCount;               // ...
 };
 struct BrushTrimeshData // sizeof=0x18
 {                                       // ...
@@ -534,18 +534,18 @@ struct BrushBrushData // sizeof=0xC
 void __cdecl Phys_DrawPoly(const Poly *poly, const float *color);
 dContactGeomExt *__cdecl AddContact(Results *results);
 bool __cdecl Phys_AddContactData(Results *results, float depth, float *normal, float *pos, int surfaceFlags);
-PolyOrientation __cdecl GetPolyOrientation(const float *polyNormal, const float (*poly)[3], unsigned int ptCount);
+PolyOrientation __cdecl GetPolyOrientation(const float *polyNormal, const float (*poly)[3], uint32_t ptCount);
 bool __cdecl Phys_GetChoppingPlaneForPolyEdge(
     const float *polyNormal,
     const float *pt1,
     const float *pt2,
     bool clockwise,
     float *outPlane);
-unsigned int __cdecl Phys_ClipLineSegmentAgainstPlane(float *pt1, float *pt2, const float *choppingPlane);
-unsigned int __cdecl Phys_ClipLineSegmentAgainstPoly(
+uint32_t __cdecl Phys_ClipLineSegmentAgainstPlane(float *pt1, float *pt2, const float *choppingPlane);
+uint32_t __cdecl Phys_ClipLineSegmentAgainstPoly(
     const float *polyNormal,
     const float (*poly)[3],
-    unsigned int polyCount,
+    uint32_t polyCount,
     float *pt1,
     float *pt2);
 void __cdecl Phys_ProjectFaceOntoFaceAndClip(
@@ -555,17 +555,17 @@ void __cdecl Phys_ProjectFaceOntoFaceAndClip(
     int surfaceFlags,
     Results *results,
     float *collisionNormal);
-unsigned int __cdecl ClipPolys(
+uint32_t __cdecl ClipPolys(
     const float *polyNormal,
     const float (*poly1)[3],
-    unsigned int poly1Count,
+    uint32_t poly1Count,
     float (*poly2)[3],
-    unsigned int poly2Count,
+    uint32_t poly2Count,
     float (*result)[3],
-    unsigned int maxCount);
+    uint32_t maxCount);
 void __cdecl Phys_GetWindingForBrushFace2(
     const cbrush_t *brush,
-    unsigned int brushSide,
+    uint32_t brushSide,
     Poly *outWinding,
     int maxVerts,
     const float (*axialPlanes)[4]);
@@ -592,7 +592,7 @@ char __cdecl Phys_TestBoxAgainstEachBrushPlane(
     float *outMaxSeparation);
 void __cdecl Phys_CollideBoxWithBrushFace(
     const cbrush_t *brush,
-    unsigned int brushSideIndex,
+    uint32_t brushSideIndex,
     const float *bestBrushPlane,
     const Poly *brushWinding,
     const objInfo *info,
@@ -605,30 +605,30 @@ void __cdecl Phys_CollideOrientedBrushWithBrush(
     const cbrush_t *fixedBrush,
     const objInfo *input,
     Results *results);
-unsigned int __cdecl Phys_BuildWindingsForBrush(
+uint32_t __cdecl Phys_BuildWindingsForBrush(
     const cbrush_t *brush,
     const float (*planes)[4],
     Poly *outPolys,
-    unsigned int maxPolys,
+    uint32_t maxPolys,
     float (*outVerts)[3],
-    unsigned int maxVerts);
+    uint32_t maxVerts);
 void __cdecl Phys_GetWindingForBrushFace(
     const cbrush_t *brush,
     const float (*inPlanes)[4],
-    unsigned int brushSide,
+    uint32_t brushSide,
     Poly *outWinding,
     int maxVerts);
-unsigned int __cdecl Phys_BuildWindingsForBrush2(
+uint32_t __cdecl Phys_BuildWindingsForBrush2(
     const cbrush_t *brush,
     Poly *outPolys,
-    unsigned int maxPolys,
+    uint32_t maxPolys,
     float (*outVerts)[3],
-    unsigned int maxVerts);
+    uint32_t maxVerts);
 double __cdecl Phys_TestVertsAgainstPlane_Wrapper(const float *plane, const Poly *verts);
-double __cdecl Phys_TestVertsAgainstPlane(const float (*verts)[3], unsigned int vertCount, const float *plane);
+double __cdecl Phys_TestVertsAgainstPlane(const float (*verts)[3], uint32_t vertCount, const float *plane);
 char __cdecl Phys_TestVertsAgainstPlanes(
     const float (*verts)[3],
-    unsigned int vertCount,
+    uint32_t vertCount,
     const cbrush_t *brushContainingThePlanes,
     const float (*planes)[4],
     float *outPlane,
@@ -642,7 +642,7 @@ void __cdecl Phys_TransformPlane(
     float *outPlane);
 void __cdecl Phys_CollideOrientedBrushAgainstFixedBrushFace(
     const cbrush_t *fixedBrush,
-    unsigned int fixedBrushSideIndex,
+    uint32_t fixedBrushSideIndex,
     float *bestFixedBrushPlane,
     const Poly *fixedBrushPolys,
     const cbrush_t *orientedBrush,
@@ -659,14 +659,14 @@ int __cdecl Phys_CollideBrushAgainstBrushFace(
     const cbrush_t *brush,
     const Poly *brushPolys,
     const cbrush_t *referenceBrush,
-    unsigned int referenceBrushSideIndex,
+    uint32_t referenceBrushSideIndex,
     float *referenceBrushPlane,
     const Poly *referenceBrushPolys,
     Results *results);
 char __cdecl Phys_DoesPolyIntersectOrientedBrush(
     const Poly *poly,
     const float (*transformedPlanes)[4],
-    unsigned int brushSides);
+    uint32_t brushSides);
 void __cdecl Phys_CollideOrientedBrushModelWithBrush(const cbrush_t *fixedBrush, const objInfo *info, Results *results);
 void __cdecl Phys_CollideOrientedBrushWithBrush_Wrapper(const cbrush_t *orientedBrush, void *userData);
 void __cdecl Phys_CollideOrientedBrushWithTriangleList(
@@ -686,7 +686,7 @@ void __cdecl Phys_CollideOrientedBrushWithTriangle(
     BrushTrimeshData *data);
 void __cdecl Phys_CollideFixedBrushWithTriangle(const cbrush_t *brush, float (*triangle)[3], BrushTrimeshData *data);
 void __cdecl Phys_GetPlaneForTriangle(const float (*triangle)[3], float *result);
-unsigned int __cdecl Phys_AxialSideToJ(unsigned int axialSide);
+uint32_t __cdecl Phys_AxialSideToJ(uint32_t axialSide);
 void __cdecl Phys_DrawPolyTransformed(const Poly *poly, const float *color, const float *pos, const float (*R)[3]);
 double __cdecl Phys_TestTriangleAgainstBrushPlane(const float *brushPlane, const float (*triangle)[3]);
 void __cdecl Phys_CollideOrientedBrushModelWithTriangleList(
@@ -700,7 +700,7 @@ void __cdecl Phys_CollideOrientedBrushWithTriangleList_Wrapper(const cbrush_t *o
 void __cdecl Phys_CollideBoxWithTriangleList(
     const unsigned __int16 *indices,
     const float (*verts)[3],
-    unsigned int triCount,
+    uint32_t triCount,
     const objInfo *info,
     int surfaceFlags,
     Results *results);
@@ -708,8 +708,8 @@ void __cdecl Phys_AxisToOdeMatrix3(const float (*inAxis)[3], float *outMatrix);
 
 int __cdecl Phys_ClipPolyAgainstPlane(
     float (*poly)[3],
-    unsigned int polyCount,
-    unsigned int maxCount,
+    uint32_t polyCount,
+    uint32_t maxCount,
     float *choppingPlane);
 
 

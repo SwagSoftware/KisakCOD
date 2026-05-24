@@ -201,12 +201,12 @@ static byte extendedVirtualKeyConvert[21][2] =
 	{ 0,				0				},
 };
 
-static bool IsNumLockAffectedVK(unsigned int wParam)
+static bool IsNumLockAffectedVK(uint32_t wParam)
 {
 	return wParam >= 0x60 && wParam <= 0x69 || wParam == 110;
 }
 
-static unsigned int AdustKeyForNumericKeypad(unsigned int key, unsigned int wParam, unsigned int extended)
+static uint32_t AdustKeyForNumericKeypad(uint32_t key, uint32_t wParam, uint32_t extended)
 {
 	if ((clientUIActives[0].keyCatchers & 0x11) == 0)
 		return key;
@@ -215,9 +215,9 @@ static unsigned int AdustKeyForNumericKeypad(unsigned int key, unsigned int wPar
 	return !IsNumLockAffectedVK(wParam) ? key : 0;
 }
 
-static unsigned char MapKey(int key, unsigned int wParam)
+static unsigned char MapKey(int key, uint32_t wParam)
 {
-	unsigned int result;
+	uint32_t result;
 	int i;
 
 	if (((key >> 8) & 0xFF)/*BYTE2*/ == ')')
@@ -247,7 +247,7 @@ static unsigned char MapKey(int key, unsigned int wParam)
 	return result;
 }
 
-void __cdecl VID_AppActivate(unsigned int activeState, int minimize)
+void __cdecl VID_AppActivate(uint32_t activeState, int minimize)
 {
 	BOOL v2; // [esp+0h] [ebp-8h]
 

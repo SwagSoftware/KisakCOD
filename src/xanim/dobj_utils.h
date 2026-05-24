@@ -11,15 +11,15 @@ void __cdecl DObjGetBoneInfo(const DObj_s *obj, XBoneInfo **boneInfo);
 int __cdecl DObjNumBones(const DObj_s *obj);
 int __cdecl DObjGetLodForDist(const DObj_s *obj, int modelIndex, float dist);
 void __cdecl DObjGetSetBones(const DObj_s *obj, int *setPartBits);
-unsigned int __cdecl DObjGetRootBoneCount(const DObj_s *obj);
+uint32_t __cdecl DObjGetRootBoneCount(const DObj_s *obj);
 int __cdecl DObjSetRotTransIndex(DObj_s *obj, const int *partBits, int boneIndex);
 char __cdecl DObjSetSkelRotTransIndex(DObj_s *obj, const int *partBits, int boneIndex);
-void __cdecl DObjSetControlTagAngles(DObj_s *obj, int *partBits, unsigned int boneIndex, float *angles);
+void __cdecl DObjSetControlTagAngles(DObj_s *obj, int *partBits, uint32_t boneIndex, float *angles);
 XModel *__cdecl DObjGetModel(const DObj_s *obj, int modelIndex);
 void __cdecl DObjSetLocalTag(
     DObj_s *obj,
     int *partBits,
-    unsigned int boneIndex,
+    uint32_t boneIndex,
     const float *trans,
     const float *angles);
 void __cdecl DObjSetLocalTagInternal(const DObj_s *obj, const float *trans, const float *angles, int boneIndex);
@@ -34,7 +34,7 @@ int __cdecl DObjSkelAreBonesUpToDate(const DObj_s *obj, int *partBits);
 int __cdecl DObjGetAllocSkelSize(const DObj_s *obj);
 void __cdecl DObjCreateSkel(DObj_s *obj, char *buf, int timeStamp);
 DObjAnimMat *__cdecl I_dmaGetDObjSkel(const DObj_s *obj);
-void __cdecl DObjGetHidePartBits(const DObj_s *obj, unsigned int *partBits);
+void __cdecl DObjGetHidePartBits(const DObj_s *obj, uint32_t *partBits);
 
 void __cdecl DObjLock(DObj_s *obj);
 void __cdecl DObjUnlock(DObj_s *obj);

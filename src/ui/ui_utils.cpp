@@ -352,7 +352,7 @@ multiDef_s *__cdecl Item_GetMultiDef(itemDef_s *item)
     return item->typeData.multi;
 }
 
-uint8_t *__cdecl UI_Alloc(unsigned int size, int alignment)
+uint8_t *__cdecl UI_Alloc(uint32_t size, int alignment)
 {
     return Hunk_AllocAlign(size, alignment, "UI_Alloc", 34);
 }

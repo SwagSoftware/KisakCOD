@@ -104,7 +104,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
     float *v10; // [esp+60h] [ebp-1C8h]
     transPlayerState_t transPs; // [esp+64h] [ebp-1C4h] BYREF
     const char *tagName; // [esp+7Ch] [ebp-1ACh]
-    unsigned int centInPrevSnapshot[32]; // [esp+80h] [ebp-1A8h] BYREF
+    uint32_t centInPrevSnapshot[32]; // [esp+80h] [ebp-1A8h] BYREF
     cg_s *cgameGlob; // [esp+100h] [ebp-128h]
     centity_s *cent; // [esp+104h] [ebp-124h]
     const char *modelName; // [esp+108h] [ebp-120h]
@@ -378,7 +378,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     DObj_s *obj; // [esp+1Ch] [ebp-20h]
     DObj_s *obja; // [esp+1Ch] [ebp-20h]
     XAnimTree_s *pXAnimTree; // [esp+24h] [ebp-18h]
-    unsigned int corpseIndex; // [esp+2Ch] [ebp-10h]
+    uint32_t corpseIndex; // [esp+2Ch] [ebp-10h]
     clientInfo_t *cia; // [esp+30h] [ebp-Ch]
     clientInfo_t *ci; // [esp+30h] [ebp-Ch]
     int i; // [esp+34h] [ebp-8h]
@@ -524,7 +524,7 @@ void __cdecl CG_TransitionKillcam(int localClientNum)
 {
     XAnimTree_s *pXAnimTree; // [esp+Ch] [ebp-24h]
     centity_s *cent; // [esp+10h] [ebp-20h]
-    unsigned int corpseIndex; // [esp+18h] [ebp-18h]
+    uint32_t corpseIndex; // [esp+18h] [ebp-18h]
     int anim; // [esp+20h] [ebp-10h]
     int i; // [esp+24h] [ebp-Ch]
     XAnim_s *anims; // [esp+28h] [ebp-8h]

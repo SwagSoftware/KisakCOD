@@ -15,7 +15,7 @@
 //Base64 char table - used internally for encoding
 unsigned char b64_chr[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-unsigned int b64_int(unsigned int ch) {
+uint32_t b64_int(uint32_t ch) {
 
 	// ASCII to base64_int
 	// 65-90  Upper Case  >>  0-25
@@ -39,7 +39,7 @@ unsigned int b64_int(unsigned int ch) {
 	return 0;
 }
 
-unsigned int b64e_size(unsigned int in_size) {
+uint32_t b64e_size(uint32_t in_size) {
 
 	// size equals 4*floor((1/3)*(in_size+2));
 	int i, j = 0;
@@ -50,14 +50,14 @@ unsigned int b64e_size(unsigned int in_size) {
 	return (4*j);
 }
 
-unsigned int b64d_size(unsigned int in_size) {
+uint32_t b64d_size(uint32_t in_size) {
 
 	return ((3*in_size)/4);
 }
 
-unsigned int b64_encode(const unsigned char* in, unsigned int in_len, unsigned char* out) {
+uint32_t b64_encode(const unsigned char* in, uint32_t in_len, unsigned char* out) {
 
-	unsigned int i=0, j=0, k=0, s[3];
+	uint32_t i=0, j=0, k=0, s[3];
 	
 	for (i=0;i<in_len;i++) {
 		s[j++]=*(in+i);
@@ -88,9 +88,9 @@ unsigned int b64_encode(const unsigned char* in, unsigned int in_len, unsigned c
 	return k;
 }
 
-unsigned int b64_decode(const unsigned char* in, unsigned int in_len, unsigned char* out) {
+uint32_t b64_decode(const unsigned char* in, uint32_t in_len, unsigned char* out) {
 
-	unsigned int i=0, j=0, k=0, s[4];
+	uint32_t i=0, j=0, k=0, s[4];
 	
 	for (i=0;i<in_len;i++) {
 		s[j++]=b64_int(*(in+i));
@@ -113,15 +113,15 @@ unsigned int b64_decode(const unsigned char* in, unsigned int in_len, unsigned c
 	return k;
 }
 
-unsigned int b64_encodef(char *InFile, char *OutFile) {
+uint32_t b64_encodef(char *InFile, char *OutFile) {
 
 	FILE *pInFile = fopen(InFile,"rb");
 	FILE *pOutFile = fopen(OutFile,"wb");
 	
-	unsigned int i=0;
-	unsigned int j=0;
-	unsigned int c=0;
-	unsigned int s[4];
+	uint32_t i=0;
+	uint32_t j=0;
+	uint32_t c=0;
+	uint32_t s[4];
 	
 	if ((pInFile==NULL) || (pOutFile==NULL) ) {
 		if (pInFile!=NULL){fclose(pInFile);}
@@ -162,15 +162,15 @@ unsigned int b64_encodef(char *InFile, char *OutFile) {
 	return i;
 }
 
-unsigned int b64_decodef(char *InFile, char *OutFile) {
+uint32_t b64_decodef(char *InFile, char *OutFile) {
 
 	FILE *pInFile = fopen(InFile,"rb");
 	FILE *pOutFile = fopen(OutFile,"wb");
 	
-	unsigned int c=0;
-	unsigned int j=0;
-	unsigned int k=0;
-	unsigned int s[4];
+	uint32_t c=0;
+	uint32_t j=0;
+	uint32_t k=0;
+	uint32_t s[4];
 	
 	if ((pInFile==NULL) || (pOutFile==NULL) ) {
 		if (pInFile!=NULL){fclose(pInFile);}

@@ -279,7 +279,7 @@ void __cdecl TRACK_r_material()
     track_static_alloc_internal((void *)s_builtInMaterials, 400, "s_builtInMaterials", 18);
 }
 
-uint8_t *__cdecl Material_Alloc(unsigned int size)
+uint8_t *__cdecl Material_Alloc(uint32_t size)
 {
     return Hunk_Alloc(size, "Material_Alloc", 22);
 }
@@ -317,7 +317,7 @@ void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, Ma
 void __cdecl AssertValidVertexDeclOffsets(const stream_source_info_t *streamTable)
 {
     int thisIndex; // [esp+0h] [ebp-10h]
-    unsigned int stream; // [esp+4h] [ebp-Ch]
+    uint32_t stream; // [esp+4h] [ebp-Ch]
     int lastIndex[2]; // [esp+8h] [ebp-8h]
 
     lastIndex[0] = -1;
@@ -533,7 +533,7 @@ Material *__cdecl Material_MakeDefault(char *name)
 void __cdecl Material_Add(Material *material, uint16_t hashIndex)
 {
     unsigned __int64 v2; // rax
-    unsigned int v3; // ecx
+    uint32_t v3; // ecx
 
     iassert(material);
     rgp.needSortMaterials = 1;
@@ -604,11 +604,11 @@ bool __cdecl R_MaterialCompare(const MaterialMemory &material0, const MaterialMe
 void __cdecl R_MaterialList_f()
 {
     const char *fmt; // [esp+8h] [ebp-4150h]
-    unsigned int i; // [esp+138h] [ebp-4020h]
+    uint32_t i; // [esp+138h] [ebp-4020h]
     Material *material; // [esp+13Ch] [ebp-401Ch]
     int v3; // [esp+140h] [ebp-4018h]
     MaterialMemory *v4; // [esp+144h] [ebp-4014h]
-    unsigned int inData; // [esp+148h] [ebp-4010h] BYREF
+    uint32_t inData; // [esp+148h] [ebp-4010h] BYREF
     MaterialMemory v6[2049]; // [esp+14Ch] [ebp-400Ch] BYREF
     float v7; // [esp+4154h] [ebp-4h]
 
@@ -652,10 +652,10 @@ void __cdecl R_GetMaterialList(XAssetHeader header, char *data)
     if (memory)
     {
         //iassert( materialList->count < ARRAY_COUNT( materialList->sorted ) ); // KISAKTODO
-        materialMemory = (XAssetHeader *)&data[8 * *(unsigned int *)data + 4];
+        materialMemory = (XAssetHeader *)&data[8 * *(uint32_t *)data + 4];
         materialMemory->xmodelPieces = header.xmodelPieces;
         materialMemory[1].xmodelPieces = (XModelPieces *)memory;
-        ++*(unsigned int *)data;
+        ++*(uint32_t *)data;
     }
 }
 

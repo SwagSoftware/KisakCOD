@@ -50,9 +50,9 @@ void __cdecl TRACK_r_scene()
     track_static_alloc_internal(&scene, 1395968, "scene", 18);
 }
 
-unsigned int __cdecl R_AllocSceneDObj()
+uint32_t __cdecl R_AllocSceneDObj()
 {
-    unsigned int sceneEntIndex; // [esp+0h] [ebp-4h]
+    uint32_t sceneEntIndex; // [esp+0h] [ebp-4h]
 
     iassert( rg.registered );
     iassert( rg.inFrame );
@@ -65,9 +65,9 @@ unsigned int __cdecl R_AllocSceneDObj()
     return sceneEntIndex;
 }
 
-unsigned int __cdecl R_AllocSceneModel()
+uint32_t __cdecl R_AllocSceneModel()
 {
-    unsigned int sceneEntIndex; // [esp+0h] [ebp-4h]
+    uint32_t sceneEntIndex; // [esp+0h] [ebp-4h]
 
     iassert( rg.registered );
     iassert( rg.inFrame );
@@ -80,9 +80,9 @@ unsigned int __cdecl R_AllocSceneModel()
     return sceneEntIndex;
 }
 
-unsigned int __cdecl R_AllocSceneBrush()
+uint32_t __cdecl R_AllocSceneBrush()
 {
-    unsigned int sceneEntIndex; // [esp+0h] [ebp-4h]
+    uint32_t sceneEntIndex; // [esp+0h] [ebp-4h]
 
     iassert( rg.registered );
     iassert( rg.inFrame );
@@ -95,7 +95,7 @@ unsigned int __cdecl R_AllocSceneBrush()
     return sceneEntIndex;
 }
 
-GfxBrushModel *__cdecl R_GetBrushModel(unsigned int modelIndex)
+GfxBrushModel *__cdecl R_GetBrushModel(uint32_t modelIndex)
 {
     iassert( rgp.world );
     if (modelIndex >= rgp.world->modelCount)
@@ -115,7 +115,7 @@ void __cdecl R_AddBrushModelToSceneFromAngles(
     const float *angles,
     uint16_t entnum)
 {
-    unsigned int sceneEntIndex; // [esp+4h] [ebp-8h]
+    uint32_t sceneEntIndex; // [esp+4h] [ebp-8h]
     GfxSceneBrush *sceneBrush; // [esp+8h] [ebp-4h]
 
     iassert( bmodel );
@@ -138,8 +138,8 @@ void __cdecl R_AddBrushModelToSceneFromAngles(
 void __cdecl R_AddDObjToScene(
     const DObj_s *obj,
     const cpose_t *pose,
-    unsigned int entnum,
-    unsigned int renderFxFlags,
+    uint32_t entnum,
+    uint32_t renderFxFlags,
     float *lightingOrigin,
     float materialTime)
 {
@@ -151,8 +151,8 @@ void __cdecl R_AddDObjToScene(
     GfxEntity *gfxEnt; // [esp+1Ch] [ebp-1Ch]
     float angles[3]; // [esp+20h] [ebp-18h] BYREF
     GfxSceneEntity *sceneEnt; // [esp+2Ch] [ebp-Ch]
-    unsigned int sceneEntIndex; // [esp+30h] [ebp-8h]
-    unsigned int gfxEntIndex; // [esp+34h] [ebp-4h]
+    uint32_t sceneEntIndex; // [esp+30h] [ebp-8h]
+    uint32_t gfxEntIndex; // [esp+34h] [ebp-4h]
 
     iassert(Sys_IsMainThread());
     iassert(obj);
@@ -216,7 +216,7 @@ void __cdecl R_AddDObjToScene(
                 sceneModel->obj = obj;
                 sceneModel->entnum = entnum;
                 scene.dpvs.sceneXModelIndex[entnum] = sceneEntIndex;
-                sceneModel->cachedLightingHandle = (uint16_t *)LongNoSwap((unsigned int)pose);
+                sceneModel->cachedLightingHandle = (uint16_t *)LongNoSwap((uint32_t)pose);
                 radius = XModelGetRadius(model);
                 CG_GetPoseOrigin(pose, sceneModel->placement.base.origin);
                 CG_GetPoseAngles(pose, angles);
@@ -234,7 +234,7 @@ void __cdecl R_AddDObjToScene(
 
 GfxParticleCloud *__cdecl R_AddParticleCloudToScene(Material *material)
 {
-    volatile unsigned int cloudIndex; // [esp+Ch] [ebp-4h]
+    volatile uint32_t cloudIndex; // [esp+Ch] [ebp-4h]
 
     cloudIndex = InterlockedIncrement(&frontEndDataOut->cloudCount) - 1;
     if (cloudIndex < 0x100)
@@ -377,16 +377,16 @@ void __cdecl R_AddBModelSurfacesCamera(
     const GfxBrushModel *bmodel,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs,
-    unsigned int reflectionProbeIndex)
+    uint32_t reflectionProbeIndex)
 {
     uint16_t surfaceCount; // [esp+4h] [ebp-28h]
-    unsigned int surfId; // [esp+8h] [ebp-24h]
+    uint32_t surfId; // [esp+8h] [ebp-24h]
     //unsigned __int64 drawSurf; // [esp+Ch] [ebp-20h]
     const Material *material; // [esp+14h] [ebp-18h]
     BModelSurface *modelSurf; // [esp+18h] [ebp-14h]
     const GfxSurface *bspSurf; // [esp+1Ch] [ebp-10h]
-    unsigned int region; // [esp+20h] [ebp-Ch]
-    unsigned int count; // [esp+28h] [ebp-4h]
+    uint32_t region; // [esp+20h] [ebp-Ch]
+    uint32_t count; // [esp+28h] [ebp-4h]
 
     iassert(bmodel);
     surfId = bmodelInfo->surfId;
@@ -399,7 +399,7 @@ void __cdecl R_AddBModelSurfacesCamera(
             "reflectionProbeIndex doesn't index 1 << MTL_SORT_ENVMAP_BITS\n\t%i not in [0, %i)",
             reflectionProbeIndex,
             256);
-    if (gfxDrawMethod.emissiveTechType >= (unsigned int)TECHNIQUE_COUNT)
+    if (gfxDrawMethod.emissiveTechType >= (uint32_t)TECHNIQUE_COUNT)
         MyAssertHandler(
             ".\\r_scene.cpp",
             550,
@@ -436,7 +436,7 @@ void __cdecl R_AddBModelSurfacesCamera(
             //LODWORD(drawSurf) = ((uint8_t)reflectionProbeIndex << 16) // reflectionProbeIndex
             //    | ((bspSurf->lightmapIndex & 0x1F) << 24) // customIndex
             //    | (uint16_t)surfId // objectId
-            //    | *(unsigned int *)&material->info.drawSurf.fields & 0xE0000000; // copy upper 3 bits of LODWORD
+            //    | *(uint32_t *)&material->info.drawSurf.fields & 0xE0000000; // copy upper 3 bits of LODWORD
 
             //HIDWORD(drawSurf) = (bspSurf->primaryLightIndex << 10) // PrimaryLightIndex
             //    | HIDWORD(material->info.drawSurf.packed) & 0xFFC003FF // all other bits in HIDWORD
@@ -459,10 +459,10 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
     GfxDrawSurf *lastDrawSurf)
 {
     uint16_t surfaceCount; // [esp+6h] [ebp-2Ah]
-    unsigned int surfId; // [esp+10h] [ebp-20h]
+    uint32_t surfId; // [esp+10h] [ebp-20h]
     const Material *material; // [esp+14h] [ebp-1Ch]
     BModelSurface *modelSurf; // [esp+20h] [ebp-10h]
-    unsigned int count; // [esp+2Ch] [ebp-4h]
+    uint32_t count; // [esp+2Ch] [ebp-4h]
 
     iassert( bmodel );
     surfId = bmodelInfo->surfId;
@@ -485,7 +485,7 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
             bcassert(surfId, (1 << MTL_SORT_OBJECT_ID_BITS));
 
             //newDrawSurf_4 = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF/*MINUS surfType*/ | 0x180000;
-            //*(unsigned int *)&drawSurf->fields = (uint16_t)surfId | *(unsigned int *)&material->info.drawSurf.fields & 0xFFFF0000;
+            //*(uint32_t *)&drawSurf->fields = (uint16_t)surfId | *(uint32_t *)&material->info.drawSurf.fields & 0xFFFF0000;
             drawSurf->fields.objectId = surfId;
             HIDWORD(drawSurf->packed) = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF/*MINUS surfType*/ | 0x180000; // 0x180000 sets bits 48-49 to 1 (primaryLightIndex?)
             ++drawSurf;
@@ -496,7 +496,7 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
     return drawSurf;
 }
 
-const XSurface *__cdecl R_GetXSurface(unsigned int *modelSurf, surfaceType_t surfType)
+const XSurface *__cdecl R_GetXSurface(uint32_t *modelSurf, surfaceType_t surfType)
 {
     iassert( modelSurf );
     iassert( R_IsModelSurfaceType( surfType ) );
@@ -508,28 +508,28 @@ void __cdecl R_AddXModelSurfacesCamera(
     const XModel *model,
     float *origin,
     uint16_t gfxEntIndex,
-    unsigned int lightingHandle,
+    uint32_t lightingHandle,
     uint8_t primaryLightIndex,
     char isShadowReceiver,
     int depthHack,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs,
-    unsigned int reflectionProbeIndex)
+    uint32_t reflectionProbeIndex)
 {
     const XSurface *xSurf; // eax
     const XSurface *v12; // eax
-    unsigned int surfId; // [esp+8h] [ebp-38h]
+    uint32_t surfId; // [esp+8h] [ebp-38h]
     int totalVertCount; // [esp+Ch] [ebp-34h]
     //__int64 drawSurf; // [esp+10h] [ebp-30h]
     int totalTriCount; // [esp+1Ch] [ebp-24h]
     Material **material; // [esp+20h] [ebp-20h]
-    unsigned int subMatIndex; // [esp+24h] [ebp-1Ch]
+    uint32_t subMatIndex; // [esp+24h] [ebp-1Ch]
     int skinnedCachedOffset; // [esp+28h] [ebp-18h]
     int lod; // [esp+2Ch] [ebp-14h]
     GfxModelRigidSurface *modelSurf; // [esp+30h] [ebp-10h]
     surfaceType_t surfType; // [esp+34h] [ebp-Ch]
-    unsigned int region; // [esp+38h] [ebp-8h]
-    unsigned int numsurfs; // [esp+3Ch] [ebp-4h]
+    uint32_t region; // [esp+38h] [ebp-8h]
+    uint32_t numsurfs; // [esp+3Ch] [ebp-4h]
 
     iassert( lightingHandle );
     totalTriCount = 0;
@@ -624,12 +624,12 @@ void __cdecl R_AddXModelSurfacesCamera(
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
-                    xSurf = R_GetXSurface((unsigned int*)modelSurf, surfType);
+                    xSurf = R_GetXSurface((uint32_t*)modelSurf, surfType);
                     totalTriCount += XSurfaceGetNumTris(xSurf);
                 }
                 else if (r_showVertCounts->current.enabled)
                 {
-                    v12 = R_GetXSurface((unsigned int *)modelSurf, surfType);
+                    v12 = R_GetXSurface((uint32_t *)modelSurf, surfType);
                     totalVertCount += XSurfaceGetNumVerts(v12);
                 }
                 surfId += 14;
@@ -664,15 +664,15 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
     GfxDrawSurf *drawSurf,
     GfxDrawSurf *lastDrawSurf)
 {
-    unsigned int surfId; // [esp+10h] [ebp-2Ch]
+    uint32_t surfId; // [esp+10h] [ebp-2Ch]
     Material **material; // [esp+14h] [ebp-28h]
-    unsigned int subMatIndex; // [esp+18h] [ebp-24h]
+    uint32_t subMatIndex; // [esp+18h] [ebp-24h]
     //unsigned __int64 newDrawSurf; // [esp+1Ch] [ebp-20h]
     int skinnedCachedOffset; // [esp+28h] [ebp-14h]
     int lod; // [esp+2Ch] [ebp-10h]
     GfxModelRigidSurface *modelSurf; // [esp+30h] [ebp-Ch]
     char surfType; // [esp+34h] [ebp-8h]
-    unsigned int numsurfs; // [esp+38h] [ebp-4h]
+    uint32_t numsurfs; // [esp+38h] [ebp-4h]
 
     iassert( model );
     surfId = modelInfo->surfId;
@@ -720,7 +720,7 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
                 //HIDWORD(newDrawSurf) = ((surfType & 0xF) << 18)  // surfType
                 //    | HIDWORD((*material)->info.drawSurf.packed) & 0xFFC3FFFF; // rest of bits in HIDWORD
                 //LODWORD(newDrawSurf) = (uint16_t)surfId  // objectID
-                //    | *(unsigned int *)&(*material)->info.drawSurf.fields & 0xFFFF0000; // rest of bits in LODWORD
+                //    | *(uint32_t *)&(*material)->info.drawSurf.fields & 0xFFFF0000; // rest of bits in LODWORD
 
                 //drawSurf->packed = newDrawSurf;
 
@@ -749,25 +749,25 @@ void __cdecl R_AddDObjSurfacesCamera(
     const XSurface *xSurf; // eax
     const XSurface *v6; // eax
     bool v10; // [esp+4h] [ebp-6Ch]
-    unsigned int surfId; // [esp+Ch] [ebp-64h]
+    uint32_t surfId; // [esp+Ch] [ebp-64h]
     int totalVertCount; // [esp+10h] [ebp-60h]
     const DObj_s *obj; // [esp+14h] [ebp-5Ch]
     //unsigned __int64 drawSurf; // [esp+18h] [ebp-58h]
     int totalTriCount; // [esp+20h] [ebp-50h]
     Material **material; // [esp+24h] [ebp-4Ch]
     XModel *model; // [esp+28h] [ebp-48h]
-    unsigned int subMatIndex; // [esp+2Ch] [ebp-44h]
-    unsigned int surfSize; // [esp+30h] [ebp-40h]
+    uint32_t subMatIndex; // [esp+2Ch] [ebp-44h]
+    uint32_t surfSize; // [esp+30h] [ebp-40h]
     int lod; // [esp+3Ch] [ebp-34h]
-    unsigned int depthHack; // [esp+40h] [ebp-30h]
+    uint32_t depthHack; // [esp+40h] [ebp-30h]
     char *modelSurf; // [esp+44h] [ebp-2Ch]
     bool isShadowReceiver; // [esp+48h] [ebp-28h]
     surfaceType_t surfType; // [esp+4Ch] [ebp-24h]
-    unsigned int region; // [esp+50h] [ebp-20h]
-    unsigned int gfxEntIndex; // [esp+54h] [ebp-1Ch]
-    unsigned int numsurfs; // [esp+5Ch] [ebp-14h]
-    unsigned int modelIndex; // [esp+60h] [ebp-10h]
-    unsigned int modelCount; // [esp+64h] [ebp-Ch]
+    uint32_t region; // [esp+50h] [ebp-20h]
+    uint32_t gfxEntIndex; // [esp+54h] [ebp-1Ch]
+    uint32_t numsurfs; // [esp+5Ch] [ebp-14h]
+    uint32_t modelIndex; // [esp+60h] [ebp-10h]
+    uint32_t modelCount; // [esp+64h] [ebp-Ch]
     int totalSurfCount; // [esp+6Ch] [ebp-4h]
 
     modelSurf = (char *)sceneEnt->cull.skinnedSurfs.firstSurf;
@@ -816,14 +816,14 @@ LABEL_15:
                 ++modelIndex;
                 goto LABEL_15;
             }
-            if (*(unsigned int *)modelSurf == -2)
+            if (*(uint32_t *)modelSurf == -2)
             {
                 surfType = SF_BEGIN_XMODEL;
                 surfSize = 56;
             }
             else
             {
-                if (*(unsigned int *)modelSurf == -3)
+                if (*(uint32_t *)modelSurf == -3)
                 {
                     surfSize = 4;
                     goto LABEL_22;
@@ -872,12 +872,12 @@ LABEL_15:
                 ++drawSurfs[region];
                 if (r_showTriCounts->current.enabled)
                 {
-                    xSurf = R_GetXSurface((unsigned int *)modelSurf, surfType);
+                    xSurf = R_GetXSurface((uint32_t *)modelSurf, surfType);
                     totalTriCount += XSurfaceGetNumTris(xSurf);
                 }
                 else if (r_showVertCounts->current.enabled)
                 {
-                    v6 = R_GetXSurface((unsigned int*)modelSurf, surfType);
+                    v6 = R_GetXSurface((uint32_t*)modelSurf, surfType);
                     totalVertCount += XSurfaceGetNumVerts(v6);
                 }
             }
@@ -906,20 +906,20 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
     GfxDrawSurf *drawSurf,
     GfxDrawSurf *lastDrawSurf)
 {
-    unsigned int surfId; // [esp+10h] [ebp-50h]
+    uint32_t surfId; // [esp+10h] [ebp-50h]
     const DObj_s *obj; // [esp+14h] [ebp-4Ch]
     Material **material; // [esp+18h] [ebp-48h]
     XModel *model; // [esp+1Ch] [ebp-44h]
-    unsigned int subMatIndex; // [esp+20h] [ebp-40h]
-    unsigned int surfSize; // [esp+24h] [ebp-3Ch]
+    uint32_t subMatIndex; // [esp+20h] [ebp-40h]
+    uint32_t surfSize; // [esp+24h] [ebp-3Ch]
     GfxDrawSurf newDrawSurf; // [esp+28h] [ebp-38h]
     int lod; // [esp+38h] [ebp-28h]
-    unsigned int depthHack; // [esp+3Ch] [ebp-24h]
+    uint32_t depthHack; // [esp+3Ch] [ebp-24h]
     char *modelSurf; // [esp+40h] [ebp-20h]
     char surfType; // [esp+44h] [ebp-1Ch]
-    unsigned int numsurfs; // [esp+50h] [ebp-10h]
-    unsigned int modelIndex; // [esp+54h] [ebp-Ch]
-    unsigned int modelCount; // [esp+58h] [ebp-8h]
+    uint32_t numsurfs; // [esp+50h] [ebp-10h]
+    uint32_t modelIndex; // [esp+54h] [ebp-Ch]
+    uint32_t modelCount; // [esp+58h] [ebp-8h]
 
     modelSurf = (char *)sceneEnt->cull.skinnedSurfs.firstSurf;
     if (!modelSurf)
@@ -945,14 +945,14 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
         LABEL_18:
             if (subMatIndex >= numsurfs)
                 continue;
-            if (*(unsigned int *)modelSurf == -2)
+            if (*(uint32_t *)modelSurf == -2)
             {
                 surfType = 7;
                 surfSize = 56;
             }
             else
             {
-                if (*(unsigned int *)modelSurf == -3)
+                if (*(uint32_t *)modelSurf == -3)
                 {
                     surfSize = 4;
                 LABEL_17:
@@ -984,8 +984,8 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                 drawSurf->packed = newDrawSurf.packed; // LWSS: see explanation below, it basically copies the whole thing and sets a few custom fields.
 
                 drawSurf->fields.objectId = (unsigned short)surfId;
-                //*(unsigned int *)&drawSurf->fields = (uint16_t)surfIda  // set lower 16 (objectId)
-                //    | *(unsigned int *)&newDrawSurf.fields & 0xFFFF0000; // Copy the higher 2 bytes (bits 16-32)
+                //*(uint32_t *)&drawSurf->fields = (uint16_t)surfIda  // set lower 16 (objectId)
+                //    | *(uint32_t *)&newDrawSurf.fields & 0xFFFF0000; // Copy the higher 2 bytes (bits 16-32)
                 
                 drawSurf->fields.surfType = surfType;
                 drawSurf->fields.primarySortKey = (newDrawSurf.fields.primarySortKey - depthHack);
@@ -1096,20 +1096,20 @@ void __cdecl R_InitScene()
     scene.maxDrawSurfCount[33] = 512;
 }
 
-void __cdecl R_ClearScene(unsigned int localClientNum)
+void __cdecl R_ClearScene(uint32_t localClientNum)
 {
-    unsigned int viewIndex; // [esp+0h] [ebp-4h]
+    uint32_t viewIndex; // [esp+0h] [ebp-4h]
 
     iassert( rg.inFrame );
     iassert( Sys_IsMainThread() || Sys_IsRenderThread() );
     scene.dpvs.localClientNum = localClientNum;
-    Com_Memset((unsigned int *)scene.sceneDObj, 0, 124 * scene.sceneDObjCount);
-    Com_Memset((unsigned int *)&scene.sceneModel[0].info, 0, 72 * scene.sceneModelCount);
-    Com_Memset((unsigned int *)&scene.sceneBrush[0].info.surfId, 0, 40 * scene.sceneBrushCount);
+    Com_Memset((uint32_t *)scene.sceneDObj, 0, 124 * scene.sceneDObjCount);
+    Com_Memset((uint32_t *)&scene.sceneModel[0].info, 0, 72 * scene.sceneModelCount);
+    Com_Memset((uint32_t *)&scene.sceneBrush[0].info.surfId, 0, 40 * scene.sceneBrushCount);
     scene.addedLightCount = 0;
     memset((uint8_t *)scene.drawSurfCount, 0, sizeof(scene.drawSurfCount));
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
-        Com_Memset((unsigned int *)scene.sceneModelVisData[viewIndex], 1, scene.sceneModelCount);
+        Com_Memset((uint32_t *)scene.sceneModelVisData[viewIndex], 1, scene.sceneModelCount);
     scene.sceneDObjCount = 0;
     scene.sceneModelCount = 0;
     scene.sceneBrushCount = 0;
@@ -1117,7 +1117,7 @@ void __cdecl R_ClearScene(unsigned int localClientNum)
         R_ClearDpvsScene();
 }
 
-unsigned int __cdecl R_GetLocalClientNum()
+uint32_t __cdecl R_GetLocalClientNum()
 {
     return scene.dpvs.localClientNum;
 }
@@ -1411,7 +1411,7 @@ void __cdecl R_RenderScene(const refdef_s *refdef)
 char __cdecl R_DoesDrawSurfListInfoNeedFloatz(GfxDrawSurfListInfo *emissiveInfo)
 {
     const MaterialTechnique *technique; // [esp+38h] [ebp-Ch]
-    unsigned int surfIndex; // [esp+3Ch] [ebp-8h]
+    uint32_t surfIndex; // [esp+3Ch] [ebp-8h]
 
     PROF_SCOPED("R_DoesDrawSurfListInfoNeedFloatz");
 
@@ -1446,16 +1446,16 @@ void __cdecl R_GenerateSortedDrawSurfs(
     float v8; // [esp+4Ch] [ebp-12Ch]
     float v9; // [esp+70h] [ebp-108h]
     float *viewOrigin; // [esp+BCh] [ebp-BCh]
-    unsigned int data[20]; // [esp+C4h] [ebp-B4h] BYREF
+    uint32_t data[20]; // [esp+C4h] [ebp-B4h] BYREF
     float v15; // [esp+114h] [ebp-64h]
     float v16; // [esp+118h] [ebp-60h]
     float v17; // [esp+11Ch] [ebp-5Ch]
     float bestError; // [esp+120h] [ebp-58h]
-    unsigned int bestNum; // [esp+124h] [ebp-54h]
+    uint32_t bestNum; // [esp+124h] [ebp-54h]
     float error; // [esp+128h] [ebp-50h]
-    unsigned int num; // [esp+12Ch] [ebp-4Ch]
-    unsigned int bestDen; // [esp+130h] [ebp-48h]
-    unsigned int den; // [esp+134h] [ebp-44h]
+    uint32_t num; // [esp+12Ch] [ebp-4Ch]
+    uint32_t bestDen; // [esp+130h] [ebp-48h]
+    uint32_t den; // [esp+134h] [ebp-44h]
     int pointLightCount; // [esp+138h] [ebp-40h]
     int firstDrawSurfCount; // [esp+13Ch] [ebp-3Ch]
     int cameraCellIndex; // [esp+140h] [ebp-38h]
@@ -1487,7 +1487,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
 
         for (den = 1; den <= 10; ++den)
         {
-            num = (unsigned int)floor((float)den * rg.sunShadowmapScale + 0.5f);
+            num = (uint32_t)floor((float)den * rg.sunShadowmapScale + 0.5f);
             error = I_fabs((float)num / (float)den - rg.sunShadowmapScale);
             if (error < bestError)
             {
@@ -1499,7 +1499,7 @@ void __cdecl R_GenerateSortedDrawSurfs(
 
         rg.sunShadowmapScale = (float)bestNum / (float)bestDen;
         rg.sunShadowmapScaleNum = (float)bestNum;
-        rg.sunShadowSize = (unsigned int)ceilf(rg.sunShadowmapScale * 1024.0f);
+        rg.sunShadowSize = (uint32_t)ceilf(rg.sunShadowmapScale * 1024.0f);
         rg.sunShadowPartitionRatio = 4.0f / rg.sunShadowmapScale;
     }
     else
@@ -1661,9 +1661,9 @@ void __cdecl R_GenerateSortedDrawSurfs(
         }
         else if (dynamicShadowType == SHADOW_COOKIE)
         {
-            data[0] = (unsigned int)viewParmsDpvs;
-            data[1] = (unsigned int)viewParmsDraw;
-            data[2] = (unsigned int)&viewInfo->shadowCookieList;
+            data[0] = (uint32_t)viewParmsDpvs;
+            data[1] = (uint32_t)viewParmsDraw;
+            data[2] = (uint32_t)&viewInfo->shadowCookieList;
             data[3] = viewInfo->localClientNum;
             R_AddWorkerCmd(WRKCMD_SHADOW_COOKIE, (uint8_t *)data);
         }
@@ -2012,7 +2012,7 @@ void R_GenerateMarkVertsForDynamicModels()
     GfxSceneModel *sceneModel; // [esp+4h] [ebp-24h]
     int dobjIndex; // [esp+8h] [ebp-20h]
     uint8_t reflectionProbeIndex; // [esp+Fh] [ebp-19h]
-    unsigned int indexCount; // [esp+10h] [ebp-18h] BYREF
+    uint32_t indexCount; // [esp+10h] [ebp-18h] BYREF
     int brushModelIndex; // [esp+14h] [ebp-14h]
     uint16_t entnum; // [esp+18h] [ebp-10h]
     uint16_t lightHandle; // [esp+1Ch] [ebp-Ch]
@@ -2026,7 +2026,7 @@ void R_GenerateMarkVertsForDynamicModels()
         entnum = sceneEntity->entnum;
         if (entnum < gfxCfg.entnumOrdinaryEnd && (scene.sceneDObjVisData[0][dobjIndex] & 1) != 0)
         {
-            lightHandle = *(_WORD *)LongNoSwap((unsigned int)sceneEntity->info.pose);
+            lightHandle = *(_WORD *)LongNoSwap((uint32_t)sceneEntity->info.pose);
             FX_GenerateMarkVertsForEntDObj(
                 scene.dpvs.localClientNum,
                 entnum,
@@ -2222,31 +2222,31 @@ void __cdecl R_SetSceneParms(const refdef_s *refdef, GfxSceneParms *sceneParms)
     sceneParms->primaryLights = refdef->primaryLights;
 }
 
-void __cdecl R_LinkDObjEntity(unsigned int localClientNum, unsigned int entnum, float *origin, float radius)
+void __cdecl R_LinkDObjEntity(uint32_t localClientNum, uint32_t entnum, float *origin, float radius)
 {
     R_FilterDObjIntoCells(localClientNum, entnum, origin, radius);
     R_LinkSphereEntityToPrimaryLights(localClientNum, entnum, origin, radius);
 }
 
-void __cdecl R_LinkBModelEntity(unsigned int localClientNum, unsigned int entnum, GfxBrushModel *bmodel)
+void __cdecl R_LinkBModelEntity(uint32_t localClientNum, uint32_t entnum, GfxBrushModel *bmodel)
 {
     R_FilterBModelIntoCells(localClientNum, entnum, bmodel);
     R_LinkBoxEntityToPrimaryLights(localClientNum, entnum, bmodel->writable.mins, bmodel->writable.maxs);
 }
 
-void __cdecl R_UnlinkEntity(unsigned int localClientNum, unsigned int entnum)
+void __cdecl R_UnlinkEntity(uint32_t localClientNum, uint32_t entnum)
 {
     R_UnfilterEntFromCells(localClientNum, entnum);
     R_UnlinkEntityFromPrimaryLights(localClientNum, entnum);
 }
 
-void __cdecl R_LinkDynEnt(unsigned int dynEntId, DynEntityDrawType drawType, float *mins, float *maxs)
+void __cdecl R_LinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType, float *mins, float *maxs)
 {
     R_FilterDynEntIntoCells(dynEntId, drawType, mins, maxs);
     R_LinkDynEntToPrimaryLights(dynEntId, drawType, mins, maxs);
 }
 
-void __cdecl R_UnlinkDynEnt(unsigned int dynEntId, DynEntityDrawType drawType)
+void __cdecl R_UnlinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType)
 {
     R_UnfilterDynEntFromCells(dynEntId, drawType);
     R_UnlinkDynEntFromPrimaryLights(dynEntId, drawType);

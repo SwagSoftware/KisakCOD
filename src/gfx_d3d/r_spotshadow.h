@@ -14,26 +14,26 @@ void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data);
 char __cdecl R_AddSpotShadowsForLight(
     GfxViewInfo *viewInfo,
     GfxLight *light,
-    unsigned int shadowableLightIndex,
+    uint32_t shadowableLightIndex,
     float spotShadowFade);
 void __cdecl R_SetViewParmsForLight(const GfxLight *light, GfxViewParms *viewParms, float nearPlaneBias);
 void __cdecl R_GetSpotShadowLookupMatrix(
     const GfxViewParms *shadowViewParms,
-    unsigned int spotShadowIndex,
-    unsigned int tileCount,
+    uint32_t spotShadowIndex,
+    uint32_t tileCount,
     GfxMatrix *lookupMatrix);
 void __cdecl R_AddSpotShadowModelEntities(
-    unsigned int localClientNum,
-    unsigned int primaryLightIndex,
+    uint32_t localClientNum,
+    uint32_t primaryLightIndex,
     const GfxLight *light);
 void __cdecl R_GenerateAllSortedSpotShadowDrawSurfs(GfxViewInfo *viewInfo);
 void __cdecl R_GenerateSortedPrimarySpotShadowDrawSurfs(
     const GfxViewInfo *viewInfo,
-    unsigned int spotShadowIndex,
-    unsigned int shadowableLightIndex);
+    uint32_t spotShadowIndex,
+    uint32_t shadowableLightIndex);
 void __cdecl R_EmitSpotShadowMapSurfs(GfxViewInfo *viewInfo);
 
 
-unsigned int R_InitSpotShadowMeshes();
+uint32_t R_InitSpotShadowMeshes();
 void __cdecl R_ShutdownSpotShadowMeshes();
 void RB_SpotShadowMaps(const GfxBackEndData *data, const GfxViewInfo *viewInfo);

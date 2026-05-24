@@ -4,7 +4,7 @@
 #include <universal/profile.h>
 #include "r_init.h"
 
-unsigned int __cdecl Image_CubemapFace(unsigned int faceIndex)
+uint32_t __cdecl Image_CubemapFace(uint32_t faceIndex)
 {
     iassert(faceIndex < 6);
     return faceIndex;
@@ -184,7 +184,7 @@ LABEL_17:
 void __cdecl Image_Upload3D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
-    unsigned int mipLevel,
+    uint32_t mipLevel,
     uint8_t *src)
 {
     const char *v4; // eax
@@ -272,22 +272,22 @@ void __cdecl Image_Upload2D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
-    unsigned int mipLevel,
+    uint32_t mipLevel,
     uint8_t *src)
 {
     const char *v5; // eax
     const char *v6; // eax
     const char *v7; // eax
     const char *v8; // eax
-    unsigned int v9; // [esp+0h] [ebp-30h]
-    unsigned int v10; // [esp+4h] [ebp-2Ch]
+    uint32_t v9; // [esp+0h] [ebp-30h]
+    uint32_t v10; // [esp+4h] [ebp-2Ch]
     int v11; // [esp+10h] [ebp-20h]
     int v12; // [esp+14h] [ebp-1Ch]
     int v13; // [esp+18h] [ebp-18h]
     int hr; // [esp+1Ch] [ebp-14h]
     _D3DLOCKED_RECT lockedRect; // [esp+20h] [ebp-10h] BYREF
-    unsigned int width; // [esp+28h] [ebp-8h]
-    unsigned int height; // [esp+2Ch] [ebp-4h]
+    uint32_t width; // [esp+28h] [ebp-8h]
+    uint32_t height; // [esp+2Ch] [ebp-4h]
 
     if (image->width >> mipLevel > 1)
         v10 = image->width >> mipLevel;
@@ -413,8 +413,8 @@ void __cdecl Image_GetMipmapResolution(
     uint16_t *mipWidth,
     uint16_t *mipHeight)
 {
-    unsigned int v5; // [esp+0h] [ebp-10h]
-    unsigned int v6; // [esp+4h] [ebp-Ch]
+    uint32_t v5; // [esp+0h] [ebp-10h]
+    uint32_t v6; // [esp+4h] [ebp-Ch]
 
     iassert(baseWidth > 0);
     iassert(baseHeight > 0);
@@ -422,14 +422,14 @@ void __cdecl Image_GetMipmapResolution(
     iassert(mipWidth);
     iassert(mipHeight);
 
-    if ((int)((unsigned int)baseWidth >> mipmap) > 1)
-        v6 = (unsigned int)baseWidth >> mipmap;
+    if ((int)((uint32_t)baseWidth >> mipmap) > 1)
+        v6 = (uint32_t)baseWidth >> mipmap;
     else
         LOWORD(v6) = 1;
 
     *mipWidth = v6;
-    if ((int)((unsigned int)baseHeight >> mipmap) > 1)
-        v5 = (unsigned int)baseHeight >> mipmap;
+    if ((int)((uint32_t)baseHeight >> mipmap) > 1)
+        v5 = (uint32_t)baseHeight >> mipmap;
     else
         LOWORD(v5) = 1;
     *mipHeight = v5;
@@ -445,8 +445,8 @@ void __cdecl Image_TrackFullscreenTexture(
     int picmip,
     _D3DFORMAT format)
 {
-    unsigned int memory; // [esp+0h] [ebp-18h]
-    unsigned int platformHeight; // [esp+4h] [ebp-14h]
+    uint32_t memory; // [esp+0h] [ebp-18h]
+    uint32_t platformHeight; // [esp+4h] [ebp-14h]
     uint16_t width; // [esp+8h] [ebp-10h] BYREF
     uint16_t height; // [esp+Ch] [ebp-Ch] BYREF
     int platformWidth; // [esp+10h] [ebp-8h]

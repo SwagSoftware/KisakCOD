@@ -247,7 +247,7 @@ struct CStringEdPackage // sizeof=0x78
         char v10; // al
         uint8_t *v11; // edi
         uint8_t *i; // esi
-        unsigned int v13; // esi
+        uint32_t v13; // esi
         std::string *v14; // eax
         std::string *v15; // eax
         bool v16; // eax
@@ -373,7 +373,7 @@ struct CStringEdPackage // sizeof=0x78
         char *v7; // [esp+28h] [ebp-18h]
         char *v8; // [esp+2Ch] [ebp-14h]
         int iWhiteSpaceScanPos; // [esp+34h] [ebp-Ch]
-        unsigned int iCharsToCopy; // [esp+38h] [ebp-8h]
+        uint32_t iCharsToCopy; // [esp+38h] [ebp-8h]
 
         if (!**psParsePos)
             return 0;

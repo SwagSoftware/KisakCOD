@@ -27,12 +27,12 @@ void __cdecl R_AddCasters(
 void __cdecl R_AddShadowCookie(
     int localClientNum,
     const GfxViewParms *viewParms,
-    unsigned int sceneEntIndex,
+    uint32_t sceneEntIndex,
     float fade,
     ShadowCookieList *cookieList);
 void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, GfxViewParms *shadowViewParms);
 void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList);
-bool __cdecl R_AllowBspShadowReceiver(int surfIndex, unsigned int *shadowReceiverCallbackAsVoid);
+bool __cdecl R_AllowBspShadowReceiver(int surfIndex, uint32_t *shadowReceiverCallbackAsVoid);
 void __cdecl R_GenerateSceneEntShadowReceivers(ShadowCookieList *shadowCookieList);
 char __cdecl R_OutsideOfShadowFrustumPlanes(const DpvsPlane *planes, const float *minmax);
 void __cdecl R_ResetShadowCookies();

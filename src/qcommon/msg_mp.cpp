@@ -21,13 +21,13 @@ static const NetField objectiveFields[6] =
 }; // idb
 
 //  struct netFieldOrderInfo_t orderInfo 82f87210     msg_mp.obj
-//  unsigned int *huffBytesSeen      82f878d0     msg_mp.obj
+//  uint32_t *huffBytesSeen      82f878d0     msg_mp.obj
 //  struct huffman_t msgHuff   82f87cd8     msg_mp.obj
 
 int msgInit;
-unsigned int huffBytesSeen[256];
+uint32_t huffBytesSeen[256];
 
-int __cdecl GetMinBitCountForNum(unsigned int num)
+int __cdecl GetMinBitCountForNum(uint32_t num)
 {
     int v2; // eax
 
@@ -97,7 +97,7 @@ int __cdecl MSG_GetUsedBitCount(const msg_t *msg)
     return 8 * (msg->splitSize + msg->cursize) - ((8 - msg->bit) & 7);
 }
 
-void __cdecl MSG_WriteBits(msg_t *msg, int value, unsigned int bits)
+void __cdecl MSG_WriteBits(msg_t *msg, int value, uint32_t bits)
 {
     int bit; // [esp+4h] [ebp-4h]
 
@@ -161,7 +161,7 @@ void __cdecl MSG_WriteBit1(msg_t *msg)
     msg->data[msg->bit++ >> 3] |= 1 << bit;
 }
 
-int __cdecl MSG_ReadBits(msg_t *msg, unsigned int bits)
+int __cdecl MSG_ReadBits(msg_t *msg, uint32_t bits)
 {
     int bit; // [esp+0h] [ebp-Ch]
     int i; // [esp+4h] [ebp-8h]
@@ -265,7 +265,7 @@ void __cdecl MSG_WriteByte(msg_t *msg, uint8_t c)
         msg->data[msg->cursize++] = c;
 }
 
-void __cdecl MSG_WriteData(msg_t *buf, uint8_t *data, unsigned int length)
+void __cdecl MSG_WriteData(msg_t *buf, uint8_t *data, uint32_t length)
 {
     int newsize; // [esp+0h] [ebp-4h]
 
@@ -311,7 +311,7 @@ void __cdecl MSG_WriteLong(msg_t *msg, int c)
     }
     else
     {
-        *(unsigned int *)&msg->data[msg->cursize] = c;
+        *(uint32_t *)&msg->data[msg->cursize] = c;
         msg->cursize = newsize;
     }
 }
@@ -447,7 +447,7 @@ static char string[1024];
 char *__cdecl MSG_ReadString(msg_t *msg)
 {
     int c; // [esp+0h] [ebp-8h]
-    unsigned int l; // [esp+4h] [ebp-4h]
+    uint32_t l; // [esp+4h] [ebp-4h]
 
     for (l = 0; ; ++l)
     {
@@ -467,7 +467,7 @@ static char bigstring[8192];
 char *__cdecl MSG_ReadBigString(msg_t *msg)
 {
     int c; // [esp+0h] [ebp-8h]
-    unsigned int l; // [esp+4h] [ebp-4h]
+    uint32_t l; // [esp+4h] [ebp-4h]
 
     for (l = 0; ; ++l)
     {
@@ -493,7 +493,7 @@ static char stringread[1024];
 char *__cdecl MSG_ReadStringLine(msg_t *msg)
 {
     int c; // [esp+0h] [ebp-8h]
-    unsigned int l; // [esp+4h] [ebp-4h]
+    uint32_t l; // [esp+4h] [ebp-4h]
 
     for (l = 0; ; ++l)
     {
@@ -554,7 +554,7 @@ void __cdecl MSG_ReadData(msg_t *msg, uint8_t *data, int len)
     }
 }
 
-void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, unsigned int bits)
+void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, uint32_t bits)
 {
     iassert( !msg->readOnly );
     if (oldV == newV)
@@ -568,7 +568,7 @@ void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, unsigned
     }
 }
 
-unsigned int __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, unsigned int bits)
+uint32_t __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, uint32_t bits)
 {
     if (MSG_ReadBit(msg))
         return kbitmask[bits] & key ^ MSG_ReadBits(msg, bits);
@@ -576,13 +576,13 @@ unsigned int __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, unsigned in
         return oldV;
 }
 
-void __cdecl MSG_WriteKey(msg_t *msg, int key, int newV, unsigned int bits)
+void __cdecl MSG_WriteKey(msg_t *msg, int key, int newV, uint32_t bits)
 {
     iassert( !msg->readOnly );
     MSG_WriteBits(msg, key ^ newV, bits);
 }
 
-unsigned int __cdecl MSG_ReadKey(msg_t *msg, int key, unsigned int bits)
+uint32_t __cdecl MSG_ReadKey(msg_t *msg, int key, uint32_t bits)
 {
     return kbitmask[bits] & key ^ MSG_ReadBits(msg, bits);
 }
@@ -640,9 +640,9 @@ void __cdecl MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd)
     cmd->angles[0] = 0;
     cmd->angles[1] = 0;
     cmd->angles[2] = 0;
-    *(unsigned int *)&cmd->weapon = 0;
+    *(uint32_t *)&cmd->weapon = 0;
     cmd->meleeChargeYaw = 0.0;
-    *(unsigned int *)&cmd->meleeChargeDist = 0;
+    *(uint32_t *)&cmd->meleeChargeDist = 0;
     cmd->weapon = ps->weapon;
     cmd->offHandIndex = ps->offHandIndex;
     for (i = 0; i < 2; ++i)
@@ -725,7 +725,7 @@ void __cdecl MSG_HorMoveFrom(char iFlags, char *pForwardMove, char *pRightMove)
 void __cdecl MSG_WriteDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from, const usercmd_s *to)
 {
     int horToMove; // [esp+4h] [ebp-Ch]
-    unsigned int delta; // [esp+8h] [ebp-8h]
+    uint32_t delta; // [esp+8h] [ebp-8h]
     int horFromMove; // [esp+Ch] [ebp-4h]
     int keyb; // [esp+1Ch] [ebp+Ch]
     int keya; // [esp+1Ch] [ebp+Ch]
@@ -887,7 +887,7 @@ void __cdecl MSG_ClearLastReferencedEntity(msg_t *msg)
     msg->lastEntityRef = -1;
 }
 
-int __cdecl MSG_ReadEntityIndex(msg_t *msg, unsigned int indexBits)
+int __cdecl MSG_ReadEntityIndex(msg_t *msg, uint32_t indexBits)
 {
     if (MSG_ReadBit(msg))
     {
@@ -1064,7 +1064,7 @@ void __cdecl MSG_ReadDeltaField(
             *toF = 0;
             iassert( *reinterpret_cast< float * >( toF ) == 0.0f );
         }
-        if ((unsigned int)(__int64)(*(float *)toF + 2048.0) >= 0x1000)
+        if ((uint32_t)(__int64)(*(float *)toF + 2048.0) >= 0x1000)
             MyAssertHandler(
                 ".\\qcommon\\msg_mp.cpp",
                 1476,
@@ -1213,7 +1213,7 @@ int __cdecl MSG_ReadDeltaEventParamField(msg_t *msg)
 
 int __cdecl MSG_Read24BitFlag(msg_t *msg, int oldFlags)
 {
-    unsigned int bitChanged; // [esp+0h] [ebp-10h]
+    uint32_t bitChanged; // [esp+0h] [ebp-10h]
     int j; // [esp+4h] [ebp-Ch]
     int value; // [esp+Ch] [ebp-4h]
 
@@ -1280,22 +1280,22 @@ double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue)
     }
 }
 
-int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, unsigned int number)
+int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, uint32_t number)
 {
     return MSG_ReadDeltaEntityStruct(msg, time, (char *)from, (char *)to, number);
 }
 
-int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, unsigned int number)
+int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, uint32_t number)
 {
     char *EntityTypeName; // eax
     const NetFieldList *stateFieldList; // [esp+38h] [ebp-20h]
     int print; // [esp+3Ch] [ebp-1Ch]
     const NetField *field; // [esp+40h] [ebp-18h]
     const NetField *fielda; // [esp+40h] [ebp-18h]
-    unsigned int lc; // [esp+44h] [ebp-14h]
+    uint32_t lc; // [esp+44h] [ebp-14h]
     const NetField *stateFields; // [esp+48h] [ebp-10h]
-    unsigned int i; // [esp+54h] [ebp-4h]
-    unsigned int ia; // [esp+54h] [ebp-4h]
+    uint32_t i; // [esp+54h] [ebp-4h]
+    uint32_t ia; // [esp+54h] [ebp-4h]
 
     iassert( number < (1 << GENTITYNUM_BITS) );
     if (MSG_ReadBit(msg) == 1)
@@ -1310,23 +1310,23 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
         {
             print = 1;
-            Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(unsigned int *)to);
+            Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(uint32_t *)to);
         }
         else
         {
             print = 0;
         }
-        *(unsigned int *)to = number;
+        *(uint32_t *)to = number;
         if (strcmp(entityStateFields[0].name, "eType"))
             MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1763, 0, "%s", "strcmp( entityStateFields[0].name, \"eType\" ) == 0");
         MSG_ReadDeltaField(msg, time, from, to, entityStateFields, print, 0);
-        stateFieldList = MSG_GetStateFieldListForEntityType(*((unsigned int *)to + 1));
+        stateFieldList = MSG_GetStateFieldListForEntityType(*((uint32_t *)to + 1));
         stateFields = stateFieldList->array;
         if (lc <= stateFieldList->count)
         {
             if (msg_dumpEnts->current.enabled)
             {
-                EntityTypeName = BG_GetEntityTypeName(*((unsigned int *)to + 1));
+                EntityTypeName = BG_GetEntityTypeName(*((uint32_t *)to + 1));
                 Com_Printf(14, "%3i: changed ent, eType %s\n", number, EntityTypeName);
             }
             if (strcmp(stateFields->name, "eType"))
@@ -1343,7 +1343,7 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
             fielda = &stateFields[lc];
             while (ia < stateFieldList->count)
             {
-                *(unsigned int *)&to[fielda->offset] = *(unsigned int *)&from[fielda->offset];
+                *(uint32_t *)&to[fielda->offset] = *(uint32_t *)&from[fielda->offset];
                 ++ia;
                 ++fielda;
             }
@@ -1366,7 +1366,7 @@ int __cdecl MSG_ReadLastChangedField(msg_t *msg, int totalFields)
 {
     const char *v2; // eax
     int lastChanged; // [esp+0h] [ebp-8h]
-    unsigned int idealBits; // [esp+4h] [ebp-4h]
+    uint32_t idealBits; // [esp+4h] [ebp-4h]
 
     idealBits = GetMinBitCountForNum(totalFields);
     lastChanged = MSG_ReadBits(msg, idealBits);
@@ -1400,7 +1400,7 @@ int __cdecl MSG_ReadDeltaArchivedEntity(
     int time,
     archivedEntity_s *from,
     archivedEntity_s *to,
-    unsigned int number)
+    uint32_t number)
 {
     return MSG_ReadDeltaStruct(
         msg,
@@ -1419,7 +1419,7 @@ int __cdecl MSG_ReadDeltaStruct(
     int time,
     char *from,
     char *to,
-    unsigned int number,
+    uint32_t number,
     int numFields,
     char indexBits,
     const NetField *stateFields,
@@ -1447,13 +1447,13 @@ int __cdecl MSG_ReadDeltaStruct(
             if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
             {
                 print = 1;
-                Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(unsigned int *)to);
+                Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(uint32_t *)to);
             }
             else
             {
                 print = 0;
             }
-            *(unsigned int *)to = number;
+            *(uint32_t *)to = number;
             i = 0;
             field = stateFields;
             while (i < lc)
@@ -1466,7 +1466,7 @@ int __cdecl MSG_ReadDeltaStruct(
             fielda = &stateFields[lc];
             while (ia < numFields)
             {
-                *(unsigned int *)&to[fielda->offset] = *(unsigned int *)&from[fielda->offset];
+                *(uint32_t *)&to[fielda->offset] = *(uint32_t *)&from[fielda->offset];
                 ++ia;
                 ++fielda;
             }
@@ -1485,7 +1485,7 @@ int __cdecl MSG_ReadDeltaStruct(
     }
 }
 
-int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clientState_s *to, unsigned int number)
+int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clientState_s *to, uint32_t number)
 {
     clientState_s dummy; // [esp+4h] [ebp-70h] BYREF
 
@@ -1523,14 +1523,14 @@ static void __cdecl MSG_ReadDeltaFields(
     //else
     //{
     //    for (int i = 0; i < numFields; ++i)
-    //        *(unsigned int *)&to[stateFields[i].offset] = *(unsigned int *)&from[stateFields[i].offset];
+    //        *(uint32_t *)&to[stateFields[i].offset] = *(uint32_t *)&from[stateFields[i].offset];
     //}
 }
 
 static void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s *from, hudelem_s *to, int count)
 {
-    unsigned int j; // [esp+8h] [ebp-18h]
-    unsigned int lc; // [esp+Ch] [ebp-14h]
+    uint32_t j; // [esp+8h] [ebp-18h]
+    uint32_t lc; // [esp+Ch] [ebp-14h]
 
     if (count != 31)
         MyAssertHandler(
@@ -2062,7 +2062,7 @@ void __cdecl MSG_DumpNetFieldChanges_f()
     int iSize; // [esp+1Ch] [ebp-3Ch]
     const char *arrayNames[6]; // [esp+20h] [ebp-38h]
     int i; // [esp+38h] [ebp-20h]
-    unsigned int iArrayNum; // [esp+3Ch] [ebp-1Ch]
+    uint32_t iArrayNum; // [esp+3Ch] [ebp-1Ch]
     const int *changeArray[6]; // [esp+40h] [ebp-18h]
 
     changeArray[0] = (const int *)&orderInfo;

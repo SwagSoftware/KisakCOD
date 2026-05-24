@@ -11,7 +11,7 @@
 #endif
 
 
-unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
+uint32_t __cdecl SV_ClipHandleForEntity(const gentity_s *ent)
 {
 #ifdef KISAK_MP
     if (ent->r.bmodel)
@@ -55,7 +55,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     int m; // [esp+88h] [ebp-14Ch]
     int j; // [esp+8Ch] [ebp-148h]
     int lastLeaf; // [esp+90h] [ebp-144h] BYREF
-    unsigned int clipHandle; // [esp+94h] [ebp-140h]
+    uint32_t clipHandle; // [esp+94h] [ebp-140h]
     DObj_s *obj; // [esp+98h] [ebp-13Ch]
     float absmin[3]; // [esp+9Ch] [ebp-138h] BYREF
     float *origin; // [esp+A8h] [ebp-12Ch]
@@ -236,7 +236,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
     float *absmax; // r26
     float radius; // fp1
     int contents; // r5
-    unsigned int clipHandle; // r29
+    uint32_t clipHandle; // r29
     const DObj_s *ServerDObj; // r3
     float *pAbsMax; // r5
     float *pAbsMin; // r4
@@ -257,7 +257,7 @@ void __cdecl SV_LinkEntity(gentity_s *gEnt)
         int p1 = CLAMP(1.0f - gEnt->r.mins[2], 1, 255);
         int p2 = CLAMP((int)(float)(gEnt->r.maxs[2] + 32.0f), 1, 255);
 
-        gEnt->s.solid = (unsigned int)p0 | ((unsigned int)p1 << 8) | (p2 << 16);
+        gEnt->s.solid = (uint32_t)p0 | ((uint32_t)p1 << 8) | (p2 << 16);
     }
     else
     {
@@ -422,7 +422,7 @@ void __cdecl SV_PointTraceToEntity(const pointtrace_t *clip, svEntity_s *check, 
     float radius; // [esp+58h] [ebp-A8h]
     gentity_s *touch; // [esp+5Ch] [ebp-A4h]
     float entAxis[4][3]; // [esp+60h] [ebp-A0h] BYREF
-    unsigned int clipHandle; // [esp+90h] [ebp-70h]
+    uint32_t clipHandle; // [esp+90h] [ebp-70h]
     DObj_s *obj; // [esp+94h] [ebp-6Ch]
     float absmin[3]; // [esp+98h] [ebp-68h] BYREF
     float localStart[3]; // [esp+A4h] [ebp-5Ch] BYREF
@@ -584,7 +584,7 @@ void __cdecl SV_ClipMoveToEntity(const moveclip_t *clip, svEntity_s *check, trac
     __int64 v3; // [esp-Ch] [ebp-40h]
     uint16_t number; // [esp+6h] [ebp-2Eh]
     gentity_s *touch; // [esp+8h] [ebp-2Ch]
-    unsigned int clipHandle; // [esp+Ch] [ebp-28h]
+    uint32_t clipHandle; // [esp+Ch] [ebp-28h]
     float absmin[3]; // [esp+10h] [ebp-24h] BYREF
     const float *angles; // [esp+1Ch] [ebp-18h]
     float absmax[3]; // [esp+20h] [ebp-14h] BYREF
@@ -650,7 +650,7 @@ int __cdecl SV_PointSightTraceToEntity(const sightpointtrace_t *clip, svEntity_s
     float radius; // [esp+30h] [ebp-D0h]
     gentity_s *touch; // [esp+34h] [ebp-CCh]
     float entAxis[4][3]; // [esp+3Ch] [ebp-C4h] BYREF
-    unsigned int clipHandle; // [esp+6Ch] [ebp-94h]
+    uint32_t clipHandle; // [esp+6Ch] [ebp-94h]
     TraceExtents extents; // [esp+70h] [ebp-90h] BYREF
     DObj_s *obj; // [esp+94h] [ebp-6Ch]
     float absmin[3]; // [esp+98h] [ebp-68h] BYREF
@@ -778,7 +778,7 @@ DObj_s *__cdecl SV_LocationalTraceDObj(const pointtrace_t *clip, const gentity_s
 int __cdecl SV_ClipSightToEntity(const sightclip_t *clip, svEntity_s *check)
 {
     gentity_s *touch; // [esp+0h] [ebp-14h]
-    unsigned int clipHandle; // [esp+8h] [ebp-Ch]
+    uint32_t clipHandle; // [esp+8h] [ebp-Ch]
     const float *angles; // [esp+Ch] [ebp-8h]
     int entnum; // [esp+10h] [ebp-4h]
 
@@ -1209,7 +1209,7 @@ void __cdecl SV_SightTrace(
 int __cdecl SV_SightTraceToEntity(float *start, float *mins, float *maxs, float *end, int entityNum, int contentmask)
 {
     double v7; // st7
-    unsigned int clipHandle; // [esp+34h] [ebp-2Ch]
+    uint32_t clipHandle; // [esp+34h] [ebp-2Ch]
     float boxmins[3]; // [esp+38h] [ebp-28h]
     const float *origin; // [esp+44h] [ebp-1Ch]
     float boxmaxs[3]; // [esp+48h] [ebp-18h]
@@ -1269,7 +1269,7 @@ int __cdecl SV_PointContents(float *p, int passEntityNum, int contentmask)
     int v3; // eax
     int entityList[1025]; // [esp+0h] [ebp-1018h] BYREF
     int v6; // [esp+1004h] [ebp-14h]
-    unsigned int model; // [esp+1008h] [ebp-10h]
+    uint32_t model; // [esp+1008h] [ebp-10h]
     gentity_s *ent; // [esp+100Ch] [ebp-Ch]
     int v9; // [esp+1010h] [ebp-8h]
     int i; // [esp+1014h] [ebp-4h]

@@ -16,7 +16,7 @@ int __cdecl UI_ParseInfos(const char *buf, int max, char **infos)
     char v5; // [esp+3h] [ebp-865h]
     char *v6; // [esp+8h] [ebp-860h]
     char *v7; // [esp+Ch] [ebp-85Ch]
-    unsigned int v8; // [esp+10h] [ebp-858h]
+    uint32_t v8; // [esp+10h] [ebp-858h]
     char info[1024]; // [esp+58h] [ebp-810h] BYREF
     char key[1028]; // [esp+458h] [ebp-410h] BYREF
     const char *token; // [esp+860h] [ebp-8h]
@@ -141,7 +141,7 @@ const char *UI_LoadArenasFromFile_LoadObj()
     int len; // [esp+24A8h] [ebp-10h]
     int f; // [esp+24ACh] [ebp-Ch] BYREF
     int v8; // [esp+24B0h] [ebp-8h]
-    unsigned int v9; // [esp+24B4h] [ebp-4h]
+    uint32_t v9; // [esp+24B4h] [ebp-4h]
 
     ui_numArenas = 0;
     result = (char *)FS_GetFileList("mp", "arena", FS_LIST_PURE_ONLY, listbuf, 1024);

@@ -1364,10 +1364,10 @@ CmdScriptNotify cmd_notify[64]{ 0 };
 
 void Cmd_RegisterNotification(const char *commandString, const char *notifyString)
 {
-    unsigned int LowercaseString; // r30
-    unsigned int String; // r3
-    unsigned int v5; // r26
-    unsigned int v6; // r9
+    uint32_t LowercaseString; // r30
+    uint32_t String; // r3
+    uint32_t v5; // r26
+    uint32_t v6; // r9
     int v7; // r11
     uint16_t *p_notify; // r10
 
@@ -1428,9 +1428,9 @@ void Cmd_RegisterNotification(const char *commandString, const char *notifyStrin
 void Cmd_CheckNotify()
 {
     const char *v0; // r3
-    unsigned int LowercaseString; // r28
-    unsigned int v2; // r11
-    unsigned int v3; // r30
+    uint32_t LowercaseString; // r28
+    uint32_t v2; // r11
+    uint32_t v3; // r30
     uint16_t *p_notify; // r31
 
     iassert(Sys_IsMainThread());
@@ -1469,10 +1469,10 @@ void Cmd_LoadNotifications(MemoryFile *memFile)
     int v3; // r26
     uint16_t *p_notify; // r30
     const char *CString; // r3
-    unsigned int String; // r7
+    uint32_t String; // r7
     uint16_t v7; // r31
     const char *v8; // r3
-    unsigned int v9; // r7
+    uint32_t v9; // r7
     uint16_t v10; // r31
     int v11; // [sp+50h] [-50h] BYREF
 
@@ -1517,7 +1517,7 @@ void Cmd_LoadNotifications(MemoryFile *memFile)
 }
 void Cmd_SaveNotifications(MemoryFile *memFile)
 {
-    unsigned int v2; // r30
+    uint32_t v2; // r30
     uint16_t *p_notify; // r31
     const char *v4; // r3
     const char *v5; // r3
@@ -1542,7 +1542,7 @@ void Cmd_SaveNotifications(MemoryFile *memFile)
 }
 void Cmd_UnregisterAllNotifications()
 {
-    unsigned int v0; // r30
+    uint32_t v0; // r30
     uint16_t *p_notify; // r31
 
     iassert(Sys_IsMainThread());

@@ -1718,9 +1718,9 @@ void DynEntCl_WakeUpAroundPlayer(int localClientNum)
     double v3; // fp0
     double v4; // fp13
     double v5; // fp0
-    unsigned int ClosestEntities; // r3
+    uint32_t ClosestEntities; // r3
     uint16_t *v7; // r31
-    unsigned int v8; // r27
+    uint32_t v8; // r27
     const DynEntityDef *EntityDef; // r28
     DynEntityClient *ClientEntity; // r30
     DynEntityPose *ClientPose; // r3
@@ -1784,7 +1784,7 @@ void DynEntCl_WakeUpAroundPlayer(int localClientNum)
                 } while (v8);
             }
             ++v2;
-        } while ((unsigned int)v2 < DYNENT_DRAW_COUNT);
+        } while ((uint32_t)v2 < DYNENT_DRAW_COUNT);
     }
 }
 #endif 

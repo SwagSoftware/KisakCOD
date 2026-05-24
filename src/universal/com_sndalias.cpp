@@ -193,9 +193,9 @@ MSSChannelMap *__cdecl Com_GetSpeakerMap(SpeakerMap *speakerMap, int sourceChann
     return &speakerMap->channelMaps[sourceChannelCount == 2][SND_IsMultiChannel()];
 }
 
-unsigned int __cdecl Com_HashAliasName(const char *name)
+uint32_t __cdecl Com_HashAliasName(const char *name)
 {
-    unsigned int hash; // [esp+4h] [ebp-4h]
+    uint32_t hash; // [esp+4h] [ebp-4h]
 
     hash = 0;
     while (*name)
@@ -206,7 +206,7 @@ unsigned int __cdecl Com_HashAliasName(const char *name)
 
 snd_alias_list_t *__cdecl Com_TryFindSoundAlias_LoadObj(const char *name)
 {
-    unsigned int hashIndex; // [esp+0h] [ebp-4h]
+    uint32_t hashIndex; // [esp+0h] [ebp-4h]
 
     if (!name)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 568, 0, "%s", "name");
@@ -228,7 +228,7 @@ snd_alias_list_t *__cdecl Com_TryFindSoundAlias(const char *name)
 
 snd_alias_list_t *__cdecl Com_FindSoundAlias_LoadObj(const char *name)
 {
-    unsigned int hashIndex; // [esp+0h] [ebp-4h]
+    uint32_t hashIndex; // [esp+0h] [ebp-4h]
 
     if (!name)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 586, 0, "%s", "name");
@@ -264,7 +264,7 @@ snd_alias_list_t *__cdecl Com_FindSoundAlias(const char *name)
 
 snd_alias_list_t *__cdecl Com_FindSoundAliasNoErrors_LoadObj(const char *name)
 {
-    unsigned int hashIndex; // [esp+0h] [ebp-4h]
+    uint32_t hashIndex; // [esp+0h] [ebp-4h]
 
     if (!name)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 655, 0, "%s", "name");
@@ -351,7 +351,7 @@ LABEL_11:
     return 0;
 }
 
-void __cdecl StreamFileNameGetName(const StreamFileName *streamFileName, char *filename, unsigned int size)
+void __cdecl StreamFileNameGetName(const StreamFileName *streamFileName, char *filename, uint32_t size)
 {
     Com_sprintf(filename, size, "%s\\%s", streamFileName->info.raw.dir, streamFileName->info.raw.name);
 }
@@ -501,7 +501,7 @@ void __cdecl Com_LoadedSoundList(snd_alias_system_t system)
                 Com_GetSoundFileName(&aliases[i], filename, 128);
                 if (aliases[i].soundFile->exists)
                 {
-                    fileMem = SND_GetSoundFileSize((unsigned int*)&aliases[i].soundFile->u.loadSnd->sound.info.format);
+                    fileMem = SND_GetSoundFileSize((uint32_t*)&aliases[i].soundFile->u.loadSnd->sound.info.format);
                     totalMem += fileMem;
                     Com_Printf(9, "%-64s %7.1f KB\n", filename, fileMem * (1.0f / 1024.0f));
                 }
@@ -519,7 +519,7 @@ void __cdecl Com_LoadedSoundList(snd_alias_system_t system)
 
 char __cdecl Com_AddAliasList(const char *name, snd_alias_list_t *aliasList)
 {
-    unsigned int hashIndex; // [esp+0h] [ebp-4h]
+    uint32_t hashIndex; // [esp+0h] [ebp-4h]
 
     for (hashIndex = Com_HashAliasName(name); g_sa.hash[hashIndex]; hashIndex = (hashIndex + 1) % g_sa.hashSize)
     {
@@ -626,11 +626,11 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
         FS_FreeFileList(fileNames);
     }
 
-    if ((unsigned int)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
+    if ((uint32_t)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
         Cmd_AddCommandInternal("snd_list", Com_SoundList_f, &Com_SoundList_f_VAR);
 
     g_sa.initialized[system] = 1;
-    if ((unsigned int)system <= SASYS_CGAME)
+    if ((uint32_t)system <= SASYS_CGAME)
     {
         numMissing = Com_LoadSoundAliasSounds(&g_sa.soundFileInfo[system]);
         if (numMissing)
@@ -649,7 +649,7 @@ void __cdecl Com_UnloadSoundAliasSounds(snd_alias_system_t system)
     int i; // [esp+8h] [ebp-8h]
     snd_alias_t *aliases; // [esp+Ch] [ebp-4h]
 
-    if ((unsigned int)system > SASYS_CGAME)
+    if ((uint32_t)system > SASYS_CGAME)
         MyAssertHandler(
             ".\\universal\\com_sndalias.cpp",
             828,
@@ -678,7 +678,7 @@ void __cdecl Com_UnloadSoundAliasSounds(snd_alias_system_t system)
 
 void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
 {
-    if ((unsigned int)system > SASYS_GAME)
+    if ((uint32_t)system > SASYS_GAME)
         MyAssertHandler(
             ".\\universal\\com_sndalias.cpp",
             1019,
@@ -722,7 +722,7 @@ void __cdecl Com_UnloadSoundAliases(snd_alias_system_t system)
                 g_sa.aliasInfo[system].count);
         }
         g_sa.initialized[system] = 0;
-        if ((unsigned int)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
+        if ((uint32_t)system <= SASYS_CGAME && !g_sa.initialized[1] && !g_sa.initialized[0])
             Cmd_RemoveCommand("snd_list");
     }
 }
@@ -1241,7 +1241,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     Com_Printf(9, "Localized %i sound alias subtitles\n", v37);
 }
 
-void __cdecl Com_InitSoundAliasHash(unsigned int aliasCount)
+void __cdecl Com_InitSoundAliasHash(uint32_t aliasCount)
 {
     g_sa.hashUsed = 0;
     g_sa.hashSize = (3 * aliasCount + 1) >> 1;

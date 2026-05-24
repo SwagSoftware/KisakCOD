@@ -269,16 +269,16 @@ BOOL __cdecl R_SortBspShadowReceiverSurfaces(GfxSurface *surface0, GfxSurface *s
 void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData)
 {
     uint16_t triSurfList[2]; // [esp+F0h] [ebp-4Ch] BYREF
-    unsigned int surfIndex; // [esp+F4h] [ebp-48h]
+    uint32_t surfIndex; // [esp+F4h] [ebp-48h]
     float mins[3]; // [esp+F8h] [ebp-44h] BYREF
     BspOmniLightCallback bspLightCallback; // [esp+104h] [ebp-38h] BYREF
-    unsigned int visLightDrawSurfCount; // [esp+118h] [ebp-24h] BYREF
+    uint32_t visLightDrawSurfCount; // [esp+118h] [ebp-24h] BYREF
     uint8_t *surfaceVisData; // [esp+11Ch] [ebp-20h]
     GfxSurface **surfaces[1]; // [esp+120h] [ebp-1Ch] BYREF
     float maxs[3]; // [esp+124h] [ebp-18h] BYREF
     GfxDrawSurf *drawSurfs; // [esp+130h] [ebp-Ch]
     GfxDrawSurf *surfaceMaterials; // [esp+134h] [ebp-8h]
-    unsigned int listSurfIndex; // [esp+138h] [ebp-4h]
+    uint32_t listSurfIndex; // [esp+138h] [ebp-4h]
     //int savedregs; // [esp+13Ch] [ebp+0h] BYREF
 
     surfaceVisData = rgp.world->dpvs.surfaceVisData[0];
@@ -341,7 +341,7 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
 
 int __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid)
 {
-    return *(_BYTE *)(*(unsigned int *)bspLightCallbackAsVoid + surfIndex)
+    return *(_BYTE *)(*(uint32_t *)bspLightCallbackAsVoid + surfIndex)
         && *((float *)bspLightCallbackAsVoid + 4) >= PointToBoxDistSq(
             (const float *)bspLightCallbackAsVoid + 1,
             rgp.world->dpvs.surfaces[surfIndex].bounds[0],
@@ -351,7 +351,7 @@ int __cdecl R_AllowBspOmniLight(int surfIndex, void *bspLightCallbackAsVoid)
 void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBspDrawSurfData *surfData)
 {
     uint16_t triSurfList[2]; // [esp+1B4h] [ebp-ACh] BYREF
-    unsigned int surfIndex; // [esp+1B8h] [ebp-A8h]
+    uint32_t surfIndex; // [esp+1B8h] [ebp-A8h]
     float mins[3]; // [esp+1BCh] [ebp-A4h] BYREF
     BspSpotLightCallback bspLightCallback; // [esp+1C8h] [ebp-98h] BYREF
     uint8_t *surfaceVisData; // [esp+230h] [ebp-30h]
@@ -359,8 +359,8 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     float maxs[3]; // [esp+23Ch] [ebp-24h] BYREF
     GfxDrawSurf *drawSurfs[2]; // [esp+248h] [ebp-18h]
     GfxDrawSurf *surfaceMaterials; // [esp+250h] [ebp-10h]
-    unsigned int listSurfIndex; // [esp+254h] [ebp-Ch]
-    unsigned int surfCounts[2]; // [esp+258h] [ebp-8h] BYREF
+    uint32_t listSurfIndex; // [esp+254h] [ebp-Ch]
+    uint32_t surfCounts[2]; // [esp+258h] [ebp-8h] BYREF
 
     iassert(lightIndex < MAX_VISIBLE_SHADOWABLE_DLIGHTS);
 
@@ -454,7 +454,7 @@ int __cdecl R_AllowBspSpotLightShadows(int surfIndex, void *bspLightCallbackAsVo
 {
     if (r_spotLightShadows->current.enabled)
         return R_BoxInPlanes(
-            (const float (*)[4])((unsigned int)bspLightCallbackAsVoid + 4),
+            (const float (*)[4])((uint32_t)bspLightCallbackAsVoid + 4),
             rgp.world->dpvs.surfaces[surfIndex].bounds[0],
             rgp.world->dpvs.surfaces[surfIndex].bounds[1]);
     else
@@ -488,7 +488,7 @@ int __cdecl R_BoxInPlanes(const float (*planes)[4], const float *mins, const flo
     float insided; // [esp+44h] [ebp-8h]
     float insidee; // [esp+44h] [ebp-8h]
     float insideg; // [esp+44h] [ebp-8h]
-    unsigned int planeIndex; // [esp+48h] [ebp-4h]
+    uint32_t planeIndex; // [esp+48h] [ebp-4h]
 
     for (planeIndex = 0; planeIndex < 6; ++planeIndex)
     {
@@ -549,9 +549,9 @@ int __cdecl R_BoxInPlanes(const float (*planes)[4], const float *mins, const flo
 
 int __cdecl R_AllowBspSpotLight(int surfIndex, void *bspLightCallbackAsVoid)
 {
-    if (*(_BYTE *)(*(unsigned int *)bspLightCallbackAsVoid + surfIndex))
+    if (*(_BYTE *)(*(uint32_t *)bspLightCallbackAsVoid + surfIndex))
         return R_BoxInPlanes(
-            (const float (*)[4])((unsigned int)bspLightCallbackAsVoid + 4),
+            (const float (*)[4])((uint32_t)bspLightCallbackAsVoid + 4),
             rgp.world->dpvs.surfaces[surfIndex].bounds[0],
             rgp.world->dpvs.surfaces[surfIndex].bounds[1]);
     else
@@ -645,15 +645,15 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
     const GfxStaticModelDrawInst* smodelDrawInst; // [esp+18h] [ebp-89Ch]
     GfxDrawSurf drawSurf; // [esp+1Ch] [ebp-898h]
     float mins[3]; // [esp+28h] [ebp-88Ch] BYREF
-    unsigned int surfaceIndex; // [esp+34h] [ebp-880h]
+    uint32_t surfaceIndex; // [esp+34h] [ebp-880h]
     const Material* material; // [esp+38h] [ebp-87Ch]
     GfxBspDrawSurfData shadowSurfData; // [esp+3Ch] [ebp-878h] BYREF
-    unsigned int surfaceCount; // [esp+58h] [ebp-85Ch]
+    uint32_t surfaceCount; // [esp+58h] [ebp-85Ch]
     const GfxLight* light; // [esp+5Ch] [ebp-858h]
     GfxStaticModelId staticModelId; // [esp+60h] [ebp-854h]
     Material* const* pMaterial; // [esp+64h] [ebp-850h]
     uint16_t list[2]; // [esp+68h] [ebp-84Ch] BYREF
-    unsigned int* lodData; // [esp+6Ch] [ebp-848h]
+    uint32_t* lodData; // [esp+6Ch] [ebp-848h]
     int lod; // [esp+70h] [ebp-844h]
     uint16_t smodels[1024]; // [esp+74h] [ebp-840h] BYREF
     float maxs[3]; // [esp+878h] [ebp-3Ch] BYREF
@@ -785,18 +785,18 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
     GfxVisibleLight *visLightShadow; // [esp+30h] [ebp-1DCh]
     GfxSceneModel *sceneModel; // [esp+34h] [ebp-1D8h]
     GfxDrawSurf *drawSurf; // [esp+38h] [ebp-1D4h]
-    unsigned int dynEntIndex; // [esp+3Ch] [ebp-1D0h]
+    uint32_t dynEntIndex; // [esp+3Ch] [ebp-1D0h]
     GfxDrawSurf *newDrawSurf; // [esp+40h] [ebp-1CCh]
     float planes[4][6][4]; // [esp+44h] [ebp-1C8h] BYREF
-    unsigned int sceneEntCount; // [esp+1C8h] [ebp-44h]
+    uint32_t sceneEntCount; // [esp+1C8h] [ebp-44h]
     const GfxLight *light; // [esp+1CCh] [ebp-40h]
-    unsigned int visLightDrawSurfCount; // [esp+1D0h] [ebp-3Ch]
+    uint32_t visLightDrawSurfCount; // [esp+1D0h] [ebp-3Ch]
     float radius; // [esp+1D4h] [ebp-38h]
     GfxVisibleLight *visLight; // [esp+1D8h] [ebp-34h]
     const DynEntityDef *dynEntDef; // [esp+1DCh] [ebp-30h]
     const float *bounds; // [esp+1E0h] [ebp-2Ch]
-    unsigned int visLightShadowDrawSurfCount; // [esp+1E4h] [ebp-28h]
-    unsigned int sceneEntIndex; // [esp+1E8h] [ebp-24h]
+    uint32_t visLightShadowDrawSurfCount; // [esp+1E4h] [ebp-28h]
+    uint32_t sceneEntIndex; // [esp+1E8h] [ebp-24h]
     GfxSceneEntity *sceneEnt; // [esp+1ECh] [ebp-20h]
     GfxSceneBrush *sceneBrush; // [esp+1F0h] [ebp-1Ch]
     uint8_t *sceneEntVisData; // [esp+1F4h] [ebp-18h]
@@ -1181,7 +1181,7 @@ void __cdecl R_GetSceneEntLightSurfs(const GfxLight **visibleLights, int visible
 
 int __cdecl R_SphereInPlanes(const float (*planes)[4], const float *center, float radius)
 {
-    unsigned int planeIndex; // [esp+4h] [ebp-4h]
+    uint32_t planeIndex; // [esp+4h] [ebp-4h]
 
     for (planeIndex = 0; planeIndex < 6; ++planeIndex)
     {
@@ -1379,7 +1379,7 @@ int __cdecl R_EmitPointLightPartitionSurfs(
     PointLightPartition *partitions; // [esp+10h] [ebp-24h]
     const GfxLight *light; // [esp+18h] [ebp-1Ch]
     int partitionCount; // [esp+20h] [ebp-14h]
-    unsigned int lightDrawSurfCount; // [esp+24h] [ebp-10h]
+    uint32_t lightDrawSurfCount; // [esp+24h] [ebp-10h]
     int lightIndex; // [esp+28h] [ebp-Ch]
     PointLightPartition *partition; // [esp+2Ch] [ebp-8h]
     int drawSurfCount; // [esp+30h] [ebp-4h]
@@ -1459,12 +1459,12 @@ int __cdecl R_GetTechniqueForLightType(const GfxLight *light, const GfxViewInfo 
 
 void __cdecl R_EmitShadowedLightPartitionSurfs(
     GfxViewInfo *viewInfo,
-    unsigned int lightDrawSurfCount,
+    uint32_t lightDrawSurfCount,
     GfxDrawSurf *lightDrawSurfs,
     GfxDrawSurfListInfo *info)
 {
     int firstDrawSurf; // [esp+0h] [ebp-8h]
-    unsigned int drawSurfCount; // [esp+4h] [ebp-4h]
+    uint32_t drawSurfCount; // [esp+4h] [ebp-4h]
 
     firstDrawSurf = frontEndDataOut->drawSurfCount;
     R_EmitDrawSurfList(lightDrawSurfs, lightDrawSurfCount);

@@ -42,16 +42,16 @@ void __cdecl SV_LocateGameData(
     int sizeofGameClient);
 void __cdecl SV_GetUsercmd(int clientNum, usercmd_s *cmd);
 XModel *__cdecl SV_XModelGet(char *name);
-uint8_t *__cdecl SV_AllocXModelPrecache(unsigned int size);
-uint8_t *__cdecl SV_AllocXModelPrecacheColl(unsigned int size);
+uint8_t *__cdecl SV_AllocXModelPrecache(uint32_t size);
+uint8_t *__cdecl SV_AllocXModelPrecacheColl(uint32_t size);
 void __cdecl SV_DObjDumpInfo(gentity_s *ent);
 void __cdecl SV_ResetSkeletonCache();
 bool __cdecl SV_DObjCreateSkelForBone(DObj_s *obj, int boneIndex);
-char *__cdecl SV_AllocSkelMemory(unsigned int size);
+char *__cdecl SV_AllocSkelMemory(uint32_t size);
 int __cdecl SV_DObjCreateSkelForBones(DObj_s *obj, int *partBits);
 int __cdecl SV_DObjUpdateServerTime(gentity_s *ent, float dtime, int bNotify);
 void __cdecl SV_DObjInitServerTime(gentity_s *ent, float dtime);
-int __cdecl SV_DObjGetBoneIndex(const gentity_s *ent, unsigned int boneName);
+int __cdecl SV_DObjGetBoneIndex(const gentity_s *ent, uint32_t boneName);
 DObjAnimMat *__cdecl SV_DObjGetMatrixArray(const gentity_s *ent);
 void __cdecl SV_DObjDisplayAnim(gentity_s *ent, const char *header);
 void __cdecl SV_DObjGetBounds(gentity_s *ent, float *mins, float *maxs);
@@ -69,8 +69,8 @@ void __cdecl SV_SetGametype();
 void __cdecl SV_InitGameProgs(int savepersist);
 void __cdecl SV_RestartGameProgs(int savepersist);
 #elif KISAK_SP
-void __cdecl SV_InitGameProgs(unsigned int randomSeed, int savegame, SaveGame **save);
-void __cdecl SV_RestartGameProgs(unsigned int randomSeed, int savegame, SaveGame **save, int loadScripts);
+void __cdecl SV_InitGameProgs(uint32_t randomSeed, int savegame, SaveGame **save);
+void __cdecl SV_RestartGameProgs(uint32_t randomSeed, int savegame, SaveGame **save, int loadScripts);
 #endif
 void __cdecl SV_InitGameVM(int restart, int savepersist);
 int __cdecl SV_GameCommand();

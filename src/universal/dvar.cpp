@@ -173,7 +173,7 @@ char *__cdecl Dvar_InfoString(int localClientNum, char bit)
     return info1;
 }
 
-void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData)
+void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, uint32_t *userData)
 {
     const char *v2; // eax
 
@@ -191,7 +191,7 @@ char *__cdecl Dvar_InfoString_Big(int bit)
     return info2;
 }
 
-void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData)
+void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, uint32_t *userData)
 {
     const char *v2; // eax
 
@@ -264,7 +264,7 @@ void __cdecl Dvar_ForEachName(void(__cdecl *callback)(const char *))
     InterlockedDecrement(&g_dvarCritSect.readCount);
 }
 
-const dvar_s *__cdecl Dvar_GetAtIndex(unsigned int index)
+const dvar_s *__cdecl Dvar_GetAtIndex(uint32_t index)
 {
     if (index >= dvarCount)
         MyAssertHandler(
@@ -545,7 +545,7 @@ const char *__cdecl Dvar_DomainToString_Internal(
     uint8_t type,
     DvarLimits domain,
     char *outBuffer,
-    unsigned int outBufferLen,
+    uint32_t outBufferLen,
     int *outLineCount)
 {
     const char *v4; // eax
@@ -668,12 +668,12 @@ const char *__cdecl Dvar_DomainToString(
     uint8_t type,
     DvarLimits *domain,
     char *outBuffer,
-    unsigned int outBufferLen)
+    uint32_t outBufferLen)
 {
     return Dvar_DomainToString_Internal(type, *domain, outBuffer, outBufferLen, 0);
 }
 
-void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen)
+void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, uint32_t outBufferLen)
 {
     if (domain.value.min == -FLT_MAX)
     {
@@ -712,7 +712,7 @@ const char *Dvar_DomainToString_GetLines(
     uint8_t type,
     DvarLimits *domain,
     char *outBuffer,
-    unsigned int outBufferLen,
+    uint32_t outBufferLen,
     int *outLineCount)
 {
     if (!outLineCount)
@@ -1116,7 +1116,7 @@ void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor)
             "(dvar->type == DVAR_TYPE_COLOR || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->type);
     if (dvar->type == 8)
-        *(unsigned int *)color = dvar->current.integer;
+        *(uint32_t *)color = dvar->current.integer;
     else
         Dvar_StringToColor(dvar->current.string, color);
     *expandedColor = (double)color[0] * 0.003921568859368563;
@@ -1358,7 +1358,7 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
         return;
     }
     if (dvar->domainFunc
-        && !((uint8_t(__cdecl *)(dvar_s *, int, unsigned int, unsigned int, unsigned int))dvar->domainFunc)(
+        && !((uint8_t(__cdecl *)(dvar_s *, int, uint32_t, uint32_t, uint32_t))dvar->domainFunc)(
             dvar,
             value.integer,
             LODWORD(value.vector[1]),
@@ -2032,9 +2032,9 @@ const dvar_s *__cdecl Dvar_RegisterInt(
 const dvar_t *__cdecl Dvar_RegisterInt(
     const char *dvarName,
     int value,
-    unsigned int min,
-    unsigned int max,
-    unsigned int flags,
+    uint32_t min,
+    uint32_t max,
+    uint32_t flags,
     const char *description)
 {
     DvarValue dvarValue = {};
@@ -2740,7 +2740,7 @@ void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *
     dvar->domainFunc = customFunc;
     if (customFunc)
     {
-        if (!((uint8_t(__cdecl *)(dvar_s *, int, unsigned int, unsigned int, unsigned int))dvar->domainFunc)(
+        if (!((uint8_t(__cdecl *)(dvar_s *, int, uint32_t, uint32_t, uint32_t))dvar->domainFunc)(
             dvar,
             dvar->current.integer,
             LODWORD(dvar->current.vector[1]),
@@ -2882,11 +2882,11 @@ void __cdecl Dvar_ResetDvars(uint16_t filter, DvarSetSource setSource)
     InterlockedDecrement(&g_dvarCritSect.readCount);
 }
 
-int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, unsigned int bufsize)
+int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, uint32_t numDvars, char *buffer, uint32_t bufsize)
 {
     const char *string; // [esp+0h] [ebp-10h]
     int written; // [esp+4h] [ebp-Ch]
-    unsigned int i; // [esp+8h] [ebp-8h]
+    uint32_t i; // [esp+8h] [ebp-8h]
     const dvar_s *dvar; // [esp+Ch] [ebp-4h]
 
     for (i = 0; i < numDvars; ++i)
@@ -2904,11 +2904,11 @@ int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars,
     return 1;
 }
 
-int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, char *filename)
+int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, uint32_t numDvars, char *buffer, char *filename)
 {
     const char *v4; // eax
     uint8_t dst[16388]; // [esp+0h] [ebp-4018h] BYREF
-    unsigned int i; // [esp+4008h] [ebp-10h]
+    uint32_t i; // [esp+4008h] [ebp-10h]
     char *s0; // [esp+400Ch] [ebp-Ch]
     dvar_s *dvar; // [esp+4010h] [ebp-8h]
     int v10; // [esp+4014h] [ebp-4h]

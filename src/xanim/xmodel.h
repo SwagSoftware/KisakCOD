@@ -111,8 +111,8 @@ static_assert(sizeof(XModelPieces) == 12);
 
 struct QueueElement // sizeof=0x8
 {                                       // ...
-    unsigned int beginIndex;            // ...
-    unsigned int count;                 // ...
+    uint32_t beginIndex;            // ...
+    uint32_t count;                 // ...
 };
 
 struct XSurfaceGetTriCandidatesLocals // sizeof=0x2A4
@@ -124,14 +124,14 @@ struct XSurfaceGetTriCandidatesLocals // sizeof=0x2A4
     const struct GfxPackedVertex *inVertices0; // ...
     bool(__cdecl *visitorFunc)(void *, const struct GfxPackedVertex **, const struct GfxPackedVertex **); // ...
     void *visitorContext;               // ...
-    unsigned int nodeQueueBegin;        // ...
-    unsigned int nodeQueueEnd;          // ...
-    unsigned int leafQueueBegin;        // ...
-    unsigned int leafQueueEnd;          // ...
-    unsigned int triangleQueueBegin;    // ...
-    unsigned int triangleQueueEnd;      // ...
-    unsigned int vertexQueueBegin;      // ...
-    unsigned int vertexQueueEnd;        // ...
+    uint32_t nodeQueueBegin;        // ...
+    uint32_t nodeQueueEnd;          // ...
+    uint32_t leafQueueBegin;        // ...
+    uint32_t leafQueueEnd;          // ...
+    uint32_t triangleQueueBegin;    // ...
+    uint32_t triangleQueueEnd;      // ...
+    uint32_t vertexQueueBegin;      // ...
+    uint32_t vertexQueueEnd;        // ...
     QueueElement nodeQueue[64];         // ...
     QueueElement leafQueue[4];
     QueueElement triangleQueue[4];
@@ -258,7 +258,7 @@ int __cdecl XModelTraceLine(
     int contentmask);
 int __cdecl XModelTraceLineAnimated(
     const struct DObj_s *obj,
-    unsigned int modelIndex,
+    uint32_t modelIndex,
     int baseBoneIndex,
     trace_t *results,
     const DObjAnimMat *boneMtxList,
@@ -267,13 +267,13 @@ int __cdecl XModelTraceLineAnimated(
     int contentmask);
 void __cdecl XModelTraceLineAnimatedPartBits(
     const struct DObj_s *obj,
-    unsigned int modelIndex,
+    uint32_t modelIndex,
     int baseBoneIndex,
     int contentmask,
     int *partBits);
 char __cdecl XSurfaceVisitTrianglesInAabb(
     const struct XSurface *surface,
-    unsigned int vertListIndex,
+    uint32_t vertListIndex,
     const float *aabbMins,
     const float *aabbMaxs,
     bool(__cdecl *visitorFunc)(void *, const struct GfxPackedVertex **, const struct GfxPackedVertex **),
@@ -288,7 +288,7 @@ bool __cdecl XSurfaceVisitTrianglesInAabb_ProcessVertices(XSurfaceGetTriCandidat
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessTriangles(XSurfaceGetTriCandidatesLocals *locals);
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessLeaf(XSurfaceGetTriCandidatesLocals *locals);
 char __cdecl XSurfaceVisitTrianglesInAabb_ProcessNode(XSurfaceGetTriCandidatesLocals *locals);
-int __cdecl XModelGetBoneIndex(const XModel *model, unsigned int name, unsigned int offset, unsigned __int8 *index);
+int __cdecl XModelGetBoneIndex(const XModel *model, uint32_t name, uint32_t offset, unsigned __int8 *index);
 int __cdecl XModelGetStaticBounds(const XModel *model, mat3x3 &axis, float *mins, float *maxs);
 
 // xmodel_utils
@@ -296,7 +296,7 @@ const char *__cdecl XModelGetName(const XModel *model);
 int __cdecl XModelGetSurfaces(const XModel *model, struct XSurface **surfaces, int lod);
 struct XSurface *__cdecl XModelGetSurface(const XModel *model, int lod, int surfIndex);
 const XModelLodInfo *__cdecl XModelGetLodInfo(const XModel *model, int lod);
-unsigned int __cdecl XModelGetSurfCount(const XModel *model, int lod);
+uint32_t __cdecl XModelGetSurfCount(const XModel *model, int lod);
 Material **__cdecl XModelGetSkins(const XModel *model, int lod);
 XModelLodRampType __cdecl XModelGetLodRampType(const XModel *model);
 int __cdecl XModelGetNumLods(const XModel *model);
@@ -304,10 +304,10 @@ double __cdecl XModelGetLodOutDist(const XModel *model);
 int __cdecl XModelNumBones(const XModel *model);
 const DObjAnimMat *__cdecl XModelGetBasePose(const XModel *model);
 int __cdecl XModelGetLodForDist(const XModel *model, float dist);
-void __cdecl XModelSetTestLods(unsigned int lodLevel, float dist);
-double __cdecl XModelGetLodDist(const XModel *model, unsigned int lod);
+void __cdecl XModelSetTestLods(uint32_t lodLevel, float dist);
+double __cdecl XModelGetLodDist(const XModel *model, uint32_t lod);
 int __cdecl XModelGetContents(const XModel *model);
-int __cdecl XModelGetStaticModelCacheVertCount(XModel *model, unsigned int lod);
+int __cdecl XModelGetStaticModelCacheVertCount(XModel *model, uint32_t lod);
 
 
 

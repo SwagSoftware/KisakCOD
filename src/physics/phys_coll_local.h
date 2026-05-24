@@ -5,7 +5,7 @@
 struct SeparatingAxisInfo // sizeof=0x14
 {                                       // ...
     float bestDepth;                    // ...
-    unsigned int bestAxis;              // ...
+    uint32_t bestAxis;              // ...
     float bestContactNormal[3];         // ...
 };
 
@@ -24,12 +24,12 @@ void __cdecl Phys_PushPolyOutOfCylinderEndcapPlane(
     const float *polyNormal,
     const objInfo *info,
     int surfaceFlags);
-unsigned int __cdecl Phys_ClipPolygonAgainstCylinderRadius(
+uint32_t __cdecl Phys_ClipPolygonAgainstCylinderRadius(
     const Poly *poly,
     const objInfo *info,
     float (*result)[3],
-    unsigned int maxVerts);
-unsigned int __cdecl Phys_ClipLineSegmentAgainstCylinderRadius(
+    uint32_t maxVerts);
+uint32_t __cdecl Phys_ClipLineSegmentAgainstCylinderRadius(
     const float *pt1,
     const float *pt2,
     const objInfo *info,
@@ -46,7 +46,7 @@ char __cdecl Phys_CylinderFaceTestAxis(
     const float *axis,
     float depthEpsilon,
     SeparatingAxisInfo *axisInfo,
-    unsigned int axisNumber,
+    uint32_t axisNumber,
     bool testForRejectionOnly);
 char __cdecl Phys_TestCircleToEdgeAxis(
     const float *polyNormal,
@@ -56,7 +56,7 @@ char __cdecl Phys_TestCircleToEdgeAxis(
     const objInfo *info,
     const float *circleCenter,
     SeparatingAxisInfo *axisInfo,
-    unsigned int axisNumber);
+    uint32_t axisNumber);
 void __cdecl Phys_ClipCylinderEdgeToPoly(
     SeparatingAxisInfo *axisInfo,
     const float *polyPlane,
@@ -73,7 +73,7 @@ void __cdecl Phys_PushEdgeAwayFromCylinderCircle(
     const objInfo *info,
     int surfaceFlags,
     Results *results);
-unsigned int __cdecl Phys_IntersectionOfCircleWithPlane(
+uint32_t __cdecl Phys_IntersectionOfCircleWithPlane(
     const float *plane,
     const float *circleCenter,
     const float *circleAxis,
@@ -99,7 +99,7 @@ double __cdecl Phys_DistanceOfCylinderFromPlane(const float *plane, const objInf
 void __cdecl Phys_CollideCylinderWithTriangleList(
     const unsigned __int16 *a_indices,
     const float (*verts)[3],
-    unsigned int triCount,
+    uint32_t triCount,
     const objInfo *info,
     int surfaceFlags,
     Results *results);
@@ -193,7 +193,7 @@ bool __cdecl Phys_TestCapsulePlane(const float *plane, const Capsule *capsule);
 void __cdecl Phys_CollideCapsuleWithTriangleList(
     const unsigned __int16 *a_indices,
     const float (*verts)[3],
-    unsigned int triCount,
+    uint32_t triCount,
     const objInfo *info,
     int surfaceFlags,
     Results *results);

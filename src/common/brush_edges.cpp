@@ -28,7 +28,7 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     char v20; // [esp+6048h] [ebp-1Ch]
     char v21; // [esp+6049h] [ebp-1Bh]
     int cycleIndex; // [esp+604Ch] [ebp-18h]
-    unsigned int cycleCount[2]; // [esp+6050h] [ebp-14h]
+    uint32_t cycleCount[2]; // [esp+6050h] [ebp-14h]
     int i1; // [esp+6058h] [ebp-Ch] BYREF
     float perimiter2; // [esp+605Ch] [ebp-8h]
     int planeIndex; // [esp+6060h] [ebp-4h]
@@ -324,7 +324,7 @@ char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, ui
     float *v3; // [esp+18h] [ebp-3010h]
     const SimplePlaneIntersection *v4; // [esp+1Ch] [ebp-300Ch]
     float p1[3073]; // [esp+20h] [ebp-3008h] BYREF
-    unsigned int i; // [esp+3024h] [ebp-4h]
+    uint32_t i; // [esp+3024h] [ebp-4h]
 
     for (i = 0; i < ptCount; ++i)
     {

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cstdint>
 #include <universal/assertive.h>
 
 template <int BIT_COUNT>
@@ -11,20 +11,20 @@ struct bitarray // sizeof=0x10
             this->array[j] = 0;
     }
 
-    void setBit(unsigned int pos)
+    void setBit(uint32_t pos)
     {
         iassert(pos < BIT_COUNT);
         array[pos / 32] |= 0x80000000 >> (pos & 0x1F);
     }
 
-    void resetBit(unsigned int pos)
+    void resetBit(uint32_t pos)
     {
         iassert(pos < BIT_COUNT);
 
         array[pos / 32] &= ~(0x80000000 >> (pos & 0x1F));
     }
 
-    bool testBit(unsigned int pos) const
+    bool testBit(uint32_t pos) const
     {
         iassert(pos < BIT_COUNT);
         return (array[pos / 32] & (0x80000000 >> (pos & 0x1F))) != 0;

@@ -49,7 +49,7 @@ inline CubemapShot &operator++(CubemapShot &e, int i)
     return e;
 }
 
-void __cdecl R_GenerateReflections(char *mapname, GfxReflectionProbe *probes, unsigned int probeCount);
+void __cdecl R_GenerateReflections(char *mapname, GfxReflectionProbe *probes, uint32_t probeCount);
 void __cdecl R_BspGenerateReflections();
 void __cdecl R_GenerateReflectionImages(
     GfxReflectionProbe *probes,
@@ -60,6 +60,6 @@ void __cdecl R_CalcCubeMapViewValues(refdef_s *refdef, CubemapShot cubemapShot, 
 
 
 // r_reflection_probe_load_obj
-void __cdecl R_LoadReflectionProbes(unsigned int bspVersion);
+void __cdecl R_LoadReflectionProbes(uint32_t bspVersion);
 void R_CreateDefaultProbe();
 void R_CreateDefaultProbes();

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <cstdint>
 #include "../universal/q_shared.h"
 
 typedef enum
@@ -96,7 +96,7 @@ extern int marker_common;
 extern int com_expectedHunkUsage;
 
 extern int com_skelTimeStamp;
-extern unsigned int com_errorPrintsCount;
+extern uint32_t com_errorPrintsCount;
 
 extern float com_timescaleValue;
 
@@ -231,7 +231,7 @@ int __cdecl Com_SafeMode();
 void __cdecl Com_ForceSafeMode();
 void __cdecl Com_StartupVariable(const char* match);
 void __cdecl Info_Print(const char* s);
-unsigned int* __cdecl Com_AllocEvent(int size);
+uint32_t* __cdecl Com_AllocEvent(int size);
 void __cdecl Com_ClientPacketEvent();
 
 void __cdecl Com_ServerPacketEvent();
@@ -273,12 +273,12 @@ void __cdecl Com_SetWeaponInfoMemory(int source);
 void __cdecl Com_FreeWeaponInfoMemory(int source);
 int __cdecl Com_AddToString(const char* add, char* msg, int len, int maxlen, int mayAddQuotes);
 char __cdecl Com_GetDecimalDelimiter();
-void __cdecl Com_LocalizedFloatToString(float f, char* buffer, unsigned int maxlen, unsigned int numDecimalPlaces);
+void __cdecl Com_LocalizedFloatToString(float f, char* buffer, uint32_t maxlen, uint32_t numDecimalPlaces);
 void __cdecl Com_SyncThreads();
 void __cdecl Com_InitDObj();
 void __cdecl Com_ShutdownDObj();
 void Com_InitHunkMemory();
-uint8_t *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type);
+uint8_t *__cdecl CM_Hunk_Alloc(uint32_t size, const char *name, int type);
 
 #ifdef KISAK_SP
 void Com_ResetFrametime();
@@ -352,9 +352,9 @@ void __cdecl Dvar_ListSingle(const dvar_s *dvar, const char *userData);
 void __cdecl Dvar_Dump_f();
 void __cdecl PBdvar_set(const char *var_name, char *value);
 char *__cdecl Dvar_InfoString(int localClientNum, char bit);
-void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData);
+void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, uint32_t *userData);
 char *__cdecl Dvar_InfoString_Big(int bit);
-void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData);
+void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, uint32_t *userData);
 void __cdecl Dvar_RegisterBool_f();
 void __cdecl Dvar_RegisterInt_f();
 void __cdecl Dvar_RegisterFloat_f();
@@ -364,7 +364,7 @@ void __cdecl CL_SelectStringTableEntryInDvar_f();
 void __cdecl Dvar_ForEach(void(__cdecl *callback)(const dvar_s *, void *), void *userData);
 void Dvar_Sort();
 void __cdecl Dvar_ForEachName(void(__cdecl *callback)(const char *));
-const dvar_s *__cdecl Dvar_GetAtIndex(unsigned int index);
+const dvar_s *__cdecl Dvar_GetAtIndex(uint32_t index);
 void __cdecl Dvar_SetInAutoExec(bool inAutoExec);
 bool __cdecl Dvar_IsSystemActive();
 char __cdecl Dvar_IsValidName(const char *dvarName);
@@ -380,9 +380,9 @@ const char *Dvar_DomainToString_GetLines(
     uint8_t type,
     DvarLimits *domain,
     char *outBuffer,
-    unsigned int outBufferLen,
+    uint32_t outBufferLen,
     int *outLineCount);
-void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, unsigned int outBufferLen);
+void __cdecl Dvar_VectorDomainToString(int components, DvarLimits domain, char *outBuffer, uint32_t outBufferLen);
 
 void __cdecl Dvar_PrintDomain(uint8_t type, DvarLimits domain);
 bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar);
@@ -483,9 +483,9 @@ const dvar_s *__cdecl Dvar_RegisterInt(
 const dvar_t *__cdecl Dvar_RegisterInt(
     const char *dvarName,
     int value,
-    unsigned int min,
-    unsigned int max,
-    unsigned int flags,
+    uint32_t min,
+    uint32_t max,
+    uint32_t flags,
     const char *description);
 const dvar_s *__cdecl Dvar_RegisterFloat(
     const char *dvarName,
@@ -627,8 +627,8 @@ void __cdecl Dvar_Init();
 void __cdecl Dvar_ResetScriptInfo();
 char __cdecl Dvar_AnyLatchedValues();
 void __cdecl Dvar_ResetDvars(uint16_t filter, DvarSetSource setSource);
-int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, char *filename);
-int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, unsigned int numDvars, char *buffer, unsigned int bufsize);
+int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, uint32_t numDvars, char *buffer, char *filename);
+int __cdecl Com_SaveDvarsToBuffer(const char **dvarnames, uint32_t numDvars, char *buffer, uint32_t bufsize);
 
 #ifdef KISAK_SP
 void Dvar_SaveDvars(struct MemoryFile *memFile, uint16_t filter);
@@ -660,9 +660,9 @@ void __cdecl Dvar_Dump_f();
 void __cdecl SV_SetConfig(int start, int max, int bit);
 void __cdecl SV_SetConfigDvar(const dvar_s *dvar, int *userData);
 char *__cdecl Dvar_InfoString(int localClientNum, char bit);
-void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, unsigned int *userData);
+void __cdecl Dvar_InfoStringSingle(const dvar_s *dvar, uint32_t *userData);
 char *__cdecl Dvar_InfoString_Big(int bit);
-void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, unsigned int *userData);
+void __cdecl Dvar_InfoStringSingle_Big(const dvar_s *dvar, uint32_t *userData);
 void __cdecl Dvar_AddCommands();
 void __cdecl Dvar_RegisterBool_f();
 void __cdecl Dvar_RegisterInt_f();
@@ -681,10 +681,10 @@ MISC
 ==============================================================
 */
 
-#define RoundUp(N, M) ((N) + ((unsigned int)(M)) - (((unsigned int)(N)) % ((unsigned int)(M))))
-#define RoundDown(N, M) ((N) - (((unsigned int)(N)) % ((unsigned int)(M))))
+#define RoundUp(N, M) ((N) + ((uint32_t)(M)) - (((uint32_t)(N)) % ((uint32_t)(M))))
+#define RoundDown(N, M) ((N) - (((uint32_t)(N)) % ((uint32_t)(M))))
 
-void _copyDWord(unsigned int *dest, const unsigned int constant, const unsigned int count);
+void _copyDWord(uint32_t *dest, const uint32_t constant, const uint32_t count);
 
 /*
 ==============================================================
@@ -700,14 +700,14 @@ struct DObjModel_s;
 struct XAnimTree_s;
 
 void __cdecl TRACK_dobj_management();
-DObj_s *__cdecl Com_GetClientDObj(unsigned int handle, int localClientNum);
-DObj_s * Com_GetClientDObjBuffered(unsigned int handle, int localClientNum);
-DObj_s *__cdecl Com_GetServerDObj(unsigned int handle);
+DObj_s *__cdecl Com_GetClientDObj(uint32_t handle, int localClientNum);
+DObj_s * Com_GetClientDObjBuffered(uint32_t handle, int localClientNum);
+DObj_s *__cdecl Com_GetServerDObj(uint32_t handle);
 DObj_s *__cdecl Com_ClientDObjCreate(
 	DObjModel_s *dobjModels,
 	uint16_t numModels,
 	XAnimTree_s *tree,
-	unsigned int handle,
+	uint32_t handle,
 	int localClientNum);
 int __cdecl Com_GetFreeDObjIndex();
 void __cdecl Com_ClientDObjClearAllSkel();
@@ -715,17 +715,17 @@ DObj_s *__cdecl Com_ServerDObjCreate(
 	DObjModel_s *dobjModels,
 	uint16_t numModels,
 	XAnimTree_s *tree,
-	unsigned int handle);
-void __cdecl Com_SafeClientDObjFree(unsigned int handle, int localClientNum);
-void __cdecl Com_SafeServerDObjFree(unsigned int handle);
+	uint32_t handle);
+void __cdecl Com_SafeClientDObjFree(uint32_t handle, int localClientNum);
+void __cdecl Com_SafeServerDObjFree(uint32_t handle);
 void __cdecl Com_InitDObj();
 void __cdecl Com_ShutdownDObj();
 void __cdecl DB_SaveDObjs();
 void __cdecl DB_LoadDObjs();
-DObj_s *Com_DObjCloneToBuffer(unsigned int entnum);
+DObj_s *Com_DObjCloneToBuffer(uint32_t entnum);
 void Com_ServerDObjClean(int handle);
 bool Com_ServerDObjDirty(int handle);
-void Com_DObjCloneFromBuffer(unsigned int entnum);
+void Com_DObjCloneFromBuffer(uint32_t entnum);
 
 /*
 ==============================================================
@@ -835,18 +835,18 @@ inline DynEntityDrawType& operator++(DynEntityDrawType &e, int i)
 }
 uint16_t __cdecl Trace_GetEntityHitId(const trace_t *trace);
 uint16_t __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType);
-unsigned int __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents);
+uint32_t __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents);
 void __cdecl CM_GetBox(struct cbrush_t **box_brush, struct cmodel_t **box_model);
-bool __cdecl CM_ClipHandleIsValid(unsigned int handle);
-cmodel_t *__cdecl CM_ClipHandleToModel(unsigned int handle);
-int __cdecl CM_ContentsOfModel(unsigned int handle);
+bool __cdecl CM_ClipHandleIsValid(uint32_t handle);
+cmodel_t *__cdecl CM_ClipHandleToModel(uint32_t handle);
+int __cdecl CM_ContentsOfModel(uint32_t handle);
 void __cdecl CM_BoxTrace(
     trace_t *results,
     const float *start,
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask);
 void __cdecl CM_Trace(
     trace_t *results,
@@ -854,7 +854,7 @@ void __cdecl CM_Trace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask);
 void __cdecl CM_GetTraceThreadInfo(TraceThreadInfo *threadInfo);
 void __cdecl CM_TestInLeaf(traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
@@ -894,7 +894,7 @@ void __cdecl CM_TransformedBoxTraceRotated(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask,
     const float *origin,
     float (*matrix)[3]);
@@ -922,7 +922,7 @@ int __cdecl CM_BoxSightTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask);
 int __cdecl CM_SightTraceThroughBrush(const traceWork_t *tw, cbrush_t *brush);
 int __cdecl CM_SightTraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *trace);
@@ -953,7 +953,7 @@ int __cdecl CM_TransformedBoxSightTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask,
     const float *origin,
     const float *angles);
@@ -1027,9 +1027,9 @@ int __cdecl CM_PointLeafnum(const float *p);
 void __cdecl CM_BoxLeafnums_r(leafList_s *ll, int nodenum);
 void __cdecl CM_StoreLeafs(leafList_s *ll, int nodenum);
 int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, uint16_t *list, int listsize, int *lastLeaf);
-int __cdecl CM_PointContents(const float *p, unsigned int model);
+int __cdecl CM_PointContents(const float *p, uint32_t model);
 int __cdecl CM_PointContentsLeafBrushNode_r(const float *p, cLeafBrushNode_s *node);
-int __cdecl CM_TransformedPointContents(const float *p, unsigned int model, const float *origin, const float *angles);
+int __cdecl CM_TransformedPointContents(const float *p, uint32_t model, const float *origin, const float *angles);
 uint8_t *__cdecl CM_ClusterPVS(int cluster);
 
 // cm_world
@@ -1072,15 +1072,15 @@ void CM_ClearWorld();
 
 struct svEntity_s;
 void __cdecl CM_UnlinkEntity(svEntity_s *ent);
-void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsigned int clipHandle);
+void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, uint32_t clipHandle);
 void __cdecl CM_AddEntityToNode(svEntity_s *ent, uint16_t childNodeIndex);
 void __cdecl CM_SortNode(uint16_t nodeIndex, float *mins, float *maxs);
 uint16_t __cdecl CM_AllocWorldSector(float *mins, float *maxs);
 void __cdecl CM_AddStaticModelToNode(struct cStaticModel_s *staticModel, uint16_t childNodeIndex);
-unsigned int CM_LinkAllStaticModels();
+uint32_t CM_LinkAllStaticModels();
 void __cdecl CM_LinkStaticModel(struct cStaticModel_s *staticModel);
 int __cdecl CM_AreaEntities(const float *mins, const float *maxs, int *entityList, int maxcount, int contentmask);
-void __cdecl CM_AreaEntities_r(unsigned int nodeIndex, areaParms_t *ap);
+void __cdecl CM_AreaEntities_r(uint32_t nodeIndex, areaParms_t *ap);
 void __cdecl CM_PointTraceStaticModels(trace_t *results, const float *start, const float *end, int contentmask);
 void __cdecl CM_PointTraceStaticModels_r(
     locTraceWork_t *tw,
@@ -1129,14 +1129,14 @@ void CM_UnlockTree();
 // cm_load
 void __cdecl TRACK_cm_load();
 void __cdecl CM_LoadMap(const char *name, int *checksum);
-void __cdecl CM_InitThreadData(unsigned int threadContext);
+void __cdecl CM_InitThreadData(uint32_t threadContext);
 void __cdecl CM_LoadMapData(const char *name);
 void __cdecl CM_LoadMapData_FastFile(const char *name);
 void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs);
 void __cdecl CM_Shutdown();
 void __cdecl CM_Unload();
-int __cdecl CM_LeafCluster(unsigned int leafnum);
-void __cdecl CM_ModelBounds(unsigned int model, float *mins, float *maxs);
+int __cdecl CM_LeafCluster(uint32_t leafnum);
+void __cdecl CM_ModelBounds(uint32_t model, float *mins, float *maxs);
 
 // cm_load_obj
 struct SpawnVar // sizeof=0xA0C
@@ -1168,8 +1168,8 @@ void CMod_LoadCollisionBorders();
 void CMod_LoadCollisionPartitions();
 struct MapEnts *CMod_LoadEntityString();
 void CMod_LoadVisibility();
-void __cdecl CMod_LoadBrushRelated(unsigned int version, bool usePvs);
-unsigned int CMod_LoadSubmodels();
+void __cdecl CMod_LoadBrushRelated(uint32_t version, bool usePvs);
+uint32_t CMod_LoadSubmodels();
 void CMod_LoadSubmodelBrushNodes();
 void __cdecl CMod_PartionLeafBrushes(uint16_t *leafBrushes, int numLeafBrushes, cLeaf_t *leaf);
 cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
@@ -1237,25 +1237,25 @@ struct clipMap_t // sizeof=0x11C
     int isInUse;                        // ...
     int planeCount;                     // ...
     struct cplane_s *planes;                   // ...
-    unsigned int numStaticModels;       // ...
+    uint32_t numStaticModels;       // ...
     struct cStaticModel_s *staticModelList;    // ...
-    unsigned int numMaterials;          // ...
+    uint32_t numMaterials;          // ...
     struct dmaterial_t *materials;             // ...
-    unsigned int numBrushSides;         // ...
+    uint32_t numBrushSides;         // ...
     struct cbrushside_t *brushsides;           // ...
-    unsigned int numBrushEdges;         // ...
+    uint32_t numBrushEdges;         // ...
     uint8_t *brushEdges;        // ...
-    unsigned int numNodes;              // ...
+    uint32_t numNodes;              // ...
     struct cNode_t *nodes;                     // ...
-    unsigned int numLeafs;              // ...
+    uint32_t numLeafs;              // ...
     struct cLeaf_t *leafs;                     // ...
-    unsigned int leafbrushNodesCount;   // ...
+    uint32_t leafbrushNodesCount;   // ...
     struct cLeafBrushNode_s *leafbrushNodes;   // ...
-    unsigned int numLeafBrushes;        // ...
+    uint32_t numLeafBrushes;        // ...
     uint16_t *leafbrushes;      // ...
-    unsigned int numLeafSurfaces;       // ...
-    unsigned int *leafsurfaces;         // ...
-    unsigned int vertCount;             // ...
+    uint32_t numLeafSurfaces;       // ...
+    uint32_t *leafsurfaces;         // ...
+    uint32_t vertCount;             // ...
     float (*verts)[3];                  // ...
     int triCount;                       // ...
     uint16_t *triIndices;       // ...
@@ -1266,7 +1266,7 @@ struct clipMap_t // sizeof=0x11C
     struct CollisionPartition *partitions;     // ...
     int aabbTreeCount;                  // ...
     struct CollisionAabbTree *aabbTrees;       // ...
-    unsigned int numSubModels;          // ...
+    uint32_t numSubModels;          // ...
     struct cmodel_t *cmodels;                  // ...
     uint16_t numBrushes;        // ...
     // padding byte
@@ -1284,7 +1284,7 @@ struct clipMap_t // sizeof=0x11C
     struct DynEntityPose *dynEntPoseList[2];   // ...
     struct DynEntityClient *dynEntClientList[2]; // ...
     struct DynEntityColl *dynEntCollList[2];   // ...
-    unsigned int checksum;              // ...
+    uint32_t checksum;              // ...
 };
 void __cdecl TRACK_cm_showcollision();
 void __cdecl CM_GetPlaneVec4Form(
@@ -1620,7 +1620,9 @@ inline int SnapFloatToInt(double x)
     __asm fld input
     __asm fistp output
 
-    iassert(retval == output);
+    //iassert(retval == output);
+    if (retval != output)
+        __debugbreak();
 #endif
 
 

@@ -39,7 +39,7 @@ void __cdecl R_DrawSunShadowMapCallback(const void *userData, GfxCmdBufContext c
 
 void R_DrawSunShadowMap(
     const GfxViewInfo *viewInfo,
-    unsigned int partitionIndex,
+    uint32_t partitionIndex,
     GfxCmdBuf *cmdBuf)
 {
     float x; // [esp+14h] [ebp-F28h]

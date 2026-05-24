@@ -14,7 +14,7 @@ struct AnnotatedLightGridPoint // sizeof=0xA
 
 struct GfxLightGridEntry_Version15 // sizeof=0x8
 {
-    unsigned int xyzHighBits;
+    uint32_t xyzHighBits;
     uint8_t xyzLowBitsAndPrimaryVis;
     uint8_t needsTrace;
     uint16_t colorsIndex;
@@ -106,16 +106,16 @@ int __cdecl R_EmitPointLightPartitionSurfs(
 int __cdecl R_GetTechniqueForLightType(const GfxLight *light, const GfxViewInfo *viewInfo);
 void __cdecl R_EmitShadowedLightPartitionSurfs(
     GfxViewInfo *viewInfo,
-    unsigned int lightDrawSurfCount,
+    uint32_t lightDrawSurfCount,
     GfxDrawSurf *lightDrawSurfs,
     GfxDrawSurfListInfo *info);
 
 
 
 // r_light_load_obj
-void __cdecl R_LoadLightGridColors(unsigned int bspVersion);
+void __cdecl R_LoadLightGridColors(uint32_t bspVersion);
 void R_LoadLightGridRowData();
 uint8_t *R_LoadLightGridEntries();
 void R_LoadLightGridHeader();
-void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion);
+void __cdecl R_LoadLightGridPoints_Version15(uint32_t bspVersion);
 GfxLightDef *__cdecl R_LoadLightDef(const char *name);

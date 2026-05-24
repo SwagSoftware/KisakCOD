@@ -12,7 +12,7 @@
 //Line 51773:  0006 : 0000bc58       float (*)[3] bytedirs        827bbc58     com_math.obj
 //Line 53450 : 0006 : 0291d360       int marker_com_math      850cd360     com_math.obj
 
-static unsigned int holdrand;
+static uint32_t holdrand;
 
 float bytedirs[162][3] =
 {
@@ -235,7 +235,7 @@ void __cdecl GaussianRandom(float *f0, float *f1)
     *f1 = y * v2;
 }
 
-unsigned int __cdecl RandWithSeed(int *seed)
+uint32_t __cdecl RandWithSeed(int *seed)
 {
     *seed = 1103515245 * *seed + 12345;
     return *seed / 0x10000 % 0x8000u;
@@ -453,7 +453,7 @@ uint8_t __cdecl DirToByte(const float *dir)
     return best;
 }
 
-void __cdecl ByteToDir(unsigned int b, float *dir)
+void __cdecl ByteToDir(uint32_t b, float *dir)
 {
     float *v2; // ecx
 

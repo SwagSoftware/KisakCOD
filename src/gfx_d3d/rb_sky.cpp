@@ -21,7 +21,7 @@ void __cdecl TRACK_rb_sky()
     track_static_alloc_internal(sunFlareArray, 160, "sunFlareArray", 18);
 }
 
-unsigned int __cdecl RB_CalcSunSpriteSamples()
+uint32_t __cdecl RB_CalcSunSpriteSamples()
 {
     const char *v1; // eax
     const char *v2; // eax
@@ -33,7 +33,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     int v8; // [esp+44h] [ebp-10h]
     IDirect3DQuery9 *occlusionQuery; // [esp+48h] [ebp-Ch]
     HRESULT hr; // [esp+4Ch] [ebp-8h]
-    unsigned int sampleCount; // [esp+50h] [ebp-4h] BYREF
+    uint32_t sampleCount; // [esp+50h] [ebp-4h] BYREF
 
     if (vidConfig.displayWidth < 0x10)
         MyAssertHandler(
@@ -135,7 +135,7 @@ unsigned int __cdecl RB_CalcSunSpriteSamples()
     return sampleCount;
 }
 
-void __cdecl RB_DrawSun(unsigned int localClientNum)
+void __cdecl RB_DrawSun(uint32_t localClientNum)
 {
     SunFlareDynamic *sunFlare; // [esp+0h] [ebp-4h]
 
@@ -165,15 +165,15 @@ void __cdecl RB_DrawSunQuerySprite(SunFlareDynamic *sunFlare)
     float v3; // [esp+14h] [ebp-70h]
     float widthInClipSpace; // [esp+28h] [ebp-5Ch]
     float heightInClipSpace; // [esp+2Ch] [ebp-58h]
-    unsigned int sunSpriteSamples; // [esp+70h] [ebp-14h]
-    unsigned int drawnSampleCount; // [esp+74h] [ebp-10h]
+    uint32_t sunSpriteSamples; // [esp+70h] [ebp-14h]
+    uint32_t drawnSampleCount; // [esp+74h] [ebp-10h]
     float lastVisibilitya; // [esp+7Ch] [ebp-8h]
     float lastVisibility; // [esp+7Ch] [ebp-8h]
     int queryIndex; // [esp+80h] [ebp-4h]
 
     iassert( sunFlare );
     queryIndex = r_glob.backEndFrameCount % 2;
-    if ((unsigned int)(r_glob.backEndFrameCount % 2) >= 2)
+    if ((uint32_t)(r_glob.backEndFrameCount % 2) >= 2)
         MyAssertHandler(
             ".\\rb_sky.cpp",
             319,
@@ -238,10 +238,10 @@ void __cdecl RB_HW_BeginOcclusionQuery(IDirect3DQuery9 *query)
     query->Issue(D3DISSUE_BEGIN);
 }
 
-unsigned int __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)
+uint32_t __cdecl RB_HW_ReadOcclusionQuery(IDirect3DQuery9 *query)
 {
     HRESULT hr; // [esp+4h] [ebp-8h]
-    unsigned int pixelCount; // [esp+8h] [ebp-4h] BYREF
+    uint32_t pixelCount; // [esp+8h] [ebp-4h] BYREF
 
     while (1)
     {
@@ -434,8 +434,8 @@ void __cdecl RB_AddSunEffects(SunFlareDynamic *sunFlare)
 void __cdecl RB_FreeSunSpriteQueries()
 {
     IDirect3DQuery9 *varCopy; // [esp+0h] [ebp-Ch]
-    unsigned int viewIndex; // [esp+4h] [ebp-8h]
-    unsigned int queryIndex; // [esp+8h] [ebp-4h]
+    uint32_t viewIndex; // [esp+4h] [ebp-8h]
+    uint32_t queryIndex; // [esp+8h] [ebp-4h]
 
     for (viewIndex = 0; viewIndex < 4; ++viewIndex)
     {
@@ -513,7 +513,7 @@ void RB_DrawSunSprite()
     RB_EndTessSurface();
 }
 
-void __cdecl RB_DrawSunPostEffects(unsigned int localClientNum)
+void __cdecl RB_DrawSunPostEffects(uint32_t localClientNum)
 {
     int frameTime; // [esp+0h] [ebp-8h]
     SunFlareDynamic *sunFlare; // [esp+4h] [ebp-4h]
@@ -666,7 +666,7 @@ void __cdecl RB_DrawBlindAndGlare(SunFlareDynamic *sunFlare, int frameTime)
     colorVec[1] = glare;
     colorVec[2] = glare;
     colorVec[3] = blind;
-    R_ConvertColorToBytes(colorVec, (unsigned int*)&color);
+    R_ConvertColorToBytes(colorVec, (uint32_t*)&color);
     RB_DrawFullScreenColoredQuad(rgp.glareBlindMaterial, 0.0, 0.0, 1.0, 1.0, color.packed);
 }
 
@@ -757,8 +757,8 @@ void __cdecl RB_CalcSunBlind(SunFlareDynamic *sunFlare, int frameTime, float *bl
 
 void __cdecl RB_AllocSunSpriteQueries()
 {
-    unsigned int viewIndex; // [esp+8h] [ebp-8h]
-    unsigned int queryIndex; // [esp+Ch] [ebp-4h]
+    uint32_t viewIndex; // [esp+8h] [ebp-8h]
+    uint32_t queryIndex; // [esp+Ch] [ebp-4h]
 
     for (viewIndex = 0; viewIndex < gfxCfg.maxClientViews; ++viewIndex)
     {

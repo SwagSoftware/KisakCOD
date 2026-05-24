@@ -1,9 +1,9 @@
 #pragma once
+#include <cstdio>
+#include <cstdint>
 
-#include <stdio.h>
-
-unsigned int __cdecl FS_FileRead(void *ptr, unsigned int len, FILE *stream);
-unsigned int __cdecl FS_FileWrite(const void *ptr, unsigned int len, FILE *stream);
+uint32_t __cdecl FS_FileRead(void *ptr, uint32_t len, FILE *stream);
+uint32_t __cdecl FS_FileWrite(const void *ptr, uint32_t len, FILE *stream);
 FILE *__cdecl FS_FileOpenReadBinary(const char *filename);
 FILE *__cdecl FS_FileOpenReadText(const char *filename);
 FILE *__cdecl FS_FileOpenWriteBinary(const char *filename);
@@ -16,4 +16,4 @@ int __cdecl FileWrapper_Seek(FILE *h, int offset, int origin);
 int __cdecl FS_FileGetFileSize(FILE *file);
 int __cdecl FileWrapper_GetFileSize(FILE *h);
 
-unsigned int FS_FileTell(FILE *file);
+uint32_t FS_FileTell(FILE *file);

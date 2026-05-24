@@ -16,7 +16,7 @@
 
 //struct WeaponDef **bg_weaponDefs 82800908     bg_weapons.obj
 //float (*)[29] penetrationDepthTable 82800f10     bg_weapons.obj
-//unsigned int bg_lastParsedWeaponIndex 828010e4     bg_weapons.obj
+//uint32_t bg_lastParsedWeaponIndex 828010e4     bg_weapons.obj
 
 int surfaceTypeSoundListCount;
 WeaponDef *bg_weaponDefs[128];
@@ -26,14 +26,14 @@ const float MY_RELOADSTART_INTERUPT_IGNORE_FRAC = 0.4f;
 WeaponDef *bg_weapAmmoTypes[128];
 WeaponDef *bg_sharedAmmoCaps[128];
 WeaponDef *bg_weapClips[128];
-unsigned int bg_numAmmoTypes;
-unsigned int bg_numSharedAmmoCaps;
-unsigned int bg_numWeapClips;
+uint32_t bg_numAmmoTypes;
+uint32_t bg_numSharedAmmoCaps;
+uint32_t bg_numWeapClips;
 
 bool penetrationDepthTableLoaded;
 float penetrationDepthTable[4][29];
 
-unsigned int bg_lastParsedWeaponIndex;
+uint32_t bg_lastParsedWeaponIndex;
 
 void __cdecl TRACK_bg_weapons()
 {
@@ -62,7 +62,7 @@ void __cdecl BG_LoadPenetrationDepthTable()
             "BULLET_PEN_TABLE",
             loadBuffer);
 #endif
-        Com_Memset((unsigned int *)penetrationDepthTable, 0, 464);
+        Com_Memset((uint32_t *)penetrationDepthTable, 0, 464);
         BG_ParsePenetrationDepthTable("small", penetrationDepthTable[1], buffer);
         BG_ParsePenetrationDepthTable("medium", penetrationDepthTable[2], buffer);
         BG_ParsePenetrationDepthTable("large", penetrationDepthTable[3], buffer);
@@ -150,9 +150,9 @@ void __cdecl BG_ClearSurfaceTypeSounds()
 
 void __cdecl BG_FreeWeaponDefStrings()
 {
-    unsigned int j; // [esp+0h] [ebp-Ch]
-    unsigned int ja; // [esp+0h] [ebp-Ch]
-    unsigned int i; // [esp+4h] [ebp-8h]
+    uint32_t j; // [esp+0h] [ebp-Ch]
+    uint32_t ja; // [esp+0h] [ebp-Ch]
+    uint32_t i; // [esp+4h] [ebp-8h]
     WeaponDef *weapDef; // [esp+8h] [ebp-4h]
 
     for (i = 1; i <= bg_lastParsedWeaponIndex; ++i)
@@ -332,9 +332,9 @@ WeaponDef *__cdecl BG_GetWeaponDef(uint32_t weaponIndex)
     return bg_weaponDefs[weaponIndex];
 }
 
-unsigned int __cdecl BG_GetWeaponIndex(const WeaponDef *weapDef)
+uint32_t __cdecl BG_GetWeaponIndex(const WeaponDef *weapDef)
 {
-    unsigned int weapIndex; // [esp+0h] [ebp-4h]
+    uint32_t weapIndex; // [esp+0h] [ebp-4h]
 
     iassert(weapDef);
 
@@ -346,7 +346,7 @@ unsigned int __cdecl BG_GetWeaponIndex(const WeaponDef *weapDef)
     return 0;
 }
 
-unsigned int __cdecl BG_GetNumWeapons()
+uint32_t __cdecl BG_GetNumWeapons()
 {
     return bg_lastParsedWeaponIndex + 1;
 }
@@ -358,9 +358,9 @@ int32_t __cdecl BG_GetSharedAmmoCapSize(uint32_t capIndex)
     return bg_sharedAmmoCaps[capIndex]->iSharedAmmoCap;
 }
 
-unsigned int __cdecl BG_FindWeaponIndexForName(const char *name)
+uint32_t __cdecl BG_FindWeaponIndexForName(const char *name)
 {
-    unsigned int weapIndex; // [esp+0h] [ebp-4h]
+    uint32_t weapIndex; // [esp+0h] [ebp-4h]
 
     if (!name)
         return 0;
@@ -436,7 +436,7 @@ void __cdecl BG_SetupWeaponAlts(uint32_t weapIndex, void(__cdecl *regWeap)(uint3
     }
 }
 
-unsigned int __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps)
+uint32_t __cdecl BG_GetViewmodelWeaponIndex(const playerState_s *ps)
 {
     int weapIndex; // [esp+0h] [ebp-4h]
 
@@ -895,7 +895,7 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 #elif KISAK_SP
 bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
 {
-    unsigned int viewmodelWeaponIndex; // r3
+    uint32_t viewmodelWeaponIndex; // r3
     WeaponDef *weapDef; // r3
     int weaponstate; // r11
 
@@ -907,7 +907,7 @@ bool __cdecl PM_IsAdsAllowed(playerState_s *ps, pml_t *pml)
         if (pml->groundPlane)
             return false;
     }
-    else if ((unsigned int)(ps->pm_type - PM_NOCLIP) <= (unsigned int)(PM_DEAD_LINKED - PM_NOCLIP))
+    else if ((uint32_t)(ps->pm_type - PM_NOCLIP) <= (uint32_t)(PM_DEAD_LINKED - PM_NOCLIP))
     {
         return false;
     }
@@ -1266,9 +1266,9 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
     ps->weaponstate = WEAPON_READY;
     PM_StartWeaponAnim(ps, 0);
 #elif KISAK_SP
-    unsigned int v1; // r10
+    uint32_t v1; // r10
     int pm_type; // r8
-    unsigned int v3; // r9
+    uint32_t v3; // r9
 
     v1 = ps->weapFlags & 0xFFFFFFFD;
     pm_type = ps->pm_type;
@@ -1579,13 +1579,13 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
     int bitNum; // [esp+10h] [ebp-2Ch]
     int altswitch; // [esp+18h] [ebp-24h]
     float aimspread; // [esp+1Ch] [ebp-20h]
-    unsigned int oldweapon; // [esp+20h] [ebp-1Ch]
-    unsigned int anim; // [esp+24h] [ebp-18h]
-    unsigned int weapontime; // [esp+28h] [ebp-14h]
+    uint32_t oldweapon; // [esp+20h] [ebp-1Ch]
+    uint32_t anim; // [esp+24h] [ebp-18h]
+    uint32_t weapontime; // [esp+28h] [ebp-14h]
     int *weapDef; // [esp+2Ch] [ebp-10h]
     playerState_s *ps; // [esp+30h] [ebp-Ch]
     bool firstequip; // [esp+34h] [ebp-8h]
-    unsigned int newweapon; // [esp+38h] [ebp-4h]
+    uint32_t newweapon; // [esp+38h] [ebp-4h]
 
     ps = pm->ps;
     iassert(ps);
@@ -1822,7 +1822,7 @@ void __cdecl PM_SetReloadingState(playerState_s *ps)
 
 void __cdecl PM_SetWeaponReloadAddAmmoDelay(playerState_s *ps)
 {
-    unsigned int bitNum; // [esp+0h] [ebp-10h]
+    uint32_t bitNum; // [esp+0h] [ebp-10h]
     int reloadTime; // [esp+8h] [ebp-8h]
     WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
@@ -1900,7 +1900,7 @@ int __cdecl PM_Weapon_AllowReload(playerState_s *ps)
 
 void __cdecl PM_Weapon_ReloadDelayedAction(playerState_s *ps)
 {
-    unsigned int bitNum; // [esp+0h] [ebp-14h]
+    uint32_t bitNum; // [esp+0h] [ebp-14h]
     int reloadTime; // [esp+8h] [ebp-Ch]
     int reloadTimea; // [esp+8h] [ebp-Ch]
     int rechamberTime; // [esp+Ch] [ebp-8h]
@@ -2177,7 +2177,7 @@ void __cdecl UpdatePendingTriggerPull(pmove_t *pm)
     playerState_s* ps = pm->ps; // [esp+4h] [ebp-4h]
     iassert(ps);
 
-    if (BG_GetWeaponDef(ps->weapon)->fireType >= (unsigned int)WEAPON_FIRETYPE_BURSTFIRE2
+    if (BG_GetWeaponDef(ps->weapon)->fireType >= (uint32_t)WEAPON_FIRETYPE_BURSTFIRE2
         && (pm->cmd.buttons & 1) != 0
         && (pm->oldcmd.buttons & 1) == 0)
     {
@@ -3001,12 +3001,12 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
 {
     WeaponDef *pWeapDef; // eax
     const char *v2; // eax
-    unsigned int FirstAvailableOffhand; // eax
+    uint32_t FirstAvailableOffhand; // eax
     WeaponDef *pWeapDef3; // eax
     int bitNum; // [esp+0h] [ebp-14h]
     WeaponDef *pWeapDef4; // [esp+4h] [ebp-10h]
     playerState_s *ps; // [esp+8h] [ebp-Ch]
-    unsigned int offHandIndex; // [esp+Ch] [ebp-8h]
+    uint32_t offHandIndex; // [esp+Ch] [ebp-8h]
     OffhandClass offhandClass; // [esp+10h] [ebp-4h]
 
     ps = pm->ps;
@@ -4458,7 +4458,7 @@ void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue)
     } while (v2);
 }
 
-int BG_ValidateWeaponNumberOffhand(unsigned int weaponIndex)
+int BG_ValidateWeaponNumberOffhand(uint32_t weaponIndex)
 {
     int result; // r3
     OffhandClass offhandClass; // r11

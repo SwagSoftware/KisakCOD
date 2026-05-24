@@ -17,12 +17,12 @@ typedef unsigned char* unzFile;
 /* tm_unz contain date/time info */
 typedef struct tm_unz_s 
 {
-	unsigned int tm_sec;            /* seconds after the minute - [0,59] */
-	unsigned int tm_min;            /* minutes after the hour - [0,59] */
-	unsigned int tm_hour;           /* hours since midnight - [0,23] */
-	unsigned int tm_mday;           /* day of the month - [1,31] */
-	unsigned int tm_mon;            /* months since January - [0,11] */
-	unsigned int tm_year;           /* years - [1980..2044] */
+	uint32_t tm_sec;            /* seconds after the minute - [0,59] */
+	uint32_t tm_min;            /* minutes after the hour - [0,59] */
+	uint32_t tm_hour;           /* hours since midnight - [0,23] */
+	uint32_t tm_mday;           /* day of the month - [1,31] */
+	uint32_t tm_mon;            /* months since January - [0,11] */
+	uint32_t tm_year;           /* years - [1980..2044] */
 } tm_unz;
 
 /* unz_global_info structure contain global data about the ZIPfile
@@ -73,7 +73,7 @@ typedef struct
 	unsigned long stream_initialised;   /* flag set if stream structure is initialised*/
 
 	unsigned long offset_local_extrafield;/* offset of the static extra field */
-	unsigned int  size_local_extrafield;/* size of the static extra field */
+	uint32_t  size_local_extrafield;/* size of the static extra field */
 	unsigned long pos_local_extrafield;   /* position in the static extra field in read*/
 
 //	unsigned long crc32;                /* crc32 of all data uncompressed */

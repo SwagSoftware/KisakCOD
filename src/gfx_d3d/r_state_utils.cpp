@@ -86,7 +86,7 @@ int __cdecl R_PickMaterial(
     char *name,
     char *surfaceFlags,
     char *contents,
-    unsigned int charLimit)
+    uint32_t charLimit)
 {
     int v8; // ecx
     char v9; // [esp+4Fh] [ebp-55h]
@@ -294,7 +294,7 @@ void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdB
     memset((uint8_t *)source, 0, sizeof(GfxCmdBufSourceState));
     qmemcpy(&source->input, input, sizeof(source->input));
 
-    for (unsigned int constant = 0; constant < 0x3A; ++constant)
+    for (uint32_t constant = 0; constant < 0x3A; ++constant)
     {
         if (input == &gfxCmdBufInput || s_codeConstUpdateFreq[constant] != 2 || constant < 0x20)
         {
@@ -347,7 +347,7 @@ void __cdecl R_SetDefaultAlphaTestFunction(GfxCmdBufState *state)
     state->alphaRef = 0;
 }
 
-void __cdecl R_SetDefaultStateBits(unsigned int *stateBits)
+void __cdecl R_SetDefaultStateBits(uint32_t *stateBits)
 {
     *stateBits = 0;
     stateBits[1] = 0;
@@ -360,7 +360,7 @@ void __cdecl R_SetDefaultStateBits(unsigned int *stateBits)
     stateBits[1] = stateBits[1];
 }
 
-void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int samplerIndex, unsigned int samplerState)
+void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, uint32_t samplerIndex, uint32_t samplerState)
 {
     const char *v3; // eax
     const char *v4; // eax
@@ -552,9 +552,9 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
 
 void __cdecl R_InitCmdBufState(GfxCmdBufState *state)
 {
-    unsigned int samplerIndex; // [esp+10h] [ebp-Ch]
+    uint32_t samplerIndex; // [esp+10h] [ebp-Ch]
     IDirect3DDevice9 *device; // [esp+14h] [ebp-8h]
-    unsigned int forceSamplerState; // [esp+18h] [ebp-4h]
+    uint32_t forceSamplerState; // [esp+18h] [ebp-4h]
 
     iassert( state );
     device = state->prim.device;

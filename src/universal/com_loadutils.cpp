@@ -17,7 +17,7 @@ char *__cdecl Com_LoadInfoString(char *fileName, const char *fileDesc, const cha
 
 const char *__cdecl Com_LoadInfoString_FastFile(const char *fileName, const char *fileDesc, const char *ident)
 {
-    unsigned int v4; // [esp+0h] [ebp-20h]
+    uint32_t v4; // [esp+0h] [ebp-20h]
     const char *buffer; // [esp+14h] [ebp-Ch]
     RawFile *rawfile; // [esp+1Ch] [ebp-4h]
 
@@ -33,7 +33,7 @@ const char *__cdecl Com_LoadInfoString_FastFile(const char *fileName, const char
 
 char *__cdecl Com_LoadInfoString_LoadObj(char *fileName, const char *fileDesc, const char *ident, char *loadBuffer)
 {
-    unsigned int v5; // [esp+0h] [ebp-1Ch]
+    uint32_t v5; // [esp+0h] [ebp-1Ch]
     int fileHandle; // [esp+14h] [ebp-8h] BYREF
     int fileLen; // [esp+18h] [ebp-4h]
 

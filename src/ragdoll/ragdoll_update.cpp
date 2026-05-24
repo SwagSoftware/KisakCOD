@@ -292,7 +292,7 @@ char __cdecl Ragdoll_CreatePhysJoint(RagdollBody *body, JointDef *jointDef, Join
     iassert( body );
     iassert( jointDef );
     iassert( joint );
-    if ((unsigned int)jointDef->bone >= body->numBones)
+    if ((uint32_t)jointDef->bone >= body->numBones)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
             527,
@@ -771,7 +771,7 @@ void __cdecl Ragdoll_GenerateAllSelfCollisionContacts()
 
 void __cdecl Ragdoll_GenBoneCapsuleSegments(RagdollBody *body, uint8_t *bones, float (*s0)[3], float (*s1)[3])
 {
-    if ((unsigned int)*bones >= body->numBones)
+    if ((uint32_t)*bones >= body->numBones)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
             957,
@@ -779,7 +779,7 @@ void __cdecl Ragdoll_GenBoneCapsuleSegments(RagdollBody *body, uint8_t *bones, f
             "bones[0] doesn't index body->numBones\n\t%i not in [0, %i)",
             *bones,
             body->numBones);
-    if ((unsigned int)bones[1] >= body->numBones)
+    if ((uint32_t)bones[1] >= body->numBones)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
             958,
@@ -1410,7 +1410,7 @@ char __cdecl Ragdoll_TunnelTest(RagdollBody *body)
                 for (child = 0; child < numChildren; ++child)
                 {
                     childIdx = childIndices[child];
-                    if ((unsigned int)childIdx >= body->numBones)
+                    if ((uint32_t)childIdx >= body->numBones)
                         MyAssertHandler(
                             ".\\ragdoll\\ragdoll_update.cpp",
                             1377,
@@ -1662,7 +1662,7 @@ bool __cdecl Ragdoll_ExitIdle(RagdollBody *body, BodyState_t curState, BodyState
     BoneOrientation *v4; // eax
 
     iassert( body );
-    if ((unsigned int)newState <= BS_DOBJ_WAIT)
+    if ((uint32_t)newState <= BS_DOBJ_WAIT)
         return 1;
     if (!Ragdoll_ValidateBodyObj(body))
         return 0;
@@ -1863,7 +1863,7 @@ char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState_t state)
     BodyState_t prevState; // [esp+4h] [ebp-4h]
 
     iassert( body );
-    if ((unsigned int)state >= RAGDOLL_NUM_STATES)
+    if ((uint32_t)state >= RAGDOLL_NUM_STATES)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
             1827,
@@ -1872,7 +1872,7 @@ char __cdecl Ragdoll_BodyNewState(RagdollBody *body, BodyState_t state)
             state,
             6);
     prevState = body->state;
-    if ((unsigned int)prevState >= RAGDOLL_NUM_STATES)
+    if ((uint32_t)prevState >= RAGDOLL_NUM_STATES)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
             1830,
@@ -1905,7 +1905,7 @@ void __cdecl Ragdoll_BodyUpdate(int msec, RagdollBody *body)
     BodyState_t prevState; // [esp+4h] [ebp-4h]
 
     iassert( body );
-    if (body->state >= (unsigned int)RAGDOLL_NUM_STATES)
+    if (body->state >= (uint32_t)RAGDOLL_NUM_STATES)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_update.cpp",
             1871,

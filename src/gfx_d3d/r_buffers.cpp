@@ -66,7 +66,7 @@ void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInB
     return vertexBufferData;
 }
 
-void *__cdecl R_AllocDynamicIndexBuffer(IDirect3DIndexBuffer9 **ib, unsigned int sizeInBytes)
+void *__cdecl R_AllocDynamicIndexBuffer(IDirect3DIndexBuffer9 **ib, uint32_t sizeInBytes)
 {
     const char *v3; // eax
     const char *v4; // eax
@@ -93,7 +93,7 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
     iassert( (sizeInBytes > 0) );
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, unsigned int, IDirect3DIndexBuffer9 **, unsigned int))dx.device->CreateIndexBuffer)(
+    //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, uint32_t, IDirect3DIndexBuffer9 **, uint32_t))dx.device->CreateIndexBuffer)(
     //    dx.device,
     //    dx.device,
     //    sizeInBytes,
@@ -350,7 +350,7 @@ void *__cdecl R_LockVertexBuffer(IDirect3DVertexBuffer9 *handle, int offset, int
 void __cdecl R_ShutdownTempSkinBuf()
 {
     GfxBackEndData *data; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-4h]
 
     for (i = 0; i < 2; ++i)
     {
@@ -527,7 +527,7 @@ void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle)
     handle->Unlock();
 }
 
-void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData, unsigned int sizeInBytes)
+void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData, uint32_t sizeInBytes)
 {
     int dummyData; // [esp+30h] [ebp-8h] BYREF
     void *dstData; // [esp+34h] [ebp-4h]

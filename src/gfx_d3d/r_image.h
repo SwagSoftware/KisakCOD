@@ -81,7 +81,7 @@ struct GfxRawImage // sizeof=0x54
 
 struct ImageList // sizeof=0x2004
 {                                       // ...
-    unsigned int count;                 // ...
+    uint32_t count;                 // ...
     GfxImage *image[2048];              // ...
 };
 
@@ -181,13 +181,13 @@ void __cdecl Image_UploadData(
     const GfxImage *image,
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
-    unsigned int mipLevel,
+    uint32_t mipLevel,
     uint8_t *src);
 
 void __cdecl Image_CreateCubeTexture_PC(
     GfxImage *image,
     uint16_t edgeLen,
-    unsigned int mipmapCount,
+    uint32_t mipmapCount,
     _D3DFORMAT imageFormat);
 
 void __cdecl Image_Create3DTexture_PC(
@@ -195,7 +195,7 @@ void __cdecl Image_Create3DTexture_PC(
     uint16_t width,
     uint16_t height,
     uint16_t depth,
-    unsigned int mipmapCount,
+    uint32_t mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat);
 
@@ -203,7 +203,7 @@ void __cdecl Image_Create2DTexture_PC(
     GfxImage *image,
     uint16_t width,
     uint16_t height,
-    unsigned int mipmapCount,
+    uint32_t mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat);
 
@@ -220,7 +220,7 @@ void __cdecl R_DownsampleMipMapBilinear(
     int texelPitch,
     uint8_t *dst);
 
-inline unsigned int __cdecl Image_GetUsage(int imageFlags, _D3DFORMAT imageFormat)
+inline uint32_t __cdecl Image_GetUsage(int imageFlags, _D3DFORMAT imageFormat)
 {
     if ((imageFlags & 0x20000) != 0)
     {
@@ -243,26 +243,26 @@ inline unsigned int __cdecl Image_GetUsage(int imageFlags, _D3DFORMAT imageForma
 // r_image_load_obj
 void __cdecl Image_BuildWaterMap(GfxImage *image);
 void __cdecl Image_SetupFromFile(GfxImage *image, const GfxImageFileHeader *fileHeader, _D3DFORMAT imageFormat);
-unsigned int __cdecl Image_CountMipmaps(char imageFlags, unsigned int width, unsigned int height, unsigned int depth);
+uint32_t __cdecl Image_CountMipmaps(char imageFlags, uint32_t width, uint32_t height, uint32_t depth);
 void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int imageFlags, _D3DFORMAT imageFormat);
 void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT format, int width, int height, int depth);
-unsigned int __cdecl Image_GetCardMemoryAmount(
+uint32_t __cdecl Image_GetCardMemoryAmount(
     char imageFlags,
     _D3DFORMAT format,
-    unsigned int width,
-    unsigned int height,
-    unsigned int depth);
-unsigned int __cdecl Image_GetCardMemoryAmountForMipLevel(
+    uint32_t width,
+    uint32_t height,
+    uint32_t depth);
+uint32_t __cdecl Image_GetCardMemoryAmountForMipLevel(
     _D3DFORMAT format,
-    unsigned int mipWidth,
-    unsigned int mipHeight,
-    unsigned int mipDepth);
+    uint32_t mipWidth,
+    uint32_t mipHeight,
+    uint32_t mipDepth);
 void __cdecl Image_TrackTotalMemory(GfxImage *image, int platform, int memory);
 uint8_t *__cdecl Image_AllocTempMemory(int bytes);
 void __cdecl Image_FreeTempMemory(uint8_t *mem, int bytes);
 GfxImage *__cdecl Image_FindExisting_LoadObj(const char *name);
 bool __cdecl Image_IsProg(GfxImage *image);
-void __cdecl Image_ExpandBgr(const uint8_t *src, unsigned int count, uint8_t *dst);
+void __cdecl Image_ExpandBgr(const uint8_t *src, uint32_t count, uint8_t *dst);
 void __cdecl Image_Generate2D(GfxImage *image, uint8_t *pixels, int width, int height, _D3DFORMAT imageFormat);
 void __cdecl Image_Generate3D(
     GfxImage *image,
@@ -276,7 +276,7 @@ void __cdecl Image_GenerateCube(
     const uint8_t *(*pixels)[15],
     int edgeLen,
     _D3DFORMAT imageFormat,
-    unsigned int mipCount);
+    uint32_t mipCount);
 void __cdecl Image_LoadBitmap(
     GfxImage *image,
     const GfxImageFileHeader *fileHeader,
@@ -318,7 +318,7 @@ struct DdsBlock_Dxt3_t // sizeof=0x10
 };
 void __cdecl Image_FreeRawPixels(GfxRawImage *image);
 void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image);
-unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
+uint32_t __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader);
 int __cdecl Image_CountMipmapsForFile_0(GfxImageFileHeader *imageFile);
 int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile);
 void __cdecl Image_CopyBitmapData(GfxRawImage *image, GfxImageFileHeader *imageFile, uint8_t *imageData);
@@ -377,14 +377,14 @@ extern GfxImage g_imageProgs[14];
 
 
 // r_image_load_common
-unsigned int __cdecl Image_CubemapFace(unsigned int faceIndex);
+uint32_t __cdecl Image_CubemapFace(uint32_t faceIndex);
 void __cdecl Image_GetPicmip(const GfxImage *image, Picmip *picmip);
 void __cdecl Image_PicmipForSemantic(uint8_t semantic, Picmip *picmip);
 int __cdecl Image_SourceBytesPerSlice_PC(_D3DFORMAT format, int width, int height);
 void __cdecl Image_Upload3D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
-    unsigned int mipLevel,
+    uint32_t mipLevel,
     uint8_t *src);
 void __cdecl Image_Upload2D_CopyDataBlock_PC(
     int width,
@@ -397,7 +397,7 @@ void __cdecl Image_Upload2D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
-    unsigned int mipLevel,
+    uint32_t mipLevel,
     uint8_t *src);
 
 void __cdecl Image_TrackFullscreenTexture(

@@ -11,7 +11,7 @@
 //int surfaceTypeSoundListCount 828010f0     bg_weapons_load_obj.obj
 //struct SurfaceTypeSoundList *surfaceTypeSoundLists 828011f8     bg_weapons_load_obj.obj
 
-unsigned int g_playerAnimTypeNamesCount;
+uint32_t g_playerAnimTypeNamesCount;
 
 SurfaceTypeSoundList surfaceTypeSoundLists[16];
 
@@ -611,7 +611,7 @@ void __cdecl TRACK_bg_weapons_load_obj()
 
 const char *__cdecl BG_GetWeaponTypeName(weapType_t type)
 {
-    if ((unsigned int)type >= WEAPTYPE_NUM)
+    if ((uint32_t)type >= WEAPTYPE_NUM)
         MyAssertHandler(
             ".\\bgame\\bg_weapons_load_obj.cpp",
             851,
@@ -624,7 +624,7 @@ const char *__cdecl BG_GetWeaponTypeName(weapType_t type)
 
 const char *__cdecl BG_GetWeaponClassName(weapClass_t type)
 {
-    if ((unsigned int)type >= WEAPCLASS_NUM)
+    if ((uint32_t)type >= WEAPCLASS_NUM)
         MyAssertHandler(
             ".\\bgame\\bg_weapons_load_obj.cpp",
             859,
@@ -637,7 +637,7 @@ const char *__cdecl BG_GetWeaponClassName(weapClass_t type)
 
 const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type)
 {
-    if ((unsigned int)type >= WEAPINVENTORYCOUNT)
+    if ((uint32_t)type >= WEAPINVENTORYCOUNT)
         MyAssertHandler(
             ".\\bgame\\bg_weapons_load_obj.cpp",
             867,
@@ -651,7 +651,7 @@ const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type)
 #ifdef KISAK_MP
 void __cdecl BG_LoadWeaponStrings()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < g_playerAnimTypeNamesCount; ++i)
         BG_InitWeaponString(i, g_playerAnimTypeNames[i]);
@@ -866,7 +866,7 @@ char __cdecl G_ParseWeaponAccurayGraphInternal(
 
 char __cdecl G_ParseWeaponAccurayGraphs(WeaponDef *weaponDef)
 {
-    unsigned int size; // [esp+4h] [ebp-8Ch]
+    uint32_t size; // [esp+4h] [ebp-8Ch]
     int weaponType; // [esp+8h] [ebp-88h]
     int accuracyGraphKnotCount; // [esp+Ch] [ebp-84h] BYREF
     float accuracyGraphKnots[16][2]; // [esp+10h] [ebp-80h] BYREF
@@ -1266,7 +1266,7 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
         buffer[len] = 0;
         if (!strncmp(buffer, "WEAPONFILE", len))
         {
-            if ((unsigned int)(v11 - len) < 0x2800)
+            if ((uint32_t)(v11 - len) < 0x2800)
             {
                 memset((uint8_t *)buffer, 0, 0x2800u);
                 FS_Read((uint8_t *)buffer, v11 - len, f);

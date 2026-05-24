@@ -1175,7 +1175,7 @@ bool __cdecl BG_PlayerHasRoomForEntAllAmmoTypes(const entityState_s *ent, const 
 {
     const char *v2; // eax
     int v3; // ecx
-    unsigned int weapIdx; // [esp+0h] [ebp-8h]
+    uint32_t weapIdx; // [esp+0h] [ebp-8h]
     const WeaponDef *weapDef; // [esp+4h] [ebp-4h]
 
     iassert(ent);

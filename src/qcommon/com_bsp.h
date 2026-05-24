@@ -36,7 +36,7 @@ struct DiskPrimaryLight // sizeof=0x80
 };
 
 char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const float *point);
-unsigned int Com_FindClosestPrimaryLight(const float *origin);
+uint32_t Com_FindClosestPrimaryLight(const float *origin);
 double __cdecl CosOfSumOfArcCos(float cos0, float cos1);
 void __cdecl Com_UnloadWorld();
 
@@ -109,21 +109,21 @@ enum ComSaveLumpBehavior : __int32
 struct BspChunk // sizeof=0x8
 {                                       // ...
     LumpType type;                      // ...
-    unsigned int length;                // ...
+    uint32_t length;                // ...
 };
 struct BspHeader // sizeof=0x32C
 {                                       // ...
-    unsigned int ident;                 // ...
-    unsigned int version;               // ...
-    unsigned int chunkCount;            // ...
+    uint32_t ident;                 // ...
+    uint32_t version;               // ...
+    uint32_t chunkCount;            // ...
     BspChunk chunks[100];               // ...
 };
 struct BspGlob // sizeof=0x54
 {                                       // ...
     char name[64];                      // ...
     BspHeader *header;                  // ...
-    unsigned int fileSize;              // ...
-    unsigned int checksum;              // ...
+    uint32_t fileSize;              // ...
+    uint32_t checksum;              // ...
     LumpType loadedLumpType;
     const void *loadedLumpData;         // ...
 };
@@ -131,34 +131,34 @@ struct BspGlob // sizeof=0x54
 //#define $0368CFE3C958026DEB0A011CBC6EA813 BspGlob // sizeof=0x54
 
 // com_bsp_load_obj
-char *__cdecl Com_GetBspLump(LumpType type, unsigned int elemSize, unsigned int *count);
+char *__cdecl Com_GetBspLump(LumpType type, uint32_t elemSize, uint32_t *count);
 void __cdecl Com_LoadBsp(char *filename);
 void __cdecl Com_UnloadBsp();
 bool __cdecl Com_IsBspLoaded();
-unsigned int __cdecl Com_GetBspLumpCountForVersion(int version);
-void __cdecl Com_GetBspFilename(char *filename, unsigned int size, const char *mapname);
+uint32_t __cdecl Com_GetBspLumpCountForVersion(int version);
+void __cdecl Com_GetBspFilename(char *filename, uint32_t size, const char *mapname);
 void __cdecl Com_CleanupBsp();
 bool __cdecl Com_BspHasLump(LumpType type);
 bool __cdecl Com_BspError();
 char *__cdecl Com_ValidateBspLumpData(
     LumpType type,
-    unsigned int offset,
-    unsigned int length,
-    unsigned int elemSize,
-    unsigned int *count);
-unsigned int __cdecl Com_GetBspVersion();
+    uint32_t offset,
+    uint32_t length,
+    uint32_t elemSize,
+    uint32_t *count);
+uint32_t __cdecl Com_GetBspVersion();
 
-int __cdecl Com_BlockChecksumKey32(const uint8_t *data, unsigned int length, unsigned int initialCrc);
+int __cdecl Com_BlockChecksumKey32(const uint8_t *data, uint32_t length, uint32_t initialCrc);
 char *__cdecl Com_EntityString(int *numEntityChars);
 
 void __cdecl Com_LoadWorld(char *name);
 void __cdecl Com_LoadWorld_FastFile(const char *name);
 void __cdecl Com_ShutdownWorld();
-void __cdecl Com_SaveLump(LumpType type, const void *newLump, unsigned int size, ComSaveLumpBehavior behavior);
+void __cdecl Com_SaveLump(LumpType type, const void *newLump, uint32_t size, ComSaveLumpBehavior behavior);
 
 extern ComWorld comWorld;
 
-inline unsigned int Com_GetPrimaryLightCount()
+inline uint32_t Com_GetPrimaryLightCount()
 {
     return comWorld.primaryLightCount;
 }

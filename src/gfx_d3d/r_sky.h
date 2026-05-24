@@ -72,7 +72,7 @@ struct SunFlareDynamic // sizeof=0x28
     int hitNum;
 };
 
-unsigned int __cdecl R_GetSunDvarCount();
+uint32_t __cdecl R_GetSunDvarCount();
 void __cdecl R_RegisterSunDvars();
 void __cdecl R_SetSunFromDvars(sunflare_t *sun);
 void __cdecl R_LoadSunThroughDvars(const char *sunName, sunflare_t *sun);

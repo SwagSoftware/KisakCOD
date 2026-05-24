@@ -23,7 +23,7 @@ struct r_double_index_t // sizeof=0x4
     union
     {
         uint16_t value[2];          // ...
-        unsigned int kisak;
+        uint32_t kisak;
     };
 };
 
@@ -107,15 +107,15 @@ struct FxCamera // sizeof=0xB0
     volatile long isValid;
     float frustum[6][4];
     float axis[3][3];
-    unsigned int frustumPlaneCount;
+    uint32_t frustumPlaneCount;
     float viewOffset[3];
-    unsigned int pad[3];
+    uint32_t pad[3];
 };
 
 struct FxSpriteInfo // sizeof=0x10
 {                                       // ...
     r_double_index_t *indices;          // ...
-    unsigned int indexCount;
+    uint32_t indexCount;
     Material *material;
     const char *name;
 };
@@ -178,7 +178,7 @@ struct FxVisState // sizeof=0x1010
 {                                       // ...
     FxVisBlocker blocker[256];
     volatile long blockerCount;
-    unsigned int pad[3];
+    uint32_t pad[3];
 };
 struct FxSystem // sizeof=0xA60
 {                                       // ...
@@ -220,7 +220,7 @@ struct FxSystem // sizeof=0xA60
     bool needsGarbageCollection;
     bool isArchiving;
     uint8_t localClientNum;
-    unsigned int restartList[32];
+    uint32_t restartList[32];
 };
 struct FxMarkPoint // sizeof=0x20
 {                                       // ...
@@ -288,8 +288,8 @@ struct FxMarksSystem // sizeof=0x4801C
     bool noMarks;
     bool hasCarryIndex;
     uint16_t carryIndex;
-    unsigned int allocedMarkCount;
-    unsigned int freedMarkCount;
+    uint32_t allocedMarkCount;
+    uint32_t freedMarkCount;
 };
 struct FxUpdateElem // sizeof=0x7C
 {                                       // ...
@@ -382,7 +382,7 @@ struct FxElemPreVisualState // sizeof=0x1C
     const FxEffect *effect;
     const FxElemVisStateSample *refState; // ...
     int randomSeed;
-    unsigned int distanceFade;
+    uint32_t distanceFade;
 };
 struct FxElemVelStateInFrame // sizeof=0x30
 {                                       // ...

@@ -241,7 +241,7 @@ int32_t __cdecl DevGui_UpdateIntScroll(float deltaTime, int32_t value, int32_t m
     range = max - min;
     if (max - min < 0)
         MyAssertHandler(".\\devgui\\devgui_input.cpp", 454, 0, "%s", "range >= 0");
-    if ((unsigned int)axis >= SCROLL_AXIS_COUNT)
+    if ((uint32_t)axis >= SCROLL_AXIS_COUNT)
         MyAssertHandler(".\\devgui\\devgui_input.cpp", 455, 0, "%s", "axis >= SCROLL_XAXIS && axis < SCROLL_AXIS_COUNT");
     if (!range)
         return 0;
@@ -321,7 +321,7 @@ double __cdecl DevGui_UpdateFloatScroll(
         MyAssertHandler(".\\devgui\\devgui_input.cpp", 547, 0, "%s", "range >= 0");
     if (step == 0.0)
         MyAssertHandler(".\\devgui\\devgui_input.cpp", 548, 0, "%s", "step");
-    if ((unsigned int)axis >= SCROLL_AXIS_COUNT)
+    if ((uint32_t)axis >= SCROLL_AXIS_COUNT)
         MyAssertHandler(".\\devgui\\devgui_input.cpp", 549, 0, "%s", "axis >= SCROLL_XAXIS && axis < SCROLL_AXIS_COUNT");
     analog = s_input.analogAxis[axis] * s_input.scrollScale / s_input.sliderScrollTime;
     scroll = analog * range * deltaTime;

@@ -117,7 +117,7 @@ int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange((volatile unsigned int*)&g_workerCmdMinType, 0x7FFFFFFF, type);
+            InterlockedCompareExchange((volatile uint32_t*)&g_workerCmdMinType, 0x7FFFFFFF, type);
         }
         if (timeout())
             return 1;
@@ -158,7 +158,7 @@ void __cdecl R_WaitWorkerCmdsOfType(WorkerCmdType type)
 void __cdecl R_NotifyWorkerCmdType(WorkerCmdType type)
 {
     if (g_workerCmdMinType > type)
-        InterlockedCompareExchange((volatile unsigned int *)&g_workerCmdMinType, type, g_workerCmdMinType);
+        InterlockedCompareExchange((volatile uint32_t *)&g_workerCmdMinType, type, g_workerCmdMinType);
     if (g_workerCmdWaitCount)
         Sys_SetWorkerCmdEvent();
 }
@@ -199,7 +199,7 @@ void __cdecl R_ProcessWorkerCmds()
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange((volatile unsigned int*)&g_workerCmdMinType, 0x7FFFFFFF, type);
+            InterlockedCompareExchange((volatile uint32_t*)&g_workerCmdMinType, 0x7FFFFFFF, type);
         }
     } while (processed || minType);
 }
@@ -208,15 +208,15 @@ int __cdecl R_ProcessWorkerCmd(WorkerCmdType type)
 {
     int v2; // eax
     int v3; // eax
-    unsigned int bufCount; // [esp+0h] [ebp-7A4h]
+    uint32_t bufCount; // [esp+0h] [ebp-7A4h]
     uint8_t data[1920]; // [esp+4h] [ebp-7A0h] BYREF
     int dataSize; // [esp+788h] [ebp-1Ch]
     WorkerCmds *workerCmds; // [esp+78Ch] [ebp-18h]
-    unsigned int currentCount; // [esp+790h] [ebp-14h]
-    unsigned int startPos; // [esp+794h] [ebp-10h]
-    unsigned int newStartPos; // [esp+798h] [ebp-Ch]
-    unsigned int i; // [esp+79Ch] [ebp-8h]
-    unsigned int count; // [esp+7A0h] [ebp-4h]
+    uint32_t currentCount; // [esp+790h] [ebp-14h]
+    uint32_t startPos; // [esp+794h] [ebp-10h]
+    uint32_t newStartPos; // [esp+798h] [ebp-Ch]
+    uint32_t i; // [esp+79Ch] [ebp-8h]
+    uint32_t count; // [esp+7A0h] [ebp-4h]
 
     workerCmds = &g_workerCmds[type];
     dataSize = workerCmds->dataSize;
@@ -363,7 +363,7 @@ void __cdecl R_ProcessWorkerCmdInternal(WorkerCmdType type, void *data)
 
 void R_InitWorkerThreads()
 {
-    unsigned int workerThreadIndexa; // [esp+0h] [ebp-4h]
+    uint32_t workerThreadIndexa; // [esp+0h] [ebp-4h]
 
     iassert( Sys_IsMainThread() );
     if (sys_smp_allowed->current.enabled)
@@ -371,7 +371,7 @@ void R_InitWorkerThreads()
         R_InitWorkerCmds();
         for (workerThreadIndexa = 0; workerThreadIndexa < 2; ++workerThreadIndexa)
         {
-            if (!Sys_SpawnWorkerThread((void(__cdecl *)(unsigned int))R_WorkerThread, workerThreadIndexa))
+            if (!Sys_SpawnWorkerThread((void(__cdecl *)(uint32_t))R_WorkerThread, workerThreadIndexa))
                 Com_Error(ERR_FATAL, "Failed to create thread");
         }
     }
@@ -556,8 +556,8 @@ void __cdecl R_AddWorkerCmd(WorkerCmdType type, uint8_t *data)
 void __cdecl R_UpdateActiveWorkerThreads()
 {
     char v0; // [esp+3h] [ebp-9h]
-    unsigned int i; // [esp+4h] [ebp-8h]
-    unsigned int workerIter; // [esp+8h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-8h]
+    uint32_t workerIter; // [esp+8h] [ebp-4h]
 
     iassert( Sys_IsMainThread() );
     for (i = 0; i < 2; ++i)

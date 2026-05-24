@@ -770,7 +770,7 @@ bool __cdecl FX_CullElemForSpawn(const FxCamera *camera, const FxElemDef *elemDe
 void __cdecl FX_SetEffectRandomSeed(FxEffect *effect, const FxEffectDef *remoteDef)
 {
     if (FX_EffectAffectsGameplay(remoteDef))
-        effect->randomSeed = (479 * ((unsigned int)(214013 * effect->msecBegin + 2531011) >> 17)) >> 15; // has to be unsigned
+        effect->randomSeed = (479 * ((uint32_t)(214013 * effect->msecBegin + 2531011) >> 17)) >> 15; // has to be unsigned
     else
         effect->randomSeed = 479 * rand() / 0x8000;
 
@@ -2116,7 +2116,7 @@ double FX_GetServerVisibility(const float *start, const float *end)
     return FX_GetClientVisibility(fx_serverVisClient, start, end);
 }
 
-FxEffect *FX_GetClientEffectByIndex(int clientIndex, unsigned int index)
+FxEffect *FX_GetClientEffectByIndex(int clientIndex, uint32_t index)
 {
     iassert(clientIndex == 0);
     iassert(index >= 0 && index < FX_EFFECT_LIMIT);

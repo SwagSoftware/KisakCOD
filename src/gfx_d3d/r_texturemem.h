@@ -1,5 +1,5 @@
 #pragma once
+#include <cstdint>
 
-
-unsigned int __cdecl R_AvailableTextureMemory();
-unsigned int __cdecl R_DetectCurrentTextureMemory();
+uint32_t __cdecl R_AvailableTextureMemory();
+uint32_t __cdecl R_DetectCurrentTextureMemory();

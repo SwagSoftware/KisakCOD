@@ -242,9 +242,9 @@ void __cdecl R_DrawTessTechnique(GfxCmdBufContext context, const GfxDrawPrimArgs
 {
     const MaterialTechnique *technique; // [esp+38h] [ebp-14h]
     IDirect3DVertexBuffer9 *vb; // [esp+3Ch] [ebp-10h]
-    unsigned int vertexOffset; // [esp+40h] [ebp-Ch]
+    uint32_t vertexOffset; // [esp+40h] [ebp-Ch]
     bool isPixelCostEnabled; // [esp+47h] [ebp-5h]
-    unsigned int passIndex; // [esp+48h] [ebp-4h]
+    uint32_t passIndex; // [esp+48h] [ebp-4h]
 
     PROF_SCOPED("RB_DrawTechnique");
 

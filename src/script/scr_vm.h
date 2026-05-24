@@ -175,8 +175,8 @@ static_assert(sizeof(Scr_StringNode_s) == 0x8);
 struct function_stack_t // sizeof=0x14
 {                                       // ...
     const char *pos;                    // ...
-    unsigned int localId;               // ...
-    unsigned int localVarCount;         // ...
+    uint32_t localId;               // ...
+    uint32_t localVarCount;         // ...
     VariableValue *top;                 // ...
     VariableValue *startTop;            // ...
 };
@@ -191,7 +191,7 @@ static_assert(sizeof(function_frame_t) == 0x18);
 
 struct scrVmPub_t // sizeof=0x4328
 {                                       // ...
-    unsigned int* localVars;            // ...
+    uint32_t* localVars;            // ...
     VariableValue* maxstack;            // ...
     int function_count;                 // ...
     function_frame_t* function_frame;   // ...
@@ -200,9 +200,9 @@ struct scrVmPub_t // sizeof=0x4328
     bool abort_on_error;                // ...
     bool terminal_error;                // ...
     // padding byte
-    unsigned int inparamcount;          // ...
-    unsigned int outparamcount;         // ...
-    unsigned int breakpointOutparamcount; // ...
+    uint32_t inparamcount;          // ...
+    uint32_t outparamcount;         // ...
+    uint32_t breakpointOutparamcount; // ...
     bool showError;                     // ...
     // padding byte
     // padding byte
@@ -239,7 +239,7 @@ struct scrVmGlob_t // sizeof=0x2028
     const char *dialog_error_message;   // ...
     int loading;                        // ...
     int starttime;                      // ...
-    unsigned int localVarsStack[2048];  // ...
+    uint32_t localVarsStack[2048];  // ...
     bool recordPlace;                   // ...
     // padding byte
     // padding byte
@@ -256,15 +256,15 @@ void __cdecl SCR_Init();
 void GScr_GetAnimLength();
 void __cdecl Scr_ErrorOnDefaultAsset(XAssetType type, const char* assetName);
 void(__cdecl* __cdecl Scr_GetFunction(const char** pName, int* type))();
-unsigned int Scr_GetFunc(unsigned int index);
+uint32_t Scr_GetFunc(uint32_t index);
 void Scr_SetRecordScriptPlace(int on);
 void Scr_GetLastScriptPlace(int *line, const char **filename);
-struct XAnim_s *Scr_GetAnimTree(unsigned int index);
+struct XAnim_s *Scr_GetAnimTree(uint32_t index);
 void(__cdecl *__cdecl Scr_GetMethod(const char **pName, int *type))(scr_entref_t);
 void(__cdecl *__cdecl BuiltIn_GetMethod(const char **pName, int *type))(scr_entref_t);
 void __cdecl GScr_AddVector(const float* vVec);
 void __cdecl GScr_Shutdown();
-void __cdecl GScr_SetDynamicEntityField(gentity_s* ent, unsigned int index);
+void __cdecl GScr_SetDynamicEntityField(gentity_s* ent, uint32_t index);
 void __cdecl Scr_InitFromChildBlocks(struct scr_block_s** childBlocks, int childCount, struct scr_block_s* block);
 Scr_StringNode_s* __cdecl Scr_GetStringList(const char* filename, char** pBuf);
 void __cdecl Scr_SetSelectionComp(struct UI_Component *comp);
@@ -283,107 +283,107 @@ void __cdecl Scr_Settings(int developer, int developer_script, int abort_on_erro
 void __cdecl Scr_Shutdown();
 void VM_Shutdown();
 void __cdecl Scr_SetLoading(int bLoading);
-unsigned int __cdecl Scr_GetNumScriptThreads();
+uint32_t __cdecl Scr_GetNumScriptThreads();
 void __cdecl Scr_ClearOutParams();
-char* __cdecl Scr_GetReturnPos(unsigned int* localId);
-char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode, int mode, unsigned int* localId);
-void __cdecl VM_CancelNotify(unsigned int notifyListOwnerId, unsigned int startLocalId);
+char* __cdecl Scr_GetReturnPos(uint32_t* localId);
+char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode, int mode, uint32_t* localId);
+void __cdecl VM_CancelNotify(uint32_t notifyListOwnerId, uint32_t startLocalId);
 void __cdecl VM_CancelNotifyInternal(
-    unsigned int notifyListOwnerId,
-    unsigned int startLocalId,
-    unsigned int notifyListId,
-    unsigned int notifyNameListId,
-    unsigned int stringValue);
-bool __cdecl Scr_IsEndonThread(unsigned int localId);
-unsigned int __cdecl Scr_GetWaittillThreadStackId(unsigned int localId, unsigned int startLocalId);
-const char* __cdecl Scr_GetThreadPos(unsigned int localId);
-const char* __cdecl Scr_GetStackThreadPos(unsigned int endLocalId, VariableStackBuffer* stackValue, bool killThread);
-const char* __cdecl Scr_GetRunningThreadPos(unsigned int localId);
-unsigned int __cdecl Scr_GetWaitThreadStackId(unsigned int localId, unsigned int startLocalId);
+    uint32_t notifyListOwnerId,
+    uint32_t startLocalId,
+    uint32_t notifyListId,
+    uint32_t notifyNameListId,
+    uint32_t stringValue);
+bool __cdecl Scr_IsEndonThread(uint32_t localId);
+uint32_t __cdecl Scr_GetWaittillThreadStackId(uint32_t localId, uint32_t startLocalId);
+const char* __cdecl Scr_GetThreadPos(uint32_t localId);
+const char* __cdecl Scr_GetStackThreadPos(uint32_t endLocalId, VariableStackBuffer* stackValue, bool killThread);
+const char* __cdecl Scr_GetRunningThreadPos(uint32_t localId);
+uint32_t __cdecl Scr_GetWaitThreadStackId(uint32_t localId, uint32_t startLocalId);
 void __cdecl Scr_NotifyNum(
-    unsigned int entnum,
-    unsigned int classnum,
-    unsigned int stringValue,
-    unsigned int paramcount);
-void __cdecl VM_Notify(unsigned int notifyListOwnerId, unsigned int stringValue, VariableValue* top);
-void __cdecl Scr_TerminateThread(unsigned int localId);
-void __cdecl Scr_TerminateRunningThread(unsigned int localId);
-void __cdecl Scr_TerminateWaitThread(unsigned int localId, unsigned int startLocalId);
-void __cdecl VM_TerminateStack(unsigned int endLocalId, unsigned int startLocalId, VariableStackBuffer* stackValue);
-void __cdecl Scr_TerminateWaittillThread(unsigned int localId, unsigned int startLocalId);
-void __cdecl Scr_CancelNotifyList(unsigned int notifyListOwnerId);
-void __cdecl VM_TrimStack(unsigned int startLocalId, VariableStackBuffer* stackValue, bool fromEndon);
-void __cdecl Scr_CancelWaittill(unsigned int startLocalId);
-uint16_t __cdecl Scr_ExecThread(int handle, unsigned int paramcount);
-unsigned int __cdecl VM_Execute(unsigned int localId, const char* pos, unsigned int paramcount);
-//unsigned int __cdecl VM_Execute_0();
-unsigned int __cdecl GetDummyObject();
-unsigned int __cdecl GetDummyFieldValue();
+    uint32_t entnum,
+    uint32_t classnum,
+    uint32_t stringValue,
+    uint32_t paramcount);
+void __cdecl VM_Notify(uint32_t notifyListOwnerId, uint32_t stringValue, VariableValue* top);
+void __cdecl Scr_TerminateThread(uint32_t localId);
+void __cdecl Scr_TerminateRunningThread(uint32_t localId);
+void __cdecl Scr_TerminateWaitThread(uint32_t localId, uint32_t startLocalId);
+void __cdecl VM_TerminateStack(uint32_t endLocalId, uint32_t startLocalId, VariableStackBuffer* stackValue);
+void __cdecl Scr_TerminateWaittillThread(uint32_t localId, uint32_t startLocalId);
+void __cdecl Scr_CancelNotifyList(uint32_t notifyListOwnerId);
+void __cdecl VM_TrimStack(uint32_t startLocalId, VariableStackBuffer* stackValue, bool fromEndon);
+void __cdecl Scr_CancelWaittill(uint32_t startLocalId);
+uint16_t __cdecl Scr_ExecThread(int handle, uint32_t paramcount);
+uint32_t __cdecl VM_Execute(uint32_t localId, const char* pos, uint32_t paramcount);
+//uint32_t __cdecl VM_Execute_0();
+uint32_t __cdecl GetDummyObject();
+uint32_t __cdecl GetDummyFieldValue();
 void VM_PrintJumpHistory();
 VariableStackBuffer* __cdecl VM_ArchiveStack();
 uint16_t __cdecl Scr_ExecEntThreadNum(
-    unsigned int entnum,
-    unsigned int classnum,
+    uint32_t entnum,
+    uint32_t classnum,
     int handle,
-    unsigned int paramcount);
-void __cdecl Scr_AddExecThread(int handle, unsigned int paramcount);
+    uint32_t paramcount);
+void __cdecl Scr_AddExecThread(int handle, uint32_t paramcount);
 void __cdecl Scr_FreeThread(uint16_t handle);
-void __cdecl Scr_ExecCode(const char* pos, unsigned int localId);
+void __cdecl Scr_ExecCode(const char* pos, uint32_t localId);
 void __cdecl Scr_InitSystem(int sys);
 void __cdecl Scr_ShutdownSystem(uint8_t sys, int bComplete);
-void __cdecl VM_TerminateTime(unsigned int timeId);
+void __cdecl VM_TerminateTime(uint32_t timeId);
 BOOL __cdecl Scr_IsSystemActive(); // LWSS: Note this has a "system" argument, however it's not used and optimized out in some builds
-int __cdecl Scr_GetInt(unsigned int index);
-scr_anim_s __cdecl Scr_GetAnim(unsigned int index, XAnimTree_s* tree);
+int __cdecl Scr_GetInt(uint32_t index);
+scr_anim_s __cdecl Scr_GetAnim(uint32_t index, XAnimTree_s* tree);
 BOOL Scr_ErrorInternal();
-float __cdecl Scr_GetFloat(unsigned int index);
-unsigned int __cdecl Scr_GetConstString(unsigned int index);
-unsigned int __cdecl Scr_GetConstLowercaseString(unsigned int index);
-const char* __cdecl Scr_GetString(unsigned int index);
-unsigned int __cdecl Scr_GetConstStringIncludeNull(unsigned int index);
-const char* __cdecl Scr_GetDebugString(unsigned int index);
-unsigned int __cdecl Scr_GetConstIString(unsigned int index);
-const char* __cdecl Scr_GetIString(unsigned int index);
-void __cdecl Scr_GetVector(unsigned int index, float* vectorValue);
-scr_entref_t __cdecl Scr_GetEntityRef(unsigned int index);
-unsigned int __cdecl Scr_GetObject(unsigned int index);
-int __cdecl Scr_GetType(unsigned int index);
-const char* __cdecl Scr_GetTypeName(unsigned int index);
-unsigned int __cdecl Scr_GetPointerType(unsigned int index);
-unsigned int __cdecl Scr_GetNumParam();
-void __cdecl Scr_AddBool(unsigned int value);
+float __cdecl Scr_GetFloat(uint32_t index);
+uint32_t __cdecl Scr_GetConstString(uint32_t index);
+uint32_t __cdecl Scr_GetConstLowercaseString(uint32_t index);
+const char* __cdecl Scr_GetString(uint32_t index);
+uint32_t __cdecl Scr_GetConstStringIncludeNull(uint32_t index);
+const char* __cdecl Scr_GetDebugString(uint32_t index);
+uint32_t __cdecl Scr_GetConstIString(uint32_t index);
+const char* __cdecl Scr_GetIString(uint32_t index);
+void __cdecl Scr_GetVector(uint32_t index, float* vectorValue);
+scr_entref_t __cdecl Scr_GetEntityRef(uint32_t index);
+uint32_t __cdecl Scr_GetObject(uint32_t index);
+int __cdecl Scr_GetType(uint32_t index);
+const char* __cdecl Scr_GetTypeName(uint32_t index);
+uint32_t __cdecl Scr_GetPointerType(uint32_t index);
+uint32_t __cdecl Scr_GetNumParam();
+void __cdecl Scr_AddBool(uint32_t value);
 void IncInParam();
 void __cdecl Scr_AddInt(int value);
 void __cdecl Scr_AddFloat(float value);
 void __cdecl Scr_AddAnim(scr_anim_s value);
 void __cdecl Scr_AddUndefined();
-void __cdecl Scr_AddObject(unsigned int id);
-void __cdecl Scr_AddEntityNum(unsigned int entnum, unsigned int classnum);
+void __cdecl Scr_AddObject(uint32_t id);
+void __cdecl Scr_AddEntityNum(uint32_t entnum, uint32_t classnum);
 void __cdecl Scr_AddStruct();
 void __cdecl Scr_AddString(const char* value);
 void __cdecl Scr_AddIString(const char* value);
-void __cdecl Scr_AddConstString(unsigned int value);
+void __cdecl Scr_AddConstString(uint32_t value);
 void __cdecl Scr_AddVector(const float* value);
 void __cdecl Scr_MakeArray();
 void __cdecl Scr_AddArray();
-void __cdecl Scr_AddArrayStringIndexed(unsigned int stringValue);
+void __cdecl Scr_AddArrayStringIndexed(uint32_t stringValue);
 void __cdecl Scr_Error(const char* error);
 void __cdecl Scr_SetErrorMessage(const char* error);
 void __cdecl Scr_TerminalError(const char* error);
 void __cdecl Scr_NeverTerminalError(const char* error);
-void __cdecl Scr_ParamError(unsigned int index, const char* error);
+void __cdecl Scr_ParamError(uint32_t index, const char* error);
 void __cdecl Scr_ObjectError(const char* error);
-char __cdecl SetEntityFieldValue(unsigned int classnum, int entnum, int offset, VariableValue* value);
-VariableValue __cdecl GetEntityFieldValue(unsigned int classnum, int entnum, int offset);
-void __cdecl Scr_SetStructField(unsigned int structId, unsigned int index);
-void __cdecl Scr_SetDynamicEntityField(unsigned int entnum, unsigned int classnum, unsigned int index);
+char __cdecl SetEntityFieldValue(uint32_t classnum, int entnum, int offset, VariableValue* value);
+VariableValue __cdecl GetEntityFieldValue(uint32_t classnum, int entnum, int offset);
+void __cdecl Scr_SetStructField(uint32_t structId, uint32_t index);
+void __cdecl Scr_SetDynamicEntityField(uint32_t entnum, uint32_t classnum, uint32_t index);
 void __cdecl Scr_IncTime();
 void __cdecl Scr_RunCurrentThreads();
 void VM_SetTime();
-void __cdecl VM_Resume(unsigned int timeId);
-void __cdecl VM_UnarchiveStack(unsigned int startLocalId, VariableStackBuffer* stackValue);
-void VM_UnarchiveStack2(unsigned int startLocalId, function_stack_t *stack, VariableStackBuffer *stackValue);
-int __cdecl Scr_AddLocalVars(unsigned int localId);
+void __cdecl VM_Resume(uint32_t timeId);
+void __cdecl VM_UnarchiveStack(uint32_t startLocalId, VariableStackBuffer* stackValue);
+void VM_UnarchiveStack2(uint32_t startLocalId, function_stack_t *stack, VariableStackBuffer *stackValue);
+int __cdecl Scr_AddLocalVars(uint32_t localId);
 void __cdecl Scr_ResetTimeout();
 BOOL __cdecl Scr_IsStackClear();
 void __cdecl Scr_StackClear();
@@ -396,7 +396,7 @@ int __cdecl Scr_BuiltinCompare(_DWORD* a, _DWORD* b);
 
 void Scr_DecTime();
 
-void Scr_AddExecEntThreadNum(int entnum, unsigned int classnum, int handle, unsigned int paramcount);
+void Scr_AddExecEntThreadNum(int entnum, uint32_t classnum, int handle, uint32_t paramcount);
 
 extern scrVmPub_t scrVmPub;
 extern scrVmDebugPub_t scrVmDebugPub;

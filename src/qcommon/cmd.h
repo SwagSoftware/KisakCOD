@@ -48,7 +48,7 @@ void __cdecl TRACK_cmd();
 void __cdecl Cmd_Wait_f();
 void __cdecl Cbuf_Init();
 void __cdecl Cbuf_AddText(int localClientNum, const char *text);
-void __cdecl memcpy_noncrt(void *dst, const void *src, unsigned int length);
+void __cdecl memcpy_noncrt(void *dst, const void *src, uint32_t length);
 int __cdecl strlen_noncrt(const char *str);
 void __cdecl Cbuf_InsertText(int localClientNum, const char *text);
 void __cdecl Cbuf_AddServerText_f();

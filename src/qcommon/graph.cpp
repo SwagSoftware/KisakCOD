@@ -15,7 +15,7 @@ void __cdecl GraphFloat_Load(GraphFloat *graph, char *fileName, float scale)
 
     iassert( graph );
     iassert( fileName );
-    Com_Memset((unsigned int *)graph, 0, 360);
+    Com_Memset((uint32_t *)graph, 0, 360);
     InfoString = Com_LoadInfoString(fileName, "graph", "GRAPH_FLOAT_FILE", loadBuffer);
     GraphFloat_ParseBuffer(graph, InfoString, fileName);
     graph->scale = scale;

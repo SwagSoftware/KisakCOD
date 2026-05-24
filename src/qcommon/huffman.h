@@ -31,7 +31,7 @@ void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const uint8_t *fin, int
 void __cdecl huffman_send(nodetype *node, nodetype *child, uint8_t *fout);
 void __cdecl add_bit(char bit, uint8_t *fout);
 int __cdecl huffman_bitCountForNode(nodetype *node, nodetype *child);
-int __cdecl Huff_bitCount(huff_t *huff, unsigned int ch);
+int __cdecl Huff_bitCount(huff_t *huff, uint32_t ch);
 void __cdecl Huff_offsetTransmit(huff_t *huff, int ch, uint8_t *fout, int *offset);
 void __cdecl Huff_Init(huffman_t *huff);
 nodetype *__cdecl Huff_initNode(huff_t *huff, int ch, int weight);

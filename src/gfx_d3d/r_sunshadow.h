@@ -47,7 +47,7 @@ void __cdecl R_SetupSunShadowBoundingPoly(
     float maxSizeInSunProj,
     const float *snappedViewOrgInClipSpace,
     GfxSunShadowBoundingPoly *boundingPoly,
-    unsigned int pointCount);
+    uint32_t pointCount);
 void __cdecl R_SetupSunShadowMapViewMatrix(
     const float *snappedViewOrgInSunProj,
     const float (*sunAxis)[3][3],

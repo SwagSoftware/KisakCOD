@@ -274,8 +274,8 @@ void __cdecl CL_WritePacket(int localClientNum)
         // Copy the 9-byte uncompressed message header (CL_ENCODE_START) verbatim
         // before the compressed bit stream begins. Bytes 0-3 + 4-7 as ints, byte 8 raw.
         v4 = (uint8_t *)compressedBuf;
-        *(unsigned int *)compressedBuf = *(unsigned int *)buf.data;
-        *((unsigned int *)v4 + 1) = *((unsigned int *)v3 + 1);
+        *(uint32_t *)compressedBuf = *(uint32_t *)buf.data;
+        *((uint32_t *)v4 + 1) = *((uint32_t *)v3 + 1);
         v4[8] = v3[8];
         if (buf.cursize > 0x800u)
             Com_Error(ERR_DROP, "Overflow compressed msg buf in CL_WritePacket()");
@@ -1186,10 +1186,10 @@ void __cdecl IN_UpUp()
 
 void __cdecl IN_KeyUp(kbutton_t *b)
 {
-    unsigned int v1; // edx
+    uint32_t v1; // edx
     const char *c; // [esp+0h] [ebp-Ch]
     const char *ca; // [esp+0h] [ebp-Ch]
-    unsigned int uptime; // [esp+4h] [ebp-8h]
+    uint32_t uptime; // [esp+4h] [ebp-8h]
     int k; // [esp+8h] [ebp-4h]
 
     c = Cmd_Argv(1);

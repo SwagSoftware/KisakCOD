@@ -24,4 +24,4 @@ void __cdecl R_LockSkinnedCache();
 
 void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *material);
 void R_DObjGetSurfMaterials(DObj_s *obj, int lod, Material **matHandleArray);
-void R_SetIgnorePrecacheErrors(unsigned int ignore);
+void R_SetIgnorePrecacheErrors(uint32_t ignore);

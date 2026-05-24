@@ -13,16 +13,16 @@
 #include <setjmp.h>
 
 
-//  unsigned int g_breakonObject      83043224     scr_evaluate.obj
+//  uint32_t g_breakonObject      83043224     scr_evaluate.obj
 //  int marker_scr_evaluate  83043238     scr_evaluate.obj
 //  int g_breakonHit         8304323c     scr_evaluate.obj
-//  unsigned int g_breakonString      83043244     scr_evaluate.obj
+//  uint32_t g_breakonString      83043244     scr_evaluate.obj
 
 debugger_sval_s *g_debugExprHead = NULL;
 int g_breakonExpr; // thread_local in blops?
 int g_breakonHit;
-unsigned int g_breakonObject;
-unsigned int g_breakonString;
+uint32_t g_breakonObject;
+uint32_t g_breakonString;
 
 scrEvaluateGlob_t scrEvaluateGlob;
 int g_script_error_level;
@@ -32,7 +32,7 @@ void __cdecl TRACK_scr_evaluate()
     track_static_alloc_internal(&scrEvaluateGlob, 16, "scrEvaluateGlob", 7);
 }
 
-int __cdecl Scr_CompareCanonicalStrings(unsigned int *arg1, unsigned int *arg2)
+int __cdecl Scr_CompareCanonicalStrings(uint32_t *arg1, uint32_t *arg2)
 {
     return scrEvaluateGlob.canonicalStringLookup[*arg1] - scrEvaluateGlob.canonicalStringLookup[*arg2];
 }
@@ -42,9 +42,9 @@ void __cdecl Scr_ArchiveCanonicalStrings()
     char v0; // [esp+13h] [ebp-35h]
     char *v1; // [esp+18h] [ebp-30h]
     const char *v2; // [esp+1Ch] [ebp-2Ch]
-    unsigned int stringValue; // [esp+30h] [ebp-18h]
-    unsigned int stringValuea; // [esp+30h] [ebp-18h]
-    unsigned int len; // [esp+34h] [ebp-14h]
+    uint32_t stringValue; // [esp+30h] [ebp-18h]
+    uint32_t stringValuea; // [esp+30h] [ebp-18h]
+    uint32_t len; // [esp+34h] [ebp-14h]
     int lena; // [esp+34h] [ebp-14h]
     uint16_t canonicalStr; // [esp+38h] [ebp-10h]
     const char *s; // [esp+3Ch] [ebp-Ch]
@@ -118,13 +118,13 @@ int __cdecl CompareCanonicalStrings(const char **arg1, const char **arg2)
     return strcmp(arg1[1], arg2[1]);
 }
 
-const char *__cdecl Scr_GetCanonicalString(unsigned int fieldName)
+const char *__cdecl Scr_GetCanonicalString(uint32_t fieldName)
 {
     if (!fieldName)
         MyAssertHandler(".\\script\\scr_evaluate.cpp", 183, 0, "%s", "fieldName");
     if (fieldName > scrVarPub.canonicalStrCount)
         MyAssertHandler(".\\script\\scr_evaluate.cpp", 184, 0, "%s", "fieldName <= scrVarPub.canonicalStrCount");
-    if (scrEvaluateGlob.canonicalStringLookup[fieldName] >= (unsigned int)scrVarPub.canonicalStrCount)
+    if (scrEvaluateGlob.canonicalStringLookup[fieldName] >= (uint32_t)scrVarPub.canonicalStrCount)
         MyAssertHandler(
             ".\\script\\scr_evaluate.cpp",
             185,
@@ -168,7 +168,7 @@ void __cdecl Scr_ShutdownEvaluate()
     KISAK_NULLSUB();
 }
 
-uint16_t __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
+uint16_t __cdecl Scr_CompileCanonicalString(uint32_t stringValue)
 {
     int v2; // [esp+4h] [ebp-24h]
     int low; // [esp+18h] [ebp-10h]
@@ -197,10 +197,10 @@ uint16_t __cdecl Scr_CompileCanonicalString(unsigned int stringValue)
     return 0;
 }
 
-void __cdecl Scr_GetFieldValue(unsigned int objectId, const char *fieldName, int len, char *text)
+void __cdecl Scr_GetFieldValue(uint32_t objectId, const char *fieldName, int len, char *text)
 {
     uint16_t v4; // ax
-    unsigned int stringValue; // [esp+0h] [ebp-Ch]
+    uint32_t stringValue; // [esp+0h] [ebp-Ch]
     VariableValue tempValue; // [esp+4h] [ebp-8h] BYREF
 
     stringValue = SL_FindString(fieldName);
@@ -232,15 +232,15 @@ void __cdecl Scr_GetFieldValue(unsigned int objectId, const char *fieldName, int
     }
 }
 
-void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int len, char *s)
+void __cdecl Scr_GetValueString(uint32_t localId, VariableValue *value, int len, char *s)
 {
     const XAnim_s *Anims; // eax
     char *AnimDebugName; // eax
     char EntClassId; // al
-    unsigned int ArraySize; // eax
-    unsigned int intValue; // [esp+14h] [ebp-20h]
+    uint32_t ArraySize; // eax
+    uint32_t intValue; // [esp+14h] [ebp-20h]
     int EntNum; // [esp+14h] [ebp-20h]
-    unsigned int type; // [esp+2Ch] [ebp-8h]
+    uint32_t type; // [esp+2Ch] [ebp-8h]
     VariableUnion id; // [esp+30h] [ebp-4h]
 
     if (value->type >= 0x17u)
@@ -330,7 +330,7 @@ void __cdecl Scr_GetValueString(unsigned int localId, VariableValue *value, int 
     }
 }
 
-void __cdecl Scr_EvalArrayVariable(unsigned int arrayId, VariableValue *value)
+void __cdecl Scr_EvalArrayVariable(uint32_t arrayId, VariableValue *value)
 {
     VariableValue parentValue; // [esp+0h] [ebp-8h] BYREF
 
@@ -357,9 +357,9 @@ void __cdecl Scr_ClearValue(VariableValue *value)
     value->type = VAR_UNDEFINED;
 }
 
-void __cdecl Scr_EvalFieldVariableInternal(unsigned int objectId, unsigned int fieldName, VariableValue *value)
+void __cdecl Scr_EvalFieldVariableInternal(uint32_t objectId, uint32_t fieldName, VariableValue *value)
 {
-    unsigned int outparamcount; // [esp+8h] [ebp-8h]
+    uint32_t outparamcount; // [esp+8h] [ebp-8h]
     VariableValue *savedTop; // [esp+Ch] [ebp-4h]
 
     if (!fieldName)
@@ -382,7 +382,7 @@ void __cdecl Scr_EvalFieldVariableInternal(unsigned int objectId, unsigned int f
     }
 }
 
-void __cdecl Scr_EvalFieldVariable(unsigned int fieldName, VariableValue *value, unsigned int objectId)
+void __cdecl Scr_EvalFieldVariable(uint32_t fieldName, VariableValue *value, uint32_t objectId)
 {
     if (!scrVarPub.evaluate)
         MyAssertHandler(".\\script\\scr_evaluate.cpp", 1122, 0, "%s", "scrVarPub.evaluate");
@@ -440,7 +440,7 @@ void __cdecl Scr_CompilePrimitiveExpression(sval_u *expr)
         break;
     case ENUM_string:
     case ENUM_istring:
-        *expr = debugger_string(expr->node[0].type, (char *)SL_ConvertToString(*(unsigned int *)(expr->type + 4)));
+        *expr = debugger_string(expr->node[0].type, (char *)SL_ConvertToString(*(uint32_t *)(expr->type + 4)));
         break;
     case ENUM_variable:
         Scr_CompileVariableExpression(&expr->node[1]);
@@ -504,8 +504,8 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
     switch (expr->node[0].type)
     {
     case ENUM_local_variable:
-        *(unsigned int *)(expr->type + 4) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 4));
-        if (*(unsigned int *)(expr->type + 4))
+        *(uint32_t *)(expr->type + 4) = Scr_CompileCanonicalString(*(uint32_t *)(expr->type + 4));
+        if (*(uint32_t *)(expr->type + 4))
         {
             tempVariableId.block = (scr_block_s*)AllocValue();
             *expr = debugger_node4(ENUM_local_variable, expr->node[1], 0, 0, tempVariableId);
@@ -522,8 +522,8 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
         break;
     case ENUM_field_variable:
         Scr_CompilePrimitiveExpressionFieldObject(&expr->node[1]);
-        *(unsigned int *)(expr->type + 8) = Scr_CompileCanonicalString(*(unsigned int *)(expr->type + 8));
-        if (*(unsigned int *)(expr->type + 8))
+        *(uint32_t *)(expr->type + 8) = Scr_CompileCanonicalString(*(uint32_t *)(expr->type + 8));
+        if (*(uint32_t *)(expr->type + 8))
             *expr = debugger_node3(ENUM_field_variable, expr->node[1], expr->node[2], 0);
         else
             *expr = debugger_node0(ENUM_unknown_field);
@@ -533,7 +533,7 @@ void __cdecl Scr_CompileVariableExpression(sval_u *expr)
         *expr = debugger_node1(ENUM_self_field, expr->node[1]);
         break;
     case ENUM_object:
-        s = SL_ConvertToString(*(unsigned int *)(expr->type + 4));
+        s = SL_ConvertToString(*(uint32_t *)(expr->type + 4));
         if (*s == 116)
         {
             idValue.intValue = atoi(s + 1);
@@ -670,7 +670,7 @@ char __cdecl Scr_CompileCallExpression(sval_u *expr)
     return 0;
 }
 
-unsigned int __cdecl Scr_GetBuiltin(sval_u func_name)
+uint32_t __cdecl Scr_GetBuiltin(sval_u func_name)
 {
     if (func_name.node[0].type != ENUM_script_call)
         return 0;
@@ -696,7 +696,7 @@ unsigned int __cdecl Scr_GetBuiltin(sval_u func_name)
 char __cdecl Scr_CompileFunction(sval_u *func_name, sval_u *params)
 {
     void(__cdecl * func)(); // [esp+0h] [ebp-10h]
-    unsigned int name; // [esp+4h] [ebp-Ch]
+    uint32_t name; // [esp+4h] [ebp-Ch]
     const char *pName; // [esp+8h] [ebp-8h] BYREF
     int type; // [esp+Ch] [ebp-4h] BYREF
 
@@ -730,7 +730,7 @@ void __cdecl Scr_CompileCallExpressionList(sval_u *exprlist)
 char __cdecl Scr_CompileMethod(sval_u *expr, sval_u *func_name, sval_u *params)
 {
     void(__cdecl * meth)(scr_entref_t); // [esp+0h] [ebp-10h]
-    unsigned int name; // [esp+4h] [ebp-Ch]
+    uint32_t name; // [esp+4h] [ebp-Ch]
     const char *pName; // [esp+8h] [ebp-8h] BYREF
     int type; // [esp+Ch] [ebp-4h] BYREF
 
@@ -765,7 +765,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
     char *start; // [esp+28h] [ebp-14h]
     char *end; // [esp+2Ch] [ebp-10h]
     HunkUser *user; // [esp+30h] [ebp-Ch]
-    unsigned int *expr; // [esp+38h] [ebp-4h]
+    uint32_t *expr; // [esp+38h] [ebp-4h]
 
     if (!strcmp(text, "<locals>"))
     {
@@ -792,8 +792,8 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
         else
         {
             scrCompilePub.developer_statement = 3;
-            expr = (unsigned int *)scriptExpr->parseData.type;
-            scriptExpr->parseData.type = (Enum_t)*(unsigned int *)(scriptExpr->parseData.type + 4);
+            expr = (uint32_t *)scriptExpr->parseData.type;
+            scriptExpr->parseData.type = (Enum_t)*(uint32_t *)(scriptExpr->parseData.type + 4);
             if (*expr == 65)
             {
                 varUsagePos = scrVarPub.varUsagePos;
@@ -834,7 +834,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
 
 bool __cdecl Scr_EvalScriptExpression(
     ScriptExpression_t *expr,
-    unsigned int localId,
+    uint32_t localId,
     VariableValue *value,
     bool freezeScope,
     bool freezeObjects)
@@ -847,7 +847,7 @@ bool __cdecl Scr_EvalScriptExpression(
     return scrEvaluateGlob.objectChanged;
 }
 
-void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalExpression(sval_u expr, uint32_t localId, VariableValue *value)
 {
     switch (expr.node[0].type)
     {
@@ -916,11 +916,11 @@ void __cdecl Scr_EvalExpression(sval_u expr, unsigned int localId, VariableValue
     }
 }
 
-void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, uint32_t localId, VariableValue *value)
 {
     VariableValue stringValue; // [esp+Ch] [ebp-14h] BYREF
     VariableValue objectValue; // [esp+14h] [ebp-Ch] BYREF
-    unsigned int selfId; // [esp+1Ch] [ebp-4h]
+    uint32_t selfId; // [esp+1Ch] [ebp-4h]
 
     switch (expr.node[0].type)
     {
@@ -1048,11 +1048,11 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, unsigned int localId, Vari
     }
 }
 
-void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalVariableExpression(sval_u expr, uint32_t localId, VariableValue *value)
 {
-    unsigned int objectId; // [esp+4h] [ebp-4h]
-    unsigned int objectIda; // [esp+4h] [ebp-4h]
-    unsigned int objectIdb; // [esp+4h] [ebp-4h]
+    uint32_t objectId; // [esp+4h] [ebp-4h]
+    uint32_t objectIda; // [esp+4h] [ebp-4h]
+    uint32_t objectIdb; // [esp+4h] [ebp-4h]
 
     switch (expr.node[0].type)
     {
@@ -1070,7 +1070,7 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
             if (!scrVarPub.error_message)
             {
                 AddRefToValue(value->type, value->u);
-                //objectId = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 16), value).stringValue;
+                //objectId = Scr_EvalFieldObject(*(uint32_t *)(expr.type + 16), value).stringValue;
                 objectId = Scr_EvalFieldObject(expr.node[4].idValue, value);
                 Scr_ClearErrorMessage();
             }
@@ -1158,18 +1158,18 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
         }
         break;
     case 0x51:
-        if (*(unsigned int *)(expr.type + 4) && Scr_IsThreadAlive(*(unsigned int *)(expr.type + 4)))
+        if (*(uint32_t *)(expr.type + 4) && Scr_IsThreadAlive(*(uint32_t *)(expr.type + 4)))
         {
-            value->u.intValue = *(unsigned int *)(expr.type + 4);
+            value->u.intValue = *(uint32_t *)(expr.type + 4);
             value->type = VAR_POINTER;
             AddRefToObject(value->u.intValue);
         }
         else
         {
-            if (*(unsigned int *)(expr.type + 4))
+            if (*(uint32_t *)(expr.type + 4))
             {
-                RemoveRefToObject(*(unsigned int *)(expr.type + 4));
-                *(unsigned int *)(expr.type + 4) = 0;
+                RemoveRefToObject(*(uint32_t *)(expr.type + 4));
+                *(uint32_t *)(expr.type + 4) = 0;
             }
             value->type = VAR_UNDEFINED;
             Scr_Error("thread not active");
@@ -1180,14 +1180,14 @@ void __cdecl Scr_EvalVariableExpression(sval_u expr, unsigned int localId, Varia
         Scr_Error("bad expression");
         break;
     case 0x57:
-        Scr_GetValue(*(unsigned int *)(expr.type + 4), value);
+        Scr_GetValue(*(uint32_t *)(expr.type + 4), value);
         break;
     default:
         return;
     }
 }
 
-void __cdecl Scr_EvalArrayVariableExpression(sval_u array, sval_u index, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalArrayVariableExpression(sval_u array, sval_u index, uint32_t localId, VariableValue *value)
 {
     VariableValue exprValue; // [esp+0h] [ebp-8h] BYREF
 
@@ -1196,9 +1196,9 @@ void __cdecl Scr_EvalArrayVariableExpression(sval_u array, sval_u index, unsigne
     Scr_EvalArrayVariableInternal(&exprValue, value);
 }
 
-void __cdecl Scr_EvalLocalVariable(sval_u expr, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalLocalVariable(sval_u expr, uint32_t localId, VariableValue *value)
 {
-    unsigned int varId; // [esp+8h] [ebp-4h]
+    uint32_t varId; // [esp+8h] [ebp-4h]
 
     if (!expr.type)
         MyAssertHandler(".\\script\\scr_evaluate.cpp", 532, 0, "%s", "expr.stringValue");
@@ -1216,7 +1216,7 @@ void __cdecl Scr_EvalLocalVariable(sval_u expr, unsigned int localId, VariableVa
 
 VariableValueInternal_u __cdecl Scr_EvalObject(sval_u classnum, sval_u entnum, VariableValue *value)
 {
-    unsigned int objectId; // [esp+0h] [ebp-4h]
+    uint32_t objectId; // [esp+0h] [ebp-4h]
 
     objectId = FindEntityId(entnum.stringValue, classnum.stringValue);
     if (objectId)
@@ -1268,7 +1268,7 @@ void __cdecl Scr_EvalSelfValue(VariableValue *value)
     }
 }
 
-void __cdecl Scr_GetValue(unsigned int index, VariableValue *value)
+void __cdecl Scr_GetValue(uint32_t index, VariableValue *value)
 {
     VariableValue *v2; // edx
     Vartype_t type; // ecx
@@ -1290,27 +1290,27 @@ void __cdecl Scr_GetValue(unsigned int index, VariableValue *value)
     }
 }
 
-VariableValue* Scr_GetValue(unsigned int param)
+VariableValue* Scr_GetValue(uint32_t param)
 {
 	return &scrVmPub.top[-int(param)];
 }
 
-unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigned int localId)
+uint32_t __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, uint32_t localId)
 {
-    unsigned int result; // eax
+    uint32_t result; // eax
     VariableValue value; // [esp+4h] [ebp-Ch] BYREF
-    unsigned int selfId; // [esp+Ch] [ebp-4h]
+    uint32_t selfId; // [esp+Ch] [ebp-4h]
 
     switch (expr.node[0].type)
     {
     case 0x11:
         Scr_EvalVariableExpression(expr.node[1], localId, &value);
-        //result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
+        //result = Scr_EvalFieldObject(*(uint32_t *)(expr.type + 8), &value).stringValue;
         result = Scr_EvalFieldObject(expr.node[2].idValue, &value);
         break;
     case 0x13:
         Scr_EvalCallExpression(expr.node[1], localId, &value);
-        //result = Scr_EvalFieldObject(*(unsigned int *)(expr.type + 8), &value).stringValue;
+        //result = Scr_EvalFieldObject(*(uint32_t *)(expr.type + 8), &value).stringValue;
         result = Scr_EvalFieldObject(expr.node[2].idValue, &value);
         break;
     case 0x20:
@@ -1357,7 +1357,7 @@ unsigned int __cdecl Scr_EvalPrimitiveExpressionFieldObject(sval_u expr, unsigne
     return result;
 }
 
-void __cdecl Scr_EvalCallExpression(sval_u expr, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalCallExpression(sval_u expr, uint32_t localId, VariableValue *value)
 {
     if (expr.node[0].type == ENUM_call)
     {
@@ -1369,10 +1369,10 @@ void __cdecl Scr_EvalCallExpression(sval_u expr, unsigned int localId, VariableV
     }
 }
 
-void __cdecl Scr_EvalFunction(sval_u func_name, sval_u params, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalFunction(sval_u func_name, sval_u params, uint32_t localId, VariableValue *value)
 {
     Scr_PreEvalBuiltin(params, localId);
-    if ((unsigned int)++g_script_error_level >= 0x21)
+    if ((uint32_t)++g_script_error_level >= 0x21)
         MyAssertHandler(
             ".\\script\\scr_evaluate.cpp",
             1641,
@@ -1395,10 +1395,10 @@ void __cdecl Scr_EvalFunction(sval_u func_name, sval_u params, unsigned int loca
     Scr_PostEvalBuiltin(value);
 }
 
-void __cdecl Scr_PreEvalBuiltin(sval_u params, unsigned int localId)
+void __cdecl Scr_PreEvalBuiltin(sval_u params, uint32_t localId)
 {
     sval_u *node; // [esp+0h] [ebp-Ch]
-    unsigned int expr_count; // [esp+4h] [ebp-8h]
+    uint32_t expr_count; // [esp+4h] [ebp-8h]
     int index; // [esp+8h] [ebp-4h]
 
     if (scrVmPub.outparamcount)
@@ -1452,19 +1452,19 @@ void __cdecl Scr_PostEvalBuiltin(VariableValue *value)
     }
 }
 
-void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, uint32_t localId, VariableValue *value)
 {
     const char *v5; // eax
     const char *v6; // eax
     scr_entref_t entref; // [esp+4h] [ebp-14h]
     VariableUnion objectId; // [esp+8h] [ebp-10h]
     int type; // [esp+Ch] [ebp-Ch]
-    unsigned int typea; // [esp+Ch] [ebp-Ch]
+    uint32_t typea; // [esp+Ch] [ebp-Ch]
     VariableValue objectValue; // [esp+10h] [ebp-8h] BYREF
 
     Scr_EvalPrimitiveExpression(expr, localId, &objectValue);
     Scr_PreEvalBuiltin(params, localId);
-    if ((unsigned int)++g_script_error_level >= 0x21)
+    if ((uint32_t)++g_script_error_level >= 0x21)
         MyAssertHandler(
             ".\\script\\scr_evaluate.cpp",
             1671,
@@ -1493,7 +1493,7 @@ void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsign
         }
         entref = Scr_GetEntityIdRef(objectId.stringValue);
         RemoveRefToObject(objectId.stringValue);
-        ((void(__cdecl *)(unsigned int))func_name.type)(entref.entnum); // KISAKTODO: fubar'd union 'entref'
+        ((void(__cdecl *)(uint32_t))func_name.type)(entref.entnum); // KISAKTODO: fubar'd union 'entref'
     }
     if (g_script_error_level < 0)
         MyAssertHandler(
@@ -1507,7 +1507,7 @@ void __cdecl Scr_EvalMethod(sval_u expr, sval_u func_name, sval_u params, unsign
     Scr_PostEvalBuiltin(value);
 }
 
-void __cdecl Scr_EvalBoolOrExpression(sval_u expr1, sval_u expr2, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalBoolOrExpression(sval_u expr1, sval_u expr2, uint32_t localId, VariableValue *value)
 {
     bool v4; // [esp+0h] [ebp-Ch]
     bool v5; // [esp+4h] [ebp-8h]
@@ -1524,7 +1524,7 @@ void __cdecl Scr_EvalBoolOrExpression(sval_u expr1, sval_u expr2, unsigned int l
     value->u.intValue = v4;
 }
 
-void __cdecl Scr_EvalBoolAndExpression(sval_u expr1, sval_u expr2, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalBoolAndExpression(sval_u expr1, sval_u expr2, uint32_t localId, VariableValue *value)
 {
     bool v4; // [esp+0h] [ebp-Ch]
     bool v5; // [esp+4h] [ebp-8h]
@@ -1545,7 +1545,7 @@ void __cdecl Scr_EvalBinaryOperatorExpression(
     sval_u expr1,
     sval_u expr2,
     sval_u opcode,
-    unsigned int localId,
+    uint32_t localId,
     VariableValue *value)
 {
     VariableValue value2; // [esp+0h] [ebp-8h] BYREF
@@ -1555,7 +1555,7 @@ void __cdecl Scr_EvalBinaryOperatorExpression(
     Scr_EvalBinaryOperator(opcode.type, value, &value2);
 }
 
-void __cdecl Scr_EvalVector(sval_u expr1, sval_u expr2, sval_u expr3, unsigned int localId, VariableValue *value)
+void __cdecl Scr_EvalVector(sval_u expr1, sval_u expr2, sval_u expr3, uint32_t localId, VariableValue *value)
 {
     VariableValue vectorValue[3]; // [esp+0h] [ebp-18h] BYREF
 

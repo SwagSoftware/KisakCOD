@@ -46,7 +46,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
             {
                 bestDirError = v2;
                 bestLenError = lenError;
-                out.packed = *(unsigned int *)testEncoding;
+                out.packed = *(uint32_t *)testEncoding;
                 if (lenError + v2 == 0.0)
                     return *(PackedUnitVec *)testEncoding;
             }
@@ -62,7 +62,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
 // 16-bit pack: low 14 bits = clamped fixed-point magnitude, high 2 bits = float exponent bits 30-31.
 static uint16_t PackTexCoordHalf(float coord)
 {
-    unsigned int bits = LODWORD(coord);
+    uint32_t bits = LODWORD(coord);
     int low14 = (int)((2 * bits) ^ 0x80000000) >> 14;
     low14 = CLAMP(low14, -16384, 0x3FFF);
     return (uint16_t)((low14 & 0x3FFF) | ((bits >> 16) & 0xC000));
@@ -101,12 +101,12 @@ void __cdecl Byte4UnpackRgba(const uint8_t *from, float *to)
 
 void __cdecl Byte4CopyRgbaToVertexColor(const uint8_t *rgbaFrom, uint8_t *nativeTo)
 {
-    *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[2] | (rgbaFrom[1] << 8) | (*rgbaFrom << 16);
+    *(uint32_t *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[2] | (rgbaFrom[1] << 8) | (*rgbaFrom << 16);
 }
 
 void __cdecl Byte4CopyBgraToVertexColor(const uint8_t *rgbaFrom, uint8_t *nativeTo)
 {
-    *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[0] | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
+    *(uint32_t *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[0] | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
 }
 
 void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)

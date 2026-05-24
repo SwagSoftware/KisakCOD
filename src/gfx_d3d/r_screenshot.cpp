@@ -66,7 +66,7 @@ void __cdecl Image_Blend1x1Faces(uint8_t *(*pixels)[15], int mipLevel)
 
 uint8_t *__cdecl Image_GetCubeCornerPixel(
     uint8_t *facePixels,
-    unsigned int coordx,
+    uint32_t coordx,
     int coordy,
     int edgeSize)
 {
@@ -1137,8 +1137,8 @@ void __cdecl R_ResampleImage(
 
 uint8_t *__cdecl R_TakeResampledScreenshot(int width, int height, int bytesPerPixel, int headerSize)
 {
-    unsigned int displayHeight; // [esp+0h] [ebp-14h]
-    unsigned int displayWidth; // [esp+4h] [ebp-10h]
+    uint32_t displayHeight; // [esp+0h] [ebp-14h]
+    uint32_t displayWidth; // [esp+4h] [ebp-10h]
     uint8_t *buffer; // [esp+8h] [ebp-Ch]
 
     if (width < (int)vidConfig.displayWidth)
@@ -1171,10 +1171,10 @@ void __cdecl R_LevelShot()
     buffer = R_TakeResampledScreenshot(128, 128, 3, 18);
     if (buffer)
     {
-        *(unsigned int *)buffer = 0;
-        *((unsigned int *)buffer + 1) = 0;
-        *((unsigned int *)buffer + 2) = 0;
-        *((unsigned int *)buffer + 3) = 0;
+        *(uint32_t *)buffer = 0;
+        *((uint32_t *)buffer + 1) = 0;
+        *((uint32_t *)buffer + 2) = 0;
+        *((uint32_t *)buffer + 3) = 0;
         *((_WORD *)buffer + 8) = 0;
         buffer[2] = 2;
         buffer[12] = 0x80;
@@ -1189,8 +1189,8 @@ void __cdecl R_LevelShot()
 void __cdecl R_SaveJpg(
     char *filename,
     int quality,
-    unsigned int image_width,
-    unsigned int image_height,
+    uint32_t image_width,
+    uint32_t image_height,
     uint8_t *image_buffer)
 {
     // KISAKTODO: Add JPEG
@@ -1201,8 +1201,8 @@ void __cdecl R_SaveJpg(
     jpeg_error_mgr jerr; // [esp+17Ch] [ebp-98h] BYREF
 
     cinfo.err = jpeg_std_error(&jerr, (void (*)(...))ExitJpeg, PrintfJpeg);
-    cinfo.alloc.malloc = (void *(__cdecl *)(unsigned int))Z_MallocJpeg;
-    cinfo.alloc.free = (void(__cdecl *)(void *, unsigned int))Com_FreeEvent;
+    cinfo.alloc.malloc = (void *(__cdecl *)(uint32_t))Z_MallocJpeg;
+    cinfo.alloc.free = (void(__cdecl *)(void *, uint32_t))Com_FreeEvent;
     jpeg_CreateCompress((jpeg_common_struct *)&cinfo, 62, 0x170u);
     out = (uint8_t *)Hunk_AllocateTempMemory(3 * image_height * image_width, "SaveJPG");
     jpegDest((jpeg_common_struct *)&cinfo, out, 3 * image_height * image_width);
@@ -1295,7 +1295,7 @@ void R_CubemapShotSetInitialState()
                 " (123987))) == 0 || ((123987 / ((((0 || 0 || (123987 / ((-123987)) == 123987 / (123987))) ? (123987) : (-123987)"
                 ") * ((0 || 0 || (123987 / ((-123987)) == 123987 / (123987))) == 0 || (0 || 0 || (123987 / ((-123987)) == 123987 "
                 "/ (123987))) == 1))) == 123987 / (123987))) == 1))) == 123987 / (123987)) ? 0.0f : 1.0f), 0 )\n");
-        //hr = ((int(__stdcall *)(IDirect3DDevice9 *, unsigned int, unsigned int, int, int, unsigned int, unsigned int))dx.device->Clear)(
+        //hr = ((int(__stdcall *)(IDirect3DDevice9 *, uint32_t, uint32_t, int, int, uint32_t, uint32_t))dx.device->Clear)(
         //    dx.device,
         //    0,
         //    0,
@@ -1385,7 +1385,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
         hra = surfaceBackBuffer->GetDesc(&desc);
         if (hra >= 0)
         {
-            //hrb = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, unsigned int, _D3DFORMAT, int, IDirect3DSurface9 **, _DWORD))dx.device->CreateOffscreenPlainSurface)(
+            //hrb = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, uint32_t, uint32_t, _D3DFORMAT, int, IDirect3DSurface9 **, _DWORD))dx.device->CreateOffscreenPlainSurface)(
             //    dx.device,
             //    dx.device,
             //    desc.Width,
@@ -1599,10 +1599,10 @@ void __cdecl R_CubemapShotWriteTargaHeader(int res, uint8_t *fileBuffer)
 {
     iassert( fileBuffer );
     iassert( (res > 0) );
-    *(unsigned int *)fileBuffer = 0;
-    *((unsigned int *)fileBuffer + 1) = 0;
-    *((unsigned int *)fileBuffer + 2) = 0;
-    *((unsigned int *)fileBuffer + 3) = 0;
+    *(uint32_t *)fileBuffer = 0;
+    *((uint32_t *)fileBuffer + 1) = 0;
+    *((uint32_t *)fileBuffer + 2) = 0;
+    *((uint32_t *)fileBuffer + 3) = 0;
     *((_WORD *)fileBuffer + 8) = 0;
     fileBuffer[2] = 2;
     *((_WORD *)fileBuffer + 6) = res;
@@ -1884,7 +1884,7 @@ void __cdecl R_CubemapShotExtractLinearLight(
     }
 }
 
-void __cdecl R_ScreenshotFilename(unsigned int lastNumber, const char *extension, char *fileName)
+void __cdecl R_ScreenshotFilename(uint32_t lastNumber, const char *extension, char *fileName)
 {
     if (lastNumber < 0x2710)
         Com_sprintf(fileName, 0x100u, "screenshots/shot%04i.%s", lastNumber, extension);

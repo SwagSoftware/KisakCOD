@@ -835,7 +835,7 @@ enum EntHandler_t : uint8_t // (not a real enum name)
     ENT_HANDLER_COUNT = 0x1B,
 };
 
-enum gentityFlags_t : unsigned int // LWSS: not a real enum name, used to force usage
+enum gentityFlags_t : uint32_t // LWSS: not a real enum name, used to force usage
 {
     FL_GODMODE               = 0x1,
     FL_DEMI_GODMODE          = 0x2,
@@ -940,7 +940,7 @@ struct gentity_s
     uint16_t script_noteworthy;
     uint16_t target;
     uint16_t targetname;
-    unsigned int attachIgnoreCollision;
+    uint32_t attachIgnoreCollision;
     int spawnflags;
     gentityFlags_t flags;
     int clipmask;
@@ -1015,7 +1015,7 @@ extern const dvar_t *jump_ladderPushVel;
 extern const dvar_t *jump_spreadAdd;
 
 // bg_weapons
-extern unsigned int bg_lastParsedWeaponIndex;
+extern uint32_t bg_lastParsedWeaponIndex;
 extern struct WeaponDef *bg_weaponDefs[128];
 
 // https://github.com/id-Software/RTCW-SP/blob/master/src/game/bg_public.h#L1573

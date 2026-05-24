@@ -21,10 +21,10 @@ void __cdecl R_SetCodeImageSamplerState(
     uint8_t samplerState);
 void __cdecl R_SetShadowableLight(
     GfxCmdBufSourceState *source,
-    unsigned int shadowableLightIndex,
+    uint32_t shadowableLightIndex,
     const GfxViewInfo *viewInfo);
 void __cdecl R_SetDrawSurfsShadowableLight(GfxCmdBufSourceState *source, const GfxDrawSurfListInfo *info);
-unsigned int __cdecl R_GetShadowableLightIndex(
+uint32_t __cdecl R_GetShadowableLightIndex(
     const GfxBackEndData *data,
     const GfxViewInfo *viewInfo,
     const GfxLight *light);

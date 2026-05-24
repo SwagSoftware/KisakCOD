@@ -68,7 +68,7 @@ DObjAnimMat *R_UpdateSceneEntBounds(
     float v54; // [esp+E4h] [ebp-270h]
     DObjAnimMat *mat; // [esp+E8h] [ebp-26Ch]
     int boneIndex; // [esp+ECh] [ebp-268h]
-    unsigned int animPartBit; // [esp+F0h] [ebp-264h]
+    uint32_t animPartBit; // [esp+F0h] [ebp-264h]
     int boneCount; // [esp+F4h] [ebp-260h]
     XBoneInfo *boneInfoArray[128]; // [esp+F8h] [ebp-25Ch] BYREF
     float4 minWorld; // [esp+300h] [ebp-54h]
@@ -78,7 +78,7 @@ DObjAnimMat *R_UpdateSceneEntBounds(
     int partBits[4]; // [esp+328h] [ebp-2Ch] BYREF
     const DObj_s *obj; // [esp+338h] [ebp-1Ch]
     GfxSceneEntity *localSceneEnt; // [esp+33Ch] [ebp-18h]
-    unsigned int state; // [esp+340h] [ebp-14h]
+    uint32_t state; // [esp+340h] [ebp-14h]
 
     if (InterlockedCompareExchange((volatile LONG *)&sceneEnt->cull, 1, 0))
     {
