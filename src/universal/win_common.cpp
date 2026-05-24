@@ -11,8 +11,8 @@
 #include "com_memory.h"
 #include "profile.h"
 
-#if defined(KISAK_WIN_LOCK)
-_RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
+#if defined(_WIN32)
+CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
 #else
 #include <mutex>
 std::mutex s_criticalSections[CRITSECT_COUNT];
@@ -21,7 +21,7 @@ uint32_t s_criticalSectionsCount[CRITSECT_COUNT] = { 0 };
 
 void Sys_InitializeCriticalSections()
 {
-#if defined(KISAK_WIN_LOCK)
+#if defined(_WIN32)
 	for (int critSect = 0; critSect < CRITSECT_COUNT; critSect++) {
 		InitializeCriticalSection(&s_criticalSections[critSect]);
 	}
@@ -33,7 +33,7 @@ void Sys_EnterCriticalSection(int critSect)
     PROF_SCOPED("Sys_EnterCriticalSection");
 
 	iassert(critSect >= 0 && critSect < CRITSECT_COUNT);
-#if defined(KISAK_WIN_LOCK)
+#if defined(_WIN32)
 	EnterCriticalSection(&s_criticalSections[critSect]);
 #else
     s_criticalSections[critSect].lock();
@@ -46,7 +46,7 @@ void Sys_EnterCriticalSection(int critSect)
 void Sys_LeaveCriticalSection(int critSect)
 {
 	iassert(critSect >= 0 && critSect < CRITSECT_COUNT);
-#if defined(KISAK_WIN_LOCK)
+#if defined(_WIN32)
 	LeaveCriticalSection(&s_criticalSections[critSect]);
 #else
     s_criticalSectionsCount[critSect]--;
