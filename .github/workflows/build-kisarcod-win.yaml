@@ -67,6 +67,7 @@ jobs:
       - name: Build ${{ matrix.config }}
         run: |
           pushd
+          cmake --build build-${{ matrix.config }} --config ${{ matrix.config }} --target "KisakCOD-sp"
           cmake --build build-${{ matrix.config }} --config ${{ matrix.config }} --target "KisakCOD-mp"
           cmake --build build-${{ matrix.config }} --config ${{ matrix.config }} --target "KisakCOD-dedi"
           popd
