@@ -18,9 +18,9 @@ int __cdecl RB_CompareTouchImages(int *e0, int *e1)
         return 1;
     if (*(_DWORD *)(image_4 + 16) != *(_DWORD *)(image + 16))
         return *(_DWORD *)(image_4 + 16) - *(_DWORD *)(image + 16);
-    if (*(unsigned __int8 *)(image + 11) == *(unsigned __int8 *)(image_4 + 11))
+    if (*(uint8_t *)(image + 11) == *(uint8_t *)(image_4 + 11))
         return 0;
-    return *(unsigned __int8 *)(image + 11) - *(unsigned __int8 *)(image_4 + 11);
+    return *(uint8_t *)(image + 11) - *(uint8_t *)(image_4 + 11);
 }
 
 void __cdecl RB_TouchImage(GfxImage *image)
@@ -52,7 +52,7 @@ void __cdecl RB_TouchAllImages()
     int v2; // [esp+0h] [ebp-201Ch]
     int hr; // [esp+4h] [ebp-2018h]
     bool inScene; // [esp+Bh] [ebp-2011h]
-    unsigned int i; // [esp+Ch] [ebp-2010h]
+    uint32_t i; // [esp+Ch] [ebp-2010h]
     int v6; // [esp+10h] [ebp-200Ch]
     ImageList imageList; // [esp+14h] [ebp-2008h] BYREF
 

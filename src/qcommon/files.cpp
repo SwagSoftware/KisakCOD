@@ -17,7 +17,7 @@ extern int fs_fakeChkSum;
 
 char *__cdecl FS_GetMapBaseName(char *mapname)
 {
-    unsigned int v2; // [esp+0h] [ebp-18h]
+    uint32_t v2; // [esp+0h] [ebp-18h]
     int c; // [esp+10h] [ebp-8h]
     signed int len; // [esp+14h] [ebp-4h]
 
@@ -28,7 +28,7 @@ char *__cdecl FS_GetMapBaseName(char *mapname)
     len = v2;
     if (!I_stricmp(&mapname[v2 - 3], "bsp"))
         len = v2 - 7;
-    memcpy((unsigned __int8 *)basename, (unsigned __int8 *)mapname, len);
+    memcpy((uint8_t *)basename, (uint8_t *)mapname, len);
     basename[len] = 0;
     for (c = 0; c < len; ++c)
     {
@@ -113,7 +113,7 @@ int __cdecl FS_CompareIwds(char *needediwds, int len, int dlstring)
     char *v4; // eax
     const char *v5; // [esp+8h] [ebp-20h]
     const char *string; // [esp+Ch] [ebp-1Ch]
-    unsigned int v7; // [esp+Ch] [ebp-1Ch]
+    uint32_t v7; // [esp+Ch] [ebp-1Ch]
     int haveiwd; // [esp+1Ch] [ebp-Ch]
     searchpath_s *j; // [esp+20h] [ebp-8h]
     int i; // [esp+24h] [ebp-4h]
@@ -123,7 +123,7 @@ int __cdecl FS_CompareIwds(char *needediwds, int len, int dlstring)
     *needediwds = 0;
     string = fs_gameDirVar->current.string;
     v5 = string + 1;
-    v7 = (unsigned int)&string[strlen(string) + 1];
+    v7 = (uint32_t)&string[strlen(string) + 1];
     for (i = 0; i < fs_numServerReferencedIwds; ++i)
     {
         haveiwd = 0;
@@ -182,7 +182,7 @@ int __cdecl FS_CompareFFs(char *neededFFs, int len, int dlstring)
     int v4; // eax
     const char *v5; // [esp+18h] [ebp-28h]
     const char *string; // [esp+1Ch] [ebp-24h]
-    unsigned int v7; // [esp+1Ch] [ebp-24h]
+    uint32_t v7; // [esp+1Ch] [ebp-24h]
     char *ffName; // [esp+2Ch] [ebp-14h]
     const char *ffNamea; // [esp+2Ch] [ebp-14h]
     int fileSize; // [esp+30h] [ebp-10h]
@@ -193,7 +193,7 @@ int __cdecl FS_CompareFFs(char *neededFFs, int len, int dlstring)
     *neededFFs = 0;
     string = fs_gameDirVar->current.string;
     v5 = string + 1;
-    v7 = (unsigned int)&string[strlen(string) + 1];
+    v7 = (uint32_t)&string[strlen(string) + 1];
     for (i = 0; i < fs_numServerReferencedFFs; ++i)
     {
         if (I_strncmp(fs_serverReferencedFFNames[i], "mods", 4)

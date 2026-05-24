@@ -4,7 +4,7 @@
 
 int bloc;
 
-int __cdecl get_bit(const unsigned __int8 *fin)
+int __cdecl get_bit(const uint8_t *fin)
 {
     int t; // [esp+0h] [ebp-4h]
 
@@ -13,7 +13,7 @@ int __cdecl get_bit(const unsigned __int8 *fin)
     return t;
 }
 
-void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const unsigned __int8 *fin, int *offset)
+void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const uint8_t *fin, int *offset)
 {
     bloc = *offset;
     while (node && node->symbol == 257)
@@ -34,7 +34,7 @@ void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const unsigned __int8 *
     }
 }
 
-void __cdecl huffman_send(nodetype *node, nodetype *child, unsigned __int8 *fout)
+void __cdecl huffman_send(nodetype *node, nodetype *child, uint8_t *fout)
 {
     if (node->parent)
         huffman_send(node->parent, node, fout);
@@ -47,7 +47,7 @@ void __cdecl huffman_send(nodetype *node, nodetype *child, unsigned __int8 *fout
     }
 }
 
-void __cdecl add_bit(char bit, unsigned __int8 *fout)
+void __cdecl add_bit(char bit, uint8_t *fout)
 {
     if ((bloc & 7) == 0)
         fout[bloc >> 3] = 0;
@@ -67,7 +67,7 @@ int __cdecl huffman_bitCountForNode(nodetype *node, nodetype *child)
     return bits;
 }
 
-int __cdecl Huff_bitCount(huff_t *huff, unsigned int ch)
+int __cdecl Huff_bitCount(huff_t *huff, uint32_t ch)
 {
     if (ch >= 0x100)
         MyAssertHandler(".\\qcommon\\huffman.cpp", 152, 0, "ch doesn't index 256\n\t%i not in [0, %i)", ch, 256);
@@ -76,7 +76,7 @@ int __cdecl Huff_bitCount(huff_t *huff, unsigned int ch)
     return huffman_bitCountForNode(huff->loc[ch], 0);
 }
 
-void __cdecl Huff_offsetTransmit(huff_t *huff, int ch, unsigned __int8 *fout, int *offset)
+void __cdecl Huff_offsetTransmit(huff_t *huff, int ch, uint8_t *fout, int *offset)
 {
     bloc = *offset;
     huffman_send(huff->loc[ch], 0, fout);
@@ -85,8 +85,8 @@ void __cdecl Huff_offsetTransmit(huff_t *huff, int ch, unsigned __int8 *fout, in
 
 void __cdecl Huff_Init(huffman_t *huff)
 {
-    //Com_Memset((unsigned int *)huff, 0, 19476);
-    Com_Memset((unsigned int *)huff, 0, sizeof(huffman_t));
+    //Com_Memset((uint32_t *)huff, 0, 19476);
+    Com_Memset((uint32_t *)huff, 0, sizeof(huffman_t));
     huff->compressDecompress.loc[256] = &huff->compressDecompress.nodeList[huff->compressDecompress.blocNode++];
     huff->compressDecompress.tree = huff->compressDecompress.loc[256];
     huff->compressDecompress.tree->symbol = 256;
@@ -112,7 +112,7 @@ nodetype *__cdecl Huff_initNode(huff_t *huff, int ch, int weight)
 
 int __cdecl nodeCmp(const void *left, const void *right)
 {
-    return *(unsigned int *)(*(unsigned int *)left + 12) - *(unsigned int *)(*(unsigned int *)right + 12);
+    return *(uint32_t *)(*(uint32_t *)left + 12) - *(uint32_t *)(*(uint32_t *)right + 12);
 }
 
 void __cdecl Huff_BuildFromData(huff_t *huff, const int *msg_hData)

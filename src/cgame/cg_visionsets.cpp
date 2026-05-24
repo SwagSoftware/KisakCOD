@@ -153,7 +153,7 @@ void __cdecl UpdateVarsLerp(
         MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 378, 0, "%s", "lerpData");
     if (!result)
         MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 379, 0, "%s", "result");
-    if (lerpData->style >= (unsigned int)VISIONSETLERP_TO_LINEAR)
+    if (lerpData->style >= (uint32_t)VISIONSETLERP_TO_LINEAR)
     {
         if (lerpData->timeDuration + lerpData->timeStart >= time)
         {

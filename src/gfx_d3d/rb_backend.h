@@ -73,8 +73,8 @@ struct GfxCmdDrawLines // sizeof=0x28
 {
     GfxCmdHeader header;
     __int16 lineCount;
-    unsigned __int8 width;
-    unsigned __int8 dimensions;
+    uint8_t width;
+    uint8_t dimensions;
     GfxPointVertex verts[2];
 };
 
@@ -178,7 +178,7 @@ struct GfxCmdStretchRaw // sizeof=0x28
     int h;
     int cols;
     int rows;
-    const unsigned __int8 *data;
+    const uint8_t *data;
     int client;
     int dirty;
 };
@@ -189,13 +189,13 @@ struct __declspec(align(16)) GfxCmdBufSourceState // sizeof=0xF00
     GfxCmdBufInput input;               // ...
     GfxViewParms viewParms;             // ...
     GfxMatrix shadowLookupMatrix;
-    unsigned __int16 constVersions[90];
-    unsigned __int16 matrixVersions[8];
+    uint16_t constVersions[90];
+    uint16_t matrixVersions[8];
     float eyeOffset[4];                 // ...
-    unsigned int shadowableLightForShadowLookupMatrix;
+    uint32_t shadowableLightForShadowLookupMatrix;
     const GfxScaledPlacement *objectPlacement;
     const GfxViewParms *viewParms3D;    // ...
-    unsigned int depthHackFlags;
+    uint32_t depthHackFlags;
     GfxScaledPlacement skinnedPlacement;
     int cameraView;
     GfxViewMode viewMode;               // ...
@@ -209,7 +209,7 @@ struct __declspec(align(16)) GfxCmdBufSourceState // sizeof=0xF00
     // padding byte
     // padding byte
     // padding byte
-    unsigned int shadowableLightIndex;
+    uint32_t shadowableLightIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -222,9 +222,9 @@ struct __declspec(align(16)) GfxCmdBufSourceState // sizeof=0xF00
 
 struct GfxCmdBufPrimState_stream // sizeof=0xC
 {                                       // ...
-    unsigned int stride;                // ...
+    uint32_t stride;                // ...
     IDirect3DVertexBuffer9 *vb;         // ...
-    unsigned int offset;                // ...
+    uint32_t offset;                // ...
 };
 struct GfxCmdBufPrimState // sizeof=0x28
 {                                       // ...
@@ -236,26 +236,26 @@ struct GfxCmdBufPrimState // sizeof=0x28
 };
 struct GfxCmdBufState // sizeof=0xA10
 {                                       // ...
-    unsigned __int8 refSamplerState[16];
-    unsigned int samplerState[16];
+    uint8_t refSamplerState[16];
+    uint32_t samplerState[16];
     const GfxTexture *samplerTexture[16];
     GfxCmdBufPrimState prim;            // ...
     const Material *material;           // ...
     MaterialTechniqueType techType;     // ...
     const MaterialTechnique *technique; // ...
     const MaterialPass *pass;
-    unsigned int passIndex;
+    uint32_t passIndex;
     GfxDepthRangeType depthRangeType;
     float depthRangeNear;
     float depthRangeFar;
     unsigned __int64 vertexShaderConstState[32]; // ...
     unsigned __int64 pixelShaderConstState[256]; // ...
-    unsigned __int8 alphaRef;           // ...
+    uint8_t alphaRef;           // ...
     // padding byte
     // padding byte
     // padding byte
-    unsigned int refStateBits[2];
-    unsigned int activeStateBits[2];    // ...
+    uint32_t refStateBits[2];
+    uint32_t activeStateBits[2];    // ...
     const MaterialPixelShader *pixelShader; // ...
     const MaterialVertexShader *vertexShader; // ...
     GfxViewport viewport;
@@ -279,8 +279,8 @@ struct GfxCmdDrawPoints // sizeof=0x18
 {
     GfxCmdHeader header;
     __int16 pointCount;
-    unsigned __int8 size;
-    unsigned __int8 dimensions;
+    uint8_t size;
+    uint8_t dimensions;
     GfxPointVertex verts[1];
 };
 
@@ -334,7 +334,7 @@ struct GfxFrameStats // sizeof=0x274
 struct GfxDrawSurfListArgs // sizeof=0x10
 {                                       // ...
     GfxCmdBufContext context;           // ...
-    unsigned int firstDrawSurfIndex;    // ...
+    uint32_t firstDrawSurfIndex;    // ...
     const GfxDrawSurfListInfo* info;    // ...
 };
 
@@ -349,9 +349,9 @@ struct r_backEndGlobals_t // sizeof=0x280
 struct __declspec(align(8)) materialCommands_t // sizeof=0x22A960
 {                                       // ...
     GfxVertex verts[5450];              // ...
-    unsigned __int16 indices[1048576];  // ...
+    uint16_t indices[1048576];  // ...
     MaterialVertexDeclType vertDeclType;
-    unsigned int vertexSize;
+    uint32_t vertexSize;
     int indexCount;                     // ...
     int vertexCount;                    // ...
     int firstVertex;                    // ...
@@ -372,7 +372,7 @@ struct __declspec(align(8)) materialCommands_t // sizeof=0x22A960
 void __cdecl TRACK_rb_backend();
 void __cdecl RB_CopyBackendStats();
 void __cdecl RB_SetIdentity();
-void __cdecl R_SetVertex2d(GfxVertex *vert, float x, float y, float s, float t, unsigned int color);
+void __cdecl R_SetVertex2d(GfxVertex *vert, float x, float y, float s, float t, uint32_t color);
 void __cdecl R_SetVertex4dWithNormal(
     GfxVertex *vert,
     float x,
@@ -384,7 +384,7 @@ void __cdecl R_SetVertex4dWithNormal(
     float nz,
     float s,
     float t,
-    const unsigned __int8 *color);
+    const uint8_t *color);
 void __cdecl RB_DrawStretchPic(
     const Material *material,
     float x,
@@ -395,7 +395,7 @@ void __cdecl RB_DrawStretchPic(
     float t0,
     float s1,
     float t1,
-    unsigned int color,
+    uint32_t color,
     GfxPrimStatsTarget statsTarget);
 void __cdecl RB_CheckTessOverflow(int vertexCount, int indexCount);
 void __cdecl RB_DrawStretchPicFlipST(
@@ -408,7 +408,7 @@ void __cdecl RB_DrawStretchPicFlipST(
     float t0,
     float s1,
     float t1,
-    unsigned int color,
+    uint32_t color,
     GfxPrimStatsTarget statsTarget);
 void __cdecl RB_DrawFullScreenColoredQuad(
     const Material *material,
@@ -416,8 +416,8 @@ void __cdecl RB_DrawFullScreenColoredQuad(
     float t0,
     float s1,
     float t1,
-    unsigned int color);
-void __cdecl RB_FullScreenColoredFilter(const Material *material, unsigned int color);
+    uint32_t color);
+void __cdecl RB_FullScreenColoredFilter(const Material *material, uint32_t color);
 void __cdecl RB_FullScreenFilter(const Material *material);
 void __cdecl RB_SplitScreenFilter(const Material *material, const GfxViewInfo *viewInfo);
 void __cdecl RB_SplitScreenTexCoords(float x, float y, float w, float h, float *s0, float *t0, float *s1, float *t1);
@@ -429,9 +429,9 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawQuadPicCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawFullScreenColoredQuadCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_StretchRawCmd(GfxRenderCommandExecState *execState);
-void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const unsigned __int8 *data);
+void __cdecl RB_StretchRaw(int x, int y, int w, int h, int cols, int rows, const uint8_t *data);
 void __cdecl R_DrawSurfs(GfxCmdBufContext context, GfxCmdBufState *prepassState, const GfxDrawSurfListInfo *info);
-unsigned int __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext);
+uint32_t __cdecl R_RenderDrawSurfListMaterial(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext);
 void __cdecl R_TessEnd(GfxCmdBufContext context, GfxCmdBufContext prepassContext);
 void __cdecl RB_ClearScreenCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetGammaRamp(const GfxGammaRamp *gammaTable);
@@ -451,10 +451,10 @@ void __cdecl R_SetVertex4d(
     float w,
     float s,
     float t,
-    const unsigned __int8 *color);
+    const uint8_t *color);
 void __cdecl RB_DrawPoints3D(const GfxCmdDrawPoints *cmd);
 void __cdecl RB_DrawLines2D(int count, int width, const GfxPointVertex *verts);
-void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, float t, const unsigned __int8 *color);
+void __cdecl R_SetVertex3d(GfxVertex *vert, float x, float y, float z, float s, float t, const uint8_t *color);
 void __cdecl RB_DrawLines3D(int count, int width, const GfxPointVertex *verts, bool depthTest);
 void __cdecl RB_DrawLinesCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawTrianglesCmd(GfxRenderCommandExecState *execState);
@@ -462,7 +462,7 @@ void __cdecl RB_DrawTriangles_Internal(
     const Material *material,
     MaterialTechniqueType techType,
     __int16 indexCount,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     __int16 vertexCount,
     const float (*xyzw)[4],
     const float (*normal)[3],
@@ -471,7 +471,7 @@ void __cdecl RB_DrawTriangles_Internal(
 void __cdecl RB_DrawProfileCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState);
-void __cdecl RB_LookupColor(unsigned __int8 c, GfxColor *color);
+void __cdecl RB_LookupColor(uint8_t c, GfxColor *color);
 void __cdecl RB_DrawText(const char *text, Font_s *font, float x, float y, GfxColor color);
 void __cdecl DrawText2D(
     const char *text,
@@ -507,7 +507,7 @@ void __cdecl RB_DrawStretchPicRotate(
     float t1,
     float sinAngle,
     float cosAngle,
-    unsigned int color,
+    uint32_t color,
     GfxPrimStatsTarget statsTarget);
 double __cdecl RB_DrawHudIcon(
     const char *text,
@@ -518,10 +518,10 @@ double __cdecl RB_DrawHudIcon(
     Font_s *font,
     float xScale,
     float yScale,
-    unsigned int color);
+    uint32_t color);
 void __cdecl RB_DrawCursor(
     const Material *material,
-    unsigned __int8 cursor,
+    uint8_t cursor,
     float x,
     float y,
     float sinAngle,
@@ -529,7 +529,7 @@ void __cdecl RB_DrawCursor(
     Font_s *font,
     float xScale,
     float yScale,
-    unsigned int color);
+    uint32_t color);
 void __cdecl RotateXY(
     float cosAngle,
     float sinAngle,
@@ -555,16 +555,16 @@ char __cdecl SetupPulseFXVars(
     bool *resultDecaying,
     int *resultdecayTimeElapsed);
 void __cdecl GetDecayingLetterInfo(
-    unsigned int letter,
+    uint32_t letter,
     Font_s *font,
     int *randSeed,
     int decayTimeElapsed,
     int fxBirthTime,
     int fxDecayDuration,
-    unsigned __int8 alpha,
+    uint8_t alpha,
     bool *resultSkipDrawing,
-    unsigned __int8 *resultAlpha,
-    unsigned int *resultLetter,
+    uint8_t *resultAlpha,
+    uint32_t *resultLetter,
     bool *resultDrawExtraFxChar);
 void __cdecl DrawTextFxExtraCharacter(
     const Material *material,
@@ -575,22 +575,22 @@ void __cdecl DrawTextFxExtraCharacter(
     float h,
     float sinAngle,
     float cosAngle,
-    unsigned int color);
-unsigned __int8 __cdecl ModulateByteColors(unsigned __int8 colorA, unsigned __int8 colorB);
+    uint32_t color);
+uint8_t __cdecl ModulateByteColors(uint8_t colorA, uint8_t colorB);
 void __cdecl RB_DrawTextInSpace(
     const char *text,
     Font_s *font,
     const float *org,
     const float *xPixelStep,
     const float *yPixelStep,
-    unsigned int color);
+    uint32_t color);
 void __cdecl RB_DrawCharInSpace(
     const Material *material,
     float *xyz,
     const float *dx,
     const float *dy,
     const Glyph *glyph,
-    unsigned int color);
+    uint32_t color);
 void __cdecl RB_DrawText2DCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_DrawText3DCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_ProjectionSetCmd(GfxRenderCommandExecState *execState);
@@ -603,7 +603,7 @@ void __cdecl RB_ExecuteRenderCommandsLoop(const void *cmds);
 void __cdecl RB_Draw3D();
 void __cdecl RB_CallExecuteRenderCommands();
 // positive sp value has been detected, the output may be wrong!
-void __cdecl  RB_RenderThread(unsigned int threadContext);
+void __cdecl  RB_RenderThread(uint32_t threadContext);
 void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data);
 void __cdecl RB_InitBackendGlobalStructs();
 void __cdecl RB_SetBspImages();

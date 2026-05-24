@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define MAX_MEM_TRACK 1024
 #define MAX_HUNK_TRACK 0x80000
@@ -20,8 +21,8 @@ struct mem_track_t // sizeof=0x14
     const char* filename;
     int size;                           // ...
     int pos;                            // ...
-    unsigned __int8 type;               // ...
-    unsigned __int8 usageType;          // ...
+    uint8_t type;               // ...
+    uint8_t usageType;          // ...
     // padding byte
     // padding byte
 };
@@ -57,7 +58,7 @@ void __cdecl track_shutdown(int project);
 void __cdecl track_getbasicinfo(meminfo_t* info);
 void __cdecl track_addbasicmeminfo(meminfo_t* sum, meminfo_t* in);
 void __cdecl track_PrintInfo();
-int __cdecl mem_track_compare(unsigned int* elem1, unsigned int* elem2);
+int __cdecl mem_track_compare(uint32_t* elem1, uint32_t* elem2);
 void __cdecl track_PrintAllInfo();
 void __cdecl UI_track_init();
 double __cdecl ConvertToMB(int bytes);

@@ -45,7 +45,7 @@ GfxCmdArray g_frontEndCmds[2];
 GfxDebugFrameGlob s_debugFrameGlob;
 GfxCmdArray g_debugFrontEndCmds;
 
-static unsigned int s_renderCmdBufferSize;
+static uint32_t s_renderCmdBufferSize;
 static int s_renderCmdWarnSize;
 
 void __cdecl TRACK_r_rendercmds()
@@ -64,8 +64,8 @@ void __cdecl R_FreeGlobalVariable(void *var)
 
 void __cdecl R_ShutdownSceneBuffers()
 {
-    unsigned int localClientNum; // [esp+0h] [ebp-8h]
-    unsigned int viewIndex; // [esp+4h] [ebp-4h]
+    uint32_t localClientNum; // [esp+0h] [ebp-8h]
+    uint32_t viewIndex; // [esp+4h] [ebp-4h]
 
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
         R_FreeGlobalVariable(scene.dpvs.entVisData[viewIndex]);
@@ -80,7 +80,7 @@ void __cdecl R_ShutdownSceneBuffers()
 
 void __cdecl R_ShutdownRenderCommands()
 {
-    unsigned int dataIndex; // [esp+4h] [ebp-4h]
+    uint32_t dataIndex; // [esp+4h] [ebp-4h]
 
     R_ShutdownModelLightingGlobals();
     for (dataIndex = 0; dataIndex < 2; ++dataIndex)
@@ -95,10 +95,10 @@ void __cdecl R_ShutdownRenderCommands()
 void __cdecl R_ShutdownRenderBuffers()
 {
     GfxBackEndData *data; // [esp+0h] [ebp-10h]
-    unsigned int partitionIndex; // [esp+4h] [ebp-Ch]
+    uint32_t partitionIndex; // [esp+4h] [ebp-Ch]
     int dataIndex; // [esp+8h] [ebp-8h]
-    unsigned int viewIndex; // [esp+Ch] [ebp-4h]
-    unsigned int viewIndexa; // [esp+Ch] [ebp-4h]
+    uint32_t viewIndex; // [esp+Ch] [ebp-4h]
+    uint32_t viewIndexa; // [esp+Ch] [ebp-4h]
 
     for (dataIndex = 0; dataIndex < 2; ++dataIndex)
     {
@@ -143,17 +143,17 @@ void __cdecl R_ShutdownDynamicMesh(GfxMeshData *mesh)
 
 void __cdecl R_InitRenderCommands()
 {
-    unsigned int dataIndex; // [esp+4h] [ebp-4h]
+    uint32_t dataIndex; // [esp+4h] [ebp-4h]
 
     s_renderCmdBufferSize = 98304 * gfxCfg.maxClientViews;
     s_renderCmdWarnSize = (signed int)(294912 * gfxCfg.maxClientViews) / 4;
     R_InitModelLightingGlobals();
     for (dataIndex = 0; dataIndex < 2; ++dataIndex)
     {
-        g_frontEndCmds[dataIndex].cmds = (unsigned __int8 *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds");
+        g_frontEndCmds[dataIndex].cmds = (uint8_t *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds");
         R_InitDebugEntry(&s_backEndData[dataIndex].debugGlobals);
     }
-    g_debugFrontEndCmds.cmds = (unsigned __int8 *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds (debug)");
+    g_debugFrontEndCmds.cmds = (uint8_t *)R_AllocGlobalVariable(s_renderCmdBufferSize, "rendercmds (debug)");
     s_debugFrameGlob.frontEndDataOut.commands = &g_debugFrontEndCmds;
     R_InitSceneBuffers();
     if (frontEndDataOut)
@@ -171,10 +171,10 @@ void __cdecl R_InitRenderBuffers()
 {
     float w; // [esp+8h] [ebp-3Ch]
     float h; // [esp+Ch] [ebp-38h]
-    unsigned int partitionIndex; // [esp+38h] [ebp-Ch]
-    unsigned int dataIndex; // [esp+3Ch] [ebp-8h]
-    unsigned int viewIndex; // [esp+40h] [ebp-4h]
-    unsigned int viewIndexa; // [esp+40h] [ebp-4h]
+    uint32_t partitionIndex; // [esp+38h] [ebp-Ch]
+    uint32_t dataIndex; // [esp+3Ch] [ebp-8h]
+    uint32_t viewIndex; // [esp+40h] [ebp-4h]
+    uint32_t viewIndexa; // [esp+40h] [ebp-4h]
 
     for (dataIndex = 0; dataIndex < 2; ++dataIndex)
     {
@@ -199,11 +199,11 @@ void __cdecl R_InitRenderBuffers()
 
 void __cdecl R_InitDynamicMesh(
     GfxMeshData *mesh,
-    unsigned int indexCount,
-    unsigned int vertCount,
-    unsigned int vertSize)
+    uint32_t indexCount,
+    uint32_t vertCount,
+    uint32_t vertSize)
 {
-    mesh->indices = (unsigned __int16 *)R_AllocGlobalVariable(2 * indexCount, "R_InitDynamicMesh");
+    mesh->indices = (uint16_t *)R_AllocGlobalVariable(2 * indexCount, "R_InitDynamicMesh");
     mesh->totalIndexCount = indexCount;
     mesh->indexCount = 0;
     mesh->vertSize = vertSize;
@@ -212,7 +212,7 @@ void __cdecl R_InitDynamicMesh(
 
 void __cdecl R_InitRenderThread()
 {
-    if (!Sys_SpawnRenderThread((void(__cdecl *)(unsigned int))RB_RenderThread))
+    if (!Sys_SpawnRenderThread((void(__cdecl *)(uint32_t))RB_RenderThread))
         Com_Error(ERR_FATAL, "Failed to create render thread");
 }
 
@@ -264,7 +264,7 @@ void __cdecl R_ReleaseThreadOwnership()
     }
 }
 
-void __cdecl R_IssueRenderCommands(unsigned int type)
+void __cdecl R_IssueRenderCommands(uint32_t type)
 {
     bool v1; // [esp+1Eh] [ebp-16h]
 
@@ -406,7 +406,7 @@ GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes)
     GfxCmdHeader *header; // [esp+8h] [ebp-8h]
     int sizeLimit; // [esp+Ch] [ebp-4h]
 
-    if ((unsigned int)renderCmd >= RC_COUNT)
+    if ((uint32_t)renderCmd >= RC_COUNT)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
             881,
@@ -416,7 +416,7 @@ GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes)
             renderCmd);
     iassert( ((bytes & 3) == 0) );
     iassert( (bytes < s_renderCmdBufferSize) );
-    if (bytes != (unsigned __int16)bytes)
+    if (bytes != (uint16_t)bytes)
         MyAssertHandler(
             ".\\r_rendercmds.cpp",
             884,
@@ -465,8 +465,8 @@ void R_FreeTempSkinBuffer()
     }
 }
 
-unsigned int s_smpFrame;
-unsigned int g_frameIndex;
+uint32_t s_smpFrame;
+uint32_t g_frameIndex;
 DebugGlobals *R_ToggleSmpFrame()
 {
     DebugGlobals *result; // eax
@@ -729,7 +729,7 @@ void __cdecl R_AddCmdDrawStretchPicFlipST(
         cmd->t0 = t0;
         cmd->s1 = s1;
         cmd->t1 = t1;
-        R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
+        R_ConvertColorToBytes(color, (uint32_t *)&cmd->color);
     }
 }
 
@@ -765,7 +765,7 @@ void __cdecl R_AddCmdDrawStretchPicRotateXY(
         cmd->t0 = t0;
         cmd->s1 = s1;
         cmd->t1 = t1;
-        R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
+        R_ConvertColorToBytes(color, (uint32_t *)&cmd->color);
         cmd->rotation = AngleNormalize360(angle);
     }
 }
@@ -804,7 +804,7 @@ void __cdecl R_AddCmdDrawStretchPicRotateST(
         cmd->radiusST = radiusST;
         cmd->scaleFinalS = scaleFinalS;
         cmd->scaleFinalT = scaleFinalT;
-        R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
+        R_ConvertColorToBytes(color, (uint32_t *)&cmd->color);
         cmd->rotation = AngleNormalize360(angle);
     }
 }
@@ -840,7 +840,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     int cursorPos,
     char cursor)
 {
-    unsigned int v13; // [esp+0h] [ebp-4Ch]
+    uint32_t v13; // [esp+0h] [ebp-4Ch]
     GfxCmdDrawText2D *cmd; // [esp+48h] [ebp-4h]
 
     iassert( maxChars > 0 );
@@ -857,7 +857,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     cmd->font = font;
     cmd->xScale = xScale;
     cmd->yScale = yScale;
-    R_ConvertColorToBytes(color, (unsigned int *)&cmd->color);
+    R_ConvertColorToBytes(color, (uint32_t *)&cmd->color);
     cmd->maxChars = maxChars;
     cmd->renderFlags = 0;
     switch (style)
@@ -880,7 +880,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawTextCmd(
     }
     {
         PROF_SCOPED("R_memcpy");
-        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)text, v13);
+        memcpy((uint8_t *)cmd->text, (uint8_t *)text, v13);
     }
     cmd->text[v13] = 0;
     return cmd;
@@ -940,7 +940,7 @@ char __cdecl SetDrawText2DGlowParms(GfxCmdDrawText2D *cmd, const float *color, c
     scaledGlowColor[1] = glowColor[1] * 0.1000000014901161;
     scaledGlowColor[2] = glowColor[2] * 0.1000000014901161;
     scaledGlowColor[3] = glowColor[3] * color[3];
-    R_ConvertColorToBytes(scaledGlowColor, (unsigned __int8 *)&cmd->glowForceColor);
+    R_ConvertColorToBytes(scaledGlowColor, (uint8_t *)&cmd->glowForceColor);
     return 1;
 }
 
@@ -1067,7 +1067,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawConsoleTextCmd(
     cmd->font = font;
     cmd->xScale = xScale;
     cmd->yScale = yScale;
-    R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+    R_ConvertColorToBytes(color, (uint8_t *)&cmd->color);
     cmd->maxChars = 0x7FFFFFFF;
     cmd->renderFlags = 0;
     switch (style)
@@ -1088,7 +1088,7 @@ GfxCmdDrawText2D *__cdecl AddBaseDrawConsoleTextCmd(
 
 void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int charCount, GfxCmdDrawText2D *cmd)
 {
-    unsigned int poolRemaining; // [esp+30h] [ebp-4h]
+    uint32_t poolRemaining; // [esp+30h] [ebp-4h]
 
     iassert(cmd);
     
@@ -1097,12 +1097,12 @@ void __cdecl CopyPoolTextToCmd(char *textPool, int poolSize, int firstChar, int 
 
     if (charCount > poolSize - firstChar)
     {
-        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], poolRemaining);
-        memcpy((unsigned __int8 *)&cmd->text[poolRemaining], (unsigned __int8 *)textPool, charCount - poolRemaining);
+        memcpy((uint8_t *)cmd->text, (uint8_t *)&textPool[firstChar], poolRemaining);
+        memcpy((uint8_t *)&cmd->text[poolRemaining], (uint8_t *)textPool, charCount - poolRemaining);
     }
     else
     {
-        memcpy((unsigned __int8 *)cmd->text, (unsigned __int8 *)&textPool[firstChar], charCount);
+        memcpy((uint8_t *)cmd->text, (uint8_t *)&textPool[firstChar], charCount);
     }
 
     cmd->text[charCount] = 0;
@@ -1205,7 +1205,7 @@ void __cdecl R_AddCmdDrawQuadPic(const float (*verts)[2], const float *color, Ma
             cmd->verts[cornerIndex][0] = (*verts)[2 * cornerIndex];
             cmd->verts[cornerIndex][1] = (*verts)[2 * cornerIndex + 1];
         }
-        R_ConvertColorToBytes(color, (unsigned __int8 *)&cmd->color);
+        R_ConvertColorToBytes(color, (uint8_t *)&cmd->color);
     }
 }
 
@@ -1469,7 +1469,7 @@ void __cdecl R_EndFrame()
     }
 }
 
-void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, unsigned __int8 stencil)
+void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float depth, uint8_t stencil)
 {
     GfxCmdClearScreen *cmd; // [esp+Ch] [ebp-4h]
 
@@ -1496,7 +1496,7 @@ void __cdecl R_AddCmdClearScreen(int whichToClear, const float *color, float dep
     cmd->color[3] = color[3];
 }
 
-void __cdecl R_AddCmdSaveScreen(unsigned int screenTimerId)
+void __cdecl R_AddCmdSaveScreen(uint32_t screenTimerId)
 {
     GfxCmdSaveScreen *cmd; // [esp+0h] [ebp-4h]
 
@@ -1519,7 +1519,7 @@ void __cdecl R_AddCmdSaveScreenSection(
     float viewY,
     float viewWidth,
     float viewHeight,
-    unsigned int screenTimerId)
+    uint32_t screenTimerId)
 {
     GfxCmdSaveScreenSection *cmd; // [esp+0h] [ebp-4h]
 
@@ -1547,7 +1547,7 @@ void __cdecl R_AddCmdBlendSavedScreenShockBlurred(
     float viewY,
     float viewWidth,
     float viewHeight,
-    unsigned int screenTimerId)
+    uint32_t screenTimerId)
 {
     GfxCmdBlendSavedScreenBlurred *cmd; // [esp+0h] [ebp-4h]
 
@@ -1728,14 +1728,14 @@ bool __cdecl R_IsInRemoteScreenUpdate()
 void __cdecl R_InitTempSkinBuf()
 {
     GfxBackEndData *data; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-4h]
 
     for (i = 0; i < 2; ++i)
     {
         data = &s_backEndData[i];
         iassert( !data->tempSkinPos );
         iassert( !data->tempSkinBuf );
-        data->tempSkinBuf = (unsigned __int8 *)Z_VirtualReserve(0x480000);
+        data->tempSkinBuf = (uint8_t *)Z_VirtualReserve(0x480000);
     }
 }
 

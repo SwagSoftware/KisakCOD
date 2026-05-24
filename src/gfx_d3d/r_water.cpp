@@ -9,7 +9,7 @@
 WaterGlob waterGlob;
 WaterGlobStatic waterGlobStatic;
 
-//unsigned int const *const g_selectByteFromInt__uint4 820e3810     gfx_d3d : r_water.obj
+//uint32_t const *const g_selectByteFromInt__uint4 820e3810     gfx_d3d : r_water.obj
 long volatile g_waterLock;//          85b3ac80     gfx_d3d : r_water.obj
 //struct __vector4 const g_selectByteFromInt 85b45900     gfx_d3d : r_water.obj
 
@@ -68,7 +68,7 @@ void __cdecl WaterFrequenciesAtTime(complex_s *H, const water_t *water, float t)
     H0 = water->H0;
     while (vecKIndex < vecKCount)
     {
-        if (*(unsigned int *)wTerm)
+        if (*(uint32_t *)wTerm)
         {
             v3 = (__int64)(*wTerm * ta);
             sinReal = waterGlobStatic.sinTable[((v3 & 0x3FF) + 255) & 0x3FF];
@@ -99,7 +99,7 @@ void __cdecl WaterAmplitudesFromFrequencies(complex_s *H, const water_t *water)
 {
     int fftIndex; // [esp+0h] [ebp-Ch]
     int fftIndexa; // [esp+0h] [ebp-Ch]
-    unsigned int log2_m; // [esp+4h] [ebp-8h]
+    uint32_t log2_m; // [esp+4h] [ebp-8h]
     int waterIndex; // [esp+8h] [ebp-4h]
     int waterIndexa; // [esp+8h] [ebp-4h]
 
@@ -126,15 +126,15 @@ void __cdecl WaterAmplitudesFromFrequencies(complex_s *H, const water_t *water)
     TransposeArray(H, water->M);
 }
 
-void __cdecl TransposeArray(complex_s *H, unsigned int M)
+void __cdecl TransposeArray(complex_s *H, uint32_t M)
 {
-    unsigned int v2; // edx
+    uint32_t v2; // edx
     float real; // ecx
     float imag; // edx
-    unsigned int v5; // eax
-    unsigned int j; // [esp+4h] [ebp-10h]
+    uint32_t v5; // eax
+    uint32_t j; // [esp+4h] [ebp-10h]
     complex_s temp; // [esp+8h] [ebp-Ch]
-    unsigned int i; // [esp+10h] [ebp-4h]
+    uint32_t i; // [esp+10h] [ebp-4h]
 
     for (i = 0; i < M; ++i)
     {
@@ -174,11 +174,11 @@ void __cdecl WaterPixelsFromAmplitudes(GfxColor *pixels, complex_s *H, const wat
     float v20; // [esp+7Ch] [ebp-2Ch]
     float v21; // [esp+80h] [ebp-28h]
     float v22; // [esp+84h] [ebp-24h]
-    unsigned int ixy; // [esp+98h] [ebp-10h]
-    unsigned int ixya; // [esp+98h] [ebp-10h]
+    uint32_t ixy; // [esp+98h] [ebp-10h]
+    uint32_t ixya; // [esp+98h] [ebp-10h]
     float dz; // [esp+9Ch] [ebp-Ch]
     GfxColor color; // [esp+A0h] [ebp-8h]
-    unsigned int count; // [esp+A4h] [ebp-4h]
+    uint32_t count; // [esp+A4h] [ebp-4h]
 
     iassert( pixels );
     iassert( H );
@@ -234,10 +234,10 @@ void __cdecl WaterPixelsFromAmplitudes(GfxColor *pixels, complex_s *H, const wat
     }
 }
 
-void __cdecl GenerateMipMaps(_D3DFORMAT format, unsigned __int8 *pixels, water_t *water)
+void __cdecl GenerateMipMaps(_D3DFORMAT format, uint8_t *pixels, water_t *water)
 {
     int srcWidth;
-    unsigned int mipIndex;
+    uint32_t mipIndex;
 
     iassert(pixels);
     iassert(water);

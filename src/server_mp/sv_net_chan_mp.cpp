@@ -7,7 +7,7 @@
 #include <cstring>
 #include <qcommon/net_chan_mp.h>
 
-void __cdecl SV_Netchan_Decode(client_t *client, unsigned __int8 *data, int size)
+void __cdecl SV_Netchan_Decode(client_t *client, uint8_t *data, int size)
 {
     int i, index;
     byte key, * string;
@@ -34,7 +34,7 @@ void __cdecl SV_Netchan_Decode(client_t *client, unsigned __int8 *data, int size
     }
 }
 
-void __cdecl SV_Netchan_Encode(client_t *client, unsigned __int8 *data, int size)
+void __cdecl SV_Netchan_Encode(client_t *client, uint8_t *data, int size)
 {
     int i, index;
     byte key, * string;
@@ -79,7 +79,7 @@ bool __cdecl SV_Netchan_TransmitNextFragment(client_t *client, netchan_t *chan)
     return res;
 }
 
-bool __cdecl SV_Netchan_Transmit(client_t *client, unsigned __int8 *data, int length)
+bool __cdecl SV_Netchan_Transmit(client_t *client, uint8_t *data, int length)
 {
     bool res; // [esp+3h] [ebp-1h]
 

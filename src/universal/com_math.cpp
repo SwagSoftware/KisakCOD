@@ -12,7 +12,7 @@
 //Line 51773:  0006 : 0000bc58       float (*)[3] bytedirs        827bbc58     com_math.obj
 //Line 53450 : 0006 : 0291d360       int marker_com_math      850cd360     com_math.obj
 
-static unsigned int holdrand;
+static uint32_t holdrand;
 
 float bytedirs[162][3] =
 {
@@ -235,7 +235,7 @@ void __cdecl GaussianRandom(float *f0, float *f1)
     *f1 = y * v2;
 }
 
-unsigned int __cdecl RandWithSeed(int *seed)
+uint32_t __cdecl RandWithSeed(int *seed)
 {
     *seed = 1103515245 * *seed + 12345;
     return *seed / 0x10000 % 0x8000u;
@@ -430,11 +430,11 @@ signed char ClampChar(int i) {
     return i;
 }
 
-unsigned __int8 __cdecl DirToByte(const float *dir)
+uint8_t __cdecl DirToByte(const float *dir)
 {
     float d; // [esp+0h] [ebp-Ch]
-    unsigned __int8 best; // [esp+6h] [ebp-6h]
-    unsigned __int8 i; // [esp+7h] [ebp-5h]
+    uint8_t best; // [esp+6h] [ebp-6h]
+    uint8_t i; // [esp+7h] [ebp-5h]
     float bestd; // [esp+8h] [ebp-4h]
 
     if (!dir)
@@ -453,7 +453,7 @@ unsigned __int8 __cdecl DirToByte(const float *dir)
     return best;
 }
 
-void __cdecl ByteToDir(unsigned int b, float *dir)
+void __cdecl ByteToDir(uint32_t b, float *dir)
 {
     float *v2; // ecx
 
@@ -2168,7 +2168,7 @@ void __cdecl ProjectPointOnPlane(const float *const f1, const float *const norma
 void __cdecl SetPlaneSignbits(cplane_s *out)
 {
     int j; // [esp+0h] [ebp-8h]
-    unsigned __int8 bits; // [esp+7h] [ebp-1h]
+    uint8_t bits; // [esp+7h] [ebp-1h]
 
     bits = 0;
     for (j = 0; j < 3; ++j)
@@ -3067,7 +3067,7 @@ void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float
     iassert(mtx);
     iassert(zNear > 0);
 
-    memset((unsigned __int8 *)mtx, 0, sizeof(mat4x4));
+    memset((uint8_t *)mtx, 0, sizeof(mat4x4));
 
     (*mtx)[0] = MAX_11BIT_FLT / tanHalfFovX;
     (*mtx)[5] = MAX_11BIT_FLT / tanHalfFovY;
@@ -3305,7 +3305,7 @@ void __cdecl FinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float t
     iassert(zNear > 0.0f);
     iassert(zFar > zNear);
 
-    memset((unsigned __int8 *)mtx, 0, 0x40u);
+    memset((uint8_t *)mtx, 0, 0x40u);
 
     (*mtx)[0] = 1.0 / tanHalfFovX;
     (*mtx)[5] = 1.0 / tanHalfFovY;

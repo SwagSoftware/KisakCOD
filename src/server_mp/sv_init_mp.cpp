@@ -46,7 +46,7 @@ const dvar_t *sv_clientArchive;
 
 void __cdecl SV_SetConfigstring(int index, const char *val)
 {
-    unsigned __int16 v2; // [esp+20h] [ebp-444h]
+    uint16_t v2; // [esp+20h] [ebp-444h]
     client_t *client; // [esp+38h] [ebp-42Ch]
     int maxChunk; // [esp+3Ch] [ebp-428h]
     int remaining; // [esp+40h] [ebp-424h]
@@ -58,7 +58,7 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
     int i; // [esp+45Ch] [ebp-8h]
     char cmd; // [esp+463h] [ebp-1h]
 
-    if ((unsigned int)index >= 0x98A)
+    if ((uint32_t)index >= 0x98A)
         Com_Error(ERR_DROP, "SV_SetConfigstring: bad index %i", index);
 
     if (sv.configstrings[index])
@@ -121,7 +121,7 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
     }
 }
 
-void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize)
+void __cdecl SV_GetConfigstring(uint32_t index, char *buffer, int bufferSize)
 {
     if (bufferSize < 1)
         Com_Error(ERR_DROP, "SV_GetConfigstring: bufferSize == %i", bufferSize);
@@ -132,7 +132,7 @@ void __cdecl SV_GetConfigstring(unsigned int index, char *buffer, int bufferSize
     I_strncpyz(buffer, SL_ConvertToString(sv.configstrings[index]), bufferSize);
 }
 
-unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
+uint32_t __cdecl SV_GetConfigstringConst(uint32_t index)
 {
     iassert((unsigned)index < MAX_CONFIGSTRINGS);
     iassert(sv.configstrings[index]);
@@ -142,8 +142,8 @@ unsigned int __cdecl SV_GetConfigstringConst(unsigned int index)
 
 void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
 {
-    unsigned int string; // [esp+0h] [ebp-14h]
-    unsigned int name; // [esp+4h] [ebp-10h]
+    uint32_t string; // [esp+0h] [ebp-14h]
+    uint32_t name; // [esp+4h] [ebp-10h]
     signed int i; // [esp+10h] [ebp-4h]
     int ia; // [esp+10h] [ebp-4h]
 
@@ -282,7 +282,7 @@ void __cdecl SV_ClearServer()
     }
     if (sv.emptyConfigString)
         SL_RemoveRefToString(sv.emptyConfigString);
-    Com_Memset((unsigned int *)&sv, 0, 392288);
+    Com_Memset((uint32_t *)&sv, 0, 392288);
     com_inServerFrame = 0;
 }
 
@@ -558,7 +558,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     if (!IsFastFileLoad())
         Com_UnloadBsp();
     CM_LinkWorld();
-    sv_serverId_value = (unsigned __int8)(sv_serverId_value + 16);
+    sv_serverId_value = (uint8_t)(sv_serverId_value + 16);
     if ((sv_serverId_value & 0xF0) == 0)
         sv_serverId_value += 16;
     Dvar_SetInt((dvar_s *)sv_serverid, sv_serverId_value);

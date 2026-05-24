@@ -27,7 +27,7 @@ const dvar_t *r_sunflare_shader;
 const dvar_t *r_sunsprite_size;
 const dvar_t *r_sunglare_max_lighten;
 
-unsigned int __cdecl R_GetSunDvarCount()
+uint32_t __cdecl R_GetSunDvarCount()
 {
     return 21;
 }
@@ -245,7 +245,7 @@ void __cdecl R_SetSunFromDvars(sunflare_t *sun)
 
 void __cdecl R_LoadSunThroughDvars(const char *sunName, sunflare_t *sun)
 {
-    unsigned int SunDvarCount; // eax
+    uint32_t SunDvarCount; // eax
     char *v3; // [esp-8h] [ebp-14h]
     char *fullpath; // [esp+0h] [ebp-Ch]
     char *sunFile; // [esp+8h] [ebp-4h] BYREF
@@ -329,7 +329,7 @@ void __cdecl R_SaveSunFromDvars(const char *sunName)
 void __cdecl R_FlushSun()
 {
     SunFlareDynamic *sunFlare; // [esp+0h] [ebp-8h]
-    unsigned int viewIndex; // [esp+4h] [ebp-4h]
+    uint32_t viewIndex; // [esp+4h] [ebp-4h]
 
     for (viewIndex = 0; viewIndex < 4; ++viewIndex)
     {

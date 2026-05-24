@@ -5,11 +5,11 @@
 
 void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsDynamicCellCmd *data)
 {
-    unsigned int planeCount; // [esp+0h] [ebp-28h]
+    uint32_t planeCount; // [esp+0h] [ebp-28h]
     const DpvsPlane *planes; // [esp+4h] [ebp-24h]
-    unsigned int dynEntClientWordCount; // [esp+8h] [ebp-20h]
-    unsigned __int8 *dynEntVisData; // [esp+10h] [ebp-18h]
-    unsigned int *dynEntCellBits; // [esp+14h] [ebp-14h]
+    uint32_t dynEntClientWordCount; // [esp+8h] [ebp-20h]
+    uint8_t *dynEntVisData; // [esp+10h] [ebp-18h]
+    uint32_t *dynEntCellBits; // [esp+14h] [ebp-14h]
     DynEntityPose *dynModelList; // [esp+18h] [ebp-10h]
     GfxWorldDpvsDynamic *worldDpvsDyn; // [esp+24h] [ebp-4h]
 
@@ -29,22 +29,22 @@ void __cdecl R_AddCellDynModelSurfacesInFrustumCmd(const DpvsDynamicCellCmd *dat
 }
 
 void __cdecl R_CullDynModelInCell(
-    const unsigned int *dynEntCellBits,
-    unsigned int dynEntClientWordCount,
+    const uint32_t *dynEntCellBits,
+    uint32_t dynEntClientWordCount,
     DynEntityPose *dynModelList,
     const DpvsPlane *planes,
     int planeCount,
-    unsigned __int8 *dynEntVisData)
+    uint8_t *dynEntVisData)
 {
     DWORD v7; // eax
     int v8; // [esp+4h] [ebp-28h]
     float radius; // [esp+8h] [ebp-24h]
     const DpvsPlane *a; // [esp+Ch] [ebp-20h]
     int v11; // [esp+10h] [ebp-1Ch]
-    unsigned int dynEntIndex; // [esp+1Ch] [ebp-10h]
-    unsigned int bits; // [esp+20h] [ebp-Ch]
-    unsigned int indexLow; // [esp+24h] [ebp-8h]
-    unsigned int wordIndex; // [esp+28h] [ebp-4h]
+    uint32_t dynEntIndex; // [esp+1Ch] [ebp-10h]
+    uint32_t bits; // [esp+20h] [ebp-Ch]
+    uint32_t indexLow; // [esp+24h] [ebp-8h]
+    uint32_t wordIndex; // [esp+28h] [ebp-4h]
 
     for (wordIndex = 0; wordIndex < dynEntClientWordCount; ++wordIndex)
     {
@@ -57,7 +57,7 @@ void __cdecl R_CullDynModelInCell(
             if ((v7 ^ 0x1Fu) >= 0x20)
                 break;
             dynEntIndex = indexLow + 32 * wordIndex;
-            unsigned int bit = (0x80000000 >> indexLow);
+            uint32_t bit = (0x80000000 >> indexLow);
             iassert( bits & bit );
             bits &= ~bit;
             if (!dynEntVisData[dynEntIndex])

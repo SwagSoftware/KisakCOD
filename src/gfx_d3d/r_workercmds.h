@@ -42,11 +42,11 @@ struct WorkerCmds // sizeof=0x80
     volatile int syncedEndPos;
     volatile int inSize;                // ...
     volatile int outSize;               // ...
-    unsigned int dataSize;              // ...
-    unsigned __int8 *buf;               // ...
+    uint32_t dataSize;              // ...
+    uint8_t *buf;               // ...
     int bufSize;                        // ...
     int bufCount;
-    unsigned int pad[23];
+    uint32_t pad[23];
 };
 
 int __cdecl R_FXNonDependentOrSpotLightPending(void* args);
@@ -64,7 +64,7 @@ void R_InitWorkerThreads();
 int R_InitWorkerCmds();
 int R_InitWorkerCmdsPos();
 void __cdecl  R_WorkerThread();
-void __cdecl R_AddWorkerCmd(WorkerCmdType type, unsigned __int8 *data);
+void __cdecl R_AddWorkerCmd(WorkerCmdType type, uint8_t *data);
 void __cdecl R_UpdateActiveWorkerThreads();
 void __cdecl R_WaitFrontendWorkerCmds();
 int __cdecl R_FinishedWorkerCmds();

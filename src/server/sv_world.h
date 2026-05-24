@@ -13,7 +13,7 @@ struct gentity_s;
 struct IgnoreEntParams;
 struct sightpointtrace_t;
 
-unsigned int __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
+uint32_t __cdecl SV_ClipHandleForEntity(const gentity_s *ent);
 void __cdecl SV_UnlinkEntity(gentity_s *gEnt);
 void __cdecl SV_LinkEntity(gentity_s *gEnt);
 void __cdecl SnapAngles(float *vAngles);
@@ -33,7 +33,7 @@ void __cdecl SV_Trace(
     const IgnoreEntParams *ignoreEntParams,
     int contentmask,
     int locational,
-    unsigned __int8 *priorityMap,
+    uint8_t *priorityMap,
     int staticmodels);
 int __cdecl SV_TracePassed(
     const float *start,
@@ -44,7 +44,7 @@ int __cdecl SV_TracePassed(
     int passEntityNum1,
     int contentmask,
     int locational,
-    unsigned __int8 *priorityMap,
+    uint8_t *priorityMap,
     int staticmodels);
 void __cdecl SV_SightTrace(
     int *hitNum,

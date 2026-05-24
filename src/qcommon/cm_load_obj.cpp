@@ -31,9 +31,9 @@ struct DiskLeaf_Version14 // sizeof=0x24
 
 struct DiskCollPartition // sizeof=0xC
 {
-    unsigned __int16 checkStamp;
-    unsigned __int8 triCount;
-    unsigned __int8 borderCount;
+    uint16_t checkStamp;
+    uint8_t triCount;
+    uint8_t borderCount;
     int firstTriIndex;
     int firstBorderIndex;
 };
@@ -48,8 +48,8 @@ struct DiskCollAabbTree // sizeof=0x20
 {
     float origin[3];
     float halfSize[3];
-    unsigned __int16 materialIndex;
-    unsigned __int16 childCount;
+    uint16_t materialIndex;
+    uint16_t childCount;
     DiskCollAabbTree_u u;
 };
 
@@ -138,16 +138,16 @@ void __cdecl CM_InitStaticModel(cStaticModel_s *staticModel, float *origin, floa
     }
 }
 
-unsigned __int8 *__cdecl CM_Hunk_AllocXModel(unsigned int size)
+uint8_t *__cdecl CM_Hunk_AllocXModel(uint32_t size)
 {
     return Hunk_Alloc(size, "CM_Hunk_AllocXModel", 21);
 }
-unsigned __int8 *__cdecl CM_Hunk_AllocXModelColl(unsigned int size)
+uint8_t *__cdecl CM_Hunk_AllocXModelColl(uint32_t size)
 {
     return Hunk_Alloc(size, "CM_Hunk_AllocXModelColl", 27);
 }
 
-unsigned __int8 *__cdecl CM_Hunk_Alloc(unsigned int size, const char *name, int type)
+uint8_t *__cdecl CM_Hunk_Alloc(uint32_t size, const char *name, int type)
 {
     return Hunk_Alloc(size, name, type);
 }
@@ -207,7 +207,7 @@ void __cdecl CM_LoadStaticModels()
     char v3; // [esp+17h] [ebp-105h]
     char *v4; // [esp+1Ch] [ebp-100h]
     char *v5; // [esp+20h] [ebp-FCh]
-    unsigned int numStaticModels; // [esp+24h] [ebp-F8h]
+    uint32_t numStaticModels; // [esp+24h] [ebp-F8h]
     float origin[3]; // [esp+28h] [ebp-F4h] BYREF
     char modelName[64]; // [esp+34h] [ebp-E8h] BYREF
     float angles[3]; // [esp+74h] [ebp-A8h] BYREF
@@ -345,7 +345,7 @@ void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs)
     char v2; // [esp+3h] [ebp-21h]
     char *v3; // [esp+8h] [ebp-1Ch]
     const char *v4; // [esp+Ch] [ebp-18h]
-    unsigned int version; // [esp+20h] [ebp-4h]
+    uint32_t version; // [esp+20h] [ebp-4h]
 
     Com_Memset(&cm, 0, sizeof(clipMap_t));
     cm.name = (const char *)CM_Hunk_Alloc(strlen(name) + 1, "CM_LoadMapFromBsp", 25);
@@ -417,11 +417,11 @@ void __cdecl CMod_LoadPlanes()
     char v1; // [esp+8h] [ebp-24h]
     char v2; // [esp+Ch] [ebp-20h]
     cplane_s *out; // [esp+10h] [ebp-1Ch]
-    unsigned int planeIter; // [esp+14h] [ebp-18h]
-    unsigned __int8 bits; // [esp+1Fh] [ebp-Dh]
+    uint32_t planeIter; // [esp+14h] [ebp-18h]
+    uint8_t bits; // [esp+1Fh] [ebp-Dh]
     char *in; // [esp+20h] [ebp-Ch] // KISAKTODO: assign struct type
-    unsigned int axisIter; // [esp+24h] [ebp-8h]
-    unsigned int count; // [esp+28h] [ebp-4h] BYREF
+    uint32_t axisIter; // [esp+24h] [ebp-8h]
+    uint32_t count; // [esp+28h] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_PLANES, 0x10u, &count);
     if (!count)
@@ -478,8 +478,8 @@ bool __cdecl CMod_HasSpawnString(const SpawnVar *userData, const char *key)
 void CMod_LoadMaterials()
 {
     dmaterial_t *in; // [esp+4h] [ebp-Ch]
-    unsigned int matIndex; // [esp+8h] [ebp-8h]
-    unsigned int count; // [esp+Ch] [ebp-4h] BYREF
+    uint32_t matIndex; // [esp+8h] [ebp-8h]
+    uint32_t count; // [esp+Ch] [ebp-4h] BYREF
 
     in = (dmaterial_t *)Com_GetBspLump(LUMP_MATERIALS, 0x48u, &count);
     if (!count)
@@ -497,9 +497,9 @@ void CMod_LoadNodes()
     int j; // [esp+0h] [ebp-1Ch]
     cNode_t *out; // [esp+4h] [ebp-18h]
     char *in; // [esp+Ch] [ebp-10h] // KISAKTODO: assign struct type (idk what it is)
-    unsigned int nodeIter; // [esp+10h] [ebp-Ch]
+    uint32_t nodeIter; // [esp+10h] [ebp-Ch]
     int child; // [esp+14h] [ebp-8h]
-    unsigned int count; // [esp+18h] [ebp-4h] BYREF
+    uint32_t count; // [esp+18h] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_NODES, 0x24u, &count);
     if (!count)
@@ -526,10 +526,10 @@ void CMod_LoadNodes()
 void CMod_LoadLeafSurfaces()
 {
     char *in; // [esp+8h] [ebp-8h]
-    unsigned int count; // [esp+Ch] [ebp-4h] BYREF
+    uint32_t count; // [esp+Ch] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_LEAFSURFACES, 4u, &count);
-    cm.leafsurfaces = (unsigned int*)CM_Hunk_Alloc(4 * count, "CMod_LoadLeafSurfaces", 28);
+    cm.leafsurfaces = (uint32_t*)CM_Hunk_Alloc(4 * count, "CMod_LoadLeafSurfaces", 28);
     cm.numLeafSurfaces = count;
     Com_Memcpy(cm.leafsurfaces, in, 4 * count);
 }
@@ -537,7 +537,7 @@ void CMod_LoadLeafSurfaces()
 void CMod_LoadCollisionVerts()
 {
     char *in; // [esp+8h] [ebp-8h]
-    unsigned int count; // [esp+Ch] [ebp-4h] BYREF
+    uint32_t count; // [esp+Ch] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_COLLISIONVERTS, 0xCu, &count);
     cm.verts = (float(*)[3])CM_Hunk_Alloc(12 * count, "CMod_LoadCollisionVerts", 28);
@@ -548,7 +548,7 @@ void CMod_LoadCollisionVerts()
 void CMod_LoadCollisionTriangles()
 {
     char *in; // [esp+8h] [ebp-8h]
-    unsigned int count; // [esp+Ch] [ebp-4h] BYREF
+    uint32_t count; // [esp+Ch] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_COLLISIONTRIS, 2u, &count);
     cm.triIndices = (unsigned short*)CM_Hunk_Alloc(2 * count, "CMod_LoadCollisionTriangles", 28);
@@ -559,7 +559,7 @@ void CMod_LoadCollisionTriangles()
 void CMod_LoadCollisionEdgeWalkable()
 {
     char *in; // [esp+0h] [ebp-8h]
-    unsigned int count; // [esp+4h] [ebp-4h] BYREF
+    uint32_t count; // [esp+4h] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_COLLISIONEDGEWALKABLE, 1u, &count);
     cm.triEdgeIsWalkable = CM_Hunk_Alloc(count, "CMod_LoadCollisionEdgeWalkable", 28);
@@ -571,8 +571,8 @@ void CMod_LoadCollisionBorders()
     const DiskCollBorder *result; // eax
     CollisionBorder *out; // [esp+0h] [ebp-14h]
     const DiskCollBorder *in; // [esp+8h] [ebp-Ch]
-    unsigned int index; // [esp+Ch] [ebp-8h]
-    unsigned int count; // [esp+10h] [ebp-4h] BYREF
+    uint32_t index; // [esp+Ch] [ebp-8h]
+    uint32_t count; // [esp+10h] [ebp-4h] BYREF
 
     in = (const DiskCollBorder*)Com_GetBspLump(LUMP_COLLISIONBORDERS, 0x1Cu, &count);
     cm.borders = (CollisionBorder*)CM_Hunk_Alloc(28 * count, "CMod_LoadCollisionBorders", 28);
@@ -597,8 +597,8 @@ void CMod_LoadCollisionPartitions()
 {
     CollisionPartition *out; // [esp+0h] [ebp-14h]
     DiskCollPartition *in; // [esp+8h] [ebp-Ch]
-    unsigned int index; // [esp+Ch] [ebp-8h]
-    unsigned int count; // [esp+10h] [ebp-4h] BYREF
+    uint32_t index; // [esp+Ch] [ebp-8h]
+    uint32_t count; // [esp+10h] [ebp-4h] BYREF
 
     iassert(sizeof(CollisionPartition) == 12);
 
@@ -646,7 +646,7 @@ bool __cdecl MapEnts_CanPurgeEntity(
     void *userData,
     bool(__cdecl *HasKeyCallback)(void *, const char *))
 {
-    unsigned int classnameIndex; // [esp+0h] [ebp-4h]
+    uint32_t classnameIndex; // [esp+0h] [ebp-4h]
 
     for (classnameIndex = 0; classnameIndex < 7; ++classnameIndex)
     {
@@ -728,7 +728,7 @@ void CMod_LoadVisibility()
 {
     const char *v0; // eax
     char *buf; // [esp+0h] [ebp-8h]
-    unsigned int len; // [esp+4h] [ebp-4h] BYREF
+    uint32_t len; // [esp+4h] [ebp-4h] BYREF
 
     buf = Com_GetBspLump(LUMP_VISIBILITY, 1u, &len);
     if (len)
@@ -759,10 +759,10 @@ void CMod_LoadVisibility()
     }
 }
 
-unsigned __int16 *CM_InitBoxHull()
+uint16_t *CM_InitBoxHull()
 {
     cLeafBrushNode_s *v0; // eax
-    unsigned __int16 *result; // eax
+    uint16_t *result; // eax
 
     cm.box_brush = &cm.brushes[cm.numBrushes];
     cm.brushes[cm.numBrushes].numsides = 0;
@@ -791,7 +791,7 @@ unsigned __int16 *CM_InitBoxHull()
     return result;
 }
 
-void __cdecl CMod_LoadBrushRelated(unsigned int version, bool usePvs)
+void __cdecl CMod_LoadBrushRelated(uint32_t version, bool usePvs)
 {
     int leafbrushNodesCount; // [esp+0h] [ebp-10h]
     HunkUser *user; // [esp+8h] [ebp-8h]
@@ -823,9 +823,9 @@ void __cdecl CMod_LoadBrushRelated(unsigned int version, bool usePvs)
     Hunk_UserDestroy(user);
 }
 
-unsigned int CMod_LoadSubmodels()
+uint32_t CMod_LoadSubmodels()
 {
-    unsigned int result; // eax
+    uint32_t result; // eax
     float v1; // [esp+0h] [ebp-50h]
     float v2; // [esp+4h] [ebp-4Ch]
     float v3; // [esp+8h] [ebp-48h]
@@ -833,10 +833,10 @@ unsigned int CMod_LoadSubmodels()
     int j; // [esp+24h] [ebp-2Ch]
     cmodel_t *out; // [esp+28h] [ebp-28h]
     DiskBrushModel *in;
-    unsigned int bmodelIndex; // [esp+34h] [ebp-1Ch]
+    uint32_t bmodelIndex; // [esp+34h] [ebp-1Ch]
     int firstCollAabbIndex; // [esp+38h] [ebp-18h]
     float extent[3]; // [esp+3Ch] [ebp-14h] BYREF
-    unsigned int count; // [esp+48h] [ebp-8h] BYREF
+    uint32_t count; // [esp+48h] [ebp-8h] BYREF
     int collAabbCount; // [esp+4Ch] [ebp-4h]
 
     iassert(sizeof(DiskBrushModel) == 0x30);
@@ -892,9 +892,9 @@ void CMod_LoadSubmodelBrushNodes()
     int leafBrushIndex; // [esp+Ch] [ebp-18h]
     char *in; // [esp+10h] [ebp-14h]
     const DiskBrushModel *ina; // [esp+10h] [ebp-14h]
-    unsigned int bmodelIndex; // [esp+14h] [ebp-10h]
-    unsigned __int16 *indexes; // [esp+18h] [ebp-Ch]
-    unsigned int count; // [esp+1Ch] [ebp-8h] BYREF
+    uint32_t bmodelIndex; // [esp+14h] [ebp-10h]
+    uint16_t *indexes; // [esp+18h] [ebp-Ch]
+    uint32_t count; // [esp+1Ch] [ebp-8h] BYREF
     int firstBrush; // [esp+20h] [ebp-4h]
 
     in = Com_GetBspLump(LUMP_MODELS, 0x30u, &count);
@@ -931,7 +931,7 @@ void __cdecl CM_Hunk_ClearTempMemoryHigh()
     Hunk_ClearTempMemoryHigh();
 }
 
-void __cdecl CMod_PartionLeafBrushes(unsigned __int16 *leafBrushes, int numLeafBrushes, cLeaf_t *leaf)
+void __cdecl CMod_PartionLeafBrushes(uint16_t *leafBrushes, int numLeafBrushes, cLeaf_t *leaf)
 {
     int j; // [esp+8h] [ebp-28h]
     int ja; // [esp+8h] [ebp-28h]
@@ -982,13 +982,13 @@ void __cdecl CMod_PartionLeafBrushes(unsigned __int16 *leafBrushes, int numLeafB
     }
 }
 
-unsigned int __cdecl CM_Hunk_AllocateTempMemoryHigh(int size, const char *name)
+uint32_t __cdecl CM_Hunk_AllocateTempMemoryHigh(int size, const char *name)
 {
     return Hunk_AllocateTempMemoryHigh(size, name);
 }
 
 cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
-    unsigned __int16 *leafBrushes,
+    uint16_t *leafBrushes,
     int numLeafBrushes,
     const float *mins,
     const float *maxs)
@@ -1004,7 +1004,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
     int nodeOffset; // [esp+20h] [ebp-58h]
     float testDist; // [esp+24h] [ebp-54h] BYREF
     int numLeafBrushesChild; // [esp+28h] [ebp-50h]
-    unsigned __int8 testAxis; // [esp+2Fh] [ebp-49h]
+    uint8_t testAxis; // [esp+2Fh] [ebp-49h]
     int k; // [esp+30h] [ebp-48h]
     float dist; // [esp+34h] [ebp-44h]
     float range; // [esp+38h] [ebp-40h]
@@ -1014,7 +1014,7 @@ cLeafBrushNode_s *__cdecl CMod_PartionLeafBrushes_r(
     int len; // [esp+50h] [ebp-28h]
     float childMins[3]; // [esp+54h] [ebp-24h] BYREF
     cLeafBrushNode_s *childNode; // [esp+60h] [ebp-18h]
-    unsigned __int16 *leafBrushesCopy; // [esp+64h] [ebp-14h]
+    uint16_t *leafBrushesCopy; // [esp+64h] [ebp-14h]
     cLeafBrushNode_s *returnNode; // [esp+68h] [ebp-10h]
     int axis; // [esp+6Ch] [ebp-Ch]
     int brushnum; // [esp+70h] [ebp-8h]
@@ -1166,7 +1166,7 @@ cLeafBrushNode_s *__cdecl CMod_AllocLeafBrushNode()
 }
 
 double __cdecl CMod_GetPartitionScore(
-    unsigned __int16 *leafBrushes,
+    uint16_t *leafBrushes,
     int numLeafBrushes,
     int axis,
     const float *mins,
@@ -1245,30 +1245,30 @@ int __cdecl CMod_GetLeafTerrainContents(cLeaf_t *leaf)
 
 void CMod_LoadBrushes()
 {
-    unsigned int edgesCount; // [esp+8h] [ebp-60h] BYREF
+    uint32_t edgesCount; // [esp+8h] [ebp-60h] BYREF
     cbrushside_t *outSides; // [esp+Ch] [ebp-5Ch]
     cbrush_t *outBrush; // [esp+10h] [ebp-58h]
     const dbrush_t *inBrush; // [esp+14h] [ebp-54h]
-    const unsigned __int8 *inEdgeCountsBase; // [esp+18h] [ebp-50h]
-    unsigned int allocSizeSides; // [esp+1Ch] [ebp-4Ch]
-    unsigned int brushCount; // [esp+20h] [ebp-48h] BYREF
+    const uint8_t *inEdgeCountsBase; // [esp+18h] [ebp-50h]
+    uint32_t allocSizeSides; // [esp+1Ch] [ebp-4Ch]
+    uint32_t brushCount; // [esp+20h] [ebp-48h] BYREF
     float sign; // [esp+24h] [ebp-44h]
     const dbrushside_t *inSides; // [esp+28h] [ebp-40h]
     int countAllocatedBrushes; // [esp+2Ch] [ebp-3Ch]
-    const unsigned __int8 *inEdgeCounts; // [esp+30h] [ebp-38h]
-    unsigned int allocSizeEdges; // [esp+34h] [ebp-34h]
-    unsigned __int8 *outEdges; // [esp+38h] [ebp-30h]
-    unsigned int materialNum; // [esp+3Ch] [ebp-2Ch]
-    unsigned int allocSizeBrushes; // [esp+40h] [ebp-28h]
+    const uint8_t *inEdgeCounts; // [esp+30h] [ebp-38h]
+    uint32_t allocSizeEdges; // [esp+34h] [ebp-34h]
+    uint8_t *outEdges; // [esp+38h] [ebp-30h]
+    uint32_t materialNum; // [esp+3Ch] [ebp-2Ch]
+    uint32_t allocSizeBrushes; // [esp+40h] [ebp-28h]
     int edgeOffset; // [esp+44h] [ebp-24h]
-    unsigned int axisIter; // [esp+48h] [ebp-20h]
+    uint32_t axisIter; // [esp+48h] [ebp-20h]
     int index; // [esp+4Ch] [ebp-1Ch]
     int num; // [esp+50h] [ebp-18h]
-    const unsigned __int8 *inEdges; // [esp+54h] [ebp-14h]
-    unsigned int sideEdgeCountsCount; // [esp+58h] [ebp-10h] BYREF
-    unsigned int sideIter; // [esp+5Ch] [ebp-Ch]
-    unsigned int sidesCount; // [esp+60h] [ebp-8h] BYREF
-    unsigned int brushIter; // [esp+64h] [ebp-4h]
+    const uint8_t *inEdges; // [esp+54h] [ebp-14h]
+    uint32_t sideEdgeCountsCount; // [esp+58h] [ebp-10h] BYREF
+    uint32_t sideIter; // [esp+5Ch] [ebp-Ch]
+    uint32_t sidesCount; // [esp+60h] [ebp-8h] BYREF
+    uint32_t brushIter; // [esp+64h] [ebp-4h]
 
     inBrush = (const dbrush_t*)Com_GetBspLump(LUMP_BRUSHES, 4u, &brushCount);
     inSides = (const dbrushside_t*)Com_GetBspLump(LUMP_BRUSHSIDES, 8u, &sidesCount);
@@ -1370,10 +1370,10 @@ void __cdecl CMod_LoadLeafs(bool usePvs)
 {
     cLeaf_t *out; // [esp+0h] [ebp-20h]
     int cluster; // [esp+4h] [ebp-1Ch]
-    unsigned int leafIter; // [esp+8h] [ebp-18h]
+    uint32_t leafIter; // [esp+8h] [ebp-18h]
     DiskLeaf *in; // [esp+10h] [ebp-10h]
     int firstCollAabbIndex; // [esp+14h] [ebp-Ch]
-    unsigned int count; // [esp+18h] [ebp-8h] BYREF
+    uint32_t count; // [esp+18h] [ebp-8h] BYREF
     int collAabbCount; // [esp+1Ch] [ebp-4h]
 
     iassert(sizeof(DiskLeaf) == 24);
@@ -1413,10 +1413,10 @@ void __cdecl CMod_LoadLeafs_Version14(bool usePvs)
 {
     cLeaf_t *out; // [esp+0h] [ebp-20h]
     int cluster; // [esp+4h] [ebp-1Ch]
-    unsigned int leafIter; // [esp+8h] [ebp-18h]
+    uint32_t leafIter; // [esp+8h] [ebp-18h]
     DiskLeaf_Version14 *in; // [esp+10h] [ebp-10h]
     int firstCollAabbIndex; // [esp+14h] [ebp-Ch]
-    unsigned int count; // [esp+18h] [ebp-8h] BYREF
+    uint32_t count; // [esp+18h] [ebp-8h] BYREF
     int collAabbCount; // [esp+1Ch] [ebp-4h]
 
     iassert(sizeof(DiskLeaf_Version14) == 0x24);
@@ -1456,12 +1456,12 @@ void CMod_LoadLeafBrushNodes()
 {
     int contents; // [esp+0h] [ebp-24h]
     cLeaf_t *out; // [esp+4h] [ebp-20h]
-    unsigned int numLeafBrushes; // [esp+8h] [ebp-1Ch]
-    unsigned int leafIter; // [esp+Ch] [ebp-18h]
+    uint32_t numLeafBrushes; // [esp+8h] [ebp-1Ch]
+    uint32_t leafIter; // [esp+Ch] [ebp-18h]
     const DiskLeaf *in; // [esp+10h] [ebp-14h]
     int indexFirstLeafBrush; // [esp+14h] [ebp-10h]
-    unsigned int count; // [esp+18h] [ebp-Ch] BYREF
-    unsigned int brushIter; // [esp+1Ch] [ebp-8h]
+    uint32_t count; // [esp+18h] [ebp-Ch] BYREF
+    uint32_t brushIter; // [esp+1Ch] [ebp-8h]
     int brushnum; // [esp+20h] [ebp-4h]
 
     in = (const DiskLeaf *)Com_GetBspLump(LUMP_LEAFS, 0x18u, &count);
@@ -1489,12 +1489,12 @@ void CMod_LoadLeafBrushNodes_Version14()
 {
     int contents; // [esp+0h] [ebp-24h]
     cLeaf_t *out; // [esp+4h] [ebp-20h]
-    unsigned int numLeafBrushes; // [esp+8h] [ebp-1Ch]
-    unsigned int leafIter; // [esp+Ch] [ebp-18h]
+    uint32_t numLeafBrushes; // [esp+8h] [ebp-1Ch]
+    uint32_t leafIter; // [esp+Ch] [ebp-18h]
     const DiskLeaf_Version14 *in; // [esp+10h] [ebp-14h]
     int indexFirstLeafBrush; // [esp+14h] [ebp-10h]
-    unsigned int count; // [esp+18h] [ebp-Ch] BYREF
-    unsigned int brushIter; // [esp+1Ch] [ebp-8h]
+    uint32_t count; // [esp+18h] [ebp-Ch] BYREF
+    uint32_t brushIter; // [esp+1Ch] [ebp-8h]
     int brushnum; // [esp+20h] [ebp-4h]
 
     in = (const DiskLeaf_Version14*)Com_GetBspLump(LUMP_LEAFS, 0x24u, &count);
@@ -1523,11 +1523,11 @@ void CMod_LoadLeafBrushNodes_Version14()
 
 void CMod_LoadLeafBrushes()
 {
-    unsigned __int16 *out; // [esp+0h] [ebp-18h]
-    unsigned int brushIndex; // [esp+4h] [ebp-14h]
+    uint16_t *out; // [esp+0h] [ebp-18h]
+    uint32_t brushIndex; // [esp+4h] [ebp-14h]
     char *in; // [esp+Ch] [ebp-Ch]
-    unsigned int iter; // [esp+10h] [ebp-8h]
-    unsigned int count; // [esp+14h] [ebp-4h] BYREF
+    uint32_t iter; // [esp+10h] [ebp-8h]
+    uint32_t count; // [esp+14h] [ebp-4h] BYREF
 
     in = Com_GetBspLump(LUMP_LEAFBRUSHES, 4u, &count);
     cm.leafbrushes = (unsigned short*)CM_Hunk_Alloc(2 * count + 2, "CMod_LoadLeafBrushes", 26);
@@ -1551,8 +1551,8 @@ void CMod_LoadCollisionAabbTrees()
 {
     CollisionAabbTree *out; // [esp+0h] [ebp-14h]
     DiskCollAabbTree *in; // [esp+8h] [ebp-Ch]
-    unsigned int index; // [esp+Ch] [ebp-8h]
-    unsigned int count; // [esp+10h] [ebp-4h] BYREF
+    uint32_t index; // [esp+Ch] [ebp-8h]
+    uint32_t count; // [esp+10h] [ebp-4h] BYREF
 
     in = (DiskCollAabbTree *)Com_GetBspLump(LUMP_COLLISIONAABBS, 0x20u, &count);
     cm.aabbTrees = (CollisionAabbTree *)CM_Hunk_Alloc(32 * count, "CMod_LoadCollisionAabbTrees", 28);

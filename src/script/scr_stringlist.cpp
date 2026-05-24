@@ -21,9 +21,9 @@ static scrStringGlob_t scrStringGlob; // 0x244E300
 
 #define SCR_SYS_GAME 1
 
-static unsigned int __cdecl GetHashCode(const char *str, unsigned int len)
+static uint32_t __cdecl GetHashCode(const char *str, uint32_t len)
 {
-	unsigned int hash; // [esp+4h] [ebp-8h]
+	uint32_t hash; // [esp+4h] [ebp-8h]
 
 	if (len >= 0x100)
 	{
@@ -42,7 +42,7 @@ static unsigned int __cdecl GetHashCode(const char *str, unsigned int len)
 	return hash % (STRINGLIST_SIZE-1) + 1;
 }
 
-unsigned int __cdecl Scr_AllocString(char *s, int sys)
+uint32_t __cdecl Scr_AllocString(char *s, int sys)
 {
 	iassert(sys == SCR_SYS_GAME);
 	return SL_GetString(s, 1);
@@ -57,8 +57,8 @@ void SL_Init()
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
 	scrStringGlob.hashTable[0].status_next = 0;
-	unsigned int prev = 0;
-	for (unsigned int hash = 1; hash < STRINGLIST_SIZE; ++hash)
+	uint32_t prev = 0;
+	for (uint32_t hash = 1; hash < STRINGLIST_SIZE; ++hash)
 	{
 		iassert(!(hash & HASH_STAT_MASK));
 		scrStringGlob.hashTable[hash].status_next = HASH_STAT_FREE; // (0)
@@ -82,14 +82,14 @@ void SL_InitCheckLeaks()
 	scrStringDebugGlob->totalRefCount = 0;
 }
 
-static unsigned int SL_ConvertFromRefString(RefString *refString)
+static uint32_t SL_ConvertFromRefString(RefString *refString)
 {
 	return ((char *)refString - scrMemTreePub.mt_buffer) / MT_NODE_SIZE;
 }
 
-void SL_AddUserInternal(RefString* refStr, unsigned int user)
+void SL_AddUserInternal(RefString* refStr, uint32_t user)
 {
-	if (((unsigned __int8)user & refStr->user) == 0)
+	if (((uint8_t)user & refStr->user) == 0)
 	{
 		if (scrStringDebugGlob)
 		{
@@ -109,7 +109,7 @@ void SL_AddUserInternal(RefString* refStr, unsigned int user)
 	}
 }
 
-void SL_AddRefToString(unsigned int stringValue)
+void SL_AddRefToString(uint32_t stringValue)
 {
 	PROF_SCOPED("SL_AddRefToString");
 
@@ -128,7 +128,7 @@ void SL_AddRefToString(unsigned int stringValue)
 	iassert(refStr->refCount);
 }
 
-void SL_CheckExists(unsigned int stringValue)
+void SL_CheckExists(uint32_t stringValue)
 {
 	iassert(!scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]);
 }
@@ -158,13 +158,13 @@ void SL_Shutdown()
 	}
 }
 
-void SL_ShutdownSystem(unsigned int user)
+void SL_ShutdownSystem(uint32_t user)
 {
 	iassert(user);
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	for (unsigned int hash = 1; hash < STRINGLIST_SIZE; ++hash)
+	for (uint32_t hash = 1; hash < STRINGLIST_SIZE; ++hash)
 	{
 		do
 		{
@@ -173,10 +173,10 @@ void SL_ShutdownSystem(unsigned int user)
 
 			RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
 
-			if (((unsigned __int8)user & refStr->user) == 0)
+			if (((uint8_t)user & refStr->user) == 0)
 				break;
 
-			refStr->data = ((unsigned __int8)(~(BYTE)user & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+			refStr->data = ((uint8_t)(~(BYTE)user & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 
 			scrStringGlob.nextFreeEntry = 0;
 			SL_RemoveRefToString(scrStringGlob.hashTable[hash].u.prev);
@@ -186,7 +186,7 @@ void SL_ShutdownSystem(unsigned int user)
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 }
 
-int SL_IsLowercaseString(unsigned int stringValue)
+int SL_IsLowercaseString(uint32_t stringValue)
 {
 	iassert(stringValue);
 
@@ -202,22 +202,22 @@ int SL_IsLowercaseString(unsigned int stringValue)
 	return 1;
 }
 
-void SL_TransferSystem(unsigned int from, unsigned int to)
+void SL_TransferSystem(uint32_t from, uint32_t to)
 {
 	iassert(from);
 	iassert(to);
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
-	for (unsigned int hash = 1; hash < STRINGLIST_SIZE; ++hash)
+	for (uint32_t hash = 1; hash < STRINGLIST_SIZE; ++hash)
 	{
 		if ((scrStringGlob.hashTable[hash].status_next & HASH_STAT_MASK) != 0)
 		{
 			RefString* refStr = GetRefString(scrStringGlob.hashTable[hash].u.prev);
-			if (((unsigned __int8)from & refStr->user) != 0)
+			if (((uint8_t)from & refStr->user) != 0)
 			{
-				refStr->data = ((unsigned __int8)(~(BYTE)from & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
-				refStr->data = ((unsigned __int8)(to | HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+				refStr->data = ((uint8_t)(~(BYTE)from & HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
+				refStr->data = ((uint8_t)(to | HIWORD(refStr->data)) << 16) | refStr->data & 0xFF00FFFF;
 			}
 		}
 	}
@@ -225,28 +225,28 @@ void SL_TransferSystem(unsigned int from, unsigned int to)
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 }
 
-unsigned int SL_GetString_(const char* str, unsigned int user, int type)
+uint32_t SL_GetString_(const char* str, uint32_t user, int type)
 {
 	return SL_GetStringOfSize(str, user, strlen(str) + 1, type);
 }
 
-unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type)
+uint32_t SL_GetStringOfSize(const char* str, uint32_t user, uint32_t len, int type)
 {
 	PROF_SCOPED("SL_GetStringOfSize");
 
 	iassert(str);
 
-	unsigned int hash = GetHashCode(str, len);
+	uint32_t hash = GetHashCode(str, len);
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
 	RefString* refStr = NULL;
 
-	unsigned int stringValue = 0;
+	uint32_t stringValue = 0;
 
-	unsigned int prev;
-	unsigned int next;
-	unsigned int newIndex;
+	uint32_t prev;
+	uint32_t next;
+	uint32_t newIndex;
 
 	HashEntry *entry = &scrStringGlob.hashTable[hash];
 	HashEntry *newEntry;
@@ -271,7 +271,7 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 		}
 
 		prev = hash;
-		newIndex = (unsigned __int16)entry->status_next;
+		newIndex = (uint16_t)entry->status_next;
 
 		for (newEntry = &scrStringGlob.hashTable[newIndex]; newEntry != entry; newEntry = &scrStringGlob.hashTable[newIndex])
 		{
@@ -281,8 +281,8 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 
 			if (refStr->byteLen == (uint8_t)len && !memcmp(refStr->str, str, len))
 			{
-				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
-				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
+				scrStringGlob.hashTable[prev].status_next = (uint16_t)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
+				newEntry->status_next = (uint16_t)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
 				entry->status_next = newIndex | entry->status_next & HASH_STAT_MASK;
 				stringValue = newEntry->u.prev;
 				newEntry->u.prev = entry->u.prev;
@@ -297,7 +297,7 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 				return stringValue;
 			}
 			prev = newIndex;
-			newIndex = (unsigned __int16)newEntry->status_next;
+			newIndex = (uint16_t)newEntry->status_next;
 		} //for()
 
 		newIndex = scrStringGlob.hashTable[0].status_next;
@@ -314,12 +314,12 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 		newEntry = &scrStringGlob.hashTable[newIndex];
 		iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
 
-		unsigned int newNext = (unsigned __int16)newEntry->status_next;
+		uint32_t newNext = (uint16_t)newEntry->status_next;
 
 		scrStringGlob.hashTable[0].status_next = newNext;
 		scrStringGlob.hashTable[newNext].u.prev = 0;
-		newEntry->status_next = (unsigned __int16)entry->status_next | HASH_STAT_MOVABLE;
-		entry->status_next = (unsigned __int16)newIndex | entry->status_next & HASH_STAT_MASK;
+		newEntry->status_next = (uint16_t)entry->status_next | HASH_STAT_MOVABLE;
+		entry->status_next = (uint16_t)newIndex | entry->status_next & HASH_STAT_MASK;
 		newEntry->u.prev = entry->u.prev;
 	}
 	else
@@ -328,11 +328,11 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 		{
 			iassert((entry->status_next & HASH_STAT_MASK) == HASH_STAT_MOVABLE);
 			
-			next = (unsigned __int16)entry->status_next;
+			next = (uint16_t)entry->status_next;
 
 			for (prev = next;
-				(unsigned __int16)scrStringGlob.hashTable[prev].status_next != hash;
-				prev = (unsigned __int16)scrStringGlob.hashTable[prev].status_next)
+				(uint16_t)scrStringGlob.hashTable[prev].status_next != hash;
+				prev = (uint16_t)scrStringGlob.hashTable[prev].status_next)
 			{
 				;
 			}
@@ -354,7 +354,7 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 
 			iassert((newEntry->status_next & HASH_STAT_MASK) == HASH_STAT_FREE);
 
-			unsigned int newNext = (unsigned __int16)newEntry->status_next;
+			uint32_t newNext = (uint16_t)newEntry->status_next;
 
 			scrStringGlob.hashTable[0].status_next = newNext;
 			scrStringGlob.hashTable[newNext].u.prev = 0;
@@ -366,7 +366,7 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 		{
 			stringValue = MT_AllocIndex(len + 4, type);
 			prev = entry->u.prev;
-			next = (unsigned __int16)entry->status_next;
+			next = (uint16_t)entry->status_next;
 
 			scrStringGlob.hashTable[prev].status_next = next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
 			scrStringGlob.hashTable[next].u.prev = prev;
@@ -378,8 +378,8 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 	entry->u.prev = stringValue;
 
 	refStr = GetRefString(stringValue);
-	memcpy((unsigned __int8*)refStr->str, (unsigned __int8*)str, len);
-	refStr->data = ((unsigned __int8)user << 16) | refStr->data & 0xFF00FFFF;
+	memcpy((uint8_t*)refStr->str, (uint8_t*)str, len);
+	refStr->data = ((uint8_t)user << 16) | refStr->data & 0xFF00FFFF;
 	iassert(refStr->user == user);
 	refStr->data = refStr->data & 0xFFFF0000 | 1;
 	refStr->data = (len << 24) | refStr->data & 0xFFFFFF;
@@ -398,7 +398,7 @@ unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int
 	return stringValue;
 }
 
-const char* SL_ConvertToString(unsigned int stringValue)
+const char* SL_ConvertToString(uint32_t stringValue)
 {
 	iassert((!stringValue || !scrStringDebugGlob || scrStringDebugGlob->refCount[stringValue]));
 
@@ -412,7 +412,7 @@ const char* SL_ConvertToString(unsigned int stringValue)
 	}
 }
 
-RefString* GetRefString(unsigned int stringValue)
+RefString* GetRefString(uint32_t stringValue)
 {
 	iassert(stringValue);
 	iassert(stringValue * MT_NODE_SIZE < MT_SIZE);
@@ -426,21 +426,21 @@ RefString* GetRefString(const char* str)
 	return (RefString*)(str - 4);
 }
 
-int SL_GetStringLen(unsigned int stringValue)
+int SL_GetStringLen(uint32_t stringValue)
 {
 	iassert(stringValue);
 	RefString* refString = GetRefString(stringValue);
 	return SL_GetRefStringLen(refString);
 }
 
-static unsigned int FindStringOfSize(const char* str, unsigned int len)
+static uint32_t FindStringOfSize(const char* str, uint32_t len)
 {
-	unsigned int stringValue = 0;
+	uint32_t stringValue = 0;
 
 	PROF_SCOPED("FindStringOfSize");
 
 	iassert(str);
-	unsigned int hash = GetHashCode(str, len);
+	uint32_t hash = GetHashCode(str, len);
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
@@ -456,8 +456,8 @@ static unsigned int FindStringOfSize(const char* str, unsigned int len)
 
 	if (refStr->byteLen != (uint8_t)len || memcmp(refStr->str, str, len))
 	{
-		unsigned int prev = hash;
-		unsigned int newIndex = (unsigned __int16)entry->status_next;
+		uint32_t prev = hash;
+		uint32_t newIndex = (uint16_t)entry->status_next;
 
 		for (HashEntry* newEntry = &scrStringGlob.hashTable[newIndex];
 			newEntry != entry;
@@ -468,8 +468,8 @@ static unsigned int FindStringOfSize(const char* str, unsigned int len)
 
 			if (refStr->byteLen == (uint8_t)len && !memcmp(refStr->str, str, len))
 			{
-				scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
-				newEntry->status_next = (unsigned __int16)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
+				scrStringGlob.hashTable[prev].status_next = (uint16_t)newEntry->status_next | scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK;
+				newEntry->status_next = (uint16_t)entry->status_next | newEntry->status_next & HASH_STAT_MASK;
 				entry->status_next = newIndex | entry->status_next & HASH_STAT_MASK;
 				stringValue = newEntry->u.prev;
 				newEntry->u.prev = entry->u.prev;
@@ -483,7 +483,7 @@ static unsigned int FindStringOfSize(const char* str, unsigned int len)
 				return stringValue;
 			}
 			prev = newIndex;
-			newIndex = (unsigned __int16)newEntry->status_next;
+			newIndex = (uint16_t)newEntry->status_next;
 		} // for()
 		Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 		return 0;
@@ -498,12 +498,12 @@ static unsigned int FindStringOfSize(const char* str, unsigned int len)
 	return stringValue;
 }
 
-unsigned int SL_FindString(const char* str)
+uint32_t SL_FindString(const char* str)
 {
 	return FindStringOfSize(str, strlen(str) + 1);
 }
 
-void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
+void __cdecl SL_TransferRefToUser(uint32_t stringValue, uint32_t user)
 {
 	volatile LONG Comperand; // [esp+20h] [ebp-28h]
 	RefString *refStr; // [esp+44h] [ebp-4h]
@@ -532,7 +532,7 @@ void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user)
 	}
 }
 
-unsigned int SL_GetStringForVector(const float* v)
+uint32_t SL_GetStringForVector(const float* v)
 {
 	char tempString[132];
 
@@ -540,7 +540,7 @@ unsigned int SL_GetStringForVector(const float* v)
 	return SL_GetString_(tempString, 0, 15);
 }
 
-unsigned int SL_GetStringForInt(int i)
+uint32_t SL_GetStringForInt(int i)
 {
 	char tempString[132]; // [esp+0h] [ebp-88h] BYREF
 
@@ -548,7 +548,7 @@ unsigned int SL_GetStringForInt(int i)
 	return SL_GetString_(tempString, 0, 15);
 }
 
-unsigned int SL_GetStringForFloat(float f)
+uint32_t SL_GetStringForFloat(float f)
 {
 	char tempString[132]; // [esp+8h] [ebp-88h] BYREF
 
@@ -556,7 +556,7 @@ unsigned int SL_GetStringForFloat(float f)
 	return SL_GetString_(tempString, 0, 15);
 }
 
-unsigned int SL_GetString(const char* str, unsigned int user)
+uint32_t SL_GetString(const char* str, uint32_t user)
 {
 	return SL_GetString_(str, user, 6);
 }
@@ -578,14 +578,14 @@ int SL_GetRefStringLen(RefString* refString)
 	return len;
 }
 
-static unsigned int GetLowercaseStringOfSize(
+static uint32_t GetLowercaseStringOfSize(
 	const char* str,
-	unsigned int user,
-	unsigned int len,
+	uint32_t user,
+	uint32_t len,
 	int type)
 {
 	char stra[8192]; // [esp+4Ch] [ebp-2008h] BYREF
-	unsigned int i; // [esp+2050h] [ebp-4h]
+	uint32_t i; // [esp+2050h] [ebp-4h]
 
 	PROF_SCOPED("GetLowercaseStringOfSize");
 	if (len <= 0x2000)
@@ -601,16 +601,16 @@ static unsigned int GetLowercaseStringOfSize(
 	}
 }
 
-unsigned int SL_GetLowercaseString_(const char* str, unsigned int user, int type)
+uint32_t SL_GetLowercaseString_(const char* str, uint32_t user, int type)
 {
 	return GetLowercaseStringOfSize(str, user, strlen(str) + 1, type);
 }
-unsigned int SL_GetLowercaseString(const char* str, unsigned int user)
+uint32_t SL_GetLowercaseString(const char* str, uint32_t user)
 {
 	return SL_GetLowercaseString_(str, user, 6);
 }
 
-void SL_RemoveRefToString(unsigned int stringValue)
+void SL_RemoveRefToString(uint32_t stringValue)
 {
 	RefString* refStr; // [esp+30h] [ebp-8h]
 	int len; // [esp+34h] [ebp-4h]
@@ -622,11 +622,11 @@ void SL_RemoveRefToString(unsigned int stringValue)
 	SL_RemoveRefToStringOfSize(stringValue, len);
 }
 
-static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned int len)
+static void SL_FreeString(uint32_t stringValue, RefString* refStr, uint32_t len)
 {
 	PROF_SCOPED("SL_FreeString");
 
-	unsigned int index = GetHashCode(refStr->str, len);
+	uint32_t index = GetHashCode(refStr->str, len);
 
 	Sys_EnterCriticalSection(CRITSECT_SCRIPT_STRING);
 
@@ -645,7 +645,7 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 
 		iassert(((entry->status_next & HASH_STAT_MASK) == HASH_STAT_HEAD));
 
-		unsigned int newIndex = (unsigned __int16)entry->status_next;
+		uint32_t newIndex = (uint16_t)entry->status_next;
 		HashEntry* newEntry = &scrStringGlob.hashTable[newIndex];
 
 		if (entry->u.prev == stringValue)
@@ -657,14 +657,14 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 			}
 			else
 			{
-				entry->status_next = (unsigned __int16)newEntry->status_next | HASH_STAT_HEAD;
+				entry->status_next = (uint16_t)newEntry->status_next | HASH_STAT_HEAD;
 				entry->u.prev = newEntry->u.prev;
 				scrStringGlob.nextFreeEntry = entry;
 			}
 		}
 		else
 		{
-			unsigned int prev = index;
+			uint32_t prev = index;
 			while (1)
 			{
 				iassert(newEntry != entry);
@@ -674,14 +674,14 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 					break;
 
 				prev = newIndex;
-				newIndex = (unsigned __int16)newEntry->status_next;
+				newIndex = (uint16_t)newEntry->status_next;
 				newEntry = &scrStringGlob.hashTable[newIndex];
 			}
-			scrStringGlob.hashTable[prev].status_next = (unsigned __int16)newEntry->status_next | (scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK);
+			scrStringGlob.hashTable[prev].status_next = (uint16_t)newEntry->status_next | (scrStringGlob.hashTable[prev].status_next & HASH_STAT_MASK);
 		}
 
 		iassert((newEntry->status_next & HASH_STAT_MASK) != HASH_STAT_FREE);
-		unsigned int newNext = scrStringGlob.hashTable[0].status_next;
+		uint32_t newNext = scrStringGlob.hashTable[0].status_next;
 		iassert((newNext & HASH_STAT_MASK) == HASH_STAT_FREE);
 
 		newEntry->status_next = newNext;
@@ -692,7 +692,7 @@ static void SL_FreeString(unsigned int stringValue, RefString* refStr, unsigned 
 	}
 }
 
-const char* __cdecl SL_DebugConvertToString(unsigned int stringValue)
+const char* __cdecl SL_DebugConvertToString(uint32_t stringValue)
 {
 	int len; // [esp+0h] [ebp-10h]
 	int i; // [esp+8h] [ebp-8h]
@@ -701,28 +701,28 @@ const char* __cdecl SL_DebugConvertToString(unsigned int stringValue)
 	if (!stringValue)
 		return "<NULL>";
 	refString = GetRefString(stringValue);
-	len = (unsigned __int8)(HIBYTE(refString->data) - 1);
+	len = (uint8_t)(HIBYTE(refString->data) - 1);
 	if (refString->str[len])
 		return "<BINARY>";
 	for (i = 0; i < len; ++i)
 	{
-		if (!isprint((unsigned __int8)refString->str[i]))
+		if (!isprint((uint8_t)refString->str[i]))
 			return "<BINARY>";
 	}
 	return refString->str;
 }
 
-unsigned int SL_ConvertFromString(const char* str)
+uint32_t SL_ConvertFromString(const char* str)
 {
 	iassert(str);
 	RefString* refStr = GetRefString(str);
 	return SL_ConvertFromRefString(refStr);
 }
 
-unsigned int SL_FindLowercaseString(const char* str)
+uint32_t SL_FindLowercaseString(const char* str)
 {
 	char stra[8196]; // [esp+5Ch] [ebp-2010h] BYREF
-	unsigned int len; // [esp+2064h] [ebp-8h]
+	uint32_t len; // [esp+2064h] [ebp-8h]
 	signed int i; // [esp+2068h] [ebp-4h]
 
 	PROF_SCOPED("SL_FindLowercaseString");
@@ -739,7 +739,7 @@ unsigned int SL_FindLowercaseString(const char* str)
 	}
 }
 
-void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
+void SL_RemoveRefToStringOfSize(uint32_t stringValue, uint32_t len)
 {
 	PROF_SCOPED("SL_RemoveRefToStringOfSize");
 
@@ -779,7 +779,7 @@ void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len)
 	}
 }
 
-void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user)
+void __cdecl SL_AddUser(uint32_t stringValue, uint32_t user)
 {
 	RefString *RefString; // eax
 
@@ -787,7 +787,7 @@ void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user)
 	SL_AddUserInternal(RefString, user);
 }
 
-void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from)
+void __cdecl Scr_SetString(uint16_t *to, uint32_t from)
 {
 	if (from)
 		SL_AddRefToString(from);
@@ -796,13 +796,13 @@ void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from)
 	*to = from;
 }
 
-unsigned int __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type)
+uint32_t __cdecl SL_ConvertToLowercase(uint32_t stringValue, uint32_t user, int type)
 {
 	const char *v4; // [esp+4Ch] [ebp-2014h]
 	char str[8192]; // [esp+50h] [ebp-2010h] BYREF
-	unsigned int stringOfSize; // [esp+2054h] [ebp-Ch]
-	unsigned int len; // [esp+2058h] [ebp-8h]
-	unsigned int i; // [esp+205Ch] [ebp-4h]
+	uint32_t stringOfSize; // [esp+2054h] [ebp-Ch]
+	uint32_t len; // [esp+2058h] [ebp-8h]
+	uint32_t i; // [esp+205Ch] [ebp-4h]
 
 	PROF_SCOPED("SL_ConvertToLowercase");
 
@@ -824,7 +824,7 @@ unsigned int __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned in
 
 void __cdecl CreateCanonicalFilename(char *newFilename, const char *filename, int count)
 {
-	unsigned int c; // [esp+0h] [ebp-4h]
+	uint32_t c; // [esp+0h] [ebp-4h]
 	const int oldCount = count; // addition because the old assert was broken, lol
 
 	iassert(count);
@@ -851,7 +851,7 @@ void __cdecl CreateCanonicalFilename(char *newFilename, const char *filename, in
 	*newFilename = 0;
 }
 
-unsigned int __cdecl Scr_CreateCanonicalFilename(const char *filename)
+uint32_t __cdecl Scr_CreateCanonicalFilename(const char *filename)
 {
 	char newFilename[1028]; // [esp+0h] [ebp-408h] BYREF
 
@@ -859,26 +859,26 @@ unsigned int __cdecl Scr_CreateCanonicalFilename(const char *filename)
 	return SL_GetString_(newFilename, 0, 7);
 }
 
-void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from)
+void Scr_SetStringFromCharString(uint16_t *to, const char *from)
 {
-	unsigned int v4; // r3
+	uint32_t v4; // r3
 	const char *v5; // r11
 
 	v4 = *to;
 	if (v4)
 		SL_RemoveRefToString(v4);
 	v5 = from;
-	while (*(unsigned __int8 *)v5++)
+	while (*(uint8_t *)v5++)
 		;
 	*to = SL_GetStringOfSize(from, 0, v5 - from, 6);
 }
 
-unsigned int SL_GetUser(unsigned int stringValue)
+uint32_t SL_GetUser(uint32_t stringValue)
 {
 	return GetRefString(stringValue)->user;
 }
 
-const char *SL_ConvertToStringSafe(unsigned int stringValue)
+const char *SL_ConvertToStringSafe(uint32_t stringValue)
 {
 	if (!stringValue)
 		return "(NULL)";

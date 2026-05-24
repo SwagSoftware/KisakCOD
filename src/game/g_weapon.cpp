@@ -29,7 +29,7 @@ void __cdecl G_AntiLagRewindClientPos(int gameTime, AntilagClientStore *antilagS
         MyAssertHandler(".\\game\\g_weapon.cpp", 30, 0, "%s", "antilagStore");
     if (g_antilag->current.enabled)
     {
-        memset((unsigned __int8 *)antilagStore, 0, sizeof(AntilagClientStore));
+        memset((uint8_t *)antilagStore, 0, sizeof(AntilagClientStore));
         if (gameTime <= 0)
             MyAssertHandler(".\\game\\g_weapon.cpp", 36, 0, "%s", "gameTime > 0");
         if (level.time - gameTime <= 400 && level.time - gameTime > 1000 / sv_fps->current.integer)
@@ -163,14 +163,14 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
 {
     int v6; // eax
     hitLocation_t partGroup; // [esp+4h] [ebp-5Ch]
-    unsigned int modelIndex; // [esp+8h] [ebp-58h]
-    unsigned int partName; // [esp+Ch] [ebp-54h]
+    uint32_t modelIndex; // [esp+8h] [ebp-58h]
+    uint32_t partName; // [esp+Ch] [ebp-54h]
     bool v10; // [esp+14h] [ebp-4Ch]
     int damage; // [esp+18h] [ebp-48h]
     gentity_s *tent; // [esp+1Ch] [ebp-44h]
     float endpos[3]; // [esp+20h] [ebp-40h] BYREF
     trace_t tr; // [esp+2Ch] [ebp-34h] BYREF
-    unsigned __int16 hitEntId; // [esp+58h] [ebp-8h]
+    uint16_t hitEntId; // [esp+58h] [ebp-8h]
     gentity_s *traceEnt; // [esp+5Ch] [ebp-4h]
 
     if (!wp)
@@ -290,8 +290,8 @@ char __cdecl Melee_Trace(
 
 gentity_s *__cdecl Weapon_Throw_Grenade(
     gentity_s *ent,
-    unsigned int grenType,
-    unsigned __int8 grenModel,
+    uint32_t grenType,
+    uint8_t grenModel,
     weaponParms *wp)
 {
     float scale; // [esp+4h] [ebp-50h]
@@ -343,8 +343,8 @@ gentity_s *__cdecl Weapon_Throw_Grenade(
 
 gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
     gentity_s *ent,
-    unsigned int grenType,
-    unsigned __int8 grenModel,
+    uint32_t grenType,
+    uint8_t grenModel,
     weaponParms *wp)
 {
     float scale; // [esp+4h] [ebp-34h]
@@ -380,7 +380,7 @@ gentity_s *__cdecl Weapon_GrenadeLauncher_Fire(
 
 gentity_s *__cdecl Weapon_RocketLauncher_Fire(
     gentity_s *ent,
-    unsigned int weaponIndex,
+    uint32_t weaponIndex,
     float spread,
     weaponParms *wp,
     const float *gunVel,
@@ -576,7 +576,7 @@ void __cdecl FireWeaponMelee(gentity_s *ent, int gametime)
     }
 }
 
-int __cdecl G_GivePlayerWeapon(playerState_s *pPS, int iWeaponIndex, unsigned __int8 altModelIndex)
+int __cdecl G_GivePlayerWeapon(playerState_s *pPS, int iWeaponIndex, uint8_t altModelIndex)
 {
     int iCurrIndex; // [esp+0h] [ebp-10h]
     int newOffHandIndex; // [esp+4h] [ebp-Ch]
@@ -672,7 +672,7 @@ void __cdecl G_SetupWeaponDef()
     Com_DPrintf(17, "----------------------\n");
 }
 
-unsigned int __cdecl G_GetWeaponIndexForName(const char *name)
+uint32_t __cdecl G_GetWeaponIndexForName(const char *name)
 {
     if (level.initializing)
         return BG_GetWeaponIndexForName(name, G_RegisterWeapon);
@@ -689,7 +689,7 @@ void __cdecl G_SelectWeaponIndex(int clientNum, int iWeaponIndex)
 #endif
 }
 
-void __cdecl G_SetEquippedOffHand(int clientNum, unsigned int offHandIndex)
+void __cdecl G_SetEquippedOffHand(int clientNum, uint32_t offHandIndex)
 {
 #ifdef KISAK_MP
     BG_AssertOffhandIndexOrNone(offHandIndex);

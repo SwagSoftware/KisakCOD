@@ -97,12 +97,12 @@ struct netchan_t // sizeof=0x62C
     int qport;
     int fragmentSequence;
     int fragmentLength;
-    unsigned __int8* fragmentBuffer;
+    uint8_t* fragmentBuffer;
     int fragmentBufferSize;
     int unsentFragments;
     int unsentFragmentStart;
     int unsentLength;
-    unsigned __int8* unsentBuffer;
+    uint8_t* unsentBuffer;
     int unsentBufferSize;
     netProfileInfo_t prof;
 };
@@ -115,15 +115,15 @@ struct fakedLatencyPackets_t // sizeof=0x50
     // padding byte
     netsrc_t sock;
     netadr_t addr;
-    unsigned int length;
-    unsigned __int8 *data;
+    uint32_t length;
+    uint8_t *data;
     int startTime;
     msg_t msg;
 };
 
 struct loopmsg_t // sizeof=0x580
 {                                       // ...
-    unsigned __int8 data[1400];
+    uint8_t data[1400];
     int datalen;
     int port;
 };
@@ -131,8 +131,8 @@ struct loopmsg_t // sizeof=0x580
 struct loopback_t // sizeof=0x5808
 {                                       // ...
     loopmsg_t msgs[16];
-    volatile unsigned int get;
-    volatile unsigned int send;
+    volatile uint32_t get;
+    volatile uint32_t send;
 };
 
 struct clientHeader_t // sizeof=0x64C
@@ -164,13 +164,13 @@ void __cdecl NetProf_NewSendPacket(netchan_t* pChan, int iSize, int bFragment);
 void __cdecl NetProf_NewRecievePacket(netchan_t* pChan, int iSize, int bFragment);
 void __cdecl NetProf_UpdateStatistics(netProfileStream_t* pStream);
 void __cdecl Net_DisplayProfile(int localClientNum);
-char __cdecl FakeLag_DestroyPacket(unsigned int packet);
-void __cdecl FakeLag_SendPacket_Real(unsigned int packet);
+char __cdecl FakeLag_DestroyPacket(uint32_t packet);
+void __cdecl FakeLag_SendPacket_Real(uint32_t packet);
 void __cdecl FakeLag_Init();
-unsigned int __cdecl FakeLag_GetFreeSlot();
+uint32_t __cdecl FakeLag_GetFreeSlot();
 bool __cdecl FakeLag_HostingGameOrParty();
-unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __int8* data, netadr_t to);
-unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t* from, msg_t* msg);
+uint32_t __cdecl FakeLag_SendPacket(netsrc_t sock, int length, uint8_t* data, netadr_t to);
+uint32_t __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t* from, msg_t* msg);
 void __cdecl FakeLag_ReceivePackets();
 int __cdecl FakeLag_GetPacket(bool loopback, netsrc_t sock, netadr_t* net_from, msg_t* net_message);
 void __cdecl FakeLag_Frame();
@@ -199,11 +199,11 @@ int __cdecl NET_GetClientPacket(netadr_t* net_from, msg_t* net_message);
 int __cdecl NET_GetServerPacket(netadr_t* net_from, msg_t* net_message);
 int __cdecl NET_GetLoopPacket_Real(netsrc_t sock, netadr_t* net_from, msg_t* net_message);
 int __cdecl NET_GetLoopPacket(netsrc_t sock, netadr_t* net_from, msg_t* net_message);
-void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __int8* data, netadr_t to);
-char __cdecl NET_SendPacket(netsrc_t sock, int length, unsigned __int8* data, netadr_t to);
+void __cdecl NET_SendLoopPacket(netsrc_t sock, uint32_t length, uint8_t* data, netadr_t to);
+char __cdecl NET_SendPacket(netsrc_t sock, int length, uint8_t* data, netadr_t to);
 bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char* data);
-bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int8* format, int len);
-bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, unsigned __int8* format, unsigned int len);
+bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const uint8_t* format, int len);
+bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, uint8_t* format, uint32_t len);
 int __cdecl NET_StringToAdr(char* s, netadr_t* a);
 
 extern const dvar_t* showpackets;

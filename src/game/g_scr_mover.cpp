@@ -661,7 +661,7 @@ void __cdecl ScriptEntCmd_DevAddPitch(scr_entref_t entref)
     ScriptEnt_DevAddRotate(entref, 1u);
 }
 
-void __cdecl ScriptEnt_DevAddRotate(scr_entref_t entref, unsigned int iAxis)
+void __cdecl ScriptEnt_DevAddRotate(scr_entref_t entref, uint32_t iAxis)
 {
     const char *v2; // eax
     float v3; // [esp+14h] [ebp-60h]
@@ -1261,7 +1261,7 @@ const BuiltinMethodDef methods_1[18] =
 
 void(__cdecl *__cdecl ScriptEnt_GetMethod(const char **pName))(scr_entref_t)
 {
-    unsigned int i; // [esp+18h] [ebp-4h]
+    uint32_t i; // [esp+18h] [ebp-4h]
 
     for (i = 0; i < 0x12; ++i)
     {

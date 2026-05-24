@@ -66,7 +66,7 @@ void *__cdecl R_AllocStaticVertexBuffer(IDirect3DVertexBuffer9 **vb, int sizeInB
     return vertexBufferData;
 }
 
-void *__cdecl R_AllocDynamicIndexBuffer(IDirect3DIndexBuffer9 **ib, unsigned int sizeInBytes)
+void *__cdecl R_AllocDynamicIndexBuffer(IDirect3DIndexBuffer9 **ib, uint32_t sizeInBytes)
 {
     const char *v3; // eax
     const char *v4; // eax
@@ -93,7 +93,7 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
     iassert( (sizeInBytes > 0) );
     if (!r_loadForRenderer->current.enabled)
         return 0;
-    //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, unsigned int, IDirect3DIndexBuffer9 **, unsigned int))dx.device->CreateIndexBuffer)(
+    //if (((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, int, int, int, uint32_t, IDirect3DIndexBuffer9 **, uint32_t))dx.device->CreateIndexBuffer)(
     //    dx.device,
     //    dx.device,
     //    sizeInBytes,
@@ -118,13 +118,13 @@ void *__cdecl R_AllocStaticIndexBuffer(IDirect3DIndexBuffer9 **ib, int sizeInByt
     return 0;
 }
 
-void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, unsigned __int8 *bufferData, int sizeInBytes)
+void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, uint8_t *bufferData, int sizeInBytes)
 {
-    unsigned __int8 *v3; // eax
+    uint8_t *v3; // eax
 
     if (r_loadForRenderer->current.enabled && bufferData)
     {
-        v3 = (unsigned __int8 *)R_AllocStaticVertexBuffer(vb, sizeInBytes);
+        v3 = (uint8_t *)R_AllocStaticVertexBuffer(vb, sizeInBytes);
         memcpy(v3, bufferData, sizeInBytes);
         R_FinishStaticVertexBuffer(*vb);
     }
@@ -136,12 +136,12 @@ void __cdecl Load_VertexBuffer(IDirect3DVertexBuffer9 **vb, unsigned __int8 *buf
 
 void __cdecl R_InitDynamicVertexBufferState(GfxVertexBufferState *vb, int bytes)
 {
-    unsigned __int8 *verts; // [esp+0h] [ebp-4h]
+    uint8_t *verts; // [esp+0h] [ebp-4h]
 
     iassert( vb );
     vb->used = 0;
     vb->total = bytes;
-    verts = (unsigned __int8 *)R_AllocDynamicVertexBuffer(&vb->buffer, bytes);
+    verts = (uint8_t *)R_AllocDynamicVertexBuffer(&vb->buffer, bytes);
     iassert( verts == NULL );
     vb->verts = verts;
 }
@@ -157,12 +157,12 @@ void __cdecl R_InitDynamicIndexBufferState(GfxIndexBufferState *ib, int indexCou
 
 void __cdecl R_InitDynamicIndices(GfxDynamicIndices *ib, int indexCount)
 {
-    unsigned __int16 *indices; // [esp+0h] [ebp-8h]
+    uint16_t *indices; // [esp+0h] [ebp-8h]
 
     iassert( ib );
     ib->used = 0;
     ib->total = indexCount;
-    indices = (unsigned __int16 *)Z_VirtualAlloc(2 * indexCount, "Dynamic Index Buffer", 18);
+    indices = (uint16_t *)Z_VirtualAlloc(2 * indexCount, "Dynamic Index Buffer", 18);
     iassert( indices != NULL );
     ib->indices = indices;
 }
@@ -223,18 +223,18 @@ void __cdecl R_CreateParticleCloudBuffer()
 {
     double *v0; // [esp+10h] [ebp-70h]
     float cornerTexCoords[4][2]; // [esp+14h] [ebp-6Ch] BYREF
-    unsigned __int16 *particleIndicesIter; // [esp+34h] [ebp-4Ch]
+    uint16_t *particleIndicesIter; // [esp+34h] [ebp-4Ch]
     float pos[3]; // [esp+38h] [ebp-48h]
     int particleId; // [esp+44h] [ebp-3Ch]
     int indexSizeInBytes; // [esp+48h] [ebp-38h]
     int xIter; // [esp+4Ch] [ebp-34h]
     int vertSizeInBytes; // [esp+50h] [ebp-30h]
-    unsigned __int16 *particleIndices; // [esp+54h] [ebp-2Ch]
+    uint16_t *particleIndices; // [esp+54h] [ebp-2Ch]
     int yIter; // [esp+58h] [ebp-28h]
     int zIter; // [esp+5Ch] [ebp-24h]
     int cornerIter; // [esp+60h] [ebp-20h]
     GfxPosTexVertex *particleVerts; // [esp+64h] [ebp-1Ch]
-    unsigned __int16 quadIndices[6]; // [esp+68h] [ebp-18h]
+    uint16_t quadIndices[6]; // [esp+68h] [ebp-18h]
     GfxPosTexVertex *particleVertsIter; // [esp+78h] [ebp-8h]
     int indIter; // [esp+7Ch] [ebp-4h]
 
@@ -255,7 +255,7 @@ void __cdecl R_CreateParticleCloudBuffer()
     vertSizeInBytes = 81920;
     indexSizeInBytes = 12288;
     particleVerts = (GfxPosTexVertex *)R_AllocStaticVertexBuffer(&gfxBuf.particleCloudVertexBuffer, 81920);
-    particleIndices = (unsigned __int16 *)R_AllocStaticIndexBuffer(&gfxBuf.particleCloudIndexBuffer, 12288);
+    particleIndices = (uint16_t *)R_AllocStaticIndexBuffer(&gfxBuf.particleCloudIndexBuffer, 12288);
     particleVertsIter = particleVerts;
     particleIndicesIter = particleIndices;
     for (xIter = 0; xIter != 8; ++xIter)
@@ -350,7 +350,7 @@ void *__cdecl R_LockVertexBuffer(IDirect3DVertexBuffer9 *handle, int offset, int
 void __cdecl R_ShutdownTempSkinBuf()
 {
     GfxBackEndData *data; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-4h]
 
     for (i = 0; i < 2; ++i)
     {
@@ -527,7 +527,7 @@ void __cdecl R_UnlockIndexBuffer(IDirect3DIndexBuffer9 *handle)
     handle->Unlock();
 }
 
-void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData, unsigned int sizeInBytes)
+void __cdecl R_CreateWorldVertexBuffer(IDirect3DVertexBuffer9 **vb, int *srcData, uint32_t sizeInBytes)
 {
     int dummyData; // [esp+30h] [ebp-8h] BYREF
     void *dstData; // [esp+34h] [ebp-4h]

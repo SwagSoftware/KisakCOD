@@ -29,20 +29,20 @@ int __cdecl SEH_GetLocalizedTokenReference(
     const char *messageType,
     msgLocErrType_t errType);
 bool __cdecl Taiwanese_ValidBig5Code(__int16 uiCode);
-bool __cdecl Japanese_ValidShiftJISCode(unsigned int _iHi, unsigned int _iLo);
-bool __cdecl Chinese_ValidGBCode(unsigned __int8 _iHi, unsigned __int8 _iLo);
-unsigned int __cdecl SEH_DecodeLetter(
-    unsigned int firstChar,
-    unsigned int secondChar,
+bool __cdecl Japanese_ValidShiftJISCode(uint32_t _iHi, uint32_t _iLo);
+bool __cdecl Chinese_ValidGBCode(uint8_t _iHi, uint8_t _iLo);
+uint32_t __cdecl SEH_DecodeLetter(
+    uint32_t firstChar,
+    uint32_t secondChar,
     int *usedCount,
     int *pbIsTrailingPunctuation);
-bool __cdecl Taiwanese_IsTrailingPunctuation(unsigned int uiCode);
-bool __cdecl Japanese_IsTrailingPunctuation(unsigned int uiCode);
-bool __cdecl Chinese_IsTrailingPunctuation(unsigned int uiCode);
-unsigned int __cdecl SEH_ReadCharFromString(const char **text, int *isTrailingPunctuation);
+bool __cdecl Taiwanese_IsTrailingPunctuation(uint32_t uiCode);
+bool __cdecl Japanese_IsTrailingPunctuation(uint32_t uiCode);
+bool __cdecl Chinese_IsTrailingPunctuation(uint32_t uiCode);
+uint32_t __cdecl SEH_ReadCharFromString(const char **text, int *isTrailingPunctuation);
 int __cdecl Language_IsAsian();
 int __cdecl SEH_PrintStrlen(const char *string);
-const char *__cdecl SEH_GetLanguageName(unsigned int iLanguage);
+const char *__cdecl SEH_GetLanguageName(uint32_t iLanguage);
 int __cdecl SEH_GetLanguageIndexForName(const char *pszLanguageName, int *piLanguageIndex);
 void __cdecl SEH_UpdateLanguageInfo();
 void __cdecl SEH_Init_StringEd();

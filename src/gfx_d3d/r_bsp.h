@@ -14,24 +14,24 @@ enum TrisType : __int32
 
 struct DiskGfxAabbTree // sizeof=0xC
 {
-    unsigned int firstSurface;
-    unsigned int surfaceCount;
-    unsigned int childCount;
+    uint32_t firstSurface;
+    uint32_t surfaceCount;
+    uint32_t childCount;
 };
 
 struct DiskGfxCullGroup // sizeof=0x20
 {
     float mins[3];
     float maxs[3];
-    unsigned int firstSurface;
-    unsigned int surfaceCount;
+    uint32_t firstSurface;
+    uint32_t surfaceCount;
 };
 
 struct DiskGfxVertex // sizeof=0x44
 {
     float xyz[3];
     float normal[3];
-    unsigned __int8 color[4];
+    uint8_t color[4];
     float texCoord[2];
     float lmapCoord[2];
     float tangent[3];
@@ -52,7 +52,7 @@ struct mnode_load_t // sizeof=0x10
 {
     int cellIndex;
     int planeIndex;
-    unsigned int children[2];
+    uint32_t children[2];
 };
 struct r_lightmapGroup_t // sizeof=0x8
 {                                       // ...
@@ -61,16 +61,16 @@ struct r_lightmapGroup_t // sizeof=0x8
 };
 struct LightDefCopyConfig // sizeof=0x8
 {                                       // ...
-    unsigned __int8 *dest;              // ...
-    unsigned int zoom;                  // ...
+    uint8_t *dest;              // ...
+    uint32_t zoom;                  // ...
 };
 struct DiskLightRegion // sizeof=0x1
 {
-    unsigned __int8 hullCount;
+    uint8_t hullCount;
 };
 struct r_lightmapMerge_t // sizeof=0x14
 {                                       // ...
-    unsigned __int8 index;
+    uint8_t index;
     // padding byte
     // padding byte
     // padding byte
@@ -80,49 +80,49 @@ struct r_lightmapMerge_t // sizeof=0x14
 
 struct DiskTriangleSoup // sizeof=0x18
 {
-    unsigned __int16 materialIndex;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
-    unsigned __int8 primaryLightIndex;
+    uint16_t materialIndex;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
+    uint8_t primaryLightIndex;
     bool castsSunShadow;
-    unsigned __int8 unused[2];
+    uint8_t unused[2];
     int vertexLayerData;
-    unsigned int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 indexCount;
+    uint32_t firstVertex;
+    uint16_t vertexCount;
+    uint16_t indexCount;
     int firstIndex;
 };
 
 struct DiskTriangleSoup_Version8 // sizeof=0x10
 {
-    unsigned __int16 materialIndex;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
+    uint16_t materialIndex;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
     int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 indexCount;
+    uint16_t vertexCount;
+    uint16_t indexCount;
     int firstIndex;
 };
 
 struct DiskTriangleSoup_Version12 // sizeof=0x14
 {
-    unsigned __int16 materialIndex;
-    unsigned __int8 lightmapIndex;
-    unsigned __int8 reflectionProbeIndex;
+    uint16_t materialIndex;
+    uint8_t lightmapIndex;
+    uint8_t reflectionProbeIndex;
     int vertexLayerData;
     int firstVertex;
-    unsigned __int16 vertexCount;
-    unsigned __int16 indexCount;
+    uint16_t vertexCount;
+    uint16_t indexCount;
     int firstIndex;
 };
 
 
 struct GfxBspLoad // sizeof=0x2A8
 {                                       // ...
-    unsigned int bspVersion;            // ...
+    uint32_t bspVersion;            // ...
     TrisType trisType;                  // ...
     const struct dmaterial_t *diskMaterials;   // ...
-    unsigned int materialCount;
+    uint32_t materialCount;
     float outdoorMins[3];               // ...
     float outdoorMaxs[3];               // ...
     r_lightmapMerge_t lmapMergeInfo[32];
@@ -148,7 +148,7 @@ struct GfxWorld // sizeof=0x2DC
     int planeCount;                     // ...
     int nodeCount;                      // ...
     int indexCount;                     // ...
-    unsigned __int16 *indices;          // ...
+    uint16_t *indices;          // ...
     int surfaceCount;                   // ...
     GfxWorldStreamInfo streamInfo;
     // padding byte
@@ -157,21 +157,21 @@ struct GfxWorld // sizeof=0x2DC
     int skySurfCount;                   // ...
     int *skyStartSurfs;                 // ...
     GfxImage *skyImage;                 // ...
-    unsigned __int8 skySamplerState;    // ...
+    uint8_t skySamplerState;    // ...
     // padding byte
     // padding byte
     // padding byte
-    unsigned int vertexCount;           // ...
+    uint32_t vertexCount;           // ...
     GfxWorldVertexData vd;              // ...
-    unsigned int vertexLayerDataSize;   // ...
+    uint32_t vertexLayerDataSize;   // ...
     GfxWorldVertexLayerData vld;        // ...
     SunLightParseParams sunParse;       // ...
     GfxLight *sunLight;                 // ...
     float sunColorFromBsp[3];
-    unsigned int sunPrimaryLightIndex;  // ...
-    unsigned int primaryLightCount;     // ...
+    uint32_t sunPrimaryLightIndex;  // ...
+    uint32_t primaryLightCount;     // ...
     int cullGroupCount;                 // ...
-    unsigned int reflectionProbeCount;  // ...
+    uint32_t reflectionProbeCount;  // ...
     GfxReflectionProbe *reflectionProbes; // ...
     GfxTexture *reflectionProbeTextures; // ...
     GfxWorldDpvsPlanes dpvsPlanes;      // ...
@@ -186,18 +186,18 @@ struct GfxWorld // sizeof=0x2DC
     GfxBrushModel *models;              // ...
     float mins[3];                      // ...
     float maxs[3];                      // ...
-    unsigned int checksum;
+    uint32_t checksum;
     int materialMemoryCount;            // ...
     struct MaterialMemory *materialMemory;     // ...
     sunflare_t sun;                     // ...
     float outdoorLookupMatrix[4][4];
     GfxImage *outdoorImage;
-    unsigned int *cellCasterBits;       // ...
+    uint32_t *cellCasterBits;       // ...
     struct GfxSceneDynModel *sceneDynModel;    // ...
     struct GfxSceneDynBrush *sceneDynBrush;    // ...
-    unsigned int *primaryLightEntityShadowVis; // ...
-    unsigned int *primaryLightDynEntShadowVis[2]; // ...
-    unsigned __int8 *nonSunPrimaryLightForModelDynEnt; // ...
+    uint32_t *primaryLightEntityShadowVis; // ...
+    uint32_t *primaryLightDynEntShadowVis[2]; // ...
+    uint8_t *nonSunPrimaryLightForModelDynEnt; // ...
     struct GfxShadowGeometry *shadowGeom;      // ...
     struct GfxLightRegion *lightRegion;        // ...
     GfxWorldDpvsStatic dpvs;            // ...
@@ -225,26 +225,26 @@ void R_LerpSunDirectionOverride(float *sunDirBegin, float *sunDirEnd, int lerpBe
 void R_ResetSunDirectionOverride();
 void R_ResetSunLightParseParams();
 
-unsigned int R_GetDebugReflectionProbeLocs(float (*locArray)[3], unsigned int maxCount);
+uint32_t R_GetDebugReflectionProbeLocs(float (*locArray)[3], uint32_t maxCount);
 
 extern GfxWorld s_world;
 extern r_globals_load_t rgl;
 
 // r_bsp_load_obj
-void __cdecl R_ModernizeLegacyLightGridColors(const unsigned __int8 *legacyColors, GfxLightGridColors *modernColors);
+void __cdecl R_ModernizeLegacyLightGridColors(const uint8_t *legacyColors, GfxLightGridColors *modernColors);
 GfxWorld *__cdecl R_LoadWorldInternal(const char *name);
 void __cdecl R_InterpretSunLightParseParamsIntoLights(SunLightParseParams *sunParse, GfxLight *sunLight);
 void __cdecl R_SetUpSunLight(const float *sunColor, const float *sunDirection, GfxLight *light);
 void __cdecl R_InitPrimaryLights(GfxLight *primaryLights);
 void __cdecl R_AddShadowSurfaceToPrimaryLight(
     GfxWorld *world,
-    unsigned int primaryLightIndex,
-    unsigned int sortedSurfIndex);
+    uint32_t primaryLightIndex,
+    uint32_t sortedSurfIndex);
 void __cdecl R_ForEachPrimaryLightAffectingSurface(
     GfxWorld *world,
     const GfxSurface *surface,
-    unsigned int sortedSurfIndex,
-    void(__cdecl *Callback)(GfxWorld *, unsigned int, unsigned int));
+    uint32_t sortedSurfIndex,
+    void(__cdecl *Callback)(GfxWorld *, uint32_t, uint32_t));
 void __cdecl R_GetXModelBounds(XModel *model, const float (*axes)[3], float *mins, float *maxs);
 
 
@@ -258,26 +258,26 @@ struct GfxSModelDrawSurfLightingData // sizeof=0x28
 void __cdecl R_InitBspDrawSurf(GfxBspDrawSurfData *surfData);
 void __cdecl R_AddBspDrawSurfs(
     GfxDrawSurf drawSurf,
-    unsigned __int8 *list,
-    unsigned int count,
+    uint8_t *list,
+    uint32_t count,
     GfxBspDrawSurfData *surfData);
 void __cdecl R_AddAllBspDrawSurfacesCamera();
 void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
-    unsigned int beginSurface,
-    unsigned int endSurface,
-    unsigned int stage,
-    unsigned int maxDrawSurfCount);
+    uint32_t beginSurface,
+    uint32_t endSurface,
+    uint32_t stage,
+    uint32_t maxDrawSurfCount);
 void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
-    unsigned int beginSurface,
-    unsigned int endSurface,
-    unsigned int stage);
+    uint32_t beginSurface,
+    uint32_t endSurface,
+    uint32_t stage);
 void __cdecl R_AddAllBspDrawSurfacesSunShadow();
 void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
-    unsigned int partitionIndex,
-    unsigned int beginSurface,
-    unsigned int endSurface,
-    unsigned int maxDrawSurfCount);
-void __cdecl R_AddAllBspDrawSurfacesSpotShadow(unsigned int spotShadowIndex, unsigned int primaryLightIndex);
+    uint32_t partitionIndex,
+    uint32_t beginSurface,
+    uint32_t endSurface,
+    uint32_t maxDrawSurfCount);
+void __cdecl R_AddAllBspDrawSurfacesSpotShadow(uint32_t spotShadowIndex, uint32_t primaryLightIndex);
 
 
 // r_add_cmdbuf
@@ -287,6 +287,6 @@ int __cdecl R_AllocDrawSurf(
     GfxDelayedCmdBuf *delayedCmdBuf,
     GfxDrawSurf drawSurf,
     GfxDrawSurfList *drawSurfList,
-    unsigned int size);
-void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, unsigned int value);
-void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, unsigned __int8 *data, unsigned int count);
+    uint32_t size);
+void __cdecl R_WritePrimDrawSurfInt(GfxDelayedCmdBuf *delayedCmdBuf, uint32_t value);
+void __cdecl R_WritePrimDrawSurfData(GfxDelayedCmdBuf *delayedCmdBuf, uint8_t *data, uint32_t count);

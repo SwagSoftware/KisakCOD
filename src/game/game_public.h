@@ -356,7 +356,7 @@ int32_t __cdecl G_GetEntityToken(char *buffer, int32_t bufferSize);
 int32_t __cdecl G_ParseSpawnVars(SpawnVar *spawnVar);
 char *__cdecl G_AddSpawnVarToken(char *string, SpawnVar *spawnVar);
 int32_t __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const char *defaultString, const char **out);
-unsigned int __cdecl G_NewString(const char *string);
+uint32_t __cdecl G_NewString(const char *string);
 char *__cdecl vtos(const float *v);
 
 
@@ -674,7 +674,7 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
 
 gentity_s *G_IsVehicleUnusable(gentity_s *player);
-bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, unsigned int weapon);
+bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapon);
 bool G_IsPlayerDrivingVehicle(const gentity_s *player);
 gentity_s *VEH_GetCollMap(const char *modelname);
 void VEH_SetupCollmap(gentity_s *ent);

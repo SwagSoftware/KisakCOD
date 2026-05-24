@@ -4,10 +4,10 @@
 struct GfxModelSurfaceInfo // sizeof=0xC
 {                                       // ...
     const struct DObjAnimMat *baseMat;
-    unsigned __int8 boneIndex;
-    unsigned __int8 boneCount;
-    unsigned __int16 gfxEntIndex;
-    unsigned __int16 lightingHandle;
+    uint8_t boneIndex;
+    uint8_t boneCount;
+    uint16_t gfxEntIndex;
+    uint16_t lightingHandle;
     // padding byte
     // padding byte
 };
@@ -38,7 +38,7 @@ struct SkinXModelCmd // sizeof=0x1C
     void *modelSurfs;
     const DObjAnimMat *mat;
     int surfacePartBits[4];
-    unsigned __int16 surfCount;
+    uint16_t surfCount;
     // padding byte
     // padding byte
 };

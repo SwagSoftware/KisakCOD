@@ -62,12 +62,12 @@ struct __declspec(align(4)) LerpEntityStateActor
 {
     float visionFov;
     float visionDist;
-    unsigned __int8 species;
+    uint8_t species;
 };
 #endif
 struct LerpEntityStatePrimaryLight // sizeof=0x14
 {                                       // XREF: LerpEntityStateTypeUnion/r
-    unsigned __int8 colorAndExp[4];
+    uint8_t colorAndExp[4];
     float intensity;
     float radius;
     float cosHalfFovOuter;
@@ -224,7 +224,7 @@ struct entityState_s // sizeof=0xF4 // (KISAKTODO: should be in q_shared?)
     int iHeadIcon;
     int iHeadIconTeam;                  // XREF: G_InitGrenadeEntity(gentity_s *,gentity_s *)+218/o
     int solid;
-    unsigned int eventParm;
+    uint32_t eventParm;
     int eventSequence;
     int events[4];                      // XREF: G_MoverPush+3FE/o
     int eventParms[4];
@@ -236,7 +236,7 @@ struct entityState_s // sizeof=0xF4 // (KISAKTODO: should be in q_shared?)
     entityState_s_un2 un2;
     float fTorsoPitch;
     float fWaistPitch;
-    unsigned int partBits[4];           // XREF: Fire_Lead:loc_5189EC/o
+    uint32_t partBits[4];           // XREF: Fire_Lead:loc_5189EC/o
 };
 struct archivedEntityShared_t // sizeof=0x24
 {                                       // ...
@@ -257,9 +257,9 @@ struct archivedEntity_s // sizeof=0x118
 
 union entityState_s_tag
 {
-    unsigned __int8 scale;
-    unsigned __int8 eventParm2;
-    unsigned __int8 vehicleCompassType;
+    uint8_t scale;
+    uint8_t eventParm2;
+    uint8_t vehicleCompassType;
 };
 
 union entityState_s_type_index
@@ -273,23 +273,23 @@ union entityState_s_type_index
 struct entityState_s
 {
     entityType_t eType; // entityType_t
-    unsigned __int8 surfType;
-    unsigned __int8 weapon;
-    unsigned __int8 weaponModel;
+    uint8_t surfType;
+    uint8_t weapon;
+    uint8_t weaponModel;
     entityState_s_tag un1;
     LerpEntityState lerp;
-    unsigned int eventParm;
-    unsigned __int16 loopSound;
-    unsigned __int16 number;
-    unsigned __int16 otherEntityNum;
-    unsigned __int16 groundEntityNum;
+    uint32_t eventParm;
+    uint16_t loopSound;
+    uint16_t number;
+    uint16_t otherEntityNum;
+    uint16_t groundEntityNum;
     //_BYTE index[2];
     entityState_s_type_index index;
     int time2;
     int solid;
     int eventSequence;
-    unsigned __int8 events[4];
-    unsigned int eventParms[4];
+    uint8_t events[4];
+    uint32_t eventParms[4];
     _BYTE un2[4];
 };
 #endif

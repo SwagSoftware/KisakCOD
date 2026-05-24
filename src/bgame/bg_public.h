@@ -399,7 +399,7 @@ struct __declspec(align(4)) pmove_t
     float xyspeed;
     int viewChangeTime;
     float viewChange;
-    unsigned __int8 handler;
+    uint8_t handler;
 };
 #elif KISAK_MP
 struct pmove_t // sizeof=0x110
@@ -423,7 +423,7 @@ struct pmove_t // sizeof=0x110
     int mantleDuration;                 // ...
     int viewChangeTime;                 // ...
     float viewChange;
-    unsigned __int8 handler;            // ...
+    uint8_t handler;            // ...
     // padding byte
     // padding byte
     // padding byte
@@ -517,11 +517,11 @@ static_assert(sizeof(entityShared_t) == 0x68);
 #elif KISAK_SP
 struct entityShared_t
 {
-    unsigned __int8 linked;
-    unsigned __int8 bmodel;
-    unsigned __int8 svFlags;
-    unsigned __int8 eventType;
-    unsigned __int8 inuse;
+    uint8_t linked;
+    uint8_t bmodel;
+    uint8_t svFlags;
+    uint8_t eventType;
+    uint8_t inuse;
     float mins[3];
     float maxs[3];
     int contents;
@@ -750,9 +750,9 @@ struct missile_ent_t
 
 struct gentity_s_tag
 {
-    unsigned __int16 notifyString;
-    unsigned __int16 index;
-    unsigned __int8 stoppable;
+    uint16_t notifyString;
+    uint16_t index;
+    uint8_t stoppable;
     int basetime;
     int duration;
 };
@@ -791,10 +791,10 @@ struct TurretInfo
     float anglesError[3];
     float pitchCap;
     int triggerDown;
-    unsigned __int16 fireSnd;
-    unsigned __int16 fireSndPlayer;
-    unsigned __int16 stopSnd;
-    unsigned __int16 stopSndPlayer;
+    uint16_t fireSnd;
+    uint16_t fireSndPlayer;
+    uint16_t stopSnd;
+    uint16_t stopSndPlayer;
 };
 
 struct spawner_ent_t
@@ -803,7 +803,7 @@ struct spawner_ent_t
     int timestamp;
 };
 
-enum EntHandler_t : unsigned __int8 // (not a real enum name)
+enum EntHandler_t : uint8_t // (not a real enum name)
 {
     ENT_HANDLER_NULL = 0x0,
     ENT_HANDLER_ACTOR_INIT = 0x1,
@@ -835,7 +835,7 @@ enum EntHandler_t : unsigned __int8 // (not a real enum name)
     ENT_HANDLER_COUNT = 0x1B,
 };
 
-enum gentityFlags_t : unsigned int // LWSS: not a real enum name, used to force usage
+enum gentityFlags_t : uint32_t // LWSS: not a real enum name, used to force usage
 {
     FL_GODMODE               = 0x1,
     FL_DEMI_GODMODE          = 0x2,
@@ -929,18 +929,18 @@ struct gentity_s
     sentient_s *sentient;
     struct scr_vehicle_s *scr_vehicle;
     TurretInfo *pTurretInfo;
-    unsigned __int8 physicsObject;
-    unsigned __int8 takedamage;
-    unsigned __int8 active;
-    unsigned __int8 nopickup;
-    unsigned __int16 model;
+    uint8_t physicsObject;
+    uint8_t takedamage;
+    uint8_t active;
+    uint8_t nopickup;
+    uint16_t model;
     EntHandler_t handler; // ENT_HANDLER_xxxxx
-    unsigned __int16 classname;
-    unsigned __int16 script_linkName;
-    unsigned __int16 script_noteworthy;
-    unsigned __int16 target;
-    unsigned __int16 targetname;
-    unsigned int attachIgnoreCollision;
+    uint16_t classname;
+    uint16_t script_linkName;
+    uint16_t script_noteworthy;
+    uint16_t target;
+    uint16_t targetname;
+    uint32_t attachIgnoreCollision;
     int spawnflags;
     gentityFlags_t flags;
     int clipmask;
@@ -964,15 +964,15 @@ struct gentity_s
         missile_ent_t missile;
     };
     EntHandle missileTargetEnt;
-    unsigned __int16 lookAtText0;
-    unsigned __int16 lookAtText1;
+    uint16_t lookAtText0;
+    uint16_t lookAtText1;
     gentity_s_tag snd_wait;
     tagInfo_s *tagInfo;
     gentity_s *tagChildren;
     struct animscripted_s *scripted;
-    unsigned __int16 attachModelNames[31];
-    unsigned __int16 attachTagNames[31];
-    unsigned __int16 disconnectedLinks;
+    uint16_t attachModelNames[31];
+    uint16_t attachTagNames[31];
+    uint16_t disconnectedLinks;
     int iDisconnectTime;
     float angleLerpRate;
     XAnimTree_s *pAnimTree;
@@ -1015,7 +1015,7 @@ extern const dvar_t *jump_ladderPushVel;
 extern const dvar_t *jump_spreadAdd;
 
 // bg_weapons
-extern unsigned int bg_lastParsedWeaponIndex;
+extern uint32_t bg_lastParsedWeaponIndex;
 extern struct WeaponDef *bg_weaponDefs[128];
 
 // https://github.com/id-Software/RTCW-SP/blob/master/src/game/bg_public.h#L1573

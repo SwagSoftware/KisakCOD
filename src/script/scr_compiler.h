@@ -32,9 +32,9 @@ enum : __int32
 
 struct CaseStatementInfo // sizeof=0x10
 {
-    unsigned int name;
+    uint32_t name;
     const char *codePos;
-    unsigned int sourcePos;
+    uint32_t sourcePos;
     CaseStatementInfo *next;
 };
 static_assert(sizeof(CaseStatementInfo) == 0x10);
@@ -66,10 +66,10 @@ static_assert(sizeof(VariableCompileValue) == 0xC);
 
 struct scrCompileGlob_t // sizeof=0x1D8
 {                                       // ...
-    unsigned __int8 *codePos;           // ...
-    unsigned __int8 *prevOpcodePos;     // ...
-    unsigned int fileId;                // ...
-    unsigned int threadId;              // ...
+    uint8_t *codePos;           // ...
+    uint8_t *prevOpcodePos;     // ...
+    uint32_t fileId;                // ...
+    uint32_t threadId;              // ...
     int cumulOffset;                    // ...
     int maxOffset;                      // ...
     int maxCallOffset;                  // ...
@@ -77,7 +77,7 @@ struct scrCompileGlob_t // sizeof=0x1D8
     bool in_developer_thread;           // ...
     // padding byte
     // padding byte
-    unsigned int developer_thread_sourcePos; // ...
+    uint32_t developer_thread_sourcePos; // ...
     bool firstThread[2];                // ...
     // padding byte
     // padding byte
@@ -112,10 +112,10 @@ struct scrCompilePub_t
 {
     int value_count;
     int far_function_count;
-    unsigned int loadedscripts;
-    unsigned int scripts;
-    unsigned int builtinFunc;
-    unsigned int builtinMeth;
+    uint32_t loadedscripts;
+    uint32_t scripts;
+    uint32_t builtinFunc;
+    uint32_t builtinMeth;
     short canonicalStrings[65536];
     const char *in_ptr;
     const char *parseBuf;
@@ -123,7 +123,7 @@ struct scrCompilePub_t
     bool allowedBreakpoint;
     int developer_statement;
     unsigned char *opcodePos;
-    unsigned int programLen;
+    uint32_t programLen;
     int func_table_size;
     int func_table[SCR_FUNC_TABLE_SIZE];
 };
@@ -131,8 +131,8 @@ struct scrCompilePub_t
 void __cdecl Scr_CompileStatement(sval_u parseData);
 void __cdecl ScriptCompile(
     sval_u val,
-    unsigned int fileId,
-    unsigned int scriptId,
+    uint32_t fileId,
+    uint32_t scriptId,
     struct PrecacheEntry *entries,
     int entriesCount);
 

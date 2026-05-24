@@ -42,7 +42,7 @@ struct GfxSkinnedXModelSurfs // sizeof=0x4
 };
 struct GfxSceneEntityCull // sizeof=0x40
 {                                       // ...
-    volatile unsigned int state;
+    volatile uint32_t state;
     float mins[3];
     float maxs[3];
     char lods[32];
@@ -54,18 +54,18 @@ struct cpose_t;
 union GfxSceneEntityInfo // sizeof=0x4
 {                                       // ...
     cpose_t *pose;
-    unsigned __int16 *cachedLightingHandle;
+    uint16_t *cachedLightingHandle;
 };
 struct GfxSceneEntity // sizeof=0x7C // (SP/MP same)
 {                                       // ...
     float lightingOrigin[3];
     GfxScaledPlacement placement;
     GfxSceneEntityCull cull;
-    unsigned __int16 gfxEntIndex;
-    unsigned __int16 entnum;
+    uint16_t gfxEntIndex;
+    uint16_t entnum;
     const DObj_s *obj;
     GfxSceneEntityInfo info;
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t reflectionProbeIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -94,12 +94,12 @@ struct GfxSceneModel // sizeof=0x48
     const XModel *model;
     const DObj_s *obj;
     GfxScaledPlacement placement;
-    unsigned __int16 gfxEntIndex;
-    unsigned __int16 entnum;
+    uint16_t gfxEntIndex;
+    uint16_t entnum;
     float radius;
-    unsigned __int16 *cachedLightingHandle;
+    uint16_t *cachedLightingHandle;
     float lightingOrigin[3];
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t reflectionProbeIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -107,10 +107,10 @@ struct GfxSceneModel // sizeof=0x48
 struct GfxSceneBrush // sizeof=0x28
 {                                       // ...
     BModelDrawInfo info;
-    unsigned __int16 entnum;
+    uint16_t entnum;
     const GfxBrushModel *bmodel;
     GfxPlacement placement;
-    unsigned __int8 reflectionProbeIndex;
+    uint8_t reflectionProbeIndex;
     // padding byte
     // padding byte
     // padding byte
@@ -124,10 +124,10 @@ union GfxEntCellRefInfo // sizeof=0x4
 
 struct GfxSceneDpvs // sizeof=0x38
 {                                       // ...
-    unsigned int localClientNum;        // ...
-    unsigned __int8 *entVisData[7];     // ...
-    unsigned __int16 *sceneXModelIndex; // ...
-    unsigned __int16 *sceneDObjIndex;   // ...
+    uint32_t localClientNum;        // ...
+    uint8_t *entVisData[7];     // ...
+    uint16_t *sceneXModelIndex; // ...
+    uint16_t *sceneDObjIndex;   // ...
     GfxEntCellRefInfo *entInfo[4];      // ...
 };
 
@@ -164,7 +164,7 @@ struct __declspec(align(64)) GfxScene // sizeof=0x154D00
     GfxDrawSurf smodelSpotShadowDrawSurfs3[256]; // ...
     GfxDrawSurf entSpotShadowDrawSurfs3[512]; // ...
     GfxDrawSurf shadowDrawSurfs[512];   // ...
-    unsigned int shadowableLightIsUsed[32]; // ...
+    uint32_t shadowableLightIsUsed[32]; // ...
     int maxDrawSurfCount[34];           // DRAW_SURF_TYPE_COUNT
     volatile long drawSurfCount[34];     // DRAW_SURF_TYPE_COUNT
     GfxDrawSurf *drawSurfs[34];         // DRAW_SURF_TYPE_COUNT
@@ -183,38 +183,38 @@ struct __declspec(align(64)) GfxScene // sizeof=0x154D00
     GfxVisibleLight visLight[4];        // ...
     GfxVisibleLight visLightShadow[1];  // ...
     GfxShadowCookie cookie[24];         // ...
-    unsigned int *entOverflowedDrawBuf; // ...
-    volatile unsigned int sceneDObjCount;        // ...
+    uint32_t *entOverflowedDrawBuf; // ...
+    volatile uint32_t sceneDObjCount;        // ...
     GfxSceneEntity sceneDObj[512];      // ...
-    unsigned __int8 sceneDObjVisData[7][512]; // ...
-    volatile unsigned int sceneModelCount;       // ...
+    uint8_t sceneDObjVisData[7][512]; // ...
+    volatile uint32_t sceneModelCount;       // ...
     GfxSceneModel sceneModel[1024];     // ...
-    unsigned __int8 sceneModelVisData[7][1024]; // ...
-    volatile unsigned int sceneBrushCount;       // ...
+    uint8_t sceneModelVisData[7][1024]; // ...
+    volatile uint32_t sceneBrushCount;       // ...
     GfxSceneBrush sceneBrush[512];      // ...
-    unsigned __int8 sceneBrushVisData[3][512]; // ...
-    unsigned int sceneDynModelCount;    // ...
-    unsigned int sceneDynBrushCount;    // ...
+    uint8_t sceneBrushVisData[3][512]; // ...
+    uint32_t sceneDynModelCount;    // ...
+    uint32_t sceneDynBrushCount;    // ...
     DpvsPlane shadowFarPlane[2];        // ...
     DpvsPlane shadowNearPlane[2];       // ...
     GfxSceneDpvs dpvs;                  // ...
 };
 
 void __cdecl TRACK_r_scene();
-unsigned int __cdecl R_AllocSceneDObj();
-unsigned int __cdecl R_AllocSceneModel();
-unsigned int __cdecl R_AllocSceneBrush();
-GfxBrushModel *__cdecl R_GetBrushModel(unsigned int modelIndex);
+uint32_t __cdecl R_AllocSceneDObj();
+uint32_t __cdecl R_AllocSceneModel();
+uint32_t __cdecl R_AllocSceneBrush();
+GfxBrushModel *__cdecl R_GetBrushModel(uint32_t modelIndex);
 void __cdecl R_AddBrushModelToSceneFromAngles(
     const GfxBrushModel *bmodel,
     const float *origin,
     const float *angles,
-    unsigned __int16 entnum);
+    uint16_t entnum);
 void __cdecl R_AddDObjToScene(
     const DObj_s *obj,
     const cpose_t *pose,
-    unsigned int entnum,
-    unsigned int renderFxFlags,
+    uint32_t entnum,
+    uint32_t renderFxFlags,
     float *lightingOrigin,
     float materialTime);
 GfxParticleCloud *__cdecl R_AddParticleCloudToScene(Material *material);
@@ -227,26 +227,26 @@ void __cdecl R_AddBModelSurfacesCamera(
     const GfxBrushModel *bmodel,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs,
-    unsigned int reflectionProbeIndex);
+    uint32_t reflectionProbeIndex);
 GfxDrawSurf *__cdecl R_AddBModelSurfaces(
     BModelDrawInfo *bmodelInfo,
     const GfxBrushModel *bmodel,
     MaterialTechniqueType techType,
     GfxDrawSurf *drawSurf,
     GfxDrawSurf *lastDrawSurf);
-const XSurface *__cdecl R_GetXSurface(unsigned int *modelSurf, surfaceType_t surfType);
+const XSurface *__cdecl R_GetXSurface(uint32_t *modelSurf, surfaceType_t surfType);
 void __cdecl R_AddXModelSurfacesCamera(
     XModelDrawInfo *modelInfo,
     const XModel *model,
     float *origin,
-    unsigned __int16 gfxEntIndex,
-    unsigned int lightingHandle,
-    unsigned __int8 primaryLightIndex,
+    uint16_t gfxEntIndex,
+    uint32_t lightingHandle,
+    uint8_t primaryLightIndex,
     char isShadowReceiver,
     int depthHack,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs,
-    unsigned int reflectionProbeIndex);
+    uint32_t reflectionProbeIndex);
 void __cdecl R_AddXModelDebugString(const float *origin, char *string);
 GfxDrawSurf *__cdecl R_AddXModelSurfaces(
     XModelDrawInfo *modelInfo,
@@ -257,7 +257,7 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
 void __cdecl R_AddDObjSurfacesCamera(
     GfxSceneEntity *sceneEnt,
     __int16 lightingHandle,
-    unsigned __int8 primaryLightIndex,
+    uint8_t primaryLightIndex,
     GfxDrawSurf **drawSurfs,
     GfxDrawSurf **lastDrawSurfs);
 GfxDrawSurf *__cdecl R_AddDObjSurfaces(
@@ -269,11 +269,11 @@ bool __cdecl R_EndFencePending();
 void __cdecl R_SetEndTime(int endTime);
 void __cdecl R_WaitEndTime();
 void __cdecl R_InitScene();
-void __cdecl R_ClearScene(unsigned int localClientNum);
-unsigned int __cdecl R_GetLocalClientNum();
+void __cdecl R_ClearScene(uint32_t localClientNum);
+uint32_t __cdecl R_GetLocalClientNum();
 void __cdecl R_SetLodOrigin(const refdef_s *refdef);
 void R_UpdateFrameFog();
-unsigned __int8 __cdecl LerpByte(unsigned __int8 from, unsigned __int8 to, float frac);
+uint8_t __cdecl LerpByte(uint8_t from, uint8_t to, float frac);
 void __cdecl R_SetViewParmsForScene(const refdef_s *refdef, GfxViewParms *viewParms);
 void __cdecl R_SetupProjection(float tanHalfFovX, float tanHalfFovY, GfxViewParms *viewParms);
 bool R_UpdateFrameSun();
@@ -309,11 +309,11 @@ void __cdecl R_SetSunShadowConstants(GfxCmdBufInput *input, const GfxSunShadowPr
 void __cdecl R_SetSunConstants(GfxCmdBufInput *input);
 void R_DrawCineWarning();
 void __cdecl R_SetSceneParms(const refdef_s *refdef, GfxSceneParms *sceneParms);
-void __cdecl R_LinkDObjEntity(unsigned int localClientNum, unsigned int entnum, float *origin, float radius);
-void __cdecl R_LinkBModelEntity(unsigned int localClientNum, unsigned int entnum, GfxBrushModel *bmodel);
-void __cdecl R_UnlinkEntity(unsigned int localClientNum, unsigned int entnum);
-void __cdecl R_LinkDynEnt(unsigned int dynEntId, DynEntityDrawType drawType, float *mins, float *maxs);
-void __cdecl R_UnlinkDynEnt(unsigned int dynEntId, DynEntityDrawType drawType);
+void __cdecl R_LinkDObjEntity(uint32_t localClientNum, uint32_t entnum, float *origin, float radius);
+void __cdecl R_LinkBModelEntity(uint32_t localClientNum, uint32_t entnum, GfxBrushModel *bmodel);
+void __cdecl R_UnlinkEntity(uint32_t localClientNum, uint32_t entnum);
+void __cdecl R_LinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType, float *mins, float *maxs);
+void __cdecl R_UnlinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType);
 
 
 extern GfxScene scene;

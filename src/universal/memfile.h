@@ -37,25 +37,25 @@ bool MemFile_IsWriting(MemoryFile* memFile);
 double MemFile_ReadFloat(MemoryFile* memFile);
 
 void __cdecl MemFile_StartSegment(MemoryFile* memFile, int index);
-void __cdecl MemFile_deflateInit(unsigned __int8* next_out, unsigned int avail_out, bool compress);
+void __cdecl MemFile_deflateInit(uint8_t* next_out, uint32_t avail_out, bool compress);
 void __cdecl MemFile_EndSegment(MemoryFile *memFile);
-unsigned int __cdecl MemFile_deflateEnd(bool compress);
+uint32_t __cdecl MemFile_deflateEnd(bool compress);
 void __cdecl MemFile_MoveToSegment(MemoryFile* memFile, int index);
-void __cdecl MemFile_inflateInit(unsigned __int8* next_in, unsigned int len, bool compress);
+void __cdecl MemFile_inflateInit(uint8_t* next_in, uint32_t len, bool compress);
 int __cdecl MemFile_inflateEnd(bool compress);
-unsigned __int8* __cdecl MemFile_GetSegmentAddess(MemoryFile* memFile, unsigned int index);
+uint8_t* __cdecl MemFile_GetSegmentAddess(MemoryFile* memFile, uint32_t index);
 void __cdecl MemFile_WriteError(MemoryFile* memFile);
 int __cdecl MemFile_WriteDataInternal(
     MemoryFile* memFile,
     int bytes,
     char nonZeroCount,
     char cacheBufferLen,
-    unsigned __int8 nextByte);
+    uint8_t nextByte);
 int __cdecl MemFile_GetUsedSize(MemoryFile* memFile);
 void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* p);
 void __cdecl MemFile_WriteCString(MemoryFile* memFile, const char* string);
 const char* __cdecl MemFile_ReadCString(MemoryFile* memFile);
-void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, unsigned __int8* p);
-unsigned __int8 __cdecl MemFile_ReadByteInternal(MemoryFile* memFile);
+void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, uint8_t* p);
+uint8_t __cdecl MemFile_ReadByteInternal(MemoryFile* memFile);
 void MemFile_Shutdown(MemoryFile *memFile);
-unsigned __int8 *MemFile_CopySegments(MemoryFile *memFile, int index, void *buf);
+uint8_t *MemFile_CopySegments(MemoryFile *memFile, int index, void *buf);

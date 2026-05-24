@@ -5,13 +5,13 @@
 #include <universal/com_files.h>
 #include <universal/profile.h>
 
-unsigned __int8 *s_imageLoadBuf;
-unsigned int s_imageLoadBytesUsed;
+uint8_t *s_imageLoadBuf;
+uint32_t s_imageLoadBytesUsed;
 
-unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes)
+uint8_t *__cdecl Image_AllocTempMemory(int bytes)
 {
-    unsigned __int8 *mem; // [esp+10h] [ebp-4h]
-    unsigned int bytesa; // [esp+1Ch] [ebp+8h]
+    uint8_t *mem; // [esp+10h] [ebp-4h]
+    uint32_t bytesa; // [esp+1Ch] [ebp+8h]
 
     bytesa = (bytes + 3) & 0xFFFFFFFC;
     if (bytesa + s_imageLoadBytesUsed > 0x600000)
@@ -21,7 +21,7 @@ unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes)
             (double)(bytesa + s_imageLoadBytesUsed) * 0.00000095367431640625);
     if (!s_imageLoadBuf)
     {
-        s_imageLoadBuf = (unsigned __int8 *)Z_VirtualAlloc(6291456, "Image_AllocTempMemory", 18);
+        s_imageLoadBuf = (uint8_t *)Z_VirtualAlloc(6291456, "Image_AllocTempMemory", 18);
         iassert( s_imageLoadBuf );
     }
     mem = &s_imageLoadBuf[s_imageLoadBytesUsed];
@@ -29,14 +29,14 @@ unsigned __int8 *__cdecl Image_AllocTempMemory(int bytes)
     return mem;
 }
 
-void __cdecl Image_FreeTempMemory(unsigned __int8 *mem, int bytes)
+void __cdecl Image_FreeTempMemory(uint8_t *mem, int bytes)
 {
     bytes = (bytes + 3) & 0xFFFFFFFC;
     iassert( mem + bytes == s_imageLoadBuf + s_imageLoadBytesUsed );
     s_imageLoadBytesUsed -= bytes;
 }
 
-void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int width, int height, _D3DFORMAT imageFormat)
+void __cdecl Image_Generate2D(GfxImage *image, uint8_t *pixels, int width, int height, _D3DFORMAT imageFormat)
 {
     iassert( pixels );
     if (width <= 0 || (width & (width - 1)) != 0)
@@ -60,7 +60,7 @@ void __cdecl Image_Generate2D(GfxImage *image, unsigned __int8 *pixels, int widt
     Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
 }
 
-void __cdecl Image_ExpandBgr(const unsigned __int8 *src, unsigned int count, unsigned __int8 *dst)
+void __cdecl Image_ExpandBgr(const uint8_t *src, uint32_t count, uint8_t *dst)
 {
     iassert( src );
     iassert( dst );
@@ -77,13 +77,13 @@ void __cdecl Image_ExpandBgr(const unsigned __int8 *src, unsigned int count, uns
     } while (count);
 }
 
-unsigned int __cdecl Image_GetCardMemoryAmountForMipLevel(
+uint32_t __cdecl Image_GetCardMemoryAmountForMipLevel(
     _D3DFORMAT format,
-    unsigned int mipWidth,
-    unsigned int mipHeight,
-    unsigned int mipDepth)
+    uint32_t mipWidth,
+    uint32_t mipHeight,
+    uint32_t mipDepth)
 {
-    unsigned int result; // eax
+    uint32_t result; // eax
     const char *v5; // eax
 
     if (format > D3DFMT_D16)
@@ -133,17 +133,17 @@ unsigned int __cdecl Image_GetCardMemoryAmountForMipLevel(
     return result;
 }
 
-unsigned int __cdecl Image_GetCardMemoryAmount(
+uint32_t __cdecl Image_GetCardMemoryAmount(
     char imageFlags,
     _D3DFORMAT format,
-    unsigned int width,
-    unsigned int height,
-    unsigned int depth)
+    uint32_t width,
+    uint32_t height,
+    uint32_t depth)
 {
-    unsigned int v6; // [esp+0h] [ebp-1Ch]
-    unsigned int v7; // [esp+4h] [ebp-18h]
-    unsigned int v8; // [esp+8h] [ebp-14h]
-    unsigned int memory; // [esp+18h] [ebp-4h]
+    uint32_t v6; // [esp+0h] [ebp-1Ch]
+    uint32_t v7; // [esp+4h] [ebp-18h]
+    uint32_t v8; // [esp+8h] [ebp-14h]
+    uint32_t memory; // [esp+18h] [ebp-4h]
 
     memory = Image_GetCardMemoryAmountForMipLevel(format, width, height, depth);
     if ((imageFlags & 2) == 0)
@@ -181,10 +181,10 @@ void __cdecl Image_TrackTotalMemory(GfxImage *image, int platform, int memory)
 
 void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT format, int width, int height, int depth)
 {
-    unsigned int CardMemoryAmount; // eax
-    unsigned int v7; // [esp+0h] [ebp-2Ch]
-    unsigned int v8; // [esp+4h] [ebp-28h]
-    unsigned int v9; // [esp+8h] [ebp-24h]
+    uint32_t CardMemoryAmount; // eax
+    uint32_t v7; // [esp+0h] [ebp-2Ch]
+    uint32_t v8; // [esp+4h] [ebp-28h]
+    uint32_t v9; // [esp+8h] [ebp-24h]
     int memory; // [esp+18h] [ebp-14h]
     int platform; // [esp+28h] [ebp-4h]
 
@@ -226,24 +226,24 @@ void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT for
 
 void __cdecl Image_SetupFromFile(GfxImage *image, const GfxImageFileHeader *fileHeader, _D3DFORMAT imageFormat)
 {
-    unsigned int v3; // [esp+0h] [ebp-2Ch]
-    unsigned int v4; // [esp+4h] [ebp-28h]
-    unsigned int v5; // [esp+8h] [ebp-24h]
-    unsigned __int8 picmip; // [esp+28h] [ebp-4h]
+    uint32_t v3; // [esp+0h] [ebp-2Ch]
+    uint32_t v4; // [esp+4h] [ebp-28h]
+    uint32_t v5; // [esp+8h] [ebp-24h]
+    uint8_t picmip; // [esp+28h] [ebp-4h]
 
     iassert( image );
     iassert( fileHeader );
     picmip = image->picmip.platform[0];
-    if ((int)((unsigned int)fileHeader->dimensions[0] >> picmip) > 1)
-        v5 = (unsigned int)fileHeader->dimensions[0] >> picmip;
+    if ((int)((uint32_t)fileHeader->dimensions[0] >> picmip) > 1)
+        v5 = (uint32_t)fileHeader->dimensions[0] >> picmip;
     else
         v5 = 1;
-    if ((int)((unsigned int)fileHeader->dimensions[1] >> picmip) > 1)
-        v4 = (unsigned int)fileHeader->dimensions[1] >> picmip;
+    if ((int)((uint32_t)fileHeader->dimensions[1] >> picmip) > 1)
+        v4 = (uint32_t)fileHeader->dimensions[1] >> picmip;
     else
         v4 = 1;
-    if ((int)((unsigned int)fileHeader->dimensions[2] >> picmip) > 1)
-        v3 = (unsigned int)fileHeader->dimensions[2] >> picmip;
+    if ((int)((uint32_t)fileHeader->dimensions[2] >> picmip) > 1)
+        v3 = (uint32_t)fileHeader->dimensions[2] >> picmip;
     else
         v3 = 1;
     Image_Setup(image, v5, v4, v3, fileHeader->flags, imageFormat);
@@ -272,7 +272,7 @@ bool __cdecl Image_IsProg(GfxImage *image)
 
 void __cdecl Image_Generate3D(
     GfxImage *image,
-    unsigned __int8 *pixels,
+    uint8_t *pixels,
     int width,
     int height,
     int depth,
@@ -310,15 +310,15 @@ void __cdecl Image_Generate3D(
 
 void __cdecl Image_GenerateCube(
     GfxImage *image,
-    const unsigned __int8 *(*pixels)[15],
+    const uint8_t *(*pixels)[15],
     int edgeLen,
     _D3DFORMAT imageFormat,
-    unsigned int mipCount)
+    uint32_t mipCount)
 {
     _D3DCUBEMAP_FACES face; // [esp+0h] [ebp-10h]
-    unsigned int mipIndex; // [esp+4h] [ebp-Ch]
-    unsigned int faceIndex; // [esp+8h] [ebp-8h]
-    unsigned __int8 imageFlags; // [esp+Fh] [ebp-1h]
+    uint32_t mipIndex; // [esp+4h] [ebp-Ch]
+    uint32_t faceIndex; // [esp+8h] [ebp-8h]
+    uint8_t imageFlags; // [esp+Fh] [ebp-1h]
 
     iassert( pixels );
     iassert( edgeLen > 0 );
@@ -333,7 +333,7 @@ void __cdecl Image_GenerateCube(
     {
         face = (_D3DCUBEMAP_FACES)Image_CubemapFace(faceIndex);
         for (mipIndex = 0; mipIndex < mipCount; ++mipIndex)
-            Image_UploadData(image, imageFormat, face, mipIndex, (unsigned __int8 *)(&(*pixels)[15 * faceIndex])[mipIndex]);
+            Image_UploadData(image, imageFormat, face, mipIndex, (uint8_t *)(&(*pixels)[15 * faceIndex])[mipIndex]);
     }
 }
 
@@ -346,16 +346,16 @@ void __cdecl Image_BuildWaterMap(GfxImage *image)
 void __cdecl Image_LoadDxtc(
     GfxImage *image,
     const GfxImageFileHeader *fileHeader,
-    const unsigned __int8 *data,
+    const uint8_t *data,
     _D3DFORMAT format,
     int bytesPerBlock)
 {
-    unsigned int v5; // [esp+0h] [ebp-34h]
-    unsigned int v6; // [esp+4h] [ebp-30h]
+    uint32_t v5; // [esp+0h] [ebp-34h]
+    uint32_t v6; // [esp+4h] [ebp-30h]
     int mipCount; // [esp+14h] [ebp-20h]
     _D3DCUBEMAP_FACES face; // [esp+20h] [ebp-14h]
-    unsigned int faceCount; // [esp+24h] [ebp-10h]
-    unsigned int faceIndex; // [esp+28h] [ebp-Ch]
+    uint32_t faceCount; // [esp+24h] [ebp-10h]
+    uint32_t faceIndex; // [esp+28h] [ebp-Ch]
     int mipLevel; // [esp+2Ch] [ebp-8h]
     int picmip; // [esp+30h] [ebp-4h]
 
@@ -380,12 +380,12 @@ void __cdecl Image_LoadDxtc(
     picmip = image->picmip.platform[0];
     for (mipLevel = mipCount - 1; mipLevel >= picmip; --mipLevel)
     {
-        if ((int)((unsigned int)fileHeader->dimensions[0] >> mipLevel) > 1)
-            v6 = (unsigned int)fileHeader->dimensions[0] >> mipLevel;
+        if ((int)((uint32_t)fileHeader->dimensions[0] >> mipLevel) > 1)
+            v6 = (uint32_t)fileHeader->dimensions[0] >> mipLevel;
         else
             v6 = 1;
-        if ((int)((unsigned int)fileHeader->dimensions[1] >> mipLevel) > 1)
-            v5 = (unsigned int)fileHeader->dimensions[1] >> mipLevel;
+        if ((int)((uint32_t)fileHeader->dimensions[1] >> mipLevel) > 1)
+            v5 = (uint32_t)fileHeader->dimensions[1] >> mipLevel;
         else
             v5 = 1;
         for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
@@ -397,7 +397,7 @@ void __cdecl Image_LoadDxtc(
     }
 }
 
-static GfxImage *__cdecl Image_Load(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack)
+static GfxImage *__cdecl Image_Load(char *name, uint8_t semantic, uint8_t imageTrack)
 {
     GfxImage *image; // [esp+0h] [ebp-4h]
 
@@ -421,7 +421,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
 {
     int v3; // eax
     int v4; // [esp+0h] [ebp-84h]
-    unsigned __int8 *imageData; // [esp+Ch] [ebp-78h]
+    uint8_t *imageData; // [esp+Ch] [ebp-78h]
     GfxImageFileHeader fileHeader; // [esp+10h] [ebp-74h] BYREF
     int fileSize; // [esp+2Ch] [ebp-58h]
     int fileHandle; // [esp+30h] [ebp-54h] BYREF
@@ -437,7 +437,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
         fileSize = OpenFileRead(filepath, &fileHandle);
         if (fileSize >= 0)
         {
-            if ((unsigned int)fileSize < 0x1C)
+            if ((uint32_t)fileSize < 0x1C)
                 MyAssertHandler(
                     ".\\r_image_load_obj.cpp",
                     659,
@@ -445,7 +445,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
                     "%s\n\t(filepath) = %s",
                     "(fileSize >= sizeof( fileHeader ))",
                     filepath);
-            if (FS_Read((unsigned __int8 *)&fileHeader, sizeof(GfxImageFileHeader), fileHandle) == sizeof(GfxImageFileHeader))
+            if (FS_Read((uint8_t *)&fileHeader, sizeof(GfxImageFileHeader), fileHandle) == sizeof(GfxImageFileHeader))
             {
                 if (Image_ValidateHeader(&fileHeader, filepath))
                 {
@@ -513,20 +513,20 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
 void __cdecl Image_LoadBitmap(
     GfxImage *image,
     const GfxImageFileHeader *fileHeader,
-    unsigned __int8 *data,
+    uint8_t *data,
     _D3DFORMAT format,
     int bytesPerPixel)
 {
-    unsigned int v5; // [esp+0h] [ebp-3Ch]
-    unsigned int v6; // [esp+4h] [ebp-38h]
-    unsigned int mipCount; // [esp+14h] [ebp-28h]
+    uint32_t v5; // [esp+0h] [ebp-3Ch]
+    uint32_t v6; // [esp+4h] [ebp-38h]
+    uint32_t mipCount; // [esp+14h] [ebp-28h]
     _D3DCUBEMAP_FACES face; // [esp+20h] [ebp-1Ch]
-    unsigned int faceCount; // [esp+24h] [ebp-18h]
-    unsigned int faceIndex; // [esp+28h] [ebp-14h]
-    unsigned __int8 *expandedData; // [esp+2Ch] [ebp-10h]
+    uint32_t faceCount; // [esp+24h] [ebp-18h]
+    uint32_t faceIndex; // [esp+28h] [ebp-14h]
+    uint8_t *expandedData; // [esp+2Ch] [ebp-10h]
     int mipLevel; // [esp+30h] [ebp-Ch]
     int picmip; // [esp+34h] [ebp-8h]
-    unsigned int expandedSize; // [esp+38h] [ebp-4h]
+    uint32_t expandedSize; // [esp+38h] [ebp-4h]
 
     iassert( image );
     iassert( fileHeader );
@@ -544,12 +544,12 @@ void __cdecl Image_LoadBitmap(
     picmip = image->picmip.platform[0];
     for (mipLevel = mipCount - 1; mipLevel >= picmip; --mipLevel)
     {
-        if ((int)((unsigned int)fileHeader->dimensions[0] >> mipLevel) > 1)
-            v6 = (unsigned int)fileHeader->dimensions[0] >> mipLevel;
+        if ((int)((uint32_t)fileHeader->dimensions[0] >> mipLevel) > 1)
+            v6 = (uint32_t)fileHeader->dimensions[0] >> mipLevel;
         else
             v6 = 1;
-        if ((int)((unsigned int)fileHeader->dimensions[1] >> mipLevel) > 1)
-            v5 = (unsigned int)fileHeader->dimensions[1] >> mipLevel;
+        if ((int)((uint32_t)fileHeader->dimensions[1] >> mipLevel) > 1)
+            v5 = (uint32_t)fileHeader->dimensions[1] >> mipLevel;
         else
             v5 = 1;
         for (faceIndex = 0; faceIndex < faceCount; ++faceIndex)
@@ -573,7 +573,7 @@ void __cdecl Image_LoadBitmap(
         Image_FreeTempMemory(expandedData, expandedSize);
 }
 
-void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader, unsigned __int8 *srcData)
+void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader, uint8_t *srcData)
 {
     const char *v3; // eax
 
@@ -629,7 +629,7 @@ void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader,
     }
 }
 
-GfxImage *__cdecl Image_Register_LoadObj(char *imageName, unsigned __int8 semantic, unsigned __int8 imageTrack)
+GfxImage *__cdecl Image_Register_LoadObj(char *imageName, uint8_t semantic, uint8_t imageTrack)
 {
     GfxImage *image; // [esp+0h] [ebp-4h]
 

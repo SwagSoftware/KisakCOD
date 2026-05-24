@@ -33,27 +33,27 @@ const char *primStatsLabel[10] =
     "debug",
     "code"
 };
-const unsigned int s_stencilFuncTable_52[8] =
+const uint32_t s_stencilFuncTable_52[8] =
 {
     1, 2, 3, 4, 5, 6, 7, 8
 };
-const unsigned int s_cullTable_52[4] =
+const uint32_t s_cullTable_52[4] =
 {
     0, 1, 3, 2
 };
-const unsigned int s_blendTable_52[11] =
+const uint32_t s_blendTable_52[11] =
 {
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
 };
-const unsigned int s_blendOpTable_52[6] =
+const uint32_t s_blendOpTable_52[6] =
 {
     0, 1, 2, 3, 4, 5
 };
-const unsigned int s_depthTestTable_52[4] =
+const uint32_t s_depthTestTable_52[4] =
 {
     8, 2, 3, 4
 };
-const unsigned int s_stencilOpTable_52[8] =
+const uint32_t s_stencilOpTable_52[8] =
 {
     1, 2, 3, 4, 5, 6, 7, 8
 };
@@ -389,7 +389,7 @@ void __cdecl RB_DrawPrimHistogramOverlay()
     int rowMax; // [esp+A0h] [ebp-7Ch]
     float x1; // [esp+A4h] [ebp-78h]
     int subTotalPrims[2][3]; // [esp+A8h] [ebp-74h] BYREF
-    unsigned int subTotalIndex; // [esp+C0h] [ebp-5Ch]
+    uint32_t subTotalIndex; // [esp+C0h] [ebp-5Ch]
     const char *caption; // [esp+C4h] [ebp-58h]
     GfxColor colorNow[3]; // [esp+C8h] [ebp-54h]
     int historyIndex; // [esp+D4h] [ebp-48h]
@@ -454,7 +454,7 @@ void __cdecl RB_DrawPrimHistogramOverlay()
                 totalPrims[viewStatsIndex] += curCount;
                 if (curCount)
                 {
-                    v3.packed = (unsigned int)colorNow[subTotalIndex];
+                    v3.packed = (uint32_t)colorNow[subTotalIndex];
                     v18 = y + fontHeight - 1.0;
                     t1 = x;
                     s1 = backEnd.debugFont;

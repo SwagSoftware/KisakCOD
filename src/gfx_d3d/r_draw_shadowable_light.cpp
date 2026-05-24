@@ -70,7 +70,7 @@ void __cdecl R_SetLightProperties(
 void __cdecl R_SetCodeImageSamplerState(
     GfxCmdBufSourceState *source,
     MaterialTextureSource codeTexture,
-    unsigned __int8 samplerState)
+    uint8_t samplerState)
 {
     bcassert(codeTexture, TEXTURE_SRC_CODE_COUNT);
     iassert(samplerState & SAMPLER_FILTER_MASK);
@@ -80,7 +80,7 @@ void __cdecl R_SetCodeImageSamplerState(
 
 void __cdecl R_SetShadowableLight(
     GfxCmdBufSourceState *source,
-    unsigned int shadowableLightIndex,
+    uint32_t shadowableLightIndex,
     const GfxViewInfo *viewInfo)
 {
     float falloffScale; // [esp+28h] [ebp-28h]
@@ -164,7 +164,7 @@ void __cdecl R_SetShadowableLight(
 
 void __cdecl R_SetDrawSurfsShadowableLight(GfxCmdBufSourceState *source, const GfxDrawSurfListInfo *info)
 {
-    unsigned int shadowableLightIndex; // [esp+4h] [ebp-14h]
+    uint32_t shadowableLightIndex; // [esp+4h] [ebp-14h]
     const GfxLight *light; // [esp+14h] [ebp-4h]
 
     if (info->light)
@@ -178,7 +178,7 @@ void __cdecl R_SetDrawSurfsShadowableLight(GfxCmdBufSourceState *source, const G
     }
 }
 
-unsigned int __cdecl R_GetShadowableLightIndex(
+uint32_t __cdecl R_GetShadowableLightIndex(
     const GfxBackEndData *data,
     const GfxViewInfo *viewInfo,
     const GfxLight *light)

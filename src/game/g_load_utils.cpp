@@ -109,7 +109,7 @@ int32_t __cdecl G_SpawnString(const SpawnVar *spawnVar, const char *key, const c
     return 0;
 }
 
-unsigned int __cdecl G_NewString(const char *string)
+uint32_t __cdecl G_NewString(const char *string)
 {
     char str[0x4000]; // [esp+10h] [ebp-4010h] BYREF
     uint32_t v3; // [esp+4014h] [ebp-Ch]

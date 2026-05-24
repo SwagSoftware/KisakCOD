@@ -33,7 +33,7 @@ const dvar_t *msg_hudelemspew;
 // struct fakedLatencyPackets_t *laggedPackets 82ff2720     net_chan_mp.obj
 // int g_qport              83020760     net_chan_mp.obj
 // BOOL fakelagInitialized  83020768     net_chan_mp.obj
-unsigned __int8 tempNetchanPacketBuf[131072];
+uint8_t tempNetchanPacketBuf[131072];
 loopback_t loopbacks[2];
 fakedLatencyPackets_t laggedPackets[512];
 bool fakelagInitialized;
@@ -89,14 +89,14 @@ void __cdecl NetProf_PrepProfiling(netProfileInfo_t *prof)
             else
                 net_iProfilingOn = 2;
             Com_Printf(16, "Net Profiling turned on: %s\n", WeaponStateNames[net_iProfilingOn + 26]);
-            memset((unsigned __int8 *)prof, 0, sizeof(netProfileInfo_t));
+            memset((uint8_t *)prof, 0, sizeof(netProfileInfo_t));
         }
     }
     else if (net_iProfilingOn)
     {
         net_iProfilingOn = 0;
         Com_Printf(16, "Net Profiling turned off\n");
-        memset((unsigned __int8 *)prof, 0, sizeof(netProfileInfo_t));
+        memset((uint8_t *)prof, 0, sizeof(netProfileInfo_t));
     }
 }
 
@@ -247,7 +247,7 @@ void __cdecl Net_DisplayProfile(int localClientNum)
     }
 }
 
-char __cdecl FakeLag_DestroyPacket(unsigned int packet)
+char __cdecl FakeLag_DestroyPacket(uint32_t packet)
 {
     Z_VirtualFree(laggedPackets[packet].data);
     laggedPackets[packet].data = 0;
@@ -257,7 +257,7 @@ char __cdecl FakeLag_DestroyPacket(unsigned int packet)
     return 1;
 }
 
-void __cdecl FakeLag_SendPacket_Real(unsigned int packet)
+void __cdecl FakeLag_SendPacket_Real(uint32_t packet)
 {
     iassert( packet < FAKELATENCY_MAX_PACKETS_HELD );
     iassert( laggedPackets[ packet ].outbound );
@@ -274,16 +274,16 @@ void __cdecl FakeLag_Init()
 {
     if (!fakelagInitialized)
     {
-        memset((unsigned __int8 *)laggedPackets, 0, sizeof(laggedPackets));
+        memset((uint8_t *)laggedPackets, 0, sizeof(laggedPackets));
         fakelagInitialized = 1;
     }
 }
 
-unsigned int __cdecl FakeLag_GetFreeSlot()
+uint32_t __cdecl FakeLag_GetFreeSlot()
 {
     int packet; // [esp+0h] [ebp-Ch]
     int packeta; // [esp+0h] [ebp-Ch]
-    unsigned int oldest; // [esp+4h] [ebp-8h]
+    uint32_t oldest; // [esp+4h] [ebp-8h]
     int oldestTime; // [esp+8h] [ebp-4h]
 
     for (packet = 0; packet < 512; ++packet)
@@ -314,7 +314,7 @@ bool __cdecl FakeLag_HostingGameOrParty()
     return com_sv_running->current.enabled;
 }
 
-unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to)
+uint32_t __cdecl FakeLag_SendPacket(netsrc_t sock, int length, uint8_t *data, netadr_t to)
 {
     static int lastCall;
 
@@ -323,7 +323,7 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
     const char *v7; // [esp+10h] [ebp-24h]
     int v8; // [esp+14h] [ebp-20h]
     int jitter; // [esp+1Ch] [ebp-18h]
-    unsigned int slot; // [esp+20h] [ebp-14h]
+    uint32_t slot; // [esp+20h] [ebp-14h]
     DWORD now; // [esp+24h] [ebp-10h]
     int change; // [esp+28h] [ebp-Ch]
 
@@ -354,7 +354,7 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
         laggedPackets[slot].loopback = to.type == NA_LOOPBACK;
         laggedPackets[slot].addr = to;
         laggedPackets[slot].length = length;
-        laggedPackets[slot].data = (unsigned __int8 *)Z_VirtualAlloc(length, "FakeLag_SendPacket", 0);
+        laggedPackets[slot].data = (uint8_t *)Z_VirtualAlloc(length, "FakeLag_SendPacket", 0);
         laggedPackets[slot].msg.data = laggedPackets[slot].data;
         memcpy(laggedPackets[slot].data, data, length);
         if (fakelag_jitter->current.integer)
@@ -394,7 +394,7 @@ unsigned int __cdecl FakeLag_SendPacket(netsrc_t sock, int length, unsigned __in
     }
 }
 
-unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t *from, msg_t *msg)
+uint32_t __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netadr_t *from, msg_t *msg)
 {
     static int lastCall_0;
 
@@ -403,7 +403,7 @@ unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, n
     const char *v7; // [esp+18h] [ebp-20h]
     int v8; // [esp+1Ch] [ebp-1Ch]
     int jitter; // [esp+24h] [ebp-14h]
-    unsigned int slot; // [esp+28h] [ebp-10h]
+    uint32_t slot; // [esp+28h] [ebp-10h]
     DWORD now; // [esp+2Ch] [ebp-Ch]
     int change; // [esp+30h] [ebp-8h]
 
@@ -430,7 +430,7 @@ unsigned int __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, n
     laggedPackets[slot].sock = sock;
     laggedPackets[slot].addr = *from;
     laggedPackets[slot].length = msg->cursize;
-    laggedPackets[slot].data = (unsigned __int8 *)Z_VirtualAlloc(msg->cursize, "FakeLag_SendPacket", 0);
+    laggedPackets[slot].data = (uint8_t *)Z_VirtualAlloc(msg->cursize, "FakeLag_SendPacket", 0);
     if (!laggedPackets[slot].data)
         return -1;
     memcpy(laggedPackets[slot].data, msg->data, msg->cursize);
@@ -733,16 +733,16 @@ void __cdecl Netchan_Setup(
     char *incomingBuffer,
     int incomingBufferSize)
 {
-    memset((unsigned __int8 *)chan, 0, sizeof(netchan_t));
+    memset((uint8_t *)chan, 0, sizeof(netchan_t));
     chan->sock = sock;
     chan->remoteAddress = adr;
     chan->qport = qport;
     iassert( adr.type == NA_BOT || qport != 0 );
     chan->incomingSequence = 0;
     chan->outgoingSequence = 1;
-    chan->unsentBuffer = (unsigned __int8 *)outgoingBuffer;
+    chan->unsentBuffer = (uint8_t *)outgoingBuffer;
     chan->unsentBufferSize = outgoingBufferSize;
-    chan->fragmentBuffer = (unsigned __int8 *)incomingBuffer;
+    chan->fragmentBuffer = (uint8_t *)incomingBuffer;
     chan->fragmentBufferSize = incomingBufferSize;
     NetProf_PrepProfiling(&chan->prof);
 }
@@ -751,7 +751,7 @@ bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan)
 {
     int fragmentLength; // [esp+30h] [ebp-5ACh]
     msg_t send; // [esp+34h] [ebp-5A8h] BYREF
-    unsigned __int8 send_buf[1400]; // [esp+5Ch] [ebp-580h] BYREF
+    uint8_t send_buf[1400]; // [esp+5Ch] [ebp-580h] BYREF
     int res; // [esp+5D8h] [ebp-4h]
 
     PROF_SCOPED("SendPacket");
@@ -792,7 +792,7 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
 {
     int file; // [esp+4Ch] [ebp-5ACh]
     msg_t send; // [esp+50h] [ebp-5A8h] BYREF
-    unsigned __int8 send_buf[1400]; // [esp+78h] [ebp-580h] BYREF
+    uint8_t send_buf[1400]; // [esp+78h] [ebp-580h] BYREF
     int res; // [esp+5F4h] [ebp-4h]
 
     PROF_SCOPED("SendPacket");
@@ -818,7 +818,7 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
             MSG_WriteShort(&send, chan->qport);
         if (packetDebug->current.enabled)
             Com_Printf(16, "Adding %i byte payload to packet\n", length);
-        MSG_WriteData(&send, (unsigned __int8 *)data, length);
+        MSG_WriteData(&send, (uint8_t *)data, length);
         if (packetDebug->current.enabled)
             Com_Printf(16, "Sending %i byte packet\n", send.cursize);
         res = (int)FakeLag_SendPacket(chan->sock, send.cursize, send.data, chan->remoteAddress) >= -1;
@@ -973,7 +973,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
             Com_Printf(16, "%s:fragmentLength %i > msg->maxsize\n", v7, v10);
             return 0;
         }
-        *(unsigned int *)msg->data = sequence;
+        *(uint32_t *)msg->data = sequence;
         memcpy(msg->data + 4, chan->fragmentBuffer, chan->fragmentLength);
         msg->cursize = chan->fragmentLength + 4;
         chan->fragmentLength = 0;
@@ -1076,10 +1076,10 @@ int __cdecl NET_GetLoopPacket_Real(netsrc_t sock, netadr_t *net_from, msg_t *net
     memcpy(net_message->data, loop->msgs[i].data, loop->msgs[i].datalen);
     net_message->cursize = loop->msgs[i].datalen;
     net_from->type = NA_BOT;
-    *(unsigned int *)net_from->ip = 0;
-    *(unsigned int *)&net_from->port = 0;
-    *(unsigned int *)&net_from->ipx[2] = 0;
-    *(unsigned int *)&net_from->ipx[6] = 0;
+    *(uint32_t *)net_from->ip = 0;
+    *(uint32_t *)&net_from->port = 0;
+    *(uint32_t *)&net_from->ipx[2] = 0;
+    *(uint32_t *)&net_from->ipx[6] = 0;
     net_from->type = NA_LOOPBACK;
     net_from->port = loop->msgs[i].port;
     return 1;
@@ -1094,7 +1094,7 @@ int __cdecl NET_GetLoopPacket(netsrc_t sock, netadr_t *net_from, msg_t *net_mess
 }
 
 
-void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __int8 *data, netadr_t to)
+void __cdecl NET_SendLoopPacket(netsrc_t sock, uint32_t length, uint8_t *data, netadr_t to)
 {
     loopback_t *loop; // [esp+0h] [ebp-10h]
     int i; // [esp+4h] [ebp-Ch]
@@ -1119,17 +1119,17 @@ void __cdecl NET_SendLoopPacket(netsrc_t sock, unsigned int length, unsigned __i
     InterlockedIncrement(&loop->send);
 }
 
-char __cdecl NET_SendPacket(netsrc_t sock, int length, unsigned __int8 *data, netadr_t to)
+char __cdecl NET_SendPacket(netsrc_t sock, int length, uint8_t *data, netadr_t to)
 {
     netadr_t v5; // [esp-14h] [ebp-18h]
 
-    if (showpackets->current.integer && *(unsigned int *)data == -1)
+    if (showpackets->current.integer && *(uint32_t *)data == -1)
         Com_Printf(16, "[%s] send packet %4i\n", netsrcString[sock], length);
     if (to.type == NA_LOOPBACK)
     {
-        //*(_QWORD *)&v5.type = __PAIR64__(*(unsigned int *)to.ip, 2);
+        //*(_QWORD *)&v5.type = __PAIR64__(*(uint32_t *)to.ip, 2);
         v5.type = NA_LOOPBACK;
-        //*(unsigned int *)&v5.port = *(unsigned int *)&to.port;
+        //*(uint32_t *)&v5.port = *(uint32_t *)&to.port;
         v5.port = to.port;
         //*(_QWORD *)&v5.ipx[2] = *(_QWORD *)&to.ipx[2];
         v5.ipx[0] = to.ipx[0];
@@ -1191,7 +1191,7 @@ bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data)
     }
 }
 
-bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int8 *format, int len)
+bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const uint8_t *format, int len)
 {
     int mbuf_20; // [esp+14h] [ebp-20h]
     int i; // [esp+28h] [ebp-Ch]
@@ -1215,7 +1215,7 @@ bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const unsigned __int
     return res > 0;
 }
 
-bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, unsigned __int8 *format, unsigned int len)
+bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, uint8_t *format, uint32_t len)
 {
     int mbuf_20; // [esp+14h] [ebp-1Ch]
     int res; // [esp+28h] [ebp-8h]
@@ -1246,17 +1246,17 @@ int __cdecl NET_StringToAdr(char *s, netadr_t *a)
 {
     char *v3; // eax
     __int16 v4; // ax
-    unsigned __int16 v5; // ax
+    uint16_t v5; // ax
     char base[1024]; // [esp+18h] [ebp-408h] BYREF
     char *port; // [esp+41Ch] [ebp-4h]
 
     if (!strcmp(s, "localhost"))
     {
         a->type = NA_BOT;
-        *(unsigned int *)a->ip = 0;
-        *(unsigned int *)&a->port = 0;
-        *(unsigned int *)&a->ipx[2] = 0;
-        *(unsigned int *)&a->ipx[6] = 0;
+        *(uint32_t *)a->ip = 0;
+        *(uint32_t *)&a->port = 0;
+        *(uint32_t *)&a->ipx[2] = 0;
+        *(uint32_t *)&a->ipx[6] = 0;
         a->type = NA_LOOPBACK;
         return 1;
     }

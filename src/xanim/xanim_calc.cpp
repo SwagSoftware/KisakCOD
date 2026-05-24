@@ -32,9 +32,9 @@ void __cdecl XAnimCalc(
     XAnimInfo *firstInfo; // [esp+18h] [ebp-28h]
     XAnimInfo *secondInfo; // [esp+1Ch] [ebp-24h]
     const XAnimTree_s *tree; // [esp+20h] [ebp-20h]
-    unsigned int secondInfoIndex; // [esp+24h] [ebp-1Ch]
+    uint32_t secondInfoIndex; // [esp+24h] [ebp-1Ch]
     DObjAnimMat *calcBuffer; // [esp+28h] [ebp-18h]
-    unsigned int firstInfoIndex; // [esp+2Ch] [ebp-14h]
+    uint32_t firstInfoIndex; // [esp+2Ch] [ebp-14h]
     bool secondChildFound; // [esp+32h] [ebp-Eh]
     bool additiveChildExists; // [esp+33h] [ebp-Dh]
     int allocedCalcBuffer; // [esp+34h] [ebp-Ch]
@@ -167,7 +167,7 @@ bool __cdecl IsInfoAdditive(const XAnimInfo *info)
 
 void __cdecl XAnimClearRotTransArray(const DObj_s *obj, DObjAnimMat *rotTransArray, XAnimCalcAnimInfo *info)
 {
-    unsigned int modelPartIndex; // [esp+4h] [ebp-4h]
+    uint32_t modelPartIndex; // [esp+4h] [ebp-4h]
 
     for (modelPartIndex = 0; (int)modelPartIndex < obj->numBones; ++modelPartIndex)
     {
@@ -237,7 +237,7 @@ void __cdecl XAnimCalcParts(
     char v48; // [esp+17Fh] [ebp-121h]
     unsigned __int8 *v49; // [esp+180h] [ebp-120h]
     int v50; // [esp+184h] [ebp-11Ch] BYREF
-    unsigned __int16 *v51; // [esp+188h] [ebp-118h]
+    uint16_t *v51; // [esp+188h] [ebp-118h]
     //__int64 v52; // [esp+18Ch] [ebp-114h]
     __int16 v52[4];
     float v53; // [esp+194h] [ebp-10Ch]
@@ -279,14 +279,14 @@ void __cdecl XAnimCalcParts(
     float4 fromVec; // [esp+254h] [ebp-4Ch] BYREF
     __int16 *dataShort; // [esp+268h] [ebp-38h]
     XAnimTime animTime; // [esp+26Ch] [ebp-34h] BYREF
-    unsigned int animPartIndex; // [esp+278h] [ebp-28h]
+    uint32_t animPartIndex; // [esp+278h] [ebp-28h]
     unsigned __int8 *dataByte; // [esp+27Ch] [ebp-24h]
     int *randomDataInt; // [esp+280h] [ebp-20h]
-    unsigned int size; // [esp+284h] [ebp-1Ch]
+    uint32_t size; // [esp+284h] [ebp-1Ch]
     int *dataInt; // [esp+288h] [ebp-18h]
     __int16 *randomDataShort; // [esp+28Ch] [ebp-14h]
     unsigned __int8 *randomDataByte; // [esp+290h] [ebp-10h]
-    unsigned int tableSize; // [esp+294h] [ebp-Ch]
+    uint32_t tableSize; // [esp+294h] [ebp-Ch]
     T *indices; // [esp+298h] [ebp-8h]
     int modelPartIndex; // [esp+29Ch] [ebp-4h]
 
@@ -341,7 +341,7 @@ void __cdecl XAnimCalcParts(
             XAnim_GetTimeIndex<T>(&animTime, pIndices, finalTableSize, &tmpKeyframeIndex, &animTime.time);
             tmpKeyframeIndex <<= 8;
 
-            unsigned int keyframeDelta = CLAMP(tableSize - tmpKeyframeIndex, 0, 256);
+            uint32_t keyframeDelta = CLAMP(tableSize - tmpKeyframeIndex, 0, 256);
             pIndices = &indices[tmpKeyframeIndex];
             XAnim_GetTimeIndex<T>(&animTime, pIndices, keyframeDelta, &keyFrameIndex, &keyFrameLerpFrac);
             keyFrameIndex += tmpKeyframeIndex;
@@ -769,7 +769,7 @@ void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotT
     animToModel = (XAnimToXModel*)SL_ConvertToString(info->animToModel);
 
     //for (i = 0; i < 4; ++i)
-    //    animInfo->animPartBits.array[i] |= *(unsigned int *)&animToModel[4 * i] & ~animInfo->ignorePartBits.array[i]; // weird exception
+    //    animInfo->animPartBits.array[i] |= *(uint32_t *)&animToModel[4 * i] & ~animInfo->ignorePartBits.array[i]; // weird exception
 
     for (i = 0; i < 4; i++)
     {
@@ -829,11 +829,11 @@ void __cdecl XAnimCalcNonLoopEnd(
     float v12[5]; // [esp+8Ch] [ebp-190h] BYREF
     float *result; // [esp+A0h] [ebp-17Ch]
     float v14[5]; // [esp+A4h] [ebp-178h] BYREF
-    unsigned int v15; // [esp+B8h] [ebp-164h]
+    uint32_t v15; // [esp+B8h] [ebp-164h]
     float *start; // [esp+BCh] [ebp-160h]
     float dir[4]; // [esp+C0h] [ebp-15Ch] BYREF
     __int64 v18; // [esp+C8h] [ebp-154h]
-    unsigned int v19; // [esp+D4h] [ebp-148h]
+    uint32_t v19; // [esp+D4h] [ebp-148h]
     float v20; // [esp+D8h] [ebp-144h]
     float v21; // [esp+DCh] [ebp-140h]
     float v22; // [esp+E0h] [ebp-13Ch]
@@ -890,14 +890,14 @@ void __cdecl XAnimCalcNonLoopEnd(
     int useSmallIndices; // [esp+1ECh] [ebp-30h]
     __int16 *dataShort; // [esp+1F0h] [ebp-2Ch]
     DObjAnimMat *totalRotTrans; // [esp+1F4h] [ebp-28h]
-    unsigned int animPartIndex; // [esp+1F8h] [ebp-24h]
+    uint32_t animPartIndex; // [esp+1F8h] [ebp-24h]
     unsigned __int8 *dataByte; // [esp+1FCh] [ebp-20h]
     int *randomDataInt; // [esp+200h] [ebp-1Ch]
-    unsigned int size; // [esp+204h] [ebp-18h]
+    uint32_t size; // [esp+204h] [ebp-18h]
     int *dataInt; // [esp+208h] [ebp-14h]
     __int16 *randomDataShort; // [esp+20Ch] [ebp-10h]
     unsigned __int8 *randomDataByte; // [esp+210h] [ebp-Ch]
-    unsigned int tableSize; // [esp+214h] [ebp-8h]
+    uint32_t tableSize; // [esp+214h] [ebp-8h]
     int modelPartIndex; // [esp+218h] [ebp-4h]
 
     iassert(!parts->bLoop);
@@ -915,7 +915,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     while (animPartIndex < size)
     {
         modelPartIndex = animToModel[animPartIndex];
-        iassert((unsigned int)modelPartIndex < DOBJ_MAX_PARTS);
+        iassert((uint32_t)modelPartIndex < DOBJ_MAX_PARTS);
 
         if (!ignorePartBits->testBit(modelPartIndex))
         {
@@ -931,7 +931,7 @@ void __cdecl XAnimCalcNonLoopEnd(
         modelPartIndex = animToModel[animPartIndex];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
 
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
 
         if (useSmallIndices)
         {
@@ -981,7 +981,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     {
         modelPartIndex = animToModel[animPartIndex];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
         if (useSmallIndices)
         {
             dataByte += tableSize + 1;
@@ -1082,7 +1082,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     {
         modelPartIndex = animToModel[*dataByte++];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
         if (useSmallIndices)
         {
             dataByte += tableSize + 1;
@@ -1135,7 +1135,7 @@ void __cdecl XAnimCalcNonLoopEnd(
     {
         modelPartIndex = animToModel[*dataByte++];
         iassert(modelPartIndex < DOBJ_MAX_PARTS);
-        tableSize = (unsigned __int16)*dataShort++;
+        tableSize = (uint16_t)*dataShort++;
 
         if (useSmallIndices)
         {
@@ -1156,9 +1156,9 @@ void __cdecl XAnimCalcNonLoopEnd(
             transWeight = totalRotTrans->transWeight;
             v28 = &randomDataShort[3 * tableSize];
 
-            v41 = (float)(unsigned __int16)v28[0];
-            v42 = (float)(unsigned __int16)v28[1];
-            v43 = (float)(unsigned __int16)v28[2];
+            v41 = (float)(uint16_t)v28[0];
+            v42 = (float)(uint16_t)v28[1];
+            v43 = (float)(uint16_t)v28[2];
             v44 = 0.0;
 
             v45 = *((float *)dataInt + 0);
@@ -1265,7 +1265,7 @@ DObjAnimMat *__cdecl XAnimGetCalcBuffer(XAnimCalcAnimInfo *info, const DObj_s *o
 void __cdecl XAnimScaleRotTransArray(int numBones, const XAnimCalcAnimInfo *info, DObjAnimMat *rotTransArray)
 {
     float r; // [esp+8h] [ebp-8h]
-    unsigned int i; // [esp+Ch] [ebp-4h]
+    uint32_t i; // [esp+Ch] [ebp-4h]
 
     for (i = 0; (int)i < numBones; ++i)
     {
@@ -1287,7 +1287,7 @@ void __cdecl XAnimNormalizeRotScaleTransArray(
 {
     float r;
 
-    for (unsigned int i = 0; (int)i < numBones; ++i)
+    for (uint32_t i = 0; (int)i < numBones; ++i)
     {
         if (!info->ignorePartBits.testBit(i))
         {
@@ -1487,8 +1487,8 @@ void XAnim_GetTimeIndex(
     int *keyFrameIndex,
     float *keyFrameLerpFrac)
 {
-    unsigned int low; // [esp+20h] [ebp-10h]
-    unsigned int frameIndex; // [esp+24h] [ebp-Ch]
+    uint32_t low; // [esp+20h] [ebp-10h]
+    uint32_t frameIndex; // [esp+24h] [ebp-Ch]
     int index; // [esp+28h] [ebp-8h]
     int high; // [esp+2Ch] [ebp-4h]
 
@@ -1556,8 +1556,8 @@ void XAnim_CalcPosDeltaDuring(
     float v5; // [esp+6Ch] [ebp-94h]
     float v6; // [esp+70h] [ebp-90h]
     float v7; // [esp+74h] [ebp-8Ch]
-    unsigned __int16 *v8; // [esp+7Ch] [ebp-84h]
-    unsigned __int16 *v9; // [esp+80h] [ebp-80h]
+    uint16_t *v8; // [esp+7Ch] [ebp-84h]
+    uint16_t *v9; // [esp+80h] [ebp-80h]
     unsigned __int8 *v10; // [esp+84h] [ebp-7Ch]
     unsigned __int8 *v11; // [esp+88h] [ebp-78h]
     XAnimPartTransData *p_u; // [esp+8Ch] [ebp-74h]
@@ -1726,12 +1726,12 @@ void DObjCalcAnim(const DObj_s *obj, int *partBits)
     XModel *model; // [esp+94h] [ebp-60A0h]
     int kk; // [esp+98h] [ebp-609Ch]
     XModel **models; // [esp+9Ch] [ebp-6098h]
-    unsigned int boneIndex; // [esp+A0h] [ebp-6094h]
+    uint32_t boneIndex; // [esp+A0h] [ebp-6094h]
     XAnimInfo *AnimInfo; // [esp+A4h] [ebp-6090h]
     XAnimTree_s *tree; // [esp+A8h] [ebp-608Ch]
     int jj; // [esp+ACh] [ebp-6088h]
     int ii; // [esp+B0h] [ebp-6084h]
-    unsigned int bone; // [esp+D0h] [ebp-6064h]
+    uint32_t bone; // [esp+D0h] [ebp-6064h]
     DObjAnimMat *mat; // [esp+D4h] [ebp-6060h]
     //float *quat; // [esp+D4h] [ebp-6060h]
     char endEarly; // [esp+DBh] [ebp-6059h]

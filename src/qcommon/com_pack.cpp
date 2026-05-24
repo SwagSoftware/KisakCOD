@@ -11,7 +11,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
     float v4; // [esp+40h] [ebp-4Ch]
     float v5; // [esp+44h] [ebp-48h]
     PackedUnitVec out; // [esp+58h] [ebp-34h]
-    unsigned __int8 testEncoding[4]; // [esp+5Ch] [ebp-30h]
+    uint8_t testEncoding[4]; // [esp+5Ch] [ebp-30h]
     float decodeScale; // [esp+60h] [ebp-2Ch]
     float encodeScale; // [esp+64h] [ebp-28h]
     float normalized[3]; // [esp+68h] [ebp-24h] BYREF
@@ -46,7 +46,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
             {
                 bestDirError = v2;
                 bestLenError = lenError;
-                out.packed = *(unsigned int *)testEncoding;
+                out.packed = *(uint32_t *)testEncoding;
                 if (lenError + v2 == 0.0)
                     return *(PackedUnitVec *)testEncoding;
             }
@@ -62,7 +62,7 @@ PackedUnitVec __cdecl Vec3PackUnitVec(const float *unitVec)
 // 16-bit pack: low 14 bits = clamped fixed-point magnitude, high 2 bits = float exponent bits 30-31.
 static uint16_t PackTexCoordHalf(float coord)
 {
-    unsigned int bits = LODWORD(coord);
+    uint32_t bits = LODWORD(coord);
     int low14 = (int)((2 * bits) ^ 0x80000000) >> 14;
     low14 = CLAMP(low14, -16384, 0x3FFF);
     return (uint16_t)((low14 & 0x3FFF) | ((bits >> 16) & 0xC000));
@@ -75,7 +75,7 @@ PackedTexCoords __cdecl Vec2PackTexCoords(const float *in)
     return v | (u << 16);
 }
 
-void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
+void __cdecl Byte4PackVertexColor(const float *from, uint8_t *to)
 {
     to[2] = CLAMP(SnapFloatToInt(from[0] * 255.0f), 0, 255);
     to[1] = CLAMP(SnapFloatToInt(from[1] * 255.0f), 0, 255);
@@ -83,7 +83,7 @@ void __cdecl Byte4PackVertexColor(const float *from, unsigned __int8 *to)
     to[3] = CLAMP(SnapFloatToInt(from[3] * 255.0f), 0, 255);
 }
 
-void __cdecl Byte4PackRgba(const float *from, unsigned __int8 *to)
+void __cdecl Byte4PackRgba(const float *from, uint8_t *to)
 {
     to[0] = CLAMP(SnapFloatToInt(from[0] * 255.0f), 0, 255);
     to[1] = CLAMP(SnapFloatToInt(from[1] * 255.0f), 0, 255);
@@ -91,7 +91,7 @@ void __cdecl Byte4PackRgba(const float *from, unsigned __int8 *to)
     to[3] = CLAMP(SnapFloatToInt(from[3] * 255.0f), 0, 255);
 }
 
-void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to)
+void __cdecl Byte4UnpackRgba(const uint8_t *from, float *to)
 {
     to[0] = (float)((double)from[0] * 0.003921568859368563);
     to[1] = (float)((double)from[1] * 0.003921568859368563);
@@ -99,14 +99,14 @@ void __cdecl Byte4UnpackRgba(const unsigned __int8 *from, float *to)
     to[3] = (float)((double)from[3] * 0.003921568859368563);
 }
 
-void __cdecl Byte4CopyRgbaToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo)
+void __cdecl Byte4CopyRgbaToVertexColor(const uint8_t *rgbaFrom, uint8_t *nativeTo)
 {
-    *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[2] | (rgbaFrom[1] << 8) | (*rgbaFrom << 16);
+    *(uint32_t *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[2] | (rgbaFrom[1] << 8) | (*rgbaFrom << 16);
 }
 
-void __cdecl Byte4CopyBgraToVertexColor(const unsigned __int8 *rgbaFrom, unsigned __int8 *nativeTo)
+void __cdecl Byte4CopyBgraToVertexColor(const uint8_t *rgbaFrom, uint8_t *nativeTo)
 {
-    *(unsigned int *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[0] | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
+    *(uint32_t *)nativeTo = (rgbaFrom[3] << 24) | rgbaFrom[0] | (rgbaFrom[1] << 8) | (rgbaFrom[2] << 16);
 }
 
 void __cdecl Vec3UnpackUnitVec(PackedUnitVec in, float *out)

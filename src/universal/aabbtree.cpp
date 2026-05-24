@@ -390,7 +390,7 @@ int __cdecl BuildAabbTree(const GenericAabbTreeOptions *options)
     float *v3; // [esp+8h] [ebp-450h]
     float *v4; // [esp+Ch] [ebp-44Ch]
     float *v5; // [esp+10h] [ebp-448h]
-    unsigned __int8 *boundCopies; // [esp+44h] [ebp-414h]
+    uint8_t *boundCopies; // [esp+44h] [ebp-414h]
     int *remap; // [esp+48h] [ebp-410h]
     int itemIndex; // [esp+4Ch] [ebp-40Ch]
     int itemIndexa; // [esp+4Ch] [ebp-40Ch]
@@ -398,7 +398,7 @@ int __cdecl BuildAabbTree(const GenericAabbTreeOptions *options)
     int itemIndexc; // [esp+4Ch] [ebp-40Ch]
     int remapBuffer[64]; // [esp+50h] [ebp-408h] BYREF
     float sortedBounds[3][64]; // [esp+150h] [ebp-308h] BYREF
-    unsigned __int8 *itemCopies; // [esp+454h] [ebp-4h]
+    uint8_t *itemCopies; // [esp+454h] [ebp-4h]
 
     if (options->itemCount > 0x40u)
     {

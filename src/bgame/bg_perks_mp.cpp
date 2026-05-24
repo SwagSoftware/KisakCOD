@@ -36,9 +36,9 @@ const char *bg_perkNames[20] =
     "specialty_specialgrenade",
 };
 
-unsigned int __cdecl BG_GetPerkIndexForName(const char *perkName)
+uint32_t __cdecl BG_GetPerkIndexForName(const char *perkName)
 {
-    unsigned int idx; // [esp+0h] [ebp-4h]
+    uint32_t idx; // [esp+0h] [ebp-4h]
 
     if (!perkName)
         return 20;

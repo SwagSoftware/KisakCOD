@@ -14,7 +14,7 @@ void __cdecl TRACK_q_parse()
 
 void __cdecl Com_InitParse()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < 4; ++i)
         Com_InitParseInfo(g_parse[i].parseInfo);
@@ -491,7 +491,7 @@ parseInfo_t *__cdecl Com_ParseExt(const char **data_p, int allowLineBreaks)
                 ;
             if (j == l)
             {
-                memcpy((unsigned __int8 *)pi, (unsigned __int8 *)*punc, l);
+                memcpy((uint8_t *)pi, (uint8_t *)*punc, l);
                 pi->token[l] = 0;
                 data += l;
                 *data_p = data;
@@ -535,7 +535,7 @@ parseInfo_t *__cdecl Com_ParseCSV(const char **data_p, int allowLineBreaks)
     const char *v3; // [esp+0h] [ebp-14h]
     const char *data; // [esp+4h] [ebp-10h]
     const char *dataa; // [esp+4h] [ebp-10h]
-    unsigned int len; // [esp+8h] [ebp-Ch]
+    uint32_t len; // [esp+8h] [ebp-Ch]
     parseInfo_t *pi; // [esp+Ch] [ebp-8h]
     ParseThreadInfo *parse; // [esp+10h] [ebp-4h]
 
@@ -628,7 +628,7 @@ int __cdecl Com_MatchToken(const char **buf_p, const char *match, int warning)
     return 0;
 }
 
-int __cdecl Com_SkipBracedSection(const char **program, unsigned int startDepth, int iMaxNesting)
+int __cdecl Com_SkipBracedSection(const char **program, uint32_t startDepth, int iMaxNesting)
 {
     int bNestingExceeded; // [esp+4h] [ebp-8h]
     parseInfo_t *token; // [esp+8h] [ebp-4h]

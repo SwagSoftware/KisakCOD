@@ -815,7 +815,7 @@ int32_t __cdecl CG_DObjGetWorldTagMatrix(
 
 DObjAnimMat *__cdecl CG_DObjGetLocalTagMatrix(const cpose_t *pose, DObj_s *obj, uint32_t tagName)
 {
-    unsigned __int8 boneIndex; // [esp+3h] [ebp-1h] BYREF
+    uint8_t boneIndex; // [esp+3h] [ebp-1h] BYREF
 
     iassert(obj);
     boneIndex = -2;
@@ -1508,7 +1508,7 @@ void __cdecl CG_LockLightingOrigin(centity_s *cent, float *lightingOrigin)
 void __cdecl CG_Item(int32_t localClientNum, centity_s *cent)
 {
     DObj_s *obj; // [esp+Ch] [ebp-20h]
-    unsigned __int8 weapModel; // [esp+17h] [ebp-15h]
+    uint8_t weapModel; // [esp+17h] [ebp-15h]
     int32_t weapIdx; // [esp+18h] [ebp-14h]
     float lightingOrigin[3]; // [esp+1Ch] [ebp-10h] BYREF
     WeaponDef *weapDef; // [esp+28h] [ebp-4h]

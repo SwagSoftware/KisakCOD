@@ -391,7 +391,7 @@ void __cdecl DirectiveFakeIntroSeconds(int32_t localClientNum, const char *arg0,
 
     fakeSeconds = 0;
     fakeSeconds = (int)strtol(arg0, NULL, 10);
-    if ((unsigned int)fakeSeconds > 0x28)
+    if ((uint32_t)fakeSeconds > 0x28)
     {
         fakeSeconds = 0;
         Com_PrintWarning(
@@ -1817,7 +1817,7 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int32_t localClientNum)
 #endif
     {
         elemCount = GetSortedHudElems(localClientNum, elems);
-        if ((unsigned int)elemCount >= 0x3E)
+        if ((uint32_t)elemCount >= 0x3E)
             MyAssertHandler(
                 ".\\cgame\\cg_hudelem.cpp",
                 1547,

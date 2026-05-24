@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define HASH_STAT_FREE      0
 #define HASH_STAT_MOVABLE   0x10000
@@ -11,13 +12,13 @@
 
 union HashEntry_unnamed_type_u
 {           
-    unsigned int prev;
-    unsigned int str;
+    uint32_t prev;
+    uint32_t str;
 };
 
 struct HashEntry
 {               
-    unsigned int status_next;
+    uint32_t status_next;
     HashEntry_unnamed_type_u u;
 };
 
@@ -38,7 +39,7 @@ struct __declspec(align(128)) scrStringGlob_t
              unsigned __int32 user : 8;
              unsigned __int32 byteLen : 8; // includes null terminator
          };
-         volatile unsigned int data;
+         volatile uint32_t data;
      };
      char str[1];
  };
@@ -49,9 +50,9 @@ struct __declspec(align(128)) scrStringGlob_t
      {
          struct
          {
-             unsigned int refCount : 16;
-             unsigned int user : 8;
-             unsigned int byteLen : 8;
+             uint32_t refCount : 16;
+             uint32_t user : 8;
+             uint32_t byteLen : 8;
          };
          volatile int head;
      };
@@ -69,8 +70,8 @@ struct scrMemTreePub_t
 
 struct scrStringDebugGlob_t
 {
-    volatile unsigned int refCount[65536];
-    volatile unsigned int totalRefCount;
+    volatile uint32_t refCount[65536];
+    volatile uint32_t totalRefCount;
     int ignoreLeaks;
 };
 
@@ -78,57 +79,57 @@ void SL_Init();
 void SL_InitCheckLeaks();
 
 void SL_Shutdown();
-void SL_ShutdownSystem(unsigned int user);
+void SL_ShutdownSystem(uint32_t user);
 
-void SL_TransferSystem(unsigned int from, unsigned int to);
+void SL_TransferSystem(uint32_t from, uint32_t to);
 
 void SL_BeginLoadScripts();
 void SL_EndLoadScripts();
 
-void __cdecl SL_AddUser(unsigned int stringValue, unsigned int user);
-void SL_AddUserInternal(RefString* refStr, unsigned int user);
+void __cdecl SL_AddUser(uint32_t stringValue, uint32_t user);
+void SL_AddUserInternal(RefString* refStr, uint32_t user);
 
-void SL_AddRefToString(unsigned int stringValue);
+void SL_AddRefToString(uint32_t stringValue);
 
-unsigned int SL_GetString_(const char* str, unsigned int user, int type);
-unsigned int SL_GetStringOfSize(const char* str, unsigned int user, unsigned int len, int type);
-const char* SL_ConvertToString(unsigned int stringValue);
-const char *SL_ConvertToStringSafe(unsigned int stringValue);
-RefString* GetRefString(unsigned int stringValue);
+uint32_t SL_GetString_(const char* str, uint32_t user, int type);
+uint32_t SL_GetStringOfSize(const char* str, uint32_t user, uint32_t len, int type);
+const char* SL_ConvertToString(uint32_t stringValue);
+const char *SL_ConvertToStringSafe(uint32_t stringValue);
+RefString* GetRefString(uint32_t stringValue);
 RefString* GetRefString(const char* str);
 
-void SL_CheckExists(unsigned int stringValue);
+void SL_CheckExists(uint32_t stringValue);
 
-unsigned int SL_GetStringForVector(const float* v);
-unsigned int SL_GetStringForInt(int i);
-unsigned int SL_GetStringForFloat(float f);
-unsigned int SL_GetString(const char* str, unsigned int user);
-unsigned int SL_GetLowercaseString_(const char* str, unsigned int user, int type);
-unsigned int SL_GetLowercaseString(const char* str, unsigned int user);
+uint32_t SL_GetStringForVector(const float* v);
+uint32_t SL_GetStringForInt(int i);
+uint32_t SL_GetStringForFloat(float f);
+uint32_t SL_GetString(const char* str, uint32_t user);
+uint32_t SL_GetLowercaseString_(const char* str, uint32_t user, int type);
+uint32_t SL_GetLowercaseString(const char* str, uint32_t user);
 
-void __cdecl SL_TransferRefToUser(unsigned int stringValue, unsigned int user);
+void __cdecl SL_TransferRefToUser(uint32_t stringValue, uint32_t user);
 
 int SL_GetRefStringLen(RefString* refString);
-int SL_GetStringLen(unsigned int stringValue);
+int SL_GetStringLen(uint32_t stringValue);
 
-unsigned int SL_FindLowercaseString(const char* str);
+uint32_t SL_FindLowercaseString(const char* str);
 
-const char* SL_DebugConvertToString(unsigned int stringValue);
-unsigned int SL_ConvertFromString(const char* str);
+const char* SL_DebugConvertToString(uint32_t stringValue);
+uint32_t SL_ConvertFromString(const char* str);
 
-unsigned int SL_FindString(const char* str);
-void SL_RemoveRefToString(unsigned int stringValue);
-void SL_RemoveRefToStringOfSize(unsigned int stringValue, unsigned int len);
+uint32_t SL_FindString(const char* str);
+void SL_RemoveRefToString(uint32_t stringValue);
+void SL_RemoveRefToStringOfSize(uint32_t stringValue, uint32_t len);
 
-int SL_IsLowercaseString(unsigned int stringValue);
+int SL_IsLowercaseString(uint32_t stringValue);
 
-void __cdecl Scr_SetString(unsigned __int16 *to, unsigned int from);
+void __cdecl Scr_SetString(uint16_t *to, uint32_t from);
 
-unsigned int __cdecl SL_ConvertToLowercase(unsigned int stringValue, unsigned int user, int type);
+uint32_t __cdecl SL_ConvertToLowercase(uint32_t stringValue, uint32_t user, int type);
 
-unsigned int __cdecl Scr_CreateCanonicalFilename(const char *filename);
+uint32_t __cdecl Scr_CreateCanonicalFilename(const char *filename);
 
-void Scr_SetStringFromCharString(unsigned __int16 *to, const char *from);
-unsigned int SL_GetUser(unsigned int stringValue);
+void Scr_SetStringFromCharString(uint16_t *to, const char *from);
+uint32_t SL_GetUser(uint32_t stringValue);
 
-unsigned int __cdecl Scr_AllocString(char *s, int sys);
+uint32_t __cdecl Scr_AllocString(char *s, int sys);

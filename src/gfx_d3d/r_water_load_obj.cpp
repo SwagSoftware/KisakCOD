@@ -126,7 +126,7 @@ void __cdecl R_PickWaterFrequencies(water_t *water)
     }
 }
 
-GfxImage *__cdecl R_CreateWaterMap(char *name, unsigned __int16 imageWidth, unsigned __int16 imageHeight)
+GfxImage *__cdecl R_CreateWaterMap(char *name, uint16_t imageWidth, uint16_t imageHeight)
 {
     GfxImage *image; // [esp+0h] [ebp-4h]
 
@@ -141,8 +141,8 @@ GfxImage *__cdecl R_CreateWaterMap(char *name, unsigned __int16 imageWidth, unsi
 void __cdecl R_CreateWaterSetup(const water_t *source, int waterMapSetupIndex, water_t *destination)
 {
     char *v3; // eax
-    unsigned __int16 M; // [esp-8h] [ebp-18h]
-    unsigned __int16 N; // [esp-4h] [ebp-14h]
+    uint16_t M; // [esp-8h] [ebp-18h]
+    uint16_t N; // [esp-4h] [ebp-14h]
     GfxImage *image; // [esp+8h] [ebp-8h]
     int elementCount; // [esp+Ch] [ebp-4h]
 

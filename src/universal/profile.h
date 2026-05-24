@@ -876,19 +876,19 @@ static constexpr const char *prof_enumNames[433] =
 
 struct ProfileAtom // sizeof=0x4
 {                                       // ...
-    unsigned int value[1];              // ...
+    uint32_t value[1];              // ...
 };
 struct ProfileWritable // sizeof=0x1C
 {                                       // ...
     int nesting;
-    unsigned int hits;
+    uint32_t hits;
     ProfileAtom start[3];
     ProfileAtom total;
     ProfileAtom child;
 };
 volatile struct ProfileReadable // sizeof=0xC
 {                                       // ...
-    unsigned int hits;
+    uint32_t hits;
     ProfileAtom total;                  // ...
     ProfileAtom self;                   // ...
 };
@@ -917,11 +917,11 @@ struct ProfileProbe // sizeof=0x5A8
 struct __declspec(align(8)) ProfileReadableGlobal // sizeof=0x38
 {                                       // ...
     int sequence;                       // ...
-    unsigned int hits;
+    uint32_t hits;
     long double totalClks;
     long double selfClks;
     ProfileAtom maxSelf;                // ...
-    unsigned int maxHits;
+    uint32_t maxHits;
     ProfileAtom min;
     ProfileAtom max;                    // ...
     ProfileReadable read;               // ...
@@ -957,21 +957,21 @@ struct ProfileStack // sizeof=0x144BC
 struct ProfileScriptWritable // sizeof=0xC
 {                                       // ...
     int refCount;
-    unsigned int startTime;
-    unsigned int totalTime;             // ...
+    uint32_t startTime;
+    uint32_t totalTime;             // ...
 };
 struct ProfileScript // sizeof=0x80C
 {                                       // ...
     ProfileScriptWritable write[40];    // ...
-    volatile unsigned int totalTime[40]; // ...
-    volatile unsigned int avgTime[40];  // ...
-    volatile unsigned int maxTime[40];  // ...
+    volatile uint32_t totalTime[40]; // ...
+    volatile uint32_t avgTime[40];  // ...
+    volatile uint32_t maxTime[40];  // ...
     volatile float cumulative[40];      // ...
     char profileScriptNames[40][20];    // ...
     int scriptSrcBufferIndex[32];
-    unsigned int srcTotal;
-    unsigned int srcAvgTime;
-    unsigned int srcMaxTime;
+    uint32_t srcTotal;
+    uint32_t srcAvgTime;
+    uint32_t srcMaxTime;
 };
 
 static const ProfileDrawInfo s_profileMain[18] =
@@ -1399,11 +1399,11 @@ inline void __cdecl Profile_Recover(int id) {}
 inline void __cdecl Profile_InitContext(int profileContext) {}
 inline ProfileStack *__cdecl Profile_GetStackForContext(int profileContext) { return NULL;  }
 inline ProfileScript *__cdecl Profile_GetScript() { return NULL;  }
-inline int __cdecl Profile_GetEnumParity(unsigned int profEnum) { return 0; }
+inline int __cdecl Profile_GetEnumParity(uint32_t profEnum) { return 0; }
 inline int __cdecl Profile_GetDisplayThread() { return 0; }
-inline void __cdecl Profile_EndScripts(unsigned int profileFlags) {} 
+inline void __cdecl Profile_EndScripts(uint32_t profileFlags) {} 
 inline void __cdecl Profile_EndScript(int profileIndex) {}
-inline void __cdecl Profile_BeginScripts(unsigned int profileFlags) {}
+inline void __cdecl Profile_BeginScripts(uint32_t profileFlags) {}
 inline void __cdecl Profile_BeginScript(int profileIndex) {}
 inline int __cdecl Profile_AddScriptName(char *profileName) { return 0; }
 inline void __cdecl Profile_ResetCountersForContext(int profileContext, int system) {}
@@ -1429,11 +1429,11 @@ void __cdecl Profile_InitContext(int profileContext);
 void __cdecl Profile_InitContext(int profileContext);
 ProfileStack *__cdecl Profile_GetStackForContext(int profileContext);
 ProfileScript *__cdecl Profile_GetScript();
-int __cdecl Profile_GetEnumParity(unsigned int profEnum);
+int __cdecl Profile_GetEnumParity(uint32_t profEnum);
 int __cdecl Profile_GetDisplayThread();
-void __cdecl Profile_EndScripts(unsigned int profileFlags);
+void __cdecl Profile_EndScripts(uint32_t profileFlags);
 void __cdecl Profile_EndScript(int profileIndex);
-void __cdecl Profile_BeginScripts(unsigned int profileFlags);
+void __cdecl Profile_BeginScripts(uint32_t profileFlags);
 void __cdecl Profile_BeginScript(int profileIndex);
 int __cdecl Profile_AddScriptName(char *profileName);
 void __cdecl Profile_ResetCountersForContext(int profileContext, int system);

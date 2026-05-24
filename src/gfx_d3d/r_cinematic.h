@@ -49,15 +49,15 @@ struct CinematicGlob // sizeof=0x7AC
     char targetCinematicName[256];      // ...
     char nextCinematicName[256];        // ...
 
-    unsigned int nextCinematicPlaybackFlags; // ...
-    unsigned int playbackFlags;         // ...
+    uint32_t nextCinematicPlaybackFlags; // ...
+    uint32_t playbackFlags;         // ...
 
     bool targetCinematicChanged;        // ...
     bool cinematicFinished;             // ...
     // padding byte
     // padding byte
-    unsigned int timeInMsec;            // ...
-    unsigned int binkIOSize;            // ...
+    uint32_t timeInMsec;            // ...
+    uint32_t binkIOSize;            // ...
     volatile bool fullSyncNextUpdate;   // ...
     bool playbackStarted;
     bool hasFileIO;                     // ...
@@ -91,52 +91,52 @@ void R_Cinematic_CheckBinkError();
 void __cdecl R_Cinematic_InitBinkVolumes();
 void __cdecl R_Cinematic_Init();
 void R_Cinematic_ReserveMemory();
-void __cdecl  R_Cinematic_Thread(unsigned int threadContext);
+void __cdecl  R_Cinematic_Thread(uint32_t threadContext);
 void R_Cinematic_UpdateFrame_Core2();
 void __cdecl R_Cinematic_UpdateFrame_Core(
     bool localTargetChanged,
     char *localTargetCinematic,
-    unsigned int localPlaybackFlags);
+    uint32_t localPlaybackFlags);
 char __cdecl R_Cinematic_AreHunksOpen();
 char __cdecl CinematicHunk_IsOpen(CinematicHunk *hunk);
 void R_Cinematic_HunksClose();
 void __cdecl CinematicHunk_Close(CinematicHunk *hunk);
 char __cdecl R_Cinematic_Advance();
-unsigned int __cdecl R_Cinematic_GetPercentageFull();
+uint32_t __cdecl R_Cinematic_GetPercentageFull();
 void R_Cinematic_SeizeIO();
 void __cdecl R_Cinematic_UpdateTimeInMsec(const BINKREALTIME *binkRealtime);
 void R_Cinematic_StopPlayback_Now();
 void __cdecl CinematicHunk_Reset(CinematicHunk *hunk);
-char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, unsigned int playbackFlags);
+char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, uint32_t playbackFlags);
 bool __cdecl CinematicHunk_IsEmpty(CinematicHunk *hunk);
 void __cdecl R_Cinematic_HunksOpen(int activeTexture, char playbackFlags);
 void __cdecl CinematicHunk_Open(CinematicHunk *hunk, char *memory, int size);
 void __cdecl R_Cinematic_HunksAllocate(int activeTexture, char playbackFlags);
 void __cdecl R_Cinematic_HunksReset(int activeTexture, char playbackFlags);
 void R_Cinematic_InitBinkTextures();
-void* __stdcall R_Cinematic_Bink_Alloc(unsigned int bytes);
+void* __stdcall R_Cinematic_Bink_Alloc(uint32_t bytes);
 void __stdcall R_Cinematic_Bink_Free(void *ptr);
 bool __cdecl R_Cinematic_BinkOpen(
     const char *filename,
-    unsigned int playbackFlags,
+    uint32_t playbackFlags,
     char *errText,
-    unsigned int errTextSize);
+    uint32_t errTextSize);
 char __cdecl R_Cinematic_BinkOpenPath(
     const char *filepath,
     char playbackFlags,
     char *errText,
-    unsigned int errTextSize);
+    uint32_t errTextSize);
 int __cdecl CinematicHunk_GetFreeSpace(CinematicHunk *hunk);
 bool R_CinematicThread_EndBinkAsync();
 char __cdecl R_Cinematic_BinkOpenPath_MemoryResident(
     const char *filename,
     const void **outPtr,
     char *errText,
-    unsigned int errTextSize);
+    uint32_t errTextSize);
 bool R_CinematicThread_WaitForHostEvent();
 void __cdecl R_Cinematic_Shutdown();
-void __cdecl R_Cinematic_StartPlayback(char *name, unsigned int playbackFlags, float volume);
-void __cdecl R_Cinematic_StartPlayback_Internal(char *name, unsigned int playbackFlags, float volume);
+void __cdecl R_Cinematic_StartPlayback(char *name, uint32_t playbackFlags, float volume);
+void __cdecl R_Cinematic_StartPlayback_Internal(char *name, uint32_t playbackFlags, float volume);
 void __cdecl R_Cinematic_StartNextPlayback();
 bool __cdecl R_Cinematic_IsNextReady_Internal();
 void __cdecl R_Cinematic_StopPlayback();
@@ -156,5 +156,5 @@ void __cdecl R_Cinematic_BeginLostDevice();
 void __cdecl R_Cinematic_EndLostDevice();
 
 void __cdecl R_Cinematic_SetPaused(CinematicEnum paused);
-void R_Cinematic_SetNextPlayback(const char *name, unsigned int playbackFlags);
+void R_Cinematic_SetNextPlayback(const char *name, uint32_t playbackFlags);
 void R_Cinematic_UnsetNextPlayback();

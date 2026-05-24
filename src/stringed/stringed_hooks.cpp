@@ -161,7 +161,7 @@ char *__cdecl SEH_LocalizeTextMessage(const char *pszInputBuffer, const char *ps
     int digit; // [esp+884h] [ebp-4h]
 
     iCurrString = (iCurrString + 1) % 10;
-    memset((unsigned __int8 *)szStrings[iCurrString], 0, sizeof(char[1024]));
+    memset((uint8_t *)szStrings[iCurrString], 0, sizeof(char[1024]));
     pszString = szStrings[iCurrString];
     iLen = 0;
     bLocOn = 1;
@@ -341,28 +341,28 @@ int __cdecl SEH_GetLocalizedTokenReference(
 bool __cdecl Taiwanese_ValidBig5Code(__int16 uiCode)
 {
     return (HIBYTE(uiCode) >= 0xA1u && HIBYTE(uiCode) <= 0xC6u || HIBYTE(uiCode) >= 0xC9u && HIBYTE(uiCode) <= 0xF9u)
-        && ((unsigned __int8)uiCode >= 0x40u && (unsigned __int8)uiCode <= 0x7Eu
-            || (unsigned __int8)uiCode >= 0xA1u && (unsigned __int8)uiCode != 255);
+        && ((uint8_t)uiCode >= 0x40u && (uint8_t)uiCode <= 0x7Eu
+            || (uint8_t)uiCode >= 0xA1u && (uint8_t)uiCode != 255);
 }
 
-bool __cdecl Japanese_ValidShiftJISCode(unsigned int _iHi, unsigned int _iLo)
+bool __cdecl Japanese_ValidShiftJISCode(uint32_t _iHi, uint32_t _iLo)
 {
     return (_iHi >= 0x81 && _iHi <= 0x9F || _iHi >= 0xE0 && _iHi <= 0xEF)
         && (_iLo >= 0x40 && _iLo <= 0x7E || _iLo >= 0x80 && _iLo <= 0xFC);
 }
 
-bool __cdecl Chinese_ValidGBCode(unsigned __int8 _iHi, unsigned __int8 _iLo)
+bool __cdecl Chinese_ValidGBCode(uint8_t _iHi, uint8_t _iLo)
 {
     return _iHi >= 0x81u && _iHi != 255 && _iLo > 0x40u && _iLo != 255;
 }
 
-unsigned int __cdecl SEH_DecodeLetter(
-    unsigned int firstChar,
-    unsigned int secondChar,
+uint32_t __cdecl SEH_DecodeLetter(
+    uint32_t firstChar,
+    uint32_t secondChar,
     int *usedCount,
     int *pbIsTrailingPunctuation)
 {
-    unsigned int result; // eax
+    uint32_t result; // eax
     bool v5; // [esp+0h] [ebp-10h]
 
     if (Language_IsAsian())
@@ -394,7 +394,7 @@ unsigned int __cdecl SEH_DecodeLetter(
             result = secondChar + (firstChar << 8);
             break;
         case 11:
-            if (!Chinese_ValidGBCode((unsigned __int16)(secondChar + ((_WORD)firstChar << 8)) >> 8, secondChar))
+            if (!Chinese_ValidGBCode((uint16_t)(secondChar + ((_WORD)firstChar << 8)) >> 8, secondChar))
                 goto LABEL_28;
             *usedCount = 2;
             if (pbIsTrailingPunctuation)
@@ -424,29 +424,29 @@ unsigned int __cdecl SEH_DecodeLetter(
     return result;
 }
 
-bool __cdecl Taiwanese_IsTrailingPunctuation(unsigned int uiCode)
+bool __cdecl Taiwanese_IsTrailingPunctuation(uint32_t uiCode)
 {
     return uiCode >= 0xA140 && uiCode < 0xA154;
 }
 
-bool __cdecl Japanese_IsTrailingPunctuation(unsigned int uiCode)
+bool __cdecl Japanese_IsTrailingPunctuation(uint32_t uiCode)
 {
     return uiCode >= 0x8140 && uiCode < 0x8152;
 }
 
-bool __cdecl Chinese_IsTrailingPunctuation(unsigned int uiCode)
+bool __cdecl Chinese_IsTrailingPunctuation(uint32_t uiCode)
 {
     return uiCode > 0x8140 && uiCode < 0x814E;
 }
 
-unsigned int __cdecl SEH_ReadCharFromString(const char **text, int *isTrailingPunctuation)
+uint32_t __cdecl SEH_ReadCharFromString(const char **text, int *isTrailingPunctuation)
 {
     int usedCount; // [esp+0h] [ebp-8h] BYREF
-    unsigned int letter; // [esp+4h] [ebp-4h]
+    uint32_t letter; // [esp+4h] [ebp-4h]
 
     letter = SEH_DecodeLetter(
-        *(unsigned __int8 *)*text,
-        *((unsigned __int8 *)*text + 1),
+        *(uint8_t *)*text,
+        *((uint8_t *)*text + 1),
         &usedCount,
         isTrailingPunctuation);
     *text += usedCount;
@@ -460,7 +460,7 @@ int __cdecl Language_IsAsian()
 
 int __cdecl SEH_PrintStrlen(const char *string)
 {
-    unsigned int c; // [esp+0h] [ebp-Ch]
+    uint32_t c; // [esp+0h] [ebp-Ch]
     int len; // [esp+4h] [ebp-8h]
     const char *p; // [esp+8h] [ebp-4h] BYREF
 
@@ -483,7 +483,7 @@ int __cdecl SEH_PrintStrlen(const char *string)
     return len;
 }
 
-const char *__cdecl SEH_GetLanguageName(unsigned int iLanguage)
+const char *__cdecl SEH_GetLanguageName(uint32_t iLanguage)
 {
     if (iLanguage <= 0xE)
         return g_languages[iLanguage].pszName;
@@ -529,7 +529,7 @@ int __cdecl FS_LanguageHasAssets(int iLanguage)
     return 0;
 }
 
-int __cdecl SEH_StringEd_SetLanguageStrings(unsigned int iLanguage)
+int __cdecl SEH_StringEd_SetLanguageStrings(uint32_t iLanguage)
 {
     const char *LanguageName; // eax
     const char *v3; // eax

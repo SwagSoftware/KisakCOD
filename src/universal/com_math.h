@@ -3,6 +3,7 @@
 #include <universal/assertive.h>
 
 #include <math.h>
+#include <cstdint>
 
 #define EQUAL_EPSILON 0.001f
 #define ZERO_EPSILON 0.000001f
@@ -17,14 +18,14 @@ struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...
     float dist;
-    unsigned __int8 type;
-    unsigned __int8 signbits;
-    unsigned __int8 pad[2];
+    uint8_t type;
+    uint8_t signbits;
+    uint8_t pad[2];
 };
 
 union PackedUnitVec // sizeof=0x4
 {                                       // ...
-    operator unsigned int()
+    operator uint32_t()
     {
         return packed;
     }
@@ -32,8 +33,8 @@ union PackedUnitVec // sizeof=0x4
     {
         return packed;
     }
-    unsigned int packed;
-    unsigned __int8 array[4];
+    uint32_t packed;
+    uint8_t array[4];
 };
 
 using vec2 = float[2];
@@ -57,7 +58,7 @@ constexpr vec2 vec2_origin = { 0.0, 0.0 };
 constexpr vec3 vec3_origin = { 0.0, 0.0, 0.0 };
 constexpr vec4 vec4_origin = { 0.0, 0.0, 0.0, 0.0 };
 
-using uint4 = unsigned int[4];
+using uint4 = uint32_t[4];
 
 // NOTE: yes, these really seem to be different matrix types specific to the FX system for some reason..
 union float4 {
@@ -167,7 +168,7 @@ float __cdecl crandom();
 float __cdecl flrand(float min, float max);
 int __cdecl irand(int min, int max);
 
-unsigned int __cdecl RandWithSeed(int* seed);
+uint32_t __cdecl RandWithSeed(int* seed);
 void __cdecl GaussianRandom(float* f0, float* f1);
 void __cdecl PointInCircleFromUniformDeviates(float radiusDeviate, float yawDeviate, float* point);
 
@@ -211,8 +212,8 @@ float __cdecl ColorNormalize(const float *in, float *out);
 float __cdecl PitchForYawOnNormal(float fYaw, const float* normal);
 
 // == PACKING ==
-unsigned __int8 __cdecl DirToByte(const float *dir);
-void __cdecl ByteToDir(unsigned int b, float *dir);
+uint8_t __cdecl DirToByte(const float *dir);
+void __cdecl ByteToDir(uint32_t b, float *dir);
 
 // == ARCs ==
 int IsPosInsideArc(
@@ -463,7 +464,7 @@ __forceinline static float COERCE_FLOAT(unsigned val) {
     return lol.f;
 }
 
-__forceinline static unsigned int COERCE_UNSIGNED_INT(float val) {
+__forceinline static uint32_t COERCE_UNSIGNED_INT(float val) {
     union {
         float f;
         unsigned v;

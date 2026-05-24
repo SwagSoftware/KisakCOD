@@ -21,7 +21,7 @@ void __cdecl StatMon_Warning(int type, int duration, const char *materialName)
 {
     if (com_statmon->current.enabled)
     {
-        if ((unsigned int)type >= 7)
+        if ((uint32_t)type >= 7)
             MyAssertHandler(
                 ".\\qcommon\\statmonitor.cpp",
                 41,
@@ -47,7 +47,7 @@ void __cdecl StatMon_GetStatsArray(const statmonitor_s **array, int *count)
 
 void __cdecl StatMon_Reset()
 {
-    memset((unsigned __int8 *)stats, 0, sizeof(stats));
+    memset((uint8_t *)stats, 0, sizeof(stats));
     statCount = 0;
 }
 

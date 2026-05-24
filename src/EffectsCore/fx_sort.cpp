@@ -8,7 +8,7 @@ void __cdecl FX_SortEffects(FxSystem *system)
     FxEffect *firstEffect; // [esp+44h] [ebp-1024h]
     float v3[1024]; // [esp+48h] [ebp-1020h]
     int v4; // [esp+1048h] [ebp-20h]
-    unsigned __int16 v5; // [esp+104Ch] [ebp-1Ch]
+    uint16_t v5; // [esp+104Ch] [ebp-1Ch]
     float *a; // [esp+1050h] [ebp-18h]
     volatile int j; // [esp+1054h] [ebp-14h]
     int v8; // [esp+1058h] [ebp-10h]
@@ -118,9 +118,9 @@ int __cdecl FX_CalcRunnerParentSortOrder(FxEffect *effect)
 
 void __cdecl FX_SortNewElemsInEffect(FxSystem *system, FxEffect *effect)
 {
-    unsigned __int16 elemHandle; // [esp+8h] [ebp-Ch]
-    unsigned __int16 elemHandlea; // [esp+8h] [ebp-Ch]
-    unsigned __int16 stopElemHandle; // [esp+Ch] [ebp-8h]
+    uint16_t elemHandle; // [esp+8h] [ebp-Ch]
+    uint16_t elemHandlea; // [esp+8h] [ebp-Ch]
+    uint16_t stopElemHandle; // [esp+Ch] [ebp-8h]
     FxPool<FxElem> *elema; // [esp+10h] [ebp-4h]
     FxPool<FxElem> *elem; // [esp+10h] [ebp-4h]
 
@@ -163,13 +163,13 @@ void __cdecl FX_SortNewElemsInEffect(FxSystem *system, FxEffect *effect)
 
 void __cdecl FX_SortSpriteElemIntoEffect(FxSystem *system, FxEffect *effect, FxElem *elem)
 {
-    unsigned __int16 v3; // [esp+5Ah] [ebp-2Ah]
+    uint16_t v3; // [esp+5Ah] [ebp-2Ah]
     FxInsertSortElem sortElem; // [esp+5Ch] [ebp-28h] BYREF
-    unsigned __int16 elemHandle; // [esp+70h] [ebp-14h]
+    uint16_t elemHandle; // [esp+70h] [ebp-14h]
     FxElem *nextElem; // [esp+74h] [ebp-10h]
-    unsigned __int16 *prevNextElemHandle; // [esp+78h] [ebp-Ch]
+    uint16_t *prevNextElemHandle; // [esp+78h] [ebp-Ch]
     FxElem *prevElem; // [esp+7Ch] [ebp-8h]
-    unsigned __int16 prevElemHandle; // [esp+80h] [ebp-4h]
+    uint16_t prevElemHandle; // [esp+80h] [ebp-4h]
 
     nextElem = 0;
     prevElemHandle = -1;
@@ -229,7 +229,7 @@ void __cdecl FX_GetInsertSortElem(
             "(elemDef->elemType <= FX_ELEM_TYPE_LAST_SPRITE)",
             elemDef->elemType);
     sortElem->defSortOrder = elemDef->sortOrder;
-    randomSeed = (296 * elem->sequence + elem->msecBegin + (unsigned int)effect->randomSeed) % 0x1DF;
+    randomSeed = (296 * elem->sequence + elem->msecBegin + (uint32_t)effect->randomSeed) % 0x1DF;
     FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, randomSeed, &orient);
     FX_OrientationPosToWorldPos(&orient, elem->origin, posWorld);
     Vec3Sub(system->cameraPrev.origin, posWorld, diff);
@@ -262,7 +262,7 @@ bool __cdecl FX_ExistingElemSortsBeforeNewElem(
         return 1;
     if (elemDef->sortOrder > sortElemNew->defSortOrder)
         return 0;
-    randomSeed = (elem->msecBegin + effect->randomSeed + 296 * (unsigned int)elem->sequence) % 0x1DF;
+    randomSeed = (elem->msecBegin + effect->randomSeed + 296 * (uint32_t)elem->sequence) % 0x1DF;
     FX_GetOrientation(elemDef, &effect->frameAtSpawn, &effect->frameNow, randomSeed, &orient);
     FX_OrientationPosToWorldPos(&orient, elem->origin, posWorld);
     Vec3Sub(system->cameraPrev.origin, posWorld, diff);

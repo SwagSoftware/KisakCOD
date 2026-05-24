@@ -63,12 +63,12 @@ void __cdecl RB_SetUploadMaterialArg(const MaterialShaderArgument *arg)
     }
 }
 
-unsigned int __cdecl RB_UploadMaterialPassVertexDecl(
+uint32_t __cdecl RB_UploadMaterialPassVertexDecl(
     GfxCmdBufPrimState *primState,
     MaterialVertexDeclaration *vertexDecl,
     MaterialVertexDeclType vertDeclType,
     void *data,
-    unsigned int stride)
+    uint32_t stride)
 {
     if (!vertexDecl->routing.decl[vertDeclType])
         return 0;
@@ -79,21 +79,21 @@ unsigned int __cdecl RB_UploadMaterialPassVertexDecl(
     return 1;
 }
 
-unsigned int RB_UploadMaterialPass(
+uint32_t RB_UploadMaterialPass(
     const MaterialPass *pass,
     MaterialVertexDeclType vertDeclType)
 {
-    unsigned int v4; // [esp-Ch] [ebp-B4h]
-    unsigned int v5; // [esp-Ch] [ebp-B4h]
-    unsigned int v6; // [esp-Ch] [ebp-B4h]
-    unsigned int v7; // [esp-Ch] [ebp-B4h]
+    uint32_t v4; // [esp-Ch] [ebp-B4h]
+    uint32_t v5; // [esp-Ch] [ebp-B4h]
+    uint32_t v6; // [esp-Ch] [ebp-B4h]
+    uint32_t v7; // [esp-Ch] [ebp-B4h]
     GfxCmdBufPrimState *p_prim; // [esp-8h] [ebp-B0h]
-    unsigned int v9[37]; // [esp-4h] [ebp-ACh] BYREF
-    unsigned int vertMem_136; // [esp+90h] [ebp-18h]
-    unsigned int vertMem_140; // [esp+94h] [ebp-14h]
-    unsigned int argIter; // [esp+9Ch] [ebp-Ch]
-    unsigned int argCount; // [esp+A0h] [ebp-8h]
-    unsigned int retaddr; // [esp+A8h] [ebp+0h]
+    uint32_t v9[37]; // [esp-4h] [ebp-ACh] BYREF
+    uint32_t vertMem_136; // [esp+90h] [ebp-18h]
+    uint32_t vertMem_140; // [esp+94h] [ebp-14h]
+    uint32_t argIter; // [esp+9Ch] [ebp-Ch]
+    uint32_t argCount; // [esp+A0h] [ebp-8h]
+    uint32_t retaddr; // [esp+A8h] [ebp+0h]
 
     //argIter = a1;
     //argCount = retaddr;
@@ -124,11 +124,11 @@ unsigned int RB_UploadMaterialPass(
     return v4;
 }
 
-unsigned int __cdecl RB_UploadMaterialTechnique(const MaterialTechnique *tech, unsigned int techType)
+uint32_t __cdecl RB_UploadMaterialTechnique(const MaterialTechnique *tech, uint32_t techType)
 {
-    unsigned int uploadCount; // [esp+0h] [ebp-Ch]
+    uint32_t uploadCount; // [esp+0h] [ebp-Ch]
     MaterialVertexDeclType vertDeclType; // [esp+4h] [ebp-8h]
-    unsigned int passIter; // [esp+8h] [ebp-4h]
+    uint32_t passIter; // [esp+8h] [ebp-4h]
 
     if (!strncmp(tech->name, "lm_", 3u))
     {
@@ -154,7 +154,7 @@ unsigned int __cdecl RB_UploadMaterialTechnique(const MaterialTechnique *tech, u
 
 void __cdecl RB_UploadShaderStep()
 {
-    unsigned int uploadCount; // [esp+0h] [ebp-Ch]
+    uint32_t uploadCount; // [esp+0h] [ebp-Ch]
     MaterialTechnique *tech; // [esp+4h] [ebp-8h]
     MaterialTechniqueSet *techSet; // [esp+8h] [ebp-4h]
 

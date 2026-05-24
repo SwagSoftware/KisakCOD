@@ -345,7 +345,7 @@ void __cdecl RB_BlurScreen(const GfxViewInfo *viewInfo, float blurRadius)
 {
     float v2; // [esp+18h] [ebp-18h]
     float blurRadiusMin; // [esp+28h] [ebp-8h]
-    unsigned int color; // [esp+2Ch] [ebp-4h]
+    uint32_t color; // [esp+2Ch] [ebp-4h]
 
     iassert( viewInfo );
     blurRadiusMin = 1440.0f / gfxCmdBufSourceState.sceneViewport.height;

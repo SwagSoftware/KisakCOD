@@ -96,13 +96,13 @@ void Outdoor_TempHunkFreePic()
     Hunk_FreeTempMemory((char *)outdoorGlob.pic);
 }
 
-unsigned __int8 *Outdoor_ComputeTexels()
+uint8_t *Outdoor_ComputeTexels()
 {
-    unsigned __int8 *result; // eax
+    uint8_t *result; // eax
     int zTexture; // [esp+24h] [ebp-1Ch]
     float zWorld; // [esp+28h] [ebp-18h]
     float yWorld; // [esp+2Ch] [ebp-14h]
-    unsigned __int8 *outByte; // [esp+30h] [ebp-10h]
+    uint8_t *outByte; // [esp+30h] [ebp-10h]
     int x; // [esp+34h] [ebp-Ch]
     int y; // [esp+38h] [ebp-8h]
     float xWorld; // [esp+3Ch] [ebp-4h]
@@ -115,7 +115,7 @@ unsigned __int8 *Outdoor_ComputeTexels()
         yWorld = outdoorGlob.invScale[1] * ((double)y + 0.5 - outdoorGlob.add[1]);
         for (x = 0; ; ++x)
         {
-            result = (unsigned __int8 *)x;
+            result = (uint8_t *)x;
             if (x == outdoorMapSize[0])
                 break;
             xWorld = outdoorGlob.invScale[0] * ((double)x + 0.5 - outdoorGlob.add[0]);
@@ -145,7 +145,7 @@ double __cdecl Outdoor_TraceHeightInWorld(float worldX, float worldY)
     traceEnd[0] = worldX;
     traceEnd[1] = worldY;
     traceEnd[2] = traceEndHeight;
-    memset((unsigned __int8 *)&results, 0, sizeof(results));
+    memset((uint8_t *)&results, 0, sizeof(results));
     results.fraction = 1.0;
     CM_BoxTrace(&results, traceStart, traceEnd, vec3_origin, vec3_origin, 0, 8193);
     return (float)((traceEndHeight - traceStartHeight) * results.fraction + traceStartHeight);
@@ -171,7 +171,7 @@ int __cdecl Outdoor_TransformToTextureClamped(int dimension, float inWorld)
 
 void __cdecl R_GenerateOutdoorImage(GfxImage *outdoorImage)
 {
-    outdoorGlob.pic = (unsigned __int8 *)Hunk_AllocateTempMemory(
+    outdoorGlob.pic = (uint8_t *)Hunk_AllocateTempMemory(
         outdoorMapSize[1] * outdoorMapSize[0],
         "Outdoor_TempHunkAllocatePic");
     Outdoor_ComputeTexels();

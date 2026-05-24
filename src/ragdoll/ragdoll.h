@@ -16,7 +16,7 @@ static const char *jointNames[3] = { "none", "hinge", "swivel" }; // idb
 struct BoneDef // sizeof=0x4C
 {                                       // ...
     char animBoneTextNames[2][20];
-    unsigned int animBoneNames[2];
+    uint32_t animBoneNames[2];
     float radius;
     bool mirror;
     // padding byte
@@ -32,8 +32,8 @@ struct BoneDef // sizeof=0x4C
 struct BaseLerpBoneDef // sizeof=0x20
 {                                       // ...
     char animBoneTextName[20];
-    unsigned int animBoneName;
-    unsigned int parentBoneIndex;
+    uint32_t animBoneName;
+    uint32_t parentBoneIndex;
     int lerpTime;
 };
 
@@ -45,7 +45,7 @@ struct Joint // sizeof=0x8
 
 struct JointDef // sizeof=0x54
 {                                       // ...
-    unsigned __int8 bone;
+    uint8_t bone;
     // padding byte
     // padding byte
     // padding byte
@@ -59,7 +59,7 @@ struct JointDef // sizeof=0x54
 
 struct SelfPairDef // sizeof=0x2
 {                                       // ...
-    unsigned __int8 bones[2];
+    uint8_t bones[2];
 };
 
 struct RagdollDef // sizeof=0xED0
@@ -83,7 +83,7 @@ struct RagdollDef // sizeof=0xED0
 struct Bone // sizeof=0x1C
 {                                       // ...
     int parentBone;
-    unsigned __int8 animBones[2];
+    uint8_t animBones[2];
     // padding byte
     // padding byte
     dxBody *rigidBody; // TODO change to void* or uintptr_t if this ends up being wrong
@@ -93,7 +93,7 @@ struct Bone // sizeof=0x1C
 struct LerpBone // sizeof=0x8
 {                                       // ...
     int parentBone;
-    unsigned __int8 animBone;
+    uint8_t animBone;
     // padding byte
     // padding byte
     // padding byte
@@ -151,8 +151,8 @@ int __cdecl Ragdoll_CreateRagdollForDObj(int localClientNum, int ragdollDef, int
 int __cdecl Ragdoll_GetUnusedBody();
 void __cdecl Ragdoll_InitBody(RagdollBody *body);
 int __cdecl Ragdoll_ReferenceDObjBody(int dobj);
-char __cdecl Ragdoll_BindDef(unsigned int ragdollDef);
-bool __cdecl Ragdoll_ValidateDef(unsigned int ragdollDef);
+char __cdecl Ragdoll_BindDef(uint32_t ragdollDef);
+bool __cdecl Ragdoll_ValidateDef(uint32_t ragdollDef);
 void __cdecl Ragdoll_Remove(int ragdoll);
 void __cdecl Ragdoll_FreeBody(int ragdollBody);
 void __cdecl Ragdoll_InitDvars();
@@ -186,7 +186,7 @@ void __cdecl Ragdoll_QuatLerp(const float *qa, const float *qb, float t, float *
 // ragdoll_update
 char __cdecl Ragdoll_ValidateBodyObj(RagdollBody *body);
 void __cdecl Ragdoll_SnapshotBaseLerpOffsets(RagdollBody *body);
-void __cdecl Ragdoll_GetDObjBaseBoneMatrix(DObj_s *obj, unsigned __int8 boneIndex, DObjAnimMat *outMat);
+void __cdecl Ragdoll_GetDObjBaseBoneMatrix(DObj_s *obj, uint8_t boneIndex, DObjAnimMat *outMat);
 void __cdecl Ragdoll_AnimMatToMat43(const DObjAnimMat *mat, float (*out)[3]);
 char __cdecl Ragdoll_CreateBodyPhysics(RagdollBody *body);
 char __cdecl Ragdoll_CreatePhysJoints(RagdollBody *body);
@@ -198,14 +198,14 @@ char __cdecl Ragdoll_GetDObjBaseBoneOrigin(
     DObj_s *obj,
     const float *offset,
     const mat3x3 &axis,
-    unsigned __int8 boneIndex,
+    uint8_t boneIndex,
     float *origin);
 char __cdecl Ragdoll_GetDObjBaseBoneOriginQuat(
     int localClientNum,
     DObj_s *obj,
     const float *offset,
     const mat3x3 &axis,
-    unsigned __int8 boneIndex,
+    uint8_t boneIndex,
     float *origin,
     float *quat);
 void __cdecl Ragdoll_PoseInvAxis(const cpose_t *pose, mat3x3 &invAxis);
@@ -214,11 +214,11 @@ void __cdecl Ragdoll_DestroyPhysObjs(RagdollBody *body);
 void __cdecl Ragdoll_RemoveBodyPhysics(RagdollBody *body);
 bool __cdecl Ragdoll_ValidatePrecalcBoneDef(RagdollDef *def, BoneDef *bone);
 void __cdecl Ragdoll_GenerateAllSelfCollisionContacts();
-void __cdecl Ragdoll_GenBoneCapsuleSegments(RagdollBody *body, unsigned __int8 *bones, float (*s0)[3], float (*s1)[3]);
+void __cdecl Ragdoll_GenBoneCapsuleSegments(RagdollBody *body, uint8_t *bones, float (*s0)[3], float (*s1)[3]);
 void __cdecl Ragdoll_GenBoneCapsuleSegment(Bone *bone, float (*seg)[3]);
 void __cdecl Ragdoll_AddSelfContact(
     RagdollBody *body,
-    unsigned __int8 *bones,
+    uint8_t *bones,
     float radius0,
     float radius1,
     float *point0,
@@ -234,7 +234,7 @@ void __cdecl Ragdoll_ExplosionEvent(
 void __cdecl Ragdoll_GetTorsoPosition(RagdollBody *body, float *center);
 bool __cdecl Ragdoll_EnterTunnelTest(RagdollBody *body, BodyState_t curState, BodyState_t newState);
 void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *snapshot);
-DObjAnimMat *__cdecl Ragdoll_GetDObjLocalBoneMatrix(const cpose_t *pose, DObj_s *obj, unsigned __int8 boneIndex);
+DObjAnimMat *__cdecl Ragdoll_GetDObjLocalBoneMatrix(const cpose_t *pose, DObj_s *obj, uint8_t boneIndex);
 void __cdecl Ragdoll_SetCurrentPoseFromSnapshot(RagdollBody *body, BoneOrientation *snapshot);
 void __cdecl Ragdoll_UpdateBodyContactCentroids(RagdollBody *body);
 void __cdecl Ragdoll_BodyCenterOfMass(RagdollBody *body, float *com);
@@ -249,7 +249,7 @@ char __cdecl Ragdoll_GetDObjWorldBoneOriginQuat(
     int localClientNum,
     const cpose_t *pose,
     DObj_s *obj,
-    unsigned __int8 boneIndex,
+    uint8_t boneIndex,
     float *origin,
     float *quat);
 

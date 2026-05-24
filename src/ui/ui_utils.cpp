@@ -352,27 +352,27 @@ multiDef_s *__cdecl Item_GetMultiDef(itemDef_s *item)
     return item->typeData.multi;
 }
 
-unsigned __int8 *__cdecl UI_Alloc(unsigned int size, int alignment)
+uint8_t *__cdecl UI_Alloc(uint32_t size, int alignment)
 {
     return Hunk_AllocAlign(size, alignment, "UI_Alloc", 34);
 }
 
 void __cdecl String_Init()
 {
-    memset((unsigned __int8 *)g_strHandle, 0, sizeof(g_strHandle));
+    memset((uint8_t *)g_strHandle, 0, sizeof(g_strHandle));
 }
 
 const char *staticNULL = "";
 const char *__cdecl String_Alloc(const char *p)
 {
     char v2; // [esp+3h] [ebp-45h]
-    unsigned __int8 *v3; // [esp+8h] [ebp-40h]
+    uint8_t *v3; // [esp+8h] [ebp-40h]
     const char *v4; // [esp+Ch] [ebp-3Ch]
     stringDef_s *str; // [esp+34h] [ebp-14h]
     stringDef_s *stra; // [esp+34h] [ebp-14h]
     stringDef_s *strb; // [esp+34h] [ebp-14h]
     int hash; // [esp+38h] [ebp-10h]
-    unsigned __int8 *s; // [esp+40h] [ebp-8h]
+    uint8_t *s; // [esp+40h] [ebp-8h]
     stringDef_s *last; // [esp+44h] [ebp-4h]
 
     if (!Sys_IsMainThread())

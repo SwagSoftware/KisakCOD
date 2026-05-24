@@ -24,7 +24,7 @@ void __cdecl R_StaticModelWriteInfoHeader(int fileHandle)
     FS_Write(dest, &dest[strlen(dest) + 1] - &dest[1], fileHandle);
 }
 
-BOOL __cdecl R_StaticModelHasLighting(unsigned int smodelIndex)
+BOOL __cdecl R_StaticModelHasLighting(uint32_t smodelIndex)
 {
     return rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle != 0;
 }

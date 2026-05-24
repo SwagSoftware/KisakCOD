@@ -3827,9 +3827,9 @@ void CG_DisplayViewmodelAnim(int localClientNum)
 void CG_SaveViewModelAnimTrees(SaveGame *save)
 {
     MemoryFile *MemoryFile; // r27
-    unsigned int v3; // r31
+    uint32_t v3; // r31
     weaponInfo_s *v4; // r30
-    unsigned int NumWeapons; // [sp+50h] [-40h] BYREF
+    uint32_t NumWeapons; // [sp+50h] [-40h] BYREF
 
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1049, 0, "%s", "save");
@@ -3864,17 +3864,17 @@ void CG_SaveViewModelAnimTrees(SaveGame *save)
 
 void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
 {
-    unsigned int NumWeapons; // r3
+    uint32_t NumWeapons; // r3
     int viewmodelIndex; // r11
     const char *ConfigString; // r3
     const char *v7; // r31
     XModel *v8; // r22
     MemoryFile *MemoryFile; // r23
-    unsigned int v10; // r29
+    uint32_t v10; // r29
     weaponInfo_s *v11; // r31
     WeaponDef *WeaponDef; // r30
     XAnimTree_s *Tree; // r30
-    unsigned int v14; // [sp+50h] [-70h] BYREF
+    uint32_t v14; // [sp+50h] [-70h] BYREF
 
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1083, 0, "%s", "save");
@@ -3956,7 +3956,7 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
 {
     BOOL IsWriting; // r22
     float v3; // r30
-    unsigned int NumWeapons; // r3
+    uint32_t NumWeapons; // r3
     int v5; // r28
     int *p_hasAnimTree; // r30
     const DObj_s *v7; // r3

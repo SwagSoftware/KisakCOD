@@ -18,8 +18,8 @@ bool __cdecl RB_IsLogging();
 void __cdecl RB_LogPrint(const char *text);
 const char *__cdecl RB_LogTechniqueType(MaterialTechniqueType techType);
 void __cdecl RB_LogPrintState_0(int stateBits0, int changedBits0);
-void __cdecl RB_LogBlend(const char *format, unsigned int blend);
-void __cdecl RB_LogBlendOp(const char *format, unsigned int blendOp);
+void __cdecl RB_LogBlend(const char *format, uint32_t blend);
+void __cdecl RB_LogBlendOp(const char *format, uint32_t blendOp);
 void __cdecl RB_LogFromTable(
     const char *keyName,
     int stateBits,

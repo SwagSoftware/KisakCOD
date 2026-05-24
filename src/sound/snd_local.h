@@ -33,11 +33,11 @@ struct snd_save_stream_t // sizeof=0x20
 
 struct MssFileHandle // sizeof=0x9C
 {                                       // ...
-    unsigned int id;
+    uint32_t id;
     MssFileHandle *next;
     int handle;
     char fileName[128];
-    unsigned int hashCode;
+    uint32_t hashCode;
     int offset;
     int fileOffset;
     int fileLength;
@@ -74,7 +74,7 @@ struct MssLocal // sizeof=0x26D0
     HSAMPLE handle_sample[40];         // ...
     _STREAM *handle_stream[13];
     MssEqInfo eq[2];                    // ...
-    unsigned int eqFilter;              // ...
+    uint32_t eqFilter;              // ...
     MssFileHandle fileHandle[13];
     MssFileHandle *freeFileHandle;
     bool isMultiChannel;                // ...
@@ -108,18 +108,18 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
 void __cdecl SND_SetRoomtype(int roomtype);
 void __cdecl SND_UpdateEqs();
 void __cdecl SND_SetEqParams(
-    unsigned int entchannel,
+    uint32_t entchannel,
     int eqIndex,
-    unsigned int band,
+    uint32_t band,
     SND_EQTYPE type,
     float gain,
     float freq,
     float q);
-void __cdecl SND_SetEqType(unsigned int entchannel, int eqIndex, unsigned int band, SND_EQTYPE type);
-void __cdecl SND_SetEqFreq(unsigned int entchannel, int eqIndex, unsigned int band, float freq);
-void __cdecl SND_SetEqGain(unsigned int entchannel, int eqIndex, unsigned int band, float gain);
-void __cdecl SND_SetEqQ(unsigned int entchannel, int eqIndex, unsigned int band, float q);
-void __cdecl SND_DisableEq(unsigned int entchannel, int eqIndex, unsigned int band);
+void __cdecl SND_SetEqType(uint32_t entchannel, int eqIndex, uint32_t band, SND_EQTYPE type);
+void __cdecl SND_SetEqFreq(uint32_t entchannel, int eqIndex, uint32_t band, float freq);
+void __cdecl SND_SetEqGain(uint32_t entchannel, int eqIndex, uint32_t band, float gain);
+void __cdecl SND_SetEqQ(uint32_t entchannel, int eqIndex, uint32_t band, float q);
+void __cdecl SND_DisableEq(uint32_t entchannel, int eqIndex, uint32_t band);
 void __cdecl SND_SaveEq(MemoryFile *memFile);
 void __cdecl SND_RestoreEq(MemoryFile *memFile);
 void __cdecl SND_PrintEqParams();
@@ -146,7 +146,7 @@ void __cdecl SND_Set2DChannelFromSaveInfo(int index, snd_save_2D_sample_t *info)
 void __cdecl SND_Get3DChannelSaveInfo(int index, snd_save_3D_sample_t *info);
 void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info);
 void __cdecl SND_SetStreamChannelFromSaveInfo(int index, snd_save_stream_t *info);
-int __cdecl SND_GetSoundFileSize(unsigned int *pSoundFile);
+int __cdecl SND_GetSoundFileSize(uint32_t *pSoundFile);
 void __cdecl SND_DriverPostUpdate();
 void __cdecl SND_Update2DChannel(int i, int frametime);
 void __cdecl SND_Update3DChannel(int i, int frametime);
@@ -159,10 +159,10 @@ void SND_SetEqLerp(double lerp);
 
 
 // snd_mss
-unsigned int __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle);
+uint32_t __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle);
 void __stdcall MSS_FileCloseCallback(UINTa hFileHandle);
-int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, unsigned int type);
-unsigned int __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, unsigned int bytes);
+int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, uint32_t type);
+uint32_t __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, uint32_t bytes);
 
 _DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels);
 void MSS_InitFailed();
@@ -176,9 +176,9 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel);
 void __cdecl MSS_ResumeSample(int i, int frametime);
 _DIG_DRIVER *__cdecl MSS_GetDriver();
 int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels);
-unsigned __int8 *__cdecl MSS_Alloc(unsigned int bytes, unsigned int rate);
-unsigned __int8 *__cdecl MSS_Alloc_LoadObj(unsigned int bytes, unsigned int rate);
-unsigned int *__cdecl MSS_Alloc_FastFile(int bytes);
+uint8_t *__cdecl MSS_Alloc(uint32_t bytes, uint32_t rate);
+uint8_t *__cdecl MSS_Alloc_LoadObj(uint32_t bytes, uint32_t rate);
+uint32_t *__cdecl MSS_Alloc_FastFile(int bytes);
 
 
 extern MssLocal milesGlob;

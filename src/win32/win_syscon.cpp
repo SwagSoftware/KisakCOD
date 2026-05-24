@@ -40,11 +40,11 @@ struct WinConData // sizeof=0x620
 	int windowWidth;                    // ...
 	int windowHeight;                   // ...
 	WNDPROC SysInputLineWndProc;
-	//int(__stdcall *SysInputLineWndProc)(HWND__ *, unsigned int, unsigned int, int); // ...
+	//int(__stdcall *SysInputLineWndProc)(HWND__ *, uint32_t, uint32_t, int); // ...
 };
 
 static WinConData s_wcd;
-unsigned int s_totalChars;
+uint32_t s_totalChars;
 
 LRESULT __stdcall ConWndProc(HWND__ *hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -109,7 +109,7 @@ LRESULT __stdcall InputLineWndProc(HWND__ *hWnd, UINT uMsg, HWND__ *wParam, LPAR
 	return CallWindowProcA((WNDPROC)s_wcd.SysInputLineWndProc, hWnd, uMsg, (WPARAM)wParam, lParam);
 }
 
-unsigned int __cdecl Conbuf_CleanText(const char *source, char *target, int sizeofTarget)
+uint32_t __cdecl Conbuf_CleanText(const char *source, char *target, int sizeofTarget)
 {
 	const char* start = target;
 	const char* last = &target[sizeofTarget - 3];
@@ -303,7 +303,7 @@ void __cdecl Conbuf_AppendText(const char *pMsg)
 	else
 		source = &pMsg[strlen(pMsg) - 0x3FFF];
 
-	unsigned int character_amount = Conbuf_CleanText(source, target, 0x8000);
+	uint32_t character_amount = Conbuf_CleanText(source, target, 0x8000);
 	s_totalChars += character_amount;
 	if (s_totalChars <= 0x4000)
 	{

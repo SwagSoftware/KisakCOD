@@ -23,13 +23,13 @@
 struct stype_t // sizeof=0x8
 {                                       // ...
 	sval_u val;                         // ...
-	unsigned int pos;                   // ...
+	uint32_t pos;                   // ...
 };
 
 #define YY_BUF_SIZE 0x4000 //16384
 
-unsigned int g_out_pos;
-unsigned int g_sourcePos;
+uint32_t g_out_pos;
+uint32_t g_sourcePos;
 unsigned char g_parse_user;
 sval_u g_dummyVal;
 int yy_init = 0;
@@ -48,7 +48,7 @@ int yy_last_accepting_state;
 unsigned char *yy_last_accepting_cpos;
 int yy_did_buffer_switch_on_eof;
 stype_t yylval;
-unsigned int yyleng;
+uint32_t yyleng;
 int yychar;
 
 
@@ -128,7 +128,7 @@ int StringValue(unsigned char *str, int len)
 	}
 }
 
-unsigned int LowerCase(unsigned int strVal)
+uint32_t LowerCase(uint32_t strVal)
 {
 	return SL_ConvertToLowercase(strVal, g_parse_user, 14);
 }
@@ -220,7 +220,7 @@ int yy_get_previous_state()
 	return yy_current_state;
 }
 
-LPVOID __cdecl yy_flex_alloc(unsigned int size)
+LPVOID __cdecl yy_flex_alloc(uint32_t size)
 {
 	return malloc(size);
 }
@@ -231,7 +231,7 @@ void yy_fatal_error(const char *msg)
 	exit(2);
 }
 
-void *yy_flex_realloc(void *ptr, unsigned int size)
+void *yy_flex_realloc(void *ptr, uint32_t size)
 {
 	return realloc(ptr, size);
 }
@@ -396,7 +396,7 @@ int __cdecl yylex()
 	int yy_next_buffer; // [esp+0h] [ebp-24h]
 	int yy_next_state; // [esp+8h] [ebp-1Ch]
 	int yy_amount_of_matched_text; // [esp+Ch] [ebp-18h]
-	unsigned __int8 yy_c; // [esp+13h] [ebp-11h]
+	uint8_t yy_c; // [esp+13h] [ebp-11h]
 	unsigned char *yy_bp; // [esp+14h] [ebp-10h]
 	int yy_current_state; // [esp+18h] [ebp-Ch]
 	int yy_act; // [esp+1Ch] [ebp-8h]
@@ -1188,7 +1188,7 @@ yynewstate:
 
 		if (yychar > 0) // YYEOF
 		{
-			yytoken = (unsigned int)yychar > 0x158 ? 119 : yytranslate[yychar];// t5 is 0x159 and 120  YYTRANSLATE
+			yytoken = (uint32_t)yychar > 0x158 ? 119 : yytranslate[yychar];// t5 is 0x159 and 120  YYTRANSLATE
 			// YY_SYMBOL_PRINT ("Next token is", yytoken, &yylval, &yylloc);
 		}
 		else
@@ -1965,7 +1965,7 @@ yynewstate:
 			//{
 			//	yystate = yydefact[yyn + 171];
 			//}
-			if ((unsigned int)yystate < YYTABLESIZE && yycheck[yystate] == *yyssp)
+			if ((uint32_t)yystate < YYTABLESIZE && yycheck[yystate] == *yyssp)
 			{
 				yystate = yytable[yystate];
 			}

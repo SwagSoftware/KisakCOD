@@ -226,7 +226,7 @@ inline void __cdecl SetConfigString(char **ppszConfigString, const char *pszKeyV
     }
 }
 
-inline void __cdecl SetConfigString2(unsigned __int8 *pMember, const char *pszKeyValue)
+inline void __cdecl SetConfigString2(uint8_t *pMember, const char *pszKeyValue)
 {
     SetConfigString((char **)pMember, pszKeyValue);
 }

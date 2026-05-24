@@ -14,7 +14,7 @@
 
 struct $EF604BEDDA69129AF7FD28DC5064E1AD // sizeof=0x18
 {                                       // ...
-    unsigned __int8 *pixels[6];         // ...
+    uint8_t *pixels[6];         // ...
 };
 $EF604BEDDA69129AF7FD28DC5064E1AD cubeShotGlob;
 
@@ -45,7 +45,7 @@ void __cdecl TRACK_r_screenshot()
     track_static_alloc_internal(&cubeShotGlob, 24, "cubeShotGlob", 18);
 }
 
-void __cdecl Image_Blend1x1Faces(unsigned __int8 *(*pixels)[15], int mipLevel)
+void __cdecl Image_Blend1x1Faces(uint8_t *(*pixels)[15], int mipLevel)
 {
     int i; // [esp+10h] [ebp-10h]
     int face; // [esp+14h] [ebp-Ch]
@@ -64,9 +64,9 @@ void __cdecl Image_Blend1x1Faces(unsigned __int8 *(*pixels)[15], int mipLevel)
     }
 }
 
-unsigned __int8 *__cdecl Image_GetCubeCornerPixel(
-    unsigned __int8 *facePixels,
-    unsigned int coordx,
+uint8_t *__cdecl Image_GetCubeCornerPixel(
+    uint8_t *facePixels,
+    uint32_t coordx,
     int coordy,
     int edgeSize)
 {
@@ -117,13 +117,13 @@ unsigned __int8 *__cdecl Image_GetCubeCornerPixel(
     return 0;
 }
 
-unsigned __int8 *__cdecl Image_GetCubeFaceEdgePixel(
-    unsigned __int8 *facePixels,
+uint8_t *__cdecl Image_GetCubeFaceEdgePixel(
+    uint8_t *facePixels,
     int pixel,
     int edgeSize,
     CubeCoord edge)
 {
-    unsigned __int8 *result; // eax
+    uint8_t *result; // eax
     const char *v5; // eax
 
     switch (edge)
@@ -153,9 +153,9 @@ unsigned __int8 *__cdecl Image_GetCubeFaceEdgePixel(
 }
 
 void __cdecl Image_BlendCubeCorner(
-    unsigned __int8 *facePixels0,
-    unsigned __int8 *facePixels1,
-    unsigned __int8 *facePixels2,
+    uint8_t *facePixels0,
+    uint8_t *facePixels1,
+    uint8_t *facePixels2,
     int edgeSize,
     CubeCoord coord0x,
     CubeCoord coord0y,
@@ -165,9 +165,9 @@ void __cdecl Image_BlendCubeCorner(
     CubeCoord coord2y)
 {
     int color; // [esp+10h] [ebp-10h]
-    unsigned __int8 *pixel2; // [esp+14h] [ebp-Ch]
-    unsigned __int8 *pixel0; // [esp+18h] [ebp-8h]
-    unsigned __int8 *pixel1; // [esp+1Ch] [ebp-4h]
+    uint8_t *pixel2; // [esp+14h] [ebp-Ch]
+    uint8_t *pixel0; // [esp+18h] [ebp-8h]
+    uint8_t *pixel1; // [esp+1Ch] [ebp-4h]
 
     pixel0 = Image_GetCubeCornerPixel(facePixels0, coord0x, coord0y, edgeSize);
     pixel1 = Image_GetCubeCornerPixel(facePixels1, coord1x, coord1y, edgeSize);
@@ -181,18 +181,18 @@ void __cdecl Image_BlendCubeCorner(
 }
 
 void __cdecl Image_BlendCubeFaceEdge(
-    unsigned __int8 *thisFacePixels,
-    unsigned __int8 *otherFacePixels,
+    uint8_t *thisFacePixels,
+    uint8_t *otherFacePixels,
     int edgeSize,
     CubeCoord thisEdge,
     CubeCoord otherEdge,
     FlipEdge flip)
 {
     int color; // [esp+0h] [ebp-14h]
-    unsigned __int8 *otherPixel; // [esp+4h] [ebp-10h]
+    uint8_t *otherPixel; // [esp+4h] [ebp-10h]
     int i; // [esp+8h] [ebp-Ch]
     int iother; // [esp+Ch] [ebp-8h]
-    unsigned __int8 *thisPixel; // [esp+10h] [ebp-4h]
+    uint8_t *thisPixel; // [esp+10h] [ebp-4h]
 
     for (i = 0; i < edgeSize; ++i)
     {
@@ -210,7 +210,7 @@ void __cdecl Image_BlendCubeFaceEdge(
     }
 }
 
-void __cdecl CubeMap_BlendFaceEdges(unsigned __int8 *(*pixels)[15], int mipLevel, int edgeSize)
+void __cdecl CubeMap_BlendFaceEdges(uint8_t *(*pixels)[15], int mipLevel, int edgeSize)
 {
     if (edgeSize == 1)
     {
@@ -351,7 +351,7 @@ void __cdecl CubeMap_BlendFaceEdges(unsigned __int8 *(*pixels)[15], int mipLevel
     }
 }
 
-void __cdecl R_CubemapShotDownSample(unsigned __int8 *pixels, int baseRes, int downSampleRes)
+void __cdecl R_CubemapShotDownSample(uint8_t *pixels, int baseRes, int downSampleRes)
 {
     int i; // [esp+10h] [ebp-34h]
     int colIndex; // [esp+14h] [ebp-30h]
@@ -360,7 +360,7 @@ void __cdecl R_CubemapShotDownSample(unsigned __int8 *pixels, int baseRes, int d
     int x; // [esp+20h] [ebp-24h]
     int y; // [esp+24h] [ebp-20h]
     float total[6]; // [esp+28h] [ebp-1Ch]
-    unsigned __int8 *pixel; // [esp+40h] [ebp-4h]
+    uint8_t *pixel; // [esp+40h] [ebp-4h]
 
     LODWORD(total[5]) = 4;
     LODWORD(total[4]) = 4;
@@ -393,7 +393,7 @@ void __cdecl R_CubemapShotDownSample(unsigned __int8 *pixels, int baseRes, int d
     }
 }
 
-void __cdecl Image_FlipVertically(unsigned __int8 *pic, int size)
+void __cdecl Image_FlipVertically(uint8_t *pic, int size)
 {
     int *v2; // ecx
     int t; // [esp+4h] [ebp-1Ch]
@@ -414,7 +414,7 @@ void __cdecl Image_FlipVertically(unsigned __int8 *pic, int size)
     }
 }
 
-void __cdecl Image_FlipDiagonally(unsigned __int8 *pic, int size)
+void __cdecl Image_FlipDiagonally(uint8_t *pic, int size)
 {
     int t; // [esp+0h] [ebp-14h]
     int cache; // [esp+4h] [ebp-10h]
@@ -431,7 +431,7 @@ void __cdecl Image_FlipDiagonally(unsigned __int8 *pic, int size)
     }
 }
 
-void __cdecl Image_FlipHorizontally(unsigned __int8 *pic, int size)
+void __cdecl Image_FlipHorizontally(uint8_t *pic, int size)
 {
     int t; // [esp+0h] [ebp-1Ch]
     int cache; // [esp+4h] [ebp-18h]
@@ -452,7 +452,7 @@ void __cdecl Image_FlipHorizontally(unsigned __int8 *pic, int size)
     }
 }
 
-void __cdecl CubeMap_FlipSides(unsigned __int8 **pic, int size)
+void __cdecl CubeMap_FlipSides(uint8_t **pic, int size)
 {
     Image_FlipDiagonally(*pic, size);
     Image_FlipDiagonally(pic[1], size);
@@ -646,7 +646,7 @@ void __cdecl Image_CalcCubeMipMapTexel32SubSample(
     int u,
     int v,
     float *dir,
-    unsigned __int8 *(*sourceFacePixels)[15],
+    uint8_t *(*sourceFacePixels)[15],
     int sourceSize,
     float minDot,
     float *color,
@@ -669,9 +669,9 @@ void __cdecl Image_CalcCubeMipMapTexel32SubSample(
 }
 
 void __cdecl Image_CalcCubeMipMapTexel32(
-    unsigned __int8 *pixel,
+    uint8_t *pixel,
     float *dir,
-    unsigned __int8 *(*sourceFacePixels)[15],
+    uint8_t *(*sourceFacePixels)[15],
     int sourceSize,
     float blurDotMin)
 {
@@ -705,9 +705,9 @@ void __cdecl Image_CalcCubeMipMapTexel32(
 }
 
 void __cdecl CubeMap_GenerateMipMap32(
-    unsigned __int8 *image,
+    uint8_t *image,
     int size,
-    unsigned __int8 *(*sourceFacePixels)[15],
+    uint8_t *(*sourceFacePixels)[15],
     int sourceSize,
     int face)
 {
@@ -743,9 +743,9 @@ void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *pr
 {
     int v2; // [esp+0h] [ebp-190h]
     int mip; // [esp+4h] [ebp-18Ch]
-    unsigned __int8 *data; // [esp+Ch] [ebp-184h]
-    unsigned __int8 *pixels[6][15]; // [esp+10h] [ebp-180h] BYREF
-    unsigned __int8 *rawPixels; // [esp+17Ch] [ebp-14h]
+    uint8_t *data; // [esp+Ch] [ebp-184h]
+    uint8_t *pixels[6][15]; // [esp+10h] [ebp-180h] BYREF
+    uint8_t *rawPixels; // [esp+17Ch] [ebp-14h]
     int mipmapLevelSize; // [esp+180h] [ebp-10h]
     int imgIndex; // [esp+184h] [ebp-Ch]
     int scaledSize; // [esp+188h] [ebp-8h]
@@ -802,7 +802,7 @@ void __cdecl R_CreateReflectionRawDataFromCubemapShot(DiskGfxReflectionProbe *pr
             "rawPixels - probeRawData->pixels == sizeof( probeRawData->pixels )");
 }
 
-char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytesPerPixel, unsigned __int8 *buffer)
+char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytesPerPixel, uint8_t *buffer)
 {
     const char *v7; // eax
     const char *v8; // eax
@@ -814,8 +814,8 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
     tagMONITORINFO monitorInfo; // [esp+6Ch] [ebp-6Ch] BYREF
     HRESULT hr; // [esp+94h] [ebp-44h]
     _D3DLOCKED_RECT lockedRect; // [esp+98h] [ebp-40h] BYREF
-    unsigned __int8 *dstPixel; // [esp+A0h] [ebp-38h]
-    const unsigned __int8 *srcPixel; // [esp+A4h] [ebp-34h]
+    uint8_t *dstPixel; // [esp+A0h] [ebp-38h]
+    const uint8_t *srcPixel; // [esp+A4h] [ebp-34h]
     HMONITOR__ *monitor; // [esp+A8h] [ebp-30h]
     int surfHeight; // [esp+ACh] [ebp-2Ch]
     tagRECT sourceRect; // [esp+B0h] [ebp-28h] BYREF
@@ -899,7 +899,7 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
     hr = surface->LockRect(&lockedRect, &sourceRect, 16u);
     if (hr >= 0)
     {
-        srcPixel = (const unsigned __int8 *)lockedRect.pBits;
+        srcPixel = (const uint8_t *)lockedRect.pBits;
         dstPixel = buffer;
         iassert( bytesPerPixel == 3 || bytesPerPixel == 4 );
         if (bytesPerPixel == 3)
@@ -965,16 +965,16 @@ void __cdecl R_UpsamplePixelData(
     int newSize,
     int stride,
     int bytesPerPixel,
-    unsigned __int8 *src,
-    unsigned __int8 *dst)
+    uint8_t *src,
+    uint8_t *dst)
 {
     int backwardWeight; // [esp+90h] [ebp-18h]
     int nextSample; // [esp+94h] [ebp-14h]
     float colorScale; // [esp+98h] [ebp-10h]
-    unsigned __int8 *currSrc; // [esp+9Ch] [ebp-Ch]
+    uint8_t *currSrc; // [esp+9Ch] [ebp-Ch]
     int column; // [esp+A0h] [ebp-8h]
     int forwardWeight; // [esp+A4h] [ebp-4h]
-    unsigned __int8 *dsta; // [esp+C4h] [ebp+1Ch]
+    uint8_t *dsta; // [esp+C4h] [ebp+1Ch]
 
     iassert( newSize > oldSize );
     nextSample = bytesPerPixel * stride;
@@ -1017,8 +1017,8 @@ void __cdecl R_DownsamplePixelData(
     int newSize,
     int stride,
     int bytesPerPixel,
-    unsigned __int8 *src,
-    unsigned __int8 *dst)
+    uint8_t *src,
+    uint8_t *dst)
 {
     float v6; // [esp+4h] [ebp-54h]
     float v7; // [esp+18h] [ebp-40h]
@@ -1068,18 +1068,18 @@ void __cdecl R_ResampleImage(
     int newWidth,
     int newHeight,
     int bytesPerPixel,
-    unsigned __int8 *data)
+    uint8_t *data)
 {
-    unsigned __int8 *src; // [esp+0h] [ebp-10h]
-    unsigned __int8 *srca; // [esp+0h] [ebp-10h]
-    unsigned __int8 *srcb; // [esp+0h] [ebp-10h]
-    unsigned __int8 *srcc; // [esp+0h] [ebp-10h]
+    uint8_t *src; // [esp+0h] [ebp-10h]
+    uint8_t *srca; // [esp+0h] [ebp-10h]
+    uint8_t *srcb; // [esp+0h] [ebp-10h]
+    uint8_t *srcc; // [esp+0h] [ebp-10h]
     int row; // [esp+4h] [ebp-Ch]
     int rowa; // [esp+4h] [ebp-Ch]
-    unsigned __int8 *dst; // [esp+8h] [ebp-8h]
-    unsigned __int8 *dsta; // [esp+8h] [ebp-8h]
-    unsigned __int8 *dstb; // [esp+8h] [ebp-8h]
-    unsigned __int8 *dstc; // [esp+8h] [ebp-8h]
+    uint8_t *dst; // [esp+8h] [ebp-8h]
+    uint8_t *dsta; // [esp+8h] [ebp-8h]
+    uint8_t *dstb; // [esp+8h] [ebp-8h]
+    uint8_t *dstc; // [esp+8h] [ebp-8h]
     int col; // [esp+Ch] [ebp-4h]
     int cola; // [esp+Ch] [ebp-4h]
 
@@ -1135,11 +1135,11 @@ void __cdecl R_ResampleImage(
     }
 }
 
-unsigned __int8 *__cdecl R_TakeResampledScreenshot(int width, int height, int bytesPerPixel, int headerSize)
+uint8_t *__cdecl R_TakeResampledScreenshot(int width, int height, int bytesPerPixel, int headerSize)
 {
-    unsigned int displayHeight; // [esp+0h] [ebp-14h]
-    unsigned int displayWidth; // [esp+4h] [ebp-10h]
-    unsigned __int8 *buffer; // [esp+8h] [ebp-Ch]
+    uint32_t displayHeight; // [esp+0h] [ebp-14h]
+    uint32_t displayWidth; // [esp+4h] [ebp-10h]
+    uint8_t *buffer; // [esp+8h] [ebp-Ch]
 
     if (width < (int)vidConfig.displayWidth)
         displayWidth = vidConfig.displayWidth;
@@ -1149,7 +1149,7 @@ unsigned __int8 *__cdecl R_TakeResampledScreenshot(int width, int height, int by
         displayHeight = vidConfig.displayHeight;
     else
         displayHeight = height;
-    buffer = (unsigned __int8 *)Z_Malloc(headerSize + bytesPerPixel * displayHeight * displayWidth, "R_ScreenShot", 22);
+    buffer = (uint8_t *)Z_Malloc(headerSize + bytesPerPixel * displayHeight * displayWidth, "R_ScreenShot", 22);
     if (R_GetFrontBufferData(0, 0, vidConfig.displayWidth, vidConfig.displayHeight, bytesPerPixel, buffer))
     {
         R_ResampleImage(vidConfig.displayWidth, vidConfig.displayHeight, width, height, bytesPerPixel, &buffer[headerSize]);
@@ -1164,17 +1164,17 @@ unsigned __int8 *__cdecl R_TakeResampledScreenshot(int width, int height, int by
 
 void __cdecl R_LevelShot()
 {
-    unsigned __int8 *buffer; // [esp+0h] [ebp-10Ch]
+    uint8_t *buffer; // [esp+0h] [ebp-10Ch]
     char checkname[260]; // [esp+4h] [ebp-108h] BYREF
 
     snprintf(checkname, ARRAYSIZE(checkname), "levelshots/%s.tga", rgp.world->baseName);
     buffer = R_TakeResampledScreenshot(128, 128, 3, 18);
     if (buffer)
     {
-        *(unsigned int *)buffer = 0;
-        *((unsigned int *)buffer + 1) = 0;
-        *((unsigned int *)buffer + 2) = 0;
-        *((unsigned int *)buffer + 3) = 0;
+        *(uint32_t *)buffer = 0;
+        *((uint32_t *)buffer + 1) = 0;
+        *((uint32_t *)buffer + 2) = 0;
+        *((uint32_t *)buffer + 3) = 0;
         *((_WORD *)buffer + 8) = 0;
         buffer[2] = 2;
         buffer[12] = 0x80;
@@ -1189,22 +1189,22 @@ void __cdecl R_LevelShot()
 void __cdecl R_SaveJpg(
     char *filename,
     int quality,
-    unsigned int image_width,
-    unsigned int image_height,
-    unsigned __int8 *image_buffer)
+    uint32_t image_width,
+    uint32_t image_height,
+    uint8_t *image_buffer)
 {
     // KISAKTODO: Add JPEG
 #if 0
-    unsigned __int8 *out; // [esp+0h] [ebp-214h]
-    unsigned __int8 *row_pointer[1]; // [esp+8h] [ebp-20Ch] BYREF
+    uint8_t *out; // [esp+0h] [ebp-214h]
+    uint8_t *row_pointer[1]; // [esp+8h] [ebp-20Ch] BYREF
     jpeg_compress_struct cinfo; // [esp+Ch] [ebp-208h] BYREF
     jpeg_error_mgr jerr; // [esp+17Ch] [ebp-98h] BYREF
 
     cinfo.err = jpeg_std_error(&jerr, (void (*)(...))ExitJpeg, PrintfJpeg);
-    cinfo.alloc.malloc = (void *(__cdecl *)(unsigned int))Z_MallocJpeg;
-    cinfo.alloc.free = (void(__cdecl *)(void *, unsigned int))Com_FreeEvent;
+    cinfo.alloc.malloc = (void *(__cdecl *)(uint32_t))Z_MallocJpeg;
+    cinfo.alloc.free = (void(__cdecl *)(void *, uint32_t))Com_FreeEvent;
     jpeg_CreateCompress((jpeg_common_struct *)&cinfo, 62, 0x170u);
-    out = (unsigned __int8 *)Hunk_AllocateTempMemory(3 * image_height * image_width, "SaveJPG");
+    out = (uint8_t *)Hunk_AllocateTempMemory(3 * image_height * image_width, "SaveJPG");
     jpegDest((jpeg_common_struct *)&cinfo, out, 3 * image_height * image_width);
     cinfo.image_width = image_width;
     cinfo.image_height = image_height;
@@ -1228,7 +1228,7 @@ void __cdecl R_SaveJpg(
 void __cdecl R_SaveGameShot(const char *saveName)
 {
     char filename[256]; // [esp+0h] [ebp-110h] BYREF
-    unsigned __int8 *pixels; // [esp+104h] [ebp-Ch]
+    uint8_t *pixels; // [esp+104h] [ebp-Ch]
     int width; // [esp+108h] [ebp-8h]
     int height; // [esp+10Ch] [ebp-4h]
 
@@ -1295,7 +1295,7 @@ void R_CubemapShotSetInitialState()
                 " (123987))) == 0 || ((123987 / ((((0 || 0 || (123987 / ((-123987)) == 123987 / (123987))) ? (123987) : (-123987)"
                 ") * ((0 || 0 || (123987 / ((-123987)) == 123987 / (123987))) == 0 || (0 || 0 || (123987 / ((-123987)) == 123987 "
                 "/ (123987))) == 1))) == 123987 / (123987))) == 1))) == 123987 / (123987)) ? 0.0f : 1.0f), 0 )\n");
-        //hr = ((int(__stdcall *)(IDirect3DDevice9 *, unsigned int, unsigned int, int, int, unsigned int, unsigned int))dx.device->Clear)(
+        //hr = ((int(__stdcall *)(IDirect3DDevice9 *, uint32_t, uint32_t, int, int, uint32_t, uint32_t))dx.device->Clear)(
         //    dx.device,
         //    0,
         //    0,
@@ -1348,12 +1348,12 @@ void __cdecl R_CopyCubemapShot(CubemapShot imgIndex)
             "(shotIndex > CUBEMAPSHOT_NONE && shotIndex < CUBEMAPSHOT_COUNT)",
             imgIndex);
     sizeInBytes = 4 * gfxMetrics.cubemapShotRes * gfxMetrics.cubemapShotRes;
-    cubeShotGlob.pixels[imgIndex - 1] = (unsigned __int8 *)Z_VirtualAlloc(sizeInBytes, "R_CopyCubemapShot", 22);
+    cubeShotGlob.pixels[imgIndex - 1] = (uint8_t *)Z_VirtualAlloc(sizeInBytes, "R_CopyCubemapShot", 22);
     iassert( cubeShotGlob.pixels[imgIndex] );
     R_CubemapShotCopySurfaceToBuffer(cubeShotGlob.pixels[imgIndex - 1], sizeInBytes);
 }
 
-char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesPerPixel, unsigned __int8 *buffer)
+char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesPerPixel, uint8_t *buffer)
 {
     const char *v6; // eax
     const char *v8; // eax
@@ -1368,9 +1368,9 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
     int hrc; // [esp+68h] [ebp-54h]
     int hrd; // [esp+68h] [ebp-54h]
     _D3DLOCKED_RECT lockedRect; // [esp+6Ch] [ebp-50h] BYREF
-    unsigned __int8 *dstPixel; // [esp+74h] [ebp-48h]
+    uint8_t *dstPixel; // [esp+74h] [ebp-48h]
     IDirect3DSurface9 *surfaceBackBuffer; // [esp+78h] [ebp-44h] BYREF
-    const unsigned __int8 *srcPixel; // [esp+7Ch] [ebp-40h]
+    const uint8_t *srcPixel; // [esp+7Ch] [ebp-40h]
     tagRECT sourceRect; // [esp+80h] [ebp-3Ch] BYREF
     int row; // [esp+90h] [ebp-2Ch]
     IDirect3DSurface9 *surface; // [esp+94h] [ebp-28h] BYREF
@@ -1385,7 +1385,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
         hra = surfaceBackBuffer->GetDesc(&desc);
         if (hra >= 0)
         {
-            //hrb = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, unsigned int, unsigned int, _D3DFORMAT, int, IDirect3DSurface9 **, _DWORD))dx.device->CreateOffscreenPlainSurface)(
+            //hrb = ((int(__thiscall *)(IDirect3DDevice9 *, IDirect3DDevice9 *, uint32_t, uint32_t, _D3DFORMAT, int, IDirect3DSurface9 **, _DWORD))dx.device->CreateOffscreenPlainSurface)(
             //    dx.device,
             //    dx.device,
             //    desc.Width,
@@ -1412,7 +1412,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
                     hrd = surface->LockRect(&lockedRect, &sourceRect, 16u);
                     if (hrd >= 0)
                     {
-                        srcPixel = (const unsigned __int8 *)lockedRect.pBits;
+                        srcPixel = (const uint8_t *)lockedRect.pBits;
                         dstPixel = buffer;
                         iassert( bytesPerPixel == 3 || bytesPerPixel == 4 );
                         if (bytesPerPixel == 3)
@@ -1512,10 +1512,10 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
     }
 }
 
-void __cdecl R_CubemapShotFlipVerticalBuffer(unsigned __int8 *buffer)
+void __cdecl R_CubemapShotFlipVerticalBuffer(uint8_t *buffer)
 {
     int srcIndex; // [esp+0h] [ebp-14h]
-    unsigned __int8 swapBuffer[4]; // [esp+4h] [ebp-10h]
+    uint8_t swapBuffer[4]; // [esp+4h] [ebp-10h]
     int colIndex; // [esp+8h] [ebp-Ch]
     int rowIndex; // [esp+Ch] [ebp-8h]
     int dstIndex; // [esp+10h] [ebp-4h]
@@ -1534,7 +1534,7 @@ void __cdecl R_CubemapShotFlipVerticalBuffer(unsigned __int8 *buffer)
     }
 }
 
-void __cdecl R_CubemapShotCopySurfaceToBuffer(unsigned __int8 *buffer, int bufferSizeInBytes)
+void __cdecl R_CubemapShotCopySurfaceToBuffer(uint8_t *buffer, int bufferSizeInBytes)
 {
     iassert( buffer );
     if (bufferSizeInBytes <= 0)
@@ -1572,7 +1572,7 @@ void __cdecl R_CubemapShotWriteTargaFile(char *filename, CubemapShot shotIndex, 
 {
     int imgIndex; // [esp+Ch] [ebp-Ch]
     int fileSize; // [esp+10h] [ebp-8h]
-    unsigned __int8 *targa; // [esp+14h] [ebp-4h]
+    uint8_t *targa; // [esp+14h] [ebp-4h]
 
     iassert( filename );
     if (shotIndex <= CUBEMAPSHOT_NONE || shotIndex >= CUBEMAPSHOT_COUNT)
@@ -1585,7 +1585,7 @@ void __cdecl R_CubemapShotWriteTargaFile(char *filename, CubemapShot shotIndex, 
             shotIndex);
     imgIndex = shotIndex - 1;
     fileSize = 4 * gfxMetrics.cubemapShotRes * gfxMetrics.cubemapShotRes + 18;
-    targa = (unsigned __int8 *)Z_VirtualAlloc(fileSize, "R_CubemapShotWriteTargaFile", 22);
+    targa = (uint8_t *)Z_VirtualAlloc(fileSize, "R_CubemapShotWriteTargaFile", 22);
     iassert( targa );
     R_CubemapShotWriteTargaHeader(gfxMetrics.cubemapShotRes, targa);
     R_CubemapShotCopyBufferToTarga(cubeShotGlob.pixels[imgIndex], targa);
@@ -1595,14 +1595,14 @@ void __cdecl R_CubemapShotWriteTargaFile(char *filename, CubemapShot shotIndex, 
     Z_VirtualFree(cubeShotGlob.pixels[imgIndex]);
 }
 
-void __cdecl R_CubemapShotWriteTargaHeader(int res, unsigned __int8 *fileBuffer)
+void __cdecl R_CubemapShotWriteTargaHeader(int res, uint8_t *fileBuffer)
 {
     iassert( fileBuffer );
     iassert( (res > 0) );
-    *(unsigned int *)fileBuffer = 0;
-    *((unsigned int *)fileBuffer + 1) = 0;
-    *((unsigned int *)fileBuffer + 2) = 0;
-    *((unsigned int *)fileBuffer + 3) = 0;
+    *(uint32_t *)fileBuffer = 0;
+    *((uint32_t *)fileBuffer + 1) = 0;
+    *((uint32_t *)fileBuffer + 2) = 0;
+    *((uint32_t *)fileBuffer + 3) = 0;
     *((_WORD *)fileBuffer + 8) = 0;
     fileBuffer[2] = 2;
     *((_WORD *)fileBuffer + 6) = res;
@@ -1611,7 +1611,7 @@ void __cdecl R_CubemapShotWriteTargaHeader(int res, unsigned __int8 *fileBuffer)
     fileBuffer[16] = 32;
 }
 
-void __cdecl R_CubemapShotCopyBufferToTarga(const unsigned __int8 *srcBuffer, unsigned __int8 *targa)
+void __cdecl R_CubemapShotCopyBufferToTarga(const uint8_t *srcBuffer, uint8_t *targa)
 {
     int srcIndex; // [esp+0h] [ebp-10h]
     int colIndex; // [esp+4h] [ebp-Ch]
@@ -1634,7 +1634,7 @@ void __cdecl R_CubemapShotCopyBufferToTarga(const unsigned __int8 *srcBuffer, un
     }
 }
 
-void __cdecl R_CubemapShotApplyFresnelToTarga(CubemapShot shotIndex, float n0, float n1, unsigned __int8 *targa)
+void __cdecl R_CubemapShotApplyFresnelToTarga(CubemapShot shotIndex, float n0, float n1, uint8_t *targa)
 {
     int colIndex; // [esp+8h] [ebp-10h]
     int rowIndex; // [esp+Ch] [ebp-Ch]
@@ -1659,7 +1659,7 @@ void __cdecl R_CubemapShotApplyFresnelToTarga(CubemapShot shotIndex, float n0, f
     }
 }
 
-unsigned __int8 __cdecl R_CubemapShotCalcReflectionFactor(
+uint8_t __cdecl R_CubemapShotCalcReflectionFactor(
     int shotIndex,
     int colIndex,
     int rowIndex,
@@ -1725,7 +1725,7 @@ void __cdecl R_CubemapLightingForDir(
     int height,
     const float *dir,
     const float *baseColor,
-    unsigned __int8 *pixel)
+    uint8_t *pixel)
 {
     float v6; // [esp+Ch] [ebp-A4h]
     float v7; // [esp+10h] [ebp-A0h]
@@ -1794,7 +1794,7 @@ void __cdecl R_CubemapLighting(
     int width,
     int height,
     const float *baseColor,
-    unsigned __int8 **pixels)
+    uint8_t **pixels)
 {
     float v5; // [esp+Ch] [ebp-20h]
     float v6; // [esp+10h] [ebp-1Ch]
@@ -1847,7 +1847,7 @@ void __cdecl R_GetDirForCubemapPixel(int faceIndex, float x, float y, float *dir
 }
 
 void __cdecl R_CubemapShotExtractLinearLight(
-    unsigned __int8 **pixels,
+    uint8_t **pixels,
     int width,
     int height,
     float (**linearColors)[3])
@@ -1884,7 +1884,7 @@ void __cdecl R_CubemapShotExtractLinearLight(
     }
 }
 
-void __cdecl R_ScreenshotFilename(unsigned int lastNumber, const char *extension, char *fileName)
+void __cdecl R_ScreenshotFilename(uint32_t lastNumber, const char *extension, char *fileName)
 {
     if (lastNumber < 0x2710)
         Com_sprintf(fileName, 0x100u, "screenshots/shot%04i.%s", lastNumber, extension);
@@ -1894,9 +1894,9 @@ void __cdecl R_ScreenshotFilename(unsigned int lastNumber, const char *extension
 
 void __cdecl R_TakeScreenshotJpg(int x, int y, int width, int height, const char *filename)
 {
-    unsigned __int8 *buffer; // [esp+0h] [ebp-4h]
+    uint8_t *buffer; // [esp+0h] [ebp-4h]
 
-    buffer = (unsigned __int8 *)Z_Malloc(3 * height * width, "R_TakeScreenshotJpg", 22);
+    buffer = (uint8_t *)Z_Malloc(3 * height * width, "R_TakeScreenshotJpg", 22);
     if (R_GetFrontBufferData(x, y, width, height, 3, buffer))
         R_SaveJpg((char*)filename, 90, width, height, buffer);
     Z_Free((char *)buffer, 22);
@@ -1904,9 +1904,9 @@ void __cdecl R_TakeScreenshotJpg(int x, int y, int width, int height, const char
 
 void __cdecl R_TakeScreenshotTga(int x, int y, int width, int height, char *filename)
 {
-    unsigned __int8 *buffer; // [esp+0h] [ebp-8h]
+    uint8_t *buffer; // [esp+0h] [ebp-8h]
 
-    buffer = (unsigned __int8 *)Z_Malloc(3 * height * width + 18, "R_TakeScreenshotTga", 22);
+    buffer = (uint8_t *)Z_Malloc(3 * height * width + 18, "R_TakeScreenshotTga", 22);
     *(_DWORD *)buffer = 0;
     *((_DWORD *)buffer + 1) = 0;
     *((_DWORD *)buffer + 2) = 0;

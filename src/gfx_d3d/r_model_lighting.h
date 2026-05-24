@@ -11,64 +11,64 @@ enum GfxModelLightExtrapolation : __int32
 
 struct GfxLightingInfo // sizeof=0x2
 {                                       // ...
-    unsigned __int8 primaryLightIndex;  // ...
-    unsigned __int8 reflectionProbeIndex; // ...
+    uint8_t primaryLightIndex;  // ...
+    uint8_t reflectionProbeIndex; // ...
 };
 
 
-void __cdecl R_SetModelLightingCoords(unsigned __int16 handle, float *out);
-unsigned int __cdecl R_ModelLightingIndexFromHandle(unsigned __int16 handle);
-void __cdecl R_GetPackedStaticModelLightingCoords(unsigned int smodelIndex, PackedLightingCoords *packedCoords);
-char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, unsigned int smodelIndex);
-unsigned int __cdecl R_AllocModelLighting_PrimaryLight(
+void __cdecl R_SetModelLightingCoords(uint16_t handle, float *out);
+uint32_t __cdecl R_ModelLightingIndexFromHandle(uint16_t handle);
+void __cdecl R_GetPackedStaticModelLightingCoords(uint32_t smodelIndex, PackedLightingCoords *packedCoords);
+char __cdecl R_AllocStaticModelLighting(GfxStaticModelDrawInst *smodelDrawInst, uint32_t smodelIndex);
+uint32_t __cdecl R_AllocModelLighting_PrimaryLight(
     float *lightingOrigin,
-    unsigned int dynEntId,
-    unsigned __int16 *cachedLightingHandle,
+    uint32_t dynEntId,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut);
-unsigned int __cdecl R_AllocModelLighting(
+uint32_t __cdecl R_AllocModelLighting(
     float *lightingOrigin,
-    unsigned __int16 *cachedLightingHandle,
-    unsigned int(__cdecl *GetPrimaryLightCallback)(const void *),
+    uint16_t *cachedLightingHandle,
+    uint32_t(__cdecl *GetPrimaryLightCallback)(const void *),
     const void *userData,
     GfxLightingInfo *lightingInfoOut);
-unsigned int __cdecl R_DynEntPrimaryLightCallback(const void *userData);
-unsigned int __cdecl R_AllocModelLighting_Box(
+uint32_t __cdecl R_DynEntPrimaryLightCallback(const void *userData);
+uint32_t __cdecl R_AllocModelLighting_Box(
     const GfxViewInfo *viewInfo,
     float *lightingOrigin,
     const float *boxMins,
     const float *boxMaxs,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut);
-unsigned int __cdecl R_GetPrimaryLightForBoxCallback(const void *userData);
-unsigned int __cdecl R_AllocModelLighting_Sphere(
+uint32_t __cdecl R_GetPrimaryLightForBoxCallback(const void *userData);
+uint32_t __cdecl R_AllocModelLighting_Sphere(
     const GfxViewInfo *viewInfo,
     float *lightingOrigin,
     const float *origin,
     float radius,
-    unsigned __int16 *cachedLightingHandle,
+    uint16_t *cachedLightingHandle,
     GfxLightingInfo *lightingInfoOut);
-unsigned int __cdecl R_GetPrimaryLightForSphereCallback(const void *userData);
+uint32_t __cdecl R_GetPrimaryLightForSphereCallback(const void *userData);
 void __cdecl R_ToggleModelLightingFrame();
-unsigned int __cdecl R_CalcModelLighting(
-    unsigned int entryIndex,
+uint32_t __cdecl R_CalcModelLighting(
+    uint32_t entryIndex,
     const float *lightingOrigin,
-    unsigned int nonSunPrimaryLightIndex,
+    uint32_t nonSunPrimaryLightIndex,
     GfxModelLightExtrapolation extrapolateBehavior);
 void __cdecl R_BeginAllStaticModelLighting();
 void __cdecl R_SetAllStaticModelLighting();
-void __cdecl R_SetStaticModelLighting(unsigned int smodelIndex);
-void __cdecl R_SetModelGroundLighting(unsigned int entryIndex, const unsigned __int8 *groundLighting);
-void __cdecl R_SetModelLightingCoordsForSource(unsigned __int16 handle, GfxCmdBufSourceState *source);
-void __cdecl R_SetStaticModelLightingCoordsForSource(unsigned int smodelIndex, GfxCmdBufSourceState *source);
-unsigned int R_SetModelLightingSampleDeltas();
+void __cdecl R_SetStaticModelLighting(uint32_t smodelIndex);
+void __cdecl R_SetModelGroundLighting(uint32_t entryIndex, const uint8_t *groundLighting);
+void __cdecl R_SetModelLightingCoordsForSource(uint16_t handle, GfxCmdBufSourceState *source);
+void __cdecl R_SetStaticModelLightingCoordsForSource(uint32_t smodelIndex, GfxCmdBufSourceState *source);
+uint32_t R_SetModelLightingSampleDeltas();
 void __cdecl R_SetModelLightingLookupScale(GfxCmdBufInput *input);
 void __cdecl R_SetupDynamicModelLighting(GfxCmdBufInput *input);
 void __cdecl R_InitModelLightingGlobals();
 void __cdecl R_ShutdownModelLightingGlobals();
-char *__cdecl R_AllocModelLightingGlobal(unsigned int bytes);
+char *__cdecl R_AllocModelLightingGlobal(uint32_t bytes);
 void __cdecl R_ResetModelLighting();
 void __cdecl R_InitModelLightingImage();
 void __cdecl R_ShutdownModelLightingImage();
 void __cdecl R_InitStaticModelLighting();
 
-void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, unsigned int patchCount);
+void __cdecl RB_PatchModelLighting(const GfxModelLightingPatch *patchList, uint32_t patchCount);

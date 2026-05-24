@@ -212,7 +212,7 @@ int __cdecl Ragdoll_GetUnusedBody()
 void __cdecl Ragdoll_InitBody(RagdollBody *body)
 {
     iassert( body );
-    memset((unsigned __int8 *)body, 0, sizeof(RagdollBody));
+    memset((uint8_t *)body, 0, sizeof(RagdollBody));
 }
 
 int __cdecl Ragdoll_ReferenceDObjBody(int dobj)
@@ -234,7 +234,7 @@ int __cdecl Ragdoll_ReferenceDObjBody(int dobj)
     return 0;
 }
 
-char __cdecl Ragdoll_BindDef(unsigned int ragdollDef)
+char __cdecl Ragdoll_BindDef(uint32_t ragdollDef)
 {
     RagdollDef *def; // [esp+0h] [ebp-18h]
     int nameIdx; // [esp+4h] [ebp-14h]
@@ -295,7 +295,7 @@ char __cdecl Ragdoll_BindDef(unsigned int ragdollDef)
     return 1;
 }
 
-bool __cdecl Ragdoll_ValidateDef(unsigned int ragdollDef)
+bool __cdecl Ragdoll_ValidateDef(uint32_t ragdollDef)
 {
     if (ragdollDef >= 2)
         MyAssertHandler(
@@ -528,7 +528,7 @@ char __cdecl Ragdoll_ReadAxis(int arg, float *dest)
 {
     float *axis; // [esp+0h] [ebp-10h]
     bool negate; // [esp+7h] [ebp-9h]
-    unsigned int idx; // [esp+8h] [ebp-8h]
+    uint32_t idx; // [esp+8h] [ebp-8h]
     const char *argv; // [esp+Ch] [ebp-4h]
 
     if (Cmd_Argc() >= arg)
@@ -575,7 +575,7 @@ char __cdecl Ragdoll_ReadAxis(int arg, float *dest)
 void __cdecl Ragdoll_Clear_f()
 {
     const char *v0; // eax
-    unsigned int ragdoll; // [esp+0h] [ebp-4h]
+    uint32_t ragdoll; // [esp+0h] [ebp-4h]
 
     if (Cmd_Argc() >= 2)
     {
@@ -583,7 +583,7 @@ void __cdecl Ragdoll_Clear_f()
         ragdoll = atoi(v0);
         if (ragdoll < 2)
         {
-            memset((unsigned __int8 *)&ragdollDefs[ragdoll], 0, sizeof(RagdollDef));
+            memset((uint8_t *)&ragdollDefs[ragdoll], 0, sizeof(RagdollDef));
             Ragdoll_ResetBodiesUsingDef();
         }
     }
@@ -598,7 +598,7 @@ void __cdecl Ragdoll_Bone_f()
     const char *v4; // eax
     const char *v5; // eax
     const char *v6; // eax
-    unsigned int ragdoll; // [esp+0h] [ebp-18h]
+    uint32_t ragdoll; // [esp+0h] [ebp-18h]
     RagdollDef *def; // [esp+4h] [ebp-14h]
     int parentBone; // [esp+8h] [ebp-10h]
     char *name; // [esp+Ch] [ebp-Ch]
@@ -672,7 +672,7 @@ void __cdecl Ragdoll_BaseLerpBone_f()
     const char *v2; // eax
     int v3; // [esp+0h] [ebp-1Ch]
     int lerpTime; // [esp+8h] [ebp-14h]
-    unsigned int ragdoll; // [esp+Ch] [ebp-10h]
+    uint32_t ragdoll; // [esp+Ch] [ebp-10h]
     RagdollDef *def; // [esp+10h] [ebp-Ch]
     char *name; // [esp+14h] [ebp-8h]
     BaseLerpBoneDef *bone; // [esp+18h] [ebp-4h]
@@ -730,7 +730,7 @@ void __cdecl Ragdoll_PinBone_f()
 {
     const char *v0; // eax
     const char *v1; // eax
-    unsigned int ragdoll; // [esp+0h] [ebp-10h]
+    uint32_t ragdoll; // [esp+0h] [ebp-10h]
     RagdollDef *def; // [esp+4h] [ebp-Ch]
     const char *name; // [esp+8h] [ebp-8h]
     BaseLerpBoneDef *bone; // [esp+Ch] [ebp-4h]
@@ -777,7 +777,7 @@ void __cdecl Ragdoll_Joint_f()
 {
     const char *v0; // eax
     const char *v1; // eax
-    unsigned int ragdoll; // [esp+0h] [ebp-Ch]
+    uint32_t ragdoll; // [esp+0h] [ebp-Ch]
     RagdollDef *def; // [esp+4h] [ebp-8h]
     JointDef *joint; // [esp+8h] [ebp-4h]
 
@@ -841,7 +841,7 @@ void __cdecl Ragdoll_Limit_f()
     float v15; // [esp+28h] [ebp-1Ch]
     float v16; // [esp+2Ch] [ebp-18h]
     float v17; // [esp+30h] [ebp-14h]
-    unsigned int ragdoll; // [esp+34h] [ebp-10h]
+    uint32_t ragdoll; // [esp+34h] [ebp-10h]
     RagdollDef *def; // [esp+38h] [ebp-Ch]
     int jointNum; // [esp+40h] [ebp-4h]
 
@@ -919,7 +919,7 @@ void __cdecl Ragdoll_Selfpair_f()
 {
     const char *v0; // eax
     const char *v1; // eax
-    unsigned int ragdoll; // [esp+0h] [ebp-10h]
+    uint32_t ragdoll; // [esp+0h] [ebp-10h]
     RagdollDef *def; // [esp+4h] [ebp-Ch]
     SelfPairDef *pair; // [esp+8h] [ebp-8h]
     int i; // [esp+Ch] [ebp-4h]
@@ -997,7 +997,7 @@ void __cdecl Ragdoll_Init()
     {
         if (ragdoll_enable->current.enabled && ragdoll_max_simulating->current.integer < 8)
             Dvar_SetInt((dvar_s *)ragdoll_max_simulating, 8);
-        memset((unsigned __int8 *)ragdollBodies, 0, 0x13A80u);
+        memset((uint8_t *)ragdollBodies, 0, 0x13A80u);
         for (i = 0; i < 2; ++i)
         {
             ragdollDefs[i].bound = 0;

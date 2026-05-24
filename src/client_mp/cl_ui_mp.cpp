@@ -114,7 +114,7 @@ int __cdecl LAN_WaitServerResponse(int source)
         return 0;
 }
 
-void __cdecl LAN_GetServerInfo(int source, unsigned int n, char *buf, int buflen)
+void __cdecl LAN_GetServerInfo(int source, uint32_t n, char *buf, int buflen)
 {
     const char *v4; // eax
     const char *v5; // eax
@@ -203,7 +203,7 @@ void __cdecl LAN_GetServerInfo(int source, unsigned int n, char *buf, int buflen
     }
 }
 
-int __cdecl LAN_GetServerPing(int source, unsigned int n)
+int __cdecl LAN_GetServerPing(int source, uint32_t n)
 {
     serverInfo_t *server; // [esp+4h] [ebp-4h]
 
@@ -230,7 +230,7 @@ int __cdecl LAN_GetServerPing(int source, unsigned int n)
         return -1;
 }
 
-serverInfo_t *__cdecl LAN_GetServerPtr(int source, unsigned int n)
+serverInfo_t *__cdecl LAN_GetServerPtr(int source, uint32_t n)
 {
     if (source)
     {
@@ -253,7 +253,7 @@ serverInfo_t *__cdecl LAN_GetServerPtr(int source, unsigned int n)
 
 void __cdecl LAN_CleanHostname(const char *hostName, char *cleanHostName)
 {
-    unsigned __int8 c; // [esp+3h] [ebp-1h]
+    uint8_t c; // [esp+3h] [ebp-1h]
 
     while (1)
     {
@@ -282,7 +282,7 @@ int __cdecl LAN_CompareHostname(const char *hostName1, const char *hostName2)
         return I_stricmp(hostName1, hostName2);
 }
 
-int __cdecl LAN_CompareServers(int source, int sortKey, int sortDir, unsigned int s1, unsigned int s2)
+int __cdecl LAN_CompareServers(int source, int sortKey, int sortDir, uint32_t s1, uint32_t s2)
 {
     char *v6; // eax
     char *v7; // eax
@@ -385,7 +385,7 @@ int __cdecl LAN_CompareServers(int source, int sortKey, int sortDir, unsigned in
         return res;
 }
 
-void __cdecl LAN_MarkServerDirty(int source, unsigned int n, unsigned __int8 dirty)
+void __cdecl LAN_MarkServerDirty(int source, uint32_t n, uint8_t dirty)
 {
     serverInfo_t *server; // [esp+8h] [ebp-8h]
     int count; // [esp+Ch] [ebp-4h]
@@ -435,7 +435,7 @@ void __cdecl LAN_MarkServerDirty(int source, unsigned int n, unsigned __int8 dir
     }
 }
 
-int __cdecl LAN_ServerIsDirty(int source, unsigned int n)
+int __cdecl LAN_ServerIsDirty(int source, uint32_t n)
 {
     if (source)
     {
@@ -456,7 +456,7 @@ int __cdecl LAN_ServerIsDirty(int source, unsigned int n)
     return 0;
 }
 
-int __cdecl LAN_UpdateDirtyPings(netsrc_t localClientNum, unsigned int source)
+int __cdecl LAN_UpdateDirtyPings(netsrc_t localClientNum, uint32_t source)
 {
     return CL_UpdateDirtyPings(localClientNum, source);
 }
@@ -480,12 +480,12 @@ int __cdecl CL_GetClientName(int localClientNum, int index, char *buf, int size)
         return 0;
     for (i = 0; i < LocalClientGlobals->snap.numClients; ++i)
     {
-        if (LocalClientGlobals->parseClients[((_WORD)i + (unsigned __int16)LocalClientGlobals->snap.parseClientsNum)
+        if (LocalClientGlobals->parseClients[((_WORD)i + (uint16_t)LocalClientGlobals->snap.parseClientsNum)
             & 0x7FF].clientIndex == index)
         {
             I_strncpyz(
                 buf,
-                LocalClientGlobals->parseClients[((_WORD)i + (unsigned __int16)LocalClientGlobals->snap.parseClientsNum) & 0x7FF].name,
+                LocalClientGlobals->parseClients[((_WORD)i + (uint16_t)LocalClientGlobals->snap.parseClientsNum) & 0x7FF].name,
                 size);
             return 1;
         }

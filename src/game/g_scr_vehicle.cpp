@@ -36,7 +36,7 @@ VehiclePhysicsBackup s_backup;
 #ifdef KISAK_SP
 __int16 s_numVehicleInfos;
 
-unsigned __int16 *s_flashTags[5] =
+uint16_t *s_flashTags[5] =
 {
     &scr_const.tag_flash,
     &scr_const.tag_flash_11,
@@ -44,7 +44,7 @@ unsigned __int16 *s_flashTags[5] =
     &scr_const.tag_flash_22,
     &scr_const.tag_flash_3
 };
-unsigned __int16 *s_wheelTags[6] =
+uint16_t *s_wheelTags[6] =
 {
     &scr_const.tag_wheel_front_left,
     &scr_const.tag_wheel_front_right,
@@ -2479,11 +2479,11 @@ gentity_s *G_IsVehicleUnusable(gentity_s *player)
     return result;
 }
 
-bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, unsigned int weapon)
+bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapon)
 {
     vehicle_info_t *v4 = &s_vehicleInfos[ent->scr_vehicle->infoIdx];
     int result;
-    unsigned int damageValue;
+    uint32_t damageValue;
 
     switch (mod)
     {
@@ -2605,10 +2605,10 @@ void G_UpdateVehicleTags(gentity_s *ent)
 {
     scr_vehicle_s *veh; // r30
     int *flash; // r28
-    unsigned __int16 **v4; // r29
+    uint16_t **v4; // r29
     int BoneIndex; // r3
     int *wheel; // r29
-    unsigned __int16 **v7; // r30
+    uint16_t **v7; // r30
     int v8; // r3
 
     iassert(ent);
@@ -2640,7 +2640,7 @@ void G_UpdateVehicleTags(gentity_s *ent)
     } while ((int)v7 < (int)&s_wheelTags[6]);
 }
 
-int VEH_ParseSpecificField(unsigned __int8 *pStruct, const char *pValue, int fieldType)
+int VEH_ParseSpecificField(uint8_t *pStruct, const char *pValue, int fieldType)
 {
     if (fieldType == 12)
     {
@@ -2696,7 +2696,7 @@ int __fastcall G_LoadVehicle(const char *name)
     int v6; // r9
     int result; // r3
     double collisionSpeed; // fp12
-    unsigned __int16 *sndIndices; // r30
+    uint16_t *sndIndices; // r30
     double maxSpeed; // fp11
     int v11; // r28
     double engineSndSpeed; // fp10
@@ -2714,11 +2714,11 @@ int __fastcall G_LoadVehicle(const char *name)
     v5 = (char*)name;
     do
     {
-        v6 = *(unsigned __int8 *)v5;
+        v6 = *(uint8_t *)v5;
         (v5++)[(char *)v4 - name] = v6;
     } while (v6);
     if (!ParseConfigStringToStruct(
-        (unsigned __int8 *)v4,
+        (uint8_t *)v4,
         s_vehicleFields,
         33,
         (char*)InfoString,
@@ -2756,7 +2756,7 @@ static int VEH_DObjHasRequiredTags(gentity_s *ent, int infoIdx)
     int type; // r11
     int v4; // r30
     int v5; // r29
-    unsigned __int16 **i; // r31
+    uint16_t **i; // r31
 
     type = s_vehicleInfos[infoIdx].type;
     if (s_vehicleInfos[infoIdx].type && type != 1)
@@ -2776,7 +2776,7 @@ static void VEH_InitModelAndValidateTags(gentity_s *ent, int *infoIdx)
 {
     int VehicleInfoFromName; // r28
     char v5; // r27
-    unsigned int v6; // r3
+    uint32_t v6; // r3
     const char *v7; // r3
 
     VehicleInfoFromName = VEH_GetVehicleInfoFromName("defaultvehicle");
@@ -2921,7 +2921,7 @@ bool G_IsVehicleUsable(gentity_s *ent, gentity_s *player)
     }
     else
     {
-        return ((unsigned int)ent->r.contents >> 21) & 1;
+        return ((uint32_t)ent->r.contents >> 21) & 1;
     }
 }
 
@@ -3424,7 +3424,7 @@ void CMD_VEH_AttachPath(scr_entref_t entref)
 void CMD_VEH_GetAttachPos(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r30
-    unsigned int v2; // r4
+    uint32_t v2; // r4
     scr_vehicle_s *scr_vehicle; // r31
     vehicle_info_t *v4; // r29
     __int16 VehicleNodeIndex; // r3
@@ -3477,7 +3477,7 @@ void CMD_VEH_StartPath(scr_entref_t entref)
         Vehicle = VEH_GetVehicle(entref.entnum);
     }
     scr_vehicle = Vehicle->scr_vehicle;
-    if ((unsigned __int16)scr_vehicle->pathPos.nodeIdx >= 0x8000u)
+    if ((uint16_t)scr_vehicle->pathPos.nodeIdx >= 0x8000u)
     {
         v3 = va("Can't start path on a vehicle that hasn't been attached");
         Scr_Error(v3);
@@ -3511,7 +3511,7 @@ void CMD_VEH_SetSwitchNode(scr_entref_t entref)
 void CMD_VEH_SetWaitNode(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r11
-    unsigned int v2; // r4
+    uint32_t v2; // r4
     scr_vehicle_s *scr_vehicle; // r31
 
     if (entref.classnum)
@@ -3705,12 +3705,12 @@ void CMD_VEH_SetJitterParams(scr_entref_t entref)
 void VEH_UpdateSounds(gentity_s *ent)
 {
     scr_vehicle_s *scr_vehicle; // r31
-    unsigned __int16 *sndIndices; // r28
+    uint16_t *sndIndices; // r28
     BOOL v4; // r27
     gentity_s *v5; // r3
     double idleSndLerp; // fp1
-    unsigned __int16 v7; // r5
-    unsigned __int16 v8; // r4
+    uint16_t v7; // r5
+    uint16_t v8; // r4
     gentity_s *v9; // r3
     VehicleTurretState turretState; // r10
 
@@ -3894,7 +3894,7 @@ void CMD_VEH_GetWheelSurface(scr_entref_t entref)
     gentity_s *Vehicle; // r3
     scr_vehicle_s *scr_vehicle; // r28
     vehicle_info_t *v3; // r30
-    unsigned int ConstString; // r31
+    uint32_t ConstString; // r31
     int v5; // r29
     const char *v6; // r3
     int v7; // r3
@@ -4130,7 +4130,7 @@ void CMD_VEH_MakeVehicleUsable(scr_entref_t entref)
 void CMD_VEH_MakeVehicleUnusable(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r31
-    unsigned int v3; // r10
+    uint32_t v3; // r10
 
     if (entref.classnum)
     {
@@ -4228,8 +4228,8 @@ void CMD_VEH_SetVehicleLookatText(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r11
     scr_vehicle_s *scr_vehicle; // r31
-    unsigned int ConstString; // r3
-    unsigned int ConstIString; // r3
+    uint32_t ConstString; // r3
+    uint32_t ConstIString; // r3
 
     if (entref.classnum)
     {
@@ -4366,7 +4366,7 @@ void CMD_VEH_ForceMaterialSpeed(scr_entref_t entref)
 {
     gentity_s *Vehicle; // r3
     scr_vehicle_s *scr_vehicle; // r31
-    unsigned int v3; // r11
+    uint32_t v3; // r11
     double Float; // fp1
     int flags; // r11
 
@@ -4454,7 +4454,7 @@ const BuiltinMethodDef s_methods[50] =
 void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
 {
     int v1; // r6
-    unsigned int v2; // r5
+    uint32_t v2; // r5
     const BuiltinMethodDef *i; // r7
     const char *actionString; // r10
     const char *v5; // r11
@@ -4468,7 +4468,7 @@ void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
         v5 = *pName;
         do
         {
-            v6 = (unsigned __int8)*v5 - *(unsigned __int8 *)actionString;
+            v6 = (uint8_t)*v5 - *(uint8_t *)actionString;
             if (!*v5)
                 break;
             ++v5;
@@ -4488,8 +4488,8 @@ void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
 void G_SaveVehicleInfo(SaveGame *save)
 {
     int v2; // r28
-    unsigned __int16 *sndIndices; // r29
-    unsigned __int16 *v4; // r31
+    uint16_t *sndIndices; // r29
+    uint16_t *v4; // r31
     int v5; // r30
 
     v2 = 0;
@@ -4516,8 +4516,8 @@ void G_SaveVehicleInfo(SaveGame *save)
 void G_LoadVehicleInfo(SaveGame *save)
 {
     int v2; // r28
-    unsigned __int16 *sndIndices; // r29
-    unsigned __int16 *v4; // r31
+    uint16_t *sndIndices; // r29
+    uint16_t *v4; // r31
     int v5; // r30
 
     v2 = 0;
@@ -4993,7 +4993,7 @@ static void VEH_UnlinkPlayer(gentity_s *player)
     scr_vehicle_s *scr_vehicle; // r30
     int detach; // r4
     int eFlags; // r11
-    unsigned int v14; // r11
+    uint32_t v14; // r11
     int v15; // [sp+8h] [-B8h]
     int v16; // [sp+Ch] [-B4h]
     int v17; // [sp+10h] [-B0h]
@@ -5201,7 +5201,7 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
             va(
                 (const char *)HIDWORD(v31),
                 LODWORD(v31),
-                (unsigned int)COERCE_UNSIGNED_INT64((float)(scr_vehicle->manualSpeed * (float)0.05681818)));
+                (uint32_t)COERCE_UNSIGNED_INT64((float)(scr_vehicle->manualSpeed * (float)0.05681818)));
             G_AddDebugString(debugPos, colorLtGrey, v14,v17);
             v18 = (float)(scr_vehicle->manualDecel * (float)0.05681818);
             v36 = v36 - (float)((float)v14 * (float)12.0);
@@ -5223,22 +5223,22 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1])),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1]),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.maxAngleVel[1]));
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.rotVel[1]),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.maxAngleVel[1]));
             G_AddDebugString(debugPos, colorLtGrey, v14,v25);
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel)),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawDecel));
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawAccel),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.yawDecel));
             G_AddDebugString(debugPos, colorLtGrey, v14,v26);
             if (scr_vehicle->hasTargetYaw)
             {
                 v36 = v36 - (float)((float)v14 * (float)12.0);
                 va(
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw)),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->targetYaw),
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
                 G_AddDebugString(debugPos, colorLtGrey, v14,v27);
             }
             if (scr_vehicle->hasGoalYaw)
@@ -5246,16 +5246,16 @@ void Vehicle_EntInfo(gentity_s *self, float *source)
                 v36 = v36 - (float)((float)v14 * (float)12.0);
                 va(
                     (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw)),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw),
-                    (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->goalYaw),
+                    (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->phys.angles[1]));
                 G_AddDebugString(debugPos, colorLtGrey, v14,v28);
             }
             v36 = v36 - (float)((float)v14 * (float)12.0);
             va(
                 (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius)),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverSpeed),
-                (unsigned int)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverAccel));
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverRadius),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverSpeed),
+                (uint32_t)COERCE_UNSIGNED_INT64(scr_vehicle->hover.hoverAccel));
             G_AddDebugString(debugPos, colorLtGrey, v14,v29);
             if (scr_vehicle->stopAtGoal)
             {

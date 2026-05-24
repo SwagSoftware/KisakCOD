@@ -39,14 +39,14 @@ void __cdecl RB_ShowCollision(const GfxViewParms *viewParms)
 {
     char v1; // [esp+8h] [ebp-98h]
     char v2; // [esp+Ch] [ebp-94h]
-    unsigned __int8 v3; // [esp+10h] [ebp-90h]
+    uint8_t v3; // [esp+10h] [ebp-90h]
     int contentMask; // [esp+18h] [ebp-88h]
     cplane_s frustumPlanes[6]; // [esp+20h] [ebp-80h] BYREF
 
     iassert( viewParms );
     if (r_showCollision && r_showCollision->current.integer != 0)
     {
-        //contentMask = showCollisionContentMasks[*(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[3]) + 12)];
+        //contentMask = showCollisionContentMasks[*(uint32_t *)(LODWORD(r_lightTweakSunDirection.vector[3]) + 12)];
         contentMask = showCollisionContentMasks[r_showCollision->current.integer];
 
         BuildFrustumPlanes(viewParms, frustumPlanes);
@@ -85,11 +85,11 @@ void __cdecl BuildFrustumPlanes(const GfxViewParms *viewParms, cplane_s *frustum
 {
     char v2; // [esp+0h] [ebp-84h]
     char v3; // [esp+4h] [ebp-80h]
-    unsigned __int8 v4; // [esp+8h] [ebp-7Ch]
+    uint8_t v4; // [esp+8h] [ebp-7Ch]
     cplane_s *v5; // [esp+Ch] [ebp-78h]
     DpvsPlane *v6; // [esp+10h] [ebp-74h]
     DpvsPlane dpvsFrustumPlanes[5]; // [esp+14h] [ebp-70h] BYREF
-    unsigned int planeIndex; // [esp+80h] [ebp-4h]
+    uint32_t planeIndex; // [esp+80h] [ebp-4h]
 
     iassert( viewParms );
     iassert( frustumPlanes );
@@ -157,7 +157,7 @@ void __cdecl RB_DrawCollisionPoly(int numPoints, float (*points)[3], const float
     iassert( points );
     if (r_showCollisionPolyType->current.integer == 2 || !r_showCollisionPolyType->current.integer)
     {
-        R_ConvertColorToBytes(colorFloat, (unsigned int *)&color);
+        R_ConvertColorToBytes(colorFloat, (uint32_t *)&color);
         RB_BeginSurface(rgp.whiteMaterial, TECHNIQUE_UNLIT);
         R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_DEBUG);
         RB_CheckTessOverflow(numPoints, 3 * (numPoints - 2));

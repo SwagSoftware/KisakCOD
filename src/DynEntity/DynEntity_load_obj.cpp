@@ -615,13 +615,13 @@ void __cdecl DynEnt_LoadEntities(MemoryFile *memFile)
     for (int drawType = 0; drawType < 2; ++drawType)
     {
         uint16_t count = 0;
-        MemFile_ReadData(memFile, sizeof(count), (unsigned __int8 *)&count);
+        MemFile_ReadData(memFile, sizeof(count), (uint8_t *)&count);
         cm.dynEntCount[drawType] = count;
         if (count == 0)
             continue;
 
-        MemFile_ReadData(memFile, sizeof(DynEntityPose) * count, (unsigned __int8 *)cm.dynEntPoseList[drawType]);
-        MemFile_ReadData(memFile, sizeof(DynEntityClient) * count, (unsigned __int8 *)cm.dynEntClientList[drawType]);
+        MemFile_ReadData(memFile, sizeof(DynEntityPose) * count, (uint8_t *)cm.dynEntPoseList[drawType]);
+        MemFile_ReadData(memFile, sizeof(DynEntityClient) * count, (uint8_t *)cm.dynEntClientList[drawType]);
 
         for (uint16_t dynEntId = 0; dynEntId < count; ++dynEntId)
         {
@@ -763,9 +763,9 @@ int32_t __cdecl DynEnt_GetXModelUsageCount(const XModel *xModel)
 void DynEnt_SaveEntities(MemoryFile *memFile)
 {
     int v2; // r26
-    unsigned __int16 *dynEntCount; // r27
+    uint16_t *dynEntCount; // r27
     DynEntityClient **dynEntClientList; // r29
-    unsigned int v5; // r31
+    uint32_t v5; // r31
     bool v6; // [sp+50h] [-40h] BYREF
 
     iassert(memFile);
@@ -789,7 +789,7 @@ void DynEnt_SaveEntities(MemoryFile *memFile)
                     MemFile_WriteData(memFile, 1, &v6);
                     if (v6)
                         Phys_ObjSave((dxBody*)(*dynEntClientList)[v5].physObjId, memFile);
-                    v5 = (unsigned __int16)(v5 + 1);
+                    v5 = (uint16_t)(v5 + 1);
                 } while (v5 < *dynEntCount);
             }
         }

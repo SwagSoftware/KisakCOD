@@ -25,7 +25,7 @@
 
 XModel *cached_models[512];
 
-void __cdecl G_SafeDObjFree(unsigned int handle, int unusedLocalClientNum)
+void __cdecl G_SafeDObjFree(uint32_t handle, int unusedLocalClientNum)
 {
     if (unusedLocalClientNum != -1)
         MyAssertHandler(
@@ -46,10 +46,10 @@ void __cdecl TRACK_g_utils()
 int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, const char *errormsg)
 {
     const char *v6; // eax
-    unsigned int ConfigstringConst; // eax
+    uint32_t ConfigstringConst; // eax
     const char *v9; // eax
-    unsigned int v10; // [esp+0h] [ebp-14h]
-    unsigned int s; // [esp+Ch] [ebp-8h]
+    uint32_t v10; // [esp+0h] [ebp-14h]
+    uint32_t s; // [esp+Ch] [ebp-8h]
     signed int i; // [esp+10h] [ebp-4h]
     signed int ia; // [esp+10h] [ebp-4h]
     int ib; // [esp+10h] [ebp-4h]
@@ -191,8 +191,8 @@ int __cdecl G_MaterialIndex(const char *name)
 int __cdecl G_ModelIndex(const char *name)
 {
     const char *v2; // eax
-    unsigned int nameString; // [esp+68h] [ebp-10h]
-    unsigned int s; // [esp+6Ch] [ebp-Ch]
+    uint32_t nameString; // [esp+68h] [ebp-10h]
+    uint32_t s; // [esp+6Ch] [ebp-Ch]
     int i; // [esp+70h] [ebp-8h]
     signed int constIndex; // [esp+74h] [ebp-4h]
     signed int constIndexa; // [esp+74h] [ebp-4h]
@@ -297,7 +297,7 @@ bool __cdecl G_XModelBad(int index)
     return XModelBad(Model);
 }
 
-unsigned int __cdecl G_ModelName(unsigned int index)
+uint32_t __cdecl G_ModelName(uint32_t index)
 {
     if (index >= 0x200)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 345, 0, "%s", "(unsigned)index < MAX_MODELS");
@@ -396,7 +396,7 @@ void __cdecl G_SetModel(gentity_s *ent, char *modelName)
     if (*modelName)
     {
         modelIndex = G_ModelIndex(modelName);
-        if (modelIndex != (unsigned __int16)modelIndex)
+        if (modelIndex != (uint16_t)modelIndex)
             MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 481, 0, "%s", "modelIndex == (modelNameIndex_t) modelIndex");
         ent->model = modelIndex;
     }
@@ -406,9 +406,9 @@ void __cdecl G_SetModel(gentity_s *ent, char *modelName)
     }
 }
 
-void __cdecl G_OverrideModel(unsigned int modelIndex, char *defaultModelName)
+void __cdecl G_OverrideModel(uint32_t modelIndex, char *defaultModelName)
 {
-    unsigned int v2; // eax
+    uint32_t v2; // eax
     XModel *v3; // eax
     const char *modelName; // [esp+8h] [ebp-4h]
 
@@ -430,7 +430,7 @@ void __cdecl G_OverrideModel(unsigned int modelIndex, char *defaultModelName)
     }
 }
 
-int __cdecl G_EntAttach(gentity_s *ent, char *modelName, unsigned int tagName, int ignoreCollision)
+int __cdecl G_EntAttach(gentity_s *ent, char *modelName, uint32_t tagName, int ignoreCollision)
 {
     int i; // [esp+0h] [ebp-8h]
     int modelIndex; // [esp+4h] [ebp-4h]
@@ -449,7 +449,7 @@ int __cdecl G_EntAttach(gentity_s *ent, char *modelName, unsigned int tagName, i
     modelIndex = G_ModelIndex(modelName);
     if (!modelIndex)
         return 0;
-    if (modelIndex != (unsigned __int16)modelIndex)
+    if (modelIndex != (uint16_t)modelIndex)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 553, 0, "%s", "modelIndex == (modelNameIndex_t) modelIndex");
     ent->attachModelNames[i] = modelIndex;
     if (ent->attachTagNames[i])
@@ -463,10 +463,10 @@ int __cdecl G_EntAttach(gentity_s *ent, char *modelName, unsigned int tagName, i
     return 1;
 }
 
-int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagName)
+int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, uint32_t tagName)
 {
-    unsigned int v4; // edx
-    unsigned int modelNameString; // [esp+4h] [ebp-8h]
+    uint32_t v4; // edx
+    uint32_t modelNameString; // [esp+4h] [ebp-8h]
     int i; // [esp+8h] [ebp-4h]
 
     if (!tagName)
@@ -516,7 +516,7 @@ void __cdecl G_EntDetachAll(gentity_s *ent)
     G_DObjUpdate(ent);
 }
 
-int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName)
+int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, uint32_t tagName)
 {
     if (!G_EntLinkToInternal(ent, parent, tagName))
         return 0;
@@ -524,7 +524,7 @@ int __cdecl G_EntLinkTo(gentity_s *ent, gentity_s *parent, unsigned int tagName)
     return 1;
 }
 
-int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int tagName)
+int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, uint32_t tagName)
 {
     int pm_type; // [esp+0h] [ebp-10h]
     char *tagInfo; // [esp+4h] [ebp-Ch]
@@ -560,18 +560,18 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
             break;
     }
     tagInfo = (char*)MT_Alloc(112, 17);
-    *(unsigned int *)tagInfo = (unsigned int)parent;
+    *(uint32_t *)tagInfo = (uint32_t)parent;
     *((_WORD *)tagInfo + 4) = 0;
 
     iassert(!tagName || SL_IsLowercaseString(tagName));
     
-    Scr_SetString((unsigned __int16 *)tagInfo + 4, tagName);
-    *((unsigned int *)tagInfo + 1) = (unsigned int)parent->tagChildren;
-    *((unsigned int *)tagInfo + 3) = index;
-    memset((unsigned __int8 *)tagInfo + 16, 0, 0x30u);
+    Scr_SetString((uint16_t *)tagInfo + 4, tagName);
+    *((uint32_t *)tagInfo + 1) = (uint32_t)parent->tagChildren;
+    *((uint32_t *)tagInfo + 3) = index;
+    memset((uint8_t *)tagInfo + 16, 0, 0x30u);
     parent->tagChildren = ent;
     ent->tagInfo = (tagInfo_s *)tagInfo;
-    memset((unsigned __int8 *)tagInfo + 64, 0, 0x30u);
+    memset((uint8_t *)tagInfo + 64, 0, 0x30u);
     if (ent->client)
     {
         pm_type = ent->client->ps.pm_type;
@@ -591,7 +591,7 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
 int __cdecl G_EntLinkToWithOffset(
     gentity_s *ent,
     gentity_s *parent,
-    unsigned int tagName,
+    uint32_t tagName,
     const float *originOffset,
     const float *anglesOffset)
 {
@@ -920,7 +920,7 @@ void __cdecl G_DObjCalcBone(const gentity_s *ent, int boneIndex)
     }
 }
 
-DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagName)
+DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, uint32_t tagName)
 {
     int boneIndex; // [esp+30h] [ebp-8h]
 
@@ -936,7 +936,7 @@ DObjAnimMat *__cdecl G_DObjGetLocalTagMatrix(gentity_s *ent, unsigned int tagNam
     return &SV_DObjGetMatrixArray(ent)[boneIndex];
 }
 
-int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, mat4x3 &tagMat)
+int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, uint32_t tagName, mat4x3 &tagMat)
 {
     float v4; // [esp+1Ch] [ebp-90h]
     float v5; // [esp+20h] [ebp-8Ch]
@@ -995,7 +995,7 @@ int __cdecl G_DObjGetWorldTagMatrix(gentity_s *ent, unsigned int tagName, mat4x3
     return 1;
 }
 
-int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, unsigned int tagName, float *pos)
+int __cdecl G_DObjGetWorldTagPos(gentity_s *ent, uint32_t tagName, float *pos)
 {
     float ent_axis[4][3]; // [esp+8h] [ebp-34h] BYREF
     DObjAnimMat *mat; // [esp+38h] [ebp-4h]
@@ -1095,9 +1095,9 @@ void __cdecl G_DObjGetWorldBoneIndexMatrix(gentity_s *ent, int boneIndex, float 
     MatrixTransformVector43(mat->trans, ent_axis, &(*tagMat)[9]);
 }
 
-gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, unsigned __int16 match)
+gentity_s *__cdecl G_Find(gentity_s *from, int fieldofs, uint16_t match)
 {
-    unsigned __int16 s; // [esp+0h] [ebp-4h]
+    uint16_t s; // [esp+0h] [ebp-4h]
     gentity_s *froma; // [esp+Ch] [ebp+8h]
 
     if (from)
@@ -1299,7 +1299,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
     if (ed->classname)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1540, 0, "%s", "ed->classname == 0");
     useCount = ed->useCount;
-    memset((unsigned __int8 *)ed, 0, sizeof(gentity_s));
+    memset((uint8_t *)ed, 0, sizeof(gentity_s));
     ed->eventTime = level.time;
     if (ed - level.gentities >= 72)
     {
@@ -1317,7 +1317,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
 
 void __cdecl G_FreeEntityDelay(gentity_s *ed)
 {
-    unsigned __int16 hThread; // [esp+0h] [ebp-4h]
+    uint16_t hThread; // [esp+0h] [ebp-4h]
 
     if (!g_scr_data.delete_)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1570, 0, "%s", "g_scr_data.delete_");
@@ -1357,13 +1357,13 @@ gentity_s *__cdecl G_TempEntity(const float *origin, int event)
     return e;
 }
 
-void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, unsigned int eventParm)
+void __cdecl G_AddPredictableEvent(gentity_s *ent, entity_event_t event, uint32_t eventParm)
 {
     if (ent->client)
         BG_AddPredictableEventToPlayerstate(event, eventParm, &ent->client->ps);
 }
 
-void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventParm)
+void __cdecl G_AddEvent(gentity_s *ent, uint32_t event, uint32_t eventParm)
 {
     if (!event)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1713, 0, "%s", "event");
@@ -1377,19 +1377,19 @@ void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventPa
     {
         ent->client->ps.events[ent->client->ps.eventSequence & 3] = event;
         ent->client->ps.eventParms[ent->client->ps.eventSequence & 3] = eventParm;
-        ent->client->ps.eventSequence = (unsigned __int8)(ent->client->ps.eventSequence + 1);
+        ent->client->ps.eventSequence = (uint8_t)(ent->client->ps.eventSequence + 1);
     }
     else
     {
         ent->s.events[ent->s.eventSequence & 3] = event;
         ent->s.eventParms[ent->s.eventSequence & 3] = eventParm;
-        ent->s.eventSequence = (unsigned __int8)(ent->s.eventSequence + 1);
+        ent->s.eventSequence = (uint8_t)(ent->s.eventSequence + 1);
     }
     ent->eventTime = level.time;
     ent->r.eventTime = level.time;
 }
 
-void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int8 index)
+void __cdecl G_PlaySoundAlias(gentity_s *ent, uint8_t index)
 {
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1760, 0, "%s", "ent");
@@ -1399,7 +1399,7 @@ void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int8 index)
 
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList)
 {
-    unsigned __int8 v2; // al
+    uint8_t v2; // al
 
     v2 = G_SoundAliasIndex((char *)aliasList->aliasName);
     G_PlaySoundAlias(&g_entities[client], v2);
@@ -1438,7 +1438,7 @@ void __cdecl G_SetAngle(gentity_s *ent, const float *angle)
     ent->r.currentAngles[2] = angle[2];
 }
 
-void __cdecl G_SetConstString(unsigned __int16 *to, char *from)
+void __cdecl G_SetConstString(uint16_t *to, char *from)
 {
     Scr_SetString(to, 0);
     *to = SL_GetString(from, 0);

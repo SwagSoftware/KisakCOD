@@ -7,35 +7,35 @@ void __cdecl R_AddAabbTreeSurfacesInFrustum_r(const GfxAabbTree *tree, const Dpv
     int v2; // [esp+10h] [ebp-D0h]
     int v3; // [esp+14h] [ebp-CCh]
     const DpvsPlane *v4; // [esp+18h] [ebp-C8h]
-    unsigned int m; // [esp+1Ch] [ebp-C4h]
+    uint32_t m; // [esp+1Ch] [ebp-C4h]
     GfxSurface *v6; // [esp+24h] [ebp-BCh]
     int v7; // [esp+28h] [ebp-B8h]
     int v8; // [esp+2Ch] [ebp-B4h]
     const DpvsPlane *v9; // [esp+30h] [ebp-B0h]
-    unsigned int j; // [esp+34h] [ebp-ACh]
+    uint32_t j; // [esp+34h] [ebp-ACh]
     GfxStaticModelInst *v11; // [esp+38h] [ebp-A8h]
-    unsigned int surfaceCountNoDecal; // [esp+3Ch] [ebp-A4h]
-    unsigned __int16 *v13; // [esp+40h] [ebp-A0h]
+    uint32_t surfaceCountNoDecal; // [esp+3Ch] [ebp-A4h]
+    uint16_t *v13; // [esp+40h] [ebp-A0h]
     int startSurfIndexNoDecal; // [esp+44h] [ebp-9Ch]
-    unsigned __int16 *smodelIndexes; // [esp+48h] [ebp-98h]
-    unsigned int v16; // [esp+4Ch] [ebp-94h]
-    unsigned int k; // [esp+50h] [ebp-90h]
-    unsigned int i; // [esp+54h] [ebp-8Ch]
-    unsigned int surfaceCount; // [esp+58h] [ebp-88h]
-    unsigned __int16 *v20; // [esp+5Ch] [ebp-84h]
-    unsigned int startSurfIndex; // [esp+60h] [ebp-80h]
-    unsigned __int16 *indices; // [esp+64h] [ebp-7Ch]
-    unsigned int smodelIndexCount; // [esp+68h] [ebp-78h]
+    uint16_t *smodelIndexes; // [esp+48h] [ebp-98h]
+    uint32_t v16; // [esp+4Ch] [ebp-94h]
+    uint32_t k; // [esp+50h] [ebp-90h]
+    uint32_t i; // [esp+54h] [ebp-8Ch]
+    uint32_t surfaceCount; // [esp+58h] [ebp-88h]
+    uint16_t *v20; // [esp+5Ch] [ebp-84h]
+    uint32_t startSurfIndex; // [esp+60h] [ebp-80h]
+    uint16_t *indices; // [esp+64h] [ebp-7Ch]
+    uint32_t smodelIndexCount; // [esp+68h] [ebp-78h]
     const DpvsPlane *plane; // [esp+6Ch] [ebp-74h]
-    unsigned int planeCount; // [esp+70h] [ebp-70h]
+    uint32_t planeCount; // [esp+70h] [ebp-70h]
     const GfxAabbTree *children; // [esp+74h] [ebp-6Ch]
-    unsigned int smodelIndexIter; // [esp+78h] [ebp-68h]
+    uint32_t smodelIndexIter; // [esp+78h] [ebp-68h]
     DpvsClipPlaneSet clipSetChild; // [esp+80h] [ebp-60h] BYREF
-    unsigned int childIndex; // [esp+CCh] [ebp-14h]
-    unsigned int surfNodeIndex; // [esp+D0h] [ebp-10h]
-    unsigned int planeIndex; // [esp+D4h] [ebp-Ch]
-    unsigned int childCount; // [esp+D8h] [ebp-8h]
-    unsigned int smodelIndex; // [esp+DCh] [ebp-4h]
+    uint32_t childIndex; // [esp+CCh] [ebp-14h]
+    uint32_t surfNodeIndex; // [esp+D0h] [ebp-10h]
+    uint32_t planeIndex; // [esp+D4h] [ebp-Ch]
+    uint32_t childCount; // [esp+D8h] [ebp-8h]
+    uint32_t smodelIndex; // [esp+DCh] [ebp-4h]
 
     clipSetChild.count = 0;
     planeCount = clipSet->count;
@@ -201,7 +201,7 @@ void __cdecl R_AddCellStaticSurfacesInFrustum(DpvsStaticCellCmd *dpvsCell)
     const GfxAabbTree *tree; // [esp+210h] [ebp-5Ch]
     DpvsClipPlaneSet clipSet; // [esp+214h] [ebp-58h] BYREF
     DpvsPlanes planes; // [esp+260h] [ebp-Ch]
-    unsigned int planeIndex; // [esp+268h] [ebp-4h]
+    uint32_t planeIndex; // [esp+268h] [ebp-4h]
 
     tree = dpvsCell->cell->aabbTree;
     if (tree)
@@ -224,7 +224,7 @@ void __cdecl R_AddCullGroupSurfacesInFrustum(int cullGroupIndex, const DpvsPlane
 {
     int v3; // [esp+4h] [ebp-20h]
     int i; // [esp+Ch] [ebp-18h]
-    const unsigned __int16 *indices; // [esp+18h] [ebp-Ch]
+    const uint16_t *indices; // [esp+18h] [ebp-Ch]
     GfxCullGroup *group; // [esp+1Ch] [ebp-8h]
     int count; // [esp+20h] [ebp-4h]
 
@@ -278,7 +278,7 @@ void __cdecl R_AddCellCullGroupsInFrustum(DpvsStaticCellCmd *dpvsCell)
 
 void __cdecl R_AddCellStaticSurfacesInFrustumCmd(DpvsStaticCellCmd *data)
 {
-    unsigned int viewIndex; // [esp+4h] [ebp-4h]
+    uint32_t viewIndex; // [esp+4h] [ebp-4h]
 
     viewIndex = data->viewIndex;
     g_smodelVisData = rgp.world->dpvs.smodelVisData[viewIndex];

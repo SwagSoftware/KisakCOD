@@ -36,7 +36,7 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
     int passEntityNum; // [esp+0h] [ebp-38h]
     trace_t tr; // [esp+4h] [ebp-34h] BYREF
     int mask; // [esp+30h] [ebp-8h]
-    unsigned __int16 hitEntId; // [esp+34h] [ebp-4h]
+    uint16_t hitEntId; // [esp+34h] [ebp-4h]
 
     if (ent->clipmask)
     {
@@ -345,7 +345,7 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     int entityList[1024]; // [esp+8Ch] [ebp-2008h] BYREF
     int i; // [esp+108Ch] [ebp-1008h]
     gentity_s *ent; // [esp+1090h] [ebp-1004h]
-    unsigned int v23[1024]; // [esp+1094h] [ebp-1000h]
+    uint32_t v23[1024]; // [esp+1094h] [ebp-1000h]
 
     *obstacle = 0;
     v18 = 1;
@@ -491,7 +491,7 @@ void __cdecl trigger_use_shared(gentity_s *self)
 {
     char szConfigString[1028]; // [esp+34h] [ebp-410h] BYREF
     const char *cursorhint; // [esp+43Ch] [ebp-8h] BYREF
-    unsigned int i; // [esp+440h] [ebp-4h]
+    uint32_t i; // [esp+440h] [ebp-4h]
 
     if (self->s.eType == ET_MISSILE)
         MyAssertHandler(".\\game\\g_mover.cpp", 749, 0, "%s", "self->s.eType != ET_MISSILE");
@@ -537,12 +537,12 @@ void __cdecl trigger_use_shared(gentity_s *self)
                 if (!szConfigString[0])
                 {
                     SV_SetConfigstring(i + 277, (char *)cursorhint);
-                    self->s.un1.scale = (unsigned __int8)i;
+                    self->s.un1.scale = (uint8_t)i;
                     break;
                 }
                 if (!strcmp(cursorhint, szConfigString))
                 {
-                    self->s.un1.scale = (unsigned __int8)i;
+                    self->s.un1.scale = (uint8_t)i;
                     break;
                 }
             }
@@ -627,7 +627,7 @@ void trigger_use_shared(gentity_s *self)
                 v8 = v11;
                 do
                 {
-                    v9 = *(unsigned __int8 *)v7 - (unsigned __int8)*v8;
+                    v9 = *(uint8_t *)v7 - (uint8_t)*v8;
                     if (!*v7)
                         break;
                     ++v7;
@@ -635,7 +635,7 @@ void trigger_use_shared(gentity_s *self)
                 } while (!v9);
                 if (!v9)
                     goto LABEL_25;
-                if ((unsigned int)++v6 >= 0x20)
+                if ((uint32_t)++v6 >= 0x20)
                     goto LABEL_26;
             }
             SV_SetConfigstring(v6 + 59, v10[0]);

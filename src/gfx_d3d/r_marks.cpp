@@ -21,11 +21,11 @@ void  R_BoxSurfaces(
     int(__cdecl **allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface ***surfLists,
-    unsigned int surfListSize,
-    unsigned int *surfCounts,
-    unsigned int listCount)
+    uint32_t surfListSize,
+    uint32_t *surfCounts,
+    uint32_t listCount)
 {
-    unsigned __int8 cellBits[128]; // [esp-4h] [ebp-9Ch] BYREF
+    uint8_t cellBits[128]; // [esp-4h] [ebp-9Ch] BYREF
 
     iassert(rgp.world);
     iassert(rgp.world->dpvsPlanes.cellCount <= (1024));
@@ -33,7 +33,7 @@ void  R_BoxSurfaces(
 
     Com_Memset(cellBits, 0, rgp.world->cellBitsCount);
 
-    for (unsigned int i = 0; i < listCount; ++i)
+    for (uint32_t i = 0; i < listCount; ++i)
         surfCounts[i] = 0;
 
     R_BoxSurfaces_r(
@@ -46,9 +46,9 @@ void  R_BoxSurfaces(
         surfListSize,
         surfCounts,
         listCount,
-        (unsigned __int8 *)cellBits);
+        (uint8_t *)cellBits);
 
-    for (unsigned int i = 0; i < listCount; ++i)
+    for (uint32_t i = 0; i < listCount; ++i)
     {
         iassert(surfCounts[i] <= surfListSize);
     }
@@ -61,10 +61,10 @@ void __cdecl R_BoxSurfaces_r(
     int(__cdecl **allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface ***surfLists,
-    unsigned int surfListSize,
-    unsigned int *surfCounts,
-    unsigned int listCount,
-    unsigned __int8 *cellBits)
+    uint32_t surfListSize,
+    uint32_t *surfCounts,
+    uint32_t listCount,
+    uint8_t *cellBits)
 {
     int side; // [esp+0h] [ebp-10h]
     int cellIndex; // [esp+4h] [ebp-Ch]
@@ -137,9 +137,9 @@ void __cdecl R_CellSurfaces(
     int(__cdecl *allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface **surfList,
-    unsigned int surfListSize,
-    unsigned int *surfCount,
-    unsigned __int8 *cellBits)
+    uint32_t surfListSize,
+    uint32_t *surfCount,
+    uint8_t *cellBits)
 {
     GfxCell *cell; // [esp+0h] [ebp-24h]
     int surfIndex; // [esp+4h] [ebp-20h]
@@ -151,7 +151,7 @@ void __cdecl R_CellSurfaces(
     int triSurfIndex; // [esp+20h] [ebp-4h]
 
     cellIndexBit = 1 << (cellIndex & 7);
-    if (((unsigned __int8)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
+    if (((uint8_t)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
     {
         cellBits[cellIndex >> 3] |= cellIndexBit;
         cell = &rgp.world->cells[cellIndex];
@@ -199,16 +199,16 @@ void __cdecl R_AABBTreeSurfaces_r(
     int(__cdecl *allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface **surfList,
-    unsigned int surfListSize,
-    unsigned int *surfCount)
+    uint32_t surfListSize,
+    uint32_t *surfCount)
 {
-    unsigned int listIndex; // [esp+0h] [ebp-1Ch]
+    uint32_t listIndex; // [esp+0h] [ebp-1Ch]
     GfxAabbTree *children; // [esp+4h] [ebp-18h]
-    unsigned int surfIndex; // [esp+8h] [ebp-14h]
-    unsigned int childIndex; // [esp+Ch] [ebp-10h]
-    unsigned int remappedSurfIndex; // [esp+10h] [ebp-Ch]
+    uint32_t surfIndex; // [esp+8h] [ebp-14h]
+    uint32_t childIndex; // [esp+Ch] [ebp-10h]
+    uint32_t remappedSurfIndex; // [esp+10h] [ebp-Ch]
     GfxSurface *surf; // [esp+14h] [ebp-8h]
-    unsigned int surfNodeIndex; // [esp+18h] [ebp-4h]
+    uint32_t surfNodeIndex; // [esp+18h] [ebp-4h]
 
     if (*mins <= (double)tree->maxs[0]
         && *maxs >= (double)tree->mins[0]
@@ -262,9 +262,9 @@ void __cdecl R_AABBTreeSurfaces_r(
     }
 }
 
-void __cdecl R_AddSurfaceToList(GfxSurface *surf, GfxSurface **surfList, unsigned int *surfCount)
+void __cdecl R_AddSurfaceToList(GfxSurface *surf, GfxSurface **surfList, uint32_t *surfCount)
 {
-    unsigned int listIndex; // [esp+0h] [ebp-4h]
+    uint32_t listIndex; // [esp+0h] [ebp-4h]
 
     for (listIndex = 0; listIndex < *surfCount; ++listIndex)
     {
@@ -281,9 +281,9 @@ void __cdecl R_CellSurfacesTwoLists(
     int(__cdecl **allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface ***surfLists,
-    unsigned int surfListSize,
-    unsigned int *surfCounts,
-    unsigned __int8 *cellBits)
+    uint32_t surfListSize,
+    uint32_t *surfCounts,
+    uint8_t *cellBits)
 {
     GfxCell *cell; // [esp+0h] [ebp-24h]
     int surfIndex; // [esp+4h] [ebp-20h]
@@ -295,7 +295,7 @@ void __cdecl R_CellSurfacesTwoLists(
     int triSurfIndex; // [esp+20h] [ebp-4h]
 
     cellIndexBit = 1 << (cellIndex & 7);
-    if (((unsigned __int8)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
+    if (((uint8_t)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
     {
         cellBits[cellIndex >> 3] |= cellIndexBit;
         cell = &rgp.world->cells[cellIndex];
@@ -351,17 +351,17 @@ void __cdecl R_AABBTreeSurfacesTwoLists_r(
     int(__cdecl **allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface ***surfLists,
-    unsigned int surfListSize,
-    unsigned int *surfCounts)
+    uint32_t surfListSize,
+    uint32_t *surfCounts)
 {
-    unsigned int i; // [esp+0h] [ebp-20h]
-    unsigned int listIndex; // [esp+4h] [ebp-1Ch]
+    uint32_t i; // [esp+0h] [ebp-20h]
+    uint32_t listIndex; // [esp+4h] [ebp-1Ch]
     GfxAabbTree *children; // [esp+8h] [ebp-18h]
-    unsigned int surfIndex; // [esp+Ch] [ebp-14h]
-    unsigned int childIndex; // [esp+10h] [ebp-10h]
-    unsigned int remappedSurfIndex; // [esp+14h] [ebp-Ch]
+    uint32_t surfIndex; // [esp+Ch] [ebp-14h]
+    uint32_t childIndex; // [esp+10h] [ebp-10h]
+    uint32_t remappedSurfIndex; // [esp+14h] [ebp-Ch]
     GfxSurface *surf; // [esp+18h] [ebp-8h]
-    unsigned int surfNodeIndex; // [esp+1Ch] [ebp-4h]
+    uint32_t surfNodeIndex; // [esp+1Ch] [ebp-4h]
 
     if (*mins <= (double)tree->maxs[0]
         && *maxs >= (double)tree->mins[0]
@@ -423,11 +423,11 @@ int  R_BoxStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize)
 {
     int smodelCount; // [esp-Ch] [ebp-A0h] BYREF
-    unsigned __int8 cellBits[128]; // [esp-8h] [ebp-9Ch] BYREF
+    uint8_t cellBits[128]; // [esp-8h] [ebp-9Ch] BYREF
 
     iassert( rgp.world );
     iassert(rgp.world->dpvsPlanes.cellCount <= (1024));
@@ -455,10 +455,10 @@ void __cdecl R_BoxStaticModels_r(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount,
-    unsigned __int8 *cellBits)
+    uint8_t *cellBits)
 {
     int side; // [esp+0h] [ebp-10h]
     int cellIndex; // [esp+4h] [ebp-Ch]
@@ -491,15 +491,15 @@ void __cdecl R_CellStaticModels(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount,
-    unsigned __int8 *cellBits)
+    uint8_t *cellBits)
 {
     int cellIndexBit; // [esp+8h] [ebp-4h]
 
     cellIndexBit = 1 << (cellIndex & 7);
-    if (((unsigned __int8)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
+    if (((uint8_t)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
     {
         cellBits[cellIndex >> 3] |= cellIndexBit;
         R_AABBTreeStaticModels_r(
@@ -518,7 +518,7 @@ void __cdecl R_AABBTreeStaticModels_r(
     const float *mins,
     const float *maxs,
     int(__cdecl *allowSModel)(int),
-    unsigned __int16 *smodelList,
+    uint16_t *smodelList,
     int smodelListSize,
     int *smodelCount)
 {
@@ -573,7 +573,7 @@ void __cdecl R_AABBTreeStaticModels_r(
     }
 }
 
-void __cdecl R_AddStaticModelToList(int smodelIndex, unsigned __int16 *smodelList, int *smodelCount)
+void __cdecl R_AddStaticModelToList(int smodelIndex, uint16_t *smodelList, int *smodelCount)
 {
     int listIndex; // [esp+0h] [ebp-4h]
 
@@ -585,19 +585,19 @@ void __cdecl R_AddStaticModelToList(int smodelIndex, unsigned __int16 *smodelLis
     smodelList[(*smodelCount)++] = smodelIndex;
 }
 
-unsigned int  R_CylinderSurfaces(
+uint32_t  R_CylinderSurfaces(
     const float *start,
     const float *end,
     float radius,
     const DpvsPlane *planes,
-    unsigned int planeCount,
+    uint32_t planeCount,
     int(__cdecl *allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface **surfList,
-    unsigned int surfListSize)
+    uint32_t surfListSize)
 {
-    unsigned int surfCount; // [esp+30h] [ebp-A0h] BYREF
-    unsigned __int8 v12[128]; // [esp+34h] [ebp-9Ch] BYREF
+    uint32_t surfCount; // [esp+30h] [ebp-A0h] BYREF
+    uint8_t v12[128]; // [esp+34h] [ebp-9Ch] BYREF
 
     //v13 = a1;
     //v14 = retaddr;
@@ -643,13 +643,13 @@ void __cdecl R_CylinderSurfaces_r(
     const float *end,
     float radius,
     const DpvsPlane *planes,
-    unsigned int planeCount,
+    uint32_t planeCount,
     int(__cdecl *allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface **surfList,
-    unsigned int surfListSize,
-    unsigned int *surfCount,
-    unsigned __int8 *cellBits)
+    uint32_t surfListSize,
+    uint32_t *surfCount,
+    uint8_t *cellBits)
 {
     float v12; // [esp+24h] [ebp-64h]
     float v13; // [esp+28h] [ebp-60h]
@@ -809,25 +809,25 @@ void __cdecl R_CylinderSurfaces_r(
 void __cdecl R_CellCylinderSurfaces(
     int cellIndex,
     const DpvsPlane *planes,
-    unsigned int planeCount,
+    uint32_t planeCount,
     int(__cdecl *allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface **surfList,
-    unsigned int surfListSize,
-    unsigned int *surfCount,
-    unsigned __int8 *cellBits)
+    uint32_t surfListSize,
+    uint32_t *surfCount,
+    uint8_t *cellBits)
 {
     GfxCell *cell; // [esp+10h] [ebp-24h]
-    unsigned int surfIndex; // [esp+14h] [ebp-20h]
-    unsigned int remappedSurfIndex; // [esp+1Ch] [ebp-18h]
+    uint32_t surfIndex; // [esp+14h] [ebp-20h]
+    uint32_t remappedSurfIndex; // [esp+1Ch] [ebp-18h]
     int cullGroupIndex; // [esp+20h] [ebp-14h]
     GfxCullGroup *group; // [esp+24h] [ebp-10h]
     GfxSurface *surf; // [esp+28h] [ebp-Ch]
-    unsigned int cellIndexBit; // [esp+2Ch] [ebp-8h]
+    uint32_t cellIndexBit; // [esp+2Ch] [ebp-8h]
     int triSurfIndex; // [esp+30h] [ebp-4h]
 
     cellIndexBit = 1 << (cellIndex & 7);
-    if (((unsigned __int8)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
+    if (((uint8_t)cellIndexBit & cellBits[cellIndex >> 3]) == 0)
     {
         cellBits[cellIndex >> 3] |= cellIndexBit;
         cell = &rgp.world->cells[cellIndex];
@@ -864,9 +864,9 @@ void __cdecl R_CellCylinderSurfaces(
     }
 }
 
-int __cdecl R_OutsideFrustumPlanes(const DpvsPlane *planes, unsigned int planeCount, const float *minmax)
+int __cdecl R_OutsideFrustumPlanes(const DpvsPlane *planes, uint32_t planeCount, const float *minmax)
 {
-    unsigned int plane; // [esp+8h] [ebp-4h]
+    uint32_t plane; // [esp+8h] [ebp-4h]
 
     for (plane = 0; plane < planeCount; ++plane)
     {
@@ -882,20 +882,20 @@ int __cdecl R_OutsideFrustumPlanes(const DpvsPlane *planes, unsigned int planeCo
 void __cdecl R_AABBTreeCylinderSurfaces_r(
     GfxAabbTree *tree,
     const DpvsPlane *planes,
-    unsigned int planeCount,
+    uint32_t planeCount,
     int(__cdecl *allowSurf)(int, void *),
     void *callbackContext,
     GfxSurface **surfList,
-    unsigned int surfListSize,
-    unsigned int *surfCount)
+    uint32_t surfListSize,
+    uint32_t *surfCount)
 {
-    unsigned int listIndex; // [esp+10h] [ebp-1Ch]
+    uint32_t listIndex; // [esp+10h] [ebp-1Ch]
     GfxAabbTree *children; // [esp+14h] [ebp-18h]
-    unsigned int surfIndex; // [esp+18h] [ebp-14h]
-    unsigned int childIndex; // [esp+1Ch] [ebp-10h]
-    unsigned int remappedSurfIndex; // [esp+20h] [ebp-Ch]
+    uint32_t surfIndex; // [esp+18h] [ebp-14h]
+    uint32_t childIndex; // [esp+1Ch] [ebp-10h]
+    uint32_t remappedSurfIndex; // [esp+20h] [ebp-Ch]
     GfxSurface *surf; // [esp+24h] [ebp-8h]
-    unsigned int surfNodeIndex; // [esp+28h] [ebp-4h]
+    uint32_t surfNodeIndex; // [esp+28h] [ebp-4h]
 
     if (!R_OutsideFrustumPlanes(planes, planeCount, tree->mins))
     {
@@ -943,7 +943,7 @@ void __cdecl R_MarkUtil_GetDObjAnimMatAndHideParts(
     const DObj_s *dobj,
     const cpose_t *pose,
     const DObjAnimMat **outBoneMtxList,
-    unsigned int *outHidePartBits)
+    uint32_t *outHidePartBits)
 {
     char zeroLods[32]; // [esp+30h] [ebp-38h] BYREF
     int partBits[4]; // [esp+58h] [ebp-10h] BYREF
@@ -1055,7 +1055,7 @@ void __cdecl R_GetMarkFragmentClipPlanes(const float *origin, const float (*axis
     }
 }
 
-char __cdecl R_MarkFragments_AddDObj(MarkInfo *markInfo, DObj_s *dObj, cpose_t *pose, unsigned __int16 entityIndex)
+char __cdecl R_MarkFragments_AddDObj(MarkInfo *markInfo, DObj_s *dObj, cpose_t *pose, uint16_t entityIndex)
 {
     MarkInfoCollidedDObj *collidedDObj; // [esp+0h] [ebp-4h]
 
@@ -1073,7 +1073,7 @@ char __cdecl R_MarkFragments_AddBModel(
     MarkInfo *markInfo,
     GfxBrushModel *brushModel,
     cpose_t *pose,
-    unsigned __int16 entityIndex)
+    uint16_t entityIndex)
 {
     MarkInfoCollidedBModel *collidedBModel; // [esp+0h] [ebp-4h]
 
@@ -1140,8 +1140,8 @@ int(__cdecl *allowSurf[1])(int, void *) = { (int(*)(int, void*))R_AllowMarks };
 char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo)
 {
     GfxSurface **surfacesArray[1]; // [esp+298h] [ebp-41Ch] BYREF
-    unsigned int surfIndex; // [esp+29Ch] [ebp-418h]
-    unsigned int surfCount; // [esp+2A0h] [ebp-414h] BYREF
+    uint32_t surfIndex; // [esp+29Ch] [ebp-418h]
+    uint32_t surfCount; // [esp+2A0h] [ebp-414h] BYREF
     GfxSurface *surfaces[256]; // [esp+2A4h] [ebp-410h] BYREF
     GfxMarkContext markContext; // [esp+6A8h] [ebp-Ch] BYREF
     bool anyMarks; // [esp+6B3h] [ebp-1h] BYREF
@@ -1232,7 +1232,7 @@ bool __cdecl R_MarkFragments_BrushSurface(
     float *v24; // [esp+58h] [ebp-280h]
     float *v25; // [esp+5Ch] [ebp-27Ch]
     float *v26; // [esp+60h] [ebp-278h]
-    const unsigned __int8 *triVerts1; // [esp+A0h] [ebp-238h]
+    const uint8_t *triVerts1; // [esp+A0h] [ebp-238h]
     FxMarkPoint *points; // [esp+A4h] [ebp-234h]
     FxWorldMarkPoint clipPoints[2][9]; // [esp+A8h] [ebp-230h] BYREF
     int baseIndex; // [esp+25Ch] [ebp-7Ch]
@@ -1240,8 +1240,8 @@ bool __cdecl R_MarkFragments_BrushSurface(
     float normal[3][3]; // [esp+264h] [ebp-74h] BYREF
     FxWorldMarkPoint *clipPoint; // [esp+288h] [ebp-50h]
     int pointIndex; // [esp+28Ch] [ebp-4Ch]
-    const unsigned __int16 *indices; // [esp+290h] [ebp-48h]
-    unsigned int triVerts1Stride; // [esp+294h] [ebp-44h]
+    const uint16_t *indices; // [esp+290h] [ebp-48h]
+    uint32_t triVerts1Stride; // [esp+294h] [ebp-44h]
     int fragmentPointCount; // [esp+298h] [ebp-40h]
     const GfxWorldVertex *triVert1[3]; // [esp+29Ch] [ebp-3Ch]
     const GfxWorldVertex *triVerts0; // [esp+2A8h] [ebp-30h]
@@ -1262,7 +1262,7 @@ bool __cdecl R_MarkFragments_BrushSurface(
     triSurf = &surface->tris;
     triVerts0 = &rgp.world->vd.vertices[surface->tris.firstVertex];
     indices = &rgp.world->indices[surface->tris.baseIndex];
-    triVerts1 = (const unsigned __int8 *)triVerts0;
+    triVerts1 = (const uint8_t *)triVerts0;
     triVerts1Stride = 44;
     triIndex = 0;
     while (triIndex < triSurf->triCount)
@@ -1482,7 +1482,7 @@ int __cdecl R_ChopWorldPolyBehindPlane(
     {
         {
             PROF_SCOPED("R_memcpy");
-            memcpy((unsigned __int8 *)outPoints, (unsigned __int8 *)inPoints, 24 * inPointCount);
+            memcpy((uint8_t *)outPoints, (uint8_t *)inPoints, 24 * inPointCount);
         }
         return inPointCount;
     }
@@ -1512,12 +1512,12 @@ bool __cdecl R_MarkFragment_IsTriangleRejected(
 
 void __cdecl R_MarkFragment_SetupWorldClipPoints(
     const GfxWorldVertex *triVerts0,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     FxWorldMarkPoint(*clipPoints)[9])
 {
     FxWorldMarkPoint *v3; // [esp+4h] [ebp-10h]
     const GfxWorldVertex *v4; // [esp+8h] [ebp-Ch]
-    unsigned int pointIndex; // [esp+Ch] [ebp-8h]
+    uint32_t pointIndex; // [esp+Ch] [ebp-8h]
 
     for (pointIndex = 0; pointIndex < 3; ++pointIndex)
     {
@@ -1638,10 +1638,10 @@ char __cdecl R_MarkFragments_SceneDObjs(MarkInfo *markInfo)
     DObj_s *dobj; // [esp+74h] [ebp-34h]
     const XModel *model; // [esp+7Ch] [ebp-2Ch]
     int submodelCount; // [esp+80h] [ebp-28h]
-    unsigned int hidePartBits[4]; // [esp+84h] [ebp-24h] BYREF
+    uint32_t hidePartBits[4]; // [esp+84h] [ebp-24h] BYREF
     const DObjAnimMat *boneMtxList; // [esp+94h] [ebp-14h] BYREF
     GfxMarkContext markContext; // [esp+98h] [ebp-10h] BYREF
-    unsigned __int16 entnum; // [esp+A0h] [ebp-8h]
+    uint16_t entnum; // [esp+A0h] [ebp-8h]
     int sceneDObjCollidedIndex; // [esp+A4h] [ebp-4h]
 
     PROF_SCOPED("R_MarkFragments_SceneDObjs");
@@ -1687,7 +1687,7 @@ char __cdecl R_MarkFragments_SceneDObjs(MarkInfo *markInfo)
 char __cdecl R_MarkFragments_AnimatedXModel(
     MarkInfo* markInfo,
     const XModel* model,
-    const unsigned int* hidePartBits,
+    const uint32_t* hidePartBits,
     int boneIndex,
     const DObjAnimMat* boneMtxList,
     int boneCount,
@@ -1696,7 +1696,7 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     int boneOffset; // [esp+528h] [ebp-30h]
     const DObjAnimMat* baseMatList; // [esp+53Ch] [ebp-1Ch]
     int surfIndex; // [esp+540h] [ebp-18h]
-    unsigned int vertListIndex; // [esp+544h] [ebp-14h]
+    uint32_t vertListIndex; // [esp+544h] [ebp-14h]
     int surfCount; // [esp+548h] [ebp-10h]
     Material** materials; // [esp+54Ch] [ebp-Ch]
     XSurface* surfaces; // [esp+550h] [ebp-8h] BYREF
@@ -1774,7 +1774,7 @@ int __cdecl R_AddMarkFragment_1_(
     FxModelMarkPoint(*clipPoints)[9],
     const float (*planes)[4],
     const GfxMarkContext *markContext,
-    unsigned __int16 baseIndex,
+    uint16_t baseIndex,
     int maxTris,
     FxMarkTri *tris,
     int maxPoints,
@@ -1954,7 +1954,7 @@ int __cdecl R_AddMarkFragment_0_(
     FxModelMarkPoint(*clipPoints)[9],
     const float (*planes)[4],
     const GfxMarkContext *markContext,
-    unsigned __int16 baseIndex,
+    uint16_t baseIndex,
     int maxTris,
     FxMarkTri *tris,
     int maxPoints,
@@ -2155,7 +2155,7 @@ void __cdecl DObjSkelMatToMatrix43(const DObjSkelMat *inSkelMat, float (*outMatr
 
 char  R_MarkFragments_AnimatedXModel_VertList(
     MarkInfo *markInfo,
-    unsigned int vertListIndex,
+    uint32_t vertListIndex,
     const DObjAnimMat *poseBone,
     const DObjAnimMat *baseBone,
     GfxMarkContext *markContext,
@@ -2257,7 +2257,7 @@ char __cdecl R_MarkFragments_StaticModels(MarkInfo *markInfo)
                 smodelDraw->reflectionProbeIndex);
         markContext.primaryLightIndex = smodelDraw->primaryLightIndex;
         markContext.modelIndex = smodelIndex;
-        if ((unsigned __int16)smodelIndex != smodelIndex)
+        if ((uint16_t)smodelIndex != smodelIndex)
             MyAssertHandler(
                 ".\\r_marks.cpp",
                 1812,
@@ -2374,7 +2374,7 @@ char __cdecl R_MarkFragments_XModelSurface_Basic(
     MarkModelCoreContext markModelCoreContext; // [esp+10h] [ebp-94h] BYREF
     float invModelScale; // [esp+2Ch] [ebp-78h]
     float localOrigin[3]; // [esp+30h] [ebp-74h] BYREF
-    unsigned int vertListIndex; // [esp+3Ch] [ebp-68h]
+    uint32_t vertListIndex; // [esp+3Ch] [ebp-68h]
     float localMaxs[3]; // [esp+40h] [ebp-64h] BYREF
     float localOriginRotated[3]; // [esp+4Ch] [ebp-58h] BYREF
     int dim; // [esp+58h] [ebp-4Ch]
@@ -2535,7 +2535,7 @@ int __cdecl R_ChopPolyBehindPlane(
     {
         {
             PROF_SCOPED("R_memcpy");
-            memcpy((unsigned __int8 *)outPoints, (unsigned __int8 *)inPoints, 24 * inPointCount);
+            memcpy((uint8_t *)outPoints, (uint8_t *)inPoints, 24 * inPointCount);
         }
         return inPointCount;
     }

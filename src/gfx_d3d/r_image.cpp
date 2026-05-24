@@ -125,7 +125,7 @@ void __cdecl R_SumOfUsedImages(Image_MemUsage *usage)
 {
     const char *v1; // eax
     GfxImage *image; // [esp+0h] [ebp-2040h]
-    unsigned int v3[4]; // [esp+4h] [ebp-203Ch] BYREF
+    uint32_t v3[4]; // [esp+4h] [ebp-203Ch] BYREF
     int v4; // [esp+14h] [ebp-202Ch]
     int v5; // [esp+18h] [ebp-2028h]
     int v6; // [esp+1Ch] [ebp-2024h]
@@ -133,7 +133,7 @@ void __cdecl R_SumOfUsedImages(Image_MemUsage *usage)
     int v8; // [esp+24h] [ebp-201Ch]
     int v9; // [esp+28h] [ebp-2018h]
     int v10; // [esp+2Ch] [ebp-2014h]
-    unsigned int i; // [esp+30h] [ebp-2010h]
+    uint32_t i; // [esp+30h] [ebp-2010h]
     int v12; // [esp+34h] [ebp-200Ch]
     ImageList imageList; // [esp+38h] [ebp-2008h] BYREF
 
@@ -196,7 +196,7 @@ void __cdecl Image_Release(GfxImage *image)
     }
 }
 
-GfxImage *__cdecl Image_AllocProg(int imageProgType, unsigned __int8 category, unsigned __int8 semantic)
+GfxImage *__cdecl Image_AllocProg(int imageProgType, uint8_t category, uint8_t semantic)
 {
     GfxImage *image; // [esp+0h] [ebp-Ch]
     const char *name; // [esp+4h] [ebp-8h]
@@ -228,7 +228,7 @@ void __cdecl R_ShutdownImages()
 {
     GfxImage *image; // [esp+0h] [ebp-2014h]
     int numBackups; // [esp+4h] [ebp-2010h]
-    unsigned int i; // [esp+8h] [ebp-200Ch]
+    uint32_t i; // [esp+8h] [ebp-200Ch]
     GfxImage* backupImages[IMAGE_HASH_TABLE_SIZE]; // [esp+Ch] [ebp-2008h]
     int j; // [esp+2010h] [ebp-4h]
 
@@ -258,8 +258,8 @@ void __cdecl R_ShutdownImages()
 
 void __cdecl Image_SetupRenderTarget(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
+    uint16_t width,
+    uint16_t height,
     _D3DFORMAT imageFormat)
 {
     iassert(image);
@@ -269,12 +269,12 @@ void __cdecl Image_SetupRenderTarget(
 
 void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
 {
-    unsigned int mipDepth; // [esp+0h] [ebp-60h]
-    unsigned int mipHeight; // [esp+4h] [ebp-5Ch]
-    unsigned int mipWidth; // [esp+8h] [ebp-58h]
+    uint32_t mipDepth; // [esp+0h] [ebp-60h]
+    uint32_t mipHeight; // [esp+4h] [ebp-5Ch]
+    uint32_t mipWidth; // [esp+8h] [ebp-58h]
     _D3DCUBEMAP_FACES v5; // [esp+Ch] [ebp-54h]
-    unsigned __int16 v6; // [esp+14h] [ebp-4Ch]
-    unsigned __int16 v7; // [esp+18h] [ebp-48h]
+    uint16_t v6; // [esp+14h] [ebp-4Ch]
+    uint16_t v7; // [esp+18h] [ebp-48h]
     GfxImageLoadDef *loadDef; // [esp+34h] [ebp-2Ch]
     LONG externalDataSize; // [esp+38h] [ebp-28h]
     signed int mipCount; // [esp+3Ch] [ebp-24h]
@@ -417,7 +417,7 @@ GfxImage *__cdecl Image_FindExisting_FastFile(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_IMAGE, name).image;
 }
 
-GfxImage *__cdecl Image_Register(const char *imageName, unsigned __int8 semantic, int imageTrack)
+GfxImage *__cdecl Image_Register(const char *imageName, uint8_t semantic, int imageTrack)
 {
     if (IsFastFileLoad())
         return (GfxImage *)Image_Register_FastFile(imageName);
@@ -456,10 +456,10 @@ char __cdecl Image_ValidateHeader(GfxImageFileHeader *imageFile, const char *fil
     }
 }
 
-unsigned int __cdecl Image_CountMipmaps(char imageFlags, unsigned int width, unsigned int height, unsigned int depth)
+uint32_t __cdecl Image_CountMipmaps(char imageFlags, uint32_t width, uint32_t height, uint32_t depth)
 {
-    unsigned int mipRes; // [esp+0h] [ebp-8h]
-    unsigned int mipCount; // [esp+4h] [ebp-4h]
+    uint32_t mipRes; // [esp+0h] [ebp-8h]
+    uint32_t mipCount; // [esp+4h] [ebp-4h]
 
     if ((imageFlags & 2) != 0)
         return 1;
@@ -468,7 +468,7 @@ unsigned int __cdecl Image_CountMipmaps(char imageFlags, unsigned int width, uns
         ++mipCount;
     return mipCount;
 }
-unsigned int __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader)
+uint32_t __cdecl Image_CountMipmapsForFile(const GfxImageFileHeader *fileHeader)
 {
     return Image_CountMipmaps(
         fileHeader->flags,
@@ -481,8 +481,8 @@ void __cdecl Image_UploadData(
     const GfxImage *image,
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
-    unsigned int mipLevel,
-    unsigned __int8 *src)
+    uint32_t mipLevel,
+    uint8_t *src)
 {
     if (image->mapType != MAPTYPE_CUBE || !mipLevel || gfxMetrics.canMipCubemaps)
     {
@@ -500,14 +500,14 @@ void __cdecl Image_LoadWhite(GfxImage *image)
 
 void __cdecl Image_LoadSolid(
     GfxImage *image,
-    unsigned __int8 r,
-    unsigned __int8 g,
-    unsigned __int8 b,
-    unsigned __int8 a)
+    uint8_t r,
+    uint8_t g,
+    uint8_t b,
+    uint8_t a)
 {
-    unsigned __int8 pic[4]; // [esp+4h] [ebp-4h] BYREF
+    uint8_t pic[4]; // [esp+4h] [ebp-4h] BYREF
 
-    *(unsigned int *)pic = (a << 24) | b | (g << 8) | (r << 16);
+    *(uint32_t *)pic = (a << 24) | b | (g << 8) | (r << 16);
     Image_Generate2D(image, pic, 1, 1, D3DFMT_A8R8G8B8);
 }
 
@@ -528,18 +528,18 @@ void __cdecl Image_LoadIdentityNormalMap(GfxImage *image)
 
 void __cdecl Image_LoadBlack3D(GfxImage *image)
 {
-    unsigned __int8 pic[4]; // [esp+4h] [ebp-4h] BYREF
+    uint8_t pic[4]; // [esp+4h] [ebp-4h] BYREF
 
-    *(unsigned int *)pic = -16777216;
+    *(uint32_t *)pic = -16777216;
     Image_Generate3D(image, pic, 1, 1, 1, D3DFMT_A8R8G8B8);
 }
 
 void __cdecl Image_LoadBlackCube(GfxImage *image)
 {
-    const unsigned __int8 *pic[6][15]; // [esp+4h] [ebp-170h] BYREF
-    unsigned __int8 pixel[4]; // [esp+170h] [ebp-4h] BYREF
+    const uint8_t *pic[6][15]; // [esp+4h] [ebp-170h] BYREF
+    uint8_t pixel[4]; // [esp+170h] [ebp-4h] BYREF
 
-    *(unsigned int *)pixel = -16777216;
+    *(uint32_t *)pixel = -16777216;
     pic[0][0] = pixel;
     pic[1][0] = pixel;
     pic[2][0] = pixel;
@@ -551,16 +551,16 @@ void __cdecl Image_LoadBlackCube(GfxImage *image)
 
 void __cdecl Image_LoadPixelCostColorCode(GfxImage *image)
 {
-    unsigned __int8 pic[257][4]; // [esp+0h] [ebp-408h] BYREF
+    uint8_t pic[257][4]; // [esp+0h] [ebp-408h] BYREF
 
     RB_PixelCost_BuildColorCodeMap(pic, 256);
     Image_Generate2D(image, pic[0], 256, 1, D3DFMT_X8R8G8B8);
 }
 
-GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsigned __int8 imageTrack)
+GfxImage *__cdecl Image_LoadBuiltin(char *name, uint8_t semantic, uint8_t imageTrack)
 {
     GfxImage *image; // [esp+14h] [ebp-8h]
-    unsigned int tableIndex; // [esp+18h] [ebp-4h]
+    uint32_t tableIndex; // [esp+18h] [ebp-4h]
 
     for (tableIndex = 0; ; ++tableIndex)
     {
@@ -582,9 +582,9 @@ GfxImage *__cdecl Image_LoadBuiltin(char *name, unsigned __int8 semantic, unsign
 void __cdecl Image_Construct(
     char *name,
     int nameSize,
-    unsigned __int8 category,
-    unsigned __int8 semantic,
-    unsigned __int8 imageTrack,
+    uint8_t category,
+    uint8_t semantic,
+    uint8_t imageTrack,
     GfxImage *image)
 {
     iassert(name);
@@ -592,7 +592,7 @@ void __cdecl Image_Construct(
     iassert(image);
     {
         PROF_SCOPED("R_memcpy");
-        memcpy((unsigned __int8 *)image->name, (unsigned __int8 *)name, nameSize);
+        memcpy((uint8_t *)image->name, (uint8_t *)name, nameSize);
     }
     iassert(category != IMG_CATEGORY_UNKNOWN);
     image->category = category;
@@ -616,11 +616,11 @@ int __cdecl Image_GetAvailableHashLocation(const char *name)
 }
 GfxImage *__cdecl Image_Alloc(
     char *name,
-    unsigned __int8 category,
-    unsigned __int8 semantic,
-    unsigned __int8 imageTrack)
+    uint8_t category,
+    uint8_t semantic,
+    uint8_t imageTrack)
 {
-    unsigned int v5; // [esp+0h] [ebp-20h]
+    uint32_t v5; // [esp+0h] [ebp-20h]
     GfxImage *image; // [esp+10h] [ebp-10h]
 
     iassert( name );
@@ -650,7 +650,7 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("image->texture.map->GetSurfaceLevel( 0, &surface )\n");
-        //hr = ((int(__stdcall *)(unsigned int, unsigned int, unsigned int))image->texture.basemap->__vftable[1].AddRef)(
+        //hr = ((int(__stdcall *)(uint32_t, uint32_t, uint32_t))image->texture.basemap->__vftable[1].AddRef)(
         //    (GfxTexture)image->texture.basemap,
         //    0,
         //    &surface);
@@ -674,8 +674,8 @@ IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image)
 
 void __cdecl R_SetPicmip()
 {
-    unsigned int texMemInMegs; // [esp+0h] [ebp-10h]
-    unsigned int sysMemInMegs; // [esp+4h] [ebp-Ch]
+    uint32_t texMemInMegs; // [esp+0h] [ebp-10h]
+    uint32_t sysMemInMegs; // [esp+4h] [ebp-Ch]
     bool cappedPicmip; // [esp+Bh] [ebp-5h]
     int minPicmip; // [esp+Ch] [ebp-4h]
 
@@ -817,10 +817,10 @@ void __cdecl R_ImageList_f()
     GfxImage *image; // [esp+A0h] [ebp-207Ch]
     int v5; // [esp+A4h] [ebp-2078h]
     bool v6; // [esp+ABh] [ebp-2071h]
-    unsigned __int8 dst[80]; // [esp+ACh] [ebp-2070h] BYREF
-    unsigned int v8[2]; // [esp+FCh] [ebp-2020h]
+    uint8_t dst[80]; // [esp+ACh] [ebp-2070h] BYREF
+    uint32_t v8[2]; // [esp+FCh] [ebp-2020h]
     _D3DFORMAT v9; // [esp+104h] [ebp-2018h]
-    unsigned int i; // [esp+108h] [ebp-2014h]
+    uint32_t i; // [esp+108h] [ebp-2014h]
     ImageList imageList; // [esp+10Ch] [ebp-2010h] BYREF
     int j; // [esp+2114h] [ebp-8h]
     float v13; // [esp+2118h] [ebp-4h]
@@ -928,7 +928,7 @@ void __cdecl R_ImageList_f()
             v5 = image->cardMemory.platform[j];
             if (!IsFastFileLoad())
             {
-                *(unsigned int *)&dst[8 * image->track + 4 * j] += v5;
+                *(uint32_t *)&dst[8 * image->track + 4 * j] += v5;
                 if (!v6 && Image_IsCodeImage(image->track))
                     continue;
             }
@@ -1006,7 +1006,7 @@ char __cdecl Image_AssignDefaultTexture(GfxImage *image)
 void __cdecl Image_Rebuild(GfxImage *image)
 {
     const char *v1; // eax
-    unsigned __int8 category; // [esp+0h] [ebp-4h]
+    uint8_t category; // [esp+0h] [ebp-4h]
 
     iassert( image );
     iassert( image->category != IMG_CATEGORY_UNKNOWN );
@@ -1108,8 +1108,8 @@ _D3DFORMAT __cdecl R_ImagePixelFormat(const GfxImage *image)
 
 void __cdecl Image_CreateCubeTexture_PC(
     GfxImage *image,
-    unsigned __int16 edgeLen,
-    unsigned int mipmapCount,
+    uint16_t edgeLen,
+    uint32_t mipmapCount,
     _D3DFORMAT imageFormat)
 {
     const char *v4; // eax
@@ -1157,10 +1157,10 @@ void __cdecl Image_CreateCubeTexture_PC(
 
 void __cdecl Image_Create3DTexture_PC(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
-    unsigned __int16 depth,
-    unsigned int mipmapCount,
+    uint16_t width,
+    uint16_t height,
+    uint16_t depth,
+    uint32_t mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat)
 {
@@ -1169,7 +1169,7 @@ void __cdecl Image_Create3DTexture_PC(
     const char *v9; // eax
     const char *v10; // eax
     HRESULT hr; // [esp+0h] [ebp-Ch]
-    unsigned int usage; // [esp+4h] [ebp-8h]
+    uint32_t usage; // [esp+4h] [ebp-8h]
 
     iassert( image );
     iassert( !image->texture.basemap );
@@ -1220,7 +1220,7 @@ void __cdecl Image_Create3DTexture_PC(
 
 void __cdecl RB_UnbindAllImages()
 {
-    unsigned int samplerIndex; // [esp+0h] [ebp-4h]
+    uint32_t samplerIndex; // [esp+0h] [ebp-4h]
 
     if (dx.device && !dx.deviceLost)
     {
@@ -1252,9 +1252,9 @@ void __cdecl Image_UpdatePicmip(GfxImage *image)
 
 void __cdecl Image_Create2DTexture_PC(
     GfxImage *image,
-    unsigned __int16 width,
-    unsigned __int16 height,
-    unsigned int mipmapCount,
+    uint16_t width,
+    uint16_t height,
+    uint32_t mipmapCount,
     int imageFlags,
     _D3DFORMAT imageFormat)
 {
@@ -1263,7 +1263,7 @@ void __cdecl Image_Create2DTexture_PC(
     const char *v8; // eax
     const char *v9; // eax
     HRESULT hr; // [esp+0h] [ebp-Ch]
-    unsigned int usage; // [esp+4h] [ebp-8h]
+    uint32_t usage; // [esp+4h] [ebp-8h]
 
     iassert( image );
     iassert( !image->texture.basemap );
@@ -1324,7 +1324,7 @@ void __cdecl Image_Create2DTexture_PC(
 
 void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int imageFlags, _D3DFORMAT imageFormat)
 {
-    unsigned int mipmapCount; // [esp+0h] [ebp-4h]
+    uint32_t mipmapCount; // [esp+0h] [ebp-4h]
 
     iassert(image);
     image->width = width;

@@ -4,7 +4,7 @@
 #include <universal/profile.h>
 #include "r_init.h"
 
-unsigned int __cdecl Image_CubemapFace(unsigned int faceIndex)
+uint32_t __cdecl Image_CubemapFace(uint32_t faceIndex)
 {
     iassert(faceIndex < 6);
     return faceIndex;
@@ -21,7 +21,7 @@ void __cdecl Image_GetPicmip(const GfxImage *image, Picmip *picmip)
         Image_PicmipForSemantic(image->semantic, picmip);
 }
 
-void __cdecl Image_PicmipForSemantic(unsigned __int8 semantic, Picmip *picmip)
+void __cdecl Image_PicmipForSemantic(uint8_t semantic, Picmip *picmip)
 {
     const char *v2; // eax
     int picmipUsed; // [esp+4h] [ebp-4h]
@@ -104,10 +104,10 @@ int __cdecl Image_SourceBytesPerSlice_PC(_D3DFORMAT format, int width, int heigh
 void __cdecl Image_Upload2D_CopyDataBlock_PC(
     int width,
     int height,
-    unsigned __int8 *src,
+    uint8_t *src,
     _D3DFORMAT format,
     int dstPitch,
-    unsigned __int8 *dst)
+    uint8_t *dst)
 {
     const char *v6; // eax
     const char *v7; // eax
@@ -184,8 +184,8 @@ LABEL_17:
 void __cdecl Image_Upload3D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
-    unsigned int mipLevel,
-    unsigned __int8 *src)
+    uint32_t mipLevel,
+    uint8_t *src)
 {
     const char *v4; // eax
     const char *v5; // eax
@@ -199,7 +199,7 @@ void __cdecl Image_Upload3D_CopyData_PC(
     _D3DLOCKED_BOX lockedBox; // [esp+2Ch] [ebp-18h] BYREF
     int width; // [esp+38h] [ebp-Ch]
     int height; // [esp+3Ch] [ebp-8h]
-    unsigned __int8 *dst; // [esp+40h] [ebp-4h]
+    uint8_t *dst; // [esp+40h] [ebp-4h]
 
     iassert(image);
     iassert(image->mapType == MAPTYPE_3D);
@@ -240,7 +240,7 @@ void __cdecl Image_Upload3D_CopyData_PC(
         }
     } while (alwaysfails);
 
-    dst = (unsigned __int8 *)lockedBox.pBits;
+    dst = (uint8_t *)lockedBox.pBits;
     for (sliceIndex = 0; sliceIndex < v6; ++sliceIndex)
     {
         Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedBox.RowPitch, dst);
@@ -272,22 +272,22 @@ void __cdecl Image_Upload2D_CopyData_PC(
     const GfxImage *image,
     _D3DFORMAT format,
     _D3DCUBEMAP_FACES face,
-    unsigned int mipLevel,
-    unsigned __int8 *src)
+    uint32_t mipLevel,
+    uint8_t *src)
 {
     const char *v5; // eax
     const char *v6; // eax
     const char *v7; // eax
     const char *v8; // eax
-    unsigned int v9; // [esp+0h] [ebp-30h]
-    unsigned int v10; // [esp+4h] [ebp-2Ch]
+    uint32_t v9; // [esp+0h] [ebp-30h]
+    uint32_t v10; // [esp+4h] [ebp-2Ch]
     int v11; // [esp+10h] [ebp-20h]
     int v12; // [esp+14h] [ebp-1Ch]
     int v13; // [esp+18h] [ebp-18h]
     int hr; // [esp+1Ch] [ebp-14h]
     _D3DLOCKED_RECT lockedRect; // [esp+20h] [ebp-10h] BYREF
-    unsigned int width; // [esp+28h] [ebp-8h]
-    unsigned int height; // [esp+2Ch] [ebp-4h]
+    uint32_t width; // [esp+28h] [ebp-8h]
+    uint32_t height; // [esp+2Ch] [ebp-4h]
 
     if (image->width >> mipLevel > 1)
         v10 = image->width >> mipLevel;
@@ -321,7 +321,7 @@ void __cdecl Image_Upload2D_CopyData_PC(
                 } while (alwaysfails);
             }
         } while (alwaysfails);
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (unsigned __int8 *)lockedRect.pBits);
+        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (uint8_t *)lockedRect.pBits);
         do
         {
             if (r_logFile && r_logFile->current.integer)
@@ -366,7 +366,7 @@ void __cdecl Image_Upload2D_CopyData_PC(
                 } while (alwaysfails);
             }
         } while (alwaysfails);
-        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (unsigned __int8 *)lockedRect.pBits);
+        Image_Upload2D_CopyDataBlock_PC(width, height, src, format, lockedRect.Pitch, (uint8_t *)lockedRect.pBits);
         do
         {
             if (r_logFile && r_logFile->current.integer)
@@ -410,11 +410,11 @@ void __cdecl Image_GetMipmapResolution(
     int baseWidth,
     int baseHeight,
     int mipmap,
-    unsigned __int16 *mipWidth,
-    unsigned __int16 *mipHeight)
+    uint16_t *mipWidth,
+    uint16_t *mipHeight)
 {
-    unsigned int v5; // [esp+0h] [ebp-10h]
-    unsigned int v6; // [esp+4h] [ebp-Ch]
+    uint32_t v5; // [esp+0h] [ebp-10h]
+    uint32_t v6; // [esp+4h] [ebp-Ch]
 
     iassert(baseWidth > 0);
     iassert(baseHeight > 0);
@@ -422,14 +422,14 @@ void __cdecl Image_GetMipmapResolution(
     iassert(mipWidth);
     iassert(mipHeight);
 
-    if ((int)((unsigned int)baseWidth >> mipmap) > 1)
-        v6 = (unsigned int)baseWidth >> mipmap;
+    if ((int)((uint32_t)baseWidth >> mipmap) > 1)
+        v6 = (uint32_t)baseWidth >> mipmap;
     else
         LOWORD(v6) = 1;
 
     *mipWidth = v6;
-    if ((int)((unsigned int)baseHeight >> mipmap) > 1)
-        v5 = (unsigned int)baseHeight >> mipmap;
+    if ((int)((uint32_t)baseHeight >> mipmap) > 1)
+        v5 = (uint32_t)baseHeight >> mipmap;
     else
         LOWORD(v5) = 1;
     *mipHeight = v5;
@@ -445,10 +445,10 @@ void __cdecl Image_TrackFullscreenTexture(
     int picmip,
     _D3DFORMAT format)
 {
-    unsigned int memory; // [esp+0h] [ebp-18h]
-    unsigned int platformHeight; // [esp+4h] [ebp-14h]
-    unsigned __int16 width; // [esp+8h] [ebp-10h] BYREF
-    unsigned __int16 height; // [esp+Ch] [ebp-Ch] BYREF
+    uint32_t memory; // [esp+0h] [ebp-18h]
+    uint32_t platformHeight; // [esp+4h] [ebp-14h]
+    uint16_t width; // [esp+8h] [ebp-10h] BYREF
+    uint16_t height; // [esp+Ch] [ebp-Ch] BYREF
     int platformWidth; // [esp+10h] [ebp-8h]
     int platform; // [esp+14h] [ebp-4h]
 

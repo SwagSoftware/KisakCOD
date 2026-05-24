@@ -87,31 +87,31 @@ void R_EndMarkMeshVerts();
 char __cdecl R_ReserveMeshIndices(GfxMeshData* mesh, int indexCount, r_double_index_t** indicesOut);
 
 char __cdecl R_ReserveCodeMeshIndices(int indexCount, r_double_index_t** indicesOut);
-char __cdecl R_ReserveCodeMeshVerts(int vertCount, unsigned __int16* baseVertex);
-char __cdecl R_ReserveCodeMeshArgs(int argCount, unsigned int* argOffsetOut);
+char __cdecl R_ReserveCodeMeshVerts(int vertCount, uint16_t* baseVertex);
+char __cdecl R_ReserveCodeMeshArgs(int argCount, uint32_t* argOffsetOut);
 
 void __cdecl R_AddCodeMeshDrawSurf(
     Material* material,
     r_double_index_t* indices,
-    unsigned int indexCount,
-    unsigned int argOffset,
-    unsigned int argCount,
+    uint32_t indexCount,
+    uint32_t argOffset,
+    uint32_t argCount,
     const char* fxName);
-float (*__cdecl R_GetCodeMeshArgs(unsigned int argOffset))[4];
-GfxPackedVertex* __cdecl R_GetCodeMeshVerts(unsigned __int16 baseVertex);
+float (*__cdecl R_GetCodeMeshArgs(uint32_t argOffset))[4];
+GfxPackedVertex* __cdecl R_GetCodeMeshVerts(uint16_t baseVertex);
 
-char __cdecl R_ReserveMarkMeshVerts(int vertCount, unsigned __int16 *baseVertex);
+char __cdecl R_ReserveMarkMeshVerts(int vertCount, uint16_t *baseVertex);
 char __cdecl R_ReserveMarkMeshIndices(int indexCount, r_double_index_t** indicesOut);
 
 void __cdecl R_BeginMarkMeshVerts();
 void __cdecl R_AddMarkMeshDrawSurf(
     Material *material,
     const GfxMarkContext *context,
-    unsigned __int16 *indices,
-    unsigned int indexCount);
+    uint16_t *indices,
+    uint32_t indexCount);
 
 void __cdecl R_SortDrawSurfs(GfxDrawSurf *drawSurfList, int surfCount);
-GfxWorldVertex *__cdecl R_GetMarkMeshVerts(unsigned __int16 baseVertex);
+GfxWorldVertex *__cdecl R_GetMarkMeshVerts(uint16_t baseVertex);
 GfxDrawSurf __cdecl R_GetWorldDrawSurf(GfxSurface *worldSurf);
 void __cdecl R_SortWorldSurfaces();
-char __cdecl R_AddParticleCloudDrawSurf(volatile unsigned int cloudIndex, Material *material);
+char __cdecl R_AddParticleCloudDrawSurf(volatile uint32_t cloudIndex, Material *material);

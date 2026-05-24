@@ -15,7 +15,7 @@ union GfxPixelCostKey // sizeof=0x8
 };
 struct GfxPixelCostRecord // sizeof=0x20
 {                                       // ...
-    unsigned __int16 costHistory[12];   // ...
+    uint16_t costHistory[12];   // ...
     GfxPixelCostKey key;                // ...
 };
 
@@ -244,12 +244,12 @@ void __cdecl RB_PixelCost_ResetPrim(unsigned __int64 packedKey)
 
     record = &pixelCostGlob.records[pixelCostGlob.expectedCount];
     record->key.packed = packedKey;
-    *(unsigned int *)record->costHistory = 0;
-    *(unsigned int *)&record->costHistory[2] = 0;
-    *(unsigned int *)&record->costHistory[4] = 0;
-    *(unsigned int *)&record->costHistory[6] = 0;
-    *(unsigned int *)&record->costHistory[8] = 0;
-    *(unsigned int *)&record->costHistory[10] = 0;
+    *(uint32_t *)record->costHistory = 0;
+    *(uint32_t *)&record->costHistory[2] = 0;
+    *(uint32_t *)&record->costHistory[4] = 0;
+    *(uint32_t *)&record->costHistory[6] = 0;
+    *(uint32_t *)&record->costHistory[8] = 0;
+    *(uint32_t *)&record->costHistory[10] = 0;
 }
 
 unsigned __int64 RB_PixelCost_BeginTiming()
@@ -273,11 +273,11 @@ void __cdecl R_HW_FinishGpu()
 
 void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
 {
-    unsigned __int16 v1; // [esp+10h] [ebp-38h]
+    uint16_t v1; // [esp+10h] [ebp-38h]
     int v2; // [esp+14h] [ebp-34h]
     int v3; // [esp+28h] [ebp-20h]
     int cost; // [esp+40h] [ebp-8h]
-    unsigned int pixelCount; // [esp+44h] [ebp-4h]
+    uint32_t pixelCount; // [esp+44h] [ebp-4h]
 
     if (pixelCostMode == GFX_PIXEL_COST_MODE_MEASURE_COST)
     {
@@ -323,7 +323,7 @@ void __cdecl R_PixelCost_EndSurface(GfxCmdBufContext context)
 int RB_PixelCost_AccumulateMsec()
 {
     int result; // eax
-    unsigned __int16 v1; // [esp+8h] [ebp-Ch]
+    uint16_t v1; // [esp+8h] [ebp-Ch]
     int v2; // [esp+Ch] [ebp-8h]
     int timeQuantized; // [esp+10h] [ebp-4h]
 

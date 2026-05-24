@@ -1718,16 +1718,16 @@ void DynEntCl_WakeUpAroundPlayer(int localClientNum)
     double v3; // fp0
     double v4; // fp13
     double v5; // fp0
-    unsigned int ClosestEntities; // r3
-    unsigned __int16 *v7; // r31
-    unsigned int v8; // r27
+    uint32_t ClosestEntities; // r3
+    uint16_t *v7; // r31
+    uint32_t v8; // r27
     const DynEntityDef *EntityDef; // r28
     DynEntityClient *ClientEntity; // r30
     DynEntityPose *ClientPose; // r3
     float v12[4]; // [sp+50h] [-2080h] BYREF
     float v13[4]; // [sp+60h] [-2070h] BYREF
     float v14[4]; // [sp+70h] [-2060h] BYREF
-    unsigned __int16 v15[40]; // [sp+80h] [-2050h] BYREF
+    uint16_t v15[40]; // [sp+80h] [-2050h] BYREF
 
     v1 = phys_gravityChangeWakeupRadius;
     if (phys_gravityChangeWakeupRadius->current.value != 0.0)
@@ -1784,7 +1784,7 @@ void DynEntCl_WakeUpAroundPlayer(int localClientNum)
                 } while (v8);
             }
             ++v2;
-        } while ((unsigned int)v2 < DYNENT_DRAW_COUNT);
+        } while ((uint32_t)v2 < DYNENT_DRAW_COUNT);
     }
 }
 #endif 

@@ -8,30 +8,30 @@
 #include <universal/profile.h>
 
 
-//   unsigned int *bitsUsedForPlayerstates 85032704     sv_snapshot_profile_mp.obj
+//   uint32_t *bitsUsedForPlayerstates 85032704     sv_snapshot_profile_mp.obj
 //   int (*)[1024] g_currentSnapshotPerEntity 85032728     sv_snapshot_profile_mp.obj
-//   unsigned int (*)[160] currentSnapshotNetworkEntityFieldsChanged 8504a730     sv_snapshot_profile_mp.obj
-//   unsigned int bitsUsedForServerCommands 8504e0b0     sv_snapshot_profile_mp.obj
+//   uint32_t (*)[160] currentSnapshotNetworkEntityFieldsChanged 8504a730     sv_snapshot_profile_mp.obj
+//   uint32_t bitsUsedForServerCommands 8504e0b0     sv_snapshot_profile_mp.obj
 //   BOOL g_archivingSnapshot 8504e0b9     sv_snapshot_profile_mp.obj
 //   int originsSentDueToPredicitonError 8504e0bc     sv_snapshot_profile_mp.obj
 //   struct ClientSnapshotData *s_clientSnapshotData 8504e0c0     sv_snapshot_profile_mp.obj
 //   int originsSentDueToServerTimeMismatch 8504ea14     sv_snapshot_profile_mp.obj
-//   unsigned int (*)[160] networkEntityFieldsChanged 8504ea20     sv_snapshot_profile_mp.obj
-//   unsigned int *bitsUsedPerEType   850523a0     sv_snapshot_profile_mp.obj
+//   uint32_t (*)[160] networkEntityFieldsChanged 8504ea20     sv_snapshot_profile_mp.obj
+//   uint32_t *bitsUsedPerEType   850523a0     sv_snapshot_profile_mp.obj
 //   unsigned char (*)[1024] g_currentSnapshotFieldsPerEntity 850528b0     sv_snapshot_profile_mp.obj
 //   unsigned char *g_currentSnapshotPlayerStateFields 850589a0     sv_snapshot_profile_mp.obj
 //   int (*)[13] g_bitsSent     850589b8     sv_snapshot_profile_mp.obj
 int g_bitsSent[64][13];
 int s_totalPacketDataSizes[20];
 int s_packetMetaDataSize[64][20];
-unsigned int s_packetModeStart[64];
+uint32_t s_packetModeStart[64];
 packetModeList s_packetMode[64];
 int g_currentSnapshotPerEntity[64][1024];
-unsigned __int8 g_currentSnapshotFieldsPerEntity[64][1024];
-unsigned __int8 g_currentSnapshotPlayerStateFields[64];
+uint8_t g_currentSnapshotFieldsPerEntity[64][1024];
+uint8_t g_currentSnapshotPlayerStateFields[64];
 bool newDataReady;
-unsigned int bitsUsedPerEType[256];
-unsigned int bitsUsedForPlayerstates[7];
+uint32_t bitsUsedPerEType[256];
+uint32_t bitsUsedForPlayerstates[7];
 int playerStateFieldsChanged[161];
 bool s_packetDataEnabled;
 bool g_archivingSnapshot;
@@ -40,9 +40,9 @@ int s_originDeltaBits[8];
 int s_originZDeltaBits[8];
 int s_originZFullBits[17];
 int s_originFullBits[17];
-unsigned int networkEntityFieldsChanged[23][160];
-unsigned int currentSnapshotNetworkEntityFieldsChanged[23][160];
-unsigned int bitsUsedForServerCommands;
+uint32_t networkEntityFieldsChanged[23][160];
+uint32_t currentSnapshotNetworkEntityFieldsChanged[23][160];
+uint32_t bitsUsedForServerCommands;
 int s_currentEntType;
 int s_currentEntNum;
 int originsSentDueToPredicitonError;
@@ -127,7 +127,7 @@ void __cdecl SV_ClearPacketAnalysis()
     newDataReady = 0;
 }
 
-void __cdecl SV_TrackETypeBytes(unsigned int eType, int bits)
+void __cdecl SV_TrackETypeBytes(uint32_t eType, int bits)
 {
     if (eType >= ET_EVENTS + EV_MAX_EVENTS)
         MyAssertHandler(
@@ -210,8 +210,8 @@ void __cdecl SV_PacketDataIsType(int clientNum, const msg_t *msg, packetModeList
 {
     const char *v3; // eax
     const char *PacketDataTypeName; // eax
-    unsigned int bitsUsed; // [esp+4Ch] [ebp-Ch]
-    unsigned int bitsUsedPrev; // [esp+50h] [ebp-8h]
+    uint32_t bitsUsed; // [esp+4Ch] [ebp-Ch]
+    uint32_t bitsUsedPrev; // [esp+50h] [ebp-8h]
     packetModeList oldMode; // [esp+54h] [ebp-4h]
 
     if (s_packetDataEnabled)
@@ -419,7 +419,7 @@ void __cdecl SV_PacketDataIsZeroInt(int clientNum, const msg_t *msg)
     SV_PacketDataIsType(clientNum, msg, PACKETDATA_ZEROINT);
 }
 
-void __cdecl SV_TrackFloatCompressedBits(unsigned int bits)
+void __cdecl SV_TrackFloatCompressedBits(uint32_t bits)
 {
     if (bits >= 0x3C)
         MyAssertHandler(
@@ -460,7 +460,7 @@ void __cdecl SV_TrackOriginFullBits(int bits)
     ++s_originFullBits[bits];
 }
 
-const char *__cdecl SV_GetEntityTypeString(unsigned int packetEntityType)
+const char *__cdecl SV_GetEntityTypeString(uint32_t packetEntityType)
 {
     if (packetEntityType >= 0x17)
         MyAssertHandler(
@@ -606,7 +606,7 @@ void __cdecl SV_AnalyzePacketData(int clientNum, const msg_t *msg)
 }
 
 int __cdecl SV_TrackPacketData(
-    unsigned int clientNum,
+    uint32_t clientNum,
     PacketDataType datatype,
     int eType,
     int entNum,
@@ -642,7 +642,7 @@ bool __cdecl SV_NewPacketAnalysisReady()
     return newDataReady;
 }
 
-void __cdecl SV_TrackFieldChange(int clientNum, int entityType, unsigned int field)
+void __cdecl SV_TrackFieldChange(int clientNum, int entityType, uint32_t field)
 {
     const char *string; // [esp+30h] [ebp-4h]
 
@@ -708,14 +708,14 @@ void __cdecl SV_WriteEntityFieldNumbers()
 {
     char *EntityTypeName; // eax
     __int64 v1; // [esp+4h] [ebp-34h]
-    unsigned int numFields; // [esp+14h] [ebp-24h] BYREF
+    uint32_t numFields; // [esp+14h] [ebp-24h] BYREF
     bool estimate; // [esp+1Bh] [ebp-1Dh] BYREF
     int totalData; // [esp+1Ch] [ebp-1Ch]
     NetFieldList stateFields; // [esp+20h] [ebp-18h] BYREF
     const char *entityTypeString; // [esp+28h] [ebp-10h]
     int f; // [esp+2Ch] [ebp-Ch]
     int entity; // [esp+30h] [ebp-8h]
-    unsigned int i; // [esp+34h] [ebp-4h]
+    uint32_t i; // [esp+34h] [ebp-4h]
 
     f = FS_FOpenFileWrite((char*)"mp_entityStats.txt");
     if (f)
@@ -877,7 +877,7 @@ void __cdecl SV_WriteEntityFieldNumbers()
     }
 }
 
-void __cdecl SV_GetAnalyzeEntityFields(int analyzeEntityType, NetFieldList *stateFields, unsigned int *numFields)
+void __cdecl SV_GetAnalyzeEntityFields(int analyzeEntityType, NetFieldList *stateFields, uint32_t *numFields)
 {
     if (analyzeEntityType > 17)
     {
@@ -943,7 +943,7 @@ void __cdecl SV_TrackSnapshotSize(int size)
     s_uncompressedDataSinceLastPoll += size;
 }
 
-void __cdecl SV_TrackPacketCompression(unsigned int clientNum, int originalSize, int compressedSize)
+void __cdecl SV_TrackPacketCompression(uint32_t clientNum, int originalSize, int compressedSize)
 {
     int slot; // [esp+0h] [ebp-4h]
 

@@ -8,7 +8,7 @@ void __cdecl Image_FreeRawPixels(GfxRawImage *image)
     Z_Free(image->pixels, 22);
 }
 
-void __cdecl Image_CopyBitmapData(GfxRawImage *image, GfxImageFileHeader *imageFile, unsigned __int8 *imageData)
+void __cdecl Image_CopyBitmapData(GfxRawImage *image, GfxImageFileHeader *imageFile, uint8_t *imageData)
 {
     int pixelCount; // [esp+4h] [ebp-8h]
     GfxRawPixel *pixel; // [esp+8h] [ebp-4h]
@@ -91,7 +91,7 @@ void __cdecl Image_CopyBitmapData(GfxRawImage *image, GfxImageFileHeader *imageF
 void __cdecl Image_DecodeBitmap(
     GfxRawImage *image,
     GfxImageFileHeader *imageFile,
-    unsigned __int8 *imageData,
+    uint8_t *imageData,
     int bytesPerPixel)
 {
     int v4; // [esp+0h] [ebp-28h]
@@ -194,12 +194,12 @@ void __cdecl Image_DecompressDxt1_Internal(
     }
 }
 
-void __cdecl Image_DecompressDxt1(unsigned __int8 *block, GfxRawImage *image, int x, int y)
+void __cdecl Image_DecompressDxt1(uint8_t *block, GfxRawImage *image, int x, int y)
 {
     Image_DecompressDxt1_Internal((DdsBlock_Dxt1_t*)block, image, x, y, 0);
 }
 
-void __cdecl Image_DecompressDxt3(unsigned __int8 *block, GfxRawImage *image, int x, int y)
+void __cdecl Image_DecompressDxt3(uint8_t *block, GfxRawImage *image, int x, int y)
 {
     int dy; // [esp+4h] [ebp-4h]
 
@@ -213,12 +213,12 @@ void __cdecl Image_DecompressDxt3(unsigned __int8 *block, GfxRawImage *image, in
     }
 }
 
-void __cdecl Image_DecompressDxt5(unsigned __int8 *block, GfxRawImage *image, int x, int y)
+void __cdecl Image_DecompressDxt5(uint8_t *block, GfxRawImage *image, int x, int y)
 {
     int i; // [esp+F4h] [ebp-24h]
-    unsigned int used; // [esp+F8h] [ebp-20h]
+    uint32_t used; // [esp+F8h] [ebp-20h]
     int bit; // [esp+FCh] [ebp-1Ch]
-    unsigned __int8 a[8]; // [esp+104h] [ebp-14h]
+    uint8_t a[8]; // [esp+104h] [ebp-14h]
     int dy; // [esp+110h] [ebp-8h]
     int sample; // [esp+114h] [ebp-4h]
 
@@ -268,11 +268,11 @@ void __cdecl Image_DecompressDxt5(unsigned __int8 *block, GfxRawImage *image, in
     }
 }
 
-void __cdecl Image_CopyDxtcData(GfxRawImage *image, GfxImageFileHeader *imageFile, unsigned __int8 *imageData)
+void __cdecl Image_CopyDxtcData(GfxRawImage *image, GfxImageFileHeader *imageFile, uint8_t *imageData)
 {
-    unsigned __int8 format; // [esp+0h] [ebp-14h]
+    uint8_t format; // [esp+0h] [ebp-14h]
     int blockSize; // [esp+4h] [ebp-10h]
-    void(__cdecl * DecompressDxtcBlock)(unsigned __int8 *, GfxRawImage *, int, int); // [esp+8h] [ebp-Ch]
+    void(__cdecl * DecompressDxtcBlock)(uint8_t *, GfxRawImage *, int, int); // [esp+8h] [ebp-Ch]
     int x; // [esp+Ch] [ebp-8h]
     int y; // [esp+10h] [ebp-4h]
 
@@ -309,7 +309,7 @@ void __cdecl Image_CopyDxtcData(GfxRawImage *image, GfxImageFileHeader *imageFil
 void __cdecl Image_DecodeDxtc(
     GfxRawImage *image,
     GfxImageFileHeader *imageFile,
-    unsigned __int8 *imageData,
+    uint8_t *imageData,
     int bytesPerBlock)
 {
     int v4; // [esp+0h] [ebp-28h]
@@ -496,21 +496,21 @@ int __cdecl Image_CountMipmapsForFile_0(GfxImageFileHeader *imageFile)
 void __cdecl Image_DecodeWavelet(
     GfxRawImage *image,
     GfxImageFileHeader *imageFile,
-    unsigned __int8 *imageData,
+    uint8_t *imageData,
     int bytesPerPixel)
 {
-    unsigned __int8 *TempMemory; // eax
+    uint8_t *TempMemory; // eax
     int v5; // [esp+0h] [ebp-90h]
     int v6; // [esp+4h] [ebp-8Ch]
-    unsigned __int8 *from[6]; // [esp+10h] [ebp-80h]
-    unsigned __int8 *pixels[6]; // [esp+28h] [ebp-68h]
+    uint8_t *from[6]; // [esp+10h] [ebp-80h]
+    uint8_t *pixels[6]; // [esp+28h] [ebp-68h]
     int sizeForLevel; // [esp+40h] [ebp-50h]
     int width; // [esp+44h] [ebp-4Ch]
     int height; // [esp+48h] [ebp-48h]
     int face; // [esp+4Ch] [ebp-44h]
     int faceCount; // [esp+50h] [ebp-40h]
     WaveletDecode decode; // [esp+54h] [ebp-3Ch] BYREF
-    unsigned __int8 *to[6]; // [esp+74h] [ebp-1Ch]
+    uint8_t *to[6]; // [esp+74h] [ebp-1Ch]
     int totalSize; // [esp+8Ch] [ebp-4h]
 
     iassert( image );
@@ -530,7 +530,7 @@ void __cdecl Image_DecodeWavelet(
     totalSize = bytesPerPixel * imageFile->dimensions[1] * imageFile->dimensions[0];
     for (face = 0; face < faceCount; ++face)
     {
-        TempMemory = (unsigned __int8 *)Hunk_AllocateTempMemory(totalSize, "Image_LoadWavelet");
+        TempMemory = (uint8_t *)Hunk_AllocateTempMemory(totalSize, "Image_LoadWavelet");
         pixels[face] = TempMemory;
         to[face] = 0;
     }

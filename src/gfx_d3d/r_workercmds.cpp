@@ -117,7 +117,7 @@ int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange((volatile unsigned int*)&g_workerCmdMinType, 0x7FFFFFFF, type);
+            InterlockedCompareExchange((volatile uint32_t*)&g_workerCmdMinType, 0x7FFFFFFF, type);
         }
         if (timeout())
             return 1;
@@ -158,7 +158,7 @@ void __cdecl R_WaitWorkerCmdsOfType(WorkerCmdType type)
 void __cdecl R_NotifyWorkerCmdType(WorkerCmdType type)
 {
     if (g_workerCmdMinType > type)
-        InterlockedCompareExchange((volatile unsigned int *)&g_workerCmdMinType, type, g_workerCmdMinType);
+        InterlockedCompareExchange((volatile uint32_t *)&g_workerCmdMinType, type, g_workerCmdMinType);
     if (g_workerCmdWaitCount)
         Sys_SetWorkerCmdEvent();
 }
@@ -199,7 +199,7 @@ void __cdecl R_ProcessWorkerCmds()
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange((volatile unsigned int*)&g_workerCmdMinType, 0x7FFFFFFF, type);
+            InterlockedCompareExchange((volatile uint32_t*)&g_workerCmdMinType, 0x7FFFFFFF, type);
         }
     } while (processed || minType);
 }
@@ -208,15 +208,15 @@ int __cdecl R_ProcessWorkerCmd(WorkerCmdType type)
 {
     int v2; // eax
     int v3; // eax
-    unsigned int bufCount; // [esp+0h] [ebp-7A4h]
-    unsigned __int8 data[1920]; // [esp+4h] [ebp-7A0h] BYREF
+    uint32_t bufCount; // [esp+0h] [ebp-7A4h]
+    uint8_t data[1920]; // [esp+4h] [ebp-7A0h] BYREF
     int dataSize; // [esp+788h] [ebp-1Ch]
     WorkerCmds *workerCmds; // [esp+78Ch] [ebp-18h]
-    unsigned int currentCount; // [esp+790h] [ebp-14h]
-    unsigned int startPos; // [esp+794h] [ebp-10h]
-    unsigned int newStartPos; // [esp+798h] [ebp-Ch]
-    unsigned int i; // [esp+79Ch] [ebp-8h]
-    unsigned int count; // [esp+7A0h] [ebp-4h]
+    uint32_t currentCount; // [esp+790h] [ebp-14h]
+    uint32_t startPos; // [esp+794h] [ebp-10h]
+    uint32_t newStartPos; // [esp+798h] [ebp-Ch]
+    uint32_t i; // [esp+79Ch] [ebp-8h]
+    uint32_t count; // [esp+7A0h] [ebp-4h]
 
     workerCmds = &g_workerCmds[type];
     dataSize = workerCmds->dataSize;
@@ -320,7 +320,7 @@ void __cdecl R_ProcessWorkerCmdInternal(WorkerCmdType type, void *data)
         R_AddCellDynBrushSurfacesInFrustumCmd((const DpvsDynamicCellCmd *)data);
         break;
     case WRKCMD_DPVS_ENTITY:
-        R_AddEntitySurfacesInFrustumCmd((unsigned __int16 *)data);
+        R_AddEntitySurfacesInFrustumCmd((uint16_t *)data);
         break;
     case WRKCMD_ADD_SCENE_ENT:
         R_AddAllSceneEntSurfacesCamera(*(const GfxViewInfo **)data);
@@ -363,7 +363,7 @@ void __cdecl R_ProcessWorkerCmdInternal(WorkerCmdType type, void *data)
 
 void R_InitWorkerThreads()
 {
-    unsigned int workerThreadIndexa; // [esp+0h] [ebp-4h]
+    uint32_t workerThreadIndexa; // [esp+0h] [ebp-4h]
 
     iassert( Sys_IsMainThread() );
     if (sys_smp_allowed->current.enabled)
@@ -371,7 +371,7 @@ void R_InitWorkerThreads()
         R_InitWorkerCmds();
         for (workerThreadIndexa = 0; workerThreadIndexa < 2; ++workerThreadIndexa)
         {
-            if (!Sys_SpawnWorkerThread((void(__cdecl *)(unsigned int))R_WorkerThread, workerThreadIndexa))
+            if (!Sys_SpawnWorkerThread((void(__cdecl *)(uint32_t))R_WorkerThread, workerThreadIndexa))
                 Com_Error(ERR_FATAL, "Failed to create thread");
         }
     }
@@ -379,71 +379,71 @@ void R_InitWorkerThreads()
 
 int R_InitWorkerCmds()
 {
-    g_workerCmds[0].buf = (unsigned __int8 *)g_UpdateFxSpotLightBuf;
+    g_workerCmds[0].buf = (uint8_t *)g_UpdateFxSpotLightBuf;
     g_workerCmds[0].bufSize = 12;
     g_workerCmds[0].dataSize = 12;
 
-    g_workerCmds[1].buf = (unsigned __int8 *)g_UpdateFxNonDependentBuf;
+    g_workerCmds[1].buf = (uint8_t *)g_UpdateFxNonDependentBuf;
     g_workerCmds[1].bufSize = 12;
     g_workerCmds[1].dataSize = 12;
 
-    g_workerCmds[2].buf = (unsigned __int8 *)g_UpdateFxRemainingBuf;
+    g_workerCmds[2].buf = (uint8_t *)g_UpdateFxRemainingBuf;
     g_workerCmds[2].bufSize = 12;
     g_workerCmds[2].dataSize = 12;
 
-    g_workerCmds[3].buf = (unsigned __int8 *)g_dpvsCellStaticBuf;
+    g_workerCmds[3].buf = (uint8_t *)g_dpvsCellStaticBuf;
     g_workerCmds[3].bufSize = 3072;
     g_workerCmds[3].dataSize = 12;
 
-    g_workerCmds[4].buf = (unsigned __int8 *)g_dpvsCellSceneEntBuf;
+    g_workerCmds[4].buf = (uint8_t *)g_dpvsCellSceneEntBuf;
     g_workerCmds[4].bufSize = 6144;
     g_workerCmds[4].dataSize = 12;
 
-    g_workerCmds[5].buf = (unsigned __int8 *)g_dpvsCellDynModelBuf;
+    g_workerCmds[5].buf = (uint8_t *)g_dpvsCellDynModelBuf;
     g_workerCmds[5].bufSize = 6144;
     g_workerCmds[5].dataSize = 12;
 
-    g_workerCmds[6].buf = (unsigned __int8 *)g_dpvsCellDynBrushBuf;
+    g_workerCmds[6].buf = (uint8_t *)g_dpvsCellDynBrushBuf;
     g_workerCmds[6].bufSize = 6144;
     g_workerCmds[6].dataSize = 12;
 
-    g_workerCmds[7].buf = (unsigned __int8 *)g_dpvsEntityBuf;
+    g_workerCmds[7].buf = (uint8_t *)g_dpvsEntityBuf;
     g_workerCmds[7].bufSize = 0x8000;
     g_workerCmds[7].dataSize = 16;
 
-    g_workerCmds[8].buf = (unsigned __int8 *)g_addSceneEntBuf;
+    g_workerCmds[8].buf = (uint8_t *)g_addSceneEntBuf;
     g_workerCmds[8].bufSize = 4;
     g_workerCmds[8].dataSize = 4;
 
-    g_workerCmds[9].buf = (unsigned __int8 *)g_spotShadowEntBuf;
+    g_workerCmds[9].buf = (uint8_t *)g_spotShadowEntBuf;
     g_workerCmds[9].bufSize = 2048;
     g_workerCmds[9].dataSize = 8;
 
-    g_workerCmds[10].buf = (unsigned __int8 *)g_shadowCookieBuf;
+    g_workerCmds[10].buf = (uint8_t *)g_shadowCookieBuf;
     g_workerCmds[10].bufSize = 16;
     g_workerCmds[10].dataSize = 16;
 
-    g_workerCmds[11].buf = (unsigned __int8 *)g_GfxEntityBoundsBuf;
+    g_workerCmds[11].buf = (uint8_t *)g_GfxEntityBoundsBuf;
     g_workerCmds[11].bufSize = 1024;
     g_workerCmds[11].dataSize = 4;
 
-    g_workerCmds[12].buf = (unsigned __int8 *)g_SkinGfxEntityBuf;
+    g_workerCmds[12].buf = (uint8_t *)g_SkinGfxEntityBuf;
     g_workerCmds[12].bufSize = 4096;
     g_workerCmds[12].dataSize = 4;
 
-    g_workerCmds[13].buf = (unsigned __int8 *)g_GenerateFxVertsBuf;
+    g_workerCmds[13].buf = (uint8_t *)g_GenerateFxVertsBuf;
     g_workerCmds[13].bufSize = 136;
     g_workerCmds[13].dataSize = 68;
 
-    g_workerCmds[14].buf = (unsigned __int8 *)g_GenerateMarkVertsBuf;
+    g_workerCmds[14].buf = (uint8_t *)g_GenerateMarkVertsBuf;
     g_workerCmds[14].bufSize = 12;
     g_workerCmds[14].dataSize = 12;
 
-    g_workerCmds[15].buf = (unsigned __int8 *)g_skinCachedStaticModelBuf;
+    g_workerCmds[15].buf = (uint8_t *)g_skinCachedStaticModelBuf;
     g_workerCmds[15].bufSize = 2048;
     g_workerCmds[15].dataSize = 4;
 
-    g_workerCmds[16].buf = (unsigned __int8 *)g_SkinXModelBuf;
+    g_workerCmds[16].buf = (uint8_t *)g_SkinXModelBuf;
     g_workerCmds[16].bufSize = 28672;
     g_workerCmds[16].dataSize = 28;
 
@@ -503,7 +503,7 @@ void __cdecl  R_WorkerThread()
     }
 }
 
-void __cdecl R_AddWorkerCmd(WorkerCmdType type, unsigned __int8 *data)
+void __cdecl R_AddWorkerCmd(WorkerCmdType type, uint8_t *data)
 {
     LONG* Destination; // [esp+30h] [ebp-20h]
     int bufCount; // [esp+34h] [ebp-1Ch]
@@ -556,8 +556,8 @@ void __cdecl R_AddWorkerCmd(WorkerCmdType type, unsigned __int8 *data)
 void __cdecl R_UpdateActiveWorkerThreads()
 {
     char v0; // [esp+3h] [ebp-9h]
-    unsigned int i; // [esp+4h] [ebp-8h]
-    unsigned int workerIter; // [esp+8h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-8h]
+    uint32_t workerIter; // [esp+8h] [ebp-4h]
 
     iassert( Sys_IsMainThread() );
     for (i = 0; i < 2; ++i)

@@ -57,7 +57,7 @@ void RB_DrawPolyInteriors()
     {
         poly = &backEndData->debugGlobals.polys[polyIndex];
         verts = backEndData->debugGlobals.verts[poly->firstVert];
-        R_ConvertColorToBytes(poly->color, (unsigned int*)&color);
+        R_ConvertColorToBytes(poly->color, (uint32_t*)&color);
         RB_CheckTessOverflow(poly->vertCount, 3 * (poly->vertCount - 2));
         for (vertIndex = 0; vertIndex < poly->vertCount; ++vertIndex)
             RB_SetPolyVert(&verts[3 * vertIndex], color, vertIndex + tess.vertexCount);
@@ -90,7 +90,7 @@ int __cdecl RB_AddDebugLine(
         RB_DrawLines3D(vertCount / 2, 1, verts, depthTest);
         vertCount = 0;
     }
-    R_ConvertColorToBytes(color, (unsigned int*)verts[vertCount].color);
+    R_ConvertColorToBytes(color, (uint32_t*)verts[vertCount].color);
     *verts[vertCount + 1].color = *verts[vertCount].color;
     v9 = &verts[vertCount];
     v9->xyz[0] = *start;
@@ -206,7 +206,7 @@ void __cdecl RB_DrawDebugStrings(trDebugString_t *strings, int stringCount)
         R_Set3D(&gfxCmdBufSourceState);
         for (stringIndex = 0; stringIndex < stringCount; ++stringIndex)
         {
-            R_ConvertColorToBytes(strings[stringIndex].color, (unsigned int*)&color);
+            R_ConvertColorToBytes(strings[stringIndex].color, (uint32_t*)&color);
             scale = -strings[stringIndex].scale;
             Vec3Scale(gfxCmdBufSourceState.viewParms.axis[1], scale, xStep);
             scalea = -strings[stringIndex].scale;

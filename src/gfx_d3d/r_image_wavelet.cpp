@@ -4108,7 +4108,7 @@ const WaveletHuffmanDecode waveletDecodeBlue[4096] =
   { -8, 6 },
   { -5, 6 }
 }; // idb
-const unsigned __int16 waveletEncodeBlue[511] =
+const uint16_t waveletEncodeBlue[511] =
 {
   60u,
   60u,
@@ -8721,7 +8721,7 @@ const WaveletHuffmanDecode waveletDecodeRedGreen[4096] =
   { -1, 3 },
   { 0, 2 }
 }; // idb
-const unsigned __int16 waveletEncodeRedGreen[1021] =
+const uint16_t waveletEncodeRedGreen[1021] =
 {
   104u,
   104u,
@@ -13844,7 +13844,7 @@ const WaveletHuffmanDecode waveletDecodeAlpha[4096] =
   { -8, 8 },
   { 0, 1 }
 }; // idb
-const unsigned __int16 waveletEncodeAlpha[511] =
+const uint16_t waveletEncodeAlpha[511] =
 {
   0u,
   0u,
@@ -14371,15 +14371,15 @@ void __cdecl TRACK_r_image_wavelet()
 
 void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHeader, const unsigned char *data, _D3DFORMAT format, int bytesPerPixel)
 {
-    unsigned __int8 *from[6]; // [esp+14h] [ebp-88h]
-    unsigned __int8 *pixels[6]; // [esp+2Ch] [ebp-70h]
-    unsigned __int8 *to[6]; // [esp+7Ch] [ebp-20h]
+    uint8_t *from[6]; // [esp+14h] [ebp-88h]
+    uint8_t *pixels[6]; // [esp+2Ch] [ebp-70h]
+    uint8_t *to[6]; // [esp+7Ch] [ebp-20h]
     int sizeForLevel; // [esp+44h] [ebp-58h]
     int width; // [esp+48h] [ebp-54h]
     int height; // [esp+4Ch] [ebp-50h]
     _D3DCUBEMAP_FACES face; // [esp+50h] [ebp-4Ch]
-    unsigned int faceCount; // [esp+54h] [ebp-48h]
-    unsigned int faceIndex; // [esp+58h] [ebp-44h]
+    uint32_t faceCount; // [esp+54h] [ebp-48h]
+    uint32_t faceIndex; // [esp+58h] [ebp-44h]
     WaveletDecode decode; // [esp+5Ch] [ebp-40h] BYREF
     int picmip; // [esp+94h] [ebp-8h]
     int totalSize; // [esp+98h] [ebp-4h]
@@ -14441,11 +14441,11 @@ void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHe
 }
 
 
-void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst, WaveletDecode *decode)
+void __cdecl Wavelet_DecompressLevel(uint8_t *src, uint8_t *dst, WaveletDecode *decode)
 {
     bool needsMipDelta;
     int dstChanOffset[4]; // [esp+8h] [ebp-6Ch] BYREF
-    unsigned __int8 *dstChan; // [esp+18h] [ebp-5Ch]
+    uint8_t *dstChan; // [esp+18h] [ebp-5Ch]
     int size; // [esp+1Ch] [ebp-58h]
     int stride; // [esp+20h] [ebp-54h]
     int chanIndex; // [esp+24h] [ebp-50h]
@@ -14599,14 +14599,14 @@ void __cdecl Wavelet_DecompressLevel(unsigned __int8 *src, unsigned __int8 *dst,
     }
 }
 
-void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decode)
+void __cdecl Wavelet_ConsumeBits(uint16_t bitCount, WaveletDecode *decode)
 {
     iassert( bitCount > 0 && bitCount <= 16 );
     iassert( decode->bit < 8 );
     decode->value >>= bitCount;
-    decode->value |= ((*((unsigned __int8 *)decode->data + 3) << 24)
-        | (*((unsigned __int8 *)decode->data + 2) << 16)
-        | (unsigned int)*(unsigned __int16 *)decode->data) >> decode->bit << (16 - bitCount);
+    decode->value |= ((*((uint8_t *)decode->data + 3) << 24)
+        | (*((uint8_t *)decode->data + 2) << 16)
+        | (uint32_t)*(uint16_t *)decode->data) >> decode->bit << (16 - bitCount);
     decode->bit += bitCount;
     decode->data += (int)decode->bit >> 3;
     decode->bit &= 7u;
@@ -14616,7 +14616,7 @@ void __cdecl Wavelet_ConsumeBits(unsigned __int16 bitCount, WaveletDecode *decod
 
 int __cdecl Wavelet_DecodeValue(
     const WaveletHuffmanDecode *decodeTable,
-    unsigned __int16 bitCount,
+    uint16_t bitCount,
     int bias,
     WaveletDecode *decode)
 {
@@ -14639,14 +14639,14 @@ int __cdecl Wavelet_DecodeValue(
 
 
 void __cdecl Wavelet_AddDeltaToMipmap(
-    unsigned __int8 *inout,
+    uint8_t *inout,
     int size,
     WaveletDecode *decode,
     const int *dstChanOffset)
 {
-    unsigned __int8 v4; // bl
+    uint8_t v4; // bl
     int chanIndex; // [esp+4h] [ebp-8h]
-    unsigned __int8 *value; // [esp+8h] [ebp-4h]
+    uint8_t *value; // [esp+8h] [ebp-4h]
 
     do
     {

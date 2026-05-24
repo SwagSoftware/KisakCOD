@@ -435,7 +435,7 @@ void __cdecl Scr_SetClientField(gclient_s *client, int32_t offset)
     {
         if (!f->ofs)
             MyAssertHandler(".\\game\\g_client_fields.cpp", 506, 0, "%s", "f->ofs");
-        Scr_SetGenericField((unsigned __int8 *)client, f->type, f->ofs);
+        Scr_SetGenericField((uint8_t *)client, f->type, f->ofs);
     }
 }
 
@@ -463,7 +463,7 @@ void __cdecl Scr_GetClientField(gclient_s *client, int32_t offset)
     {
         if (!f->ofs)
             MyAssertHandler(".\\game\\g_client_fields.cpp", 532, 0, "%s", "f->ofs");
-        Scr_GetGenericField((unsigned __int8 *)client, f->type, f->ofs);
+        Scr_GetGenericField((uint8_t *)client, f->type, f->ofs);
     }
 }
 

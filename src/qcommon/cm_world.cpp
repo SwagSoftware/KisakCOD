@@ -15,20 +15,20 @@ struct worldContents_s // sizeof=0x10
     int contentsStaticModels;           // ...
     int contentsEntities;               // ...
     int linkcontentsEntities;           // ...
-    unsigned __int16 entities;          // ...
-    unsigned __int16 staticModels;      // ...
+    uint16_t entities;          // ...
+    uint16_t staticModels;      // ...
 };
 union worldTree_s_u// sizeof=0x2
 {                                       // ...
-    unsigned __int16 parent;
-    unsigned __int16 nextFree;
+    uint16_t parent;
+    uint16_t nextFree;
 };
 struct worldTree_s // sizeof=0xC
 {                                       // ...
     float dist;                         // ...
-    unsigned __int16 axis;              // ...
+    uint16_t axis;              // ...
     worldTree_s_u u;    // ...
-    unsigned __int16 child[2];          // ...
+    uint16_t child[2];          // ...
 };
 struct worldSector_s // sizeof=0x1C
 {                                       // ...
@@ -45,7 +45,7 @@ struct cm_world_t // sizeof=0x701C
 #ifdef KISAK_SP
     bool lockTree;
 #endif
-    unsigned __int16 freeHead;          // ...
+    uint16_t freeHead;          // ...
     worldSector_s sectors[1024];        // ...
 };
 
@@ -67,9 +67,9 @@ void CM_ClearWorld()
 {
     float size; // [esp+4h] [ebp-Ch]
     float size_4; // [esp+8h] [ebp-8h]
-    unsigned int i; // [esp+Ch] [ebp-4h]
+    uint32_t i; // [esp+Ch] [ebp-4h]
 
-    memset((unsigned __int8 *)&cm_world, 0, sizeof(cm_world));
+    memset((uint8_t *)&cm_world, 0, sizeof(cm_world));
     CM_ModelBounds(0, cm_world.mins, cm_world.maxs);
     cm_world.freeHead = 2;
     for (i = 2; i < 1023; ++i)
@@ -88,12 +88,12 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
     gentity_s *i; // eax
     worldSector_s *node; // [esp+0h] [ebp-18h]
     int contents; // [esp+4h] [ebp-14h]
-    unsigned __int16 nodeIndex; // [esp+8h] [ebp-10h]
+    uint16_t nodeIndex; // [esp+8h] [ebp-10h]
     svEntity_s *scan; // [esp+Ch] [ebp-Ch]
     svEntity_s *scana; // [esp+Ch] [ebp-Ch]
     int linkcontents; // [esp+10h] [ebp-8h]
-    unsigned __int16 parentNodeIndex; // [esp+14h] [ebp-4h]
-    unsigned __int16 parentNodeIndexa; // [esp+14h] [ebp-4h]
+    uint16_t parentNodeIndex; // [esp+14h] [ebp-4h]
+    uint16_t parentNodeIndexa; // [esp+14h] [ebp-4h]
 
     nodeIndex = ent->worldSector;
     if (ent->worldSector)
@@ -167,11 +167,11 @@ void __cdecl CM_UnlinkEntity(svEntity_s *ent)
     }
 }
 
-void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsigned int clipHandle)
+void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, uint32_t clipHandle)
 {
     worldSector_s *node; // [esp+10h] [ebp-30h]
     int contents; // [esp+14h] [ebp-2Ch]
-    unsigned __int16 nodeIndex; // [esp+18h] [ebp-28h]
+    uint16_t nodeIndex; // [esp+18h] [ebp-28h]
     float dist; // [esp+1Ch] [ebp-24h]
     float mins[2]; // [esp+20h] [ebp-20h] BYREF
     cmodel_t *cmod; // [esp+28h] [ebp-18h]
@@ -242,23 +242,23 @@ void __cdecl CM_LinkEntity(svEntity_s *ent, float *absmin, float *absmax, unsign
     }
 }
 
-void __cdecl CM_AddEntityToNode(svEntity_s *ent, unsigned __int16 childNodeIndex)
+void __cdecl CM_AddEntityToNode(svEntity_s *ent, uint16_t childNodeIndex)
 {
-    unsigned __int16 *prevEnt; // [esp+0h] [ebp-8h]
-    unsigned int entnum; // [esp+4h] [ebp-4h]
+    uint16_t *prevEnt; // [esp+0h] [ebp-8h]
+    uint32_t entnum; // [esp+4h] [ebp-4h]
 
     entnum = ent - sv.svEntities;
     prevEnt = &cm_world.sectors[childNodeIndex].contents.entities;
 #ifdef KISAK_MP
     for (;
-        (unsigned int)*prevEnt - 1 <= entnum;
+        (uint32_t)*prevEnt - 1 <= entnum;
         prevEnt = &sv.configstrings[188 * *prevEnt + 2256])
     {
         ;
     }
 #elif KISAK_SP // KISAKTODO: hellish previous array abuse here
     for (entnum = ent - sv.svEntities;
-        (unsigned int)*prevEnt - 1 <= entnum;
+        (uint32_t)*prevEnt - 1 <= entnum;
         prevEnt = &sv.configstrings[4 * *prevEnt + 2804 + 4 * __ROL4__(*prevEnt, 1)])
     {
         ;
@@ -270,19 +270,19 @@ void __cdecl CM_AddEntityToNode(svEntity_s *ent, unsigned __int16 childNodeIndex
     *prevEnt = entnum + 1;
 }
 
-void __cdecl CM_SortNode(unsigned __int16 nodeIndex, float *mins, float *maxs)
+void __cdecl CM_SortNode(uint16_t nodeIndex, float *mins, float *maxs)
 {
     worldSector_s *node; // [esp+4h] [ebp-28h]
-    unsigned __int16 modelnum; // [esp+8h] [ebp-24h]
+    uint16_t modelnum; // [esp+8h] [ebp-24h]
     svEntity_s *prevEnt; // [esp+Ch] [ebp-20h]
     float dist; // [esp+10h] [ebp-1Ch]
     svEntity_s *ent; // [esp+14h] [ebp-18h]
     cStaticModel_s *staticModel; // [esp+18h] [ebp-14h]
-    unsigned __int16 entnum; // [esp+1Ch] [ebp-10h]
+    uint16_t entnum; // [esp+1Ch] [ebp-10h]
     int axis; // [esp+20h] [ebp-Ch]
     cStaticModel_s *prevStaticModel; // [esp+24h] [ebp-8h]
-    unsigned __int16 childNodeIndex; // [esp+28h] [ebp-4h]
-    unsigned __int16 childNodeIndexa; // [esp+28h] [ebp-4h]
+    uint16_t childNodeIndex; // [esp+28h] [ebp-4h]
+    uint16_t childNodeIndexa; // [esp+28h] [ebp-4h]
 
     node = &cm_world.sectors[nodeIndex];
     axis = node->tree.axis;
@@ -414,12 +414,12 @@ void __cdecl CM_SortNode(unsigned __int16 nodeIndex, float *mins, float *maxs)
     }
 }
 
-unsigned __int16 __cdecl CM_AllocWorldSector(float *mins, float *maxs)
+uint16_t __cdecl CM_AllocWorldSector(float *mins, float *maxs)
 {
     worldSector_s *node; // [esp+4h] [ebp-14h]
-    unsigned __int16 nodeIndex; // [esp+8h] [ebp-10h]
+    uint16_t nodeIndex; // [esp+8h] [ebp-10h]
     float size[2]; // [esp+Ch] [ebp-Ch]
-    unsigned __int16 axis; // [esp+14h] [ebp-4h]
+    uint16_t axis; // [esp+14h] [ebp-4h]
 
     nodeIndex = cm_world.freeHead;
     if (!cm_world.freeHead)
@@ -443,14 +443,14 @@ unsigned __int16 __cdecl CM_AllocWorldSector(float *mins, float *maxs)
     return nodeIndex;
 }
 
-void __cdecl CM_AddStaticModelToNode(cStaticModel_s *staticModel, unsigned __int16 childNodeIndex)
+void __cdecl CM_AddStaticModelToNode(cStaticModel_s *staticModel, uint16_t childNodeIndex)
 {
-    unsigned int modelnum; // [esp+0h] [ebp-8h]
+    uint32_t modelnum; // [esp+0h] [ebp-8h]
     cStaticModel_s *prevStaticModel; // [esp+4h] [ebp-4h]
 
     modelnum = staticModel - cm.staticModelList;
     for (prevStaticModel = (cStaticModel_s *)&cm_world.sectors[childNodeIndex].contents.staticModels;
-        (unsigned int)prevStaticModel->writable.nextModelInWorldSector - 1 <= modelnum;
+        (uint32_t)prevStaticModel->writable.nextModelInWorldSector - 1 <= modelnum;
         prevStaticModel = &cm.staticModelList[prevStaticModel->writable.nextModelInWorldSector - 1])
     {
         ;
@@ -459,11 +459,11 @@ void __cdecl CM_AddStaticModelToNode(cStaticModel_s *staticModel, unsigned __int
     prevStaticModel->writable.nextModelInWorldSector = modelnum + 1;
 }
 
-unsigned int CM_LinkAllStaticModels()
+uint32_t CM_LinkAllStaticModels()
 {
-    unsigned int result; // eax
+    uint32_t result; // eax
     cStaticModel_s *staticModel; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-4h]
 
     i = 0;
     for (staticModel = cm.staticModelList; ; ++staticModel)
@@ -483,7 +483,7 @@ void __cdecl CM_LinkStaticModel(cStaticModel_s *staticModel)
 {
     int contents; // [esp+0h] [ebp-24h]
     worldSector_s *node; // [esp+4h] [ebp-20h]
-    unsigned __int16 nodeIndex; // [esp+8h] [ebp-1Ch]
+    uint16_t nodeIndex; // [esp+8h] [ebp-1Ch]
     float dist; // [esp+Ch] [ebp-18h]
     float mins[2]; // [esp+10h] [ebp-14h] BYREF
     float maxs[2]; // [esp+18h] [ebp-Ch] BYREF
@@ -538,12 +538,12 @@ int __cdecl CM_AreaEntities(const float *mins, const float *maxs, int *entityLis
     return ap.count;
 }
 
-void __cdecl CM_AreaEntities_r(unsigned int nodeIndex, areaParms_t *ap)
+void __cdecl CM_AreaEntities_r(uint32_t nodeIndex, areaParms_t *ap)
 {
     worldSector_s *node; // [esp+0h] [ebp-14h]
-    unsigned int nextNodeIndex; // [esp+4h] [ebp-10h]
+    uint32_t nextNodeIndex; // [esp+4h] [ebp-10h]
     gentity_s *gcheck; // [esp+8h] [ebp-Ch]
-    unsigned int entnum; // [esp+Ch] [ebp-8h]
+    uint32_t entnum; // [esp+Ch] [ebp-8h]
     svEntity_s *svEnt;
 
     int n;
@@ -622,7 +622,7 @@ void __cdecl CM_PointTraceStaticModels(trace_t *results, const float *start, con
 
 void __cdecl CM_PointTraceStaticModels_r(
     locTraceWork_t *tw,
-    unsigned __int16 nodeIndex,
+    uint16_t nodeIndex,
     const float *p1_,
     const float *p2,
     trace_t *trace)
@@ -631,7 +631,7 @@ void __cdecl CM_PointTraceStaticModels_r(
     float v6; // [esp+10h] [ebp-40h]
     bool side; // [esp+14h] [ebp-3Ch]
     worldSector_s *node; // [esp+18h] [ebp-38h]
-    unsigned __int16 modelnum; // [esp+1Ch] [ebp-34h]
+    uint16_t modelnum; // [esp+1Ch] [ebp-34h]
     float t1; // [esp+20h] [ebp-30h]
     float frac; // [esp+24h] [ebp-2Ch]
     float p1[4]; // [esp+28h] [ebp-28h] BYREF
@@ -713,7 +713,7 @@ int __cdecl CM_PointTraceStaticModelsComplete(const float *start, const float *e
 
 int __cdecl CM_PointTraceStaticModelsComplete_r(
     const staticmodeltrace_t *clip,
-    unsigned __int16 nodeIndex,
+    uint16_t nodeIndex,
     const float *p1_,
     const float *p2)
 {
@@ -721,7 +721,7 @@ int __cdecl CM_PointTraceStaticModelsComplete_r(
     float v6; // [esp+10h] [ebp-38h]
     bool side; // [esp+14h] [ebp-34h]
     worldSector_s *node; // [esp+18h] [ebp-30h]
-    unsigned __int16 modelnum; // [esp+1Ch] [ebp-2Ch]
+    uint16_t modelnum; // [esp+1Ch] [ebp-2Ch]
     float t1; // [esp+20h] [ebp-28h]
     float frac; // [esp+24h] [ebp-24h]
     float p1[3]; // [esp+28h] [ebp-20h] BYREF
@@ -804,7 +804,7 @@ void __cdecl CM_ClipMoveToEntities(moveclip_t *clip, trace_t *trace)
 
 void __cdecl CM_ClipMoveToEntities_r(
     const moveclip_t *clip,
-    unsigned __int16 nodeIndex,
+    uint16_t nodeIndex,
     const float *p1,
     const float *p2,
     trace_t *trace)
@@ -828,7 +828,7 @@ void __cdecl CM_ClipMoveToEntities_r(
     float t2; // [esp+50h] [ebp-38h]
     float frac2; // [esp+54h] [ebp-34h]
     float invDist; // [esp+5Ch] [ebp-2Ch]
-    unsigned int entnum; // [esp+60h] [ebp-28h]
+    uint32_t entnum; // [esp+60h] [ebp-28h]
     float mid[4]; // [esp+64h] [ebp-24h] BYREF
     svEntity_s *check; // [esp+74h] [ebp-14h]
     float p[4]; // [esp+78h] [ebp-10h] BYREF
@@ -936,7 +936,7 @@ int __cdecl CM_ClipSightTraceToEntities(sightclip_t *clip)
 
 int __cdecl CM_ClipSightTraceToEntities_r(
     const sightclip_t *clip,
-    unsigned __int16 nodeIndex,
+    uint16_t nodeIndex,
     const float *p1,
     const float *p2)
 {
@@ -959,7 +959,7 @@ int __cdecl CM_ClipSightTraceToEntities_r(
     float t2; // [esp+50h] [ebp-34h]
     float frac2; // [esp+54h] [ebp-30h]
     float invDist; // [esp+5Ch] [ebp-28h]
-    unsigned int entnum; // [esp+60h] [ebp-24h]
+    uint32_t entnum; // [esp+60h] [ebp-24h]
     int hitNum; // [esp+64h] [ebp-20h]
     int hitNuma; // [esp+64h] [ebp-20h]
     float mid[3]; // [esp+68h] [ebp-1Ch] BYREF
@@ -1068,7 +1068,7 @@ void __cdecl CM_PointTraceToEntities(pointtrace_t *clip, trace_t *trace)
 
 void __cdecl CM_PointTraceToEntities_r(
     pointtrace_t *clip,
-    unsigned __int16 nodeIndex,
+    uint16_t nodeIndex,
     const float *p1,
     const float *p2,
     trace_t *trace)
@@ -1079,7 +1079,7 @@ void __cdecl CM_PointTraceToEntities_r(
     float t1; // [esp+18h] [ebp-34h]
     float frac; // [esp+1Ch] [ebp-30h]
     float t2; // [esp+20h] [ebp-2Ch]
-    unsigned int entnum; // [esp+24h] [ebp-28h]
+    uint32_t entnum; // [esp+24h] [ebp-28h]
     float mid[4]; // [esp+28h] [ebp-24h] BYREF
     svEntity_s *check; // [esp+38h] [ebp-14h]
     float p[4]; // [esp+3Ch] [ebp-10h] BYREF
@@ -1147,7 +1147,7 @@ int __cdecl CM_PointSightTraceToEntities(sightpointtrace_t *clip)
 
 int __cdecl CM_PointSightTraceToEntities_r(
     sightpointtrace_t *clip,
-    unsigned __int16 nodeIndex,
+    uint16_t nodeIndex,
     const float *p1,
     const float *p2)
 {
@@ -1157,7 +1157,7 @@ int __cdecl CM_PointSightTraceToEntities_r(
     float t1; // [esp+18h] [ebp-24h]
     float frac; // [esp+1Ch] [ebp-20h]
     float t2; // [esp+20h] [ebp-1Ch]
-    unsigned int entnum; // [esp+24h] [ebp-18h]
+    uint32_t entnum; // [esp+24h] [ebp-18h]
     int hitNum; // [esp+28h] [ebp-14h]
     int hitNuma; // [esp+28h] [ebp-14h]
     int hitNumb; // [esp+28h] [ebp-14h]
@@ -1208,9 +1208,9 @@ int __cdecl CM_PointSightTraceToEntities_r(
     return 0;
 }
 
-int CM_SaveWorld(unsigned __int8 *buf)
+int CM_SaveWorld(uint8_t *buf)
 {
-    unsigned __int8 *v1; // r30
+    uint8_t *v1; // r30
     worldTree_s *p_tree; // r31
 
     if (buf)
@@ -1237,9 +1237,9 @@ void CM_ValidateWorld()
     //DynEnt_ValidateCollWorld();
 }
 
-void CM_LoadWorld(unsigned __int8 *buf)
+void CM_LoadWorld(uint8_t *buf)
 {
-    unsigned __int8 *v2; // r29
+    uint8_t *v2; // r29
     worldTree_s *p_tree; // r31
     void *v4; // r3
 

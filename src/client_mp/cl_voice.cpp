@@ -7,7 +7,7 @@
 #include <win32/win_local.h>
 #include <server_mp/server_mp.h>
 
-unsigned __int8 tempVoicePacketBuf[2048];
+uint8_t tempVoicePacketBuf[2048];
 voiceCommunication_t cl_voiceCommunication;
 
 void __cdecl CL_WriteVoicePacket(int localClientNum)
@@ -69,7 +69,7 @@ void __cdecl CL_VoicePacket(int localClientNum, msg_t *msg)
     int numPackets; // [esp+110h] [ebp-4h]
 
     numPackets = MSG_ReadByte(msg);
-    if ((unsigned int)numPackets <= 0x28)
+    if ((uint32_t)numPackets <= 0x28)
     {
         for (packet = 0; packet < numPackets; ++packet)
         {

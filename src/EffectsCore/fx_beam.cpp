@@ -11,7 +11,7 @@
 #include <cgame/cg_main.h>
 #endif
 
-const unsigned __int16 templateIndices[12] = { 0u, 2u, 1u, 2u, 4u, 1u, 1u, 4u, 3u, 3u, 4u, 5u }; // idb
+const uint16_t templateIndices[12] = { 0u, 2u, 1u, 2u, 4u, 1u, 1u, 4u, 3u, 3u, 4u, 5u }; // idb
 
 static FxBeamInfo g_beamInfo;
 
@@ -41,7 +41,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float v4; // [esp+30h] [ebp-288h]
     float v5; // [esp+34h] [ebp-284h]
     float v6; // [esp+38h] [ebp-280h]
-    unsigned __int8 v7; // [esp+40h] [ebp-278h]
+    uint8_t v7; // [esp+40h] [ebp-278h]
     int v8; // [esp+44h] [ebp-274h]
     float v9; // [esp+48h] [ebp-270h]
     float4 *v10; // [esp+4Ch] [ebp-26Ch]
@@ -57,7 +57,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float alpha; // [esp+114h] [ebp-1A4h]
     float4 wiggleXs; // [esp+118h] [ebp-1A0h]
     int indexPairIter; // [esp+128h] [ebp-190h]
-    unsigned __int16 offset; // [esp+12Ch] [ebp-18Ch]
+    uint16_t offset; // [esp+12Ch] [ebp-18Ch]
     float endRadius; // [esp+130h] [ebp-188h]
     r_double_index_t workingIndex; // [esp+134h] [ebp-184h]
     r_double_index_t *baseIndices; // [esp+138h] [ebp-180h] BYREF
@@ -81,8 +81,8 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     GfxColor lerpedColor; // [esp+1BCh] [ebp-FCh]
     float4 tpos0; // [esp+1C0h] [ebp-F8h]
     float4 normDelta; // [esp+1D0h] [ebp-E8h] BYREF
-    unsigned int argOffset; // [esp+1E0h] [ebp-D8h] BYREF
-    unsigned __int16 baseVertex; // [esp+1E4h] [ebp-D4h] BYREF
+    uint32_t argOffset; // [esp+1E0h] [ebp-D8h] BYREF
+    uint16_t baseVertex; // [esp+1E4h] [ebp-D4h] BYREF
     float4 perpFlatDelta; // [esp+1E8h] [ebp-D0h] BYREF
     float4 *args; // [esp+1F8h] [ebp-C0h]
     GfxPackedVertex *baseVerts; // [esp+1FCh] [ebp-BCh]
@@ -332,7 +332,7 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
 
 void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat3x3& viewaxis)
 {
-    unsigned int v3; // [esp+Ch] [ebp-90h]
+    uint32_t v3; // [esp+Ch] [ebp-90h]
     float4x4 viewMtx; // [esp+14h] [ebp-88h] BYREF
     float4x4 projMtx; // [esp+54h] [ebp-48h] BYREF
     cg_s *cgameGlob;

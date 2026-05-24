@@ -10,8 +10,8 @@ struct GfxMeshGlobals // sizeof=0x180
 };
 
 char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_index_t **indicesOut);
-char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int16 *baseVertex);
-unsigned __int8 *__cdecl R_GetMeshVerts(GfxMeshData *mesh, unsigned __int16 baseVertex);
+char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, uint16_t *baseVertex);
+uint8_t *__cdecl R_GetMeshVerts(GfxMeshData *mesh, uint16_t baseVertex);
 void __cdecl R_ResetMesh(GfxMeshData *mesh);
 void __cdecl R_SetQuadMeshData(
     GfxMeshData *mesh,
@@ -23,7 +23,7 @@ void __cdecl R_SetQuadMeshData(
     float t0,
     float s1,
     float t1,
-    unsigned int color);
+    uint32_t color);
 void __cdecl R_SetQuadMesh(
     GfxQuadMeshData *quadMesh,
     float x,
@@ -34,7 +34,7 @@ void __cdecl R_SetQuadMesh(
     float t0,
     float s1,
     float t1,
-    unsigned int color);
+    uint32_t color);
 void __cdecl R_DrawQuadMesh(GfxCmdBufContext context, const Material *material, GfxMeshData *quadMesh);
 void __cdecl R_BeginMeshVerts(GfxMeshData* mesh);
 

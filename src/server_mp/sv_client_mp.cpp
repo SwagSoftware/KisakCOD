@@ -44,7 +44,7 @@ ucmd_t ucmds[13] =
   { NULL, NULL, 0 }
 }; // idb
 
-unsigned __int16 botport;
+uint16_t botport;
 
 BOOL __cdecl SV_ShouldAuthorizeAddress(netadr_t adr)
 {
@@ -112,7 +112,7 @@ void __cdecl SV_AuthorizeRequest(netadr_t from, int challenge, const char *cdkey
 
 int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
 {
-    unsigned int banSlot; // [esp+Ch] [ebp-4h]
+    uint32_t banSlot; // [esp+Ch] [ebp-4h]
 
     if (!*cdkeyHash)
         return 0;
@@ -293,7 +293,7 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
     int v4; // [esp+0h] [ebp-20h]
     client_t *ClientByAddress; // [esp+8h] [ebp-18h]
     int start; // [esp+Ch] [ebp-14h]
-    unsigned int packetNum; // [esp+14h] [ebp-Ch]
+    uint32_t packetNum; // [esp+14h] [ebp-Ch]
     int qport; // [esp+18h] [ebp-8h]
 
     qport = MSG_ReadShort(msg);
@@ -345,7 +345,7 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
     }
 }
 
-void __cdecl SV_SetClientStat(int clientNum, int index, unsigned int value)
+void __cdecl SV_SetClientStat(int clientNum, int index, uint32_t value)
 {
     const char *v3; // eax
     client_t *v4; // [esp+0h] [ebp-8h]
@@ -369,9 +369,9 @@ void __cdecl SV_SetClientStat(int clientNum, int index, unsigned int value)
     {
         if (index < 3498)
         {
-            if (*(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] == value) // KISAKTODO
+            if (*(uint32_t *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] == value) // KISAKTODO
                 return;
-            *(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] = value;
+            *(uint32_t *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75] = value;
             goto LABEL_16;
         }
         if (!alwaysfails)
@@ -384,7 +384,7 @@ void __cdecl SV_SetClientStat(int clientNum, int index, unsigned int value)
     {
         if (value >= 0x100)
             MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 342, 0, "%s", "value >= 0 && value <= 255");
-        if (v4->stats[index + 4] != (unsigned __int8)value)
+        if (v4->stats[index + 4] != (uint8_t)value)
         {
             v4->stats[index + 4] = value;
         LABEL_16:
@@ -414,7 +414,7 @@ int __cdecl SV_GetClientStat(int clientNum, int index)
     if (index < 2000)
         return svs.clients[clientNum].stats[index + 4];
     if (index < 3498)
-        return *(unsigned int *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75]; // KISAKTODO
+        return *(uint32_t *)&svs.clients[clientNum].voicePackets[17].data[4 * index + 75]; // KISAKTODO
     if (!alwaysfails)
     {
         v3 = va("Unhandled stat index %i", index);
@@ -425,17 +425,17 @@ int __cdecl SV_GetClientStat(int clientNum, int index)
 
 void __cdecl SV_BanGuidBriefly(const char *cdkeyHash)
 {
-    unsigned int banSlot; // [esp+8h] [ebp-4h]
+    uint32_t banSlot; // [esp+8h] [ebp-4h]
 
     banSlot = SV_FindFreeTempBanSlot();
     memcpy(&svs.tempBans[banSlot], cdkeyHash, 0x20u);
     LODWORD(svs.mapCenter[9 * banSlot - 136]) = svs.time;
 }
 
-unsigned int __cdecl SV_FindFreeTempBanSlot()
+uint32_t __cdecl SV_FindFreeTempBanSlot()
 {
-    unsigned int oldestSlot; // [esp+0h] [ebp-8h]
-    unsigned int banSlot; // [esp+4h] [ebp-4h]
+    uint32_t oldestSlot; // [esp+0h] [ebp-8h]
+    uint32_t banSlot; // [esp+4h] [ebp-4h]
 
     oldestSlot = 0;
     for (banSlot = 0; banSlot < 0x10; ++banSlot)
@@ -516,7 +516,7 @@ void __cdecl SV_UnbanClient(char *name)
             if (unban)
             {
                 ++found;
-                memmove((unsigned __int8 *)line, (unsigned __int8 *)text, fileSize - (text - file) + 1);
+                memmove((uint8_t *)line, (uint8_t *)text, fileSize - (text - file) + 1);
                 fileSize -= text - line;
                 text = line;
             }
@@ -600,7 +600,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
     const char *password; // [esp+64h] [ebp-424h]
     char userinfo[1024]; // [esp+68h] [ebp-420h] BYREF
     gentity_s *ent; // [esp+468h] [ebp-20h]
-    unsigned int scriptId; // [esp+46Ch] [ebp-1Ch]
+    uint32_t scriptId; // [esp+46Ch] [ebp-1Ch]
     char *pb_authmsg; // [esp+470h] [ebp-18h]
     int i; // [esp+474h] [ebp-14h]
     int clientNum; // [esp+478h] [ebp-10h]
@@ -757,14 +757,14 @@ void __cdecl SV_DirectConnect(netadr_t from)
         clients->reliableAcknowledge = 0;
         clients->reliableSequence = 0;
     gotnewcl:
-        memset((unsigned __int8 *)newcl, 0, sizeof(client_t));
+        memset((uint8_t *)newcl, 0, sizeof(client_t));
         clientNum = newcl - svs.clients;
         ent = SV_GentityNum(clientNum);
         newcl->gentity = ent;
         if (newcl->scriptId)
             MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1074, 0, "%s", "!newcl->scriptId");
         scriptId = Scr_AllocArray();
-        if (scriptId != (unsigned __int16)scriptId)
+        if (scriptId != (uint16_t)scriptId)
             MyAssertHandler(
                 ".\\server_mp\\sv_client_mp.cpp",
                 1077,
@@ -838,7 +838,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
 void __cdecl SV_FreeClientScriptPers()
 {
     client_t *clients; // [esp+0h] [ebp-Ch]
-    unsigned int scriptId; // [esp+4h] [ebp-8h]
+    uint32_t scriptId; // [esp+4h] [ebp-8h]
     int i; // [esp+8h] [ebp-4h]
 
     i = 0;
@@ -849,7 +849,7 @@ void __cdecl SV_FreeClientScriptPers()
         {
             SV_FreeClientScriptId(clients);
             scriptId = Scr_AllocArray();
-            if (scriptId != (unsigned __int16)scriptId)
+            if (scriptId != (uint16_t)scriptId)
                 MyAssertHandler(
                     ".\\server_mp\\sv_client_mp.cpp",
                     1201,
@@ -1017,7 +1017,7 @@ void __cdecl SV_DelayDropClient(client_t *drop, const char *reason)
     }
 }
 
-unsigned __int8 msgBuffer_0[131072];
+uint8_t msgBuffer_0[131072];
 void __cdecl SV_SendClientGameState(client_t *client)
 {
     int configStringCount; // [esp+38h] [ebp-16Ch]
@@ -1156,7 +1156,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
     dataStart = msg.cursize;
     numWritten = 0;
     clientNum = client - svs.clients;
-    if ((unsigned int)clientNum >= 0x40)
+    if ((uint32_t)clientNum >= 0x40)
         MyAssertHandler(
             ".\\server_mp\\sv_client_mp.cpp",
             1610,
@@ -1164,7 +1164,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
             "%s\n\t(clientNum) = %i",
             "(clientNum >= 0 && clientNum < 64)",
             clientNum);
-    memset((unsigned __int8 *)&nullstate, 0, sizeof(nullstate));
+    memset((uint8_t *)&nullstate, 0, sizeof(nullstate));
     for (start = 0; start < 1024; ++start)
     {
         base = &sv.svEntities[start].baseline.s;
@@ -1304,7 +1304,7 @@ void __cdecl SV_ClientThink(client_t *cl, usercmd_s *cmd)
         memcpy(&cl->lastUsercmd, cmd, sizeof(cl->lastUsercmd));
         if (cl->header.state == 4)
         {
-            if ((unsigned int)(cl - svs.clients) >= 0x40)
+            if ((uint32_t)(cl - svs.clients) >= 0x40)
                 MyAssertHandler(
                     ".\\server_mp\\sv_client_mp.cpp",
                     2934,
@@ -1572,7 +1572,7 @@ int __cdecl SV_ProcessClientCommands(client_t *cl, msg_t *msg, int fromOldServer
     return 0;
 }
 
-unsigned __int8 msgCompressed_buf_0[2048];
+uint8_t msgCompressed_buf_0[2048];
 void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
 {
     msg_t v2; // [esp+60h] [ebp-54h] BYREF
@@ -1734,12 +1734,12 @@ gentity_s *__cdecl SV_AddTestClient()
         1,
         botport + 1);
     SV_Cmd_TokenizeString(file);
-    *(unsigned int *)a.ip = 0;
+    *(uint32_t *)a.ip = 0;
     memset(a.ipx, 0, sizeof(a.ipx));
     a.type = NA_BOT;
     a.port = botport++;
     *(_QWORD *)&v1.type = 0;
-    *(unsigned int *)&v1.port = a.port;
+    *(uint32_t *)&v1.port = a.port;
     *(_QWORD *)&v1.ipx[2] = 0;
     SV_DirectConnect(v1);
     SV_Cmd_EndTokenizedString();

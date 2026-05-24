@@ -40,8 +40,8 @@ struct msg_t // sizeof=0x28
 {                                       // ...
     int overflowed;                     // ...
     int readOnly;                       // ...
-    unsigned __int8* data;              // ...
-    unsigned __int8* splitData;         // ...
+    uint8_t* data;              // ...
+    uint8_t* splitData;         // ...
     int maxsize;                        // ...
     int cursize;                        // ...
     int splitSize;                      // ...
@@ -56,7 +56,7 @@ struct NetField // sizeof=0x10
     const char* name;
     size_t offset;
     int bits;
-    unsigned __int8 changeHints;
+    uint8_t changeHints;
     // padding byte
     // padding byte
     // padding byte
@@ -82,23 +82,23 @@ struct hudelem_s;
 struct clientState_s;
 struct playerState_s;
 
-int __cdecl GetMinBitCountForNum(unsigned int num);
-void __cdecl MSG_Init(msg_t *buf, unsigned __int8 *data, int length);
-void __cdecl MSG_InitReadOnly(msg_t *buf, unsigned __int8 *data, int length);
-void __cdecl MSG_InitReadOnlySplit(msg_t *buf, unsigned __int8 *data, int length, unsigned __int8 *data2, int length2);
+int __cdecl GetMinBitCountForNum(uint32_t num);
+void __cdecl MSG_Init(msg_t *buf, uint8_t *data, int length);
+void __cdecl MSG_InitReadOnly(msg_t *buf, uint8_t *data, int length);
+void __cdecl MSG_InitReadOnlySplit(msg_t *buf, uint8_t *data, int length, uint8_t *data2, int length2);
 void __cdecl MSG_BeginReading(msg_t *msg);
 void __cdecl MSG_Discard(msg_t *msg);
 int __cdecl MSG_GetUsedBitCount(const msg_t *msg);
-void __cdecl MSG_WriteBits(msg_t *msg, int value, unsigned int bits);
+void __cdecl MSG_WriteBits(msg_t *msg, int value, uint32_t bits);
 void __cdecl MSG_WriteBit0(msg_t *msg);
 void __cdecl MSG_WriteBit1(msg_t *msg);
-int __cdecl MSG_ReadBits(msg_t *msg, unsigned int bits);
+int __cdecl MSG_ReadBits(msg_t *msg, uint32_t bits);
 int __cdecl MSG_GetByte(msg_t *msg, int where);
 int __cdecl MSG_ReadBit(msg_t *msg);
-int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const unsigned __int8 *from, unsigned __int8 *to, int size);
-int __cdecl MSG_ReadBitsCompress(const unsigned __int8 *from, unsigned __int8 *to, int size);
-void __cdecl MSG_WriteByte(msg_t *msg, unsigned __int8 c);
-void __cdecl MSG_WriteData(msg_t *buf, unsigned __int8 *data, unsigned int length);
+int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_t *to, int size);
+int __cdecl MSG_ReadBitsCompress(const uint8_t *from, uint8_t *to, int size);
+void __cdecl MSG_WriteByte(msg_t *msg, uint8_t c);
+void __cdecl MSG_WriteData(msg_t *buf, uint8_t *data, uint32_t length);
 void __cdecl MSG_WriteShort(msg_t *msg, __int16 c);
 void __cdecl MSG_WriteLong(msg_t *msg, int c);
 void __cdecl MSG_WriteString(msg_t *sb, const char *s);
@@ -111,20 +111,20 @@ char *__cdecl MSG_ReadString(msg_t *msg);
 char *__cdecl MSG_ReadBigString(msg_t *msg);
 char *__cdecl MSG_ReadStringLine(msg_t *msg);
 double __cdecl MSG_ReadAngle16(msg_t *msg);
-void __cdecl MSG_ReadData(msg_t *msg, unsigned __int8 *data, int len);
-void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, unsigned int bits);
-unsigned int __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, unsigned int bits);
-void __cdecl MSG_WriteKey(msg_t *msg, int key, int newV, unsigned int bits);
-unsigned int __cdecl MSG_ReadKey(msg_t *msg, int key, unsigned int bits);
+void __cdecl MSG_ReadData(msg_t *msg, uint8_t *data, int len);
+void __cdecl MSG_WriteDeltaKey(msg_t *msg, int key, int oldV, int newV, uint32_t bits);
+uint32_t __cdecl MSG_ReadDeltaKey(msg_t *msg, int key, int oldV, uint32_t bits);
+void __cdecl MSG_WriteKey(msg_t *msg, int key, int newV, uint32_t bits);
+uint32_t __cdecl MSG_ReadKey(msg_t *msg, int key, uint32_t bits);
 void __cdecl MSG_WriteDeltaKeyByte(msg_t *msg, char key, char oldV, char newV);
-int __cdecl MSG_ReadDeltaKeyByte(msg_t *msg, unsigned __int8 key, int oldV);
+int __cdecl MSG_ReadDeltaKeyByte(msg_t *msg, uint8_t key, int oldV);
 void __cdecl MSG_WriteDeltaKeyShort(msg_t *msg, __int16 key, __int16 oldV, __int16 newV);
 int __cdecl MSG_ReadDeltaKeyShort(msg_t *msg, __int16 key, int oldV);
 void __cdecl MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd);
 void __cdecl MSG_WriteDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from, const usercmd_s *to);
 void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from, usercmd_s *to);
 void __cdecl MSG_ClearLastReferencedEntity(msg_t *msg);
-int __cdecl MSG_ReadEntityIndex(msg_t *msg, unsigned int indexBits);
+int __cdecl MSG_ReadEntityIndex(msg_t *msg, uint32_t indexBits);
 void __cdecl MSG_ReadDeltaField(
     msg_t *msg,
     int time,
@@ -139,26 +139,26 @@ int __cdecl MSG_ReadDeltaEventParamField(msg_t *msg);
 int __cdecl MSG_Read24BitFlag(msg_t *msg, int oldFlags);
 double __cdecl MSG_ReadOriginFloat(int bits, msg_t *msg, float oldValue);
 double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue);
-int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, unsigned int number);
-int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, unsigned int number);
+int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, uint32_t number);
+int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, uint32_t number);
 int __cdecl MSG_ReadLastChangedField(msg_t *msg, int totalFields);
 int __cdecl MSG_ReadDeltaArchivedEntity(
     msg_t *msg,
     int time,
     archivedEntity_s *from,
     archivedEntity_s *to,
-    unsigned int number);
+    uint32_t number);
 int __cdecl MSG_ReadDeltaStruct(
     msg_t *msg,
     int time,
     char *from,
     char *to,
-    unsigned int number,
+    uint32_t number,
     int numFields,
     char indexBits,
     const NetField *stateFields,
     int totalFields);
-int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clientState_s *to, unsigned int number);
+int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clientState_s *to, uint32_t number);
 void __cdecl MSG_ReadDeltaPlayerstate(
     int localClientNum,
     msg_t *msg,

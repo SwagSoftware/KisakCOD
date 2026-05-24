@@ -12,7 +12,7 @@ GfxMeshGlobals gfxMeshGlob;
 
 char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_index_t **indicesOut)
 {
-    unsigned int usedCodeMeshIndexCount; // [esp+0h] [ebp-4h]
+    uint32_t usedCodeMeshIndexCount; // [esp+0h] [ebp-4h]
 
     iassert( (indexCount >= 0) );
     iassert( (!(indexCount & 1)) );
@@ -23,7 +23,7 @@ char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_in
         return 0;
     mesh->indexCount = indexCount + usedCodeMeshIndexCount;
     *indicesOut = (r_double_index_t *)&mesh->indices[usedCodeMeshIndexCount];
-    if (((unsigned int)*indicesOut & 3) != 0)
+    if (((uint32_t)*indicesOut & 3) != 0)
         MyAssertHandler(
             ".\\r_meshdata.cpp",
             67,
@@ -34,9 +34,9 @@ char __cdecl R_ReserveMeshIndices(GfxMeshData *mesh, int indexCount, r_double_in
     return 1;
 }
 
-char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int16 *baseVertex)
+char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, uint16_t *baseVertex)
 {
-    volatile unsigned int usedCodeMeshVertBytes; // [esp+8h] [ebp-8h]
+    volatile uint32_t usedCodeMeshVertBytes; // [esp+8h] [ebp-8h]
 
     iassert( (vertCount >= 0) );
     iassert( baseVertex );
@@ -48,7 +48,7 @@ char __cdecl R_ReserveMeshVerts(GfxMeshData *mesh, int vertCount, unsigned __int
     return 1;
 }
 
-unsigned __int8 *__cdecl R_GetMeshVerts(GfxMeshData *mesh, unsigned __int16 baseVertex)
+uint8_t *__cdecl R_GetMeshVerts(GfxMeshData *mesh, uint16_t baseVertex)
 {
     return &mesh->vb.verts[mesh->vertSize * baseVertex];
 }
@@ -62,7 +62,7 @@ void __cdecl R_ResetMesh(GfxMeshData *mesh)
 void __cdecl R_BeginMeshVerts(GfxMeshData *mesh)
 {
     iassert( mesh->vb.verts == NULL );
-    mesh->vb.verts = (unsigned __int8 *)R_LockVertexBuffer(
+    mesh->vb.verts = (uint8_t *)R_LockVertexBuffer(
         mesh->vb.buffer,
         0,
         mesh->vb.total,
@@ -79,7 +79,7 @@ void __cdecl R_SetQuadMeshData(
     float t0,
     float s1,
     float t1,
-    unsigned int color)
+    uint32_t color)
 {
     float v10; // [esp+1Ch] [ebp-14h]
     float v11; // [esp+20h] [ebp-10h]
@@ -124,7 +124,7 @@ void __cdecl R_SetQuadMesh(
     float t0,
     float s1,
     float t1,
-    unsigned int color)
+    uint32_t color)
 {
     iassert( quadMesh );
     quadMesh->x = x;
@@ -155,7 +155,7 @@ void __cdecl R_DrawQuadMesh(GfxCmdBufContext context, const Material *material, 
         R_SetMeshStream(context.state, quadMesh);
         args.vertexCount = 4;
         args.triCount = 2;
-        args.baseIndex = R_SetIndexData(&context.state->prim, (unsigned __int8 *)quadMesh->indices, 2);
+        args.baseIndex = R_SetIndexData(&context.state->prim, (uint8_t *)quadMesh->indices, 2);
         R_SetupPassPerObjectArgs(context);
         R_SetupPassPerPrimArgs(context);
         R_TrackPrims(context.state, GFX_PRIM_STATS_CODE);

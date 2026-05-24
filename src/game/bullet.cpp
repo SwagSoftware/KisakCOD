@@ -634,7 +634,7 @@ void __cdecl Bullet_ImpactEffect(
     gentity_s *tempEnt; // r31
     gentity_s *v21; // r11
     __int16 number; // r11
-    unsigned __int8 WeaponIndex; // r3
+    uint8_t WeaponIndex; // r3
     gentity_s *v24; // r11
     __int16 v25; // r11
 

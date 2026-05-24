@@ -28,7 +28,7 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
     char v20; // [esp+6048h] [ebp-1Ch]
     char v21; // [esp+6049h] [ebp-1Bh]
     int cycleIndex; // [esp+604Ch] [ebp-18h]
-    unsigned int cycleCount[2]; // [esp+6050h] [ebp-14h]
+    uint32_t cycleCount[2]; // [esp+6050h] [ebp-14h]
     int i1; // [esp+6058h] [ebp-Ch] BYREF
     float perimiter2; // [esp+605Ch] [ebp-8h]
     int planeIndex; // [esp+6060h] [ebp-4h]
@@ -75,7 +75,7 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
             v21 = TestConvexWithoutNearPoints((const SimplePlaneIntersection **)cycle[1], cycleCount[1]);
             if (CycleLess(v20, v21, perimiter1, perimiter2, cycleCount[0], cycleCount[1]))
             {
-                memcpy((unsigned __int8 *)cycle, (unsigned __int8 *)cycle[1], 4 * cycleCount[1]);
+                memcpy((uint8_t *)cycle, (uint8_t *)cycle[1], 4 * cycleCount[1]);
                 cycleCount[0] = cycleCount[1];
             }
         }
@@ -291,7 +291,7 @@ const SimplePlaneIntersection *__cdecl RemoveNextPointFormedByThisPlane(
     if (begina == end)
         return 0;
     returnVal = *begina;
-    memmove((unsigned __int8 *)begina, (unsigned __int8 *)begina + 4, 4 * (end - (begina + 1)));
+    memmove((uint8_t *)begina, (uint8_t *)begina + 4, 4 * (end - (begina + 1)));
     return returnVal;
 }
 
@@ -324,7 +324,7 @@ char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, ui
     float *v3; // [esp+18h] [ebp-3010h]
     const SimplePlaneIntersection *v4; // [esp+1Ch] [ebp-300Ch]
     float p1[3073]; // [esp+20h] [ebp-3008h] BYREF
-    unsigned int i; // [esp+3024h] [ebp-4h]
+    uint32_t i; // [esp+3024h] [ebp-4h]
 
     for (i = 0; i < ptCount; ++i)
     {
@@ -343,7 +343,7 @@ char __cdecl TestConvexWithoutNearPoints(const SimplePlaneIntersection **pts, ui
         }
         else
         {
-            memmove((unsigned __int8 *)&p1[3 * i], (unsigned __int8 *)&p1[3 * i + 3], 12 * (ptCount - i - 1));
+            memmove((uint8_t *)&p1[3 * i], (uint8_t *)&p1[3 * i + 3], 12 * (ptCount - i - 1));
             --ptCount;
         }
     }

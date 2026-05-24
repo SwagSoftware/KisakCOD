@@ -82,7 +82,7 @@ void __cdecl TRACK_sv_main()
 char string_2[1024];
 char *__cdecl SV_ExpandNewlines(char *in)
 {
-    unsigned int l; // [esp+0h] [ebp-4h]
+    uint32_t l; // [esp+0h] [ebp-4h]
 
     l = 0;
     while (*in && l < 1021)
@@ -248,7 +248,7 @@ void __cdecl SV_CullIgnorableServerCommands(client_t *client)
     client->reliableSequence = to - 1;
 }
 
-unsigned __int8 tempServerCommandBuf[131072];
+uint8_t tempServerCommandBuf[131072];
 void SV_SendServerCommand(client_t *cl, svscmd_type type, const char *fmt, ...)
 {
     const char *v3; // eax
@@ -314,7 +314,7 @@ void __cdecl SVC_Status(netadr_t from)
     const char *v3; // eax
     const char *v4; // eax
     char v5; // [esp+3h] [ebp-4861h]
-    unsigned __int8 *v6; // [esp+8h] [ebp-485Ch]
+    uint8_t *v6; // [esp+8h] [ebp-485Ch]
     char *v7; // [esp+Ch] [ebp-4858h]
     int ClientScore; // [esp+20h] [ebp-4844h]
     char v9; // [esp+27h] [ebp-483Dh]
@@ -426,7 +426,7 @@ void __cdecl SVC_GameCompleteStatus(netadr_t from)
     int ping; // [esp-8h] [ebp-C58h]
     const char *name; // [esp-4h] [ebp-C54h]
     char v7; // [esp+3h] [ebp-C4Dh]
-    unsigned __int8 *v8; // [esp+8h] [ebp-C48h]
+    uint8_t *v8; // [esp+8h] [ebp-C48h]
     char *v9; // [esp+Ch] [ebp-C44h]
     char v10; // [esp+23h] [ebp-C2Dh]
     char *v11; // [esp+28h] [ebp-C28h]
@@ -749,7 +749,7 @@ void __cdecl SV_PacketEvent(netadr_t from, msg_t *msg)
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\server_mp\\sv_main_mp.cpp", 1336, 0, "%s", "Sys_IsMainThread()");
-    if (msg->cursize >= 4 && *(unsigned int *)msg->data == -1)
+    if (msg->cursize >= 4 && *(uint32_t *)msg->data == -1)
     {
         SV_ConnectionlessPacket(from, msg);
     }

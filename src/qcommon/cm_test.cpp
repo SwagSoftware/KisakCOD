@@ -72,7 +72,7 @@ void __cdecl CM_StoreLeafs(leafList_s *ll, int nodenum)
     }
 }
 
-int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, unsigned __int16 *list, int listsize, int *lastLeaf)
+int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, uint16_t *list, int listsize, int *lastLeaf)
 {
     leafList_s ll; // [esp+4h] [ebp-2Ch] BYREF
 
@@ -92,7 +92,7 @@ int __cdecl CM_BoxLeafnums(const float *mins, const float *maxs, unsigned __int1
     return ll.count;
 }
 
-int __cdecl CM_PointContents(const float *p, unsigned int model)
+int __cdecl CM_PointContents(const float *p, uint32_t model)
 {
     cLeaf_t *leaf; // [esp+0h] [ebp-10h]
     int i; // [esp+Ch] [ebp-4h]
@@ -160,7 +160,7 @@ int __cdecl CM_PointContentsLeafBrushNode_r(const float *p, cLeafBrushNode_s *no
     return contents;
 }
 
-int __cdecl CM_TransformedPointContents(const float *p, unsigned int model, const float *origin, const float *angles)
+int __cdecl CM_TransformedPointContents(const float *p, uint32_t model, const float *origin, const float *angles)
 {
     float temp[3]; // [esp+0h] [ebp-3Ch] BYREF
     float axis[3][3]; // [esp+Ch] [ebp-30h] BYREF
@@ -180,7 +180,7 @@ int __cdecl CM_TransformedPointContents(const float *p, unsigned int model, cons
     return CM_PointContents(p_l, model);
 }
 
-unsigned __int8 *__cdecl CM_ClusterPVS(int cluster)
+uint8_t *__cdecl CM_ClusterPVS(int cluster)
 {
     if (!cm.vised)
         return cm.visibility;

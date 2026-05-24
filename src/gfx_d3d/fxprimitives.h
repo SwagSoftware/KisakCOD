@@ -22,8 +22,8 @@ struct r_double_index_t // sizeof=0x4
     }
     union
     {
-        unsigned __int16 value[2];          // ...
-        unsigned int kisak;
+        uint16_t value[2];          // ...
+        uint32_t kisak;
     };
 };
 
@@ -35,11 +35,11 @@ struct orientation_t // sizeof=0x30
 
 struct GfxMarkContext // sizeof=0x6
 {                                       // ...
-    unsigned __int8 lmapIndex;          // ...
-    unsigned __int8 primaryLightIndex;  // ...
-    unsigned __int8 reflectionProbeIndex; // ...
-    unsigned __int8 modelTypeAndSurf;   // ...
-    unsigned __int16 modelIndex;        // ...
+    uint8_t lmapIndex;          // ...
+    uint8_t primaryLightIndex;  // ...
+    uint8_t reflectionProbeIndex; // ...
+    uint8_t modelTypeAndSurf;   // ...
+    uint16_t modelIndex;        // ...
 };
 
 struct FxElemDef;
@@ -76,12 +76,12 @@ struct FxEffect // sizeof=0x80
 {                                       // ...
     const FxEffectDef *def;
     volatile long status;
-    unsigned __int16 firstElemHandle[3];
-    unsigned __int16 firstSortedElemHandle;
-    unsigned __int16 firstTrailHandle;
-    unsigned __int16 randomSeed;
-    unsigned __int16 owner;
-    unsigned __int16 packedLighting;
+    uint16_t firstElemHandle[3];
+    uint16_t firstSortedElemHandle;
+    uint16_t firstTrailHandle;
+    uint16_t randomSeed;
+    uint16_t owner;
+    uint16_t packedLighting;
     FxBoltAndSortOrder boltAndSortOrder;
     volatile long frameCount;
     int msecBegin;
@@ -107,31 +107,31 @@ struct FxCamera // sizeof=0xB0
     volatile long isValid;
     float frustum[6][4];
     float axis[3][3];
-    unsigned int frustumPlaneCount;
+    uint32_t frustumPlaneCount;
     float viewOffset[3];
-    unsigned int pad[3];
+    uint32_t pad[3];
 };
 
 struct FxSpriteInfo // sizeof=0x10
 {                                       // ...
     r_double_index_t *indices;          // ...
-    unsigned int indexCount;
+    uint32_t indexCount;
     Material *material;
     const char *name;
 };
 union FxElem_u // sizeof=0x4
 {                                       // ...
     float trailTexCoord;
-    unsigned __int16 lightingHandle;
+    uint16_t lightingHandle;
 };
 struct FxElem // sizeof=0x28
 {                                       // ...
-    unsigned __int8 defIndex;
-    unsigned __int8 sequence;
-    unsigned __int8 atRestFraction;
-    unsigned __int8 emitResidual;
-    unsigned __int16 nextElemHandleInEffect;
-    unsigned __int16 prevElemHandleInEffect;
+    uint8_t defIndex;
+    uint8_t sequence;
+    uint8_t atRestFraction;
+    uint8_t emitResidual;
+    uint16_t nextElemHandleInEffect;
+    uint16_t prevElemHandleInEffect;
     int msecBegin;
     float baseVel[3];
     //$A58BA6DA60295001BBA5E9F807131CF1 ___u8;
@@ -147,9 +147,9 @@ struct FxElem // sizeof=0x28
 };
 struct FxTrail // sizeof=0x8
 {                                       // ...
-    unsigned __int16 nextTrailHandle;   // ...
-    unsigned __int16 firstElemHandle;   // ...
-    unsigned __int16 lastElemHandle;    // ...
+    uint16_t nextTrailHandle;   // ...
+    uint16_t firstElemHandle;   // ...
+    uint16_t lastElemHandle;    // ...
     char defIndex;                      // ...
     char sequence;                      // ...
 
@@ -160,25 +160,25 @@ struct FxTrailElem // sizeof=0x20
     float origin[3];
     float spawnDist;
     int msecBegin;
-    unsigned __int16 nextTrailElemHandle;
+    uint16_t nextTrailElemHandle;
     __int16 baseVelZ;
     char basis[2][3];
-    unsigned __int8 sequence;
-    unsigned __int8 unused;
+    uint8_t sequence;
+    uint8_t unused;
 
     static constexpr size_t HANDLE_SCALE = 4;
 };
 struct FxVisBlocker // sizeof=0x10
 {                                       // ...
     float origin[3];
-    unsigned __int16 radius;
-    unsigned __int16 visibility;
+    uint16_t radius;
+    uint16_t visibility;
 };
 struct FxVisState // sizeof=0x1010
 {                                       // ...
     FxVisBlocker blocker[256];
     volatile long blockerCount;
-    unsigned int pad[3];
+    uint32_t pad[3];
 };
 struct FxSystem // sizeof=0xA60
 {                                       // ...
@@ -189,7 +189,7 @@ struct FxSystem // sizeof=0xA60
     FxPool<FxElem> *elems;
     FxPool<FxTrail> *trails;
     FxPool<FxTrailElem> *trailElems;
-    unsigned __int16 *deferredElems;
+    uint16_t *deferredElems;
     volatile long firstFreeElem;
     volatile long firstFreeTrailElem;
     volatile long firstFreeTrail;
@@ -204,11 +204,11 @@ struct FxSystem // sizeof=0xA60
     volatile long firstActiveEffect;
     volatile long firstNewEffect;
     volatile long firstFreeEffect;
-    unsigned __int16 allEffectHandles[1024];
+    uint16_t allEffectHandles[1024];
     volatile long activeSpotLightEffectCount;
     volatile long activeSpotLightElemCount;
-    unsigned __int16 activeSpotLightEffectHandle;
-    unsigned __int16 activeSpotLightElemHandle;
+    uint16_t activeSpotLightEffectHandle;
+    uint16_t activeSpotLightElemHandle;
     __int16 activeSpotLightBoltDobj;
     // padding byte
     // padding byte
@@ -219,8 +219,8 @@ struct FxSystem // sizeof=0xA60
     bool isInitialized;
     bool needsGarbageCollection;
     bool isArchiving;
-    unsigned __int8 localClientNum;
-    unsigned int restartList[32];
+    uint8_t localClientNum;
+    uint32_t restartList[32];
 };
 struct FxMarkPoint // sizeof=0x20
 {                                       // ...
@@ -241,10 +241,10 @@ union FxPointGroupPool // sizeof=0x44
 
 struct FxTriGroup // sizeof=0x18
 {                                       // ...
-    unsigned __int16 indices[2][3];
+    uint16_t indices[2][3];
     GfxMarkContext context;
-    unsigned __int8 triCount;
-    unsigned __int8 unused[1];
+    uint8_t triCount;
+    uint8_t unused[1];
     int next;
 };
 
@@ -256,19 +256,19 @@ union FxTriGroupPool // sizeof=0x18
 
 struct FxMark // sizeof=0x44
 {                                       // ...
-    unsigned __int16 prevMark;
-    unsigned __int16 nextMark;
+    uint16_t prevMark;
+    uint16_t nextMark;
     int frameCountDrawn;
     int frameCountAlloced;
     float origin[3];
     float radius;
     float texCoordAxis[3];
-    unsigned __int8 nativeColor[4];
+    uint8_t nativeColor[4];
     Material *material;
     GfxMarkContext context;
-    unsigned __int8 triCount;
+    uint8_t triCount;
     // padding byte
-    unsigned __int16 pointCount;
+    uint16_t pointCount;
     // padding byte
     // padding byte
     int tris;
@@ -277,9 +277,9 @@ struct FxMark // sizeof=0x44
 struct FxMarksSystem // sizeof=0x4801C
 {                                       // ...
     int frameCount;
-    unsigned __int16 firstFreeMarkHandle;
-    unsigned __int16 firstActiveWorldMarkHandle;
-    unsigned __int16 entFirstMarkHandles[1024];
+    uint16_t firstFreeMarkHandle;
+    uint16_t firstActiveWorldMarkHandle;
+    uint16_t entFirstMarkHandles[1024];
     FxTriGroupPool *firstFreeTriGroup;
     FxPointGroupPool *firstFreePointGroup;
     FxMark marks[512];
@@ -287,9 +287,9 @@ struct FxMarksSystem // sizeof=0x4801C
     FxPointGroupPool pointGroups[3072]; // ...
     bool noMarks;
     bool hasCarryIndex;
-    unsigned __int16 carryIndex;
-    unsigned int allocedMarkCount;
-    unsigned int freedMarkCount;
+    uint16_t carryIndex;
+    uint32_t allocedMarkCount;
+    uint32_t freedMarkCount;
 };
 struct FxUpdateElem // sizeof=0x7C
 {                                       // ...
@@ -348,12 +348,12 @@ union FxSpawnDef // sizeof=0x8
 };
 struct FxElemAtlas // sizeof=0x8
 {                                       // ...
-    unsigned __int8 behavior;
-    unsigned __int8 index;
-    unsigned __int8 fps;
-    unsigned __int8 loopCount;
-    unsigned __int8 colIndexBits;
-    unsigned __int8 rowIndexBits;
+    uint8_t behavior;
+    uint8_t index;
+    uint8_t fps;
+    uint8_t loopCount;
+    uint8_t colIndexBits;
+    uint8_t rowIndexBits;
     __int16 entryCount;
 };
 struct FxElemVec3Range // sizeof=0x18
@@ -363,7 +363,7 @@ struct FxElemVec3Range // sizeof=0x18
 };
 struct FxElemVisualState // sizeof=0x18
 {                                       // ...
-    unsigned __int8 color[4];
+    uint8_t color[4];
     float rotationDelta;
     float rotationTotal;                // ...
     float size[2];                      // ...
@@ -382,7 +382,7 @@ struct FxElemPreVisualState // sizeof=0x1C
     const FxEffect *effect;
     const FxElemVisStateSample *refState; // ...
     int randomSeed;
-    unsigned int distanceFade;
+    uint32_t distanceFade;
 };
 struct FxElemVelStateInFrame // sizeof=0x30
 {                                       // ...
@@ -435,7 +435,7 @@ struct FxTrailDef // sizeof=0x1C
     int vertCount;
     FxTrailVertex *verts;
     int indCount;
-    unsigned __int16 *inds;
+    uint16_t *inds;
 };
 const struct FxElemDef // sizeof=0xFC
 {
@@ -456,10 +456,10 @@ const struct FxElemDef // sizeof=0xFC
     FxFloatRange gravity;
     FxFloatRange reflectionFactor;
     FxElemAtlas atlas;
-    unsigned __int8 elemType;
-    unsigned __int8 visualCount;
-    unsigned __int8 velIntervalCount;
-    unsigned __int8 visStateIntervalCount;
+    uint8_t elemType;
+    uint8_t visualCount;
+    uint8_t velIntervalCount;
+    uint8_t visStateIntervalCount;
     FxElemVelStateSample *velSamples;
     FxElemVisStateSample *visSamples;
     FxElemDefVisuals visuals;
@@ -471,10 +471,10 @@ const struct FxElemDef // sizeof=0xFC
     FxFloatRange emitDist;
     FxFloatRange emitDistVariance;
     FxTrailDef *trailDef;
-    unsigned __int8 sortOrder;
-    unsigned __int8 lightingFrac;
-    unsigned __int8 useItemClip;
-    unsigned __int8 unused[1];
+    uint8_t sortOrder;
+    uint8_t lightingFrac;
+    uint8_t useItemClip;
+    uint8_t unused[1];
 };
 
 struct FxImpactEntry // sizeof=0x84
@@ -497,8 +497,8 @@ struct FxSystemBuffers // sizeof=0x47480
     FxPool<FxTrail> trails[MAX_TRAILS];
     FxPool<FxTrailElem> trailElems[MAX_TRAIL_ELEMS];
     FxVisState visState[2];
-    unsigned __int16 deferredElems[2048];
-    unsigned __int8 padBuffer[96];
+    uint16_t deferredElems[2048];
+    uint8_t padBuffer[96];
 };
 
 template<typename ITEM_TYPE, size_t LIMIT>

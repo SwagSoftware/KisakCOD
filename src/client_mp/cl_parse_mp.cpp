@@ -54,7 +54,7 @@ void __cdecl CL_SavePredictedOriginForServerTime(
     float *v7; // [esp+0h] [ebp-10h]
     float *velocity; // [esp+4h] [ebp-Ch]
     float *origin; // [esp+8h] [ebp-8h]
-    unsigned int lastIndex; // [esp+Ch] [ebp-4h]
+    uint32_t lastIndex; // [esp+Ch] [ebp-4h]
 
     lastIndex = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - 1) % CLIENT_ARCHIVE_SIZE;
     if (lastIndex >= CLIENT_ARCHIVE_SIZE)
@@ -149,7 +149,7 @@ void __cdecl CL_DeltaClient(
     msg_t *msg,
     int time,
     clSnapshot_t *frame,
-    unsigned int newnum,
+    uint32_t newnum,
     clientState_s *old,
     int unchanged)
 {
@@ -324,7 +324,7 @@ void __cdecl CL_NextDownload(int localClientNum)
     char *s; // [esp+28h] [ebp-8h]
     char *sa; // [esp+28h] [ebp-8h]
     char *sb; // [esp+28h] [ebp-8h]
-    unsigned __int8 *sc; // [esp+28h] [ebp-8h]
+    uint8_t *sc; // [esp+28h] [ebp-8h]
     char *remoteName; // [esp+2Ch] [ebp-4h]
 
     CL_GetLocalClientConnection(localClientNum);
@@ -345,15 +345,15 @@ void __cdecl CL_NextDownload(int localClientNum)
         if (sb)
         {
             *sb = 0;
-            sc = (unsigned __int8 *)(sb + 1);
+            sc = (uint8_t *)(sb + 1);
         }
         else
         {
-            sc = (unsigned __int8 *)&localName[strlen(localName)];
+            sc = (uint8_t *)&localName[strlen(localName)];
         }
         CL_BeginDownload(localName, remoteName);
         cls.downloadRestart = 1;
-        memmove((unsigned __int8 *)cls.downloadList, sc, strlen((const char *)sc) + 1);
+        memmove((uint8_t *)cls.downloadList, sc, strlen((const char *)sc) + 1);
     }
     else
     {
@@ -403,7 +403,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
         }
         size = MSG_ReadShort(msg);
         if (size > 0)
-            MSG_ReadData(msg, (unsigned __int8 *)parseDownloadData, size);
+            MSG_ReadData(msg, (uint8_t *)parseDownloadData, size);
         if (cls.downloadBlock == block)
         {
             if (cls.download)
@@ -461,7 +461,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
     }
 }
 
-unsigned __int8 msgCompressed_buf[0x20000];
+uint8_t msgCompressed_buf[0x20000];
 void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
 {
     msg_t msgCompressed; // [esp+4h] [ebp-30h] BYREF
@@ -479,7 +479,7 @@ void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
 
     MSG_Init(&msgCompressed, msgCompressed_buf, sizeof(msgCompressed_buf));
 
-    if ((unsigned int)(msg->cursize - msg->readcount) > sizeof(msgCompressed_buf))
+    if ((uint32_t)(msg->cursize - msg->readcount) > sizeof(msgCompressed_buf))
         Com_Error(ERR_DROP, "Compressed msg overflow in CL_ParseServerMessage");
 
     msgCompressed.cursize = MSG_ReadBitsCompress(
@@ -560,7 +560,7 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
 
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     clc = CL_GetLocalClientConnection(localClientNum);
-    memset((unsigned __int8 *)&newSnap, 0, sizeof(newSnap));
+    memset((uint8_t *)&newSnap, 0, sizeof(newSnap));
     newSnap.serverCommandNum = clc->serverCommandSequence;
     newSnap.serverTime = MSG_ReadLong(msg);
     newSnap.messageNum = clc->serverMessageSequence;
@@ -637,11 +637,11 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
         while (oldMessageNum < newSnap.messageNum)
             LocalClientGlobals->snapshots[oldMessageNum++ & 0x1F].valid = 0;
         LocalClientGlobals->oldSnapServerTime = LocalClientGlobals->snap.serverTime;
-        memcpy((unsigned __int8 *)&LocalClientGlobals->snap, (unsigned __int8 *)&newSnap, sizeof(LocalClientGlobals->snap));
+        memcpy((uint8_t *)&LocalClientGlobals->snap, (uint8_t *)&newSnap, sizeof(LocalClientGlobals->snap));
         LocalClientGlobals->snap.ping = 999;
         for (i = 0; i < 32; ++i)
         {
-            packetNum = ((unsigned __int8)clc->netchan.outgoingSequence - 1 - (_BYTE)i) & 0x1F;
+            packetNum = ((uint8_t)clc->netchan.outgoingSequence - 1 - (_BYTE)i) & 0x1F;
             if (LocalClientGlobals->snap.ps.commandTime >= LocalClientGlobals->outPackets[packetNum].p_serverTime)
             {
                 LocalClientGlobals->snap.ping = cls.realtime - LocalClientGlobals->outPackets[packetNum].p_realtime;
@@ -649,8 +649,8 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
             }
         }
         memcpy(
-            (unsigned __int8 *)&LocalClientGlobals->snapshots[LocalClientGlobals->snap.messageNum & 0x1F],
-            (unsigned __int8 *)&LocalClientGlobals->snap,
+            (uint8_t *)&LocalClientGlobals->snapshots[LocalClientGlobals->snap.messageNum & 0x1F],
+            (uint8_t *)&LocalClientGlobals->snap,
             sizeof(LocalClientGlobals->snapshots[LocalClientGlobals->snap.messageNum & 0x1F]));
         if (cl_shownet->current.integer == 3)
             Com_Printf(
@@ -809,7 +809,7 @@ void __cdecl CL_DeltaEntity(
     msg_t *msg,
     int time,
     clSnapshot_t *frame,
-    unsigned int newnum,
+    uint32_t newnum,
     entityState_s *old)
 {
     if (!MSG_ReadDeltaEntity(msg, time, old, &cl->parseEntities[cl->parseEntitiesNum & 0x7FF], newnum))
@@ -1007,17 +1007,17 @@ void __cdecl CL_InitDownloads(int localClientNum)
 void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
 {
     int v4; // eax
-    unsigned int v5; // [esp+0h] [ebp-164h]
-    unsigned int v6; // [esp+10h] [ebp-154h]
-    unsigned int v7; // [esp+20h] [ebp-144h]
+    uint32_t v5; // [esp+0h] [ebp-164h]
+    uint32_t v6; // [esp+10h] [ebp-154h]
+    uint32_t v7; // [esp+20h] [ebp-144h]
     int constConfigStringIndex; // [esp+34h] [ebp-130h]
     int constConfigStringIndexa; // [esp+34h] [ebp-130h]
     int lastStringIndex; // [esp+3Ch] [ebp-128h]pac
     int numConfigStrings; // [esp+40h] [ebp-124h]
     int currentConstConfigString; // [esp+44h] [ebp-120h]
     clientActive_t *LocalClientGlobals; // [esp+48h] [ebp-11Ch]
-    unsigned int configStringIndex; // [esp+4Ch] [ebp-118h]
-    unsigned int newnum; // [esp+50h] [ebp-114h]
+    uint32_t configStringIndex; // [esp+4Ch] [ebp-118h]
+    uint32_t newnum; // [esp+50h] [ebp-114h]
     entityState_s nullstate; // [esp+54h] [ebp-110h] BYREF
     clientConnection_t *clc; // [esp+150h] [ebp-14h]
     entityState_s *to; // [esp+154h] [ebp-10h]
@@ -1064,8 +1064,8 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
                     v7 = strlen(s);
                     LocalClientGlobals->gameState.stringOffsets[constConfigStringIndex] = LocalClientGlobals->gameState.dataCount;
                     memcpy(
-                        (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
-                        (unsigned __int8 *)s,
+                        (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
+                        (uint8_t *)s,
                         v7 + 1);
                     LocalClientGlobals->gameState.dataCount += v7 + 1;
                     ++currentConstConfigString;
@@ -1078,8 +1078,8 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
                     Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
                 LocalClientGlobals->gameState.stringOffsets[configStringIndex] = LocalClientGlobals->gameState.dataCount;
                 memcpy(
-                    (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
-                    (unsigned __int8 *)s,
+                    (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
+                    (uint8_t *)s,
                     v6 + 1);
                 LocalClientGlobals->gameState.dataCount += v6 + 1;
                 lastStringIndex = configStringIndex;
@@ -1091,8 +1091,8 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
                 v5 = strlen(s);
                 LocalClientGlobals->gameState.stringOffsets[constConfigStringIndexa] = LocalClientGlobals->gameState.dataCount;
                 memcpy(
-                    (unsigned __int8 *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
-                    (unsigned __int8 *)s,
+                    (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
+                    (uint8_t *)s,
                     v5 + 1);
                 LocalClientGlobals->gameState.dataCount += v5 + 1;
                 ++currentConstConfigString;
@@ -1103,7 +1103,7 @@ void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
             newnum = MSG_ReadEntityIndex(msg, 0xAu);
             if (newnum >= 0x400)
                 Com_Error(ERR_DROP, "Baseline number out of range: %i", newnum);
-            memset((unsigned __int8 *)&nullstate, 0, sizeof(nullstate));
+            memset((uint8_t *)&nullstate, 0, sizeof(nullstate));
             to = &LocalClientGlobals->entityBaselines[newnum];
             MSG_ReadDeltaEntity(msg, 0, &nullstate, to, newnum);
             break;

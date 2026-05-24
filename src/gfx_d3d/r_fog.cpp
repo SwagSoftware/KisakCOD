@@ -4,18 +4,18 @@
 
 void __cdecl R_ClearFogs()
 {
-    memset((unsigned __int8 *)rg.fogSettings, 0, sizeof(rg.fogSettings));
+    memset((uint8_t *)rg.fogSettings, 0, sizeof(rg.fogSettings));
     rg.fogIndex = 0;
 }
 
-void __cdecl R_SetFogFromServer(float start, unsigned __int8 r, unsigned __int8 g, unsigned __int8 b, float density)
+void __cdecl R_SetFogFromServer(float start, uint8_t r, uint8_t g, uint8_t b, float density)
 {
     rg.fogSettings[1].color.packed = (r << 16) | (g << 8) | b | 0xFF000000;
     rg.fogSettings[1].fogStart = start;
     rg.fogSettings[1].density = density;
 }
 
-void __cdecl R_SwitchFog(unsigned int fogvar, int startTime, int transitionTime)
+void __cdecl R_SwitchFog(uint32_t fogvar, int startTime, int transitionTime)
 {
     iassert( (fogvar >= FOG_NONE && fogvar < FOG_COUNT) );
     rg.fogIndex = fogvar;

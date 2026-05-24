@@ -101,7 +101,7 @@ typedef struct
     FILE *yy_input_file;
     unsigned char *yy_ch_buf;
     unsigned char *yy_buf_pos;
-    unsigned int yy_buf_size;
+    uint32_t yy_buf_size;
     int yy_n_chars;
     int yy_is_our_buffer;
     int yy_is_interactive;
@@ -122,7 +122,7 @@ int __cdecl yy_try_NUL_trans(int yy_current_state);
 void __cdecl yy_load_buffer_state();
 void __cdecl yy_flush_buffer(yy_buffer_state *b);
 void __cdecl  yy_fatal_error(const char *msg);
-LPVOID __cdecl yy_flex_alloc(unsigned int size);
-void *__cdecl yy_flex_realloc(void *ptr, unsigned int size);
+LPVOID __cdecl yy_flex_alloc(uint32_t size);
+void *__cdecl yy_flex_realloc(void *ptr, uint32_t size);
 //int __cdecl yyerror();
 void __cdecl ScriptParse(union sval_u *parseData, unsigned char user);

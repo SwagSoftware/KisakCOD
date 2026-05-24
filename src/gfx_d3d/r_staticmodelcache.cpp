@@ -36,7 +36,7 @@ void __cdecl R_InitStaticModelCache()
     SMC_ClearCache();
 }
 
-static_model_leaf_t *SMC_GetLeaf(unsigned int cacheIndex)
+static_model_leaf_t *SMC_GetLeaf(uint32_t cacheIndex)
 {
     iassert(cacheIndex);
     static_model_leaf_t *retval = &s_cache.leafs[0][cacheIndex - 1];
@@ -69,19 +69,19 @@ void __cdecl R_ShutdownStaticModelCache()
     }
 }
 
-void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lod, unsigned int cacheBaseVertIndex)
+void __cdecl R_CacheStaticModelIndices(uint32_t smodelIndex, uint32_t lod, uint32_t cacheBaseVertIndex)
 {
-    unsigned int surfIndex; // [esp+30h] [ebp-2Ch]
-    unsigned int baseIndex; // [esp+38h] [ebp-24h]
+    uint32_t surfIndex; // [esp+30h] [ebp-2Ch]
+    uint32_t baseIndex; // [esp+38h] [ebp-24h]
     XModel *model; // [esp+3Ch] [ebp-20h]
-    unsigned int surfCount; // [esp+40h] [ebp-1Ch]
-    unsigned int *twoSrcIndices; // [esp+44h] [ebp-18h]
-    unsigned int *twoSrcIndicesa; // [esp+44h] [ebp-18h]
+    uint32_t surfCount; // [esp+40h] [ebp-1Ch]
+    uint32_t *twoSrcIndices; // [esp+44h] [ebp-18h]
+    uint32_t *twoSrcIndicesa; // [esp+44h] [ebp-18h]
     int iterationCount; // [esp+48h] [ebp-14h]
     const XSurface *xsurf; // [esp+4Ch] [ebp-10h]
     XSurface *surfs; // [esp+50h] [ebp-Ch] BYREF
-    unsigned int *twoDstIndices; // [esp+54h] [ebp-8h]
-    unsigned int twoBaseOffsets; // [esp+58h] [ebp-4h]
+    uint32_t *twoDstIndices; // [esp+54h] [ebp-8h]
+    uint32_t twoBaseOffsets; // [esp+58h] [ebp-4h]
 
     model = rgp.world->dpvs.smodelDrawInsts[smodelIndex].model;
     XModelGetSurfaces(model, &surfs, lod);
@@ -89,9 +89,9 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
     for (surfIndex = 0; surfIndex < surfCount; ++surfIndex)
     {
         xsurf = &surfs[surfIndex];
-        twoBaseOffsets = (unsigned __int16)(cacheBaseVertIndex + xsurf->baseVertIndex)
-            | ((unsigned __int16)(cacheBaseVertIndex + xsurf->baseVertIndex) << 16);
-        twoSrcIndices = (unsigned int *)xsurf->triIndices;
+        twoBaseOffsets = (uint16_t)(cacheBaseVertIndex + xsurf->baseVertIndex)
+            | ((uint16_t)(cacheBaseVertIndex + xsurf->baseVertIndex) << 16);
+        twoSrcIndices = (uint32_t *)xsurf->triIndices;
         baseIndex = 3 * xsurf->baseTriIndex + 4 * cacheBaseVertIndex;
         iassert( baseIndex < SMC_MAX_INDEX_IN_CACHE );
         if (baseIndex + 3 * xsurf->triCount > 0x100000)
@@ -101,7 +101,7 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
                 0,
                 "%s",
                 "baseIndex + xsurf->triCount * 3 <= SMC_MAX_INDEX_IN_CACHE");
-        twoDstIndices = (unsigned int *)&gfxBuf.smodelCache.indices[baseIndex];
+        twoDstIndices = (uint32_t *)&gfxBuf.smodelCache.indices[baseIndex];
         iterationCount = xsurf->triCount / 2;
         iassert( iterationCount * 2 == xsurf->triCount );
         iassert( iterationCount );
@@ -120,7 +120,7 @@ void __cdecl R_CacheStaticModelIndices(unsigned int smodelIndex, unsigned int lo
     }
 }
 
-char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex)
+char __cdecl SMC_ForceFreeBlock(uint32_t smcIndex)
 {
     static_model_leaf_t *leafs; // [esp+8h] [ebp-8h]
     static_model_tree_t *treenode; // [esp+Ch] [ebp-4h]
@@ -148,15 +148,15 @@ char __cdecl SMC_ForceFreeBlock(unsigned int smcIndex)
     return 1;
 }
 
-char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listIndex)
+char __cdecl SMC_GetFreeBlockOfSize(uint32_t smcIndex, uint32_t listIndex)
 {
     static_model_node_list_t *block; // [esp+Ch] [ebp-1Ch]
     static_model_node_list_t *blocka; // [esp+Ch] [ebp-1Ch]
     static_model_tree_t *tree; // [esp+10h] [ebp-18h]
     static_model_leaf_t *leafs; // [esp+14h] [ebp-14h]
     static_model_leaf_t *freelist; // [esp+18h] [ebp-10h]
-    unsigned int index; // [esp+1Ch] [ebp-Ch]
-    unsigned int treeIndex; // [esp+24h] [ebp-4h]
+    uint32_t index; // [esp+1Ch] [ebp-Ch]
+    uint32_t treeIndex; // [esp+24h] [ebp-4h]
 
     if (listIndex >= 6)
         MyAssertHandler(
@@ -222,16 +222,16 @@ char __cdecl SMC_GetFreeBlockOfSize(unsigned int smcIndex, unsigned int listInde
     return 1;
 }
 
-unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCount)
+uint16_t __cdecl SMC_Allocate(uint32_t smcIndex, uint32_t bitCount)
 {
     static_model_node_list_t *block; // [esp+8h] [ebp-2Ch]
-    unsigned int listIndex; // [esp+Ch] [ebp-28h]
+    uint32_t listIndex; // [esp+Ch] [ebp-28h]
     static_model_tree_t *tree; // [esp+10h] [ebp-24h]
-    unsigned int nodeIndex; // [esp+14h] [ebp-20h]
+    uint32_t nodeIndex; // [esp+14h] [ebp-20h]
     static_model_leaf_t *leafs; // [esp+1Ch] [ebp-18h]
     static_model_node_list_t *freelist; // [esp+20h] [ebp-14h]
-    unsigned int index; // [esp+24h] [ebp-10h]
-    unsigned int treeIndex; // [esp+30h] [ebp-4h]
+    uint32_t index; // [esp+24h] [ebp-10h]
+    uint32_t treeIndex; // [esp+30h] [ebp-4h]
 
     iassert(bitCount >= 4 && bitCount <= 9);
 
@@ -279,20 +279,20 @@ unsigned __int16 __cdecl SMC_Allocate(unsigned int smcIndex, unsigned int bitCou
     return cacheIndex;
 }
 
-unsigned __int16 __cdecl R_CacheStaticModelSurface(
-    unsigned int smcIndex,
-    unsigned int smodelIndex,
+uint16_t __cdecl R_CacheStaticModelSurface(
+    uint32_t smcIndex,
+    uint32_t smodelIndex,
     const XModelLodInfo *lodInfo)
 {
-    unsigned int smcPatchVertsUsed; // [esp+4h] [ebp-2Ch]
+    uint32_t smcPatchVertsUsed; // [esp+4h] [ebp-2Ch]
     static_model_tree_t *tree; // [esp+18h] [ebp-18h]
     static_model_tree_t *treea; // [esp+18h] [ebp-18h]
     GfxCachedSModelSurf *cachedSurf; // [esp+1Ch] [ebp-14h]
     GfxCachedSModelSurf *cachedSurfa; // [esp+1Ch] [ebp-14h]
-    unsigned __int16 cacheIndex; // [esp+24h] [ebp-Ch]
-    unsigned __int16 cacheIndexa; // [esp+24h] [ebp-Ch]
+    uint16_t cacheIndex; // [esp+24h] [ebp-Ch]
+    uint16_t cacheIndexa; // [esp+24h] [ebp-Ch]
     SkinCachedStaticModelCmd skinSmodelCmd; // [esp+28h] [ebp-8h] BYREF
-    unsigned int cachedVertsNeeded; // [esp+2Ch] [ebp-4h]
+    uint32_t cachedVertsNeeded; // [esp+2Ch] [ebp-4h]
 
     iassert(lodInfo);
     iassert(lodInfo->smcAllocBits >= 4 && lodInfo->smcAllocBits <= 9);
@@ -413,18 +413,18 @@ void __cdecl SMC_FreeCachedSurface_r(
         //freenode->freenode.next->prev = (static_model_node_list_t *)freenode->cachedSurf.baseVertIndex;
         freenode->freenode.next->prev = freenode->freenode.prev;
         freenode->freenode.prev->next = freenode->freenode.next;
-        //*(_DWORD *)(freenode->cachedSurf.baseVertIndex + 4) = (unsigned int)freenode->freenode.next;
+        //*(_DWORD *)(freenode->cachedSurf.baseVertIndex + 4) = (uint32_t)freenode->freenode.next;
     }
 }
 
 void SMC_ClearCache()
 {
     static_model_leaf_t *v0; // [esp+4h] [ebp-14h]
-    unsigned int treeIter; // [esp+8h] [ebp-10h]
-    unsigned int treeItera; // [esp+8h] [ebp-10h]
-    unsigned int leafIter; // [esp+Ch] [ebp-Ch]
-    unsigned int listIter; // [esp+10h] [ebp-8h]
-    unsigned int smcIter; // [esp+14h] [ebp-4h]
+    uint32_t treeIter; // [esp+8h] [ebp-10h]
+    uint32_t treeItera; // [esp+8h] [ebp-10h]
+    uint32_t leafIter; // [esp+Ch] [ebp-Ch]
+    uint32_t listIter; // [esp+10h] [ebp-8h]
+    uint32_t smcIter; // [esp+14h] [ebp-4h]
 
     for (treeIter = 0; treeIter < 0x200; ++treeIter)
     {
@@ -455,7 +455,7 @@ void __cdecl R_FlushStaticModelCache()
 {
     static_model_tree_list_t *next; // [esp+4h] [ebp-10h]
     static_model_tree_t *tree; // [esp+8h] [ebp-Ch]
-    unsigned int smcIter; // [esp+Ch] [ebp-8h]
+    uint32_t smcIter; // [esp+Ch] [ebp-8h]
     static_model_leaf_t *leafs; // [esp+10h] [ebp-4h]
 
     if (s_cache.usedlist[0].next)
@@ -483,7 +483,7 @@ void __cdecl R_FlushStaticModelCache()
     }
 }
 
-GfxCachedSModelSurf *__cdecl R_GetCachedSModelSurf(unsigned int cacheIndex)
+GfxCachedSModelSurf *__cdecl R_GetCachedSModelSurf(uint32_t cacheIndex)
 {
     static_model_leaf_t *leaf;
 
@@ -498,11 +498,11 @@ const GfxBackEndData *RB_PatchStaticModelCache()
     const GfxBackEndData *result; // eax
     IDirect3DVertexBuffer9 *handle; // [esp+58h] [ebp-24h]
     const GfxCachedSModelSurf *cachedSurf; // [esp+60h] [ebp-1Ch]
-    unsigned int offset; // [esp+64h] [ebp-18h]
-    unsigned int firstPatchVert; // [esp+6Ch] [ebp-10h]
-    unsigned int patchIter; // [esp+70h] [ebp-Ch]
+    uint32_t offset; // [esp+64h] [ebp-18h]
+    uint32_t firstPatchVert; // [esp+6Ch] [ebp-10h]
+    uint32_t patchIter; // [esp+70h] [ebp-Ch]
     char *bufferData; // [esp+74h] [ebp-8h]
-    unsigned int vertCount; // [esp+78h] [ebp-4h]
+    uint32_t vertCount; // [esp+78h] [ebp-4h]
 
     result = backEndData;
     if (backEndData->smcPatchCount)
@@ -539,14 +539,14 @@ const GfxBackEndData *RB_PatchStaticModelCache()
 
 void __cdecl R_StaticModelCacheStats_f()
 {
-    unsigned int usedCount; // [esp+24h] [ebp-24h]
-    unsigned int lodIter; // [esp+28h] [ebp-20h]
-    unsigned int allocCount; // [esp+2Ch] [ebp-1Ch]
-    unsigned int surfCount; // [esp+30h] [ebp-18h]
-    unsigned int smodelIter; // [esp+34h] [ebp-14h]
-    unsigned int lodCount; // [esp+38h] [ebp-10h]
+    uint32_t usedCount; // [esp+24h] [ebp-24h]
+    uint32_t lodIter; // [esp+28h] [ebp-20h]
+    uint32_t allocCount; // [esp+2Ch] [ebp-1Ch]
+    uint32_t surfCount; // [esp+30h] [ebp-18h]
+    uint32_t smodelIter; // [esp+34h] [ebp-14h]
+    uint32_t lodCount; // [esp+38h] [ebp-10h]
     const GfxStaticModelDrawInst *drawInst; // [esp+3Ch] [ebp-Ch]
-    unsigned int surfIter; // [esp+40h] [ebp-8h]
+    uint32_t surfIter; // [esp+40h] [ebp-8h]
     XSurface *surfs; // [esp+44h] [ebp-4h] BYREF
 
     if (rgp.world)
@@ -581,11 +581,11 @@ void __cdecl R_StaticModelCacheFlush_f()
     R_ClearAllStaticModelCacheRefs();
 }
 
-void __cdecl R_UncacheStaticModel(unsigned int smodelIndex)
+void __cdecl R_UncacheStaticModel(uint32_t smodelIndex)
 {
     GfxStaticModelDrawInst *smodelDrawInst; // [esp+0h] [ebp-14h]
-    unsigned int lod; // [esp+Ch] [ebp-8h]
-    unsigned int cacheIndex; // [esp+10h] [ebp-4h]
+    uint32_t lod; // [esp+Ch] [ebp-8h]
+    uint32_t cacheIndex; // [esp+10h] [ebp-4h]
 
     smodelDrawInst = &rgp.world->dpvs.smodelDrawInsts[smodelIndex];
     for (lod = 0; lod < 4; ++lod)
@@ -604,8 +604,8 @@ void __cdecl R_UncacheStaticModel(unsigned int smodelIndex)
 
 void __cdecl R_ClearAllStaticModelCacheRefs()
 {
-    unsigned int smodelCount; // [esp+0h] [ebp-8h]
-    unsigned int smodelIndex; // [esp+4h] [ebp-4h]
+    uint32_t smodelCount; // [esp+0h] [ebp-8h]
+    uint32_t smodelIndex; // [esp+4h] [ebp-4h]
 
     if (rgp.world)
     {
@@ -651,17 +651,17 @@ PackedUnitVec __cdecl LocalTransformUnitVec(PackedUnitVec in, const int (*fixedM
 void __cdecl R_SkinXSurfaceStaticVerts(
     const float4 *useAxis,
     const int (*normAxis)[3],
-    unsigned int baseVertIndex,
-    unsigned int vertCount,
+    uint32_t baseVertIndex,
+    uint32_t vertCount,
     const GfxPackedVertex *srcVertArray,
-    unsigned int smodelIndex,
+    uint32_t smodelIndex,
     GfxSModelCachedVertex *verts)
 {
     PackedUnitVec v7; // [esp+24h] [ebp-14h]
     PackedUnitVec v8; // [esp+28h] [ebp-10h]
     const GfxPackedVertex *srcVert; // [esp+2Ch] [ebp-Ch]
     PackedLightingCoords packedBaseLighting; // [esp+30h] [ebp-8h] BYREF
-    unsigned int vertIndex; // [esp+34h] [ebp-4h]
+    uint32_t vertIndex; // [esp+34h] [ebp-4h]
 
     R_GetPackedStaticModelLightingCoords(smodelIndex, &packedBaseLighting);
     for (vertIndex = 0; vertIndex < vertCount; ++vertIndex)
@@ -687,11 +687,11 @@ void __cdecl R_SkinCachedStaticModelCmd(SkinCachedStaticModelCmd *skinCmd)
     int cacheIndex; // [esp+C0h] [ebp-D4h]
     float4 useAxis[4]; // [esp+C4h] [ebp-D0h] BYREF
     GfxStaticModelDrawInst *smodelDrawInst; // [esp+108h] [ebp-8Ch]
-    unsigned int surfIndex; // [esp+10Ch] [ebp-88h]
+    uint32_t surfIndex; // [esp+10Ch] [ebp-88h]
     int baseVertIndex; // [esp+110h] [ebp-84h]
     float4 normAxis[4]; // [esp+114h] [ebp-80h] BYREF
     const GfxCachedSModelSurf *cachedSurf; // [esp+158h] [ebp-3Ch]
-    unsigned int surfCount; // [esp+15Ch] [ebp-38h]
+    uint32_t surfCount; // [esp+15Ch] [ebp-38h]
     const static_model_leaf_t *leaf; // [esp+160h] [ebp-34h]
     GfxSModelCachedVertex *verts; // [esp+164h] [ebp-30h]
     const XSurface *xsurf; // [esp+168h] [ebp-2Ch]

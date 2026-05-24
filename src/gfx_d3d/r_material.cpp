@@ -279,7 +279,7 @@ void __cdecl TRACK_r_material()
     track_static_alloc_internal((void *)s_builtInMaterials, 400, "s_builtInMaterials", 18);
 }
 
-unsigned __int8 *__cdecl Material_Alloc(unsigned int size)
+uint8_t *__cdecl Material_Alloc(uint32_t size)
 {
     return Hunk_Alloc(size, "Material_Alloc", 22);
 }
@@ -317,7 +317,7 @@ void __cdecl Load_CreateMaterialVertexShader(GfxVertexShaderLoadDef *loadDef, Ma
 void __cdecl AssertValidVertexDeclOffsets(const stream_source_info_t *streamTable)
 {
     int thisIndex; // [esp+0h] [ebp-10h]
-    unsigned int stream; // [esp+4h] [ebp-Ch]
+    uint32_t stream; // [esp+4h] [ebp-Ch]
     int lastIndex[2]; // [esp+8h] [ebp-8h]
 
     lastIndex[0] = -1;
@@ -494,9 +494,9 @@ Material *__cdecl Material_Register_FastFile(const char *name)
     return DB_FindXAssetHeader(ASSET_TYPE_MATERIAL, name).material;
 }
 
-void __cdecl Material_GetHashIndex(const char *name, unsigned __int16 *hashIndex, bool *exists)
+void __cdecl Material_GetHashIndex(const char *name, uint16_t *hashIndex, bool *exists)
 {
-    unsigned __int16 beginHashIndex; // [esp+14h] [ebp-4h]
+    uint16_t beginHashIndex; // [esp+14h] [ebp-4h]
 
     iassert( name );
     iassert( hashIndex );
@@ -530,10 +530,10 @@ Material *__cdecl Material_MakeDefault(char *name)
     return Material_Duplicate(rgp.defaultMaterial, name);
 }
 
-void __cdecl Material_Add(Material *material, unsigned __int16 hashIndex)
+void __cdecl Material_Add(Material *material, uint16_t hashIndex)
 {
     unsigned __int64 v2; // rax
-    unsigned int v3; // ecx
+    uint32_t v3; // ecx
 
     iassert(material);
     rgp.needSortMaterials = 1;
@@ -557,7 +557,7 @@ Material *__cdecl Material_Register_LoadObj(char *name, int imageTrack)
 {
     Material *material; // [esp+0h] [ebp-Ch]
     bool exists; // [esp+7h] [ebp-5h] BYREF
-    unsigned __int16 hashIndex; // [esp+8h] [ebp-4h] BYREF
+    uint16_t hashIndex; // [esp+8h] [ebp-4h] BYREF
 
     iassert( name );
     iassert( name[0] );
@@ -604,11 +604,11 @@ bool __cdecl R_MaterialCompare(const MaterialMemory &material0, const MaterialMe
 void __cdecl R_MaterialList_f()
 {
     const char *fmt; // [esp+8h] [ebp-4150h]
-    unsigned int i; // [esp+138h] [ebp-4020h]
+    uint32_t i; // [esp+138h] [ebp-4020h]
     Material *material; // [esp+13Ch] [ebp-401Ch]
     int v3; // [esp+140h] [ebp-4018h]
     MaterialMemory *v4; // [esp+144h] [ebp-4014h]
-    unsigned int inData; // [esp+148h] [ebp-4010h] BYREF
+    uint32_t inData; // [esp+148h] [ebp-4010h] BYREF
     MaterialMemory v6[2049]; // [esp+14Ch] [ebp-400Ch] BYREF
     float v7; // [esp+4154h] [ebp-4h]
 
@@ -652,10 +652,10 @@ void __cdecl R_GetMaterialList(XAssetHeader header, char *data)
     if (memory)
     {
         //iassert( materialList->count < ARRAY_COUNT( materialList->sorted ) ); // KISAKTODO
-        materialMemory = (XAssetHeader *)&data[8 * *(unsigned int *)data + 4];
+        materialMemory = (XAssetHeader *)&data[8 * *(uint32_t *)data + 4];
         materialMemory->xmodelPieces = header.xmodelPieces;
         materialMemory[1].xmodelPieces = (XModelPieces *)memory;
-        ++*(unsigned int *)data;
+        ++*(uint32_t *)data;
     }
 }
 
@@ -825,7 +825,7 @@ void __cdecl Material_Init()
 {
     if (!IsFastFileLoad())
     {
-        memset((unsigned __int8 *)&materialGlobals, 0, sizeof(materialGlobals));
+        memset((uint8_t *)&materialGlobals, 0, sizeof(materialGlobals));
         Material_PreLoadAllShaderText();
     }
     Material_LoadBuiltIn(s_builtInMaterials, 50);
@@ -835,8 +835,8 @@ void __cdecl Material_Init()
 void __cdecl Material_Shutdown()
 {
     Material_FreeAll();
-    memset((unsigned __int8 *)&materialGlobals, 0, sizeof(materialGlobals));
-    memset((unsigned __int8 *)rg.materialHashTable, 0, sizeof(rg.materialHashTable));
+    memset((uint8_t *)&materialGlobals, 0, sizeof(materialGlobals));
+    memset((uint8_t *)rg.materialHashTable, 0, sizeof(rg.materialHashTable));
     rgp.materialCount = 0;
 }
 
@@ -908,7 +908,7 @@ void __cdecl Material_UpdatePicmipAll()
 Material *__cdecl Material_Find(const char *name)
 {
     Material *material; // [esp+0h] [ebp-Ch]
-    unsigned __int16 hashIndex[3]; // [esp+4h] [ebp-8h] BYREF
+    uint16_t hashIndex[3]; // [esp+4h] [ebp-8h] BYREF
     bool exists; // [esp+Bh] [ebp-1h] BYREF
 
     Material_GetHashIndex(name, hashIndex, &exists);

@@ -1,7 +1,7 @@
 #pragma once
-
 #include <ode/ode.h>
 #include <qcommon/bitarray.h>
+#include <cstdint>
 
 struct PhysPreset;
 
@@ -22,9 +22,9 @@ struct DObjTrace_s // sizeof=0x1C
     float fraction;                     // ...
     int surfaceflags;                   // ...
     float normal[3];                    // ...
-    unsigned __int16 modelIndex;        // ...
-    unsigned __int16 partName;          // ...
-    unsigned __int16 partGroup;         // ...
+    uint16_t modelIndex;        // ...
+    uint16_t partName;          // ...
+    uint16_t partGroup;         // ...
     // padding byte
     // padding byte
 };
@@ -63,24 +63,24 @@ struct DObjSkelMat // sizeof=0x40
 struct DObj_s // sizeof=0x64
 {
     XAnimTree_s* tree;
-    unsigned __int16 duplicateParts;
-    unsigned __int16 entnum;
+    uint16_t duplicateParts;
+    uint16_t entnum;
     unsigned __int8 duplicatePartsSize;
     unsigned __int8 numModels;
     unsigned __int8 numBones;
     // padding byte
-    unsigned int ignoreCollision;
-    volatile unsigned int locked;
+    uint32_t ignoreCollision;
+    volatile uint32_t locked;
     DSkel skel;
     float radius;
-    unsigned int hidePartBits[4];
+    uint32_t hidePartBits[4];
     XModel** models;
 };
 
 struct DObjModel_s // sizeof=0x8
 {                                       // ...
     XModel* model;                      // ...
-    unsigned __int16 boneName;          // ...
+    uint16_t boneName;          // ...
     bool ignoreCollision;               // ...
     // padding byte
 };
@@ -92,17 +92,17 @@ bool __cdecl DObjIgnoreCollision(const DObj_s *obj, char modelIndex);
 void __cdecl DObjGetHierarchyBits(const DObj_s *obj, int boneIndex, int *partBits);
 bool __cdecl DObjSkelIsBoneUpToDate(DObj_s *obj, int boneIndex);
 void __cdecl DObjSetTree(DObj_s *obj, XAnimTree_s *tree);
-void __cdecl DObjCreate(DObjModel_s *dobjModels, unsigned int numModels, XAnimTree_s *tree, DObj_s *buf, __int16 entnum);
-void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, unsigned int numModels);
-void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, unsigned int numModels);
+void __cdecl DObjCreate(DObjModel_s *dobjModels, uint32_t numModels, XAnimTree_s *tree, DObj_s *buf, __int16 entnum);
+void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, uint32_t numModels);
+void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, uint32_t numModels);
 void __cdecl DObjComputeBounds(DObj_s *obj);
 void __cdecl DObjFree(DObj_s *obj);
 void __cdecl DObjGetCreateParms(
     const DObj_s *obj,
     DObjModel_s *dobjModels,
-    unsigned __int16 *numModels,
+    uint16_t *numModels,
     XAnimTree_s **tree,
-    unsigned __int16 *entnum);
+    uint16_t *entnum);
 void __cdecl DObjArchive(DObj_s *obj);
 void __cdecl DObjUnarchive(DObj_s *obj);
 void __cdecl DObjSkelClear(const DObj_s *obj);
@@ -127,10 +127,10 @@ void __cdecl DObjGeomTracelinePartBits(DObj_s *obj, int contentmask, int *partBi
 int __cdecl DObjHasContents(DObj_s *obj, int contentmask);
 int __cdecl DObjGetContents(const DObj_s *obj);
 int __cdecl DObjSetLocalBoneIndex(DObj_s *obj, int *partBits, int boneIndex, const float *trans, const float *angles);
-int __cdecl DObjGetBoneIndex(const DObj_s *obj, unsigned int name, unsigned __int8 *index);
-int __cdecl DObjGetModelBoneIndex(const DObj_s *obj, const char *modelName, unsigned int name, unsigned __int8 *index);
+int __cdecl DObjGetBoneIndex(const DObj_s *obj, uint32_t name, unsigned __int8 *index);
+int __cdecl DObjGetModelBoneIndex(const DObj_s *obj, const char *modelName, uint32_t name, unsigned __int8 *index);
 void __cdecl DObjGetBasePoseMatrix(const DObj_s *obj, unsigned __int8 boneIndex, DObjAnimMat *outMat);
-void __cdecl DObjSetHidePartBits(DObj_s *obj, const unsigned int *partBits);
+void __cdecl DObjSetHidePartBits(DObj_s *obj, const uint32_t *partBits);
 int DObjGetNumSurfaces(const DObj_s *obj, char *lods);
 void DObjClone(const DObj_s *from, DObj_s *obj);
 
@@ -157,8 +157,8 @@ void __cdecl CalcSkelRootBonesNoParentOrDuplicate(
 void __cdecl CalcSkelRootBonesWithParent(
     const XModel *model,
     DSkel *skel,
-    unsigned int minBoneIndex,
-    unsigned int modelParent,
+    uint32_t minBoneIndex,
+    uint32_t modelParent,
     int *calcPartBits,
     const int *controlPartBits);
 void __cdecl CalcSkelNonRootBones(

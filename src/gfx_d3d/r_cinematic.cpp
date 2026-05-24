@@ -146,7 +146,7 @@ void R_Cinematic_ReserveMemory()
     cinematicGlob.memPool = Z_Malloc(0xD00000, "R_Cinematic_ReserveMemory", 18);
 }
 
-void __cdecl  R_Cinematic_Thread(unsigned int threadContext)
+void __cdecl  R_Cinematic_Thread(uint32_t threadContext)
 {
     iassert(threadContext == THREAD_CONTEXT_CINEMATIC);
     while (1)
@@ -163,7 +163,7 @@ void R_Cinematic_UpdateFrame_Core2()
 {
     bool localTargetChanged; // [esp+3h] [ebp-109h]
     char localTargetCinematic[256]; // [esp+4h] [ebp-108h] BYREF
-    unsigned int localTargetPlaybackFlags; // [esp+108h] [ebp-4h]
+    uint32_t localTargetPlaybackFlags; // [esp+108h] [ebp-4h]
 
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC_TARGET_CHANGE);
     localTargetChanged = cinematicGlob.targetCinematicChanged;
@@ -185,7 +185,7 @@ void R_Cinematic_UpdateFrame_Core2()
 void __cdecl R_Cinematic_UpdateFrame_Core(
     bool localTargetChanged,
     char *localTargetCinematic,
-    unsigned int localPlaybackFlags)
+    uint32_t localPlaybackFlags)
 {
     bool isCinematicBeingPlayed; // [esp+3h] [ebp-1h]
 
@@ -282,7 +282,7 @@ char __cdecl R_Cinematic_Advance()
 {
     CinematicEnum targetPaused; // [esp+A0h] [ebp-44h]
     BINKREALTIME binkRealtime; // [esp+A4h] [ebp-40h] BYREF
-    unsigned int percentageFull; // [esp+DCh] [ebp-8h]
+    uint32_t percentageFull; // [esp+DCh] [ebp-8h]
     int skipped; // [esp+E0h] [ebp-4h]
 
     PROF_SCOPED("R_Cinematic_Advance");
@@ -383,7 +383,7 @@ char __cdecl R_Cinematic_Advance()
     }
 }
 
-unsigned int __cdecl R_Cinematic_GetPercentageFull()
+uint32_t __cdecl R_Cinematic_GetPercentageFull()
 {
     BINKREALTIME binkRealtime; // [esp+4h] [ebp-38h] BYREF
 
@@ -415,24 +415,24 @@ void __cdecl R_Cinematic_UpdateTimeInMsec(const BINKREALTIME *binkRealtime)
     unsigned __int64 frameRate; // [esp+20h] [ebp-8h]
 
     frameNum = binkRealtime->FrameNum;
-    if ((unsigned int)frameNum < 0x80000000)
+    if ((uint32_t)frameNum < 0x80000000)
     {
         frameRateDiv = binkRealtime->FrameRateDiv;
         frameRate = binkRealtime->FrameRate;
         timeInMsec = 1000 * frameNum * frameRateDiv / frameRate;
         cinematicGlob.timeInMsec = timeInMsec;
-        if (timeInMsec != (unsigned int)timeInMsec)
+        if (timeInMsec != (uint32_t)timeInMsec)
         {
             v1 = va(
                 "%08x:%08x, %08x:%08x, %08x:%08x, %08x:%08x",
                 HIDWORD(timeInMsec),
-                (unsigned int)timeInMsec,
+                (uint32_t)timeInMsec,
                 HIDWORD(frameNum),
-                (unsigned int)frameNum,
+                (uint32_t)frameNum,
                 HIDWORD(frameRate),
-                (unsigned int)frameRate,
+                (uint32_t)frameRate,
                 HIDWORD(frameRateDiv),
-                (unsigned int)frameRateDiv);
+                (uint32_t)frameRateDiv);
             MyAssertHandler(".\\r_cinematic.cpp", 1063, 0, "%s\n\t%s", "cinematicGlob.timeInMsec == timeInMsec", v1);
         }
     }
@@ -462,10 +462,10 @@ void __cdecl CinematicHunk_Reset(CinematicHunk *hunk)
     hunk->atBack = hunk->end;
 }
 
-char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, unsigned int playbackFlags)
+char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, uint32_t playbackFlags)
 {
     _DIG_DRIVER *Driver; // eax
-    unsigned int TrackIDsToPlay[5]; // [esp+1Ch] [ebp-9Ch] BYREF
+    uint32_t TrackIDsToPlay[5]; // [esp+1Ch] [ebp-9Ch] BYREF
     char errText[132]; // [esp+30h] [ebp-88h] BYREF
 
     TrackIDsToPlay[0] = 0;
@@ -498,7 +498,7 @@ char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, unsigned int pl
     BinkSetMemory(R_Cinematic_Bink_Alloc, R_Cinematic_Bink_Free);
     R_Cinematic_CheckBinkError();
     Driver = MSS_GetDriver();
-    BinkSetSoundSystem(BinkOpenMiles, (unsigned int)Driver);
+    BinkSetSoundSystem(BinkOpenMiles, (uint32_t)Driver);
     R_Cinematic_CheckBinkError();
     BinkSetSoundTrack(5, TrackIDsToPlay);
     R_Cinematic_CheckBinkError();
@@ -617,8 +617,8 @@ static void __cdecl R_Cinematic_ReleaseImages(CinematicTextureSet *textureSet)
 
 IDirect3DTexture9 *__cdecl R_Cinematic_MakeBinkTexture_PC(
     GfxImage *image,
-    unsigned int width,
-    unsigned int height,
+    uint32_t width,
+    uint32_t height,
     int baseImageFlags)
 {
     Image_Setup(image, width, height, 1, baseImageFlags | 3, D3DFMT_L8);
@@ -717,7 +717,7 @@ void R_Cinematic_InitBinkTextures()
     R_Cinematic_MakeBinkDrawTextures();
 }
 
-void* __stdcall R_Cinematic_Bink_Alloc(unsigned int bytes)
+void* __stdcall R_Cinematic_Bink_Alloc(uint32_t bytes)
 {
     return (void*)CinematicHunk_Alloc(&cinematicGlob.binkHunk, bytes);
 }
@@ -729,9 +729,9 @@ void __stdcall R_Cinematic_Bink_Free(void *ptr)
 
 bool __cdecl R_Cinematic_BinkOpen(
     const char *filename,
-    unsigned int playbackFlags,
+    uint32_t playbackFlags,
     char *errText,
-    unsigned int errTextSize)
+    uint32_t errTextSize)
 {
     char *cwd; // [esp+4h] [ebp-20Ch]
     char filepath[2][256]; // [esp+8h] [ebp-208h] BYREF
@@ -765,12 +765,12 @@ char __cdecl R_Cinematic_BinkOpenPath(
     const char *filepath,
     char playbackFlags,
     char *errText,
-    unsigned int errTextSize)
+    uint32_t errTextSize)
 {
     const char *Error; // eax
     RawFile *rawfile; // [esp+5Ch] [ebp-Ch]
     const void *filledBuffer; // [esp+60h] [ebp-8h] BYREF
-    unsigned int flags; // [esp+64h] [ebp-4h]
+    uint32_t flags; // [esp+64h] [ebp-4h]
 
     if ((playbackFlags & 8) != 0)
     {
@@ -870,7 +870,7 @@ char __cdecl R_Cinematic_BinkOpenPath_MemoryResident(
     const char *filename,
     const void **outPtr,
     char *errText,
-    unsigned int errTextSize)
+    uint32_t errTextSize)
 {
     void *allocedBuffer; // [esp+Ch] [ebp-18h]
     FILE *fileHandle; // [esp+10h] [ebp-14h]
@@ -944,14 +944,14 @@ void __cdecl R_Cinematic_Shutdown()
     Z_Free(cinematicGlob.memPool, 18);
 }
 
-void __cdecl R_Cinematic_StartPlayback(char *name, unsigned int playbackFlags, float volume)
+void __cdecl R_Cinematic_StartPlayback(char *name, uint32_t playbackFlags, float volume)
 {
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
     R_Cinematic_StartPlayback_Internal(name, playbackFlags, volume);
     Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
 }
 
-void __cdecl R_Cinematic_StartPlayback_Internal(char *name, unsigned int playbackFlags, float volume)
+void __cdecl R_Cinematic_StartPlayback_Internal(char *name, uint32_t playbackFlags, float volume)
 {
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC_TARGET_CHANGE);
     I_strncpyz(cinematicGlob.targetCinematicName, name, 256);
@@ -1168,7 +1168,7 @@ bool __cdecl R_Cinematic_IsUnderrun()
 
 void __cdecl R_Cinematic_BeginLostDevice()
 {
-    unsigned int setIter; // [esp+4h] [ebp-8h]
+    uint32_t setIter; // [esp+4h] [ebp-8h]
     CinematicTextureSet *textureSet; // [esp+8h] [ebp-4h]
 
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
@@ -1190,7 +1190,7 @@ void __cdecl R_Cinematic_BeginLostDevice()
     Sys_LeaveCriticalSection(CRITSECT_CINEMATIC);
 }
 
-void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int height, unsigned __int8 clearValue)
+void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int height, uint8_t clearValue)
 {
     const char *v4; // eax
     HRESULT hr; // [esp+0h] [ebp-Ch]
@@ -1200,7 +1200,7 @@ void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int
     if (hr >= 0)
     {
         iassert( lockedRect.Pitch >= width );
-        memset((unsigned __int8 *)lockedRect.pBits, clearValue, lockedRect.Pitch * height);
+        memset((uint8_t *)lockedRect.pBits, clearValue, lockedRect.Pitch * height);
         texture->UnlockRect(0);
     }
     else
@@ -1259,7 +1259,7 @@ void __cdecl R_Cinematic_SetPaused(CinematicEnum paused)
     cinematicGlob.targetPaused = paused;
 }
 
-void R_Cinematic_SetNextPlayback(const char *name, unsigned int playbackFlags)
+void R_Cinematic_SetNextPlayback(const char *name, uint32_t playbackFlags)
 {
     Sys_EnterCriticalSection(CRITSECT_CINEMATIC);
     I_strncpyz(cinematicGlob.nextCinematicName, name, 256);
@@ -1285,7 +1285,7 @@ bool R_Cinematic_IsPending()
 #else
 void __cdecl R_Cinematic_Init() { /* THUNK */ }
 void __cdecl R_Cinematic_Shutdown() { /* THUNK */ }
-void __cdecl R_Cinematic_StartPlayback(char *name, unsigned int playbackFlags, float volume) { /* THUNK */ }
+void __cdecl R_Cinematic_StartPlayback(char *name, uint32_t playbackFlags, float volume) { /* THUNK */ }
 void __cdecl R_Cinematic_StartNextPlayback() { /* THUNK */ }
 void __cdecl R_Cinematic_StopPlayback() { /* THUNK */ }
 void __cdecl R_Cinematic_UpdateFrame() { /* THUNK */ }
@@ -1299,6 +1299,6 @@ bool __cdecl R_Cinematic_IsUnderrun() { /* THUNK */ return false; }
 void __cdecl R_Cinematic_BeginLostDevice() { /* THUNK */ }
 void __cdecl R_Cinematic_EndLostDevice() { /* THUNK */ }
 void __cdecl R_Cinematic_SetPaused(CinematicEnum paused) {}
-void R_Cinematic_SetNextPlayback(const char *name, unsigned int playbackFlags) {}
+void R_Cinematic_SetNextPlayback(const char *name, uint32_t playbackFlags) {}
 void R_Cinematic_UnsetNextPlayback() {}
 #endif

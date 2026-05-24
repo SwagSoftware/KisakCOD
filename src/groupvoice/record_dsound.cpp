@@ -19,7 +19,7 @@ int(__cdecl *current_audioCallback)(audioSample_t *);
 void __cdecl DSOUNDRecord_UpdateSample(dsound_sample_t *pRecSample)
 {
     int lLockSize; // [esp+8h] [ebp-48h]
-    unsigned int lLockSizea; // [esp+8h] [ebp-48h]
+    uint32_t lLockSizea; // [esp+8h] [ebp-48h]
     int lLockSizeb; // [esp+8h] [ebp-48h]
     HRESULT hr; // [esp+Ch] [ebp-44h]
     HRESULT hra; // [esp+Ch] [ebp-44h]

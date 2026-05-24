@@ -194,8 +194,8 @@ enum ViewLockTypes : __int32
 
 //struct $6CB7272563F4458FB40A4A5E123C4ABA // sizeof=0x4
 //{                                       // ...
-//    unsigned __int16 index;
-//    unsigned __int16 tree;
+//    uint16_t index;
+//    uint16_t tree;
 //};
 //union $76411D3CC105A18E6E4A61D5A929E310 // sizeof=0x4
 //{                                       // ...
@@ -994,14 +994,14 @@ struct playerState_s
     int eFlags; // 0x20000 = USING_VEHICLE
     int eventSequence;
     int events[4];
-    unsigned int eventParms[4];
+    uint32_t eventParms[4];
     int oldEventSequence;
     int clientNum;
     int offHandIndex;
     OffhandSecondaryClass offhandSecondary;
-    unsigned int weapon;
+    uint32_t weapon;
     weaponstate_t weaponstate;
-    unsigned int weaponShotCount;
+    uint32_t weaponShotCount;
     float fWeaponPosFrac;
     int adsDelayTime;
     int spreadOverride;
@@ -1022,9 +1022,9 @@ struct playerState_s
     int stats[4];
     int ammo[128];
     int ammoclip[128];
-    unsigned int weapons[4];
-    unsigned int weaponold[4];
-    unsigned int weaponrechamber[4];
+    uint32_t weapons[4];
+    uint32_t weaponold[4];
+    uint32_t weaponrechamber[4];
     float proneDirection;
     float proneDirectionPitch;
     float proneTorsoPitch;
@@ -1049,9 +1049,9 @@ struct playerState_s
     int meleeChargeTime;
     int weapLockFlags;
     int weapLockedEntnum;
-    unsigned int forcedViewAnimWeaponIdx;
+    uint32_t forcedViewAnimWeaponIdx;
     int forcedViewAnimWeaponState;
-    unsigned int forcedViewAnimOriginalWeaponIdx;
+    uint32_t forcedViewAnimOriginalWeaponIdx;
     ActionSlotType actionSlotType[4];
     ActionSlotParam actionSlotParam[4];
     int entityEventSequence;
@@ -1069,7 +1069,7 @@ struct playerState_s
     float dofViewmodelStart;
     float dofViewmodelEnd;
     int hudElemLastAssignedSoundID;
-    unsigned __int8 weaponmodels[128];
+    uint8_t weaponmodels[128];
     playerState_s_hud hud;
 };
 #endif
@@ -1194,9 +1194,9 @@ struct CEntActorInfo
 };
 struct cpose_t
 {
-    unsigned __int16 lightingHandle;
-    unsigned __int8 eType;
-    unsigned __int8 eTypeUnion;
+    uint16_t lightingHandle;
+    uint8_t eType;
+    uint8_t eTypeUnion;
     bool isRagdoll;
     int ragdollHandle;
     //int physObjId;
@@ -1230,7 +1230,7 @@ struct centity_s // sizeof=0x1DC
     float lightingOrigin[3];
     XAnimTree_s* tree;
 #else
-    unsigned __int8 oldEType;
+    uint8_t oldEType;
     int previousEventSequence;
     float lightingOrigin[3];
 #endif
@@ -1519,8 +1519,8 @@ struct scr_vehicle_s // sizeof=0x338
     VehicleJitter jitter;
     VehicleHover hover;
     int drawOnCompass;
-    unsigned __int16 lookAtText0;
-    unsigned __int16 lookAtText1;
+    uint16_t lookAtText0;
+    uint16_t lookAtText1;
     int manualMode;
     float manualSpeed;
     float manualAccel;
@@ -2306,7 +2306,7 @@ WeaponDef *__cdecl BG_LoadWeaponDef(const char *name);
 WeaponDef *__cdecl BG_LoadWeaponDef_FastFile(const char *name);
 void __cdecl BG_AssertOffhandIndexOrNone(uint32_t offHandIndex);
 void __cdecl BG_StringCopy(uint8_t *member, const char *keyValue);
-int BG_ValidateWeaponNumberOffhand(unsigned int weaponIndex);
+int BG_ValidateWeaponNumberOffhand(uint32_t weaponIndex);
 
 
 // bg_vehicles_mp

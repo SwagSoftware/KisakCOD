@@ -453,8 +453,8 @@ void track_init()
     mem_track_t* mem_track; // [esp+0h] [ebp-4h]
 
     InitializeCriticalSection(&g_crit);
-    memset((unsigned __int8*)&g_info, 0, sizeof(g_info));
-    memset((unsigned __int8*)&g_virtualMemInfo, 0, sizeof(g_virtualMemInfo));
+    memset((uint8_t*)&g_info, 0, sizeof(g_info));
+    memset((uint8_t*)&g_virtualMemInfo, 0, sizeof(g_virtualMemInfo));
     for (g_mem_track_count = 0; g_mem_track_count < 37; ++g_mem_track_count)
     {
         mem_track = &g_mem_track[g_mem_track_count];
@@ -640,7 +640,7 @@ void __cdecl track_getbasicinfo(meminfo_t* info)
 
     iassert( info );
     EnterCriticalSection(&g_crit);
-    memset((unsigned __int8*)info, 0, sizeof(meminfo_t));
+    memset((uint8_t*)info, 0, sizeof(meminfo_t));
     //MinSpecImageMemory = R_GetMinSpecImageMemory(); // KISAKTODO
     MinSpecImageMemory = 1337;
     track_addbasicinfo(info, 35, MinSpecImageMemory);
@@ -692,7 +692,7 @@ void __cdecl track_PrintInfo()
     int minSpecImageMemory; // [esp+10Ch] [ebp-4h]
 
     EnterCriticalSection(&g_crit);
-    memset((unsigned __int8*)&info, 0, sizeof(info));
+    memset((uint8_t*)&info, 0, sizeof(info));
     minSpecImageMemory = 0;
     minSpecImageMemory = R_GetMinSpecImageMemory();
     len2 = g_hunklow_track_count + g_hunk_track_count + g_mem_track_count;
@@ -731,7 +731,7 @@ void __cdecl track_PrintInfo()
             mem_track->filename = nodea->data.filename;
             mem_track->size = nodea->data.size;
             mem_track->pos = nodea->data.pos;
-            *(unsigned int*)&mem_track->type = *(unsigned int*)&nodea->data.type;
+            *(uint32_t*)&mem_track->type = *(uint32_t*)&nodea->data.type;
             nodea = nodea->next;
             ++mem_track;
         }
@@ -743,7 +743,7 @@ void __cdecl track_PrintInfo()
             mem_track->filename = p_data->filename;
             mem_track->size = p_data->size;
             mem_track->pos = p_data->pos;
-            *(unsigned int*)&mem_track->type = *(unsigned int*)&p_data->type;
+            *(uint32_t*)&mem_track->type = *(uint32_t*)&p_data->type;
             ++i;
             ++mem_track;
         }
@@ -765,7 +765,7 @@ void __cdecl track_PrintInfo()
                     mem_tracka->filename = v1->filename;
                     mem_tracka->size = v1->size;
                     mem_tracka->pos = v1->pos;
-                    *(unsigned int*)&mem_tracka->type = *(unsigned int*)&v1->type;
+                    *(uint32_t*)&mem_tracka->type = *(uint32_t*)&v1->type;
                     break;
                 }
             }
@@ -1080,11 +1080,11 @@ double __cdecl ConvertToMB(int bytes)
     return (float)((double)bytes / 1048576.0);
 }
 
-int __cdecl mem_track_compare(unsigned int *elem1, unsigned int *elem2)
+int __cdecl mem_track_compare(uint32_t *elem1, uint32_t *elem2)
 {
-    if (*((unsigned __int8 *)elem1 + 16) < (int)*((unsigned __int8 *)elem2 + 16))
+    if (*((uint8_t *)elem1 + 16) < (int)*((uint8_t *)elem2 + 16))
         return -1;
-    if (*((unsigned __int8 *)elem1 + 16) <= (int)*((unsigned __int8 *)elem2 + 16))
+    if (*((uint8_t *)elem1 + 16) <= (int)*((uint8_t *)elem2 + 16))
         return elem1[2] - elem2[2];
     return 1;
 }

@@ -166,7 +166,7 @@ void __cdecl R_XModelDebug(const DObj_s *obj, int *partBits)
 void __cdecl R_XModelDebugBoxes(const DObj_s *obj, int *partBits)
 {
     DObjAnimMat *boneMatrix; // [esp+0h] [ebp-250h]
-    unsigned int boxEdge; // [esp+4h] [ebp-24Ch]
+    uint32_t boxEdge; // [esp+4h] [ebp-24Ch]
     XBoneInfo *boneInfoArray[128]; // [esp+8h] [ebp-248h] BYREF
     int boneIndex; // [esp+208h] [ebp-48h]
     int boneCount; // [esp+20Ch] [ebp-44h]
@@ -176,7 +176,7 @@ void __cdecl R_XModelDebugBoxes(const DObj_s *obj, int *partBits)
     float org[3]; // [esp+22Ch] [ebp-24h] BYREF
     XBoneInfo *boneInfo; // [esp+238h] [ebp-18h]
     float color[4]; // [esp+23Ch] [ebp-14h] BYREF
-    unsigned int animPartBit; // [esp+24Ch] [ebp-4h]
+    uint32_t animPartBit; // [esp+24Ch] [ebp-4h]
 
     iassert( obj );
     boneMatrix = DObjGetRotTransArray(obj);
@@ -229,7 +229,7 @@ void __cdecl R_XModelDebugAxes(const DObj_s *obj, int *partBits)
     float end[3]; // [esp+3Ch] [ebp-24h] BYREF
     int axis; // [esp+48h] [ebp-18h]
     float color[4]; // [esp+4Ch] [ebp-14h] BYREF
-    unsigned int animPartBit; // [esp+5Ch] [ebp-4h]
+    uint32_t animPartBit; // [esp+5Ch] [ebp-4h]
 
     iassert( obj );
     boneMatrix = DObjGetRotTransArray(obj);
@@ -277,12 +277,12 @@ int __cdecl R_SkinXModel(
     float val,
     __int16 gfxEntIndex)
 {
-    unsigned int startSurfPos; // [esp+2Ch] [ebp-E58h]
+    uint32_t startSurfPos; // [esp+2Ch] [ebp-E58h]
     XSurface* xsurf; // [esp+38h] [ebp-E4Ch]
     int surfaceIndex; // [esp+40h] [ebp-E44h]
-    unsigned __int16* surfPos; // [esp+44h] [ebp-E40h]
-    unsigned __int8 surfBuf[3580]; // [esp+48h] [ebp-E3Ch] BYREF
-    unsigned int hidePartBits[4]; // [esp+E4Ch] [ebp-38h] BYREF
+    uint16_t* surfPos; // [esp+44h] [ebp-E40h]
+    uint8_t surfBuf[3580]; // [esp+48h] [ebp-E3Ch] BYREF
+    uint32_t hidePartBits[4]; // [esp+E4Ch] [ebp-38h] BYREF
     //XSurface* surfaces; // [esp+E5Ch] [ebp-28h]
     XSurface* surfaces; // [esp+E60h] [ebp-24h] BYREF
     int lodForDist; // [esp+E64h] [ebp-20h]
@@ -317,7 +317,7 @@ int __cdecl R_SkinXModel(
     if (obj)
         DObjGetHidePartBits(obj, hidePartBits);
 
-    surfPos = (unsigned __int16*)surfBuf;
+    surfPos = (uint16_t*)surfBuf;
     for (surfaceIndex = 0; surfaceIndex < surfaceCount; ++surfaceIndex)
     {
         xsurf = surfaces + surfaceIndex;
@@ -413,7 +413,7 @@ void __cdecl R_LockSkinnedCache()
         PROF_SCOPED("LockSkinnedCache");
 
         gfxBuf.skinnedCacheLockAddr = (unsigned char *)R_LockVertexBuffer(vb, 0, 0, 0x2000);
-        if (((unsigned int)gfxBuf.skinnedCacheLockAddr & 0xF) != 0)
+        if (((uint32_t)gfxBuf.skinnedCacheLockAddr & 0xF) != 0)
         {
             R_UnlockVertexBuffer(vb);
             gfxBuf.skinnedCacheLockAddr = 0;
@@ -426,13 +426,13 @@ void __cdecl R_LockSkinnedCache()
 
 void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *material)
 {
-    unsigned int NumModels; // r21
+    uint32_t NumModels; // r21
     int v9; // r29
     int v10; // r26
     const XModel *model; // r31
-    unsigned int SurfCount; // r30
+    uint32_t SurfCount; // r30
     Material **originalMaterial; // r31
-    unsigned int v14; // r11
+    uint32_t v14; // r11
 
     iassert( obj );
     iassert( lod >= 0 );
@@ -468,15 +468,15 @@ void R_DObjReplaceMaterial(DObj_s *obj, int lod, int surfaceIndex, Material *mat
 
 void R_DObjGetSurfMaterials(DObj_s *obj, int lod, Material **matHandleArray)
 {
-    unsigned int NumModels; // r21
+    uint32_t NumModels; // r21
     int v7; // r29
-    unsigned int i; // r28
+    uint32_t i; // r28
     const XModel *model; // r30
-    unsigned int SurfCount; // r31
+    uint32_t SurfCount; // r31
     Material *const *material; // r30
     Material *const *v12; // r10
     Material **v13; // r9
-    unsigned int v14; // r11
+    uint32_t v14; // r11
 
     iassert(obj && matHandleArray);
     iassert(lod >= 0);
@@ -505,7 +505,7 @@ void R_DObjGetSurfMaterials(DObj_s *obj, int lod, Material **matHandleArray)
     }
 }
 
-void R_SetIgnorePrecacheErrors(unsigned int ignore)
+void R_SetIgnorePrecacheErrors(uint32_t ignore)
 {
     //rg.ignorePrecacheErrors = (_cntlzw(ignore) & 0x20) == 0;
     rg.ignorePrecacheErrors = ignore;

@@ -86,7 +86,7 @@ int __cdecl R_PickMaterial(
     char *name,
     char *surfaceFlags,
     char *contents,
-    unsigned int charLimit)
+    uint32_t charLimit)
 {
     int v8; // ecx
     char v9; // [esp+4Fh] [ebp-55h]
@@ -115,7 +115,7 @@ int __cdecl R_PickMaterial(
     contents[charLimit - 1] = 0;
     contentsLen = 0;
     v8 = (trace.surfaceFlags & 0x1F00000) >> 20;
-    index = (unsigned __int8)v8;
+    index = (uint8_t)v8;
     if ((_BYTE)v8 && index < 29)
         strncpy(surfaceFlags, infoParms[index - 1].name, charLimit);
     else
@@ -197,7 +197,7 @@ void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport)
     v7 = 1.0 / (double)viewport->width;
     transform_60 = 1.0 / (double)viewport->height;
     transform_56 = &source->viewParms;
-    memset((unsigned __int8*)&identity_52, 0, sizeof(identity_52));
+    memset((uint8_t*)&identity_52, 0, sizeof(identity_52));
     identity_52.m[0][0] = v7 * 2.0;
     identity_52.m[1][1] = transform_60 * -2.0;
     identity_52.m[3][0] = -1.0 - v7;
@@ -209,7 +209,7 @@ void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport)
     memcpy(&transform_56->projectionMatrix, &identity_52, sizeof(transform_56->projectionMatrix));
     memcpy(&transform_56->viewProjectionMatrix, &identity_52, sizeof(transform_56->viewProjectionMatrix));
     memset(
-        (unsigned __int8*)&transform_56->inverseViewProjectionMatrix,
+        (uint8_t*)&transform_56->inverseViewProjectionMatrix,
         0,
         sizeof(transform_56->inverseViewProjectionMatrix));
     ++source->matrixVersions[1];
@@ -291,10 +291,10 @@ void __cdecl R_InitCmdBufSourceState(GfxCmdBufSourceState *source, const GfxCmdB
     iassert(source);
     iassert(input);
 
-    memset((unsigned __int8 *)source, 0, sizeof(GfxCmdBufSourceState));
+    memset((uint8_t *)source, 0, sizeof(GfxCmdBufSourceState));
     qmemcpy(&source->input, input, sizeof(source->input));
 
-    for (unsigned int constant = 0; constant < 0x3A; ++constant)
+    for (uint32_t constant = 0; constant < 0x3A; ++constant)
     {
         if (input == &gfxCmdBufInput || s_codeConstUpdateFreq[constant] != 2 || constant < 0x20)
         {
@@ -347,7 +347,7 @@ void __cdecl R_SetDefaultAlphaTestFunction(GfxCmdBufState *state)
     state->alphaRef = 0;
 }
 
-void __cdecl R_SetDefaultStateBits(unsigned int *stateBits)
+void __cdecl R_SetDefaultStateBits(uint32_t *stateBits)
 {
     *stateBits = 0;
     stateBits[1] = 0;
@@ -360,7 +360,7 @@ void __cdecl R_SetDefaultStateBits(unsigned int *stateBits)
     stateBits[1] = stateBits[1];
 }
 
-void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int samplerIndex, unsigned int samplerState)
+void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, uint32_t samplerIndex, uint32_t samplerState)
 {
     const char *v3; // eax
     const char *v4; // eax
@@ -383,7 +383,7 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
     {
         if (r_logFile && r_logFile->current.integer)
             RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MINFILTER, minFilter )\n");
-        hr = device->SetSamplerState(samplerIndex, D3DSAMP_MINFILTER, (unsigned __int16)(samplerState & 0xF00) >> 8);
+        hr = device->SetSamplerState(samplerIndex, D3DSAMP_MINFILTER, (uint16_t)(samplerState & 0xF00) >> 8);
         if (hr < 0)
         {
             do
@@ -406,7 +406,7 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
         v17 = device->SetSamplerState(
             samplerIndex,
             D3DSAMP_MAGFILTER,
-            (unsigned __int16)(samplerState & 0xF000) >> 12);
+            (uint16_t)(samplerState & 0xF000) >> 12);
         if (v17 < 0)
         {
             do
@@ -422,13 +422,13 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
             } while (alwaysfails);
         }
     } while (alwaysfails);
-    if ((unsigned __int8)samplerState > 1u)
+    if ((uint8_t)samplerState > 1u)
     {
         do
         {
             if (r_logFile && r_logFile->current.integer)
                 RB_LogPrint("device->SetSamplerState( samplerIndex, D3DSAMP_MAXANISOTROPY, anisotropy )\n");
-            v16 = device->SetSamplerState(samplerIndex, D3DSAMP_MAXANISOTROPY, (unsigned __int8)samplerState);
+            v16 = device->SetSamplerState(samplerIndex, D3DSAMP_MAXANISOTROPY, (uint8_t)samplerState);
             if (v16 < 0)
             {
                 do
@@ -552,9 +552,9 @@ void __cdecl R_HW_ForceSamplerState(IDirect3DDevice9 *device, unsigned int sampl
 
 void __cdecl R_InitCmdBufState(GfxCmdBufState *state)
 {
-    unsigned int samplerIndex; // [esp+10h] [ebp-Ch]
+    uint32_t samplerIndex; // [esp+10h] [ebp-Ch]
     IDirect3DDevice9 *device; // [esp+14h] [ebp-8h]
-    unsigned int forceSamplerState; // [esp+18h] [ebp-4h]
+    uint32_t forceSamplerState; // [esp+18h] [ebp-4h]
 
     iassert( state );
     device = state->prim.device;

@@ -8,16 +8,16 @@
 
 struct AnnotatedLightGridPoint // sizeof=0xA
 {                                       // ...
-    unsigned __int16 pos[3];            // ...
+    uint16_t pos[3];            // ...
     GfxLightGridEntry entry;            // ...
 };
 
 struct GfxLightGridEntry_Version15 // sizeof=0x8
 {
-    unsigned int xyzHighBits;
-    unsigned __int8 xyzLowBitsAndPrimaryVis;
-    unsigned __int8 needsTrace;
-    unsigned __int16 colorsIndex;
+    uint32_t xyzHighBits;
+    uint8_t xyzLowBitsAndPrimaryVis;
+    uint8_t needsTrace;
+    uint16_t colorsIndex;
 };
 
 struct DiskGfxCell_Version14 // sizeof=0x34
@@ -37,13 +37,13 @@ struct DiskGfxCell // sizeof=0x70
 {
     float mins[3];
     float maxs[3];
-    unsigned __int16 aabbTreeIndex[2];
+    uint16_t aabbTreeIndex[2];
     int firstPortal;
     int portalCount;
     int firstCullGroup;
     int cullGroupCount;
-    unsigned __int8 reflectionProbeCount;
-    unsigned __int8 reflectionProbes[64];
+    uint8_t reflectionProbeCount;
+    uint8_t reflectionProbes[64];
     // padding byte
     // padding byte
     // padding byte
@@ -57,13 +57,13 @@ struct LightGlobals // sizeof=0x104
 
 struct BspOmniLightCallback // sizeof=0x14
 {                                       // ...
-    const unsigned __int8 *surfaceVisData; // ...
+    const uint8_t *surfaceVisData; // ...
     float position[3];                  // ...
     float radiusSq;                     // ...
 };
 struct BspSpotLightCallback // sizeof=0x64
 {                                       // ...
-    const unsigned __int8 *surfaceVisData; // ...
+    const uint8_t *surfaceVisData; // ...
     float planes[6][4];                 // ...
 };
 
@@ -106,16 +106,16 @@ int __cdecl R_EmitPointLightPartitionSurfs(
 int __cdecl R_GetTechniqueForLightType(const GfxLight *light, const GfxViewInfo *viewInfo);
 void __cdecl R_EmitShadowedLightPartitionSurfs(
     GfxViewInfo *viewInfo,
-    unsigned int lightDrawSurfCount,
+    uint32_t lightDrawSurfCount,
     GfxDrawSurf *lightDrawSurfs,
     GfxDrawSurfListInfo *info);
 
 
 
 // r_light_load_obj
-void __cdecl R_LoadLightGridColors(unsigned int bspVersion);
+void __cdecl R_LoadLightGridColors(uint32_t bspVersion);
 void R_LoadLightGridRowData();
-unsigned __int8 *R_LoadLightGridEntries();
+uint8_t *R_LoadLightGridEntries();
 void R_LoadLightGridHeader();
-void __cdecl R_LoadLightGridPoints_Version15(unsigned int bspVersion);
+void __cdecl R_LoadLightGridPoints_Version15(uint32_t bspVersion);
 GfxLightDef *__cdecl R_LoadLightDef(const char *name);

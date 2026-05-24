@@ -396,10 +396,10 @@ bool __cdecl CL_CDKeyValidate(netadr_t addr)
 //bool __cdecl CL_CDKeyValidate(const char *key, const char *checksum)
 //{
 //    char chs[8]; // [esp+4h] [ebp-1Ch] BYREF
-//    unsigned int crcAcc; // [esp+10h] [ebp-10h]
+//    uint32_t crcAcc; // [esp+10h] [ebp-10h]
 //    int index; // [esp+14h] [ebp-Ch]
 //    int i; // [esp+18h] [ebp-8h]
-//    unsigned int crcAccInit; // [esp+1Ch] [ebp-4h]
+//    uint32_t crcAccInit; // [esp+1Ch] [ebp-4h]
 //
 //    crcAccInit = 0;
 //    crcAcc = 0;
@@ -558,7 +558,7 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
     }
 }
 
-void __cdecl CL_ResetPlayerMuting(unsigned int muteClientIndex)
+void __cdecl CL_ResetPlayerMuting(uint32_t muteClientIndex)
 {
     if (muteClientIndex >= 0x40)
         MyAssertHandler(
@@ -570,7 +570,7 @@ void __cdecl CL_ResetPlayerMuting(unsigned int muteClientIndex)
     s_playerMute[muteClientIndex] = 0;
 }
 
-void __cdecl CL_MutePlayer(int localClientNum, unsigned int muteClientIndex)
+void __cdecl CL_MutePlayer(int localClientNum, uint32_t muteClientIndex)
 {
     const char *v2; // eax
 
@@ -590,7 +590,7 @@ void __cdecl CL_MutePlayer(int localClientNum, unsigned int muteClientIndex)
     Cbuf_AddText(0, v2);
 }
 
-bool __cdecl CL_IsPlayerMuted(int localClientNum, unsigned int muteClientIndex)
+bool __cdecl CL_IsPlayerMuted(int localClientNum, uint32_t muteClientIndex)
 {
     if (muteClientIndex >= 0x40)
         MyAssertHandler(
@@ -604,6 +604,6 @@ bool __cdecl CL_IsPlayerMuted(int localClientNum, unsigned int muteClientIndex)
 
 void __cdecl CL_ClearMutedList()
 {
-    memset((unsigned __int8 *)s_playerMute, 0, sizeof(s_playerMute));
+    memset((uint8_t *)s_playerMute, 0, sizeof(s_playerMute));
 }
 

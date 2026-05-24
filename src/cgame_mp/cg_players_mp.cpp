@@ -556,12 +556,12 @@ void __cdecl CG_ResetPlayerEntity(int32_t localClientNum, cg_s *cgameGlob, centi
             XAnimSetCompleteGoalWeight(obj, cgameGlob->bgs.animScriptData.torsoAnim, 0.0, 0.0, 1.0, 0, 0, 0);
             XAnimSetCompleteGoalWeight(obj, cgameGlob->bgs.animScriptData.legsAnim, 1.0, 0.0, 1.0, 0, 0, 0);
             XAnimSetCompleteGoalWeight(obj, cgameGlob->bgs.animScriptData.turningAnim, 0.0, 0.0, 1.0, 0, 0, 0);
-            memset((unsigned __int8 *)&ci->legs, 0, sizeof(ci->legs));
+            memset((uint8_t *)&ci->legs, 0, sizeof(ci->legs));
             ci->legs.yawAngle = ci->playerAngles[1];
             ci->legs.yawing = 0;
             ci->legs.pitchAngle = 0.0;
             ci->legs.pitching = 0;
-            memset((unsigned __int8 *)&ci->torso, 0, sizeof(ci->torso));
+            memset((uint8_t *)&ci->torso, 0, sizeof(ci->torso));
             ci->torso.yawAngle = ci->playerAngles[1];
             ci->torso.yawing = 0;
             ci->torso.pitchAngle = ci->playerAngles[0];
@@ -725,7 +725,7 @@ int32_t __cdecl CG_GetPlayerClipAmmoCount(int32_t localClientNum)
 void __cdecl CG_UpdateWeaponVisibility(int32_t localClientNum, centity_s *cent)
 {
     bool IsKnifeMeleeAnim; // [esp+0h] [ebp-58h]
-    unsigned __int8 boneIndex; // [esp+7h] [ebp-51h] BYREF
+    uint8_t boneIndex; // [esp+7h] [ebp-51h] BYREF
     DObj_s *obj; // [esp+8h] [ebp-50h]
     float origin[3]; // [esp+Ch] [ebp-4Ch] BYREF
     cg_s *cgameGlob; // [esp+18h] [ebp-40h]

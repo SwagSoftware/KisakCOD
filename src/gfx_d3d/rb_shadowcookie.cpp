@@ -77,7 +77,7 @@ void __cdecl RB_DrawShadowCookies(const GfxViewInfo *viewInfo)
     int needToClearDynamicShadows; // [esp+54h] [ebp-18h]
     const ShadowCookie *cookie; // [esp+58h] [ebp-14h]
     const ShadowCookieList *cookieList; // [esp+60h] [ebp-Ch]
-    unsigned int cookieIter; // [esp+64h] [ebp-8h]
+    uint32_t cookieIter; // [esp+64h] [ebp-8h]
     int receiverSurfCount; // [esp+68h] [ebp-4h]
 
     PROF_SCOPED("SC_DrawReceivers");
@@ -136,7 +136,7 @@ void __cdecl RB_DrawShadowCookies(const GfxViewInfo *viewInfo)
 
 void RB_ShadowCookieOverlay()
 {
-    unsigned int v1; // [esp+2Ch] [ebp-68h] BYREF
+    uint32_t v1; // [esp+2Ch] [ebp-68h] BYREF
     float v2; // [esp+30h] [ebp-64h]
     float v3; // [esp+34h] [ebp-60h]
     __int64 color; // [esp+38h] [ebp-5Ch]

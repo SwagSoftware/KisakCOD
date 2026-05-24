@@ -264,7 +264,7 @@ char *__cdecl I_strlwr(char *s);
 char *__cdecl I_strupr(char *s);
 int __cdecl I_DrawStrlen(const char *str);
 char *__cdecl I_CleanStr(char *string);
-unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character);
+uint8_t __cdecl I_CleanChar(uint8_t character);
 
 inline float I_fmin(float a, float b) { return a < b ? a : b; }
 inline float I_fmax(float a, float b) { return a > b ? a : b; }
@@ -299,7 +299,7 @@ typedef unsigned __int64 ull;
 #else
 #error "unknown compiler"
 #endif
-typedef unsigned int uint;
+typedef uint32_t uint;
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
@@ -529,7 +529,7 @@ union DvarValue
 	}
     bool enabled;
     int integer;
-    unsigned int unsignedInt;
+    uint32_t unsignedInt;
     float value;
     float vector[4];
     const char *string;
@@ -610,14 +610,14 @@ union FloatWriteSwap_union // sizeof=0x4
 {                                       // ...
 	float f;
 	int n;
-	unsigned __int8 b[4];
+	uint8_t b[4];
 };
 
 union FloatReadSwap_union // sizeof=0x4
 {                                       // ...
 	float f;
 	int n;
-	unsigned __int8 b[4];
+	uint8_t b[4];
 };
 
 static const float colorBlack[4] = { 0.0, 0.0, 0.0, 1.0 }; // idb
@@ -645,12 +645,12 @@ static const float colorGreenFaded[4] = { 0.0, 1.0, 0.0, 0.75 }; // idb
 static const float colorRedFaded[4] = { 0.75, 0.25, 0.0, 0.75 }; // idb
 
 void __cdecl TRACK_q_shared();
-unsigned __int8 __cdecl ColorIndex(unsigned __int8 c);
+uint8_t __cdecl ColorIndex(uint8_t c);
 const char *__cdecl Com_GetFilenameSubString(const char *pathname);
 void __cdecl Com_AssembleFilepath(char *folder, char *name, char *extension, char *path, int maxCharCount);
 const char *__cdecl Com_GetExtensionSubString(const char *filename);
 void __cdecl Com_StripExtension(char *in, char *out);
-void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *extension);
+void __cdecl Com_DefaultExtension(char *path, uint32_t maxSize, const char *extension);
 __int16 __cdecl BigShort(__int16 l);
 int __cdecl ShortSwap(__int16 l);
 __int16 __cdecl ShortNoSwap(__int16 l);
@@ -665,7 +665,7 @@ void __cdecl Swap_InitBigEndian();
 void __cdecl Swap_Init();
 
 
-int Com_sprintf(char *dest, unsigned int size, const char *fmt, ...);
+int Com_sprintf(char *dest, uint32_t size, const char *fmt, ...);
 int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...);
 
 bool __cdecl CanKeepStringPointer(const char *string);
@@ -678,26 +678,26 @@ bool __cdecl Info_Validate(const char *s);
 void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value);
 void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value);
 bool __cdecl ParseConfigStringToStruct(
-	unsigned __int8 *pStruct,
+	uint8_t *pStruct,
 	const cspField_t *pFieldList,
 	int iNumFields,
 	char *pszBuffer,
 	int iMaxFieldTypes,
-	int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
-	void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *));
+	int(__cdecl *parseSpecialFieldType)(uint8_t *, const char *, const int),
+	void(__cdecl *parseStrcpy)(uint8_t *, const char *));
 bool __cdecl ParseConfigStringToStructCustomSize(
-	unsigned __int8 *pStruct,
+	uint8_t *pStruct,
 	const cspField_t *pFieldList,
 	int iNumFields,
 	char *pszBuffer,
 	int iMaxFieldTypes,
-	int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
-	void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *));
+	int(__cdecl *parseSpecialFieldType)(uint8_t *, const char *, const int),
+	void(__cdecl *parseStrcpy)(uint8_t *, const char *));
 double __cdecl GetLeanFraction(float fFrac);
 double __cdecl UnGetLeanFraction(float fFrac);
 void __cdecl AddLeanToPosition(float *position, float fViewYaw, float fLeanFrac, float fViewRoll, float fLeanDist);
 bool __cdecl Com_IsLegacyXModelName(const char *name);
-unsigned int __cdecl LongNoSwap(unsigned int color);
+uint32_t __cdecl LongNoSwap(uint32_t color);
 
 #define arr_esize(a) (sizeof((a)[0]))
 #define arr_cnt(a) (sizeof(a)/arr_esize(a))
@@ -744,10 +744,10 @@ struct trace_t // sizeof=0x2C
 	int contents;                       // ...
 	const char *material;               // ...
 	TraceHitType hitType;               // ...
-	unsigned __int16 hitId;
-	unsigned __int16 modelIndex;        // ...
-	unsigned __int16 partName;          // ...
-	unsigned __int16 partGroup;         // ...
+	uint16_t hitId;
+	uint16_t modelIndex;        // ...
+	uint16_t partName;          // ...
+	uint16_t partGroup;         // ...
 	bool allsolid;                      // ...
 	bool startsolid;                    // ...
 	bool walkable;                      // ...
@@ -755,8 +755,8 @@ struct trace_t // sizeof=0x2C
 };
 
 // win_shared
-unsigned int __cdecl Sys_Milliseconds();
-unsigned int __cdecl Sys_MillisecondsRaw();
+uint32_t __cdecl Sys_Milliseconds();
+uint32_t __cdecl Sys_MillisecondsRaw();
 void __cdecl Sys_SnapVector(float *v);
 
 // com_shared
@@ -777,9 +777,9 @@ char __cdecl Com_FilterPath(const char *filter, const char *name, int casesensit
 int __cdecl Com_HashKey(const char *string, int maxlen);
 int __cdecl Com_RealTime(qtime_s *qtime);
 //void __cdecl Com_Memcpy(char *dest, char *src, int count);
-//void __cdecl Com_Memset(unsigned int *dest, int val, int count);
+//void __cdecl Com_Memset(uint32_t *dest, int val, int count);
 
-inline bool __cdecl Com_BitCheckAssert(const unsigned int *array, int bitNum, int size)
+inline bool __cdecl Com_BitCheckAssert(const uint32_t *array, int bitNum, int size)
 {
 	iassert(array);
 	iassert(bitNum < (8 * size));
@@ -787,7 +787,7 @@ inline bool __cdecl Com_BitCheckAssert(const unsigned int *array, int bitNum, in
 	return (array[bitNum / 32] & (1 << (bitNum & 31))) != 0;
 }
 
-inline void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size)
+inline void __cdecl Com_BitClearAssert(uint32_t *array, int bitNum, int size)
 {
 	iassert(array);
 	iassert(bitNum < (8 * size));
@@ -795,7 +795,7 @@ inline void __cdecl Com_BitClearAssert(unsigned int *array, int bitNum, int size
 	array[bitNum / 32] &= ~(1 << (bitNum & 31));
 }
 
-inline void __cdecl Com_BitSetAssert(unsigned int *array, int bitNum, int size)
+inline void __cdecl Com_BitSetAssert(uint32_t *array, int bitNum, int size)
 {
 	iassert(array);
 	iassert(bitNum < (8 * size));

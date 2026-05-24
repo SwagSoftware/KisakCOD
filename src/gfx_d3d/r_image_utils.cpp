@@ -1,24 +1,24 @@
 #include "r_image.h"
 
 void __cdecl R_DownsampleMipMapBilinear(
-    const unsigned __int8 *src,
+    const uint8_t *src,
     int srcWidth,
     int srcHeight,
     int texelPitch,
-    unsigned __int8 *dst)
+    uint8_t *dst)
 {
     int srcRowPitch; // [esp+0h] [ebp-24h]
     int channelIndex; // [esp+4h] [ebp-20h]
     int channelIndexa; // [esp+4h] [ebp-20h]
-    unsigned __int8 *dstPos; // [esp+8h] [ebp-1Ch]
-    unsigned __int8 *dstPosa; // [esp+8h] [ebp-1Ch]
+    uint8_t *dstPos; // [esp+8h] [ebp-1Ch]
+    uint8_t *dstPosa; // [esp+8h] [ebp-1Ch]
     int dstWidth; // [esp+Ch] [ebp-18h]
     int dstWidtha; // [esp+Ch] [ebp-18h]
     int dstHeight; // [esp+10h] [ebp-14h]
     int colIndex; // [esp+14h] [ebp-10h]
     int colIndexa; // [esp+14h] [ebp-10h]
-    const unsigned __int8 *srcPos; // [esp+1Ch] [ebp-8h]
-    const unsigned __int8 *srcPosa; // [esp+1Ch] [ebp-8h]
+    const uint8_t *srcPos; // [esp+1Ch] [ebp-8h]
+    const uint8_t *srcPosa; // [esp+1Ch] [ebp-8h]
     int rowIndex; // [esp+20h] [ebp-4h]
 
     iassert( src );

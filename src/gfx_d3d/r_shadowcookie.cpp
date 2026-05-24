@@ -17,7 +17,7 @@
 
 struct ShadowReceiverCallback // sizeof=0x4
 {                                       // ...
-    unsigned __int8 *surfaceVisData;    // ...
+    uint8_t *surfaceVisData;    // ...
 };
 struct ShadowCookieGlob // sizeof=0x8
 {                                       // ...
@@ -36,9 +36,9 @@ void __cdecl R_EmitShadowCookieSurfs(GfxViewInfo *viewInfo)
 {
     ShadowCookie *cookie; // [esp+14h] [ebp-28h]
     int firstCasterDrawSurf; // [esp+1Ch] [ebp-20h]
-    unsigned int cookieIndex; // [esp+20h] [ebp-1Ch]
+    uint32_t cookieIndex; // [esp+20h] [ebp-1Ch]
     int firstReceiverDrawSurf; // [esp+24h] [ebp-18h]
-    unsigned int casterDrawSurfCount; // [esp+2Ch] [ebp-10h]
+    uint32_t casterDrawSurfCount; // [esp+2Ch] [ebp-10h]
     GfxDrawSurf *casterDrawSurfs; // [esp+34h] [ebp-8h]
     GfxDrawSurfListInfo *casterInfo;
     GfxDrawSurfListInfo *receiverInfo;
@@ -95,13 +95,13 @@ void __cdecl R_PopulateCandidates(const GfxViewParms *viewParmsDraw, ShadowCandi
     float diff[3]; // [esp+4h] [ebp-38h] BYREF
     ShadowCandidate *worstCandidate; // [esp+10h] [ebp-2Ch]
     float entityMajorAxisLength; // [esp+14h] [ebp-28h]
-    unsigned int sceneEntCount; // [esp+18h] [ebp-24h]
+    uint32_t sceneEntCount; // [esp+18h] [ebp-24h]
     int shadowHint; // [esp+1Ch] [ebp-20h]
     GfxEntity *gfxEnt; // [esp+20h] [ebp-1Ch]
-    unsigned int sceneEntIndex; // [esp+24h] [ebp-18h]
+    uint32_t sceneEntIndex; // [esp+24h] [ebp-18h]
     GfxSceneEntity *sceneEnt; // [esp+28h] [ebp-14h]
-    unsigned int gfxEntIndex; // [esp+2Ch] [ebp-10h]
-    unsigned int candidateIter; // [esp+30h] [ebp-Ch]
+    uint32_t gfxEntIndex; // [esp+2Ch] [ebp-10h]
+    uint32_t candidateIter; // [esp+30h] [ebp-Ch]
     float entityDistance; // [esp+34h] [ebp-8h]
     float entityWeight; // [esp+38h] [ebp-4h]
 
@@ -244,7 +244,7 @@ void __cdecl R_AddCasters(
     ShadowCandidate *candidates,
     ShadowCookieList *shadowCookieList)
 {
-    unsigned int unsignedInt; // [esp+8h] [ebp-38h]
+    uint32_t unsignedInt; // [esp+8h] [ebp-38h]
     float timeDeltaSeconds; // [esp+18h] [ebp-28h]
     int localClientCount; // [esp+1Ch] [ebp-24h]
     float fadePoint; // [esp+20h] [ebp-20h]
@@ -298,7 +298,7 @@ void __cdecl R_AddCasters(
     iassert( sc_wantCountMargin );
     if (candidateIter <= sc_wantCountMargin->current.integer + 12 + sc_wantCount->current.integer)
     {
-        //if (candidateIter < sc_wantCount->current.integer - *(unsigned int *)(LODWORD(r_lightTweakSunDirection.vector[2]) + 12))
+        //if (candidateIter < sc_wantCount->current.integer - *(uint32_t *)(LODWORD(r_lightTweakSunDirection.vector[2]) + 12))
         if (candidateIter < sc_wantCount->current.integer - sc_wantCountMargin->current.integer + 12)
             moveWeightCap = 1;
     }
@@ -335,7 +335,7 @@ LABEL_24:
 void __cdecl R_AddShadowCookie(
     int localClientNum,
     const GfxViewParms *viewParms,
-    unsigned int sceneEntIndex,
+    uint32_t sceneEntIndex,
     float fade,
     ShadowCookieList *cookieList)
 {
@@ -567,9 +567,9 @@ void __cdecl R_GenerateShadowCookieViewParms(float *modelMin, float *modelMax, G
 
 void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
 {
-    unsigned __int16 triSurfList[2]; // [esp+A0h] [ebp-64h] BYREF
+    uint16_t triSurfList[2]; // [esp+A0h] [ebp-64h] BYREF
     ShadowCookie *cookie; // [esp+A4h] [ebp-60h]
-    unsigned int surfIndex; // [esp+A8h] [ebp-5Ch]
+    uint32_t surfIndex; // [esp+A8h] [ebp-5Ch]
     float start[3]; // [esp+ACh] [ebp-58h] BYREF
     float end[3]; // [esp+B8h] [ebp-4Ch] BYREF
     float radius; // [esp+C4h] [ebp-40h]
@@ -580,8 +580,8 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
     GfxSurface **surfaces; // [esp+D8h] [ebp-2Ch]
     GfxDrawSurf *drawSurfs; // [esp+DCh] [ebp-28h]
     GfxDrawSurf *surfaceMaterials; // [esp+E0h] [ebp-24h]
-    unsigned int listSurfIndex; // [esp+E4h] [ebp-20h]
-    unsigned int cookieDrawSurfCount; // [esp+E8h] [ebp-1Ch]
+    uint32_t listSurfIndex; // [esp+E4h] [ebp-20h]
+    uint32_t cookieDrawSurfCount; // [esp+E8h] [ebp-1Ch]
     GfxBspDrawSurfData surfData; // [esp+ECh] [ebp-18h] BYREF
     int savedregs; // [esp+104h] [ebp+0h] BYREF
 
@@ -637,7 +637,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
                         rgp.world->surfaceCount);
                 surfIndex = surfaces[listSurfIndex] - rgp.world->dpvs.surfaces;
                 triSurfList[0] = surfIndex;
-                R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (unsigned __int8 *)triSurfList, 1u, &surfData);
+                R_AddBspDrawSurfs(surfaceMaterials[surfIndex], (uint8_t *)triSurfList, 1u, &surfData);
             }
             R_EndCmdBuf(&surfData.delayedCmdBuf);
             scene.cookie[cookieIndex].drawSurfCount = surfData.drawSurfList.current - scene.cookie[cookieIndex].drawSurfs;
@@ -645,7 +645,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
     }
 }
 
-bool __cdecl R_AllowBspShadowReceiver(int surfIndex, unsigned int *shadowReceiverCallbackAsVoid)
+bool __cdecl R_AllowBspShadowReceiver(int surfIndex, uint32_t *shadowReceiverCallbackAsVoid)
 {
     return *(_BYTE *)(*shadowReceiverCallbackAsVoid + surfIndex)
         && Material_GetTechnique(rgp.world->dpvs.surfaces[surfIndex].material, TECHNIQUE_SHADOWCOOKIE_RECEIVER) != 0;
@@ -653,11 +653,11 @@ bool __cdecl R_AllowBspShadowReceiver(int surfIndex, unsigned int *shadowReceive
 
 void __cdecl R_GenerateSceneEntShadowReceivers(ShadowCookieList *shadowCookieList)
 {
-    volatile unsigned int sceneEntCount; // [esp+48h] [ebp-28h]
-    unsigned int cookieIndex; // [esp+50h] [ebp-20h]
-    unsigned int sceneEntIndex; // [esp+54h] [ebp-1Ch]
+    volatile uint32_t sceneEntCount; // [esp+48h] [ebp-28h]
+    uint32_t cookieIndex; // [esp+50h] [ebp-20h]
+    uint32_t sceneEntIndex; // [esp+54h] [ebp-1Ch]
     GfxSceneEntity *sceneEnt; // [esp+58h] [ebp-18h]
-    unsigned int cookieCount; // [esp+5Ch] [ebp-14h]
+    uint32_t cookieCount; // [esp+5Ch] [ebp-14h]
     volatile int cookieDrawSurfCount; // [esp+68h] [ebp-8h]
 
     PROF_SCOPED("R_GenerateSceneEntShadowReceivers");

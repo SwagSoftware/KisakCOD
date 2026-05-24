@@ -33,7 +33,7 @@ bool __cdecl RB_IsGpuFinished()
                     v1);
             } while (alwaysfails);
         }
-        if ((unsigned int)hr > 1)
+        if ((uint32_t)hr > 1)
             MyAssertHandler(
                 ".\\r_setstate_d3d.cpp",
                 30,

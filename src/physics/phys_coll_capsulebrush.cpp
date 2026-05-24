@@ -8,7 +8,7 @@ LocalContactData localContacts[32];
 void __cdecl Phys_InfoToCapsule(const objInfo *info, Capsule *capsule)
 {
     float scale; // [esp+0h] [ebp-20h]
-    unsigned int dir; // [esp+1Ch] [ebp-4h]
+    uint32_t dir; // [esp+1Ch] [ebp-4h]
 
     dir = info->cylDirection - 1;
     if (dir > 2)
@@ -131,14 +131,14 @@ void __cdecl Phys_CollideCapsuleWithBrush(const cbrush_t *brush, const objInfo *
     cplane_s *v4; // [esp+30h] [ebp-D58h]
     float plane[4]; // [esp+3Ch] [ebp-D4Ch] BYREF
     float v6; // [esp+4Ch] [ebp-D3Ch]
-    unsigned int i; // [esp+50h] [ebp-D38h]
+    uint32_t i; // [esp+50h] [ebp-D38h]
     float v8; // [esp+54h] [ebp-D34h]
     float axialPlanes_1[6][4]; // [esp+58h] [ebp-D30h] BYREF
     Poly outWinding; // [esp+B8h] [ebp-CD0h] BYREF
-    unsigned int tri; // [esp+C0h] [ebp-CC8h]
+    uint32_t tri; // [esp+C0h] [ebp-CC8h]
     int surfaceFlags; // [esp+C4h] [ebp-CC4h]
     float brushPlane[4];
-    unsigned int ptCount; // [esp+D8h] [ebp-CB0h]
+    uint32_t ptCount; // [esp+D8h] [ebp-CB0h]
     int brushSideIndex; // [esp+DCh] [ebp-CACh]
     Capsule capsule; // [esp+E0h] [ebp-CA8h] BYREF
     float *pts; // [esp+120h] [ebp-C68h]
@@ -936,7 +936,7 @@ bool __cdecl Phys_TestCapsulePlane(const float *plane, const Capsule *capsule)
 void __cdecl Phys_CollideCapsuleWithTriangleList(
     const unsigned __int16 *a_indices,
     const float (*verts)[3],
-    unsigned int triCount,
+    uint32_t triCount,
     const objInfo *info,
     int surfaceFlags,
     Results *results)
@@ -950,7 +950,7 @@ void __cdecl Phys_CollideCapsuleWithTriangleList(
     Capsule capsule; // [esp+F8h] [ebp-58h] BYREF
     float radius; // [esp+13Ch] [ebp-14h]
     const unsigned __int16 *indices; // [esp+140h] [ebp-10h]
-    unsigned int triIndex; // [esp+144h] [ebp-Ch]
+    uint32_t triIndex; // [esp+144h] [ebp-Ch]
     Poly triPoly; // [esp+148h] [ebp-8h]
 
     if (results->contactCount < results->maxContacts)

@@ -125,7 +125,7 @@ bool __cdecl CM_CullBox(const traceWork_t *tw, const float *origin, const float 
     return v5 > (double)v4;
 }
 
-void __cdecl CM_TracePointThroughTriangle(const traceWork_t *tw, const unsigned __int16 *indices, trace_t *trace)
+void __cdecl CM_TracePointThroughTriangle(const traceWork_t *tw, const uint16_t *indices, trace_t *trace)
 {
     const float *v0; // [esp+8h] [ebp-50h]
     float t; // [esp+Ch] [ebp-4Ch]
@@ -176,7 +176,7 @@ void __cdecl CM_TracePointThroughTriangle(const traceWork_t *tw, const unsigned 
 void __cdecl CM_TraceCapsuleThroughTriangle(
     const traceWork_t *tw,
     int triIndex,
-    const unsigned __int16 *indices,
+    const uint16_t *indices,
     trace_t *trace)
 {
     const char *v4; // eax
@@ -913,7 +913,7 @@ void __cdecl CM_PositionTestInAabbTree_r(const traceWork_t *tw, CollisionAabbTre
 {
     int childIndex; // [esp+0h] [ebp-1Ch]
     int triCount; // [esp+4h] [ebp-18h]
-    unsigned __int16 *indices; // [esp+8h] [ebp-14h]
+    uint16_t *indices; // [esp+8h] [ebp-14h]
     int partitionIndex; // [esp+Ch] [ebp-10h]
     CollisionAabbTree *child; // [esp+10h] [ebp-Ch]
     int checkStamp; // [esp+14h] [ebp-8h]
@@ -951,7 +951,7 @@ void __cdecl CM_PositionTestInAabbTree_r(const traceWork_t *tw, CollisionAabbTre
     }
 }
 
-void __cdecl CM_PositionTestCapsuleInTriangle(const traceWork_t *tw, const unsigned __int16 *indices, trace_t *trace)
+void __cdecl CM_PositionTestCapsuleInTriangle(const traceWork_t *tw, const uint16_t *indices, trace_t *trace)
 {
     float v3; // [esp+8h] [ebp-3Ch]
     float radiusSq; // [esp+Ch] [ebp-38h]
@@ -996,7 +996,7 @@ void __cdecl CM_PositionTestCapsuleInTriangle(const traceWork_t *tw, const unsig
     }
 }
 
-double __cdecl CM_DistanceSquaredFromPointToTriangle(const float *pt, const unsigned __int16 *indices)
+double __cdecl CM_DistanceSquaredFromPointToTriangle(const float *pt, const uint16_t *indices)
 {
     float diff[3]; // [esp+10h] [ebp-48h] BYREF
     const float *v0; // [esp+1Ch] [ebp-3Ch]
@@ -1165,7 +1165,7 @@ bool __cdecl CM_DoesCapsuleIntersectTriangle(
     const float *start,
     const float *end,
     float radiusSq,
-    const unsigned __int16 *indices)
+    const uint16_t *indices)
 {
     double v4; // st7
     double v5; // st7

@@ -192,7 +192,7 @@ double __cdecl FX_GetClientVisibility(int32_t localClientNum, const float *start
 void __cdecl FX_TrailElem_CompressBasis(const float (*inBasis)[3], char (*outBasis)[3]);
 
 double FX_GetServerVisibility(const float *start, const float *end);
-FxEffect *FX_GetClientEffectByIndex(int clientIndex, unsigned int index);
+FxEffect *FX_GetClientEffectByIndex(int clientIndex, uint32_t index);
 int FX_GetClientEffectIndex(int clientIndex, FxEffect *effect);
 
 extern FxSystem fx_systemPool[1];

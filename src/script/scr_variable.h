@@ -80,10 +80,10 @@ enum var_stat_t
 struct VariableStackBuffer // sizeof=0xC
 {
     const char *pos;
-    unsigned __int16 size;
-    unsigned __int16 bufLen;
-    unsigned __int16 localId;
-    unsigned __int8 time;
+    uint16_t size;
+    uint16_t bufLen;
+    uint16_t localId;
+    uint8_t time;
     char buf[1];
 };
 static_assert(sizeof(VariableStackBuffer) == 0xC);
@@ -113,12 +113,12 @@ union VariableUnion // sizeof=0x4
 
     int intValue;
     float floatValue;
-    unsigned int stringValue;
+    uint32_t stringValue;
     const float *vectorValue;
     const char *codePosValue;
-    unsigned int pointerValue;
+    uint32_t pointerValue;
     VariableStackBuffer *stackValue;
-    unsigned int entityOffset;
+    uint32_t entityOffset;
 };
 static_assert(sizeof(VariableUnion) == 0x4);
 
@@ -132,30 +132,30 @@ static_assert(sizeof(VariableValue) == 0x8);
 
 union ObjectInfo_u // sizeof=0x2
 {                                       // ...
-    unsigned __int16 size;
-    unsigned __int16 entnum;
-    unsigned __int16 nextEntId;
-    unsigned __int16 self;
+    uint16_t size;
+    uint16_t entnum;
+    uint16_t nextEntId;
+    uint16_t self;
 };
 static_assert(sizeof(ObjectInfo_u) == 0x2);
 
 struct ObjectInfo // sizeof=0x4
 {                                       // ...
-    unsigned __int16 refCount;
+    uint16_t refCount;
     ObjectInfo_u u;
 };
 static_assert(sizeof(ObjectInfo) == 0x4);
 
 union Variable_u // sizeof=0x2
 {                                       // ...
-    unsigned __int16 prev;
-    unsigned __int16 prevSibling;
+    uint16_t prev;
+    uint16_t prevSibling;
 };
 static_assert(sizeof(Variable_u) == 0x2);
 
 struct Variable // sizeof=0x4
 {                                       // ...
-    unsigned __int16 id;                // ...
+    uint16_t id;                // ...
     Variable_u u;                       // ...
 };
 static_assert(sizeof(Variable) == 0x4);
@@ -175,7 +175,7 @@ union VariableValueInternal_u // sizeof=0x4
         u.intValue = 0;
     }
 
-    unsigned __int16 next;
+    uint16_t next;
     VariableUnion u;
     ObjectInfo o;
 };
@@ -183,20 +183,20 @@ static_assert(sizeof(VariableValueInternal_u) == 0x4);
 
 union VariableValueInternal_w // sizeof=0x4
 {                                       // ...
-    unsigned int status;
-    unsigned int type;
-    unsigned int name;
-    unsigned int classnum;
-    unsigned int notifyName;
-    unsigned int waitTime;
-    unsigned int parentLocalId;
+    uint32_t status;
+    uint32_t type;
+    uint32_t name;
+    uint32_t classnum;
+    uint32_t notifyName;
+    uint32_t waitTime;
+    uint32_t parentLocalId;
 };
 static_assert(sizeof(VariableValueInternal_w) == 0x4);
 
 union VariableValueInternal_v // sizeof=0x2
 {                                       // ...
-    unsigned __int16 next;
-    unsigned __int16 index;
+    uint16_t next;
+    uint16_t index;
 };
 static_assert(sizeof(VariableValueInternal_v) == 0x2);
 
@@ -206,15 +206,15 @@ struct VariableValueInternal // sizeof=0x10
     VariableValueInternal_u u;          // ...
     VariableValueInternal_w w;          // ...
     VariableValueInternal_v v;          // ...
-    unsigned __int16 nextSibling;       // ...
+    uint16_t nextSibling;       // ...
 };
 static_assert(sizeof(VariableValueInternal) == 0x10);
 
 struct scrVarDebugPub_t // sizeof=0xE0004
 {                                       // ...
     const char* varUsage[0x18000];
-    unsigned __int16 extRefCount[0x8000];
-    unsigned __int16 refCount[0x8000];
+    uint16_t extRefCount[0x8000];
+    uint16_t refCount[0x8000];
     int leakCount[0x18000];
     bool dummy;
     // padding byte
@@ -241,22 +241,22 @@ struct scr_entref_t // sizeof=0x4
         entnum = i;
         classnum = i;
     }
-    unsigned __int16 entnum;            // ...
-    unsigned __int16 classnum;          // ...
+    uint16_t entnum;            // ...
+    uint16_t classnum;          // ...
 };
 static_assert(sizeof(scr_entref_t) == 0x4);
 
 struct scr_classStruct_t // sizeof=0xC
 {
-    scr_classStruct_t(unsigned __int16 _id, unsigned __int16 _entArrayId, char _charID, const char* _name)
+    scr_classStruct_t(uint16_t _id, uint16_t _entArrayId, char _charID, const char* _name)
     {
         id = _id;
         entArrayId = _entArrayId;
         charId = _charID;
         name = _name;
     }
-    unsigned __int16 id;
-    unsigned __int16 entArrayId;
+    uint16_t id;
+    uint16_t entArrayId;
     char charId;
     // padding byte
     // padding byte
@@ -279,28 +279,28 @@ void __cdecl Scr_Cleanup();
 bool  IsObject(VariableValueInternal* entryValue);
 bool  IsObject(VariableValue* value);
 void  Scr_InitVariables(void);
-void  Scr_InitVariableRange(unsigned int begin, unsigned int end);
+void  Scr_InitVariableRange(uint32_t begin, uint32_t end);
 void  Scr_InitClassMap(void);
-unsigned int  Scr_GetNumScriptVars(void);
-unsigned int  GetVariableKeyObject(unsigned int id);
-unsigned int  Scr_GetVarId(unsigned int index);
-void  Scr_SetThreadNotifyName(unsigned int startLocalId, unsigned int stringValue);
-unsigned short  Scr_GetThreadNotifyName(unsigned int startLocalId);
-void  Scr_SetThreadWaitTime(unsigned int startLocalId, unsigned int waitTime);
-void  Scr_ClearWaitTime(unsigned int startLocalId);
-unsigned int  Scr_GetThreadWaitTime(unsigned int startLocalId);
-unsigned int  GetParentLocalId(unsigned int threadId);
-unsigned int  GetSafeParentLocalId(unsigned int threadId);
-unsigned int  GetStartLocalId(unsigned int);
-unsigned int  AllocValue(void);
-unsigned int  AllocObject(void);
-unsigned int  Scr_AllocArray(void);
-unsigned int  AllocThread(unsigned int self);
-unsigned int  AllocChildThread(unsigned int self, unsigned int parentLocalId);
-unsigned int  Scr_GetSelf(unsigned int threadId);
-void  AddRefToObject(unsigned int id);
-void  RemoveRefToEmptyObject(unsigned int id);
-int  Scr_GetRefCountToObject(unsigned int id);
+uint32_t  Scr_GetNumScriptVars(void);
+uint32_t  GetVariableKeyObject(uint32_t id);
+uint32_t  Scr_GetVarId(uint32_t index);
+void  Scr_SetThreadNotifyName(uint32_t startLocalId, uint32_t stringValue);
+unsigned short  Scr_GetThreadNotifyName(uint32_t startLocalId);
+void  Scr_SetThreadWaitTime(uint32_t startLocalId, uint32_t waitTime);
+void  Scr_ClearWaitTime(uint32_t startLocalId);
+uint32_t  Scr_GetThreadWaitTime(uint32_t startLocalId);
+uint32_t  GetParentLocalId(uint32_t threadId);
+uint32_t  GetSafeParentLocalId(uint32_t threadId);
+uint32_t  GetStartLocalId(uint32_t);
+uint32_t  AllocValue(void);
+uint32_t  AllocObject(void);
+uint32_t  Scr_AllocArray(void);
+uint32_t  AllocThread(uint32_t self);
+uint32_t  AllocChildThread(uint32_t self, uint32_t parentLocalId);
+uint32_t  Scr_GetSelf(uint32_t threadId);
+void  AddRefToObject(uint32_t id);
+void  RemoveRefToEmptyObject(uint32_t id);
+int  Scr_GetRefCountToObject(uint32_t id);
 float const*  Scr_AllocVector(float const* v);
 void  AddRefToVector(float const* vectorValue);
 void  RemoveRefToVector(float const* vectorValue);
@@ -310,45 +310,45 @@ inline void RemoveRefToValue(VariableValue *value)
 {
     RemoveRefToValue(value->type, value->u);
 }
-bool  IsValidArrayIndex(unsigned int unsignedValue);
-unsigned int  GetInternalVariableIndex(unsigned int unsignedValue);
-unsigned int  FindArrayVariable(unsigned int parentId, int intValue);
-unsigned int  FindVariable(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  FindObjectVariable(unsigned int parentId, unsigned int id);
-struct VariableValue  Scr_GetArrayIndexValue(unsigned int name);
-void  SetVariableValue(unsigned int id, struct VariableValue* value);
-void  SetNewVariableValue(unsigned int id, struct VariableValue* value);
-VariableValueInternal_u*  GetVariableValueAddress(unsigned int id);
-void  ClearVariableValue(unsigned int id);
-unsigned int Scr_EvalVariableObject(unsigned int id);
-unsigned int  GetArraySize(unsigned int id);
-unsigned int  FindFirstSibling(unsigned int id);
-unsigned int  FindNextSibling(unsigned int id);
-unsigned int  FindLastSibling(unsigned int parentId);
-unsigned int  FindPrevSibling(unsigned int index);
-unsigned int  GetVariableName(unsigned int id);
-unsigned int GetObject(unsigned int id);
-unsigned int GetArray(unsigned int id);
-unsigned int FindObject(unsigned int id);
-bool  IsFieldObject(unsigned int id);
-int  Scr_IsThreadAlive(unsigned int);
-bool  IsObjectFree(unsigned int id);
-Vartype_t GetValueType(unsigned int id);
-unsigned int GetObjectType(unsigned int id);
-void  Scr_SetClassMap(unsigned int classnum);
-int Scr_GetOffset(unsigned int classnum, const char* name);
-unsigned int FindEntityId(unsigned int entnum, unsigned int classnum);
-void  SetEmptyArray(unsigned int parentId);
-void  Scr_AddArrayKeys(unsigned int parentId);
-scr_entref_t Scr_GetEntityIdRef(unsigned int entId);
-unsigned int  Scr_FindField(char const* name, int* type);
+bool  IsValidArrayIndex(uint32_t unsignedValue);
+uint32_t  GetInternalVariableIndex(uint32_t unsignedValue);
+uint32_t  FindArrayVariable(uint32_t parentId, int intValue);
+uint32_t  FindVariable(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  FindObjectVariable(uint32_t parentId, uint32_t id);
+struct VariableValue  Scr_GetArrayIndexValue(uint32_t name);
+void  SetVariableValue(uint32_t id, struct VariableValue* value);
+void  SetNewVariableValue(uint32_t id, struct VariableValue* value);
+VariableValueInternal_u*  GetVariableValueAddress(uint32_t id);
+void  ClearVariableValue(uint32_t id);
+uint32_t Scr_EvalVariableObject(uint32_t id);
+uint32_t  GetArraySize(uint32_t id);
+uint32_t  FindFirstSibling(uint32_t id);
+uint32_t  FindNextSibling(uint32_t id);
+uint32_t  FindLastSibling(uint32_t parentId);
+uint32_t  FindPrevSibling(uint32_t index);
+uint32_t  GetVariableName(uint32_t id);
+uint32_t GetObject(uint32_t id);
+uint32_t GetArray(uint32_t id);
+uint32_t FindObject(uint32_t id);
+bool  IsFieldObject(uint32_t id);
+int  Scr_IsThreadAlive(uint32_t);
+bool  IsObjectFree(uint32_t id);
+Vartype_t GetValueType(uint32_t id);
+uint32_t GetObjectType(uint32_t id);
+void  Scr_SetClassMap(uint32_t classnum);
+int Scr_GetOffset(uint32_t classnum, const char* name);
+uint32_t FindEntityId(uint32_t entnum, uint32_t classnum);
+void  SetEmptyArray(uint32_t parentId);
+void  Scr_AddArrayKeys(uint32_t parentId);
+scr_entref_t Scr_GetEntityIdRef(uint32_t entId);
+uint32_t  Scr_FindField(char const* name, int* type);
 void  Scr_AddFields(char const* path, char const* extension);
 void  Scr_AllocGameVariable(void);
 //void  Scr_GetChecksum(int* const);
 int  Scr_GetClassnumForCharId(char charId);
-//unsigned int  Scr_InitStringSet(void);
-unsigned int  Scr_FindAllThreads(unsigned int selfId, unsigned int* threads, unsigned int localId);
-unsigned int  Scr_FindAllEndons(unsigned int threadId, unsigned int* names);
+//uint32_t  Scr_InitStringSet(void);
+uint32_t  Scr_FindAllThreads(uint32_t selfId, uint32_t* threads, uint32_t localId);
+uint32_t  Scr_FindAllEndons(uint32_t threadId, uint32_t* names);
 //bool  CheckReferences(void);
 
 void  Scr_DumpScriptVariables(bool spreadsheet,
@@ -364,38 +364,38 @@ inline void Scr_DumpScriptVariablesDefault(void)
 {
     Scr_DumpScriptVariables(0, 0, 0, 0, 0, 0, 0, 0);
 }
-unsigned int  GetVariableIndexInternal(unsigned int parentId, unsigned int name);
-void  ClearObject(unsigned int parentId);
-void  Scr_RemoveThreadNotifyName(unsigned int startLocalId);
-//void  Scr_RemoveThreadEmptyNotifyName(unsigned int startLocalId);
-void  FreeValue(unsigned int id);
-unsigned int  GetArrayVariableIndex(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  Scr_GetVariableFieldIndex(unsigned int parentId, unsigned int name);
-unsigned int  Scr_FindAllVariableField(unsigned int parentId, unsigned int* names);
-unsigned int  GetArrayVariable(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  GetNewArrayVariable(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  GetVariable(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  GetNewVariable(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  GetObjectVariable(unsigned int parentId, unsigned int id);
-unsigned int  GetNewObjectVariable(unsigned int parentId, unsigned int id);
-unsigned int  GetNewObjectVariableReverse(unsigned int parentId, unsigned int id);
-void  RemoveVariable(unsigned int parentId, unsigned int unsignedValue);
-void  RemoveNextVariable(unsigned int parentId);
-void  RemoveObjectVariable(unsigned int parentId, unsigned int id);
-void  SafeRemoveVariable(unsigned int parentId, unsigned int unsignedValue);
-void  RemoveVariableValue(unsigned int parentId, unsigned int index);
-void  SetVariableEntityFieldValue(unsigned int entId, unsigned int fieldName, VariableValue* value);
-void  SetVariableFieldValue(unsigned int id, VariableValue* value);
-VariableValue  Scr_EvalVariable(unsigned int id);
+uint32_t  GetVariableIndexInternal(uint32_t parentId, uint32_t name);
+void  ClearObject(uint32_t parentId);
+void  Scr_RemoveThreadNotifyName(uint32_t startLocalId);
+//void  Scr_RemoveThreadEmptyNotifyName(uint32_t startLocalId);
+void  FreeValue(uint32_t id);
+uint32_t  GetArrayVariableIndex(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  Scr_GetVariableFieldIndex(uint32_t parentId, uint32_t name);
+uint32_t  Scr_FindAllVariableField(uint32_t parentId, uint32_t* names);
+uint32_t  GetArrayVariable(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  GetNewArrayVariable(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  GetVariable(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  GetNewVariable(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  GetObjectVariable(uint32_t parentId, uint32_t id);
+uint32_t  GetNewObjectVariable(uint32_t parentId, uint32_t id);
+uint32_t  GetNewObjectVariableReverse(uint32_t parentId, uint32_t id);
+void  RemoveVariable(uint32_t parentId, uint32_t unsignedValue);
+void  RemoveNextVariable(uint32_t parentId);
+void  RemoveObjectVariable(uint32_t parentId, uint32_t id);
+void  SafeRemoveVariable(uint32_t parentId, uint32_t unsignedValue);
+void  RemoveVariableValue(uint32_t parentId, uint32_t index);
+void  SetVariableEntityFieldValue(uint32_t entId, uint32_t fieldName, VariableValue* value);
+void  SetVariableFieldValue(uint32_t id, VariableValue* value);
+VariableValue  Scr_EvalVariable(uint32_t id);
 void  Scr_EvalBoolComplement(VariableValue* value);
 void  Scr_CastBool(VariableValue* value);
 bool  Scr_CastString(VariableValue* value);
 void  Scr_CastDebugString(VariableValue* value);
-char  Scr_GetEntClassId(unsigned int id);
-int  Scr_GetEntNum(unsigned int id);
+char  Scr_GetEntClassId(uint32_t id);
+int  Scr_GetEntNum(uint32_t id);
 void  Scr_ClearVector(VariableValue* value);
 void  Scr_CastVector(VariableValue* value);
-unsigned int Scr_EvalFieldObject(unsigned int tempVariable, VariableValue* value);
+uint32_t Scr_EvalFieldObject(uint32_t tempVariable, VariableValue* value);
 void  Scr_UnmatchingTypesError(VariableValue* value1, VariableValue* value2);
 
 void  Scr_EvalOr(VariableValue* value1, VariableValue* value2);
@@ -413,13 +413,13 @@ void  Scr_EvalMultiply(VariableValue* value1, VariableValue* value2);
 void  Scr_EvalDivide(VariableValue* value1, VariableValue* value2);
 void  Scr_EvalMod(VariableValue* value1, VariableValue* value2);
 
-void  Scr_FreeEntityNum(unsigned int entnum, unsigned int classnum);
+void  Scr_FreeEntityNum(uint32_t entnum, uint32_t classnum);
 void  Scr_FreeObjects(void);
-void  Scr_AddClassField(unsigned int classnum, char* name, unsigned int offset);
-unsigned int  Scr_GetEntityId(unsigned int entnum, unsigned int classnum);
-//void  Scr_CopyEntityNum(int, int, unsigned int);
+void  Scr_AddClassField(uint32_t classnum, char* name, uint32_t offset);
+uint32_t  Scr_GetEntityId(uint32_t entnum, uint32_t classnum);
+//void  Scr_CopyEntityNum(int, int, uint32_t);
 void  Scr_FreeGameVariable(int bComplete);
-//bool  Scr_AddStringSet(unsigned int, char const*);
+//bool  Scr_AddStringSet(uint32_t, char const*);
 
 struct ThreadDebugInfo // sizeof=0x8C
 {                                       // ...
@@ -432,26 +432,26 @@ static_assert(sizeof(ThreadDebugInfo) == 0x8C);
 
 void  Scr_DumpScriptThreads(void);
 void  Scr_ShutdownVariables(void);
-void  RemoveRefToObject(unsigned int id);
-void  ClearVariableField(unsigned int parentId, unsigned int name, VariableValue* value);
-VariableValue  Scr_EvalVariableField(unsigned int id);
+void  RemoveRefToObject(uint32_t id);
+void  ClearVariableField(uint32_t parentId, uint32_t name, VariableValue* value);
+VariableValue  Scr_EvalVariableField(uint32_t id);
 void  Scr_EvalSizeValue(VariableValue* value);
 void  Scr_EvalBoolNot(VariableValue* value);
 void  Scr_EvalEquality(VariableValue* value1, VariableValue* value2);
 void  Scr_EvalInequality(VariableValue* value1, VariableValue* value2);
 void  Scr_EvalBinaryOperator(int op, VariableValue* value1, VariableValue* value2);
 void  Scr_FreeEntityList(void);
-void  Scr_RemoveClassMap(unsigned int classnum);
+void  Scr_RemoveClassMap(uint32_t classnum);
 void  Scr_EvalArray(VariableValue* value, VariableValue* index);
-unsigned int Scr_EvalArrayRef(unsigned int parentId);
-void  ClearArray(unsigned int parentId, VariableValue* value);
-void  Scr_FreeValue(unsigned int id);
-//void  Scr_ShutdownStringSet(unsigned int);
-void  Scr_StopThread(unsigned int threadId);
-void  Scr_KillEndonThread(unsigned int threadId);
-VariableValue Scr_FindVariableField(unsigned int parentId, unsigned int name);
-void  Scr_KillThread(unsigned int parentId);
-void  Scr_CheckLeakRange(unsigned int begin, unsigned int end);
+uint32_t Scr_EvalArrayRef(uint32_t parentId);
+void  ClearArray(uint32_t parentId, VariableValue* value);
+void  Scr_FreeValue(uint32_t id);
+//void  Scr_ShutdownStringSet(uint32_t);
+void  Scr_StopThread(uint32_t threadId);
+void  Scr_KillEndonThread(uint32_t threadId);
+VariableValue Scr_FindVariableField(uint32_t parentId, uint32_t name);
+void  Scr_KillThread(uint32_t parentId);
+void  Scr_CheckLeakRange(uint32_t begin, uint32_t end);
 void  Scr_CheckLeaks(void);
 
 int  ThreadInfoCompare(_DWORD* info1, _DWORD* info2);
@@ -459,50 +459,50 @@ int  ThreadInfoCompare(_DWORD* info1, _DWORD* info2);
 int VariableInfoFileNameCompare(_DWORD* info1, _DWORD* info2);
 int VariableInfoCountCompare(_DWORD* info1, _DWORD* info2);
 int VariableInfoFileLineCompare(_DWORD* info1, _DWORD* info2);
-unsigned int  FindVariableIndexInternal2(unsigned int name, unsigned int index);
-unsigned int FindVariableIndexInternal(unsigned int parentId, unsigned int name);
+uint32_t  FindVariableIndexInternal2(uint32_t name, uint32_t index);
+uint32_t FindVariableIndexInternal(uint32_t parentId, uint32_t name);
 unsigned short  AllocVariable(void);
-void  FreeVariable(unsigned int id);
-unsigned int  AllocEntity(unsigned int classnum, unsigned short entnum);
+void  FreeVariable(uint32_t id);
+uint32_t  AllocEntity(uint32_t classnum, unsigned short entnum);
 float*  Scr_AllocVector(void);
-unsigned int  FindArrayVariableIndex(unsigned int parentId, unsigned int unsignedValue);
-unsigned int  Scr_FindArrayIndex(unsigned int parentId, VariableValue* index);
-float  Scr_GetEntryUsage(unsigned int type, VariableUnion u);
+uint32_t  FindArrayVariableIndex(uint32_t parentId, uint32_t unsignedValue);
+uint32_t  Scr_FindArrayIndex(uint32_t parentId, VariableValue* index);
+float  Scr_GetEntryUsage(uint32_t type, VariableUnion u);
 float  Scr_GetEntryUsage(VariableValueInternal* entryValue);
-float  Scr_GetObjectUsage(unsigned int parentId);
+float  Scr_GetObjectUsage(uint32_t parentId);
 char*  Scr_GetSourceFile_FastFile(char const* filename);
 char*  Scr_GetSourceFile(char const* filename);
 void  Scr_AddFieldsForFile(char const* filename);
 void  Scr_AddFields_FastFile(char const* path, char const* extension);
-//void  CheckReferenceRange(unsigned int, unsigned int);
-unsigned int  GetNewVariableIndexInternal3(unsigned int parentId, unsigned int name, unsigned int index);
-unsigned int  GetNewVariableIndexInternal2(unsigned int parentId, unsigned int name, unsigned int index);
-unsigned int  GetNewVariableIndexReverseInternal2(unsigned int parentId, unsigned int name, unsigned int index);
-unsigned int  GetNewVariableIndexInternal(unsigned int parentId, unsigned int name);
-unsigned int  GetNewVariableIndexReverseInternal(unsigned int parentId, unsigned int name);
-void  MakeVariableExternal(unsigned int index, VariableValueInternal* parentValue);
-void  FreeChildValue(unsigned int parentId, unsigned int id);
-void  ClearObjectInternal(unsigned int parentId);
-unsigned int  GetNewArrayVariableIndex(unsigned int parentId, unsigned int unsignedValue);
-void  RemoveArrayVariable(unsigned int parentId, unsigned int unsignedValue);
-void  CopyArray(unsigned int parentId, unsigned int newParentId);
+//void  CheckReferenceRange(uint32_t, uint32_t);
+uint32_t  GetNewVariableIndexInternal3(uint32_t parentId, uint32_t name, uint32_t index);
+uint32_t  GetNewVariableIndexInternal2(uint32_t parentId, uint32_t name, uint32_t index);
+uint32_t  GetNewVariableIndexReverseInternal2(uint32_t parentId, uint32_t name, uint32_t index);
+uint32_t  GetNewVariableIndexInternal(uint32_t parentId, uint32_t name);
+uint32_t  GetNewVariableIndexReverseInternal(uint32_t parentId, uint32_t name);
+void  MakeVariableExternal(uint32_t index, VariableValueInternal* parentValue);
+void  FreeChildValue(uint32_t parentId, uint32_t id);
+void  ClearObjectInternal(uint32_t parentId);
+uint32_t  GetNewArrayVariableIndex(uint32_t parentId, uint32_t unsignedValue);
+void  RemoveArrayVariable(uint32_t parentId, uint32_t unsignedValue);
+void  CopyArray(uint32_t parentId, uint32_t newParentId);
 void  Scr_CastWeakerPair(VariableValue* value1, VariableValue* value2);
 void  Scr_CastWeakerStringPair(VariableValue* value1, VariableValue* value2);
-//void  CopyEntity(unsigned int, unsigned int);
-float  Scr_GetEndonUsage(unsigned int parentId);
+//void  CopyEntity(uint32_t, uint32_t);
+float  Scr_GetEndonUsage(uint32_t parentId);
 float  Scr_GetThreadUsage(const VariableStackBuffer* stackBuf, float* endonUsage);
-int  Scr_MakeValuePrimitive(unsigned int parentId);
-void  SafeRemoveArrayVariable(unsigned int parentId, unsigned int unsignedValue);
-VariableValue  Scr_EvalVariableEntityField(unsigned int entId, unsigned int fieldName);
-void  Scr_ClearThread(unsigned int parentId);
-void Scr_GetChecksum(unsigned int *checksum);
+int  Scr_MakeValuePrimitive(uint32_t parentId);
+void  SafeRemoveArrayVariable(uint32_t parentId, uint32_t unsignedValue);
+VariableValue  Scr_EvalVariableEntityField(uint32_t entId, uint32_t fieldName);
+void  Scr_ClearThread(uint32_t parentId);
+void Scr_GetChecksum(uint32_t *checksum);
 
-void Scr_CopyEntityNum(int fromEntnum, int toEntnum, unsigned int classnum);
-void CopyEntity(unsigned int parentId, unsigned int newParentId);
+void Scr_CopyEntityNum(int fromEntnum, int toEntnum, uint32_t classnum);
+void CopyEntity(uint32_t parentId, uint32_t newParentId);
 
-unsigned int Scr_InitStringSet();
-void Scr_ShutdownStringSet(unsigned int setId);
-int Scr_AddStringSet(unsigned int setId, const char *string);
+uint32_t Scr_InitStringSet();
+void Scr_ShutdownStringSet(uint32_t setId);
+int Scr_AddStringSet(uint32_t setId, const char *string);
 
 extern scr_classStruct_t g_classMap[4];
 extern scrStringDebugGlob_t *scrStringDebugGlob;

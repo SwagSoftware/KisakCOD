@@ -14,25 +14,25 @@ void __cdecl R_SkinXSurfaceWeight(
     GfxPackedVertex *outVerts);
 void __cdecl R_SkinXSurfaceWeight0(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut);
 void __cdecl R_SkinXSurfaceWeight1(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut);
 void __cdecl R_SkinXSurfaceWeight2(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut);
 void __cdecl R_SkinXSurfaceWeight3(
     const GfxPackedVertex *vertsIn,
-    const unsigned __int16 *vertexBlend,
+    const uint16_t *vertexBlend,
     int vertCount,
     const DObjSkelMat *boneMatrix,
     GfxPackedVertex *vertsOut);

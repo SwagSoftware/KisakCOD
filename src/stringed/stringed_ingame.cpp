@@ -34,7 +34,7 @@ char *__cdecl SE_Load(char *psFileName, bool forceEnglish)
     char *psParsePos; // [esp+14h] [ebp-4014h] BYREF
     char psDest[16388]; // [esp+20h] [ebp-4010h] BYREF
     const char *errorMsg; // [esp+4020h] [ebp-8h]
-    unsigned __int8 *psLoadedFile; // [esp+4024h] [ebp-4h]
+    uint8_t *psLoadedFile; // [esp+4024h] [ebp-4h]
 
     errorMsg = 0;
     psLoadedFile = SE_LoadFileData(psFileName);
@@ -162,16 +162,16 @@ char *__cdecl SE_GetFoundFile(std::string *strResult)
     return sTemp;
 }
 
-unsigned __int8 *__cdecl SE_LoadFileData(const char *psFileName)
+uint8_t *__cdecl SE_LoadFileData(const char *psFileName)
 {
     int len; // [esp+0h] [ebp-8h]
-    unsigned __int8 *pvLoadedData; // [esp+4h] [ebp-4h] BYREF
+    uint8_t *pvLoadedData; // [esp+4h] [ebp-4h] BYREF
 
     len = FS_ReadFile(psFileName, (void **)&pvLoadedData);
     return len <= 0 ? 0 : pvLoadedData;
 }
 
-void __cdecl SE_FreeFileDataAfterLoad(unsigned __int8 *psLoadedFile)
+void __cdecl SE_FreeFileDataAfterLoad(uint8_t *psLoadedFile)
 {
     iassert(psLoadedFile);
     FS_FreeFile((char *)psLoadedFile);

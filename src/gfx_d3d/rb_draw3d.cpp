@@ -95,8 +95,8 @@ void __cdecl RB_Draw3DInternal(const GfxViewInfo *viewInfo)
     else
     {
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-        memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-        memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+        memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+        memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
         R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
         R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
         memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
@@ -130,8 +130,8 @@ void __cdecl RB_EndSceneRendering(GfxCmdBufContext context, const GfxCmdBufInput
     R_HW_InsertFence((IDirect3DQuery9 **)&backEndData->endFence);
     R_InitCmdBufSourceState(context.source, input, 0);
     memcpy(context.state, &gfxCmdBufState, sizeof(GfxCmdBufState));
-    memset((unsigned __int8 *)context.state->vertexShaderConstState, 0, sizeof(context.state->vertexShaderConstState));
-    memset((unsigned __int8 *)context.state->pixelShaderConstState, 0, sizeof(context.state->pixelShaderConstState));
+    memset((uint8_t *)context.state->vertexShaderConstState, 0, sizeof(context.state->vertexShaderConstState));
+    memset((uint8_t *)context.state->pixelShaderConstState, 0, sizeof(context.state->pixelShaderConstState));
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_BeginView(&gfxCmdBufSourceState, &viewInfo->sceneDef, &viewInfo->viewParms);
     R_SetViewportStruct(&gfxCmdBufSourceState, &viewInfo->sceneViewport);
@@ -156,8 +156,8 @@ void __cdecl RB_EndSceneRendering(GfxCmdBufContext context, const GfxCmdBufInput
 void __cdecl R_SetAndClearSceneTarget(const GfxViewport *viewport)
 {
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-    memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-    memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
     KISAK_NULLSUB();
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
@@ -350,8 +350,8 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     ShadowType dynamicShadowType; // [esp+54h] [ebp-1Ch]
     int isRenderingFullScreen; // [esp+58h] [ebp-18h]
     float clearColor[4]; // [esp+5Ch] [ebp-14h] BYREF
-    unsigned __int8 whichToClearForScene; // [esp+6Eh] [ebp-2h]
-    unsigned __int8 whichToClearForSetup; // [esp+6Fh] [ebp-1h]
+    uint8_t whichToClearForScene; // [esp+6Eh] [ebp-2h]
+    uint8_t whichToClearForSetup; // [esp+6Fh] [ebp-1h]
     int savedregs; // [esp+70h] [ebp+0h] BYREF
 
     data = backEndData;
@@ -418,8 +418,8 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     iassert(viewInfo->isRenderingFullScreen == isRenderingFullScreen);
     R_InitCmdBufSourceState(&gfxCmdBufSourceState, &viewInfo->input, 0);
     memcpy(&gfxCmdBufState, &gfxCmdBufState, sizeof(gfxCmdBufState));
-    memset((unsigned __int8 *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
-    memset((unsigned __int8 *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.vertexShaderConstState, 0, sizeof(gfxCmdBufState.vertexShaderConstState));
+    memset((uint8_t *)gfxCmdBufState.pixelShaderConstState, 0, sizeof(gfxCmdBufState.pixelShaderConstState));
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_SCENE);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_SCENE);
     R_BeginView(&gfxCmdBufSourceState, &viewInfo->sceneDef, &viewInfo->viewParms);
@@ -492,10 +492,10 @@ void __cdecl R_DrawPointLitSurfs(GfxCmdBufSourceState *source, const GfxViewInfo
     GfxColor color; // [esp+120h] [ebp-3Ch] BYREF
     float x; // [esp+124h] [ebp-38h]
     float y; // [esp+128h] [ebp-34h]
-    unsigned int axis; // [esp+12Ch] [ebp-30h]
+    uint32_t axis; // [esp+12Ch] [ebp-30h]
     float offsetDistSq; // [esp+130h] [ebp-2Ch]
     GfxDrawPrimArgs args; // [esp+134h] [ebp-28h]
-    unsigned int planeIndex; // [esp+140h] [ebp-1Ch]
+    uint32_t planeIndex; // [esp+140h] [ebp-1Ch]
     float halfHeight; // [esp+144h] [ebp-18h]
     float perpDir[3]; // [esp+148h] [ebp-14h] BYREF
     float perpDist; // [esp+154h] [ebp-8h]
@@ -508,7 +508,7 @@ void __cdecl R_DrawPointLitSurfs(GfxCmdBufSourceState *source, const GfxViewInfo
     if (pointLightCount)
     {
         pointLightPartitions = viewInfo->pointLightPartitions;
-        R_ConvertColorToBytes(colorWhite, (unsigned int*)&color);
+        R_ConvertColorToBytes(colorWhite, (uint32_t*)&color);
         data = source->input.data;
         args.baseIndex = 0;
         args.vertexCount = 4;
@@ -612,9 +612,9 @@ void __cdecl R_DrawPointLitSurfs(GfxCmdBufSourceState *source, const GfxViewInfo
 
 void __cdecl R_DrawPointLitSurfsCallback(const void *userData, GfxCmdBufContext context, GfxCmdBufContext prepassContext)
 {
-    unsigned int h; // [esp+4h] [ebp-28h]
-    unsigned int w; // [esp+8h] [ebp-24h]
-    unsigned int y; // [esp+Ch] [ebp-20h]
+    uint32_t h; // [esp+4h] [ebp-28h]
+    uint32_t w; // [esp+8h] [ebp-24h]
+    uint32_t y; // [esp+Ch] [ebp-20h]
     IDirect3DDevice9 *device; // [esp+14h] [ebp-18h]
     tagRECT rect; // [esp+18h] [ebp-14h] BYREF
     const GfxPointLitSurfsInfo *info; // [esp+28h] [ebp-4h]
@@ -721,7 +721,7 @@ GfxCmdBufSourceState *RB_DebugShaderDrawCommandsCommon()
     GfxCmdBufSourceState *result; // eax
     const GfxBackEndData *data; // [esp+10h] [ebp-Ch]
     GfxViewInfo *viewInfo; // [esp+14h] [ebp-8h]
-    unsigned int viewInfoIndex; // [esp+18h] [ebp-4h]
+    uint32_t viewInfoIndex; // [esp+18h] [ebp-4h]
 
     result = gfxCmdBufContext.source;
     data = backEndData;
@@ -750,7 +750,7 @@ void RB_StandardDrawCommandsCommon()
     const GfxBackEndData *data; // [esp+1Ch] [ebp-Ch]
     GfxViewInfo *viewInfo; // [esp+20h] [ebp-8h]
     GfxViewInfo *viewInfoa; // [esp+20h] [ebp-8h]
-    unsigned int viewInfoIndex; // [esp+24h] [ebp-4h]
+    uint32_t viewInfoIndex; // [esp+24h] [ebp-4h]
     int savedregs; // [esp+28h] [ebp+0h] BYREF
 
     data = backEndData;

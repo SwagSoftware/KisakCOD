@@ -11,7 +11,7 @@
 
 int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
 {
-    unsigned int v2; // edx
+    uint32_t v2; // edx
     int indexCount; // [esp+8h] [ebp-4h]
 
     indexCount = 3 * triCount;
@@ -35,13 +35,13 @@ int __cdecl R_ReserveIndexData(GfxCmdBufPrimState *state, int triCount)
     return gfxBuf.dynamicIndexBuffer->used;
 }
 
-int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, int triCount)
+int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, uint8_t *indices, int triCount)
 {
     int baseIndex; // [esp+60h] [ebp-18h]
     int indexDataSize; // [esp+64h] [ebp-14h]
-    unsigned int lockFlags; // [esp+68h] [ebp-10h]
+    uint32_t lockFlags; // [esp+68h] [ebp-10h]
     IDirect3DIndexBuffer9 *ib; // [esp+70h] [ebp-8h]
-    unsigned __int8 *bufferData; // [esp+74h] [ebp-4h]
+    uint8_t *bufferData; // [esp+74h] [ebp-4h]
 
     PROF_SCOPED("RB_SetIndexData");
 
@@ -54,13 +54,13 @@ int __cdecl R_SetIndexData(GfxCmdBufPrimState *state, unsigned __int8 *indices, 
     {
         PROF_SCOPED("LockIndexBufferNoOverwrite");
         lockFlags = D3DLOCK_NOOVERWRITE;
-        bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
+        bufferData = (uint8_t *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
     else
     {
         PROF_SCOPED("LockIndexBufferDiscard");
         lockFlags = D3DLOCK_DISCARD;
-        bufferData = (unsigned __int8 *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
+        bufferData = (uint8_t *)R_LockIndexBuffer(ib, 2 * gfxBuf.dynamicIndexBuffer->used, indexDataSize, lockFlags);
     }
 
     memcpy(bufferData, indices, indexDataSize);
@@ -82,9 +82,9 @@ void __cdecl R_SetupPassPerPrimArgs(GfxCmdBufContext context)
 
 void __cdecl R_HW_SetVertexShaderConstant(
     IDirect3DDevice9 *device,
-    unsigned int dest,
+    uint32_t dest,
     const float *data,
-    unsigned int rowCount)
+    uint32_t rowCount)
 {
     const char *v4; // eax
     const char *v5; // eax
@@ -136,7 +136,7 @@ void __cdecl R_SetVertexShaderConstantFromCode(GfxCmdBufContext context, const M
     }
 }
 
-float *__cdecl R_GetCodeConstant(GfxCmdBufContext context, unsigned int constant)
+float *__cdecl R_GetCodeConstant(GfxCmdBufContext context, uint32_t constant)
 {
     iassert(context.state);
     iassert(context.source);
@@ -179,8 +179,8 @@ char __cdecl R_IsShaderMatrixUpToDate(
     const MaterialShaderArgument *routingData)
 {
     GfxShaderConstantState newState; // [esp+4h] [ebp-10h]
-    unsigned int rowCount; // [esp+Ch] [ebp-8h]
-    unsigned int rowCounta; // [esp+Ch] [ebp-8h]
+    uint32_t rowCount; // [esp+Ch] [ebp-8h]
+    uint32_t rowCounta; // [esp+Ch] [ebp-8h]
 
     newState.fields.codeConst = routingData->u.codeConst;
     newState.fields.version = source->matrixVersions[(routingData->u.codeConst.index - 58) >> 2];
@@ -223,7 +223,7 @@ void __cdecl R_SetupPassPerObjectArgs(GfxCmdBufContext context)
         R_SetPassShaderObjectArguments(context, pass->perObjArgCount, &pass->args[pass->perPrimArgCount]);
 }
 
-void __cdecl R_SetPixelShaderConstantFromLiteral(GfxCmdBufState *state, unsigned int dest, const float *literal)
+void __cdecl R_SetPixelShaderConstantFromLiteral(GfxCmdBufState *state, uint32_t dest, const float *literal)
 {
     if (dest >= 0x100)
         MyAssertHandler(
@@ -240,9 +240,9 @@ void __cdecl R_SetPixelShaderConstantFromLiteral(GfxCmdBufState *state, unsigned
 
 void __cdecl R_HW_SetPixelShaderConstant(
     IDirect3DDevice9 *device,
-    unsigned int dest,
+    uint32_t dest,
     const float *data,
-    unsigned int rowCount)
+    uint32_t rowCount)
 {
     const char *v4; // eax
     int hr; // [esp+0h] [ebp-4h]
@@ -415,7 +415,7 @@ void __cdecl R_UpdateVertexDecl(GfxCmdBufState *state)
     R_SetVertexShader(state, vertexShader);
 }
 
-void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
+void __cdecl R_SetupPass(GfxCmdBufContext context, uint32_t passIndex)
 {
     const char *v2; // eax
     const char *v3; // eax
@@ -423,7 +423,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
     const MaterialPass *pass; // [esp+30h] [ebp-14h]
     const Material *material; // [esp+34h] [ebp-10h]
     const GfxStateBits *refStateBits; // [esp+38h] [ebp-Ch]
-    unsigned int stateBits[2]; // [esp+3Ch] [ebp-8h] BYREF
+    uint32_t stateBits[2]; // [esp+3Ch] [ebp-8h] BYREF
 
     PROF_SCOPED("R_SetupPass");
 
@@ -431,7 +431,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
     context.state->pass = pass;
     context.state->passIndex = passIndex;
     material = context.state->material;
-    if (material->stateBitsEntry[context.state->techType] >= (unsigned int)material->stateBitsCount)
+    if (material->stateBitsEntry[context.state->techType] >= (uint32_t)material->stateBitsCount)
         MyAssertHandler(
             ".\\r_shade.cpp",
             787,
@@ -463,7 +463,7 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, unsigned int passIndex)
             &pass->args[pass->perPrimArgCount + pass->perObjArgCount]);
 }
 
-void __cdecl R_SetState(GfxCmdBufState *state, unsigned int *stateBits)
+void __cdecl R_SetState(GfxCmdBufState *state, uint32_t *stateBits)
 {
     if (*stateBits != state->refStateBits[0])
     {
@@ -477,7 +477,7 @@ void __cdecl R_SetState(GfxCmdBufState *state, unsigned int *stateBits)
     }
 }
 
-void __cdecl R_SetVertexShaderConstantFromLiteral(GfxCmdBufState *state, unsigned int dest, const float *literal)
+void __cdecl R_SetVertexShaderConstantFromLiteral(GfxCmdBufState *state, uint32_t dest, const float *literal)
 {
     if (dest >= 0x20)
         MyAssertHandler(
@@ -533,7 +533,7 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
 
 void __cdecl R_SetPassShaderPrimArguments(
     GfxCmdBufContext context,
-    unsigned int argCount,
+    uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
     while (arg->type == 3)
@@ -548,11 +548,11 @@ void __cdecl R_SetPassShaderPrimArguments(
 
 void __cdecl R_SetPassShaderObjectArguments(
     GfxCmdBufContext context,
-    unsigned int argCount,
+    uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
     const GfxImage *image; // [esp+Ch] [ebp-8h]
-    unsigned __int8 samplerState; // [esp+13h] [ebp-1h] BYREF
+    uint8_t samplerState; // [esp+13h] [ebp-1h] BYREF
 
     while (arg->type == MTL_ARG_CODE_VERTEX_CONST)
     {
@@ -578,7 +578,7 @@ void __cdecl R_SetPassShaderObjectArguments(
 
 void __cdecl R_SetPassPixelShaderStableArguments(
     GfxCmdBufContext context,
-    unsigned int argCount,
+    uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
     const char *v3; // eax
@@ -635,7 +635,7 @@ void __cdecl R_SetPassPixelShaderStableArguments(
 
 void __cdecl R_SetPassVertexShaderStableArguments(
     GfxCmdBufContext context,
-    unsigned int argCount,
+    uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
     while (arg->type < 3u)
@@ -655,14 +655,14 @@ void __cdecl R_SetPassVertexShaderStableArguments(
 
 void __cdecl R_SetPassShaderStableArguments(
     GfxCmdBufContext context,
-    unsigned int argCount,
+    uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
     const char *v3; // eax
     const GfxImage *image; // [esp+14h] [ebp-14h]
     const Material *material; // [esp+18h] [ebp-10h]
     const MaterialTextureDef *texDef; // [esp+1Ch] [ebp-Ch]
-    unsigned __int8 samplerState; // [esp+23h] [ebp-5h] BYREF
+    uint8_t samplerState; // [esp+23h] [ebp-5h] BYREF
     const MaterialConstantDef *constDef; // [esp+24h] [ebp-4h]
 
     material = context.state->material;
@@ -764,7 +764,7 @@ int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexC
 {
     IDirect3DVertexBuffer9 *vb; // [esp+6Ch] [ebp-14h]
     volatile int vertexOffset; // [esp+70h] [ebp-10h]
-    unsigned int lockFlags; // [esp+74h] [ebp-Ch]
+    uint32_t lockFlags; // [esp+74h] [ebp-Ch]
     void *bufferData; // [esp+78h] [ebp-8h]
     int totalSize; // [esp+7Ch] [ebp-4h]
 

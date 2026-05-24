@@ -77,7 +77,7 @@ void __cdecl ProfLoad_Init()
 void __cdecl ProfLoad_Activate()
 {
     iassert( mapLoadProfile.isLoading == false );
-    memset((unsigned __int8 *)&mapLoadProfile, 0, sizeof(mapLoadProfile));
+    memset((uint8_t *)&mapLoadProfile, 0, sizeof(mapLoadProfile));
     mapLoadProfile.isLoading = 1;
     mapLoadProfile.ticksStart = __rdtsc();
     mapLoadProfile.ticksFinish = mapLoadProfile.ticksStart;

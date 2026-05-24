@@ -16,13 +16,13 @@ enum GfxLightType : __int32
 
 struct GfxCandidateShadowedLight // sizeof=0x8
 {                                       // ...
-    unsigned int shadowableLightIndex;  // ...
+    uint32_t shadowableLightIndex;  // ...
     float score;
 };
 
 struct GfxShadowedLightEntry // sizeof=0x8
 {                                       // ...
-    unsigned __int8 shadowableLightIndex;
+    uint8_t shadowableLightIndex;
     bool isFadingOut;
     // padding byte
     // padding byte
@@ -30,18 +30,18 @@ struct GfxShadowedLightEntry // sizeof=0x8
 };
 struct GfxShadowedLightHistory // sizeof=0x48
 {                                       // ...
-    unsigned int shadowableLightWasUsed[8];
+    uint32_t shadowableLightWasUsed[8];
     GfxShadowedLightEntry entries[4];
-    unsigned int entryCount;
-    unsigned int lastUpdateTime;
+    uint32_t entryCount;
+    uint32_t lastUpdateTime;
 };
 
 struct GfxShadowGeometry // sizeof=0xC
 {
-    unsigned __int16 surfaceCount;
-    unsigned __int16 smodelCount;
-    unsigned __int16 *sortedSurfIndex;
-    unsigned __int16 *smodelIndex;
+    uint16_t surfaceCount;
+    uint16_t smodelCount;
+    uint16_t *sortedSurfIndex;
+    uint16_t *smodelIndex;
 };
 struct GfxLightRegionAxis // sizeof=0x14
 {
@@ -53,44 +53,44 @@ struct GfxLightRegionHull // sizeof=0x50
 {
     float kdopMidPoint[9];
     float kdopHalfSize[9];
-    unsigned int axisCount;
+    uint32_t axisCount;
     GfxLightRegionAxis *axis;
 };
 struct GfxLightRegion // sizeof=0x8
 {
-    unsigned int hullCount;
+    uint32_t hullCount;
     GfxLightRegionHull *hulls;
 };
 
 void __cdecl R_ClearShadowedPrimaryLightHistory(int localClientNum);
 void __cdecl R_AddDynamicShadowableLight(GfxViewInfo *viewInfo, const GfxLight *visibleLight);
-bool __cdecl R_IsDynamicShadowedLight(unsigned int shadowableLightIndex);
-bool __cdecl R_IsPrimaryLight(unsigned int shadowableLightIndex);
+bool __cdecl R_IsDynamicShadowedLight(uint32_t shadowableLightIndex);
+bool __cdecl R_IsPrimaryLight(uint32_t shadowableLightIndex);
 void __cdecl R_ChooseShadowedLights(GfxViewInfo *viewInfo);
-unsigned int __cdecl R_AddPotentiallyShadowedLight(
+uint32_t __cdecl R_AddPotentiallyShadowedLight(
     const GfxViewInfo *viewInfo,
-    unsigned int shadowableLightIndex,
+    uint32_t shadowableLightIndex,
     GfxCandidateShadowedLight *candidateLights,
-    unsigned int candidateLightCount);
+    uint32_t candidateLightCount);
 double __cdecl R_ShadowedSpotLightScore(const GfxViewParms *viewParms, const GfxLight *light);
-void __cdecl R_AddShadowsForLight(GfxViewInfo *viewInfo, unsigned int shadowableLightIndex, float spotShadowFade);
+void __cdecl R_AddShadowsForLight(GfxViewInfo *viewInfo, uint32_t shadowableLightIndex, float spotShadowFade);
 void __cdecl R_AddShadowedLightToShadowHistory(
     GfxShadowedLightHistory *shadowHistory,
-    unsigned int shadowableLightIndex,
+    uint32_t shadowableLightIndex,
     float fadeDelta);
 void __cdecl R_FadeOutShadowHistoryEntries(GfxShadowedLightHistory *shadowHistory, float fadeDelta);
 void __cdecl R_LinkSphereEntityToPrimaryLights(
-    unsigned int localClientNum,
-    unsigned int entityNum,
+    uint32_t localClientNum,
+    uint32_t entityNum,
     const float *origin,
     float radius);
-unsigned int __cdecl R_GetPrimaryLightEntityShadowBit(
-    unsigned int localClientNum,
-    unsigned int entnum,
-    unsigned int primaryLightIndex);
+uint32_t __cdecl R_GetPrimaryLightEntityShadowBit(
+    uint32_t localClientNum,
+    uint32_t entnum,
+    uint32_t primaryLightIndex);
 void __cdecl R_LinkBoxEntityToPrimaryLights(
-    unsigned int localClientNum,
-    unsigned int entityNum,
+    uint32_t localClientNum,
+    uint32_t entityNum,
     const float *mins,
     const float *maxs);
 char __cdecl R_CullBoxFromLightRegionHull(
@@ -98,7 +98,7 @@ char __cdecl R_CullBoxFromLightRegionHull(
     const float *boxMidPoint,
     const float *boxHalfSize);
 void __cdecl R_LinkDynEntToPrimaryLights(
-    unsigned int dynEntId,
+    uint32_t dynEntId,
     DynEntityDrawType drawType,
     const float *mins,
     const float *maxs);
@@ -106,31 +106,31 @@ bool __cdecl Com_CullBoxFromPrimaryLight(
     const struct ComPrimaryLight *light,
     const float *boxMidPoint,
     const float *boxHalfSize);
-unsigned int __cdecl R_GetPrimaryLightDynEntShadowBit(unsigned int entnum, unsigned int primaryLightIndex);
-void __cdecl R_UnlinkEntityFromPrimaryLights(unsigned int localClientNum, unsigned int entityNum);
-void __cdecl R_UnlinkDynEntFromPrimaryLights(unsigned int dynEntId, DynEntityDrawType drawType);
+uint32_t __cdecl R_GetPrimaryLightDynEntShadowBit(uint32_t entnum, uint32_t primaryLightIndex);
+void __cdecl R_UnlinkEntityFromPrimaryLights(uint32_t localClientNum, uint32_t entityNum);
+void __cdecl R_UnlinkDynEntFromPrimaryLights(uint32_t dynEntId, DynEntityDrawType drawType);
 bool __cdecl R_IsEntityVisibleToPrimaryLight(
-    unsigned int localClientNum,
-    unsigned int entityNum,
-    unsigned int primaryLightIndex);
+    uint32_t localClientNum,
+    uint32_t entityNum,
+    uint32_t primaryLightIndex);
 bool __cdecl R_IsDynEntVisibleToPrimaryLight(
-    unsigned int dynEntId,
+    uint32_t dynEntId,
     DynEntityDrawType drawType,
-    unsigned int primaryLightIndex);
-int __cdecl R_IsEntityVisibleToAnyShadowedPrimaryLight(const GfxViewInfo *viewInfo, unsigned int entityNum);
-bool __cdecl R_IsEntityVisibleToShadowedPrimaryLight(unsigned int baseBitIndex, unsigned int shadowableLightIndex);
+    uint32_t primaryLightIndex);
+int __cdecl R_IsEntityVisibleToAnyShadowedPrimaryLight(const GfxViewInfo *viewInfo, uint32_t entityNum);
+bool __cdecl R_IsEntityVisibleToShadowedPrimaryLight(uint32_t baseBitIndex, uint32_t shadowableLightIndex);
 int __cdecl R_IsDynEntVisibleToAnyShadowedPrimaryLight(
     const GfxViewInfo *viewInfo,
-    unsigned int dynEntId,
+    uint32_t dynEntId,
     DynEntityDrawType drawType);
 bool __cdecl R_IsDynEntVisibleToShadowedPrimaryLight(
-    unsigned int baseBitIndex,
+    uint32_t baseBitIndex,
     DynEntityDrawType drawType,
-    unsigned int shadowableLightIndex);
-unsigned int __cdecl R_GetNonSunPrimaryLightForBox(
+    uint32_t shadowableLightIndex);
+uint32_t __cdecl R_GetNonSunPrimaryLightForBox(
     const GfxViewInfo *viewInfo,
     const float *boxMidPoint,
     const float *boxHalfSize);
-unsigned int __cdecl R_GetNonSunPrimaryLightForSphere(const GfxViewInfo *viewInfo, const float *origin, float radius);
+uint32_t __cdecl R_GetNonSunPrimaryLightForSphere(const GfxViewInfo *viewInfo, const float *origin, float radius);
 char __cdecl R_CullSphereFromLightRegionHull(const GfxLightRegionHull *hull, const float *origin, float radius);
 bool __cdecl Com_CullSphereFromPrimaryLight(const struct ComPrimaryLight *light, const float *origin, float radius);

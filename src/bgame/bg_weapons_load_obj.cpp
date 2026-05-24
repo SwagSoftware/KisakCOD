@@ -11,7 +11,7 @@
 //int surfaceTypeSoundListCount 828010f0     bg_weapons_load_obj.obj
 //struct SurfaceTypeSoundList *surfaceTypeSoundLists 828011f8     bg_weapons_load_obj.obj
 
-unsigned int g_playerAnimTypeNamesCount;
+uint32_t g_playerAnimTypeNamesCount;
 
 SurfaceTypeSoundList surfaceTypeSoundLists[16];
 
@@ -611,7 +611,7 @@ void __cdecl TRACK_bg_weapons_load_obj()
 
 const char *__cdecl BG_GetWeaponTypeName(weapType_t type)
 {
-    if ((unsigned int)type >= WEAPTYPE_NUM)
+    if ((uint32_t)type >= WEAPTYPE_NUM)
         MyAssertHandler(
             ".\\bgame\\bg_weapons_load_obj.cpp",
             851,
@@ -624,7 +624,7 @@ const char *__cdecl BG_GetWeaponTypeName(weapType_t type)
 
 const char *__cdecl BG_GetWeaponClassName(weapClass_t type)
 {
-    if ((unsigned int)type >= WEAPCLASS_NUM)
+    if ((uint32_t)type >= WEAPCLASS_NUM)
         MyAssertHandler(
             ".\\bgame\\bg_weapons_load_obj.cpp",
             859,
@@ -637,7 +637,7 @@ const char *__cdecl BG_GetWeaponClassName(weapClass_t type)
 
 const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type)
 {
-    if ((unsigned int)type >= WEAPINVENTORYCOUNT)
+    if ((uint32_t)type >= WEAPINVENTORYCOUNT)
         MyAssertHandler(
             ".\\bgame\\bg_weapons_load_obj.cpp",
             867,
@@ -651,7 +651,7 @@ const char *__cdecl BG_GetWeaponInventoryTypeName(weapInventoryType_t type)
 #ifdef KISAK_MP
 void __cdecl BG_LoadWeaponStrings()
 {
-    unsigned int i; // [esp+0h] [ebp-4h]
+    uint32_t i; // [esp+0h] [ebp-4h]
 
     for (i = 0; i < g_playerAnimTypeNamesCount; ++i)
         BG_InitWeaponString(i, g_playerAnimTypeNames[i]);
@@ -822,14 +822,14 @@ char __cdecl G_ParseWeaponAccurayGraphInternal(
     v6 = FS_FOpenFileByMode(string, &f, FS_READ);
     if (v6 >= 0)
     {
-        FS_Read((unsigned __int8 *)buffer, len, f);
+        FS_Read((uint8_t *)buffer, len, f);
         buffer[len] = 0;
         if (!strncmp(buffer, last, len))
         {
             if (v6 - len < 0x2000)
             {
-                memset((unsigned __int8 *)buffer, 0, 0x2000u);
-                FS_Read((unsigned __int8 *)buffer, v6 - len, f);
+                memset((uint8_t *)buffer, 0, 0x2000u);
+                FS_Read((uint8_t *)buffer, v6 - len, f);
                 buffer[v6 - len] = 0;
                 FS_FCloseFile(f);
                 knotCounta = 0;
@@ -866,14 +866,14 @@ char __cdecl G_ParseWeaponAccurayGraphInternal(
 
 char __cdecl G_ParseWeaponAccurayGraphs(WeaponDef *weaponDef)
 {
-    unsigned int size; // [esp+4h] [ebp-8Ch]
+    uint32_t size; // [esp+4h] [ebp-8Ch]
     int weaponType; // [esp+8h] [ebp-88h]
     int accuracyGraphKnotCount; // [esp+Ch] [ebp-84h] BYREF
     float accuracyGraphKnots[16][2]; // [esp+10h] [ebp-80h] BYREF
 
     for (weaponType = 0; weaponType < 2; ++weaponType)
     {
-        memset((unsigned __int8 *)accuracyGraphKnots, 0, sizeof(accuracyGraphKnots));
+        memset((uint8_t *)accuracyGraphKnots, 0, sizeof(accuracyGraphKnots));
         accuracyGraphKnotCount = 0;
         if (!G_ParseWeaponAccurayGraphInternal(
             weaponDef,
@@ -891,7 +891,7 @@ char __cdecl G_ParseWeaponAccurayGraphs(WeaponDef *weaponDef)
                 "G_ParseWeaponAccurayGraphs",
                 9);
             weaponDef->originalAccuracyGraphKnots[weaponType] = weaponDef->accuracyGraphKnots[weaponType];
-            memcpy((unsigned __int8 *)weaponDef->accuracyGraphKnots[weaponType], (unsigned __int8 *)accuracyGraphKnots, size);
+            memcpy((uint8_t *)weaponDef->accuracyGraphKnots[weaponType], (uint8_t *)accuracyGraphKnots, size);
             weaponDef->accuracyGraphKnotCount[weaponType] = accuracyGraphKnotCount;
             weaponDef->originalAccuracyGraphKnotCount[weaponType] = weaponDef->accuracyGraphKnotCount[weaponType];
         }
@@ -990,10 +990,10 @@ snd_alias_list_t **__cdecl BG_RegisterSurfaceTypeSounds(const char *surfaceSound
     return result;
 }
 
-int __cdecl BG_ParseWeaponDefSpecificFieldType(unsigned __int8 *pStruct, const char *pValue, int iFieldType)
+int __cdecl BG_ParseWeaponDefSpecificFieldType(uint8_t *pStruct, const char *pValue, int iFieldType)
 {
-    unsigned __int16 LowercaseString_DONE; // ax
-    unsigned __int16 v5; // ax
+    uint16_t LowercaseString_DONE; // ax
+    uint16_t v5; // ax
     int result; // eax
     char v7; // [esp+3h] [ebp-91h]
     char *v8; // [esp+8h] [ebp-8Ch]
@@ -1262,21 +1262,21 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
     v11 = FS_FOpenFileByMode(dest, &f, FS_READ);
     if (v11 >= 0)
     {
-        FS_Read((unsigned __int8 *)buffer, len, f);
+        FS_Read((uint8_t *)buffer, len, f);
         buffer[len] = 0;
         if (!strncmp(buffer, "WEAPONFILE", len))
         {
-            if ((unsigned int)(v11 - len) < 0x2800)
+            if ((uint32_t)(v11 - len) < 0x2800)
             {
-                memset((unsigned __int8 *)buffer, 0, 0x2800u);
-                FS_Read((unsigned __int8 *)buffer, v11 - len, f);
+                memset((uint8_t *)buffer, 0, 0x2800u);
+                FS_Read((uint8_t *)buffer, v11 - len, f);
                 buffer[v11 - len] = 0;
                 FS_FCloseFile(f);
                 if (Info_Validate(buffer))
                 {
                     SetConfigString((char **)weapDef, two);
                     if (ParseConfigStringToStructCustomSize(
-                        (unsigned __int8 *)weapDef,
+                        (uint8_t *)weapDef,
                         weaponDefFields,
                         502,
                         buffer,

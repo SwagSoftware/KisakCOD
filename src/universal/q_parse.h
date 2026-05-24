@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 struct parseInfo_t // sizeof=0x420
 {                                       // ...
@@ -18,6 +19,8 @@ struct parseInfo_t // sizeof=0x420
     const char *backup_text;
     const char *parseFile;
 };
+static_assert(sizeof(struct parseInfo_t) == 0x420);
+
 struct ParseThreadInfo // sizeof=0x460C
 {                                       // ...
     parseInfo_t parseInfo[16];
@@ -26,6 +29,7 @@ struct ParseThreadInfo // sizeof=0x460C
     const char *prevTokenPos;
     char line[1024];
 };
+static_assert(sizeof(struct ParseThreadInfo) == 0x460C);
 
 struct com_parse_mark_t // sizeof=0x14
 {                                       // ...
@@ -35,6 +39,7 @@ struct com_parse_mark_t // sizeof=0x14
     int backup_lines;
     const char *backup_text;
 };
+static_assert(sizeof(struct com_parse_mark_t) == 0x14);
 
 void __cdecl TRACK_q_parse();
 void __cdecl Com_InitParse();
@@ -70,7 +75,7 @@ inline parseInfo_t *__cdecl Com_ParseOnLine(char **data_p)
     return Com_ParseOnLine((const char **)data_p);
 }
 int __cdecl Com_MatchToken(const char **buf_p, const char *match, int warning);
-int __cdecl Com_SkipBracedSection(const char **program, unsigned int startDepth, int iMaxNesting);
+int __cdecl Com_SkipBracedSection(const char **program, uint32_t startDepth, int iMaxNesting);
 void __cdecl Com_SkipRestOfLine(const char **data);
 int __cdecl Com_GetArgCountOnLine(const char **data_p);
 double __cdecl Com_ParseFloat(const char **buf_p);

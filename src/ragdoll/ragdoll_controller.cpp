@@ -15,7 +15,7 @@
 
 RagdollBody *__cdecl Ragdoll_HandleBody(int ragdollHandle)
 {
-    if ((unsigned int)(ragdollHandle - 1) >= 0x20)
+    if ((uint32_t)(ragdollHandle - 1) >= 0x20)
         MyAssertHandler(
             ".\\ragdoll\\ragdoll_controller.cpp",
             31,
@@ -59,7 +59,7 @@ void __cdecl Ragdoll_DoControllers(const cpose_t *pose, DObj_s *obj, int *partBi
     RagdollBody *v3; // eax
     float v4; // [esp+0h] [ebp-48h]
     float v5; // [esp+8h] [ebp-40h]
-    unsigned int LocalClientNum; // [esp+14h] [ebp-34h]
+    uint32_t LocalClientNum; // [esp+14h] [ebp-34h]
     BoneOrientation *boneOrientation; // [esp+1Ch] [ebp-2Ch]
     float viewOffset[3]; // [esp+20h] [ebp-28h] BYREF
     RagdollBody *body; // [esp+2Ch] [ebp-1Ch]

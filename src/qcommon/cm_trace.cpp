@@ -5,7 +5,7 @@
 #include <game/game_public.h>
 #include <universal/profile.h>
 
-unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace)
+uint16_t __cdecl Trace_GetEntityHitId(const trace_t *trace)
 {
     iassert( trace );
     if (trace->hitType == TRACE_HITTYPE_DYNENT_MODEL || trace->hitType == TRACE_HITTYPE_DYNENT_BRUSH)
@@ -16,7 +16,7 @@ unsigned __int16 __cdecl Trace_GetEntityHitId(const trace_t *trace)
         return ENTITYNUM_NONE;
 }
 
-unsigned __int16 __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType)
+uint16_t __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDrawType *drawType)
 {
     iassert( trace );
     iassert( drawType );
@@ -36,7 +36,7 @@ unsigned __int16 __cdecl Trace_GetDynEntHitId(const trace_t *trace, DynEntityDra
     }
 }
 
-unsigned int __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents)
+uint32_t __cdecl CM_TempBoxModel(const float *mins, const float *maxs, int contents)
 {
     float *v4; // [esp+0h] [ebp-18h]
     cbrush_t *v5; // [esp+4h] [ebp-14h]
@@ -80,12 +80,12 @@ void __cdecl CM_GetBox(cbrush_t **box_brush, cmodel_t **box_model)
     *box_model = value->box_model;
 }
 
-bool __cdecl CM_ClipHandleIsValid(unsigned int handle)
+bool __cdecl CM_ClipHandleIsValid(uint32_t handle)
 {
     return handle < cm.numSubModels || handle == 4095;
 }
 
-cmodel_t *__cdecl CM_ClipHandleToModel(unsigned int handle)
+cmodel_t *__cdecl CM_ClipHandleToModel(uint32_t handle)
 {
     const char *v2; // eax
     cbrush_t *box_brush; // [esp+0h] [ebp-8h] BYREF
@@ -102,7 +102,7 @@ cmodel_t *__cdecl CM_ClipHandleToModel(unsigned int handle)
     return box_model;
 }
 
-int __cdecl CM_ContentsOfModel(unsigned int handle)
+int __cdecl CM_ContentsOfModel(uint32_t handle)
 {
     cmodel_t *v1; // edx
 
@@ -116,10 +116,10 @@ void __cdecl CM_BoxTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask)
 {
-    memset((unsigned __int8 *)results, 0, sizeof(trace_t));
+    memset((uint8_t *)results, 0, sizeof(trace_t));
     results->fraction = 1.0;
     CM_Trace(results, start, end, mins, maxs, model, brushmask);
 }
@@ -130,7 +130,7 @@ void __cdecl CM_Trace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask)
 {
     const char *v7; // eax
@@ -335,7 +335,7 @@ void __cdecl CM_TestInLeafBrushNode_r(const traceWork_t *tw, cLeafBrushNode_s *n
 {
     int k; // [esp+0h] [ebp-10h]
     cbrush_t *b; // [esp+4h] [ebp-Ch]
-    unsigned __int16 *brushes; // [esp+8h] [ebp-8h]
+    uint16_t *brushes; // [esp+8h] [ebp-8h]
 
     iassert( node );
     while ((tw->contents & node->contents) != 0)
@@ -549,7 +549,7 @@ void __cdecl CM_TestCapsuleInCapsule(const traceWork_t *tw, trace_t *trace)
 void __cdecl CM_PositionTest(traceWork_t *tw, trace_t *trace)
 {
     leafList_s ll; // [esp+0h] [ebp-834h] BYREF
-    unsigned __int16 leafs[1024]; // [esp+2Ch] [ebp-808h] BYREF
+    uint16_t leafs[1024]; // [esp+2Ch] [ebp-808h] BYREF
     int i; // [esp+830h] [ebp-4h]
 
     if (!trace->allsolid)
@@ -652,7 +652,7 @@ void __cdecl CM_TraceThroughLeafBrushNode_r(
     float tmax; // [esp+6Ch] [ebp-30h]
     float t2; // [esp+70h] [ebp-2Ch]
     float frac2; // [esp+74h] [ebp-28h]
-    unsigned __int16 *brushes; // [esp+78h] [ebp-24h]
+    uint16_t *brushes; // [esp+78h] [ebp-24h]
     float absDiff; // [esp+7Ch] [ebp-20h]
     float invDist; // [esp+80h] [ebp-1Ch]
     float tmin; // [esp+84h] [ebp-18h]
@@ -1482,7 +1482,7 @@ void __cdecl CM_TransformedBoxTraceRotated(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask,
     const float *origin,
     float (*matrix)[3])
@@ -1586,7 +1586,7 @@ void __cdecl CM_TransformedBoxTraceExternal(
     const float *origin,
     const float *angles)
 {
-    memset((unsigned __int8 *)results, 0, sizeof(trace_t));
+    memset((uint8_t *)results, 0, sizeof(trace_t));
     results->fraction = 1.0;
     CM_TransformedBoxTrace(results, start, end, mins, maxs, model, origin, angles);
 }
@@ -1597,7 +1597,7 @@ int __cdecl CM_BoxSightTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask)
 {
     const char *v7; // eax
@@ -1962,7 +1962,7 @@ int __cdecl CM_SightTraceThroughLeafBrushNode_r(
     float tmax; // [esp+60h] [ebp-30h]
     float t2; // [esp+64h] [ebp-2Ch]
     float frac2; // [esp+68h] [ebp-28h]
-    unsigned __int16 *brushes; // [esp+6Ch] [ebp-24h]
+    uint16_t *brushes; // [esp+6Ch] [ebp-24h]
     float absDiff; // [esp+70h] [ebp-20h]
     float invDist; // [esp+74h] [ebp-1Ch]
     int hitNum; // [esp+78h] [ebp-18h]
@@ -2413,7 +2413,7 @@ int __cdecl CM_TransformedBoxSightTrace(
     const float *end,
     const float *mins,
     const float *maxs,
-    unsigned int model,
+    uint32_t model,
     int brushmask,
     const float *origin,
     const float *angles)

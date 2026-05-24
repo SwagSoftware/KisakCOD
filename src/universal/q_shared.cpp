@@ -77,8 +77,8 @@ int I_strnicmp(const char* s0, const char* s1, int n)
 
     do
     {
-        c0 = *(unsigned __int8*)s0;
-        c1 = *(unsigned __int8*)s1;
+        c0 = *(uint8_t*)s0;
+        c1 = *(uint8_t*)s1;
         ++s0;
         ++s1;
         if (!n--)
@@ -167,9 +167,9 @@ void __cdecl TRACK_q_shared()
     TRACK_STATIC_ARR(value1, 10);
 }
 
-unsigned __int8 __cdecl ColorIndex(unsigned __int8 c)
+uint8_t __cdecl ColorIndex(uint8_t c)
 {
-    if ((unsigned __int8)(c - 48) >= 0xAu)
+    if ((uint8_t)(c - 48) >= 0xAu)
         return 7;
     else
         return c - 48;
@@ -191,9 +191,9 @@ const char *__cdecl Com_GetFilenameSubString(const char *pathname)
 
 void __cdecl Com_AssembleFilepath(char *folder, char *name, char *extension, char *path, int maxCharCount)
 {
-    unsigned int v5; // [esp+0h] [ebp-3Ch]
-    unsigned int v6; // [esp+10h] [ebp-2Ch]
-    unsigned int v7; // [esp+20h] [ebp-1Ch]
+    uint32_t v5; // [esp+0h] [ebp-3Ch]
+    uint32_t v6; // [esp+10h] [ebp-2Ch]
+    uint32_t v7; // [esp+20h] [ebp-1Ch]
     char *patha; // [esp+50h] [ebp+14h]
 
     if (!folder)
@@ -211,10 +211,10 @@ void __cdecl Com_AssembleFilepath(char *folder, char *name, char *extension, cha
     v5 = strlen(extension);
     if ((int)(v5 + v6 + v7) >= maxCharCount)
         Com_Error(ERR_DROP, "filepath '%s%s%s' is longer than %i characters", folder, name, extension, maxCharCount - 1);
-    memcpy((unsigned __int8 *)path, (unsigned __int8 *)folder, v7);
+    memcpy((uint8_t *)path, (uint8_t *)folder, v7);
     patha = &path[v7];
-    memcpy((unsigned __int8 *)patha, (unsigned __int8 *)name, v6);
-    memcpy((unsigned __int8 *)&patha[v6], (unsigned __int8 *)extension, v5 + 1);
+    memcpy((uint8_t *)patha, (uint8_t *)name, v6);
+    memcpy((uint8_t *)&patha[v6], (uint8_t *)extension, v5 + 1);
 }
 
 const char *__cdecl Com_GetExtensionSubString(const char *filename)
@@ -251,7 +251,7 @@ void __cdecl Com_StripExtension(char *in, char *out)
     *out = 0;
 }
 
-void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *extension)
+void __cdecl Com_DefaultExtension(char *path, uint32_t maxSize, const char *extension)
 {
     char *src; // [esp+10h] [ebp-4Ch]
     char oldPath[68]; // [esp+14h] [ebp-48h] BYREF
@@ -267,7 +267,7 @@ void __cdecl Com_DefaultExtension(char *path, unsigned int maxSize, const char *
 
 int __cdecl ShortSwap(__int16 l)
 {
-    return HIBYTE(l) + ((unsigned __int8)l << 8);
+    return HIBYTE(l) + ((uint8_t)l << 8);
 }
 
 __int16 __cdecl ShortNoSwap(__int16 l)
@@ -277,7 +277,7 @@ __int16 __cdecl ShortNoSwap(__int16 l)
 
 int __cdecl LongSwap(int l)
 {
-    return HIBYTE(l) + (BYTE2(l) << 8) + (BYTE1(l) << 16) + ((unsigned __int8)l << 24);
+    return HIBYTE(l) + (BYTE2(l) << 8) + (BYTE1(l) << 16) + ((uint8_t)l << 24);
 }
 
 unsigned __int64 __cdecl Long64Swap(unsigned __int64 l)
@@ -289,7 +289,7 @@ unsigned __int64 __cdecl Long64Swap(unsigned __int64 l)
         + ((unsigned __int64)BYTE3(l) << 32)
         + ((unsigned __int64)BYTE2(l) << 40)
         + ((unsigned __int64)BYTE1(l) << 48)
-        + ((unsigned __int64)(unsigned __int8)l << 56);
+        + ((unsigned __int64)(uint8_t)l << 56);
 }
 
 unsigned __int64 __cdecl Long64NoSwap(unsigned __int64 ll)
@@ -502,7 +502,7 @@ char *__cdecl I_CleanStr(char *string)
     return string;
 }
 
-unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character)
+uint8_t __cdecl I_CleanChar(uint8_t character)
 {
     if (character == 146)
         return 39;
@@ -510,7 +510,7 @@ unsigned __int8 __cdecl I_CleanChar(unsigned __int8 character)
         return character;
 }
 
-int Com_sprintf(char *dest, unsigned int size, const char *fmt, ...)
+int Com_sprintf(char *dest, uint32_t size, const char *fmt, ...)
 {
     int result; // eax
     va_list va; // [esp+1Ch] [ebp+14h] BYREF
@@ -525,7 +525,7 @@ int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...)
 {
     int len; // [esp+4h] [ebp-Ch]
     char *destMod; // [esp+8h] [ebp-8h]
-    unsigned int destModSize; // [esp+Ch] [ebp-4h]
+    uint32_t destModSize; // [esp+Ch] [ebp-4h]
     va_list va; // [esp+28h] [ebp+18h] BYREF
 
     va_start(va, fmt);
@@ -938,13 +938,13 @@ void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value
 }
 
 bool __cdecl ParseConfigStringToStruct(
-    unsigned __int8 *pStruct,
+    uint8_t *pStruct,
     const cspField_t *pFieldList,
     int iNumFields,
     char *pszBuffer,
     int iMaxFieldTypes,
-    int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
-    void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *))
+    int(__cdecl *parseSpecialFieldType)(uint8_t *, const char *, const int),
+    void(__cdecl *parseStrcpy)(uint8_t *, const char *))
 {
     return ParseConfigStringToStructCustomSize(
         pStruct,
@@ -957,13 +957,13 @@ bool __cdecl ParseConfigStringToStruct(
 }
 
 bool __cdecl ParseConfigStringToStructCustomSize(
-    unsigned __int8 *pStruct,
+    uint8_t *pStruct,
     const cspField_t *pFieldList,
     int iNumFields,
     char *pszBuffer,
     int iMaxFieldTypes,
-    int(__cdecl *parseSpecialFieldType)(unsigned __int8 *, const char *, const int),
-    void(__cdecl *parseStrcpy)(unsigned __int8 *, const char *))
+    int(__cdecl *parseSpecialFieldType)(uint8_t *, const char *, const int),
+    void(__cdecl *parseStrcpy)(uint8_t *, const char *))
 {
     int v7; // eax
     int v8; // eax
@@ -1026,11 +1026,11 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     break;
                 case 4:
                     v7 = atoi(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = v7;
+                    *(uint32_t *)&pStruct[v20->iOffset] = v7;
                     break;
                 case 5:
                     v8 = atoi(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = v8 != 0;
+                    *(uint32_t *)&pStruct[v20->iOffset] = v8 != 0;
                     break;
                 case 6:
                     v16 = atof(src);
@@ -1038,7 +1038,7 @@ bool __cdecl ParseConfigStringToStructCustomSize(
                     break;
                 case 7:
                     v15 = atof(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
+                    *(uint32_t *)&pStruct[v20->iOffset] = (int)(v15 * 1000.0);
                     break;
                 case 8:
 #ifdef KISAK_MP
@@ -1046,13 +1046,13 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     {
                         v9 = FX_Register(src);
-                        *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v9;
+                        *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v9;
                     }
                     break;
                 case 9:
                     I_strncpyz(dest, src, 0x2000);
                     v22 = R_RegisterModel(dest);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v22;
+                    *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v22;
                     if (!v22)
                         v18 = 1;
                     break;
@@ -1062,12 +1062,12 @@ bool __cdecl ParseConfigStringToStructCustomSize(
 #endif
                     {
                         v10 = Material_RegisterHandle(src, 0);
-                        *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)v10;
+                        *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)v10;
                     }
                     break;
                 case 0xB:
                     SoundAlias = Com_FindSoundAlias(src);
-                    *(unsigned int *)&pStruct[v20->iOffset] = (unsigned int)SoundAlias;
+                    *(uint32_t *)&pStruct[v20->iOffset] = (uint32_t)SoundAlias;
                     break;
                 default:
                     if (v20->iFieldType >= 0)
@@ -1139,7 +1139,7 @@ bool __cdecl Com_IsLegacyXModelName(const char *name)
     return !I_strnicmp(name, "xmodel", 6) && (name[6] == 47 || name[6] == 92);
 }
 
-unsigned int __cdecl LongNoSwap(unsigned int color)
+uint32_t __cdecl LongNoSwap(uint32_t color)
 {
     return color;
 }

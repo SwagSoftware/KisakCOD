@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 
 #define CMD_MAX_NESTING 8
 
@@ -30,7 +31,7 @@ struct cmd_function_s
 
 struct CmdText // sizeof=0xC
 {                                       // ...
-    unsigned __int8 *data;              // ...
+    uint8_t *data;              // ...
     int maxsize;                        // ...
     int cmdsize;                        // ...
 };
@@ -47,7 +48,7 @@ void __cdecl TRACK_cmd();
 void __cdecl Cmd_Wait_f();
 void __cdecl Cbuf_Init();
 void __cdecl Cbuf_AddText(int localClientNum, const char *text);
-void __cdecl memcpy_noncrt(void *dst, const void *src, unsigned int length);
+void __cdecl memcpy_noncrt(void *dst, const void *src, uint32_t length);
 int __cdecl strlen_noncrt(const char *str);
 void __cdecl Cbuf_InsertText(int localClientNum, const char *text);
 void __cdecl Cbuf_AddServerText_f();
@@ -63,7 +64,7 @@ void __cdecl Cmd_ArgsBuffer(int start, char *buffer, int bufLength);
 void __cdecl Cmd_TokenizeStringWithLimit(char *text_in, int max_tokens);
 void __cdecl Cmd_TokenizeStringKernel(char *text_in, int max_tokens, CmdArgs *args, CmdArgsPrivate *argsPriv);
 int __cdecl Cmd_TokenizeStringInternal(char *text_in, int max_tokens, const char **argv, CmdArgsPrivate *argsPriv);
-bool __cdecl Cmd_IsWhiteSpaceChar(unsigned __int8 letter);
+bool __cdecl Cmd_IsWhiteSpaceChar(uint8_t letter);
 void __cdecl AssertCmdArgsConsistency(const CmdArgs *args, const CmdArgsPrivate *argsPriv);
 void __cdecl Cmd_TokenizeString(char *text_in);
 void __cdecl Cmd_EndTokenizedString();

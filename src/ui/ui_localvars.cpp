@@ -9,7 +9,7 @@ void __cdecl UILocalVar_Init(UILocalVarContext *context)
 
 void __cdecl UILocalVar_Shutdown(UILocalVarContext *context)
 {
-    unsigned int hash; // [esp+4h] [ebp-4h]
+    uint32_t hash; // [esp+4h] [ebp-4h]
 
     if (!context)
         MyAssertHandler(".\\ui\\ui_localvars.cpp", 31, 0, "%s", "context");
@@ -22,12 +22,12 @@ void __cdecl UILocalVar_Shutdown(UILocalVarContext *context)
             FreeString(context->table[hash].name);
         }
     }
-    memset((unsigned __int8 *)context, 0, sizeof(UILocalVarContext));
+    memset((uint8_t *)context, 0, sizeof(UILocalVarContext));
 }
 
 UILocalVarContext *__cdecl UILocalVar_Find(UILocalVarContext *context, const char *name)
 {
-    unsigned int hash; // [esp+0h] [ebp-4h] BYREF
+    uint32_t hash; // [esp+0h] [ebp-4h] BYREF
 
     if (UILocalVar_FindLocation(context, name, &hash))
         return (UILocalVarContext *)((char *)context + 12 * hash);
@@ -35,10 +35,10 @@ UILocalVarContext *__cdecl UILocalVar_Find(UILocalVarContext *context, const cha
         return 0;
 }
 
-char __cdecl UILocalVar_FindLocation(UILocalVarContext *context, const char *name, unsigned int *hashForName)
+char __cdecl UILocalVar_FindLocation(UILocalVarContext *context, const char *name, uint32_t *hashForName)
 {
-    unsigned int hash; // [esp+1Ch] [ebp-8h]
-    unsigned int initialHash; // [esp+20h] [ebp-4h]
+    uint32_t hash; // [esp+1Ch] [ebp-8h]
+    uint32_t initialHash; // [esp+20h] [ebp-4h]
 
     initialHash = UILocalVar_HashName(name);
     hash = initialHash;
@@ -51,27 +51,27 @@ char __cdecl UILocalVar_FindLocation(UILocalVarContext *context, const char *nam
             *hashForName = hash;
             return 1;
         }
-        hash = (unsigned __int8)(hash + 1);
+        hash = (uint8_t)(hash + 1);
     } while (hash != initialHash);
     *hashForName = hash;
     return 0;
 }
 
-unsigned int __cdecl UILocalVar_HashName(const char *name)
+uint32_t __cdecl UILocalVar_HashName(const char *name)
 {
     __int16 hash; // [esp+0h] [ebp-8h]
-    unsigned int i; // [esp+4h] [ebp-4h]
+    uint32_t i; // [esp+4h] [ebp-4h]
 
     hash = 0;
     for (i = 0; name[i]; ++i)
         hash += (i + 119) * name[i];
-    return (unsigned __int8)(hash + HIBYTE(hash));
+    return (uint8_t)(hash + HIBYTE(hash));
 }
 
 UILocalVarContext *__cdecl UILocalVar_FindOrCreate(UILocalVarContext *context, char *name)
 {
     UILocalVar *var; // [esp+0h] [ebp-8h]
-    unsigned int hash; // [esp+4h] [ebp-4h] BYREF
+    uint32_t hash; // [esp+4h] [ebp-4h] BYREF
 
     if (UILocalVar_FindLocation(context, name, &hash))
         return (UILocalVarContext *)((char *)context + 12 * hash);
@@ -131,7 +131,7 @@ double __cdecl UILocalVar_GetFloat(const UILocalVar *var)
     return (float)atof(var->u.string);
 }
 
-char *__cdecl UILocalVar_GetString(const UILocalVar *var, char *stringBuf, unsigned int size)
+char *__cdecl UILocalVar_GetString(const UILocalVar *var, char *stringBuf, uint32_t size)
 {
     if (!var)
         MyAssertHandler(".\\ui\\ui_localvars.cpp", 171, 0, "%s", "var");

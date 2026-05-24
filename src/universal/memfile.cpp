@@ -219,12 +219,12 @@ void MemFile_StartSegment(MemoryFile* memFile, int index)
     }
 }
 
-void __cdecl MemFile_deflateInit(unsigned __int8* next_out, unsigned int avail_out, bool compress)
+void __cdecl MemFile_deflateInit(uint8_t* next_out, uint32_t avail_out, bool compress)
 {
     AssertStreamMode(MEM_FILE_MODE_DEFAULT);
     if (compress)
     {
-        memset((unsigned __int8*)&stream, 0, sizeof(stream));
+        memset((uint8_t*)&stream, 0, sizeof(stream));
         stream.next_out = next_out;
         stream.avail_out = avail_out;
         if (deflateInit_(&stream, 1, "1.1.4", 52))
@@ -236,8 +236,8 @@ void __cdecl MemFile_deflateInit(unsigned __int8* next_out, unsigned int avail_o
 
 void __cdecl MemFile_EndSegment(MemoryFile* memFile)
 {
-    unsigned int err; // [esp+0h] [ebp-Ch]
-    unsigned int index; // [esp+8h] [ebp-4h]
+    uint32_t err; // [esp+0h] [ebp-Ch]
+    uint32_t index; // [esp+8h] [ebp-4h]
 
     if (memFile->memoryOverflow)
         MyAssertHandler(".\\universal\\memfile.cpp", 310, 0, "%s", "!memFile->memoryOverflow");
@@ -286,7 +286,7 @@ void __cdecl MemFile_EndSegment(MemoryFile* memFile)
             if (MemFile_deflateEnd(memFile->compress))
                 MyAssertHandler(".\\universal\\memfile.cpp", 362, 0, "%s", "err == Z_OK");
             memFile->segmentIndex = -1;
-            *(unsigned int*)&memFile->buffer[memFile->segmentStart] = memFile->bytesUsed - memFile->segmentStart;
+            *(uint32_t*)&memFile->buffer[memFile->segmentStart] = memFile->bytesUsed - memFile->segmentStart;
         }
         else
         {
@@ -307,9 +307,9 @@ void __cdecl MemFile_EndSegment(MemoryFile* memFile)
     }
 }
 
-unsigned int __cdecl MemFile_deflateEnd(bool compress)
+uint32_t __cdecl MemFile_deflateEnd(bool compress)
 {
-    unsigned int err; // [esp+0h] [ebp-4h]
+    uint32_t err; // [esp+0h] [ebp-4h]
 
     AssertStreamMode(MEM_FILE_MODE_DEFLATE);
     if (compress)
@@ -322,8 +322,8 @@ unsigned int __cdecl MemFile_deflateEnd(bool compress)
 
 void __cdecl MemFile_MoveToSegment(MemoryFile* memFile, int index)
 {
-    unsigned __int8* data; // [esp+4h] [ebp-8h]
-    unsigned int len; // [esp+8h] [ebp-4h]
+    uint8_t* data; // [esp+4h] [ebp-8h]
+    uint32_t len; // [esp+8h] [ebp-4h]
 
     if (index < -1 || index >= 8)
         MyAssertHandler(
@@ -341,7 +341,7 @@ void __cdecl MemFile_MoveToSegment(MemoryFile* memFile, int index)
         if (index >= 0)
         {
             data = MemFile_GetSegmentAddess(memFile, index);
-            len = *(unsigned int*)data - 4;
+            len = *(uint32_t*)data - 4;
             memFile->bytesUsed = data - memFile->buffer + 4;
             MemFile_inflateInit(&memFile->buffer[memFile->bytesUsed], len, memFile->compress);
             g_nonZeroCount = 0;
@@ -350,12 +350,12 @@ void __cdecl MemFile_MoveToSegment(MemoryFile* memFile, int index)
     }
 }
 
-void __cdecl MemFile_inflateInit(unsigned __int8* next_in, unsigned int len, bool compress)
+void __cdecl MemFile_inflateInit(uint8_t* next_in, uint32_t len, bool compress)
 {
     AssertStreamMode(MEM_FILE_MODE_DEFAULT);
     if (compress)
     {
-        memset((unsigned __int8*)&stream, 0, sizeof(stream));
+        memset((uint8_t*)&stream, 0, sizeof(stream));
         stream.next_in = next_in;
         stream.avail_in = len;
         if (inflateInit_(&stream, "1.1.4", 52))
@@ -378,7 +378,7 @@ int __cdecl MemFile_inflateEnd(bool compress)
     return err;
 }
 
-unsigned __int8* __cdecl MemFile_GetSegmentAddess(MemoryFile* memFile, unsigned int index)
+uint8_t* __cdecl MemFile_GetSegmentAddess(MemoryFile* memFile, uint32_t index)
 {
     int segmentStart; // [esp+0h] [ebp-4h]
 
@@ -402,7 +402,7 @@ unsigned __int8* __cdecl MemFile_GetSegmentAddess(MemoryFile* memFile, unsigned 
                 0,
                 "%s",
                 "segmentStart + static_cast< int >( sizeof( int ) ) <= memFile->bufferSize");
-        segmentStart += *(unsigned int*)&memFile->buffer[segmentStart];
+        segmentStart += *(uint32_t*)&memFile->buffer[segmentStart];
         --index;
     }
     if (segmentStart + 4 > memFile->bufferSize)
@@ -431,10 +431,10 @@ int __cdecl MemFile_WriteDataInternal(
     int bytes,
     char nonZeroCount,
     char cacheBufferLen,
-    unsigned __int8 nextByte)
+    uint8_t nextByte)
 {
     signed int sourceLen; // [esp+0h] [ebp-10h]
-    unsigned __int8* data; // [esp+8h] [ebp-8h]
+    uint8_t* data; // [esp+8h] [ebp-8h]
     int len; // [esp+Ch] [ebp-4h]
 
     if (!memFile)
@@ -522,8 +522,8 @@ int __cdecl MemFile_GetUsedSize(MemoryFile* memFile)
 
 void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* dat)
 {
-    unsigned int moveByte; // [esp+0h] [ebp-20h]
-    unsigned int nextByte; // [esp+8h] [ebp-18h]
+    uint32_t moveByte; // [esp+0h] [ebp-20h]
+    uint32_t nextByte; // [esp+8h] [ebp-18h]
     int nonZeroCount; // [esp+Ch] [ebp-14h]
     int cacheBufferLen; // [esp+10h] [ebp-10h]
     int zeroCount; // [esp+18h] [ebp-8h]
@@ -687,7 +687,7 @@ void __cdecl MemFile_WriteData(MemoryFile* memFile, int byteCount, const void* d
 
     while (1)
     {
-        nextByte = (unsigned __int8)p[i];
+        nextByte = (uint8_t)p[i];
         if (cacheBufferLen == 63)
         {
             if (!MemFile_WriteDataInternal(memFile, cacheSize, 0, 63, nextByte))
@@ -804,7 +804,7 @@ void __cdecl MemFile_WriteCString(MemoryFile* memFile, const char* string)
 
 const char* __cdecl MemFile_ReadCString(MemoryFile* memFile)
 {
-    unsigned __int8* string; // [esp+0h] [ebp-4h]
+    uint8_t* string; // [esp+0h] [ebp-4h]
 
     if (!memFile)
         MyAssertHandler(".\\universal\\memfile.cpp", 824, 0, "%s", "memFile");
@@ -835,10 +835,10 @@ const char* __cdecl MemFile_ReadCString(MemoryFile* memFile)
     return (const char*)g_saveBuffer;
 }
 
-void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, unsigned __int8* p)
+void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, uint8_t* p)
 {
-    unsigned __int8* data; // [esp+0h] [ebp-8h]
-    unsigned __int8 code; // [esp+7h] [ebp-1h]
+    uint8_t* data; // [esp+0h] [ebp-8h]
+    uint8_t code; // [esp+7h] [ebp-1h]
 
     if (!memFile)
         MyAssertHandler(".\\universal\\memfile.cpp", 900, 0, "%s", "memFile");
@@ -897,10 +897,10 @@ void __cdecl MemFile_ReadData(MemoryFile* memFile, int byteCount, unsigned __int
     }
 }
 
-unsigned __int8 __cdecl MemFile_ReadByteInternal(MemoryFile* memFile)
+uint8_t __cdecl MemFile_ReadByteInternal(MemoryFile* memFile)
 {
-    unsigned int err; // [esp+0h] [ebp-8h]
-    unsigned __int8 result; // [esp+7h] [ebp-1h] BYREF
+    uint32_t err; // [esp+0h] [ebp-8h]
+    uint8_t result; // [esp+7h] [ebp-1h] BYREF
 
     if (!memFile)
         MyAssertHandler(".\\universal\\memfile.cpp", 851, 0, "%s", "memFile");
@@ -956,10 +956,10 @@ void MemFile_Shutdown(MemoryFile *memFile)
     memFile->buffer = 0;
 }
 
-unsigned __int8 *MemFile_CopySegments(MemoryFile *memFile, int index, void *buf)
+uint8_t *MemFile_CopySegments(MemoryFile *memFile, int index, void *buf)
 {
-    const unsigned __int8 *SegmentAddess; // r4
-    unsigned __int8 *v7; // r31
+    const uint8_t *SegmentAddess; // r4
+    uint8_t *v7; // r31
 
     iassert(!memFile->memoryOverflow);
 

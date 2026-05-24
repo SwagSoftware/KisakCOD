@@ -140,8 +140,8 @@ void R_SetDefaultLitTechTypes()
 
 void __cdecl R_ForceLitTechType(MaterialTechniqueType litTechType)
 {
-    unsigned int surfType; // [esp+0h] [ebp-8h]
-    unsigned int lightType; // [esp+4h] [ebp-4h]
+    uint32_t surfType; // [esp+0h] [ebp-8h]
+    uint32_t lightType; // [esp+4h] [ebp-4h]
 
     for (surfType = 0; surfType < 13; ++surfType)
     {
@@ -152,10 +152,10 @@ void __cdecl R_ForceLitTechType(MaterialTechniqueType litTechType)
 
 void __cdecl R_UpdateDrawMethod(GfxBackEndData *data, const GfxViewInfo *viewInfo)
 {
-    unsigned int primaryLightIndex; // [esp+4h] [ebp-Ch]
-    unsigned int surfType; // [esp+8h] [ebp-8h]
-    unsigned int lightTypea; // [esp+Ch] [ebp-4h]
-    unsigned int lightType; // [esp+Ch] [ebp-4h]
+    uint32_t primaryLightIndex; // [esp+4h] [ebp-Ch]
+    uint32_t surfType; // [esp+8h] [ebp-8h]
+    uint32_t lightTypea; // [esp+Ch] [ebp-4h]
+    uint32_t lightType; // [esp+Ch] [ebp-4h]
 
     iassert(viewInfo->shadowableLightCount <= 255);
 
