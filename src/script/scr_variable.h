@@ -68,6 +68,7 @@ enum var_stat_t
 
 #define VAR_NAME_HIGH_MASK 0xFFFFFF00
 
+#define OBJECT_NOTIFY_LIST 0x18000
 #define OBJECT_STACK 0x18001
 
 #define FIRST_OBJECT 15

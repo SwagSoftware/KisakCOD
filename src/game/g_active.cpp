@@ -235,10 +235,10 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
     touch = entityHandlers[ent->handler].touch;
     if (count > 0)
     {
-        for (i = count; i; --i)
+        for (i = 0; i < count; ++i)
         {
             hit = &g_entities[entityList[i]];
-            //iassert(hit->r.contents & contentMask); // KISAKTODO... the traceray flags are wrong for SP.... 
+            //iassert(hit->r.contents & contentMask); // KISAKTODO... the traceray flags are wrong for SP....
             iassert(hit->s.eType != ET_MISSILE);
             hitTouch = entityHandlers[hit->handler].touch;
 

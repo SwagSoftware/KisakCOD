@@ -2865,7 +2865,7 @@ void __cdecl ScrCmd_StalingradSpawn(scr_entref_t entref)
 
     Entity = GetEntity(entref);
     v2 = Entity;
-    if (Entity->s.eType != 15)
+    if (Entity->s.eType != ET_ACTOR_SPAWNER)
     {
         targetname = Entity->targetname;
         if (v2->targetname)
@@ -2886,6 +2886,7 @@ void __cdecl ScrCmd_StalingradSpawn(scr_entref_t entref)
             v5);
         Scr_Error(v8);
     }
+
     if (v2->item[0].clipAmmoCount < level.time)
     {
         Int = 0;

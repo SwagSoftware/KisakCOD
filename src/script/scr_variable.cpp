@@ -4604,16 +4604,14 @@ void Scr_GetChecksum(uint32_t *checksum)
 void CopyEntity(uint32_t parentId, uint32_t newParentId)
 {
 	VariableValueInternal *parentValue; // r31
-	uint32_t FirstSibling; // r15
 	VariableValueInternal *entryValue; // r26
 	uint32_t name; // r29
 	VariableValueInternal *newEntryValue; // r31
-	VariableUnion *intValue; // r4
 
 	iassert(parentId);
 	iassert(newParentId);
 
-	parentValue = &scrVarGlob.variableList[parentId + 1];
+	parentValue = &scrVarGlob.variableList[parentId + VARIABLELIST_PARENT_BEGIN];
 
 	iassert((parentValue->w.status & VAR_STAT_MASK) == VAR_STAT_EXTERNAL);
 	iassert(IsObject(parentValue));
@@ -4634,7 +4632,7 @@ void CopyEntity(uint32_t parentId, uint32_t newParentId)
 		name = entryValue->w.name >> VAR_NAME_BITS;
 		iassert(name != OBJECT_STACK);
 
-		if (name != OBJECT_STACK)
+		if (name != OBJECT_STACK && name != OBJECT_NOTIFY_LIST)
 		{
 			iassert(!FindVariableIndexInternal(newParentId, name));
 			newEntryValue = &scrVarGlob.variableList[GetVariable(newParentId, name) + VARIABLELIST_CHILD_BEGIN];

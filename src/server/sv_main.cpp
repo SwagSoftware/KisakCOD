@@ -1106,10 +1106,8 @@ int __cdecl SV_ForwardFrame()
 int __cdecl SV_ClientFrameRateFix(int msec)
 {
     const dvar_t *v2; // r11
-    volatile int serverExecTime; // r11
     int v4; // r10
     int v5; // r10
-    int v6; // r9
     int result; // r3
 
     v2 = sv_clientFrameRateFix;
@@ -1120,20 +1118,17 @@ int __cdecl SV_ClientFrameRateFix(int msec)
     }
     if (!v2->current.enabled)
         return msec;
-    serverExecTime = sv.serverExecTime;
-    if (!sv.serverExecTime)
+    int serverExecTime = sv.serverExecTime;
+    if (serverExecTime <= 0)
         return msec;
     if (!msec)
         return msec;
     v4 = msec - sv.waitSnapshotTime;
-    if (msec - sv.waitSnapshotTime <= 0)
+    if (v4 <= 0)
         return msec;
-    if (sv.serverExecTime > 200)
+    if (serverExecTime > 200)
         serverExecTime = 200;
-    v6 = __ROL4__(50 * v4, 1);
     v5 = 50 * v4 / serverExecTime;
-    //__twllei(serverExecTime, 0); // LWSS: I think these instructions are just traps for bad values?
-    //__twlgei(serverExecTime & ~(v6 - 1), 0xFFFFFFFF);
     if (msec >= v5)
         msec = v5;
     result = 1;
