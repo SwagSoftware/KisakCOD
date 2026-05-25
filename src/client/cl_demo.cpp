@@ -828,8 +828,8 @@ void __cdecl CL_FinishLoadingDemo()
         do
         {
             MSG_ReadString(&v7, v8, 1024);
-            if (v8[0] && (unsigned int)(v0 - 1155) <= 0x1FF)
-                G_SetModelIndex(v0 - 1155, v8);
+            if (v8[0] && (unsigned int)(v0 - 1123) <= 0x1FF) // CS_MODELS (PC SP, was Xbox 1155)
+                G_SetModelIndex(v0 - 1123, v8); // CS_MODELS
             else
                 SV_SetConfigstring(v0, v8);
             v1 = v8;

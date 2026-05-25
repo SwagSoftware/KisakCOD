@@ -929,7 +929,7 @@ void __cdecl CG_LoadWorld(int savegame)
 
 void __cdecl RegisterNightVisionAssets(int localClientNum)
 {
-    if (*CL_GetConfigString(localClientNum, 0x47Fu) == 49)
+    if (*CL_GetConfigString(localClientNum, CS_NIGHTVISION) == 49)
     {
         ProfLoad_Begin("Register night vision assets");
         cgMedia.nightVisionOverlay = Material_RegisterHandle("nightvision_overlay_goggles", 7);
@@ -1008,7 +1008,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     ProfLoad_Begin("Register server models");
     for (i = 1; i < 512; ++i)
     {
-        ConfigString = CL_GetConfigString(localClientNum, i + 1155);
+        ConfigString = CL_GetConfigString(localClientNum, i + 1123); // CS_MODELS (PC SP, was Xbox 1155)
         if (!*ConfigString)
             break;
         CG_DrawInformation(localClientNum);
@@ -1022,7 +1022,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     v7 = &cgsArray[0].fxs[1];
     do
     {
-        v8 = CL_GetConfigString(localClientNum, v6 + 2179);
+        v8 = CL_GetConfigString(localClientNum, v6 + 2147); // CS_EFFECT_NAMES (PC SP, was Xbox 2179)
         if (!*v8)
             break;
         v9 = FX_Register(v8);
@@ -1036,7 +1036,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     ProfLoad_Begin("Register shellshocks");
     for (j = 1; j < 16; ++j)
     {
-        v11 = CL_GetConfigString(localClientNum, j + 2535);
+        v11 = CL_GetConfigString(localClientNum, j + 2503); // CS_SHELLSHOCKS (PC SP, was Xbox 2535)
         v12 = v11;
         if (!*v11)
             break;
@@ -1060,7 +1060,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     cgMedia.fxKnifeBlood = FX_Register("impacts/flesh_hit_knife");
     cgMedia.fxKnifeNoBlood = FX_Register("impacts/flesh_hit_knife_noblood");
     ProfLoad_End();
-    if (*CL_GetConfigString(localClientNum, 0x47Fu) == 49)
+    if (*CL_GetConfigString(localClientNum, CS_NIGHTVISION) == 49)
     {
         ProfLoad_Begin("Register night vision assets");
         cgMedia.nightVisionOverlay = Material_RegisterHandle("nightvision_overlay_goggles", 7);
@@ -1512,7 +1512,8 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     SCR_UpdateLoadScreen();
 
     ProfLoad_Begin("Precache script menus");
-    for (i = 2551; i < 2583; ++i)
+    // CS_SCRIPT_MENUS range: PC SP [2519, 2551), was Xbox [2551, 2583)
+    for (i = 2519; i < 2551; ++i)
         CG_PrecacheScriptMenu(localClientNum, i);
     ProfLoad_End();
 

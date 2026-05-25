@@ -105,45 +105,15 @@ void __cdecl WriteVector(float *v, MemoryFile *memFile)
 
 const float *__cdecl Scr_ReadVec3(MemoryFile *memFile)
 {
-    double v2; // fp0
-    float v4; // [sp+50h] [-50h] BYREF
-    float v5; // [sp+54h] [-4Ch]
-    float v6; // [sp+58h] [-48h] BYREF
-    float v7; // [sp+5Ch] [-44h]
-    float v8; // [sp+60h] [-40h]
+    float vec[3]; // [sp+58h] [-48h] BYREF
 
-    MemFile_ReadData(memFile, 4, (unsigned char*)&v4);
-    v5 = v4;
-    if ((LODWORD(v4) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\../universal/memfile.h", 173, 0, "%s", "!IS_NAN(value)");
-    v6 = v4;
-    MemFile_ReadData(memFile, 4, (unsigned char *)&v4);
-    v5 = v4;
-    if ((LODWORD(v4) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\../universal/memfile.h", 173, 0, "%s", "!IS_NAN(value)");
-    v7 = v4;
-    MemFile_ReadData(memFile, 4, (unsigned char *)&v4);
-    v2 = v4;
-    v5 = v4;
-    if ((LODWORD(v4) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\script\\../universal/memfile.h", 173, 0, "%s", "!IS_NAN(value)");
-        v2 = v4;
-    }
-    v5 = v6;
-    v8 = v2;
-    if ((LODWORD(v6) & 0x7F800000) == 0x7F800000
-        || (v5 = v7, (LODWORD(v7) & 0x7F800000) == 0x7F800000)
-        || (v5 = v2, (LODWORD(v5) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\script\\scr_readwrite.cpp",
-            119,
-            0,
-            "%s",
-            "!IS_NAN((v)[0]) && !IS_NAN((v)[1]) && !IS_NAN((v)[2])");
-    }
-    return Scr_AllocVector(&v6);
+    vec[0] = MemFile_ReadFloat(memFile);
+    vec[1] = MemFile_ReadFloat(memFile);
+    vec[2] = MemFile_ReadFloat(memFile);
+
+    nanassertvec3(vec);
+
+    return Scr_AllocVector(vec);
 }
 
 void __cdecl WriteCodepos(const char *pos, MemoryFile *memFile)

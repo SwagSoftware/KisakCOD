@@ -771,7 +771,7 @@ void __cdecl SP_worldspawn()
     G_SpawnString(&level.spawnVar, "northyaw", "", &northyaw);
     if (northyaw[0])
     {
-        SV_SetConfigstring(1147, northyaw);
+        SV_SetConfigstring(1115, northyaw); // CS_NORTHYAW (PC SP, was Xbox 1147)
 
         float yaw = DEG2RAD(atof(northyaw));
         level.compassNorth[1] = sin(yaw);
@@ -779,7 +779,7 @@ void __cdecl SP_worldspawn()
     }
     else
     {
-        SV_SetConfigstring(1147, "0");
+        SV_SetConfigstring(1115, "0"); // CS_NORTHYAW (PC SP, was Xbox 1147)
         level.compassNorth[0] = 1.0;
         level.compassNorth[1] = 0.0;
     }

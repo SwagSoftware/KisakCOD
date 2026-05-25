@@ -3899,7 +3899,7 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     }
     else
     {
-        ConfigString = CL_GetConfigString(0, viewmodelIndex + 1155);
+        ConfigString = CL_GetConfigString(0, viewmodelIndex + 1123); // CS_MODELS (PC SP, was Xbox 1155)
         v7 = ConfigString;
         if (!ConfigString || !*ConfigString)
             MyAssertHandler(

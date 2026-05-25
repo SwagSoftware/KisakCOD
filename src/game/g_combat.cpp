@@ -411,7 +411,7 @@ void __cdecl G_DamageNotify(
     {
         //v36 = 2 * (modelIndex + 272);
         iassert(targ->attachTagNames[modelIndex - 1]);
-        modelName = SV_GetConfigstringConst(*((unsigned __int16 *)&targ->scripted + modelIndex + 1) + 1155);
+        modelName = SV_GetConfigstringConst(*((unsigned __int16 *)&targ->scripted + modelIndex + 1) + 1123); // CS_MODELS (PC SP, was Xbox 1155)
         iassert(modelName);
         //Scr_AddConstString(*(unsigned __int16 *)(&targ->s.eType + v36));
         Scr_AddConstString(targ->attachTagNames[modelIndex - 1]);

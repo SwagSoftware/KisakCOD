@@ -220,17 +220,17 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
             case EV_SOUND_ALIAS:
                 if (ent->eventParm)
                 {
-                    ConfigString = CL_GetConfigString(localClientNum, ent->eventParm + 1342);
+                    ConfigString = CL_GetConfigString(localClientNum, CS_SOUNDALIASES + ent->eventParm);
                     CG_PlaySoundAliasByName(localClientNum, ent->number, ent->lerp.pos.trBase, ConfigString);
                 }
                 return;
             case EV_SOUND_ALIAS_AS_MASTER:
                 if (ent->eventParm)
                 {
-                    CG_PlaySoundAliasAsMasterByName(localClientNum, 
-                        ent->number, 
-                        ent->lerp.pos.trBase, 
-                        CL_GetConfigString(localClientNum, ent->eventParm + 1342)
+                    CG_PlaySoundAliasAsMasterByName(localClientNum,
+                        ent->number,
+                        ent->lerp.pos.trBase,
+                        CL_GetConfigString(localClientNum, CS_SOUNDALIASES + ent->eventParm)
                     );
                 }
                 return;
@@ -474,7 +474,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 {
                     SoundAliasSeed = Com_GetSoundAliasSeed();
                     Com_SetSoundAliasSeed(cgArray[0].snap->serverCommandSequence + cent->nextState.number);
-                    v85 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1667);
+                    v85 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_SOUNDALIASES);
                     v86 = cent->nextState.number;
                     if (event == EV_SOUND_ALIAS_NOTIFY)
                         v88 = CG_PlaySoundAliasByName(localClientNum, v86, cent->nextState.lerp.pos.trBase, v85);
@@ -491,7 +491,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 {
                     if (cgArray[0].demoType != DEMO_TYPE_CLIENT)
                     {
-                        v90 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1667);
+                        v90 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_SOUNDALIASES);
                         if (v90)
                         {
                             SND_AddLengthNotify(SND_FindPlaybackId((const snd_alias_t *)cent->nextState.number, v90), (const snd_alias_t *)cent->nextState.number, SndLengthNotify_Script);
@@ -1322,7 +1322,7 @@ void __cdecl CG_PlayFxOnTag(int32_t localClientNum, centity_s *cent, int32_t eve
     int32_t csIndex; // [esp+18h] [ebp-4h]
 
     csIndex = eventParm + 1698;
-    tagAndEffect = CL_GetConfigString(localClientNum, eventParm + 1698);
+    tagAndEffect = CL_GetConfigString(localClientNum, eventParm + 1698); // KISAKTODO: CS_ offset with sub-offset
 
     iassert(tagAndEffect[0]);
     iassert(tagAndEffect[1]);

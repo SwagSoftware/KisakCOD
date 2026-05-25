@@ -2873,47 +2873,45 @@ void __cdecl WriteEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
 
 void __cdecl ReadEntityDisconnectedLinks(gentity_s *ent, SaveGame *save)
 {
-    int disconnectedLinks; // r27
-    int index; // r31
-    pathnode_t *node; // r29
-    int j; // r31
-    int i; // r28
-    int prev; // r10
-    int next; // r9
-    unsigned __int64 v11; // r4
-    _WORD buffer[4]; // [sp+50h] [-70h] BYREF
+    int disconnectedLinks;
+    pathnode_t *node;
+    int i;
+    int prev;
+    int next;
+    PathLinkInfo savedInfo; // 8 bytes: from, to, prev, next
 
     iassert(save);
+
     disconnectedLinks = ent->disconnectedLinks;
-    if (ent->disconnectedLinks)
+    if (!disconnectedLinks)
+        return;
+
+    do
     {
-        do
+        SaveMemory_LoadRead(&savedInfo, sizeof(savedInfo), save);
+
+        bcassert(savedInfo.from, g_path.actualNodeCount);
+        node = &gameWorldSp.path.nodes[savedInfo.from];
+
+        for (i = node->constant.totalLinkCount - 1; ; --i)
         {
-            SaveMemory_LoadRead(buffer, 8, save);
-            index = buffer[0];
-            bcassert(index, g_path.actualNodeCount);
-            node = &gameWorldSp.path.nodes[index];
-            j = node->constant.totalLinkCount - 1;
-            for (i = j; ; --i)
-            {
-                iassert(j >= node->dynamic.wLinkCount);
+            iassert(i >= node->dynamic.wLinkCount);
+            if (node->constant.Links[i].nodeNum == savedInfo.to)
+                break;
+        }
 
-                if (node->constant.Links[i].nodeNum == buffer[1])
-                    break;
-                --j;
-            }
-            ++node->constant.Links[j].disconnectCount;
-            prev = g_path.pathLinkInfoArray[disconnectedLinks].prev;
-            next = g_path.pathLinkInfoArray[disconnectedLinks].next;
-            *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].next + __ROL4__(prev, 3)) = next;
-            *(unsigned __int16 *)((char *)&g_path.pathLinkInfoArray[0].prev + __ROL4__(next, 3)) = prev;
-            //g_path.pathLinkInfoArray[disconnectedLinks] = (PathLinkInfo)v11;
-            g_path.pathLinkInfoArray[disconnectedLinks].from = buffer[2];
-            g_path.pathLinkInfoArray[disconnectedLinks].to = buffer[3]; // KISAKTODO: this could be wrong, it was packed weird
+        // Bump the link's disconnectCount.
+        ++node->constant.Links[i].disconnectCount;
 
-            disconnectedLinks = g_path.pathLinkInfoArray[disconnectedLinks].next;
-        } while (disconnectedLinks != ent->disconnectedLinks);
-    }
+        prev = g_path.pathLinkInfoArray[disconnectedLinks].prev;
+        next = g_path.pathLinkInfoArray[disconnectedLinks].next;
+        g_path.pathLinkInfoArray[prev].next = next;
+        g_path.pathLinkInfoArray[next].prev = prev;
+
+        g_path.pathLinkInfoArray[disconnectedLinks] = savedInfo;
+
+        disconnectedLinks = g_path.pathLinkInfoArray[disconnectedLinks].next;
+    } while (disconnectedLinks != ent->disconnectedLinks);
 }
 
 void __cdecl Scr_SetNodePriority()

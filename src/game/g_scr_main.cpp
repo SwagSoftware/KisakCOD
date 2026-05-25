@@ -2006,19 +2006,16 @@ void GScr_GetBrushModelCenter()
 
 void GScr_GetKeyBinding()
 {
-    const char *String; // r3
-    int KeyBinding; // r30
-    char v2[128]; // [sp+50h] [-120h] BYREF
-    char v3[136]; // [sp+D0h] [-A0h] BYREF
+    int bindCount;
+    char bindings[2][128];
 
-    String = Scr_GetString(0);
-    KeyBinding = CL_GetKeyBinding(0, String, (char (*)[128])v2);
+    bindCount = CL_GetKeyBinding(0, Scr_GetString(0), bindings);
     Scr_MakeArray();
-    Scr_AddIString(v2);
+    Scr_AddIString(bindings[0]);
     Scr_AddArrayStringIndexed(scr_const.key1);
-    Scr_AddIString(v3);
+    Scr_AddIString(bindings[1]);
     Scr_AddArrayStringIndexed(scr_const.key2);
-    Scr_AddInt(KeyBinding);
+    Scr_AddInt(bindCount);
     Scr_AddArrayStringIndexed(scr_const.count);
 }
 
@@ -2483,14 +2480,12 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
 
 void __cdecl ScrCmd_SetMoveSpeedScale(scr_entref_t entref)
 {
-    gentity_s *PlayerEntity; // r29
+    gentity_s *ent; // r29
 
-    PlayerEntity = GetPlayerEntity(entref);
-    if (!PlayerEntity)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 2554, 0, "%s", "ent");
-    if (!PlayerEntity->client)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 2555, 0, "%s", "ent->client");
-    PlayerEntity->client->pers.moveSpeedScaleMultiplier = Scr_GetFloat(0);
+    ent = GetPlayerEntity(entref);
+    iassert(ent);
+    iassert(ent->client);
+    ent->client->pers.moveSpeedScaleMultiplier = Scr_GetFloat(0);
 }
 
 void ScrCmd_GetTimeScale()
@@ -2707,24 +2702,19 @@ void __cdecl ScrCmd_PlayerLinkToDelta(scr_entref_t entref)
 
 void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t entref)
 {
-    gentity_s *Entity; // r31
-    gentity_s *v2; // r29
+    gentity_s *ent; // r31
     unsigned int ConstLowercaseString; // r30
-    float *p_commandTime; // r11
+    playerState_s *ps; // r11
 
-    Entity = GetEntity(entref);
+    ent = GetEntity(entref);
+
     if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
         Scr_ParamError(0, "Not an entity");
-    if (!Entity->client)
+
+    if (!ent->client)
         Scr_ObjectError("Not a player entity");
-    if ((Entity->flags & 0x800) == 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            2833,
-            0,
-            "%s",
-            "ent->flags & FL_SUPPORTS_LINKTO");
-    v2 = Scr_GetEntity(0);
+
+    iassert(ent->flags & FL_SUPPORTS_LINKTO);
     ConstLowercaseString = 0;
     if ((int)Scr_GetNumParam() > 1)
     {
@@ -2735,15 +2725,19 @@ void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t entref)
                 ConstLowercaseString = 0;
         }
     }
-    Entity->client->linkAnglesFrac = 1.0;
-    Entity->client->linkAnglesLocked = 1;
-    Entity->client->ps.pm_flags |= 0x1000000u;
-    p_commandTime = (float *)&Entity->client->ps.commandTime;
-    p_commandTime[351] = 0.0;
-    p_commandTime[352] = 0.0;
-    p_commandTime[353] = 0.0;
-    Entity->client->link_rotationMovesEyePos = 1;
-    if (!G_EntLinkTo(Entity, v2, ConstLowercaseString))
+
+    ent->client->linkAnglesFrac = 1.0;
+    ent->client->linkAnglesLocked = 1;
+    ent->client->ps.pm_flags |= 0x1000000u;
+
+    ps = &ent->client->ps;
+    ps->linkAngles[0] = 0.0;
+    ps->linkAngles[1] = 0.0;
+    ps->linkAngles[2] = 0.0;
+
+    ent->client->link_rotationMovesEyePos = 1;
+
+    if (!G_EntLinkTo(ent, Scr_GetEntity(0), ConstLowercaseString))
         Scr_Error("Failed to link entity");
 }
 
@@ -6513,7 +6507,7 @@ void GScr_PrecacheLocationSelector()
 void Scr_PrecacheNightvisionCodeAssets()
 {
     if (level.initializing)
-        SV_SetConfigstring(1151, "1");
+        SV_SetConfigstring(1119, "1"); // CS_NIGHTVISION (PC SP, was Xbox 1151)
     else
         Scr_Error("PrecacheNightvisionCodeAssets() must be called during level initialization.\n");
 }
@@ -7558,7 +7552,7 @@ void GScr_GetNorthYaw()
     long double v0; // fp2
     char v1[40]; // [sp+50h] [-30h] BYREF
 
-    SV_GetConfigstring(1147, v1, 32);
+    SV_GetConfigstring(1115, v1, 32); // CS_NORTHYAW (PC SP, was Xbox 1147)
     v0 = atof(v1);
     Scr_AddFloat((float)*(double *)&v0);
 }
@@ -7623,7 +7617,7 @@ void __cdecl Scr_FxParamError(unsigned int paramIndex, const char *errorString, 
     if (!errorString)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 8822, 0, "%s", "errorString");
     if (fxId)
-        SV_GetConfigstring(fxId + 2179, v7, 1024);
+        SV_GetConfigstring(fxId + 2147, v7, 1024); // CS_EFFECT_NAMES (PC SP, was Xbox 2179)
     else
         strcpy(v7, "not successfully loaded");
     v6 = va("%s (effect = %s)\n", errorString, v7);
@@ -7765,7 +7759,7 @@ void Scr_PlayFXOnTag()
     }
     v10 = SL_ConvertToString(ConstLowercaseString);
     v11 = va("%02d%s", v1, v10);
-    ConfigstringIndex = G_FindConfigstringIndex(v11, 2279, 256, 1, 0);
+    ConfigstringIndex = G_FindConfigstringIndex(v11, 2247, 256, 1, 0); // CS_EFFECT_TAGS (PC SP, was Xbox 2279)
     v13 = ConfigstringIndex;
     if (ConfigstringIndex <= 0 || ConfigstringIndex >= 256)
         MyAssertHandler(
@@ -8192,7 +8186,7 @@ void Scr_VisionSetNaked()
     }
     String = Scr_GetString(0);
     v4 = va("\"%s\" %i", String, v5);
-    SV_SetConfigstring(1149, v4);
+    SV_SetConfigstring(1117, v4); // CS_VISIONSET_NAKED (PC SP, was Xbox 1149)
 }
 
 void Scr_VisionSetNight()
@@ -8219,7 +8213,7 @@ void Scr_VisionSetNight()
     }
     String = Scr_GetString(0);
     v4 = va("\"%s\" %i", String, v5);
-    SV_SetConfigstring(1150, v4);
+    SV_SetConfigstring(1118, v4); // CS_VISIONSET_NIGHT (PC SP, was Xbox 1150)
 }
 
 void Scr_SetCullDist()
@@ -9563,7 +9557,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
         v3 = 1;
         while (1)
         {
-            SV_GetConfigstring(v3 + 2535, v11, 1024);
+            SV_GetConfigstring(v3 + 2503, v11, 1024); // CS_SHELLSHOCKS (PC SP, was Xbox 2535)
             if (!I_stricmp(v11, String))
                 break;
             if (++v3 >= 16)
@@ -10164,7 +10158,7 @@ void GScr_PrecacheMenu()
     String = Scr_GetString(0);
     for (i = 0; i < 32; ++i)
     {
-        SV_GetConfigstring(i + 2551, v4, 1024);
+        SV_GetConfigstring(i + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, v4, 1024);
         if (!I_stricmp(v4, String))
         {
             Com_DPrintf(23, "Script tried to precache the menu '%s' more than once\n", String);
@@ -10173,7 +10167,7 @@ void GScr_PrecacheMenu()
     }
     for (j = 0; j < 32; ++j)
     {
-        SV_GetConfigstring(j + 2551, v4, 1024);
+        SV_GetConfigstring(j + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, v4, 1024);
         if (!v4[0])
             break;
     }
@@ -10182,7 +10176,7 @@ void GScr_PrecacheMenu()
         v3 = va("Too many menus precached. Max allowed menus is %i", 32);
         Scr_Error(v3);
     }
-    SV_SetConfigstring(j + 2551, String);
+    SV_SetConfigstring(j + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, String);
 }
 
 int __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
@@ -10194,7 +10188,7 @@ int __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
     v2 = 0;
     while (1)
     {
-        SV_GetConfigstring(v2 + 2551, v5, 1024);
+        SV_GetConfigstring(v2 + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, v5, 1024);
         if (!I_stricmp(v5, pszMenu))
             break;
         if (++v2 >= 32)
@@ -10701,7 +10695,7 @@ void GScr_SetMiniMap()
     level.compassMapUpperLeft[1] = v1;
 
     v5 = va("\"%s\" %f %f %f %f", mapName, Float, v1, v2, v3);
-    SV_SetConfigstring(1148, v5);
+    SV_SetConfigstring(1116, v5); // CS_MINIMAP (PC SP, was Xbox 1148)
 }
 
 void GScr_GetArrayKeys()

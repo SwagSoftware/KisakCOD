@@ -861,7 +861,7 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
     if (!cg_paused->current.integer && !CG_Flashbanged(localClientNum))
     {
         LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
-        ConfigString = CL_GetConfigString(localClientNum, 9u);
+        ConfigString = CL_GetConfigString(localClientNum, CS_FRIEND_OVERLAY);
         v4 = ConfigString;
         if (ConfigString)
         {
@@ -904,7 +904,7 @@ void __cdecl CG_DrawFriendOverlay(int localClientNum)
                     colorBlue,
                     false,
                     false);
-                v17 = CL_GetConfigString(localClientNum, 0xAu);
+                v17 = CL_GetConfigString(localClientNum, CS_FRIEND_OVERLAY_LAST);
                 v18 = v17;
                 if (v17 && *v17)
                 {

@@ -219,7 +219,7 @@ int __cdecl G_MaterialIndex(const char *name)
         (v2++)[v5 - name] = v3;
     } while (v3);
     I_strlwr(v5);
-    return G_FindConfigstringIndex(v5, 2583, 128, level.initializing, "material");
+    return G_FindConfigstringIndex(v5, 2551, 128, level.initializing, "material"); // CS_SERVER_MATERIALS (PC SP, was Xbox 2583)
 }
 
 void __cdecl G_SetModelIndex(int modelIndex, const char *name)
@@ -233,7 +233,7 @@ void __cdecl G_SetModelIndex(int modelIndex, const char *name)
             "(modelIndex > 0 && modelIndex < (1 << 9))",
             modelIndex);
     cached_models[modelIndex] = SV_XModelGet((char*)name);
-    SV_SetConfigstring(modelIndex + 1155, name);
+    SV_SetConfigstring(modelIndex + 1123, name); // CS_MODELS (PC SP, was Xbox 1155)
 }
 
 int __cdecl G_ModelIndex(const char *name)
@@ -255,7 +255,7 @@ int __cdecl G_ModelIndex(const char *name)
     v4 = 1;
     while (1)
     {
-        ConfigstringConst = SV_GetConfigstringConst(v4 + 1155);
+        ConfigstringConst = SV_GetConfigstringConst(v4 + 1123); // CS_MODELS (PC SP, was Xbox 1155)
         if (ConfigstringConst == scr_const._)
         {
         LABEL_9:
@@ -326,7 +326,7 @@ unsigned int __cdecl G_ModelName(unsigned int index)
 {
     if (index >= 0x200)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 316, 0, "%s", "(unsigned)index < MAX_MODELS");
-    return SV_GetConfigstringConst(index + 1155);
+    return SV_GetConfigstringConst(index + 1123); // CS_MODELS (PC SP, was Xbox 1155)
 }
 
 void __cdecl G_EntityCentroidWithBounds(const gentity_s *ent, const float *mins, const float *maxs, float *centroid)
@@ -387,14 +387,14 @@ int __cdecl G_EffectIndex(const char *name)
             "%s\n\t(name) = %s",
             "(I_strncmp( name, \"fx/\", 3 ))",
             name);
-    return G_FindConfigstringIndex(name, 2179, 100, level.initializing, "effect");
+    return G_FindConfigstringIndex(name, 2147, 100, level.initializing, "effect"); // CS_EFFECT_NAMES (PC SP, was Xbox 2179)
 }
 
 int __cdecl G_ShellShockIndex(const char *name)
 {
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 365, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, 2535, 16, 1, 0);
+    return G_FindConfigstringIndex(name, 2503, 16, 1, 0); // CS_SHELLSHOCKS (PC SP, was Xbox 2535)
 }
 
 unsigned int __cdecl G_SoundAliasIndexTransientAdvance(unsigned __int16 aliasIndex, int offset)
@@ -572,7 +572,7 @@ unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
                 "(aliasIndex >= 256 && aliasIndex < 512)",
                 (unsigned __int16)v16);
         level.soundAliasLast = v16;
-        SV_SetConfigstring((unsigned __int16)v8 + 1667, name);
+        SV_SetConfigstring((unsigned __int16)v8 + 1635, name);
     }
     else
     {
@@ -580,7 +580,7 @@ unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
         {
             if (!(_WORD)v8)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 404, 0, "%s", "aliasIndex != 0");
-            if (SV_GetConfigstringConst((unsigned __int16)v8 + 1667) == v9)
+            if (SV_GetConfigstringConst((unsigned __int16)v8 + 1635) == v9)
                 break;
             if ((unsigned __int16)v8 < 0x100u || (unsigned __int16)v8 >= 0x200u)
                 MyAssertHandler(
@@ -612,14 +612,25 @@ int __cdecl G_SoundAliasIndexPermanent(const char *name)
 {
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 424, 0, "%s", "name");
-    return (unsigned __int16)G_FindConfigstringIndex(name, 1667, 256, 1, 0);
+    return (unsigned __int16)G_FindConfigstringIndex(name, 1635, 256, 1, 0);
 }
 
 int __cdecl G_RumbleIndex(const char *name)
 {
+#if 0
     if (!name)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 432, 0, "%s", "name");
+    // KISAKTODO: CS_RUMBLES bucket (1115, size 32) existed in Xbox CoD3-SP but is
+    // ABSENT from the PC SP configstring layout (iw3sp_dump). The slots 1115..1146
+    // in PC SP are CS_NORTHYAW (1115), CS_MINIMAP (1116), CS_VISIONSET_NAKED (1117),
+    // CS_VISIONSET_NIGHT (1118), CS_NIGHTVISION (1119), CS_LOC_SEL_MTLS[0..2]
+    // (1120..1122), and the start of CS_MODELS (1123+). Calling this with the
+    // Xbox values writes garbage into singles + models — broken on PC SP.
     return G_FindConfigstringIndex(name, 1115, 32, 1, 0);
+#else
+    iassert(0);
+    return 0;
+#endif
 }
 
 void __cdecl G_SetClientDemoTime(int time)
@@ -1147,7 +1158,7 @@ void __cdecl G_OverrideModel(unsigned int modelindex, const char *defaultModelNa
     }
     MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", v4, 0, "%s", v5);
 LABEL_6:
-    ConfigstringConst = SV_GetConfigstringConst(modelindex + 1155);
+    ConfigstringConst = SV_GetConfigstringConst(modelindex + 1123); // CS_MODELS (PC SP, was Xbox 1155)
     v7 = SL_ConvertToString(ConfigstringConst);
     if (!*v7)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 895, 0, "%s", "modelName[0]");
@@ -2002,8 +2013,8 @@ void __cdecl G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigne
         Scr_Notify(ent, ent->snd_wait.notifyString, 0);
         if (!ent->snd_wait.stoppable || !stoppable)
         {
-            SV_GetConfigstring(ent->snd_wait.index + 1667, v16, 1024);
-            SV_GetConfigstring(index + 1667, v15, 1024);
+            SV_GetConfigstring(ent->snd_wait.index + 1635, v16, 1024);
+            SV_GetConfigstring(index + 1635, v15, 1024);
             Scr_SetString(v14, 0);
             if (ent->targetname)
                 SL_ConvertToString(ent->targetname);
@@ -2276,7 +2287,15 @@ void __cdecl G_CalcTagParentAxis(gentity_s *ent, float (*parentAxis)[3])
         G_DObjCalcBone(parent, tagInfo->index);
         v7 = &SV_DObjGetMatrixArray(parent)[tagInfo->index];
         LocalConvertQuatToMat(v7, v9);
-        MatrixMultiply((const mat3x3&)v9, (const mat3x3&)v10, (mat3x3&)parentAxis);
+        // parentAxis is `float (*)[3]` (a pointer parameter). The previous cast
+        // `(mat3x3&)parentAxis` reinterpreted the 4-byte pointer SLOT as a 36-byte
+        // 3x3 matrix — MatrixMultiply then wrote 9 floats starting at the address
+        // of the local pointer variable, clobbering return address / saved EBP.
+        // Caught by ASAN at G_CalcTagParentAxis → MatrixMultiply. IDA SP 0x82272330
+        // passed `parentAxis` directly to a `float (*)[3]`-typed parameter; the
+        // kisak port redeclared MatrixMultiply with `mat3x3&` references, so we
+        // need to bind the reference to the pointee, not the pointer variable.
+        MatrixMultiply((const mat3x3&)v9, (const mat3x3&)v10, (mat3x3&)*parentAxis);
         v8 = &(*parentAxis)[9];
         MatrixTransformVector43(v7->trans, (const mat4x3&)v10, &(*parentAxis)[9]);
     }
@@ -2336,7 +2355,10 @@ void __cdecl G_CalcTagParentRelAxis(gentity_s *ent, float (*parentRelAxis)[3])
     if (!tagInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 1419, 0, "%s", "tagInfo");
     G_CalcTagParentAxis(ent, v5);
-    MatrixMultiply43(tagInfo->parentInvAxis, (const mat4x3&)v5, (mat4x3&)parentRelAxis);
+    // Same pointer-vs-pointee gotcha as G_CalcTagParentAxis: parentRelAxis is
+    // `float (*)[3]` and `(mat4x3&)parentRelAxis` would treat the 4-byte pointer
+    // SLOT as a 48-byte mat4x3, blowing out the stack on write. Dereference first.
+    MatrixMultiply43(tagInfo->parentInvAxis, (const mat4x3&)v5, (mat4x3&)*parentRelAxis);
 }
 
 void __cdecl G_CalcTagAxis(gentity_s *ent, int bAnglesOnly)
@@ -3039,7 +3061,7 @@ int __cdecl G_EntDetach(gentity_s *ent, const char *modelName, unsigned int tagN
                         0,
                         "%s",
                         "(unsigned)index < MAX_MODELS");
-                if (SV_GetConfigstringConst(v10 + 1155) == v7)
+                if (SV_GetConfigstringConst(v10 + 1123) == v7) // CS_MODELS (PC SP, was Xbox 1155)
                     break;
             }
             ++v8;

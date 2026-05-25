@@ -830,7 +830,7 @@ void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
         SV_Cmd_ArgvBuffer(1, v4, 1024);
         v3 = atol(v4);
         if (v3 <= 0x1F)
-            SV_GetConfigstring(v3 + 2551, v4, 1024);
+            SV_GetConfigstring(v3 + 2519, v4, 1024); // CS_SCRIPT_MENUS (PC SP, was Xbox 2551)
         SV_Cmd_ArgvBuffer(2, v5, 1024);
     }
     else
@@ -904,7 +904,7 @@ void Cmd_VisionSetNaked_f()
     else
         v5 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     v6 = va("\"%s\" %i", v5, v7);
-    SV_SetConfigstring(1149, v6);
+    SV_SetConfigstring(1117, v6); // CS_VISIONSET_NAKED (PC SP, was Xbox 1149)
 }
 
 void Cmd_VisionSetNight_f()
@@ -962,7 +962,7 @@ void Cmd_VisionSetNight_f()
     else
         v5 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     v6 = va("\"%s\" %i", v5, v7);
-    SV_SetConfigstring(1150, v6);
+    SV_SetConfigstring(1118, v6); // CS_VISIONSET_NIGHT (PC SP, was Xbox 1150)
 }
 
 void __cdecl ClientCommand(int clientNum, const char *s)

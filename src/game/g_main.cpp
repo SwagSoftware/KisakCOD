@@ -830,20 +830,17 @@ void G_InitDvars()
 
 void __cdecl G_FreeEntities()
 {
-    int v0; // r29
-    gentity_s *v1; // r31
+    gentity_s *e; // r31
     int i; // r11
 
-    v0 = 0;
-    v1 = g_entities;
-    for (i = level.num_entities; v0 < i; ++v1)
+    e = g_entities;
+    for (int i = 0; i < level.num_entities; i++)
     {
-        if (v1->r.inuse)
+        if (e->r.inuse)
         {
-            G_FreeEntity(v1);
-            i = level.num_entities;
+            G_FreeEntity(e);
         }
-        ++v0;
+        ++e;
     }
     if (g_entities[ENTITYNUM_WORLD].r.inuse)
         G_FreeEntity(&g_entities[ENTITYNUM_WORLD]);
@@ -1317,7 +1314,7 @@ void G_ChangeLevel()
         if (level.bMissionSuccess)
         {
             v2 = level.exitTime + 1000;
-            ConfigstringIndex = G_FindConfigstringIndex("victoryscreen", 2535, 16, 0, 0);
+            ConfigstringIndex = G_FindConfigstringIndex("victoryscreen", 2503, 16, 0, 0); // CS_SHELLSHOCKS (PC SP, was Xbox 2535)
             v4 = va("setchannelvol %d %d %d", 1, ConfigstringIndex, v2);
         }
         else

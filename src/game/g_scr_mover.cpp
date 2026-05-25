@@ -178,6 +178,11 @@ void __cdecl SP_script_brushmodel(gentity_s *self)
     {
         InitScriptMover(self);
         SV_LinkEntity(self);
+
+#ifdef KISAK_SP
+        if ((self->spawnflags & 1) != 0)
+            self->flags |= FL_DYNAMICPATH | FL_AUTO_BLOCKPATHS;
+#endif
     }
     else
     {
@@ -198,6 +203,11 @@ void __cdecl SP_script_model(gentity_s *pSelf)
     pSelf->r.svFlags |= 4u;
     pSelf->r.contents = 8320;
     SV_LinkEntity(pSelf);
+#ifdef KISAK_SP
+    pSelf->flags |= FL_SUPPORTS_ANIMSCRIPTED; // KISAKTODO: flags here different in blops, why?
+    iassert(pSelf->handler == ENT_HANDLER_SCRIPT_MOVER);
+    pSelf->handler = ENT_HANDLER_SCRIPT_MODEL;
+#endif
 }
 
 void __cdecl SP_script_origin(gentity_s *pSelf)

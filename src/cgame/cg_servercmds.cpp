@@ -211,7 +211,7 @@ void __cdecl CG_PrecacheScriptMenu(int localClientNum, int iConfigNum)
     const char *ConfigString; // r3
     const char *v5; // r31
 
-    if (iConfigNum < 2551 || iConfigNum >= 2583)
+    if (iConfigNum < CS_SCRIPT_MENUS || iConfigNum >= CS_SERVER_MATERIALS)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
             165,
@@ -231,7 +231,7 @@ void __cdecl CG_RegisterServerMaterial(int localClientNum, int num)
 {
     const char *ConfigString; // r3
 
-    if (num < 2583 || num >= 2711)
+    if (num < CS_SERVER_MATERIALS || num >= CS_ITEMS)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
             180,
@@ -249,9 +249,9 @@ void __cdecl CG_RegisterServerMaterials(int localClientNum)
     signed int i; // r31
     const char *ConfigString; // r3
 
-    for (i = 2584; i < 2711; ++i)
+    for (i = CS_SERVER_MATERIALS + 1; i < CS_ITEMS; ++i)
     {
-        if (i < 2583)
+        if (i < CS_SERVER_MATERIALS)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
                 180,
@@ -285,11 +285,11 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
             localClientNum);
     ConfigString = CL_GetConfigString(localClientNum, stringIndex);
     v5 = ConfigString;
-    if (stringIndex == 2711)
+    if (stringIndex == CS_ITEMS)
     {
         CG_RegisterItems(localClientNum);
     }
-    else if (stringIndex == 1114)
+    else if (stringIndex == CS_AMBIENT)
     {
         CG_StartAmbient(localClientNum);
     }
@@ -309,31 +309,31 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
             CG_ParseSunDirection(localClientNum);
             break;
         default:
-            if (stringIndex - 1155 > 0x1FF)
+            if (stringIndex - CS_MODELS > 0x1FF)
             {
-                if (stringIndex - 2179 > 0x63)
+                if (stringIndex - CS_EFFECT_NAMES > 0x63)
                 {
-                    if (stringIndex - 2535 > 0xF)
+                    if (stringIndex - CS_SHELLSHOCKS > 0xF)
                     {
-                        if (stringIndex - 11 > 0xF)
+                        if (stringIndex - CS_OBJECTIVES > 0xF)
                         {
-                            if (stringIndex - 2583 > 0x7F)
+                            if (stringIndex - CS_SERVER_MATERIALS > 0x7F)
                             {
-                                if (stringIndex == 1147)
+                                if (stringIndex == CS_NORTHYAW)
                                 {
                                     CG_NorthDirectionChanged(localClientNum);
                                 }
-                                else if (stringIndex == 1148)
+                                else if (stringIndex == CS_MINIMAP)
                                 {
                                     CG_MiniMapChanged(localClientNum);
                                 }
-                                else if (stringIndex - 27 > 0x1F)
+                                else if (stringIndex - CS_TARGETS > 0x1F)
                                 {
-                                    if (stringIndex == 1149)
+                                    if (stringIndex == CS_VISIONSET_NAKED)
                                     {
                                         CG_VisionSetConfigString_Naked(localClientNum);
                                     }
-                                    else if (stringIndex == 1150)
+                                    else if (stringIndex == CS_VISIONSET_NIGHT)
                                     {
                                         CG_VisionSetConfigString_Night(localClientNum);
                                     }
@@ -356,7 +356,7 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
                     else if (*ConfigString && BG_LoadShellShockDvars(ConfigString))
                     {
                         CG_GetLocalClientStaticGlobals(localClientNum);
-                        ShellshockParms = BG_GetShellshockParms(stringIndex - 2535);
+                        ShellshockParms = BG_GetShellshockParms(stringIndex - CS_SHELLSHOCKS);
                         BG_SetShellShockParmsFromDvars(ShellshockParms);
                     }
                 }
@@ -411,7 +411,7 @@ void __cdecl CG_OpenScriptMenu(int localClientNum)
         Com_Printf(14, "Server tried to open a bad script menu index: %i\n", v4);
         goto LABEL_23;
     }
-    ConfigString = CL_GetConfigString(localClientNum, v4 + 2551);
+    ConfigString = CL_GetConfigString(localClientNum, v4 + CS_SCRIPT_MENUS); // PC SP 2519 (was Xbox 2551)
     if (!*ConfigString)
     {
         Com_Printf(14, "Server tried to open a non-loaded script menu index: %i\n", v5);
@@ -933,7 +933,7 @@ void __cdecl LocalSound(int localClientNum)
         }
         else
         {
-            ConfigString = CL_GetConfigString(localClientNum, v5 + 1667);
+            ConfigString = CL_GetConfigString(localClientNum, v5 + 1635);
             v7 = CG_PlayClientSoundAliasByName(localClientNum, ConfigString);
             if (v3 > 2)
             {
@@ -978,7 +978,7 @@ void __cdecl LocalSoundStop(int localClientNum)
         }
         else
         {
-            ConfigString = CL_GetConfigString(localClientNum, v4 + 1667);
+            ConfigString = CL_GetConfigString(localClientNum, v4 + 1635);
             CG_StopClientSoundAliasByName(localClientNum, ConfigString);
         }
     }

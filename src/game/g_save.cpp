@@ -1114,7 +1114,7 @@ void __cdecl ReadEntity(gentity_s *ent, SaveGame *save)
     _BYTE v4[8]; // [sp+50h] [-20h] BYREF
 
     iassert(save);
-    G_ReadStruct(gentityFields, (unsigned char*)&ent->s.eType, 628, save);
+    G_ReadStruct(gentityFields, (unsigned char*)ent, sizeof(gentity_s), save);
     if (ent->s.weapon)
     {
         ent->s.weapon = ReadWeaponIndex(save);
@@ -1625,46 +1625,50 @@ void __cdecl G_ClearAllConfigstrings()
     int ii; // r30
     int jj; // r30
 
+    // PC SP configstring layout (see client.h ConstStringOffsets) — each
+    // base shifted down by 32 vs Xbox CoD3-SP because CS_RUMBLES (32 entries)
+    // doesn't exist on PC SP. Sound aliases already moved 1667 -> 1635 in a
+    // prior sweep; here we finish the other buckets.
     for (i = 0; i < 100; ++i)
-        SV_SetConfigstring(i + 2179, "");
+        SV_SetConfigstring(i + 2147, "");   // CS_EFFECT_NAMES        (was Xbox 2179)
     for (j = 0; j < 256; ++j)
-        SV_SetConfigstring(j + 2279, "");
+        SV_SetConfigstring(j + 2247, "");   // CS_EFFECT_TAGS         (was Xbox 2279)
     for (k = 0; k < 512; ++k)
-        SV_SetConfigstring(k + 1667, "");
+        SV_SetConfigstring(k + 1635, "");   // CS_SOUNDALIASES        (already shifted)
     for (m = 0; m < 128; ++m)
-        SV_SetConfigstring(m + 2583, "");
+        SV_SetConfigstring(m + 2551, "");   // CS_SERVER_MATERIALS    (was Xbox 2583)
     for (n = 0; n < 1023; ++n)
-        SV_SetConfigstring(n + 91, "");
-    SV_SetConfigstring(1114, "");
+        SV_SetConfigstring(n + 91, "");     // CS_LOCALIZED_STRINGS   (unchanged, <1114)
+    SV_SetConfigstring(1114, "");           // CS_AMBIENT             (unchanged)
     for (ii = 0; ii < 16; ++ii)
-        SV_SetConfigstring(ii + 11, "");
-    SV_SetConfigstring(6, "");
-    SV_SetConfigstring(7, "");
-    SV_SetConfigstring(8, "");
-    SV_SetConfigstring(1148, "");
-    SV_SetConfigstring(1151, "");
+        SV_SetConfigstring(ii + 11, "");    // CS_OBJECTIVES          (unchanged, <1114)
+    SV_SetConfigstring(6, "");              // CS_CULLDIST
+    SV_SetConfigstring(7, "");              // CS_SUNLIGHT
+    SV_SetConfigstring(8, "");              // CS_SUNDIR
+    SV_SetConfigstring(1116, "");           // CS_MINIMAP             (was Xbox 1148)
+    SV_SetConfigstring(1119, "");           // CS_NIGHTVISION         (was Xbox 1151)
     for (jj = 0; jj < 32; ++jj)
-        SV_SetConfigstring(jj + 27, "");
+        SV_SetConfigstring(jj + 27, "");    // CS_TARGETS             (unchanged, <1114)
 }
 
 void __cdecl G_SaveInitConfigstrings(SaveGame *save)
 {
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1871, 0, "%s", "save");
-    G_SaveConfigstrings(1155, 512, save);
-    G_SaveConfigstrings(2179, 100, save);
-    G_SaveConfigstrings(2279, 256, save);
-    G_SaveConfigstrings(1667, 512, save);
-    G_SaveConfigstrings(2583, 128, save);
-    G_SaveConfigstrings(91, 1023, save);
-    G_SaveConfigstrings(1114, 1, save);
-    G_SaveConfigstrings(6, 1, save);
-    G_SaveConfigstrings(7, 1, save);
-    G_SaveConfigstrings(8, 1, save);
-    G_SaveConfigstrings(1148, 1, save);
-    G_SaveConfigstrings(1151, 1, save);
-    G_SaveConfigstrings(1149, 1, save);
-    G_SaveConfigstrings(1150, 1, save);
+    G_SaveConfigstrings(1123, 512, save);    // CS_MODELS             (was Xbox 1155)
+    G_SaveConfigstrings(2147, 100, save);    // CS_EFFECT_NAMES       (was Xbox 2179)
+    G_SaveConfigstrings(2247, 256, save);    // CS_EFFECT_TAGS        (was Xbox 2279)
+    G_SaveConfigstrings(1635, 512, save);    // CS_SOUNDALIASES
+    G_SaveConfigstrings(2551, 128, save);    // CS_SERVER_MATERIALS   (was Xbox 2583)
+    G_SaveConfigstrings(91, 1023, save);     // CS_LOCALIZED_STRINGS
+    G_SaveConfigstrings(1114, 1, save);      // CS_AMBIENT
+    G_SaveConfigstrings(6, 1, save);         // CS_CULLDIST
+    G_SaveConfigstrings(7, 1, save);         // CS_SUNLIGHT
+    G_SaveConfigstrings(8, 1, save);         // CS_SUNDIR
+    G_SaveConfigstrings(1116, 1, save);      // CS_MINIMAP            (was Xbox 1148)
+    G_SaveConfigstrings(1119, 1, save);      // CS_NIGHTVISION        (was Xbox 1151)
+    G_SaveConfigstrings(1117, 1, save);      // CS_VISIONSET_NAKED    (was Xbox 1149)
+    G_SaveConfigstrings(1118, 1, save);      // CS_VISIONSET_NIGHT    (was Xbox 1150)
 }
 
 void __cdecl G_LoadInitConfigstrings(SaveGame *save)
@@ -1672,19 +1676,19 @@ void __cdecl G_LoadInitConfigstrings(SaveGame *save)
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 1896, 0, "%s", "save");
     G_LoadModelPrecacheList(save);
-    G_LoadConfigstrings(2179, 100, save);
-    G_LoadConfigstrings(2279, 256, save);
-    G_LoadConfigstrings(1667, 512, save);
-    G_LoadConfigstrings(2583, 128, save);
-    G_LoadConfigstrings(91, 1023, save);
-    G_LoadConfigstrings(1114, 1, save);
-    G_LoadConfigstrings(6, 1, save);
-    G_LoadConfigstrings(7, 1, save);
-    G_LoadConfigstrings(8, 1, save);
-    G_LoadConfigstrings(1148, 1, save);
-    G_LoadConfigstrings(1151, 1, save);
-    G_LoadConfigstrings(1149, 1, save);
-    G_LoadConfigstrings(1150, 1, save);
+    G_LoadConfigstrings(2147, 100, save);    // CS_EFFECT_NAMES       (was Xbox 2179)
+    G_LoadConfigstrings(2247, 256, save);    // CS_EFFECT_TAGS        (was Xbox 2279)
+    G_LoadConfigstrings(1635, 512, save);    // CS_SOUNDALIASES
+    G_LoadConfigstrings(2551, 128, save);    // CS_SERVER_MATERIALS   (was Xbox 2583)
+    G_LoadConfigstrings(91, 1023, save);     // CS_LOCALIZED_STRINGS
+    G_LoadConfigstrings(1114, 1, save);      // CS_AMBIENT
+    G_LoadConfigstrings(6, 1, save);         // CS_CULLDIST
+    G_LoadConfigstrings(7, 1, save);         // CS_SUNLIGHT
+    G_LoadConfigstrings(8, 1, save);         // CS_SUNDIR
+    G_LoadConfigstrings(1116, 1, save);      // CS_MINIMAP            (was Xbox 1148)
+    G_LoadConfigstrings(1119, 1, save);      // CS_NIGHTVISION        (was Xbox 1151)
+    G_LoadConfigstrings(1117, 1, save);      // CS_VISIONSET_NAKED    (was Xbox 1149)
+    G_LoadConfigstrings(1118, 1, save);      // CS_VISIONSET_NIGHT    (was Xbox 1150)
 }
 
 void __cdecl G_SaveItems(SaveGame *save)

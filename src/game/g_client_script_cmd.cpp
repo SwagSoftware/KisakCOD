@@ -2474,7 +2474,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
     }
     String = Scr_GetString(1);
 
-    int csIndex = G_FindConfigstringIndex(String, 2535, 16, 0, 0);
+    int csIndex = G_FindConfigstringIndex(String, 2503, 16, 0, 0); // CS_SHELLSHOCKS (PC SP, was Xbox 2535)
     ConstString = Scr_GetConstString(0);
     v7 = 2;
     if (ConstString != scr_const.snd_channelvolprio_holdbreath)

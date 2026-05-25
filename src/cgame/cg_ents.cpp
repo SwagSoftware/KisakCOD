@@ -227,7 +227,7 @@ void __cdecl CG_AddEntityLoopSound(int localClientNum, const centity_s *cent)
     {
         BrushModel = (float *)R_GetBrushModel(cent->nextState.index.item);
         v5 = cent->pose.origin[1];
-        v6 = cent->nextState.loopSound + 1667;
+        v6 = cent->nextState.loopSound + CS_SOUNDALIASES;
         v7 = cent->pose.origin[2];
         v8 = (float)((float)(BrushModel[7] + BrushModel[10]) * (float)0.5);
         v9 = (float)((float)(BrushModel[8] + BrushModel[11]) * (float)0.5);
@@ -239,7 +239,7 @@ void __cdecl CG_AddEntityLoopSound(int localClientNum, const centity_s *cent)
     }
     else
     {
-        ConfigString = CL_GetConfigString(localClientNum, cent->nextState.loopSound + 1667);
+        ConfigString = CL_GetConfigString(localClientNum, cent->nextState.loopSound + CS_SOUNDALIASES);
         origin = cent->pose.origin;
     }
     CG_PlaySoundAliasByName(localClientNum, cent->nextState.number, origin, ConfigString);
@@ -1198,9 +1198,9 @@ void __cdecl CG_SoundBlend(int localClientNum, centity_s *cent)
     {
         if (cent->nextState.eventParms[1])
         {
-            ConfigString = CL_GetConfigString(localClientNum, v5 + 1667);
+            ConfigString = CL_GetConfigString(localClientNum, v5 + CS_SOUNDALIASES);
             alias0 = CL_PickSoundAlias(ConfigString);
-            v8 = CL_GetConfigString(localClientNum, p_nextState->eventParms[1] + 1667);
+            v8 = CL_GetConfigString(localClientNum, p_nextState->eventParms[1] + CS_SOUNDALIASES);
             v9 = CL_PickSoundAlias(v8);
             alias1 = v9;
             if (alias0)
