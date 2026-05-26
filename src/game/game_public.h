@@ -70,8 +70,8 @@ enum fieldtype_t : __int32
 };
 #endif
 
-struct vehicle_info_t // sizeof=0x270
-{                                       // ...
+struct vehicle_info_t // sizeof=0x274
+{                                       // CoD3SP IDA: sizeof=628 (0x274)
     char name[64];
     int16_t type;
     // padding byte
@@ -102,12 +102,14 @@ struct vehicle_info_t // sizeof=0x270
     float turretVertSpanDown;
     float turretRotRate;
     char sndNames[6][64];
+#ifdef KISAK_SP
+    uint16_t sndIndices[6];
+#else
     uint8_t sndIndices[6];
-    // padding byte
-    // padding byte
+#endif
     float engineSndSpeed;
 };
-static_assert(sizeof(vehicle_info_t) == 0x270);
+
 
 struct client_fields_s // sizeof=0x14
 {                                       // ...
@@ -611,6 +613,9 @@ bool __cdecl AttachedStickyMissile(gentity_s *vehicle, gentity_s *missile);
 void __cdecl PushAttachedStickyMissile(gentity_s *vehicle, gentity_s *missile);
 void __cdecl VEH_UpdateAim(gentity_s *ent);
 void __cdecl VEH_UpdateAIMove(gentity_s *ent);
+void __cdecl VEH_UpdatePath(gentity_s *ent);
+void __cdecl VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity);
+void __cdecl VEH_DebugBox(float *pos, float width, float r, float g, float b);
 void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos);
 bool __cdecl VEH_IsHovering(scr_vehicle_s *veh);
 void __cdecl VEH_UpdateMoveOrientation(gentity_s *ent, float *desiredDir);
@@ -672,6 +677,25 @@ void __cdecl VEH_JoltBody(gentity_s *ent, const float *dir, float intensity, flo
 void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
+
+#ifdef KISAK_SP
+// CoD3SP SP-only vehicle physics entry points (kisak ports in g_scr_vehicle.cpp).
+void __cdecl VEH_UpdateClient(gentity_s *ent);
+void __cdecl VEH_VerifyPosition(gentity_s *ent);
+void __cdecl VEH_UpdateWeapon(gentity_s *ent);
+void __cdecl VEH_UpdateBody(gentity_s *ent);
+void __cdecl VEH_UpdateSteering(gentity_s *ent);
+void __cdecl VEH_UpdateMaterialTime(gentity_s *ent);
+void VEH_UpdateSounds(gentity_s *ent);
+// SP-only vehicle physics helpers (called by VEH_UpdateClient).  GroundTrace
+// and GroundMove also exist in MP but with frameTime args and using s_phys_0;
+// SP versions match CoD3SP IDA (s_phys, no frameTime).  DebugCapsule/CalcAccel
+// are SP-only (MP has neither).
+void __cdecl VEH_DebugCapsule(float *pos, float rad, float height, float r, float g, float b);
+void __cdecl VEH_GroundTrace(gentity_s *ent);
+void __cdecl VEH_GroundMove(gentity_s *ent);
+void __cdecl VEH_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float *rotAccel);
+#endif
 
 gentity_s *G_IsVehicleUnusable(gentity_s *player);
 bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapon);

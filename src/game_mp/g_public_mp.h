@@ -1,4 +1,8 @@
 #pragma once
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include <xanim/xanim.h>
 #include <qcommon/msg_mp.h>
 #include <bgame/bg_public.h>

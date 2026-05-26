@@ -605,7 +605,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v4 = (*(unsigned int *)v3 - (int)g_entities) / 628 + 1;
             if (v4 > 0x880)
                 Com_Error(ERR_DROP, "WriteField1: entity out of range (%i)", v4);
-            *v3 = (EntHandle)v4;
+
+            *(int *)v3 = v4;
         }
         else
         {
@@ -620,7 +621,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v6 = v5 + 1;
             if ((int)(v5 + 1) > MAX_GENTITIES || v6 < 0)
                 Com_Error(ERR_DROP, "WriteField1: entity out of range (%i)", v5 + 1);
-            *v3 = (EntHandle)v6;
+
+            *(int *)v3 = v6;
         }
         else
         {
@@ -633,7 +635,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v7 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.clients) / 46104 + 1;
             if (v7 >= 2)
                 Com_Error(ERR_DROP, "WriteField1: client out of range (%i)", v7);
-            *v3 = (EntHandle)v7;
+            *(int *)v3 = v7;
         }
         else
         {
@@ -646,7 +648,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v8 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.actors) / 7824 + 1;
             if (v8 > 0x20)
                 Com_Error(ERR_DROP, "WriteField1: actor out of range (%i)", v8);
-            *v3 = (EntHandle)v8;
+            *(int *)v3 = v8;
         }
         else
         {
@@ -659,7 +661,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v9 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.sentients) / 116 + 1;
             if (v9 >= 0x22)
                 Com_Error(ERR_DROP, "WriteField1: sentient out of range (%i)", v9);
-            *v3 = (EntHandle)v9;
+            *(int *)v3 = v9;
         }
         else
         {
@@ -674,7 +676,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v10 = senthand->sentient() - level.sentients + 1;
             if (v10 >= 0x22)
                 Com_Error(ERR_DROP, "WriteField1: sentient out of range (%i)", v10);
-            *v3 = (EntHandle)v10;
+
+            *(int *)v3 = v10;
         }
         else
         {
@@ -687,7 +690,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v11 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.vehicles) / 824 + 1;
             if (v11 > 0x40)
                 Com_Error(ERR_DROP, "WriteField1: vehicle out of range (%i)", v11);
-            *v3 = (EntHandle)v11;
+            *(int *)v3 = v11;
         }
         else
         {
@@ -700,7 +703,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             v12 = (signed int)(*(unsigned int *)v3 - (unsigned int)level.turrets) / 188 + 1;
             if (v12 > 0x20)
                 Com_Error(ERR_DROP, "WriteField1: turret out of range (%i)", v12);
-            *v3 = (EntHandle)v12;
+            *(int *)v3 = v12;
         }
         else
         {
@@ -716,7 +719,8 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         {
             if (v13 == original + 504)
             {
-                *v3 = (EntHandle)-1;
+
+                *(int *)v3 = -1;
             }
             else
             {
@@ -730,7 +734,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
                         "%s\n\t(index) = %i",
                         "(index > 0 && index <= (int)( sizeof( AnimScriptList ) * MAX_AI_SPECIES / sizeof( scr_animscript_t ) ))",
                         v14 + 1);
-                *v3 = (EntHandle)v15;
+                *(int *)v3 = v15;
             }
         }
         else
@@ -739,7 +743,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
         }
         break;
     case SF_PATHNODE:
-        *v3 = (EntHandle)Path_SaveIndex(*(const pathnode_t **)v3);
+        *(int *)v3 = Path_SaveIndex(*(const pathnode_t **)v3);
         break;
     case SF_ANIMTREE:
         if (*(unsigned int *)v3)
@@ -748,7 +752,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
             iassert(anims);
             index = Scr_GetAnimsIndex(anims);
             iassert(index);
-            *v3 = (EntHandle)index;
+            *(int *)v3 = index;
         }
         else
         {
@@ -758,7 +762,7 @@ void __cdecl WriteField1(const saveField_t *field, const unsigned __int8 *base, 
     case SF_TYPE_TAG_INFO:
     case SF_TYPE_SCRIPTED:
         //*v3 = (EntHandle)((_cntlzw((unsigned int)*v3) & 0x20) == 0);
-        *v3 = (EntHandle)((*(unsigned int *)v3 != 0));
+        *(int *)v3 = (*(unsigned int *)v3 != 0);
         break;
     case SF_MODELUSHORT:
     case SF_MODELINT:
@@ -928,7 +932,8 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
         v19 = (int)*(int*)v7;
         if (*(unsigned int *)v7 > 33 || v19 < 0)
             Com_Error(ERR_DROP, "ReadField: sentient out of range (%i)", *v7);
-        *v7 = (EntHandle)0;
+
+        *(int*)v7 = 0;
         if (v19)
         {
             senthand = (SentientHandle *)v7;
@@ -960,7 +965,8 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
         break;
     case SF_ANIMSCRIPT:
         v23 = (int)*(int*)v7;
-        if (*(unsigned int *)v7 > 298 || v23 < -1)
+
+        if (v23 > 298 || v23 < -1)
             Com_Error(ERR_DROP, "ReadField: animscript out of range (%i)", *v7);
         if (!v23)
             goto LABEL_58;
@@ -1005,7 +1011,8 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
         v7->number = *(unsigned __int16 *)((char *)level.modelMap + __ROL4__(v7->number, 1));
         break;
     case SF_MODELINT:
-        *v7 = (EntHandle)level.modelMap[*(unsigned int *)v7];
+
+        *(int *)v7 = level.modelMap[*(unsigned int *)v7];
         break;
     default:
         Com_Error(ERR_DROP, "ReadField: unknown field type");

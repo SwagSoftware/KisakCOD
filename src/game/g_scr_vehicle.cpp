@@ -350,140 +350,6 @@ void __cdecl VEH_ClearGround()
     s_phys.hasGround = 0;
 }
 
-bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity)
-{
-    float *v3; // [esp+24h] [ebp-D4h]
-    float timeLeft; // [esp+30h] [ebp-C8h]
-    int32_t j; // [esp+34h] [ebp-C4h]
-    vehicle_physic_t *phys; // [esp+38h] [ebp-C0h]
-    float dir[3]; // [esp+3Ch] [ebp-BCh] BYREF
-    int32_t bumpCount; // [esp+48h] [ebp-B0h]
-    scr_vehicle_s *veh; // [esp+4Ch] [ebp-ACh]
-    int32_t k; // [esp+50h] [ebp-A8h]
-    float planes[5][3]; // [esp+54h] [ebp-A4h] BYREF
-    float clipVel[3]; // [esp+90h] [ebp-68h] BYREF
-    float end[3]; // [esp+9Ch] [ebp-5Ch] BYREF
-    float endVel[3]; // [esp+A8h] [ebp-50h] BYREF
-    int32_t numPlanes; // [esp+B4h] [ebp-44h]
-    trace_t trace; // [esp+B8h] [ebp-40h] BYREF
-    float endClipVel[3]; // [esp+E4h] [ebp-14h] BYREF
-    int32_t i; // [esp+F0h] [ebp-8h]
-    float dot; // [esp+F4h] [ebp-4h]
-
-    veh = ent->scr_vehicle;
-    phys = &veh->phys;
-    timeLeft = 0.050000001f;
-    endVel[0] = veh->phys.vel[0];
-    endVel[1] = veh->phys.vel[1];
-    endVel[2] = veh->phys.vel[2];
-    if (gravity)
-    {
-        endVel[2] = endVel[2] - 40.0f;
-        veh->phys.vel[2] = (veh->phys.vel[2] + endVel[2]) * 0.5f;
-        if (s_phys.hasGround)
-            VEH_ClipVelocity(phys->vel, s_phys.groundTrace.normal, phys->vel);
-    }
-    if (s_phys.hasGround)
-    {
-        numPlanes = 1;
-        planes[0][0] = s_phys.groundTrace.normal[0];
-        planes[0][1] = s_phys.groundTrace.normal[1];
-        planes[0][2] = s_phys.groundTrace.normal[2];
-    }
-    else
-    {
-        numPlanes = 0;
-    }
-    Vec3NormalizeTo(phys->vel, planes[numPlanes++]);
-    for (bumpCount = 0; bumpCount < 4; ++bumpCount)
-    {
-        Vec3Mad(phys->origin, timeLeft, phys->vel, end);
-        G_TraceCapsule(&trace, phys->origin, phys->mins, phys->maxs, end, ent->s.number, ent->clipmask);
-        if (trace.startsolid)
-        {
-            phys->vel[2] = 0.0f;
-            return 1;
-        }
-        if (trace.fraction > 0.0f)
-            Vec3Lerp(phys->origin, end, trace.fraction, phys->origin);
-        if (trace.fraction == 1.0f)
-            break;
-        timeLeft = timeLeft - timeLeft * trace.fraction;
-        if (numPlanes >= 5)
-        {
-            phys->vel[0] = 0.0f;
-            phys->vel[1] = 0.0f;
-            phys->vel[2] = 0.0f;
-            return 1;
-        }
-        for (i = 0; i < numPlanes; ++i)
-        {
-            if (Vec3Dot(trace.normal, planes[i]) > 0.9900000095367432f)
-            {
-                Vec3Add(trace.normal, phys->vel, phys->vel);
-                break;
-            }
-        }
-        if (i >= numPlanes)
-        {
-            v3 = planes[numPlanes];
-            *v3 = trace.normal[0];
-            v3[1] = trace.normal[1];
-            v3[2] = trace.normal[2];
-            ++numPlanes;
-            for (i = 0; i < numPlanes; ++i)
-            {
-                if (Vec3Dot(phys->vel, planes[i]) < 0.1000000014901161f)
-                {
-                    VEH_ClipVelocity(phys->vel, planes[i], clipVel);
-                    VEH_ClipVelocity(endVel, planes[i], endClipVel);
-                    for (j = 0; j < numPlanes; ++j)
-                    {
-                        if (j != i && Vec3Dot(clipVel, planes[j]) < 0.1000000014901161f)
-                        {
-                            VEH_ClipVelocity(clipVel, planes[j], clipVel);
-                            VEH_ClipVelocity(endClipVel, planes[j], endClipVel);
-                            if (Vec3Dot(clipVel, planes[i]) < 0.0f)
-                            {
-                                Vec3Cross(planes[i], planes[j], dir);
-                                Vec3Normalize(dir);
-                                dot = Vec3Dot(dir, phys->vel);
-                                Vec3Scale(dir, dot, clipVel);
-                                dot = Vec3Dot(dir, endVel);
-                                Vec3Scale(dir, dot, endClipVel);
-                                for (k = 0; k < numPlanes; ++k)
-                                {
-                                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1000000014901161f)
-                                    {
-                                        phys->vel[0] = 0.0f;
-                                        phys->vel[1] = 0.0f;
-                                        phys->vel[2] = 0.0f;
-                                        return 1;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    phys->vel[0] = clipVel[0];
-                    phys->vel[1] = clipVel[1];
-                    phys->vel[2] = clipVel[2];
-                    endVel[0] = endClipVel[0];
-                    endVel[1] = endClipVel[1];
-                    endVel[2] = endClipVel[2];
-                    break;
-                }
-            }
-        }
-    }
-    if (gravity)
-    {
-        phys->vel[0] = endVel[0];
-        phys->vel[1] = endVel[1];
-        phys->vel[2] = endVel[2];
-    }
-    return bumpCount != 0;
-}
-
 void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out)
 {
     double v3; // st7
@@ -514,21 +380,946 @@ void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out)
     }
 }
 
+#ifdef KISAK_SP
+
+// aigenned functions for SP player vehicles.
+// Some functions adapted from MP. 
+
+void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime)
+{
+    if (s_phys_0.hasGround)
+        VEH_ClipVelocity(ent->scr_vehicle->phys.vel, s_phys_0.groundTrace.normal, ent->scr_vehicle->phys.vel);
+    VEH_StepSlideMove(ent, gravity, frameTime);
+}
+
+// --- VEH_DebugCapsule (CoD3SP 0x8225d620) ---
+// Wireframe debug capsule: top circle at (pos.x, pos.y, pos.z+height) and
+// bottom circle at pos, both radius=rad and color=(r,g,b,1).  Note the
+// trailing `0` (duration) matches CoD3SP — the MP version passes `1` here.
+void __cdecl VEH_DebugCapsule(float *pos, float rad, float height, float r, float g, float b)
+{
+    float top[3];
+    float color[4];
+
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+    color[3] = 1.0f;
+    top[0] = pos[0];
+    top[1] = pos[1];
+    top[2] = pos[2] + height;
+    G_DebugCircle(pos, rad, color, 1, 1, 0);
+    G_DebugCircle(top, rad, color, 1, 1, 0);
+}
+
+// --- VEH_GroundTrace (CoD3SP 0x8225ee90) ---
+// Tiny ±0.25z capsule sweep from origin populates s_phys.{groundTrace,
+// hasGround, onGround}.  hasGround=1 when we land (or auto-correct an
+// allsolid trace) AND we're not climbing fast away from the surface
+// (vel·normal ≤ 10).  onGround=1 additionally needs normal.z ≥ 0.7
+// (≤ ~45° slope) — the vehicle can drive on it.
+// NOTE: VEH_AirMove above reads s_phys_0 (copied from MP), so until that's
+// reconciled, VEH_AirMove won't see the ground state set here.  CoD3SP
+// uses s_phys for both — that's the canonical SP behavior.
+void __cdecl VEH_GroundTrace(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    float start[3];
+    float end[3];
+    trace_t trace;
+
+    veh = ent->scr_vehicle;
+    start[0] = veh->phys.origin[0];
+    start[1] = veh->phys.origin[1];
+    start[2] = veh->phys.origin[2] + 0.25f;
+    end[0]   = veh->phys.origin[0];
+    end[1]   = veh->phys.origin[1];
+    end[2]   = veh->phys.origin[2] - 0.25f;
+    G_TraceCapsule(&trace, start, veh->phys.mins, veh->phys.maxs, end, ent->s.number, ent->clipmask);
+
+    memcpy(&s_phys, &trace, 0x2Cu); // groundTrace = trace (first 0x2C bytes)
+    s_phys.hasGround = 0;
+    s_phys.onGround  = 0;
+
+    if ((!trace.allsolid || VEH_CorrectAllSolid(ent, &trace))
+        && trace.fraction != 1.0f
+        && (veh->phys.vel[2] <= 0.0f
+         || (veh->phys.vel[0] * trace.normal[0]
+           + veh->phys.vel[1] * trace.normal[1]
+           + veh->phys.vel[2] * trace.normal[2]) <= 10.0f))
+    {
+        s_phys.hasGround = 1;
+        if (trace.normal[2] >= 0.69999999f)
+            s_phys.onGround = 1;
+    }
+}
+
+// --- VEH_SlideMove (CoD3SP 0x8225f120 / CoD3MP 0x545610) ---
+// Quake-style PM_SlideMove for vehicles: trace forward up to 4 times,
+// accumulating up to 5 clip planes, clipping vel against each plane the
+// vehicle is violating.  If two planes both violate, slide along their
+// intersection line (the "crease"); if three violate, give up and zero
+// vel.  When gravity is set, applies half-frame gravity for this step and
+// restores the full-frame value at the end (Quake's symplectic-Euler trick).
+// Returns true if any obstruction was encountered (caller VEH_StepSlideMove
+// uses this to decide whether to try the step-up retry).
+//
+// SP/MP comparison (verified against IDA):
+//   - CoD3SP takes (ent, gravity);  CoD3MP takes (ent, gravity, frameTime).
+//   - CoD3SP gravity step: endVel[2] -= 40.0 (constant; SP runs at fixed 20Hz).
+//     CoD3MP: endVel[2] -= frameTime * 800.0 (equivalent at frameTime=0.05).
+//   - CoD3SP reads/writes s_phys;  CoD3MP uses s_phys_0.
+//   - CoD3SP inlines the Vec3Mad/Vec3Lerp/Vec3Dot/Vec3Cross/Vec3Add/Vec3Scale
+//     math;  CoD3MP uses the helpers.  Mathematically identical.
+//   - Both: 5 clip planes max, 4 bumps max, dot thresholds 0.99 / 0.1 / 0.0.
+// This kisak port follows the SP binary on globals (s_phys) and gravity
+// constant (-40.0), but uses kisak's 3-arg signature and the Vec3* helpers
+// for readability.  At frameTime=0.05 (the only value SP ever passes), the
+// gravity step constant -40.0 equals MP's -frameTime*800.0 exactly.
+bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime)
+{
+    scr_vehicle_s *veh;
+    vehicle_physic_t *phys;
+    float *vel;
+    float endVel[3];       // Pre-step velocity (restored on exit if gravity).
+    float planes[5][3];    // Up to 5 clip-plane normals.
+    int   numPlanes;
+    float end[3];          // This-step destination = origin + vel * timeLeft.
+    trace_t trace;
+    float clipVel[3];
+    float endClipVel[3];
+    float dir[3];          // Crease direction (cross product of two planes).
+    float timeLeft;
+    int   bumpCount;
+    int   i, j, k;
+    float dot;
+
+    veh  = ent->scr_vehicle;
+    phys = &veh->phys;
+    vel  = phys->vel;
+    timeLeft = frameTime;
+    endVel[0] = vel[0];
+    endVel[1] = vel[1];
+    endVel[2] = vel[2];
+
+    if (gravity)
+    {
+        // SP-faithful half-frame gravity (Quake symplectic-Euler):
+        //   endVel[2] -= 40.0       (full gravity step, restored at exit)
+        //   vel[2]     = (vel[2] + endVel[2]) * 0.5  (half-step for trace)
+        // SP IDA uses the -40.0 constant; MP generalizes as -frameTime*800.
+        endVel[2] = vel[2] - 40.0f;
+        vel[2]    = (vel[2] + endVel[2]) * 0.5f;
+        if (s_phys.hasGround)
+            VEH_ClipVelocity(vel, s_phys.groundTrace.normal, vel);
+    }
+
+    // Seed the clip-plane list.  If we're touching ground, plane 0 is the
+    // ground normal; then the next slot is our intended move direction.
+    if (s_phys.hasGround)
+    {
+        planes[0][0] = s_phys.groundTrace.normal[0];
+        planes[0][1] = s_phys.groundTrace.normal[1];
+        planes[0][2] = s_phys.groundTrace.normal[2];
+        numPlanes = 1;
+    }
+    else
+    {
+        numPlanes = 0;
+    }
+    Vec3NormalizeTo(vel, planes[numPlanes]);
+    ++numPlanes;
+
+    for (bumpCount = 0; bumpCount < 4; ++bumpCount)
+    {
+        // Try to move all the way to (origin + vel * timeLeft).
+        Vec3Mad(phys->origin, timeLeft, vel, end);
+        G_TraceCapsule(&trace, phys->origin, phys->mins, phys->maxs, end, ent->s.number, ent->clipmask);
+
+        if (trace.startsolid)
+        {
+            // Stuck inside a brush — kill vertical vel and bail.
+            vel[2] = 0.0f;
+            return true;
+        }
+        if (trace.fraction > 0.0f)
+            Vec3Lerp(phys->origin, end, trace.fraction, phys->origin);
+        if (trace.fraction == 1.0f)
+            break; // Clean move — done.
+
+        // Move what we could; budget the remainder for further iterations.
+        timeLeft -= timeLeft * trace.fraction; // = timeLeft * (1 - fraction)
+
+        if (numPlanes >= 5)
+        {
+            // Out of plane slots — give up.
+            vel[0] = 0.0f;
+            vel[1] = 0.0f;
+            vel[2] = 0.0f;
+            return true;
+        }
+
+        // If this surface matches a plane we've already tagged (dot > 0.99),
+        // nudge vel along the normal and retry — avoids infinite re-clipping
+        // off the same wall when float rounding misaligns the plane test.
+        for (i = 0; i < numPlanes; ++i)
+        {
+            if (Vec3Dot(trace.normal, planes[i]) > 0.99000001f)
+            {
+                Vec3Add(trace.normal, vel, vel);
+                break;
+            }
+        }
+        if (i < numPlanes)
+            continue;
+
+        // New surface — record its plane and re-clip vel against any plane
+        // it now violates (dot < 0.1).  endVel mirrors vel through the same
+        // clipping so the post-step velocity reflects the obstruction stack.
+        planes[numPlanes][0] = trace.normal[0];
+        planes[numPlanes][1] = trace.normal[1];
+        planes[numPlanes][2] = trace.normal[2];
+        ++numPlanes;
+
+        for (i = 0; i < numPlanes; ++i)
+        {
+            if (Vec3Dot(vel, planes[i]) >= 0.1f)
+                continue;
+
+            VEH_ClipVelocity(vel,    planes[i], clipVel);
+            VEH_ClipVelocity(endVel, planes[i], endClipVel);
+
+            // Did clipping against plane i drop us into another plane?
+            // If so, try to slide along their intersection line (the "crease").
+            for (j = 0; j < numPlanes; ++j)
+            {
+                if (j == i || Vec3Dot(clipVel, planes[j]) >= 0.1f)
+                    continue;
+
+                VEH_ClipVelocity(clipVel,    planes[j], clipVel);
+                VEH_ClipVelocity(endClipVel, planes[j], endClipVel);
+
+                if (Vec3Dot(clipVel, planes[i]) >= 0.0f)
+                    continue;
+
+                // Two-plane crease: slide along (planes[i] × planes[j]).
+                // SP IDA recomputes the cross product twice (once for vel,
+                // once for endVel) — preserved here.
+                Vec3Cross(planes[i], planes[j], dir);
+                Vec3Normalize(dir);
+                dot = Vec3Dot(dir, vel);
+                Vec3Scale(dir, dot, clipVel);
+                Vec3Cross(planes[i], planes[j], dir);
+                Vec3Normalize(dir);
+                dot = Vec3Dot(dir, endVel);
+                Vec3Scale(dir, dot, endClipVel);
+
+                // Three-plane crease — geometrically a corner; give up.
+                for (k = 0; k < numPlanes; ++k)
+                {
+                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1f)
+                    {
+                        vel[0] = 0.0f;
+                        vel[1] = 0.0f;
+                        vel[2] = 0.0f;
+                        return true;
+                    }
+                }
+            }
+            vel[0]    = clipVel[0];
+            vel[1]    = clipVel[1];
+            vel[2]    = clipVel[2];
+            endVel[0] = endClipVel[0];
+            endVel[1] = endClipVel[1];
+            endVel[2] = endClipVel[2];
+            break;
+        }
+    }
+
+    if (gravity)
+    {
+        // Restore the full-gravity-step velocity for the next frame's input.
+        vel[0] = endVel[0];
+        vel[1] = endVel[1];
+        vel[2] = endVel[2];
+    }
+    return bumpCount != 0; // true if any obstruction was encountered.
+}
+
+// 2-arg overload matching CoD3SP's canonical signature.  game_public.h
+// declares both forms (line 587: 2-arg, line 683: 3-arg) because the SP
+// binary uses 2-arg and the kisak MP-inherited helpers use 3-arg.  Callers
+// in g_helicopter.cpp pass 2 args; this thin wrapper plugs in SP's locked
+// frameTime of 0.05 and dispatches to the real impl above.
+bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity)
+{
+    return VEH_SlideMove(ent, gravity, 0.050000001f);
+}
+
+// --- VEH_StepSlideMove (CoD3SP 0x8225f640 / CoD3MP 0x545390) ---
+// SlideMove with a one-frame "step-up" attempt — if the initial slide left
+// us pressed against a wall we trace 18u up, slide again from there, then
+// trace back down to land on whatever shelf we just stepped onto.  The
+// down trace's Z target is `(startOrigin.z - endpos.z) + currentOrigin.z`
+// which equals the original origin.z if no step happened, or the stepped-up
+// height bonus added to the post-slide origin.  Used by VEH_GroundMove and
+// VEH_AirMove to traverse steps and slopes.
+//
+// SP/MP comparison (verified against IDA):
+//   - CoD3SP takes (ent, gravity);  CoD3MP takes (ent, gravity, frameTime).
+//   - CoD3SP calls VEH_SlideMove(ent, gravity);  MP calls (ent, gravity, frameTime).
+//   - CoD3SP inlines the Vec3Lerp math;  MP uses the Vec3Lerp helper.
+// Algorithms are otherwise identical (same step height ±18, same condition
+// on vel[2]/fraction/normal.z, same ClipVelocity at end).
+// This kisak port follows the MP signature (3 args, Vec3Lerp helper) and
+// passes frameTime through to VEH_SlideMove — callers in SP pass 0.05f.
+void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime)
+{
+    vehicle_physic_t *phys; // [esp+10h] [ebp-70h]
+    scr_vehicle_s *veh; // [esp+14h] [ebp-6Ch]
+    float startOrigin[3]; // [esp+18h] [ebp-68h] BYREF
+    float endpos[3]; // [esp+24h] [ebp-5Ch] BYREF
+    trace_t trace; // [esp+30h] [ebp-50h] BYREF
+    float up[3]; // [esp+5Ch] [ebp-24h] BYREF
+    float down[3]; // [esp+68h] [ebp-18h] BYREF
+    float startVel[3]; // [esp+74h] [ebp-Ch]
+
+    veh = ent->scr_vehicle;
+    phys = &veh->phys;
+    startOrigin[0] = veh->phys.origin[0];
+    startOrigin[1] = veh->phys.origin[1];
+    startOrigin[2] = veh->phys.origin[2];
+    startVel[0] = veh->phys.vel[0];
+    startVel[1] = veh->phys.vel[1];
+    startVel[2] = veh->phys.vel[2];
+    if (VEH_SlideMove(ent, gravity, frameTime))
+    {
+        down[0] = startOrigin[0];
+        down[1] = startOrigin[1];
+        down[2] = startOrigin[2] - 18.0f;
+        G_TraceCapsule(&trace, startOrigin, veh->phys.mins, veh->phys.maxs, down, ent->s.number, ent->clipmask);
+        if (veh->phys.vel[2] <= 0.0f || trace.fraction != 1.0f && trace.normal[2] >= 0.699999988079071f)
+        {
+            up[0] = startOrigin[0];
+            up[1] = startOrigin[1];
+            up[2] = startOrigin[2] + 18.0f;
+            G_TraceCapsule(&trace, startOrigin, veh->phys.mins, veh->phys.maxs, up, ent->s.number, ent->clipmask);
+            if (!trace.startsolid)
+            {
+                Vec3Lerp(startOrigin, up, trace.fraction, endpos);
+                phys->origin[0] = endpos[0];
+                veh->phys.origin[1] = endpos[1];
+                veh->phys.origin[2] = endpos[2];
+                veh->phys.vel[0] = startVel[0];
+                veh->phys.vel[1] = startVel[1];
+                veh->phys.vel[2] = startVel[2];
+                VEH_SlideMove(ent, gravity, frameTime);
+                down[0] = phys->origin[0];
+                down[1] = veh->phys.origin[1];
+                down[2] = veh->phys.origin[2];
+                down[2] = startOrigin[2] - endpos[2] + down[2];
+                G_TraceCapsule(&trace, veh->phys.origin, veh->phys.mins, veh->phys.maxs, down, ent->s.number, ent->clipmask);
+                if (!trace.startsolid)
+                    Vec3Lerp(phys->origin, down, trace.fraction, phys->origin);
+                if (trace.fraction < 1.0f)
+                    VEH_ClipVelocity(veh->phys.vel, trace.normal, veh->phys.vel);
+            }
+        }
+    }
+}
+
+// --- VEH_GroundMove (CoD3SP 0x8225f880) ---
+// Slide-on-ground vehicle move.  Save pre-clip speed, clip vel against the
+// ground normal; if direction wasn't reversed (dot of pre/post > 0),
+// re-normalize and rescale to original speed (preserves KE on slopes).
+// Step-slide-move w/ gravity=0 if horizontal velocity remains.
+//
+// CoD3SP's VEH_GroundMove takes only (ent) — frameTime is implicitly 0.05.
+// kisak's header reuses MP's 3-arg VEH_StepSlideMove signature, so we pass
+// 0.05 explicitly.  MP's VEH_GroundMove uses Vec3Length/Normalize/Scale
+// helpers; SP inlines the math — we match SP for float ordering.
+void __cdecl VEH_GroundMove(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    float *vel;
+    float oldVelX, oldVelY, oldVelZ;
+    float oldSpeed;
+
+    veh = ent->scr_vehicle;
+    vel = veh->phys.vel;
+
+    oldVelX = vel[0];
+    oldVelY = vel[1];
+    oldVelZ = vel[2];
+    oldSpeed = sqrtf(oldVelX * oldVelX + oldVelY * oldVelY + oldVelZ * oldVelZ);
+
+    VEH_ClipVelocity(vel, s_phys.groundTrace.normal, vel);
+
+    if ((vel[0] * oldVelX + vel[1] * oldVelY + vel[2] * oldVelZ) > 0.0f)
+    {
+        float newSpeed = sqrtf(vel[0] * vel[0] + vel[1] * vel[1] + vel[2] * vel[2]);
+        // PPC fsel idiom: divisor = (newSpeed > 0 ? newSpeed : 1.0f) avoids /0.
+        float divisor = (-newSpeed >= 0.0f) ? 1.0f : newSpeed;
+        float factor = 1.0f / divisor;
+        vel[0] *= factor;
+        vel[1] *= factor;
+        vel[2] *= factor;
+        vel[0] *= oldSpeed;
+        vel[1] *= oldSpeed;
+        vel[2] *= oldSpeed;
+    }
+
+    // SP asm checks only XY (vel[0] || vel[1]); vertical motion alone doesn't trigger slide.
+    if (vel[0] != 0.0f || vel[1] != 0.0f)
+        VEH_StepSlideMove(ent, 0, 0.050000001f);
+}
+
+// --- VEH_CalcAccel (CoD3SP 0x8225e8d0) ---
+// Maps a 3-byte (forwardmove, rightmove, handbrake) cmd to body-space
+// accel + rotational accel:
+//   bodyAccel[0] (forward/back) — driven by forwardmove stick, clamped to ±maxSpeed.
+//   bodyAccel[1] (lateral)      — target = 0, lateral velocity damped.
+//   bodyAccel[2] (vertical)     — target = clamp(current, ±maxSpeed): keeps gravity but caps it.
+//   rotAccel[1]  (yaw)          — rightmove drives directly; handbrake redirects toward player view yaw.
+//   rotAccel[0] (pitch) / [2] (roll) — target = 0, damped.
+// All accel rates clamped to vehicle_info_t's {accel, rotAccel}.  During
+// the jolt grace window (joltTime > 0) maxSpeed/accel swap for the jolt
+// pair so the player can't fight collision recoil.
+void __cdecl VEH_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float *rotAccel)
+{
+    scr_vehicle_s *veh;
+    vehicle_info_t *info;
+    gentity_s *player;
+    float maxSpeed;
+    float accel;
+    float fwdFrac;
+    float rightFrac;
+    float wish;
+    float clamped;
+    float a;
+    float angle;
+    float frac;
+
+    veh  = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+
+    if (veh->joltTime > 0.0f)
+    {
+        maxSpeed = veh->joltSpeed;
+        accel    = veh->joltDecel;
+    }
+    else
+    {
+        maxSpeed = info->maxSpeed;
+        accel    = info->accel;
+    }
+
+    // 1/127 = 0.0078740157
+    rightFrac = I_fabs((float)move[1]) * 0.0078740157f;
+    fwdFrac   = I_fabs((float)move[0]) * 0.0078740157f;
+
+    // --- bodyAccel[0] (forward/back) ---
+    if (move[0] > 0)
+        wish = (accel * 0.050000001f + veh->phys.bodyVel[0]) * fwdFrac;
+    else if (move[0] < 0)
+        wish = (veh->phys.bodyVel[0] - accel * 0.050000001f) * fwdFrac;
+    else
+        wish = 0.0f;
+
+    // Clamp wish to [-maxSpeed, +maxSpeed].
+    clamped = (wish - maxSpeed >= 0.0f) ? maxSpeed : wish;
+    if (-maxSpeed - clamped >= 0.0f)
+        clamped = -maxSpeed;
+    a = (clamped - veh->phys.bodyVel[0]) * 20.0f; // 20 = 1/0.05
+    if (a - accel >= 0.0f)
+        a = accel;
+    if (-accel - a >= 0.0f)
+        a = -accel;
+    bodyAccel[0] = a;
+
+    // --- bodyAccel[1] (lateral): target = 0 ---
+    a = -veh->phys.bodyVel[1] * 20.0f;
+    if (a - accel >= 0.0f)
+        a = accel;
+    if (-accel - a >= 0.0f)
+        a = -accel;
+    bodyAccel[1] = a;
+
+    // --- bodyAccel[2] (vertical): target = clamp(current, ±maxSpeed) ---
+    clamped = (veh->phys.bodyVel[2] - maxSpeed >= 0.0f) ? maxSpeed : veh->phys.bodyVel[2];
+    if (-maxSpeed - clamped >= 0.0f)
+        clamped = -maxSpeed;
+    a = (clamped - veh->phys.bodyVel[2]) * 20.0f;
+    if (a - accel >= 0.0f)
+        a = accel;
+    if (-accel - a >= 0.0f)
+        a = -accel;
+    bodyAccel[2] = a;
+
+    // --- rotAccel[1] (yaw) ---
+    if (move[2] > 0)
+    {
+        // Handbrake on: yaw toward player view yaw (SP tank-style steer).
+        if (!ent->r.ownerNum.isDefined())
+            MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 1073, 0, "%s", "ent->r.ownerNum.isDefined()");
+        player = ent->r.ownerNum.ent();
+        if (!player->client)
+            MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 1077, 0, "%s", "player->client");
+
+        // Wrap (viewYaw - prevYaw)/360 into [-0.5, 0.5], multiply by 7200 (= 20*360 deg/sec).
+        angle = (player->client->ps.viewangles[1] - veh->phys.prevAngles[1]) * 0.0027777778f;
+        frac  = (float)floor(angle + 0.5f);
+        wish  = (angle - frac) * 7200.0f;
+    }
+    else
+    {
+        // No handbrake: yaw rate driven by rightmove (signed) scaled by rightFrac.
+        if (move[1] < 0)
+            wish = (info->rotAccel * 0.050000001f + veh->phys.rotVel[1]) * rightFrac;
+        else if (move[1] > 0)
+            wish = (veh->phys.rotVel[1] - info->rotAccel * 0.050000001f) * rightFrac;
+        else
+            wish = 0.0f;
+    }
+
+    // Clamp wishYaw to [-rotRate, +rotRate]; accel = 20 * (wish - currentRotVel).
+    clamped = (wish - info->rotRate >= 0.0f) ? info->rotRate : wish;
+    if (-info->rotRate - clamped >= 0.0f)
+        clamped = -info->rotRate;
+    a = (clamped - veh->phys.rotVel[1]) * 20.0f;
+    if (a - info->rotAccel >= 0.0f)
+        a = info->rotAccel;
+    if (-info->rotAccel - a >= 0.0f)
+        a = -info->rotAccel;
+    rotAccel[1] = a;
+
+    // --- rotAccel[0] (pitch): target = 0 ---
+    a = -veh->phys.rotVel[0] * 20.0f;
+    if (a - info->rotAccel >= 0.0f)
+        a = info->rotAccel;
+    if (-info->rotAccel - a >= 0.0f)
+        a = -info->rotAccel;
+    rotAccel[0] = a;
+
+    // --- rotAccel[2] (roll): target = 0 ---
+    a = -veh->phys.rotVel[2] * 20.0f;
+    if (a - info->rotAccel >= 0.0f)
+        a = info->rotAccel;
+    if (-info->rotAccel - a >= 0.0f)
+        a = -info->rotAccel;
+    rotAccel[2] = a;
+}
+
+// aigenn'd functions for player-controlled vehicles (missing in MP)
+
+// --- VEH_UpdateBody (CoD3SP 0x822612e8) ---
+// Decays a "jolt" sinusoid into the turret's pitch/yaw display angles each
+// physics tick.  joltDir is the planar direction the jolt was applied along,
+// joltWave is the running phase in degrees (advances 36°/tick = 10Hz), and
+// joltTime decays linearly to zero by 0.05/tick.
+void __cdecl VEH_UpdateBody(gentity_s *ent)
+{
+    scr_vehicle_s *veh; // r31
+    double sinWave;
+    float scaled;
+
+    veh = ent->scr_vehicle;
+    if (veh->joltTime > 0.0f)
+    {
+        sinWave = sin((double)(veh->joltWave * 0.017453292f)); // deg→rad
+        scaled = veh->joltTime * (float)sinWave;
+        ent->s.lerp.u.turret.gunAngles[0] = veh->joltDir[0] * scaled;
+        ent->s.lerp.u.turret.gunAngles[1] = veh->joltDir[1] * scaled;
+        veh->joltTime  = veh->joltTime  - 0.050000001f;
+        veh->joltWave  = veh->joltWave  + 36.0f;
+    }
+}
+
+// --- VEH_UpdateSteering (CoD3SP 0x82261390) ---
+// For wheeled vehicles, computes a visualizer "steering wheel" angle in
+// gunAngles[2] proportional to yaw change between frames.  Sign flipped when
+// the vehicle is going in reverse (vel · forward < 0).  Clamps to ±45°.
+void __cdecl VEH_UpdateSteering(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    vehicle_info_t *info;
+    bool reverse;
+    float forward[3];
+    float angle;
+    float frac;
+    float steer;
+    float scale;
+
+    veh  = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+    if (!info->steerWheels)
+    {
+        ent->s.lerp.u.turret.gunAngles[2] = 0.0f;
+        return;
+    }
+
+    reverse = false;
+    if ((veh->phys.vel[0] * veh->phys.vel[0]
+       + veh->phys.vel[1] * veh->phys.vel[1]
+       + veh->phys.vel[2] * veh->phys.vel[2]) != 0.0f)
+    {
+        AngleVectors(veh->phys.angles, forward, 0, 0);
+        if ((veh->phys.vel[0] * forward[0]
+           + veh->phys.vel[1] * forward[1]
+           + veh->phys.vel[2] * forward[2]) < 0.0f)
+        {
+            reverse = true;
+        }
+    }
+
+    // Wrap (angles[1] - prevAngles[1]) / 360 into [-0.5, 0.5], multiply back to deg
+    angle = (veh->phys.angles[1] - veh->phys.prevAngles[1]) * 0.0027777778f; // 1/360
+    frac  = (float)floor(angle + 0.5f);
+    scale = reverse ? -10.0f : 10.0f;
+    steer = (angle - frac) * 360.0f * scale;
+
+    // Asm uses two fsel ops to clamp to ±45 (matches IDA exactly).
+    if (steer - 45.0f >= 0.0f)
+        steer = 45.0f;
+    if (-45.0f - steer >= 0.0f)
+        steer = -45.0f;
+    ent->s.lerp.u.turret.gunAngles[2] = steer;
+}
+
+// --- VEH_UpdateMaterialTime (CoD3SP 0x822614f0) ---
+// Drives the texScroll-tagged material's lerp time so the vehicle's treads
+// appear to rotate at a speed proportional to ground velocity (with sign).
+// If no texScroll on this vehicle type, sets materialTime to -1.
+void __cdecl VEH_UpdateMaterialTime(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    vehicle_info_t *info;
+    float forward[3];
+    float normVel[3];
+    float sign;
+    float speed;
+    float scale;
+    int delta;
+
+    veh  = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+    if (!info->texScroll)
+    {
+        ent->s.lerp.u.vehicle.materialTime = -1;
+        return;
+    }
+
+    sign = 1.0f;
+    if (sqrtf(veh->phys.vel[0] * veh->phys.vel[0]
+            + veh->phys.vel[1] * veh->phys.vel[1]
+            + veh->phys.vel[2] * veh->phys.vel[2]) != 0.0f)
+    {
+        AngleVectors(veh->phys.angles, forward, 0, 0);
+        Vec3NormalizeTo(veh->phys.vel, normVel);
+        if ((forward[0] * normVel[0]
+           + forward[1] * normVel[1]
+           + forward[2] * normVel[2]) < 0.0f)
+        {
+            sign = -1.0f;
+        }
+    }
+
+    if ((veh->flags & 4) != 0)
+        speed = veh->forcedMaterialSpeed;
+    else
+        speed = veh->speed * sign;
+
+    // 0.0056818184 = 1 / 176 (vehicle units → tread cycle fraction).
+    if (g_vehicleTexScrollScale->current.value <= 0.0f)
+        scale = (speed * 0.0056818184f) * info->texScrollScale;
+    else
+        scale = (speed * 0.0056818184f) * g_vehicleTexScrollScale->current.value;
+
+    // -1000 * 0.05 frame time, then truncated-to-int subtraction.
+    delta = (int)((scale * 0.050000001f) * -1000.0f);
+    ent->s.lerp.u.vehicle.materialTime -= delta;
+}
+
+// --- VEH_UpdateWeapon (CoD3SP 0x82261670) ---
+// Drives the vehicle's primary turret weapon: fires while attack-button is
+// held (subject to fireTime cooldown and pm_flags spectate gating), traces
+// the player view to set targetOrigin (capped at 10240 units), and checks
+// the muzzle-to-flash capsule for blocked barrel.  KISAK_SP-only because
+// the SP CoD3 binary couples this tightly to scr_vehicle's turret flags.
+void __cdecl VEH_UpdateWeapon(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    vehicle_info_t *info;
+    gentity_s *player;
+    const playerState_s *ps;
+    int fireTime;
+    int ownerEntNum;
+    const char *flashTagName;
+    float forward[3];
+    float viewOrigin[3];
+    float endPos[3];
+    float flashPos[3];
+    float barrelPos[3];
+    trace_t trace;
+
+    veh  = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+    if (!ent->r.ownerNum.isDefined() || !ent->s.weapon)
+        return;
+
+    player = ent->r.ownerNum.ent();
+    if (!player->client)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2307, 0, "%s", "client");
+    ps = &player->client->ps;
+    if ((player->client->ps.eFlags & 0x80000) != 0)
+        return;
+
+    fireTime = veh->turret.fireTime;
+    if (fireTime > 0)
+    {
+        veh->turret.fireTime = fireTime - 50;
+    }
+    else if ((player->client->pers.cmd.buttons & 1) != 0
+          && (player->client->ps.pm_flags & 0xC00) == 0)
+    {
+        Scr_Notify(ent, scr_const.turret_fire, 0);
+    }
+
+    veh->hasTarget = 1;
+
+    if (veh->boneIndex.flash[0] < 0)
+    {
+        flashTagName = SL_ConvertToString(*s_flashTags[0]);
+        Com_Error(ERR_DROP, "Player vehicle has no %s\n", flashTagName);
+    }
+    if (veh->boneIndex.barrel < 0)
+        Com_Error(ERR_DROP, "Player vehicle has no tag_barrel\n");
+
+    G_DObjGetWorldBoneIndexPos(ent, veh->boneIndex.flash[0], flashPos);
+    G_DObjGetWorldBoneIndexPos(ent, veh->boneIndex.barrel, barrelPos);
+    G_GetPlayerViewOrigin(ps, viewOrigin);
+
+    if (vehHelicopterHeadSwayDontSwayTheTurret->current.enabled
+        && info->type == 5
+        && (player->client->ps.eFlags & 0x40000) != 0)
+    {
+        AngleVectors(ent->r.currentAngles, forward, 0, 0);
+    }
+    else
+    {
+        G_GetPlayerViewDirection(player, forward, 0, 0);
+    }
+
+    endPos[0] = forward[0] * 10240.0f + viewOrigin[0];
+    endPos[1] = forward[1] * 10240.0f + viewOrigin[1];
+    endPos[2] = forward[2] * 10240.0f + viewOrigin[2];
+    veh->targetOrigin[0] = endPos[0];
+    veh->targetOrigin[1] = endPos[1];
+    veh->targetOrigin[2] = endPos[2];
+
+    ownerEntNum = ent->r.ownerNum.entnum();
+    // contentMask 0x02810111: shot mask used by CoD3SP for turret aim trace.
+    G_LocationalTrace(&trace, viewOrigin, endPos, ownerEntNum, 0x02810111, 0);
+    if (trace.fraction < 1.0f)
+    {
+        veh->targetOrigin[0] = (endPos[0] - viewOrigin[0]) * trace.fraction + viewOrigin[0];
+        veh->targetOrigin[1] = (endPos[1] - viewOrigin[1]) * trace.fraction + viewOrigin[1];
+        veh->targetOrigin[2] = (endPos[2] - viewOrigin[2]) * trace.fraction + viewOrigin[2];
+    }
+
+    // Capsule barrel→flash: if blocked, suppress firing.
+    if (!G_TraceCapsuleComplete(barrelPos, vec3_origin, vec3_origin, flashPos, ent->s.number, ent->clipmask))
+        veh->turret.barrelBlocked = 1;
+}
+
+// --- VEH_VerifyPosition (CoD3SP 0x82260410) ---
+// Brush-model vehicles only: walks the global s_vehicles[] array and tests
+// SV_EntityContact against each other live, brush-model vehicle's bounds
+// (expanded ±64 in xy to give a comfort margin).  On contact, snaps this
+// vehicle's pose back to its s_backup snapshot (taken in VEH_BackupPosition
+// at frame start) and zeros speed.  Prevents the vehicle from clipping into
+// another vehicle's solid box during this frame's physics step.
+void __cdecl VEH_VerifyPosition(gentity_s *ent)
+{
+    scr_vehicle_s *scr_vehicle;
+    int i;
+
+    scr_vehicle = ent->scr_vehicle;
+    if (!ent->r.bmodel)
+        return;
+
+    for (i = 0; i < 64; ++i)
+    {
+        scr_vehicle_s *other_veh = &s_vehicles[i];
+        gentity_s *other;
+        float mins[3];
+        float maxs[3];
+
+        if (other_veh->entNum == ENTITYNUM_NONE)
+            continue;
+        if (other_veh->entNum == ent->s.number)
+            continue;
+        if ((other_veh->flags & 1) == 0)
+            continue;
+
+        other = &g_entities[other_veh->entNum];
+        mins[0] = other->r.currentOrigin[0] + (other_veh->phys.mins[0] - 64.0f);
+        mins[1] = other->r.currentOrigin[1] + (other_veh->phys.mins[1] - 64.0f);
+        mins[2] = other->r.currentOrigin[2] +  other_veh->phys.mins[2];
+        maxs[0] = other->r.currentOrigin[0] + (other_veh->phys.maxs[0] + 64.0f);
+        maxs[1] = other->r.currentOrigin[1] + (other_veh->phys.maxs[1] + 64.0f);
+        maxs[2] = other->r.currentOrigin[2] +  other_veh->phys.maxs[2];
+
+        ExpandBoundsToWidth(mins, maxs);
+        if (SV_EntityContact(mins, maxs, ent))
+        {
+            // Restore from s_backup (set at frame start by VEH_BackupPosition).
+            memcpy(scr_vehicle,         &s_backup,      0xC0u);
+            memcpy(&scr_vehicle->phys,  &s_backup.phys, sizeof(scr_vehicle->phys));
+            VEH_SetPosition(ent, scr_vehicle->phys.origin, scr_vehicle->phys.vel, scr_vehicle->phys.angles);
+            scr_vehicle->speed = 0.0f;
+            return;
+        }
+    }
+}
+
+// --- VEH_UpdateClient (CoD3SP 0x82261ac8) ---
+// Main per-frame physics step for a player-driven (or unmanned) non-chopper
+// vehicle.  Reads player input (forwardmove/rightmove/handbrake), feeds it
+// to VEH_CalcAccel, integrates rotational and linear velocity over a 0.05s
+// step, and performs ground/air slide-move plus optional ground-planting
+// for land vehicles (type 0 / type 1).  Tracks idle/engine sound lerp
+// targets at the end so the engine/idle crossfade is driven by throttle.
+void __cdecl VEH_UpdateClient(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    vehicle_info_t *info;
+    gentity_s *player;
+    gclient_s *client;
+    int buttons;
+    char move[3];          // [0]=forwardmove (signed), [1]=rightmove, [2]=handbrake (0 or 0x7F)
+    float angle;
+    float frac;
+    float rotOrWorldAccel[3]; // initially rotAccel from VEH_CalcAccel; then reused as worldAccel
+    float bodyAccel[3];
+    float axis[4][3];      // 3-row axis + 1-row zeroed translation (used by 4x3 transpose)
+
+    move[0] = 0;
+    move[1] = 0;
+    move[2] = 0;
+
+    if (!ent)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2416, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2417, 0, "%s", "ent->scr_vehicle");
+
+    veh  = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+
+    if (ent->r.ownerNum.isDefined())
+    {
+        player = ent->r.ownerNum.ent();
+        if (!player->client)
+            MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2427, 0, "%s", "player->client");
+        player->client->ps.eFlags |= 0x40000u;
+        if ((player->client->ps.eFlags & 0x80000) == 0
+         && (player->client->ps.pm_flags & 0xC00) == 0)
+        {
+            int8_t handbrake;
+            client  = player->client;
+            buttons = client->pers.cmd.buttons;
+            move[0] = client->pers.cmd.forwardmove;
+            move[1] = client->pers.cmd.rightmove;
+            handbrake = (int8_t)((buttons & 0x800) ? 0x7F : 0);
+            move[2] = handbrake;
+            if (handbrake > 0)
+                player->client->ps.eFlags &= ~0x40000u;
+        }
+    }
+
+    VEH_CalcAccel(ent, move, bodyAccel, rotOrWorldAccel);
+
+    // Accumulate rotational velocity (0.05s frame).
+    veh->phys.rotVel[0] = rotOrWorldAccel[0] * 0.050000001f + veh->phys.rotVel[0];
+    veh->phys.rotVel[1] = rotOrWorldAccel[1] * 0.050000001f + veh->phys.rotVel[1];
+    veh->phys.rotVel[2] = rotOrWorldAccel[2] * 0.050000001f + veh->phys.rotVel[2];
+
+    // Wrap yaw into [-180, 180): take (rotVel.y*0.05 + prevYaw)/360, fold by round, *360.
+    angle = (veh->phys.rotVel[1] * 0.050000001f + veh->phys.prevAngles[1]) * 0.0027777778f; // 1/360
+    frac  = (float)floor(angle + 0.5);
+    veh->phys.angles[0] = 0.0f;
+    veh->phys.angles[2] = 0.0f;
+    veh->phys.angles[1] = (angle - frac) * 360.0f;
+
+    AnglesToAxis(veh->phys.angles, axis);
+    axis[3][0] = 0.0f;
+    axis[3][1] = 0.0f;
+    axis[3][2] = 0.0f;
+    MatrixTransformVector(bodyAccel, *(const mat3x3*)axis, rotOrWorldAccel); // body→world
+
+    veh->phys.vel[0] = rotOrWorldAccel[0] * 0.050000001f + veh->phys.vel[0];
+    veh->phys.vel[1] = rotOrWorldAccel[1] * 0.050000001f + veh->phys.vel[1];
+    veh->phys.vel[2] = rotOrWorldAccel[2] * 0.050000001f + veh->phys.vel[2];
+
+    if (veh->phys.vel[0] != 0.0f || veh->phys.vel[1] != 0.0f || veh->phys.vel[2] != 0.0f)
+    {
+        VEH_GroundTrace(ent);
+        if (s_phys.onGround)
+            VEH_GroundMove(ent);
+        else
+            VEH_AirMove(ent, 1, 0.050000001f);
+    }
+
+    // Land vehicles (type 0 / 1): keep planted on the ground.
+    if (info->type == 0 || info->type == 1)
+        VEH_GroundPlant(ent, &veh->phys, 1);
+
+    MatrixTransposeTransformVector43(veh->phys.vel, axis, veh->phys.bodyVel); // world→body
+    veh->speed = I_fabs(veh->phys.bodyVel[0]);
+    if (veh->speed < 0.0f)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2486, 0, "%s", "veh->speed >= 0.0f");
+
+    // Idle/engine sound crossfade: targets driven by whether throttle is held.
+    if (move[0])
+    {
+        veh->idleSndLerp   = DiffTrack(0.0f, veh->idleSndLerp,   4.0f, 0.050000001f);
+        veh->engineSndLerp = DiffTrack(1.0f, veh->engineSndLerp, 4.0f, 0.050000001f);
+    }
+    else
+    {
+        veh->idleSndLerp   = DiffTrack(1.0f, veh->idleSndLerp,   4.0f, 0.050000001f);
+        veh->engineSndLerp = DiffTrack(0.0f, veh->engineSndLerp, 4.0f, 0.050000001f);
+    }
+
+    if (g_vehicleDebug->current.enabled)
+        VEH_DebugCapsule(veh->phys.origin, veh->phys.maxs[0], veh->phys.maxs[2], 1.0f, 1.0f, 0.0f);
+}
+
+#endif // KISAK_SP
+
 void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
 {
     vehicle_info_t *info; // [esp+4h] [ebp-8h]
     scr_vehicle_s *veh; // [esp+8h] [ebp-4h]
 
-    if (!pSelf)
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 4417, 0, "%s", "pSelf");
-    if (!pSelf->scr_vehicle)
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 4418, 0, "%s", "pSelf->scr_vehicle");
+    iassert(pSelf);
+    iassert(pSelf->scr_vehicle);
+
     veh = pSelf->scr_vehicle;
     info = &s_vehicleInfos[veh->infoIdx];
+
     VEH_BackupPosition(pSelf);
     memset((uint8_t *)&s_phys, 0, sizeof(s_phys));
+
     if (info->type != 4)
     {
+#ifdef KISAK_SP
+        if ((veh->flags & 8) != 0)
+        {
+            VEH_UpdatePath(pSelf);
+        }
+        else 
+#endif
         if ((veh->flags & 2) != 0)
         {
             VEH_UpdateAIMove(pSelf);
@@ -537,15 +1328,47 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
         {
             VEH_UpdateClientChopper(pSelf);
         }
+#ifdef KISAK_SP
+        else
+        {
+            VEH_UpdateClient(pSelf);
+        }
+#endif
     }
-    if (veh->speed < 0.0)
-        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 4457, 0, "%s", "veh->speed >= 0.0f");
+    iassert(veh->speed >= 0.0f);
     VEH_SetPosition(pSelf, veh->phys.origin, veh->phys.vel, veh->phys.angles);
+
+#ifdef KISAK_SP
+    if (info->type != 4 && (veh->flags & 8) != 0)
+        VEH_VerifyPosition(pSelf);
+#endif
+
     if ((veh->flags & 2) != 0)
         VEH_MoveTrace(pSelf);
     VEH_TouchEntities(pSelf);
+#ifdef KISAK_SP
+    G_DoTouchTriggers(pSelf);
+    if (g_vehicleDebug->current.enabled)
+        VEH_DebugBox(veh->phys.origin, 4.0, 1.0, 1.0, 0.0);
+#endif
+
     veh->turret.barrelBlocked = 0;
+
+#ifdef KISAK_SP
+    if (veh->flags & 1)
+    {
+        VEH_UpdateWeapon(pSelf);
+    }
+#endif
     VEH_UpdateAim(pSelf);
+
+#ifdef KISAK_SP
+    VEH_UpdateBody(pSelf);
+    VEH_UpdateSteering(pSelf);
+    VEH_UpdateMaterialTime(pSelf);
+    VEH_UpdateSounds(pSelf);
+#endif
+
     pSelf->s.time2 = (int)(info->suspensionTravel * 1000.0f);
     pSelf->nextthink = level.time + 50;
 }
@@ -960,6 +1783,168 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
     }
 }
 
+#ifdef KISAK_SP
+void __cdecl VEH_UpdatePath(gentity_s *ent)
+{
+    scr_vehicle_s *veh;
+    vehicle_info_t *info;
+    float prevSpeed;
+    bool waitNodeHit;
+    vehicle_pathpos_t nextVpp; // local copy that G_VehUpdatePathPos advances
+    float ratio;
+    float clampedRatio;
+
+    if (!ent)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2516, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2517, 0, "%s", "ent->scr_vehicle");
+
+    veh = ent->scr_vehicle;
+    info = &s_vehicleInfos[veh->infoIdx];
+    memcpy(&nextVpp, &veh->pathPos, sizeof(nextVpp));
+    prevSpeed = veh->speed;
+    waitNodeHit = false;
+
+    if (nextVpp.nodeIdx < 0)
+        return;
+
+    if (veh->pathPos.speed < 0.0f)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2530, 0, "%s", "veh->pathPos.speed >= 0.0f");
+    if (veh->manualSpeed < 0.0f)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2531, 0, "%s", "veh->manualSpeed >= 0.0f");
+
+    if (veh->manualMode == 0)
+    {
+        // No manual override - just track the path's prescribed speed.
+        veh->speed = veh->pathPos.speed;
+    }
+    else
+    {
+        // manualMode 1 = explicit manual speed; mode 2 = decay back to path
+        // speed and then auto-clear.
+        float manualSpeed = (veh->manualMode == 2) ? veh->pathPos.speed
+                                                   : veh->manualSpeed;
+        float newSpeed;
+        if (veh->speed >= manualSpeed)
+        {
+            newSpeed = veh->speed - veh->manualAccel * 0.050000001f;
+            if (newSpeed < manualSpeed)
+                newSpeed = manualSpeed;
+        }
+        else
+        {
+            newSpeed = veh->speed + veh->manualAccel * 0.050000001f;
+            if (newSpeed > manualSpeed)
+                newSpeed = manualSpeed;
+        }
+        veh->speed = newSpeed;
+        if (veh->manualMode == 2 && newSpeed == manualSpeed)
+            veh->manualMode = 0;
+    }
+
+    if (veh->speed < 0.0f)
+        MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2547, 0, "%s", "veh->speed >= 0.0f");
+
+    if (veh->pathPos.speed <= 0.0f)
+        veh->manualTime = 0.0f;
+    else
+        veh->manualTime = (float)(veh->speed / veh->pathPos.speed) + veh->manualTime;
+
+    // Step through nodes while we have unit-length progress. Each call to
+    // G_VehUpdatePathPos advances nextVpp by one node and returns nonzero
+    // if it crossed the waitNode.
+    if (veh->manualTime >= 1.0f)
+    {
+        do
+        {
+            if (G_VehUpdatePathPos(&nextVpp, veh->waitNode))
+                waitNodeHit = true;
+            veh->manualTime = veh->manualTime - 1.0f;
+        } while (veh->manualTime >= 1.0f);
+    }
+
+    // Commit advanced node state back to pathPos (nodeIdx/endOfPath/frac etc.)
+    memcpy(&veh->pathPos, &nextVpp, sizeof(veh->pathPos));
+
+    if (veh->manualTime > 0.0f)
+    {
+        if (veh->manualTime >= 1.0f)
+            MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2567, 0, "%s", "veh->manualTime < 1.0f");
+        // Get a lookahead pathPos for the manualTime fractional remainder
+        // so we can interpolate origin/angles smoothly between this tick's
+        // node state and the next.
+        G_VehUpdatePathPos(&nextVpp, -1);
+    }
+
+    if (veh->pathPos.endOfPath)
+        veh->speed = 0.0f;
+
+    veh->phys.origin[0] = (float)((nextVpp.origin[0] - veh->pathPos.origin[0]) * veh->manualTime)
+                         + veh->pathPos.origin[0];
+    veh->phys.origin[1] = (float)((nextVpp.origin[1] - veh->pathPos.origin[1]) * veh->manualTime)
+                         + veh->pathPos.origin[1];
+    veh->phys.origin[2] = (float)((nextVpp.origin[2] - veh->pathPos.origin[2]) * veh->manualTime)
+                         + veh->pathPos.origin[2];
+
+    veh->phys.angles[0] = LerpAngle(veh->pathPos.angles[0], nextVpp.angles[0], veh->manualTime);
+    veh->phys.angles[1] = LerpAngle(veh->pathPos.angles[1], nextVpp.angles[1], veh->manualTime);
+    veh->phys.angles[2] = LerpAngle(veh->pathPos.angles[2], nextVpp.angles[2], veh->manualTime);
+
+    // Smooth out angle changes against last tick's pose so node corners don't snap.
+    veh->phys.angles[0] = DiffTrackAngle(veh->phys.angles[0], veh->phys.prevAngles[0], 6.0f, 0.050000001f);
+    veh->phys.angles[1] = DiffTrackAngle(veh->phys.angles[1], veh->phys.prevAngles[1], 4.0f, 0.050000001f);
+    veh->phys.angles[2] = DiffTrackAngle(veh->phys.angles[2], veh->phys.prevAngles[2], 6.0f, 0.050000001f);
+
+    if (info->type == 0 || info->type == 1)
+        VEH_GroundPlant(ent, &veh->phys, 1);
+
+    if (g_vehicleDebug->current.enabled)
+        VEH_DebugBox(veh->pathPos.lookPos, 8.0f, 0.0f, 1.0f, 1.0f);
+
+    // Per-frame velocity from the position delta (20Hz tick = 1/0.05).
+    veh->phys.vel[0] = (veh->phys.origin[0] - veh->phys.prevOrigin[0]) * 20.0f;
+    veh->phys.vel[1] = (veh->phys.origin[1] - veh->phys.prevOrigin[1]) * 20.0f;
+    veh->phys.vel[2] = (veh->phys.origin[2] - veh->phys.prevOrigin[2]) * 20.0f;
+
+    veh->phys.bodyVel[0] = veh->speed;
+    veh->phys.bodyVel[1] = 0.0f;
+    veh->phys.bodyVel[2] = 0.0f;
+
+    AnglesSubtract(veh->phys.angles, veh->phys.prevAngles, veh->phys.rotVel);
+    veh->phys.rotVel[0] = veh->phys.rotVel[0] * 20.0f;
+    veh->phys.rotVel[1] = veh->phys.rotVel[1] * 20.0f;
+    veh->phys.rotVel[2] = veh->phys.rotVel[2] * 20.0f;
+
+    // Notifies - these are the entire reason this function has to exist for
+    // the script side to clean up properly. gopath() waittills on
+    // "reached_end_node"; without this notify nothing tears down the
+    // vehicle's endon listeners.
+    if (waitNodeHit && veh->waitNode > -1)
+        Scr_Notify(ent, scr_const.reached_wait_node, 0);
+    if (veh->pathPos.endOfPath)
+        Scr_Notify(ent, scr_const.reached_end_node, 0);
+
+    // Engine/idle sound lerp: clamp(speed/engineSndSpeed, 0, 1). Same
+    // fsel-style clamp pattern used in VEH_UpdateMoveToGoal.
+    ratio = veh->speed / info->engineSndSpeed;
+    if (ratio - 1.0f < 0.0f)
+        clampedRatio = ratio;
+    else
+        clampedRatio = 1.0f;
+    if (-ratio < 0.0f)
+        veh->engineSndLerp = clampedRatio;
+    else
+        veh->engineSndLerp = 0.0f;
+    veh->idleSndLerp = 1.0f - veh->engineSndLerp;
+
+    // waitSpeed crossing: fires reached_wait_speed when this tick's speed
+    // crossed veh->waitSpeed (in either direction) since the previous tick.
+    if (veh->waitSpeed >= 0.0f
+        && ((prevSpeed <= veh->waitSpeed && veh->speed >= veh->waitSpeed)
+            || (prevSpeed >= veh->waitSpeed && veh->speed <= veh->waitSpeed)))
+        Scr_Notify(ent, scr_const.reached_wait_speed, 0);
+}
+#endif
 void __cdecl VEH_UpdateAIMove(gentity_s *ent)
 {
     VehicleMoveState moveState; // [esp+0h] [ebp-8h]
@@ -3133,6 +4118,31 @@ void VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
     }
 }
 
+void __cdecl VEH_DebugBox(float *pos, float width, float r, float g, float b)
+{
+    // Mirrors CoD3SP.exe!VEH_DebugBox @ 0x8225d598 - a thin wrapper over
+    // G_DebugBox that draws a centered colored cube. Used by VEH_UpdatePath
+    // and Scr_Vehicle_Think when g_vehicleDebug is enabled.
+    float color[4];
+    float mins[3];
+    float maxs[3];
+    float halfWidth = width * 0.5f;
+
+    color[0] = r;
+    color[1] = g;
+    color[2] = b;
+    color[3] = 1.0f;
+
+    maxs[0] = halfWidth;
+    maxs[1] = halfWidth;
+    maxs[2] = halfWidth;
+    mins[0] = -halfWidth;
+    mins[1] = -halfWidth;
+    mins[2] = -halfWidth;
+
+    G_DebugBox(pos, mins, maxs, 0.0f, color, 1, 0);
+}
+
 void VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
 {
     scr_vehicle_s *scr_vehicle; // r19
@@ -4485,59 +5495,40 @@ void(* ScriptVehicle_GetMethod(const char **pName))(scr_entref_t)
     return s_methods[v1].actionFunc;
 }
 
+// IDA gates each 2-byte save/load on `if (*v4)` — only persist sndIndices that
+// are currently non-zero. That assumes save-time and load-time runtime values
+// have IDENTICAL non-zero footprints (a given slot is either non-zero in BOTH
+// runs or zero in BOTH runs). In the kisak port the sound-alias system can
+// resolve indices at slightly different points across map (re)load — at SAVE
+// time several sndIndices slots were non-zero (so save wrote 2 bytes each), at
+// LOAD time the same slots were still 0 (so load skipped them), leaving 12+
+// orphan bytes in the file stream that the *next* read (turret-loop inuse
+// flag) consumes as garbage. Symptom: turret-loop reads inuse=131073 and the
+// "manualTarget" 4 bytes are actually two unrelated sndIndices, e.g. {17,18}.
+//
+// Fix: write/read ALL six uint16 slots unconditionally. Symmetric regardless
+// of runtime gate state. A few bytes per vehicle-info-type is negligible.
 void G_SaveVehicleInfo(SaveGame *save)
 {
-    int v2; // r28
-    uint16_t *sndIndices; // r29
-    uint16_t *v4; // r31
-    int v5; // r30
-
-    v2 = 0;
-    if (s_numVehicleInfos > 0)
+    if (s_numVehicleInfos <= 0)
+        return;
+    uint16_t *sndIndices = (uint16_t *)s_vehicleInfos[0].sndIndices;
+    for (int v2 = 0; v2 < s_numVehicleInfos; ++v2)
     {
-        sndIndices = (unsigned short*)s_vehicleInfos[0].sndIndices;
-        do
-        {
-            v4 = sndIndices;
-            v5 = 6;
-            do
-            {
-                if (*v4)
-                    SaveMemory_SaveWrite(v4, 2, save);
-                --v5;
-                ++v4;
-            } while (v5);
-            ++v2;
-            sndIndices += 314;
-        } while (v2 < s_numVehicleInfos);
+        SaveMemory_SaveWrite(sndIndices, 6 * sizeof(uint16_t), save);
+        sndIndices += 314; // = sizeof(vehicle_info_t) / sizeof(uint16_t)
     }
 }
 
 void G_LoadVehicleInfo(SaveGame *save)
 {
-    int v2; // r28
-    uint16_t *sndIndices; // r29
-    uint16_t *v4; // r31
-    int v5; // r30
-
-    v2 = 0;
-    if (s_numVehicleInfos > 0)
+    if (s_numVehicleInfos <= 0)
+        return;
+    uint16_t *sndIndices = (uint16_t *)s_vehicleInfos[0].sndIndices;
+    for (int v2 = 0; v2 < s_numVehicleInfos; ++v2)
     {
-        sndIndices = (unsigned short*)s_vehicleInfos[0].sndIndices;
-        do
-        {
-            v4 = sndIndices;
-            v5 = 6;
-            do
-            {
-                if (*v4)
-                    SaveMemory_LoadRead(v4, 2, save);
-                --v5;
-                ++v4;
-            } while (v5);
-            ++v2;
-            sndIndices += 314;
-        } while (v2 < s_numVehicleInfos);
+        SaveMemory_LoadRead(sndIndices, 6 * sizeof(uint16_t), save);
+        sndIndices += 314;
     }
 }
 

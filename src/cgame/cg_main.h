@@ -521,8 +521,6 @@ extern const dvar_t *cg_tracerScrewDist;
 extern const dvar_t *cg_tracerLength;
 extern const dvar_t *cg_cinematicFullscreen;
 
-#define CS_EFFECT_NAMES 211
-
 
 inline cgs_t *CG_GetLocalClientStaticGlobals(int localClientNum)
 {

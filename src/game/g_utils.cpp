@@ -628,7 +628,6 @@ int __cdecl G_RumbleIndex(const char *name)
     // Xbox values writes garbage into singles + models — broken on PC SP.
     return G_FindConfigstringIndex(name, 1115, 32, 1, 0);
 #else
-    iassert(0);
     return 0;
 #endif
 }

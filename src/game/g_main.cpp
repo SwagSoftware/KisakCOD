@@ -1772,50 +1772,46 @@ void __cdecl G_RunFrameForEntity(gentity_s *ent)
             iassert(ent->s.eType != ET_VEHICLE);
         }
 
-        if (ent->s.eType != ET_VEHICLE)
+        if (ent->snd_wait.notifyString)
         {
-            if (ent->snd_wait.notifyString)
+            duration = ent->snd_wait.duration;
+            if (duration < 0)
+                duration = 5000;
+            if (level.time - ent->snd_wait.basetime - duration >= 0)
             {
-                duration = ent->snd_wait.duration;
-                if (duration < 0)
-                    duration = 5000;
-                if (level.time - ent->snd_wait.basetime - duration >= 0)
-                {
-                    Scr_Notify(ent, ent->snd_wait.notifyString, 0);
-                    Scr_SetString(&ent->snd_wait.notifyString, 0);
-                }
+                Scr_Notify(ent, ent->snd_wait.notifyString, 0);
+                Scr_SetString(&ent->snd_wait.notifyString, 0);
             }
-            G_RunFrameForEntityInternal(ent);
-            if (ent->s.eType == ET_ACTOR || (ent->s.lerp.eFlags & 0x800) != 0)
-                AimTarget_ProcessEntity(ent);
-            if (snd_enableEq->current.enabled)
+        }
+        G_RunFrameForEntityInternal(ent);
+        if (ent->s.eType == ET_ACTOR || (ent->s.lerp.eFlags & 0x800) != 0)
+            AimTarget_ProcessEntity(ent);
+        if (snd_enableEq->current.enabled)
+        {
+            switch (ent->s.eType)
             {
-                switch (ent->s.eType)
-                {
-                case ET_MISSILE:
-                case ET_SOUND_BLEND:
-                case ET_MG42:
-                case ET_ACTOR:
-                    G_ApplyEntityEq(ent);
-                    break;
-                default:
-                    break;
-                }
+            case ET_MISSILE:
+            case ET_SOUND_BLEND:
+            case ET_MG42:
+            case ET_ACTOR:
+                G_ApplyEntityEq(ent);
+                break;
+            default:
+                break;
             }
-            if (g_debugLocDamage->current.enabled)
+        }
+        if (g_debugLocDamage->current.enabled)
+        {
+            if (SV_DObjExists(ent))
             {
-                if (SV_DObjExists(ent))
-                {
-                    int partBits[4];
-                    partBits[0] = 0xFFFFFFFF;
-                    partBits[1] = 0xFFFFFFFF;
-                    partBits[2] = 0xFFFFFFFF;
-                    partBits[3] = 0xFFFFFFFF;
-                    G_DObjCalcPose(ent, partBits);
-                    SV_XModelDebugBoxes(ent);
-                }
+                int partBits[4];
+                partBits[0] = 0xFFFFFFFF;
+                partBits[1] = 0xFFFFFFFF;
+                partBits[2] = 0xFFFFFFFF;
+                partBits[3] = 0xFFFFFFFF;
+                G_DObjCalcPose(ent, partBits);
+                SV_XModelDebugBoxes(ent);
             }
-            return;
         }
     }
 }

@@ -2026,6 +2026,141 @@ void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime)
     }
 }
 
+
+bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
+{
+    float *v3; // [esp+24h] [ebp-D4h]
+    float timeLeft; // [esp+30h] [ebp-C8h]
+    int j; // [esp+34h] [ebp-C4h]
+    vehicle_physic_t *phys; // [esp+38h] [ebp-C0h]
+    float dir[3]; // [esp+3Ch] [ebp-BCh] BYREF
+    int bumpCount; // [esp+48h] [ebp-B0h]
+    scr_vehicle_s *veh; // [esp+4Ch] [ebp-ACh]
+    int k; // [esp+50h] [ebp-A8h]
+    float planes[5][3]; // [esp+54h] [ebp-A4h] BYREF
+    float clipVel[3]; // [esp+90h] [ebp-68h] BYREF
+    float end[3]; // [esp+9Ch] [ebp-5Ch] BYREF
+    float endVel[3]; // [esp+A8h] [ebp-50h] BYREF
+    int numPlanes; // [esp+B4h] [ebp-44h]
+    trace_t trace; // [esp+B8h] [ebp-40h] BYREF
+    float endClipVel[3]; // [esp+E4h] [ebp-14h] BYREF
+    int i; // [esp+F0h] [ebp-8h]
+    float dot; // [esp+F4h] [ebp-4h]
+
+    veh = ent->scr_vehicle;
+    phys = &veh->phys;
+    timeLeft = 0.050000001;
+    endVel[0] = veh->phys.vel[0];
+    endVel[1] = veh->phys.vel[1];
+    endVel[2] = veh->phys.vel[2];
+    if (gravity)
+    {
+        endVel[2] = endVel[2] - 40.0;
+        veh->phys.vel[2] = (veh->phys.vel[2] + endVel[2]) * 0.5;
+        if (s_phys.hasGround)
+            VEH_ClipVelocity(phys->vel, s_phys.groundTrace.normal, phys->vel);
+    }
+    if (s_phys.hasGround)
+    {
+        numPlanes = 1;
+        planes[0][0] = s_phys.groundTrace.normal[0];
+        planes[0][1] = s_phys.groundTrace.normal[1];
+        planes[0][2] = s_phys.groundTrace.normal[2];
+    }
+    else
+    {
+        numPlanes = 0;
+    }
+    Vec3NormalizeTo(phys->vel, planes[numPlanes++]);
+    for (bumpCount = 0; bumpCount < 4; ++bumpCount)
+    {
+        Vec3Mad(phys->origin, timeLeft, phys->vel, end);
+        G_TraceCapsule(&trace, phys->origin, phys->mins, phys->maxs, end, ent->s.number, ent->clipmask);
+        if (trace.startsolid)
+        {
+            phys->vel[2] = 0.0;
+            return 1;
+        }
+        if (trace.fraction > 0.0)
+            Vec3Lerp(phys->origin, end, trace.fraction, phys->origin);
+        if (trace.fraction == 1.0)
+            break;
+        timeLeft = timeLeft - timeLeft * trace.fraction;
+        if (numPlanes >= 5)
+        {
+            phys->vel[0] = 0.0;
+            phys->vel[1] = 0.0;
+            phys->vel[2] = 0.0;
+            return 1;
+        }
+        for (i = 0; i < numPlanes; ++i)
+        {
+            if (Vec3Dot(trace.normal, planes[i]) > 0.9900000095367432)
+            {
+                Vec3Add(trace.normal, phys->vel, phys->vel);
+                break;
+            }
+        }
+        if (i >= numPlanes)
+        {
+            v3 = planes[numPlanes];
+            *v3 = trace.normal[0];
+            v3[1] = trace.normal[1];
+            v3[2] = trace.normal[2];
+            ++numPlanes;
+            for (i = 0; i < numPlanes; ++i)
+            {
+                if (Vec3Dot(phys->vel, planes[i]) < 0.1000000014901161)
+                {
+                    VEH_ClipVelocity(phys->vel, planes[i], clipVel);
+                    VEH_ClipVelocity(endVel, planes[i], endClipVel);
+                    for (j = 0; j < numPlanes; ++j)
+                    {
+                        if (j != i && Vec3Dot(clipVel, planes[j]) < 0.1000000014901161)
+                        {
+                            VEH_ClipVelocity(clipVel, planes[j], clipVel);
+                            VEH_ClipVelocity(endClipVel, planes[j], endClipVel);
+                            if (Vec3Dot(clipVel, planes[i]) < 0.0)
+                            {
+                                Vec3Cross(planes[i], planes[j], dir);
+                                Vec3Normalize(dir);
+                                dot = Vec3Dot(dir, phys->vel);
+                                Vec3Scale(dir, dot, clipVel);
+                                dot = Vec3Dot(dir, endVel);
+                                Vec3Scale(dir, dot, endClipVel);
+                                for (k = 0; k < numPlanes; ++k)
+                                {
+                                    if (k != i && k != j && Vec3Dot(clipVel, planes[k]) < 0.1000000014901161)
+                                    {
+                                        phys->vel[0] = 0.0;
+                                        phys->vel[1] = 0.0;
+                                        phys->vel[2] = 0.0;
+                                        return 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    phys->vel[0] = clipVel[0];
+                    phys->vel[1] = clipVel[1];
+                    phys->vel[2] = clipVel[2];
+                    endVel[0] = endClipVel[0];
+                    endVel[1] = endClipVel[1];
+                    endVel[2] = endClipVel[2];
+                    break;
+                }
+            }
+        }
+    }
+    if (gravity)
+    {
+        phys->vel[0] = endVel[0];
+        phys->vel[1] = endVel[1];
+        phys->vel[2] = endVel[2];
+    }
+    return bumpCount != 0;
+}
+
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime)
 {
     float *v4; // [esp+30h] [ebp-D4h]

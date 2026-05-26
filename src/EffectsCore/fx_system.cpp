@@ -2130,10 +2130,10 @@ int FX_GetClientEffectIndex(int clientIndex, FxEffect *effect)
 
     iassert(clientIndex == 0);
     iassert(effect);
-    
+
     effects = fx_systemPool[0].effects;
 
     iassert(effect >= &fx_systemPool[0].effects[0] && effect < &fx_systemPool[0].effects[FX_EFFECT_LIMIT]);
 
-    return ((uintptr_t)effect - (uintptr_t)effects);
+    return effect - effects;
 }
