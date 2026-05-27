@@ -90,7 +90,7 @@ bool __cdecl CG_JavelinADS(int32_t localClientNum)
 
 int32_t __cdecl CG_WeaponDObjHandle(int32_t weaponNum)
 {
-    return weaponNum + 1024;
+    return weaponNum + MAX_GENTITIES;
 }
 
 void __cdecl CG_RegisterWeapon(int32_t localClientNum, uint32_t weaponNum)

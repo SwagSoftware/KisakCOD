@@ -39,7 +39,7 @@ void __cdecl FX_InitMarksSystem(FxMarksSystem *marksSystem)
     int32_t triIndex; // [esp+10h] [ebp-8h]
     uint32_t markHandleIndex; // [esp+14h] [ebp-4h]
 
-    for (markHandleIndex = 0; markHandleIndex != 1024; ++markHandleIndex)
+    for (markHandleIndex = 0; markHandleIndex != MAX_GENTITIES; ++markHandleIndex)
         marksSystem->entFirstMarkHandles[markHandleIndex] = -1;
     marksSystem->firstFreeMarkHandle = FX_MarkToHandle(marksSystem, marksSystem->marks);
     for (markIndex = 0; markIndex < 0x1FF; ++markIndex)

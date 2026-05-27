@@ -959,22 +959,8 @@ FxEffect *__cdecl FX_SpawnBoltedEffect(
         return 0;
     if (FX_NeedsBoltUpdate(def))
     {
-        if (dobjHandle >= 0xFFF)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_system.cpp",
-                1408,
-                0,
-                "dobjHandle doesn't index FX_DOBJ_HANDLE_NONE\n\t%i not in [0, %i)",
-                dobjHandle,
-                4095);
-        if (boneIndex >= 0x7FF)
-            MyAssertHandler(
-                ".\\EffectsCore\\fx_system.cpp",
-                1409,
-                0,
-                "boneIndex doesn't index FX_BONE_INDEX_NONE\n\t%i not in [0, %i)",
-                boneIndex,
-                2047);
+        bcassert(dobjHandle, FX_DOBJ_HANDLE_NONE);
+        bcassert(boneIndex, FX_BONE_INDEX_NONE);
     }
     else
     {
@@ -982,7 +968,7 @@ FxEffect *__cdecl FX_SpawnBoltedEffect(
         boneIndex = 2047;
     }
     system = FX_GetSystem(localClientNum);
-    return FX_SpawnEffect(system, def, msecBegin, orient.origin, orient.axis, dobjHandle, boneIndex, 255, 0xFFFFu, 0x3FFu);
+    return FX_SpawnEffect(system, def, msecBegin, orient.origin, orient.axis, dobjHandle, boneIndex, 255, -1, ENTITYNUM_NONE);
 }
 
 char __cdecl FX_NeedsBoltUpdate(const FxEffectDef *def)
@@ -1045,8 +1031,7 @@ void __cdecl FX_RetriggerEffect(int32_t localClientNum, FxEffect* effect, int32_
             &effect->framePrev,
             &effect->frameNow,
             effect->msecBegin,
-            effect->msecLastUpdate,
-            0);
+            effect->msecLastUpdate);
         FX_StopEffect(system, effect);
     }
     for (elemClass = 0; elemClass < 3; ++elemClass)

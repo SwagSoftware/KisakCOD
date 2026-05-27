@@ -330,7 +330,8 @@ void __cdecl FX_DrawMarkProfile(int32_t clientIndex, void(__cdecl* drawFunc)(con
         0,
         drawFunc,
         profilePos);
-    for (entityIndex = 0; entityIndex != 1024; ++entityIndex)
+
+    for (entityIndex = 0; entityIndex != MAX_GENTITIES; ++entityIndex)
         FX_DrawMarkProfile_MarkPrint(
             fx_marksSystemPool,
             fx_marksSystemPool[0].entFirstMarkHandles[entityIndex],

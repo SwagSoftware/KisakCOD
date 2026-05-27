@@ -32,14 +32,8 @@ int32_t __cdecl CG_GetBoneIndex(
 {
     const DObj_s *obj; // [esp+0h] [ebp-4h]
 
-    if (dobjHandle >= 0x480)
-        MyAssertHandler(
-            ".\\cgame\\cg_event.cpp",
-            307,
-            0,
-            "dobjHandle doesn't index CLIENT_DOBJ_HANDLE_MAX\n\t%i not in [0, %i)",
-            dobjHandle,
-            1152);
+    bcassert(dobjHandle, CLIENT_DOBJ_HANDLE_MAX);
+
     obj = Com_GetClientDObj(dobjHandle, localClientNum);
     if (obj)
         return DObjGetBoneIndex(obj, boneName, boneIndex);

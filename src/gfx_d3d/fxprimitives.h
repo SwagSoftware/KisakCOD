@@ -274,12 +274,13 @@ struct FxMark // sizeof=0x44
     int tris;
     int points;
 };
-struct FxMarksSystem // sizeof=0x4801C
+
+struct FxMarksSystem
 {                                       // ...
     int frameCount;
     uint16_t firstFreeMarkHandle;
     uint16_t firstActiveWorldMarkHandle;
-    uint16_t entFirstMarkHandles[1024];
+    uint16_t entFirstMarkHandles[MAX_GENTITIES];
     FxTriGroupPool *firstFreeTriGroup;
     FxPointGroupPool *firstFreePointGroup;
     FxMark marks[512];

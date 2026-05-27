@@ -461,16 +461,16 @@ void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int32_t offset)
     }
 
 #ifdef KISAK_MP
-    if (scale >= 1.4)
+    if (scale >= 1.4f)
     {
-        if (scale > 4.6)
+        if (scale > 4.6f)
         {
-            Scr_Error(va("font scale %f is above the expected maximum %f", scale, 4.6));
+            Scr_Error(va("font scale %f is above the expected maximum %f", scale, 4.6f));
         }
     }
     else
     {
-        Scr_Error(va("font scale %f is below the expected minimum %f", scale, 1.4));
+        Scr_Error(va("font scale %f is below the expected minimum %f", scale, 1.4f));
     }
 #endif
 

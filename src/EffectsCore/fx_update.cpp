@@ -156,9 +156,9 @@ void __cdecl FX_SpawnLoopingElems(
     int32_t elemDefIndex,
     const FxSpatialFrame *frameBegin,
     const FxSpatialFrame *frameEnd,
-    long double msecWhenPlayed,
-    long double msecUpdateBegin,
-    long double msecUpdateEnd)
+    int msecWhenPlayed,
+    int msecUpdateBegin,
+    int msecUpdateEnd)
 {
     const FxEffectDef *effectDef; // [esp+40h] [ebp-3Ch]
     const FxElemDef *elemDef; // [esp+44h] [ebp-38h]
@@ -169,41 +169,13 @@ void __cdecl FX_SpawnLoopingElems(
     int32_t maxUpdateMsec; // [esp+74h] [ebp-8h]
     int32_t updateMsec; // [esp+78h] [ebp-4h]
 
-    if (!effect)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 350, 0, "%s", "effect");
+    iassert(effect);
     effectDef = effect->def;
-    if (!effect->def)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 353, 0, "%s", "effectDef");
-    if (elemDefIndex >= (effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot
-        + effectDef->elemDefCountLooping))
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_update.cpp",
-            355,
-            0,
-            "elemDefIndex doesn't index effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCou"
-            "ntEmission\n"
-            "\t%i not in [0, %i)",
-            elemDefIndex,
-            effectDef->elemDefCountEmission + effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping);
-    if (elemDefIndex >= effectDef->elemDefCountLooping
-        && elemDefIndex < effectDef->elemDefCountOneShot + effectDef->elemDefCountLooping)
-    {
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_update.cpp",
-            356,
-            0,
-            "%s",
-            "elemDefIndex < effectDef->elemDefCountLooping || elemDefIndex >= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot");
-    }
-    if (msecWhenPlayed > msecUpdateBegin || msecUpdateBegin > msecUpdateEnd)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_update.cpp",
-            357,
-            0,
-            "msecUpdateBegin not in [msecWhenPlayed, msecUpdateEnd]\n\t%g not in [%g, %g]",
-            msecUpdateBegin,
-            msecWhenPlayed,
-            msecUpdateEnd);
+    iassert(effectDef);
+    bcassert(elemDefIndex, effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot + effectDef->elemDefCountEmission);
+    iassert(elemDefIndex < effectDef->elemDefCountLooping || elemDefIndex >= effectDef->elemDefCountLooping + effectDef->elemDefCountOneShot);
+    rangeassert(msecUpdateBegin, msecWhenPlayed, msecUpdateEnd);
+
     elemDef = &effect->def->elemDefs[elemDefIndex];
     if (elemDef->elemType != 3)
     {
@@ -242,24 +214,19 @@ void __cdecl FX_SpawnAllFutureLooping(
     int32_t elemDefCount,
     const FxSpatialFrame *frameBegin,
     const FxSpatialFrame *frameEnd,
-    long double msecWhenPlayed,
-    long double msecUpdateBegin,
-    long double msecUpdateEnd)
+    int msecWhenPlayed,
+    int msecUpdateBegin)
 {
-    long double v9; // [esp-4h] [ebp-6Ch]
-    long double v10; // [esp+4h] [ebp-64h]
-    int32_t elemDefIndex; // [esp+64h] [ebp-4h]
+    iassert(effect);
 
-    if (!effect)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 465, 0, "%s", "effect");
-    if (!effect->def)
-        MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 468, 0, "%s", "effectDef");
-    for (elemDefIndex = elemDefFirst; elemDefIndex != elemDefCount + elemDefFirst; ++elemDefIndex)
+    const FxEffectDef *effectDef = effect->def;
+    iassert(effectDef);
+
+    for (int32_t elemDefIndex = elemDefFirst; elemDefIndex != elemDefCount + elemDefFirst; ++elemDefIndex)
     {
-        if (effect->def->elemDefs[elemDefIndex].spawn.looping.count != 0x7FFFFFFF)
+        if (effectDef->elemDefs[elemDefIndex].spawn.looping.count != 0x7FFFFFFF)
         {
-            LODWORD(v9) = 0x7FFFFFFF;
-            FX_SpawnLoopingElems(system, effect, elemDefIndex, frameBegin, frameEnd, msecWhenPlayed, msecUpdateBegin, msecUpdateEnd);
+            FX_SpawnLoopingElems(system, effect, elemDefIndex, frameBegin, frameEnd, msecWhenPlayed, msecUpdateBegin, 0x7FFFFFFF);
         }
     }
 }
@@ -565,14 +532,8 @@ char __cdecl FX_GetBoneOrientation(int32_t localClientNum, uint32_t dobjHandle, 
     DObj_s *obj; // [esp+60h] [ebp-8h]
     centity_s *pose; // [esp+64h] [ebp-4h]
 
-    if (dobjHandle >= 0x480)
-        MyAssertHandler(
-            ".\\EffectsCore\\fx_update.cpp",
-            1351,
-            0,
-            "dobjHandle doesn't index CLIENT_DOBJ_HANDLE_MAX\n\t%i not in [0, %i)",
-            dobjHandle,
-            1152);
+    bcassert(dobjHandle, CLIENT_DOBJ_HANDLE_MAX);
+    
     if (!orient)
         MyAssertHandler(".\\EffectsCore\\fx_update.cpp", 1352, 0, "%s", "orient");
     if (!FX_GetBoneOrientation_IsDObjEntityValid(localClientNum, dobjHandle))

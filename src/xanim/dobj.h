@@ -17,6 +17,9 @@ struct XModel;
 
 #define NO_BONEINDEX 255
 
+#define CLIENT_DOBJ_HANDLE_MAX (MAX_GENTITIES + 128)
+#define SERVER_DOBJ_HANDLE_MAX (MAX_GENTITIES)
+
 struct DObjTrace_s // sizeof=0x1C
 {                                       // ...
     float fraction;                     // ...

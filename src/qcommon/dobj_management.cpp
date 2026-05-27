@@ -4,10 +4,7 @@
 #include <xanim/dobj.h>
 #include <win32/win_local.h>
 
-#define CLIENT_DOBJ_HANDLE_MAX (MAX_GENTITIES + 128)
-#define SERVER_DOBJ_HANDLE_MAX (MAX_GENTITIES)
-
-#define DOBJ_HANDLE_MAX 2048
+#define DOBJ_HANDLE_MAX (MAX_GENTITIES - 128) // 2048
 
 static DObj_s objBuf[DOBJ_HANDLE_MAX];
 static bool objAlloced[DOBJ_HANDLE_MAX];
@@ -97,7 +94,7 @@ DObj_s *__cdecl Com_ClientDObjCreate(
     uint32_t index; // [esp+0h] [ebp-4h]
 
     iassert(dobjModels);
-    iassert(((unsigned)handle < (((1 << 10)) + 128)));
+    iassert(((unsigned)handle < CLIENT_DOBJ_HANDLE_MAX));
     iassert(!Com_GetClientDObj(handle, localClientNum));
     index = Com_GetFreeDObjIndex();
     iassert((unsigned)handle < CLIENT_DOBJ_HANDLE_MAX);
