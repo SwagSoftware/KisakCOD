@@ -27,6 +27,9 @@
 #include "actor_corpse.h"
 #include <universal/profile.h>
 #include <qcommon/cmd.h>
+#include <client/client.h>
+#include <qcommon/qcommon.h>
+#include <server/sv_world.h>
 
 const char *g_helicopterYawAltitudeControlsNames[4] =
 {
@@ -2180,7 +2183,7 @@ void __cdecl G_SightTrace(int *hitNum, const float *start, const float *end, int
 
 void __cdecl G_AddDebugString(const float *xyz, const float *color, double scale, const char *pszText)
 {
-    CL_AddDebugString(xyz, color, scale, pszText, 0, 1);
+    CL_AddDebugString(xyz, color, scale, pszText, 1, 1);
 }
 
 void __cdecl G_AddDebugStringWithDuration(
@@ -2196,118 +2199,87 @@ void __cdecl G_AddDebugStringWithDuration(
 static int lastEntTime;
 void __cdecl ShowEntityInfo()
 {
-    // KISAKTODO: broken sv_trace
-#if 0
-    int integer; // r11
-    int v1; // r30
-    int num_entities; // r10
-    entityShared_t *p_r; // r31
-    int hitnum; // r11
-    float client; // r11
-    void(__cdecl * v6)(gentity_s *, float *); // r11
-    int visBonePos; // r11
-    int v8; // r31
-    int EntityHitId; // r4
-    int time; // r10
-    int v11; // r11
-    int v12; // r9
-    gentity_s *v13; // r31
-    void(__cdecl * entinfo)(gentity_s *, float *); // r11
-    unsigned __int8 *v15; // [sp+8h] [-F8h]
-    int v16; // [sp+Ch] [-F4h]
-    float v17[4]; // [sp+60h] [-A0h] BYREF
-    float v18[4]; // [sp+70h] [-90h] BYREF
-    float v19[4]; // [sp+80h] [-80h] BYREF
-    IgnoreEntParams v20; // [sp+90h] [-70h] BYREF
-    trace_t v21[2]; // [sp+A0h] [-60h] BYREF
+    int mode;
+    int filter;
+    int contentmask;
+    int hitEntNum;
+    int selectedEnt;
+    int now;
+    int recentTime;
+    gentity_s *ent;
+    void(__cdecl * entinfo)(gentity_s *, float *);
+    float viewPos[3]; // BYREF
+    float viewFwd[3]; // BYREF
+    float endPos[3]; // BYREF
+    IgnoreEntParams ignoreEntParams; // BYREF
+    trace_t trace; // BYREF
+    int32_t i;
 
-    if (g_entinfo->current.integer)
+    if (!g_entinfo->current.integer)
+        return;
+
+    CL_GetViewPos(viewPos);
+    mode = g_entinfo->current.integer;
+    if (mode == 2 || mode == 3 || mode == 5)
     {
-        CL_GetViewPos(v17);
-        integer = g_entinfo->current.integer;
-        if (integer == 2 || integer == 3 || integer == 5)
+        CL_GetViewForward(viewFwd);
+        endPos[0] = viewFwd[0] * 16000.0f + viewPos[0];
+        endPos[1] = viewFwd[1] * 16000.0f + viewPos[1];
+        endPos[2] = viewFwd[2] * 16000.0f + viewPos[2];
+
+        filter = g_entinfo_type->current.integer;
+        if (filter == 1)
+            contentmask = 0x4000;             // AI only -> CONTENTS_BODY
+        else if (filter == 2)
+            contentmask = 0x800000;           // vehicle only -> CONTENTS_VEHICLE
+        else
+            contentmask = 0x806080;           // default: BODY | VEHICLE | extras
+
+        SV_SetupIgnoreEntParams(&ignoreEntParams, 0);
+        SV_Trace(&trace, viewPos, (float *)vec3_origin, (float *)vec3_origin, endPos,
+                 &ignoreEntParams, contentmask, 0, NULL, 0);
+
+        hitEntNum = Trace_GetEntityHitId(&trace);
+        now = level.time;
+        if (entityHandlers[g_entities[hitEntNum].handler].entinfo)
         {
-            CL_GetViewForward(v18);
-            v19[0] = (float)(v18[0] * (float)16000.0) + v17[0];
-            v19[1] = (float)(v18[1] * (float)16000.0) + v17[1];
-            v19[2] = (float)(v18[2] * (float)16000.0) + v17[2];
-            visBonePos = g_entinfo_type->current.integer;
-            if (visBonePos == 1)
-            {
-                v8 = 0x4000;
-            }
-            else
-            {
-                v8 = 0x800000;
-                if (visBonePos != 2)
-                    v8 = 8413312;
-            }
-            SV_SetupIgnoreEntParams(&v20, 0);
-            SV_Trace(v21, v17, (float*)vec3_origin, (float *)vec3_origin, v19, &v20, v8, 0, v15, v16);
-            EntityHitId = Trace_GetEntityHitId(v21);
-            if (entityHandlers[g_entities[EntityHitId].handler].entinfo)
-            {
-                Dvar_SetInt(ai_debugEntIndex, EntityHitId);
-                time = level.time;
-                v11 = level.time;
-                lastEntTime = level.time;
-            }
-            else
-            {
-                v11 = lastEntTime;
-                time = level.time;
-            }
-            v12 = ai_debugEntIndex->current.integer;
-            if (v12 != -1 && v11 + 30000 > time)
-            {
-                v13 = &g_entities[v12];
-                if (v13->actor && ai_debugCoverEntityNum->current.integer > 0)
-                    Dvar_SetInt(ai_debugCoverEntityNum, v13->s.number);
-                entinfo = entityHandlers[v13->handler].entinfo;
-                if (entinfo)
-                    entinfo(v13, v17);
-            }
+            Dvar_SetInt(ai_debugEntIndex, hitEntNum);
+            recentTime = now;
+            lastEntTime = now;
         }
         else
         {
-            v1 = 0;
-            num_entities = level.num_entities;
-            if (level.num_entities > 0)
-            {
-                p_r = &g_entities[0].r;
-                do
-                {
-                    if (!p_r->inuse || !p_r->linked)
-                        goto LABEL_16;
-                    hitnum = g_entinfo_type->current.integer;
-                    if (hitnum == 1)
-                    {
-                        client = *(float *)&p_r[1].inuse;
-                    }
-                    else
-                    {
-                        if (hitnum != 2)
-                            goto LABEL_14;
-                        client = p_r[1].mins[1];
-                    }
-                    if (client != 0.0)
-                    {
-                    LABEL_14:
-                        v6 = entityHandlers[BYTE2(p_r[1].maxs[1])].entinfo;
-                        if (v6)
-                        {
-                            v6((gentity_s *)p_r[-2].maxs, v17);
-                            num_entities = level.num_entities;
-                        }
-                    }
-                LABEL_16:
-                    ++v1;
-                    p_r = (entityShared_t *)((char *)p_r + 628);
-                } while (v1 < num_entities);
-            }
+            recentTime = lastEntTime;
+        }
+
+        selectedEnt = ai_debugEntIndex->current.integer;
+        if (selectedEnt != -1 && recentTime + 30000 > now)
+        {
+            ent = &g_entities[selectedEnt];
+            if (ent->actor && ai_debugCoverEntityNum->current.integer > 0)
+                Dvar_SetInt(ai_debugCoverEntityNum, ent->s.number);
+            entinfo = entityHandlers[ent->handler].entinfo;
+            if (entinfo)
+                entinfo(ent, viewPos);
         }
     }
-#endif
+    else
+    {
+        filter = g_entinfo_type->current.integer;
+        for (i = 0; i < level.num_entities; ++i)
+        {
+            ent = &g_entities[i];
+            if (!ent->r.inuse || !ent->r.linked)
+                continue;
+            if (filter == 1 && !ent->actor)
+                continue;
+            if (filter == 2 && !ent->scr_vehicle)
+                continue;
+            entinfo = entityHandlers[ent->handler].entinfo;
+            if (entinfo)
+                entinfo(ent, viewPos);
+        }
+    }
 }
 
 int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)

@@ -773,23 +773,25 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
 {
     bool adsRequested; // [esp+2h] [ebp-Eh]
     bool adsAllowed; // [esp+3h] [ebp-Dh]
-    int weapIndex; // [esp+4h] [ebp-Ch]
-    WeaponDef *weapDef; // [esp+Ch] [ebp-4h]
 
     playerState_s* ps = pm->ps; // [esp+8h] [ebp-8h]
     iassert(ps);
 
-    weapIndex = BG_GetViewmodelWeaponIndex(ps);
-    weapDef = BG_GetWeaponDef(weapIndex);
+#ifdef KISAK_MP
+    int weapIndex = BG_GetViewmodelWeaponIndex(ps);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+#endif
     ps->pm_flags &= ~PMF_SIGHT_AIMING;
     adsAllowed = PM_IsAdsAllowed(ps, pml);
     adsRequested = (pm->cmd.buttons & 0x800) != 0;
+#ifdef KISAK_MP
     if ((pm->cmd.buttons & 2) != 0
         && (weapDef->overlayReticle == WEAPOVERLAYRETICLE_NONE || (pm->cmd.buttons & 0x2000) == 0))
     {
         PM_ExitAimDownSight(ps);
         adsAllowed = 0;
     }
+#endif
     if (adsRequested && adsAllowed)
     {
         if ((ps->pm_flags & PMF_PRONE) == 0 || BG_UsingSniperScope(ps))

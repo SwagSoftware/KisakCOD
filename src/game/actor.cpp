@@ -3247,7 +3247,6 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
     gentity_s *v47; // r3
     const float *v48; // r4
     aiGoalSources codeGoalSrc; // r11
-    double v50; // fp0
     pathnode_t *pDesiredChainPos; // r11
     const float *v55; // r5
     const float *v57; // r29
@@ -3300,11 +3299,11 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
     //float v107; // [sp+60h] [-190h] BYREF // vDebugTargetPosition
     //float v108; // [sp+64h] [-18Ch]
     //float v109; // [sp+68h] [-188h]
-    float timingColor[3];
+    float timingColor[4];
     //float v110; // [sp+70h] [-180h] BYREF
     //float v111; // [sp+74h] [-17Ch]
     //float v112; // [sp+78h] [-178h]
-    float v113; // [sp+7Ch] [-174h]
+    //float v113; // [sp+7Ch] [-174h]
     float forward[3];
     //float v114; // [sp+80h] [-170h] BYREF // forward
     //float v115; // [sp+84h] [-16Ch]
@@ -3495,7 +3494,7 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
         goto LABEL_80;
     }
 
-    v113 = 1.0;
+    timingColor[3] = 1.0;
     if (level.time <= endTime)
     {
         if (endTime - level.time > 1000)
@@ -3561,14 +3560,14 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
             timingColor[0] = colorBlue[0];
             timingColor[1] = 0.0;
             timingColor[2] = 1.0;
-            v50 = 1.0;
+            timingColor[3] = 1.0;
         }
         else if (codeGoalSrc == AI_GOAL_SRC_FRIENDLY_CHAIN)
         {
             timingColor[0] = colorGreen[0];
             timingColor[1] = 1.0;
             timingColor[2] = 0.0;
-            v50 = 1.0;
+            timingColor[3] = 1.0;
         }
         else
         {
@@ -3584,9 +3583,8 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
                 timingColor[1] = 0.0;
                 timingColor[2] = 0.0;
             }
-            v50 = 1.0;
+            timingColor[3] = 1.0;
         }
-        v113 = v50;
         G_DebugCircle(pos, actor->codeGoal.radius, timingColor, 0, 1, 0);
     }
 
