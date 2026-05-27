@@ -1331,14 +1331,10 @@ void __cdecl G_ProcessCommandNotifies()
 
 void __cdecl PlayerCmd_notifyOnCommand(scr_entref_t entref)
 {
-    const char *String; // r31
-    const char *v2; // r3
-
     if (Scr_GetNumParam() != 2)
         Scr_Error("USAGE: <player> notifyOnCommand( <notify>, <command> )\n");
-    String = Scr_GetString(0);
-    v2 = Scr_GetString(1);
-    Cmd_RegisterNotification(v2, String);
+
+    Cmd_RegisterNotification(Scr_GetString(1), Scr_GetString(0));
 }
 
 void __cdecl PlayerCmd_playerADS(scr_entref_t entref)

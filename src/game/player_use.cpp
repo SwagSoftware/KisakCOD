@@ -491,30 +491,30 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
             {
                 v12 = SL_ConvertToString(scr_vehicle->lookAtText0);
                 v13 = va("%s", v12);
-                SV_SetConfigstring(9, v13);
+                SV_SetConfigstring(CS_FRIEND_OVERLAY, v13);
                 lookAtText1 = v2->scr_vehicle->lookAtText1;
                 goto LABEL_12;
             }
             v9 = "none";
         LABEL_19:
-            v10 = 9;
+            v10 = CS_FRIEND_OVERLAY;
             goto LABEL_20;
         }
         if (v2->lookAtText0)
         {
             v15 = SL_ConvertToString(v2->lookAtText0);
             v16 = va("%s", v15);
-            SV_SetConfigstring(9, v16);
+            SV_SetConfigstring(CS_FRIEND_OVERLAY, v16);
             lookAtText1 = v2->lookAtText1;
         LABEL_12:
             if (lookAtText1)
             {
                 v9 = SL_ConvertToString(lookAtText1);
-                v10 = 10;
+                v10 = CS_FRIEND_OVERLAY_LAST;
             }
             else
             {
-                v10 = 10;
+                v10 = CS_FRIEND_OVERLAY_LAST;
                 v9 = "none";
             }
             goto LABEL_20;
@@ -525,14 +525,14 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
     }
     v4 = SL_ConvertToString(actor->properName);
     v5 = va("%s", v4);
-    SV_SetConfigstring(9, v5);
+    SV_SetConfigstring(CS_FRIEND_OVERLAY, v5);
     if (!ent->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 455, 0, "%s", "ent->client");
     v6 = SL_ConvertToString(v2->actor->weaponName);
     WeaponIndexForName = G_GetWeaponIndexForName(v6);
     WeaponDef = BG_GetWeaponDef(WeaponIndexForName);
     v9 = va("%s", WeaponDef->szOverlayName);
-    v10 = 10;
+    v10 = CS_FRIEND_OVERLAY_LAST;
 LABEL_20:
     SV_SetConfigstring(v10, v9);
 }

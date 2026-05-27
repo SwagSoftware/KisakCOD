@@ -449,32 +449,31 @@ void __cdecl HudElem_GetGlowAlpha(game_hudelem_s *hud, int32_t offset)
 
 void __cdecl HudElem_SetFontScale(game_hudelem_s *hud, int32_t offset)
 {
-    const char *v2; // eax
-    const char *v3; // eax
-    const char *v4; // eax
     float scale; // [esp+10h] [ebp-4h]
-
+    
     if (fields_0[offset].ofs != 20)
         MyAssertHandler(".\\game\\g_hudelem.cpp", 585, 0, "%s", "fields[offset].ofs == HEOFS( elem.fontScale )");
+
     scale = Scr_GetFloat(0);
     if (scale <= 0.0)
     {
-        v2 = va("font scale was %g; should be > 0", scale);
-        Scr_Error(v2);
+        Scr_Error(va("font scale was %g; should be > 0", scale));
     }
-    if (scale >= 1.399999976158142)
+
+#ifdef KISAK_MP
+    if (scale >= 1.4)
     {
-        if (scale > 4.599999904632568)
+        if (scale > 4.6)
         {
-            v4 = va("font scale %f is above the expected maximum %f", scale, 4.599999904632568);
-            Scr_Error(v4);
+            Scr_Error(va("font scale %f is above the expected maximum %f", scale, 4.6));
         }
     }
     else
     {
-        v3 = va("font scale %f is below the expected minimum %f", scale, 1.399999976158142);
-        Scr_Error(v3);
+        Scr_Error(va("font scale %f is below the expected minimum %f", scale, 1.4));
     }
+#endif
+
     hud->elem.fontScale = scale;
 }
 
@@ -745,10 +744,12 @@ void __cdecl HECmd_ClearAllTextAfterHudElem(scr_entref_t entref)
     game_hudelem_s *hud; // [esp+4h] [ebp-4h]
 
     hud = HECmd_GetHudElem(entref);
+
     if (!hud->elem.text)
         Scr_Error("Hud elem doesn't reference any text.  Make sure to call setText before using clearAllTextAfterHudElem.");
+
     for (configStringIndex = hud->elem.text + 1; configStringIndex < 512; ++configStringIndex)
-        SV_SetConfigstring(configStringIndex + 309, (char *)"");
+        SV_SetConfigstring(CS_LOCALIZED_STRINGS + configStringIndex, (char *)"");
 }
 
 void __cdecl HECmd_SetMaterial(scr_entref_t entref)

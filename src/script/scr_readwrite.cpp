@@ -1353,7 +1353,14 @@ void __cdecl Scr_LoadSource(MemoryFile *memFile, void *fileHandle)
     MemFile_ReadData(memFile, 1, (unsigned char*)&scrVarPub.developer_script);
     if (v12)
     {
-        ReadFromDevice(&scrParserGlob.saveSourceBufferLookupLen, 4, fileHandle);
+        const int bytesRead = ReadFromDevice(
+            &scrParserGlob.saveSourceBufferLookupLen, 4, fileHandle);
+        if (bytesRead != 4 || scrParserGlob.saveSourceBufferLookupLen == 0)
+        {
+            scrParserGlob.saveSourceBufferLookupLen = 0;
+            scrParserGlob.saveSourceBufferLookup = 0;
+            return;
+        }
         saveSourceBufferLookup = (SaveSourceBufferInfo *)Hunk_AllocDebugMem(
             8 * scrParserGlob.saveSourceBufferLookupLen,
             "Scr_LoadSource");
@@ -1402,7 +1409,10 @@ void __cdecl Scr_SkipSource(MemoryFile *memFile, void *fileHandle)
     {
         if (fileHandle)
         {
-            ReadFromDevice(&v6, 4, fileHandle);
+            v6 = 0;
+            const int bytesRead = ReadFromDevice(&v6, 4, fileHandle);
+            if (bytesRead != 4 || v6 <= 0)
+                return;
             for (i = v6 - 1; i >= 0; --i)
             {
                 ReadFromDevice(v7, 4, fileHandle);

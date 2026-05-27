@@ -859,7 +859,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionRemoveSound);
                 return;
 #ifdef KISAK_SP
-                // KISAKTODO: Rumbling
+                // KISAKTODO: Rumbling (This also requires re-adding the CS_RUMBLES inside enum 'ConstStringOffsets'(SP)
             case EV_PLAY_RUMBLE_ON_ENT:
                 //v109 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
                 //CG_PlayRumbleOnEntity(localClientNum, v109, clientNum);
@@ -1321,8 +1321,8 @@ void __cdecl CG_PlayFxOnTag(int32_t localClientNum, centity_s *cent, int32_t eve
     int32_t fxId; // [esp+14h] [ebp-8h]
     int32_t csIndex; // [esp+18h] [ebp-4h]
 
-    csIndex = eventParm + 1698;
-    tagAndEffect = CL_GetConfigString(localClientNum, eventParm + 1698); // KISAKTODO: CS_ offset with sub-offset
+    csIndex = CS_EFFECT_TAGS + eventParm;
+    tagAndEffect = CL_GetConfigString(localClientNum, csIndex);
 
     iassert(tagAndEffect[0]);
     iassert(tagAndEffect[1]);

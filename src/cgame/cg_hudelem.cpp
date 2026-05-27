@@ -674,7 +674,7 @@ void __cdecl SafeTranslateHudElemString(int32_t localClientNum, int32_t index, c
 
     if (index)
     {
-        CG_TranslateHudElemMessage(localClientNum, CL_GetConfigString(localClientNum, index + 309), "hudelem string", hudElemString);
+        CG_TranslateHudElemMessage(localClientNum, CL_GetConfigString(localClientNum, CS_LOCALIZED_STRINGS + index), "hudelem string", hudElemString);
     }
 }
 

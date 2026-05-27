@@ -1008,7 +1008,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     ProfLoad_Begin("Register server models");
     for (i = 1; i < 512; ++i)
     {
-        ConfigString = CL_GetConfigString(localClientNum, i + 1123); // CS_MODELS (PC SP, was Xbox 1155)
+        ConfigString = CL_GetConfigString(localClientNum, i + CS_MODELS);
         if (!*ConfigString)
             break;
         CG_DrawInformation(localClientNum);
@@ -1022,7 +1022,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     v7 = &cgsArray[0].fxs[1];
     do
     {
-        v8 = CL_GetConfigString(localClientNum, v6 + 2147); // CS_EFFECT_NAMES (PC SP, was Xbox 2179)
+        v8 = CL_GetConfigString(localClientNum, v6 + CS_EFFECT_NAMES);
         if (!*v8)
             break;
         v9 = FX_Register(v8);
@@ -1036,7 +1036,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     ProfLoad_Begin("Register shellshocks");
     for (j = 1; j < 16; ++j)
     {
-        v11 = CL_GetConfigString(localClientNum, j + 2503); // CS_SHELLSHOCKS (PC SP, was Xbox 2535)
+        v11 = CL_GetConfigString(localClientNum, j + CS_SHELLSHOCKS);
         v12 = v11;
         if (!*v11)
             break;
@@ -1060,7 +1060,7 @@ void __cdecl CG_RegisterGraphics(int localClientNum, const char *mapname)
     cgMedia.fxKnifeBlood = FX_Register("impacts/flesh_hit_knife");
     cgMedia.fxKnifeNoBlood = FX_Register("impacts/flesh_hit_knife_noblood");
     ProfLoad_End();
-    if (*CL_GetConfigString(localClientNum, CS_NIGHTVISION) == 49)
+    if (*CL_GetConfigString(localClientNum, CS_NIGHTVISION) == '1')
     {
         ProfLoad_Begin("Register night vision assets");
         cgMedia.nightVisionOverlay = Material_RegisterHandle("nightvision_overlay_goggles", 7);
@@ -1082,7 +1082,7 @@ void __cdecl CG_StartAmbient(int localClientNum)
     const char *v8; // r11
     const snd_alias_t *v10; // r3
 
-    ConfigString = CL_GetConfigString(localClientNum, 0x45Au);
+    ConfigString = CL_GetConfigString(localClientNum, CS_AMBIENT);
     v3 = Info_ValueForKey(ConfigString, "n");
     v4 = Info_ValueForKey(ConfigString, "t");
     if (localClientNum)
@@ -1406,7 +1406,6 @@ void __cdecl CL_LoadSoundAliases(const char *loadspec)
 
 void __cdecl CG_Init(int localClientNum, int savegame)
 {
-    const char *ConfigString; // r11
     const char *v5; // r10
     int v6; // r8
     int i; // r31
@@ -1463,8 +1462,7 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     CG_InitConsoleCommands();
     CG_InitViewDimensions(localClientNum);
 
-    ConfigString = CL_GetConfigString(localClientNum, 2u);
-    if (strcmp(ConfigString, "cod-sp"))
+    if (strcmp(CL_GetConfigString(localClientNum, CS_GAME_VERSION), "cod-sp"))
         Com_Error(ERR_DROP, "Client/Server game mismatch");
 
     ProfLoad_Begin("Parse server info");

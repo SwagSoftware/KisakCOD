@@ -13,12 +13,16 @@
 #include "cg_main.h"
 #endif
 
-const float sign[4][2] =
+const float sign[8][2] =
 {
-    { -1.0f, -1.0f },
-    { 1.0f, -1.0f },
-    { 1.0f, 1.0f },
-    {-1.0f, 1.0f }
+  { -1.0, -1.0 },
+  { 1.0, -1.0 },
+  { 1.0, 1.0 },
+  { -1.0, 1.0 },
+  { 1.0, -1.0 },
+  { 1.0, 1.0 },
+  { -1.0, 1.0 },
+  { -1.0, -1.0 }
 };
 
 float color_0[4];
@@ -305,7 +309,7 @@ void __cdecl CG_MiniMapChanged(int32_t localClientNum)
     float lowerRight[2]; // [esp+28h] [ebp-8h]
     cg_s *cgameGlob;
 
-    string = CL_GetConfigString(localClientNum, 0x337u);
+    string = CL_GetConfigString(localClientNum, CS_MINIMAP);
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     material = (const char*)Com_Parse(&string);
     cgameGlob->compassMapMaterial = Material_RegisterHandle((char*)material, 7);
@@ -337,7 +341,7 @@ void __cdecl CG_NorthDirectionChanged(int32_t localClientNum)
     const char *pszString; // [esp+10h] [ebp-4h]
     cg_s *cgameGlob;
 
-    pszString = CL_GetConfigString(localClientNum, 0x336u);
+    pszString = CL_GetConfigString(localClientNum, CS_NORTHYAW);
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     cgameGlob->compassNorthYaw = atof(pszString);
     v1 = cgameGlob->compassNorthYaw * 0.01745329238474369;

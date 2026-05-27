@@ -1632,30 +1632,28 @@ void __cdecl G_ClearAllConfigstrings()
     int ii; // r30
     int jj; // r30
 
-    // PC SP configstring layout (see client.h ConstStringOffsets) — each
-    // base shifted down by 32 vs Xbox CoD3-SP because CS_RUMBLES (32 entries)
-    // doesn't exist on PC SP. Sound aliases already moved 1667 -> 1635 in a
-    // prior sweep; here we finish the other buckets.
     for (i = 0; i < 100; ++i)
-        SV_SetConfigstring(i + 2147, "");   // CS_EFFECT_NAMES        (was Xbox 2179)
+        SV_SetConfigstring(i + CS_EFFECT_NAMES, "");
     for (j = 0; j < 256; ++j)
-        SV_SetConfigstring(j + 2247, "");   // CS_EFFECT_TAGS         (was Xbox 2279)
+        SV_SetConfigstring(j + CS_EFFECT_TAGS, "");
     for (k = 0; k < 512; ++k)
-        SV_SetConfigstring(k + 1635, "");   // CS_SOUNDALIASES        (already shifted)
+        SV_SetConfigstring(k + CS_SOUNDALIASES, "");
     for (m = 0; m < 128; ++m)
-        SV_SetConfigstring(m + 2551, "");   // CS_SERVER_MATERIALS    (was Xbox 2583)
+        SV_SetConfigstring(m + CS_SERVER_MATERIALS, "");
     for (n = 0; n < 1023; ++n)
-        SV_SetConfigstring(n + 91, "");     // CS_LOCALIZED_STRINGS   (unchanged, <1114)
-    SV_SetConfigstring(1114, "");           // CS_AMBIENT             (unchanged)
+        SV_SetConfigstring(n + CS_LOCALIZED_STRINGS, "");
+
+    SV_SetConfigstring(CS_AMBIENT, "");
+
     for (ii = 0; ii < 16; ++ii)
-        SV_SetConfigstring(ii + 11, "");    // CS_OBJECTIVES          (unchanged, <1114)
-    SV_SetConfigstring(6, "");              // CS_CULLDIST
-    SV_SetConfigstring(7, "");              // CS_SUNLIGHT
-    SV_SetConfigstring(8, "");              // CS_SUNDIR
-    SV_SetConfigstring(1116, "");           // CS_MINIMAP             (was Xbox 1148)
-    SV_SetConfigstring(1119, "");           // CS_NIGHTVISION         (was Xbox 1151)
+        SV_SetConfigstring(ii + CS_OBJECTIVES, "");
+    SV_SetConfigstring(CS_CULLDIST, "");
+    SV_SetConfigstring(CS_SUNLIGHT, "");
+    SV_SetConfigstring(CS_SUNDIR, "");
+    SV_SetConfigstring(CS_MINIMAP, "");
+    SV_SetConfigstring(CS_NIGHTVISION, "");
     for (jj = 0; jj < 32; ++jj)
-        SV_SetConfigstring(jj + 27, "");    // CS_TARGETS             (unchanged, <1114)
+        SV_SetConfigstring(jj + CS_TARGETS, "");
 }
 
 void __cdecl G_SaveInitConfigstrings(SaveGame *save)

@@ -1200,6 +1200,9 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
         {
             cmd_args.localClientNum[cmd_args.nesting] = localClientNum;
             cmd_args.controllerIndex[cmd_args.nesting] = controllerIndex;
+#ifdef KISAK_SP
+            Cmd_CheckNotify();
+#endif
             arg0 = Cmd_Argv(0);
             for (itr = cmd_functions; itr->next; itr = itr->next)
             {
@@ -1225,7 +1228,19 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
                     break;
                 }
             }
-            if (I_strnicmp(text, "pb_", 3))
+
+            //if (!I_strnicmp(text, "pb_", 3))
+            //{
+            //    if (I_strnicmp(text + 3, "sv_", 3))
+            //    {
+            //        PbClAddEvent(14, strlen(text) + 1, text);
+            //    }
+            //    else
+            //    {
+            //        PbSvAddEvent(14, -1, strlen(text) + 1, text);
+            //    }
+            //}
+            //else
             {
                 if (!Dvar_Command() && (!com_sv_running || !com_sv_running->current.enabled || !SV_GameCommand()))
                 {
@@ -1234,14 +1249,7 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
                     return;
                 }
             }
-            else if (I_strnicmp(text + 3, "sv_", 3))
-            {
-                //PbClAddEvent(14, strlen(text) + 1, text);
-            }
-            else
-            {
-                //PbSvAddEvent(14, -1, strlen(text) + 1, text);
-            }
+
         }
     LABEL_26:
         Cmd_EndTokenizedString();
@@ -1355,210 +1363,107 @@ void __cdecl SV_Cmd_ArgvBuffer(int32_t  arg, char *buffer, int32_t  bufferLength
 
 struct CmdScriptNotify
 {
-    uint16_t command;
-    uint16_t notify;
+    uint16_t command;   // SL stringID, lowercased
+    uint16_t notify;    // SL stringID, raw
 };
 
-int dword_8359AD3C;
-CmdScriptNotify cmd_notify[64]{ 0 };
+constexpr int CMD_NOTIFY_MAX = 64;
+
+CmdScriptNotify cmd_notify[CMD_NOTIFY_MAX]{ 0 };
+int cmd_notifyCount = 0;
 
 void Cmd_RegisterNotification(const char *commandString, const char *notifyString)
 {
-    uint32_t LowercaseString; // r30
-    uint32_t String; // r3
-    uint32_t v5; // r26
-    uint32_t v6; // r9
-    int v7; // r11
-    uint16_t *p_notify; // r10
+    uint32_t commandID = SL_GetLowercaseString(commandString, 0);
+    uint32_t notifyID  = SL_GetString(notifyString, 0);
 
-    LowercaseString = SL_GetLowercaseString(commandString, 0);
-    String = SL_GetString(notifyString, 0);
-    v5 = String;
-    v6 = 0;
-    v7 = dword_8359AD3C;
-    if (dword_8359AD3C)
+    // Already registered? Drop the extra refs and bail.
+    for (int i = 0; i < cmd_notifyCount; ++i)
     {
-        p_notify = &cmd_notify[0].notify;
-        while (*(p_notify - 1) != LowercaseString || *p_notify != String)
+        if (cmd_notify[i].command == commandID && cmd_notify[i].notify == notifyID)
         {
-            ++v6;
-            p_notify += 2;
-            if (v6 >= dword_8359AD3C)
-                goto LABEL_6;
+            SL_RemoveRefToString(commandID);
+            SL_RemoveRefToString(notifyID);
+            return;
         }
-        SL_RemoveRefToString(LowercaseString);
-        SL_RemoveRefToString(v5);
     }
-    else
-    {
-    LABEL_6:
-        if (dword_8359AD3C == 64)
-        {
-            Scr_Error(va("Cannot currently register more than %i commands\n", 64));
-            v7 = dword_8359AD3C;
-        }
 
-        if (LowercaseString != (uint16_t)LowercaseString)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                LowercaseString,
-                (uint16_t)LowercaseString);
-            v7 = dword_8359AD3C;
-        }
-        cmd_notify[v7].command = LowercaseString;
-        if (v5 != (uint16_t)v5)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
-                281,
-                0,
-                "i == static_cast< Type >( i )\n\t%i, %i",
-                v5,
-                (uint16_t)v5);
-            v7 = dword_8359AD3C;
-        }
-        cmd_notify[v7].notify = v5;
-        dword_8359AD3C = v7 + 1;
+    if (cmd_notifyCount >= CMD_NOTIFY_MAX)
+    {
+        Scr_Error(va("Cannot currently register more than %i commands\n", CMD_NOTIFY_MAX));
+        return;
     }
+
+    iassert(commandID == (uint16_t)commandID);
+    iassert(notifyID  == (uint16_t)notifyID);
+
+    cmd_notify[cmd_notifyCount].command = (uint16_t)commandID;
+    cmd_notify[cmd_notifyCount].notify  = (uint16_t)notifyID;
+    ++cmd_notifyCount;
 }
+
 void Cmd_CheckNotify()
 {
-    const char *v0; // r3
-    uint32_t LowercaseString; // r28
-    uint32_t v2; // r11
-    uint32_t v3; // r30
-    uint16_t *p_notify; // r31
-
     iassert(Sys_IsMainThread());
 
-    if (dword_8359AD3C)
+    if (cmd_notifyCount == 0)
+        return;
+    if (cl_paused->current.integer)
+        return;
+
+    uint32_t commandID = SL_FindLowercaseString(Cmd_Argv(0));
+
+    if (!commandID)
+        return;
+
+    for (int i = 0; i < cmd_notifyCount; ++i)
     {
-        if (!cl_paused->current.integer)
-        {
-            v0 = Cmd_Argv(0);
-            LowercaseString = SL_FindLowercaseString(v0);
-            if (LowercaseString)
-            {
-                v2 = dword_8359AD3C;
-                v3 = 0;
-                if (dword_8359AD3C)
-                {
-                    p_notify = &cmd_notify[0].notify;
-                    do
-                    {
-                        if (LowercaseString == *(p_notify - 1))
-                        {
-                            G_AddCommandNotify(*p_notify);
-                            v2 = dword_8359AD3C;
-                        }
-                        ++v3;
-                        p_notify += 2;
-                    } while (v3 < v2);
-                }
-            }
-        }
+        if (cmd_notify[i].command == commandID)
+            G_AddCommandNotify(cmd_notify[i].notify);
     }
 }
+
 void Cmd_LoadNotifications(MemoryFile *memFile)
 {
-    int v2; // r24
-    int v3; // r26
-    uint16_t *p_notify; // r30
-    const char *CString; // r3
-    uint32_t String; // r7
-    uint16_t v7; // r31
-    const char *v8; // r3
-    uint32_t v9; // r7
-    uint16_t v10; // r31
-    int v11; // [sp+50h] [-50h] BYREF
+    int count = 0;
 
-    dword_8359AD3C = 0;
-    MemFile_ReadData(memFile, 4, (unsigned char*)&v11);
-    v2 = v11;
-    if (v11)
+    cmd_notifyCount = 0;
+    MemFile_ReadData(memFile, 4, (unsigned char *)&count);
+
+    for (int i = 0; i < count; ++i)
     {
-        v3 = v11;
-        p_notify = &cmd_notify[0].notify;
-        do
-        {
-            CString = MemFile_ReadCString(memFile);
-            String = SL_GetString(CString, 0);
-            v7 = String;
-            if (String != (uint16_t)String)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
-                    281,
-                    0,
-                    "i == static_cast< Type >( i )\n\t%i, %i",
-                    String,
-                    (uint16_t)String);
-            *(p_notify - 1) = v7;
-            v8 = MemFile_ReadCString(memFile);
-            v9 = SL_GetString(v8, 0);
-            v10 = v9;
-            if (v9 != (uint16_t)v9)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\qcommon\\../universal/assertive.h",
-                    281,
-                    0,
-                    "i == static_cast< Type >( i )\n\t%i, %i",
-                    v9,
-                    (uint16_t)v9);
-            --v3;
-            *p_notify = v10;
-            p_notify += 2;
-        } while (v3);
+        uint32_t commandID = SL_GetString(MemFile_ReadCString(memFile), 0);
+        iassert(commandID == (uint16_t)commandID);
+        cmd_notify[i].command = (uint16_t)commandID;
+
+        uint32_t notifyID = SL_GetString(MemFile_ReadCString(memFile), 0);
+        iassert(notifyID == (uint16_t)notifyID);
+        cmd_notify[i].notify = (uint16_t)notifyID;
     }
-    dword_8359AD3C = v2;
+    cmd_notifyCount = count;
 }
+
 void Cmd_SaveNotifications(MemoryFile *memFile)
 {
-    uint32_t v2; // r30
-    uint16_t *p_notify; // r31
-    const char *v4; // r3
-    const char *v5; // r3
-    int v6; // [sp+50h] [-30h] BYREF
+    int count = cmd_notifyCount;
+    MemFile_WriteData(memFile, 4, &count);
 
-    v6 = dword_8359AD3C;
-    MemFile_WriteData(memFile, 4, &v6);
-    v2 = 0;
-    if (dword_8359AD3C)
+    for (int i = 0; i < cmd_notifyCount; ++i)
     {
-        p_notify = &cmd_notify[0].notify;
-        do
-        {
-            v4 = SL_ConvertToString(*(p_notify - 1));
-            MemFile_WriteCString(memFile, v4);
-            v5 = SL_ConvertToString(*p_notify);
-            MemFile_WriteCString(memFile, v5);
-            ++v2;
-            p_notify += 2;
-        } while (v2 < dword_8359AD3C);
+        MemFile_WriteCString(memFile, SL_ConvertToString(cmd_notify[i].command));
+        MemFile_WriteCString(memFile, SL_ConvertToString(cmd_notify[i].notify));
     }
 }
+
 void Cmd_UnregisterAllNotifications()
 {
-    uint32_t v0; // r30
-    uint16_t *p_notify; // r31
-
     iassert(Sys_IsMainThread());
 
-    v0 = 0;
-    if (dword_8359AD3C)
+    for (int i = 0; i < cmd_notifyCount; ++i)
     {
-        p_notify = &cmd_notify[0].notify;
-        do
-        {
-            SL_RemoveRefToString(*(p_notify - 1));
-            SL_RemoveRefToString(*p_notify);
-            ++v0;
-            p_notify += 2;
-        } while (v0 < dword_8359AD3C);
+        SL_RemoveRefToString(cmd_notify[i].command);
+        SL_RemoveRefToString(cmd_notify[i].notify);
     }
-    dword_8359AD3C = 0;
+    cmd_notifyCount = 0;
 }
 #endif

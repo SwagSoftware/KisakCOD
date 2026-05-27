@@ -362,16 +362,12 @@ void __cdecl SV_SetConfigstring(unsigned int index, const char *val)
 
 void SV_SaveSystemInfo()
 {
-    const char *v0; // r3
-    const char *v1; // r3
-    char v2[0x2000]; // [sp+50h] [-2010h] BYREF
+    char str[0x2000]; // [sp+50h] [-2010h] BYREF
 
-    v0 = Dvar_InfoString_Big(8);
-    I_strncpyz(v2, v0, 0x2000);
+    I_strncpyz(str, Dvar_InfoString_Big(8), 0x2000);
     dvar_modifiedFlags &= ~8u;
-    SV_SetConfigstring(1u, v2);
-    v1 = Dvar_InfoString(0, 4);
-    SV_SetConfigstring(0, v1);
+    SV_SetConfigstring(1, str);
+    SV_SetConfigstring(0, Dvar_InfoString(0, 4));
     dvar_modifiedFlags &= ~4u;
 }
 

@@ -8,6 +8,7 @@
 #include <universal/com_files.h>
 #include <client/client.h>      // SaveHeader
 #include "../server/server.h"
+#include <script/scr_readwrite.h>   // Scr_SaveSourceImmediate
 
 // void __cdecl SaveDevice_Init(void)    8227fb88 f   savedevice_xenon.obj
 // void __cdecl SV_DisplaySaveErrorUI(void) 8227fba8 f   savedevice_xenon.obj
@@ -194,6 +195,13 @@ int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *save
 	unsigned int wroteBody = (bodySize > 0)
 		? FS_Write((const char *)data, bodySize, handle)
 		: 0;
+
+
+	SaveImmediate saveImmediate;
+	saveImmediate.f = (void *)(intptr_t)handle;
+	Scr_SaveSourceImmediate(&saveImmediate);
+	if (saveHeader->demoPlayback)
+		SV_SaveDemoImmediate(&saveImmediate);
 
 	FS_FCloseFile(handle);
 

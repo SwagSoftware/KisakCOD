@@ -702,7 +702,7 @@ void __cdecl CG_ProcessNextSnap(int localClientNum)
     viewmodelIndex = nextSnap->ps.viewmodelIndex;
     if (viewmodelIndex > 0)
     {
-        ConfigString = CL_GetConfigString(localClientNum, viewmodelIndex + 1123); // CS_MODELS (PC SP, was Xbox 1155)
+        ConfigString = CL_GetConfigString(localClientNum, viewmodelIndex + CS_MODELS);
         v13 = ConfigString;
         if (!ConfigString || !*ConfigString)
             MyAssertHandler(

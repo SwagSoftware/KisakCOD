@@ -4626,7 +4626,7 @@ int __cdecl G_GetHintStringIndex(int *piIndex, const char *pszString)
             return result;
         }
     }
-    SV_SetConfigstring(v4 + 59, pszString);
+    SV_SetConfigstring(CS_USE_TRIG_STRINGS + v4, pszString);
 LABEL_10:
     result = 1;
     *piIndex = v4;
@@ -4700,10 +4700,8 @@ void __cdecl GScr_UseTriggerRequireLookAt(scr_entref_t entref)
 
 void __cdecl G_InitObjectives()
 {
-    int i; // r31
-
-    for (i = 0; i < 16; ++i)
-        SV_SetConfigstring(i + 11, 0);
+    for (int i = 0; i < 16; ++i)
+        SV_SetConfigstring(CS_OBJECTIVES + i, 0);
 }
 
 int __cdecl PrintObjectiveUpdate(unsigned int state, const char *objectiveDesc)
@@ -4834,7 +4832,6 @@ int Scr_Objective_Add()
     unsigned int v22; // r5
     const char *v23; // r3
     const char *v24; // r3
-    const char *v25; // r3
     int v27; // [sp+50h] [-860h] BYREF
     float v28[6]; // [sp+58h] [-858h] BYREF
     char v29[1024]; // [sp+70h] [-840h] BYREF
@@ -4938,8 +4935,7 @@ int Scr_Objective_Add()
         }
     }
     SV_SetConfigstring(v3, v29);
-    v25 = va("menu_show_notify \"%i\"", 2);
-    SV_GameSendServerCommand(-1, v25);
+    SV_GameSendServerCommand(-1, va("menu_show_notify \"%i\"", 2));
     return PrintObjectiveUpdate(ConstString, v9);
 }
 
@@ -6507,7 +6503,7 @@ void GScr_PrecacheLocationSelector()
 void Scr_PrecacheNightvisionCodeAssets()
 {
     if (level.initializing)
-        SV_SetConfigstring(1119, "1"); // CS_NIGHTVISION (PC SP, was Xbox 1151)
+        SV_SetConfigstring(CS_NIGHTVISION, "1");
     else
         Scr_Error("PrecacheNightvisionCodeAssets() must be called during level initialization.\n");
 }
@@ -6545,11 +6541,7 @@ void Scr_AmbientPlay()
     const char *v2; // r3
     long double v3; // fp2
     long double v4; // fp2
-    const char *String; // r31
-    const char *v6; // r3
-    const char *v7; // r3
-    const char *v8; // r3
-    const char *v9; // r3
+    const char *name; // r31
 
     v0 = 0;
     NumParam = Scr_GetNumParam();
@@ -6565,43 +6557,35 @@ void Scr_AmbientPlay()
         v4 = floor(v3);
         v0 = (int)(float)*(double *)&v4;
     }
-    String = Scr_GetString(0);
-    if (!*String)
+    name = Scr_GetString(0);
+    if (!*name)
     {
-        v6 = va("ambientPlay: alias name cannot be the empty string... use stop or fade version\n");
-        Scr_Error(v6);
+        Scr_Error(va("ambientPlay: alias name cannot be the empty string... use stop or fade version\n"));
     }
     if (v0 < 0)
     {
-        v7 = va("ambientPlay: fade time must be >= 0\n");
-        Scr_Error(v7);
+        Scr_Error(va("ambientPlay: fade time must be >= 0\n"));
     }
-    if (!Com_FindSoundAlias(String))
+    if (!Com_FindSoundAlias(name))
     {
-        v8 = va("unknown sound alias '%s'", String);
-        Scr_ParamError(0, v8);
+        Scr_ParamError(0, va("unknown sound alias '%s'", name));
     }
-    v9 = va("n\\%s\\t\\%i", String, level.time + v0);
-    SV_SetConfigstring(1114, v9);
+    SV_SetConfigstring(CS_AMBIENT, va("n\\%s\\t\\%i", name, level.time + v0));
 }
 
 void Scr_AmbientStop()
 {
     unsigned int NumParam; // r3
-    const char *v1; // r3
     long double v2; // fp2
     long double v3; // fp2
     int v4; // r31
-    const char *v5; // r3
-    const char *v6; // r3
 
     NumParam = Scr_GetNumParam();
     if (NumParam)
     {
         if (NumParam != 1)
         {
-            v1 = va("Incorrect number of parameters\n");
-            Scr_Error(v1);
+            Scr_Error(va("Incorrect number of parameters\n"));
             return;
         }
         *(double *)&v2 = (float)((float)(Scr_GetFloat(0) * (float)1000.0) + (float)0.5);
@@ -6609,16 +6593,15 @@ void Scr_AmbientStop()
         v4 = (int)(float)*(double *)&v3;
         if (v4 < 0)
         {
-            v5 = va("ambientStop: fade time must be >= 0\n");
-            Scr_Error(v5);
+            Scr_Error(va("ambientStop: fade time must be >= 0\n"));
         }
     }
     else
     {
         v4 = 0;
     }
-    v6 = va("t\\%i", level.time + v4);
-    SV_SetConfigstring(1114, v6);
+
+    SV_SetConfigstring(CS_AMBIENT, va("t\\%i", level.time + v4));
 }
 
 void __cdecl Scr_CheckForSaveErrors(int saveId)
@@ -8167,8 +8150,6 @@ void Scr_VisionSetNaked()
     unsigned int NumParam; // r3
     long double v1; // fp2
     long double v2; // fp2
-    const char *String; // r3
-    const char *v4; // r3
     int v5; // [sp+50h] [-10h]
 
     v5 = 1000;
@@ -8184,9 +8165,7 @@ void Scr_VisionSetNaked()
         v2 = floor(v1);
         v5 = (int)(float)*(double *)&v2;
     }
-    String = Scr_GetString(0);
-    v4 = va("\"%s\" %i", String, v5);
-    SV_SetConfigstring(1117, v4); // CS_VISIONSET_NAKED (PC SP, was Xbox 1149)
+    SV_SetConfigstring(CS_VISIONSET_NAKED, va("\"%s\" %i", Scr_GetString(0), v5));
 }
 
 void Scr_VisionSetNight()
@@ -8194,8 +8173,6 @@ void Scr_VisionSetNight()
     unsigned int NumParam; // r3
     long double v1; // fp2
     long double v2; // fp2
-    const char *String; // r3
-    const char *v4; // r3
     int v5; // [sp+50h] [-10h]
 
     v5 = 1000;
@@ -8211,21 +8188,15 @@ void Scr_VisionSetNight()
         v2 = floor(v1);
         v5 = (int)(float)*(double *)&v2;
     }
-    String = Scr_GetString(0);
-    v4 = va("\"%s\" %i", String, v5);
-    SV_SetConfigstring(1118, v4); // CS_VISIONSET_NIGHT (PC SP, was Xbox 1150)
+    SV_SetConfigstring(CS_VISIONSET_NIGHT, va("\"%s\" %i", Scr_GetString(0), v5));
 }
 
 void Scr_SetCullDist()
 {
-    const char *v0; // r3
-    double Float; // [sp+18h] [-48h]
-
     if (Scr_GetNumParam() != 1)
         Scr_Error("Incorrect number of parameters\n");
-    Float = Scr_GetFloat(0);
-    v0 = va("%g", Float);
-    SV_SetConfigstring(6, v0);
+
+    SV_SetConfigstring(CS_CULLDIST, va("%g", Scr_GetFloat(0)));
 }
 
 void Scr_GetMapSunLight()
@@ -8250,14 +8221,14 @@ void Scr_SetSunLight()
     float f1 = Scr_GetFloat(1);
     float f0 = Scr_GetFloat(0);
 
-    SV_SetConfigstring(7, va("%g %g %g", f0, f1, f2));
+    SV_SetConfigstring(CS_SUNLIGHT, va("%g %g %g", f0, f1, f2));
 }
 
 void Scr_ResetSunLight()
 {
     if (Scr_GetNumParam())
         Scr_Error("Incorrect number of parameters\n");
-    SV_SetConfigstring(7, "");
+    SV_SetConfigstring(CS_SUNLIGHT, "");
 }
 
 void Scr_GetMapSunDirection()
@@ -8296,7 +8267,7 @@ void Scr_SetSunDirection()
 
     // Format and store sun direction as a config string
     const char *sunDirStr = va("%f %f %f", sunDir[0], sunDir[1], sunDir[2]);
-    SV_SetConfigstring(8, sunDirStr);
+    SV_SetConfigstring(CS_SUNDIR, sunDirStr);
 }
 
 // aislop
@@ -8362,7 +8333,7 @@ void Scr_LerpSunDirection()
         sunDirEnd[0], sunDirEnd[1], sunDirEnd[2],
         lerpBeginTime, lerpEndTime);
 
-    SV_SetConfigstring(8, configStr);
+    SV_SetConfigstring(CS_SUNDIR, configStr);
 }
 
 
@@ -8370,7 +8341,7 @@ void Scr_ResetSunDirection()
 {
     if (Scr_GetNumParam())
         Scr_Error("Incorrect number of parameters\n");
-    SV_SetConfigstring(8, "");
+    SV_SetConfigstring(CS_SUNDIR, "");
 }
 
 void Scr_BadPlace_Delete()
@@ -10158,7 +10129,7 @@ void GScr_PrecacheMenu()
     String = Scr_GetString(0);
     for (i = 0; i < 32; ++i)
     {
-        SV_GetConfigstring(i + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, v4, 1024);
+        SV_GetConfigstring(CS_SCRIPT_MENUS + i, v4, 1024);
         if (!I_stricmp(v4, String))
         {
             Com_DPrintf(23, "Script tried to precache the menu '%s' more than once\n", String);
@@ -10167,7 +10138,7 @@ void GScr_PrecacheMenu()
     }
     for (j = 0; j < 32; ++j)
     {
-        SV_GetConfigstring(j + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, v4, 1024);
+        SV_GetConfigstring(CS_SCRIPT_MENUS + j, v4, 1024);
         if (!v4[0])
             break;
     }
@@ -10176,7 +10147,7 @@ void GScr_PrecacheMenu()
         v3 = va("Too many menus precached. Max allowed menus is %i", 32);
         Scr_Error(v3);
     }
-    SV_SetConfigstring(j + 2519 /*CS_SCRIPT_MENUS, was Xbox 2551*/, String);
+    SV_SetConfigstring(CS_SCRIPT_MENUS + j, String);
 }
 
 int __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
@@ -10672,7 +10643,6 @@ void GScr_SetMiniMap()
     double v2; // fp29
     double v3; // fp28
     double v4; // fp10
-    const char *v5; // r3
 
     if (Scr_GetNumParam() != 5)
         Scr_Error("Expecting 5 arguments");
@@ -10694,8 +10664,7 @@ void GScr_SetMiniMap()
     level.compassMapUpperLeft[0] = Float;
     level.compassMapUpperLeft[1] = v1;
 
-    v5 = va("\"%s\" %f %f %f %f", mapName, Float, v1, v2, v3);
-    SV_SetConfigstring(1116, v5); // CS_MINIMAP (PC SP, was Xbox 1148)
+    SV_SetConfigstring(CS_MINIMAP, va("\"%s\" %f %f %f %f", mapName, Float, v1, v2, v3));
 }
 
 void GScr_GetArrayKeys()

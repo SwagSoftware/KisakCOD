@@ -19,6 +19,7 @@ struct snd_alias_t;
 // from CS_MODELS onward shifts down by 32 slots.
 enum ConstStringOffsets
 {
+    // 0/1 = SV_SaveSystemInfo()
     CS_GAME_VERSION           = 2,        // same as Xbox SP                  (0x2)
     CS_MESSAGE                = 3,        // same                              (0x3)
     CS_SCORES1                = 4,        // same                              (0x4)

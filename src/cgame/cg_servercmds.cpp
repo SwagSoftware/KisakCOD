@@ -55,7 +55,7 @@ void __cdecl CG_ParseCullDist(int localClientNum)
     const char *ConfigString; // r3
     long double v2; // fp2
 
-    ConfigString = CL_GetConfigString(localClientNum, 6u);
+    ConfigString = CL_GetConfigString(localClientNum, CS_CULLDIST);
     v2 = atof(ConfigString);
     R_SetCullDist((float)*(double *)&v2);
 }
@@ -66,7 +66,7 @@ void __cdecl CG_ParseSunLight(int localClientNum)
     int argCount; // r8
     float sunColor[3]; // [sp+50h] [-20h] BYREF
 
-    ConfigString = CL_GetConfigString(localClientNum, 7);
+    ConfigString = CL_GetConfigString(localClientNum, CS_SUNLIGHT);
     if (*ConfigString)
     {
         argCount = sscanf(ConfigString, "%g %g %g", &sunColor[0], &sunColor[1], &sunColor[2]);
@@ -89,7 +89,7 @@ void __cdecl CG_ParseSunDirection(int localClientNum)
     int lerpBeginTime;
     int lerpEndTime;
 
-    ConfigString = CL_GetConfigString(localClientNum, 8);
+    ConfigString = CL_GetConfigString(localClientNum, CS_SUNDIR);
     if (*ConfigString)
     {
         argCount = sscanf(
@@ -298,7 +298,7 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
         switch (stringIndex)
         {
         case 6u:
-            v6 = CL_GetConfigString(localClientNum, 6u);
+            v6 = CL_GetConfigString(localClientNum, CS_CULLDIST);
             v7 = atof(v6);
             R_SetCullDist((float)*(double *)&v7);
             break;
@@ -933,7 +933,7 @@ void __cdecl LocalSound(int localClientNum)
         }
         else
         {
-            ConfigString = CL_GetConfigString(localClientNum, v5 + 1635);
+            ConfigString = CL_GetConfigString(localClientNum, v5 + CS_SOUNDALIASES);
             v7 = CG_PlayClientSoundAliasByName(localClientNum, ConfigString);
             if (v3 > 2)
             {
@@ -978,7 +978,7 @@ void __cdecl LocalSoundStop(int localClientNum)
         }
         else
         {
-            ConfigString = CL_GetConfigString(localClientNum, v4 + 1635);
+            ConfigString = CL_GetConfigString(localClientNum, v4 + CS_SOUNDALIASES);
             CG_StopClientSoundAliasByName(localClientNum, ConfigString);
         }
     }
@@ -2387,7 +2387,7 @@ void __cdecl CG_MapInit(int restart)
         CG_ParseObjectiveChange(0, i);
     for (j = 27; j < 59; ++j)
         CG_TargetsChanged(0, j);
-    ConfigString = CL_GetConfigString(0, 6u);
+    ConfigString = CL_GetConfigString(0, CS_CULLDIST);
     v5 = atof(ConfigString);
     R_SetCullDist((float)*(double *)&v5);
     CG_NorthDirectionChanged(0);

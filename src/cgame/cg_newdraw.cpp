@@ -778,7 +778,7 @@ int __cdecl CG_ServerMaterialName(int localClientNum, int index, char *materialN
 
     if ((unsigned int)(index - 1) > 0x7E)
         return 0;
-    ConfigString = CL_GetConfigString(localClientNum, index + 2551); // CS_SERVER_MATERIALS (PC SP, was Xbox 2583)
+    ConfigString = CL_GetConfigString(localClientNum, index + CS_SERVER_MATERIALS);
     v7 = (char*)ConfigString;
     if (!*ConfigString)
         return 0;
@@ -923,7 +923,7 @@ char *__cdecl CG_GetUseString(int localClientNum)
             "cgameGlob->cursorHintString >= 0");
         cursorHintString = cgArray[0].cursorHintString;
     }
-    ConfigString = CL_GetConfigString(localClientNum, cursorHintString + 59);
+    ConfigString = CL_GetConfigString(localClientNum, cursorHintString + CS_USE_TRIG_STRINGS);
     v4 = ConfigString;
     if (!ConfigString || !*ConfigString)
         return 0;

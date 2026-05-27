@@ -1020,8 +1020,6 @@ void SV_Map_f()
     I_strlwr(mapname);
     hasSVG = strstr(mapname, ".svg");
 
-    hasSVG = 0; // LWSS ADD -- // KISAKTODO !! (SP saves!)
-
     savegame = hasSVG != 0;
 
     if (hasSVG)

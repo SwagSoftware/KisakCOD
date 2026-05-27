@@ -417,7 +417,7 @@ void __cdecl CG_RegisterItems(int32_t localClientNum)
     int32_t i; // [esp+98h] [ebp-8h]
     int32_t digit; // [esp+9Ch] [ebp-4h]
 
-    ConfigString = CL_GetConfigString(localClientNum, 0x90Au);
+    ConfigString = CL_GetConfigString(localClientNum, CS_ITEMS);
     v2 = items;
     do
     {
@@ -3672,7 +3672,7 @@ void __cdecl CG_SetupWeaponDef(int32_t localClientNum)
 
     memset((uint8_t *)dst, 0, 0x1FCu);
     iNumFiles = 0;
-    ConfigString = CL_GetConfigString(localClientNum, 0x8D2u);
+    ConfigString = CL_GetConfigString(localClientNum, CS_WEAPONFILES);
     v3 = ConfigString;
     v2 = v8;
     do
@@ -3899,7 +3899,7 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     }
     else
     {
-        ConfigString = CL_GetConfigString(0, viewmodelIndex + 1123); // CS_MODELS (PC SP, was Xbox 1155)
+        ConfigString = CL_GetConfigString(0, viewmodelIndex + CS_MODELS);
         v7 = ConfigString;
         if (!ConfigString || !*ConfigString)
             MyAssertHandler(

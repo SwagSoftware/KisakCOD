@@ -638,7 +638,7 @@ void trigger_use_shared(gentity_s *self)
                 if ((uint32_t)++v6 >= 0x20)
                     goto LABEL_26;
             }
-            SV_SetConfigstring(v6 + 59, v10[0]);
+            SV_SetConfigstring(CS_USE_TRIG_STRINGS + v6, v10[0]);
         LABEL_25:
             self->s.un1.scale = v6;
         LABEL_26:

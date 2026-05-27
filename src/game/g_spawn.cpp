@@ -749,18 +749,18 @@ void __cdecl SP_worldspawn()
     if (I_stricmp(classname, "worldspawn"))
         Com_Error(ERR_DROP, "SP_worldspawn: the first entity isn't worldspawn");
 
-    SV_SetConfigstring(2, "cod-sp");
+    SV_SetConfigstring(CS_GAME_VERSION, "cod-sp");
 
     const char *ambienttrack;
     G_SpawnString(&level.spawnVar, "ambienttrack", "", &ambienttrack);
     if (ambienttrack[0])
-        SV_SetConfigstring(1114, va("n\\%s", ambienttrack));
+        SV_SetConfigstring(CS_AMBIENT, va("n\\%s", ambienttrack));
     else
-        SV_SetConfigstring(1114, "");
+        SV_SetConfigstring(CS_AMBIENT, "");
 
     const char *message;
     G_SpawnString(&level.spawnVar, "message", "", &message);
-    SV_SetConfigstring(3, message);
+    SV_SetConfigstring(CS_MESSAGE, message);
 
     const char *gravity;
     G_SpawnString(&level.spawnVar, "gravity", "800", &gravity);
@@ -771,7 +771,7 @@ void __cdecl SP_worldspawn()
     G_SpawnString(&level.spawnVar, "northyaw", "", &northyaw);
     if (northyaw[0])
     {
-        SV_SetConfigstring(1115, northyaw); // CS_NORTHYAW (PC SP, was Xbox 1147)
+        SV_SetConfigstring(CS_NORTHYAW, northyaw);
 
         float yaw = DEG2RAD(atof(northyaw));
         level.compassNorth[1] = sin(yaw);
@@ -779,7 +779,7 @@ void __cdecl SP_worldspawn()
     }
     else
     {
-        SV_SetConfigstring(1115, "0"); // CS_NORTHYAW (PC SP, was Xbox 1147)
+        SV_SetConfigstring(CS_NORTHYAW, "0");
         level.compassNorth[0] = 1.0;
         level.compassNorth[1] = 0.0;
     }

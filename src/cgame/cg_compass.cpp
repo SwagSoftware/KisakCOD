@@ -1239,7 +1239,7 @@ void __cdecl CG_CompassDrawPlayerMapLocationSelector(
             &scaledRect.w,
             &scaledRect.h);
         mtlIndex = cgameGlob->predictedPlayerState.locationSelectionInfo & 2;
-        mtlName = CL_GetConfigString(localClientNum, mtlIndex + 827);
+        mtlName = CL_GetConfigString(localClientNum, mtlIndex + CS_LOC_SEL_MTLS);
         selectorMaterial = Material_RegisterHandle(mtlName, 7);
         radius = (float)(cgameGlob->predictedPlayerState.locationSelectionInfo >> 2) / 63.0f;
         if (radius > 0.0)

@@ -496,7 +496,7 @@ void __cdecl CG_VisionSetConfigString_Naked(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    configString = CL_GetConfigString(localClientNum, 0x338u);
+    configString = CL_GetConfigString(localClientNum, CS_VISIONSET_NAKED);
     token = (const char *)Com_Parse(&configString);
     I_strncpyz(cgameGlob->visionNameNaked, (char *)token, 64);
     v1 = Com_Parse(&configString);
@@ -519,7 +519,7 @@ void __cdecl CG_VisionSetConfigString_Night(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    configString = CL_GetConfigString(localClientNum, 0x339u);
+    configString = CL_GetConfigString(localClientNum, CS_VISIONSET_NIGHT);
     token = (const char *)Com_Parse(&configString);
     I_strncpyz(cgameGlob->visionNameNight, (char *)token, 64);
     v1 = Com_Parse(&configString);

@@ -61,7 +61,7 @@ int __cdecl G_FindConfigstringIndex(const char *name, int start, int max, int cr
         //Profile_EndInternal(0);
         return 0;
     }
-    if (start < 1114)
+    if (start < CS_CASE_INSENSITIVE_BEGIN)
         String = SL_FindString(name);
     else
         String = SL_FindLowercaseString(name);
@@ -135,7 +135,7 @@ int __cdecl G_LocalizedStringIndex(const char *string)
         v5 = SL_FindString(string);
         for (i = 1; i < 1023; ++i)
         {
-            ConfigstringConst = SV_GetConfigstringConst(i + 91);
+            ConfigstringConst = SV_GetConfigstringConst(CS_LOCALIZED_STRINGS + i);
             if (ConfigstringConst == scr_const._)
                 break;
             if (ConfigstringConst == v5)
@@ -158,7 +158,7 @@ int __cdecl G_LocalizedStringIndex(const char *string)
             v9 = va("G_LocalizedStringIndex: overflow (%d) : %s", 91, string);
             Com_Error(ERR_DROP, v9);
         }
-        SV_SetConfigstring(i + 91, string);
+        SV_SetConfigstring(CS_LOCALIZED_STRINGS + i, string);
     LABEL_22:
         //Profile_EndInternal(0);
         if (i)
@@ -192,7 +192,7 @@ LABEL_24:
             v12 = va("G_LocalizedStringIndex: overflow (%d) : %s", 91, string);
             Com_Error(ERR_DROP, v12);
         }
-        SV_SetConfigstring(i + 91, string);
+        SV_SetConfigstring(CS_LOCALIZED_STRINGS + i, string);
     LABEL_34:
         //Profile_EndInternal(0);
         if (i)
@@ -224,16 +224,9 @@ int __cdecl G_MaterialIndex(const char *name)
 
 void __cdecl G_SetModelIndex(int modelIndex, const char *name)
 {
-    if (modelIndex <= 0 || modelIndex >= 512)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
-            225,
-            0,
-            "%s\n\t(modelIndex) = %i",
-            "(modelIndex > 0 && modelIndex < (1 << 9))",
-            modelIndex);
+    iassert(modelIndex > 0 && modelIndex < (1 << 9));
     cached_models[modelIndex] = SV_XModelGet((char*)name);
-    SV_SetConfigstring(modelIndex + 1123, name); // CS_MODELS (PC SP, was Xbox 1155)
+    SV_SetConfigstring(CS_MODELS + modelIndex, name);
 }
 
 int __cdecl G_ModelIndex(const char *name)
@@ -572,7 +565,7 @@ unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
                 "(aliasIndex >= 256 && aliasIndex < 512)",
                 (unsigned __int16)v16);
         level.soundAliasLast = v16;
-        SV_SetConfigstring((unsigned __int16)v8 + 1635, name);
+        SV_SetConfigstring(CS_SOUNDALIASES + (unsigned __int16)v8, name);
     }
     else
     {
@@ -580,7 +573,7 @@ unsigned int __cdecl G_SoundAliasIndexTransient(const char *name)
         {
             if (!(_WORD)v8)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 404, 0, "%s", "aliasIndex != 0");
-            if (SV_GetConfigstringConst((unsigned __int16)v8 + 1635) == v9)
+            if (SV_GetConfigstringConst(CS_SOUNDALIASES + (unsigned __int16)v8) == v9)
                 break;
             if ((unsigned __int16)v8 < 0x100u || (unsigned __int16)v8 >= 0x200u)
                 MyAssertHandler(

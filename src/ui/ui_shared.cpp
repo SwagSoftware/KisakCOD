@@ -1809,7 +1809,6 @@ void __cdecl Script_ConditionalResponseHandler(
     const char **args,
     bool(__cdecl *shouldRespond)(const char *, const char *))
 {
-    int Int; // eax
     const char *v5; // eax
     int iIndex; // [esp+0h] [ebp-C10h]
     const char *pszName; // [esp+4h] [ebp-C0Ch]
@@ -1829,7 +1828,7 @@ void __cdecl Script_ConditionalResponseHandler(
                 {
                     for (iIndex = 0; iIndex < 32; ++iIndex)
                     {
-                        pszName = CL_GetConfigString(localClientNum, iIndex + 1970);
+                        pszName = CL_GetConfigString(localClientNum, iIndex + CS_SCRIPT_MENUS);
                         if (*pszName)
                         {
                             if (!I_stricmp(item->parent->window.name, pszName))
@@ -1838,8 +1837,11 @@ void __cdecl Script_ConditionalResponseHandler(
                     }
                     if (iIndex == 32)
                         iIndex = -1;
-                    Int = Dvar_GetInt("sv_serverId");
-                    v5 = va("cmd mr %i %i %s\n", Int, iIndex, command);
+#ifdef KISAK_MP
+                    v5 = va("cmd mr %i %i %s\n", Dvar_GetInt("sv_serverId"), iIndex, command);
+#else
+                    v5 = va("cmd mr %i %s\n", iIndex, command);
+#endif
                     Cbuf_AddText(localClientNum, v5);
                 }
             }
@@ -1988,7 +1990,6 @@ void __cdecl Script_Play(UiContext *dc, itemDef_s *item, const char **args)
 
 void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const char **args)
 {
-    int Int; // eax
     const char *v4; // eax
     int iIndex; // [esp+0h] [ebp-410h]
     const char *pszName; // [esp+4h] [ebp-40Ch]
@@ -1998,7 +1999,7 @@ void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const cha
     {
         for (iIndex = 0; iIndex < 32; ++iIndex)
         {
-            pszName = CL_GetConfigString(dc->localClientNum, iIndex + 1970);
+            pszName = CL_GetConfigString(dc->localClientNum, iIndex + CS_SCRIPT_MENUS);
             if (*pszName)
             {
                 if (!I_stricmp(item->parent->window.name, pszName))
@@ -2007,8 +2008,11 @@ void __cdecl Script_ScriptMenuResponse(UiContext *dc, itemDef_s *item, const cha
         }
         if (iIndex == 32)
             iIndex = -1;
-        Int = Dvar_GetInt("sv_serverId");
-        v4 = va("cmd mr %i %i %s\n", Int, iIndex, val);
+#ifdef KISAK_MP
+        v4 = va("cmd mr %i %i %s\n", Dvar_GetInt("sv_serverId"), iIndex, val);
+#else
+        v4 = va("cmd mr %i %s\n", iIndex, val);
+#endif
         Cbuf_AddText(dc->localClientNum, v4);
     }
 }

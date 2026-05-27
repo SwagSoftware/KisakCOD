@@ -857,7 +857,6 @@ void Cmd_VisionSetNaked_f()
     long double v3; // fp2
     long double v4; // fp2
     const char *v5; // r4
-    const char *v6; // r3
     int v7; // [sp+50h] [-30h]
 
     v7 = 1000;
@@ -903,8 +902,7 @@ void Cmd_VisionSetNaked_f()
         v5 = "";
     else
         v5 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
-    v6 = va("\"%s\" %i", v5, v7);
-    SV_SetConfigstring(1117, v6); // CS_VISIONSET_NAKED (PC SP, was Xbox 1149)
+    SV_SetConfigstring(CS_VISIONSET_NAKED, va("\"%s\" %i", v5, v7));
 }
 
 void Cmd_VisionSetNight_f()
@@ -915,7 +913,6 @@ void Cmd_VisionSetNight_f()
     long double v3; // fp2
     long double v4; // fp2
     const char *v5; // r4
-    const char *v6; // r3
     int v7; // [sp+50h] [-30h]
 
     v7 = 1000;
@@ -961,8 +958,7 @@ void Cmd_VisionSetNight_f()
         v5 = "";
     else
         v5 = (const char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
-    v6 = va("\"%s\" %i", v5, v7);
-    SV_SetConfigstring(1118, v6); // CS_VISIONSET_NIGHT (PC SP, was Xbox 1150)
+    SV_SetConfigstring(CS_VISIONSET_NIGHT, va("\"%s\" %i", v5, v7));
 }
 
 void __cdecl ClientCommand(int clientNum, const char *s)

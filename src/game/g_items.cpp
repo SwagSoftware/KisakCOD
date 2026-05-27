@@ -1155,7 +1155,7 @@ void __cdecl SaveRegisteredItems()
     if (bits)
         string[n++] = digit + (digit >= 10 ? 87 : 48);
     string[n] = 0;
-    SV_SetConfigstring(2314, string);
+    SV_SetConfigstring(CS_ITEMS, string);
 }
 
 void __cdecl G_RegisterWeapon(uint32_t weapIndex)
