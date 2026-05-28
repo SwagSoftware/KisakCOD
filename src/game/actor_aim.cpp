@@ -874,8 +874,7 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
     unsigned int weaponName; // r3
     const char *v11; // r3
     unsigned int weapon; // r26
-    gentity_s *TargetEntity; // r3
-    const float *p_eType; // r25
+    gentity_s *TargetEntity;
     float invLen; // fp11
     double v18; // fp0
     double v19; // fp13
@@ -907,7 +906,6 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
     wp.weapDef = BG_GetWeaponDef(weapon);
     Actor_FillWeaponParms(self, &wp);
     TargetEntity = Actor_GetTargetEntity(self);
-    p_eType = (const float *)&TargetEntity->s.eType;
 
     if (posOverride)
     {
@@ -974,7 +972,7 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
 
     if (weapType == WEAPTYPE_PROJECTILE)
     {
-        Weapon_RocketLauncher_Fire(ent, weapon, 0.0, &wp, wp.forward, (gentity_s *)vec3_origin, p_eType);
+        Weapon_RocketLauncher_Fire(ent, weapon, 0.0, &wp, vec3_origin, TargetEntity, NULL);
         G_AddEvent(ent, 26, 0);
         return;
     }

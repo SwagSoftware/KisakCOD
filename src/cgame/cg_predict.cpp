@@ -252,74 +252,47 @@ void __cdecl CG_InterpolatePlayerState(int localClientNum, int grabAngles, int g
                 + prevSnap->ps.viewHeightCurrent;
         }
 
-        //linkAngles = nextSnap->ps.linkAngles;
-        //origin = prevSnap->ps.origin;
-        //v16 = (char *)nextSnap - (char *)prevSnap;
-        //v17 = (char *)((char *)&cgArray[0].oldTime - (char *)prevSnap);
-        //v18 = (char *)((char *)&out->weaponrechamber[1] - (char *)prevSnap);
-        //v19 = 3;
-        //do
-        //{
-        //    *(float *)&v17[(unsigned int)origin] = (float)((float)(*(float *)((char *)origin + v16) - *origin)
-        //        * (float)f)
-        //        + *origin;
-        //    if (!grabAngles)
-        //        *(float *)((char *)origin + (char *)&out->offhandSecondary - (char *)prevSnap) = LerpAngle(origin[50], *(linkAngles - 294), f);
-        //    *(float *)((char *)origin + (char *)&out->pm_type - (char *)prevSnap) = (float)((float)(*(linkAngles - 341) - origin[3]) * (float)f) + origin[3];
-        //    if (prevSnap->ps.pm_type == 1)
-        //        *(float *)&v18[(unsigned int)origin] = LerpAngle(origin[344], *linkAngles, f);
-        //    else
-        //        *(float *)&v18[(unsigned int)origin] = *linkAngles;
-        //    if (nextSnap->ps.pm_type == 1 && (nextSnap->ps.eFlags & 0x20000) == 0)
-        //        *(float *)((char *)origin + (char *)&out->weaponDelay - (char *)prevSnap) = LerpAngle(origin[18], *(linkAngles - 326), f);
-        //    --v19;
-        //    ++origin;
-        //    ++linkAngles;
-        //} while (v19);
-
-        for (int link = 0; link < 3; ++link)
+        for (int i = 0; i < 3; ++i)
         {
-            float v7 = prevSnap->ps.viewangles[link];
-            float v2 = AngleNormalize180(nextSnap->ps.viewangles[link] - v7);
-            out->viewangles[link] = v2 * f + v7;
+            // (1) origin — always interpolated
+            out->origin[i] = (nextSnap->ps.origin[i] - prevSnap->ps.origin[i]) * f
+                + prevSnap->ps.origin[i];
 
-            float v6 = prevSnap->ps.delta_angles[link];
-            float v3 = AngleNormalize180(nextSnap->ps.delta_angles[link] - v6);
-            out->delta_angles[link] = v3 * f + v6;
+            // (2) viewangles — only when not grabbing a fresh usercmd
+            if (!grabAngles)
+            {
+                float v5 = prevSnap->ps.viewangles[i];
+                float dv = AngleNormalize180(nextSnap->ps.viewangles[i] - v5);
+                out->viewangles[i] = dv * f + v5;
+            }
 
+            // (3) velocity — always interpolated
+            out->velocity[i] = (nextSnap->ps.velocity[i] - prevSnap->ps.velocity[i]) * f
+                + prevSnap->ps.velocity[i];
+
+            // (4) linkAngles — LerpAngle when prev is linked, else just copy next
             if (prevSnap->ps.pm_type == 1)
             {
-                float v5 = prevSnap->ps.linkAngles[link];
-                float v4 = AngleNormalize180(nextSnap->ps.linkAngles[link] - v5);
-                out->linkAngles[link] = v4 * f + v5;
+                float v5 = prevSnap->ps.linkAngles[i];
+                float dv = AngleNormalize180(nextSnap->ps.linkAngles[i] - v5);
+                out->linkAngles[i] = dv * f + v5;
             }
             else
             {
-                out->linkAngles[link] = nextSnap->ps.linkAngles[link];
+                out->linkAngles[i] = nextSnap->ps.linkAngles[i];
+            }
+
+            // (5) delta_angles — only LerpAngle when next is linked and not in vehicle
+            if (nextSnap->ps.pm_type == 1 && (nextSnap->ps.eFlags & 0x20000) == 0)
+            {
+                float v5 = prevSnap->ps.delta_angles[i];
+                float dv = AngleNormalize180(nextSnap->ps.delta_angles[i] - v5);
+                out->delta_angles[i] = dv * f + v5;
             }
         }
 
+
         CG_InterpolatePlayerStateViewAngles(localClientNum, out, 0);
-        //if (prevSnap->ps.pm_type == PM_NORMAL_LINKED || (prevSnap->ps.eFlags & 0x300) != 0)
-        //{
-        //    viewAngleClampBase = prevSnap->ps.viewAngleClampBase;
-        //    viewAngleClampRange = nextSnap->ps.viewAngleClampRange;
-        //    v22 = 2;
-        //    v23 = (char *)((char *)&cgArray[0].predictedPlayerState - (char *)prevSnap);
-        //    do
-        //    {
-        //        *(float *)&v17[(unsigned int)viewAngleClampBase] = LerpAngle(
-        //            *viewAngleClampBase,
-        //            *(float *)((char *)viewAngleClampBase + v16),
-        //            f);
-        //        --v22;
-        //        *(float *)((char *)viewAngleClampBase + (unsigned int)v23) = (float)((float)(*viewAngleClampRange++
-        //            - viewAngleClampBase[2])
-        //            * (float)f)
-        //            + viewAngleClampBase[2];
-        //        ++viewAngleClampBase;
-        //    } while (v22);
-        //}
     }
 }
 
@@ -687,27 +660,18 @@ void __cdecl CG_PredictPlayerState(int localClientNum)
 {
     centity_s *Entity; // r3
 
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     CG_PredictPlayerState_Internal(localClientNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    Entity = CG_GetEntity(localClientNum, cgArray[0].predictedPlayerState.clientNum);
-    Entity->pose.origin[0] = cgArray[0].predictedPlayerState.origin[0];
-    Entity->pose.origin[1] = cgArray[0].predictedPlayerState.origin[1];
-    Entity->pose.origin[2] = cgArray[0].predictedPlayerState.origin[2];
-    BG_EvaluateTrajectory(&Entity->currentState.apos, cgArray[0].time, Entity->pose.angles);
-    cgArray[0].predictedPlayerEntity.nextState.number = cgArray[0].predictedPlayerState.clientNum;
-    BG_PlayerStateToEntityState(&cgArray[0].predictedPlayerState, &cgArray[0].predictedPlayerEntity.nextState, 0, 0);
-    memcpy(
-        &cgArray[0].predictedPlayerEntity.currentState,
-        &cgArray[0].predictedPlayerEntity.nextState.lerp,
-        sizeof(cgArray[0].predictedPlayerEntity.currentState));
-    cgArray[0].predictedPlayerEntity.oldEType = cgArray[0].predictedPlayerEntity.nextState.eType;
-    CG_CalcEntityLerpPositions(localClientNum, &cgArray[0].predictedPlayerEntity);
+
+    playerState_s *ps = &cgameGlob->predictedPlayerState;
+
+    Entity = CG_GetEntity(localClientNum, ps->clientNum);
+    Vec3Copy(ps->origin, Entity->pose.origin);
+    BG_EvaluateTrajectory(&Entity->currentState.apos, cgameGlob->time, Entity->pose.angles);
+    cgameGlob->predictedPlayerEntity.nextState.number = ps->clientNum;
+    BG_PlayerStateToEntityState(ps, &cgameGlob->predictedPlayerEntity.nextState, 0, 0);
+    memcpy(&cgameGlob->predictedPlayerEntity.currentState, &cgameGlob->predictedPlayerEntity.nextState.lerp, sizeof(LerpEntityState));
+    cgameGlob->predictedPlayerEntity.oldEType = cgameGlob->predictedPlayerEntity.nextState.eType;
+    CG_CalcEntityLerpPositions(localClientNum, &cgameGlob->predictedPlayerEntity);
 }
 

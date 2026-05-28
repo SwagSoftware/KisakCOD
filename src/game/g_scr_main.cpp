@@ -2501,36 +2501,24 @@ void ScrCmd_SetTimeScale()
     Dvar_SetFloat(com_timescale, Float);
 }
 
-// aislop
 void ScrCmd_SetPhysicsGravityDir()
 {
-    float v7[3];
-    double v2, v5, v6;
-    const char *v4;
+    float v[3]; // [sp+50h]
+    const char *cmd;
 
-    // Get vector from parameter 0
-    Scr_GetVector(0, v7);
+    Scr_GetVector(0, v);
 
-    // Compute the magnitude (length) of the vector
-    float magnitude = sqrtf(v7[0] * v7[0] + v7[1] * v7[1] + v7[2] * v7[2]);
 
-    // Avoid division by zero
-    if (magnitude == 0.0f) {
-        Scr_Error("Zero vector length detected, cannot normalize.");
-        return;
-    }
+    float magSq = v[0]*v[0] + v[1]*v[1] + v[2]*v[2];
+    float mag = sqrtf(magSq);
+    float divisor = (mag <= 0.0f) ? 1.0f : mag;
+    float invMag = 1.0f / divisor;
+    v[0] *= invMag;
+    v[1] *= invMag;
+    v[2] *= invMag;
 
-    // Normalize the vector
-    float invMagnitude = 1.0f / magnitude;
-    v7[0] *= invMagnitude;
-    v7[1] *= invMagnitude;
-    v7[2] *= invMagnitude;
-
-    // Prepare the formatted string for the server command
-    v4 = va("phys_grav %f %f %f\n", v7[0], v7[1], v7[2]);
-
-    // Send the command to the server
-    SV_GameSendServerCommand(-1, v4);
+    cmd = va("phys_grav %f %f %f\n", v[0], v[1], v[2]);
+    SV_GameSendServerCommand(-1, cmd);
 }
 
 
@@ -2555,189 +2543,208 @@ void __cdecl ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t entref)
     Entity->client->groundTiltEntNum = number;
 }
 
-// aislop
+static inline float ClampLinkAngle180(double angle)
+{
+    if (angle >= 180.0)
+        return 180.0f;
+    if (angle <= 0.0)
+        return 0.0f;
+    return (float)angle;
+}
+
 void __cdecl ScrCmd_PlayerLinkTo(scr_entref_t entref)
 {
-    gentity_s *Entity = GetEntity(entref);
-    if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
-        Scr_ParamError(0, "not an entity");
-
-    if (!Entity->client)
-        Scr_ObjectError("not a player entity");
-
-    if ((Entity->flags & 0x800) == 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            2680, 0, "%s", "ent->flags & FL_SUPPORTS_LINKTO"
-        );
-
-    gentity_s *v2 = Scr_GetEntity(0);
-    int NumParam = Scr_GetNumParam();
-    unsigned int ConstLowercaseString = 0;
-
-    // Set ConstLowercaseString if valid
-    if (NumParam > 1 && Scr_GetType(1) && Scr_GetConstLowercaseString(1) != scr_const._)
-        ConstLowercaseString = Scr_GetConstLowercaseString(1);
-
-    // Default value for linkAnglesFrac
-    float linkAnglesFrac = (NumParam > 2) ? Scr_GetFloat(2) : 0.0f;
-    Entity->client->linkAnglesFrac = linkAnglesFrac;
-    Entity->client->linkAnglesLocked = 0;
-    Entity->client->link_rotationMovesEyePos = 0;
-    Entity->client->link_useTagAnglesForViewAngles = 1;
-
-    // Set link_doCollision based on parameter 7
-    //bool linkDoCollision = (NumParam > 7 && (_cntlzw(Scr_GetInt(7)) & 0x20) == 0);
-    bool linkDoCollision = (NumParam > 7 && Scr_GetInt(7));
-    Entity->client->link_doCollision = linkDoCollision;
-
-    // Set min/max clamp values
-    float clampAngles[4] = { 180.0f, 180.0f, 180.0f, 180.0f };
-    for (int i = 3; i < NumParam && i < 7; i++) {
-        clampAngles[i - 3] = Scr_GetFloat(i);
-    }
-
-    // Apply clamping angles
-    for (int i = 0; i < 2; i++) {
-        float angle = clampAngles[i];
-        angle -= 180.0f;  // Adjust angle
-        Entity->client->linkAnglesMinClamp[i] = -angle;
-        Entity->client->linkAnglesMaxClamp[i] = angle;
-    }
-
-    // Update view angle clamp
-    G_UpdateViewAngleClamp(Entity->client, v2->r.currentAngles);
-
-    // Reset player flags
-    Entity->client->ps.pm_flags &= ~0x1000000u;
-    Entity->client->prevLinkAnglesSet = 0;
-
-    // Link entities
-    if (G_EntLinkTo(Entity, v2, ConstLowercaseString)) {
-        gclient_s *client = Entity->client;
-        if (client->link_useTagAnglesForViewAngles) {
-            float v28[4][3];
-            G_CalcTagParentAxis(Entity, v28);
-            AxisToAngles((const mat3x3&)v28, client->ps.linkAngles);
-        }
-        else {
-            client->ps.linkAngles[0] = client->ps.linkAngles[1] = client->ps.linkAngles[2] = 0.0f;
-        }
-    }
-    else {
-        Scr_Error("failed to link entity");
-    }
-}
-
-
-//aislop
-void __cdecl ScrCmd_PlayerLinkToDelta(scr_entref_t entref)
-{
-    gentity_s *Entity = GetEntity(entref);
-    if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
-        Scr_ParamError(0, "not an entity");
-
-    if (!Entity->client)
-        Scr_ObjectError("not a player entity");
-
-    if ((Entity->flags & 0x800) == 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            2760, 0, "%s", "ent->flags & FL_SUPPORTS_LINKTO"
-        );
-
-    gentity_s *v2 = Scr_GetEntity(0);
-    int NumParam = Scr_GetNumParam();
-    unsigned int ConstLowercaseString = 0;
-
-    if (NumParam > 1 && Scr_GetType(1) && Scr_GetConstLowercaseString(1) != scr_const._)
-        ConstLowercaseString = Scr_GetConstLowercaseString(1);
-
-    float linkAnglesFrac = (NumParam > 2) ? Scr_GetFloat(2) : 0.0f;
-    Entity->client->linkAnglesFrac = linkAnglesFrac;
-    Entity->client->linkAnglesLocked = 0;
-    Entity->client->link_rotationMovesEyePos = 1;
-
-    // Set link angles clamp
-    float clampAngles[4] = { 180.0f, 180.0f, 180.0f, 180.0f };
-    for (int i = 3; i < NumParam && i < 7; i++) {
-        clampAngles[i - 3] = Scr_GetFloat(i);
-    }
-
-    // Set min and max clamping angles
-    for (int i = 0; i < 2; i++) {
-        float angle = clampAngles[i];
-        angle -= 180.0f;  // Adjust angle
-        Entity->client->linkAnglesMinClamp[i] = -angle;
-        Entity->client->linkAnglesMaxClamp[i] = angle;
-    }
-
-    // Update the view angle clamp
-    G_UpdateViewAngleClamp(Entity->client, v2->r.currentAngles);
-
-    // Link angles flag for view angles
-    //bool useTagAnglesForViewAngles = (NumParam > 7 && (_cntlzw(Scr_GetInt(7)) & 0x20) == 0);
-    bool useTagAnglesForViewAngles = (NumParam > 7 && Scr_GetInt(7));
-    Entity->client->link_useTagAnglesForViewAngles = useTagAnglesForViewAngles;
-    Entity->client->ps.pm_flags &= ~0x1000000u;
-    Entity->client->prevLinkAnglesSet = 0;
-
-    // Link entities
-    if (G_EntLinkTo(Entity, v2, ConstLowercaseString)) {
-        gclient_s *client = Entity->client;
-        if (client->link_useTagAnglesForViewAngles) {
-            float v28[4][3];
-            G_CalcTagParentAxis(Entity, v28);
-            AxisToAngles((const mat3x3&)v28, client->ps.linkAngles);
-        }
-        else {
-            client->ps.linkAngles[0] = client->ps.linkAngles[1] = client->ps.linkAngles[2] = 0.0f;
-        }
-    }
-    else {
-        Scr_Error("failed to link entity");
-    }
-}
-
-
-void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t entref)
-{
     gentity_s *ent; // r31
-    unsigned int ConstLowercaseString; // r30
-    playerState_s *ps; // r11
+    gentity_s *parent; // r26
+    int numParam; // r30
+    unsigned int ConstLowercaseString; // r29
+    double v7; // fp1
+    double v12; // fp1
+    double v17; // fp1
+    double v22; // fp1
+    gclient_s *client; // r11
+    float parentAxis[4][3]; // [sp+50h] [-80h] BYREF
 
     ent = GetEntity(entref);
-
     if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
-        Scr_ParamError(0, "Not an entity");
-
+        Scr_ParamError(0, "not an entity");
     if (!ent->client)
-        Scr_ObjectError("Not a player entity");
+        Scr_ObjectError("not a player entity");
 
     iassert(ent->flags & FL_SUPPORTS_LINKTO);
+
+    parent = Scr_GetEntity(0);
+    numParam = Scr_GetNumParam();
     ConstLowercaseString = 0;
-    if ((int)Scr_GetNumParam() > 1)
+    if (numParam > 1)
     {
-        if (Scr_GetType(1))
+        if (Scr_GetType(1u))
         {
-            ConstLowercaseString = Scr_GetConstLowercaseString(1);
+            ConstLowercaseString = Scr_GetConstLowercaseString(1u);
             if (ConstLowercaseString == scr_const._)
                 ConstLowercaseString = 0;
         }
     }
 
-    ent->client->linkAnglesFrac = 1.0;
-    ent->client->linkAnglesLocked = 1;
-    ent->client->ps.pm_flags |= 0x1000000u;
+    ent->client->linkAnglesFrac = (numParam > 2) ? Scr_GetFloat(2u) : 0.0f;
+    ent->client->linkAnglesLocked = 0;
+    ent->client->link_rotationMovesEyePos = 0;
+    ent->client->link_useTagAnglesForViewAngles = 1;
+    ent->client->link_doCollision = numParam > 7 && Scr_GetInt(7u) != 0;
 
-    ps = &ent->client->ps;
+    v7 = (numParam > 3) ? Scr_GetFloat(3u) : 180.0;
+    ent->client->linkAnglesMinClamp[1] = -ClampLinkAngle180(v7);
+
+    v12 = (numParam > 4) ? Scr_GetFloat(4u) : 180.0;
+    ent->client->linkAnglesMaxClamp[1] = ClampLinkAngle180(v12);
+
+    v17 = (numParam > 5) ? Scr_GetFloat(5u) : 180.0;
+    ent->client->linkAnglesMinClamp[0] = -ClampLinkAngle180(v17);
+
+    v22 = (numParam > 6) ? Scr_GetFloat(6u) : 180.0;
+    ent->client->linkAnglesMaxClamp[0] = ClampLinkAngle180(v22);
+
+    G_UpdateViewAngleClamp(ent->client, parent->r.currentAngles);
+    ent->client->ps.pm_flags &= ~0x1000000u;
+    ent->client->prevLinkAnglesSet = 0;
+
+    if (G_EntLinkTo(ent, parent, ConstLowercaseString))
+    {
+        client = ent->client;
+        if (client->link_useTagAnglesForViewAngles)
+        {
+            G_CalcTagParentAxis(ent, parentAxis);
+            AxisToAngles((const mat3x3&)parentAxis, ent->client->ps.linkAngles);
+        }
+        else
+        {
+            Vec3Clear(client->ps.linkAngles);
+        }
+    }
+    else
+    {
+        Scr_Error("failed to link entity");
+    }
+}
+
+void __cdecl ScrCmd_PlayerLinkToDelta(scr_entref_t entref)
+{
+    gentity_s *ent; // r31
+    gentity_s *v2; // r27
+    int NumParam; // r30
+    unsigned int ConstLowercaseString; // r29
+    double v6; // fp1
+    double v11; // fp1
+    double v16; // fp1
+    double v21; // fp1
+    gclient_s *client; // r11
+    float v28[4][3]; // [sp+50h] [-70h] BYREF
+
+    ent = GetEntity(entref);
+    if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
+        Scr_ParamError(0, "not an entity");
+    if (!ent->client)
+        Scr_ObjectError("not a player entity");
+    if ((ent->flags & FL_SUPPORTS_LINKTO) == 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
+            2760, 0, "%s", "ent->flags & FL_SUPPORTS_LINKTO");
+
+    v2 = Scr_GetEntity(0);
+    NumParam = Scr_GetNumParam();
+    ConstLowercaseString = 0;
+    if (NumParam > 1)
+    {
+        if (Scr_GetType(1u))
+        {
+            ConstLowercaseString = Scr_GetConstLowercaseString(1u);
+            if (ConstLowercaseString == scr_const._)
+                ConstLowercaseString = 0;
+        }
+    }
+
+    ent->client->linkAnglesFrac = (NumParam > 2) ? Scr_GetFloat(2u) : 0.0f;
+    ent->client->linkAnglesLocked = 0;
+    ent->client->link_rotationMovesEyePos = 1;
+
+    v6 = (NumParam > 3) ? Scr_GetFloat(3u) : 180.0;
+    ent->client->linkAnglesMinClamp[1] = -ClampLinkAngle180(v6);
+
+    v11 = (NumParam > 4) ? Scr_GetFloat(4u) : 180.0;
+    ent->client->linkAnglesMaxClamp[1] = ClampLinkAngle180(v11);
+
+    v16 = (NumParam > 5) ? Scr_GetFloat(5u) : 180.0;
+    ent->client->linkAnglesMinClamp[0] = -ClampLinkAngle180(v16);
+
+    v21 = (NumParam > 6) ? Scr_GetFloat(6u) : 180.0;
+    ent->client->linkAnglesMaxClamp[0] = ClampLinkAngle180(v21);
+
+    G_UpdateViewAngleClamp(ent->client, v2->r.currentAngles);
+
+    ent->client->link_useTagAnglesForViewAngles = NumParam > 7 && Scr_GetInt(7u) != 0;
+    ent->client->ps.pm_flags &= ~0x1000000u;
+    ent->client->prevLinkAnglesSet = 0;
+
+    if (G_EntLinkTo(ent, v2, ConstLowercaseString))
+    {
+        client = ent->client;
+        if (client->link_useTagAnglesForViewAngles)
+        {
+            G_CalcTagParentAxis(ent, v28);
+            AxisToAngles((const mat3x3&)v28, ent->client->ps.linkAngles);
+        }
+        else
+        {
+            client->ps.linkAngles[0] = 0.0;
+            client->ps.linkAngles[1] = 0.0;
+            client->ps.linkAngles[2] = 0.0;
+        }
+    }
+    else
+    {
+        Scr_Error("failed to link entity");
+    }
+}
+
+void __cdecl ScrCmd_PlayerLinkToAbsolute(scr_entref_t entref)
+{
+    gentity_s *Entity; // r31
+    gentity_s *v2; // r29
+    unsigned int ConstLowercaseString; // r30
+    playerState_s *ps; // r11
+
+    Entity = GetEntity(entref);
+    if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
+        Scr_ParamError(0, "Not an entity");
+    if (!Entity->client)
+        Scr_ObjectError("Not a player entity");
+    if ((Entity->flags & FL_SUPPORTS_LINKTO) == 0)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
+            2833, 0, "%s", "ent->flags & FL_SUPPORTS_LINKTO");
+
+    v2 = Scr_GetEntity(0);
+    ConstLowercaseString = 0;
+    if ((int)Scr_GetNumParam() > 1)
+    {
+        if (Scr_GetType(1u))
+        {
+            ConstLowercaseString = Scr_GetConstLowercaseString(1u);
+            if (ConstLowercaseString == scr_const._)
+                ConstLowercaseString = 0;
+        }
+    }
+
+    Entity->client->linkAnglesFrac = 1.0;
+    Entity->client->linkAnglesLocked = 1;
+    Entity->client->ps.pm_flags |= 0x1000000u;
+    ps = &Entity->client->ps;
     ps->linkAngles[0] = 0.0;
     ps->linkAngles[1] = 0.0;
     ps->linkAngles[2] = 0.0;
+    Entity->client->link_rotationMovesEyePos = 1;
 
-    ent->client->link_rotationMovesEyePos = 1;
-
-    if (!G_EntLinkTo(ent, Scr_GetEntity(0), ConstLowercaseString))
+    if (!G_EntLinkTo(Entity, v2, ConstLowercaseString))
         Scr_Error("Failed to link entity");
 }
 
@@ -3215,109 +3222,81 @@ void __cdecl Scr_BulletTracer()
     v0->s.eventParm = v1;
 }
 
-// aislop
 void __cdecl Scr_MagicBullet()
 {
-    if (Scr_GetNumParam() != 3) {
+    const char *weapName; // r31
+    int weapon;        // r30
+    WeaponDef *weapDef;
+    weaponParms wp;      // [sp+70h] (v34) — { forward, right, up, muzzleTrace, weapDef }
+    float src[3];           // (v31, v32, v33) — copied into parms.muzzleTrace
+    float dst[3];           // (v28, v29, v30) read from arg 2
+    gentity_s *tempEnt;     // r31
+
+    if (Scr_GetNumParam() != 3)
         Scr_Error("MagicBullet weaponName sourceLoc destLoc.\n");
-        return;
-    }
 
-    const char *weaponName = Scr_GetString(0);
-    int weaponIndex = G_GetWeaponIndexForName(weaponName);
-    if (!weaponIndex) {
-        Scr_Error(va("MagicBullet called with unknown weapon name %s\n", weaponName));
-        return;
-    }
+    weapName = Scr_GetString(0);
+    weapon = G_GetWeaponIndexForName(weapName);
 
-    float src[3], dst[3];
-    Scr_GetVector(1, src);  // Source
-    Scr_GetVector(2, dst);  // Destination
+    if (!weapon)
+        Scr_Error(va("MagicBullet called with unknown weapon name %s\n", weapName));
 
-    // Prepare weapon parameters
-    WeaponDef *weapDef = BG_GetWeaponDef(weaponIndex);
-    weaponParms parms = { 0 };
-    parms.weapDef = weapDef;
+    Scr_GetVector(1, src);
+    Scr_GetVector(2, dst);
 
-    // Set muzzle trace to source
-    parms.muzzleTrace[0] = src[0];
-    parms.muzzleTrace[1] = src[1];
-    parms.muzzleTrace[2] = src[2];
+    weapDef = BG_GetWeaponDef(weapon);
+    Vec3Copy(src, wp.muzzleTrace);
+    Vec3Clear(wp.right);
+    wp.weapDef = weapDef;
+    Vec3Clear(wp.up);
 
-    // Compute normalized direction vector (dst - src)
     float dx = dst[0] - src[0];
     float dy = dst[1] - src[1];
     float dz = dst[2] - src[2];
-    float dist = sqrtf(dx * dx + dy * dy + dz * dz);
+    float dist = sqrtf(dx*dx + dy*dy + dz*dz);
+    float invDist = 1.0f / ((dist <= 0.0f) ? 1.0f : dist);
+    wp.forward[0] = invDist * dx;
+    wp.forward[1] = dy * invDist;
+    wp.forward[2] = dz * invDist;
 
-    if (dist == 0.0f) {
-        Scr_Error("MagicBullet(): Source and destination are the same.\n");
-        return;
-    }
-
-    float invDist = 1.0f / dist;
-    parms.forward[0] = dx * invDist;
-    parms.forward[1] = dy * invDist;
-    parms.forward[2] = dz * invDist;
-
-    // Reject unsupported grenade-type weapons
-    if (weapDef->weapType == WEAPTYPE_GRENADE) {
+    if (weapDef->weapType == WEAPTYPE_GRENADE)
         Scr_Error("MagicBullet() does not work with grenade-type weapons.\n");
-        return;
+
+    if (weapDef->weapType == WEAPTYPE_BULLET)
+    {
+        Bullet_Fire(&g_entities[ENTITYNUM_WORLD], 0.0f, &wp, NULL, level.time);
     }
-
-    // Fire based on weapon type and class
-    switch (weapDef->weapType) {
-    case WEAPTYPE_BULLET:
-        Bullet_Fire(&g_entities[ENTITYNUM_WORLD], 0.0f, &parms, NULL, level.time);
-        break;
-
-    case WEAPTYPE_PROJECTILE:
-        switch (weapDef->weapClass) {
-        case WEAPCLASS_GRENADE:
-            Weapon_GrenadeLauncher_Fire(&g_entities[ENTITYNUM_WORLD], weaponIndex, 0, &parms);
-            break;
-
-        case WEAPCLASS_ROCKETLAUNCHER:
+    else if (weapDef->weapType == WEAPTYPE_PROJECTILE)
+    {
+        if (weapDef->weapClass == WEAPCLASS_GRENADE)
+        {
+            Weapon_GrenadeLauncher_Fire(&g_entities[ENTITYNUM_WORLD], weapon, 0, &wp);
+        }
+        else if (weapDef->weapClass == WEAPCLASS_ROCKETLAUNCHER)
+        {
             Weapon_RocketLauncher_Fire(
                 &g_entities[ENTITYNUM_WORLD],
-                weaponIndex,
+                weapon,
                 0.0f,
+                &wp,
+                vec3_origin,  // 0,0,0
                 NULL,
-                parms.forward,
-                (gentity_s *)vec3_origin,
-                0
-            );
-            break;
-
-        default:
-            Scr_Error("MagicBullet(): Unhandled projectile weapClass.\n");
-            return;
+                vec3_origin); // 0,0,0
         }
-        break;
-
-    default: {
+        else
+        {
+            Scr_Error("MagicBullet(): Unhandled projectile weapClass.\n");
+        }
+    }
+    else
+    {
         const char *typeName = BG_GetWeaponTypeName(weapDef->weapType);
         Scr_Error(va("MagicBullet(): Unhandled weapType \"%s\".\n", typeName));
-        return;
-    }
     }
 
-    // Create temp entity for visual event tracking
-    gentity_s *tempEnt = G_TempEntity(src, 26);
-    tempEnt->s.weapon = weaponIndex;
-
-    // Sanity check: weapon ID must fit in a byte
-    if ((uint8_t)weaponIndex != weaponIndex) {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            3493,
-            0,
-            "%s",
-            "tempEnt->s.weapon == weapon"
-        );
-    }
-
+    tempEnt = G_TempEntity(src, EV_FIRE_WEAPON);
+    tempEnt->s.weapon = weapon;
+    iassert(tempEnt->s.weapon == weapon);
     tempEnt->s.eventParms[tempEnt->s.eventSequence & 3] = 0;
 }
 
@@ -7532,12 +7511,10 @@ void GScr_GetAngleDelta()
 
 void GScr_GetNorthYaw()
 {
-    long double v0; // fp2
-    char v1[40]; // [sp+50h] [-30h] BYREF
+    char northYawString[32]; // [sp+50h] [-30h] BYREF
 
-    SV_GetConfigstring(1115, v1, 32); // CS_NORTHYAW (PC SP, was Xbox 1147)
-    v0 = atof(v1);
-    Scr_AddFloat((float)*(double *)&v0);
+    SV_GetConfigstring(CS_NORTHYAW, northYawString, 32);
+    Scr_AddFloat(atof(northYawString));
 }
 
 void __cdecl Scr_SetFxAngles(unsigned int givenAxisCount, float (*axis)[3], float *angles)
@@ -7607,38 +7584,26 @@ void __cdecl Scr_FxParamError(unsigned int paramIndex, const char *errorString, 
     Scr_ParamError(paramIndex, v6);
 }
 
-// aislop
 void Scr_PlayFX()
 {
-    int numParams = Scr_GetNumParam();
+    int numParams; // r29
+    int fxId;
+    gentity_s *ent; // r28
+    float origin[3];  // v23 [sp+50h]
+    float axis[3][3];
+
+    numParams = Scr_GetNumParam();
     if (numParams < 2 || numParams > 4)
-    {
         Scr_Error("Incorrect number of parameters");
-        return;
-    }
+    fxId = Scr_GetInt(0);
+    if (fxId <= 0 || fxId >= 100)
+        Scr_Error(va("Scr_PlayFX: invalid effect id %d", fxId));
 
-    int effectId = Scr_GetInt(0);
-    if (effectId <= 0 || effectId >= 100)
-    {
-        Scr_Error(va("Scr_PlayFX: invalid effect id %d", effectId));
-        return;
-    }
+    Scr_GetVector(1, origin);
+    ent = G_TempEntity(origin, 59);
+    iassert(ent->s.lerp.apos.trType == TR_STATIONARY);
 
-    float origin[3];
-    Scr_GetVector(1u, origin);
-
-    gentity_s *ent = G_TempEntity(origin, 59);
-    if (ent->s.lerp.apos.trType != TR_STATIONARY)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            8870,
-            1,
-            "%s",
-            "ent->s.lerp.apos.trType == TR_STATIONARY");
-    }
-
-    ent->s.eventParm = (unsigned char)effectId;
+    ent->s.eventParm = (uint8_t)fxId;
 
     if (numParams == 2)
     {
@@ -7648,51 +7613,25 @@ void Scr_PlayFX()
     }
     else
     {
-        float forward[3];
-        Scr_GetVector(2u, forward);
+        iassert(numParams == 3 || numParams == 4);
 
-        float forwardLen = sqrtf(forward[0] * forward[0] + forward[1] * forward[1] + forward[2] * forward[2]);
-        if (forwardLen == 0.0f)
-        {
-            Scr_FxParamError(2u, "playFx called with (0 0 0) forward direction", effectId);
-            return;
-        }
-
-        float invForwardLen = 1.0f / forwardLen;
-        forward[0] *= invForwardLen;
-        forward[1] *= invForwardLen;
-        forward[2] *= invForwardLen;
+        Scr_GetVector(2, axis[0]);
+        if (Vec3Normalize(axis[0]) == 0.0f)
+            Scr_FxParamError(2, "playFx called with (0 0 0) forward direction", fxId);
 
         if (numParams == 3)
         {
-            vectoangles(forward, ent->s.lerp.apos.trBase);
+            vectoangles(axis[0], ent->s.lerp.apos.trBase);
         }
         else
         {
-            float up[3];
-            Scr_GetVector(3u, up);
+            iassert(numParams == 4);
 
-            float upLen = sqrtf(up[0] * up[0] + up[1] * up[1] + up[2] * up[2]);
-            if (upLen == 0.0f)
-            {
-                Scr_FxParamError(3u, "playFx called with (0 0 0) up direction", effectId);
-                return;
-            }
+            Scr_GetVector(3, axis[2]);
+            if (Vec3Normalize(axis[2]) == 0.0f)
+                Scr_FxParamError(3, "playFx called with (0 0 0) up direction", fxId);
 
-            float invUpLen = 1.0f / upLen;
-            up[0] *= invUpLen;
-            up[1] *= invUpLen;
-            up[2] *= invUpLen;
-
-            float axis[3][3];
-            axis[0][0] = forward[0];
-            axis[0][1] = forward[1];
-            axis[0][2] = forward[2];
-            axis[1][0] = up[0];
-            axis[1][1] = up[1];
-            axis[1][2] = up[2];
-
-            Scr_SetFxAngles(2u, (float(*)[3])axis, ent->s.lerp.apos.trBase);
+            Scr_SetFxAngles(2, axis, ent->s.lerp.apos.trBase);
         }
     }
 }
@@ -7742,7 +7681,7 @@ void Scr_PlayFXOnTag()
     }
     v10 = SL_ConvertToString(ConstLowercaseString);
     v11 = va("%02d%s", v1, v10);
-    ConfigstringIndex = G_FindConfigstringIndex(v11, 2247, 256, 1, 0); // CS_EFFECT_TAGS (PC SP, was Xbox 2279)
+    ConfigstringIndex = G_FindConfigstringIndex(v11, CS_EFFECT_TAGS, 256, 1, 0);
     v13 = ConfigstringIndex;
     if (ConfigstringIndex <= 0 || ConfigstringIndex >= 256)
         MyAssertHandler(
@@ -7754,197 +7693,106 @@ void Scr_PlayFXOnTag()
     G_AddEvent(Entity, 60, v13);
 }
 
-// aislop
 void Scr_PlayLoopedFX()
 {
-    unsigned int numParams = Scr_GetNumParam();
-    if (numParams < 3 || numParams > 6)
-    {
+    int axisCount;    // r28 (v0)
+    float cullDist;   // fp30 (Float)
+    int fxId;         // r30
+    unsigned int numParams; // r3
+    int repeatMs;     // r29
+    gentity_s *ent;   // r31
+    float axis[3][3]; // v19[6] + v20/v21/v22 contiguous = 9 floats
+    float origin[3];  // v18
+
+    if (Scr_GetNumParam() < 3 || Scr_GetNumParam() > 6)
         Scr_Error("Incorrect number of parameters");
-        return;
-    }
 
-    int fxId = Scr_GetInt(0);
-    float repeatTimeMs = Scr_GetFloat(1) * 1000.0f;
-    int repeat = (int)(repeatTimeMs + 0.5f);
-    if (repeat <= 0)
+    axisCount = 0;
+    cullDist = 0.0f;
+    fxId = Scr_GetInt(0);
+    numParams = Scr_GetNumParam();
+
+    if (numParams != 4)
     {
-        Scr_FxParamError(1, "playLoopedFx called with repeat < 0.001 seconds", fxId);
-        return;
-    }
+        if (numParams != 5)
+        {
+            if (numParams != 6)
+                goto skipAxes;
 
-    float origin[3];
-    Scr_GetVector(2, origin);
+            axisCount = 1;
+            Scr_GetVector(5, axis[2]);
+            if (Vec3Normalize(axis[2]) == 0.0f)
+                Scr_FxParamError(5, "playLoopedFx called with (0 0 0) up direction", fxId);
+        }
 
-    int axisCount = 0;
-    float axis[3][3] = { 0 };
-
-    float cullDist = 0.0f;
-    if (numParams >= 5)
-    {
         Scr_GetVector(4, axis[0]);
-
-        float forwardLen = sqrtf(axis[0][0] * axis[0][0] +
-            axis[0][1] * axis[0][1] +
-            axis[0][2] * axis[0][2]);
-
-        if (forwardLen == 0.0f)
-        {
+        if (Vec3Normalize(axis[0]) == 0.0f)
             Scr_FxParamError(4, "playLoopedFx called with (0 0 0) forward direction", fxId);
-            return;
-        }
-
-        float invLen = 1.0f / forwardLen;
-        axis[0][0] *= invLen;
-        axis[0][1] *= invLen;
-        axis[0][2] *= invLen;
-
-        axisCount++;
+        ++axisCount;
     }
+    cullDist = Scr_GetFloat(3);
+skipAxes:
+    Scr_GetVector(2, origin);
+    repeatMs = (int)(Scr_GetFloat(1) * 1000.0f + 0.5f);
+    if (repeatMs <= 0)
+        Scr_FxParamError(1, "playLoopedFx called with repeat < 0.001 seconds", fxId);
 
-    if (numParams == 6)
-    {
-        Scr_GetVector(5, axis[2]);
-
-        float upLen = sqrtf(axis[2][0] * axis[2][0] +
-            axis[2][1] * axis[2][1] +
-            axis[2][2] * axis[2][2]);
-
-        if (upLen == 0.0f)
-        {
-            Scr_FxParamError(5, "playLoopedFx called with (0 0 0) up direction", fxId);
-            return;
-        }
-
-        float invUpLen = 1.0f / upLen;
-        axis[2][0] *= invUpLen;
-        axis[2][1] *= invUpLen;
-        axis[2][2] *= invUpLen;
-
-        axisCount++;
-    }
-
-    if (numParams >= 4)
-    {
-        cullDist = Scr_GetFloat(3);
-    }
-
-    gentity_s *ent = G_Spawn();
-    ent->s.eType = ET_LOOP_FX; // originally 8 or 9, using symbolic name is clearer
+    ent = G_Spawn();
     ent->s.un1.scale = fxId;
-
-    if ((unsigned char)fxId != fxId)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            9009,
-            0,
-            "%s",
-            "ent->s.un1.eventParm2 == fxId"
-        );
-    }
+    ent->s.eType = ET_LOOP_FX;
+    iassert(ent->s.un1.eventParm2 == fxId);
 
     G_SetOrigin(ent, origin);
     Scr_SetFxAngles(axisCount, axis, ent->s.lerp.apos.trBase);
     ent->s.lerp.u.turret.gunAngles[0] = cullDist;
-    ent->s.lerp.u.loopFx.period = repeat;
-
+    ent->s.lerp.u.loopFx.period = repeatMs;
     SV_LinkEntity(ent);
     Scr_AddEntity(ent);
 }
 
-// aislop
 void Scr_SpawnFX()
 {
-    unsigned int numParams = Scr_GetNumParam();
-    if (numParams < 2 || numParams > 4)
-    {
+    int axisCount;    // r28 (v0)
+    int fxId;         // r31
+    unsigned int numParams;
+    gentity_s *ent;   // r30
+    float origin[3];  // v15 [sp+50h]
+    float axis[3][3]; // v16[6] + v17/v18/v19 contiguous
+    float fwdMag;
+    float fwdInv;
+
+    if (Scr_GetNumParam() < 2 || Scr_GetNumParam() > 4)
         Scr_Error("Incorrect number of parameters");
-        return;
-    }
 
-    int fxId = Scr_GetInt(0);
-    int axisCount = 0;
+    axisCount = 0;
+    fxId = Scr_GetInt(0);
+    numParams = Scr_GetNumParam();
 
-    float axis[3][3] = { 0 };
-    float origin[3];
-
-    // Optional up vector (arg 3)
-    if (numParams == 4)
+    if (numParams != 3)
     {
+        if (numParams != 4)
+            goto skipAxes;
+
         Scr_GetVector(3, axis[2]);
-
-        float upLen = sqrtf(axis[2][0] * axis[2][0] +
-            axis[2][1] * axis[2][1] +
-            axis[2][2] * axis[2][2]);
-
-        if (upLen == 0.0f)
-        {
+        if (Vec3Normalize(axis[2]) == 0.0f)
             Scr_FxParamError(3, "spawnFx called with (0 0 0) up direction", fxId);
-            return;
-        }
-
-        float invLen = 1.0f / upLen;
-        axis[2][0] *= invLen;
-        axis[2][1] *= invLen;
-        axis[2][2] *= invLen;
-
-        axisCount++;
+        axisCount = 1;
     }
 
-    // Required forward vector (arg 2)
     Scr_GetVector(2, axis[0]);
-
-    float forwardLen = sqrtf(axis[0][0] * axis[0][0] +
-        axis[0][1] * axis[0][1] +
-        axis[0][2] * axis[0][2]);
-
-    if (forwardLen == 0.0f)
-    {
+    if (Vec3Normalize(axis[0]) == 0.0f)
         Scr_FxParamError(2, "spawnFx called with (0 0 0) forward direction", fxId);
-        return;
-    }
-
-    float invLen = 1.0f / forwardLen;
-    axis[0][0] *= invLen;
-    axis[0][1] *= invLen;
-    axis[0][2] *= invLen;
-
-    axisCount++;
-
-    // Position vector (arg 1)
+    ++axisCount;
+skipAxes:
     Scr_GetVector(1, origin);
-
-    gentity_s *ent = G_Spawn();
+    ent = G_Spawn();
     ent->s.un1.scale = fxId;
     ent->s.eType = ET_FX;
-
-    if ((unsigned char)fxId != fxId)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            9068,
-            0,
-            "ent->s.un1.eventParm2 == fxId\n\t%i, %i",
-            (unsigned char)fxId,
-            fxId
-        );
-    }
+    iassert(ent->s.un1.eventParm2 == fxId);
 
     G_SetOrigin(ent, origin);
     Scr_SetFxAngles(axisCount, axis, ent->s.lerp.apos.trBase);
-
-    if (ent->s.time2)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
-            9071,
-            1,
-            "%s\n\t(ent->s.time2) = %i",
-            "(ent->s.time2 == 0)",
-            ent->s.time2
-        );
-    }
+    iassert(ent->s.time2 == 0);
 
     SV_LinkEntity(ent);
     Scr_AddEntity(ent);
@@ -8238,102 +8086,60 @@ void Scr_GetMapSunDirection()
     Scr_AddVector(level.mapSunDirection);
 }
 
-// aislop
 void Scr_SetSunDirection()
 {
-    // Ensure exactly one parameter is passed
+    float v[3]; // [sp+50h]
+    const char *cmd;
+
     if (Scr_GetNumParam() != 1)
-    {
         Scr_Error("Incorrect number of parameters\n");
-        return;
-    }
+    Scr_GetVector(0, v);
 
-    float sunDir[3];
-    Scr_GetVector(0, sunDir);
+    float mag = sqrtf(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+    float divisor = (mag <= 0.0f) ? 1.0f : mag;
+    float invMag = 1.0f / divisor;
+    v[0] *= invMag;
+    v[1] *= invMag;
+    v[2] *= invMag;
 
-    // Normalize the vector
-    float len = sqrtf(sunDir[0] * sunDir[0] + sunDir[1] * sunDir[1] + sunDir[2] * sunDir[2]);
-
-    if (len == 0.0f)
-    {
-        Scr_Error("Sun direction cannot be a zero vector\n");
-        return;
-    }
-
-    float invLen = 1.0f / len;
-    sunDir[0] *= invLen;
-    sunDir[1] *= invLen;
-    sunDir[2] *= invLen;
-
-    // Format and store sun direction as a config string
-    const char *sunDirStr = va("%f %f %f", sunDir[0], sunDir[1], sunDir[2]);
-    SV_SetConfigstring(CS_SUNDIR, sunDirStr);
+    cmd = va("%g %g %g", v[0], v[1], v[2]);
+    SV_SetConfigstring(CS_SUNDIR, cmd);
 }
 
-// aislop
 void Scr_LerpSunDirection()
 {
+    float dirEnd[3];   // var_38
+    float dirBegin[3]; // var_28
+    float lerpTime;    // f31
+    const char *cmd;
+
     if (Scr_GetNumParam() != 3)
-    {
         Scr_Error("Incorrect number of parameters\n");
-        return;
-    }
+    Scr_GetVector(0, dirBegin);
+    Scr_GetVector(1, dirEnd);
+    lerpTime = Scr_GetFloat(2);
 
-    float sunDirBegin[3];
-    float sunDirEnd[3];
-
-    Scr_GetVector(0, sunDirBegin);
-    Scr_GetVector(1, sunDirEnd);
-    float lerpTime = Scr_GetFloat(2);
-
-    // Validate and normalize start direction
-    float lenBegin = sqrtf(sunDirBegin[0] * sunDirBegin[0] +
-        sunDirBegin[1] * sunDirBegin[1] +
-        sunDirBegin[2] * sunDirBegin[2]);
-
-    if (lenBegin == 0.0f)
-    {
-        Scr_Error("Start sun direction cannot be a zero vector\n");
-        return;
-    }
-
-    float invLenBegin = 1.0f / lenBegin;
-    sunDirBegin[0] *= invLenBegin;
-    sunDirBegin[1] *= invLenBegin;
-    sunDirBegin[2] *= invLenBegin;
-
-    // Validate and normalize end direction
-    float lenEnd = sqrtf(sunDirEnd[0] * sunDirEnd[0] +
-        sunDirEnd[1] * sunDirEnd[1] +
-        sunDirEnd[2] * sunDirEnd[2]);
-
-    if (lenEnd == 0.0f)
-    {
-        Scr_Error("End sun direction cannot be a zero vector\n");
-        return;
-    }
-
-    float invLenEnd = 1.0f / lenEnd;
-    sunDirEnd[0] *= invLenEnd;
-    sunDirEnd[1] *= invLenEnd;
-    sunDirEnd[2] *= invLenEnd;
+    float magBegin = sqrtf(dirBegin[0]*dirBegin[0] + dirBegin[1]*dirBegin[1] + dirBegin[2]*dirBegin[2]);
+    float magEnd   = sqrtf(dirEnd[0]*dirEnd[0]     + dirEnd[1]*dirEnd[1]     + dirEnd[2]*dirEnd[2]);
+    float invBegin = 1.0f / ((magBegin <= 0.0f) ? 1.0f : magBegin);
+    float invEnd   = 1.0f / ((magEnd   <= 0.0f) ? 1.0f : magEnd);
+    dirBegin[0] *= invBegin;
+    dirBegin[1] *= invBegin;
+    dirBegin[2] *= invBegin;
+    dirEnd[0]   *= invEnd;
+    dirEnd[1]   *= invEnd;
+    dirEnd[2]   *= invEnd;
 
     if (lerpTime <= 0.001f)
-    {
         Scr_Error("Lerp time must be greater than 1 ms\n");
-        return;
-    }
 
-    int lerpBeginTime = level.time;
-    int lerpEndTime = lerpBeginTime + (int)(lerpTime * 1000.0f);
+    int lerpEndTime = (int)(lerpTime * 1000.0f + (float)level.time);
 
-    const char *configStr = va(
-        "%f %f %f %f %f %f %d %d",
-        sunDirBegin[0], sunDirBegin[1], sunDirBegin[2],
-        sunDirEnd[0], sunDirEnd[1], sunDirEnd[2],
-        lerpBeginTime, lerpEndTime);
-
-    SV_SetConfigstring(CS_SUNDIR, configStr);
+    cmd = va("%g %g %g %g %g %g %d %d",
+        dirBegin[0], dirBegin[1], dirBegin[2],
+        dirEnd[0],   dirEnd[1],   dirEnd[2],
+        level.time, lerpEndTime);
+    SV_SetConfigstring(CS_SUNDIR, cmd);
 }
 
 
@@ -11056,54 +10862,69 @@ void __cdecl GScr_GetLightFovOuter(scr_entref_t entref)
     Scr_AddFloat(fov);
 }
 
-// aislop
-void GScr_SetLightFovRange(scr_entref_t entref)
+void GScr_SetLightFovRange(scr_entref_t entref) // KISAKTODO: another cleanup pass
 {
-    gentity_s *ent = GScr_SetupLightEntity(entref);
-    const ComPrimaryLight *lightDef = Com_GetPrimaryLight(ent->s.index.primaryLight);
+    gentity_s *ent;
+    const ComPrimaryLight *refLight;
+    float outerFov;        // f25
+    float cosOuter;        // f31 (first half of function)
+    float clampedCosOuter; // f29 — max(lightDef.cosHalfFovOuter, min(cosOuter, 1.0))
+    float cosInner;        // f31 (second half, output)
 
-    if (!lightDef)
-        MyAssertHandler(__FILE__, 14134, 0, "%s", "refLight");
+    ent = GScr_SetupLightEntity(entref);
+    refLight = Com_GetPrimaryLight(ent->s.index.primaryLight);
+    iassert(refLight);
 
-    float outerFov = Scr_GetFloat(0);
-    if (outerFov < 1.0f || outerFov >= 120.0f)
+    outerFov = Scr_GetFloat(0);
+    if (outerFov < 0.99900001f || outerFov >= 120.001f)
         Scr_ParamError(0, "outer fov must be in the range of 1 to 120");
 
-    float cosOuter = cosf(outerFov * (M_PI / 180.0f * 0.5f));
-    if (cosOuter < lightDef->cosHalfFovOuter - 0.001f)
+    //cosOuter = cosf(outerFov * 0.017453292f * 0.5f);
+    cosOuter = cosf(outerFov * 0.017453292f) * 0.5f; // blops bug fix? This seems more right to me
+    if (cosOuter < refLight->cosHalfFovOuter - 0.001f)
         Scr_ParamError(0, "outer fov cannot be larger than the fov when the map was compiled");
 
-    float clampedCosOuter = fmaxf(cosOuter, lightDef->cosHalfFovOuter - 0.001f);
-    float innerCos = lightDef->cosHalfFovInner;
+    {
+        float upperClamped = (cosOuter >= 1.0f) ? 1.0f : cosOuter;
+        clampedCosOuter = (refLight->cosHalfFovOuter >= cosOuter)
+            ? refLight->cosHalfFovOuter
+            : upperClamped;
+    }
 
     if (Scr_GetNumParam() == 2)
     {
         float innerFov = Scr_GetFloat(1);
-        if (innerFov < 0.0f || innerFov >= outerFov + 0.001f)
+        if (innerFov < -0.001f || innerFov >= outerFov + 0.001f)
             Scr_ParamError(1, "inner fov must be in the range of 0 to outer fov");
 
-        innerCos = cosf(innerFov * (M_PI / 180.0f * 0.5f));
-        innerCos = fminf(innerCos, clampedCosOuter + 0.001f);
+        //float rawCosInner = cosf(innerFov * 0.017453292f * 0.5f);
+        float rawCosInner = cosf(innerFov * 0.017453292f) * 0.5f;// blops bug fix? This seems more right to me
+
+        float upperClampedInner = (rawCosInner >= 1.0f) ? 1.0f : rawCosInner;
+        cosInner = ((clampedCosOuter + 0.001f) >= rawCosInner)
+            ? (clampedCosOuter + 0.001f)
+            : upperClampedInner;
     }
     else
     {
-        innerCos = fminf(innerCos, clampedCosOuter + 0.001f);
+        float floor_ = clampedCosOuter + 0.001f;
+        cosInner = (refLight->cosHalfFovInner >= floor_)
+            ? floor_
+            : refLight->cosHalfFovInner;
     }
 
-    if (clampedCosOuter <= 0.0f || clampedCosOuter >= innerCos || innerCos > 1.0f)
+    if (clampedCosOuter <= 0.0f || clampedCosOuter >= cosInner || cosInner > 1.0f)
     {
-        const char *debugMsg = va(
-            "Invalid FOV configuration: cosHalfFovOuter = %.6f, cosHalfFovInner = %.6f",
-            clampedCosOuter, innerCos
-        );
-
-        MyAssertHandler(__FILE__, 14157, 0,
-            "0.0f < cosHalfFovOuter && cosHalfFovOuter < cosHalfFovInner && cosHalfFovInner <= 1.0f\n\t%s",
+        const char *debugMsg = va("%g, %g", clampedCosOuter, cosInner);
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp",
+            14157, 0, "%s\n\t%s",
+            "0.0f < cosHalfFovOuter && cosHalfFovOuter < cosHalfFovInner && cosHalfFovInner <= 1.0f",
             debugMsg);
     }
 
     ent->s.lerp.u.primaryLight.cosHalfFovOuter = clampedCosOuter;
-    ent->s.lerp.u.primaryLight.cosHalfFovInner = innerCos;
+    ent->s.lerp.u.primaryLight.cosHalfFovInner = cosInner;
 }
 
 
