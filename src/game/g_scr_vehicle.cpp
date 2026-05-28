@@ -4329,7 +4329,7 @@ void VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
     AxisToAngles(*(const mat3x3 *)&axis, angles);
 
     phys->angles[0] = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0f, 0.05f);
-    phys->angles[1] = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, 0.05f);
+    phys->angles[2] = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, 0.05f);
 
     CLAMP(phys->angles[0], -60.0f, 60.0f);
     CLAMP(phys->angles[2], -60.0f, 60.0f);
