@@ -125,14 +125,10 @@ dsound_sample_t *__cdecl DSOUNDRecord_NewSample()
     dsound_sample_t *pRecSample; // [esp+0h] [ebp-4h]
 
     if (!g_recording_initialized)
-        return 0;
-    if (s_recordingSamplePtr - s_recordingSamples > 65)
-        MyAssertHandler(
-            ".\\groupvoice\\record_dsound.cpp",
-            197,
-            0,
-            "%s",
-            "s_recordingSamplePtr - s_recordingSamples <= MAX_CLIENTS + 1");
+        return nullptr;
+
+    iassert(s_recordingSamplePtr - s_recordingSamples <= 64 /* MAX_CLIENTS */ + 1);
+
     pRecSample = s_recordingSamplePtr++;
     memset(pRecSample, 0, sizeof(dsound_sample_t));
     pRecSample->frequency = g_sound_recordFrequency;
@@ -272,7 +268,7 @@ int __cdecl DSOUNDRecord_Init(bool bCallDsoundInit)
     g_recording_initialized = 0;
     if (bCallDsoundInit && (hr = DirectSoundCaptureCreate(0, &g_pDSCaptureInstance, 0), hr < 0))
     {
-        Com_PrintError(9, "Error initializing direct sound instance!  %s\n", hr);
+        Com_PrintError(9, "Error initializing direct sound instance!  0x%x\n", hr);
         return 0;
     }
     else
