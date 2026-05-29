@@ -189,10 +189,8 @@ bool __cdecl Actor_CoverArrival_Resume(actor_s *self, ai_state_t ePrevState)
 
 actor_think_result_t __cdecl Actor_CoverArrival_Think(actor_s *self)
 {
-    scr_animscript_t *StopAnim; // r3
-
     iassert(self->bUseGoalWeight);
-    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->cover_arrival, 0, self->eAnimMode);
+    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->cover_arrival, AI_MOVE_STOP, self->eAnimMode);
     self->pushable = 0;
     if (Actor_IsAnimScriptAlive(self))
     {
@@ -205,8 +203,7 @@ actor_think_result_t __cdecl Actor_CoverArrival_Think(actor_s *self)
     else
     {
         Actor_SetState(self, AIS_EXPOSED);
-        StopAnim = Actor_GetStopAnim(self);
-        Actor_SetAnimScript(self, StopAnim, 0, AI_ANIM_MOVE_CODE);
+        Actor_SetAnimScript(self, Actor_GetStopAnim(self), AI_MOVE_STOP, AI_ANIM_MOVE_CODE);
         Actor_ClearPath(self);
         return ACTOR_THINK_REPEAT;
     }

@@ -51,6 +51,7 @@ struct AnimScriptList
 };
 
 struct actor_s;
+enum ai_movemode_t : unsigned __int8;
 
 void __cdecl Actor_InitAnim(actor_s *self);
 unsigned int __cdecl Actor_IsAnimScriptAlive(actor_s *self);
@@ -58,7 +59,7 @@ void __cdecl Actor_KillAnimScript(actor_s *self);
 void __cdecl Actor_SetAnimScript(
     actor_s *self,
     scr_animscript_t *pAnimScriptFunc,
-    unsigned __int8 moveMode,
+    ai_movemode_t moveMode,
     ai_animmode_t animMode);
 void __cdecl Actor_AnimMoveAway(actor_s *self, scr_animscript_t *pAnimScriptFunc);
 void __cdecl Actor_AnimStop(actor_s *self, scr_animscript_t *pAnimScriptFunc);

@@ -1055,7 +1055,7 @@ void __cdecl Actor_MoveAlongPathWithTeam(actor_s *self, bool bRun, bool bUseInte
         if (!IsMoving)
         {
             stateLevel = self->stateLevel;
-            self->moveMode = 0;
+            self->moveMode = AI_MOVE_STOP;
             self->eAnimMode = AI_ANIM_MOVE_CODE;
             if (stateLevel < 5 && self->eState[stateLevel + 1] != AIS_NEGOTIATION)
             {

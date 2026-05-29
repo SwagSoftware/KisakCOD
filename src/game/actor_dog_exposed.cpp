@@ -72,7 +72,7 @@ void __cdecl Actor_Dog_Attack(actor_s *self)
     {
         if ((AnimScriptList *)self->pAnimScriptFunc == &g_scr_data.dogAnim && !Actor_IsAnimScriptAlive(self))
             Actor_KillAnimScript(self);
-        Actor_SetAnimScript(self, &g_animScriptTable[self->species]->combat, 0, AI_ANIM_MOVE_CODE);
+        Actor_SetAnimScript(self, &g_animScriptTable[self->species]->combat, AI_MOVE_STOP, AI_ANIM_MOVE_CODE);
     }
 }
 

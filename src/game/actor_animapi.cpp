@@ -14,27 +14,9 @@
 
 void __cdecl Actor_InitAnim(actor_s *self)
 {
-    if (self->AnimScriptHandle)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp",
-            16,
-            0,
-            "%s",
-            "self->AnimScriptHandle == 0");
-    if (self->pAnimScriptFunc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp",
-            17,
-            0,
-            "%s",
-            "self->pAnimScriptFunc == NULL");
-    if (self->eAnimMode)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp",
-            18,
-            0,
-            "%s",
-            "self->eAnimMode == AI_ANIM_UNKNOWN");
+    iassert(self->AnimScriptHandle == 0);
+    iassert(self->pAnimScriptFunc == NULL);
+    iassert(self->eAnimMode == AI_ANIM_UNKNOWN);
 }
 
 unsigned int __cdecl Actor_IsAnimScriptAlive(actor_s *self)
@@ -58,6 +40,7 @@ void __cdecl Actor_KillAnimScript(actor_s *self)
             0,
             "%s",
             "Scr_IsSystemActive( SCR_SYS_GAME )");
+
     AnimScriptHandle = self->AnimScriptHandle;
     self->pAnimScriptFunc = 0;
     if (AnimScriptHandle)
@@ -72,17 +55,15 @@ void __cdecl Actor_KillAnimScript(actor_s *self)
 void __cdecl Actor_SetAnimScript(
     actor_s *self,
     scr_animscript_t *pAnimScriptFunc,
-    unsigned __int8 moveMode,
+    ai_movemode_t moveMode,
     ai_animmode_t animMode)
 {
     ai_animmode_t eScriptSetAnimMode; // r11
     gentity_s *ent; // r11
-    unsigned __int16 v10; // r3
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 72, 0, "%s", "self");
-    if (!pAnimScriptFunc)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 73, 0, "%s", "pAnimScriptFunc");
+    iassert(self);
+    iassert(pAnimScriptFunc);
+
     if (self->pAnimScriptFunc == pAnimScriptFunc)
     {
         eScriptSetAnimMode = self->eScriptSetAnimMode;
@@ -114,10 +95,8 @@ void __cdecl Actor_SetAnimScript(
         self->moveMode = moveMode;
         self->pushable = 1;
         Actor_ClearKeepClaimedNode(self);
-        v10 = Scr_ExecEntThread(self->ent, pAnimScriptFunc->func, 0);
-        self->AnimScriptHandle = v10;
-        if (!v10)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 117, 0, "%s", "self->AnimScriptHandle");
+        self->AnimScriptHandle = Scr_ExecEntThread(self->ent, pAnimScriptFunc->func, 0);
+        iassert(self->AnimScriptHandle);
         G_XAnimUpdateEnt(self->ent);
         Scr_IncTime();
     }
@@ -125,66 +104,52 @@ void __cdecl Actor_SetAnimScript(
 
 void __cdecl Actor_AnimMoveAway(actor_s *self, scr_animscript_t *pAnimScriptFunc)
 {
-    unsigned __int8 v4; // r5
-    scr_animscript_t *p_move; // r4
-
-    if (!pAnimScriptFunc)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 132, 0, "%s", "pAnimScriptFunc");
-    if ((float)((float)(self->Physics.vVelocity[0] * self->Physics.vVelocity[0])
-        + (float)(self->Physics.vVelocity[1] * self->Physics.vVelocity[1])) >= 1.0)
+    iassert(pAnimScriptFunc);
+    
+    if (Vec2LengthSq(self->Physics.vVelocity) >= 1.0f)
     {
-        v4 = 2;
-        p_move = &g_animScriptTable[self->species]->move;
+        Actor_SetAnimScript(self, &g_animScriptTable[self->species]->move, AI_MOVE_WALK, AI_ANIM_MOVE_CODE);
     }
     else
     {
-        v4 = 1;
-        p_move = pAnimScriptFunc;
+        Actor_SetAnimScript(self, pAnimScriptFunc, AI_MOVE_STOP_SOON, AI_ANIM_MOVE_CODE);
     }
-    Actor_SetAnimScript(self, p_move, v4, AI_ANIM_MOVE_CODE);
+
     self->bUseGoalWeight = 0;
 }
 
 void __cdecl Actor_AnimStop(actor_s *self, scr_animscript_t *pAnimScriptFunc)
 {
-    if (!pAnimScriptFunc)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 150, 0, "%s", "pAnimScriptFunc");
+    iassert(pAnimScriptFunc);
+
     Actor_CheckCollisions(self);
+
     if (self->pCloseEnt.isDefined())
     {
         Actor_AnimMoveAway(self, pAnimScriptFunc);
     }
     else
     {
-        if (!pAnimScriptFunc)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 156, 0, "%s", "pAnimScriptFunc");
-        Actor_SetAnimScript(self, pAnimScriptFunc, 0, AI_ANIM_MOVE_CODE);
+        iassert(pAnimScriptFunc);
+        Actor_SetAnimScript(self, pAnimScriptFunc, AI_MOVE_STOP, AI_ANIM_MOVE_CODE);
         self->bUseGoalWeight = 0;
     }
 }
 
 void __cdecl Actor_AnimWalk(actor_s *self, scr_animscript_t *pAfterMoveAnimScriptFunc)
 {
-    int iPathEndTime; // r10
-    unsigned __int8 v5; // r5
-    scr_animscript_t *p_move; // r4
+    iassert(Actor_HasPath(self));
+    iassert(pAfterMoveAnimScriptFunc);
 
-    if (!Actor_HasPath(self))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 175, 0, "%s", "Actor_HasPath( self )");
-    if (!pAfterMoveAnimScriptFunc)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 176, 0, "%s", "pAfterMoveAnimScriptFunc");
-    iPathEndTime = self->Path.iPathEndTime;
-    if (iPathEndTime && iPathEndTime - level.time < 200)
+    if (self->Path.iPathEndTime && self->Path.iPathEndTime - level.time < 200)
     {
-        v5 = 1;
-        p_move = pAfterMoveAnimScriptFunc;
+        Actor_SetAnimScript(self, pAfterMoveAnimScriptFunc, AI_MOVE_STOP_SOON, AI_ANIM_MOVE_CODE);
     }
     else
     {
-        v5 = 2;
-        p_move = &g_animScriptTable[self->species]->move;
+        Actor_SetAnimScript(self, &g_animScriptTable[self->species]->move, AI_MOVE_WALK, AI_ANIM_MOVE_CODE);
     }
-    Actor_SetAnimScript(self, p_move, v5, AI_ANIM_MOVE_CODE);
+
     self->bUseGoalWeight = 0;
 }
 
@@ -217,85 +182,61 @@ scr_animscript_t *__cdecl Actor_GetStopAnim(actor_s *self)
 
 void __cdecl Actor_AnimTryWalk(actor_s *self)
 {
-    int iPathEndTime; // r10
-    scr_animscript_t *StopAnim; // r4
-    unsigned __int8 v4; // r5
-
     if (self->pCloseEnt.isDefined())
     {
         Actor_AnimMoveAway(self, &g_animScriptTable[self->species]->stop);
     }
     else
     {
-        if (!Actor_HasPath(self))
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 235, 0, "%s", "Actor_HasPath( self )");
-        iPathEndTime = self->Path.iPathEndTime;
-        if (iPathEndTime && iPathEndTime - level.time < 200)
+        iassert(Actor_HasPath(self));
+        if (self->Path.iPathEndTime && self->Path.iPathEndTime - level.time < 200)
         {
-            StopAnim = Actor_GetStopAnim(self);
-            v4 = 1;
+            Actor_SetAnimScript(self, Actor_GetStopAnim(self), AI_MOVE_STOP_SOON, AI_ANIM_MOVE_CODE);
         }
         else
         {
-            v4 = 2;
-            StopAnim = &g_animScriptTable[self->species]->move;
+            Actor_SetAnimScript(self, &g_animScriptTable[self->species]->move, AI_MOVE_WALK, AI_ANIM_MOVE_CODE);
         }
-        Actor_SetAnimScript(self, StopAnim, v4, AI_ANIM_MOVE_CODE);
+
         self->bUseGoalWeight = 0;
     }
 }
 
 void __cdecl Actor_AnimRun(actor_s *self, scr_animscript_t *pAfterMoveAnimScriptFunc)
 {
-    int iPathEndTime; // r10
-    unsigned __int8 v5; // r5
-    scr_animscript_t *p_move; // r4
+    iassert(Actor_HasPath(self));
+    iassert(pAfterMoveAnimScriptFunc);
 
-    if (!Actor_HasPath(self))
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 258, 0, "%s", "Actor_HasPath( self )");
-    if (!pAfterMoveAnimScriptFunc)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 259, 0, "%s", "pAfterMoveAnimScriptFunc");
-    iPathEndTime = self->Path.iPathEndTime;
-    if (iPathEndTime && iPathEndTime - level.time < 200)
+    if (self->Path.iPathEndTime && self->Path.iPathEndTime - level.time < 200)
     {
-        v5 = 1;
-        p_move = pAfterMoveAnimScriptFunc;
+        Actor_SetAnimScript(self, pAfterMoveAnimScriptFunc, AI_MOVE_STOP_SOON, AI_ANIM_MOVE_CODE);
     }
     else
     {
-        v5 = 3;
-        p_move = &g_animScriptTable[self->species]->move;
+        Actor_SetAnimScript(self, &g_animScriptTable[self->species]->move, AI_MOVE_RUN, AI_ANIM_MOVE_CODE);
     }
-    Actor_SetAnimScript(self, p_move, v5, AI_ANIM_MOVE_CODE);
+
     self->bUseGoalWeight = 0;
 }
 
 void __cdecl Actor_AnimTryRun(actor_s *self)
 {
-    int iPathEndTime; // r10
-    scr_animscript_t *StopAnim; // r4
-    unsigned __int8 v4; // r5
-
     if (self->pCloseEnt.isDefined())
     {
         Actor_AnimMoveAway(self, &g_animScriptTable[self->species]->stop);
     }
     else
     {
-        if (!Actor_HasPath(self))
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 280, 0, "%s", "Actor_HasPath( self )");
-        iPathEndTime = self->Path.iPathEndTime;
-        if (iPathEndTime && iPathEndTime - level.time <= 200)
+        iassert(Actor_HasPath(self));
+        if (self->Path.iPathEndTime && self->Path.iPathEndTime - level.time <= 200)
         {
-            StopAnim = Actor_GetStopAnim(self);
-            v4 = 1;
+            Actor_SetAnimScript(self, Actor_GetStopAnim(self), AI_MOVE_STOP_SOON, AI_ANIM_MOVE_CODE);
         }
         else
         {
-            v4 = 3;
-            StopAnim = &g_animScriptTable[self->species]->move;
+            Actor_SetAnimScript(self, &g_animScriptTable[self->species]->move, AI_MOVE_RUN, AI_ANIM_MOVE_CODE);
         }
-        Actor_SetAnimScript(self, StopAnim, v4, AI_ANIM_MOVE_CODE);
+
         self->bUseGoalWeight = 0;
     }
 }
@@ -344,12 +285,12 @@ void __cdecl Actor_AnimCombat(actor_s *self)
     if (isDefined)
         goto LABEL_17;
 LABEL_18:
-    Actor_SetAnimScript(self, &v5->combat, 0, v7);
+    Actor_SetAnimScript(self, &v5->combat, AI_MOVE_STOP, v7);
 }
 
 void __cdecl Actor_AnimPain(actor_s *self)
 {
-    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->pain, 0, AI_ANIM_USE_BOTH_DELTAS);
+    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->pain, AI_MOVE_STOP, AI_ANIM_USE_BOTH_DELTAS);
     self->bUseGoalWeight = 0;
 }
 
@@ -360,7 +301,7 @@ void __cdecl Actor_AnimDeath(actor_s *self)
     eScriptSetAnimMode = self->eScriptSetAnimMode;
     if (eScriptSetAnimMode == AI_ANIM_UNKNOWN)
         eScriptSetAnimMode = AI_ANIM_USE_BOTH_DELTAS;
-    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->death, 0, eScriptSetAnimMode);
+    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->death, AI_MOVE_STOP, eScriptSetAnimMode);
     self->bUseGoalWeight = 0;
 }
 
@@ -368,18 +309,17 @@ void __cdecl Actor_AnimSpecific(actor_s *self, scr_animscript_t *func, ai_animmo
 {
     ai_animmode_t eScriptSetAnimMode; // r6
 
-    if (!func)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animapi.cpp", 389, 0, "%s", "func");
+    iassert(func);
     eScriptSetAnimMode = self->eScriptSetAnimMode;
     if (eScriptSetAnimMode == AI_ANIM_UNKNOWN)
         eScriptSetAnimMode = eAnimMode;
-    Actor_SetAnimScript(self, func, 0, eScriptSetAnimMode);
+    Actor_SetAnimScript(self, func, AI_MOVE_STOP, eScriptSetAnimMode);
     self->bUseGoalWeight = bUseGoalWeight;
 }
 
 void __cdecl Actor_AnimScripted(actor_s *self)
 {
-    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->scripted, 0, AI_ANIM_USE_BOTH_DELTAS);
+    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->scripted, AI_MOVE_STOP, AI_ANIM_USE_BOTH_DELTAS);
     self->bUseGoalWeight = 1;
 }
 

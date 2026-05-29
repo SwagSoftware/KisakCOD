@@ -227,6 +227,15 @@ struct ai_funcs_t
     void( *pfnPain)(actor_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t);
 };
 
+//enum $D416C61A81CE0211A2B0E6C3C6220A84 : __int32
+enum ai_movemode_t : unsigned __int8 // not a real name
+{
+    AI_MOVE_STOP      = 0x0,
+    AI_MOVE_STOP_SOON = 0x1,
+    AI_MOVE_WALK      = 0x2,
+    AI_MOVE_RUN       = 0x3,
+};
+
 struct actor_s
 {
     gentity_s *ent;
@@ -283,7 +292,7 @@ struct actor_s
     scr_animscript_t *pAnimScriptFunc;
     scr_animscript_t AnimScriptSpecific;
     ai_traverse_mode_t eTraverseMode;
-    unsigned __int8 moveMode;
+    ai_movemode_t moveMode;
     bool safeToChangeScript;
     bool bUseGoalWeight;
     ai_animmode_t eAnimMode;
