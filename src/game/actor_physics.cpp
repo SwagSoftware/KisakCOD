@@ -165,22 +165,12 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
         LABEL_66:
             if (gravity)
             {
-                // KISAKFIX: kisak port copy-pasted the X line three times. IDA
-                // `AIPhys_SlideMove` at 0x82208928 restores all three velocity
-                // components from the saved vEndVelocity. Y/Z lost meant every
-                // gravity slide-move that hit iMaxBumps or trace.fraction==1.0
-                // had the saved Y/Z velocity dropped — AI drifts sideways /
-                // refuses to fall / sticks to slopes / floats after bumps.
-                g_pPhys->vVelocity[0] = vEndVelocity[0];
-                g_pPhys->vVelocity[1] = vEndVelocity[1];
-                g_pPhys->vVelocity[2] = vEndVelocity[2];
+                Vec3Copy(vEndVelocity, g_pPhys->vVelocity);
             }
             return (SlideMoveResult)(iBumpCount != 0);
         }
 
-        vEnd[0] = (float)(fTimeLeft * g_pPhys->vVelocity[0]) + g_pPhys->vOrigin[0];
-        vEnd[1] = (float)(fTimeLeft * g_pPhys->vVelocity[1]) + g_pPhys->vOrigin[1];
-        vEnd[2] = (float)(fTimeLeft * g_pPhys->vVelocity[2]) + g_pPhys->vOrigin[2];
+        Vec3Mad(g_pPhys->vOrigin, fTimeLeft, g_pPhys->vVelocity, vEnd);
 
         G_TraceCapsule(&trace, g_pPhys->vOrigin, g_pPhys->vMins, g_pPhys->vMaxs, vEnd, g_pPhys->iEntNum, g_apl.iTraceMask);
 
@@ -212,9 +202,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
 
         if (iNumPlanes >= 5)
         {
-            g_pPhys->vVelocity[0] = 0.0f;
-            g_pPhys->vVelocity[1] = 0.0f;
-            g_pPhys->vVelocity[2] = 0.0f;
+            Vec3Clear(g_pPhys->vVelocity);
             return SLIDEMOVE_CLIPPED;
         }
 
@@ -234,9 +222,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
                     g_pPhys->bStuck = 0;
                 }
 
-                g_pPhys->vVelocity[0] = trace.normal[0] + g_pPhys->vVelocity[0];
-                g_pPhys->vVelocity[1] = trace.normal[1] + g_pPhys->vVelocity[1];
-                g_pPhys->vVelocity[2] = trace.normal[2] + g_pPhys->vVelocity[2];
+                Vec3Add(g_pPhys->vVelocity, trace.normal, g_pPhys->vVelocity);
                 break;
             }
         }

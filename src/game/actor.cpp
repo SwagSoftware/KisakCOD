@@ -1596,7 +1596,6 @@ int __cdecl Actor_IsMovingToMeleeAttack(actor_s *self)
 
 bool __cdecl Actor_SkipPathEndActions(actor_s *self)
 {
-    float *v3; // r10
     double v4; // fp31
     double v5; // fp30
     double v6; // fp29
@@ -1613,10 +1612,10 @@ bool __cdecl Actor_SkipPathEndActions(actor_s *self)
     }
     if (Path_UsesObstacleNegotiation(&self->Path))
     {
-        v3 = (float *)((char *)self + 28 * self->Path.wNegotiationStartNode);
-        v4 = (float)(v3[199] - self->ent->r.currentOrigin[0]);
-        v5 = (float)(v3[200] - self->ent->r.currentOrigin[1]);
-        v6 = (float)(v3[201] - self->ent->r.currentOrigin[2]);
+        const pathpoint_t *pNegPt = &self->Path.pts[self->Path.wNegotiationStartNode];
+        v4 = (float)(pNegPt->vOrigPoint[0] - self->ent->r.currentOrigin[0]);
+        v5 = (float)(pNegPt->vOrigPoint[1] - self->ent->r.currentOrigin[1]);
+        v6 = (float)(pNegPt->vOrigPoint[2] - self->ent->r.currentOrigin[2]);
         if ((float)((float)((float)v5 * (float)v5) + (float)((float)v4 * (float)v4)) <= (double)(float)((float)((float)((float)(self->Physics.vVelocity[2] * self->Physics.vVelocity[2]) + (float)((float)(self->Physics.vVelocity[0] * self->Physics.vVelocity[0]) + (float)(self->Physics.vVelocity[1] * self->Physics.vVelocity[1]))) * (float)0.0049999999) + (float)0.000001))
         {
             if (Actor_PushState(self, AIS_NEGOTIATION))
@@ -1641,7 +1640,6 @@ void __cdecl Actor_PathEndActions(actor_s *self)
     double v2; // fp1
     double v3; // fp31
     char v4; // r11
-    float *v5; // r10
     double v6; // fp31
     double v7; // fp30
     double v8; // fp28
@@ -1683,10 +1681,10 @@ void __cdecl Actor_PathEndActions(actor_s *self)
     }
     if (!Actor_SkipPathEndActions(self) && self->Path.pathEndAnimDistSq <= 0.0)
     {
-        v5 = (float *)((char *)self + 28 * self->Path.wNegotiationStartNode);
-        v6 = (float)(v5[199] - self->ent->r.currentOrigin[0]);
-        v7 = (float)(v5[200] - self->ent->r.currentOrigin[1]);
-        v8 = (float)(v5[201] - self->ent->r.currentOrigin[2]);
+        const pathpoint_t *pNegPt = &self->Path.pts[self->Path.wNegotiationStartNode];
+        v6 = (float)(pNegPt->vOrigPoint[0] - self->ent->r.currentOrigin[0]);
+        v7 = (float)(pNegPt->vOrigPoint[1] - self->ent->r.currentOrigin[1]);
+        v8 = (float)(pNegPt->vOrigPoint[2] - self->ent->r.currentOrigin[2]);
         if (self->Path.iPathEndTime)
             goto LABEL_25;
         v9 = (float)((float)((float)v7 * (float)v7) + (float)((float)v6 * (float)v6));
