@@ -1,5 +1,8 @@
 #pragma once
 #include <cstdint>
+#include <iostream>
+#include <format>
+
 #include "../universal/q_shared.h"
 
 typedef enum
@@ -1597,34 +1600,6 @@ inline int SnapFloatToInt(float x)
 
     iassert(retval == output);
 #endif
-
-    return retval;
-}
-
-// `double` overload — where the binary computes the rounding expression as a double (hex-rays shows `(int)(double_expr + 9.313e-10)`).
-inline int SnapFloatToInt(double x)
-{
-#if defined(KISAK_PURE) && defined(_WIN32)
-    int i;
-    __asm fld x;
-    __asm fistp i;
-    return i;
-#endif
-
-    int retval = _mm_cvtsd_si32(_mm_set_sd(x));
-
-#if defined(_DEBUG) && defined(_WIN32)
-    const float input = x;
-    int32_t output{};
-
-    __asm fld input
-    __asm fistp output
-
-    //iassert(retval == output);
-    if (retval != output)
-        __debugbreak();
-#endif
-
 
     return retval;
 }

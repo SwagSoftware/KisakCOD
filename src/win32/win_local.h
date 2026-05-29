@@ -120,6 +120,12 @@ struct __declspec(align(8)) SysInfo // sizeof=0x260
 
 // LWSS add
 
+#if defined(_WIN32)
+extern _RTL_CRITICAL_SECTION s_criticalSections[];
+#else
+extern std::mutex s_criticalSections[];
+#endif
+
 extern int client_state; // LWSS ADD. This looks similar to signonstate
 extern HWND g_splashWnd;
 
