@@ -300,6 +300,7 @@ void __cdecl ScriptMover_Move(gentity_s *pEnt, const float *vPos, float fTotalTi
     origin[0] = pEnt->r.currentOrigin[0];
     origin[1] = pEnt->r.currentOrigin[1];
     origin[2] = pEnt->r.currentOrigin[2];
+
     ScriptMover_SetupMove(
         &pEnt->s.lerp.pos,
         vPos,
@@ -309,8 +310,7 @@ void __cdecl ScriptMover_Move(gentity_s *pEnt, const float *vPos, float fTotalTi
         origin,
         &pEnt->mover.speed,
         &pEnt->mover.midTime,
-        &pEnt->mover.aDecelTime,
-        //(float *)&pEnt->u30,
+        &pEnt->mover.decelTime,
         pEnt->mover.pos1,
         pEnt->mover.pos2,
         pEnt->mover.pos3);

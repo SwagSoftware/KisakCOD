@@ -4120,9 +4120,6 @@ void VEH_GetWheelOrigin(gentity_s *ent, int idx, float *origin)
 
 void __cdecl VEH_DebugBox(float *pos, float width, float r, float g, float b)
 {
-    // Mirrors CoD3SP.exe!VEH_DebugBox @ 0x8225d598 - a thin wrapper over
-    // G_DebugBox that draws a centered colored cube. Used by VEH_UpdatePath
-    // and Scr_Vehicle_Think when g_vehicleDebug is enabled.
     float color[4];
     float mins[3];
     float maxs[3];
@@ -4194,22 +4191,20 @@ void VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
 
         if (g_vehicleDebug->current.enabled)
         {
-            // KISAKTODO
-            //v114[0] = 1.0;
-            //v114[1] = 0.0;
-            //v114[2] = 0.0;
-            //v114[3] = 1.0;
-            //
-            //mins[0] = -2.0f;
-            //mins[1] = -2.0f;
-            //mins[2] = -2.0f;
-            //
-            //maxs[0] = 2.0f;
-            //maxs[1] = 2.0f;
-            //maxs[2] = 2.0f;
-            //
-            //G_DebugBox(hitPos, mins, maxs, 0.0f, colorBlue, (int)v114, 1);
-            //v15 = g_vehicleDebug;
+            color[0] = 1.0f;
+            color[1] = 0.0f;
+            color[2] = 0.0f;
+            color[3] = 1.0f;
+
+            mins[0] = -2.0f;
+            mins[1] = -2.0f;
+            mins[2] = -2.0f;
+
+            maxs[0] = 2.0f;
+            maxs[1] = 2.0f;
+            maxs[2] = 2.0f;
+
+            G_DebugBox(hitPos, mins, maxs, 0.0f, color, 1, 0);
         }
 
         traceStart[0] = hitPos[0];
@@ -4268,18 +4263,20 @@ void VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity)
 
         if (g_vehicleDebug->current.enabled)
         {
-            // KISAKTODO
-            //v116[0] = 0.0;
-            //v116[1] = 1.0;
-            //v116[2] = 0.0;
-            //v116[3] = 1.0;
-            //v84 = -2.0;
-            //v85 = -2.0;
-            //v86 = -2.0;
-            //v81 = 2.0;
-            //v82 = 2.0;
-            //v83 = 2.0;
-            //G_DebugBox(v12, &v84, &v81, 0.0, v16, (int)v116, 1);
+            color[0] = 0.0f;
+            color[1] = 1.0f;
+            color[2] = 0.0f;
+            color[3] = 1.0f;
+
+            mins[0] = -2.0f;
+            mins[1] = -2.0f;
+            mins[2] = -2.0f;
+
+            maxs[0] = 2.0f;
+            maxs[1] = 2.0f;
+            maxs[2] = 2.0f;
+
+            G_DebugBox(wheelPos[i], mins, maxs, 0.0f, color, 1, 0);
         }
     }
 
@@ -5903,21 +5900,15 @@ static void VEH_LinkPlayer(gentity_s *ent, gentity_s *player)
     __int64 v14; // r8
     __int64 v15; // r6
     int barrel; // r4
-    const float *v17; // r3
     __int64 v18; // r10
     __int64 v19; // r8
     __int64 v20; // r6
     __int16 type; // r10
-    int v22; // [sp+8h] [-F8h]
-    int v23; // [sp+Ch] [-F4h]
-    int v24; // [sp+10h] [-F0h]
-    int v25; // [sp+14h] [-ECh]
-    int v26; // [sp+18h] [-E8h]
-    int v27; // [sp+1Ch] [-E4h]
-    float v28[4]; // [sp+50h] [-B0h] BYREF
-    float v29[3][3]; // [sp+60h] [-A0h] BYREF
-    float v30[3]; // [sp+84h] [-7Ch] BYREF
-    float v31[9][3]; // [sp+90h] [-70h] BYREF
+
+    float angles[3];           // was v28[4] — only angles[0..2] are used
+    float playerMtx[4][3];     // was v29[3][3] + v30[3]
+    float barrelMtx[4][3];     // was v31[9][3] (oversized; only mat4x3 written)
+    const float *axisRot;
 
     client = player->client;
     scr_vehicle = ent->scr_vehicle;
@@ -5932,21 +5923,21 @@ static void VEH_LinkPlayer(gentity_s *ent, gentity_s *player)
         Com_Error(ERR_DROP, "VEH_LinkPlayer: Vehicle already has an owner");
     if (scr_vehicle->boneIndex.player < 0)
         Com_Error(ERR_DROP, "VEH_LinkPlayer: Trying to use vehicle without a bone [tag_player]");
-    G_DObjGetWorldBoneIndexMatrix(ent, scr_vehicle->boneIndex.player, v29);
+    G_DObjGetWorldBoneIndexMatrix(ent, scr_vehicle->boneIndex.player, playerMtx);
     barrel = scr_vehicle->boneIndex.barrel;
     if (barrel < 0)
     {
-        v17 = v29[0];
+        axisRot = playerMtx[0];
     }
     else
     {
-        G_DObjGetWorldBoneIndexMatrix(ent, barrel, v31);
-        v17 = v31[0];
+        G_DObjGetWorldBoneIndexMatrix(ent, barrel, barrelMtx);
+        axisRot = barrelMtx[0];
     }
-    AxisToAngles((const mat3x3&)v17, v28);
-    v28[2] = 0.0;
-    SetClientOrigin(player, v30);
-    SetClientViewAngle(player, v28);
+    AxisToAngles((const mat3x3&)*axisRot, angles);
+    angles[2] = 0.0f;
+    SetClientOrigin(player, playerMtx[3]);
+    SetClientViewAngle(player, angles);
 
     if (!G_EntLinkToWithOffset(player, ent, scr_const.tag_player, (float*)vec3_origin, vec3_origin))
         Com_Error(ERR_DROP, "VEH_LinkPlayer: cannot link to vehicle bone [tag_player]");
@@ -5971,7 +5962,7 @@ static void VEH_LinkPlayer(gentity_s *ent, gentity_s *player)
     client->linkAnglesMinClamp[0] = -180.0;
     client->linkAnglesMaxClamp[0] = 180.0;
     client->ps.vehicleType = type;
-    G_UpdateViewAngleClamp(client, v28);
+    G_UpdateViewAngleClamp(client, angles);
 }
 
 static void VEH_UnlinkPlayer(gentity_s *player)
