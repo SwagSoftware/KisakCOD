@@ -492,8 +492,9 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
             || ent->s.eType == ET_ITEM
             || ent->s.eType == ET_MISSILE
 #ifdef KISAK_SP
-            || ent->s.eType == ET_ACTOR_CORPSE)
+            || ent->s.eType == ET_ACTOR_CORPSE
 #endif
+            )
         {
             SV_LinkEntity(ent);
         }
