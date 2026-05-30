@@ -881,10 +881,4 @@ inline constexpr T truncate_cast(U value)
 	return static_cast<T>(value);
 }
 
-#pragma function(abs)          // 'abs': intrinsic function, cannot be defined (In Release mode only! Thanks MSVC)
-inline int abs(int n)
-{
-	return n < 0 ? -n : n;
-}
-
 extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);
