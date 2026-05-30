@@ -1013,12 +1013,12 @@ void __cdecl GetHudElemOrg(
     float x; // [esp+18h] [ebp-8h]
     float y; // [esp+1Ch] [ebp-4h]
 
-    if (!orgX)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 582, 0, "%s", "orgX");
-    if (!orgY)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 583, 0, "%s", "orgY");
+    iassert(orgX);
+    iassert(orgY);
+
     x = ScrPlace_ApplyX(scrPlace, xVirtual, (alignScreen >> 3) & 7);
     *orgX = AlignHudElemX(alignOrg, x, width);
+
     y = ScrPlace_ApplyY(scrPlace, yVirtual, alignScreen & 7);
     *orgY = AlignHudElemY(alignOrg, y, height);
 }
@@ -1028,14 +1028,9 @@ double __cdecl AlignHudElemX(int32_t alignOrg, float x, float width)
     uint32_t alignX; // [esp+4h] [ebp-4h]
 
     alignX = (alignOrg >> 2) & 3;
-    if (alignX > 2)
-        MyAssertHandler(
-            ".\\cgame\\cg_hudelem.cpp",
-            558,
-            0,
-            "%s\n\t(alignOrg) = %i",
-            "(alignX == 0 || alignX == 1 || alignX == 2)",
-            alignOrg);
+
+    iassert((alignX == 0 || alignX == 1 || alignX == 2));
+
     return (float)(x - width * s_alignScale[alignX]);
 }
 
@@ -1044,14 +1039,9 @@ double __cdecl AlignHudElemY(int32_t alignOrg, float y, float height)
     int32_t alignY; // [esp+4h] [ebp-4h]
 
     alignY = alignOrg & 3;
-    if ((alignOrg & 3) != 0 && alignY != 1 && alignY != 2)
-        MyAssertHandler(
-            ".\\cgame\\cg_hudelem.cpp",
-            569,
-            0,
-            "%s\n\t(alignOrg) = %i",
-            "(alignY == 0 || alignY == 1 || alignY == 2)",
-            alignOrg);
+
+    iassert((alignY == 0 || alignY == 1 || alignY == 2));
+
     return (float)(y - height * s_alignScale[alignY]);
 }
 
@@ -1104,10 +1094,10 @@ void __cdecl CopyStringToHudElemString(char *string, char *hudElemString)
     const char *v3; // eax
     int32_t stringLen; // [esp+10h] [ebp-4h]
 
-    if (!string)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 718, 0, "%s", "string");
-    if (!hudElemString)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 719, 0, "%s", "hudElemString");
+    iassert(string);
+
+    iassert(hudElemString);
+
     v2 = strlen(string);
     stringLen = v2;
     if (v2 < 256)
