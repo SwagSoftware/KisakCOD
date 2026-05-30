@@ -615,6 +615,7 @@ char __cdecl CG_LookingThroughNightVision(int32_t localClientNum)
 
     if (clientUIActives[0].connectionState < CA_ACTIVE)
         return 0;
+
     if (nightVisionDisableEffects->current.enabled)
         return 0;
 

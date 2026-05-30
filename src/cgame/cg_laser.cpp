@@ -64,14 +64,9 @@ void __cdecl CG_Laser_Add_Core(
     float laserEnd[3]; // [esp+118h] [ebp-Ch] BYREF
 
     Com_Memset((uint32_t *)&traceResults, 0, 44);
-    if ((uint32_t)laserOwner > LASER_OWNER_PLAYER)
-        MyAssertHandler(
-            ".\\cgame\\cg_laser.cpp",
-            43,
-            0,
-            "%s\n\t(laserOwner) = %i",
-            "(laserOwner == LASER_OWNER_PLAYER || laserOwner == LASER_OWNER_NON_PLAYER)",
-            laserOwner);
+
+    iassert((laserOwner == LASER_OWNER_PLAYER || laserOwner == LASER_OWNER_NON_PLAYER));
+
     if (laserOwner == LASER_OWNER_PLAYER)
         laserRange = cg_laserRangePlayer->current.value;
     else
@@ -90,8 +85,9 @@ void __cdecl CG_Laser_Add_Core(
     laserLength = traceResults.fraction * laserRange;
     scale = laserLength - cg_laserEndOffset->current.value;
     Vec3Mad(orient->origin, scale, orient->axis[0], laserEnd);
-    if (traceResults.fraction > 1.000100016593933)
-        MyAssertHandler(".\\cgame\\cg_laser.cpp", 60, 0, "%s", "traceResults.fraction <= 1.0001f");
+
+    iassert(traceResults.fraction <= 1.0001f);
+
     beam.begin[0] = laserBegin[0];
     beam.begin[1] = laserBegin[1];
     beam.begin[2] = laserBegin[2];

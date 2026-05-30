@@ -429,14 +429,9 @@ void __cdecl UpdateShellShockSound(int32_t localClientNum, const shellshock_parm
                 fade = 0.0;
             SND_PlayBlendedSoundAliases(alias0, alias1, fade, 1.0, (SndEntHandle)ENTITYNUM_NONE, vec3_origin, 0, SASYS_CGAME);
         }
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1071,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+
+        iassert(localClientNum == 0);
+
         end = parms->sound.loopEndDelay + duration + cgameGlob->time - time;
         if (cgameGlob->time >= end)
         {
@@ -468,14 +463,13 @@ void __cdecl UpdateShellShockLookControl(int32_t localClientNum, const shellshoc
     float fade; // [esp+14h] [ebp-8h]
     cg_s *cgameGlob;
 
-    if (!parms)
-        MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 530, 0, "%s", "parms");
-    if (time < 0)
-        MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 531, 0, "%s", "time >= 0");
-    if (duration < 0)
-        MyAssertHandler(".\\cgame\\cg_shellshock.cpp", 532, 0, "%s", "duration >= 0");
+    iassert(parms);
+    iassert(time >= 0);
+    iassert(duration >= 0);
+
     if (!parms->lookControl.affect)
         goto LABEL_8;
+
     if (duration - time < parms->lookControl.fadeTime)
     {
         if (duration - time <= 0)

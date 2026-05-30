@@ -110,41 +110,26 @@ void __cdecl CG_AddMovingTracer(const cg_s *cgameGlob, localEntity_s *le, const 
     float lengthFromBase; // [esp+5Ch] [ebp-4h]
 
     BG_EvaluateTrajectory(&le->pos, cgameGlob->time, start);
-    if (!(!isnan((le->pos.trDelta)[0]) && !isnan((le->pos.trDelta)[1]) && !isnan((le->pos.trDelta)[2])))
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_localents.cpp",
-            105,
-            0,
-            "%s",
-            "!IS_NAN((le->pos.trDelta)[0]) && !IS_NAN((le->pos.trDelta)[1]) && !IS_NAN((le->pos.trDelta)[2])");
-    }
+
+    iassert(!IS_NAN((le->pos.trDelta)[0]) && !IS_NAN((le->pos.trDelta)[1]) && !IS_NAN((le->pos.trDelta)[2]));
+
     Vec3NormalizeTo(le->pos.trDelta, dir);
     Vec3Sub(start, le->pos.trBase, startFromBase);
     lengthFromBase = Vec3Dot(startFromBase, dir);
-    if (lengthFromBase < 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_localents.cpp",
-            110,
-            1,
-            "%s\n\t(lengthFromBase) = %g",
-            "(lengthFromBase >= 0.0f)",
-            lengthFromBase);
+
+    iassert(lengthFromBase >= 0.0f);
+
     lengthFromClip = le->tracerClipDist - lengthFromBase;
-    if (lengthFromClip < 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_localents.cpp",
-            112,
-            1,
-            "%s\n\t(lengthFromClip) = %g",
-            "(lengthFromClip >= 0.0f)",
-            lengthFromClip);
+
+    iassert(lengthFromClip >= 0.0f);
+
     value = cg_tracerLength->current.value;
     v4 = value - lengthFromClip;
     if (v4 < 0.0)
         scale = value;
     else
         scale = lengthFromClip;
+
     end[3] = scale;
     Vec3Mad(start, scale, dir, end);
     CG_DrawTracer(start, end, refdef);
