@@ -34,7 +34,7 @@
 enum {
     NUM_WEAP_ANIMS = 0x20,
     WEAP_ANIM_ADS_UP = 31,
-    WEAP_ANIM_ADS_DOWN = 32
+    WEAP_ANIM_ADS_DOWN = 32,
 };
 
 const float MYLERP_START = 0.3f;
@@ -3728,7 +3728,7 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     }
     MemoryFile = SaveMemory_GetMemoryFile(save);
     v10 = 1;
-    if (v14 > 1)
+    if (numWeapons > 1)
     {
         v11 = &cg_weaponsArray[0][1];
         do
@@ -3763,7 +3763,7 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
             }
             ++v10;
             ++v11;
-        } while (v10 < v14);
+        } while (v10 < numWeapons);
     }
 }
 
@@ -3791,9 +3791,9 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
         numWeapons = v8[0];
         iassert(LODWORD(numWeapons) <= BG_GetNumWeapons());
     }
-    if (LODWORD(v3) > 1)
+    if (LODWORD(numWeapons) > 1)
     {
-        v5 = LODWORD(v3) - 1;
+        v5 = LODWORD(numWeapons) - 1;
         p_hasAnimTree = &cg_weaponsArray[0][1].hasAnimTree;
         do
         {

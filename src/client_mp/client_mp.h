@@ -830,8 +830,6 @@ extern BOOL g_waitingForServer;
 extern bool cl_waitingOnServerToLoadMap[1];
 extern BOOL cl_serverLoadingMap;
 
-#define STATIC_MAX_LOCAL_CLIENTS 1 // LWSS Add
-
 extern clientConnection_t clientConnections[STATIC_MAX_LOCAL_CLIENTS];
 extern clientUIActive_t clientUIActives[STATIC_MAX_LOCAL_CLIENTS];
 extern clientActive_t clients[STATIC_MAX_LOCAL_CLIENTS];
