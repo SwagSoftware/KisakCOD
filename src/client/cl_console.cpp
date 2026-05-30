@@ -17,6 +17,14 @@
 #endif
 #include <sound/snd_public.h>
 
+enum {
+    COLOR_FIRST = 48,
+    COLOR_LAST = 57,
+    CONTXTCMD_LEN_HUDICON = 7,
+    CONTXTCMD_ARG_HUDICON_MATERIAL = 3,
+    CON_MSG_TIME_DRIFT_BUFFER = 1000,
+    GAMEMSG_WINDOW_COUNT = 4
+};
 
 const dvar_t *con_typewriterColorGlowFailed;
 const dvar_t *con_typewriterColorGlowCompleted;
@@ -191,32 +199,11 @@ void __cdecl Con_ResetMessageWindowTimes(MessageWindow *msgwnd, int32_t serverTi
 
     for (lineOffset = 0; lineOffset < msgwnd->activeLineCount; ++lineOffset)
     {
-        if (msgwnd->lineCount <= 0)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                423,
-                0,
-                "%s\n\t(msgwnd->lineCount) = %i",
-                "(msgwnd->lineCount > 0)",
-                msgwnd->lineCount);
+        iassert(msgwnd->lineCount > 0);
         lineIndex = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if (lineIndex >= msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                426,
-                0,
-                "lineIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                lineIndex,
-                msgwnd->lineCount);
+        bcassert(lineIndex, msgwnd->lineCount);
         line = &msgwnd->lines[lineIndex];
-        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                429,
-                0,
-                "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                line->messageIndex,
-                msgwnd->lineCount);
+        bcassert(line->messageIndex, (uint32_t)msgwnd->lineCount);
         message = &msgwnd->messages[line->messageIndex];
         duration = message->endTime - message->startTime;
         message->startTime = serverTime;
@@ -254,32 +241,11 @@ void __cdecl Con_NudgeMessageWindowTimes(MessageWindow *msgwnd, int32_t serverTi
     lastMessageIndex = -1;
     for (lineOffset = 0; lineOffset < msgwnd->activeLineCount; ++lineOffset)
     {
-        if (msgwnd->lineCount <= 0)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                463,
-                0,
-                "%s\n\t(msgwnd->lineCount) = %i",
-                "(msgwnd->lineCount > 0)",
-                msgwnd->lineCount);
+        iassert(msgwnd->lineCount > 0);
         lineIndex = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if (lineIndex >= msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                466,
-                0,
-                "lineIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                lineIndex,
-                msgwnd->lineCount);
+        bcassert(lineIndex, msgwnd->lineCount);
         line = &msgwnd->lines[lineIndex];
-        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                469,
-                0,
-                "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                line->messageIndex,
-                msgwnd->lineCount);
+        bcassert(line->messageIndex, (uint32_t)msgwnd->lineCount);
         if (line->messageIndex != lastMessageIndex)
         {
             lastMessageIndex = line->messageIndex;
@@ -311,12 +277,9 @@ void __cdecl Con_ClearNotify(int32_t localClientNum)
 
 void __cdecl Con_ClearMessageWindow(MessageWindow *msgwnd)
 {
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 512, 0, "%s", "msgwnd");
-    if (!msgwnd->messages)
-        MyAssertHandler(".\\client\\cl_console.cpp", 513, 0, "%s", "msgwnd->messages");
-    if (!msgwnd->lines)
-        MyAssertHandler(".\\client\\cl_console.cpp", 514, 0, "%s", "msgwnd->lines");
+    iassert(msgwnd);
+    iassert(msgwnd->messages);
+    iassert(msgwnd->lines);
     msgwnd->textBufPos = 0;
     msgwnd->messageIndex = 0;
     msgwnd->firstLineIndex = 0;
@@ -358,8 +321,7 @@ void __cdecl Con_CheckResize()
     if (cls.consoleFont)
     {
         con.fontHeight = R_TextHeight(cls.consoleFont);
-        if (con.fontHeight <= 0)
-            MyAssertHandler(".\\client\\cl_console.cpp", 554, 0, "%s", "con.fontHeight > 0");
+        iassert(con.fontHeight > 0);
         con.visibleLineCount = (int)(con.screenMax[1] - con.screenMin[1] - (double)(2 * con.fontHeight) - 6.0 * 4.0)
             / con.fontHeight;
         con.visiblePixelWidth = (int)(con.screenMax[0] - con.screenMin[0] - 10.0 - 6.0 * 3.0);
@@ -420,14 +382,7 @@ void __cdecl SetupChatField(int32_t localClientNum, int32_t teamChat, int32_t wi
         chatField->chatField.charHeight = 16.0;
     else
         chatField->chatField.charHeight = 10.0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client\\../client_mp/client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     clientUIActives[0].keyCatchers ^= 0x20u;
 }
 
@@ -513,12 +468,9 @@ void __cdecl Con_InitMessageWindow(
     int32_t fadeIn,
     int32_t fadeOut)
 {
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 569, 0, "%s", "msgwnd");
-    if (!lines)
-        MyAssertHandler(".\\client\\cl_console.cpp", 570, 0, "%s", "lines");
-    if (lineCount < padding)
-        MyAssertHandler(".\\client\\cl_console.cpp", 571, 0, "lineCount >= padding\n\t%i, %i", lineCount, padding);
+    iassert(msgwnd);
+    iassert(lines);
+    iassert(lineCount >= padding);
     msgwnd->lines = lines;
     msgwnd->messages = messages;
     msgwnd->circularTextBuffer = text;
@@ -530,8 +482,7 @@ void __cdecl Con_InitMessageWindow(
     msgwnd->lineCount = lineCount;
     msgwnd->padding = padding;
     msgwnd->scrollTime = scrollTime;
-    if (fadeOut <= 0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 589, 0, "%s\n\t(fadeOut) = %i", "(fadeOut > 0)", fadeOut);
+    iassert(fadeOut > 0);
     msgwnd->fadeIn = fadeIn;
     msgwnd->fadeOut = fadeOut;
 }
@@ -641,21 +592,9 @@ void Con_OneTimeInit()
     {
         dvarDesc = con_gameMsgWindowNMsgTime_Descs[gameWindowIndex];
         snprintf(con_gameMsgWindowNMsgTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNMsgTime_Names[gameWindowIndex]), "con_gameMsgWindow%dMsgTime", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNMsgTime_Names[gameWindowIndex]) != 25)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1083,
-                0,
-                "%s",
-                "strlen( dvarName ) == sizeof( con_gameMsgWindowNMsgTime_Names[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNMsgTime_Names[gameWindowIndex]) == sizeof(con_gameMsgWindowNMsgTime_Names[gameWindowIndex]) - 1);
         snprintf(dvarDesc, ARRAYSIZE(con_gameMsgWindowNMsgTime_Descs[gameWindowIndex]), "On screen time for game messages in seconds in game message window %d", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNMsgTime_Descs[gameWindowIndex]) != 68)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1083,
-                0,
-                "%s",
-                "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNMsgTime_Descs[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNMsgTime_Descs[gameWindowIndex]) == sizeof(con_gameMsgWindowNMsgTime_Descs[gameWindowIndex]) - 1);
         mine.value.max = FLT_MAX;
         mine.value.min = 0.0f;
         con_gameMsgWindowNMsgTime[gameWindowIndex] = Dvar_RegisterFloat(
@@ -666,21 +605,9 @@ void Con_OneTimeInit()
             dvarDesc);
         dvarDesca = con_gameMsgWindowNLineCount_Descs[gameWindowIndex];
         snprintf(con_gameMsgWindowNLineCount_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNLineCount_Names[gameWindowIndex]), "con_gameMsgWindow%dLineCount", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNLineCount_Names[gameWindowIndex]) != 27)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1086,
-                0,
-                "%s",
-                "strlen( dvarName ) == sizeof( con_gameMsgWindowNLineCount_Names[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNLineCount_Names[gameWindowIndex]) == sizeof(con_gameMsgWindowNLineCount_Names[gameWindowIndex]) - 1);
         snprintf(dvarDesca, ARRAYSIZE(con_gameMsgWindowNLineCount_Descs[gameWindowIndex]), "Maximum number of lines of text visible at once in game message window %d", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNLineCount_Descs[gameWindowIndex]) != 72)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1086,
-                0,
-                "%s",
-                "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNLineCount_Descs[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNLineCount_Descs[gameWindowIndex]) == sizeof(con_gameMsgWindowNLineCount_Descs[gameWindowIndex]) - 1);
         con_gameMsgWindowNLineCount[gameWindowIndex] = Dvar_RegisterInt(
             con_gameMsgWindowNLineCount_Names[gameWindowIndex],
             defaultGameMessageWindowLineCounts[gameWindowIndex],
@@ -689,23 +616,11 @@ void Con_OneTimeInit()
             dvarDesca);
         dvarDescb = con_gameMsgWindowNScrollTime_Descs[gameWindowIndex];
         snprintf(con_gameMsgWindowNScrollTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNScrollTime_Names[gameWindowIndex]), "con_gameMsgWindow%dScrollTime", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNScrollTime_Names[gameWindowIndex]) != 28)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1090,
-                0,
-                "%s",
-                "strlen( dvarName ) == sizeof( con_gameMsgWindowNScrollTime_Names[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNScrollTime_Names[gameWindowIndex]) == sizeof(con_gameMsgWindowNScrollTime_Names[gameWindowIndex]) - 1);
         snprintf(dvarDescb, ARRAYSIZE(con_gameMsgWindowNScrollTime_Descs[gameWindowIndex]),
             "Time to scroll messages when the oldest message is removed in game message window %d",
             gameWindowIndex);
-        if (strlen(con_gameMsgWindowNScrollTime_Descs[gameWindowIndex]) != 83)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1090,
-                0,
-                "%s",
-                "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNScrollTime_Descs[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNScrollTime_Descs[gameWindowIndex]) == sizeof(con_gameMsgWindowNScrollTime_Descs[gameWindowIndex]) - 1);
         minf.value.max = FLT_MAX;
         minf.value.min = 0.0f;
         con_gameMsgWindowNScrollTime[gameWindowIndex] = Dvar_RegisterFloat(
@@ -716,21 +631,9 @@ void Con_OneTimeInit()
             dvarDescb);
         dvarDescc = con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex];
         snprintf(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex]), "con_gameMsgWindow%dFadeInTime", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex]) != 28)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1093,
-                0,
-                "%s",
-                "strlen( dvarName ) == sizeof( con_gameMsgWindowNFadeInTime_Names[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex]) == sizeof(con_gameMsgWindowNFadeInTime_Names[gameWindowIndex]) - 1);
         snprintf(dvarDescc, ARRAYSIZE(con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex]), "Time to fade in new messages in game message window %d", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex]) != 53)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1093,
-                0,
-                "%s",
-                "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex]) == sizeof(con_gameMsgWindowNFadeInTime_Descs[gameWindowIndex]) - 1);
         if (gameWindowIndex == 2)
             v18 = 0.75f;
         else
@@ -745,21 +648,9 @@ void Con_OneTimeInit()
             dvarDescc);
         dvarDescd = con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex];
         snprintf(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex], ARRAYSIZE(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex]), "con_gameMsgWindow%dFadeOutTime", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex]) != 29)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1096,
-                0,
-                "%s",
-                "strlen( dvarName ) == sizeof( con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex]) == sizeof(con_gameMsgWindowNFadeOutTime_Names[gameWindowIndex]) - 1);
         snprintf(dvarDescd, ARRAYSIZE(con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex]), "Time to fade out old messages in game message window %d", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex]) != 54)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1096,
-                0,
-                "%s",
-                "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex]) == sizeof(con_gameMsgWindowNFadeOutTime_Descs[gameWindowIndex]) - 1);
         if (gameWindowIndex == 1)
             v17 = 0.0099999998f;
         else
@@ -778,21 +669,9 @@ void Con_OneTimeInit()
             ARRAYSIZE(con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex]),
             "con_gameMsgWindow%dSplitscreenScale",
             gameWindowIndex);
-        if (strlen(con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex]) != 34)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1099,
-                0,
-                "%s",
-                "strlen( dvarName ) == sizeof( con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex]) == sizeof(con_gameMsgWindowNSplitscreenScale_Names[gameWindowIndex]) - 1);
         snprintf(dvarDesce, ARRAYSIZE(con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex]), "Scaling of game message window %d in splitscreen", gameWindowIndex);
-        if (strlen(con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex]) != 47)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1099,
-                0,
-                "%s",
-                "strlen( dvarDesc ) == sizeof( con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex] ) - 1");
+        iassert(strlen(con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex]) == sizeof(con_gameMsgWindowNSplitscreenScale_Descs[gameWindowIndex]) - 1);
         mini.value.max = FLT_MAX;
         mini.value.min = 0.0f;
         con_gameMsgWindowNSplitscreenScale[gameWindowIndex] = Dvar_RegisterFloat(
@@ -941,15 +820,7 @@ char __cdecl CL_ConsolePrint_AddLine(
     const char *text; // [esp+58h] [ebp-4h] BYREF
 
     iassert(txt);
-    if (color < 48 || color > 57)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            1164,
-            0,
-            "color not in [COLOR_FIRST, COLOR_LAST]\n\t%i not in [%i, %i]",
-            color,
-            48,
-            57);
+    iassert(color >= COLOR_FIRST && color <= COLOR_LAST);
     if (callDepth)
         return color;
     callDepth = 1;
@@ -970,15 +841,13 @@ char __cdecl CL_ConsolePrint_AddLine(
     if (!pixelWidth)
         pixelWidth = con.visiblePixelWidth;
     v16 = R_TextLineWrapPosition(txt, 512 - con.lineOffset, pixelWidth, font, xScale);
-    if (!v16)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1144, 0, "%s", "lineWrapPos");
+    iassert(v16); // KISAK_AI: lineWrapPos -> v16
     wrapPosition = *v16 != 0 ? v16 : 0;
     if (txt == wrapPosition && con.lineOffset)
     {
         Con_Linefeed(localClientNum, channel, flags);
         v15 = R_TextLineWrapPosition(txt, 512 - con.lineOffset, pixelWidth, font, xScale);
-        if (!v15)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1144, 0, "%s", "lineWrapPos");
+        iassert(v15); // KISAK_AI: lineWrapPos -> v15
         wrapPosition = *v15 != 0 ? v15 : 0;
     }
     text = txt;
@@ -1020,61 +889,21 @@ char __cdecl CL_ConsolePrint_AddLine(
                     {
                         if (c > 255)
                         {
-                            if (con.lineOffset >= 0x200)
-                                MyAssertHandler(
-                                    ".\\client\\cl_console.cpp",
-                                    1259,
-                                    0,
-                                    "con.lineOffset doesn't index sizeof( con.textTempLine )\n\t%i not in [0, %i)",
-                                    con.lineOffset,
-                                    512);
+                            bcassert(con.lineOffset, sizeof(con.textTempLine)); // 0x200
                             con.textTempLine[con.lineOffset++] = BYTE1(c);
                             c = (uint8_t)c;
-                            if (con.lineOffset >= 0x201)
-                                MyAssertHandler(
-                                    ".\\client\\cl_console.cpp",
-                                    1263,
-                                    0,
-                                    "con.lineOffset doesn't index sizeof( con.textTempLine ) + 1\n\t%i not in [0, %i)",
-                                    con.lineOffset,
-                                    513);
+                            bcassert(con.lineOffset, sizeof(con.textTempLine) + 1); // 0x201
                         }
-                        if (con.lineOffset >= 0x200)
-                            MyAssertHandler(
-                                ".\\client\\cl_console.cpp",
-                                1265,
-                                0,
-                                "con.lineOffset doesn't index sizeof( con.textTempLine )\n\t%i not in [0, %i)",
-                                con.lineOffset,
-                                512);
+                        bcassert(con.lineOffset, sizeof(con.textTempLine)); // 0x200
                         con.textTempLine[con.lineOffset++] = c;
-                        if (con.lineOffset >= 0x201)
-                            MyAssertHandler(
-                                ".\\client\\cl_console.cpp",
-                                1268,
-                                0,
-                                "con.lineOffset doesn't index sizeof( con.textTempLine ) + 1\n\t%i not in [0, %i)",
-                                con.lineOffset,
-                                513);
+                        bcassert(con.lineOffset, sizeof(con.textTempLine) + 1); // 0x201
                         atStartOfBrokenLine = 0;
                     }
                     goto LABEL_70;
                 }
-                if (con.lineOffset >= 0x1F9)
-                    MyAssertHandler(
-                        ".\\client\\cl_console.cpp",
-                        1236,
-                        0,
-                        "con.lineOffset doesn't index sizeof( con.textTempLine ) - CONTXTCMD_LEN_HUDICON\n\t%i not in [0, %i)",
-                        con.lineOffset,
-                        505);
-                if (!IsValidMaterialHandle(*(Material *const *)(text + 3)))
-                    MyAssertHandler(
-                        ".\\client\\cl_console.cpp",
-                        1238,
-                        0,
-                        "%s",
-                        "IsValidMaterialHandle( *reinterpret_cast< const MaterialHandle * >( &text[CONTXTCMD_ARG_HUDICON_MATERIAL] ) )");
+                bcassert(con.lineOffset, sizeof(con.textTempLine) - CONTXTCMD_LEN_HUDICON); // 0x1F9
+                // Kisak: I screwed this up, and can't figure it out.
+                // iassert(IsValidMaterialHandle(*reinterpret_cast<Material*>(&text[CONTXTCMD_ARG_HUDICON_MATERIAL]))); // IsValidMaterialHandle( *reinterpret_cast< const MaterialHandle * >( &text[CONTXTCMD_ARG_HUDICON_MATERIAL] )
                 con.textTempLine[con.lineOffset++] = 94;
                 v9 = &con.textTempLine[con.lineOffset];
                 v10 = text;
@@ -1083,37 +912,16 @@ char __cdecl CL_ConsolePrint_AddLine(
                 v9[6] = v10[6];
                 con.lineOffset += 7;
                 text += 7;
-                if (con.lineOffset >= 0x201)
-                    MyAssertHandler(
-                        ".\\client\\cl_console.cpp",
-                        1244,
-                        0,
-                        "con.lineOffset doesn't index sizeof( con.textTempLine ) + 1\n\t%i not in [0, %i)",
-                        con.lineOffset,
-                        513);
+                bcassert(con.lineOffset, sizeof(con.textTempLine) + 1); // 0x201
                 atStartOfBrokenLine = 0;
             }
             else
             {
-                if (con.lineOffset >= 0x1FF)
-                    MyAssertHandler(
-                        ".\\client\\cl_console.cpp",
-                        1225,
-                        0,
-                        "con.lineOffset doesn't index sizeof( con.textTempLine ) - 1\n\t%i not in [0, %i)",
-                        con.lineOffset,
-                        511);
+                bcassert(con.lineOffset, sizeof(con.textTempLine) - 1); // 0x1FF
                 color = *text;
                 con.textTempLine[con.lineOffset++] = 94;
                 con.textTempLine[con.lineOffset++] = color;
-                if (con.lineOffset >= 0x201)
-                    MyAssertHandler(
-                        ".\\client\\cl_console.cpp",
-                        1229,
-                        0,
-                        "con.lineOffset doesn't index sizeof( con.textTempLine ) + 1\n\t%i not in [0, %i)",
-                        con.lineOffset,
-                        513);
+                bcassert(con.lineOffset, sizeof(con.textTempLine) + 1); // 0x201
                 ++text;
                 atStartOfBrokenLine = 0;
             }
@@ -1127,35 +935,13 @@ char __cdecl CL_ConsolePrint_AddLine(
                 atStartOfBrokenLine = 1;
                 if (color != 55)
                 {
-                    if (color < 48 || color > 57)
-                        MyAssertHandler(
-                            ".\\client\\cl_console.cpp",
-                            1282,
-                            0,
-                            "color not in [COLOR_FIRST, COLOR_LAST]\n\t%i not in [%i, %i]",
-                            color,
-                            48,
-                            57);
-                    if (con.lineOffset >= 0x1FF)
-                        MyAssertHandler(
-                            ".\\client\\cl_console.cpp",
-                            1283,
-                            0,
-                            "con.lineOffset doesn't index sizeof( con.textTempLine ) - 1\n\t%i not in [0, %i)",
-                            con.lineOffset,
-                            511);
+                    iassert(color >= COLOR_FIRST && color <= COLOR_LAST);
+                    bcassert(con.lineOffset, sizeof(con.textTempLine) - 1); // 0x1FF
                     con.textTempLine[con.lineOffset] = 94;
                     //*(_BYTE *)(con.lineOffset + 11724761) = color;
                     con.consoleText[con.lineOffset + 1] = color;
                     con.lineOffset += 2;
-                    if (con.lineOffset >= 0x201)
-                        MyAssertHandler(
-                            ".\\client\\cl_console.cpp",
-                            1287,
-                            0,
-                            "con.lineOffset doesn't index sizeof( con.textTempLine ) + 1\n\t%i not in [0, %i)",
-                            con.lineOffset,
-                            513);
+                    bcassert(con.lineOffset, sizeof(con.textTempLine) + 1); // 0x201
                 }
             }
             v13 = (char *)text;
@@ -1165,8 +951,7 @@ char __cdecl CL_ConsolePrint_AddLine(
                     ++v13;
             }
             v14 = R_TextLineWrapPosition(v13, 512 - con.lineOffset, pixelWidth, font, xScale);
-            if (!v14)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1144, 0, "%s", "lineWrapPos");
+            iassert(v14); // KISAK_AI: lineWrapPos -> v14
             wrapPosition = *v14 != 0 ? v14 : 0;
         }
     }
@@ -1186,13 +971,11 @@ void __cdecl Con_UpdateNotifyMessage(int32_t localClientNum, uint32_t channel, i
 {
     print_msg_dest_t dest; // [esp+0h] [ebp-4h]
 
-    if (!Con_IsChannelOpen(channel))
-        MyAssertHandler(".\\client\\cl_console.cpp", 976, 0, "%s", "Con_IsChannelOpen(channel)");
+    iassert(Con_IsChannelOpen(channel));
     Con_UpdateNotifyMessageWindow(localClientNum, channel, duration, flags, CON_DEST_MINICON);
     for (dest = CON_DEST_GAME_FIRST; (uint32_t)dest <= CON_DEST_GAME4; ++dest)
         Con_UpdateNotifyMessageWindow(localClientNum, channel, duration, flags, dest);
-    if (!com_developer)
-        MyAssertHandler(".\\client\\cl_console.cpp", 982, 0, "%s", "com_developer");
+    iassert(com_developer);
     if (com_developer->current.integer)
         Con_UpdateNotifyMessageWindow(localClientNum, channel, duration, flags, CON_DEST_ERROR);
 }
@@ -1238,18 +1021,9 @@ void __cdecl Con_UpdateMessage(int32_t localClientNum, MessageWindow *msgwnd, in
 {
     Message *message; // [esp+0h] [ebp-4h]
 
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 678, 0, "%s", "msgwnd");
-    if (msgwnd->messageIndex >= (uint32_t)msgwnd->lineCount)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            679,
-            0,
-            "msgwnd->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-            msgwnd->messageIndex,
-            msgwnd->lineCount);
-    if (!msgwnd->lineCount)
-        MyAssertHandler(".\\client\\cl_console.cpp", 682, 0, "%s", "msgwnd->lineCount != 0");
+    iassert(msgwnd);
+    bcassert(msgwnd->messageIndex, (uint32_t)msgwnd->lineCount);
+    iassert(msgwnd->lineCount != 0);
     msgwnd->messageIndex = (msgwnd->messageIndex + 1) % msgwnd->lineCount;
     message = &msgwnd->messages[msgwnd->messageIndex];
     if (localClientNum >= 1)
@@ -1270,13 +1044,7 @@ MessageWindow *__cdecl Con_GetDestWindow(int32_t localClientNum, print_msg_dest_
     case CON_DEST_ERROR:
         return (MessageWindow *)&con.color[4630 * localClientNum - 53];
     }
-    if (dest < CON_DEST_GAME_FIRST || dest > CON_DEST_GAME4)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            951,
-            0,
-            "%s",
-            "dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST");
+    iassert(dest >= CON_DEST_GAME_FIRST && dest <= CON_DEST_GAME_LAST);
     return (MessageWindow *)&con.color[4630 * localClientNum - 2621 + 13 * dest];
 }
 
@@ -1284,14 +1052,12 @@ void __cdecl Con_UpdateNotifyLine(int32_t localClientNum, uint32_t channel, bool
 {
     print_msg_dest_t dest; // [esp+0h] [ebp-4h]
 
-    if (!Con_IsChannelOpen(channel))
-        MyAssertHandler(".\\client\\cl_console.cpp", 1001, 0, "%s", "Con_IsChannelOpen(channel)");
+    iassert(Con_IsChannelOpen(channel));
     Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, CON_DEST_CONSOLE);
     Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, CON_DEST_MINICON);
     for (dest = CON_DEST_GAME_FIRST; (uint32_t)dest <= CON_DEST_GAME4; ++dest)
         Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, dest);
-    if (!com_developer)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1008, 0, "%s", "com_developer");
+    iassert(com_developer);
     if (com_developer->current.integer)
         Con_UpdateNotifyLineWindow(localClientNum, channel, lineFeed, flags, CON_DEST_ERROR);
 }
@@ -1321,24 +1087,9 @@ void __cdecl Con_UpdateMessageWindowLine(int32_t localClientNum, MessageWindow *
     MessageLine *linea; // [esp+Ch] [ebp-8h]
     int32_t serverTime; // [esp+10h] [ebp-4h]
 
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 893, 0, "%s", "msgwnd");
-    if (msgwnd->firstLineIndex >= (uint32_t)msgwnd->lineCount)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            894,
-            0,
-            "msgwnd->firstLineIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-            msgwnd->firstLineIndex,
-            msgwnd->lineCount);
-    if (msgwnd->messageIndex >= (uint32_t)msgwnd->lineCount)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            895,
-            0,
-            "msgwnd->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-            msgwnd->messageIndex,
-            msgwnd->lineCount);
+    iassert(msgwnd);
+    bcassert(msgwnd->firstLineIndex, (uint32_t)msgwnd->lineCount);
+    bcassert(msgwnd->messageIndex, (uint32_t)msgwnd->lineCount);
     if (localClientNum >= 1)
         serverTime = 0;
     else
@@ -1360,34 +1111,13 @@ void __cdecl Con_UpdateMessageWindowLine(int32_t localClientNum, MessageWindow *
         if (newPadLineOffset > 0)
         {
             imod = (msgwnd->firstLineIndex + newPadLineOffset - 1) % msgwnd->lineCount;
-            if (imod >= msgwnd->lineCount)
-                MyAssertHandler(
-                    ".\\client\\cl_console.cpp",
-                    925,
-                    0,
-                    "imod doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                    imod,
-                    msgwnd->lineCount);
+            bcassert(imod, msgwnd->lineCount);
             linea = &msgwnd->lines[imod];
-            if (linea->messageIndex >= (uint32_t)msgwnd->lineCount)
-                MyAssertHandler(
-                    ".\\client\\cl_console.cpp",
-                    927,
-                    0,
-                    "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                    linea->messageIndex,
-                    msgwnd->lineCount);
+            bcassert(linea->messageIndex, (uint32_t)msgwnd->lineCount);
             message = &msgwnd->messages[linea->messageIndex];
             if (message->endTime - msgwnd->fadeOut > serverTime)
             {
-                if (message->endTime < message->startTime)
-                    MyAssertHandler(
-                        ".\\client\\cl_console.cpp",
-                        932,
-                        0,
-                        "message->endTime >= message->startTime\n\t%i, %i",
-                        message->endTime,
-                        message->startTime);
+                iassert(message->endTime >= message->startTime);
                 message->endTime = msgwnd->fadeOut + serverTime;
             }
         }
@@ -1398,8 +1128,7 @@ void __cdecl Con_FreeFirstMessageWindowLine(MessageWindow *msgwnd)
 {
     int32_t activeLineCount; // [esp+0h] [ebp-4h]
 
-    if (msgwnd->activeLineCount <= 0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 696, 0, "%s", "msgwnd->activeLineCount > 0");
+    iassert(msgwnd->activeLineCount > 0);
     --msgwnd->activeLineCount;
     if (++msgwnd->firstLineIndex == msgwnd->lineCount)
         msgwnd->firstLineIndex = 0;
@@ -1417,8 +1146,7 @@ void __cdecl Con_CopyCurrentConsoleLineText(MessageWindow *msgwnd, MessageLine *
 {
     uint32_t poolRemaining; // [esp+0h] [ebp-4h]
 
-    if (!msgLine)
-        MyAssertHandler(".\\client\\cl_console.cpp", 736, 0, "%s", "msgLine");
+    iassert(msgLine);
     while (Con_NeedToFreeMessageWindowLine(msgwnd, con.lineOffset + 1))
         Con_FreeFirstMessageWindowLine(msgwnd);
     poolRemaining = msgwnd->textBufSize - msgwnd->textBufPos;
@@ -1443,7 +1171,7 @@ void __cdecl Con_CopyCurrentConsoleLineText(MessageWindow *msgwnd, MessageLine *
     msgLine->textBufPos = msgwnd->textBufPos;
     msgLine->textBufSize = con.lineOffset;
     if ((msgwnd->textBufSize & (msgwnd->textBufSize - 1)) != 0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 755, 0, "%s", "IsPowerOf2( msgwnd->textBufSize )");
+        iassert(IsPowerOf2(msgwnd->textBufSize));
     msgwnd->textBufPos = (msgwnd->textBufSize - 1) & (con.lineOffset + msgwnd->textBufPos);
     msgwnd->circularTextBuffer[msgwnd->textBufPos] = 10;
     msgwnd->textBufPos = (msgwnd->textBufSize - 1) & (msgwnd->textBufPos + 1);
@@ -1456,11 +1184,9 @@ bool __cdecl Con_NeedToFreeMessageWindowLine(MessageWindow *msgwnd, int32_t char
 
     if (!msgwnd->activeLineCount)
         return 0;
-    if (msgwnd->lineCount <= 0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 720, 0, "%s", "msgwnd->lineCount > 0");
+    iassert(msgwnd->lineCount > 0);
     line = &msgwnd->lines[msgwnd->firstLineIndex];
-    if ((msgwnd->textBufSize & (msgwnd->textBufSize - 1)) != 0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 723, 0, "%s", "IsPowerOf2( msgwnd->textBufSize )");
+    iassert(IsPowerOf2(msgwnd->textBufSize));
     pastLastChar = (msgwnd->textBufSize - 1) & (charCount + msgwnd->textBufPos);
     if (pastLastChar < msgwnd->textBufPos)
         return line->textBufPos >= msgwnd->textBufPos || line->textBufPos < pastLastChar;
@@ -1493,13 +1219,7 @@ int32_t __cdecl PrintableCharsCount(const MessageWindow *msgwnd, MessageLine *li
         v3 = (msgwnd->textBufSize & (msgwnd->textBufSize - 1)) == 0;
     else
         v3 = 1;
-    if (!v3)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            799,
-            0,
-            "%s",
-            "line->textBufSize ? IsPowerOf2( msgwnd->textBufSize ) : true");
+    iassert(line->textBufSize ? IsPowerOf2(msgwnd->textBufSize) : true);
     printedCnt = 0;
     idx = 0;
     while (idx < line->textBufSize)
@@ -1602,21 +1322,21 @@ void __cdecl CL_DeathMessagePrint(
     char deathMsg[1024]; // [esp+18h] [ebp-408h] BYREF
     int32_t color; // [esp+41Ch] [ebp-4h]
 
-    if (!attackerName)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1468, 0, "%s", "attackerName != NULL");
-    if (!victimName)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1469, 0, "%s", "victimName != NULL");
-    if (!&victimColorIndex || victimColorIndex == 94 || victimColorIndex < 48 || victimColorIndex > 57)
+    iassert(attackerName != NULL);
+    iassert(victimName != NULL);
+    /*if (!&victimColorIndex || victimColorIndex == 94 || victimColorIndex < 48 || victimColorIndex > 57)
         MyAssertHandler(".\\client\\cl_console.cpp", 1470, 0, "%s", "I_IsColorIndex( &victimColorIndex )");
     if (!&attackerColorIndex || attackerColorIndex == 94 || attackerColorIndex < 48 || attackerColorIndex > 57)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1471, 0, "%s", "I_IsColorIndex( &attackerColorIndex )");
+        MyAssertHandler(".\\client\\cl_console.cpp", 1471, 0, "%s", "I_IsColorIndex( &attackerColorIndex )");*/
+
+    /*iassert(I_IsColorIndex(&victimColorIndex));
+    iassert(I_IsColorIndex(&attackerColorIndex));*/
     if (!cl_noprint || !cl_noprint->current.enabled)
     {
         if (!con.initialized)
         {
             Con_OneTimeInit();
-            if (!con.initialized)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1480, 0, "%s", "con.initialized");
+            iassert(con.initialized);
         }
         deathMsgLen = 0;
         if (con.lineOffset)
@@ -1624,30 +1344,18 @@ void __cdecl CL_DeathMessagePrint(
         color = ColorIndex(0x37u);
         if (*attackerName)
         {
-            if (attackerColorIndex < 48 || attackerColorIndex > 57)
-                MyAssertHandler(
-                    ".\\client\\cl_console.cpp",
-                    1494,
-                    0,
-                    "attackerColorIndex not in [COLOR_FIRST, COLOR_LAST]\n\t%i not in [%i, %i]",
-                    attackerColorIndex,
-                    48,
-                    57);
+            iassert(attackerColorIndex >= COLOR_FIRST && attackerColorIndex <= COLOR_LAST);
             deathMsg[0] = 94;
-            if (!attackerColorIndex)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1403, 0, "%s", "c != '\\0'");
+            iassert(attackerColorIndex != '\0');
             deathMsg[1] = attackerColorIndex;
             deathMsgLena = CL_AddDeathMessageString(deathMsg, 2u, 0x400u, attackerName);
-            if (deathMsgLena + 1 > 0x400)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+            iassert(deathMsgLena + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
             deathMsg[deathMsgLena] = 94;
             deathMsgLenb = deathMsgLena + 1;
-            if (deathMsgLenb + 1 > 0x400)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+            iassert(deathMsgLenb + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
             deathMsg[deathMsgLenb] = 55;
             deathMsgLenc = deathMsgLenb + 1;
-            if (deathMsgLenc + 1 > 0x400)
-                MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+            iassert(deathMsgLenc + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
             deathMsg[deathMsgLenc] = 32;
             deathMsgLen = deathMsgLenc + 1;
         }
@@ -1659,41 +1367,21 @@ void __cdecl CL_DeathMessagePrint(
             iconWidth,
             iconHeight,
             horzFlipIcon);
-        if (victimColorIndex < 48 || victimColorIndex > 57)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1505,
-                0,
-                "victimColorIndex not in [COLOR_FIRST, COLOR_LAST]\n\t%i not in [%i, %i]",
-                victimColorIndex,
-                48,
-                57);
-        if (deathMsgLend + 1 > 0x400)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+        iassert(victimColorIndex >= COLOR_FIRST && victimColorIndex <= COLOR_LAST);
+        iassert(deathMsgLend + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
         deathMsg[deathMsgLend] = 32;
         deathMsgLene = deathMsgLend + 1;
-        if (deathMsgLene + 1 > 0x400)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+        iassert(deathMsgLene + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
         deathMsg[deathMsgLene] = 94;
         deathMsgLenf = deathMsgLene + 1;
-        if (!victimColorIndex)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1403, 0, "%s", "c != '\\0'");
-        if (deathMsgLenf + 1 > 0x400)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+        iassert(victimColorIndex != '\0');
+        iassert(deathMsgLenf + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
         deathMsg[deathMsgLenf] = victimColorIndex;
         deathMsgLeng = CL_AddDeathMessageString(deathMsg, deathMsgLenf + 1, 0x400u, victimName);
-        if (deathMsgLeng + 1 > 0x400)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+        iassert(deathMsgLeng + 1 <= ARRAY_COUNT(deathMsg)); // 0x400
         deathMsg[deathMsgLeng] = 10;
         deathMsgLenh = deathMsgLeng + 1;
-        if (deathMsgLenh >= 0x400)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                1512,
-                0,
-                "deathMsgLen < ARRAY_COUNT( deathMsg )\n\t%i, %i",
-                deathMsgLenh,
-                1024);
+        bcassert(deathMsgLenh, ARRAY_COUNT(deathMsg)); // 0x400
         deathMsg[deathMsgLenh] = 0;
         CL_ConsolePrint(localClientNum, 5, deathMsg, 0, con.visiblePixelWidth, 0);
     }
@@ -1710,14 +1398,14 @@ uint32_t __cdecl CL_AddDeathMessageString(
     while (*string)
     {
         v5 = *string;
-        if (deathMsgLen + 1 > deathMsgMaxLen)
-            MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+        iassert(deathMsgLen + 1 <= deathMsgMaxLen);
         deathMsg[deathMsgLen++] = v5;
         ++string;
     }
     return deathMsgLen;
 }
 
+#if defined(KISAK_PURE)
 uint32_t __cdecl CL_AddDeathMessageIcon(
     char *deathMsg,
     uint32_t deathMsgLen,
@@ -1735,49 +1423,81 @@ uint32_t __cdecl CL_AddDeathMessageIcon(
     uint32_t deathMsgLend; // [esp+54h] [ebp+Ch]
     uint32_t deathMsgLene; // [esp+54h] [ebp+Ch]
 
-    if (iconWidth <= 0.0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1432, 0, "%s", "iconWidth > 0");
-    if (iconHeight <= 0.0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1433, 0, "%s", "iconHeight > 0");
-    if (!IsValidMaterialHandle(iconShader))
-        MyAssertHandler(".\\client\\cl_console.cpp", 1436, 0, "%s", "IsValidMaterialHandle( iconShader )");
-    if (deathMsgLen + 1 > deathMsgMaxLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+    iassert(iconWidth > 0);
+    iassert(iconHeight > 0);
+    iassert(IsValidMaterialHandle(iconShader));
+    iassert(deathMsgLen + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLen] = 94;
     deathMsgLena = deathMsgLen + 1;
-    if (horzFlipIcon == -1)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1403, 0, "%s", "c != '\\0'");
-    if (deathMsgLena + 1 > deathMsgMaxLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+
+    iassert(horzFlipIcon != -1); // KISAK_AI: c -> horzFlipIcon
+    // "c != '\0'"
+    iassert(deathMsgLena + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLena] = horzFlipIcon + 1;
     deathMsgLenb = deathMsgLena + 1;
     v9 = CL_DeathMessageIconDimension(iconWidth);
-    if (!v9)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1403, 0, "%s", "c != '\\0'");
-    if (deathMsgLenb + 1 > deathMsgMaxLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+    iassert(v9); // KISAK_AI: c -> v9
+    // "c != '\0'"
+    iassert(deathMsgLenb + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLenb] = v9;
     deathMsgLenc = deathMsgLenb + 1;
     v8 = CL_DeathMessageIconDimension(iconHeight);
-    if (!v8)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1403, 0, "%s", "c != '\\0'");
-    if (deathMsgLenc + 1 > deathMsgMaxLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1404, 0, "%s", "deathMsgLen + 1 <= deathMsgMaxLen");
+
+    iassert(v8); // KISAK_AI: c -> v8
+    // "c != '\0'"
+    iassert(deathMsgLenc + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLenc] = v8;
     deathMsgLend = deathMsgLenc + 1;
-    if (deathMsgLend + 4 > deathMsgMaxLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1449, 0, "%s", "deathMsgLen + sizeof( iconShader ) <= deathMsgMaxLen");
+
+    iassert(deathMsgLend + sizeof(iconShader) <= deathMsgMaxLen);
+
     *(uint32_t *)&deathMsg[deathMsgLend] = (uint32_t)iconShader;
     deathMsgLene = deathMsgLend + 4;
-    if (deathMsgLene - deathMsgLen != 8)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            1455,
-            0,
-            "%s",
-            "deathMsgLen - startDeathMsgLen == CONTXTCMD_LEN_HUDICON + 1");
+
+    iassert(deathMsgLene - deathMsgLen == CONTXTCMD_LEN_HUDICON + 1);
+
     return deathMsgLene;
 }
+#else
+uint32_t __cdecl CL_AddDeathMessageIcon(
+    char* deathMsg,
+    uint32_t deathMsgLen,
+    uint32_t deathMsgMaxLen,
+    Material* iconShader,
+    float iconWidth,
+    float iconHeight,
+    bool horzFlipIcon)
+{
+    const uint32_t startLen = deathMsgLen;
+
+    iassert(iconWidth > 0);
+    iassert(iconHeight > 0);
+    iassert(IsValidMaterialHandle(iconShader));
+
+    char encodedWidth = CL_DeathMessageIconDimension(iconWidth);
+    char encodedHeight = CL_DeathMessageIconDimension(iconHeight);
+
+    iassert(horzFlipIcon != -1);
+    iassert(encodedWidth != '\0');
+    iassert(encodedHeight != '\0');
+    iassert(deathMsgLen + CONTXTCMD_LEN_HUDICON + 1 <= deathMsgMaxLen);
+
+    deathMsg[deathMsgLen++] = 94;
+    deathMsg[deathMsgLen++] = (char)(horzFlipIcon + 1);
+    deathMsg[deathMsgLen++] = encodedWidth;
+    deathMsg[deathMsgLen++] = encodedHeight;
+    *(uint32_t*)&deathMsg[deathMsgLen] = (uint32_t)iconShader;
+    deathMsgLen += 4;
+
+    iassert(deathMsgLen - startLen == CONTXTCMD_LEN_HUDICON + 1);
+
+    return deathMsgLen;
+}
+#endif
 
 int32_t __cdecl CL_DeathMessageIconDimension(float size)
 {
@@ -1863,12 +1583,9 @@ bool __cdecl Con_IsAutoCompleteMatch(const char *query, const char *matchToText,
     int32_t matchTextPos; // [esp+4h] [ebp-8h]
     const char *queryPos; // [esp+8h] [ebp-4h]
 
-    if (!query)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1823, 0, "%s", "query");
-    if (!matchToText)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1824, 0, "%s", "matchToText");
-    if (!matchTextLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1825, 0, "%s", "matchTextLen");
+    iassert(query);
+    iassert(matchToText);
+    iassert(matchTextLen);
     if (!con_ignoreMatchPrefixOnly && con_matchPrefixOnly->current.enabled)
         return I_strnicmp(query, matchToText, matchTextLen) == 0;
     matchTextPos = 0;
@@ -2007,14 +1724,7 @@ void __cdecl Con_DrawGameMessageWindow(
 
     if (!cg_paused->current.integer)
     {
-        if (windowIndex >= 4)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2735,
-                0,
-                "windowIndex doesn't index GAMEMSG_WINDOW_COUNT\n\t%i not in [0, %i)",
-                windowIndex,
-                4);
+        bcassert(windowIndex, GAMEMSG_WINDOW_COUNT); // 4
         Con_DrawMessageWindow(
             localClientNum,
             (MessageWindow *)&con.color[4630 * localClientNum - 2582 + 13 * windowIndex],
@@ -2047,8 +1757,7 @@ void __cdecl Con_DrawMessageWindow(
     msgwnd_mode_t mode,
     char textAlignMode)
 {
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2688, 0, "%s", "msgwnd");
+    iassert(msgwnd);
     if (!CL_ShouldntDrawMessageWindow(localClientNum))
     {
         switch (mode)
@@ -2126,8 +1835,7 @@ void __cdecl Con_DrawMessageWindowNewToOld(
     int32_t charHeight; // [esp+68h] [ebp-8h]
     int32_t serverTime; // [esp+6Ch] [ebp-4h]
 
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2543, 0, "%s", "msgwnd");
+    iassert(msgwnd);
     serverTime = CL_GetLocalClientGlobals(localClientNum)->serverTime;
     Con_CullFinishedLines(serverTime, msgwnd);
     charHeight = hudCharHeight;
@@ -2135,36 +1843,13 @@ void __cdecl Con_DrawMessageWindowNewToOld(
         y -= charHeight;
     for (lineOffset = 0; lineOffset < msgwnd->activeLineCount; ++lineOffset)
     {
-        if (msgwnd->lineCount <= 0)
-            MyAssertHandler(".\\client\\cl_console.cpp", 2554, 0, "%s", "msgwnd->lineCount > 0");
+        iassert(msgwnd->lineCount > 0);
         imod = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if ((uint32_t)imod >= msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2556,
-                0,
-                "imod doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                imod,
-                msgwnd->lineCount);
+        bcassert((uint32_t)imod, msgwnd->lineCount);
         line = &msgwnd->lines[imod];
-        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2558,
-                0,
-                "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                line->messageIndex,
-                msgwnd->lineCount);
+        bcassert(line->messageIndex, (uint32_t)msgwnd->lineCount);
         message = &msgwnd->messages[line->messageIndex];
-        if (message->startTime < 0 || message->startTime > serverTime + 1000)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2560,
-                0,
-                "message->startTime not in [0, serverTime + CON_MSG_TIME_DRIFT_BUFFER]\n\t%i not in [%i, %i]",
-                message->startTime,
-                0,
-                serverTime + 1000);
+        iassert(message->startTime >= 0 && message->startTime <= serverTime + CON_MSG_TIME_DRIFT_BUFFER);
         time = serverTime - message->startTime;
         if (time < msgwnd->scrollTime)
         {
@@ -2197,23 +1882,9 @@ void __cdecl Con_DrawMessageWindowNewToOld(
     for (lineOffset = msgwnd->activeLineCount - 1; lineOffset >= 0; --lineOffset)
     {
         imod = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if ((uint32_t)imod >= msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2581,
-                0,
-                "imod doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                imod,
-                msgwnd->lineCount);
+        bcassert((uint32_t)imod, msgwnd->lineCount);
         line = &msgwnd->lines[imod];
-        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2584,
-                0,
-                "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                line->messageIndex,
-                msgwnd->lineCount);
+        bcassert(line->messageIndex, (uint32_t)msgwnd->lineCount);
         message = &msgwnd->messages[line->messageIndex];
         if (up)
             y -= charHeight;
@@ -2395,8 +2066,7 @@ void __cdecl Con_DrawMessageLineOnHUD(
 
 bool __cdecl LineVisible(const MessageWindow *msgwnd, int32_t lineIdx, int32_t time)
 {
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2361, 0, "%s", "msgwnd");
+    iassert(msgwnd);
     return time >= msgwnd->lines[lineIdx].typingStartTime;
 }
 
@@ -2421,21 +2091,12 @@ void __cdecl Con_CullFinishedLines(int32_t serverTime, MessageWindow *msgwnd)
 {
     const MessageLine *line; // [esp+4h] [ebp-4h]
 
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2472, 0, "%s", "msgwnd");
-    if (msgwnd->lineCount <= 0)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2473, 0, "%s", "msgwnd->lineCount > 0");
+    iassert(msgwnd);
+    iassert(msgwnd->lineCount > 0);
     while (msgwnd->activeLineCount)
     {
         line = &msgwnd->lines[msgwnd->firstLineIndex];
-        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2479,
-                0,
-                "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                line->messageIndex,
-                msgwnd->lineCount);
+        bcassert(line->messageIndex, (uint32_t)msgwnd->lineCount);
         if (serverTime - msgwnd->messages[line->messageIndex].endTime < 0)
             break;
         Con_FreeFirstMessageWindowLine(msgwnd);
@@ -2448,20 +2109,11 @@ double __cdecl Con_GetMessageAlpha(Message *message, MessageWindow *msgwnd, int3
     float curalpha; // [esp+14h] [ebp-4h]
 
     curalpha = 1.0;
-    if (!message)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2493, 0, "%s", "message");
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2494, 0, "%s", "msgwnd");
+    iassert(message);
+    iassert(msgwnd);
     if (message->endTime - serverTime < msgwnd->fadeOut)
     {
-        if (msgwnd->fadeOut <= 0)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2501,
-                0,
-                "%s\n\t(msgwnd->fadeOut) = %i",
-                "(msgwnd->fadeOut > 0)",
-                msgwnd->fadeOut);
+        iassert(msgwnd->fadeOut > 0);
         curalpha = (double)(message->endTime - serverTime) / (double)msgwnd->fadeOut * curalpha;
     }
     if (scrollsIntoPlace && msgwnd->fadeIn < msgwnd->scrollTime)
@@ -2470,14 +2122,7 @@ double __cdecl Con_GetMessageAlpha(Message *message, MessageWindow *msgwnd, int3
         {
             if (serverTime - message->startTime <= msgwnd->scrollTime - msgwnd->fadeIn)
                 return 0.0;
-            if (msgwnd->fadeIn <= 0)
-                MyAssertHandler(
-                    ".\\client\\cl_console.cpp",
-                    2513,
-                    0,
-                    "%s\n\t(msgwnd->fadeIn) = %i",
-                    "(msgwnd->fadeIn > 0)",
-                    msgwnd->fadeIn);
+            iassert(msgwnd->fadeIn > 0);
             curalpha = (double)(serverTime - (msgwnd->scrollTime - msgwnd->fadeIn + message->startTime))
                 / (double)msgwnd->fadeIn
                 * curalpha;
@@ -2522,8 +2167,7 @@ void __cdecl Con_DrawMessageWindowOldToNew(
     int32_t groupsize; // [esp+5Ch] [ebp-8h]
     int32_t serverTime; // [esp+60h] [ebp-4h]
 
-    if (!msgwnd)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2616, 0, "%s", "msgwnd");
+    iassert(msgwnd);
     serverTime = CL_GetLocalClientGlobals(localClientNum)->serverTime;
     Con_CullFinishedLines(serverTime, msgwnd);
     groupsize = 0;
@@ -2537,36 +2181,13 @@ void __cdecl Con_DrawMessageWindowOldToNew(
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     for (lineOffset = 0; lineOffset < msgwnd->activeLineCount; ++lineOffset)
     {
-        if (msgwnd->lineCount <= 0)
-            MyAssertHandler(".\\client\\cl_console.cpp", 2632, 0, "%s", "msgwnd->lineCount > 0");
+        iassert(msgwnd->lineCount > 0);
         imod = (lineOffset + msgwnd->firstLineIndex) % msgwnd->lineCount;
-        if ((uint32_t)imod >= msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2634,
-                0,
-                "imod doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                imod,
-                msgwnd->lineCount);
+        bcassert((uint32_t)imod, msgwnd->lineCount);
         line = &msgwnd->lines[imod];
-        if (line->messageIndex >= (uint32_t)msgwnd->lineCount)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2636,
-                0,
-                "line->messageIndex doesn't index msgwnd->lineCount\n\t%i not in [0, %i)",
-                line->messageIndex,
-                msgwnd->lineCount);
+        bcassert(line->messageIndex, (uint32_t)msgwnd->lineCount);
         message = &msgwnd->messages[line->messageIndex];
-        if (message->startTime < 0 || message->startTime > LocalClientGlobals->serverTime + 1000)
-            MyAssertHandler(
-                ".\\client\\cl_console.cpp",
-                2639,
-                0,
-                "message->startTime not in [0, cl->serverTime + CON_MSG_TIME_DRIFT_BUFFER]\n\t%i not in [%i, %i]",
-                message->startTime,
-                0,
-                LocalClientGlobals->serverTime + 1000);
+        iassert(message->startTime >= 0 && message->startTime <= LocalClientGlobals->serverTime + CON_MSG_TIME_DRIFT_BUFFER);
         if (LocalClientGlobals->serverTime <= message->endTime)
         {
             if (LocalClientGlobals->serverTime > message->endTime - msgwnd->scrollTime)
@@ -2574,14 +2195,7 @@ void __cdecl Con_DrawMessageWindowOldToNew(
                 time = LocalClientGlobals->serverTime - (message->endTime - msgwnd->scrollTime);
                 if (time > 0)
                 {
-                    if (msgwnd->scrollTime <= 0)
-                        MyAssertHandler(
-                            ".\\client\\cl_console.cpp",
-                            2650,
-                            0,
-                            "%s\n\t(msgwnd->scrollTime) = %i",
-                            "(msgwnd->scrollTime > 0)",
-                            msgwnd->scrollTime);
+                    iassert(msgwnd->scrollTime > 0);
                     if (up)
                     {
                         v += SnapFloatToInt((float)charHeight * ((float)time / (float)msgwnd->scrollTime));
@@ -2623,14 +2237,7 @@ bool __cdecl CL_ShouldntDrawMessageWindow(int32_t localClientNum)
 #elif KISAK_SP
     uint8_t v1; // r11
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\client.h",
-            548,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if ((clientUIActives[0].keyCatchers & 0x10) == 0)
         return 0;
     v1 = 1;
@@ -2646,14 +2253,7 @@ void __cdecl Con_DrawMiniConsole(int32_t localClientNum, int32_t xPos, int32_t y
     float color[4]; // [esp+14h] [ebp-10h] BYREF
 
     font = UI_GetFontHandle(&scrPlaceView[localClientNum], 0, 1.0);
-    if (con_miniconlines->current.integer > 0x64u)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            2757,
-            0,
-            "%s\n\t(con_miniconlines->current.integer) = %i",
-            "(con_miniconlines->current.integer >= 0 && con_miniconlines->current.integer <= 100)",
-            con_miniconlines->current.integer);
+    iassert(con_miniconlines->current.integer >= 0 && con_miniconlines->current.integer <= 100);
     if (con.messageBuffer[0].miniconWindow.lineCount != con_miniconlines->current.integer)
     {
         con.messageBuffer[0].miniconWindow.lineCount = con_miniconlines->current.integer;
@@ -2717,14 +2317,7 @@ bool __cdecl Con_IsValidGameMessageWindow(uint32_t windowIndex)
 
 bool __cdecl Con_IsGameMessageWindowActive(int32_t localClientNum, uint32_t windowIndex)
 {
-    if (windowIndex >= 4)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            2791,
-            0,
-            "windowIndex doesn't index GAMEMSG_WINDOW_COUNT\n\t%i not in [0, %i)",
-            windowIndex,
-            4);
+    bcassert(windowIndex, GAMEMSG_WINDOW_COUNT); // 4
     return SLODWORD(con.color[4630 * localClientNum - 2571 + 13 * windowIndex]) > 0;
 }
 
@@ -2805,8 +2398,7 @@ void __cdecl Con_DrawInput(int32_t localClientNum)
     const char *originalCommand; // [esp+48h] [ebp-4h]
 
 #ifndef KISAK_SP
-    if (!Sys_IsMainThread() && !Sys_IsRenderThread())
-        MyAssertHandler(".\\client\\cl_console.cpp", 2163, 0, "%s", "Sys_IsMainThread() || Sys_IsRenderThread()");
+    iassert(Sys_IsMainThread() || Sys_IsRenderThread());
 #endif
     if (Key_IsCatcherActive(localClientNum, 1) && Sys_IsMainThread())
     {
@@ -2930,24 +2522,21 @@ void __cdecl ConDrawInput_Text(char *str, const float *color)
 {
     float y; // [esp+1Ch] [ebp-4h]
 
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1645, 0, "%s", "str");
+    iassert(str);
     y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
     R_AddCmdDrawText(str, 0x7FFFFFFF, cls.consoleFont, conDrawInputGlob.x, y, 1.0, 1.0, 0.0, color, 0);
 }
 
 void __cdecl ConDrawInput_TextAndOver(char *str, const float *color)
 {
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1672, 0, "%s", "str");
+    iassert(str);
     ConDrawInput_Text(str, color);
     conDrawInputGlob.x = (double)ConDrawInput_TextWidth(str) + conDrawInputGlob.x;
 }
 
 int32_t __cdecl ConDrawInput_TextWidth(const char *text)
 {
-    if (!text)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1638, 0, "%s", "text");
+    iassert(text);
     return R_TextWidth(text, 0, cls.consoleFont);
 }
 
@@ -2998,8 +2587,7 @@ void __cdecl ConDrawInput_DvarMatch(char *str)
 {
     char *VariantString; // eax
 
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1874, 0, "%s", "str");
+    iassert(str);
     if (Con_IsAutoCompleteMatch(str, conDrawInputGlob.inputText, conDrawInputGlob.inputTextLen))
     {
         ConDrawInput_TextLimitChars(str, 24, con_inputDvarMatchColor);
@@ -3015,8 +2603,7 @@ void __cdecl ConDrawInput_TextLimitChars(char *str, int32_t maxChars, const floa
 {
     float y; // [esp+1Ch] [ebp-4h]
 
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1652, 0, "%s", "str");
+    iassert(str);
     y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
     R_AddCmdDrawText(str, maxChars, cls.consoleFont, conDrawInputGlob.x, y, 1.0, 1.0, 0.0, color, 0);
 }
@@ -3034,14 +2621,12 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
     const dvar_s *dvar; // [esp+414h] [ebp-8h]
     int32_t lineIndex; // [esp+418h] [ebp-4h]
 
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1999, 0, "%s", "str");
+    iassert(str);
     if (Con_IsAutoCompleteMatch(str, conDrawInputGlob.inputText, conDrawInputGlob.inputTextLen)
         && (!conDrawInputGlob.hasExactMatch || !str[conDrawInputGlob.inputTextLen]))
     {
         dvar = Dvar_FindVar(str);
-        if (!dvar)
-            MyAssertHandler(".\\client\\cl_console.cpp", 2007, 0, "%s", "dvar");
+        iassert(dvar);
         hasLatchedValue = Dvar_HasLatchedValue(dvar);
         if (hasLatchedValue)
             ConDrawInput_Box(3, &con_inputHintBoxColor->current.value);
@@ -3180,8 +2765,7 @@ int32_t __cdecl ConDrawInput_GetDvarDescriptionLines(const dvar_s *dvar)
     int32_t linecount; // [esp+10h] [ebp-Ch]
     int32_t index; // [esp+14h] [ebp-8h]
 
-    if (!dvar->description)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1978, 0, "%s", "dvar->description");
+    iassert(dvar->description);
     v1 = strlen(dvar->description);
     linecount = 1;
     for (index = 0; index < v1; ++index)
@@ -3197,8 +2781,7 @@ void __cdecl ConDrawInput_DetailedCmdMatch(char *str)
     int32_t fileCount; // [esp+0h] [ebp-8h] BYREF
     const char **files; // [esp+4h] [ebp-4h]
 
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2068, 0, "%s", "str");
+    iassert(str);
     if (Con_IsAutoCompleteMatch(str, conDrawInputGlob.inputText, conDrawInputGlob.inputTextLen)
         && (!conDrawInputGlob.hasExactMatch || !str[conDrawInputGlob.inputTextLen]))
     {
@@ -3220,8 +2803,7 @@ void __cdecl ConDrawInput_DetailedCmdMatch(char *str)
 
 void __cdecl ConDrawInput_CmdMatch(char *str)
 {
-    if (!str)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2095, 0, "%s", "str");
+    iassert(str);
     if (Con_IsAutoCompleteMatch(str, conDrawInputGlob.inputText, conDrawInputGlob.inputTextLen))
     {
         ConDrawInput_Text(str, con_inputCommandMatchColor);
@@ -3247,17 +2829,9 @@ void __cdecl Con_DrawAutoCompleteChoice(int32_t localClientNum, bool isDvarComma
         colorCodedLine);
     x = (int)conDrawInputGlob.x;
     y = (int)conDrawInputGlob.y;
-    if (&colorCodedLine[strlen(colorCodedLine) + 1] == &colorCodedLine[1])
-        MyAssertHandler(".\\client\\cl_console.cpp", 2117, 0, "%s", "strlen( colorCodedLine ) > 0");
+    iassert(strlen(colorCodedLine) > 0);
     drawLen = SEH_PrintStrlen(colorCodedLine);
-    if (drawLen <= 0)
-        MyAssertHandler(
-            ".\\client\\cl_console.cpp",
-            2119,
-            0,
-            "%s\n\t(colorCodedLine) = %s",
-            "(drawLen > 0)",
-            colorCodedLine);
+    iassert(drawLen > 0);
     Field_DrawTextOverride(localClientNum, &g_consoleField, x, y, 5, 5, colorCodedLine, drawLen, cursorPos);
 }
 
@@ -3303,12 +2877,9 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
     const char *queryPos; // [esp+34h] [ebp-8h]
     char isMatching; // [esp+3Bh] [ebp-1h]
 
-    if (!query)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1721, 0, "%s", "query");
-    if (!matchToText)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1722, 0, "%s", "matchToText");
-    if (!matchTextLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1723, 0, "%s", "matchTextLen");
+    iassert(query);
+    iassert(matchToText);
+    iassert(matchTextLen);
     wasMatching = 0;
     matchTextPos = 0;
     colorCodedPos = 0;
@@ -3342,8 +2913,7 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
     colorCoded[colorCodedPosb] = 32;
     colorCodedPosa = colorCodedPosb + 1;
     colorCoded[colorCodedPosa] = 0;
-    if (!strlen(colorCoded))
-        MyAssertHandler(".\\client\\cl_console.cpp", 1754, 0, "%s", "strlen( colorCoded ) > 0");
+    iassert(strlen(colorCoded) > 0);
     return colorCodedPosa;
 }
 
@@ -3367,12 +2937,9 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
     int32_t colorCodedPosd; // [esp+60h] [ebp-Ch]
     char *queryPos; // [esp+64h] [ebp-8h]
 
-    if (!query)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1765, 0, "%s", "query");
-    if (!matchToText)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1766, 0, "%s", "matchToText");
-    if (!matchTextLen)
-        MyAssertHandler(".\\client\\cl_console.cpp", 1767, 0, "%s", "matchTextLen");
+    iassert(query);
+    iassert(matchToText);
+    iassert(matchTextLen);
     colorCodedPos = 0;
     queryPos = (char *)I_stristr(query, matchToText);
     if (queryPos)
@@ -3399,8 +2966,7 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
     }
     else
     {
-        if (!strlen(query))
-            MyAssertHandler(".\\client\\cl_console.cpp", 1792, 0, "%s", "strlen( query ) > 0");
+        iassert(strlen(query) > 0);
         v7 = query;
         v6 = colorCoded;
         do
@@ -3409,8 +2975,7 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringContiguous(
             *v6++ = *v7++;
         } while (v5);
     }
-    if (!strlen(colorCoded))
-        MyAssertHandler(".\\client\\cl_console.cpp", 1796, 0, "%s", "strlen( colorCoded ) > 0");
+    iassert(strlen(colorCoded) > 0);
     return colorCodedPos;
 }
 
@@ -3506,8 +3071,7 @@ void __cdecl Con_DrawOutputText(float x, float y)
 #elif KISAK_MP
     CL_LookupColor(0, 0x37, color);
 #endif
-    if (!con.fontHeight)
-        MyAssertHandler(".\\client\\cl_console.cpp", 2877, 0, "%s", "con.fontHeight");
+    iassert(con.fontHeight);
     rowCount = con.visibleLineCount;
     firstRow = con.displayLineOffset - con.visibleLineCount;
     if (con.displayLineOffset - con.visibleLineCount < 0)
@@ -3599,14 +3163,7 @@ void __cdecl Con_Close(int32_t localClientNum)
 {
     int32_t client; // [esp+0h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client\\../client_mp/client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if (clientUIActives[0].isRunning)
     {
         Field_Clear(&g_consoleField);
@@ -3648,8 +3205,7 @@ void __cdecl CL_PlayTextFXPulseSounds(
         {
             if (timeElapsed < fxLetterTime * strLength)
             {
-                if (!fxLetterTime)
-                    MyAssertHandler(".\\client\\cl_console.cpp", 3070, 0, "%s", "fxLetterTime");
+                iassert(fxLetterTime);
                 if (lastSoundTime < fxLetterTime * (timeElapsed / fxLetterTime))
                 {
                     SND_PlayLocalSoundAliasByName(localClientNum, "ui_pulse_text_type", SASYS_CGAME);

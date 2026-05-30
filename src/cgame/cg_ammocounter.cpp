@@ -521,8 +521,8 @@ void __cdecl CG_DrawPlayerActionSlot(
                     else
                         Com_PrintWarning(14, "CG_DrawNightVisionOverlay(): Nightvision Assets not Precached.\n");
                 }
-                else
-                {
+                else if (ps->actionSlotType[slotIdx])
+                {                    
                     iassert(ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING);
                 }
 

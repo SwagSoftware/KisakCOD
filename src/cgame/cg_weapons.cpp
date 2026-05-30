@@ -31,6 +31,12 @@
 #include <client/cl_scrn.h>
 #endif
 
+enum {
+    NUM_WEAP_ANIMS = 0x20,
+    WEAP_ANIM_ADS_UP = 31,
+    WEAP_ANIM_ADS_DOWN = 32,
+};
+
 const float MYLERP_START = 0.3f;
 const float MYLERP_END = 0.1f;
 
@@ -746,14 +752,7 @@ void __cdecl CG_UpdateViewWeaponAnim(int32_t localClientNum)
         if (weaponIndex > 0)
         {
             CG_RegisterWeapon(localClientNum, weaponIndex);
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1095,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            iassert(localClientNum == 0);
             weapInfo = &cg_weaponsArray[0][weaponIndex];
             iassert(weapInfo->viewModelDObj);
             UpdateViewmodelAttachments(localClientNum, weaponIndex, ps->weaponmodels[weaponIndex], weapInfo);
@@ -979,24 +978,14 @@ double __cdecl GetWeaponAnimRate(WeaponDef *weapDef, XAnim_s *anims, uint32_t an
     int32_t offset; // [esp+8h] [ebp-8h]
     int32_t time; // [esp+Ch] [ebp-4h]
 
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 129, 0, "%s", "weapDef");
-    if (!anims)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 130, 0, "%s", "anims");
-    if (animIndex > 0x20)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            131,
-            0,
-            "%s\n\t(animIndex) = %i",
-            "(((animIndex >= 0) && (animIndex < NUM_WEAP_ANIMS)))",
-            animIndex);
+    iassert(weapDef);
+    iassert(anims);
+    bcassert(animIndex, NUM_WEAP_ANIMS);
     offset = g_animRateOffsets[animIndex];
     if (offset < 0)
         return 1.0;
     time = *(int32_t *)((char *)&weapDef->szInternalName + offset);
-    if (time < 0)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 138, 0, "%s\n\t(time) = %i", "((time >= 0))", time);
+    iassert(time >= 0);
     if (!time)
         return 0.0;
     return (float)((double)XAnimGetLengthMsec(anims, animIndex) / (double)time);
@@ -1008,13 +997,7 @@ void __cdecl PlayADSAnim(float weaponPosFrac, int32_t weaponNum, DObj_s *obj, in
     XAnimTree_s *v5; // eax
     float time; // [esp+18h] [ebp-4h]
 
-    if (animIndex != 31 && animIndex != 32)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            199,
-            0,
-            "%s",
-            "(animIndex == WEAP_ANIM_ADS_UP) || (animIndex == WEAP_ANIM_ADS_DOWN)");
+    iassert((animIndex == WEAP_ANIM_ADS_UP) || (animIndex == WEAP_ANIM_ADS_DOWN));
     if (animIndex == 31)
     {
         XAnimSetGoalWeight(obj, 0x1Fu, 1.0f, 0.1f, 0.0f, 0, 1u, 0);
@@ -1040,20 +1023,12 @@ void __cdecl ResetWeaponAnimTrees(int32_t localClientNum, const playerState_s *p
 
     for (weapIndex = 1; weapIndex < BG_GetNumWeapons(); ++weapIndex)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                1095,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
+        iassert(localClientNum == 0);
         obj = cg_weaponsArray[0][weapIndex].viewModelDObj;
         if (obj)
         {
             animTree = DObjGetTree(obj);
-            if (!animTree)
-                MyAssertHandler(".\\cgame\\cg_weapons.cpp", 525, 0, "%s", "animTree");
+            iassert(animTree);
             XAnimClearTreeGoalWeights(animTree, 0, 0.0f);
             XAnimSetGoalWeight(obj, 0, 1.0f, 0.0f, 1.0f, 0, 1u, 0);
             if (ps->ammoclip[BG_ClipForWeapon(weapIndex)])
@@ -1075,16 +1050,8 @@ char __cdecl UpdateViewmodelAttachments(
     XModel *newRocket; // [esp+10h] [ebp-4h]
     weaponInfo_s *weapInfoa; // [esp+28h] [ebp+14h]
 
-    if (!weapInfo)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 902, 0, "%s", "weapInfo");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1095,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(weapInfo);
+    iassert(localClientNum == 0);
     weapInfoa = &cg_weaponsArray[0][weaponNum];
     newRocket = 0;
     newKnife = 0;
@@ -1146,17 +1113,7 @@ void __cdecl ProcessWeaponNoteTracks(int32_t localClientNum, const playerState_s
     weapIndex = BG_GetViewmodelWeaponIndex(predictedPlayerState);
     if (weapIndex)
     {
-        if (weapIndex >= BG_GetNumWeapons())
-        {
-            NumWeapons = BG_GetNumWeapons();
-            MyAssertHandler(
-                ".\\cgame\\cg_weapons.cpp",
-                1022,
-                0,
-                "weapIndex doesn't index BG_GetNumWeapons()\n\t%i not in [0, %i)",
-                weapIndex,
-                NumWeapons);
-        }
+        bcassert(weapIndex, BG_GetNumWeapons());
         weapDef = BG_GetWeaponDef(weapIndex);
         noteListSize = DObjGetClientNotifyList(&noteList);
         for (i = 0; i < noteListSize; ++i)
@@ -1474,8 +1431,7 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
     else
     {
         frac = (cgameGlob->xyspeed - minSpeed) / ((double)ps->speed - minSpeed);
-        if (frac <= 0.0f)
-            MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1513, 0, "%s\n\t(frac) = %g", "(frac > 0)", frac);
+        iassert(frac > 0);
         v5 = frac - 1.0f;
         if (v5 < 0.0f)
             scale = frac;
@@ -1508,8 +1464,7 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
             }
             else
             {
-                if (ps->weaponstate != 26)
-                    MyAssertHandler(".\\cgame\\cg_weapons.cpp", 1549, 0, "%s", "ps->weaponstate == WEAPON_NIGHTVISION_REMOVE");
+                iassert(ps->weaponstate == WEAPON_NIGHTVISION_REMOVE);
                 lerpa = (float)ps->weaponTime / (float)weapDef->nightVisionWearTime;
             }
             if (MYLERP_END <= (float)lerpa)
@@ -1650,8 +1605,7 @@ bool __cdecl WeaponCycleAllowed(cg_s *cgameGlob)
     // — wrong field and wrong bit. CoD3SP IDA (sub_8215CA90) actually returns
     // `((~predictedPlayerState.eFlags >> 17) & 1)` — i.e. allow cycling unless eFlags
     // bit 17 (0x20000) is set. Also was missing the cg_paused gate.
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3240, 0, "%s", "cgameGlob");
+    iassert(cgameGlob);
     if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
@@ -1823,8 +1777,7 @@ uint32_t __cdecl CG_AltWeaponToggleIndex(int32_t localClientNum, const cg_s *cga
     WeaponDef *weapDef; // [esp+4h] [ebp-8h]
     int32_t newPrimaryIdx; // [esp+8h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3501, 0, "%s", "cgameGlob");
+    iassert(cgameGlob);
     ps = &cgameGlob->predictedPlayerState;
     weapDef = BG_GetWeaponDef(cgameGlob->weaponSelect);
     if (weapDef->altWeaponIndex)
@@ -1852,8 +1805,7 @@ int32_t __cdecl NextWeapInCycle(
     int32_t weaponIndex; // [esp+Ch] [ebp-8h]
     WeaponDef *weapDef; // [esp+10h] [ebp-4h]
 
-    if (!ps)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3373, 0, "%s", "ps");
+    iassert(ps);
     if (BG_GetNumWeapons() < 2)
         return 0;
     highestWeapIndex = BG_GetNumWeapons() - 1;
@@ -1868,8 +1820,7 @@ int32_t __cdecl NextWeapInCycle(
         weapDef = BG_GetWeaponDef(weaponIndex);
         if (weapDef->inventoryType == type)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
             if (Com_BitCheckAssert(ps->weapons, weaponIndex, 16)
                 && (!skipEmpties || BG_WeaponAmmo(ps, weaponIndex))
                 && (!skipHaveNoAlts || weapDef->altWeaponIndex))
@@ -1910,8 +1861,7 @@ void __cdecl CG_ActionSlotDown_f()
                 if (weapon == cgameGlob->weaponLatestPrimaryIdx)
                     goto LABEL_15;
                 bitNum = cgameGlob->weaponLatestPrimaryIdx;
-                if (!ps)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+                iassert(ps);
                 if (!Com_BitCheckAssert(ps->weapons, bitNum, 16))
                 {
                 LABEL_15:
@@ -1925,8 +1875,7 @@ void __cdecl CG_ActionSlotDown_f()
             }
             else
             {
-                if (!ps)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+                iassert(ps);
                 if (Com_BitCheckAssert(ps->weapons, weapon, 16) && ps->weapon != weapon)
                 {
                     didSomething = 1;
@@ -1982,8 +1931,7 @@ bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob)
     // ActionSlotUsageAllowed (sub_8215CDB8) gates on `(eFlags & 0x20000) == 0` (in-vehicle
     // check) and also tests `cg_paused`. Kisak port had `nextSnap->ps.otherFlags & 4` (wrong
     // field + wrong bit) and was missing the paused gate.
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 3545, 0, "%s", "cgameGlob");
+    iassert(cgameGlob);
     if (!cgameGlob->nextSnap)
         return 0;
     if (cgameGlob->predictedPlayerState.weaponstate == 3 || cgameGlob->predictedPlayerState.weaponstate == 4)
@@ -2734,22 +2682,11 @@ char __cdecl BulletTrace(
     centity_s *Entity; // [esp+Ch] [ebp-10h]
     uint16_t hitEntId; // [esp+18h] [ebp-4h]
 
-    if (!bp)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2301, 0, "%s", "bp");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2302, 0, "%s", "weapDef");
-    if (!attacker)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2303, 0, "%s", "attacker");
-    if (!br)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2304, 0, "%s", "br");
-    if (lastSurfaceType >= 0x1D)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            2305,
-            0,
-            "lastSurfaceType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-            lastSurfaceType,
-            29);
+    iassert(bp);
+    iassert(weapDef);
+    iassert(attacker);
+    iassert(br);
+    bcassert(lastSurfaceType, SURF_TYPECOUNT);
     Com_Memset((uint32_t *)br, 0, 68);
     CG_LocationalTrace(&br->trace, (float*)bp->start, (float*)bp->end, bp->ignoreEntIndex, 0x2806831);
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
@@ -2791,11 +2728,9 @@ bool __cdecl IsEntityAPlayer(int32_t localClientNum, uint32_t entityNum)
     centity_s *cent; // [esp+4h] [ebp-4h]
 
     cent = CG_GetEntity(localClientNum, entityNum);
+    iassert(cent);
     if (!cent)
-    {
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2350, 0, "%s", "cent");
         return 0;
-    }
     return cent->nextState.eType == ET_PLAYER;
 }
 
@@ -2816,62 +2751,27 @@ void __cdecl CG_BulletEndpos(
     float aimOffset; // [esp+58h] [ebp-8h]
     float up; // [esp+5Ch] [ebp-4h] BYREF
 
-    if ((LODWORD(spread) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2635, 0, "%s", "!IS_NAN(spread)");
-    if (!end)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2637, 0, "%s", "end");
+    iassert(!IS_NAN(spread));
+    iassert(end);
     v10 = spread * 0.01745329238474369;
     v9 = tan(v10);
     aimOffset = v9 * maxRange;
-    if ((LODWORD(aimOffset) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2641, 0, "%s", "!IS_NAN(aimOffset)");
+    iassert(!IS_NAN(aimOffset));
     RandomBulletDir(randSeed, &right, &up);
     right = right * aimOffset;
     up = up * aimOffset;
-    if ((LODWORD(right) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2648, 0, "%s", "!IS_NAN(right)");
-    if ((LODWORD(up) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2649, 0, "%s", "!IS_NAN(up)");
+    iassert(!IS_NAN(right));
+    iassert(!IS_NAN(up));
     Vec3Mad(start, maxRange, forwardDir, end);
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            2653,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+    iassert(!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2]));
     Vec3Mad(end, right, rightDir, end);
     Vec3Mad(end, up, upDir, end);
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            2658,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+    iassert(!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2]));
     if (dir)
     {
         Vec3Sub(end, start, dir);
         Vec3Normalize(dir);
-        if ((COERCE_UNSIGNED_INT(*dir) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(dir[1]) & 0x7F800000) == 0x7F800000
-            || (COERCE_UNSIGNED_INT(dir[2]) & 0x7F800000) == 0x7F800000)
-        {
-            MyAssertHandler(
-                ".\\cgame\\cg_weapons.cpp",
-                2665,
-                0,
-                "%s",
-                "!IS_NAN((dir)[0]) && !IS_NAN((dir)[1]) && !IS_NAN((dir)[2])");
-        }
+        iassert(!IS_NAN((dir)[0]) && !IS_NAN((dir)[1]) && !IS_NAN((dir)[2]));
     }
 }
 
@@ -2883,10 +2783,8 @@ void __cdecl RandomBulletDir(int32_t randSeed, float *x, float *y)
     float r; // [esp+14h] [ebp-8h]
     float cosT; // [esp+18h] [ebp-4h]
 
-    if (!x)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2612, 0, "%s", "x");
-    if (!y)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 2613, 0, "%s", "y");
+    iassert(x);
+    iassert(y);
     theta = G_GoodRandomFloat(&randSeed) * 360.0;
     r = G_GoodRandomFloat(&randSeed);
     v3 = theta * 0.01745329238474369;
@@ -2948,28 +2846,8 @@ void __cdecl CG_SpawnTracer(int32_t localClientNum, const float *pstart, const f
     trBase[1] = start[1];
     trBase[2] = start[2];
     Vec3Scale(dir, cg_tracerSpeed->current.value, le->pos.trDelta);
-    if ((COERCE_UNSIGNED_INT(le->pos.trBase[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(le->pos.trBase[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(le->pos.trBase[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            4064,
-            0,
-            "%s",
-            "!IS_NAN((le->pos.trBase)[0]) && !IS_NAN((le->pos.trBase)[1]) && !IS_NAN((le->pos.trBase)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(le->pos.trDelta[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(le->pos.trDelta[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(le->pos.trDelta[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            4065,
-            0,
-            "%s",
-            "!IS_NAN((le->pos.trDelta)[0]) && !IS_NAN((le->pos.trDelta)[1]) && !IS_NAN((le->pos.trDelta)[2])");
-    }
+    iassert(!IS_NAN((le->pos.trBase)[0]) && !IS_NAN((le->pos.trBase)[1]) && !IS_NAN((le->pos.trBase)[2]));
+    iassert(!IS_NAN((le->pos.trDelta)[0]) && !IS_NAN((le->pos.trDelta)[1]) && !IS_NAN((le->pos.trDelta)[2]));
 }
 
 void __cdecl CG_DrawTracer(const float *start, const float *finish, const refdef_s *refdef)
@@ -3016,16 +2894,11 @@ void __cdecl ScaleTracer(
     float tracerScaleDistRange; // [esp+50h] [ebp-8h]
     float tracerScaleMinDist; // [esp+54h] [ebp-4h]
 
-    if (!startWidth)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4095, 0, "%s", "startWidth");
-    if (!finishWidth)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4096, 0, "%s", "finishWidth");
-    if (!cg_tracerScale)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4097, 0, "%s", "cg_tracerScale");
-    if (!cg_tracerScaleMinDist)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4098, 0, "%s", "cg_tracerScaleMinDist");
-    if (!cg_tracerScaleDistRange)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4099, 0, "%s", "cg_tracerScaleDistRange");
+    iassert(startWidth);
+    iassert(finishWidth);
+    iassert(cg_tracerScale);
+    iassert(cg_tracerScaleMinDist);
+    iassert(cg_tracerScaleDistRange);
     tracerScale = cg_tracerScale->current.value;
     tracerScaleMinDist = cg_tracerScaleMinDist->current.value;
     tracerScaleDistRange = cg_tracerScaleDistRange->current.value;
@@ -3060,8 +2933,8 @@ double __cdecl CalcTracerFinalScale(float tracerScaleDistRange, float dist, floa
     {
         lerp = dist / tracerScaleDistRange;
         v4 = tracerScale * lerp;
-        if (tracerScale <= 1.0)
-            MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
+        iassert(tracerScale > 1.0);
+        // MyAssertHandler("c:\\trees\\cod3\\src\\universal\\com_math.h", 533, 0, "%s", "min < max");
         if (v4 >= 1.0)
         {
             if (tracerScale >= (double)v4)
@@ -3169,12 +3042,9 @@ void __cdecl CG_RandomEffectAxis(const float *forward, float *left, float *up)
     float dot; // [esp+28h] [ebp-10h]
     float point[3]; // [esp+2Ch] [ebp-Ch] BYREF
 
-    if (!forward)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4339, 0, "%s", "forward");
-    if (!left)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4340, 0, "%s", "left");
-    if (!up)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4341, 0, "%s", "up");
+    iassert(forward);
+    iassert(left);
+    iassert(up);
     v5 = -forward[2];
     v6 = *forward;
     v7 = -forward[1];
@@ -3207,16 +3077,8 @@ void __cdecl CG_ImpactEffectForWeapon(
     const WeaponDef *weaponDef; // [esp+24h] [ebp-4h]
 
     weaponDef = BG_GetWeaponDef(weaponIndex);
-    if (!weaponDef)
-        MyAssertHandler(".\\cgame\\cg_weapons.cpp", 4363, 0, "%s", "weaponDef");
-    if (surfType >= 0x1D)
-        MyAssertHandler(
-            ".\\cgame\\cg_weapons.cpp",
-            4364,
-            0,
-            "surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-            surfType,
-            29);
+    iassert(weaponDef);
+    bcassert(surfType, SURF_TYPECOUNT);
     fxType = -1;
     *outSnd = 0;
     switch (weaponDef->impactType)
@@ -3641,14 +3503,7 @@ void __cdecl CG_MeleeBloodEvent(int32_t localClientNum, const centity_s *cent)
 
     dobjHandle = CG_WeaponDObjHandle(cent->nextState.weapon);
     weapon = cent->nextState.weapon;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1095,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if (cg_weaponsArray[0][weapon].knifeModel)
     {
         if (cg_blood->current.enabled)
@@ -3762,14 +3617,7 @@ char __cdecl CG_ScopeIsOverlayed(int32_t localClientNum)
 {
     float zoom; // [esp+8h] [ebp-4h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if (clientUIActives[0].connectionState < CA_ACTIVE)
         return 0;
 
@@ -3807,14 +3655,7 @@ void CG_DisplayViewmodelAnim(int localClientNum)
     int ViewmodelWeaponIndex; // r4
     weaponInfo_s *LocalClientWeaponInfo; // r3
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
     if (ViewmodelWeaponIndex > 0)
     {
@@ -3831,8 +3672,7 @@ void CG_SaveViewModelAnimTrees(SaveGame *save)
     weaponInfo_s *v4; // r30
     uint32_t NumWeapons; // [sp+50h] [-40h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1049, 0, "%s", "save");
+    iassert(save);
     NumWeapons = BG_GetNumWeapons();
     SaveMemory_SaveWrite(&NumWeapons, 4, save);
     MemoryFile = SaveMemory_GetMemoryFile(save);
@@ -3842,14 +3682,7 @@ void CG_SaveViewModelAnimTrees(SaveGame *save)
         v4 = &cg_weaponsArray[0][1];
         do
         {
-            if (v3 >= 0x80)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-                    1057,
-                    0,
-                    "weapIndex doesn't index ARRAY_COUNT( cg_weaponsArray[0] )\n\t%i not in [0, %i)",
-                    v3,
-                    128);
+            bcassert(v3, ARRAY_COUNT(cg_weaponsArray[0])); // 0x80
             if (v4->hasAnimTree)
             {
                 if (!v4->viewModelDObj)
@@ -3874,24 +3707,12 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     weaponInfo_s *v11; // r31
     WeaponDef *WeaponDef; // r30
     XAnimTree_s *Tree; // r30
-    uint32_t v14; // [sp+50h] [-70h] BYREF
+    uint32_t numWeapons; // [sp+50h] [-70h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1083, 0, "%s", "save");
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1084, 0, "%s", "ps");
-    SaveMemory_LoadRead(&v14, 4, save);
-    if (v14 > BG_GetNumWeapons())
-    {
-        NumWeapons = BG_GetNumWeapons();
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-            1087,
-            0,
-            "numWeapons <= BG_GetNumWeapons()\n\t%i, %i",
-            v14,
-            NumWeapons);
-    }
+    iassert(save);
+    iassert(ps);
+    SaveMemory_LoadRead(&numWeapons, 4, save);
+    iassert(numWeapons <= BG_GetNumWeapons());
     viewmodelIndex = ps->viewmodelIndex;
     if (viewmodelIndex <= 0)
     {
@@ -3901,18 +3722,13 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     {
         ConfigString = CL_GetConfigString(0, viewmodelIndex + CS_MODELS);
         v7 = ConfigString;
-        if (!ConfigString || !*ConfigString)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-                1094,
-                0,
-                "%s",
-                "handModelName && handModelName[0]");
+        iassert(ConfigString && *ConfigString); // KISAK_AI: handModelName -> ConfigString
+        // "handModelName && handModelName[0]"
         v8 = R_RegisterModel(v7);
     }
     MemoryFile = SaveMemory_GetMemoryFile(save);
     v10 = 1;
-    if (v14 > 1)
+    if (numWeapons > 1)
     {
         v11 = &cg_weaponsArray[0][1];
         do
@@ -3935,61 +3751,49 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
                     if (!v11->viewModelDObj)
                     {
                         WeaponDef = BG_GetWeaponDef(v10);
-                        if (!WeaponDef)
-                            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1119, 0, "%s", "weapDef");
+                        iassert(WeaponDef);
                         Com_Error(ERR_DROP, "CG_LoadViewModelAnimTrees: viewmodel '%s' has no dobj", WeaponDef->szInternalName);
                     }
                 }
                 Tree = DObjGetTree(v11->viewModelDObj);
-                if (!Tree)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1124, 0, "%s", "animTree");
+                iassert(Tree); // KISAK_AI: animTree -> Tree
+                // "animTree"
                 XAnimClearTree(Tree);
                 XAnimLoadAnimTree(v11->viewModelDObj, MemoryFile);
             }
             ++v10;
             ++v11;
-        } while (v10 < v14);
+        } while (v10 < numWeapons);
     }
 }
 
 void CG_ArchiveWeaponInfo(MemoryFile *memFile)
 {
     BOOL IsWriting; // r22
-    float v3; // r30
+    float numWeapons; // r30
     uint32_t NumWeapons; // r3
     int v5; // r28
     int *p_hasAnimTree; // r30
     const DObj_s *v7; // r3
     float v8[24]; // [sp+50h] [-60h] BYREF
 
-    if (!memFile)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1144, 0, "%s", "memFile");
+    iassert(memFile);
     IsWriting = MemFile_IsWriting(memFile);
     if (IsWriting)
     {
-        v3 = COERCE_FLOAT(BG_GetNumWeapons());
-        v8[0] = v3;
+        numWeapons = COERCE_FLOAT(BG_GetNumWeapons());
+        v8[0] = numWeapons;
         MemFile_WriteData(memFile, 4, v8);
     }
     else
     {
         MemFile_ReadData(memFile, 4, (unsigned char*)v8);
-        v3 = v8[0];
-        if (LODWORD(v3) > BG_GetNumWeapons())
-        {
-            NumWeapons = BG_GetNumWeapons();
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-                1155,
-                0,
-                "numWeapons <= BG_GetNumWeapons()\n\t%i, %i",
-                v3,
-                NumWeapons);
-        }
+        numWeapons = v8[0];
+        iassert(LODWORD(numWeapons) <= BG_GetNumWeapons());
     }
-    if (LODWORD(v3) > 1)
+    if (LODWORD(numWeapons) > 1)
     {
-        v5 = LODWORD(v3) - 1;
+        v5 = LODWORD(numWeapons) - 1;
         p_hasAnimTree = &cg_weaponsArray[0][1].hasAnimTree;
         do
         {
@@ -3998,105 +3802,37 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
                 v7 = (const DObj_s *)*(p_hasAnimTree - 11);
                 *p_hasAnimTree = v7 && DObjGetTree(v7);
             }
-            if (!memFile)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
-            if (!memFile->archiveProc)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-                    189,
-                    0,
-                    "%s",
-                    "memFile->archiveProc");
+            iassert(memFile);
+            iassert(memFile->archiveProc);
             memFile->archiveProc(memFile, 4, (byte*)p_hasAnimTree);
-            if (!memFile->archiveProc)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-                    189,
-                    0,
-                    "%s",
-                    "memFile->archiveProc");
+            iassert(memFile->archiveProc);
             memFile->archiveProc(memFile, 4, (byte *)p_hasAnimTree - 1);
             --v5;
             p_hasAnimTree += 18;
         } while (v5);
     }
-    if (!memFile)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile);
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte*)&cgArray[0].prevViewmodelWeapon);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].weaponSelect);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].weaponSelectTime);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].equippedOffHand);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 96, (byte *)cgArray[0].viewDamage);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathTime);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathInTime);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathDelay);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathFrac);
     v8[0] = cgArray[0].holdBreathFrac;
-    if ((LODWORD(cgArray[0].holdBreathFrac) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 234, 0, "%s", "!IS_NAN(*value)");
+    iassert(!IS_NAN(cgArray[0].holdBreathFrac)); // KISAK_AI: *value -> cgArray[0].holdBreathFrac
+    // "!IS_NAN(*value)"
 }
 
 #endif // KISAK_SP

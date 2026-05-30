@@ -1792,7 +1792,7 @@ void __cdecl BG_PlayerAnimation_VerifyAnim(XAnimTree_s *pAnimTree, lerpFrame_t *
             lf->animationTime = 150;
         }
     }
-    else
+    else if (lf->animation)
     {
         iassert(!lf->animation);
     }

@@ -4134,8 +4134,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
     int msec; // r10
     uint32_t v6; // r11
 
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\bg_pmove.cpp", 3679, 0, "%s", "ps");
+    iassert(ps);
     pm_time = ps->pm_time;
     if (pm_time)
     {

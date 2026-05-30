@@ -1114,16 +1114,16 @@ void __cdecl CopyStringToHudElemString(char *string, char *hudElemString)
 
 void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resultColor)
 {
-    if (!hudElemPausedBrightness)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 853, 0, "%s", "hudElemPausedBrightness");
-    if (!cl_paused)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 854, 0, "%s", "cl_paused");
+    iassert(hudElemPausedBrightness);
+    iassert(cl_paused);
+
     *resultColor = (double)hudElemColor->r * 0.003921568859368563;
     resultColor[1] = (double)hudElemColor->g * 0.003921568859368563;
     resultColor[2] = (double)hudElemColor->b * 0.003921568859368563;
     resultColor[3] = (double)hudElemColor->a * 0.003921568859368563;
     if (cl_paused->current.integer)
         Vec3Scale(resultColor, hudElemPausedBrightness->current.value, resultColor);
+
     if (*resultColor < 0.0 || *resultColor > 1.000000953674316)
         MyAssertHandler(
             ".\\cgame\\cg_hudelem.cpp",
@@ -1133,6 +1133,7 @@ void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resu
             *resultColor,
             0.0,
             1.000000953674316);
+
     if (resultColor[1] < 0.0 || resultColor[1] > 1.000000953674316)
         MyAssertHandler(
             ".\\cgame\\cg_hudelem.cpp",
@@ -1142,6 +1143,7 @@ void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resu
             resultColor[1],
             0.0,
             1.000000953674316);
+
     if (resultColor[2] < 0.0 || resultColor[2] > 1.000000953674316)
         MyAssertHandler(
             ".\\cgame\\cg_hudelem.cpp",
@@ -1151,6 +1153,7 @@ void __cdecl HudElemColorToVec4(const hudelem_color_t *hudElemColor, float *resu
             resultColor[2],
             0.0,
             1.000000953674316);
+
     if (resultColor[3] < 0.0 || resultColor[3] > 1.000000953674316)
         MyAssertHandler(
             ".\\cgame\\cg_hudelem.cpp",
@@ -1260,8 +1263,7 @@ void __cdecl DrawHudElemClock(int32_t localClientNum, const hudelem_s *elem, con
     Material *faceMaterial; // [esp+90h] [ebp-8h]
     float y; // [esp+94h] [ebp-4h]
 
-    if (cghe->color[3] == 0.0)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 925, 0, "%s", "cghe->color[3]");
+    iassert(cghe->color[3]);
     if (CG_ServerMaterialName(localClientNum, elem->materialIndex, materialName, 0x3Au))
     {
         faceMaterial = Material_RegisterHandle(materialName, 7);
@@ -1304,8 +1306,7 @@ void __cdecl DrawHudElemMaterial(int32_t localClientNum, const hudelem_s *elem, 
     char materialName[64]; // [esp+38h] [ebp-48h] BYREF
     float y; // [esp+7Ch] [ebp-4h]
 
-    if (cghe->color[3] == 0.0)
-        MyAssertHandler(".\\cgame\\cg_hudelem.cpp", 956, 0, "%s", "cghe->color[3]");
+    iassert(cghe->color[3]);
     if (CG_ServerMaterialName(localClientNum, elem->materialIndex, materialName, 0x40u))
     {
         material = Material_RegisterHandle(materialName, 7);
@@ -1784,14 +1785,7 @@ void __cdecl CG_AddDrawSurfsFor3dHudElems(int32_t localClientNum)
 #endif
     {
         elemCount = GetSortedHudElems(localClientNum, elems);
-        if ((uint32_t)elemCount >= 0x3E)
-            MyAssertHandler(
-                ".\\cgame\\cg_hudelem.cpp",
-                1547,
-                0,
-                "elemCount doesn't index ARRAY_COUNT( elems )\n\t%i not in [0, %i)",
-                elemCount,
-                62);
+        bcassert(elemCount, ARRAY_COUNT(elems));
         for (i = 0; i < elemCount; ++i)
         {
             if (elems[i]->type == HE_TYPE_WAYPOINT)
