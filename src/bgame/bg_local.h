@@ -1994,7 +1994,7 @@ void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wis
 double __cdecl PM_PlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
 bool __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const float *wishdir);
 double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float umove);
-double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd);
+float __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd);
 void __cdecl PM_AirMove(pmove_t *pm, pml_t *pml);
 void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml);
 void __cdecl PM_WalkMove(pmove_t *pm, pml_t *pml);

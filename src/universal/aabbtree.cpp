@@ -156,7 +156,7 @@ static bool PickAabbSplitPlane(
             {
                 heuristic = LODWORD(globalMins[axisIndex + 3])
                     + count
-                    - abs32(sideFrontCount - sideBackCount)
+                    - abs(sideFrontCount - sideBackCount)
                     - sideOnCount
                     - 4 * sideSplitCount;
                 if (!sideOnCount && !sideSplitCount && !prevMinCount)

@@ -1792,8 +1792,10 @@ void __cdecl BG_PlayerAnimation_VerifyAnim(XAnimTree_s *pAnimTree, lerpFrame_t *
             lf->animationTime = 150;
         }
     }
-
-    iassert(!lf->animation);
+    else
+    {
+        iassert(!lf->animation);
+    }
 }
 
 void __cdecl BG_PlayerAngles(const entityState_s *es, clientInfo_t *ci)
