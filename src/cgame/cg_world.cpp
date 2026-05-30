@@ -155,14 +155,10 @@ void __cdecl CG_GetEntityDobjBounds(const centity_s *cent, const DObj_s *dobj, f
     float v9; // [esp+14h] [ebp-8h]
     float radius; // [esp+18h] [ebp-4h]
 
-    if (!cent)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 113, 0, "%s", "cent");
-    if (!dobj)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 114, 0, "%s", "dobj");
-    if (!absMins)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 115, 0, "%s", "absMins");
-    if (!absMaxs)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 116, 0, "%s", "absMaxs");
+    iassert(cent);
+    iassert(dobj);
+    iassert(absMins);
+    iassert(absMaxs);
     radius = DObjGetRadius(dobj);
     v7 = cent->pose.origin[0] - radius;
     v8 = cent->pose.origin[1] - radius;
@@ -180,14 +176,10 @@ void __cdecl CG_GetEntityDobjBounds(const centity_s *cent, const DObj_s *dobj, f
 
 void __cdecl CG_LocationalTrace(trace_t *results, float *start, float *end, int32_t passEntityNum, int32_t contentMask)
 {
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 843, 0, "%s", "results");
-    if (!start)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 844, 0, "%s", "start");
-    if (!end)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 845, 0, "%s", "end");
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 846, 0, "%s", "Sys_IsMainThread()");
+    iassert(results);
+    iassert(start);
+    iassert(end);
+    iassert(Sys_IsMainThread());
     KISAK_NULLSUB();
     PROF_SCOPED("CG_LocationalTrace");
     CG_Trace(results, start, (float *)vec3_origin, (float *)vec3_origin, end, passEntityNum, contentMask, 1, 1);
@@ -209,83 +201,31 @@ void __cdecl CG_Trace(
     IgnoreEntParams ignoreEntParams; // [esp+100h] [ebp-18h] BYREF
     float delta[3]; // [esp+10Ch] [ebp-Ch] BYREF
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 731, 0, "%s", "Sys_IsMainThread()");
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 733, 0, "%s", "results");
-    if (!start)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 734, 0, "%s", "start");
-    if (!mins)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 735, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 736, 0, "%s", "maxs");
-    if (!end)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 737, 0, "%s", "end");
-    if (*mins > (double)*maxs)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 739, 0, "%s", "maxs[0] >= mins[0]");
-    if (mins[1] > (double)maxs[1])
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 740, 0, "%s", "maxs[1] >= mins[1]");
-    if (mins[2] > (double)maxs[2])
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 741, 0, "%s", "maxs[2] >= mins[2]");
-    if ((COERCE_UNSIGNED_INT(*start) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            743,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*mins) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(mins[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            744,
-            0,
-            "%s",
-            "!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*maxs) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(maxs[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            745,
-            0,
-            "%s",
-            "!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            746,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+    iassert(Sys_IsMainThread());
+    iassert(results);
+    iassert(start);
+    iassert(mins);
+    iassert(maxs);
+    iassert(end);
+    iassert(maxs[0] >= mins[0]);
+    iassert(maxs[1] >= mins[1]);
+    iassert(maxs[2] >= mins[2]);
+    iassert(!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2]));
+    iassert(!IS_NAN((mins)[0]) && !IS_NAN((mins)[1]) && !IS_NAN((mins)[2]));
+    iassert(!IS_NAN((maxs)[0]) && !IS_NAN((maxs)[1]) && !IS_NAN((maxs)[2]));
+    iassert(!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2]));
     PROF_SCOPED("CG_Trace");
     CM_BoxTrace(results, start, end, mins, maxs, 0, contentMask);
-    if ((COERCE_UNSIGNED_INT(results->fraction) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 752, 0, "%s", "!IS_NAN(results->fraction)");
+    iassert(!IS_NAN(results->fraction));
     if (results->fraction == 1.0)
     {
-        if (!results)
-            MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
+        iassert(results);
         results->hitType = TRACE_HITTYPE_NONE;
         results->hitId = 0;
     }
     else
     {
-        if (!results)
-            MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
+        iassert(results);
         results->hitType = TRACE_HITTYPE_ENTITY;
         results->hitId = ENTITYNUM_WORLD;
     }
@@ -296,8 +236,7 @@ void __cdecl CG_Trace(
         if (staticModels)
         {
             CM_PointTraceStaticModels(results, start, end, contentMask);
-            if ((COERCE_UNSIGNED_INT(results->fraction) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler(".\\cgame\\cg_world.cpp", 774, 0, "%s", "!IS_NAN(results->fraction)");
+            iassert(!IS_NAN(results->fraction));
             if (results->fraction == 0.0)
             {
             LABEL_45:
@@ -325,10 +264,8 @@ void __cdecl CG_Trace(
     }
     else
     {
-        if (staticModels)
-            MyAssertHandler(".\\cgame\\cg_world.cpp", 805, 0, "%s", "!staticModels");
-        if (locational)
-            MyAssertHandler(".\\cgame\\cg_world.cpp", 806, 0, "%s", "!locational");
+        iassert(!staticModels);
+        iassert(!locational);
         result.contentmask = contentMask;
         result.passEntityNum = passEntityNum;
         result.passOwnerNum = -1;
@@ -356,28 +293,11 @@ void __cdecl CG_ClipMoveToEntities(const moveclip_t *clip, trace_t *results)
     float start[4]; // [esp+40h] [ebp-20h] BYREF
     float end[4]; // [esp+50h] [ebp-10h] BYREF
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 474, 0, "%s", "Sys_IsMainThread()");
-    if (!clip)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 475, 0, "%s", "clip");
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 476, 0, "%s", "results");
-    if (results->fraction <= 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            477,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction > 0.0f)",
-            results->fraction);
-    if (results->fraction > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            478,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction <= 1.0f)",
-            results->fraction);
+    iassert(Sys_IsMainThread());
+    iassert(clip);
+    iassert(results);
+    iassert(results->fraction > 0.0f);
+    iassert(results->fraction <= 1.0f);
     PROF_SCOPED("CG_ClipMoveToEntities");
     start[0] = clip->extents.start[0];
     start[1] = clip->extents.start[1];
@@ -422,22 +342,11 @@ void __cdecl CG_ClipMoveToEntities_r(
     float p[4]; // [esp+80h] [ebp-20h] BYREF
     float mid[4]; // [esp+90h] [ebp-10h] BYREF
 
-    if (!clip)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 374, 0, "%s", "clip");
-    if (!p1)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 375, 0, "%s", "p1");
-    if (!p2)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 376, 0, "%s", "p2");
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 377, 0, "%s", "results");
-    if (results->fraction > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            378,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction <= 1.0f)",
-            results->fraction);
+    iassert(clip);
+    iassert(p1);
+    iassert(p2);
+    iassert(results);
+    iassert(results->fraction <= 1.0f);
     localClientNum = CG_GetCollWorldLocalClientNum();
     p[0] = *p1;
     p[1] = p1[1];
@@ -497,8 +406,7 @@ void __cdecl CG_ClipMoveToEntities_r(
                     frac2 = (v9 - offset) * invDist;
                     side = diff >= 0.0;
                 }
-                if (frac < 0.0)
-                    MyAssertHandler(".\\cgame\\cg_world.cpp", 441, 0, "%s", "frac >= 0.0f");
+                iassert(frac >= 0.0f);
                 v8 = 1.0 - frac;
                 v7 = v8 < 0.0 ? 1.0 : frac;
                 mid[0] = (*p2 - p[0]) * v7 + p[0];
@@ -508,8 +416,7 @@ void __cdecl CG_ClipMoveToEntities_r(
                 CG_ClipMoveToEntities_r(clip, sector->tree.child[side], p, mid, results);
                 if (results->fraction == 0.0)
                     return;
-                if (frac2 > 1.0)
-                    MyAssertHandler(".\\cgame\\cg_world.cpp", 453, 0, "%s\n\t(frac2) = %g", "(frac2 <= 1.0f)", frac2);
+                iassert(frac2 <= 1.0f);
                 v6 = frac2 - 0.0;
                 if (v6 < 0.0)
                     v5 = 0.0;
@@ -557,8 +464,7 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, uint32_t entIndex, trac
     localClientNum = CG_GetCollWorldLocalClientNum();
     cent = CG_GetEntity(localClientNum, entIndex);
     p_nextState = &cent->nextState;
-    if (entIndex == clip->passEntityNum)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 306, 0, "%s", "entIndex != clip->passEntityNum");
+    iassert(entIndex != clip->passEntityNum);
     if (p_nextState->solid && (p_nextState->solid != 0xFFFFFF || (p_nextState->lerp.eFlags & 1) == 0))
     {
         contents = CG_GetEntityBModelContents(cent);
@@ -601,8 +507,7 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, uint32_t entIndex, trac
                     results->partName = 0;
                     results->partGroup = 0;
                     number = p_nextState->number;
-                    if (!results)
-                        MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
+                    iassert(results);
                     results->hitType = TRACE_HITTYPE_ENTITY;
                     results->hitId = number;
                 }
@@ -613,10 +518,8 @@ void __cdecl CG_ClipMoveToEntity(const moveclip_t *clip, uint32_t entIndex, trac
 
 int32_t __cdecl CG_GetEntityBModelContents(const centity_s *cent)
 {
-    if (!cent)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 25, 0, "%s", "cent");
-    if (!cent->nextState.solid)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 28, 0, "%s", "es->solid");
+    iassert(cent);
+    iassert(cent->nextState.solid);
     if (cent->nextState.solid == 0xFFFFFF)
         return CM_ContentsOfModel(cent->nextState.index.brushmodel);
     if (cent->nextState.eType == ET_PLAYER)
@@ -630,28 +533,11 @@ void __cdecl CG_PointTraceToEntities(const pointtrace_t *clip, trace_t *results)
     float end[4]; // [esp+4Ch] [ebp-10h] BYREF
 
     PROF_SCOPED("CG_PointTraceToEntities");
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 707, 0, "%s", "Sys_IsMainThread()");
-    if (!clip)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 708, 0, "%s", "clip");
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 709, 0, "%s", "results");
-    if (results->fraction <= 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            710,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction > 0.0f)",
-            results->fraction);
-    if (results->fraction > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            711,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction <= 1.0f)",
-            results->fraction);
+    iassert(Sys_IsMainThread());
+    iassert(clip);
+    iassert(results);
+    iassert(results->fraction > 0.0f);
+    iassert(results->fraction <= 1.0f);
     start[0] = clip->extents.start[0];
     start[1] = clip->extents.start[1];
     start[2] = clip->extents.start[2];
@@ -682,22 +568,11 @@ void __cdecl CG_PointTraceToEntities_r(
     float p[4]; // [esp+4Ch] [ebp-20h] BYREF
     float mid[4]; // [esp+5Ch] [ebp-10h] BYREF
 
-    if (!clip)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 635, 0, "%s", "clip");
-    if (!p1)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 636, 0, "%s", "p1");
-    if (!p2)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 637, 0, "%s", "p2");
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 638, 0, "%s", "results");
-    if (results->fraction > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            639,
-            0,
-            "%s\n\t(results->fraction) = %g",
-            "(results->fraction <= 1.0f)",
-            results->fraction);
+    iassert(clip);
+    iassert(p1);
+    iassert(p2);
+    iassert(results);
+    iassert(results->fraction <= 1.0f);
     localClientNum = CG_GetCollWorldLocalClientNum();
     p[0] = *p1;
     p[1] = p1[1];
@@ -726,10 +601,8 @@ void __cdecl CG_PointTraceToEntities_r(
             if (p[3] >= (double)results->fraction)
                 return;
             frac = t1 / (t1 - t2);
-            if (frac < 0.0)
-                MyAssertHandler(".\\cgame\\cg_world.cpp", 677, 0, "%s", "frac >= 0.0f");
-            if (frac > 1.0)
-                MyAssertHandler(".\\cgame\\cg_world.cpp", 678, 0, "%s", "frac <= 1.0f");
+            iassert(frac >= 0.0f);
+            iassert(frac <= 1.0f);
             mid[0] = (*p2 - p[0]) * frac + p[0];
             mid[1] = (p2[1] - p[1]) * frac + p[1];
             mid[2] = (p2[2] - p[2]) * frac + p[2];
@@ -785,8 +658,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, 
     localClientNum = CG_GetCollWorldLocalClientNum();
     cent = CG_GetEntity(localClientNum, entIndex);
     p_nextState = &cent->nextState;
-    if (entIndex == clip->ignoreEntParams->baseEntity)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 516, 0, "%s", "entIndex != clip->ignoreEntParams->baseEntity");
+    iassert(entIndex != clip->ignoreEntParams->baseEntity);
     if (clip->bLocational)
         v4 = CG_LocationalTraceDObj(localClientNum, entIndex);
     else
@@ -824,8 +696,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, 
                             results->walkable = results->normal[2] >= 0.699999988079071;
                         LABEL_33:
                             number = p_nextState->number;
-                            if (!results)
-                                MyAssertHandler("c:\\trees\\cod3\\src\\cgame\\../qcommon/cm_public.h", 135, 0, "%s", "trace");
+                            iassert(results);
                             results->hitType = TRACE_HITTYPE_ENTITY;
                             results->hitId = number;
                             results->contents = contents;
@@ -837,8 +708,7 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, 
         }
         else
         {
-            if (!p_nextState->solid)
-                MyAssertHandler(".\\cgame\\cg_world.cpp", 572, 0, "%s", "es->solid");
+            iassert(p_nextState->solid);
             if (p_nextState->solid != 0xFFFFFF || (p_nextState->lerp.eFlags & 1) == 0)
             {
                 contents = CG_GetEntityBModelContents(cent);
@@ -889,15 +759,12 @@ void __cdecl CG_PointTraceToEntity(const pointtrace_t *clip, uint32_t entIndex, 
 
 void __cdecl CG_LocationTraceDobjCalcPose(const DObj_s *dobj, const cpose_t *pose, int32_t *partBits)
 {
-    if (!dobj)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 159, 0, "%s", "dobj");
-    if (!pose)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 160, 0, "%s", "pose");
+    iassert(dobj);
+    iassert(pose);
     DObjLock((DObj_s * )dobj);
     CG_DObjCalcPose(pose, dobj, partBits);
     DObjUnlock((DObj_s * )dobj);
-    if (!DObjSkelAreBonesUpToDate(dobj, partBits))
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 172, 0, "%s", "DObjSkelAreBonesUpToDate( dobj, partBits )");
+    iassert(DObjSkelAreBonesUpToDate(dobj, partBits));
 }
 
 void __cdecl CG_LocationalTraceEntitiesOnly(
@@ -910,36 +777,12 @@ void __cdecl CG_LocationalTraceEntitiesOnly(
     pointtrace_t clip; // [esp+48h] [ebp-40h] BYREF
     IgnoreEntParams ignoreEntParams; // [esp+7Ch] [ebp-Ch] BYREF
 
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 864, 0, "%s", "results");
-    if (!start)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 865, 0, "%s", "start");
-    if (!end)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 866, 0, "%s", "end");
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 867, 0, "%s", "Sys_IsMainThread()");
-    if ((COERCE_UNSIGNED_INT(*start) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(start[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            868,
-            0,
-            "%s",
-            "!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*end) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(end[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_world.cpp",
-            869,
-            0,
-            "%s",
-            "!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2])");
-    }
+    iassert(results);
+    iassert(start);
+    iassert(end);
+    iassert(Sys_IsMainThread());
+    iassert(!IS_NAN((start)[0]) && !IS_NAN((start)[1]) && !IS_NAN((start)[2]));
+    iassert(!IS_NAN((end)[0]) && !IS_NAN((end)[1]) && !IS_NAN((end)[2]));
     KISAK_NULLSUB();
     {
         PROF_SCOPED("CG_LocationalTrace");
@@ -973,18 +816,12 @@ void __cdecl CG_TraceCapsule(
     int32_t passEntityNum,
     int32_t contentMask)
 {
-    if (!results)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 904, 0, "%s", "results");
-    if (!start)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 905, 0, "%s", "start");
-    if (!mins)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 906, 0, "%s", "mins");
-    if (!maxs)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 907, 0, "%s", "maxs");
-    if (!end)
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 908, 0, "%s", "end");
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\cgame\\cg_world.cpp", 909, 0, "%s", "Sys_IsMainThread()");
+    iassert(results);
+    iassert(start);
+    iassert(mins);
+    iassert(maxs);
+    iassert(end);
+    iassert(Sys_IsMainThread());
 
     {
         PROF_SCOPED("CG_TraceCapsule");
