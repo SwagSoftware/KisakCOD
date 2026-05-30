@@ -11,6 +11,10 @@
 #include "cg_main.h"
 #endif
 
+enum {
+    DTYPE_VEC3 = 2
+};
+
 const dvar_t *nightVisionFadeInOutTime;
 const dvar_t *nightVisionPowerOnTime;
 const dvar_t *nightVisionDisableEffects;
@@ -80,24 +84,15 @@ void __cdecl CG_AddVisionSetMenuItem(XAssetHeader header)
     char command[256]; // [esp+208h] [ebp-108h] BYREF
     const char *visionSetNameBegin; // [esp+30Ch] [ebp-4h]
 
-    if (!header.xmodelPieces)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 38, 0, "%s", "header.rawfile");
-    if (!header.xmodelPieces->name)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 39, 0, "%s", "header.rawfile->name");
+    iassert(header.rawfile);
+    iassert(header.rawfile->name);
     visionSetNameEnd = I_stristr(header.xmodelPieces->name, ".vision");
     if (visionSetNameEnd)
     {
         visionSetNameBegin = I_stristr(header.xmodelPieces->name, "/");
-        if (!visionSetNameBegin)
-            MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 47, 1, "%s", "visionSetNameBegin");
+        iassert(visionSetNameBegin);
         ++visionSetNameBegin;
-        if (visionSetNameEnd - visionSetNameBegin >= 256)
-            MyAssertHandler(
-                ".\\cgame\\cg_visionsets.cpp",
-                51,
-                1,
-                "%s",
-                "visionSetNameEnd - visionSetNameBegin < static_cast<int>( sizeof( visionSetName ) )");
+        iassert(visionSetNameEnd - visionSetNameBegin < static_cast<int>( sizeof( visionSetName ) ));
         strncpy(visionSetName, visionSetNameBegin, visionSetNameEnd - visionSetNameBegin);
         visionSetName[visionSetNameEnd - visionSetNameBegin] = 0;
         _snprintf(devguiPath, 0x100u, "Renderer/Vision Sets/%s", visionSetName);
@@ -145,14 +140,10 @@ void __cdecl UpdateVarsLerp(
     float fraction; // [esp+44h] [ebp-8h]
     int32_t fieldNum; // [esp+48h] [ebp-4h]
 
-    if (!from)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 376, 0, "%s", "from");
-    if (!to)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 377, 0, "%s", "to");
-    if (!lerpData)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 378, 0, "%s", "lerpData");
-    if (!result)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 379, 0, "%s", "result");
+    iassert(from);
+    iassert(to);
+    iassert(lerpData);
+    iassert(result);
     if (lerpData->style >= (uint32_t)VISIONSETLERP_TO_LINEAR)
     {
         if (lerpData->timeDuration + lerpData->timeStart >= time)
@@ -182,8 +173,8 @@ void __cdecl UpdateVarsLerp(
                     }
                     else
                     {
-                        if (visionDefFields[fieldNum].fieldType != 2)
-                            MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 442, 0, "%s", "fieldDef->fieldType == DTYPE_VEC3");
+                        auto fieldDef = &visionDefFields[fieldNum];
+                        iassert(fieldDef->fieldType == DTYPE_VEC3);
                         LerpVec3(voidFrom, voidTo, v6, lerpData->style, voidResult);
                     }
                 }
@@ -198,13 +189,7 @@ void __cdecl UpdateVarsLerp(
             style = lerpData->style;
             if (style < VISIONSETLERP_TO_LINEAR || style > VISIONSETLERP_TO_SMOOTH)
             {
-                if (lerpData->style != VISIONSETLERP_BACKFORTH_LINEAR && lerpData->style != VISIONSETLERP_BACKFORTH_SMOOTH)
-                    MyAssertHandler(
-                        ".\\cgame\\cg_visionsets.cpp",
-                        405,
-                        0,
-                        "%s",
-                        "(lerpData->style == VISIONSETLERP_BACKFORTH_LINEAR) || (lerpData->style == VISIONSETLERP_BACKFORTH_SMOOTH)");
+                iassert((lerpData->style == VISIONSETLERP_BACKFORTH_LINEAR) || (lerpData->style == VISIONSETLERP_BACKFORTH_SMOOTH));
                 memcpy(result, from, sizeof(visionSetVars_t));
             }
             else
@@ -218,8 +203,7 @@ void __cdecl UpdateVarsLerp(
 
 bool __cdecl LerpBool(bool from, bool to, float fraction, visionSetLerpStyle_t style)
 {
-    if (style == VISIONSETLERP_NONE)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 303, 0, "%s", "style != VISIONSETLERP_NONE");
+    iassert(style != VISIONSETLERP_NONE);
     if (style < VISIONSETLERP_BACKFORTH_LINEAR || style > VISIONSETLERP_BACKFORTH_SMOOTH || fraction < 0.5)
         return to;
     else
@@ -337,10 +321,8 @@ char __cdecl LoadVisionFile(const char *name, visionSetVars_t *resultSettings)
     char success; // [esp+7h] [ebp-49h]
     char fullPath[68]; // [esp+8h] [ebp-48h] BYREF
 
-    if (!name)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 241, 0, "%s", "name");
-    if (!resultSettings)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 242, 0, "%s", "resultSettings");
+    iassert(name);
+    iassert(resultSettings);
     fileBuf = RawBufferOpen(name, "vision/%s.vision");
     if (!fileBuf)
         return 0;
@@ -374,8 +356,7 @@ char __cdecl LoadVisionSettingsFromBuffer(const char *buffer, const char *filena
     bool wasRead[16]; // [esp+4h] [ebp-1Ch] BYREF
     const char *token; // [esp+1Ch] [ebp-4h]
 
-    if (!settings)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 195, 0, "%s", "settings");
+    iassert(settings);
     memset(wasRead, 0, sizeof(wasRead));
     Com_BeginParseSession(filename);
     while (1)
@@ -416,19 +397,9 @@ char __cdecl ApplyTokenToField(uint32_t fieldNum, const char *token, visionSetVa
     float tempFloat; // [esp+28h] [ebp-8h] BYREF
     bool *boolField; // [esp+2Ch] [ebp-4h]
 
-    if (fieldNum > 0x10)
-        MyAssertHandler(
-            ".\\cgame\\cg_visionsets.cpp",
-            151,
-            0,
-            "fieldNum not in [0, numVisionDefFields]\n\t%i not in [%i, %i]",
-            fieldNum,
-            0,
-            16);
-    if (!token)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 152, 0, "%s", "token");
-    if (!settings)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 153, 0, "%s", "settings");
+    bcassert(fieldNum, 16);
+    iassert(token);
+    iassert(settings);
     voidField = &settings->glowEnable + visionDefFields[fieldNum].offset;
     fieldType = visionDefFields[fieldNum].fieldType;
     if (fieldType)
@@ -441,8 +412,10 @@ char __cdecl ApplyTokenToField(uint32_t fieldNum, const char *token, visionSetVa
         }
         else
         {
-            if (visionDefFields[fieldNum].fieldType != 2)
-                MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 176, 0, "%s", "fieldDef->fieldType == DTYPE_VEC3");
+            auto fieldDef = &visionDefFields[fieldNum];
+
+            iassert(fieldDef->fieldType == DTYPE_VEC3);
+
             vec3Field = (float *)voidField;
             if (sscanf(token, "%f %f %f", tempVec, &tempVec[1], &tempVec[2]) != 3)
                 return 0;
@@ -544,14 +517,7 @@ void __cdecl CG_VisionSetMyChanges()
 
         if (clientUIActives[0].cgameInitialized)
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                    1071,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            iassert(localClientNum == 0);
             for (visSetIdx = 0; visSetIdx < 4; ++visSetIdx)
                 cgameGlob->visionSetPreLoadedName[visSetIdx][0] = 0;
             if (cgameGlob->visionNameNaked[0])
@@ -825,16 +791,8 @@ double __cdecl VisionFadeValue(int32_t localClientNum)
 
 void __cdecl FadeRefDef(refdef_s *rd, float brightness)
 {
-    if (!rd)
-        MyAssertHandler(".\\cgame\\cg_visionsets.cpp", 806, 0, "%s", "rd");
-    if (brightness < 0.0 || brightness > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_visionsets.cpp",
-            807,
-            0,
-            "%s\n\t(brightness) = %g",
-            "((brightness >= 0.f) && (brightness <= 1.f))",
-            brightness);
+    iassert(rd);
+    iassert((brightness >= 0.f) && (brightness <= 1.f));
     rd->glow.bloomCutoff = brightness * rd->glow.bloomCutoff + (1.0 - brightness) * 1.0;
     rd->glow.bloomDesaturation = brightness * rd->glow.bloomDesaturation + (1.0 - brightness) * 0.0;
     rd->film.brightness = brightness * rd->film.brightness + (1.0 - brightness) * -1.0;
