@@ -9,6 +9,7 @@
 #include <universal/profile.h>
 #include <script/scr_vm.h>
 #include <universal/com_files.h>
+#include <win32/win_local.h>
 
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>
@@ -1121,32 +1122,21 @@ void __cdecl XAnimFreeInfo(XAnimTree_s* tree, uint32_t infoIndex)
     uint32_t prev; // [esp+Ch] [ebp-8h]
 
     InterlockedIncrement(&tree->modifyRefCount);
-    if (tree->calcRefCount)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 732, 0, "%s", "!tree->calcRefCount");
-    if (!tree)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 735, 0, "%s", "tree");
-    if (!infoIndex || infoIndex >= 0x1000)
-        MyAssertHandler(
-            ".\\xanim\\xanim.cpp",
-            737,
-            0,
-            "%s\n\t(infoIndex) = %i",
-            "(infoIndex && (infoIndex < 4096))",
-            infoIndex);
+
+    iassert(!tree->calcRefCount);
+    iassert(tree);
+    iassert(infoIndex && (infoIndex < 4096));
+
     info = &g_xAnimInfo[infoIndex];
-    if (info->tree != tree)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 741, 0, "%s", "info->tree == tree");
-    if (!info->inuse)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 742, 0, "%s", "info->inuse");
+
+    iassert(info->tree == tree);
+    iassert(info->inuse);
     info->inuse = 0;
     if (info->animToModel)
     {
-        if (info->children)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 748, 0, "%s", "!info->children");
-        if (!info->parts)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 751, 0, "%s", "parts");
-        if (!info->animToModel)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 753, 0, "%s", "info->animToModel");
+        iassert(!info->children);
+        iassert(info->parts);
+        iassert(info->animToModel);
         animToModel = SL_ConvertToString(info->animToModel);
         SL_RemoveRefToStringOfSize(info->animToModel, (unsigned __int8)animToModel[16] + 17);
         info->animToModel = 0;
@@ -1174,17 +1164,24 @@ void __cdecl XAnimFreeInfo(XAnimTree_s* tree, uint32_t infoIndex)
         g_xAnimInfo[next].prev = prev;
     XAnimClearServerNotify(info);
     info->prev = 0;
+
+#ifdef KISAK_SP
+    Sys_EnterCriticalSection(CRITSECT_XANIM_ALLOC);
+#endif
+
     info->next = g_xAnimInfo[0].next;
     g_xAnimInfo[g_xAnimInfo[0].next].prev = infoIndex;
     g_xAnimInfo[0].next = infoIndex;
-    if (!g_info_usage)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 796, 0, "%s", "g_info_usage");
+    iassert(g_info_usage);
     --g_info_usage;
-    if (!tree->info_usage)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 799, 0, "%s", "tree->info_usage");
+    iassert(tree->info_usage);
     --tree->info_usage;
-    if (tree->calcRefCount)
-        MyAssertHandler(".\\xanim\\xanim.cpp", 808, 0, "%s", "!tree->calcRefCount");
+
+#ifdef KISAK_SP
+    Sys_LeaveCriticalSection(CRITSECT_XANIM_ALLOC);
+#endif
+
+    iassert(!tree->calcRefCount);
     InterlockedDecrement(&tree->modifyRefCount);
 }
 
@@ -2989,94 +2986,79 @@ uint32_t __cdecl XAnimAllocInfoWithParent(
     int after)
 {
     XAnimInfo* childInfo; // [esp+0h] [ebp-18h]
-    XAnimInfo* childInfoa; // [esp+0h] [ebp-18h]
     XAnimInfo* info; // [esp+4h] [ebp-14h]
     uint32_t next; // [esp+8h] [ebp-10h]
-    uint32_t nexta; // [esp+8h] [ebp-10h]
     uint32_t infoIndex; // [esp+Ch] [ebp-Ch]
     uint32_t prev; // [esp+10h] [ebp-8h]
     XAnimEntry* anim; // [esp+14h] [ebp-4h]
 
     iassert(tree);
     iassert(tree->anims);
+
+#ifdef KISAK_SP
+    Sys_EnterCriticalSection(CRITSECT_XANIM_ALLOC);
+#endif
     infoIndex = g_xAnimInfo[0].next;
     if (g_xAnimInfo[0].next)
     {
-        if (!++g_info_usage)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3084, 0, "%s", "g_info_usage");
+        g_info_usage++;
+        iassert(g_info_usage);
         if (g_info_usage > g_info_high_usage)
             g_info_high_usage = g_info_usage;
-        if (!++tree->info_usage)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3090, 0, "%s", "tree->info_usage");
-        if (!infoIndex || infoIndex >= 0x1000)
-            MyAssertHandler(
-                ".\\xanim\\xanim.cpp",
-                3093,
-                0,
-                "%s\n\t(infoIndex) = %i",
-                "(infoIndex && (infoIndex < 4096))",
-                infoIndex);
+        tree->info_usage++;
+        iassert(tree->info_usage);
+        iassert(infoIndex && (infoIndex < 4096));
         g_xAnimInfo[0].next = g_xAnimInfo[infoIndex].next;
         next = g_xAnimInfo[0].next;
-        if (g_xAnimInfo[0].next >= 0x1000u)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3096, 0, "%s\n\t(next) = %i", "(next < 4096)", g_xAnimInfo[0].next);
+        iassert(next < 4096);
         g_xAnimInfo[next].prev = 0;
+#ifdef KISAK_SP
+        Sys_LeaveCriticalSection(CRITSECT_XANIM_ALLOC);
+#endif
         info = &g_xAnimInfo[infoIndex];
-        if (animIndex >= tree->anims->size)
-            MyAssertHandler(
-                ".\\xanim\\xanim.cpp",
-                3104,
-                0,
-                "animIndex < tree->anims->size\n\t%i, %i",
-                animIndex,
-                tree->anims->size);
+        iassert(animIndex < tree->anims->size);
+        
         prev = 0;
         if (after)
         {
-            for (nexta = g_xAnimInfo[parentInfoIndex].children; nexta; nexta = childInfoa->next)
+            for (next = g_xAnimInfo[parentInfoIndex].children; next; next = childInfo->next)
             {
-                childInfoa = &g_xAnimInfo[nexta];
-                if (!childInfoa->inuse)
-                    MyAssertHandler(".\\xanim\\xanim.cpp", 3127, 0, "%s", "childInfo->inuse");
-                if (childInfoa->animIndex > animIndex)
+                childInfo = &g_xAnimInfo[next];
+                iassert(childInfo->inuse);
+                if (childInfo->animIndex > animIndex)
                     break;
-                prev = nexta;
+                prev = next;
             }
         }
         else
         {
-            for (nexta = g_xAnimInfo[parentInfoIndex].children; nexta; nexta = childInfo->next)
+            for (next = g_xAnimInfo[parentInfoIndex].children; next; next = childInfo->next)
             {
-                childInfo = &g_xAnimInfo[nexta];
-                if (!childInfo->inuse)
-                    MyAssertHandler(".\\xanim\\xanim.cpp", 3114, 0, "%s", "childInfo->inuse");
+                childInfo = &g_xAnimInfo[next];
+                iassert(childInfo->inuse);
                 if (childInfo->animIndex >= animIndex)
                     break;
-                prev = nexta;
+                prev = next;
             }
         }
-        if (animIndex >= tree->anims->size)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3135, 0, "%s", "animIndex < tree->anims->size");
+        iassert(animIndex < tree->anims->size);
         info->prev = prev;
-        info->next = nexta;
+        info->next = next;
         info->animIndex = animIndex;
         anim = &tree->anims->entries[animIndex];
         info->children = 0;
         info->parent = parentInfoIndex;
         info->animToModel = animToModel;
         info->parts = anim->parts;
-        if (info->animParent.children != anim->animParent.children)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3146, 0, "%s", "info->animParent.children == anim->animParent.children");
-        if (info->animParent.flags != anim->animParent.flags)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3147, 0, "%s", "info->animParent.flags == anim->animParent.flags");
-        if (animIndex >= tree->anims->size)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3149, 0, "%s", "animIndex < tree->anims->size");
-        if (info->inuse)
-            MyAssertHandler(".\\xanim\\xanim.cpp", 3152, 0, "%s", "!info->inuse");
+        iassert(info->animParent.children == anim->animParent.children);
+        iassert(info->animParent.flags == anim->animParent.flags);
+        iassert(animIndex < tree->anims->size);
+        iassert(!info->inuse);
+    
         info->inuse = 1;
         info->tree = tree;
-        if (nexta)
-            g_xAnimInfo[nexta].prev = infoIndex;
+        if (next)
+            g_xAnimInfo[next].prev = infoIndex;
         if (prev)
         {
             g_xAnimInfo[prev].next = infoIndex;
@@ -3093,6 +3075,9 @@ uint32_t __cdecl XAnimAllocInfoWithParent(
     }
     else
     {
+#ifdef KISAK_SP
+        Sys_LeaveCriticalSection(CRITSECT_XANIM_ALLOC);
+#endif
         Com_Error(ERR_DROP, "exceeded maximum number of anim info");
         return 0;
     }

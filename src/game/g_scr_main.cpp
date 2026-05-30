@@ -8486,32 +8486,25 @@ void __cdecl DumpAnimCommand(
     XAnimTree_s *tree,
     unsigned int anim,
     int root,
-    double weight,
-    double time,
-    double rate)
+    float weight,
+    float time,
+    float rate)
 {
-    const XAnim_s *Anims; // r29
-    unsigned int v12; // r4
-    const char *v13; // r30
-    int v14; // [sp+60h] [-50h] BYREF
-    const char *v15; // [sp+64h] [-4Ch] BYREF
+    int lineNum; // [sp+60h] [-50h] BYREF
+    const char *filename; // [sp+64h] [-4Ch] BYREF
 
-    Anims = XAnimGetAnims(tree);
-    Scr_GetLastScriptPlace(&v14, &v15);
-    v12 = anim;
-    v13 = (const char *)level.time;
-    XAnimGetAnimDebugName(Anims, v12);
+    Scr_GetLastScriptPlace(&lineNum, &filename);
     Com_Printf(
         19,
         "^3%s  ^7weight=^5%.2f ^7time=^5%.2f ^7rate=^5%.2f   ^7level time:%d  %s:%d   %s\n",
-        (const char *)HIDWORD(weight),
+        XAnimGetAnimDebugName(XAnimGetAnims(tree), anim),
         weight,
         time,
         rate,
-        HIDWORD(time),
-        (const char *)HIDWORD(rate),
-        LODWORD(rate),
-        v13);
+        level.time,
+        filename,
+        lineNum,
+        funcName);
 }
 
 void __cdecl GScr_ClearAnim(scr_entref_t entref)

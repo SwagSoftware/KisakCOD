@@ -40,7 +40,7 @@ void __cdecl CG_ClearEntityCollWorld(int32_t localClientNum)
     uint16_t sectorIndex; // [esp+14h] [ebp-8h]
     CgEntCollWorld *world; // [esp+18h] [ebp-4h]
 
-    bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
 
     memset((uint8_t *)&cgEntCollWorld[localClientNum], 0, sizeof(CgEntCollWorld));
     memset((uint8_t *)cgEntCollNodes[localClientNum], 0, sizeof(CgEntCollNode[1024]));
@@ -62,7 +62,7 @@ void __cdecl CG_ClearEntityCollWorld(int32_t localClientNum)
 
 const CgEntCollSector *__cdecl CG_GetEntityCollSector(int32_t localClientNum, uint16_t sectorIndex)
 {
-    bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
     iassert(sectorIndex);
 
     iassert(sectorIndex < 1024);
@@ -341,7 +341,7 @@ uint16_t __cdecl CG_AllocEntityCollSector(int32_t localClientNum, const float *m
     CgEntCollWorld *world; // [esp+14h] [ebp-8h]
     uint16_t axis; // [esp+18h] [ebp-4h]
 
-    bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
+    //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
     iassert(mins);
     iassert(maxs);
 

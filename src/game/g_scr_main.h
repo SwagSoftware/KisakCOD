@@ -440,9 +440,9 @@ void __cdecl DumpAnimCommand(
     XAnimTree_s *tree,
     unsigned int anim,
     int root,
-    double weight,
-    double time,
-    double rate);
+    float weight,
+    float time,
+    float rate);
 void __cdecl GScr_ClearAnim(scr_entref_t entref);
 void __cdecl GScr_HandleAnimError(int error);
 void __cdecl GScr_SetAnimKnobInternal(scr_entref_t entref, unsigned int flags);

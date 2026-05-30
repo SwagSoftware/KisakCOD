@@ -866,56 +866,51 @@ int __cdecl isNodeInRegion(pathnode_t *node, gentity_s *volume)
 
 int __cdecl Actor_Cover_FindBestCoverListInList(actor_s *self, pathsort_t *nodes, int iNodeCount, gentity_s *volume)
 {
-    int v4; // r25
-    int v7; // r18
-    pathsort_t *v8; // r29
-    pathsort_t *v9; // r22
-    const pathnode_t *node; // r31
-    bool v11; // r30
-    const char *v12; // r3
-    double NodeMetric; // [sp+18h] [-B8h]
+    int count = iNodeCount;
+    int numValid = 0;
 
-    v4 = iNodeCount;
-    v7 = 0;
     if (iNodeCount > 0)
     {
-        v8 = nodes;
-        v9 = &nodes[iNodeCount];
+        pathsort_t *cur = nodes;
+        pathsort_t *end = &nodes[iNodeCount];
+
         do
         {
-            node = v8->node;
-            v11 = (unsigned __int8)Actor_Cover_IsValidCover(self, v8->node) != 0;
-            if (v11 && volume)
+            const pathnode_t *node = cur->node;
+            bool valid = Actor_Cover_IsValidCover(self, node) != 0;
+
+            // Reject cover whose node isn't inside the requested volume.
+            if (valid && volume)
             {
-                if (!node)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_cover.cpp", 908, 0, "%s", "node");
+                iassert(node);
                 if (!SV_EntityContact(node->constant.vOrigin, node->constant.vOrigin, volume))
                 {
                     DebugDrawNodePicking("vol", self, node, (float *)colorRed);
-                    v11 = 0;
+                    valid = false;
                 }
             }
-            if (v11)
+
+            if (valid)
             {
-                v8->distMetric = Actor_Cover_GetNodeDistMetric(self, node);
-                NodeMetric = Actor_Cover_GetNodeMetric(self, node);
-                v8->metric = NodeMetric;
-                v12 = va((const char *)HIDWORD(NodeMetric), LODWORD(NodeMetric));
-                DebugDrawNodePicking(v12, self, node, (float *)colorWhite);
-                ++v7;
-                ++v8;
+                cur->distMetric = Actor_Cover_GetNodeDistMetric(self, node);
+                float metric = Actor_Cover_GetNodeMetric(self, node);
+                cur->metric = metric;
+                DebugDrawNodePicking(va("%3.1f", metric), self, node, (float *)colorWhite);
+                ++numValid;
+                ++cur;
             }
             else
             {
-                --v9;
-                --v4;
-                v8->node = v9->node;
-                v8->metric = v9->metric;
-                v8->distMetric = v9->distMetric;
+                --end;
+                --count;
+                cur->node = end->node;
+                cur->metric = end->metric;
+                cur->distMetric = end->distMetric;
             }
-        } while (v7 < v4);
+        } while (numValid < count);
     }
-    return v4;
+
+    return count;
 }
 
 int __cdecl compare_node_sort(float *pe1, float *pe2)

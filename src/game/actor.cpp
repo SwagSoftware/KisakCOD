@@ -1185,8 +1185,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
 {
     bool useMeleeAttackSpot; // r10
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3398, 0, "%s", "self");
+    iassert(self);
     useMeleeAttackSpot = self->useMeleeAttackSpot;
     self->pathWaitTime = level.time + 500;
     if (!useMeleeAttackSpot)
@@ -1198,7 +1197,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
                 Com_Printf(
                     18,
                     "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal. Maybe suppressed.\n",
-                    0, // KISAKTODO ent id
+                    self->ent->s.number,
                     self->ent->r.currentOrigin[0],
                     self->ent->r.currentOrigin[1],
                     self->ent->r.currentOrigin[2]);
@@ -1208,13 +1207,12 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
             Com_Printf(
                 18,
                 "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
-                0, // KISAKTODO ent id
+                self->ent->s.number,
                 self->ent->r.currentOrigin[0],
                 self->ent->r.currentOrigin[1],
                 self->ent->r.currentOrigin[2]);
         }
-        if (!self->ent)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3419, 0, "%s", "self->ent");
+        iassert(self->ent);
         Scr_AddVector(g_pathAttemptGoalPos);
         Scr_Notify(self->ent, scr_const.bad_path, 1u);
     }

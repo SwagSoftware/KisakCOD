@@ -1123,7 +1123,6 @@ void __cdecl CG_FirstSnapshot(int localClientNum)
 void __cdecl CG_ProcessDemoSnapshots(int localClientNum)
 {
     snapshot_s *nextSnap; // r11
-    __int64 v4; // r11
 
     if (localClientNum)
         MyAssertHandler(
@@ -1143,9 +1142,8 @@ void __cdecl CG_ProcessDemoSnapshots(int localClientNum)
     }
     if (cgArray[0].time - cgArray[0].snap->serverTime < 0 || cgArray[0].time - nextSnap->serverTime >= 0)
     {
-        HIDWORD(v4) = cgArray[0].frametime;
-        LODWORD(v4) = cgArray[0].frametime - cgArray[0].animFrametime;
-        CG_CreateNextSnap(localClientNum, (float)((float)v4 * (float)0.001), 1);
+        float dtime = (float)(cgArray[0].frametime - cgArray[0].animFrametime) * 0.001f;
+        CG_CreateNextSnap(localClientNum, dtime, 1);
         CG_SetNextSnap(localClientNum);
         CG_ProcessNextSnap(localClientNum);
     }

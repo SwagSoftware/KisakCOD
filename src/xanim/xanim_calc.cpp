@@ -1118,10 +1118,10 @@ void __cdecl XAnimCalcNonLoopEnd(
             sizeVec.v[2] = *((float *)dataInt + 5);
             sizeVec.v[3] = 0.0;
 
-            posVec.v[0] = weightScale * sizeVec.v[0] * lerp.v[0] + minsVec.v[0] + posVec.v[0];
-            posVec.v[1] = weightScale * sizeVec.v[1] * lerp.v[1] + minsVec.v[1] + posVec.v[1];
-            posVec.v[2] = weightScale * sizeVec.v[2] * lerp.v[2] + minsVec.v[2] + posVec.v[2];
-            posVec.v[3] = weightScale * (float)0.0f * (float)0.0f + (float)0.0f + posVec.v[3];
+            posVec.v[0] = weightScale * (sizeVec.v[0] * lerp.v[0] + minsVec.v[0]) + posVec.v[0];
+            posVec.v[1] = weightScale * (sizeVec.v[1] * lerp.v[1] + minsVec.v[1]) + posVec.v[1];
+            posVec.v[2] = weightScale * (sizeVec.v[2] * lerp.v[2] + minsVec.v[2]) + posVec.v[2];
+            posVec.v[3] = weightScale * ((float)0.0f * (float)0.0f + (float)0.0f) + posVec.v[3];
             *(float4 *)totalRotTrans->trans = posVec;
             totalRotTrans->transWeight = totalRotTrans->transWeight + weightScale;
         }
