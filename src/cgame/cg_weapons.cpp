@@ -1861,8 +1861,7 @@ void __cdecl CG_ActionSlotDown_f()
                 if (weapon == cgameGlob->weaponLatestPrimaryIdx)
                     goto LABEL_15;
                 bitNum = cgameGlob->weaponLatestPrimaryIdx;
-                if (!ps)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+                iassert(ps);
                 if (!Com_BitCheckAssert(ps->weapons, bitNum, 16))
                 {
                 LABEL_15:
@@ -1876,8 +1875,7 @@ void __cdecl CG_ActionSlotDown_f()
             }
             else
             {
-                if (!ps)
-                    MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+                iassert(ps);
                 if (Com_BitCheckAssert(ps->weapons, weapon, 16) && ps->weapon != weapon)
                 {
                     didSomething = 1;
@@ -3505,14 +3503,7 @@ void __cdecl CG_MeleeBloodEvent(int32_t localClientNum, const centity_s *cent)
 
     dobjHandle = CG_WeaponDObjHandle(cent->nextState.weapon);
     weapon = cent->nextState.weapon;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1095,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if (cg_weaponsArray[0][weapon].knifeModel)
     {
         if (cg_blood->current.enabled)
@@ -3626,14 +3617,7 @@ char __cdecl CG_ScopeIsOverlayed(int32_t localClientNum)
 {
     float zoom; // [esp+8h] [ebp-4h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     if (clientUIActives[0].connectionState < CA_ACTIVE)
         return 0;
 
@@ -3671,14 +3655,7 @@ void CG_DisplayViewmodelAnim(int localClientNum)
     int ViewmodelWeaponIndex; // r4
     weaponInfo_s *LocalClientWeaponInfo; // r3
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
     ViewmodelWeaponIndex = BG_GetViewmodelWeaponIndex(&cgArray[0].predictedPlayerState);
     if (ViewmodelWeaponIndex > 0)
     {
@@ -3695,8 +3672,7 @@ void CG_SaveViewModelAnimTrees(SaveGame *save)
     weaponInfo_s *v4; // r30
     uint32_t NumWeapons; // [sp+50h] [-40h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1049, 0, "%s", "save");
+    iassert(save);
     NumWeapons = BG_GetNumWeapons();
     SaveMemory_SaveWrite(&NumWeapons, 4, save);
     MemoryFile = SaveMemory_GetMemoryFile(save);
@@ -3706,14 +3682,7 @@ void CG_SaveViewModelAnimTrees(SaveGame *save)
         v4 = &cg_weaponsArray[0][1];
         do
         {
-            if (v3 >= 0x80)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-                    1057,
-                    0,
-                    "weapIndex doesn't index ARRAY_COUNT( cg_weaponsArray[0] )\n\t%i not in [0, %i)",
-                    v3,
-                    128);
+            bcassert(v3, ARRAY_COUNT(cg_weaponsArray[0])); // 0x80
             if (v4->hasAnimTree)
             {
                 if (!v4->viewModelDObj)
@@ -3738,24 +3707,12 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     weaponInfo_s *v11; // r31
     WeaponDef *WeaponDef; // r30
     XAnimTree_s *Tree; // r30
-    uint32_t v14; // [sp+50h] [-70h] BYREF
+    uint32_t numWeapons; // [sp+50h] [-70h] BYREF
 
-    if (!save)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1083, 0, "%s", "save");
-    if (!ps)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1084, 0, "%s", "ps");
-    SaveMemory_LoadRead(&v14, 4, save);
-    if (v14 > BG_GetNumWeapons())
-    {
-        NumWeapons = BG_GetNumWeapons();
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-            1087,
-            0,
-            "numWeapons <= BG_GetNumWeapons()\n\t%i, %i",
-            v14,
-            NumWeapons);
-    }
+    iassert(save);
+    iassert(ps);
+    SaveMemory_LoadRead(&numWeapons, 4, save);
+    iassert(numWeapons <= BG_GetNumWeapons());
     viewmodelIndex = ps->viewmodelIndex;
     if (viewmodelIndex <= 0)
     {
@@ -3765,13 +3722,8 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
     {
         ConfigString = CL_GetConfigString(0, viewmodelIndex + CS_MODELS);
         v7 = ConfigString;
-        if (!ConfigString || !*ConfigString)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-                1094,
-                0,
-                "%s",
-                "handModelName && handModelName[0]");
+        iassert(ConfigString && *ConfigString); // KISAK_AI: handModelName -> ConfigString
+        // "handModelName && handModelName[0]"
         v8 = R_RegisterModel(v7);
     }
     MemoryFile = SaveMemory_GetMemoryFile(save);
@@ -3799,14 +3751,13 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
                     if (!v11->viewModelDObj)
                     {
                         WeaponDef = BG_GetWeaponDef(v10);
-                        if (!WeaponDef)
-                            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1119, 0, "%s", "weapDef");
+                        iassert(WeaponDef);
                         Com_Error(ERR_DROP, "CG_LoadViewModelAnimTrees: viewmodel '%s' has no dobj", WeaponDef->szInternalName);
                     }
                 }
                 Tree = DObjGetTree(v11->viewModelDObj);
-                if (!Tree)
-                    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1124, 0, "%s", "animTree");
+                iassert(Tree); // KISAK_AI: animTree -> Tree
+                // "animTree"
                 XAnimClearTree(Tree);
                 XAnimLoadAnimTree(v11->viewModelDObj, MemoryFile);
             }
@@ -3819,37 +3770,26 @@ void CG_LoadViewModelAnimTrees(SaveGame *save, const playerState_s *ps)
 void CG_ArchiveWeaponInfo(MemoryFile *memFile)
 {
     BOOL IsWriting; // r22
-    float v3; // r30
+    float numWeapons; // r30
     uint32_t NumWeapons; // r3
     int v5; // r28
     int *p_hasAnimTree; // r30
     const DObj_s *v7; // r3
     float v8[24]; // [sp+50h] [-60h] BYREF
 
-    if (!memFile)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp", 1144, 0, "%s", "memFile");
+    iassert(memFile);
     IsWriting = MemFile_IsWriting(memFile);
     if (IsWriting)
     {
-        v3 = COERCE_FLOAT(BG_GetNumWeapons());
-        v8[0] = v3;
+        numWeapons = COERCE_FLOAT(BG_GetNumWeapons());
+        v8[0] = numWeapons;
         MemFile_WriteData(memFile, 4, v8);
     }
     else
     {
         MemFile_ReadData(memFile, 4, (unsigned char*)v8);
-        v3 = v8[0];
-        if (LODWORD(v3) > BG_GetNumWeapons())
-        {
-            NumWeapons = BG_GetNumWeapons();
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_weapons.cpp",
-                1155,
-                0,
-                "numWeapons <= BG_GetNumWeapons()\n\t%i, %i",
-                v3,
-                NumWeapons);
-        }
+        numWeapons = v8[0];
+        iassert(LODWORD(numWeapons) <= BG_GetNumWeapons());
     }
     if (LODWORD(v3) > 1)
     {
@@ -3862,105 +3802,37 @@ void CG_ArchiveWeaponInfo(MemoryFile *memFile)
                 v7 = (const DObj_s *)*(p_hasAnimTree - 11);
                 *p_hasAnimTree = v7 && DObjGetTree(v7);
             }
-            if (!memFile)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
-            if (!memFile->archiveProc)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-                    189,
-                    0,
-                    "%s",
-                    "memFile->archiveProc");
+            iassert(memFile);
+            iassert(memFile->archiveProc);
             memFile->archiveProc(memFile, 4, (byte*)p_hasAnimTree);
-            if (!memFile->archiveProc)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-                    189,
-                    0,
-                    "%s",
-                    "memFile->archiveProc");
+            iassert(memFile->archiveProc);
             memFile->archiveProc(memFile, 4, (byte *)p_hasAnimTree - 1);
             --v5;
             p_hasAnimTree += 18;
         } while (v5);
     }
-    if (!memFile)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 188, 0, "%s", "memFile");
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile);
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte*)&cgArray[0].prevViewmodelWeapon);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].weaponSelect);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].weaponSelectTime);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].equippedOffHand);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 96, (byte *)cgArray[0].viewDamage);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathTime);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathInTime);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathDelay);
-    if (!memFile->archiveProc)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h",
-            189,
-            0,
-            "%s",
-            "memFile->archiveProc");
+    iassert(memFile->archiveProc);
     memFile->archiveProc(memFile, 4, (byte *)&cgArray[0].holdBreathFrac);
     v8[0] = cgArray[0].holdBreathFrac;
-    if ((LODWORD(cgArray[0].holdBreathFrac) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\../universal/memfile.h", 234, 0, "%s", "!IS_NAN(*value)");
+    iassert(!IS_NAN(cgArray[0].holdBreathFrac)); // KISAK_AI: *value -> cgArray[0].holdBreathFrac
+    // "!IS_NAN(*value)"
 }
 
 #endif // KISAK_SP
