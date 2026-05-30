@@ -9,6 +9,10 @@
 #include "cg_main.h"
 #endif
 
+enum
+{
+    MAX_CAMERA_SHAKE = 4
+};
 
 CameraShakeSet s_cameraShakeSet[1];
 
@@ -52,8 +56,8 @@ void __cdecl CG_StartShakeCamera(int32_t localClientNum, float p, int32_t durati
         }
     }
     minsize = buildShake.size;
-    if (i != 4)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 118, 0, "%s", "i == MAX_CAMERA_SHAKE");
+
+    iassert(i == MAX_CAMERA_SHAKE);
     for (j = 0; j < 4; ++j)
     {
         if (minsize > (double)cameraShakeArray->shakes[j].size)
@@ -62,7 +66,7 @@ void __cdecl CG_StartShakeCamera(int32_t localClientNum, float p, int32_t durati
             i = j;
         }
     }
-    if (i != 4)
+    if (i != MAX_CAMERA_SHAKE)
         LABEL_23:
     memcpy(&cameraShakeArray->shakes[i], &buildShake, sizeof(cameraShakeArray->shakes[i]));
 }
@@ -81,63 +85,43 @@ int32_t __cdecl CG_UpdateCameraShake(const cg_s *cgameGlob, CameraShake *shake)
     float x; // [esp+34h] [ebp-4h]
 
     length = shake->length;
-    if ((LODWORD(length) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 46, 0, "%s", "!IS_NAN(shake->length)");
+    iassert(!IS_NAN(shake->length));
+
     radius = shake->radius;
-    if ((LODWORD(radius) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 47, 0, "%s", "!IS_NAN(shake->radius)");
+    iassert(!IS_NAN(shake->radius));
+
     scale = shake->scale;
-    if ((LODWORD(scale) & 0x7F800000) == 0x7F800000)
-        MyAssertHandler(".\\cgame\\cg_camerashake.cpp", 48, 0, "%s", "!IS_NAN(shake->scale)");
+    iassert(!IS_NAN(shake->scale));
+
     dtime = cgameGlob->time - shake->time;
     if (dtime < 0 || shake->length <= (double)dtime)
         return 0;
-    if (shake->length <= 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_camerashake.cpp",
-            54,
-            0,
-            "%s\n\t(shake->length) = %g",
-            "(shake->length > 0.0f)",
-            shake->length);
-    if (shake->radius <= 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_camerashake.cpp",
-            55,
-            0,
-            "%s\n\t(shake->radius) = %g",
-            "(shake->radius > 0.0f)",
-            shake->radius);
-    if (shake->scale <= 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_camerashake.cpp",
-            56,
-            0,
-            "%s\n\t(shake->scale) = %g",
-            "(shake->scale > 0.0f)",
-            shake->scale);
+
+    iassert(shake->length > 0.0f);
+    iassert(shake->radius > 0.0f);
+    iassert(shake->scale > 0.0f);
+
     Vec3Sub(cgameGlob->refdef.vieworg, shake->src, diff);
+
     dist = Vec3Length(diff);
     val = 1.0 - dist / shake->radius;
     timePercent = (double)dtime / shake->length;
-    if (timePercent < 0.0 || timePercent >= 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_camerashake.cpp",
-            62,
-            0,
-            "%s\n\t(timePercent) = %g",
-            "(timePercent >= 0.0f && timePercent < 1.0f)",
-            timePercent);
+
+    iassert(timePercent >= 0.0f && timePercent < 1.0f);
+
     x = (1.0 - timePercent) * shake->scale;
     if (x <= 0.0)
         return 0;
+
     if (val < 0.0)
         v3 = val / x;
     else
         v3 = val * x;
+
     val = v3;
     shake->size = val;
     shake->rumbleScale = x;
+
     return 1;
 }
 

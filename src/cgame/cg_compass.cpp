@@ -600,36 +600,29 @@ void __cdecl CG_CompassCalcDimensions(
     float center; // [esp+18h] [ebp-4h]
     float centera; // [esp+18h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 303, 0, "%s", "cgameGlob");
-    if (!parentRect)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 304, 0, "%s", "parentRect");
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 305, 0, "%s", "rect");
-    if (!x)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 306, 0, "%s", "x");
-    if (!y)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 307, 0, "%s", "y");
-    if (!w)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 308, 0, "%s", "w");
-    if (!h)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 309, 0, "%s", "h");
+    iassert(cgameGlob);
+    iassert(parentRect);
+    iassert(rect);
+    iassert(x);
+    iassert(y);
+    iassert(w);
+    iassert(h);
+
     if (compassType)
     {
         if (rect->w <= 0.0 || rect->h <= 0.0)
             Com_Error(ERR_FATAL, "Compass ownerdraw had width or height of 0");
-        if (rect->w == 0.0)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 340, 0, "%s", "rect->w");
-        if (rect->h == 0.0)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 341, 0, "%s", "rect->h");
-        if (cgameGlob->compassMapWorldSize[0] == 0.0)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 342, 0, "%s", "cgameGlob->compassMapWorldSize[0]");
-        if (cgameGlob->compassMapWorldSize[1] == 0.0)
-            MyAssertHandler(".\\cgame\\cg_compass.cpp", 343, 0, "%s", "cgameGlob->compassMapWorldSize[1]");
+
+        iassert(rect->w);
+        iassert(rect->h);
+        iassert(cgameGlob->compassMapWorldSize[0]);
+        iassert(cgameGlob->compassMapWorldSize[1]);
+
         rectAspectRatio = rect->w / rect->h;
         mapAspectRatio = cgameGlob->compassMapWorldSize[0] / cgameGlob->compassMapWorldSize[1];
         basex = parentRect->x + rect->x;
         basey = parentRect->y + rect->y;
+
         if (rectAspectRatio >= (double)mapAspectRatio)
         {
             centera = rect->w * 0.5 + basex;
@@ -1349,8 +1342,8 @@ void __cdecl CG_CompassDrawPlayer(
         }
         else
         {
-            if (compassType)
-                MyAssertHandler(".\\cgame\\cg_compass.cpp", 880, 0, "%s", "compassType == COMPASS_TYPE_PARTIAL");
+            iassert(compassType == COMPASS_TYPE_PARTIAL);
+
             w = compassPlayerWidth->current.value * compassSize->current.value;
             h = compassPlayerHeight->current.value * compassSize->current.value;
             KISAK_NULLSUB();
@@ -1359,10 +1352,12 @@ void __cdecl CG_CompassDrawPlayer(
         }
         x = centerX - w * 0.5 + x;
         y = centerY - h * 0.5 + y;
+
         if (compassType || !compassRotation->current.enabled)
             angle = AngleDelta(cgameGlob->compassNorthYaw, cgameGlob->refdefViewAngles[1]);
         else
             angle = 0.0;
+
         CG_DrawRotatedPic(
             &scrPlaceView[localClientNum],
             x,
@@ -1775,10 +1770,9 @@ void __cdecl CG_CompassDrawTickertape(
 
 void __cdecl CalcCompassPointerSize(CompassType compassType, float *w, float *h)
 {
-    if (!w)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 975, 0, "%s", "w");
-    if (!h)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 976, 0, "%s", "h");
+    iassert(w);
+    iassert(h);
+
     if (compassType)
     {
         *w = compassObjectiveIconWidth->current.value;
@@ -1811,12 +1805,13 @@ void __cdecl DrawIconDistanceText(
     float textHeight; // [esp+78h] [ebp-14h]
     float colorMod[4]; // [esp+7Ch] [ebp-10h] BYREF
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 1111, 0, "%s", "rect");
+    iassert(rect);
+
     colorMod[0] = 0.89999998f;
     colorMod[1] = 1.0f;
     colorMod[2] = 0.1f;
     colorMod[3] = color[3];
+
     if (compassObjectiveDetailDist->current.value <= (double)distance)
     {
         Com_sprintf(str, 0x40u, "%im", (int)distance);
@@ -1826,10 +1821,12 @@ void __cdecl DrawIconDistanceText(
         v10 = CutFloat(distance);
         Com_sprintf(str, 0x40u, "%.1fm", v10);
     }
+
     textWidth = (float)UI_TextWidth(str, 20, textFont, textScale);
     textHeight = (float)UI_TextHeight(textFont, textScale);
     textX = iconX - textWidth * 0.5;
     textY = iconY + iconH + 2.0;
+
     UI_DrawTextNoSnap(
         &scrPlaceView[localClientNum],
         str,
@@ -1857,10 +1854,9 @@ double __cdecl CG_GetHudAlphaCompass(int32_t localClientNum)
 
 void __cdecl CalcCompassFriendlySize(CompassType compassType, float *w, float *h)
 {
-    if (!w)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 1470, 0, "%s", "w");
-    if (!h)
-        MyAssertHandler(".\\cgame\\cg_compass.cpp", 1471, 0, "%s", "h");
+    iassert(w);
+    iassert(h);
+
     if (compassType)
     {
         *w = cg_hudMapFriendlyWidth->current.value;
@@ -1926,14 +1922,9 @@ void __cdecl CG_CompassDrawPlayerPointers_MP(
         centerX = scaledRect.w * 0.5 + scaledRect.x;
         centerY = scaledRect.h * 0.5 + scaledRect.y;
         ps = &cgameGlob->nextSnap->ps;
-        if (ps->clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame\\cg_compass.cpp",
-                1542,
-                0,
-                "ps->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                ps->clientNum,
-                64);
+
+        bcassert(ps->clientNum, MAX_CLIENTS);
+
         if (cgameGlob->bgs.clientinfo[ps->clientNum].infoValid)
         {
             CG_CompassUpYawVector(cgameGlob, yawVector);
@@ -2285,8 +2276,8 @@ static float DistanceToNearestGoal(cg_s *cgameGlob, float *heightDelta)
     double fadeAlpha; // fp1
     float v12[2]; // fp1
 
-    if (!cgameGlob)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compass.cpp", 1354, 0, "%s", "cgameGlob");
+    iassert(cgameGlob);
+
     v4 = 0;
     objectives = cgameGlob->objectives;
     v6 = 16;
@@ -2362,14 +2353,8 @@ void CG_CompassDrawGoalDistance(
     float v32; // [sp+8Ch] [-A4h]
     char txt[64]; // [sp+90h] [-A0h] BYREF
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
+
     compassFadeTime = cgArray[0].compassFadeTime;
     *(double *)&v12 = (float)((float)(hud_fade_compass->current.value * (float)1000.0) + (float)0.5);
     v13 = floor(v12);

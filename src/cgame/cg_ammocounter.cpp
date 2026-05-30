@@ -214,8 +214,8 @@ uint32_t __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *weapD
 {
     const WeaponDef *weapDefAlt; // [esp+0h] [ebp-4h]
 
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 89, 0, "%s", "weapDef");
+    iassert(weapDef);
+
     if (weapDef->altWeaponIndex)
     {
         weapDefAlt = BG_GetWeaponDef(weapDef->altWeaponIndex);
@@ -247,8 +247,8 @@ double __cdecl AmmoCounterFadeAlpha(int32_t localClientNum, cg_s *cgameGlob)
 {
     float v3; // [esp+4h] [ebp-10h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 152, 0, "%s", "cgameGlob");
+    iassert(cgameGlob);
+
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0.0;
 
@@ -269,10 +269,11 @@ double __cdecl DpadFadeAlpha(int32_t localClientNum, cg_s *cgameGlob)
 {
     uint32_t idx; // [esp+14h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 578, 0, "%s", "cgameGlob");
+    iassert(cgameGlob);
+
     if ((cgameGlob->predictedPlayerState.weapFlags & 0x80) != 0)
         return 0.0;
+
     for (idx = 0; idx < 4; ++idx)
     {
         if (ActionSlotIsActive(localClientNum, idx))
@@ -520,15 +521,9 @@ void __cdecl CG_DrawPlayerActionSlot(
                     else
                         Com_PrintWarning(14, "CG_DrawNightVisionOverlay(): Nightvision Assets not Precached.\n");
                 }
-                else if (ps->actionSlotType[slotIdx])
-                {
-                    MyAssertHandler(
-                        ".\\cgame\\cg_ammocounter.cpp",
-                        794,
-                        0,
-                        "%s",
-                        "ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING");
-                }
+
+                iassert(ps->actionSlotType[slotIdx] == ACTIONSLOTTYPE_DONOTHING);
+
                 return;
             }
             weapIdx = cgameGlob->weaponSelect;
@@ -583,8 +578,8 @@ void __cdecl CG_DrawPlayerActionSlot(
         weapIdx = ps->actionSlotParam[slotIdx].specifyWeapon.index;
         if (weapIdx)
         {
-            if (!ps)
-                MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+            iassert(ps);
+
             if (Com_BitCheckAssert(ps->weapons, weapIdx, 16))
             {
                 weapDef = BG_GetWeaponDef(weapIdx);
@@ -625,18 +620,13 @@ void __cdecl DpadIconDims(
     float *w,
     float *h)
 {
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 490, 0, "%s", "rect");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 491, 0, "%s", "weapDef");
-    if (!x)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 492, 0, "%s", "x");
-    if (!y)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 493, 0, "%s", "y");
-    if (!w)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 494, 0, "%s", "w");
-    if (!h)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 495, 0, "%s", "h");
+    iassert(rect);
+    iassert(weapDef);
+    iassert(x);
+    iassert(y);
+    iassert(w);
+    iassert(h);
+
     if (weapDef->dpadIconRatio == WEAPON_ICON_RATIO_4TO1)
     {
         *x = rect->x;
@@ -664,16 +654,14 @@ void __cdecl DpadIconDims(
 
 void __cdecl DpadTextPos(const rectDef_s *rect, uint32_t slotIdx, WeaponDef *weapDef, float *x, float *y)
 {
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 526, 0, "%s", "rect");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 527, 0, "%s", "weapDef");
-    if (!x)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 528, 0, "%s", "x");
-    if (!y)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 529, 0, "%s", "y");
+    iassert(rect);
+    iassert(weapDef);
+    iassert(x);
+    iassert(y);
+
     *x = rect->x + rect->w + -13.0f;
     *y = rect->y + rect->h + 3.0f;
+
     if (weapDef->dpadIconRatio == WEAPON_ICON_RATIO_2TO1 || weapDef->dpadIconRatio == WEAPON_ICON_RATIO_4TO1)
         *x = *x + rect->w;
 }
@@ -749,8 +737,8 @@ void __cdecl GetBaseRectPos(int32_t localClientNum, const rectDef_s *rect, float
     float dummyW; // [esp+0h] [ebp-8h] BYREF
     float dummyH; // [esp+4h] [ebp-4h] BYREF
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 69, 0, "%s", "rect");
+    iassert(rect);
+
     *base = rect->x;
     base[1] = rect->y;
     ScrPlace_ApplyRect(&scrPlaceView[localClientNum], base, base + 1, &dummyW, &dummyH, rect->horzAlign, rect->vertAlign);
@@ -761,10 +749,9 @@ void __cdecl DrawClipAmmo(cg_s *cgameGlob, float *base, uint32_t weapIdx, const 
     WeaponDef *weapDefAlt; // [esp+4h] [ebp-8h]
     int32_t weapIdxAlt; // [esp+8h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 324, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 325, 0, "%s", "weapDef");
+    iassert(cgameGlob);
+    iassert(weapDef);
+
     switch (weapDef->ammoCounterClip)
     {
     case AMMO_COUNTER_CLIP_MAGAZINE:
@@ -791,13 +778,7 @@ void __cdecl DrawClipAmmo(cg_s *cgameGlob, float *base, uint32_t weapIdx, const 
         }
         break;
     default:
-        if (weapDef->ammoCounterClip)
-            MyAssertHandler(
-                ".\\cgame\\cg_ammocounter.cpp",
-                354,
-                0,
-                "%s",
-                "weapDef->ammoCounterClip == AMMO_COUNTER_CLIP_NONE");
+        iassert(weapDef->ammoCounterClip == AMMO_COUNTER_CLIP_NONE);
         break;
     }
 }
@@ -871,14 +852,15 @@ void __cdecl DrawClipAmmoShortMagazine(
     int32_t clipIdx; // [esp+3Ch] [ebp-Ch]
     int32_t clipCnt; // [esp+44h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 200, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 201, 0, "%s", "weapDef");
+    iassert(cgameGlob);
+    iassert(weapDef);
+
     bulletX = *base - 32.0f;
     bulletY = base[1] - 8.0f * 0.5f;
     clipCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
+
     AmmoColor(cgameGlob, color, weapIdx);
+
     for (clipIdx = 0; clipIdx < weapDef->iClipSize; ++clipIdx)
     {
         if (clipIdx == clipCnt)
@@ -904,10 +886,9 @@ void __cdecl DrawClipAmmoShotgunShells(
     float bulletY; // [esp+3Ch] [ebp-Ch]
     int32_t magIdx; // [esp+44h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 230, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 231, 0, "%s", "weapDef");
+    iassert(cgameGlob);
+    iassert(weapDef);
+
     bulletX = *base - TEST_bullet_wh_1[0];
     bulletY = base[1] - TEST_bullet_wh_1[1] * 0.5f;
     magCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
@@ -947,10 +928,9 @@ void __cdecl DrawClipAmmoRockets(
     float bulletY; // [esp+3Ch] [ebp-Ch]
     int32_t magIdx; // [esp+44h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 260, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 261, 0, "%s", "weapDef");
+    iassert(cgameGlob);
+    iassert(weapDef);
+
     bulletX = *base - TEST_bullet_wh_2[0];
     bulletY = base[1] - TEST_bullet_wh_2[1] * 0.5;
     magCnt = cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(weapIdx)];
@@ -991,10 +971,9 @@ void __cdecl DrawClipAmmoBeltfed(
     int32_t clipIdx; // [esp+44h] [ebp-Ch]
     int32_t clipCnt; // [esp+4Ch] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 292, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 293, 0, "%s", "weapDef");
+    iassert(cgameGlob);
+    iassert(weapDef);
+
     stepX = TEST_bullet_step_3[0];
     bulletX = *base;
     bulletY = TEST_bullet_wh_3[1] * 0.25 * (double)(weapDef->iClipSize / TEST_bullet_rowCnt) + base[1];
@@ -1074,8 +1053,8 @@ void __cdecl DrawStretchPicGun(
     float h; // [esp+34h] [ebp-8h] BYREF
     float w; // [esp+38h] [ebp-4h] BYREF
 
-    if (!rect)
-        MyAssertHandler(".\\cgame\\cg_ammocounter.cpp", 850, 0, "%s", "rect");
+    iassert(rect);
+
     x = rect->x;
     y = rect->y;
     w = rect->w;
@@ -1090,14 +1069,8 @@ void __cdecl DrawStretchPicGun(
         }
         else
         {
-            if (ratio != WEAPON_ICON_RATIO_4TO1)
-                MyAssertHandler(
-                    ".\\cgame\\cg_ammocounter.cpp",
-                    866,
-                    0,
-                    "%s\n\t(ratio) = %i",
-                    "(ratio == WEAPON_ICON_RATIO_4TO1)",
-                    ratio);
+            iassert(ratio == WEAPON_ICON_RATIO_4TO1);
+
             x = x - w * 3.0f;
             w = w * 4.0f;
         }
@@ -1235,8 +1208,11 @@ uint32_t __cdecl GetWeaponIndex(const cg_s *cgameGlob)
     if (cgameGlob->weaponSelect >= BG_GetNumWeapons())
         return cgameGlob->predictedPlayerState.weapon;
     bitNum = cgameGlob->weaponSelect;
+
+    // Kisak: What the fuck is this...
     if (cgameGlob == (const cg_s *)-287036)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
+
     if (Com_BitCheckAssert(cgameGlob->predictedPlayerState.weapons, bitNum, 16))
         return cgameGlob->weaponSelect;
     else

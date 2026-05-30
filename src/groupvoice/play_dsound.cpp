@@ -290,14 +290,20 @@ dsound_sample_t *__cdecl DSound_NewSample()
     dsound_sample_t *sample; // [esp+4h] [ebp-4h]
 
     if (!dsoundplay_initialized)
-        return 0;
+        return NULL;
+
     sample = DSOUNDRecord_NewSample();
+    if (!sample)
+        return NULL;
+
     sample->dwBufferSize = g_sound_playBufferSize;
     if (CreateBasicBuffer(lpds, &sample->DSB, sample->frequency, sample->channels, g_sound_playBufferSize) >= 0)
         return sample;
+
     Com_Printf(9, "Error: Failed to create DirectSound play buffer\n");
     sample->DSB->Release();
     sample->DSB = 0;
+
     return 0;
 }
 

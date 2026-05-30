@@ -529,16 +529,11 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     weaponDef->damage);
                 return;
             case EV_GRENADE_BOUNCE:
-                if (ent->surfType >= 0x1Du)
-                    MyAssertHandler(
-                        ".\\cgame\\cg_event.cpp",
-                        971,
-                        0,
-                        "es->surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-                        ent->surfType,
-                        29);
+                bcassert(ent->surfType, SURF_TYPECOUNT);
+
                 if (weaponDef->bounceSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->bounceSound[ent->surfType]);
+
                 if (cgMedia.fx->table[8].nonflesh[ent->surfType])
                 {
                     ByteToDir(ent->eventParm, axis[0]);
@@ -565,25 +560,24 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     1.0,
                     weaponDef->iExplosionInnerDamage,
                     weaponDef->iExplosionOuterDamage);
-                if (ent->surfType >= 0x1Du)
-                    MyAssertHandler(
-                        ".\\cgame\\cg_event.cpp",
-                        992,
-                        0,
-                        "es->surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-                        ent->surfType,
-                        29);
+
+                bcassert(ent->surfType, SURF_TYPECOUNT);
+
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 CG_ImpactEffectForWeapon(weaponIdx, ent->surfType, 0, &fx, &snd);
                 if (fx)
                     FX_PlayOrientedEffect(localClientNum, fx, cgameGlob->time, position, axis);
+
                 if (snd)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, snd);
+
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
+
                 if (weaponDef->projExplosionSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
+
                 return;
             case EV_ROCKET_EXPLODE:
                 goto $LN48_1;
@@ -603,34 +597,36 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     1.0,
                     weaponDef->iExplosionInnerDamage,
                     weaponDef->iExplosionOuterDamage);
-                if (ent->surfType >= 0x1Du)
-                    MyAssertHandler(
-                        ".\\cgame\\cg_event.cpp",
-                        1022,
-                        0,
-                        "es->surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-                        ent->surfType,
-                        29);
+
+                bcassert(ent->surfType, SURF_TYPECOUNT);
+
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 CG_ImpactEffectForWeapon(weaponIdx, ent->surfType, 0, (const FxEffectDef **)&outFx, &outSnd);
                 if (outFx)
                     FX_PlayOrientedEffect(localClientNum, outFx, cgameGlob->time, position, axis);
+
                 if (outSnd)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, outSnd);
+
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
+
                 if (weaponDef->projExplosionSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
+
                 cgameGlob->nomarks = 0;
                 return;
             case EV_FLASHBANG_EXPLODE:
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
+
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
+
                 if (weaponDef->projExplosionSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
+
                 return;
             case EV_CUSTOM_EXPLODE:
                 goto $LN37_1;
@@ -689,14 +685,8 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 cgameGlob->nomarks = 0;
                 return;
             case EV_DUD_EXPLODE:
-                if (ent->surfType >= 0x1Du)
-                    MyAssertHandler(
-                        ".\\cgame\\cg_event.cpp",
-                        1103,
-                        0,
-                        "es->surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-                        ent->surfType,
-                        29);
+                bcassert(ent->surfType, SURF_TYPECOUNT);
+ 
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitLargeSound[ent->surfType]);
@@ -707,27 +697,27 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                         cgameGlob->time,
                         position,
                         axis);
+
                 if (weaponDef->projExplosionEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projExplosionEffect, cgameGlob->time, position, axis);
+
                 if (weaponDef->projExplosionSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projExplosionSound);
+
                 if (weaponDef->projDudEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projDudEffect, cgameGlob->time, position, axis);
+
                 if (weaponDef->projDudSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projDudSound);
+
                 return;
             case EV_DUD_IMPACT:
-                if (ent->surfType >= 0x1Du)
-                    MyAssertHandler(
-                        ".\\cgame\\cg_event.cpp",
-                        1122,
-                        0,
-                        "es->surfType doesn't index SURF_TYPECOUNT\n\t%i not in [0, %i)",
-                        ent->surfType,
-                        29);
+                bcassert(ent->surfType, SURF_TYPECOUNT);
+
                 ByteToDir(ent->eventParm, axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, cgMedia.bulletHitLargeSound[ent->surfType]);
+
                 if (cgMedia.fx->table[11].nonflesh[ent->surfType])
                     FX_PlayOrientedEffect(
                         localClientNum,
@@ -735,10 +725,13 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                         cgameGlob->time,
                         position,
                         axis);
+
                 if (weaponDef->projDudEffect)
                     FX_PlayOrientedEffect(localClientNum, weaponDef->projDudEffect, cgameGlob->time, position, axis);
+
                 if (weaponDef->projDudSound)
                     CG_PlaySoundAlias(localClientNum, ENTITYNUM_WORLD, position, weaponDef->projDudSound);
+
                 return;
             case EV_PLAY_FX:
                 CG_PlayFx(localClientNum, cent, ent->lerp.apos.trBase);
@@ -1087,30 +1080,19 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
     default:
         break;
     }
-    if (target >= 0x40)
+    if (target >= MAX_CLIENTS)
     {
         Com_Error(ERR_DROP, "CG_Obituary: target out of range");
-        MyAssertHandler(
-            ".\\cgame\\cg_event.cpp",
-            139,
-            0,
-            "target doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-            target,
-            64);
+        bcassert(target, MAX_CLIENTS);
     }
     victimCI = &cgameGlob->bgs.clientinfo[target];
     if (victimCI->infoValid)
     {
         CL_GetClientName(localClientNum, target, targetName, 38);
         victimColor = CG_DrawScoreboard_GetTeamColorIndex(victimCI->oldteam, localClientNum);
-        if (cgameGlob->clientNum >= 0x40u)
-            MyAssertHandler(
-                ".\\cgame\\cg_event.cpp",
-                147,
-                0,
-                "cgameGlob->clientNum doesn't index MAX_CLIENTS\n\t%i not in [0, %i)",
-                cgameGlob->clientNum,
-                64);
+
+        bcassert(cgameGlob->clientNum, MAX_CLIENTS);
+
         playerCI = &cgameGlob->bgs.clientinfo[cgameGlob->clientNum];
         if (playerCI->infoValid)
         {
@@ -1214,8 +1196,7 @@ void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPl
             CG_PlayEntitySoundAlias(localClientNum, entNum, cgMedia.qsprintingEquipmentSoundPlayer);
             break;
         default:
-            if (type)
-                MyAssertHandler(".\\cgame\\cg_event.cpp", 265, 0, "%s", "type == EQS_WALKING");
+            iassert(type == EQS_WALKING);
             CG_PlayEntitySoundAlias(localClientNum, entNum, cgMedia.walkingEquipmentSoundPlayer);
             break;
         }
@@ -1240,8 +1221,7 @@ void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPl
             CG_PlayEntitySoundAlias(localClientNum, entNum, cgMedia.qsprintingEquipmentSound);
             break;
         default:
-            if (type)
-                MyAssertHandler(".\\cgame\\cg_event.cpp", 296, 0, "%s", "type == EQS_WALKING");
+            iassert(type == EQS_WALKING);
             CG_PlayEntitySoundAlias(localClientNum, entNum, cgMedia.walkingEquipmentSound);
             break;
         }
@@ -1261,8 +1241,7 @@ void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPl
         }
         else
         {
-            if (type)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_event.cpp", 265, 0, "%s", "type == EQS_WALKING");
+            iassert(type == EQS_WALKING);
             runningEquipmentSoundPlayer = cgMedia.walkingEquipmentSoundPlayer;
         }
     }
@@ -1276,8 +1255,7 @@ void __cdecl CG_EquipmentSound(int32_t localClientNum, int32_t entNum, bool isPl
     }
     else
     {
-        if (type)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_event.cpp", 296, 0, "%s", "type == EQS_WALKING");
+        iassert(type == EQS_WALKING);
         runningEquipmentSoundPlayer = cgMedia.walkingEquipmentSound;
     }
     CG_PlayEntitySoundAlias(localClientNum, entNum, runningEquipmentSoundPlayer);
@@ -1432,8 +1410,8 @@ void __cdecl CG_CheckEvents(int32_t localClientNum, centity_s *cent)
     }
     else
     {
-        if (cent->nextState.eventSequence)
-            MyAssertHandler(".\\cgame\\cg_event.cpp", 1277, 0, "%s", "!cent->nextState.eventSequence");
+        iassert(!cent->nextState.eventSequence);
+
         if (!cent->previousEventSequence)
         {
             cent->previousEventSequence = 1;

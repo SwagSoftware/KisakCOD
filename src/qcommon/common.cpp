@@ -478,6 +478,7 @@ void Com_DPrintf(int channel, const char* fmt, ...)
 
 void Com_PrintError(int channel, const char *fmt, ...)
 {
+#if defined(KISAK_PURE)
     char dest[4096]; // [esp+14h] [ebp-1008h] BYREF
     int v3; // [esp+1018h] [ebp-4h]
     va_list va; // [esp+102Ch] [ebp+10h] BYREF
@@ -492,6 +493,15 @@ void Com_PrintError(int channel, const char *fmt, ...)
     dest[4095] = 0;
     ++com_errorPrintsCount;
     Com_PrintMessage(channel, dest, 3);
+#else
+    char msg[4096] = { 0 };
+    va_list va;
+    va_start(va, fmt);
+    vsnprintf(msg, sizeof(msg), fmt, va);
+    va_end(va);
+    ++com_errorPrintsCount;
+    Com_PrintMessage(channel, msg, 3);
+#endif
 }
 
 void Com_PrintWarning(int channel, const char *fmt, ...)

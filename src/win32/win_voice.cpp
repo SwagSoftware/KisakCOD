@@ -606,11 +606,11 @@ bool __cdecl Voice_Init()
     mixerSetMicrophoneMute(winvoice_mic_mute->current.color[0]);
     g_current_bandwidth_setting = 0;
     handle = GetDesktopWindow();
-    Record_Init();
-    Sound_Init(handle);
+    const auto recordInitialized = Record_Init();
+    const auto soundInitialized = Sound_Init(handle);
     Encode_Init(g_current_bandwidth_setting);
     Decode_Init(g_current_bandwidth_setting);
-    g_voice_initialized = 1;
+    g_voice_initialized = recordInitialized && soundInitialized;
     memset((unsigned __int8 *)s_clientTalkTime, 0, sizeof(s_clientTalkTime));
     for (client = 0; client < 64; ++client)
         s_clientSamples[client] = Sound_NewSample();

@@ -73,8 +73,13 @@ char __cdecl AssertNotify(int type, AssertOccurance occurance)
     ActiveWindow = GetActiveWindow();
     if (MessageBoxA(ActiveWindow, assertMessage, msg, 0x12011u) != 1)
         return 1;
+#if defined(_DEBUG)
+    if (occurance != RECURSIVE)
+        DebugBreak();
+#else
     if (occurance != RECURSIVE)
         ExitProcess(0xFFFFFFFF);
+ #endif
     return 1;
 }
 

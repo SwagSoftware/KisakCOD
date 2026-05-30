@@ -12,7 +12,7 @@
 #include "profile.h"
 
 #if defined(_WIN32)
-CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
+_RTL_CRITICAL_SECTION s_criticalSections[CRITSECT_COUNT];
 #else
 #include <mutex>
 std::mutex s_criticalSections[CRITSECT_COUNT];
