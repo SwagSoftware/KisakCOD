@@ -459,24 +459,23 @@ bool __cdecl WeaponPickup_LeechFromWeaponEnt(
 
 void __cdecl PrintPlayerPickupMessage(gentity_s *player, uint32_t weapIdx, WeaponDef *weapDef)
 {
-    const char *v3; // eax
+    const char *text;
 
     iassert(player);
     iassert(weapDef);
 
 #ifdef KISAK_MP
     if (BG_WeaponIsClipOnly(weapIdx))
-        v3 = va("*WARNING* One or more selections were skipped as they could not be interpreted as c data", 102, weapDef->szDisplayName);
+        text = va("%c \"GAME_PICKUP_CLIPONLY_AMMO %s\"", 'f', weapDef->szDisplayName);
     else
-        v3 = va("*WARNING* One or more selections were skipped as they could not be interpreted as c data", 102, weapDef->szDisplayName);
-    SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, v3);
+        text = va("%c \"GAME_PICKUP_AMMO %s\"", 'f', weapDef->szDisplayName);
+    SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, text);
 #elif KISAK_SP
-    const char *v8;
     if (BG_WeaponIsClipOnly(weapIdx))
-        v8 = va("gm \"GAME_PICKUP_CLIPONLY_AMMO %s\"", weapDef->szDisplayName);
+        text = va("gm \"GAME_PICKUP_CLIPONLY_AMMO %s\"", weapDef->szDisplayName);
     else
-        v8 = va("gm \"GAME_PICKUP_AMMO %s\"", weapDef->szDisplayName);
-    SV_GameSendServerCommand(player - g_entities, v8);
+        text = va("gm \"GAME_PICKUP_AMMO %s\"", weapDef->szDisplayName);
+    SV_GameSendServerCommand(player - g_entities, text);
 #endif
 }
 
