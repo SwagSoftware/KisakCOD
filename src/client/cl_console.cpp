@@ -20,7 +20,7 @@
 enum {
     COLOR_FIRST = 48,
     COLOR_LAST = 57,
-    CONTXTCMD_LEN_HUDICON = 505,
+    CONTXTCMD_LEN_HUDICON = 7,
     CONTXTCMD_ARG_HUDICON_MATERIAL = 3,
     CON_MSG_TIME_DRIFT_BUFFER = 1000,
     GAMEMSG_WINDOW_COUNT = 4
@@ -1405,6 +1405,7 @@ uint32_t __cdecl CL_AddDeathMessageString(
     return deathMsgLen;
 }
 
+#if defined(KISAK_PURE)
 uint32_t __cdecl CL_AddDeathMessageIcon(
     char *deathMsg,
     uint32_t deathMsgLen,
@@ -1426,31 +1427,77 @@ uint32_t __cdecl CL_AddDeathMessageIcon(
     iassert(iconHeight > 0);
     iassert(IsValidMaterialHandle(iconShader));
     iassert(deathMsgLen + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLen] = 94;
     deathMsgLena = deathMsgLen + 1;
+
     iassert(horzFlipIcon != -1); // KISAK_AI: c -> horzFlipIcon
     // "c != '\0'"
     iassert(deathMsgLena + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLena] = horzFlipIcon + 1;
     deathMsgLenb = deathMsgLena + 1;
     v9 = CL_DeathMessageIconDimension(iconWidth);
     iassert(v9); // KISAK_AI: c -> v9
     // "c != '\0'"
     iassert(deathMsgLenb + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLenb] = v9;
     deathMsgLenc = deathMsgLenb + 1;
     v8 = CL_DeathMessageIconDimension(iconHeight);
+
     iassert(v8); // KISAK_AI: c -> v8
     // "c != '\0'"
     iassert(deathMsgLenc + 1 <= deathMsgMaxLen);
+
     deathMsg[deathMsgLenc] = v8;
     deathMsgLend = deathMsgLenc + 1;
+
     iassert(deathMsgLend + sizeof(iconShader) <= deathMsgMaxLen);
+
     *(uint32_t *)&deathMsg[deathMsgLend] = (uint32_t)iconShader;
     deathMsgLene = deathMsgLend + 4;
+
     iassert(deathMsgLene - deathMsgLen == CONTXTCMD_LEN_HUDICON + 1);
+
     return deathMsgLene;
 }
+#else
+uint32_t __cdecl CL_AddDeathMessageIcon(
+    char* deathMsg,
+    uint32_t deathMsgLen,
+    uint32_t deathMsgMaxLen,
+    Material* iconShader,
+    float iconWidth,
+    float iconHeight,
+    bool horzFlipIcon)
+{
+    const uint32_t startLen = deathMsgLen;
+
+    iassert(iconWidth > 0);
+    iassert(iconHeight > 0);
+    iassert(IsValidMaterialHandle(iconShader));
+
+    char encodedWidth = CL_DeathMessageIconDimension(iconWidth);
+    char encodedHeight = CL_DeathMessageIconDimension(iconHeight);
+
+    iassert(horzFlipIcon != -1);
+    iassert(encodedWidth != '\0');
+    iassert(encodedHeight != '\0');
+    iassert(deathMsgLen + CONTXTCMD_LEN_HUDICON + 1 <= deathMsgMaxLen);
+
+    deathMsg[deathMsgLen++] = 94;
+    deathMsg[deathMsgLen++] = (char)(horzFlipIcon + 1);
+    deathMsg[deathMsgLen++] = encodedWidth;
+    deathMsg[deathMsgLen++] = encodedHeight;
+    *(uint32_t*)&deathMsg[deathMsgLen] = (uint32_t)iconShader;
+    deathMsgLen += 4;
+
+    iassert(deathMsgLen - startLen == CONTXTCMD_LEN_HUDICON + 1);
+
+    return deathMsgLen;
+}
+#endif
 
 int32_t __cdecl CL_DeathMessageIconDimension(float size)
 {
