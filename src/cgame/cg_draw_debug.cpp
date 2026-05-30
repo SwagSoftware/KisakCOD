@@ -30,6 +30,11 @@ int32_t previous;
 int32_t fps_previousTimes[32];
 int32_t fps_index;
 
+enum {
+    TRACK_MINSPEC_IMAGES = 35,
+    MAX_MINSPEC_TEXTURE_USAGE = 0x3000000
+};
+
 const struct MemInfoData//$26A77A1ABB1A9087FD9203E2FD79C24D // sizeof=0x8
 {                                       // ...
     const char *name;                   // ...
@@ -241,13 +246,9 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
             s = va("%d", rendererStats.c_imageUsage.minspec / 0x100000);
         }
         ye = CG_CornerDebugPrint(scrPlace, farRight, yd, v10, s, (char *)" min pc tex", color) + yd;
-        if (meminfoData[35].budgetKB << 10 != 0x3000000)
-            MyAssertHandler(
-                ".\\cgame\\cg_draw_debug.cpp",
-                415,
-                0,
-                "%s",
-                "MAX_MINSPEC_TEXTURE_USAGE == meminfoData[TRACK_MINSPEC_IMAGES].budgetKB * 1024");
+
+        iassert(MAX_MINSPEC_TEXTURE_USAGE == meminfoData[TRACK_MINSPEC_IMAGES].budgetKB * 1024);
+        
         meminfo->typeTotal[35] = 0;
         s = va("%i", meminfo->nonSwapMinSpecTotal / 0x100000);
         yb = CG_CornerDebugPrint(scrPlace, farRight, ye, v10, s, (char *)" min pc mem", colorWhite) + ye;
@@ -806,8 +807,8 @@ void __cdecl CG_DrawFxProfile(int32_t localClientNum)
 
 void __cdecl CG_DrawFxText(char *text, float *profilePos)
 {
-    if (!text)
-        MyAssertHandler(".\\cgame\\cg_draw_debug.cpp", 866, 0, "%s", "text");
+    iassert(text);
+
     CL_DrawText(
         &scrPlaceFull,
         text,

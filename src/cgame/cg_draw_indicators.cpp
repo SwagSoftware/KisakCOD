@@ -145,18 +145,13 @@ char __cdecl CG_AddHudGrenade_PositionCheck(const cg_s *cgameGlob, const centity
     float grenadeOffsetSquared; // [esp+34h] [ebp-8h]
     float maxOffset; // [esp+38h] [ebp-4h]
 
-    if (!grenadeEnt)
-        MyAssertHandler(".\\cgame\\cg_draw_indicators.cpp", 206, 0, "%s", "grenadeEnt");
+    iassert(grenadeEnt);
+
     Vec3Sub(grenadeEnt->pose.origin, cgameGlob->predictedPlayerState.origin, grenadeOffset);
     if (weapDef->projExplosion && weapDef->projExplosion != WEAPPROJEXP_HEAVY)
     {
-        if (weapDef->projExplosion != WEAPPROJEXP_FLASHBANG)
-            MyAssertHandler(
-                ".\\cgame\\cg_draw_indicators.cpp",
-                220,
-                0,
-                "%s",
-                "weapDef->projExplosion == WEAPPROJEXP_FLASHBANG");
+        iassert(weapDef->projExplosion == WEAPPROJEXP_FLASHBANG);
+
         maxOffset = cg_hudGrenadeIconMaxRangeFlash->current.value;
     }
     else if (cg_hudGrenadeIconMaxRangeFrag->current.value == 0.0)
@@ -205,25 +200,12 @@ void __cdecl CG_AddHudGrenade(const cg_s *cgameGlob, const centity_s *grenadeEnt
     float maxSpeedSq; // [esp+20h] [ebp-8h]
     WeaponDef *weapDef; // [esp+24h] [ebp-4h]
 
-    if (grenadeEnt->nextState.eType != ET_MISSILE)
-        MyAssertHandler(
-            ".\\cgame\\cg_draw_indicators.cpp",
-            262,
-            0,
-            "%s\n\t(state->eType) = %i",
-            "(state->eType == ET_MISSILE)",
-            grenadeEnt->nextState.eType);
-    if ((COERCE_UNSIGNED_INT(grenadeEnt->nextState.lerp.pos.trDelta[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(grenadeEnt->nextState.lerp.pos.trDelta[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(grenadeEnt->nextState.lerp.pos.trDelta[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            ".\\cgame\\cg_draw_indicators.cpp",
-            264,
-            0,
-            "%s",
-            "!IS_NAN((state->lerp.pos.trDelta)[0]) && !IS_NAN((state->lerp.pos.trDelta)[1]) && !IS_NAN((state->lerp.pos.trDelta)[2])");
-    }
+    const entityState_s* state = &grenadeEnt->nextState;
+    iassert((state->eType == ET_MISSILE));
+
+
+    iassert(!IS_NAN((state->lerp.pos.trDelta)[0]) && !IS_NAN((state->lerp.pos.trDelta)[1]) && !IS_NAN((state->lerp.pos.trDelta)[2]));
+
     weapDef = BG_GetWeaponDef(grenadeEnt->nextState.weapon);
     if (weapDef->weapType == WEAPTYPE_GRENADE
         && (weapDef->projExplosion == WEAPPROJEXP_GRENADE
@@ -250,14 +232,9 @@ void __cdecl CG_AddHudGrenade(const cg_s *cgameGlob, const centity_s *grenadeEnt
                 }
                 goto LABEL_29;
             }
-            if (weapDef->projExplosion != WEAPPROJEXP_FLASHBANG)
-                MyAssertHandler(
-                    ".\\cgame\\cg_draw_indicators.cpp",
-                    304,
-                    0,
-                    "%s\n\t(weapDef->projExplosion) = %i",
-                    "(weapDef->projExplosion == WEAPPROJEXP_FLASHBANG)",
-                    weapDef->projExplosion);
+
+            iassert((weapDef->projExplosion == WEAPPROJEXP_FLASHBANG));
+
             if (cg_hudGrenadeIconEnabledFlash->current.enabled)
             {
                 material = cgMedia.grenadeIconFlash;

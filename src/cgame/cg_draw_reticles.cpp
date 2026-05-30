@@ -54,12 +54,15 @@ char __cdecl CG_GetWeapReticleZoom(const cg_s *cgameGlob, float *zoom)
     weapDef = BG_GetWeaponDef(weapIndex);
     fPosLerp = cgameGlob->predictedPlayerState.fWeaponPosFrac;
     *zoom = 0.0;
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 57, 0, "%s", "weapDef");
+
+    iassert(weapDef);
+
     if (!weapDef->overlayMaterial && weapDef->overlayReticle == WEAPOVERLAYRETICLE_NONE)
         return 0;
+
     if (fPosLerp == 0.0)
         return 0;
+
     if (cgameGlob->playerEntity.bPositionToADS)
     {
         *zoom = fPosLerp - (1.0 - weapDef->fAdsZoomInFrac);
@@ -72,23 +75,20 @@ char __cdecl CG_GetWeapReticleZoom(const cg_s *cgameGlob, float *zoom)
         if (*zoom > 0.0)
             *zoom = *zoom / weapDef->fAdsZoomOutFrac;
     }
+
     if (*zoom <= 0.009999999776482582)
         return 0;
+
     if (*zoom > 1.0)
         *zoom = 1.0;
+
     return 1;
 }
 
 void __cdecl CG_DrawNightVisionOverlay(int32_t localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-            1071,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+    iassert(localClientNum == 0);
+
     if (CG_LookingThroughNightVision(localClientNum))
     {
         if (cgMedia.nightVisionOverlay)
@@ -170,14 +170,8 @@ void __cdecl CG_DrawCrosshair(int32_t localClientNum)
                 reticleAlpha = CG_DrawWeapReticle(localClientNum);
                 if (!CG_Flashbanged(localClientNum) && drawHud)
                 {
-                    if (localClientNum)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\src\\cgame\\../cgame_mp/cg_local_mp.h",
-                            1083,
-                            0,
-                            "%s\n\t(localClientNum) = %i",
-                            "(localClientNum == 0)",
-                            localClientNum);
+                    iassert(localClientNum == 0);
+
                     CG_CalcCrosshairColor(localClientNum, reticleAlpha, color);
                     if (color[3] >= 0.009999999776482582
                         && (posLerp != 1.0 || !cg_drawGun->current.enabled)
@@ -403,10 +397,10 @@ void __cdecl CG_UpdateScissorViewport(refdef_s *refdef, float *drawPos, float *d
     int32_t x1; // [esp+48h] [ebp-Ch]
     int32_t y1; // [esp+4Ch] [ebp-8h]
 
-    if (!refdef)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 161, 0, "%s", "refdef");
-    if (refdef->useScissorViewport)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 162, 0, "%s", "!refdef->useScissorViewport");
+    iassert(refdef);
+
+    iassert(!refdef->useScissorViewport);
+
     refdef->useScissorViewport = 1;
     refdef->scissorViewport.x = refdef->x + (int32_t)*drawPos;
     refdef->scissorViewport.y = refdef->y + (int32_t)drawPos[1];
@@ -606,14 +600,15 @@ void __cdecl CG_DrawTurretCrossHair(int32_t localClientNum)
 
 char __cdecl AllowedToDrawCrosshair(int32_t localClientNum, const playerState_s *predictedPlayerState)
 {
-    if (!predictedPlayerState)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 487, 0, "%s", "predictedPlayerState");
-    if (!cg_paused)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 488, 0, "%s", "cg_paused");
+    iassert(predictedPlayerState);
+    iassert(cg_paused);
+
     if (cg_paused->current.integer && cg_drawpaused->current.enabled)
         return 0;
+
     if (CG_IsReticleTurnedOff())
         return 0;
+
     switch (predictedPlayerState->weaponstate)
     {
     case 0xC:
@@ -654,10 +649,9 @@ void __cdecl CG_DrawAdsAimIndicator(
     float w; // [esp+48h] [ebp-4h]
     float wa; // [esp+48h] [ebp-4h]
 
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 526, 0, "%s", "weapDef");
-    if (!cg_drawGun)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 527, 0, "%s", "cg_drawGun");
+    iassert(weapDef);
+    iassert(cg_drawGun);
+
     if (!cg_drawGun->current.enabled && transScale < 1.0)
     {
         material = weapDef->reticleCenter;
@@ -685,52 +679,35 @@ void __cdecl CG_TransitionToAds(
     float fa; // [esp+14h] [ebp-4h]
     float fb; // [esp+14h] [ebp-4h]
 
-    if (!cgameGlob)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 560, 0, "%s", "cgameGlob");
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 561, 0, "%s", "weapDef");
-    if (!transScale)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 562, 0, "%s", "transScale");
-    if (!transShift)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 563, 0, "%s", "transShift");
+    iassert(cgameGlob);
+    iassert(weapDef);
+    iassert(transScale);
+    iassert(transShift);
+
     if (cgameGlob->playerEntity.bPositionToADS)
     {
         f = posLerp - (1.0 - weapDef->fAdsCrosshairInFrac);
+
         if (f <= 0.0)
             return;
-        if (weapDef->fAdsCrosshairInFrac == 0.0)
-            MyAssertHandler(
-                ".\\cgame\\cg_draw_reticles.cpp",
-                573,
-                0,
-                "%s\n\t(weapDef->fAdsCrosshairInFrac) = %g",
-                "(weapDef->fAdsCrosshairInFrac != 0.0f)",
-                weapDef->fAdsCrosshairInFrac);
+
+        iassert(weapDef->fAdsCrosshairInFrac != 0.0f);
         fa = f / weapDef->fAdsCrosshairInFrac;
     }
     else
     {
         fb = posLerp - (1.0 - weapDef->fAdsCrosshairOutFrac);
+
         if (fb <= 0.0)
             return;
-        if (weapDef->fAdsCrosshairOutFrac == 0.0)
-            MyAssertHandler(
-                ".\\cgame\\cg_draw_reticles.cpp",
-                582,
-                0,
-                "%s\n\t(weapDef->fAdsCrosshairOutFrac) = %g",
-                "(weapDef->fAdsCrosshairOutFrac != 0.0f)",
-                weapDef->fAdsCrosshairOutFrac);
+
+        iassert(weapDef->fAdsCrosshairOutFrac != 0.0f);
+
         fa = fb / weapDef->fAdsCrosshairOutFrac;
     }
-    if (cgameGlob->refdef.tanHalfFovY == 0.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_draw_reticles.cpp",
-            586,
-            0,
-            "%s\n\t(cgameGlob->refdef.tanHalfFovY) = %g",
-            "(cgameGlob->refdef.tanHalfFovY != 0.0f)",
-            cgameGlob->refdef.tanHalfFovY);
+
+    iassert(cgameGlob->refdef.tanHalfFovY != 0.0f);
+
     *transScale = 1.0 - fa * 0.5;
     v6 = weapDef->fAdsAimPitch * 0.01745329238474369;
     v5 = tan(v6);
@@ -894,8 +871,8 @@ void __cdecl CG_CalcReticleSpread(
     float f; // [esp+10h] [ebp-8h] BYREF
     float scale; // [esp+14h] [ebp-4h]
 
-    if (!weapDef)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 641, 0, "%s", "weapDef");
+    iassert(weapDef);
+
     BG_GetSpreadForWeapon(&cgameGlob->predictedPlayerState, weapDef, &f, &maxSpread);
     f = ((maxSpread - f) * (cgameGlob->predictedPlayerState.aimSpreadScale / 255.0) + f) * transScale;
     v6 = f * 0.01745329238474369;
@@ -909,32 +886,19 @@ void __cdecl CG_CalcReticleSpread(
 
 void __cdecl CG_CalcReticleColor(const float *baseColor, float alpha, float aimSpreadScale, float *reticleColor)
 {
-    if (!cg_crosshairAlpha)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 657, 0, "%s", "cg_crosshairAlpha");
-    if (!cg_crosshairAlphaMin)
-        MyAssertHandler(".\\cgame\\cg_draw_reticles.cpp", 658, 0, "%s", "cg_crosshairAlphaMin");
-    if (alpha < 0.0 || alpha > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_draw_reticles.cpp",
-            659,
-            0,
-            "%s\n\t(alpha) = %g",
-            "(alpha >= 0 && alpha <= 1.0f)",
-            alpha);
+    iassert(cg_crosshairAlpha);
+    iassert(cg_crosshairAlphaMin);
+    iassert((alpha >= 0 && alpha <= 1.0f));
+
     *reticleColor = *baseColor;
     reticleColor[1] = baseColor[1];
     reticleColor[2] = baseColor[2];
     reticleColor[3] = alpha * cg_crosshairAlpha->current.value * (1.0 - aimSpreadScale / 255.0);
+
     if (cg_crosshairAlphaMin->current.value > (double)reticleColor[3])
         reticleColor[3] = cg_crosshairAlphaMin->current.value;
-    if (reticleColor[3] < 0.0 || reticleColor[3] > 1.0)
-        MyAssertHandler(
-            ".\\cgame\\cg_draw_reticles.cpp",
-            666,
-            1,
-            "%s\n\t(reticleColor[3]) = %g",
-            "(reticleColor[3] >= 0 && reticleColor[3] <= 1.0f)",
-            reticleColor[3]);
+
+    iassert((reticleColor[3] >= 0 && reticleColor[3] <= 1.0f));
 }
 
 void __cdecl CG_CalcReticleImageOffset(const float *drawSize, float *imageTexelOffset)

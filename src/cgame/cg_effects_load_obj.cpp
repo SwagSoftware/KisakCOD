@@ -256,15 +256,8 @@ int __cdecl CG_RegisterImpactEffects_Generic_4_char_const_____cdecl_int__(
 
 const char *__cdecl CG_FleshTypeToName(uint32_t fleshTypeId)
 {
-    if (fleshTypeId >= 4)
-        MyAssertHandler(
-            ".\\cgame\\cg_effects_load_obj.cpp",
-            61,
-            0,
-            "%s\n\t(fleshTypeId) = %i",
-            "(fleshTypeId >= 0 && fleshTypeId < (sizeof( g_FleshTypeName ) / (sizeof( g_FleshTypeName[0] ) * (sizeof( g_FleshTy"
-            "peName ) != 4 || sizeof( g_FleshTypeName[0] ) <= 4))))",
-            fleshTypeId);
+    iassert((fleshTypeId >= 0 && fleshTypeId < (sizeof(g_FleshTypeName) / (sizeof(g_FleshTypeName[0]) * (sizeof(g_FleshTypeName) != 4 || sizeof(g_FleshTypeName[0]) <= 4)))));
+
     return g_FleshTypeName[fleshTypeId];
 }
 
