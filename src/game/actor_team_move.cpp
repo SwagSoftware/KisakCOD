@@ -18,21 +18,18 @@ void __cdecl Actor_TeamMoveBlockedClear(actor_s *self)
     self->iTeamMoveWaitTime = 0;
 }
 
-int __cdecl Actor_TeamMoveCheckWaitTimer(actor_s *self, ai_teammove_t *result)
+bool Actor_TeamMoveCheckWaitTimer(actor_s *self, ai_teammove_t *result)
 {
-    int v4; // r3
+    iassert(self);
+    iassert(result);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp", 69, 0, "%s", "self");
-    if (!result)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_team_move.cpp", 70, 0, "%s", "result");
     if (level.time >= self->iTeamMoveWaitTime)
     {
         if (self->pCloseEnt.isDefined())
         {
-            v4 = 1;
             self->iTeamMoveWaitTime = level.time + 50;
             *result = AI_TEAMMOVE_WAIT;
+            return 1;
         }
         else
         {
@@ -41,10 +38,9 @@ int __cdecl Actor_TeamMoveCheckWaitTimer(actor_s *self, ai_teammove_t *result)
     }
     else
     {
-        v4 = 1;
         *result = AI_TEAMMOVE_WAIT;
+        return 1;
     }
-    return v4;
 }
 
 bool __cdecl Actor_TeamMoveNeedToCheckWait(unsigned __int8 moveMode, path_t *pPath)
@@ -1055,7 +1051,7 @@ void __cdecl Actor_MoveAlongPathWithTeam(actor_s *self, bool bRun, bool bUseInte
         if (!IsMoving)
         {
             stateLevel = self->stateLevel;
-            self->moveMode = 0;
+            self->moveMode = AI_MOVE_STOP;
             self->eAnimMode = AI_ANIM_MOVE_CODE;
             if (stateLevel < 5 && self->eState[stateLevel + 1] != AIS_NEGOTIATION)
             {

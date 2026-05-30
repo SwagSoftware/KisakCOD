@@ -1938,25 +1938,27 @@ void __cdecl PM_Friction(playerState_s *ps, pml_t *pml)
 
 void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wishdir, float wishspeed, float accel)
 {
-    float value = 0; // [esp+Ch] [ebp-44h]
-    float wishVelocity[3] = { 0 }; // [esp+1Ch] [ebp-34h] BYREF
-    float pushDir[3] = { 0 }; // [esp+28h] [ebp-28h] BYREF
-    float pushLen = 0; // [esp+34h] [ebp-1Ch]
-    float canPush = 0; // [esp+38h] [ebp-18h]
-    float inertiaspeed = 0; // [esp+3Ch] [ebp-14h]
-    float control = 0; // [esp+40h] [ebp-10h]
-    float addspeed = 0; // [esp+44h] [ebp-Ch]
-    float currentspeed = 0; // [esp+48h] [ebp-8h]
-    float accelspeed = 0; // [esp+4Ch] [ebp-4h]
+    float value; // [esp+Ch] [ebp-44h]
+    float wishVelocity[3]; // [esp+1Ch] [ebp-34h] BYREF
+    float pushDir[3]; // [esp+28h] [ebp-28h] BYREF
+    float pushLen; // [esp+34h] [ebp-1Ch]
+    float canPush; // [esp+38h] [ebp-18h]
+    float inertiaspeed; // [esp+3Ch] [ebp-14h]
+    float control; // [esp+40h] [ebp-10h]
+    float addspeed; // [esp+44h] [ebp-Ch]
+    float currentspeed; // [esp+48h] [ebp-8h]
+    float accelspeed; // [esp+4Ch] [ebp-4h]
 
     if ((ps->pm_flags & PMF_LADDER) != 0)
     {
         Vec3Scale(wishdir, wishspeed, wishVelocity);
         Vec3Sub(wishVelocity, ps->velocity, pushDir);
         pushLen = Vec3Normalize(pushDir);
+
         canPush = accel * pml->frametime * wishspeed;
-        if (pushLen < (double)canPush)
+        if (canPush > pushLen)
             canPush = pushLen;
+
         Vec3Mad(ps->velocity, canPush, pushDir, ps->velocity);
     }
     else
@@ -1964,24 +1966,30 @@ void __cdecl PM_Accelerate(playerState_s *ps, const pml_t *pml, const float *wis
         iassert(ps);
 
         currentspeed = Vec3Dot(ps->velocity, wishdir);
-
         addspeed = wishspeed - currentspeed;
-        if (addspeed > 0.0)
+        if (addspeed <= 0)
         {
-            if (stopspeed->current.value <= (double)wishspeed)
-                value = wishspeed;
-            else
-                value = stopspeed->current.value;
-
-            control = value;
-            accelspeed = accel * pml->frametime * value;
-
-            if (addspeed < (double)accelspeed)
-                accelspeed = addspeed;
-
-            inertiaspeed = PM_PlayerInertia(ps, accelspeed, wishdir);
-            Vec3Mad(ps->velocity, inertiaspeed, wishdir, ps->velocity);
+            return;
         }
+
+        if (stopspeed->current.value <= (double)wishspeed)
+            value = wishspeed;
+        else
+            value = stopspeed->current.value;
+
+        control = value;
+        accelspeed = accel * pml->frametime * value;
+
+        if (accelspeed > addspeed)
+            accelspeed = addspeed;
+
+        // Inertia system slows down immediate turn arounds (A/D/A/D spam, or 180 sprint's)
+        // It's set to 50, which is so high it doesn't trigger. I couldn't get it to trigger over 10
+        inertiaspeed = PM_PlayerInertia(ps, accelspeed, wishdir);
+        Vec3Mad(ps->velocity, inertiaspeed, wishdir, ps->velocity);
+
+        // blops removed inertia and just did this:
+        //Vec3Mad(ps->velocity, accelspeed, wishdir, ps->velocity);
     }
 }
 
@@ -2106,80 +2114,80 @@ double __cdecl PM_MoveScale(playerState_s *ps, float fmove, float rmove, float u
     return scalea;
 }
 
-double __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
+float __cdecl PM_CmdScale(playerState_s *ps, usercmd_s *cmd)
 {
-    float v3; // [esp+0h] [ebp-18h]
-    float v4; // [esp+8h] [ebp-10h]
+    float total; // [esp+0h] [ebp-18h]
     int32_t max; // [esp+Ch] [ebp-Ch]
     float scale; // [esp+14h] [ebp-4h]
-    float scalea; // [esp+14h] [ebp-4h]
 
     iassert(ps);
 
-    v4 = (float)(cmd->rightmove * cmd->rightmove + cmd->forwardmove * cmd->forwardmove);
-    v3 = sqrt(v4);
-    max = abs8(cmd->forwardmove);
+    total = sqrt((float)(cmd->rightmove * cmd->rightmove 
+        + cmd->forwardmove * cmd->forwardmove));
 
-    if (abs8(cmd->rightmove) > max)
-        max = abs8(cmd->rightmove);
+    max = abs(cmd->forwardmove);
+
+    if (abs(cmd->rightmove) > max)
+        max = abs(cmd->rightmove);
 
     if (!max)
-        return 0.0;
+        return 0;
 
-    scale = (double)ps->speed * (double)max / (v3 * 127.0);
+    scale = (float)ps->speed * max / (total * 127.0f);
 
     if ((ps->pm_flags & PMF_WALKING) == 0 && ps->leanf == 0.0)
-        scalea = scale * 1.0;
+        scale = scale * 1.0;
     else
-        scalea = scale * 0.4000000059604645;
+        scale = scale * 0.4000000059604645;
 
     if (ps->pm_type == PM_NOCLIP)
-        scalea = scalea * 3.0;
+        scale *= 3.0;
 
     if (ps->pm_type == PM_UFO)
-        scalea = scalea * 6.0;
+        scale *= 6.0;
 
 #ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
-        return (float)(scalea * player_spectateSpeedScale->current.value);
+        return (float)(scale * player_spectateSpeedScale->current.value);
 #endif
-    return scalea;
+
+    return scale;
 }
 
 void __cdecl PM_AirMove(pmove_t *pm, pml_t *pml)
 {
-    float wishdir[3] = { 0 }; // [esp+40h] [ebp-50h] BYREF
-    float wishvel[3] = { 0 }; // [esp+4Ch] [ebp-44h]
+    float wishdir[3]; // [esp+40h] [ebp-50h] BYREF
+    float wishvel[3]; // [esp+4Ch] [ebp-44h]
      
     usercmd_s cmd; // [esp+6Ch] [ebp-24h] BYREF
 
     iassert(pm);
-
     playerState_s* ps = pm->ps; // [esp+68h] [ebp-28h]
-
     iassert(ps);
 
+    // normal slowdown
     PM_Friction(ps, pml);
 
-    float fmove = (float)pm->cmd.forwardmove; // [esp+3Ch] [ebp-54h]
-    float smove = (float)pm->cmd.rightmove; // [esp+5Ch] [ebp-34h]
+    float fmove = pm->cmd.forwardmove; // [esp+3Ch] [ebp-54h]
+    float smove = pm->cmd.rightmove; // [esp+5Ch] [ebp-34h]
 
     memcpy(&cmd, &pm->cmd, sizeof(cmd));
-
     float scale = PM_CmdScale(ps, &cmd); // [esp+64h] [ebp-2Ch]
+
     pml->forward[2] = 0.0;
     pml->right[2] = 0.0;
     Vec3Normalize(pml->forward);
     Vec3Normalize(pml->right);
 
-    for (int32_t i = 0; i < 2; ++i) // [esp+60h] [ebp-30h]
-        wishvel[i] = pml->forward[i] * fmove + pml->right[i] * smove;
-
+    for (int32_t i = 0; i < 2; ++i)
+    {
+        wishvel[i] = pml->forward[i]*fmove + pml->right[i]*smove;
+    }
     wishvel[2] = 0.0;
-    wishdir[0] = wishvel[0];
-    wishdir[1] = wishvel[1];
-    wishdir[2] = 0.0;
+
+    Vec3Copy(wishvel, wishdir);
     float wishspeed = Vec3Normalize(wishdir); // [esp+58h] [ebp-38h]
+
     wishspeed = wishspeed * scale;
     PM_Accelerate(ps, pml, wishdir, wishspeed, 1.0);
 
@@ -2214,7 +2222,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
         {
             speed = vectoyaw(ps->vLadderVec) + 180.0;
             moveyaw = (int)AngleDelta(speed, ps->viewangles[1]);
-            if ((int)abs32(moveyaw) > 90)
+            if ((int)abs(moveyaw) > 90)
             {
                 if (moveyaw <= 0)
                     moveyaw = -90;
@@ -2247,7 +2255,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
                     v2 = (v6 - v3) * 360.0;
                     moveyaw = (int)v2;
                 }
-                if ((int)abs32(moveyaw) > 90)
+                if ((int)abs(moveyaw) > 90)
                 {
                     if (moveyaw <= 0)
                         moveyaw = -90;
@@ -2261,7 +2269,7 @@ void __cdecl PM_SetMovementDir(pmove_t *pm, pml_t *pml)
     else
     {
         moveyaw = (int)AngleDelta(ps->proneDirection, ps->viewangles[1]);
-        if ((int)abs32(moveyaw) > 90)
+        if ((int)abs(moveyaw) > 90)
         {
             if (moveyaw <= 0)
                 moveyaw = -90;
@@ -4497,7 +4505,7 @@ void __cdecl PM_LadderMove(pmove_t *pm, pml_t *pml)
         PM_StepSlideMove(pm, pml, 0);
         scale = vectoyaw(ps->vLadderVec) + 180.0;
         moveyaw = (int)AngleDelta(scale, ps->viewangles[1]);
-        if ((int)abs32(moveyaw) > 75)
+        if ((int)abs(moveyaw) > 75)
         {
             if (moveyaw <= 0)
                 moveyaw = -75;

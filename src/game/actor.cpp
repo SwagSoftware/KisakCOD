@@ -1185,8 +1185,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
 {
     bool useMeleeAttackSpot; // r10
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3398, 0, "%s", "self");
+    iassert(self);
     useMeleeAttackSpot = self->useMeleeAttackSpot;
     self->pathWaitTime = level.time + 500;
     if (!useMeleeAttackSpot)
@@ -1198,7 +1197,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
                 Com_Printf(
                     18,
                     "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal. Maybe suppressed.\n",
-                    0, // KISAKTODO ent id
+                    self->ent->s.number,
                     self->ent->r.currentOrigin[0],
                     self->ent->r.currentOrigin[1],
                     self->ent->r.currentOrigin[2]);
@@ -1208,13 +1207,12 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
             Com_Printf(
                 18,
                 "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
-                0, // KISAKTODO ent id
+                self->ent->s.number,
                 self->ent->r.currentOrigin[0],
                 self->ent->r.currentOrigin[1],
                 self->ent->r.currentOrigin[2]);
         }
-        if (!self->ent)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 3419, 0, "%s", "self->ent");
+        iassert(self->ent);
         Scr_AddVector(g_pathAttemptGoalPos);
         Scr_Notify(self->ent, scr_const.bad_path, 1u);
     }
@@ -1307,90 +1305,39 @@ bool __cdecl Actor_IsCloseToSegment(
 
 int __cdecl Actor_IsAlongPath(actor_s *self, float *origin, float *pathPoint, int hadPath)
 {
-    path_t *path; // r29
-    double pathEnemyLookahead; // fp0
-    double v10; // fp31
-    float *v11; // r5
-    float *v12; // r5
-    double v13; // fp2
-    int idx; // r9
-    int v16; // r4
-    double dist; // fp8
-    double pathEnemyFightDist; // fp7
-    pathpoint_t *v21; // r10
-    double v22; // fp0
-    double v23; // fp13
-    double v24; // fp10
-    bool v25; // r11
-    double v26; // fp0
-    double v27; // fp0
-
-    path = &self->Path;
+    path_t *path = &self->Path;
     iassert(path);
     iassert(path->wPathLen > 0);
     iassert(path->lookaheadNextNode >= 0);
     iassert(path->lookaheadNextNode < path->wPathLen);
 
-    pathEnemyLookahead = self->pathEnemyLookahead;
+    float pathEnemyLookahead = self->pathEnemyLookahead;
     if (!hadPath)
-        pathEnemyLookahead = (float)(self->pathEnemyLookahead + (float)256.0);
-    v10 = (float)((float)pathEnemyLookahead * (float)pathEnemyLookahead);
+        pathEnemyLookahead = (float)(self->pathEnemyLookahead + 256.0f);
+    float reqDistSq = pathEnemyLookahead * pathEnemyLookahead;
 
-    if (Vec2DistanceSq(self->ent->r.currentOrigin, origin) < v10)
+    if (Vec2DistanceSq(self->ent->r.currentOrigin, origin) < reqDistSq)
         return 1;
 
-    if (Actor_IsCloseToSegment(origin, pathPoint, path->fLookaheadDist, path->lookaheadDir,v10))
+    if (Actor_IsCloseToSegment(origin, pathPoint, path->fLookaheadDist, path->lookaheadDir, reqDistSq))
         return 1;
 
-    if (Actor_IsCloseToSegment(origin,
-        path->pts[path->lookaheadNextNode].vOrigPoint,
-        path->fLookaheadDistToNextNode,
-        path->pts[path->lookaheadNextNode].fDir2D,
-        v10))
+    const pathpoint_t *ptNext = &path->pts[path->lookaheadNextNode];
+    if (Actor_IsCloseToSegment(origin, (float *)ptNext->vOrigPoint, path->fLookaheadDistToNextNode, (float *)ptNext->fDir2D, reqDistSq))
+        return 1;
+
+    float dist = path->fLookaheadDist + path->fLookaheadDistToNextNode;
+    float pathEnemyFightDist = self->pathEnemyFightDist;
+    int idx = path->lookaheadNextNode;
+    while (dist < pathEnemyFightDist)
     {
-        return 1;
-    }
-
-    idx = path->lookaheadNextNode;
-
-    dist = path->fLookaheadDist + path->fLookaheadDistToNextNode;
-    pathEnemyFightDist = self->pathEnemyFightDist;
-    if (dist < pathEnemyFightDist)
-    {
-        //v21 = (float *)(v16 + 16);
-        v21 = &path->pts[path->lookaheadNextNode]; // KISAKTODO: could be some accuracy issues here
-        do
-        {
-            --idx;
-            --v21;
-            if (idx < 0)
-                break;
-            v24 = (float)((float)(*(float *)&v21[-1].iNodeNum * (float)(v21[-1].fDir2D[0] - *origin))
-                + (float)(v21->vOrigPoint[0] * (float)(v21[-1].fDir2D[1] - origin[1])));
-            if (v24 < v21->vOrigPoint[1])
-            {
-                if (v24 > 0.0)
-                {
-                    v27 = (float)((float)(v21->vOrigPoint[0] * (float)(v21[-1].fDir2D[0] - *origin))
-                        - (float)(*(float *)&v21[-1].iNodeNum * (float)(v21[-1].fDir2D[1] - origin[1])));
-                    v26 = (float)((float)v27 * (float)v27);
-                }
-                else
-                {
-                    v23 = (float)(v21[-1].fDir2D[1] - origin[1]);
-                    v22 = (float)(v21[-1].fDir2D[0] - *origin);
-                    v26 = (float)((float)((float)v23 * (float)v23) + (float)((float)v22 * (float)v22));
-                }
-                v25 = v26 < v10;
-            }
-            else
-            {
-                v25 = 0;
-            }
-            if (v25)
-                return 1;
-            dist = (float)(v21->vOrigPoint[1] + (float)dist);
-        } while (dist < pathEnemyFightDist);
+        --idx;
+        if (idx < 0)
+            break;
+        const pathpoint_t *pt = &path->pts[idx];
+        if (Actor_IsCloseToSegment(origin, (float*)pt->vOrigPoint, pt->fOrigLength, (float *)pt->fDir2D, reqDistSq))
+            return 1;
+        dist += pt->fOrigLength;
     }
     return 0;
 }
@@ -1596,7 +1543,6 @@ int __cdecl Actor_IsMovingToMeleeAttack(actor_s *self)
 
 bool __cdecl Actor_SkipPathEndActions(actor_s *self)
 {
-    float *v3; // r10
     double v4; // fp31
     double v5; // fp30
     double v6; // fp29
@@ -1613,10 +1559,10 @@ bool __cdecl Actor_SkipPathEndActions(actor_s *self)
     }
     if (Path_UsesObstacleNegotiation(&self->Path))
     {
-        v3 = (float *)((char *)self + 28 * self->Path.wNegotiationStartNode);
-        v4 = (float)(v3[199] - self->ent->r.currentOrigin[0]);
-        v5 = (float)(v3[200] - self->ent->r.currentOrigin[1]);
-        v6 = (float)(v3[201] - self->ent->r.currentOrigin[2]);
+        const pathpoint_t *pNegPt = &self->Path.pts[self->Path.wNegotiationStartNode];
+        v4 = (float)(pNegPt->vOrigPoint[0] - self->ent->r.currentOrigin[0]);
+        v5 = (float)(pNegPt->vOrigPoint[1] - self->ent->r.currentOrigin[1]);
+        v6 = (float)(pNegPt->vOrigPoint[2] - self->ent->r.currentOrigin[2]);
         if ((float)((float)((float)v5 * (float)v5) + (float)((float)v4 * (float)v4)) <= (double)(float)((float)((float)((float)(self->Physics.vVelocity[2] * self->Physics.vVelocity[2]) + (float)((float)(self->Physics.vVelocity[0] * self->Physics.vVelocity[0]) + (float)(self->Physics.vVelocity[1] * self->Physics.vVelocity[1]))) * (float)0.0049999999) + (float)0.000001))
         {
             if (Actor_PushState(self, AIS_NEGOTIATION))
@@ -1641,7 +1587,6 @@ void __cdecl Actor_PathEndActions(actor_s *self)
     double v2; // fp1
     double v3; // fp31
     char v4; // r11
-    float *v5; // r10
     double v6; // fp31
     double v7; // fp30
     double v8; // fp28
@@ -1683,10 +1628,10 @@ void __cdecl Actor_PathEndActions(actor_s *self)
     }
     if (!Actor_SkipPathEndActions(self) && self->Path.pathEndAnimDistSq <= 0.0)
     {
-        v5 = (float *)((char *)self + 28 * self->Path.wNegotiationStartNode);
-        v6 = (float)(v5[199] - self->ent->r.currentOrigin[0]);
-        v7 = (float)(v5[200] - self->ent->r.currentOrigin[1]);
-        v8 = (float)(v5[201] - self->ent->r.currentOrigin[2]);
+        const pathpoint_t *pNegPt = &self->Path.pts[self->Path.wNegotiationStartNode];
+        v6 = (float)(pNegPt->vOrigPoint[0] - self->ent->r.currentOrigin[0]);
+        v7 = (float)(pNegPt->vOrigPoint[1] - self->ent->r.currentOrigin[1]);
+        v8 = (float)(pNegPt->vOrigPoint[2] - self->ent->r.currentOrigin[2]);
         if (self->Path.iPathEndTime)
             goto LABEL_25;
         v9 = (float)((float)((float)v7 * (float)v7) + (float)((float)v6 * (float)v6));

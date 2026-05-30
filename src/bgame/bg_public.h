@@ -11,8 +11,6 @@
 
 #include <type_traits> // used for enum operators
 
-#define abs8(x) abs(x)
-#define abs32(x) abs(x)
 
 #ifdef KISAK_MP
 enum entity_event_t : __int32

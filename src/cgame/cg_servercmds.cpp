@@ -121,89 +121,23 @@ void __cdecl CG_ParseSunDirection(int localClientNum)
 
 void __cdecl CG_ParseFog(int time)
 {
-    int nesting; // r7
-    const char *v3; // r3
-    long double v4; // fp2
-    int v5; // r7
-    double v6; // fp28
-    const char *v7; // r3
-    long double v8; // fp2
-    double v9; // fp29
-    const char *v10; // r3
-    long double v11; // fp2
-    long double v12; // fp2
-    unsigned __int8 v13; // r31
-    const char *v14; // r3
-    long double v15; // fp2
-    long double v16; // fp2
-    unsigned __int8 v17; // r30
-    const char *v18; // r3
-    long double v19; // fp2
-    const char *v20; // r3
-    int v21; // r3
-    unsigned __int8 v22; // r4
-    int v23; // r31
-    int v24; // r5
-    int v25; // r3
+    float start = (float)atof(Cmd_Argv(1));
 
-    v3 = Cmd_Argv(1);
+    const char *halfwayStr = Cmd_Argv(2);
+    if (Cmd_Argc() <= 2 || !halfwayStr || !*halfwayStr)
+    {
+        R_SwitchFog(0, time, (int)start);
+        return;
+    }
 
-    v4 = atof(v3);
-    v5 = cmd_args.nesting;
-    v6 = (float)*(double *)&v4;
-    if (cmd_args.nesting >= 8u)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            174,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        v5 = cmd_args.nesting;
-    }
-    if (cmd_args.argc[v5] <= 2)
-    {
-        v7 = "";
-    }
-    else
-    {
-        v7 = (char *)*((unsigned int *)cmd_args.argv[v5] + 2);
-        if (!v7)
-        {
-        LABEL_13:
-            v25 = 0;
-            v24 = (int)v6;
-            goto LABEL_14;
-        }
-    }
-    if (!*v7)
-        goto LABEL_13;
-    v8 = atof(v7);
-    v9 = (float)*(double *)&v8;
-    v10 = Cmd_Argv(3);
-    v11 = atof(v10);
-    *(double *)&v11 = (float)((float)((float)*(double *)&v11 * (float)255.0) + (float)0.5);
-    v12 = floor(v11);
-    v13 = (int)(float)*(double *)&v12;
-    v14 = Cmd_Argv(4);
-    v15 = atof(v14);
-    *(double *)&v15 = (float)((float)((float)*(double *)&v15 * (float)255.0) + (float)0.5);
-    v16 = floor(v15);
-    v17 = (int)(float)*(double *)&v16;
-    v18 = Cmd_Argv(5);
-    v19 = atof(v18);
-    *(double *)&v19 = (float)((float)((float)*(double *)&v19 * (float)255.0) + (float)0.5);
-    floor(v19);
-    v20 = Cmd_Argv(6);
-    v21 = atol(v20);
-    v22 = v13;
-    v23 = v21;
-    R_SetFogFromServer(v6, v21, v22, v17, v9);
-    v24 = v23;
-    v25 = 1;
-LABEL_14:
-    R_SwitchFog(v25, time, v24);
+    float halfway = (float)atof(halfwayStr);
+    uint8_t red   = (uint8_t)(int)floorf((float)atof(Cmd_Argv(3)) * 255.0f + 0.5f);
+    uint8_t green = (uint8_t)(int)floorf((float)atof(Cmd_Argv(4)) * 255.0f + 0.5f);
+    uint8_t blue  = (uint8_t)(int)floorf((float)atof(Cmd_Argv(5)) * 255.0f + 0.5f);
+    int transitionTime = atoi(Cmd_Argv(6));
+
+    R_SetFogFromServer(start, red, green, blue, halfway);
+    R_SwitchFog(1, time, transitionTime);
 }
 
 void __cdecl CG_PrecacheScriptMenu(int localClientNum, int iConfigNum)

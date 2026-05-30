@@ -17,23 +17,19 @@ bool __cdecl Actor_ScriptedAnim_Start(actor_s *self, ai_state_t ePrevState)
 void __cdecl Actor_ScriptedAnim_Finish(actor_s *self, ai_state_t eNextState)
 {
     gentity_s *ent; // r31
-    animscripted_s *scripted; // r3
 
     ent = self->ent;
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp", 31, 0, "%s", "ent");
-    scripted = ent->scripted;
-    if (scripted)
+    iassert(ent);
+    if (ent->scripted)
     {
-        MT_Free((unsigned char*)scripted, 96);
-        ent->scripted = 0;
+        MT_Free((unsigned char*)ent->scripted, sizeof(animscripted_s));
+        ent->scripted = NULL;
     }
 }
 
 actor_think_result_t __cdecl Actor_ScriptedAnim_Think(actor_s *self)
 {
     int keepNodeDuringScriptedAnim; // r10
-    actor_s *v3; // r3
     gentity_s *ent; // r30
 
     keepNodeDuringScriptedAnim = self->keepNodeDuringScriptedAnim;
@@ -46,43 +42,30 @@ actor_think_result_t __cdecl Actor_ScriptedAnim_Think(actor_s *self)
     Actor_ClearPath(self);
     Actor_AnimScripted(self);
     self->pushable = 0;
+
     if (!Actor_IsAnimScriptAlive(self))
     {
-        if (self->eSimulatedState[self->simulatedStateLevel] != AIS_SCRIPTEDANIM
-            && self->eState[self->stateLevel] != AIS_DEATH)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp",
-                66,
-                0,
-                "%s",
-                "self->eSimulatedState[self->simulatedStateLevel] == AIS_SCRIPTEDANIM || self->eState[self->stateLevel] == AIS_DEATH");
-        }
+        iassert(self->eSimulatedState[self->simulatedStateLevel] == AIS_SCRIPTEDANIM || self->eState[self->stateLevel] == AIS_DEATH);
+
         if (self->eSimulatedState[self->simulatedStateLevel] != AIS_SCRIPTEDANIM)
             return ACTOR_THINK_REPEAT;
-        v3 = self;
-    LABEL_9:
-        Actor_PopState(v3);
-        return ACTOR_THINK_REPEAT;
     }
+
     ent = self->ent;
-    if (!self->ent)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp", 73, 0, "%s", "ent");
+    iassert(ent);
     G_Animscripted_Think(ent);
-    v3 = self;
 
     if (!ent->scripted)
-        goto LABEL_9;
+    {
+        Actor_PopState(self);
+        return ACTOR_THINK_REPEAT;
+    }
 
     Actor_PreThink(self);
     Actor_SetDesiredAngles(&self->CodeOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
 
-    self->Physics.vVelocity[0] = 0.0f;
-    self->Physics.vVelocity[1] = 0.0f;
-    self->Physics.vVelocity[2] = 0.0f;
-    self->Physics.vWishDelta[0] = 0.0f;
-    self->Physics.vWishDelta[1] = 0.0f;
-    self->Physics.vWishDelta[2] = 0.0f;
+    Vec3Clear(self->Physics.vVelocity);
+    Vec3Clear(self->Physics.vWishDelta);
 
     return ACTOR_THINK_DONE;
 }
@@ -99,13 +82,9 @@ actor_think_result_t __cdecl Actor_CustomAnim_Think(actor_s *self)
     int keepNodeDuringScriptedAnim; // r10
 
     p_AnimScriptSpecific = &self->AnimScriptSpecific;
-    if (!self->AnimScriptSpecific.func)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp",
-            118,
-            0,
-            "%s",
-            "self->AnimScriptSpecific.func");
+
+    iassert(self->AnimScriptSpecific.func);
+
     keepNodeDuringScriptedAnim = self->keepNodeDuringScriptedAnim;
     self->pszDebugInfo = "animcustom";
     if (!keepNodeDuringScriptedAnim)
@@ -117,16 +96,9 @@ actor_think_result_t __cdecl Actor_CustomAnim_Think(actor_s *self)
     Actor_AnimSpecific(self, p_AnimScriptSpecific, AI_ANIM_USE_BOTH_DELTAS, 1);
     if (Actor_IsAnimScriptAlive(self))
     {
-        if (!self->ent)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp", 137, 0, "%s", "ent");
+        iassert(self->ent);
         Actor_PreThink(self);
-        if (self->eAnimMode == AI_ANIM_UNKNOWN)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_animscripted.cpp",
-                141,
-                0,
-                "%s",
-                "self->eAnimMode != AI_ANIM_UNKNOWN");
+        iassert(self->eAnimMode != AI_ANIM_UNKNOWN);
         Actor_UpdateOriginAndAngles(self);
         return ACTOR_THINK_DONE;
     }

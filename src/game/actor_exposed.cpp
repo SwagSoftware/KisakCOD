@@ -31,7 +31,7 @@ void __cdecl Actor_Exposed_CheckLockGoal(actor_s *self)
             if (v3 <= 0.0
                 || Vec2DistanceSq(self->ent->r.currentOrigin, self->codeGoal.pos) >= (double)(float)((float)v3 * (float)v3))
             {
-                self->moveMode = 0;
+                self->moveMode = AI_MOVE_STOP;
                 self->eAnimMode = AI_ANIM_MOVE_CODE;
             }
         }
@@ -510,9 +510,9 @@ void __cdecl Actor_Exposed_NonCombat_Think(actor_s *self)
 
 void __cdecl Actor_Exposed_FlashBanged(actor_s *self)
 {
-    if (!self->flashBanged)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_exposed.cpp", 684, 0, "%s", "self->flashBanged");
-    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->flashed, 0, AI_ANIM_USE_BOTH_DELTAS);
+    iassert(self->flashBanged);
+
+    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->flashed, AI_MOVE_STOP, AI_ANIM_USE_BOTH_DELTAS);
     Actor_SetOrientMode(self, AI_ORIENT_DONT_CHANGE);
 }
 

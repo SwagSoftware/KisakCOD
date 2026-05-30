@@ -1492,7 +1492,7 @@ actor_think_result_t __cdecl Actor_Grenade_ThrowBack(actor_s *self)
     if (!self)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 1961, 0, "%s", "self");
     Actor_ClearPileUp(self);
-    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->grenade_return_throw, 0, AI_ANIM_MOVE_CODE);
+    Actor_SetAnimScript(self, &g_animScriptTable[self->species]->grenade_return_throw, AI_MOVE_STOP, AI_ANIM_MOVE_CODE);
     self->bUseGoalWeight = 1;
     if (Actor_IsAnimScriptAlive(self))
     {

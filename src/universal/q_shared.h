@@ -881,4 +881,9 @@ inline constexpr T truncate_cast(U value)
 	return static_cast<T>(value);
 }
 
+inline int abs(int n)
+{
+	return n < 0 ? -n : n;
+}
+
 extern unsigned __int64(__cdecl *LittleLong64)(unsigned __int64);

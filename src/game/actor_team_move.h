@@ -50,7 +50,7 @@ struct team_move_other_context_t
 
 void __cdecl Actor_TeamMoveBlocked(actor_s *self);
 void __cdecl Actor_TeamMoveBlockedClear(actor_s *self);
-int __cdecl Actor_TeamMoveCheckWaitTimer(actor_s *self, ai_teammove_t *result);
+bool Actor_TeamMoveCheckWaitTimer(actor_s *self, ai_teammove_t *result);
 bool __cdecl Actor_TeamMoveNeedToCheckWait(unsigned __int8 moveMode, path_t *pPath);
 bool __cdecl Actor_IsEnemy(actor_s *self, sentient_s *other);
 void __cdecl Actor_CalcInterval(

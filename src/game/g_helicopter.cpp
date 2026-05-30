@@ -594,9 +594,9 @@ void __cdecl HELI_CmdScale(char *move, float *outFracs)
     {
         v8 = (float)(move[1] * move[1] + *move * *move);
         v7 = sqrt(v8);
-        max = abs8(*move);
-        if (abs8(move[1]) > max)
-            max = abs8(move[1]);
+        max = abs(*move);
+        if (abs(move[1]) > max)
+            max = abs(move[1]);
         if (max)
         {
             scale = (float)max / v7;

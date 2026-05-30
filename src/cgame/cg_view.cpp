@@ -1033,14 +1033,7 @@ int __cdecl PausedClientFreeMove(int localClientNum)
     cg_s *LocalClientGlobals; // r30
     int v6; // r26
     double value; // fp12
-    __int64 v8; // r11
     double v9; // fp31
-    __int64 v11; // r9
-    double v12; // fp12
-    double v13; // fp11
-    double v14; // fp10
-    double v15; // fp11
-    double v16; // fp10
     float v17[4]; // [sp+50h] [-C0h] BYREF
     float v18[4]; // [sp+60h] [-B0h] BYREF
     float v19[3]; // [sp+70h] [-A0h] BYREF
@@ -1053,12 +1046,10 @@ int __cdecl PausedClientFreeMove(int localClientNum)
     if (CL_GetUserCmd(localClientNum, CurrentCmdNumber, &usercmd))
     {
         LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
-        *(_QWORD *)v17 = __PAIR64__(usercmd.angles[1], usercmd.angles[0]);
-        *(_QWORD *)v18 = __PAIR64__(usercmd.angles[2], usercmd.angles[1]);
-        *(_QWORD *)v19 = (unsigned int)usercmd.angles[2] | 0x1000000000000LL;
-        angles[0] = (float)__SPAIR64__(usercmd.angles[1], usercmd.angles[0]) * (float)0.0054931641;
-        angles[1] = (float)__SPAIR64__(usercmd.angles[2], usercmd.angles[1]) * (float)0.0054931641;
-        angles[2] = (float)*(__int64 *)v19 * (float)0.0054931641;
+
+        angles[0] = (float)usercmd.angles[0] * 0.0054931641f;
+        angles[1] = (float)usercmd.angles[1] * 0.0054931641f;
+        angles[2] = (float)usercmd.angles[2] * 0.0054931641f;
         angles[0] = LocalClientGlobals->predictedPlayerState.delta_angles[0] + angles[0];
         angles[1] = LocalClientGlobals->predictedPlayerState.delta_angles[1] + angles[1];
         angles[2] = LocalClientGlobals->predictedPlayerState.delta_angles[2] + angles[2];
@@ -1076,10 +1067,10 @@ int __cdecl PausedClientFreeMove(int localClientNum)
         v17[1] = 0.0;
         v17[0] = 0.0;
         v17[2] = 1.0;
-        LODWORD(v8) = v6 - oldMsec;
+
+        int deltaMsec = v6 - oldMsec;
         oldMsec = v6;
-        *(_QWORD *)v19 = v8;
-        v9 = (float)((float)((float)v8 * (float)value) * (float)0.050000001);
+        v9 = (float)deltaMsec * (float)value * 0.050000001f;
         AnglesToAxis(LocalClientGlobals->refdefViewAngles, LocalClientGlobals->refdef.viewaxis);
         v18[0] = LocalClientGlobals->refdef.viewaxis[0][0];
         v18[1] = LocalClientGlobals->refdef.viewaxis[0][1];
@@ -1088,59 +1079,30 @@ int __cdecl PausedClientFreeMove(int localClientNum)
         Vec3Cross(v19, v17, v18);
         if (usercmd.rightmove || usercmd.forwardmove || usercmd.upmove)
         {
-            HIDWORD(v11) = moveMsec;
+
             if (!moveMsec)
-            {
-                HIDWORD(v11) = v6;
                 moveMsec = v6;
-            }
             if (usercmd.rightmove)
             {
-                v12 = v19[0];
-                v13 = v19[1];
-                LODWORD(v11) = -usercmd.rightmove;
-                v14 = v19[2];
-                *(_QWORD *)v19 = v11;
-                LocalClientGlobals->predictedPlayerState.origin[0] = (float)((float)v12
-                    * (float)((float)((float)v11 * (float)0.2) * (float)v9))
-                    + LocalClientGlobals->predictedPlayerState.origin[0];
-                LocalClientGlobals->predictedPlayerState.origin[1] = (float)((float)v13
-                    * (float)((float)((float)v11 * (float)0.2) * (float)v9))
-                    + LocalClientGlobals->predictedPlayerState.origin[1];
-                LocalClientGlobals->predictedPlayerState.origin[2] = (float)((float)v14
-                    * (float)((float)((float)v11 * (float)0.2) * (float)v9))
-                    + LocalClientGlobals->predictedPlayerState.origin[2];
+                float scale = (float)(((float)(-usercmd.rightmove) * 0.2f) * (float)v9);
+                LocalClientGlobals->predictedPlayerState.origin[0] += v19[0] * scale;
+                LocalClientGlobals->predictedPlayerState.origin[1] += v19[1] * scale;
+                LocalClientGlobals->predictedPlayerState.origin[2] += v19[2] * scale;
             }
             if (usercmd.forwardmove)
             {
-                LODWORD(v11) = usercmd.forwardmove;
-                v15 = v18[1];
-                v16 = v18[2];
-                *(_QWORD *)v19 = v11;
-                LocalClientGlobals->predictedPlayerState.origin[0] = (float)((float)((float)((float)v11 * (float)0.2) * (float)v9)
-                    * v18[0])
-                    + LocalClientGlobals->predictedPlayerState.origin[0];
-                LocalClientGlobals->predictedPlayerState.origin[1] = (float)((float)v15
-                    * (float)((float)((float)v11 * (float)0.2) * (float)v9))
-                    + LocalClientGlobals->predictedPlayerState.origin[1];
-                LocalClientGlobals->predictedPlayerState.origin[2] = (float)((float)v16
-                    * (float)((float)((float)v11 * (float)0.2) * (float)v9))
-                    + LocalClientGlobals->predictedPlayerState.origin[2];
+                float scale = (float)(((float)usercmd.forwardmove * 0.2f) * (float)v9);
+                LocalClientGlobals->predictedPlayerState.origin[0] += scale * v18[0];
+                LocalClientGlobals->predictedPlayerState.origin[1] += v18[1] * scale;
+                LocalClientGlobals->predictedPlayerState.origin[2] += v18[2] * scale;
             }
-            if (v6 - HIDWORD(v11) < 250)
-                v9 = (float)((float)v9 * (float)0.25);
+            if (v6 - moveMsec < 250)
+                v9 = (float)((float)v9 * 0.25f);
             if (usercmd.upmove)
             {
-                LODWORD(v11) = usercmd.upmove;
-                *(_QWORD *)v19 = v11;
-                LocalClientGlobals->predictedPlayerState.origin[0] = (float)((float)((float)((float)v11 * (float)0.2) * (float)v9)
-                    * (float)0.0)
-                    + LocalClientGlobals->predictedPlayerState.origin[0];
-                LocalClientGlobals->predictedPlayerState.origin[1] = LocalClientGlobals->predictedPlayerState.origin[1]
-                    + (float)((float)((float)((float)v11 * (float)0.2) * (float)v9)
-                        * (float)0.0);
-                LocalClientGlobals->predictedPlayerState.origin[2] = LocalClientGlobals->predictedPlayerState.origin[2]
-                    + (float)((float)((float)v11 * (float)0.2) * (float)v9);
+                // upmove only affects Z (the original multiplies X/Y by 0.0).
+                LocalClientGlobals->predictedPlayerState.origin[2] +=
+                    ((float)usercmd.upmove * 0.2f) * (float)v9;
             }
         }
         else

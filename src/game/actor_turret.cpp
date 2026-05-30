@@ -828,7 +828,7 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
                             if (Path_CanClaimNode(v15, self->sentient))
                                 Path_ForceClaimNode(v16, self->sentient);
                         }
-                        Actor_SetAnimScript(self, v13, 0, AI_ANIM_MOVE_CODE);
+                        Actor_SetAnimScript(self, v13, AI_MOVE_STOP, AI_ANIM_MOVE_CODE);
                         if ((unsigned __int8)Actor_IsUsingTurret(self))
                         {
                             self->bUseGoalWeight = 0;
