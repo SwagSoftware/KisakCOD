@@ -216,7 +216,7 @@ LABEL_24:
             {
                 if (phys_drawCollisionWorld->current.enabled)
                     Phys_DrawPoly(&outWinding, colorCyan);
-                vassert(ptCount > 3, "ptCount = %d", ptCount);
+                vassert(ptCount >= 3, "ptCount = %d", ptCount);
 
                 pts = (float *)outWinding.pts;
                 ptCount -= 3;

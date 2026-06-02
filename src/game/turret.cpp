@@ -146,90 +146,97 @@ bool __cdecl MayHitTarget(const weaponParms *weapon, const gentity_s *target, co
     return SV_SightTraceToEntity(v17, (float*)vec3_origin, (float *)vec3_origin, v18, number, -1) != 0;
 }
 
-// blops version
 void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
 {
-    gentity_s *v2; // [esp+18h] [ebp-78h]
-    int i; // [esp+20h] [ebp-70h]
-    //$A5C519FFED38118F396585C413DE405F *targets; // [esp+24h] [ebp-6Ch]
-    const target_t *targetEnt; // [esp+28h] [ebp-68h]
-    float spread; // [esp+30h] [ebp-60h]
-    TurretInfo *turretInfo; // [esp+34h] [ebp-5Ch]
-    weaponParms wp; // [esp+38h] [ebp-58h] BYREF
-    float targetPos[3]; // [esp+84h] [ebp-Ch]
-    int savedregs; // [esp+90h] [ebp+0h] BYREF
+    gentity_s *shooter; // r25
+    weaponParms wp; // [sp+70h] BYREF
+    float targetPos[3]; // [sp+60h] BYREF
 
     iassert(activator);
 
+    // A "none" activator means the turret is firing autonomously (AI), so the
+    // turret entity itself acts as the shooter.
     if (activator == &g_entities[ENTITYNUM_NONE])
-        v2 = ent;
+        shooter = ent;
     else
-        v2 = activator;
+        shooter = activator;
 
-    Turret_FillWeaponParms(ent, v2, &wp);
-    turretInfo = ent->pTurretInfo;
+    Turret_FillWeaponParms(ent, shooter, &wp);
+    wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
+
+    TurretInfo *turretInfo = ent->pTurretInfo;
     iassert(turretInfo);
+
     targetPos[0] = turretInfo->targetPos[0];
     targetPos[1] = turretInfo->targetPos[1];
     targetPos[2] = turretInfo->targetPos[2];
-    if (wp.weapDef->weapType)
+
+    if (bUseAccuracy)
     {
-        //if (wp.weapDef->weapType == WEAPTYPE_GAS)
-        //{
-        //    Weapon_Flamethrower_Fire(ent, &wp);
-        //}
-        //else if ((turretInfo->flags & 0x20000) != 0 && EntHandle::isDefined(&turretInfo->target))
-        //{
-        //    targets = Target_GetTargetArray();
-        //    targetEnt = 0;
-        //    for (i = 0; i < 32; ++i)
-        //    {
-        //        if (targets->targets[i].ent == EntHandle::ent(&turretInfo->target))
-        //        {
-        //            targetEnt = &targets->targets[i];
-        //            break;
-        //        }
-        //    }
-        //    if (targetEnt)
-        //        Weapon_RocketLauncher_Fire(
-        //            COERCE_FLOAT(&savedregs),
-        //            ent,
-        //            ent->s.weapon,
-        //            0.0,
-        //            &wp,
-        //            vec3_origin,
-        //            targetEnt->ent,
-        //            targetEnt->offset);
-        //    else
-        //        Weapon_RocketLauncher_Fire(COERCE_FLOAT(&savedregs), ent, ent->s.weapon, 0.0, &wp, vec3_origin, 0, 0);
-        //}
-        //else
+        // Update the "off target" flag (0x80) from the angle between the gun's
+        // forward and the direction toward the desired target position.
+        float dir[3];
+        dir[0] = targetPos[0] - wp.muzzleTrace[0];
+        dir[1] = targetPos[1] - wp.muzzleTrace[1];
+        dir[2] = targetPos[2] - wp.muzzleTrace[2];
+
+        float len = sqrtf(dir[0] * dir[0] + dir[1] * dir[1] + dir[2] * dir[2]);
+        float invLen = 1.0f / (len > 0.0f ? len : 1.0f);
+        float forwardDot = wp.forward[0] * (dir[0] * invLen)
+                         + wp.forward[1] * (dir[1] * invLen)
+                         + wp.forward[2] * (dir[2] * invLen);
+
+        if (forwardDot > turretInfo->forwardAngleDot)
+            turretInfo->flags &= ~0x80;
+        else
+            turretInfo->flags |= 0x80;
+
+        float visibility = SV_FX_GetVisibility(wp.muzzleTrace, targetPos);
+        int remainingConvergence =
+            turretInfo->convergenceTime[1] + turretInfo->targetTime - level.time;
+
+        if (turretInfo->target.isDefined())
         {
-            //Weapon_RocketLauncher_Fire(COERCE_FLOAT(&savedregs), v2, ent->s.weapon, 0.0, &wp, vec3_origin, 0, 0);
-            Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0f, &wp, vec3_origin, NULL, NULL);
+            gentity_s *target = turretInfo->target.ent();
+            if (MayHitTarget(&wp, target, wp.forward))
+            {
+                // Score a hit only once the turret has finished converging on
+                // the target and the target is sufficiently visible.
+                bool hit = remainingConvergence <= 0 && visibility >= 0.2f;
+
+                // Targets flagged invulnerable to turrets are always missed.
+                gentity_s *hitTarget = turretInfo->target.ent();
+                if (hitTarget->sentient && hitTarget->sentient->turretInvulnerability)
+                    hit = false;
+
+                float aimDir[3];
+                if (hit)
+                    Actor_HitTarget(&wp, targetPos, aimDir);
+                else
+                    Actor_MissTarget(&wp, targetPos, aimDir);
+
+                // Adopt the computed hit/miss aim only if it stays within ~18deg
+                // of the gun's current forward; otherwise keep firing straight.
+                if (aimDir[0] * wp.forward[0]
+                  + aimDir[1] * wp.forward[1]
+                  + aimDir[2] * wp.forward[2] > 0.94999999f)
+                {
+                    wp.forward[0] = aimDir[0];
+                    wp.forward[1] = aimDir[1];
+                    wp.forward[2] = aimDir[2];
+                }
+            }
         }
     }
+
+    if (wp.weapDef->weapType)
+        Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0f, &wp, vec3_origin, NULL, NULL);
+    else if (activator->client)
+        Bullet_Fire(shooter, turretInfo->playerSpread, &wp, ent, level.time);
     else
-    {
-        if (activator->client)
-            spread = turretInfo->playerSpread;
-        else
-            spread = turretInfo->aiSpread;
-        Bullet_Fire(v2, spread, &wp, ent, level.time);
-    }
+        Bullet_Fire(shooter, turretInfo->aiSpread, &wp, ent, level.time);
 
-    //if (turretInfo->fireBarrel)
-    //    G_AddEvent(ent, 0x30u, v2->s.number);
-    //else
-    //    G_AddEvent(ent, 0x2Fu, v2->s.number);
-
-    G_AddEvent(ent, 0x26, v2->s.number);
-
-    //if ((turretInfo->flags & 0x8000) != 0)
-    //{
-    //    ++turretInfo->fireBarrel;
-    //    turretInfo->fireBarrel %= 2;
-    //}
+    G_AddEvent(ent, 0x26, shooter->s.number);
 }
 
 void __cdecl clamp_playerbehindgun(gentity_s *self, gentity_s *other)
@@ -1879,9 +1886,9 @@ bool turret_canuse_auto(gentity_s *self, actor_s *actor)
     iassert(actor);
 
     TurretInfo *pTurretInfo = self->pTurretInfo;
-
     iassert(pTurretInfo);
 
+    // Already on a turret that's at least as good as this one -> can't switch to it.
     if (Actor_IsUsingTurret(actor) && actor->pTurret != self && !Actor_IsTurretCloserThenCurrent(actor, self))
         return false;
 
@@ -1889,63 +1896,73 @@ bool turret_canuse_auto(gentity_s *self, actor_s *actor)
     if (!targetSentient)
         return true;
 
-    int idx = targetSentient - level.sentients;
-    sentient_info_t *sentientInfo = &actor->sentientInfo[idx];
+    int sentientIndex = targetSentient - level.sentients;
+    sentient_info_t *sentientInfo = &actor->sentientInfo[sentientIndex];
 
+    // Target isn't recent enough to count as suppressing fire -> allow.
     if (level.time - sentientInfo->lastKnownPosTime >= pTurretInfo->suppressTime)
         return true;
 
     const float *targetOrigin = targetSentient->ent->r.currentOrigin;
-    float dx = targetOrigin[0] - self->r.currentOrigin[0];
-    float dy = targetOrigin[1] - self->r.currentOrigin[1];
-    float dz = targetOrigin[2] - self->r.currentOrigin[2];
-    float distSq = dx * dx + dy * dy + dz * dz;
+    float delta[3];
+    delta[0] = targetOrigin[0] - self->r.currentOrigin[0];
+    delta[1] = targetOrigin[1] - self->r.currentOrigin[1];
+    delta[2] = targetOrigin[2] - self->r.currentOrigin[2];
+    float distSq = delta[0] * delta[0] + delta[1] * delta[1] + delta[2] * delta[2];
 
-    if (distSq >= pTurretInfo->maxRangeSquared || Vec2DistanceSq(targetOrigin, sentientInfo->vLastKnownPos) >= 4096.0f)
+    // Out of range, or the last-seen position has drifted far from the live origin -> allow.
+    if (distSq >= pTurretInfo->maxRangeSquared
+        || Vec2DistanceSq(targetOrigin, sentientInfo->vLastKnownPos) >= 4096.0f)
         return true;
 
     if (sentientInfo->VisCache.bVisible)
     {
-        float eyePos[4], outPos[12], outAngles[2];
+        // turret_CanTargetSentient fills a vec3 muzzle position and a vec2 local-angle pair;
+        // here only its bool result matters, so the outputs are scratch (but must be sized right).
+        float eyePos[3];
+        float targetPos[3];
+        float muzzlePos[3];
+        float localAngles[2];
         Sentient_GetEyePosition(targetSentient, eyePos);
-        if (turret_CanTargetSentient(self, targetSentient, outPos, &outAngles[0], &outAngles[1]))
+        if (turret_CanTargetSentient(self, targetSentient, targetPos, muzzlePos, localAngles))
             return true;
     }
     else
     {
+        // Not directly visible: allow if the target lies within the turret's forward cone.
         float forward[3];
         AngleVectors(self->r.currentAngles, forward, NULL, NULL);
 
         float dist = sqrtf(distSq);
-        if (dist == 0.0f)
-            return false;
+        float invDist = (dist != 0.0f) ? 1.0f / dist : 0.0f;   // guard div-by-zero; delta is 0 here so dot becomes 0
 
-        float nx = dx / dist;
-        float ny = dy / dist;
-        float nz = dz / dist;
-
-        float dot = forward[0] * nx + forward[1] * ny + forward[2] * nz;
+        float dot = forward[0] * (delta[0] * invDist)
+                  + forward[1] * (delta[1] * invDist)
+                  + forward[2] * (delta[2] * invDist);
         if (dot >= pTurretInfo->forwardAngleDot)
             return true;
     }
 
+    // Trace from just past the muzzle (pushed along the weapon->aim direction) to the target's
+    // eyes; allowed only when turret_SightTrace reports that line is blocked (non-zero).
     float tagWeaponPos[3], tagAimPos[3];
     if (!G_DObjGetWorldTagPos(self, scr_const.tag_weapon, tagWeaponPos))
         return false;
     if (!G_DObjGetWorldTagPos(self, scr_const.tag_aim, tagAimPos))
         return false;
 
-    float vec[2] = { tagWeaponPos[0] - tagAimPos[0], tagWeaponPos[1] - tagAimPos[1] };
-    Vec2Normalize(vec);
-    vec[0] = vec[0] * 30.0f + tagWeaponPos[0];
-    vec[1] = vec[1] * 30.0f + tagWeaponPos[1];
+    float dir[2] = { tagWeaponPos[0] - tagAimPos[0], tagWeaponPos[1] - tagAimPos[1] };
+    Vec2Normalize(dir);
 
-    float eyePos[4];
+    float traceStart[3];
+    traceStart[0] = dir[0] * 30.0f + tagWeaponPos[0];
+    traceStart[1] = dir[1] * 30.0f + tagWeaponPos[1];
+    traceStart[2] = tagAimPos[2];
+
+    float eyePos[3];
     Sentient_GetEyePosition(targetSentient, eyePos);
 
-    int traceResult = turret_SightTrace(vec, eyePos, actor->ent->s.number, targetSentient->ent->s.number);
-
-    return (traceResult & 0x20) == 0;
+    return turret_SightTrace(traceStart, eyePos, actor->ent->s.number, targetSentient->ent->s.number) != 0;
 }
 
 

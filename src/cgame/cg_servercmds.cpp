@@ -1105,79 +1105,27 @@ void CG_ParseAmp()
 
 void __cdecl CG_ParsePhysGravityDir(int localClientNum)
 {
-    unsigned int nesting; // r7
-    int v3; // r28
-    const char *v4; // r3
-    const char *v5; // r3
-    const char *v6; // r3
-    long double v7; // fp2
-    const char *v8; // r3
-    long double v9; // fp2
-    const char *v10; // r3
-    long double v11; // fp2
-    float v12; // [sp+50h] [-40h] BYREF
-    float v13; // [sp+54h] [-3Ch]
-    float v14; // [sp+58h] [-38h]
+    float down[3]; // BYREF
 
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
+    if (Cmd_Argc() == 4)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            160,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    v3 = cmd_args.argc[nesting];
-    if (nesting >= 8)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            160,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    if (cmd_args.argc[nesting] == 4)
-    {
-        v4 = Cmd_Argv(0);
-        if (I_strcmp(v4, "phys_grav"))
+        iassert(!I_strcmp(Cmd_Argv(0), "phys_grav" ));
+
+        down[0] = (float)atof(Cmd_Argv(1));
+        down[1] = (float)atof(Cmd_Argv(2));
+        down[2] = (float)atof(Cmd_Argv(3));
+        if (down[0] == 0.0 && down[1] == 0.0 && down[2] == 0.0)
         {
-            v5 = Cmd_Argv(0);
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_servercmds.cpp",
-                980,
-                0,
-                "%s\n\t(Cmd_Argv( 0 )) = %s",
-                "(!I_strcmp( Cmd_Argv( 0 ), \"phys_grav\" ))",
-                v5);
+            down[0] = 0.0;
+            down[1] = 0.0;
+            down[2] = -1.0;
         }
-        v6 = Cmd_Argv(1);
-        v7 = atof(v6);
-        v12 = *(double *)&v7;
-        v8 = Cmd_Argv(2);
-        v9 = atof(v8);
-        v13 = *(double *)&v9;
-        v10 = Cmd_Argv(3);
-        v11 = atof(v10);
-        v14 = *(double *)&v11;
-        if (v12 == 0.0 && v13 == 0.0 && (float)*(double *)&v11 == 0.0)
-        {
-            v12 = 0.0;
-            v13 = 0.0;
-            v14 = -1.0;
-        }
-        Phys_SetGravityDir(&v12);
+        Phys_SetGravityDir(down);
         DynEntCl_WakeUpAroundPlayer(localClientNum);
     }
     else
     {
-        Com_PrintError(14, "phys_grav called with %i arguments, should be 3\n", v3);
+        Com_PrintError(14, "phys_grav called with %i arguments, should be 3\n", Cmd_Argc());
     }
 }
 
@@ -2126,8 +2074,8 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                     else
                                                                     {
                                                                         v88 = Cmd_Argv(2);
-                                                                        //v89 = (_cntlzw(atol(v88)) & 0x20) == 0;
-                                                                        v89 = (atol(v88) & 0x20) == 0;
+
+                                                                        v89 = atol(v88) != 0;
                                                                         v90 = Cmd_Argv(1);
                                                                         v91 = CL_PickSoundAlias(v90);
                                                                         SND_PlayMusicAlias(localClientNum, v91, v89, SASYS_CGAME);

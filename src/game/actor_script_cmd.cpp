@@ -2543,16 +2543,15 @@ void __cdecl ActorCmd_ClearEnemy(scr_entref_t entref)
     Sentient_SetEnemy(self->sentient, 0, 1);
 }
 
+static const float AI_ENTITY_TARGET_MAX_THREAT = 1.0;
 void __cdecl ActorCmd_SetEntityTarget(scr_entref_t entref)
 {
     actor_s *self; // r29
     gentity_s *targetEnt; // r28
-    double Float; // fp1
-    double v5; // fp0
-    sentient_s *sentient; // r3
 
     self = Actor_Get(entref);
     targetEnt = Scr_GetEntity(0);
+
     iassert(targetEnt);
 
     if (targetEnt->sentient)
@@ -2563,32 +2562,12 @@ void __cdecl ActorCmd_SetEntityTarget(scr_entref_t entref)
     self->sentient->scriptTargetEnt.setEnt(targetEnt);
 
     if (Scr_GetNumParam() <= 1)
-    {
-        v5 = 1.0;
-        self->sentient->entityTargetThreat = 1.0;
-    }
+        self->sentient->entityTargetThreat = AI_ENTITY_TARGET_MAX_THREAT;
     else
-    {
-        Float = Scr_GetFloat(1);
+        self->sentient->entityTargetThreat = ClampFloat(Scr_GetFloat(1), 0.0f, AI_ENTITY_TARGET_MAX_THREAT);
 
-        // PPC two-fsel clamp:
-        //   _FP12 = -Float
-        //   _FP13 = Float - 1
-        //   f11   = (Float-1 >= 0) ? 1.0 : Float           ; min(Float, 1.0)
-        //   f13   = (-Float  >= 0) ? (Float-1) : f11       ; (Float<=0) ? Float-1 : min(Float,1)
-        // BUG was: prior port flipped condition AND the value, producing 0.0 for Float==1.0
-        // (so setentitytarget(ent, 1.0) never auto-promoted to enemy because the line 2582
-        //  check `entityTargetThreat == 1.0` never matched).
-        if (Float <= 0.0f)
-            self->sentient->entityTargetThreat = Float - 1.0f;
-        else if (Float >= 1.0f)
-            self->sentient->entityTargetThreat = 1.0f;
-        else
-            self->sentient->entityTargetThreat = Float;
-    }
-    sentient = self->sentient;
-    if (sentient->entityTargetThreat == v5)
-        Sentient_SetEnemy(sentient, targetEnt, 1);
+    if (self->sentient->entityTargetThreat == AI_ENTITY_TARGET_MAX_THREAT)
+        Sentient_SetEnemy(self->sentient, targetEnt, 1);
 }
 
 void __cdecl ActorCmd_ClearEntityTarget(scr_entref_t entref)

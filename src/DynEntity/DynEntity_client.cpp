@@ -1713,78 +1713,49 @@ void __cdecl DynEntCl_DestroyEvent(
 #ifdef KISAK_SP
 void DynEntCl_WakeUpAroundPlayer(int localClientNum)
 {
-    const dvar_s *v1; // r11
-    DynEntityDrawType v2; // r29
-    double v3; // fp0
-    double v4; // fp13
-    double v5; // fp0
-    uint32_t ClosestEntities; // r3
-    uint16_t *v7; // r31
-    uint32_t v8; // r27
+    DynEntityDrawType drawType; // r29
+    uint32_t hitCount; // r3
     const DynEntityDef *EntityDef; // r28
-    DynEntityClient *ClientEntity; // r30
+    DynEntityClient *dynEntClient; // r30
     DynEntityPose *ClientPose; // r3
-    float v12[4]; // [sp+50h] [-2080h] BYREF
-    float v13[4]; // [sp+60h] [-2070h] BYREF
-    float v14[4]; // [sp+70h] [-2060h] BYREF
-    uint16_t v15[40]; // [sp+80h] [-2050h] BYREF
+    float vOrigin[3]; // [sp+70h] [-2060h] BYREF
+    uint16_t ents[4096]; // [sp+80h] [-2050h] BYREF
 
-    v1 = phys_gravityChangeWakeupRadius;
     if (phys_gravityChangeWakeupRadius->current.value != 0.0)
     {
-        if (localClientNum)
-        {
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\dynentity\\../cgame/cg_local.h",
-                910,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-            v1 = phys_gravityChangeWakeupRadius;
-        }
-        v2 = DYNENT_DRAW_MODEL;
-        v14[0] = cgArray[0].predictedPlayerState.origin[0];
-        v14[1] = cgArray[0].predictedPlayerState.origin[1];
-        v14[2] = cgArray[0].predictedPlayerState.origin[2];
-        v3 = -v1->current.value;
-        v13[0] = (float)v3 + cgArray[0].predictedPlayerState.origin[0];
-        v13[1] = (float)v3 + cgArray[0].predictedPlayerState.origin[1];
-        v13[2] = cgArray[0].predictedPlayerState.origin[2] + (float)v3;
-        v4 = (float)(v1->current.value + cgArray[0].predictedPlayerState.origin[1]);
-        v5 = (float)(cgArray[0].predictedPlayerState.origin[2] + v1->current.value);
-        v12[0] = v1->current.value + cgArray[0].predictedPlayerState.origin[0];
-        v12[1] = v4;
-        v12[2] = v5;
+        drawType = DYNENT_DRAW_MODEL;
+
+        const playerState_s *ps = CG_GetPredictedPlayerState(localClientNum);
+
+        Vec3Copy(ps->origin, vOrigin);
+
+        float radiusMin[4];
+        Vec3AddScalar(vOrigin, -phys_gravityChangeWakeupRadius->current.value, radiusMin);
+
+        float radiusMax[4];
+        Vec3AddScalar(vOrigin, phys_gravityChangeWakeupRadius->current.value, radiusMax);
+
         do
         {
-            ClosestEntities = DynEntCl_GetClosestEntities(v2, v13, v12, v14, v15, 0);
-            if (ClosestEntities)
+            hitCount = DynEntCl_GetClosestEntities(drawType, radiusMin, radiusMax, vOrigin, ents, 0);
+
+            for (int i = 0; i < hitCount; i++)
             {
-                v7 = v15;
-                v8 = ClosestEntities;
-                do
+                uint16_t dynEntId = ents[i];
+                EntityDef = DynEnt_GetEntityDef(dynEntId, drawType);
+                dynEntClient = DynEnt_GetClientEntity(dynEntId, drawType);
+
+                iassert(dynEntClient->flags & DYNENT_CL_ACTIVE);
+
+                if (DynEnt_GetEntityProps(EntityDef->type)->usePhysics && !dynEntClient->physObjId)
                 {
-                    EntityDef = DynEnt_GetEntityDef(*v7, v2);
-                    ClientEntity = DynEnt_GetClientEntity(*v7, v2);
-                    if ((ClientEntity->flags & 1) == 0)
-                        MyAssertHandler(
-                            "c:\\trees\\cod3\\cod3src\\src\\DynEntity\\DynEntity_client.cpp",
-                            1501,
-                            0,
-                            "%s",
-                            "dynEntClient->flags & DYNENT_CL_ACTIVE");
-                    if (DynEnt_GetEntityProps(EntityDef->type)->usePhysics && !ClientEntity->physObjId)
-                    {
-                        ClientPose = DynEnt_GetClientPose(*v7, v2);
-                        ClientEntity->physObjId = (int32_t)DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose);
-                    }
-                    --v8;
-                    ++v7;
-                } while (v8);
+                    ClientPose = DynEnt_GetClientPose(dynEntId, drawType);
+                    dynEntClient->physObjId = (int32_t)DynEntCl_CreatePhysObj(EntityDef, &ClientPose->pose);
+                }
             }
-            ++v2;
-        } while ((uint32_t)v2 < DYNENT_DRAW_COUNT);
+
+            ++drawType;
+        } while ((uint32_t)drawType < DYNENT_DRAW_COUNT);
     }
 }
 #endif 

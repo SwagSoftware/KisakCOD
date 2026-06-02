@@ -29,8 +29,6 @@ void __cdecl TRACK_actor_grenade()
 void __cdecl SP_info_grenade_hint(gentity_s *ent)
 {
     unsigned int grenadeHintCount; // r11
-    float *v3; // r10
-    double v4; // fp0
 
     grenadeHintCount = level.grenadeHintCount;
     if (level.grenadeHintCount >= 0x200)
@@ -38,259 +36,166 @@ void __cdecl SP_info_grenade_hint(gentity_s *ent)
         Com_Error(ERR_DROP, "MAX_GRENADE_HINTS (%i) exceeded", 512);
         grenadeHintCount = level.grenadeHintCount;
     }
-    v3 = g_vGrenadeHint[grenadeHintCount];
-    *v3 = ent->r.currentOrigin[0];
-    v3[1] = ent->r.currentOrigin[1];
-    v4 = ent->r.currentOrigin[2];
+
+    Vec3Copy(ent->r.currentOrigin, g_vGrenadeHint[grenadeHintCount]);
+
     level.grenadeHintCount = grenadeHintCount + 1;
-    v3[2] = v4;
     G_FreeEntity(ent);
 }
 
+// aislop
 bool __cdecl Actor_Grenade_IsValidTrajectory(
     actor_s *self,
     const float *vFrom,
     float *vVelocity,
     const float *vGoal)
 {
-    double v8; // fp12
-    double v9; // fp31
-    double v10; // fp24
-    double v11; // fp29
-    double v12; // fp30
-    double v13; // fp0
-    double v14; // fp30
-    int v15; // r4
-    double v16; // fp30
-    double v17; // fp12
-    double v18; // fp27
-    double v19; // fp12
-    double v20; // fp11
-    double v21; // fp28
-    double v22; // fp13
-    gentity_s *ent; // r11
-    gentity_s *v24; // r8
-    double v25; // fp0
-    double v27; // fp31
-    double v28; // fp0
-    gentity_s *v29; // r11
-    int EntityHitId; // r11
-    double v31; // fp0
-    double v32; // fp13
-    double v33; // fp12
-    double v34; // fp0
-    sentient_s *sentient; // r31
-    int v36; // [sp+50h] [-130h] BYREF
-    float v37; // [sp+54h] [-12Ch]
-    // KISAKFIX: v38/v39/v40 vec3 at sp+0x58..0x60 passed as &v38 to SV_SightTrace /
-    // G_DebugLineWithDuration / G_TraceCapsule. v41/v42/v43 vec3 at sp+0x68..0x70 passed as &v41.
-    // Pack into arrays so address-of-first-element works.
-    float midPos[3]; // was v38 (BYREF) + v39 + v40
-    float farPos[3]; // was v41 (BYREF) + v42 + v43
-    float v44[2]; // [sp+78h] [-108h] BYREF
-    float v45; // [sp+80h] [-100h]
-    float v46[4]; // [sp+88h] [-F8h] BYREF
-    float v47[6]; // [sp+98h] [-E8h] BYREF
-    trace_t v48[2]; // [sp+B0h] [-D0h] BYREF
+    iassert(self);
+    iassert(vFrom);
+    iassert(vVelocity);
+    iassert(vGoal);
+    iassert(g_gravity->current.value > 0);
+    nanassertvec3(vFrom);
+    nanassertvec3(vVelocity);
+    nanassertvec3(vGoal);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 81, 0, "%s", "self");
-    if (!vFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 82, 0, "%s", "vFrom");
-    if (!vVelocity)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 83, 0, "%s", "vVelocity");
-    if (!vGoal)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 84, 0, "%s", "vGoal");
-    if (g_gravity->current.value <= 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            85,
-            0,
-            "%s",
-            "g_gravity->current.value > 0");
-    v37 = *vFrom;
-    if ((LODWORD(v37) & 0x7F800000) == 0x7F800000
-        || (v37 = vFrom[1], (LODWORD(v37) & 0x7F800000) == 0x7F800000)
-        || (v37 = vFrom[2], (LODWORD(v37) & 0x7F800000) == 0x7F800000))
+    const float gravity = g_gravity->current.value;
+    const float vVelZ = vVelocity[2];
+
+    // Solve the vertical parabola for the segment timings. The arc is split
+    // into a rising part (vFrom -> nearPos -> apex) and a falling part
+    // (apex -> farPos -> goal); each gets its own sampled times.
+    float tApex;           // time to the apex (0 when thrown level or downward)
+    float tMidNear;        // time of the near sample on the rising part
+    float tDiscriminant;   // discriminant of the vertical solve
+    float tHalfFarSegment; // half the duration of the falling part
+
+    if (vVelZ <= 0.0f)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            106,
-            0,
-            "%s",
-            "!IS_NAN((vFrom)[0]) && !IS_NAN((vFrom)[1]) && !IS_NAN((vFrom)[2])");
-    }
-    v37 = *vVelocity;
-    if ((LODWORD(v37) & 0x7F800000) == 0x7F800000
-        || (v37 = vVelocity[1], (LODWORD(v37) & 0x7F800000) == 0x7F800000)
-        || (v37 = vVelocity[2], (LODWORD(v37) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            107,
-            0,
-            "%s",
-            "!IS_NAN((vVelocity)[0]) && !IS_NAN((vVelocity)[1]) && !IS_NAN((vVelocity)[2])");
-    }
-    v37 = *vGoal;
-    if ((LODWORD(v37) & 0x7F800000) == 0x7F800000
-        || (v37 = vGoal[1], (LODWORD(v37) & 0x7F800000) == 0x7F800000)
-        || (v37 = vGoal[2], (LODWORD(v37) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            108,
-            0,
-            "%s",
-            "!IS_NAN((vGoal)[0]) && !IS_NAN((vGoal)[1]) && !IS_NAN((vGoal)[2])");
-    }
-    v8 = vVelocity[2];
-    v47[0] = -1.0;
-    v47[1] = -1.0;
-    v47[2] = -1.0;
-    v44[0] = 1.0;
-    v44[1] = 1.0;
-    v45 = 1.0;
-    if (v8 <= 0.0)
-    {
-        v9 = 0.0;
-        v11 = 0.0;
-        v16 = (float)((float)((float)((float)(vFrom[2] - vGoal[2]) * g_gravity->current.value) * (float)2.0)
-            + (float)(vVelocity[2] * vVelocity[2]));
-        v37 = (float)((float)((float)(vFrom[2] - vGoal[2]) * g_gravity->current.value) * (float)2.0)
-            + (float)(vVelocity[2] * vVelocity[2]);
-        if ((LODWORD(v37) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 142, 0, "%s", "!IS_NAN(tDiscriminant)");
-        if (v16 <= 0.0)
-            return 0;
-        v17 = sqrtf(v16);
-        v10 = 0.5;
-        v14 = (float)((float)((float)((float)v17 + vVelocity[2]) / g_gravity->current.value) * (float)0.5);
-        v37 = (float)((float)((float)v17 + vVelocity[2]) / g_gravity->current.value) * (float)0.5;
-        if ((LODWORD(v37) & 0x7F800000) != 0x7F800000)
-            goto LABEL_39;
-        v15 = 148;
+        // Thrown level or downward: there is no rising part.
+        tApex = 0.0f;
+        tMidNear = 0.0f;
+        tDiscriminant = (vFrom[2] - vGoal[2]) * gravity * 2.0f + vVelZ * vVelZ;
+        iassert(!IS_NAN(tDiscriminant));
+        if (tDiscriminant <= 0.0f)
+            return false;
+        tHalfFarSegment = (sqrtf(tDiscriminant) + vVelZ) / gravity * 0.5f;
+        iassert(!IS_NAN(tHalfFarSegment));
     }
     else
     {
-        v9 = (float)((float)((float)1.0 / g_gravity->current.value) * (float)v8);
-        v10 = 0.5;
-        v11 = (float)((float)((float)((float)1.0 / g_gravity->current.value) * (float)v8) * (float)0.5);
-        v12 = (float)((float)((float)((float)(vFrom[2] - vGoal[2]) * (float)((float)1.0 / g_gravity->current.value))
-            * (float)2.0)
-            + (float)((float)v9 * (float)v9));
-        if ((COERCE_UNSIGNED_INT((float)((float)1.0 / g_gravity->current.value) * (float)v8) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 126, 0, "%s", "!IS_NAN(tApex)");
-        v37 = v11;
-        if ((LODWORD(v37) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 127, 0, "%s", "!IS_NAN(tMidNear)");
-        v37 = v12;
-        if ((LODWORD(v37) & 0x7F800000) == 0x7F800000)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 128, 0, "%s", "!IS_NAN(tDiscriminant)");
-        if (v12 <= 0.0)
-            return 0;
-        v13 = sqrtf(v12);
-        v14 = (float)((float)v13 * (float)0.5);
-        v37 = (float)v13 * (float)0.5;
-        if ((LODWORD(v37) & 0x7F800000) != 0x7F800000)
-            goto LABEL_39;
-        v15 = 134;
+        const float invGravity = 1.0f / gravity;
+        tApex = invGravity * vVelZ;
+        iassert(!IS_NAN(tApex));
+        tMidNear = tApex * 0.5f;
+        iassert(!IS_NAN(tMidNear));
+        tDiscriminant = (vFrom[2] - vGoal[2]) * invGravity * 2.0f + tApex * tApex;
+        iassert(!IS_NAN(tDiscriminant));
+        if (tDiscriminant <= 0.0f)
+            return false;
+        tHalfFarSegment = sqrtf(tDiscriminant) * 0.5f;
+        iassert(!IS_NAN(tHalfFarSegment));
     }
-    MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", v15, 0, "%s", "!IS_NAN(tHalfFarSegment)");
-LABEL_39:
-    v18 = (float)((float)v14 + (float)v9);
-    v19 = *vFrom;
-    if (I_fabs((float)((float)((float)((float)((float)((float)v14 + (float)v9) + (float)v14) * *vVelocity) + *vFrom)
-        - *vGoal)) <= 0.1)
+
+    const float tFar = tHalfFarSegment + tApex;  // time of the far sample
+    const float tLand = tFar + tHalfFarSegment;  // full time of flight to the goal
+
+    // Reject if the horizontal landing point misses the goal in X or Y.
+    const float landX = tLand * vVelocity[0] + vFrom[0];
+    if (I_fabs(landX - vGoal[0]) > 0.1)
+        return false;
+    const float landY = tLand * vVelocity[1] + vFrom[1];
+    if (I_fabs(landY - vGoal[1]) > 0.1)
+        return false;
+
+    float traceMins[3] = { -1.0f, -1.0f, -1.0f };
+    float traceMaxs[3] = { 1.0f, 1.0f, 1.0f };
+    float nearPos[3];
+    float midPos[3];
+    float farPos[3];
+    int blocked = 0;
+
+    if (tApex <= 0.0f)
     {
-        v20 = vFrom[1];
-        if (I_fabs((float)((float)((float)((float)((float)((float)v14 + (float)v9) + (float)v14) * vVelocity[1]) + vFrom[1])
-            - vGoal[1])) <= 0.1)
-        {
-            v36 = 0;
-            if (v9 <= 0.0)
-            {
-                midPos[2] = vFrom[2];
-                midPos[0] = v19;
-                midPos[1] = v20;
-            }
-            else
-            {
-                v21 = (float)((float)((float)(g_gravity->current.value * (float)v11) * (float)v11) * (float)0.125);
-                v37 = (float)((float)(g_gravity->current.value * (float)v11) * (float)v11) * (float)0.125;
-                if ((LODWORD(v37) & 0x7F800000) == 0x7F800000)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-                        164,
-                        0,
-                        "%s",
-                        "!IS_NAN(fMaxErrorNear)");
-                v22 = (float)((float)(vVelocity[1] * (float)v11) + vFrom[1]);
-                v46[0] = (float)(*vVelocity * (float)v11) + *vFrom;
-                v45 = (float)v21 + (float)1.0;
-                v46[1] = v22;
-                ent = self->ent;
-                v46[2] = (float)((float)((float)(g_gravity->current.value * (float)v11) * (float)v11) * (float)1.5) + vFrom[2];
-                SV_SightTrace(&v36, vFrom, v47, v44, v46, ent->s.number, ENTITYNUM_NONE, 42004625);
-                if (g_drawGrenadeHints->current.integer > 0)
-                    G_DebugLineWithDuration(vFrom, v46, colorCyan, 1, 200);
-                if (v36)
-                    return 0;
-                v24 = self->ent;
-                v25 = (float)((float)(vVelocity[1] * (float)v9) + vFrom[1]);
-                midPos[0] = (float)(*vVelocity * (float)v9) + *vFrom;
-                midPos[1] = v25;
-                midPos[2] = (float)((float)((float)(g_gravity->current.value * (float)v9) * (float)v9) * (float)v10) + vFrom[2];
-                SV_SightTrace(&v36, v46, v47, v44, midPos, v24->s.number, ENTITYNUM_NONE, 42004625);
-                if (g_drawGrenadeHints->current.integer > 0)
-                    G_DebugLineWithDuration(v46, midPos, colorCyan, 1, 200);
-                if (v36)
-                    return 0;
-            }
-            v27 = (float)((float)((float)(g_gravity->current.value * (float)v14) * (float)v14) * (float)0.125);
-            v37 = (float)((float)(g_gravity->current.value * (float)v14) * (float)v14) * (float)0.125;
-            if ((LODWORD(v37) & 0x7F800000) == 0x7F800000)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 207, 0, "%s", "!IS_NAN(fMaxErrorFar)");
-            v28 = (float)((float)(*vVelocity * (float)v18) + *vFrom);
-            v45 = (float)v27 + (float)1.0;
-            v29 = self->ent;
-            farPos[1] = (float)(vVelocity[1] * (float)v18) + vFrom[1];
-            farPos[0] = v28;
-            farPos[2] = (float)((float)-(float)((float)((float)(g_gravity->current.value * (float)v18) * (float)v10) - vVelocity[2])
-                * (float)v18)
-                + vFrom[2];
-            SV_SightTrace(&v36, midPos, v47, v44, farPos, v29->s.number, ENTITYNUM_NONE, 42004625);
-            if (g_drawGrenadeHints->current.integer > 0)
-                G_DebugLineWithDuration(midPos, farPos, colorCyan, 1, 200);
-            if (!v36)
-            {
-                G_TraceCapsule(v48, farPos, v47, v44, vGoal, self->ent->s.number, 42004625);
-                if (g_drawGrenadeHints->current.integer > 0)
-                    G_DebugLineWithDuration(farPos, vGoal, colorCyan, 1, 200);
-                if (v48[0].fraction == 1.0)
-                    return 1;
-                EntityHitId = Trace_GetEntityHitId(v48);
-                if (EntityHitId == ENTITYNUM_WORLD)
-                {
-                    v31 = (float)((float)((float)((float)(vGoal[1] - farPos[1]) * v48[0].fraction) + farPos[1]) - vGoal[1]);
-                    v32 = (float)((float)((float)((float)(vGoal[2] - farPos[2]) * v48[0].fraction) + farPos[2]) - vGoal[2]);
-                    v33 = (float)((float)((float)((float)(*vGoal - farPos[0]) * v48[0].fraction) + farPos[0]) - *vGoal);
-                    v34 = (float)((float)((float)v33 * (float)v33)
-                        + (float)((float)((float)v32 * (float)v32) + (float)((float)v31 * (float)v31)));
-                    if (v34 >= 16.0)
-                        return v34 < 900.0 && v48[0].normal[2] > v10;
-                }
-                else
-                {
-                    sentient = level.gentities[EntityHitId].sentient;
-                    if (!sentient || sentient->eTeam != Sentient_EnemyTeam(self->sentient->eTeam))
-                        return 0;
-                }
-                return 1;
-            }
-        }
+        // No rising part: the descending sweep starts straight from vFrom.
+        midPos[0] = vFrom[0];
+        midPos[1] = vFrom[1];
+        midPos[2] = vFrom[2];
     }
-    return 0;
+    else
+    {
+        // Sweep the rising part in two segments: vFrom -> nearPos -> apex.
+        const float fMaxErrorNear = gravity * tMidNear * tMidNear * 0.125f;
+        iassert(!IS_NAN(fMaxErrorNear));
+
+        nearPos[0] = vVelocity[0] * tMidNear + vFrom[0];
+        nearPos[1] = vVelocity[1] * tMidNear + vFrom[1];
+        nearPos[2] = gravity * tMidNear * tMidNear * 1.5f + vFrom[2];
+        traceMaxs[2] = fMaxErrorNear + 1.0f;
+        SV_SightTrace(&blocked, vFrom, traceMins, traceMaxs, nearPos,
+            self->ent->s.number, ENTITYNUM_NONE, 42004625);
+        if (g_drawGrenadeHints->current.integer > 0)
+            G_DebugLineWithDuration(vFrom, nearPos, colorCyan, 1, 200);
+        if (blocked)
+            return false;
+
+        midPos[0] = vVelocity[0] * tApex + vFrom[0];
+        midPos[1] = vVelocity[1] * tApex + vFrom[1];
+        midPos[2] = gravity * tApex * tApex * 0.5f + vFrom[2];
+        SV_SightTrace(&blocked, nearPos, traceMins, traceMaxs, midPos,
+            self->ent->s.number, ENTITYNUM_NONE, 42004625);
+        if (g_drawGrenadeHints->current.integer > 0)
+            G_DebugLineWithDuration(nearPos, midPos, colorCyan, 1, 200);
+        if (blocked)
+            return false;
+    }
+
+    // Sweep the descending part: apex/midPos -> farPos.
+    const float fMaxErrorFar = gravity * tHalfFarSegment * tHalfFarSegment * 0.125f;
+    iassert(!IS_NAN(fMaxErrorFar));
+
+    farPos[0] = vVelocity[0] * tFar + vFrom[0];
+    farPos[1] = vVelocity[1] * tFar + vFrom[1];
+    farPos[2] = -(gravity * tFar * 0.5f - vVelZ) * tFar + vFrom[2];
+    traceMaxs[2] = fMaxErrorFar + 1.0f;
+    SV_SightTrace(&blocked, midPos, traceMins, traceMaxs, farPos,
+        self->ent->s.number, ENTITYNUM_NONE, 42004625);
+    if (g_drawGrenadeHints->current.integer > 0)
+        G_DebugLineWithDuration(midPos, farPos, colorCyan, 1, 200);
+    if (blocked)
+        return false;
+
+    // Final capsule trace from the last sampled point to the goal.
+    trace_t trace[2];
+    G_TraceCapsule(trace, farPos, traceMins, traceMaxs, vGoal,
+        self->ent->s.number, 42004625);
+    if (g_drawGrenadeHints->current.integer > 0)
+        G_DebugLineWithDuration(farPos, vGoal, colorCyan, 1, 200);
+
+    const float frac = trace[0].fraction;
+    if (frac == 1.0f)
+        return true;
+
+    int entityHit = Trace_GetEntityHitId(trace);
+    if (entityHit == ENTITYNUM_WORLD)
+    {
+        // Hit world geometry: accept only if the impact point lands close to
+        // the goal and on a fairly flat (floor-like) surface.
+        const float errX = (vGoal[0] - farPos[0]) * frac + farPos[0] - vGoal[0];
+        const float errY = (vGoal[1] - farPos[1]) * frac + farPos[1] - vGoal[1];
+        const float errZ = (vGoal[2] - farPos[2]) * frac + farPos[2] - vGoal[2];
+        const float distSq = errX * errX + (errZ * errZ + errY * errY);
+        if (distSq >= 16.0)
+            return distSq < 900.0 && trace[0].normal[2] > 0.5f;
+    }
+    else
+    {
+        // Hit an entity: only valid if it is an enemy of this actor.
+        sentient_s *sentient = level.gentities[entityHit].sentient;
+        if (!sentient || sentient->eTeam != Sentient_EnemyTeam(self->sentient->eTeam))
+            return false;
+    }
+    return true;
 }
 
 void __cdecl Actor_Grenade_GetTossFromPosition(
@@ -638,83 +543,34 @@ bool __cdecl Actor_Grenade_CheckInfiniteEnergyToss(actor_s *self, float *vFrom, 
 
 bool __cdecl Actor_Grenade_CheckMinimumEnergyToss(actor_s *self, float *vFrom, float *vLand, float *vVelOut)
 {
-    double v8; // fp29
-    double v9; // fp28
-    double v10; // fp30
-    double v11; // fp31
-    double v13; // fp31
-    const dvar_s *v14; // r11
-    double v15; // fp0
-    float v16; // [sp+50h] [-80h]
-    float v17; // [sp+50h] [-80h]
+    float fTotalDist; // fp31
+    float fTotalTime; // fp31
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 500, 0, "%s", "self");
-    if (!vFrom)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 501, 0, "%s", "vFrom");
-    if (!vLand)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 502, 0, "%s", "vLand");
-    if (g_gravity->current.value <= 0.0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            509,
-            0,
-            "%s",
-            "g_gravity->current.value > 0");
-    if ((COERCE_UNSIGNED_INT(*vFrom) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(vFrom[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(vFrom[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            511,
-            0,
-            "%s",
-            "!IS_NAN((vFrom)[0]) && !IS_NAN((vFrom)[1]) && !IS_NAN((vFrom)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*vLand) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(vLand[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(vLand[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            512,
-            0,
-            "%s",
-            "!IS_NAN((vLand)[0]) && !IS_NAN((vLand)[1]) && !IS_NAN((vLand)[2])");
-    }
-    v8 = (float)(*vLand - *vFrom);
-    v9 = (float)(vLand[1] - vFrom[1]);
-    v10 = (float)(vLand[2] - vFrom[2]);
-    v11 = sqrtf((float)((float)((float)v10 * (float)v10)
-        + (float)((float)((float)v9 * (float)v9)
-            + (float)((float)(*vLand - *vFrom) * (float)(*vLand - *vFrom)))));
-    if (v11 <= 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 516, 0, "%s", "fTotalDist > 0");
-    if ((float)((float)((float)v10 + (float)v11) * g_gravity->current.value) > 810000.0)
+    iassert(self);
+    iassert(vFrom);
+    iassert(vLand);
+    iassert(g_gravity->current.value > 0);
+    nanassertvec3(vFrom);
+    nanassertvec3(vLand);
+
+    float landingDistance[3];
+    Vec3Sub(vLand, vFrom, landingDistance);
+
+    fTotalDist = Vec3Length(landingDistance);
+    iassert(fTotalDist > 0);
+
+    if (((landingDistance[2] + fTotalDist) * g_gravity->current.value) > 810000.0) // 900 * 900
         return 0;
-    v13 = sqrtf((float)((float)((float)v11 / g_gravity->current.value) * (float)2.0));
-    if (v13 == 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 524, 0, "%s", "fTotalTime != 0.0f");
-    v14 = g_gravity;
-    v16 = (float)((float)1.0 / (float)v13) * (float)v8;
-    *vVelOut = v16;
-    vVelOut[1] = (float)((float)1.0 / (float)v13) * (float)v9;
-    v15 = (float)((float)((float)(v14->current.value * (float)v13) * (float)0.5)
-        + (float)((float)((float)1.0 / (float)v13) * (float)v10));
-    vVelOut[2] = (float)((float)(v14->current.value * (float)v13) * (float)0.5)
-        + (float)((float)((float)1.0 / (float)v13) * (float)v10);
-    if ((LODWORD(v16) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT((float)((float)1.0 / (float)v13) * (float)v9) & 0x7F800000) == 0x7F800000
-        || (v17 = v15, (LODWORD(v17) & 0x7F800000) == 0x7F800000))
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp",
-            530,
-            0,
-            "%s",
-            "!IS_NAN((vVelOut)[0]) && !IS_NAN((vVelOut)[1]) && !IS_NAN((vVelOut)[2])");
-    }
+
+    fTotalTime = sqrtf(((fTotalDist / g_gravity->current.value) * 2.0f));
+    iassert(fTotalTime != 0.0f);
+
+    vVelOut[0] = (1.0f / fTotalTime) * landingDistance[0];
+    vVelOut[1] = (1.0f / fTotalTime) * landingDistance[1];
+    vVelOut[2] = ((g_gravity->current.value * fTotalTime) * 0.5f) + ((1.0f / fTotalTime) * landingDistance[2]);
+
+    nanassertvec3(vVelOut);
+
     return Actor_Grenade_IsValidTrajectory(self, vFrom, vVelOut, vLand);
 }
 

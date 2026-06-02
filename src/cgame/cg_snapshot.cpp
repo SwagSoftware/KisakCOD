@@ -1039,85 +1039,42 @@ void __cdecl CG_CreateNextSnap(int localClientNum, double dtime, int readNext)
 
 void __cdecl CG_FirstSnapshot(int localClientNum)
 {
-    unsigned int i; // r31
-    const char *v4; // r3
-    snapshot_s *nextSnap; // r11
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-            910,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (cgArray[0].snap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 835, 0, "%s", "!cgameGlob->snap");
-    if (cgArray[0].nextSnap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 836, 0, "%s", "!cgameGlob->nextSnap");
-    for (i = 0; i < 0x880; ++i)
+    iassert(!cgameGlob->snap);
+    iassert(!cgameGlob->nextSnap);
+
+    for (unsigned int i = 0; i < MAX_GENTITIES; ++i)
     {
-        if (g_clientDirty[i])
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp",
-                839,
-                0,
-                "%s\n\t(i) = %i",
-                "(!g_clientDirty[i])",
-                i);
+        iassert(!g_clientDirty[i]);
     }
+
     CG_CreateNextSnap(localClientNum, 0.0, 1);
     CG_SetInitialSnapshot(localClientNum);
     CG_SetNextSnap(localClientNum);
     CG_ProcessNextSnap(localClientNum);
-    if (!cgArray[0].snap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 847, 0, "%s", "cgameGlob->snap");
-    if (!cgArray[0].nextSnap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 848, 0, "%s", "cgameGlob->nextSnap");
-    if (cgArray[0].nextSnap->serverTime != G_GetServerSnapTime())
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp",
-            849,
-            0,
-            "%s",
-            "cgameGlob->nextSnap->serverTime == G_GetServerSnapTime()");
+
+    iassert(cgameGlob->snap);
+    iassert(cgameGlob->nextSnap);
+    iassert(cgameGlob->nextSnap->serverTime == G_GetServerSnapTime());
+
     AimAssist_Setup(localClientNum);
-    v4 = va(
-        "spawned: %.1f %.1f %.1f",
-        cgArray[0].snap->ps.origin[0],
-        cgArray[0].snap->ps.origin[1],
-        cgArray[0].snap->ps.origin[2]
-    );
+
+    //v4 = va(
+    //    "spawned: %.1f %.1f %.1f",
+    //    cgArray[0].snap->ps.origin[0],
+    //    cgArray[0].snap->ps.origin[1],
+    //    cgArray[0].snap->ps.origin[2]
+    //);
     //LSP_LogString(cl_controller_in_use, v4);
-    if (!cgArray[0].snap)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 867, 0, "%s", "cgameGlob->snap");
-    if (cgArray[0].time - cgArray[0].snap->serverTime < 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp",
-            868,
-            0,
-            "%s",
-            "cgameGlob->time - cgameGlob->snap->serverTime >= 0");
-    nextSnap = cgArray[0].nextSnap;
-    if (!cgArray[0].nextSnap)
-    {
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp", 869, 0, "%s", "cgameGlob->nextSnap");
-        nextSnap = cgArray[0].nextSnap;
-    }
-    if (nextSnap != cgArray[0].snap && nextSnap->serverTime - cgArray[0].time <= 0)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp",
-            870,
-            0,
-            "%s",
-            "cgameGlob->nextSnap == cgameGlob->snap || cgameGlob->nextSnap->serverTime - cgameGlob->time > 0");
-    if (cgArray[0].nextSnap->serverTime != G_GetServerSnapTime())
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_snapshot.cpp",
-            871,
-            0,
-            "%s",
-            "cgameGlob->nextSnap->serverTime == G_GetServerSnapTime()");
+
+    iassert(cgameGlob->snap);
+    iassert(cgameGlob->time - cgameGlob->snap->serverTime >= 0);
+
+    iassert(cgameGlob->nextSnap);
+
+    iassert(cgameGlob->nextSnap == cgameGlob->snap || cgameGlob->nextSnap->serverTime - cgameGlob->time > 0);
+    iassert(cgameGlob->nextSnap->serverTime == G_GetServerSnapTime());
 }
 
 void __cdecl CG_ProcessDemoSnapshots(int localClientNum)

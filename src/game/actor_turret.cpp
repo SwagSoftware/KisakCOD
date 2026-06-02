@@ -217,150 +217,38 @@ void __cdecl Actor_StopUseTurret(actor_s *self)
     self->pTurret = 0;
 }
 
+// (aislop)
+// Drives an AI manning a turret. Each think:
+//   1. Pick the pitch/yaw turret-animation pair whose absolute delta brings the gun
+//      to the height the AI wants to aim at, and blend them on the server DObj.
+//   2. If the desired pitch is outside the animated range, push the pitch cap out and
+//      flag the turret as having exceeded its anim pitch.
+//   3. Compose the resulting gun transform with the turret's world transform to get the
+//      AI's origin/angles, easing in via an origin/angle error that decays over time.
+//   4. For free-standing turrets, move the AI to that origin; if it gets wedged against a
+//      non-living obstruction, tighten the firing arc or detach from the turret.
+//
 actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
 {
-    gentity_s *ent; // r16
-    DObjAnimMat *LocalTagMatrix; // r31
-    actor_think_result_t result; // r3
-    unsigned int turretAnim; // r15
-    WeaponDef *WeaponDef; // r19
-    double v7; // fp25
-    double v8; // fp26
-    XAnimTree_s *ActorAnimTree; // r22
-    const XAnim_s *Anims; // r31
-    int NumChildren; // r27
-    unsigned int v12; // r21
-    unsigned int v13; // r26
-    double v14; // fp28
-    double v15; // fp27
-    const char *AnimDebugName; // r3
-    DObj_s *ServerDObj; // r20
-    int v18; // r25
-    unsigned int ChildAt; // r28
-    int v20; // r30
-    // KISAKFIX: was `__int64 v21` (OVERLAPPED int64) — kisak port wrote `LODWORD(v21) = X`
-    // then read `(float)v21`, which on x86 converts 8 bytes (4 real + 4 garbage HIDWORD)
-    // to float. PPC used `extsw r11, r30` to sign-extend int32→int64 before `fcfid`, so
-    // the int64 detour was an artifact of PPC's int-to-float instruction; on x86 int32→float
-    // directly. Turret-AI anim child index computed from garbage every tick.
-    int v21; // r11
-    const char *v22; // r3
-    double v23; // fp0
-    int v24; // r30
-    double v25; // fp30
-    unsigned int v26; // r29
-    double v27; // fp0
-    int v28; // r7
-    unsigned int v29; // r6
-    unsigned int v30; // r5
-    int v31; // r7
-    unsigned int v32; // r6
-    unsigned int v33; // r5
-    const gentity_s *v34; // r24
-    TurretInfo *pTurretInfo; // r30
-    int flags; // r11
-    double v37; // fp0
-    double v38; // fp13
-    double v39; // fp0
-    double v40; // fp13
-    double v41; // fp30
-    unsigned int v42; // r29
-    int v43; // r7
-    unsigned int v44; // r6
-    unsigned int v45; // r5
-    unsigned int v46; // r3
-    int v47; // r7
-    unsigned int v48; // r6
-    unsigned int v49; // r5
-    unsigned int v50; // r3
-    int v51; // r7
-    unsigned int v52; // r6
-    unsigned int v53; // r5
-    float *v54; // r29
-    double v55; // fp1
-    float (*v56)[3]; // r3
-    int v57; // r11
-    int v58; // r7
-    unsigned int v59; // r6
-    unsigned int v60; // r5
-    DObjAnimMat *v61; // r3
-    DObjAnimMat *v62; // r31
-    int v63; // r11
-    long double v64; // fp2
-    double v65; // fp28
-    long double v66; // fp2
-    double v67; // fp30
-    int v68; // r11
-    unsigned int v69; // r11
-    const char *v70; // r11
-    int iHitEntnum; // r10
-    double v72; // fp0
-    double v73; // fp0
-    gentity_s *v74; // r31
-    double v75; // fp4
-    double v76; // fp0
-    float trans[3]; // [sp+50h] [-220h] BYREF
-    //float v78; // [sp+54h] [-21Ch]
-    //float v79; // [sp+58h] [-218h]
-    DObjAnimMat *v80; // [sp+5Ch] [-214h]
-    // KISAKFIX: v81/v82/v83 vec3 → G_ReduceOriginError(&v81). v85/v86/v87 vec3 → AxisToAngles(&v85),
-    // AnglesSubtract(..., &v85), G_ReduceAnglesError(&v85). v88/v89 vec2 → Vec2Normalize(&v88).
-    // v90/v91 vec2 → Vec2Normalize(&v90). Pack into arrays.
-    float originDelta[3]; // was v81 (BYREF) + v82 + v83
-    scr_const_t *v84; // [sp+6Ch] [-204h]
-    float anglesNew[3];   // was v85 (BYREF) + v86 + v87
-    float dirEnt[2];      // was v88 (BYREF) + v89
-    float dirTurret[2];   // was v90 (BYREF) + v91
-    #define v81 originDelta[0]
-    #define v82 originDelta[1]
-    #define v83 originDelta[2]
-    #define v85 anglesNew[0]
-    #define v86 anglesNew[1]
-    #define v87 anglesNew[2]
-    #define v88 dirEnt[0]
-    #define v89 dirEnt[1]
-    #define v90 dirTurret[0]
-    #define v91 dirTurret[1]
-    int v92; // [sp+90h] [-1E0h]
-    float v93[2]; // [sp+98h] [-1D8h] BYREF
-    const gentity_s *pTurret; // [sp+A0h] [-1D0h]
-    __int64 v95; // [sp+A8h] [-1C8h] BYREF
-    float tmpTrans[3]; // [sp+B8h] [-1B8h] BYREF
-    //float v97; // [sp+C0h] [-1B0h]
-    __int64 v98; // [sp+C8h] [-1A8h]
-    __int64 v99; // [sp+D0h] [-1A0h]
-    float v100[12]; // [sp+E0h] [-190h] BYREF
-    float v101[12]; // [sp+110h] [-160h] BYREF
-    float v102[12]; // [sp+140h] [-130h] BYREF
-    float v103[8][3]; // [sp+170h] [-100h] BYREF
-
     iassert(self);
 
-    pTurret = self->pTurret;
+    const gentity_s *pTurret = self->pTurret;
     iassert(pTurret);
     iassert(pTurret->r.inuse);
 
-    ent = self->ent;
-
+    gentity_s *ent = self->ent;
     iassert(ent);
 
-    v84 = &scr_const;
-    LocalTagMatrix = G_DObjGetLocalTagMatrix(pTurret, scr_const.tag_weapon);
-    v80 = LocalTagMatrix;
-    if (!LocalTagMatrix)
+    DObjAnimMat *tagWeaponMtx = G_DObjGetLocalTagMatrix(pTurret, scr_const.tag_weapon);
+    if (!tagWeaponMtx)
     {
         Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_weapon' does not exist\n");
         Actor_StopUseTurret(self);
         Actor_SetState(self, AIS_EXPOSED);
         return ACTOR_THINK_REPEAT;
     }
-    if (self->eAnimMode == AI_ANIM_UNKNOWN)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
-            233,
-            0,
-            "%s",
-            "self->eAnimMode != AI_ANIM_UNKNOWN");
+
+    iassert(self->eAnimMode != AI_ANIM_UNKNOWN);
     if (!self->turretAnimSet)
     {
         Com_PrintWarning(18, "WARNING: aborting turret behavior since no turret animation specified\n");
@@ -368,368 +256,377 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         Actor_SetState(self, AIS_EXPOSED);
         return ACTOR_THINK_REPEAT;
     }
-    turretAnim = self->turretAnim;
-    if (!pTurret->s.weapon)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 245, 0, "%s", "pTurret->s.weapon");
-    WeaponDef = BG_GetWeaponDef(pTurret->s.weapon);
-    if (WeaponDef->weapClass != WEAPCLASS_TURRET)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
-            249,
-            0,
-            "%s",
-            "weapDef->weapClass == WEAPCLASS_TURRET");
-    LocalConvertQuatToMat(LocalTagMatrix, v103);
-    v7 = vectosignedyaw(v103[0]);
-    if (!ent->tagInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 254, 0, "%s", "ent->tagInfo");
-    v8 = (float)(ent->tagInfo->axis[3][2] - LocalTagMatrix->trans[2]);
-    ActorAnimTree = G_GetActorAnimTree(self);
-    if (!ActorAnimTree)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 258, 0, "%s", "tree");
-    Anims = XAnimGetAnims(ActorAnimTree);
-    NumChildren = XAnimGetNumChildren(Anims, turretAnim);
-    v12 = 0;
-    v13 = 0;
-    v14 = 0.0;
-    v15 = 0.0;
-    if (!NumChildren)
-    {
-        AnimDebugName = XAnimGetAnimDebugName(Anims, turretAnim);
-        Com_Error(ERR_DROP, "anim '%s' has no children", AnimDebugName);
-    }
-    ServerDObj = Com_GetServerDObj(ent->s.number);
-    v18 = 0;
+
+    unsigned int turretAnim = self->turretAnim;
+    iassert(pTurret->s.weapon);
+    WeaponDef *weapDef = BG_GetWeaponDef(pTurret->s.weapon);
+    iassert(weapDef->weapClass == WEAPCLASS_TURRET);
+
+    // Current turret yaw, and the gun height the AI needs to reach.
+    mat3x3 tagWeaponAxis;
+    LocalConvertQuatToMat(tagWeaponMtx, tagWeaponAxis);
+    float fTurretYaw = vectosignedyaw(tagWeaponAxis[0]);
+
+    iassert(ent->tagInfo);
+    float fDesiredZ = ent->tagInfo->axis[3][2] - tagWeaponMtx->trans[2];
+
+    XAnimTree_s *animTree = G_GetActorAnimTree(self);
+    iassert(animTree);
+    const XAnim_s *anims = XAnimGetAnims(animTree);
+
+    int numPitchAnims = XAnimGetNumChildren(anims, turretAnim);
+    if (!numPitchAnims)
+        Com_Error(ERR_DROP, "anim '%s' has no children", XAnimGetAnimDebugName(anims, turretAnim));
+
+    DObj_s *serverDObj = Com_GetServerDObj(ent->s.number);
+
+    // Walk the pitch animations from the top down until one reaches fDesiredZ. The
+    // bracketing pair is (this pitch level, the one above it); each level's yaw pair is
+    // (yawAnim0, yawAnim1) blended by fYawFrac.
+    unsigned int pitchAnim    = 0;
+    unsigned int yawAnim0     = 0;
+    unsigned int yawAnim1     = 0;
+    float        fYawFrac     = 0.0f;
+    int          iPrevYawIdx  = 0;
+    float        fPrevYawFrac = 0.0f;
+    float        fPrevZ       = 0.0f;
+    float        rot[2];
+    float        trans[3];
+
+    int iPitchStep = 0;
     do
     {
-        ChildAt = XAnimGetChildAt(Anims, turretAnim, NumChildren - v18 - 1);
-        v20 = XAnimGetNumChildren(Anims, ChildAt);
-        if (!v20)
+        pitchAnim = XAnimGetChildAt(anims, turretAnim, numPitchAnims - iPitchStep - 1);
+
+        int numYawAnims = XAnimGetNumChildren(anims, pitchAnim);
+        if (!numYawAnims)
+            Com_Error(ERR_DROP, "anim '%s' has no children", XAnimGetAnimDebugName(anims, pitchAnim));
+
+        iassert(weapDef->fAnimHorRotateInc != 0.0f);
+
+        // Map the turret yaw onto a fractional yaw-animation index, clamped to the set.
+        float fYawIdx = (float)numYawAnims * 0.5f + fTurretYaw / weapDef->fAnimHorRotateInc;
+        if (fYawIdx < 0.0f)
+            fYawIdx = 0.0f;
+        else if (fYawIdx >= (float)(numYawAnims - 1))
+            fYawIdx = (float)(numYawAnims - 1);
+
+        int iYawIdx = (int)fYawIdx;
+        fYawFrac = fYawIdx - (float)iYawIdx;
+
+        yawAnim0 = XAnimGetChildAt(anims, pitchAnim, iYawIdx);
+        XAnimGetAbsDelta(anims, yawAnim0, rot, trans, 0.0f);
+
+        if (fYawFrac != 0.0f)
         {
-            v22 = XAnimGetAnimDebugName(Anims, ChildAt);
-            Com_Error(ERR_DROP, "anim '%s' has no children", v22);
+            yawAnim1 = XAnimGetChildAt(anims, pitchAnim, iYawIdx + 1);
+            float tmpTrans[3];
+            XAnimGetAbsDelta(anims, yawAnim1, rot, tmpTrans, 0.0f);
+            trans[0] += (tmpTrans[0] - trans[0]) * fYawFrac;
+            trans[1] += (tmpTrans[1] - trans[1]) * fYawFrac;
+            trans[2] += (tmpTrans[2] - trans[2]) * fYawFrac;
         }
-        if (WeaponDef->fAnimHorRotateInc == 0.0)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
-                281,
-                0,
-                "%s",
-                "weapDef->fAnimHorRotateInc");
-        v21 = v20;
-        v23 = (float)((float)((float)v21 * (float)0.5) + (float)((float)v7 / WeaponDef->fAnimHorRotateInc));
-        v99 = v21;
-        if (v23 >= 0.0)
-        {
-            v21 = v20 - 1;
-            v98 = v21;
-            if (v23 >= (float)v21)
-                v23 = (float)v21;
-        }
-        else
-        {
-            v23 = 0.0;
-        }
-        v92 = (int)v23;
-        v24 = (int)v23;
-        v21 = (int)v23;
-        v95 = v21;
-        v25 = (float)((float)v23 - (float)v21);
-        v26 = XAnimGetChildAt(Anims, ChildAt, (int)v23);
-        XAnimGetAbsDelta(Anims, v26, v93, trans, 0.0);
-        if (v25 == 0.0)
-        {
-            v27 = trans[2];
-        }
-        else
-        {
-            v13 = XAnimGetChildAt(Anims, ChildAt, v24 + 1);
-            XAnimGetAbsDelta(Anims, v13, v93, tmpTrans, 0.0);
-            trans[0] = (float)((float)(tmpTrans[0] - trans[0]) * (float)v25) + trans[0];
-            trans[1] = (float)((float)(tmpTrans[1] - trans[1]) * (float)v25) + trans[1];
-            v27 = (float)((float)((float)(tmpTrans[2] - trans[2]) * (float)v25) + trans[2]);
-            trans[2] = (float)((float)(tmpTrans[2] - trans[2]) * (float)v25) + trans[2];
-        }
-        if (v27 >= v8)
+
+        if (trans[2] >= fDesiredZ)
             break;
-        ++v18;
-        v14 = v27;
-        v12 = v24;
-        v15 = v25;
-    } while (v18 < NumChildren);
-    XAnimClearTreeGoalWeightsStrict(ActorAnimTree, turretAnim, 0.0);
-    XAnimSetGoalWeight(ServerDObj, v26, (float)((float)1.0 - (float)v25), 0.0, 1.0, 0, 0, 0);
-    if (v25 != 0.0)
-        XAnimSetGoalWeight(ServerDObj, v13, v25, 0.0, 1.0, 0, 0, 0);
-    v34 = pTurret;
-    pTurretInfo = pTurret->pTurretInfo;
-    if (!pTurretInfo)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 320, 0, "%s", "pTurretInfo");
-    if (v18 && v18 != NumChildren)
+
+        ++iPitchStep;
+        fPrevZ       = trans[2];
+        iPrevYawIdx  = iYawIdx;
+        fPrevYawFrac = fYawFrac;
+    } while (iPitchStep < numPitchAnims);
+
+    // Apply the yaw blend for the level we stopped on.
+    XAnimClearTreeGoalWeightsStrict(animTree, turretAnim, 0.0f);
+    XAnimSetGoalWeight(serverDObj, yawAnim0, 1.0f - fYawFrac, 0.0f, 1.0f, 0, 0, 0);
+    if (fYawFrac != 0.0f)
+        XAnimSetGoalWeight(serverDObj, yawAnim1, fYawFrac, 0.0f, 1.0f, 0, 0, 0);
+
+    TurretInfo *pTurretInfo = pTurret->pTurretInfo;
+    iassert(pTurretInfo);
+
+    if (iPitchStep != 0 && iPitchStep != numPitchAnims)
     {
-        flags = pTurretInfo->flags;
+        // Desired pitch lies between two animated levels: blend them.
+        int flags = pTurretInfo->flags;
+        bool clearPitchCap;
         if ((flags & 0x20) == 0
-            || pTurretInfo->originError[0] != 0.0
-            || pTurretInfo->originError[1] != 0.0
-            || pTurretInfo->originError[2] != 0.0)
+            || pTurretInfo->originError[0] != 0.0f
+            || pTurretInfo->originError[1] != 0.0f
+            || pTurretInfo->originError[2] != 0.0f)
         {
-            goto LABEL_54;
+            clearPitchCap = true;
         }
-        if ((flags & 0x200) != 0)
+        else if ((flags & 0x200) != 0)
         {
+            // Ease the active pitch cap toward its arc limit; clear it once reached.
             if ((flags & 0x400) != 0)
             {
-                v37 = (float)(pTurretInfo->pitchCap - (float)0.1);
-                v38 = pTurretInfo->arcmin[0];
-                pTurretInfo->pitchCap = pTurretInfo->pitchCap - (float)0.1;
-                if (v37 <= v38)
-                    goto LABEL_54;
+                pTurretInfo->pitchCap -= 0.1f;
+                clearPitchCap = (pTurretInfo->pitchCap <= pTurretInfo->arcmin[0]);
             }
             else
             {
-                v39 = (float)(pTurretInfo->pitchCap + (float)0.1);
-                v40 = pTurretInfo->arcmax[0];
-                pTurretInfo->pitchCap = pTurretInfo->pitchCap + (float)0.1;
-                if (v39 >= v40)
-                    LABEL_54:
-                pTurretInfo->flags = flags & 0xFFFFFDFF;
-            }
-        }
-        if ((float)(trans[2] - (float)v14) == 0.0)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 406, 0, "%s", "trans[2] - fPrevTransZ");
-        v41 = (float)((float)((float)v8 - (float)v14) / (float)(trans[2] - (float)v14));
-        XAnimSetGoalWeight(ServerDObj, ChildAt, v41, 0.0, 1.0, 0, 0, 0);
-        v42 = XAnimGetChildAt(Anims, turretAnim, NumChildren - v18);
-        XAnimSetGoalWeight(ServerDObj, v42, (float)((float)1.0 - (float)v41), 0.0, 1.0, 0, 0, 0);
-        v46 = XAnimGetChildAt(Anims, v42, v12);
-        XAnimSetGoalWeight(ServerDObj, v46, (float)((float)1.0 - (float)v15), 0.0, 1.0, 0, 0, 0);
-        if (v15 != 0.0)
-        {
-            v50 = XAnimGetChildAt(Anims, v42, v12 + 1);
-            XAnimSetGoalWeight(ServerDObj, v50, v15, 0.0, 1.0, 0, 0, 0);
-        }
-        v54 = (float *)v80;
-        goto LABEL_60;
-    }
-    v61 = G_DObjGetLocalTagMatrix(v34, v84->tag_aim);
-    v62 = v61;
-    if (!v61)
-    {
-        Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_aim' does not exist\n");
-        Actor_StopUseTurret(self);
-        Actor_SetState(self, AIS_EXPOSED);
-        return ACTOR_THINK_REPEAT;
-    }
-    v63 = pTurretInfo->flags;
-    if ((v63 & 0x20) != 0
-        && pTurretInfo->originError[0] == 0.0
-        && pTurretInfo->originError[1] == 0.0
-        && pTurretInfo->originError[2] == 0.0)
-    {
-        v54 = (float *)v80;
-        v90 = Vec2Distance(v80->trans, v61->trans);
-        v91 = v54[6] - v62->trans[2];
-        v88 = v90;
-        v89 = (float)(ent->tagInfo->axis[3][2] - trans[2]) - v62->trans[2];
-        Vec2Normalize(dirTurret);
-        Vec2Normalize(dirEnt);
-        *(double *)&v64 = (float)((float)(v89 * v91) + (float)(v88 * v90));
-        if (*(double *)&v64 >= 0.0)
-        {
-            if (*(double *)&v64 <= 1.0)
-            {
-                v66 = acos(v64);
-                v65 = (float)((float)*(double *)&v66 * (float)57.295776);
-            }
-            else
-            {
-                v65 = 0.0;
+                pTurretInfo->pitchCap += 0.1f;
+                clearPitchCap = (pTurretInfo->pitchCap >= pTurretInfo->arcmax[0]);
             }
         }
         else
         {
-            v65 = 90.0;
+            clearPitchCap = false;
         }
-        UnitQuatToAngles(v62->quat, (float *)&v95);
-        v67 = *(float *)&v95;
-        if (*(float *)&v95 > 180.0)
-            v67 = (float)(*(float *)&v95 - (float)360.0);
-        if (v65 < 0.0)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 360, 0, "%s", "animPitchError >= 0");
-        v68 = pTurretInfo->flags;
-        if (v18)
+        if (clearPitchCap)
+            pTurretInfo->flags = flags & ~0x200;
+
+        iassert((trans[2] - fPrevZ) != 0.0f);
+        float fPitchFrac = (fDesiredZ - fPrevZ) / (trans[2] - fPrevZ);
+        XAnimSetGoalWeight(serverDObj, pitchAnim, fPitchFrac, 0.0f, 1.0f, 0, 0, 0);
+
+        unsigned int prevPitchAnim = XAnimGetChildAt(anims, turretAnim, numPitchAnims - iPitchStep);
+        XAnimSetGoalWeight(serverDObj, prevPitchAnim, 1.0f - fPitchFrac, 0.0f, 1.0f, 0, 0, 0);
+
+        unsigned int prevYawAnim0 = XAnimGetChildAt(anims, prevPitchAnim, iPrevYawIdx);
+        XAnimSetGoalWeight(serverDObj, prevYawAnim0, 1.0f - fPrevYawFrac, 0.0f, 1.0f, 0, 0, 0);
+        if (fPrevYawFrac != 0.0f)
         {
-            v69 = v68 | 0x600;
-            pTurretInfo->pitchCap = (float)v67 + (float)v65;
+            unsigned int prevYawAnim1 = XAnimGetChildAt(anims, prevPitchAnim, iPrevYawIdx + 1);
+            XAnimSetGoalWeight(serverDObj, prevYawAnim1, fPrevYawFrac, 0.0f, 1.0f, 0, 0, 0);
+        }
+    }
+    else
+    {
+        // Desired pitch is past the top (iPitchStep == 0) or bottom (== numPitchAnims) of
+        // the animated range: measure the overshoot and push the pitch cap out by it.
+        DObjAnimMat *tagAimMtx = G_DObjGetLocalTagMatrix(pTurret, scr_const.tag_aim);
+        if (!tagAimMtx)
+        {
+            Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_aim' does not exist\n");
+            Actor_StopUseTurret(self);
+            Actor_SetState(self, AIS_EXPOSED);
+            return ACTOR_THINK_REPEAT;
+        }
+
+        int flags = pTurretInfo->flags;
+        if ((flags & 0x20) != 0
+            && pTurretInfo->originError[0] == 0.0f
+            && pTurretInfo->originError[1] == 0.0f
+            && pTurretInfo->originError[2] == 0.0f)
+        {
+            // Angle between the weapon->aim direction and the weapon->target direction.
+            float dirTurret[2];
+            dirTurret[0] = Vec2Distance(tagWeaponMtx->trans, tagAimMtx->trans);
+            dirTurret[1] = tagWeaponMtx->trans[2] - tagAimMtx->trans[2];
+
+            float dirEnt[2];
+            dirEnt[0] = dirTurret[0];
+            dirEnt[1] = (ent->tagInfo->axis[3][2] - trans[2]) - tagAimMtx->trans[2];
+
+            Vec2Normalize(dirTurret);
+            Vec2Normalize(dirEnt);
+
+            float cosPitchError = dirEnt[1] * dirTurret[1] + dirEnt[0] * dirTurret[0];
+            float fAnimPitchError;
+            if (cosPitchError < 0.0f)
+                fAnimPitchError = 90.0f;
+            else if (cosPitchError > 1.0f)
+                fAnimPitchError = 0.0f;
+            else
+                fAnimPitchError = (float)(acos(cosPitchError) * 57.295776);
+
+            float aimAngles[3];
+            UnitQuatToAngles(tagAimMtx->quat, aimAngles);
+            float fAimPitch = aimAngles[0];
+            if (fAimPitch > 180.0f)
+                fAimPitch -= 360.0f;
+
+            iassert(fAnimPitchError >= 0.0f);
+
+            if (iPitchStep)   // overshot the bottom: cap rises above the target
+            {
+                pTurretInfo->flags    = flags | 0x600;
+                pTurretInfo->pitchCap = fAimPitch + fAnimPitchError;
+            }
+            else              // overshot the top: cap drops below the target
+            {
+                pTurretInfo->flags    = (flags & ~0x600) | 0x200;
+                pTurretInfo->pitchCap = fAimPitch - fAnimPitchError;
+            }
         }
         else
         {
-            v69 = v68 & 0xFFFFF9FF | 0x200;
-            pTurretInfo->pitchCap = (float)v67 - (float)v65;
+            pTurretInfo->flags = flags & ~0x200;
         }
+
+        self->pszDebugInfo = (pTurretInfo->flags & 2) ? "auto_turret EXCEEDED ANIM PITCH"
+                                                      : "manual_turret EXCEEDED ANIM PITCH";
+        XAnimSetGoalWeight(serverDObj, pitchAnim, 1.0f, 0.0f, 1.0f, 0, 0, 0);
     }
-    else
+
+    // --- Resolve the AI's world origin/angles from the blended turret delta ---
+    XAnimCalcAbsDelta(serverDObj, turretAnim, rot, trans);
+    VectorAngleMultiply(trans, fTurretYaw);
+
+    // animMat: the gun-delta transform expressed in the turret's local frame.
+    float animMat[4][3];
+    animMat[3][0] = tagWeaponMtx->trans[0] + trans[0];
+    animMat[3][1] = tagWeaponMtx->trans[1] + trans[1];
+    animMat[3][2] = tagWeaponMtx->trans[2] + trans[2];
+    // NOTE: the IDA writes the rotation into this matrix; the prior port wrote it through
+    // an uninitialized pointer (v56). Target animMat's 3x3 rotation.
+    YawToAxis(RotationToYaw(rot) + fTurretYaw, (mat3x3&)animMat);
+
+    // turretMat: the turret's world transform.
+    float turretMat[4][3];
+    AnglesToAxis(pTurret->r.currentAngles, (float (*)[3])turretMat);
+    turretMat[3][0] = pTurret->r.currentOrigin[0];
+    turretMat[3][1] = pTurret->r.currentOrigin[1];
+    turretMat[3][2] = pTurret->r.currentOrigin[2];
+
+    float worldMat[4][3];
+    MatrixMultiply43((const mat4x3&)animMat, (const mat4x3&)turretMat, (mat4x3&)worldMat);
+
+    float newAngles[3];
+    AxisToAngles((const mat3x3&)worldMat, newAngles);
+
+    float newOrigin[3];
+    newOrigin[0] = worldMat[3][0];
+    newOrigin[1] = worldMat[3][1];
+    newOrigin[2] = worldMat[3][2];
+
+    // On the first think after mounting, seed the origin/angle error so the AI eases into
+    // the computed pose instead of snapping (unless the level is still loading).
+    if ((pTurretInfo->flags & 0x20) == 0)
     {
-        v54 = (float *)v80;
-        v69 = v63 & 0xFFFFFDFF;
-    }
-    pTurretInfo->flags = v69;
-    if ((v69 & 2) != 0)
-        v70 = "auto_turret EXCEEDED ANIM PITCH";
-    else
-        v70 = "manual_turret EXCEEDED ANIM PITCH";
-    self->pszDebugInfo = v70;
-    XAnimSetGoalWeight(ServerDObj, ChildAt, 1.0, 0.0, 1.0, 0, 0, 0);
-LABEL_60:
-    XAnimCalcAbsDelta(ServerDObj, turretAnim, v93, trans);
-    VectorAngleMultiply(trans, v7);
-    v100[9] = v54[4] + trans[0];
-    v100[10] = v54[5] + trans[1];
-    v100[11] = v54[6] + trans[2];
-    v55 = RotationToYaw(v93);
-    YawToAxis((float)((float)v55 + (float)v7), (mat3x3&)v56);
-    AnglesToAxis(v34->r.currentAngles, (float (*)[3])v101);
-    v101[9] = v34->r.currentOrigin[0];
-    v101[10] = v34->r.currentOrigin[1];
-    v101[11] = v34->r.currentOrigin[2];
-    MatrixMultiply43((const mat4x3&)v100, (const mat4x3&)v101, (mat4x3&)v102);
-    AxisToAngles((const mat3x3&)v102, anglesNew);
-    v81 = v102[9];
-    v82 = v102[10];
-    v83 = v102[11];
-    v57 = pTurretInfo->flags;
-    if ((v57 & 0x20) == 0)
-    {
-        pTurretInfo->flags = v57 | 0x20;
+        pTurretInfo->flags |= 0x20;
         if (level.loading == LOADING_LEVEL)
         {
-            v81 = ent->r.currentOrigin[0];
-            v82 = ent->r.currentOrigin[1];
-            v83 = ent->r.currentOrigin[2];
-            v85 = ent->r.currentAngles[0];
-            v86 = ent->r.currentAngles[1];
-            v87 = ent->r.currentAngles[2];
-            pTurretInfo->originError[0] = 0.0;
-            pTurretInfo->originError[1] = 0.0;
-            pTurretInfo->originError[2] = 0.0;
-            pTurretInfo->anglesError[0] = 0.0;
-            pTurretInfo->anglesError[1] = 0.0;
-            pTurretInfo->anglesError[2] = 0.0;
+            Vec3Copy(ent->r.currentOrigin, newOrigin);
+            Vec3Copy(ent->r.currentAngles, newAngles);
+            Vec3Clear(pTurretInfo->originError);
+            Vec3Clear(pTurretInfo->anglesError);
         }
         else
         {
-            pTurretInfo->originError[0] = ent->r.currentOrigin[0] - v81;
-            pTurretInfo->originError[1] = ent->r.currentOrigin[1] - v82;
-            pTurretInfo->originError[2] = ent->r.currentOrigin[2] - v83;
-            AnglesSubtract(ent->r.currentAngles, anglesNew, pTurretInfo->anglesError);
+            pTurretInfo->originError[0] = ent->r.currentOrigin[0] - newOrigin[0];
+            pTurretInfo->originError[1] = ent->r.currentOrigin[1] - newOrigin[1];
+            pTurretInfo->originError[2] = ent->r.currentOrigin[2] - newOrigin[2];
+            AnglesSubtract(ent->r.currentAngles, newAngles, pTurretInfo->anglesError);
         }
     }
-    G_ReduceOriginError(originDelta, pTurretInfo->originError, 3.0);
-    G_ReduceAnglesError(anglesNew, pTurretInfo->anglesError, 27.0);
-    ent->r.currentAngles[0] = v85;
-    ent->r.currentAngles[1] = v86;
-    ent->r.currentAngles[2] = v87;
+
+    G_ReduceOriginError(newOrigin, pTurretInfo->originError, 3.0);
+    G_ReduceAnglesError(newAngles, pTurretInfo->anglesError, 27.0);
+
+    Vec3Copy(newAngles, ent->r.currentAngles);
+
     Actor_SetDesiredAngles(&self->CodeOrient, ent->r.currentAngles[0], ent->r.currentAngles[1]);
     Actor_SetLookAngles(self, ent->r.currentAngles[0], ent->r.currentAngles[1]);
-    if (v34->tagInfo)
+
+    if (pTurret->tagInfo)
     {
-        ent->r.currentOrigin[0] = v81;
-        ent->r.currentOrigin[1] = v82;
-        ent->r.currentOrigin[2] = v83;
+        // Turret is mounted on another entity: just place the AI, no physics move.
+        Vec3Copy(newOrigin, ent->r.currentOrigin);
         G_CalcTagAxis(ent, 1);
-        goto success;
+        Vec3Clear(self->Physics.vVelocity);
+        Vec3Clear(self->Physics.vWishDelta);
+        return ACTOR_THINK_DONE;
     }
+
+    // Free-standing turret: physically move the AI toward the computed origin.
     self->Physics.ePhysicsType = AIPHYS_NORMAL_ABSOLUTE;
-    self->Physics.vWishDelta[0] = v81 - ent->r.currentOrigin[0];
-    self->Physics.vWishDelta[1] = v82 - ent->r.currentOrigin[1];
-    self->Physics.vWishDelta[2] = 0.0;
+    self->Physics.vWishDelta[0] = newOrigin[0] - ent->r.currentOrigin[0];
+    self->Physics.vWishDelta[1] = newOrigin[1] - ent->r.currentOrigin[1];
+    self->Physics.vWishDelta[2] = 0.0f;
     Actor_DoMove(self);
     G_TouchEnts(ent, self->Physics.iNumTouch, self->Physics.iTouchEnts);
     G_CalcTagAxis(ent, 0);
-    iHitEntnum = self->Physics.iHitEntnum;
+
+    int iHitEntnum = self->Physics.iHitEntnum;
     if (iHitEntnum == ENTITYNUM_NONE)
-        goto success;
-    if (level.time - self->iStateTime < 1000)
-        goto success;
-    v72 = v34->s.lerp.u.turret.gunAngles[0];
-    if (v72 > pTurretInfo->arcmax[0])
-        goto success;
-    if (v72 < pTurretInfo->arcmin[0])
-        goto success;
-    v73 = v34->s.lerp.u.turret.gunAngles[1];
-    if (v73 > pTurretInfo->arcmax[1]
-        || v73 < pTurretInfo->arcmin[1]
-        || pTurretInfo->originError[0] != 0.0
-        || pTurretInfo->originError[1] != 0.0
-        || pTurretInfo->originError[2] != 0.0
-        || pTurretInfo->anglesError[0] != 0.0
-        || pTurretInfo->anglesError[1] != 0.0
-        || pTurretInfo->anglesError[2] != 0.0)
     {
-        goto success;
+        Vec3Clear(self->Physics.vVelocity);
+        Vec3Clear(self->Physics.vWishDelta);
+        return ACTOR_THINK_DONE;
     }
-    v74 = &level.gentities[iHitEntnum];
-    if (!v74->sentient)
+    if (level.time - self->iStateTime < 1000)
     {
-        if (v73 < 0.0)
+        Vec3Clear(self->Physics.vVelocity);
+        Vec3Clear(self->Physics.vWishDelta);
+        return ACTOR_THINK_DONE;
+    }
+
+    // Only react to an obstruction once the gun is settled inside its arc.
+    float fGunPitch = pTurret->s.lerp.u.turret.gunAngles[0];
+    if (fGunPitch > pTurretInfo->arcmax[0] || fGunPitch < pTurretInfo->arcmin[0])
+    {
+        Vec3Clear(self->Physics.vVelocity);
+        Vec3Clear(self->Physics.vWishDelta);
+        return ACTOR_THINK_DONE;
+    }
+
+    float fGunYaw = pTurret->s.lerp.u.turret.gunAngles[1];
+    if (fGunYaw > pTurretInfo->arcmax[1]
+        || fGunYaw < pTurretInfo->arcmin[1]
+        || pTurretInfo->originError[0] != 0.0f
+        || pTurretInfo->originError[1] != 0.0f
+        || pTurretInfo->originError[2] != 0.0f
+        || pTurretInfo->anglesError[0] != 0.0f
+        || pTurretInfo->anglesError[1] != 0.0f
+        || pTurretInfo->anglesError[2] != 0.0f)
+    {
+        Vec3Clear(self->Physics.vVelocity);
+        Vec3Clear(self->Physics.vWishDelta);
+        return ACTOR_THINK_DONE;
+    }
+
+    gentity_s *pHitEnt = &level.gentities[iHitEntnum];
+    if (!pHitEnt->sentient)
+    {
+        // Wedged against a non-living obstruction while traversing: shrink the arc toward
+        // it, and detach from the turret once that side of the arc has fully collapsed.
+        if (fGunYaw < 0.0f)
         {
-            v76 = (float)(pTurretInfo->arcmin[1] + (float)1.0);
-            pTurretInfo->arcmin[1] = pTurretInfo->arcmin[1] + (float)1.0;
-            if (v76 <= 0.0)
+            pTurretInfo->arcmin[1] += 1.0f;
+            if (pTurretInfo->arcmin[1] <= 0.0f)
             {
-                Com_PrintWarning(
-                    18,
-                    "WARNING: capping rightarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
-                    v34->r.currentOrigin[0],
-                    v34->r.currentOrigin[1],
-                    v34->r.currentOrigin[2],
-                    -v76);
-                goto success;
+                Com_PrintWarning(18, "WARNING: capping rightarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
+                    pTurret->r.currentOrigin[0], pTurret->r.currentOrigin[1], pTurret->r.currentOrigin[2],
+                    -pTurretInfo->arcmin[1]);
+                Vec3Clear(self->Physics.vVelocity);
+                Vec3Clear(self->Physics.vWishDelta);
+                return ACTOR_THINK_DONE;
             }
-            pTurretInfo->arcmin[1] = 0.0;
+            pTurretInfo->arcmin[1] = 0.0f;
         }
         else
         {
-            v75 = (float)(pTurretInfo->arcmax[1] - (float)1.0);
-            pTurretInfo->arcmax[1] = pTurretInfo->arcmax[1] - (float)1.0;
-            if (v75 >= 0.0)
+            pTurretInfo->arcmax[1] -= 1.0f;
+            if (pTurretInfo->arcmax[1] >= 0.0f)
             {
-                Com_PrintWarning(
-                    18,
-                    "WARNING: capping leftarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
-                    v34->r.currentOrigin[0],
-                    v34->r.currentOrigin[1],
-                    v34->r.currentOrigin[2],
-                    v75);
-            success:
-                self->Physics.vVelocity[0] = 0.0;
-                result = ACTOR_THINK_DONE;
-                self->Physics.vVelocity[1] = 0.0;
-                self->Physics.vVelocity[2] = 0.0;
-                self->Physics.vWishDelta[0] = 0.0;
-                self->Physics.vWishDelta[1] = 0.0;
-                self->Physics.vWishDelta[2] = 0.0;
-                return result;
+                Com_PrintWarning(18, "WARNING: capping leftarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
+                    pTurret->r.currentOrigin[0], pTurret->r.currentOrigin[1], pTurret->r.currentOrigin[2],
+                    pTurretInfo->arcmax[1]);
+                Vec3Clear(self->Physics.vVelocity);
+                Vec3Clear(self->Physics.vWishDelta);
+                return ACTOR_THINK_DONE;
             }
-            pTurretInfo->arcmax[1] = 0.0;
+            pTurretInfo->arcmax[1] = 0.0f;
         }
-        Com_PrintWarning(
-            18,
+
+        Com_PrintWarning(18,
             "WARNING: AI %d at (%.2f, %.2f, %.2f) with turret angles (%.2f, %.2f) detaching from turret due to obstruction\n",
-            0, // KISAKTODO: number
-            self->ent->r.currentOrigin[0],
-            self->ent->r.currentOrigin[1],
-            self->ent->r.currentOrigin[2],
-            v34->s.lerp.u.turret.gunAngles[0],
-            v34->s.lerp.u.turret.gunAngles[2]);
+            self->ent->s.number,
+            self->ent->r.currentOrigin[0], self->ent->r.currentOrigin[1], self->ent->r.currentOrigin[2],
+            pTurret->s.lerp.u.turret.gunAngles[0], pTurret->s.lerp.u.turret.gunAngles[1]);
     }
+
     Actor_StopUseTurret(self);
-    if (v74->client)
+    if (pHitEnt->client)
     {
-        if (((1 << v74->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(self->ent->sentient->eTeam))) != 0)
+        if (((1 << pHitEnt->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(self->ent->sentient->eTeam))) != 0)
         {
-            Scr_AddEntity(v74);
-            Scr_Notify(self->ent, v84->trigger, 1u);
+            Scr_AddEntity(pHitEnt);
+            Scr_Notify(self->ent, scr_const.trigger, 1u);
         }
     }
     Actor_SetState(self, AIS_EXPOSED);

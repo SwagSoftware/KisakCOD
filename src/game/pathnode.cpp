@@ -111,7 +111,7 @@ int __cdecl NodeTypeCanHavePriority(nodeType type)
 void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float *angleMax)
 {
     int turretEntNumber; // r11
-    gentity_s *v7; // r29
+    gentity_s *ent; // r29
 
     iassert(node);
     iassert(angleMin);
@@ -122,11 +122,10 @@ void __cdecl TurretNode_GetAngles(const pathnode_t *node, float *angleMin, float
     if (turretEntNumber >= 0)
     {
         iassert(node->dynamic.turretEntNumber < MAX_GENTITIES);
-        v7 = &g_entities[node->dynamic.turretEntNumber];
-        if (!v7->pTurretInfo)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 527, 0, "%s", "ent->pTurretInfo");
-        *angleMin = AngleNormalize360(v7->pTurretInfo->arcmin[1]);
-        *angleMax = AngleNormalize360(v7->pTurretInfo->arcmax[1]);
+        ent = &g_entities[node->dynamic.turretEntNumber];
+        iassert(ent->pTurretInfo);
+        *angleMin = AngleNormalize360(ent->pTurretInfo->arcmin[1]);
+        *angleMax = AngleNormalize360(ent->pTurretInfo->arcmax[1]);
     }
     else
     {
@@ -200,24 +199,10 @@ void __cdecl Path_GetType(pathnode_t *node, int offset)
 
 void __cdecl Scr_SetPathnodeField(unsigned int entnum, unsigned int offset)
 {
-    const char *v4; // r3
+    iassert((unsigned)offset < ARRAY_COUNT(fields_3) - 1);
+    iassert((unsigned)entnum < PATH_MAX_NODES);
 
-    if (offset >= 0xB)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            584,
-            0,
-            "%s",
-            "(unsigned)offset < ARRAY_COUNT( fields ) - 1");
-    if (entnum >= 0x2000)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            585,
-            0,
-            "%s",
-            "(unsigned)entnum < PATH_MAX_NODES");
-    v4 = va("pathnode property '%s' is read-only", fields_3[offset].name);
-    Scr_Error(v4);
+    Scr_Error(va("pathnode property '%s' is read-only", fields_3[offset].name));
 }
 
 void __cdecl Scr_GetPathnodeField(unsigned int entnum, unsigned int offset)
@@ -285,30 +270,29 @@ void __cdecl PathNode_UpdateStringField(
 
 void __cdecl PathNode_UpdateFloatField(const char *destKey, float *destFloat, const char *key, const char *value)
 {
-    float v8; // [sp+50h] [-40h] BYREF
+    float floatValue; // [sp+50h] [-40h] BYREF
 
-    if (!key)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 705, 0, "%s", "key");
-    if (!destKey)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp", 706, 0, "%s", "destKey");
+    iassert(key);
+    iassert(destKey);
+
     if (!I_stricmp(key, destKey))
     {
-        if (sscanf(value, "%f", &v8) != 1)
+        if (sscanf(value, "%f", &floatValue) != 1)
             Com_Error(ERR_DROP, "Malformed '%s' float field for node '%s'\n", key, value);
-        *destFloat = v8;
+        *destFloat = floatValue;
     }
 }
 
 void __cdecl PathNode_OriginMatches(const char *value, const float *nodeOrigin)
 {
-    float v4; // [sp+50h] [-30h] BYREF
-    float v5; // [sp+54h] [-2Ch] BYREF
-    float v6; // [sp+58h] [-28h] BYREF
+    float x; // [sp+50h] [-30h] BYREF
+    float y; // [sp+54h] [-2Ch] BYREF
+    float z; // [sp+58h] [-28h] BYREF
 
-    if (sscanf(value, "%f %f %f", &v4, &v5, &v6) != 3)
+    if (sscanf(value, "%f %f %f", &x, &y, &z) != 3)
         Com_Error(ERR_DROP, "Malformed origin for path node '%s'\n", value);
 
-    if (v4 != *nodeOrigin || v5 != nodeOrigin[1])
+    if (x != nodeOrigin[0] || y != nodeOrigin[1])
         ++g_path.originErrors;
 }
 
@@ -322,8 +306,6 @@ void __cdecl node_droptofloor(pathnode_t *node)
     float startpos[3];
 
     trace_t tr; // [sp+90h] [-70h] BYREF
-
-    memset(&tr, 0, sizeof(trace_t));
 
     vEnd[0] = node->constant.vOrigin[0];
     vEnd[1] = node->constant.vOrigin[1];
@@ -345,7 +327,6 @@ void __cdecl node_droptofloor(pathnode_t *node)
 
     if (tr.startsolid || tr.allsolid)
     {
-    LABEL_8:
         Com_PrintError(
             1,
             "ERROR: Pathnode (%s) at (%g %g %g) is in solid\n",
@@ -354,24 +335,32 @@ void __cdecl node_droptofloor(pathnode_t *node)
             node->constant.vOrigin[1],
             node->constant.vOrigin[2]
         );
-        goto LABEL_9;
+        node->constant.type = NODE_BADNODE;
+        return;
     }
+
     if (tr.fraction != 1.0)
     {
         Vec3Lerp(startpos, endpos, tr.fraction, startpos);
-        //start[0] = (float)((float)(end - start) * tr.fraction) + start[0];
-        //start[1] = (float)((float)(end[1] - start[1]) * tr.fraction) + start[1];
-        //start[2] = (float)((float)(end[2] - start[2]) * tr.fraction) + start[2];
+
         G_TraceCapsule(&tr, startpos, actorMins, actorMaxs, startpos, ENTITYNUM_NONE, 8519697);
         if (!tr.startsolid && !tr.allsolid)
         {
-            node->constant.vOrigin[0] = startpos[0];
-            node->constant.vOrigin[1] = startpos[1];
-            node->constant.vOrigin[2] = startpos[2];
+            Vec3Copy(startpos, node->constant.vOrigin);
             return;
         }
-        goto LABEL_8;
+        Com_PrintError(
+            1,
+            "ERROR: Pathnode (%s) at (%g %g %g) is in solid\n",
+            nodeStringTable[node->constant.type],
+            node->constant.vOrigin[0],
+            node->constant.vOrigin[1],
+            node->constant.vOrigin[2]
+        );
+        node->constant.type = NODE_BADNODE;
+        return;
     }
+
     Com_PrintError(
         1,
         "ERROR: Pathnode (%s) at (%g %g %g) is floating\n",
@@ -380,7 +369,6 @@ void __cdecl node_droptofloor(pathnode_t *node)
         node->constant.vOrigin[1],
         node->constant.vOrigin[2]
     );
-LABEL_9:
     node->constant.type = NODE_BADNODE;
 }
 
@@ -415,26 +403,10 @@ void __cdecl G_UpdateTrackExtraNodes()
 
 void __cdecl GScr_AddFieldsForPathnode()
 {
-    node_field_t *v0; // r30
-    int v1; // r29
-
-    v0 = fields_3;
-    if (fields_3[0].name)
+    for (node_field_t *f = fields_3; f->name; ++f)
     {
-        v1 = 0;
-        do
-        {
-            if (v1 >> 4 != (unsigned __int16)(v1 >> 4))
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-                    977,
-                    0,
-                    "%s",
-                    "(f - fields) == (unsigned short)( f - fields )");
-            Scr_AddClassField(2u, (char*)v0->name, (unsigned __int16)(v1 >> 4));
-            ++v0;
-            v1 += 16;
-        } while (v0->name);
+        iassert((f - fields_3) == (unsigned short)(f - fields_3));
+        Scr_AddClassField(2, (char *)f->name, (unsigned __int16)(f - fields_3));
     }
 }
 
@@ -604,9 +576,9 @@ void __cdecl Path_NodesInCylinder_r(pathnode_tree_t *tree)
 }
 
 int __cdecl Path_NodesInCylinder(
-    float *origin,
-    double maxDist,
-    double maxHeight,
+    const float *origin,
+    float maxDist,
+    float maxHeight,
     pathsort_t *nodes,
     int maxNodes,
     int typeFlags)
@@ -762,7 +734,7 @@ void Path_InitLinkInfoArray()
     unsigned __int16 v1; // r10
     int v2; // r9
     unsigned __int16 v3; // r10
-
+    
     g_path.pathLinkInfoArrayInited = 1;
     for (i = 0; i < 2048; ++i)
     {
@@ -3038,93 +3010,49 @@ void __cdecl GScr_SetDynamicPathnodeField(pathnode_t *node, unsigned int index)
     Scr_SetDynamicEntityField(v3, 2u, index);
 }
 
+static void __cdecl G_InitPathBaseNode(pathbasenode_t *pbnode, const pathnode_t *pnode)
+{
+    pbnode->vOrigin[0] = pnode->constant.vOrigin[0];
+    pbnode->vOrigin[1] = pnode->constant.vOrigin[1];
+    pbnode->vOrigin[2] = pnode->constant.vOrigin[2];
+    pbnode->type = 1 << pnode->constant.type;
+    if ((pnode->constant.spawnflags & 1) != 0)
+        pbnode->type |= 0x100000u;
+}
+
+static void __cdecl G_DropPathNodeToFloor(unsigned int nodeIndex)
+{
+    node_droptofloor(&gameWorldSp.path.nodes[nodeIndex]);
+    G_InitPathBaseNode(&gameWorldSp.path.basenodes[nodeIndex], &gameWorldSp.path.nodes[nodeIndex]);
+}
+
 void __cdecl G_DropPathnodesToFloor()
 {
-    int v0; // r7
-    int num_entities; // r8
-    int v2; // r10
-    int *v3; // r9
-    gentity_s *v4; // r11
-    int v5; // r5
-    unsigned int v6; // r27
-    int v7; // r29
-    int v8; // r30
-    pathnode_t *v9; // r11
-    pathbasenode_t *v10; // r10
-    int v11; // r7
-    int v12; // r10
-    int *v13; // r9
-    _BYTE v14[576]; // [sp+50h] [-2240h] BYREF
+    unsigned int backupEntContents[MAX_GENTITIES]; // [esp+Ch] [ebp-1008h]
 
-    if (g_path.actualNodeCount > gameWorldSp.path.nodeCount)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\pathnode.cpp",
-            855,
-            0,
-            "%s",
-            "g_path.actualNodeCount <= gameWorldSp.path.nodeCount");
-    v0 = 0;
-    num_entities = level.num_entities;
-    if (level.num_entities > 0)
+    iassert(g_path.actualNodeCount <= gameWorldSp.path.nodeCount);
+
+    for (int i = 0; i < level.num_entities; ++i)
     {
-        v2 = 0;
-        v3 = (int *)v14;
-        do
+        gentity_s *ent = &level.gentities[i];
+        if (ent->r.inuse)
         {
-            v4 = &level.gentities[v2];
-            if (level.gentities[v2].r.inuse)
-            {
-                v5 = v4->flags & 0x100;
-                *v3 = v4->r.contents;
-                if (v5)
-                {
-                    v4->r.contents = 0;
-                    num_entities = level.num_entities;
-                }
-            }
-            ++v0;
-            ++v2;
-            ++v3;
-        } while (v0 < num_entities);
+            backupEntContents[i] = ent->r.contents;
+            if (Path_IsDynamicBlockingEntity(ent))
+                ent->r.contents = 0;
+        }
     }
-    v6 = 0;
-    if (gameWorldSp.path.nodeCount)
+
+    for (unsigned int nodeIndex = 0; nodeIndex < gameWorldSp.path.nodeCount; ++nodeIndex)
     {
-        v7 = 0;
-        v8 = 0;
-        do
-        {
-            node_droptofloor(&gameWorldSp.path.nodes[v8]);
-            v9 = &gameWorldSp.path.nodes[v8];
-            v10 = &gameWorldSp.path.basenodes[v7];
-            v10->vOrigin[0] = gameWorldSp.path.nodes[v8].constant.vOrigin[0];
-            v10->vOrigin[1] = v9->constant.vOrigin[1];
-            v10->vOrigin[2] = v9->constant.vOrigin[2];
-            gameWorldSp.path.basenodes[v7].type = 1 << gameWorldSp.path.nodes[v8].constant.type;
-            if ((gameWorldSp.path.nodes[v8].constant.spawnflags & 1) != 0)
-                gameWorldSp.path.basenodes[v7].type |= 0x100000u;
-            ++v6;
-            ++v8;
-            ++v7;
-        } while (v6 < gameWorldSp.path.nodeCount);
-        num_entities = level.num_entities;
+        G_DropPathNodeToFloor(nodeIndex);
     }
-    v11 = 0;
-    if (num_entities > 0)
+
+    for (int i = 0; i < level.num_entities; ++i)
     {
-        v12 = 0;
-        v13 = (int *)v14;
-        do
-        {
-            if (level.gentities[v12].r.inuse)
-            {
-                level.gentities[v12].r.contents = *v13;
-                num_entities = level.num_entities;
-            }
-            ++v11;
-            ++v12;
-            ++v13;
-        } while (v11 < num_entities);
+        gentity_s *ent = &level.gentities[i];
+        if (ent->r.inuse)
+            ent->r.contents = backupEntContents[i];
     }
 }
 
@@ -4167,29 +4095,14 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     int maxNodes,
     nearestNodeHeightCheck heightCheck)
 {
-    int v39; // r5
-    pathsort_t *v40; // r4
     const float *pOrigin; // r3
-    double maxHeight; // fp2
+    float maxHeight; // fp2
     int numNodes; // r28
-    int v44; // r24
-    int v45; // r25
-    pathnode_t **v46; // r23
+
     pathnode_t *node; // r29
-    double v48; // fp13
-    double v49; // fp13
-    double v50; // fp13
-    int v51; // r9
-    int v52; // r10
-    const float *v53; // r11
-    int v54; // r30
-    unsigned int *v55; // r31
-    const float *v56; // r7
-    int v58[2]; // [sp+50h] [-4C0h] BYREF
     float mins[3]; // [sp+58h] [-4B8h] BYREF
     float maxs[3]; // [sp+68h] [-4A8h] BYREF
-    float v61[6]; // [sp+78h] [-498h] BYREF
-    unsigned int v62[256]; // [sp+90h] [-480h] BYREF
+    float loweredOrigin[3]; // [sp+78h] [-498h] BYREF
 
     //Profile_Begin(232);
     if (heightCheck)
@@ -4199,21 +4112,16 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     }
     else
     {
-        v61[0] = vOrigin[0];
-        v61[1] = vOrigin[1];
-        v61[2] = vOrigin[2] - (float)120.0;
-        pOrigin = v61;
+        loweredOrigin[0] = vOrigin[0];
+        loweredOrigin[1] = vOrigin[1];
+        loweredOrigin[2] = vOrigin[2] - (float)120.0;
+        pOrigin = loweredOrigin;
         maxHeight = 184.0;
     }
-    numNodes = Path_NodesInCylinder((float*)pOrigin, fMaxDist, maxHeight, nodes, maxNodes, typeFlags);
-    //std::_Sort<pathsort_t *, int, bool(__cdecl *)(pathsort_t const &, pathsort_t const &)>(
-    //    nodes,
-    //    &nodes[(unsigned int)v43],
-    //    12 * (int)v43 / 12,
-    //    (bool(__cdecl *)(const pathsort_t *, const pathsort_t *))Path_CompareNodesIncreasing);
+
+    numNodes = Path_NodesInCylinder(pOrigin, fMaxDist, maxHeight, nodes, maxNodes, typeFlags);
+
     std::sort(nodes, &nodes[numNodes], Path_CompareNodesIncreasing);
-    v44 = 0;
-    v45 = 0;
 
     mins[0] = actorMins[0];
     mins[1] = actorMins[1];
@@ -4231,32 +4139,47 @@ pathnode_t *__cdecl Path_NearestNodeNotCrossPlanes(
     for (int i = 0; i < numNodes; i++)
     {
         pathnode_t *node = nodes[i].node;
-        if (node->dynamic.wLinkCount)
+
+        if (!node->dynamic.wLinkCount)
         {
-            if (vOrigin[0] > ((node->constant.vOrigin[0] + -15.0f) - 1.0f) && vOrigin[0] < ((node->constant.vOrigin[0] + 15.0f) + 1.0f) &&
-                vOrigin[1] > ((node->constant.vOrigin[1] + -15.0f) - 1.0f) && vOrigin[1] < ((node->constant.vOrigin[1] + 15.0f) + 1.0f) &&
-                vOrigin[2] > ((node->constant.vOrigin[2] + 0.0f) - 1.0f) && vOrigin[2] < ((node->constant.vOrigin[2] + 72.0f) + 1.0f)
-                )
-            {
-                return node;
-            }
-
-            for (int j = 0; j < iPlaneCount; j++)
-            {
-                if ((node->constant.vOrigin[0] * (*vNormal)[2 * j]) + (node->constant.vOrigin[1] * (*vNormal)[2 * j + 1]) > fDist[j])
-                {
-                    goto failed_node;
-                }
-            }
-
+            failedNodes[failedNodeCount++] = node;   // no-link -> defer to LOS fallback (IDA goto failed_node)
+            continue;
         }
-        else
+
+        if (vOrigin[0] > ((node->constant.vOrigin[0] + -15.0f) - 1.0f) && vOrigin[0] < ((node->constant.vOrigin[0] + 15.0f) + 1.0f) &&
+            vOrigin[1] > ((node->constant.vOrigin[1] + -15.0f) - 1.0f) && vOrigin[1] < ((node->constant.vOrigin[1] + 15.0f) + 1.0f) &&
+            vOrigin[2] > ((node->constant.vOrigin[2] + 0.0f) - 1.0f) && vOrigin[2] < ((node->constant.vOrigin[2] + 72.0f) + 1.0f)
+            )
         {
-failed_node:
-            failedNodes[failedNodeCount++] = node;
+            return node;
+        }
+
+        bool crossesPlane = false;
+        for (int j = 0; j < iPlaneCount; j++)
+        {
+            if ((node->constant.vOrigin[0] * (*vNormal)[2 * j]) + (node->constant.vOrigin[1] * (*vNormal)[2 * j + 1]) > fDist[j])
+            {
+                crossesPlane = true;
+                break;
+            }
+        }
+        if (crossesPlane)
+        {
+            failedNodes[failedNodeCount++] = node;   // plane-crosser -> defer to LOS fallback (IDA goto failed_node)
+            continue;
+        }
+
+        // linked + passes all planes (always taken when iPlaneCount==0): inline LOS trace and
+        // return immediately if clear; if blocked, skip to next node (NOT added to fallback) — IDA LABEL_17.
+        {
+            int hitnum = 0;
+            SV_SightTrace(&hitnum, vOrigin, mins, maxs, node->constant.vOrigin, ENTITYNUM_NONE, ENTITYNUM_NONE, 8519697);
+            if (!hitnum)
+                return node;
         }
     }
 
+    // Fallback pass: LOS-test the deferred (no-link / plane-crosser) nodes, return first clear, else 0.
     for (int i = 0; i < failedNodeCount; i++)
     {
         int hitnum = 0;
@@ -4267,15 +4190,6 @@ failed_node:
         }
     }
 
-    // KISAKFIX: kisak port added a "closest node fallback" loop that's not in the
-    // CoD3SP IDA at 0x8227cb20 LABEL_23 (which simply returns 0). Worse, the kisak
-    // loop's `distSq < FLT_MAX` comparison is always true → just stores the LAST
-    // failedNode visited, not the closest. Callers that fall through to here got
-    // a JUNK seed for A* (often a far/unreachable node) → pathfinding chose
-    // nonsensically far nodes or pathed through occupied/banned regions. Match
-    // IDA: when no failedNode passes the sight trace, return 0. The kisak source
-    // comment "I think technically it is supposed to return 0 here" had the right
-    // intuition — restoring it.
     return 0;
 }
 

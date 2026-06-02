@@ -43,7 +43,7 @@ void __cdecl CG_ClearEntityCollWorld(int32_t localClientNum)
     //bcassert(localClientNum, STATIC_MAX_LOCAL_CLIENTS);
 
     memset((uint8_t *)&cgEntCollWorld[localClientNum], 0, sizeof(CgEntCollWorld));
-    memset((uint8_t *)cgEntCollNodes[localClientNum], 0, sizeof(CgEntCollNode[1024]));
+    memset((uint8_t *)cgEntCollNodes[localClientNum], 0, sizeof(cgEntCollNodes[localClientNum]));
 
     world = &cgEntCollWorld[localClientNum];
 

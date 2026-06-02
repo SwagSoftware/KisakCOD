@@ -8,6 +8,8 @@
 
 #define MAX_NODES_IN_BRUSH 0x200
 
+#define PATH_MAX_NODES 8192
+
 enum nearestNodeHeightCheck : __int32
 {
     NEAREST_NODE_DO_HEIGHT_CHECK = 0x0,
@@ -257,9 +259,9 @@ void __cdecl Path_NodesInCylinder_r(pathnode_tree_t *tree);
 
 // returns nodecount
 int __cdecl Path_NodesInCylinder(
-    float *origin,
-    double maxDist,
-    double maxHeight,
+    const float *origin,
+    float maxDist,
+    float maxHeight,
     pathsort_t *nodes,
     int maxNodes,
     int typeFlags);

@@ -196,7 +196,7 @@ void __cdecl CG_CheckPlayerstateEvents(int32_t localClientNum, playerState_s *ps
     v13[1] = v6;
     v13[2] = v7;
     v13[3] = v8;
-    iassert(localClientNum);
+    iassert(localClientNum == 0);
     v9 = ps->eventSequence - 4;
     v10 = v9 - eventSequence;
     v11 = eventSequence - v9;
