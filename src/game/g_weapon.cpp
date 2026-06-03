@@ -183,7 +183,7 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
     hitEntId = Trace_GetEntityHitId(&tr);
     traceEnt = &g_entities[hitEntId];
     if (ent->client && traceEnt->client)
-        G_AddEvent(ent, 0x25u, 0);
+        G_AddEvent(ent, EV_MELEE_BLOOD, 0);
     if (traceEnt->client)
         tent = G_TempEntity(endpos, 35);
     else

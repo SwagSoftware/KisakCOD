@@ -1394,7 +1394,7 @@ void __cdecl G_PlaySoundAlias(gentity_s *ent, uint8_t index)
     if (!ent)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 1760, 0, "%s", "ent");
     if (index)
-        G_AddEvent(ent, 3u, index);
+        G_AddEvent(ent, EV_SOUND_ALIAS, index);
 }
 
 int __cdecl G_AnimScriptSound(int client, snd_alias_list_t *aliasList)

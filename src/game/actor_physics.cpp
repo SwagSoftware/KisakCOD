@@ -740,7 +740,7 @@ void AIPhys_FoliageSounds(void)
             G_TraceCapsule(&tr, phys->vOrigin, mins, maxs, phys->vOrigin, phys->iEntNum, 2);
             if (tr.startsolid)
             {
-                G_AddEvent(&g_entities[phys->iEntNum], 1, 0);
+                G_AddEvent(&g_entities[phys->iEntNum], EV_FOLIAGE_SOUND, 0);
                 phys->foliageSoundTime = level.time;
             }
         }

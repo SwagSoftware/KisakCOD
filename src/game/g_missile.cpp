@@ -1015,11 +1015,11 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
         && !CheckCrumpleMissile(ent, trace))
     {
         if (BounceMissile(ent, trace) && !trace->startsolid)
-            G_AddEvent(ent, 0x2Cu, (trace->surfaceFlags & 0x1F00000) >> 20);
+            G_AddEvent(ent, EV_GRENADE_BOUNCE, (trace->surfaceFlags & 0x1F00000) >> 20);
         if (weapDef->iProjectileActivateDist > 0 && ent->s.lerp.pos.trType == TR_STATIONARY)
         {
             v4 = DirToByte(trace->normal);
-            G_AddEvent(ent, 0x33u, v4);
+            G_AddEvent(ent, EV_CHANGE_TO_DUD, v4);
             G_FreeEntityAfterEvent(ent);
         }
         return;
@@ -1096,7 +1096,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
             if (!CheckCrumpleMissile(ent, trace))
             {
                 if (BounceMissile(ent, trace) && !trace->startsolid)
-                    G_AddEvent(ent, 0x2Cu, (trace->surfaceFlags & 0x1F00000) >> 20);
+                    G_AddEvent(ent, EV_GRENADE_BOUNCE, (trace->surfaceFlags & 0x1F00000) >> 20);
                 return;
             }
         }
@@ -1165,15 +1165,15 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
         {
         case 1:
             v9 = DirToByte(normal);
-            G_AddEvent(ent, (nomarks != 0) + 46, v9);
+            G_AddEvent(ent, nomarks != 0 ? EV_ROCKET_EXPLODE_NOMARKS : EV_ROCKET_EXPLODE, v9);
             goto LABEL_92;
         case 3:
             v10 = DirToByte(normal);
-            G_AddEvent(ent, (nomarks != 0) + 49, v10);
+            G_AddEvent(ent, nomarks != 0 ? EV_CUSTOM_EXPLODE_NOMARKS : EV_CUSTOM_EXPLODE, v10);
             goto LABEL_92;
         case 2:
             v11 = DirToByte(normal);
-            G_AddEvent(ent, 0x30u, v11);
+            G_AddEvent(ent, EV_FLASHBANG_EXPLODE, v11);
             goto LABEL_92;
         }
         if (explosionType != 4)
@@ -1185,16 +1185,16 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
             javNormal[1] = -javNormal[1];
             javNormal[2] = -javNormal[2];
             v12 = DirToByte(javNormal);
-            G_AddEvent(ent, 0x35u, v12);
+            G_AddEvent(ent, EV_DUD_IMPACT, v12);
             goto LABEL_92;
         }
     LABEL_91:
         v13 = DirToByte(normal);
-        G_AddEvent(ent, 0x34u, v13);
+        G_AddEvent(ent, EV_DUD_EXPLODE, v13);
         goto LABEL_92;
     }
     v8 = DirToByte(normal);
-    G_AddEvent(ent, 0x2Du, v8);
+    G_AddEvent(ent, EV_GRENADE_EXPLODE, v8);
 LABEL_92:
     if (inWater)
         v28 = 20;

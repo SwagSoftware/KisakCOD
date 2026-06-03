@@ -133,20 +133,20 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
             ps->pm_flags &= ~PMF_DUCKED;
             ps->pm_flags |= PMF_PRONE;
             ps->viewHeightTarget = 11;
-            G_AddEvent(owner, 8u, 0);
+            G_AddEvent(owner, EV_STANCE_FORCE_PRONE, 0);
         }
         else if (pTurretInfo->prevStance == 1)
         {
             ps->pm_flags &= ~PMF_PRONE;
             ps->pm_flags |= PMF_DUCKED;
             ps->viewHeightTarget = 40;
-            G_AddEvent(owner, 7u, 0);
+            G_AddEvent(owner, EV_STANCE_FORCE_CROUCH, 0);
         }
         else
         {
             ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
             ps->viewHeightTarget = 60;
-            G_AddEvent(owner, 6u, 0);
+            G_AddEvent(owner, EV_STANCE_FORCE_STAND, 0);
         }
         pTurretInfo->prevStance = -1;
     }
@@ -582,7 +582,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator)
         Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0, &wp, vec3_origin, 0, 0);
     else
         Bullet_Fire(v2, ent->pTurretInfo->playerSpread, &wp, ent, level.time);
-    G_AddEvent(ent, 0x26u, v2->s.number);
+    G_AddEvent(ent, EV_FIRE_WEAPON_MG42, v2->s.number);
 }
 
 void __cdecl Turret_FillWeaponParms(gentity_s *ent, gentity_s *activator, weaponParms *wp)

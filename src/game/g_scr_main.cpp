@@ -2981,14 +2981,14 @@ void __cdecl ScrCmd_SetStance(scr_entref_t entref)
             v4 = client->ps.pm_flags & 0xFFFFFFFC;
             client->ps.viewHeightTarget = 60;
             client->ps.pm_flags = v4;
-            G_AddEvent(Entity, 6, 0);
+            G_AddEvent(Entity, EV_STANCE_FORCE_STAND, 0);
         }
         else if (ConstString == scr_const.crouch)
         {
             v5 = __ROL4__(1, 1) & 3 | client->ps.pm_flags & 0xFFFFFFFC;
             client->ps.viewHeightTarget = 40;
             client->ps.pm_flags = v5;
-            G_AddEvent(Entity, 7, 0);
+            G_AddEvent(Entity, EV_STANCE_FORCE_CROUCH, 0);
         }
         else if (ConstString == scr_const.prone)
         {
@@ -2997,7 +2997,7 @@ void __cdecl ScrCmd_SetStance(scr_entref_t entref)
                 client->ps.proneDirection = client->ps.viewangles[1];
             client->ps.viewHeightTarget = 11;
             client->ps.pm_flags = pm_flags & 0xFFFFFFFC | 1;
-            G_AddEvent(Entity, 8, 0);
+            G_AddEvent(Entity, EV_STANCE_FORCE_PRONE, 0);
         }
     }
     else
@@ -3622,7 +3622,7 @@ void __cdecl ScrCmd_StopSounds(scr_entref_t entref)
 
     Entity = GetEntity(entref);
     Entity->r.svFlags &= ~1u;
-    G_AddEvent(Entity, 5, 0);
+    G_AddEvent(Entity, EV_STOPSOUNDS, 0);
 }
 
 void __cdecl ScrCmd_EqOn(scr_entref_t entref)
@@ -7690,7 +7690,7 @@ void Scr_PlayFXOnTag()
             0,
             "%s",
             "csIndex > 0 && csIndex < MAX_EFFECT_TAGS");
-    G_AddEvent(Entity, 60, v13);
+    G_AddEvent(Entity, EV_PLAY_FX_ON_TAG, v13);
 }
 
 void Scr_PlayLoopedFX()
@@ -10685,7 +10685,7 @@ void __cdecl ScrCmd_StopRumble(scr_entref_t entref)
     }
     Entity->r.svFlags &= ~1u;
     if (Scr_GetNumParam() == 1)
-        G_AddEvent(Entity, 74, v3);
+        G_AddEvent(Entity, EV_STOP_RUMBLE, v3);
     else
         Scr_Error("Incorrect number of parameters.\n");
 }

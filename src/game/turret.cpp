@@ -236,7 +236,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
     else
         Bullet_Fire(shooter, turretInfo->aiSpread, &wp, ent, level.time);
 
-    G_AddEvent(ent, 0x26, shooter->s.number);
+    G_AddEvent(ent, EV_FIRE_WEAPON_MG42, shooter->s.number);
 }
 
 void __cdecl clamp_playerbehindgun(gentity_s *self, gentity_s *other)

@@ -1131,7 +1131,7 @@ void __cdecl ReadEntity(gentity_s *ent, SaveGame *save)
     if (ent->snd_wait.notifyString)
     {
         if (ent->snd_wait.duration < 0)
-            G_AddEvent(ent, 44, ent->snd_wait.index);
+            G_AddEvent(ent, EV_SOUND_ALIAS_ADD_NOTIFY, ent->snd_wait.index);
     }
 }
 

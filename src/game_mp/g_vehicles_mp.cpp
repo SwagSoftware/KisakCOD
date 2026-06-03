@@ -1575,7 +1575,7 @@ void __cdecl FireTurret(gentity_s *ent, gentity_s *player)
             Com_Error(ERR_DROP, "FireTurret(): WeapDef is not a bullet type.");
         else
             Bullet_Fire(player, wp.weapDef->fAdsSpread, &wp, ent, level.time);
-        G_AddEvent(ent, 0x1Au, 0);
+        G_AddEvent(ent, EV_FIRE_WEAPON, 0);
         veh->turret.fireTime = wp.weapDef->iFireTime;
     }
 }

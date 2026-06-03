@@ -2081,7 +2081,7 @@ void __cdecl G_PlaySoundAlias(gentity_s *ent, unsigned __int16 index)
     if (!ent)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2773, 0, "%s", "ent");
     if (index)
-        G_AddEvent(ent, 3u, index);
+        G_AddEvent(ent, EV_SOUND_ALIAS, index);
 }
 
 void __cdecl G_SetOrigin(gentity_s *ent, float *origin)

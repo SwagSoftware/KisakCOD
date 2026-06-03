@@ -754,17 +754,17 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
         Bullet_Fire(ent, 0.0, &wp, ent, level.time);
         if (lastShot == LAST_SHOT_IN_CLIP)
         {
-            G_AddEvent(ent, 27, 0);
+            G_AddEvent(ent, EV_FIRE_WEAPON_LASTSHOT, 0);
             return;
         }
-        G_AddEvent(ent, 26, 0);
+        G_AddEvent(ent, EV_FIRE_WEAPON, 0);
         return;
     }
 
     if (weapType == WEAPTYPE_PROJECTILE)
     {
         Weapon_RocketLauncher_Fire(ent, weapon, 0.0, &wp, vec3_origin, TargetEntity, NULL);
-        G_AddEvent(ent, 26, 0);
+        G_AddEvent(ent, EV_FIRE_WEAPON, 0);
         return;
     }
 }
@@ -815,7 +815,7 @@ void __cdecl Actor_ShootBlank(actor_s *self)
                 0,
                 "%s",
                 "wp.weapDef->weapType == WEAPTYPE_BULLET");
-        G_AddEvent(self->ent, 26, 0);
+        G_AddEvent(self->ent, EV_FIRE_WEAPON, 0);
     }
 }
 

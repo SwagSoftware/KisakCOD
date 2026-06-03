@@ -802,7 +802,7 @@ void __cdecl Cmd_DropWeapon_f(gentity_s *pSelf)
     if (v3)
     {
         if (Drop_Weapon(pSelf, pSelf->s.weapon, pSelf->s.weaponModel, 0))
-            G_AddEvent(pSelf, 11, 0);
+            G_AddEvent(pSelf, EV_NOAMMO, 0);
     }
 }
 

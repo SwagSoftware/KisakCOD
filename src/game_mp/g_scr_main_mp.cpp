@@ -4258,7 +4258,7 @@ void Scr_PlayFXOnTag()
     csIndex = G_FindConfigstringIndex(va("%02d%s", fxId, SL_ConvertToString(tag)), 1698, 256, 1, 0);
     if (csIndex <= 0 || csIndex >= 256)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4421, 0, "%s", "csIndex > 0 && csIndex < MAX_EFFECT_TAGS");
-    G_AddEvent(ent, 0x38u, csIndex);
+    G_AddEvent(ent, EV_PLAY_FX_ON_TAG, csIndex);
 }
 
 void Scr_PlayLoopedFX()
