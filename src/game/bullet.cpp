@@ -339,15 +339,56 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
 
 bool __cdecl Bullet_IgnoreHitEntity(const BulletFireParams *bp, const BulletTraceResults *br, gentity_s *attacker)
 {
-    if (!bp)
-        MyAssertHandler(".\\game\\bullet.cpp", 375, 0, "%s", "bp");
-    if (!br)
-        MyAssertHandler(".\\game\\bullet.cpp", 376, 0, "%s", "br");
-    if (!br->hitEnt)
-        MyAssertHandler(".\\game\\bullet.cpp", 377, 0, "%s", "br->hitEnt");
-    if (!attacker)
-        MyAssertHandler(".\\game\\bullet.cpp", 378, 0, "%s", "attacker");
+    iassert(bp);
+    iassert(br);
+    iassert(br->hitEnt);
+    iassert(attacker);
+#ifdef KISAK_SP
+    gentity_s *hitEnt = br->hitEnt;
+
+    // Always pass through the shooter himself.
+    if (hitEnt == attacker)
+        return true;
+
+    // AI shooters additionally pass through the entity they're mounted on
+    // (e.g. a turret/vehicle) and same-team friendlies.
+    if (attacker->actor)
+    {
+        if (attacker->tagInfo && attacker->tagInfo->parent == hitEnt)
+            return true;
+        if (hitEnt->sentient && hitEnt->sentient->eTeam == attacker->sentient->eTeam)
+            return true;
+    }
+
+    // Only players (clients) get the view-axis hit filter below; anything else
+    // that was hit is a real hit.
+    if (!hitEnt->client)
+        return false;
+
+    // A bullet only damages a player if it lands within 8 units of that player's
+    // (lean-adjusted) view axis. Grazes farther out than that — including the AI's
+    // intentional near-misses against the coarse player bounds — are treated as
+    // misses. Dropping this check is what made AI fire never miss the player.
+    float viewOrigin[3];
+    G_GetPlayerViewOrigin(&hitEnt->client->ps, viewOrigin);
+
+    float horizLen = sqrtf(bp->dir[0] * bp->dir[0] + bp->dir[1] * bp->dir[1]);
+    float invHorizLen = (horizLen != 0.0f) ? (1.0f / horizLen) : 1.0f;
+
+    // Perpendicular (horizontal) distance from the hit point to the line through
+    // the view origin along the bullet's heading. The original's vertical term is
+    // multiplied by zero, so only the horizontal offset matters.
+    float lateralDist = I_fabs(
+        (invHorizLen * bp->dir[1]) * (br->hitPos[0] - viewOrigin[0])
+        - (invHorizLen * bp->dir[0]) * (br->hitPos[1] - viewOrigin[1]));
+
+    if (lateralDist <= 8.0f)
+        return false;
+
+    return true;
+#else
     return br->hitEnt == attacker;
+#endif
 }
 
 #ifdef KISAK_SP

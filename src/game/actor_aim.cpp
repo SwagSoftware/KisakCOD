@@ -18,8 +18,11 @@
 #include <universal/com_files.h>
 #include <devgui/devgui.h>
 #include <win32/win_local.h>
+#include <universal/profile.h>
 
 #define AI_DEBUG_ACCURACY_MSG_COUNT 8
+static const float ACTOR_MAX_ACCURAY_DISTANCE = 4000.0f;
+
 
 struct AccuracyGraphBackup
 {
@@ -34,7 +37,7 @@ WeaponDef *g_accuGraphWeapon[2][128];
 DevGraph g_accuracyGraphs[128];
 AccuracyGraphBackup g_accuGraphBuf[2][128];
 char debugAccuracyStrings[8][32] = { 0 };
-int dword_82C31FB0[256];
+int g_accuGraphTime[2][128]; // [bufferIndex][weapIndex] (dword_82C31FB0)
 
 void __cdecl TRACK_actor_aim()
 {
@@ -57,13 +60,6 @@ void __cdecl Actor_DrawDebugAccuracy(const float *pos, double scale, double rowH
         G_AddDebugString(pos, debugAccuracyColors[i], scale, debugAccuracyStrings[i]);
         *((float *)pos + 2) = pos[2] - (float)rowHeight;
     }
-    //do
-    //{
-    //    G_AddDebugString(pos, v8, scale, a5);
-    //    v9 += 32;
-    //    *((float *)pos + 2) = pos[2] - (float)rowHeight;
-    //    v8 += 4;
-    //} while ((int)v9 < (int)&dword_82C31FB0);
 }
 
 void __cdecl Actor_DebugAccuracyMsg(
@@ -95,59 +91,30 @@ float __cdecl Actor_GetAccuracyFraction(
     const WeaponDef *weapDef,
     WeapAccuracyType accuracyType)
 {
-    double frac; // fp30
-    int v7; // r28
-    const char *v8; // r11
-    const char *v9; // r10
-    double v10; // fp1
-    const char *v11; // r3
-    double ValueFromFraction; // fp1
-
-    frac = (dist * 0.00025f);
-
     iassert(accuracyType >= WEAP_ACCURACY_AI_VS_AI && accuracyType < WEAP_ACCURACY_COUNT);
 
-    
-    //v7 = a4 + 477;
-    //v8 = accuracyType[v7];
-    //if (v8)
-    //{
-    //    v9 = accuracyType[a4 + 481];
-    //    if (v9)
-    //    {
-    //        v10 = *(float *)&v8[8 * (unsigned int)v9 - 8];
-    //        if (v10 != 1.0)
-    //        {
-    //            v11 = va("weapon '%s' has invalid graph...max range %f != 1.0.", *accuracyType, v10);
-    //            MyAssertHandler(
-    //                "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-    //                125,
-    //                0,
-    //                "%s\n\t%s",
-    //                "weapDef->accuracyGraphKnots[accuracyType] == 0 || weapDef->accuracyGraphKnotCount[accuracyType] == 0 || weapDe"
-    //                "f->accuracyGraphKnots[accuracyType][weapDef->accuracyGraphKnotCount[accuracyType] - 1][0] == 1.0f",
-    //                v11);
-    //        }
-    //    }
-    //}
+    float (*knots)[2] = weapDef->accuracyGraphKnots[accuracyType];
+    int knotCount = weapDef->accuracyGraphKnotCount[accuracyType];
 
+    vassert(
+        !knots || !knotCount || knots[knotCount - 1][0] == 1.0f,
+        "weapon '%s' has invalid graph...max range %f != 1.0.",
+        weapDef->szInternalName,
+        knots[knotCount - 1][0]);
+
+    float frac = dist / ACTOR_MAX_ACCURAY_DISTANCE;
     if (frac > 1.0f)
         frac = 1.0f;
 
-    //if (!accuracyType[v7] || !accuracyType[a4 + 481])
-    //{
-    //    if (accuracyType)
-    //    {
-    //        if (accuracyType == WEAP_ACCURACY_AI_VS_PLAYER)
-    //            Com_Error(ERR_DROP, "No AI vs Player accuracy for weapon %s", weapDef->accuracyGraphName[accuracyType]);
-    //    }
-    //    else
-    //    {
-    //        Com_Error(ERR_DROP, "No AI vs AI accuracy graph for weapon %s", weapDef->accuracyGraphName[accuracyType]);
-    //    }
-    //}
+    if (!knots || !knotCount)
+    {
+        if (accuracyType == WEAP_ACCURACY_AI_VS_PLAYER)
+            Com_Error(ERR_DROP, "No 'AI vs Player' accuracy graph for weapon '%s'", weapDef->szInternalName);
+        else if (accuracyType == WEAP_ACCURACY_AI_VS_AI)
+            Com_Error(ERR_DROP, "No 'AI vs AI' accuracy graph for weapon '%s'", weapDef->szInternalName);
+    }
 
-    return GraphGetValueFromFraction(weapDef->accuracyGraphKnotCount[accuracyType], weapDef->accuracyGraphKnots[accuracyType], frac);
+    return GraphGetValueFromFraction(knotCount, knots, frac);
 }
 
 float __cdecl Actor_GetWeaponAccuracy(
@@ -156,7 +123,7 @@ float __cdecl Actor_GetWeaponAccuracy(
     const WeaponDef *weapDef,
     WeapAccuracyType accuracyType)
 {
-    double distance; // fp1
+    float distance; // fp1
     float accuracy; // fp1
     float selfOrigin[3]; // [sp+50h] [-60h] BYREF
     float enemyOrigin[3]; // [sp+60h] [-50h] BYREF
@@ -169,10 +136,8 @@ float __cdecl Actor_GetWeaponAccuracy(
 
     Sentient_GetOrigin(self->sentient, selfOrigin);
     Sentient_GetOrigin(enemy, enemyOrigin);
-    //v9 = sqrtf((float)((float)((float)(v14 - v17) * (float)(v14 - v17)) + (float)((float)((float)(v16 - v19) * (float)(v16 - v19)) + (float)((float)(v15 - v18) * (float)(v15 - v18)))));
-    distance = sqrtf((((selfOrigin[0] - enemyOrigin[0]) * (selfOrigin[0] - enemyOrigin[0]))
-        + (((selfOrigin[2] - enemyOrigin[2]) * (selfOrigin[2] - enemyOrigin[2]))
-        + ((selfOrigin[1] - enemyOrigin[1]) * (selfOrigin[1] - enemyOrigin[1])))));
+
+    distance = Vec3Distance(enemyOrigin, selfOrigin);
 
     if (accuracyType == WEAP_ACCURACY_AI_VS_PLAYER)
         distance *= ai_accuracyDistScale->current.value;
@@ -206,49 +171,6 @@ float __cdecl Actor_GetPlayerStanceAccuracy(const actor_s *self, const sentient_
     }
 }
 
-//float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentient_s *enemy)
-//{
-//    double v6; // fp0
-//    double v10; // fp1
-//    double v12; // fp31
-//    float v14; // [sp+50h] [-50h] BYREF
-//    float v15; // [sp+54h] [-4Ch]
-//    float v16; // [sp+58h] [-48h]
-//    float v17; // [sp+60h] [-40h] BYREF
-//    float v18; // [sp+64h] [-3Ch]
-//    float v19; // [sp+68h] [-38h]
-//
-//    iassert(self);
-//    iassert(enemy);
-//    iassert(enemy->ent);
-//    iassert(enemy->ent->client);
-//
-//    Sentient_GetOrigin(self->sentient, &v14);
-//    Sentient_GetOrigin(enemy, &v17);
-//
-//    _FP5 = -sqrtf((float)((float)((float)(v17 - v14) * (float)(v17 - v14)) + (float)((float)((float)(v19 - v16) * (float)(v19 - v16)) + (float)((float)(v18 - v15) * (float)(v18 - v15)))));
-//    __asm { fsel      f10, f5, f11, f10 }
-//    v6 = I_fabs((float)((float)(enemy->ent->client->ps.velocity[0]
-//        * (float)((float)((float)1.0 / (float)_FP10) * (float)(v18 - v15)))
-//        + (float)((float)(enemy->ent->client->ps.velocity[2]
-//            * (float)((float)(v19 - v16) * (float)((float)1.0 / (float)_FP10)))
-//            + (float)(enemy->ent->client->ps.velocity[1]
-//                * (float)-(float)((float)((float)1.0 / (float)_FP10) * (float)(v17 - v14))))));
-//    _FP12 = (float)((float)v6 - (float)250.0);
-//    _FP10 = -v6;
-//    __asm { fsel      f13, f12, f13, f0 }
-//    v10 = 0.1;
-//    __asm { fsel      f13, f10, f0, f13 }
-//    v12 = (float)-(float)((float)((float)_FP13 * (float)0.0040000002) - (float)1.0);
-//    if (v12 >= 0.1)
-//    {
-//        if (v12 < 0.0 || v12 > 1.0)
-//            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 244, 1, (const char *)HIDWORD(v12), 0, 0, 0);
-//        v10 = v12;
-//    }
-//    return *((float *)&v10 + 1);
-//}
-
 float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentient_s *enemy)
 {
     iassert(self);
@@ -271,10 +193,12 @@ float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentien
 
     const float *velocity = enemy->ent->client->ps.velocity;
 
-    float dot =
-        velocity[0] * dy * inv_dist +
-        velocity[2] * dz * inv_dist -
-        velocity[1] * dx * inv_dist;
+    // Unit direction from self -> enemy.
+    float dirX = dx * inv_dist;
+    float dirY = dy * inv_dist;
+    float dirZ = dz * inv_dist;
+
+    float dot = velocity[0] * dirY + (velocity[2] * dirZ - velocity[1] * dirX);
 
     float absDot = fabsf(dot);
     float clampedDot = I_fmin(absDot, 250.0f);
@@ -307,38 +231,25 @@ float __cdecl Actor_GetPlayerSightAccuracy(actor_s *self, const sentient_s *enem
     accuracyFactor = 0.0;
 
     float enemyOrigin[3];
-    enemyOrigin[0] = enemy->ent->client->ps.origin[0]; // v6
-    enemyOrigin[1] = enemy->ent->client->ps.origin[1]; // v8
-    enemyOrigin[2] = enemy->ent->client->ps.origin[2]; // v10
+    Vec3Copy(enemy->ent->client->ps.origin, enemyOrigin);
 
     float enemyEyeOffset[3];
     Vec3Sub(enemyEyePos, enemy->ent->client->ps.origin, enemyEyeOffset);
-
     if (Actor_CanSeeEntityPoint(self, enemyEyePos, enemy->ent))
         accuracyFactor = 10.0;
 
-    // KISAKTODO: idk the vec3 function here
     float eyeOffset75[3];
-    eyeOffset75[0] = (enemyEyeOffset[0] * 0.75f) + enemyOrigin[0]; // v18
-    eyeOffset75[1] = (enemyEyeOffset[1] * 0.75f) + enemyOrigin[1]; // v19
-    eyeOffset75[2] = (enemyEyeOffset[2] * 0.75f) + enemyOrigin[2]; // v20
-
+    Vec3Mad(enemyOrigin, 0.75f, enemyEyeOffset, eyeOffset75);
     if (Actor_CanSeeEntityPoint(self, eyeOffset75, enemy->ent))
         accuracyFactor += 30.0f;
 
     float eyeOffset50[3];
-    eyeOffset50[0] = (enemyEyeOffset[0] * 0.5f) + enemyOrigin[0]; // v18
-    eyeOffset50[1] = (enemyEyeOffset[1] * 0.5f) + enemyOrigin[1]; // v19
-    eyeOffset50[2] = (enemyEyeOffset[2] * 0.5f) + enemyOrigin[2]; // v20
-
+    Vec3Mad(enemyOrigin, 0.5f, enemyEyeOffset, eyeOffset50);
     if (Actor_CanSeeEntityPoint(self, eyeOffset50, enemy->ent))
         accuracyFactor += 30.0f;
 
     float eyeOffset25[3];
-    eyeOffset25[0] = (enemyEyeOffset[0] * 0.25f) + enemyOrigin[0];
-    eyeOffset25[1] = (enemyEyeOffset[1] * 0.25f) + enemyOrigin[1];
-    eyeOffset25[2] = (enemyEyeOffset[2] * 0.25f) + enemyOrigin[2];
-
+    Vec3Mad(enemyOrigin, 0.25f, enemyEyeOffset, eyeOffset25);
     if (Actor_CanSeeEntityPoint(self, eyeOffset25, enemy->ent))
         accuracyFactor += 30.0f;
 
@@ -422,84 +333,24 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
 
 void __cdecl Actor_FillWeaponParms(actor_s *self, weaponParms *wp)
 {
-    float *gunForward; // r28
+    iassert(self);
+    iassert(wp);
+    nanassertvec3(self->vLookForward);
+    nanassertvec3(self->vLookRight);
+    nanassertvec3(self->vLookUp);
 
-    if (!self)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 380, 0, "%s", "self");
-    if (!wp)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 381, 0, "%s", "wp");
-    if ((COERCE_UNSIGNED_INT(self->vLookForward[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(self->vLookForward[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(self->vLookForward[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            383,
-            0,
-            "%s",
-            "!IS_NAN((self->vLookForward)[0]) && !IS_NAN((self->vLookForward)[1]) && !IS_NAN((self->vLookForward)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(self->vLookRight[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(self->vLookRight[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(self->vLookRight[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            384,
-            0,
-            "%s",
-            "!IS_NAN((self->vLookRight)[0]) && !IS_NAN((self->vLookRight)[1]) && !IS_NAN((self->vLookRight)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(self->vLookUp[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(self->vLookUp[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(self->vLookUp[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            385,
-            0,
-            "%s",
-            "!IS_NAN((self->vLookUp)[0]) && !IS_NAN((self->vLookUp)[1]) && !IS_NAN((self->vLookUp)[2])");
-    }
-    gunForward = wp->gunForward;
-    wp->forward[0] = self->vLookForward[0];
-    wp->forward[1] = self->vLookForward[1];
-    wp->forward[2] = self->vLookForward[2];
-    wp->right[0] = self->vLookRight[0];
-    wp->right[1] = self->vLookRight[1];
-    wp->right[2] = self->vLookRight[2];
-    wp->up[0] = self->vLookUp[0];
-    wp->up[1] = self->vLookUp[1];
-    wp->up[2] = self->vLookUp[2];
+    Vec3Copy(self->vLookForward, wp->forward);
+    Vec3Copy(self->vLookRight, wp->right);
+    Vec3Copy(self->vLookUp, wp->up);
+
     if (!Actor_GetMuzzleInfo(self, wp->muzzleTrace, wp->gunForward))
     {
         Actor_GetEyePosition(self, wp->muzzleTrace);
-        *gunForward = wp->forward[0];
-        wp->gunForward[1] = wp->forward[1];
-        wp->gunForward[2] = wp->forward[2];
+        Vec3Copy(wp->forward, wp->gunForward);
     }
-    if ((COERCE_UNSIGNED_INT(wp->muzzleTrace[0]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->muzzleTrace[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->muzzleTrace[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            401,
-            0,
-            "%s",
-            "!IS_NAN((wp->muzzleTrace)[0]) && !IS_NAN((wp->muzzleTrace)[1]) && !IS_NAN((wp->muzzleTrace)[2])");
-    }
-    if ((COERCE_UNSIGNED_INT(*gunForward) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->gunForward[1]) & 0x7F800000) == 0x7F800000
-        || (COERCE_UNSIGNED_INT(wp->gunForward[2]) & 0x7F800000) == 0x7F800000)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            402,
-            0,
-            "%s",
-            "!IS_NAN((wp->gunForward)[0]) && !IS_NAN((wp->gunForward)[1]) && !IS_NAN((wp->gunForward)[2])");
-    }
+
+    nanassertvec3(wp->muzzleTrace);
+    nanassertvec3(wp->gunForward);
 }
 
 // aislop
@@ -513,29 +364,17 @@ void Actor_HitSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
     Sentient_GetEyePosition(enemy, eyePos);
     float headHeight = (float)Sentient_GetHeadHeight(enemy);
 
-    // Vector from muzzle to eye
-    float toEye[3] = {
-        eyePos[0] - wp->muzzleTrace[0],
-        eyePos[1] - wp->muzzleTrace[1],
-        eyePos[2] - wp->muzzleTrace[2]
-    };
+    // Normalized direction from muzzle to eye
+    float dir[3];
+    Vec3Sub(eyePos, wp->muzzleTrace, dir);
+    float dist = Vec3Normalize(dir);
+    iassert(dist > 0.0f);
 
-    // Normalize toEye
-    float lenSq = toEye[0] * toEye[0] + toEye[1] * toEye[1] + toEye[2] * toEye[2];
-    iassert(lenSq > 0.0f);
-    float invLen = 1.0f / sqrtf(lenSq);
-    float dir[3] = { toEye[0] * invLen, toEye[1] * invLen, toEye[2] * invLen };
-
-    // Compute lateral vector by cross with wp->up
-    float lat[3] = {
-        dir[1] * wp->up[2] - dir[2] * wp->up[1],
-        dir[2] * wp->up[0] - dir[0] * wp->up[2],
-        dir[0] * wp->up[1] - dir[1] * wp->up[0]
-    };
-    float latLenSq = lat[0] * lat[0] + lat[1] * lat[1] + lat[2] * lat[2];
-    iassert(latLenSq > 0.0f);
-    float latInv = 1.0f / sqrtf(latLenSq);
-    lat[0] *= latInv; lat[1] *= latInv; lat[2] *= latInv;
+    // Lateral axis = normalize(cross(dir, up))
+    float lat[3];
+    Vec3Cross(dir, wp->up, lat);
+    float latLen = Vec3Normalize(lat);
+    iassert(latLen > 0.0f);
 
     // Determine spread parameters
     float vertMax, horizMax;
@@ -554,21 +393,14 @@ void Actor_HitSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
     // Add randomness
     float rVert = G_crandom() * vertMax;
     float rHoriz = G_random() * horizMax;
-
     float center = rHoriz + headHeight;
-    wp->forward[0] = wp->up[0] * center + lat[0] * rVert + eyePos[0] - wp->muzzleTrace[0];
-    wp->forward[1] = wp->up[1] * center + lat[1] * rVert + eyePos[1] - wp->muzzleTrace[1];
-    wp->forward[2] = wp->up[2] * center + lat[2] * rVert + eyePos[2] - wp->muzzleTrace[2];
 
-    // Renormalize forward vector
-    float fwdLenSq = wp->forward[0] * wp->forward[0]
-        + wp->forward[1] * wp->forward[1]
-        + wp->forward[2] * wp->forward[2];
-    iassert(fwdLenSq > 0.0f);
-    float invFwdLen = 1.0f / sqrtf(fwdLenSq);
-    wp->forward[0] *= invFwdLen;
-    wp->forward[1] *= invFwdLen;
-    wp->forward[2] *= invFwdLen;
+    // forward = center*up + rVert*lat + (eyePos - muzzle), normalized
+    Vec3ScaleMad(center, wp->up, rVert, lat, wp->forward);
+    Vec3Add(wp->forward, eyePos, wp->forward);
+    Vec3Sub(wp->forward, wp->muzzleTrace, wp->forward);
+    float fwdLen = Vec3Normalize(wp->forward);
+    iassert(fwdLen > 0.0f);
 }
 
 // aislop
@@ -578,57 +410,30 @@ void Actor_HitTarget(const weaponParms *wp, const float *target, float *forward)
 
     const float *up = wp->up;
 
-    // Direction from muzzle to target
-    float toTarget[3] = {
-        target[0] - wp->muzzleTrace[0],
-        target[1] - wp->muzzleTrace[1],
-        target[2] - wp->muzzleTrace[2]
-    };
-    float distSq = toTarget[0] * toTarget[0] + toTarget[1] * toTarget[1] + toTarget[2] * toTarget[2];
-    iassert(distSq > 0.0f);
-    float invLen = 1.0f / sqrtf(distSq);
-    float dir[3] = {
-        toTarget[0] * invLen,
-        toTarget[1] * invLen,
-        toTarget[2] * invLen
-    };
+    // Normalized direction from muzzle to target
+    float dir[3];
+    Vec3Sub(target, wp->muzzleTrace, dir);
+    float dist = Vec3Normalize(dir);
+    iassert(dist > 0.0f);
 
-    // Lateral vector = cross(dir, up), normalized
-    float crossVec[3] = {
-        dir[1] * up[2] - dir[2] * up[1],
-        dir[2] * up[0] - dir[0] * up[2],
-        dir[0] * up[1] - dir[1] * up[0]
-    };
-    float crossLenSq = crossVec[0] * crossVec[0] + crossVec[1] * crossVec[1] + crossVec[2] * crossVec[2];
-    iassert(crossLenSq > 0.0f);
-    float crossInv = 1.0f / sqrtf(crossLenSq);
-    crossVec[0] *= crossInv;
-    crossVec[1] *= crossInv;
-    crossVec[2] *= crossInv;
+    // Lateral axis = normalize(cross(dir, up))
+    float lateral[3];
+    Vec3Cross(dir, up, lateral);
+    float lateralLen = Vec3Normalize(lateral);
+    iassert(lateralLen > 0.0f);
 
-    // Random spread
+    // Random spread offset along the lateral and up axes
     float r1 = G_crandom() * 8.0f;
     float r2 = G_crandom() * 8.0f;
 
-    // Apply spread around right and up
-    float aimPos[3] = {
-        target[0] + crossVec[0] * r1 + up[0] * r2,
-        target[1] + crossVec[1] * r1 + up[1] * r2,
-        target[2] + crossVec[2] * r1 + up[2] * r2
-    };
+    float aimPos[3];
+    Vec3Mad(target, r1, lateral, aimPos);   // aimPos  = target + r1 * lateral
+    Vec3Mad(aimPos, r2, up, aimPos);        // aimPos += r2 * up
 
-    // Compute final forward vector from muzzle to aimPos
-    forward[0] = aimPos[0] - wp->muzzleTrace[0];
-    forward[1] = aimPos[1] - wp->muzzleTrace[1];
-    forward[2] = aimPos[2] - wp->muzzleTrace[2];
-
-    // Normalize forward
-    float fwdLenSq = forward[0] * forward[0] + forward[1] * forward[1] + forward[2] * forward[2];
-    iassert(fwdLenSq > 0.0f);
-    float fwdInvLen = 1.0f / sqrtf(fwdLenSq);
-    forward[0] *= fwdInvLen;
-    forward[1] *= fwdInvLen;
-    forward[2] *= fwdInvLen;
+    // Final normalized forward vector from muzzle to the spread aim point
+    Vec3Sub(aimPos, wp->muzzleTrace, forward);
+    float fwdLen = Vec3Normalize(forward);
+    iassert(fwdLen > 0.0f);
 }
 
 
@@ -817,24 +622,13 @@ void __cdecl Actor_MissEnemy(actor_s *self, weaponParms *wp, double accuracy)
 
 void __cdecl Actor_ShootNoEnemy(actor_s *self, weaponParms *wp)
 {
-    wp->forward[0] = wp->gunForward[0];
-    wp->forward[1] = wp->gunForward[1];
-    wp->forward[2] = wp->gunForward[2];
+    Vec3Copy(wp->gunForward, wp->forward);
 }
 
-// aislop
 void __cdecl Actor_ShootPos(actor_s *self, weaponParms *wp, float *pos)
 {
-    wp->forward[0] = *pos - wp->muzzleTrace[0];
-    wp->forward[1] = pos[1] - wp->muzzleTrace[1];
-    wp->forward[2] = pos[2] - wp->muzzleTrace[2];
-
-    float magnitude = -sqrtf(wp->forward[0] * wp->forward[0] +
-        wp->forward[1] * wp->forward[1] +
-        wp->forward[2] * wp->forward[2]);
-    wp->forward[0] /= magnitude;
-    wp->forward[1] /= magnitude;
-    wp->forward[2] /= magnitude;
+    Vec3Sub(pos, wp->muzzleTrace, wp->forward);
+    Vec3NormalizeFast(wp->forward);
 }
 
 void __cdecl Actor_ClampShot(actor_s *self, weaponParms *wp)
@@ -862,9 +656,7 @@ void __cdecl Actor_ClampShot(actor_s *self, weaponParms *wp)
         iassert(planeNormal[0] || planeNormal[1] || planeNormal[2]);
         
         RotatePointAroundVector(dest, planeNormal, wp->gunForward, 15.0);
-        wp->forward[0] = dest[0];
-        wp->forward[1] = dest[1];
-        wp->forward[2] = dest[2];
+        Vec3Copy(dest, wp->forward);
     }
 }
 
@@ -889,16 +681,15 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
     iassert(self);
 
     ent = self->ent;
-    //Profile_Begin(236);
+
+    PROF_SCOPED("Actor_Shoot");
+
     if (self->lastShotTime == level.time)
     {
-        Com_PrintError(
-            18,
-            "ERROR: Attempt for same actor (entnum %d) to shoot/melee more than once in a frame.\n",
-            ent->s.number);
-        //Profile_EndInternal(0);
+        Com_PrintError(18, "ERROR: Attempt for same actor (entnum %d) to shoot/melee more than once in a frame.\n", ent->s.number);
         return;
     }
+
     weaponName = self->weaponName;
     self->lastShotTime = level.time;
     v11 = SL_ConvertToString(weaponName);
@@ -960,7 +751,7 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
 
     if (weapType == WEAPTYPE_BULLET)
     {
-        Bullet_Fire(ent, 0.0, &wp, ent, level.time); // KISAKTODO: guessed last arg
+        Bullet_Fire(ent, 0.0, &wp, ent, level.time);
         if (lastShot == LAST_SHOT_IN_CLIP)
         {
             G_AddEvent(ent, 27, 0);
@@ -1117,7 +908,12 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
         wp.forward[2] = v15;
     }
     ent->s.weapon = WeaponIndexForName;
-    return Weapon_Melee(self->ent, &wp, 64.0, 0.0, 0.0, level.time); // KISAKTODO: guessed last arg
+    iassert(ent->s.weapon == WeaponIndexForName); // weapon index must fit the s.weapon byte
+
+    // CoD3SP calls Weapon_Melee(ent, wp, 64.0, 0.0, 0.0) with no time arg -- its
+    // Weapon_Melee/Weapon_Melee_internal are time-independent. kisak's signature
+    // adds a gametime param that the melee path ignores, so level.time is harmless.
+    return Weapon_Melee(self->ent, &wp, 64.0, 0.0, 0.0, level.time);
 }
 
 float __cdecl Sentient_GetScarinessForDistance(sentient_s *self, sentient_s *enemy, double fDist)
@@ -1368,19 +1164,12 @@ void __cdecl Actor_AiVsPlayerAccuracyGraphEventCallback(
 
 void __cdecl Actor_AccuracyGraphTextCallback(
     const DevGraph *graph,
-    double inputX,
-    double inputY,
+    const float inputX,
+    const float inputY,
     char *text,
     const int textLength)
 {
-    // TODO: Check if textLength is set correctly
-    // to change below to snprintf
-    sprintf(
-        text,
-        "Distance: %.2f, Accuracy: %.4f",
-        inputX * 4000.0f,
-        inputY
-    ); // KISAKTODO: unsure
+    sprintf(text, "Distance: %.2f, Accuracy: %.4f", inputX * ACTOR_MAX_ACCURAY_DISTANCE, inputY);
 }
 
 void __cdecl G_SwapAccuracyBuffers()
@@ -1393,146 +1182,85 @@ DevGraph *__cdecl Actor_InitWeaponAccuracyGraphForWeaponType(
     WeapAccuracyType accuracyType,
     void(__cdecl *eventCallback)(const DevGraph *, DevEventType, int))
 {
-    WeaponDef *WeaponDef; // r31
-    int *v7; // r21
-    DevGraph *result; // r3
-    __int32 v9; // r25
-    float *v10; // r24
-    float *v11; // r11
-    int v12; // r29
-    int v13; // r22
-    unsigned int v14; // r11
-    unsigned int v15; // r28
-    unsigned int v16; // r11
-    unsigned int v17; // r28
-    char *v18; // r27
-    unsigned int v19; // r10
-    unsigned int v20; // r11
-    float *v21; // r11
+    WeaponDef *weaponDef = BG_GetWeaponDef(weaponIndex);
+    iassert(weaponDef);
 
-    WeaponDef = BG_GetWeaponDef(weaponIndex);
-    if (!WeaponDef)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp", 1115, 0, "%s", "weaponDef");
-    v7 = &WeaponDef->accuracyGraphKnotCount[accuracyType];
-    if (!*v7)
+    int *knotCount = &weaponDef->accuracyGraphKnotCount[accuracyType];
+    if (!*knotCount)
         return 0;
-    v9 = 4 * (accuracyType + 477);
-    v10 = (float *)WeaponDef->originalAccuracyGraphKnots[accuracyType];
-    v11 = *(float **)((char *)&WeaponDef->szInternalName + v9);
-    v12 = g_accuracyBufferIndex;
-    if (v10 != v11)
+
+    const unsigned int bufferIndex = g_accuracyBufferIndex & 1;
+    float (*srcKnots)[2] = weaponDef->originalAccuracyGraphKnots[accuracyType];
+    float (*workingKnots)[2] = weaponDef->accuracyGraphKnots[accuracyType];
+
+    if (srcKnots != workingKnots)
     {
-        v13 = ((_BYTE)g_accuracyBufferIndex - 1) & 1;
-        v14 = (char *)&v11[-8192 * v13] - (char *)g_accuGraphBuf;
-        if (v14 < 0x8000)
+        const unsigned int prevBufferIndex = (g_accuracyBufferIndex - 1) & 1;
+        unsigned int byteOff = (unsigned int)((const char *)workingKnots - (const char *)g_accuGraphBuf[prevBufferIndex]);
+        if (byteOff < sizeof(g_accuGraphBuf[prevBufferIndex]))
         {
-            v15 = v14 >> 8;
-            if (v14 >> 8 >= 0x80)
+            unsigned int weapInPrev = byteOff / sizeof(AccuracyGraphBackup);
+            iassert(weapInPrev < 128);
+            if (g_accuGraphTime[prevBufferIndex][weapInPrev] == (int)(g_accuracyBufferIndex - 1)
+                && g_accuGraphWeapon[prevBufferIndex][weapInPrev] == weaponDef)
             {
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                    1131,
-                    0,
-                    "%s\n\t(oldWeaponIndex) = %i",
-                    "(oldWeaponIndex < (sizeof( g_accuGraphBuf[prevBufferIndex] ) / (sizeof( g_accuGraphBuf[prevBufferIndex][0] ) *"
-                    " (sizeof( g_accuGraphBuf[prevBufferIndex] ) != 4 || sizeof( g_accuGraphBuf[prevBufferIndex][0] ) <= 4))))",
-                    v14 >> 8);
-                v12 = g_accuracyBufferIndex;
+                srcKnots = workingKnots;
             }
-            v16 = (v13 << 7) + v15;
-            if (dword_82C31FB0[v16] == v12 - 1 && g_accuGraphWeapon[0][v16] == WeaponDef)
-                v10 = *(float **)((char *)&WeaponDef->szInternalName + v9);
         }
     }
-    v17 = ((v12 << 7) & 0x80) + weaponIndex;
-    v18 = (char *)g_accuGraphBuf + 128 * (2 * v17 + accuracyType);
-    memcpy(v18, v10, 8 * *v7);
-    v19 = v17;
-    v20 = g_numAccuracyGraphs;
-    g_accuGraphWeapon[0][v19] = WeaponDef;
-    dword_82C31FB0[v19] = v12;
-    *(const char **)((char *)&WeaponDef->szInternalName + v9) = v18;
-    if (v20 >= 0x80)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-            1146,
-            0,
-            "%s",
-            "g_accuracyGraphCount < ARRAY_COUNT( g_accuracyGraphs )");
-        v20 = g_numAccuracyGraphs;
-    }
-    result = &g_accuracyGraphs[v20];
-    g_numAccuracyGraphs = v20 + 1;
+
+    float (*bufSlot)[2] = g_accuGraphBuf[bufferIndex][weaponIndex].accuracyGraphKnots[accuracyType];
+    memcpy(bufSlot, srcKnots, 8 * *knotCount);
+    g_accuGraphWeapon[bufferIndex][weaponIndex] = weaponDef;
+    g_accuGraphTime[bufferIndex][weaponIndex] = g_accuracyBufferIndex;
+    weaponDef->accuracyGraphKnots[accuracyType] = bufSlot;
+
+    iassert(g_numAccuracyGraphs < ARRAY_COUNT(g_accuracyGraphs));
+
+    DevGraph *result = &g_accuracyGraphs[g_numAccuracyGraphs++];
     result->knotCountMax = 16;
-    v21 = *(float **)((char *)&WeaponDef->szInternalName + v9);
-    result->knotCount = v7;
+    result->knotCount = knotCount;
     result->eventCallback = eventCallback;
-    result->textCallback = (void(__cdecl *)(const DevGraph *, const float, const float, char *, const int))Actor_AccuracyGraphTextCallback;
-    result->data = WeaponDef;
-    result->knots = (float (*)[2])v21;
+    result->textCallback = Actor_AccuracyGraphTextCallback;
+    result->data = weaponDef;
+    result->knots = bufSlot;
     return result;
 }
 
 void __cdecl Actor_CopyAccuGraphBuf(WeaponDef *from, WeaponDef *to)
 {
-    int v3; // r22
-    WeaponDef **i; // r11
-    unsigned int v5; // r25
-    int *accuracyGraphKnotCount; // r30
-    int v7; // r17
-    unsigned int v8; // r31
-    char *v9; // r29
-    unsigned int v10; // r31
-    int v11; // r11
+    if (!bg_lastParsedWeaponIndex)
+        return;
 
-    v3 = 1;
-    if (bg_lastParsedWeaponIndex)
+    // Find `from`'s index in the parsed weapon list.
+    int fromIndex = 1;
+    for (WeaponDef **i = &bg_weaponDefs[1]; *i != from; ++i)
     {
-        for (i = &bg_weaponDefs[1]; *i != from; ++i)
-        {
-            if (++v3 > bg_lastParsedWeaponIndex)
-                return;
-        }
-        v5 = 0;
-        accuracyGraphKnotCount = to->accuracyGraphKnotCount;
-        v7 = (char *)from - (char *)to;
-        do
-        {
-            if (*(int *)((char *)accuracyGraphKnotCount + v7) && *accuracyGraphKnotCount)
-            {
-                v8 = ((g_accuracyBufferIndex << 7) & 0x80) + v3;
-                v9 = (char *)g_accuGraphBuf + 128 * (2 * v8 + v5);
-                memcpy(v9, (const void *)*(accuracyGraphKnotCount - 2), 8 * accuracyGraphKnotCount[2]);
-                v10 = v8;
-                if (dword_82C31FB0[v10] != g_accuracyBufferIndex)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                        1180,
-                        0,
-                        "%s",
-                        "g_accuGraphTime[bufferIndex][weapIndex] == g_accuracyBufferIndex");
-                if (g_accuGraphWeapon[0][v10] != from)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                        1181,
-                        0,
-                        "%s",
-                        "g_accuGraphWeapon[bufferIndex][weapIndex] == from");
-                v11 = accuracyGraphKnotCount[2];
-                *(accuracyGraphKnotCount - 4) = (int)v9;
-                *accuracyGraphKnotCount = v11;
-                if (*(float *)&v9[8 * v11 - 8] != 1.0)
-                    MyAssertHandler(
-                        "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
-                        1185,
-                        1,
-                        "%s",
-                        "to->accuracyGraphKnots[accuracyType][to->accuracyGraphKnotCount[accuracyType] - 1][0] == 1.0f");
-            }
-            ++v5;
-            ++accuracyGraphKnotCount;
-        } while (v5 < 2);
+        if (++fromIndex > bg_lastParsedWeaponIndex)
+            return; // `from` not found
+    }
+
+    const unsigned int bufferIndex = g_accuracyBufferIndex & 1;
+    for (unsigned int accuracyType = 0; accuracyType < WEAP_ACCURACY_COUNT; ++accuracyType)
+    {
+        if (!from->accuracyGraphKnotCount[accuracyType] || !to->accuracyGraphKnotCount[accuracyType])
+            continue;
+
+        // Repoint `to`'s working graph at `from`'s double-buffer slot, copying
+        // `to`'s original knots into it.
+        float (*bufSlot)[2] = g_accuGraphBuf[bufferIndex][fromIndex].accuracyGraphKnots[accuracyType];
+        int count = to->originalAccuracyGraphKnotCount[accuracyType];
+        memcpy(bufSlot, to->originalAccuracyGraphKnots[accuracyType], 8 * count);
+
+        // The slot must already have been set up for `from` this generation.
+        iassert(g_accuGraphTime[bufferIndex][fromIndex] == g_accuracyBufferIndex);
+        iassert(g_accuGraphWeapon[bufferIndex][fromIndex] == from);
+
+        to->accuracyGraphKnots[accuracyType] = bufSlot;
+        to->accuracyGraphKnotCount[accuracyType] = count;
+
+        // The graph must reach normalized distance 1.0 at its last knot.
+        iassert(bufSlot[count - 1][0] == 1.0f);
     }
 }
 

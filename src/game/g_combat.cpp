@@ -1194,14 +1194,14 @@ float __cdecl EntDistToPoint(float *origin, gentity_s *ent)
                 v[i] = ent->r.absmin[i] - origin[i];
             }
         }
-        return Abs(v);
+        return Vec3Length(v);
     }
     else
     {
         v[0] = ent->r.currentOrigin[0] - *origin;
         v[1] = ent->r.currentOrigin[1] - origin[1];
         v[2] = ent->r.currentOrigin[2] - origin[2];
-        return Abs(v);
+        return Vec3Length(v);
     }
 }
 

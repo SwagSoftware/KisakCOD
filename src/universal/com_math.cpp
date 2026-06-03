@@ -3526,11 +3526,6 @@ float Vec3DistanceSq(const float *p1, const float *p2)
          + (p2[0] - p1[0]) * (p2[0] - p1[0]);
 }
 
-float  __cdecl Abs(const float *v)
-{
-    return (float)sqrt((float)((float)((float)(*v * *v) + (float)(v[1] * v[1])) + (float)(v[2] * v[2])));
-}
-
 float __cdecl Vec3Distance(const float *v1, const float *v2)
 {
     float dir[3]; // [esp+4h] [ebp-Ch] BYREF
@@ -3538,5 +3533,6 @@ float __cdecl Vec3Distance(const float *v1, const float *v2)
     dir[0] = v2[0] - v1[0];
     dir[1] = v2[1] - v1[1];
     dir[2] = v2[2] - v1[2];
-    return Abs(dir);
+
+    return Vec3Length(dir);
 }

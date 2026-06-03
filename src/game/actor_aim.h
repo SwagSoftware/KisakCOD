@@ -83,8 +83,8 @@ void __cdecl Actor_AiVsPlayerAccuracyGraphEventCallback(
     int unusedLocalClientNum);
 void __cdecl Actor_AccuracyGraphTextCallback(
     const DevGraph *graph,
-    double inputX,
-    double inputY,
+    const float inputX,
+    const float inputY,
     char *text,
     const int textLength);
 void __cdecl G_SwapAccuracyBuffers();
