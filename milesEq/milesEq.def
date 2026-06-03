@@ -1,0 +1,5 @@
+; milesEq.flt -- exports the RIB provider entry under its undecorated name so
+; the Miles RIB loader (AIL_find_filter / provider scan in mss32.dll) resolves
+; it. __stdcall would otherwise decorate it as _RIB_Main@8.
+EXPORTS
+    RIB_Main
