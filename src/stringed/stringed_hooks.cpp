@@ -60,7 +60,8 @@ void __cdecl SEH_InitLanguage()
     loc_language = Dvar_RegisterInt("loc_language", 0, (DvarLimits)0xE00000000LL, DVAR_ARCHIVE | DVAR_LATCH, "Language");
     loc_forceEnglish = Dvar_RegisterBool("loc_forceEnglish", 0, DVAR_ARCHIVE | DVAR_LATCH, "Force english localized strings");
     loc_translate = Dvar_RegisterBool("loc_translate", 1, DVAR_LATCH, "Enable translations");
-    loc_warnings = Dvar_RegisterBool("loc_warnings", 1, DVAR_NOFLAG, "Enable localization warnings");
+    //loc_warnings = Dvar_RegisterBool("loc_warnings", 1, DVAR_NOFLAG, "Enable localization warnings");
+    loc_warnings = Dvar_RegisterBool("loc_warnings", 0, DVAR_NOFLAG, "Enable localization warnings"); // Disable by default, npc names spam warnings, I dont see a translation for them
     //loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 1, DVAR_NOFLAG, "Throw an error for any unlocalized string"); // KISAK EDIT
     loc_warningsAsErrors = Dvar_RegisterBool("loc_warningsAsErrors", 0, DVAR_NOFLAG, "Throw an error for any unlocalized string");
     SEH_UpdateCurrentLanguage();
@@ -307,8 +308,6 @@ int __cdecl SEH_GetLocalizedTokenReference(
     const char *messageType,
     msgLocErrType_t errType)
 {
-    char v5; // dl
-    char *v7; // [esp+Ch] [ebp-8h]
     const char *translation; // [esp+10h] [ebp-4h]
 
     translation = SEH_StringEd_GetString(reference);
@@ -329,12 +328,9 @@ int __cdecl SEH_GetLocalizedTokenReference(
         if (errType == LOCMSG_NOERR)
             return 0;
     }
-    v7 = (char *)translation;
-    do
-    {
-        v5 = *v7;
-        *token++ = *v7++;
-    } while (v5);
+
+    strcpy(token, translation);
+    
     return 1;
 }
 

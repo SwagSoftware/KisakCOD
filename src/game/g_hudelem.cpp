@@ -269,10 +269,14 @@ void __cdecl HudElem_DestroyAll()
 
 void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int32_t offset)
 {
-    const char *string; // [esp+0h] [ebp-8h]
+#ifdef KISAK_MP
+    *(int *)((char *)&hud->elem.type + fields_0[offset].ofs) = G_LocalizedStringIndex(Scr_GetIString(0));
+#elif KISAK_SP
+    char string[1024]; // [esp+0h] [ebp-408h] BYREF
 
-    string = Scr_GetIString(0);
-    *(int *)((char *)&hud->elem.type + fields_0[offset].ofs) = G_LocalizedStringIndex((char*)string);
+    Scr_ConstructMessageString(0, 0, "Hud Elem String", string, 0x400u);
+    *(int *)((char *)&hud->elem.type + fields_0[offset].ofs) = G_LocalizedStringIndex(string);
+#endif
 }
 
 void __cdecl HudElem_SetFlagForeground(game_hudelem_s *hud, int32_t offset)
