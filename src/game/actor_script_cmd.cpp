@@ -2728,16 +2728,15 @@ void __cdecl ActorCmd_IsKnownEnemyInVolume(scr_entref_t entref)
 
 void __cdecl ActorCmd_SetTalkToSpecies(scr_entref_t entref)
 {
-    actor_s *v1; // r26
-    int v2; // r30
-    int v3; // r27
+    actor_s *self; // r26
+    int speciesMask; // r30
+    int param; // r27
     unsigned int ConstString; // r3
-    char v5; // r10
-    const unsigned __int16 **v6; // r11
+    int speciesIndex; // r10
 
-    v1 = Actor_Get(entref);
-    v2 = 0;
-    v3 = 0;
+    self = Actor_Get(entref);
+    speciesMask = 0;
+    param = 0;
     if (Scr_GetNumParam())
     {
         while (1)
@@ -2745,26 +2744,24 @@ void __cdecl ActorCmd_SetTalkToSpecies(scr_entref_t entref)
             ConstString = Scr_GetConstString(0);
             if (ConstString == scr_const.all)
                 break;
-            v5 = 0;
-            v6 = g_AISpeciesNames;
-            while (ConstString != **v6)
+
+            for (speciesIndex = 0;
+                 speciesIndex < ARRAY_COUNT(g_AISpeciesNames) && ConstString != *g_AISpeciesNames[speciesIndex];
+                 ++speciesIndex)
             {
-                ++v6;
-                ++v5;
-                if ((uintptr_t)v6 >= (uintptr_t)g_AISpeciesNames[2])
-                    goto LABEL_8;
             }
-            v2 |= 1 << v5;
-        LABEL_8:
-            if (++v3 >= Scr_GetNumParam())
+
+            if (speciesIndex < ARRAY_COUNT(g_AISpeciesNames))
+                speciesMask |= 1 << speciesIndex;
+            if (++param >= Scr_GetNumParam())
                 goto LABEL_9;
         }
-        v1->talkToSpecies = -1;
+        self->talkToSpecies = -1;
     }
     else
     {
     LABEL_9:
-        v1->talkToSpecies = v2;
+        self->talkToSpecies = speciesMask;
     }
 }
 

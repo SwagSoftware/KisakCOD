@@ -544,59 +544,20 @@ void __cdecl CG_HudMenuShowAllTimed(int localClientNum)
 
 void CG_EqCommand()
 {
-    int nesting; // r7
-    int v1; // r5
-    const char *v2; // r31
-    const char *v3; // r3
-    int v4; // r30
-    const char *v5; // r3
-    int v6; // r29
-    const char *v7; // r3
-    SND_EQTYPE v8; // r28
-    const char *v9; // r3
-    long double v10; // fp2
-    double v11; // fp31
-    const char *v12; // r3
-    long double v13; // fp2
-    double v14; // fp30
-    const char *v15; // r3
-    long double v16; // fp2
-
-    nesting = cmd_args.nesting;
-    if (cmd_args.nesting >= 8u)
+    if (Cmd_Argc() == 8)
     {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\cgame\\../qcommon/cmd.h",
-            160,
-            0,
-            "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
-            cmd_args.nesting,
-            8);
-        nesting = cmd_args.nesting;
-    }
-    v1 = cmd_args.argc[nesting];
-    if (v1 == 8)
-    {
-        v2 = Cmd_Argv(1);
-        v3 = Cmd_Argv(2);
-        v4 = atol(v3);
-        v5 = Cmd_Argv(3);
-        v6 = atol(v5);
-        v7 = Cmd_Argv(4);
-        v8 = (SND_EQTYPE)atol(v7);
-        v9 = Cmd_Argv(5);
-        v10 = atof(v9);
-        v11 = (float)*(double *)&v10;
-        v12 = Cmd_Argv(6);
-        v13 = atof(v12);
-        v14 = (float)*(double *)&v13;
-        v15 = Cmd_Argv(7);
-        v16 = atof(v15);
-        SND_SetEq(v2, v4, v6, v8, v11, v14, (float)*(double *)&v16);
+        //const char *channelName,
+        //int eqIndex,
+        //int band,
+        //SND_EQTYPE type,
+        //float gain,
+        //float freq,
+        //float q)
+        SND_SetEq(Cmd_Argv(1), atol(Cmd_Argv(2)), atol(Cmd_Argv(3)), (SND_EQTYPE)atol(Cmd_Argv(4)), atof(Cmd_Argv(5)), atof(Cmd_Argv(6)), atof(Cmd_Argv(7)));
     }
     else
     {
-        Com_PrintError(14, "ERROR: CG_EqCommand called with %i args (should be 8)\n", v1);
+        Com_PrintError(14, "ERROR: CG_EqCommand called with %i args (should be 8)\n", Cmd_Argc());
     }
 }
 
@@ -1259,8 +1220,6 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
     const char *v131; // r10
     const char *v132; // r11
     int v133; // r8
-    const char *v134; // r3
-    long double v135; // fp2
     const char *v136; // r10
     const char *v137; // r11
     int v138; // r8
@@ -2006,9 +1965,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                                                             }
                                                                                                             else
                                                                                                             {
-                                                                                                                v134 = Cmd_Argv(1);
-                                                                                                                v135 = atof(v134);
-                                                                                                                SND_SetEqLerp((float)*(double *)&v135);
+                                                                                                                SND_SetEqLerp(atof(Cmd_Argv(1)));
                                                                                                             }
                                                                                                         }
                                                                                                         else

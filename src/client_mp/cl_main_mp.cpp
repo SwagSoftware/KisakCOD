@@ -4333,7 +4333,8 @@ Font_s *__cdecl CL_RegisterFont(const char *fontName, int32_t imageTrack)
 
 void __cdecl CL_UpdateSound()
 {
-    KISAK_NULLSUB();
+    PROF_SCOPED("update sound");
+
     SND_PlayFXSounds();
     SND_UpdateLoopingSounds();
     SND_Update();

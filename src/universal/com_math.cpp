@@ -3448,10 +3448,9 @@ void vectosignedangles(const float *vec, float *angles)
 {
     float yaw, pitch;
 
-    // Handle the special case where horizontal components are zero
     if (vec[0] == 0.0f && vec[1] == 0.0f) {
         yaw = 0.0f;
-        pitch = (vec[2] < 0.0f) ? -90.0f : 90.0f;
+        pitch = (vec[2] >= 0.0f) ? -90.0f : 90.0f;
     }
     else {
         // Compute yaw (angle in the XY plane)
@@ -3460,8 +3459,8 @@ void vectosignedangles(const float *vec, float *angles)
         // Compute horizontal distance (magnitude in the XY plane)
         float xyLen = sqrtf(vec[0] * vec[0] + vec[1] * vec[1]);
 
-        // Compute pitch (elevation from horizontal plane)
-        pitch = RAD2DEG(atan2f(vec[2], xyLen));
+        // Compute pitch (elevation from horizontal plane). NEGATED: up = negative pitch.
+        pitch = -RAD2DEG(atan2f(vec[2], xyLen));
     }
 
     angles[0] = pitch;  // X = pitch
@@ -3496,9 +3495,9 @@ void MatrixRotationY(float mat[3][3], float degree)
     float s = sinf(radians);
     float c = cosf(radians);
 
-    mat[0][0] = c;  mat[0][1] = 0.0f; mat[0][2] = -s;
+    mat[0][0] = c;  mat[0][1] = 0.0f; mat[0][2] = s;
     mat[1][0] = 0.0f; mat[1][1] = 1.0f; mat[1][2] = 0.0f;
-    mat[2][0] = s;  mat[2][1] = 0.0f; mat[2][2] = c;
+    mat[2][0] = -s; mat[2][1] = 0.0f; mat[2][2] = c;
 }
 
 // aislop

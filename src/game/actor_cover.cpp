@@ -106,7 +106,7 @@ void __cdecl DebugDrawNodeSelectionOverlay()
 // aislop
 void DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node, float *color)
 {
-    float *colorVec = (float *)&color;
+    float *colorVec = color;
 
     if (ai_debugCoverSelection->current.enabled && ai_debugEntIndex->current.integer == self->ent->s.number)
     {
@@ -421,17 +421,8 @@ float Actor_Cover_ScoreOnDistance(actor_s *self, const pathnode_t *node)
 
     float distSq = dx * dx + dy * dy + dz * dz;
 
-    // Clamp to max distance threshold (here: 1440000 == 1200^2)
-    float clampedDist = distSq - 1440000.0f;
-
-    if (clampedDist < 0.0f)
-    {
-        clampedDist = 0.0f;
-    }
-
-    // Inverse linear falloff: score = 1.0 - (clampedDist * scale)
-    // scale = 1 / 1,440,000 = ~0.00000069444445
-    float score = 1.0f - (clampedDist * 0.00000069444445f);
+    float clampedDistSq = (distSq <= 1440000.0f) ? distSq : 1440000.0f;
+    float score = 1.0f - (clampedDistSq * 0.00000069444445f);
 
     if (score < 0.0f)
     {
@@ -625,17 +616,9 @@ float Actor_Cover_GetNodeDistMetric(actor_s *self, const pathnode_t *node)
     float dz = self->ent->r.currentOrigin[2] - node->constant.vOrigin[2];
 
     float distSq = dx * dx + dy * dy + dz * dz;
-    float distDelta = distSq - 1440000.0f;
 
-    float score = 0.0f;
-    if (distDelta >= 0.0f)
-    {
-        score = distDelta * 0.00000069444445f;
-    }
-    else
-    {
-        score = -distSq * 0.00000069444445f;
-    }
+    float clampedDistSq = (distSq <= 1440000.0f) ? distSq : 1440000.0f;
+    float score = clampedDistSq * 0.00000069444445f;
 
     return (1.0f - score) * ai_coverScore_distance->current.value;
 }

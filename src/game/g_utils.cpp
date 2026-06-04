@@ -2504,21 +2504,23 @@ void __cdecl G_SetPlayerFixedLink(gentity_s *ent)
             client->ps.viewangles[angleIndex] = client->ps.viewangles[angleIndex] + angleDiff;
         }
 
-        // LWSS: removed in blops... try this for now
-        //if (ent->client->link_useTagAnglesForViewAngles)
-        //{
+        if (ent->client->link_useTagAnglesForViewAngles)
+        {
             client->ps.linkAngles[0] = worldAngles[0];
             client->ps.linkAngles[1] = worldAngles[1];
             client->ps.linkAngles[2] = worldAngles[2];
-        //}
-        //else
-        //{
-        //    AnglesToAxis(client->ps.linkAngles, v38);
-        //    AxisToQuat(v38, v37);
-        //    QuatMultiply(v37, linkChangeQuat, v34);
-        //    QuatToAxis(v34, (mat3x3&)v38);
-        //    AxisToAngles((const mat3x3&)v38, client->ps.linkAngles);
-        //}
+        }
+        else
+        {
+            float relMat[3][3];   // v38
+            float relQuat[4];     // v37
+            float newRelQuat[4];  // v34
+            AnglesToAxis(client->ps.linkAngles, relMat);
+            AxisToQuat(relMat, relQuat);
+            QuatMultiply(relQuat, linkChangeQuat, newRelQuat);
+            QuatToAxis(newRelQuat, (mat3x3&)relMat);
+            AxisToAngles((const mat3x3&)relMat, client->ps.linkAngles);
+        }
     }
     if (ent->client->link_rotationMovesEyePos)
     {

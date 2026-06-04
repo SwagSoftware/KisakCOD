@@ -1462,14 +1462,9 @@ int __cdecl Actor_InFixedNodeExposedCombat(actor_s *self)
     if ((AnimScriptList *)self->pAnimScriptFunc != &g_scr_data.anim)
         return 0;
 
-    // aislop
-    //_FP12 = (float)((float)64.0 - self->codeGoal.radius);
-    //__asm { fsel      f1, f12, f13, f0# buffer }
-    //v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, _FP1);
 
-    float distance = 64.0f - self->codeGoal.radius;
-    float clampedDistance = (distance >= 0.0f) ? distance : 0.0f;
-    v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, clampedDistance);
+    float buffer = (self->codeGoal.radius <= 64.0f) ? self->codeGoal.radius : 64.0f;
+    v7 = Actor_PointNearPoint(self->ent->r.currentOrigin, self->codeGoal.pos, buffer);
 
 
     v8 = 1;

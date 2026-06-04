@@ -49,6 +49,9 @@ actor_think_result_t __cdecl Actor_ScriptedAnim_Think(actor_s *self)
 
         if (self->eSimulatedState[self->simulatedStateLevel] != AIS_SCRIPTEDANIM)
             return ACTOR_THINK_REPEAT;
+
+        Actor_PopState(self);
+        return ACTOR_THINK_REPEAT;
     }
 
     ent = self->ent;

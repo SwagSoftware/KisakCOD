@@ -270,7 +270,7 @@ void __cdecl HudElem_DestroyAll()
 void __cdecl HudElem_SetLocalizedString(game_hudelem_s *hud, int32_t offset)
 {
 #ifdef KISAK_MP
-    *(int *)((char *)&hud->elem.type + fields_0[offset].ofs) = G_LocalizedStringIndex(Scr_GetIString(0));
+    *(int *)((char *)&hud->elem.type + fields_0[offset].ofs) = G_LocalizedStringIndex((char*)Scr_GetIString(0));
 #elif KISAK_SP
     char string[1024]; // [esp+0h] [ebp-408h] BYREF
 

@@ -859,82 +859,70 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
 
 void __cdecl Info_SetValueForKey_Big(char *s, const char *key, const char *value)
 {
-    int v3; // eax
-    int v4; // eax
-    int v5; // eax
-    int v6; // [esp+54h] [ebp-4018h]
-    char v7; // [esp+5Bh] [ebp-4011h]
-    char v8[8196]; // [esp+5Ch] [ebp-4010h] BYREF
-    int v9; // [esp+2060h] [ebp-200Ch]
-    char dest[0x400]; // [esp+2064h] [ebp-2008h] BYREF
-    int i; // [esp+4068h] [ebp-4h]
+    int j;
+    char c;
+    char cleanValue[BIG_INFO_STRING + 4];
+    int len;
+    char newi[BIG_INFO_STRING];
+    int i;
 
-    if (!value)
-        MyAssertHandler(".\\universal\\q_shared.cpp", 1334, 0, "%s", "value");
+    iassert(value);
 
-    if (strlen(s) < 0x2000)
-    {
-        v6 = 0;
-        for (i = 0; i < 0x1FFF; ++i)
-        {
-            v7 = value[i];
-            if (!v7)
-                break;
-            if (v7 != 92 && v7 != 59 && v7 != 34)
-            {
-                if (v6 >= 0x2000)
-                    MyAssertHandler(".\\universal\\q_shared.cpp", 1350, 0, "%s", "j < BIG_INFO_STRING");
-                v8[v6++] = v7;
-            }
-        }
-        if (v6 >= 0x2000)
-            MyAssertHandler(".\\universal\\q_shared.cpp", 1355, 0, "%s", "j < BIG_INFO_STRING");
-        v8[v6] = 0;
-        v3 = (int)strchr(key, 0x5Cu);
-        if (v3)
-        {
-            Com_Printf(16, "Can't use keys with a \\ key: %s value: %s", key, value);
-        }
-        else
-        {
-            v4 = (int)strchr(key, 0x3Bu);
-            if (v4)
-            {
-                Com_Printf(16, "Can't use keys with a semicolon. key: %s value: %s", key, value);
-            }
-            else
-            {
-                v5 = (int)strchr(key, 0x22u);
-                if (v5)
-                {
-                    Com_Printf(16, "Can't use keys with a \". key: %s value: %s", key, value);
-                }
-                else
-                {
-                    Info_RemoveKey_Big(s, key);
-                    if (v8[0])
-                    {
-                        v9 = Com_sprintf(dest, 0x2000u, "\\%s\\%s", key, v8);
-                        if (v9 > 0)
-                        {
-                            if (strlen(s) + strlen(dest) <= 0x400)
-                                strcat(s, dest);
-                            else
-                                Com_Printf(16, "Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
-                        }
-                        else
-                        {
-                            Com_Printf(16, "Info buffer length exceeded, not including key/value pair in response.");
-                        }
-                    }
-                }
-            }
-        }
-    }
-    else
+    if (strlen(s) >= BIG_INFO_STRING)
     {
         Com_Printf(16, "Info_SetValueForKey_Big: oversize infostring");
+        return;
     }
+
+    // Copy the value, stripping the info-string delimiters ('\', ';', '"').
+    j = 0;
+    for (i = 0; i < BIG_INFO_STRING - 1; ++i)
+    {
+        c = value[i];
+        if (!c)
+            break;
+        if (c != '\\' && c != ';' && c != '"')
+        {
+            iassert(j < BIG_INFO_STRING);
+            cleanValue[j++] = c;
+        }
+    }
+
+    iassert(j < BIG_INFO_STRING);
+    cleanValue[j] = 0;
+
+    // Keys may not contain the delimiters either.
+    if (strchr(key, '\\'))
+    {
+        Com_Printf(16, "Can't use keys with a \\ key: %s value: %s", key, value);
+        return;
+    }
+    if (strchr(key, ';'))
+    {
+        Com_Printf(16, "Can't use keys with a semicolon. key: %s value: %s", key, value);
+        return;
+    }
+    if (strchr(key, '"'))
+    {
+        Com_Printf(16, "Can't use keys with a \". key: %s value: %s", key, value);
+        return;
+    }
+
+    Info_RemoveKey_Big(s, key);
+    if (!cleanValue[0])
+        return;
+
+    len = Com_sprintf(newi, BIG_INFO_STRING, "\\%s\\%s", key, cleanValue);
+    if (len <= 0)
+    {
+        Com_Printf(16, "Info buffer length exceeded, not including key/value pair in response.");
+        return;
+    }
+
+    if (strlen(s) + strlen(newi) <= BIG_INFO_STRING)
+        strcat(s, newi);
+    else
+        Com_Printf(16, "Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);
 }
 
 bool __cdecl ParseConfigStringToStruct(

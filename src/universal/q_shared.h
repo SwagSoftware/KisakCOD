@@ -148,6 +148,10 @@ typedef int		clipHandle_t;
 #define	MAX_INFO_KEY		1024
 #define	MAX_INFO_VALUE		1024
 
+#define	BIG_INFO_STRING		8192	// used for newconfig info that can exceed MAX_INFO_STRING
+#define	BIG_INFO_KEY		8192
+#define	BIG_INFO_VALUE		8192
+
 
 #define	MAX_QPATH			64		// max length of a quake game pathname
 #define	MAX_OSPATH			260		// max length of a filesystem pathname

@@ -25,6 +25,7 @@
 #include <ragdoll/ragdoll.h>
 #include "cl_scrn.h"
 #include <qcommon/com_bsp.h>
+#include <universal/profile.h>
 
 enum MovieToPlayScriptOp : __int32
 {
@@ -1553,11 +1554,11 @@ bool __cdecl CL_SkipRendering()
 
 void __cdecl CL_UpdateSound()
 {
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "update sound");
+    PROF_SCOPED("update sound");
+
     SND_PlayFXSounds();
     SND_UpdateLoopingSounds();
     SND_Update();
-    //PIXEndNamedEvent();
 }
 
 

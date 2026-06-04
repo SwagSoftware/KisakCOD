@@ -517,19 +517,27 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
 
 void __cdecl CalcMuzzlePoints(const gentity_s *ent, weaponParms *wp)
 {
-    float *viewangles; // [esp+0h] [ebp-10h]
     float viewang[3]; // [esp+4h] [ebp-Ch] BYREF
 
-    if (!ent->client)
-        MyAssertHandler(".\\game\\g_weapon.cpp", 437, 0, "%s", "ent->client");
-    viewangles = ent->client->ps.viewangles;
-    viewang[0] = *viewangles;
-    viewang[1] = viewangles[1];
-    viewang[2] = viewangles[2];
-    viewang[0] = ent->client->fGunPitch;
-    viewang[1] = ent->client->fGunYaw;
+    iassert(ent->client);
+
+    viewang[0] = ent->client->ps.viewangles[0];
+    viewang[1] = ent->client->ps.viewangles[1];
+    viewang[2] = ent->client->ps.viewangles[2];
+#ifdef KISAK_SP
+    if ((ent->client->ps.eFlags & 0x20000) == 0)
+#endif
+    {
+        viewang[0] = ent->client->fGunPitch;
+        viewang[1] = ent->client->fGunYaw;
+    }
     AngleVectors(viewang, wp->forward, wp->right, wp->up);
     G_GetPlayerViewOrigin(&ent->client->ps, wp->muzzleTrace);
+#ifdef KISAK_SP
+    wp->muzzleTrace[0] = ent->client->fGunXOfs + wp->muzzleTrace[0];
+    wp->muzzleTrace[1] = ent->client->fGunYOfs + wp->muzzleTrace[1];
+    wp->muzzleTrace[2] = ent->client->fGunZOfs + wp->muzzleTrace[2];
+#endif
 }
 
 void __cdecl G_UseOffHand(gentity_s *ent)

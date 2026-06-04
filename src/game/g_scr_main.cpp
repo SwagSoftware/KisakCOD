@@ -1740,28 +1740,22 @@ int __cdecl Scr_GetTeamFlags(unsigned int i, const char *pszCaller)
 
 int __cdecl Scr_GetSpecies(unsigned __int16 speciesString)
 {
-    int v1; // r10
-    const unsigned __int16 **v2; // r11
+    int speciesIndex; // r10
     const char *String; // r3
     const char *v4; // r3
 
     if (speciesString == scr_const.all)
         return 2;
-    v1 = 0;
-    v2 = g_AISpeciesNames;
-    while (speciesString != **v2)
+
+    for (speciesIndex = 0; speciesIndex < ARRAY_COUNT(g_AISpeciesNames); ++speciesIndex)
     {
-        ++v2;
-        ++v1;
-        if ((int)v2 >= (int)g_entinfoAITextNames)
-        {
-            String = Scr_GetString(speciesString);
-            v4 = va("unknown species '%s' (should be human, dog, or all)", String);
-            Scr_Error(v4);
-            return 2;
-        }
+        if (speciesString == *g_AISpeciesNames[speciesIndex])
+            return speciesIndex;
     }
-    return v1;
+    String = Scr_GetString(speciesString);
+    v4 = va("unknown species '%s' (should be human, dog, or all)", String);
+    Scr_Error(v4);
+    return 2;
 }
 
 actor_s *Scr_GetAIArray()

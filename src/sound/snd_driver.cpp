@@ -1062,20 +1062,13 @@ void __cdecl SND_SetEqParams(
     float freq,
     float q)
 {
-    if (entchannel >= 0x40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1247,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < 64)",
-            entchannel);
-    if (band > 2)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1248, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
-    if (freq < 0.0 || freq > 20000.0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1249, 0, "%s\n\t(freq) = %g", "(freq >= 0 && freq <= 20000)", freq);
-    if (q <= 0.0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1250, 0, "%s\n\t(q) = %g", "(q > 0)", q);
+    iassert(entchannel >= 0 && entchannel < 64);
+    iassert(band >= 0 && band < 3);
+    iassert(freq >= 0 && freq <= 20000);
+    iassert(q > 0);
+
+    iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
+
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].gain = gain;
     milesGlob.eq[eqIndex].params[band][entchannel].freq = freq;
@@ -1095,6 +1088,7 @@ void __cdecl SND_SetEqType(uint32_t entchannel, int eqIndex, uint32_t band, SND_
             entchannel);
     if (band > 2)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1265, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
+    iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].type = type;
 }
@@ -1113,6 +1107,7 @@ void __cdecl SND_SetEqFreq(uint32_t entchannel, int eqIndex, uint32_t band, floa
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1277, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
     if (freq < 0.0 || freq > 20000.0)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1278, 0, "%s\n\t(freq) = %g", "(freq >= 0 && freq <= 20000)", freq);
+    iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].freq = freq;
 }
@@ -1129,6 +1124,7 @@ void __cdecl SND_SetEqGain(uint32_t entchannel, int eqIndex, uint32_t band, floa
             entchannel);
     if (band > 2)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1290, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
+    iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].gain = gain;
 }
@@ -1147,6 +1143,7 @@ void __cdecl SND_SetEqQ(uint32_t entchannel, int eqIndex, uint32_t band, float q
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1304, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
     if (q <= 0.0)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1305, 0, "%s\n\t(q) = %g", "(q > 0)", q);
+    iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].q = q;
 }
@@ -1163,6 +1160,7 @@ void __cdecl SND_DisableEq(uint32_t entchannel, int eqIndex, uint32_t band)
             entchannel);
     if (band > 2)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1317, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
+    iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 0;
 }
 
