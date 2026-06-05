@@ -972,40 +972,6 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
 }
 
 #ifdef KISAK_MP
-static void CG_BuildObituaryLocMsg(char *buf, int bufSize, const char *locRef, const char *insertName, const char *locRef2)
-{
-	int len = strlen(locRef);
-	int tokenLen;
-
-	if (len + 1 >= bufSize)
-		return;
-
-    memcpy(buf, locRef, len);
-
-	if (insertName && insertName[0])
-	{
-		tokenLen = strlen(insertName);
-		if (len + tokenLen + 2 >= bufSize)
-			return;
-
-		buf[len++] = 21;
-		memcpy(&buf[len], insertName, tokenLen);
-		len += tokenLen;
-	}
-
-	if (locRef2 && locRef2[0])
-	{
-		tokenLen = strlen(locRef2);
-		if (len + tokenLen + 2 >= bufSize)
-			return;
-		buf[len++] = 20;
-		memcpy(&buf[len], locRef2, tokenLen);
-		len += tokenLen;
-	}
-
-	buf[len] = 0;
-}
-
 void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
 {
     const char *v2; // eax
@@ -1022,7 +988,7 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
     const clientInfo_t *victimCI; // [esp+8Ch] [ebp-24h]
     char attackerColor; // [esp+93h] [ebp-1Dh]
     float baseIconSize; // [esp+94h] [ebp-1Ch]
-	char locMsg[256]; // [esp+98h] [ebp-18h]
+	const char *locMsg; // [esp+98h] [ebp-18h]
     char victimColor; // [esp+9Fh] [ebp-11h]
     const clientInfo_t *playerCI; // [esp+A0h] [ebp-10h]
     const WeaponDef *weapDef; // [esp+A4h] [ebp-Ch]
@@ -1155,9 +1121,9 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
                 if (!cgameGlob->inKillCam)
                 {
                     if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
-						CG_BuildObituaryLocMsg(locMsg, 256, "CGAME_YOUKILLED", targetName, "CGAME_TEAMMATE");
+						locMsg = va("CGAME_YOUKILLED\x15%s\x14" "CGAME_TEAMMATE", targetName);
 					else
-						CG_BuildObituaryLocMsg(locMsg, 256, "CGAME_YOUKILLED", targetName, 0);
+						locMsg = va("CGAME_YOUKILLED\x15%s", targetName);
                     CG_PriorityCenterPrint(localClientNum, locMsg, 0);
                 }
             }
@@ -1165,9 +1131,9 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
             {
                 // KISAKTODO: double check the string literals here in va() `CGAME_...`
                 if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
-					CG_BuildObituaryLocMsg(locMsg, 256, "CGAME_YOUWEREKILLED", attackerName, "CGAME_TEAMMATE");
+					locMsg = va("CGAME_YOUWEREKILLED\x15%s\x14" "CGAME_TEAMMATE", attackerName);
 				else
-					CG_BuildObituaryLocMsg(locMsg, 256, "CGAME_YOUWEREKILLED", attackerName, 0);
+					locMsg = va("CGAME_YOUWEREKILLED\x15%s", attackerName);
                 CG_PriorityCenterPrint(localClientNum, locMsg, 0);
             }
             if (!cgameGlob->inKillCam)
