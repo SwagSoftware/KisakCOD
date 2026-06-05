@@ -471,6 +471,11 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
     weaponParms wp; // [esp+30h] [ebp-48h] BYREF
     float aimSpreadScale; // [esp+74h] [ebp-4h]
 
+#ifdef KISAK_SP
+	if ((ent->client->ps.weapFlags & 8) != 0)// g_friendlyfireDist
+		return;
+#endif
+
     if ((ent->client->ps.eFlags & 0x300) == 0 || !ent->active)
     {
         Scr_Notify(ent, scr_const.weapon_fired, 0);
