@@ -988,7 +988,7 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
     const clientInfo_t *victimCI; // [esp+8Ch] [ebp-24h]
     char attackerColor; // [esp+93h] [ebp-1Dh]
     float baseIconSize; // [esp+94h] [ebp-1Ch]
-    const char *s; // [esp+98h] [ebp-18h]
+	const char *locMsg; // [esp+98h] [ebp-18h]
     char victimColor; // [esp+9Fh] [ebp-11h]
     const clientInfo_t *playerCI; // [esp+A0h] [ebp-10h]
     const WeaponDef *weapDef; // [esp+A4h] [ebp-Ch]
@@ -1121,20 +1121,20 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
                 if (!cgameGlob->inKillCam)
                 {
                     if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
-                        s = va("CGAME_YOUKILLED", targetName, "CGAME_TEAMMATE");
-                    else
-                        s = va("CGAME_YOUKILLED", targetName);
-                    CG_PriorityCenterPrint(localClientNum, s, 0);
+						locMsg = va("CGAME_YOUKILLED\x15%s\x14" "CGAME_TEAMMATE", targetName);
+					else
+						locMsg = va("CGAME_YOUKILLED\x15%s", targetName);
+                    CG_PriorityCenterPrint(localClientNum, locMsg, 0);
                 }
             }
             else if (target == ps->clientNum && attackerCI && !cgameGlob->inKillCam)
             {
                 // KISAKTODO: double check the string literals here in va() `CGAME_...`
                 if (attackerCI->oldteam && victimCI->oldteam == attackerCI->oldteam)
-                    s = va("CGAME_YOUWEREKILLED", attackerName, "CGAME_TEAMMATE");
-                else
-                    s = va("CGAME_YOUWEREKILLED", attackerName);
-                CG_PriorityCenterPrint(localClientNum, s, 0);
+					locMsg = va("CGAME_YOUWEREKILLED\x15%s\x14" "CGAME_TEAMMATE", attackerName);
+				else
+					locMsg = va("CGAME_YOUWEREKILLED\x15%s", attackerName);
+                CG_PriorityCenterPrint(localClientNum, locMsg, 0);
             }
             if (!cgameGlob->inKillCam)
                 CL_DeathMessagePrint(

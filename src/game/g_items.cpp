@@ -466,15 +466,15 @@ void __cdecl PrintPlayerPickupMessage(gentity_s *player, uint32_t weapIdx, Weapo
 
 #ifdef KISAK_MP
     if (BG_WeaponIsClipOnly(weapIdx))
-        text = va("%c \"GAME_PICKUP_CLIPONLY_AMMO %s\"", 'f', weapDef->szDisplayName);
+        text = va("%c \"GAME_PICKUP_CLIPONLY_AMMO\x15%s\"", 'f', weapDef->szDisplayName);
     else
-        text = va("%c \"GAME_PICKUP_AMMO %s\"", 'f', weapDef->szDisplayName);
+        text = va("%c \"GAME_PICKUP_AMMO\x15%s\"", 'f', weapDef->szDisplayName);
     SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, text);
 #elif KISAK_SP
     if (BG_WeaponIsClipOnly(weapIdx))
-        text = va("gm \"GAME_PICKUP_CLIPONLY_AMMO %s\"", weapDef->szDisplayName);
+        text = va("gm \"GAME_PICKUP_CLIPONLY_AMMO\x15%s\"", weapDef->szDisplayName);
     else
-        text = va("gm \"GAME_PICKUP_AMMO %s\"", weapDef->szDisplayName);
+        text = va("gm \"GAME_PICKUP_AMMO\x15%s\"", weapDef->szDisplayName);
     SV_GameSendServerCommand(player - g_entities, text);
 #endif
 }
@@ -581,7 +581,7 @@ void __cdecl PrintMessage_CannotGrabItem(gentity_s *ent, gentity_s *player, int3
             if (Com_BitCheckAssert(ps->ps.weapons, weapIndex, 16))
             {
                 WeaponDef = BG_GetWeaponDef(weapIndex);
-                v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO", 102, WeaponDef->szDisplayName);
+                v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO\x15%s\"", 102, WeaponDef->szDisplayName);
             }
             else
             {
@@ -593,7 +593,7 @@ void __cdecl PrintMessage_CannotGrabItem(gentity_s *ent, gentity_s *player, int3
             if (BG_PlayerHasWeapon(&player->client->ps, weapIndex))
             {
                 WeaponDef = BG_GetWeaponDef(weapIndex);
-                v10 = va("gm \"GAME_PICKUP_CANTCARRYMOREAMMO %s\"", WeaponDef->szDisplayName);
+                v10 = va("gm \"GAME_PICKUP_CANTCARRYMOREAMMO\x15%s\"", WeaponDef->szDisplayName);
             }
             else
             {

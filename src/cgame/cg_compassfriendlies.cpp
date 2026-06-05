@@ -81,7 +81,7 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, fl
             //v13 = _cntlzw(v15 - 1);
             v10->beginFadeTime = LocalClientTime + msec;
             //v10->enemy = (v13 & 0x20) != 0;
-            v10->enemy = team == TEAM_BAD;
+            v10->enemy = team == TEAM_AXIS;
             if (v12)
             {
                 v10->lastPos[0] = *origin;

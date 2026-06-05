@@ -809,14 +809,6 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     int32_t i; // [esp+254h] [ebp-10Ch]
     char arg3[260]; // [esp+258h] [ebp-108h] BYREF
 
-    const char aCGameCalledavo[] = "%c \"GAME_CALLEDAVOTE"; // idb
-    const char aGameVoteKick[] = "GAME_VOTE_KICK"; // idb
-    const char aGameVoteGamety[] = "GAME_VOTE_GAMETYPE"; // idb
-    const char aGameVoteMap[] = "GAME_VOTE_MAP"; // idb
-    const char aGameVoteGamety_0[] = "GAME_VOTE_GAMETYPE"; // idb
-
-    const char aC_7[] = "%c \""; // idb
-
     if (!g_allowVote->current.enabled)
     {
         v1 = va("%c \"GAME_VOTINGNOTENABLED\"", 101);
@@ -877,8 +869,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     {
         v10 = va("%c \"GAME_INVALIDVOTESTRING\"", 101);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v10);
-        const char aCGameVotecomma[] = "%c \"GAME_VOTECOMMANDSARE"; // idb
-        v11 = va(aCGameVotecomma, 101);
+        v11 = va("%c \"GAME_VOTECOMMANDSARE\"", 101);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v11);
         return;
     }
@@ -920,18 +911,18 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
             if (arg2[0])
             {
                 GameTypeNameForScript = Scr_GetGameTypeNameForScript(arg2);
-                Com_sprintf(level.voteDisplayString, 0x400u, aGameVoteGamety_0, GameTypeNameForScript, arg3);
+                Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_GAMETYPE\x15%s\x15%s", GameTypeNameForScript, arg3);
             }
             else
             {
-                Com_sprintf(level.voteDisplayString, 0x400u, aGameVoteMap, arg3);
+                Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_MAP\x15%s", arg3);
             }
         }
         else
         {
             Com_sprintf(level.voteString, 0x400u, "g_gametype %s; map_restart", arg2);
             v17 = Scr_GetGameTypeNameForScript(arg2);
-            Com_sprintf(level.voteDisplayString, 0x400u, aGameVoteGamety, v17);
+            Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_MAP\x15%s", v17);
         }
         goto LABEL_91;
     }
@@ -941,7 +932,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
             goto LABEL_31;
         Com_sprintf(level.voteString, 0x400u, "%s %s; map_restart", arg1, arg2);
         v18 = Scr_GetGameTypeNameForScript(arg2);
-        Com_sprintf(level.voteDisplayString, 0x400u, aGameVoteGamety, v18);
+        Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_MAP\x15%s", v18);
         goto LABEL_91;
     }
     if (!I_stricmp(arg1, "map_restart"))
@@ -955,7 +946,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
         Com_sprintf(level.voteString, 0x400u, "%s", arg1);
         Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_NEXTMAP");
     LABEL_91:
-        v20 = va(aCGameCalledavo, 101, ent->client->sess.cs.name);
+        v20 = va("%c \"GAME_CALLEDAVOTE\x15%s\"", 101, ent->client->sess.cs.name);
         SV_GameSendServerCommand(-1, SV_CMD_CAN_IGNORE, v20);
         level.voteTime = level.time + 30000;
         level.voteYes = 1;
@@ -978,12 +969,11 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
         if (!IsFastFileLoad() && !SV_MapExists(arg2))
         {
         LABEL_36:
-            v14 = va(aC_7, 101);
-            SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, v14);
+            SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"GAME_VOTEMAPINVALID\x15%s\"", 101));
             return;
         }
         Com_sprintf(level.voteString, 0x400u, "%s %s", arg1, arg2);
-        Com_sprintf(level.voteDisplayString, 0x400u, aGameVoteMap, arg2);
+        Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_MAP\x15%s", arg2);
         goto LABEL_91;
     }
     if (!I_stricmp(arg1, "kick")
@@ -1030,7 +1020,7 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
             Com_sprintf(level.voteString, 0x400u, "%s \"%d\"", "tempBanClient", kicknum);
         else
             Com_sprintf(level.voteString, 0x400u, "%s \"%d\"", "clientkick", kicknum);
-        Com_sprintf(level.voteDisplayString, 0x400u, aGameVoteKick, kicknum, level.clients[kicknum].sess.cs.name);
+        Com_sprintf(level.voteDisplayString, 0x400u, "GAME_VOTE_KICK\x15%d\x15%s", kicknum, level.clients[kicknum].sess.cs.name);
         goto LABEL_91;
     }
     if (!alwaysfails)
@@ -1095,8 +1085,6 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
     }
 }
 
-const char aCGameUsage[] = "%c \"GAME_USAGE"; // idb
-
 void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
     char buffer[1024]; // [esp+4h] [ebp-420h] BYREF
@@ -1113,7 +1101,7 @@ void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
     }
     if (SV_Cmd_Argc() < 4 || SV_Cmd_Argc() > 6)
     {
-        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va(aCGameUsage, 101));
+        SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"GAME_USAGE\x15: setviewpos x y z [yaw] [pitch]\"", 101));
         return;
     }
     for (int i = 0; i < 3; ++i)
@@ -1180,8 +1168,6 @@ void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
     Scr_Notify(pEnt, scr_const.menuresponse, 2u);
 }
 
-const char aCGameUnknowncl[] = "%c \"GAME_UNKNOWNCLIENTCOMMAND"; // idb
-
 void __cdecl ClientCommand(int32_t clientNum)
 {
     const char *v1; // eax
@@ -1238,7 +1224,7 @@ void __cdecl ClientCommand(int32_t clientNum)
                                                                                             {
                                                                                                 if (I_stricmp(cmd, "visionsetnight"))
                                                                                                 {
-                                                                                                    v1 = va(aCGameUnknowncl, 101, cmd);
+                                                                                                    v1 = va("%c \"GAME_UNKNOWNCLIENTCOMMAND\x15%s\"", 101, cmd);
                                                                                                     SV_GameSendServerCommand(clientNum, SV_CMD_CAN_IGNORE, v1);
                                                                                                 }
                                                                                                 else
