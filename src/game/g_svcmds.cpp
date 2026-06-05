@@ -215,7 +215,7 @@ int __cdecl ConsoleCommand()
                     else
                     {
                         v1 = ConcatArgs(1);
-                        v2 = va("%c \"GAME_SERVER: %s\"", 101, v1);
+                        v2 = va("%c \"GAME_SERVER: \x15%s\"", 101, v1);
                         SV_GameSendServerCommand(-1, SV_CMD_CAN_IGNORE, v2);
                         return 1;
                     }

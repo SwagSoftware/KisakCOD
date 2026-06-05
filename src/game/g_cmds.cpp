@@ -1103,7 +1103,7 @@ void __cdecl ClientCommand(int clientNum, const char *s)
             SV_Cmd_EndTokenizedString();
             return;
         }
-        v6 = va("print \"GAME_UNKNOWNCLIENTCOMMAND %s\"", v7);
+        v6 = va("print \"GAME_UNKNOWNCLIENTCOMMAND\x15%s\"", v7);
         SV_GameSendServerCommand(clientNum, v6);
     }
     SV_Cmd_EndTokenizedString();

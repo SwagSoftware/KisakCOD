@@ -1085,8 +1085,6 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
     }
 }
 
-const char aCGameUsage[] = "%c \"GAME_USAGE"; // idb
-
 void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 {
     char buffer[1024]; // [esp+4h] [ebp-420h] BYREF
