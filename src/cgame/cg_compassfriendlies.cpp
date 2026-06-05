@@ -348,7 +348,7 @@ void __cdecl CG_CompassDrawActors(
     float v72; // [sp+B0h] [-110h]
     float v73; // [sp+B4h] [-10Ch]
     float v74; // [sp+B8h] [-108h]
-    float v75; // [sp+BCh] [-104h]
+    float pingAlpha; // [sp+BCh] [-104h]
     rectDef_s v76; // [sp+C0h] [-100h] BYREF
 
     cg_s *cgameGlob = &cgArray[0];
@@ -363,7 +363,7 @@ void __cdecl CG_CompassDrawActors(
         v72 = color[0];
         v73 = color[1];
         v74 = color[2];
-        v75 = color[3];
+        pingAlpha = color[3];
         centerX = ((v76.w * 0.5f) + v76.x);
         centerY = ((v76.h * 0.5f) + v76.y);
         numCompassActors = 32;
@@ -398,34 +398,34 @@ void __cdecl CG_CompassDrawActors(
                 v69 = __PAIR64__((unsigned int)compassSoundPingFadeTime, beginFadeTime);
                 if ((float)((float)__SPAIR64__((unsigned int)compassSoundPingFadeTime, beginFadeTime) + (float)v25) < (double)(float)__SPAIR64__((unsigned int)compassSoundPingFadeTime, cgameGlob->time))
                 {
-                    firingFade = v75;
+                    firingFade = pingAlpha;
                 }
                 else if (beginFadeTime < cgameGlob->time)
                 {
                     compassping_friendlyfiring = cgMedia.compassping_friendlyfiring;
                     int elapsed = cgameGlob->time - beginFadeTime;
                     firingFade = 1.0f - (float)elapsed / v25;
-                    v75 = firingFade;
+                    pingAlpha = firingFade;
                 }
                 else
                 {
                     firingFade = 1.0;
                     compassping_friendlyfiring = cgMedia.compassping_friendlyfiring;
-                    v75 = 1.0;
+                    pingAlpha = 1.0;
                 }
                 if (fadeAlpha < color[3])
                     color[3] = fadeAlpha;
                 if (fadeAlpha < firingFade)
                 {
                     firingFade = fadeAlpha;
-                    v75 = fadeAlpha;
+                    pingAlpha = fadeAlpha;
                 }
 
-                // KISAKTODO: materials here seem wrong
+                float pingColor[4] = { color[0], color[1], color[2], pingAlpha };
                 if (!compassping_friendlyfiring || firingFade != 1.0)
-                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], xy[0], xy[1], sizeW, sizeH, rect->horzAlign, rect->vertAlign, yawTo, color, cgMedia.compassping_enemyfiring);
+                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], xy[0], xy[1], sizeW, sizeH, rect->horzAlign, rect->vertAlign, yawTo, color, material);
                 if (compassping_friendlyfiring)
-                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], xy[0], xy[1], sizeW, sizeH, rect->horzAlign, rect->vertAlign, yawTo, color, compassping_friendlyfiring);
+                    CG_DrawRotatedPic(&scrPlaceView[localClientNum], xy[0], xy[1], sizeW, sizeH, rect->horzAlign, rect->vertAlign, yawTo, pingColor, compassping_friendlyfiring);
                 if (compassDebug->current.enabled)
                 {
                     lastYaw = compassActor->lastYaw;
@@ -485,10 +485,11 @@ void __cdecl CG_CompassDrawActors(
                     {
                         v47 = 1.0;
                     }
-                    v75 = v47;
+                    pingAlpha = v47;
                     if (fadeAlpha < v47)
-                        v75 = fadeAlpha;
-                    UI_DrawHandlePic(&scrPlaceView[localClientNum], picX, pixY, sizeW, sizeH, rect->horzAlign, rect->vertAlign, color, material);
+                        pingAlpha = fadeAlpha;
+                    float pingColor[4] = { color[0], color[1], color[2], pingAlpha };
+                    UI_DrawHandlePic(&scrPlaceView[localClientNum], picX, pixY, sizeW, sizeH, rect->horzAlign, rect->vertAlign, pingColor, cgMedia.compassping_enemyfiring);
                 }
             }
             --v35;
