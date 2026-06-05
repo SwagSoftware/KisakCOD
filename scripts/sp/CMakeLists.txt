@@ -1,9 +1,4 @@
-# Build Guard
-#if (NOT DEFINED KISAK_SP)
-#    return()
-#else()
-    message("----- KisakCOD Client(SP) -----")
-#endif()
+message("----- KisakCOD Client(SP) -----")
 
 project(KisakCOD-sp)
 
@@ -15,6 +10,8 @@ include(sp_files.cmake)
 
 # Create the source groups
 include(${SCRIPTS_DIR}/source_groups.cmake)
+
+include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
 # Add the new executable
 add_executable(${PROJECT_NAME} 
@@ -58,8 +55,6 @@ add_executable(${PROJECT_NAME}
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_SP CINEMA USE_SEPARATE_BLIT_TEXTURE)
-
-target_compile_options(${PROJECT_NAME} PRIVATE /we4700)
 
 # We need all of the pre/post-build commands
 include(${SCRIPTS_DIR}/pre_build.cmake)
