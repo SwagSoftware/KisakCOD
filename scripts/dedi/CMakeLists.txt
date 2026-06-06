@@ -1,9 +1,4 @@
-# Build Guard
-#if (NOT DEFINED DEDICATED) # This should be renamed to KISAK_DEDICATED
-#    return()
-#else()
-    message("----- KisakCOD Dedicated(MP) -----")
-#endif()
+message("----- KisakCOD Dedicated(MP) -----")
 
 project(KisakCOD-dedi)
 
@@ -16,6 +11,9 @@ include(dedi_files.cmake)
 
 # Create the source groups
 include(${SCRIPTS_DIR}/source_groups.cmake)
+
+# Handle platform configs and overrides
+include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
 # Add the new executable
 add_executable(${PROJECT_NAME} 
@@ -59,8 +57,6 @@ add_executable(${PROJECT_NAME}
 )
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP KISAK_DEDICATED DEDICATED)
-
-target_compile_options(${PROJECT_NAME} PRIVATE /we4700)
 
 # We need all of the pre/post-build commands
 include(${SCRIPTS_DIR}/pre_build.cmake)

@@ -1,10 +1,6 @@
-# Build Guard
-#if (NOT DEFINED KISAK_MP)
-#    return()
-#else()
-    message("----- KisakCOD Client(MP) -----")
-#endif()
+message("----- KisakCOD Client(MP) -----")
 
+# Set project name to mp
 project(KisakCOD-mp)
 
 # Include all common files between mp/sp/dedi
@@ -16,7 +12,8 @@ include(mp_files.cmake)
 # Create the source groups
 include(${SCRIPTS_DIR}/source_groups.cmake)
 
-message(${SRC_DIR})
+# message(${SRC_DIR})
+include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
 # Add the new executable
 add_executable(${PROJECT_NAME} 
@@ -62,8 +59,6 @@ add_executable(${PROJECT_NAME}
 # Add multiplayer flag
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP CINEMA USE_SEPARATE_BLIT_TEXTURE)
 
-target_compile_options(${PROJECT_NAME} PRIVATE /we4700)
-
 # We need all of the pre/post-build commands
 include(${SCRIPTS_DIR}/pre_build.cmake)
 include(${SCRIPTS_DIR}/post_build.cmake)
@@ -75,4 +70,3 @@ else()
 # Tracy
     include(${SCRIPTS_DIR}/extern/tracy.cmake)
 endif()
-
