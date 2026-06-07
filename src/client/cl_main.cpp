@@ -1625,11 +1625,8 @@ void __cdecl CL_Disconnect_f()
 void __cdecl CL_ShutdownRef()
 {
     R_SyncRenderThread();
-    cls.rendererStarted = 0;
-    R_Shutdown(1);
-    cls.whiteMaterial = 0;
-    cls.consoleMaterial = 0;
-    cls.consoleFont = 0;
+	CL_ShutdownRenderer(1);
+
     //Con_ShutdownClientAssets(); // nullsub
     track_shutdown(3);
     StatMon_Reset();
