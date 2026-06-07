@@ -1625,18 +1625,7 @@ void __cdecl CL_Disconnect_f()
 void __cdecl CL_ShutdownRef()
 {
     R_SyncRenderThread();
-
-	// Errors when closing the game while on a map
-	// Cannot unload collision while it is in use
-	/*
-    cls.rendererStarted = 0;
-    R_Shutdown(1);
-    cls.whiteMaterial = 0;
-    cls.consoleMaterial = 0;
-    cls.consoleFont = 0;
-	*/
-
-	CL_ShutdownRenderer(1);// Fix
+	CL_ShutdownRenderer(1);
 
     //Con_ShutdownClientAssets(); // nullsub
     track_shutdown(3);
