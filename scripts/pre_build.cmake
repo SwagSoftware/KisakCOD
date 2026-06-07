@@ -21,6 +21,12 @@ endif()
 # Set Win32 compiler flag
 target_compile_definitions(${PROJECT_NAME} PUBLIC WIN32 _CONSOLE _MBCS)
 
+# Set DRWAV IMPL
+target_compile_definitions(${PROJECT_NAME} PUBLIC DR_WAV_IMPLEMENTATION DR_MP3_IMPLEMENTATION)
+
+# Set PortAudio Logging
+target_compile_definitions(${PROJECT_NAME} PUBLIC PA_ENABLE_DEBUG_OUTPUT PA_LOG_API_CALLS)
+
 # Set the generator platform
 set(CMAKE_GENERATOR_PLATFORM "WIN32")
 
@@ -66,7 +72,8 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${DEPS_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${DXSDK_INC_DIR})
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${DXSDK_LIB_DIR})
-target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
+#target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
+
 target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/steamsdk")
 target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/binklib")
 
@@ -79,7 +86,7 @@ target_link_options(${PROJECT_NAME} PRIVATE /machine:x86)
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        mss32.lib
+        # mss32.lib
         dsound.lib
         ${D3DX_LIB}
         d3d9.lib
@@ -101,6 +108,8 @@ target_link_libraries(${PROJECT_NAME} PUBLIC
         binkw32.lib
         steam_api.lib
         dxguid.lib
+        ntdll
+        shlwapi
 )
 
 set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

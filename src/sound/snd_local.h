@@ -1,7 +1,14 @@
 #pragma once
-
-#include <msslib/mss.h>
+#include <portaudio.h>
+extern "C"
+{
+    #include <dr_libs/dr_wav.h>
+    #include <dr_libs/dr_mp3.h>
+};
 #include "snd_public.h"
+
+#include <thread>
+#include <mutex>
 
 static const char *snd_outputConfigurationStrings[6] = { "Windows default", "Mono", "Stereo", "4 speakers", "5.1 speakers", NULL }; // idb
 
@@ -31,18 +38,6 @@ struct snd_save_stream_t // sizeof=0x20
     float org[3];                       // ...
 };
 
-struct MssFileHandle // sizeof=0x9C
-{                                       // ...
-    uint32_t id;
-    MssFileHandle *next;
-    int handle;
-    char fileName[128];
-    uint32_t hashCode;
-    int offset;
-    int fileOffset;
-    int fileLength;
-};
-
 struct SndEqParams // sizeof=0x14
 {                                       // ...
     SND_EQTYPE type;                    // ...
@@ -64,23 +59,6 @@ struct snd_eqoverlay_info_t // sizeof=0x1C
 struct MssEqInfo // sizeof=0xF00
 {                                       // ...
     SndEqParams params[3][64];
-};
-
-typedef struct _SAMPLE FAR *HSAMPLE;           // Handle to sample
-
-struct MssLocal // sizeof=0x26D0
-{                                       // ...
-    _DIG_DRIVER *driver;                // ...
-    HSAMPLE handle_sample[40];         // ...
-    _STREAM *handle_stream[13];
-    MssEqInfo eq[2];                    // ...
-    uint32_t eqFilter;              // ...
-    MssFileHandle fileHandle[13];
-    MssFileHandle *freeFileHandle;
-    bool isMultiChannel;                // ...
-    // padding byte
-    // padding byte
-    // padding byte
 };
 
 // snd_driver
@@ -156,33 +134,75 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime);
 void SND_SetEqLerp(double lerp);
 #endif
 
-
-
-// snd_mss
-uint32_t __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle);
-void __stdcall MSS_FileCloseCallback(UINTa hFileHandle);
-int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, uint32_t type);
-uint32_t __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, uint32_t bytes);
-
-_DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels);
-void MSS_InitFailed();
-char __cdecl MSS_Init();
-void MSS_InitChannels();
-void MSS_InitEq();
-bool __cdecl MSS_Startup();
-void MSS_ShutdownCleanup();
-double __cdecl MSS_GetWetLevel(const snd_alias_t *pAlias);
-void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel);
-void __cdecl MSS_ResumeSample(int i, int frametime);
-_DIG_DRIVER *__cdecl MSS_GetDriver();
-int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels);
-uint8_t *__cdecl MSS_Alloc(uint32_t bytes, uint32_t rate);
-uint8_t *__cdecl MSS_Alloc_LoadObj(uint32_t bytes, uint32_t rate);
-uint32_t *__cdecl MSS_Alloc_FastFile(int bytes);
-
-
-extern MssLocal milesGlob;
 extern snd_local_t g_snd;
 
 extern const dvar_t *snd_khz;
 extern const dvar_t *snd_outputConfiguration;
+
+// PortAudio
+enum {
+    PA_OUTPUT_RATE = 48000,
+    PA_OUTPUT_CHANNELS = 2,
+    PA_RING_FRAMES = 8192 // per-stream ring buffer size in frames
+};
+
+struct PaStreamState {
+    float    ring[PA_RING_FRAMES * PA_OUTPUT_CHANNELS];  // stereo float, pre-converted
+    volatile int writePos;      // advanced by fill thread (in frames, never wraps)
+    volatile int readPos;       // advanced by audio callback (in frames, never wraps)
+    drmp3    wav;
+    bool     looping;
+    volatile bool active;
+    volatile bool stopThread;
+    std::thread   fillThread;
+    std::mutex lock;
+};
+
+
+struct PaChannelState {
+    // Loaded PCM (channels 0-39)
+    int16_t* pcmData;           // decoded s16 samples; NULL for streaming channels
+    int      pcmFrames;         // total sample frames
+    float    pcmPos;            // fractional read position (for resampling)
+    int      srcRate;           // original sample rate (e.g. 22050)
+    int      srcChannels;       // 1 = mono, 2 = stereo
+
+    // Playback state � volatile because the audio callback reads on another thread
+    volatile float gain;
+    volatile float pitch;       // speed ratio: 1.0 = normal, 2.0 = double speed
+    volatile float panL;        // left  output gain  (0.0 � 1.0)
+    volatile float panR;        // right output gain  (0.0 � 1.0)
+    volatile bool  looping;
+    volatile bool  playing;
+    volatile bool  paused;
+
+    // Streaming (channels 40-52 only; NULL for loaded channels)
+    PaStreamState* stream;
+};
+
+struct PaLocal {
+    PaStream* stream;                // the single PortAudio output stream
+    PaChannelState  channels[53];          // 0-7: 2D, 8-39: 3D, 40-52: streamed
+    PaStreamState   streamStates[13];      // backing store for stream channels
+    MssEqInfo       eq[2];                 // EQ param storage � unchanged
+    bool            isMultiChannel;
+};
+
+extern PaLocal paGlob;
+extern snd_local_t g_snd;
+extern const dvar_t* snd_khz;
+extern const dvar_t* snd_outputConfiguration;
+
+// snd_pa
+bool PA_Startup();
+bool PA_Init();
+void PA_InitChannels();
+void PA_InitEq();
+void PA_ShutdownCleanup();
+void PA_StartStreamFillThread(int si);
+void PA_StopStreamFillThread(int si);
+
+// Assert Defines
+#define SNDALIASFLAGS_GET_TYPE(x) (x & 0xC0) >> 6
+
+// Helper Functions
