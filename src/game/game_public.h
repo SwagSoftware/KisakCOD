@@ -295,7 +295,13 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_
 void __cdecl HudElem_UpdateClient(gclient_s *client);
 #endif
 
-extern game_hudelem_s g_hudelems[1024];
+#ifdef KISAK_MP
+#define MAX_HUDELEMS_TOTAL 0x400
+extern game_hudelem_s g_hudelems[MAX_HUDELEMS_TOTAL];
+#elif KISAK_SP
+#define MAX_HUDELEMS_TOTAL 0x100
+extern game_hudelem_s g_hudelems[MAX_HUDELEMS_TOTAL];
+#endif
 
 
 // g_items

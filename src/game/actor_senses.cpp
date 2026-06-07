@@ -699,7 +699,7 @@ int __cdecl Actor_CanSeePoint(actor_s *self, const float *vPoint)
 
 int __cdecl Actor_CanSeeEntityPoint(actor_s *self, const float *vPoint, const gentity_s *ent)
 {
-    return Actor_CanSeePointEx(self, vPoint, self->fovDot, self->fMaxSightDistSqrd, (int)ent);
+    return Actor_CanSeePointEx(self, vPoint, self->fovDot, self->fMaxSightDistSqrd, ent->s.number);
 }
 
 int __cdecl Actor_CanSeeEntity(actor_s *self, const gentity_s *ent)

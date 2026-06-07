@@ -305,7 +305,7 @@ void __cdecl Path_DrawBadPlace(badplace_t *place)
             G_DebugCircle(v0, radius, colorLtOrange, 1, 1, 0);
             v0[2] += (place->parms.arc.halfheight * 2.0f);
             G_DebugCircle(v0, radius, colorLtOrange, 1, 1, 0);
-            v0[0] += (place->parms.arc.halfheight * 2.0f);
+            v0[2] += (place->parms.arc.halfheight * 2.0f);
             G_DebugCircle(v0, radius, colorLtOrange, 1, 1, 0);
         }
         else

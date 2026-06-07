@@ -84,7 +84,7 @@ int __cdecl SpotWouldTelefrag(gentity_s *spot)
     gclient_s *client; // r10
     float v8[4]; // [sp+50h] [-2230h] BYREF
     float v9[4]; // [sp+60h] [-2220h] BYREF
-    int v10[132]; // [sp+70h] [-2210h] BYREF
+    int v10[MAX_GENTITIES];
 
     v9[0] = spot->r.currentOrigin[0] + (float)-15.0;
     v9[1] = spot->r.currentOrigin[1] + (float)-15.0;

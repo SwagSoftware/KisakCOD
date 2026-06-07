@@ -150,7 +150,7 @@ SlideMoveResult __cdecl AIPhys_SlideMove(int gravity, int zonly)
 
     Vec3NormalizeTo(g_pPhys->vVelocity, planes[iNumPlanes]);
 
-    isWalkable[iNumPlanes] = g_pPhys->vVelocity[2] >= 0.7f;
+    isWalkable[iNumPlanes] = g_pPhys->vVelocity[2] > 0.7f;
     iNumPlanes++;
 
     static const int iMaxBumps = 4;
@@ -423,30 +423,7 @@ int AIPhys_StepSlideMove(int gravity, int zonly)
 
     moveResult = AIPhys_SlideMove(gravity, zonly);
 
-    float diff2_4;
-
     if (moveResult == SLIDEMOVE_FAIL)
-    {
-        goto LABEL_22;
-    }
-
-    diff2_4 = (float)((float)(g_apl.fFrameTime * start_v[1]) + start_o[1]) - g_pPhys->vOrigin[1];
-
-    // Im leaving this if-statement intact for your enjoyment
-    if ((float)((float)((float)((float)((float)(g_apl.fFrameTime * start_v[0]) + start_o[0]) - g_pPhys->vOrigin[0])
-        * (float)((float)((float)(g_apl.fFrameTime * start_v[0]) + start_o[0]) - g_pPhys->vOrigin[0]))
-        + (float)(diff2_4 * diff2_4)) > (float)((float)((float)((float)((float)(g_apl.fFrameTime * start_v[0])
-            + start_o[0])
-            - phys.vOrigin[0])
-            * (float)((float)((float)(g_apl.fFrameTime * start_v[0])
-                + start_o[0])
-                - phys.vOrigin[0]))
-            + (float)((float)((float)((float)(g_apl.fFrameTime * start_v[1])
-                + start_o[1])
-                - phys.vOrigin[1])
-                * (float)((float)((float)(g_apl.fFrameTime * start_v[1])
-                    + start_o[1])
-                    - phys.vOrigin[1]))))
     {
         goto LABEL_22;
     }
@@ -720,10 +697,10 @@ void AIPhys_FoliageSounds(void)
         if (t > 1.0f)
             t = 1.0f;
 
-        unsigned slow = bg_foliagesnd_slowinterval->current.integer;
-        unsigned fast = bg_foliagesnd_fastinterval->current.integer;
-        unsigned since = phys->foliageSoundTime;
-        unsigned interval = slow + (unsigned)((fast - slow) * t);
+        int slow = bg_foliagesnd_slowinterval->current.integer;
+        int fast = bg_foliagesnd_fastinterval->current.integer;
+        int since = phys->foliageSoundTime;
+        int interval = (int)((float)(fast - slow) * t + (float)slow);
 
         if (since + interval < level.time)
         {

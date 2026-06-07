@@ -805,7 +805,7 @@ pathnode_t *__cdecl Actor_Cover_FindCoverFromPoint(actor_s *self, const float *v
 
     Actor_HasPath(self);
 
-    nodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, 512.0, 80.0, nodes, 64, 0x41FFC);
+    nodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, 512.0, 80.0, nodes, 256, 0x41FFC);
     bestNode = NULL;
     bestNodeMetric = 0.0;
 
@@ -819,7 +819,7 @@ pathnode_t *__cdecl Actor_Cover_FindCoverFromPoint(actor_s *self, const float *v
             vOrigin = pNode->node->constant.vOrigin;
             if (Vec2DistanceSq(vOrigin, vPoint) > (fMinSafeDist * fMinSafeDist)
                 || (v15 = Actor_Cover_MinHeightAtCover(node),
-                    !G_CanRadiusDamageFromPos(self->ent, vOrigin, NULL, vPoint, fMinSafeDist, 1.0f, NULL, v15, 0, 0x802011))) // KISAKTODO: argcheck 
+                    !G_CanRadiusDamageFromPos(self->ent, vOrigin, NULL, vPoint, fMinSafeDist, 1.0f, NULL, v15, 0, 0x802011)))
             {
                 if (Actor_Cover_IsValidCover(self, node))
                 {

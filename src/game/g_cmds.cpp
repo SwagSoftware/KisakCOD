@@ -147,6 +147,7 @@ void __cdecl G_setfog(const char *fogstring)
     if (sscanf(fogstring, "%f %f %f %f %f %f %i", &fNear, &fFar, &fDensity, clr, &clr[1], &clr[2], &time) == 7
         && fDensity >= 1.0)
     {
+        //level.fFogOpaqueDist = (fFar - fNear) * 0.82800001f + fNear;
         level.fFogOpaqueDist = (fFar - fNear) * 1.0 + fNear;
         level.fFogOpaqueDistSqrd = level.fFogOpaqueDist * level.fFogOpaqueDist;
     }

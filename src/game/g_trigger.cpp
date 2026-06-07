@@ -459,7 +459,7 @@ void __cdecl G_CheckHitTriggerDamage(
     float v23[4]; // [sp+50h] [-22B0h] BYREF
     float v24[4]; // [sp+60h] [-22A0h] BYREF
     float v25[4]; // [sp+70h] [-2290h] BYREF
-    int v26[160]; // [sp+80h] [-2280h] BYREF
+    int v26[MAX_GENTITIES];
 
     if (iMOD >= 0x10)
         MyAssertHandler(
@@ -549,7 +549,7 @@ void __cdecl G_GrenadeTouchTriggerDamage(
     float v23[4]; // [sp+50h] [-22A0h] BYREF
     float v24[4]; // [sp+60h] [-2290h] BYREF
     float v25[4]; // [sp+70h] [-2280h] BYREF
-    int v26[156]; // [sp+80h] [-2270h] BYREF
+    int v26[MAX_GENTITIES];
 
     v8 = *vStart;
     v9 = vStart[1];

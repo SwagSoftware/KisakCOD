@@ -442,7 +442,7 @@ void __cdecl ActorCmd_AimAtPos(scr_entref_t entref)
         float len = sqrtf((v6 - eyePos[2]) * (v6 - eyePos[2])
             + (v5 - eyePos[1]) * (v5 - eyePos[1])
             + (v4 - eyePos[0]) * (v4 - eyePos[0]));
-        v9 = (len > 0.0f) ? (1.0f / len) : 0.0f;
+        v9 = (len > 0.0f) ? (1.0f / len) : 1.0f;
     }
 
     v10 = -(float)((float)v9 * (float)((float)v6 - eyePos[2]));
@@ -754,7 +754,7 @@ void __cdecl ActorCmd_DropWeapon(scr_entref_t entref)
             // BUG was: previous port fed -len as denominator when len==0, producing 1/0 = inf.
             {
                 float len = sqrtf(v12 * v12 + v11 * v11 + v10 * v10);
-                v15 = (len > 0.0f) ? (1.0f / len) : 0.0f;
+                v15 = (len > 0.0f) ? (1.0f / len) : 1.0f;
             }
 
             v16 = (float)((float)(v8->r.currentOrigin[1] - v1->ent->r.currentOrigin[1]) * (float)v15);
@@ -2365,7 +2365,7 @@ void __cdecl ActorCmd_SetGoalNode(scr_entref_t entref)
         Com_PrintError(
             18,
             "AI %d's goal node at (%0.f, %0.f, %0.f) does not have any path links\n",
-            0, // KISAKTODO: index...
+            self->ent->s.number,
             Pathnode->constant.vOrigin[0],
             Pathnode->constant.vOrigin[1],
             Pathnode->constant.vOrigin[2]

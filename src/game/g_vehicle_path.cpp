@@ -55,7 +55,7 @@ void __cdecl VP_AddDebugLine(float *start, float *end, int forceDraw)
 
     float magnitude = sqrtf(deltaZ * deltaZ + deltaY * deltaY + deltaX * deltaX);
 
-    v10 = 1.0f / magnitude;
+    v10 = (magnitude != 0.0f) ? (1.0f / magnitude) : 0.0f;
 
     v11 = (float)((float)v10 * (float)(*end - *start));
     v12 = (float)((float)v10 * (float)(end[1] - start[1]));
@@ -386,7 +386,7 @@ float VP_CalcNodeLookAhead(int16_t nodeIdx)
         vehicle_node_t *prev = &s_nodes[prevIdx];
         backLength += prev->length;
 
-        if (prev->lookAhead >= 0.0f)
+        if (prev->lookAhead > 0.0f)
         {
             backLookAhead = prev->lookAhead;
             break;
@@ -408,7 +408,7 @@ float VP_CalcNodeLookAhead(int16_t nodeIdx)
         forwardLength += cur->length;
         cur = &s_nodes[nextIdx];
 
-        if (cur->lookAhead >= 0.0f)
+        if (cur->lookAhead > 0.0f)
         {
             forwardLookAhead = cur->lookAhead;
             break;

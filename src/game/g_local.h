@@ -9,7 +9,6 @@
 #include <script/scr_variable.h>
 #include "game_public.h"
 
-#define MAX_HUDELEMS_TOTAL 0x100
 
 enum $854C867908149C343981C8BAF4C9A230 : __int32
 {

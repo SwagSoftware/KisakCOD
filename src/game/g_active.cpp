@@ -740,14 +740,14 @@ void __cdecl ClientThink_real(gentity_s *ent)
             v30 = p_cmd->selectedLocation[0];
             v36[2] = 0.0;
             LODWORD(v29) = (char)v29;
-            v38 = *(__int64 *)((char *)&v29 - 4);
+            v38 = v30;
             v37 = v29;
             v36[0] = -(float)((float)(level.compassNorth[0]
                 * (float)(level.compassMapWorldSize[1]
                     * (float)((float)((float)v29 + (float)128.0) * (float)0.0039215689)))
                 - (float)((float)(level.compassNorth[1]
                     * (float)(level.compassMapWorldSize[0]
-                        * (float)((float)((float)*(__int64 *)((char *)&v29 - 4) + (float)128.0)
+                        * (float)((float)((float)v30 + (float)128.0)
                             * (float)0.0039215689)))
                     + level.compassMapUpperLeft[0]));
             v36[1] = -(float)((float)(level.compassNorth[1]
@@ -755,7 +755,7 @@ void __cdecl ClientThink_real(gentity_s *ent)
                     * (float)((float)((float)v29 + (float)128.0) * (float)0.0039215689)))
                 - (float)-(float)((float)(level.compassNorth[0]
                     * (float)(level.compassMapWorldSize[0]
-                        * (float)((float)((float)*(__int64 *)((char *)&v29 - 4)
+                        * (float)((float)((float)v30
                             + (float)128.0)
                             * (float)0.0039215689)))
                     - level.compassMapUpperLeft[1]));

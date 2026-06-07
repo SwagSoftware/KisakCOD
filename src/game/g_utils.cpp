@@ -1271,7 +1271,7 @@ bool __cdecl G_SlideMove(
 
         G_TraceCapsule(&trace, origin, mins, maxs, end, passEntityNum, clipMask);
 
-        if (trace.startsolid)
+        if (trace.allsolid)
         {
             velocity[2] = 0.0f;
             return 1;
@@ -1420,12 +1420,12 @@ void __cdecl G_StepSlideMove(
     if (G_SlideMove(deltaT, origin, velocity, mins, maxs, gravity, passEntityNum, clipMask))
     {
         down[0] = startOrigin[0];
-        down[0] = startOrigin[1];
-        down[0] = startOrigin[2] - 18.0f;
+        down[1] = startOrigin[1];
+        down[2] = startOrigin[2] - 18.0f;
 
         G_TraceCapsule(&trace, startOrigin, mins, maxs, down, passEntityNum, clipMask);
 
-        if (velocity[2] <= 0.0f || trace.fraction != 1.0f && trace.normal[2] >= 0.7f)
+        if (startVel[2] <= 0.0f || trace.fraction != 1.0f && trace.normal[2] >= 0.7f)
         {
             up[0] = startOrigin[0];
             up[1] = startOrigin[1];
@@ -1718,7 +1718,7 @@ void __cdecl G_PrintEntities()
                 v2 = p_model[2];
                 if (scr_const.script_model == v2 && *p_model)
                 {
-                    G_GetModel(*p_model);
+                    const char *modelName = G_GetModel(*p_model)->name;
                     v3 = *((float *)p_model - 12);
                     v4 = *((float *)p_model - 13);
                     v5 = *((float *)p_model - 14);
@@ -1730,24 +1730,24 @@ void __cdecl G_PrintEntities()
                         v0,
                         EntityTypeName,
                         v6,
-                        (const char *)HIDWORD(v5),
+                        modelName,
                         v5,
                         v4,
                         v3);
                 }
                 else
                 {
+                    const char *className = SL_ConvertToStringSafe(v2);
                     v8 = *((float *)p_model - 12);
                     v9 = *((float *)p_model - 13);
                     v10 = *((float *)p_model - 14);
-                    SL_ConvertToStringSafe(v2);
                     v11 = BG_GetEntityTypeName(*((unsigned __int8 *)p_model - 280));
                     Com_Printf(
                         15,
                         "%4i: Type: %s, Class: %s, origin: %6.1f %6.1f %6.1f\n",
                         v0,
                         v11,
-                        (const char *)HIDWORD(v10),
+                        className,
                         v10,
                         v9,
                         v8);
@@ -1897,10 +1897,10 @@ int __cdecl G_SaveFreeEntities(unsigned __int8 *buf)
         {
             if (buf)
             {
-                *v4 = HIBYTE(firstFreeEnt->nextFree);
+                *v4 = (unsigned __int8)firstFreeEnt->nextFree;
                 v4[1] = BYTE1(firstFreeEnt->nextFree);
                 v4[2] = BYTE2(firstFreeEnt->nextFree);
-                v4[3] = (unsigned __int8)firstFreeEnt->nextFree;
+                v4[3] = HIBYTE(firstFreeEnt->nextFree);
             }
             firstFreeEnt = firstFreeEnt->nextFree;
             result += 4;
@@ -1987,12 +1987,6 @@ void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventPa
 
 void __cdecl G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigned int notifyString, int stoppable)
 {
-    const char *v7; // r20
-    double v8; // fp31
-    double v9; // fp30
-    double v10; // fp29
-    const char *v11; // r3
-    const char *v12; // r3
     int time; // r11
     unsigned __int16 v14[8]; // [sp+80h] [-890h] BYREF
     char v15[1024]; // [sp+90h] [-880h] BYREF
@@ -2005,28 +1999,33 @@ void __cdecl G_RegisterSoundWait(gentity_s *ent, unsigned __int16 index, unsigne
         Scr_Notify(ent, ent->snd_wait.notifyString, 0);
         if (!ent->snd_wait.stoppable || !stoppable)
         {
+            const char *classnameStr;
+            const char *targetnameStr;
+            const char *oldStr;
+            const char *newStr;
+
             SV_GetConfigstring(ent->snd_wait.index + 1635, v16, 1024);
             SV_GetConfigstring(index + 1635, v15, 1024);
             Scr_SetString(v14, 0);
-            if (ent->targetname)
-                SL_ConvertToString(ent->targetname);
-            SL_ConvertToString(v14[0]);
-            v7 = SL_ConvertToString(ent->snd_wait.notifyString);
-            v8 = ent->r.currentOrigin[2];
-            v9 = ent->r.currentOrigin[1];
-            v10 = ent->r.currentOrigin[0];
-            v11 = SL_ConvertToString(ent->classname);
-            v12 = va(
+            targetnameStr = ent->targetname ? SL_ConvertToString(ent->targetname) : "<undefined>";
+            newStr = SL_ConvertToString(v14[0]);
+            oldStr = SL_ConvertToString(ent->snd_wait.notifyString);
+            classnameStr = SL_ConvertToString(ent->classname);
+            Scr_Error(va(
                 "issued a second playsound with notification string before the first finished on entity %i classname %s tar"
                 "getname %s location %g %g %g old string %s alias %s at time %i new string %s alias %s at time %i\n",
                 ent->s.number,
-                v11,
-                HIDWORD(v10),
-                HIDWORD(v9),
-                HIDWORD(v8),
-                LODWORD(v8),
-                v7);
-            Scr_Error(v12);
+                classnameStr,
+                targetnameStr,
+                ent->r.currentOrigin[0],
+                ent->r.currentOrigin[1],
+                ent->r.currentOrigin[2],
+                oldStr,
+                v16,
+                ent->snd_wait.basetime,
+                newStr,
+                v15,
+                level.time));
         }
     }
     Scr_SetString(&ent->snd_wait.notifyString, v14[0]);

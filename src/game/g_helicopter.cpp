@@ -42,6 +42,7 @@ void __cdecl VEH_CheckForPredictedCrash(gentity_s *ent)
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
 {
     bool v1; // eax
@@ -73,6 +74,186 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
     veh = ent->scr_vehicle;
     phys = &veh->phys;
     VEH_GetVehicleInfo(veh->infoIdx);
+    HELI_CalcAccel(ent, move, bodyAccel, rotAccel);
+    veh->phys.rotVel[1] = rotAccel[1] * 0.05000000074505806 + veh->phys.rotVel[1];
+    v5 = veh->phys.rotVel[1] * 0.05000000074505806 + veh->phys.prevAngles[1];
+    v6 = v5 * 0.002777777845039964;
+    v4 = v6 + 0.5;
+    v3 = floor(v4);
+    veh->phys.angles[1] = (v6 - v3) * 360.0;
+    veh->phys.angles[0] = rotAccel[0];
+    veh->phys.angles[2] = rotAccel[2];
+    if ((COERCE_UNSIGNED_INT(veh->phys.angles[0]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(veh->phys.angles[1]) & 0x7F800000) == 0x7F800000
+        || (COERCE_UNSIGNED_INT(veh->phys.angles[2]) & 0x7F800000) == 0x7F800000)
+    {
+        MyAssertHandler(
+            ".\\game\\g_helicopter.cpp",
+            577,
+            0,
+            "%s",
+            "!IS_NAN((phys->angles)[0]) && !IS_NAN((phys->angles)[1]) && !IS_NAN((phys->angles)[2])");
+    }
+    yawAngles[0] = 0.0f;
+    yawAngles[1] = veh->phys.angles[1];
+    yawAngles[2] = 0.0f;
+    AngleVectors(yawAngles, axis[0], axis[1], axis[2]);
+    axis[3][0] = 0.0f;
+    axis[3][1] = 0.0f;
+    axis[3][2] = 0.0f;
+    MatrixTransformVector(bodyAccel, *(const mat3x3 *)axis, worldAccel);
+    if (vehHelicopterSoftCollisions->current.enabled)
+        HELI_SoftenCollisions(ent, worldAccel);
+    Vec3Mad(veh->phys.vel, 0.050000001f, worldAccel, veh->phys.vel);
+    if (0.0 != veh->phys.vel[0] || 0.0 != veh->phys.vel[1] || 0.0 != veh->phys.vel[2])
+    {
+        startVel[0] = veh->phys.vel[0];
+        startVel[1] = veh->phys.vel[1];
+        startVel[2] = veh->phys.vel[2];
+        startPos[0] = phys->origin[0];
+        startPos[1] = veh->phys.origin[1];
+        startPos[2] = veh->phys.origin[2];
+        VEH_ClearGround();
+        v1 = VEH_SlideMove(ent, 0);
+        bumped = v1;
+        if (v1)
+        {
+            Vec3Mad(startPos, 0.050000001f, startVel, collision);
+            Vec3Sub(phys->origin, collision, collision);
+            if (Vec3Normalize(collision) > 0.0)
+            {
+                Scr_AddVector(collision);
+                Scr_AddVector(startVel);
+                Scr_Notify(ent, scr_const.veh_collision, 2u);
+            }
+        }
+    }
+    VEH_CheckForPredictedCrash(ent);
+    MatrixTransposeTransformVector43(veh->phys.vel, axis, veh->phys.bodyVel);
+    veh->speed = Vec3Length(veh->phys.vel);
+    if (veh->speed < 0.0f)
+        MyAssertHandler(".\\game\\g_helicopter.cpp", 622, 0, "%s", "veh->speed >= 0.0f");
+    if (move[2] > 0)
+    {
+        veh->idleSndLerp = DiffTrack(0.0, veh->idleSndLerp, 4.0f, 0.050000001f);
+        veh->engineSndLerp = DiffTrack(1.0, veh->engineSndLerp, 4.0f, 0.050000001f);
+    }
+    else
+    {
+        veh->idleSndLerp = DiffTrack(1.0, veh->idleSndLerp, 4.0f, 0.050000001f);
+        veh->engineSndLerp = DiffTrack(0.0, veh->engineSndLerp, 4.0f, 0.050000001f);
+    }
+}
+#elif KISAK_SP
+void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
+{
+    bool v1; // eax
+    float v3; // [esp+14h] [ebp-D0h]
+    float v4; // [esp+18h] [ebp-CCh]
+    float v5; // [esp+44h] [ebp-A0h]
+    float v6; // [esp+48h] [ebp-9Ch]
+    vehicle_physic_t *phys; // [esp+4Ch] [ebp-98h]
+    scr_vehicle_s *veh; // [esp+54h] [ebp-90h]
+    char move[7]; // [esp+58h] [ebp-8Ch] BYREF
+    char pitchmove; // r23
+    char altmove; // r27 (v3 in IDA — altitude accumulator)
+    int buttons;
+    int yawAltControls;
+    gentity_s *player;
+    gclient_s *client;
+    vehicle_info_t *info;
+    bool bumped; // [esp+5Fh] [ebp-85h]
+    float rotAccel[3]; // [esp+60h] [ebp-84h] BYREF
+    float startPos[3]; // [esp+6Ch] [ebp-78h] BYREF
+    float collision[3]; // [esp+78h] [ebp-6Ch] BYREF
+    float bodyAccel[3]; // [esp+84h] [ebp-60h] BYREF
+    float worldAccel[3]; // [esp+90h] [ebp-54h] BYREF
+    float axis[4][3]; // [esp+9Ch] [ebp-48h] BYREF
+    float yawAngles[3]; // [esp+CCh] [ebp-18h] BYREF
+    float startVel[3]; // [esp+D8h] [ebp-Ch] BYREF
+    float debugPos[3]; // [esp+88h] [ebp-E8h] BYREF (v49/v50)
+
+    move[0] = 0;
+    move[1] = 0;
+    move[2] = 0;
+    move[3] = 0;
+    pitchmove = 0;
+    altmove = 0;
+    if (!ent)
+        MyAssertHandler(".\\game\\g_helicopter.cpp", 491, 0, "%s", "ent");
+    if (!ent->scr_vehicle)
+        MyAssertHandler(".\\game\\g_helicopter.cpp", 492, 0, "%s", "ent->scr_vehicle");
+    veh = ent->scr_vehicle;
+    phys = &veh->phys;
+    info = VEH_GetVehicleInfo(veh->infoIdx);
+    if (ent->r.ownerNum.isDefined())
+    {
+        player = ent->r.ownerNum.ent();
+        if (!player->client)
+            MyAssertHandler(".\\game\\g_helicopter.cpp", 502, 0, "%s", "player->client");
+        player->client->ps.eFlags |= 0x40000u;
+        player->client->linkAnglesFrac = 0.0;
+        if ((player->client->ps.eFlags & 0x80000) == 0)
+        {
+            client = player->client;
+            if ((client->ps.pm_flags & 0xC00) == 0)
+            {
+                buttons = client->pers.cmd.buttons;
+                move[0] = client->pers.cmd.forwardmove;
+                move[1] = client->pers.cmd.rightmove;
+                if ((buttons & 0x800) != 0)
+                {
+                    client->ps.eFlags &= ~0x40000u;
+                    player->client->linkAnglesMinClamp[1] = -info->turretHorizSpanRight;
+                    player->client->linkAnglesMaxClamp[1] = info->turretHorizSpanLeft;
+                    player->client->linkAnglesMinClamp[0] = -info->turretVertSpanUp;
+                    player->client->linkAnglesMaxClamp[0] = info->turretVertSpanDown;
+                    goto LABEL_27;
+                }
+                yawAltControls = vehHelicopterYawAltitudeControls->current.integer;
+                if (yawAltControls)
+                {
+                    if (yawAltControls == 1)
+                    {
+                        pitchmove = client->pers.cmd.pitchmove;
+                        move[2] = pitchmove;
+                        if ((client->pers.cmd.buttons & 0x8000) != 0)
+                        {
+                            altmove = 127;
+                            move[3] = 127;
+                        }
+                        if ((client->pers.cmd.buttons & 0x4000) != 0)
+                            move[3] = altmove - 127;
+                        goto LABEL_25;
+                    }
+                    if (yawAltControls >= 3)
+                        goto LABEL_25;
+                    move[3] = client->pers.cmd.yawmove;
+                    if ((client->pers.cmd.buttons & 0x4000) != 0)
+                    {
+                        pitchmove = 127;
+                        move[2] = 127;
+                    }
+                    if ((client->pers.cmd.buttons & 0x8000) == 0)
+                        goto LABEL_25;
+                    pitchmove -= 127;
+                }
+                else
+                {
+                    pitchmove = client->pers.cmd.pitchmove;
+                    move[3] = client->pers.cmd.yawmove;
+                }
+                move[2] = pitchmove;
+            LABEL_25:
+                if (vehHelicopterInvertUpDown->current.enabled)
+                {
+                    move[2] = -pitchmove;
+                    pitchmove = -pitchmove;
+                }
+            }
+        }
+    }
+LABEL_27:
     HELI_CalcAccel(ent, move, bodyAccel, rotAccel);
     veh->phys.rotVel[1] = rotAccel[1] * 0.05000000074505806 + veh->phys.rotVel[1];
     v5 = veh->phys.rotVel[1] * 0.05000000074505806 + veh->phys.prevAngles[1];
@@ -132,7 +313,7 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
     veh->speed = Vec3Length(veh->phys.vel);
     if (veh->speed < 0.0f)
         MyAssertHandler(".\\game\\g_helicopter.cpp", 622, 0, "%s", "veh->speed >= 0.0f");
-    if (move[2] > 0)
+    if (pitchmove > 0)
     {
         veh->idleSndLerp = DiffTrack(0.0, veh->idleSndLerp, 4.0f, 0.050000001f);
         veh->engineSndLerp = DiffTrack(1.0, veh->engineSndLerp, 4.0f, 0.050000001f);
@@ -142,7 +323,21 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
         veh->idleSndLerp = DiffTrack(1.0, veh->idleSndLerp, 4.0f, 0.050000001f);
         veh->engineSndLerp = DiffTrack(0.0, veh->engineSndLerp, 4.0f, 0.050000001f);
     }
+    if (g_vehicleDebug->current.enabled)
+    {
+        debugPos[0] = veh->phys.origin[0];
+        debugPos[1] = veh->phys.origin[1];
+        debugPos[2] = veh->phys.mins[2] + veh->phys.origin[2];
+        VEH_DebugCapsule(
+            debugPos,
+            veh->phys.maxs[0],
+            veh->phys.maxs[2] - veh->phys.mins[2],
+            1.0f,
+            1.0f,
+            0.0f);
+    }
 }
+#endif
 
 void __cdecl HELI_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float *rotAccel)
 {

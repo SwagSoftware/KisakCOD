@@ -273,7 +273,7 @@ void G_DebugPlane(
     v26[0] = (float)((float)((float)size * (float)0.5) * (float)v20) + v32[0];
     v26[1] = (float)((float)((float)size * (float)0.5) * dir[0]) + v32[1];
     v23[0] = (float)((float)((float)size * (float)-0.5) * (float)v20) + v32[0];
-    v23[2] = (float)((float)((float)size * (float)-0.5) * dir[0]) + v32[1];
+    v23[1] = (float)((float)((float)size * (float)-0.5) * dir[0]) + v32[1];
     CL_AddDebugLine(v26, v23, color, depthTest, duration, 1);
 
     v26[2] = v26[2] + (float)size;

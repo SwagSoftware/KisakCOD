@@ -414,8 +414,7 @@ void __cdecl SaveMemory_CreateHeader(
     save->suppressPlayerNotify = suppressPlayerNotify;
     save->header.demoPlayback = demoPlayback;
     save->header.saveVersion = 287;
-    //save->header.internalSave = (_cntlzw(saveType) & 0x20) != 0;
-    save->header.internalSave = saveType != 0;
+    save->header.internalSave = saveType == 0;
     v36 = Dvar_RegisterString("mapname", "", 0x44u, "The current map name");
     save->header.saveId = saveId;
     I_strncpyz(save->header.mapName, v36->current.string, 256);

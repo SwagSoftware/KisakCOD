@@ -699,12 +699,13 @@ void __cdecl Cmd_AI_DisplayValue(actor_s *pSelf, unsigned __int8 *pBase, const a
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 769, 0, "%s", "pField->type == F_INT");
         HIDWORD(v7) = pField->ofs;
         LODWORD(v7) = *(unsigned int *)&pBase[HIDWORD(v7)];
+
         Com_Printf(
             0,
             "ent %i: %s = %g\n",
             number,
-            "swag", // KISAKTODO
-            (float)((float)v7 * (float)0.001));
+            pField->name,
+            (float)((float)(int)v7 * (float)0.001));
     }
     else
     {
@@ -1098,13 +1099,14 @@ void __cdecl Cmd_AI_Name(
     actor_s *actor; // [esp+Ch] [ebp-4h]
 
     if (I_strnicmp(szName, "actor_", 6))
-        offset = 360;
+        offset = offsetof(gentity_s, targetname);
     else
-        offset = 356;
+        offset = offsetof(gentity_s, classname);
+
     name = SL_GetString(szName, 0);
     for (actor = Actor_FirstActor(-1); actor; actor = Actor_NextActor(actor, -1))
     {
-        if ((*(unsigned __int16 *)((char *)&actor->ent->s.number + offset) == name) == (bInvertSelection == 0))
+        if ((*(unsigned __int16 *)((char *)actor->ent + offset) == name) == (bInvertSelection == 0))
             Cmd_AI_Dispatch(argc, actor, fields, pField);
     }
     Scr_SetString(&name, 0);

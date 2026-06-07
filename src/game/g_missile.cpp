@@ -10,21 +10,26 @@
 #elif KISAK_SP
 #include "g_local.h"
 #include "g_main.h"
+#include "actor_grenade.h"
+#include "actor_events.h"
+#include <xanim/xmodel.h>
 #endif
 
-struct AttractorRepulsor_t // sizeof=0x1C
+struct AttractorRepulsor_t // sizeof=0x18
 {                                       // ...
     bool inUse;                         // ...
     bool isAttractor;                   // ...
-    // padding byte
-    // padding byte
-    int32_t entnum;                         // ...
+#ifdef KISAK_SP
+    uint16_t entnum;
+#elif KISAK_MP
+    int32_t entnum;
+#endif
     float origin[3];                    // ...
     float strength;
     float maxDist;
 };
 
-struct $BC9161899B8BF9011D942B4F1507C18F // sizeof=0x380
+struct $BC9161899B8BF9011D942B4F1507C18F
 {                                       // ...
     AttractorRepulsor_t attractors[32]; // ...
 };
@@ -266,9 +271,28 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
     }
     else
     {
-
-        BG_EvaluateTrajectory(&ent->s.lerp.pos, level.time, origin);
-        G_SetOrigin(ent, origin);
+#ifdef KISAK_SP
+        if (ent->activator && ent->activator->actor && (ent->r.svFlags & 1) != 0)
+        {
+            float handPos[3];
+            G_DObjGetWorldTagPos_CheckTagExists(ent->activator, scr_const.grenade_return_hand_tag, handPos);
+            G_SetOrigin(ent, handPos);
+            ent->r.svFlags &= ~1u;
+            G_EntDetach(
+                ent->activator,
+                XModelGetName(weapDef->worldModel[ent->s.weaponModel]),
+                scr_const.grenade_return_hand_tag);
+        }
+        else
+#endif
+        {
+            BG_EvaluateTrajectory(&ent->s.lerp.pos, level.time, origin);
+            G_SetOrigin(ent, origin);
+        }
+#ifdef KISAK_SP
+        if (weapDef->weapType == WEAPTYPE_GRENADE)
+            Actor_DissociateGrenade(ent);
+#endif
 
         doEvent = 1;
         v1 = SV_PointContents(ent->r.currentOrigin, -1, 32);
@@ -316,7 +340,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                 G_SetOrigin(eventEnt, ent->r.currentOrigin);
                 if (weapDef->stickiness == WEAPSTICKINESS_ALL && ent->s.groundEntityNum != ENTITYNUM_NONE)
                 {
-                    Vec3Mad(ent->r.currentOrigin, -16.0, &ent->mover.aSpeed, end);
+                    Vec3Mad(ent->r.currentOrigin, -16.0, &ent->mover.pos1[2], end);
                 }
                 else
                 {
@@ -476,7 +500,7 @@ void __cdecl G_MissileTrace(trace_t *results, float *start, float *end, int32_t 
 
 void __cdecl TRACK_missile_attractors()
 {
-    track_static_alloc_internal(&attrGlob, 896, "attrGlob", 9);
+    track_static_alloc_internal(&attrGlob, sizeof(attrGlob), "attrGlob", 9);
 }
 
 void __cdecl Missile_InitAttractors()
@@ -625,13 +649,43 @@ void __cdecl G_MakeMissilePickupItem(gentity_s *ent)
     ent->s.index.brushmodel = (uint16_t)itemIndex;
     ent->s.clientNum = 64;
 #elif KISAK_SP
-    itemIndex = (int32_t)((char *)item - (char *)bg_itemlist);
+    itemIndex = (int32_t)((char *)item - (char *)bg_itemlist) >> 2;
     ent->s.index.item = (uint16_t) itemIndex;
 #endif
 
     iassert(ent->s.index.item == itemIndex);
     iassert(item->giType == IT_WEAPON);
 }
+
+#ifdef KISAK_SP
+void __cdecl RunMissile_BroadcastActorEvents(gentity_s *missile)
+{
+    int32_t methodOfDeath; // r27
+    WeaponDef *weapDef; // r28
+
+    if (!missile)
+        MyAssertHandler(".\\game\\g_missile.cpp", 1415, 0, "%s", "missile");
+    methodOfDeath = entityHandlers[missile->handler].methodOfDeath;
+    weapDef = BG_GetWeaponDef(missile->s.weapon);
+    if (!weapDef)
+        MyAssertHandler(".\\game\\g_missile.cpp", 1419, 0, "%s", "weapDef");
+    if (methodOfDeath == 3)
+    {
+        if (weapDef->offhandClass)
+        {
+            if (level.time - missile->item[1].clipAmmoCount >= 250)
+            {
+                Actor_BroadcastPointEvent(missile, AI_EV_GRENADE_PING, -1, missile->r.currentOrigin, 0.0);
+                missile->item[1].clipAmmoCount = level.time;
+            }
+        }
+    }
+    else
+    {
+        Actor_BroadcastPointEvent(missile, AI_EV_PROJECTILE_PING, -1, missile->r.currentOrigin, 0.0);
+    }
+}
+#endif
 
 void __cdecl G_RunMissile(gentity_s *ent)
 {
@@ -674,6 +728,9 @@ void __cdecl G_RunMissile(gentity_s *ent)
         MyAssertHandler(".\\game\\g_missile.cpp", 2080, 0, "%s", "ent");
     if (ent->s.eType != ET_MISSILE)
         MyAssertHandler(".\\game\\g_missile.cpp", 2081, 0, "%s", "ent->s.eType == ET_MISSILE");
+#ifdef KISAK_SP
+    RunMissile_BroadcastActorEvents(ent);
+#endif
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 2088, 0, "%s", "weapDef");
@@ -694,7 +751,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         origin[0] = ent->r.currentOrigin[0];
         origin[1] = ent->r.currentOrigin[1];
         origin[2] = ent->r.currentOrigin[2];
-        Vec3Mad(origin, -1.635f, &ent->mover.aSpeed, origin);
+        Vec3Mad(origin, -1.635f, &ent->mover.pos1[2], origin);
         if (ent->r.ownerNum.isDefined())
         {
             passEntityNum = ent->r.ownerNum.entnum();
@@ -764,7 +821,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
             G_MissileTrace(&tr, ent->r.currentOrigin, origin, ENTITYNUM_NONE, ent->clipmask);
         }
     }
-    if ((char *)(tr.surfaceFlags & 0x1F00000) == " (%i) exceeded\n")
+    if ((tr.surfaceFlags & 0x1F00000) == 0x900000)
         Missile_PenetrateGlass(&tr, ent, ent->r.currentOrigin, origin, weapDef->damage, 0);
     Vec3Lerp(ent->r.currentOrigin, origin, tr.fraction, endpos);
     DrawMissileDebug(ent->r.currentOrigin, endpos);
@@ -884,7 +941,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
                     }
                     else
                     {
-                        if (attrGlob.attractors[attractorIndex].entnum >= 1024)
+                        if (attrGlob.attractors[attractorIndex].entnum >= MAX_GENTITIES)
                             MyAssertHandler(
                                 ".\\game\\g_missile.cpp",
                                 2265,
@@ -1009,6 +1066,13 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
     else
         partGroup = HITLOC_NONE;
     hitLocation = partGroup;
+#ifdef KISAK_SP
+    if (methodOfDeath != 7 && ent->r.ownerNum.isDefined())
+    {
+        gentity_s *owner = ent->r.ownerNum.ent();
+        Actor_BroadcastLineEvent(owner, AI_EV_PROJECTILE_IMPACT, 0, owner->s.lerp.pos.trBase, endpos, 0.0);
+    }
+#endif
     if (!other->takedamage
         && (ent->s.lerp.eFlags & 0x1000000) != 0
         && !explodeOnImpact
@@ -1203,6 +1267,9 @@ LABEL_92:
     ent->s.surfType = v28;
     Scr_Notify(ent, scr_const.death, 0);
     G_FreeEntityAfterEvent(ent);
+#ifdef KISAK_SP
+    ent->s.eType = ET_GENERAL;
+#endif
     ent->s.lerp.eFlags ^= 2u;
     ent->s.lerp.eFlags |= 0x20u;
     if (inWater && waterExplodeAllowed)
@@ -1383,7 +1450,9 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
             MissileLandAngles(ent, trace, vAngles, 1);
         }
         G_SetAngle(ent, vAngles);
-        ent->item[1] = *(item_ent_t *)trace->normal;
+        ent->mover.pos1[2] = trace->normal[0];
+        ent->mover.pos2[0] = trace->normal[1];
+        ent->mover.pos2[1] = trace->normal[2];
         if (!weapDef->timedDetonation)
             ent->nextthink = 0;
         CheckGrenadeDanger(ent);
@@ -1405,6 +1474,9 @@ bool __cdecl BounceMissile(gentity_s *ent, trace_t *trace)
         ent->s.lerp.apos.trBase[1] = vAngles[1];
         ent->s.lerp.apos.trBase[2] = vAngles[2];
         ent->s.lerp.apos.trTime = level.time;
+#ifdef KISAK_SP
+        Actor_GrenadeBounced(ent, &g_entities[Trace_GetEntityHitId(trace)]);
+#endif
         if (contents)
         {
             return 0;
@@ -1841,7 +1913,7 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
             }
             else
             {
-                if (attrGlob.attractors[attractorIndex].entnum >= 1024)
+                if (attrGlob.attractors[attractorIndex].entnum >= MAX_GENTITIES)
                     MyAssertHandler(
                         ".\\game\\g_missile.cpp",
                         1262,
@@ -1929,7 +2001,7 @@ void __cdecl RunMissile_CreateWaterSplash(const gentity_s *missile, const trace_
     Vec3NormalizeTo(missile->s.lerp.pos.trDelta, reflect);
     if (reflect[2] < 0.0f)
         reflect[2] = reflect[2] * -1.0f;
-    tent = G_TempEntity((float*)missile->r.currentOrigin, 44);
+    tent = G_TempEntity((float*)missile->r.currentOrigin, EV_GRENADE_BOUNCE);
     tent->s.eventParm = DirToByte(trace->normal);
     tent->s.un1.scale = 0;
     tent->s.surfType = (trace->surfaceFlags & 0x1F00000) >> 20;
@@ -1954,7 +2026,7 @@ void __cdecl MissileTrajectory(gentity_s *ent, float *result)
     weapDef = BG_GetWeaponDef(ent->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 1984, 0, "%s", "weapDef");
-    if (level.time > ent->s.lerp.u.missile.launchTime && ent->s.lerp.pos.trType != TR_LINEAR && ent->handler == 9)
+    if (level.time > ent->s.lerp.u.missile.launchTime && ent->s.lerp.pos.trType != TR_LINEAR && ent->handler == ENT_HANDLER_ROCKET)
     {
         if (weapDef->timeToAccelerate > 0.0)
         {
@@ -3004,7 +3076,11 @@ gentity_s *__cdecl G_FireRocket(
             bolt->s.lerp.pos.trType = TR_GRAVITY;
             bolt->s.lerp.pos.trTime = level.time;
             bolt->missile.stage = MISSILESTAGE_SOFTLAUNCH;
+#ifdef KISAK_SP
+            bolt->missile.flightMode = (MissileFlightMode)!G_TargetAttackProfileTop(target);
+#elif KISAK_MP
             bolt->missile.flightMode = MISSILEFLIGHTMODE_DIRECT;
+#endif
         }
     }
     if (!weapDef->iProjectileSpeed)
@@ -3182,7 +3258,7 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
         }
         else
         {
-            G_MissileTrace(&tr, org, origin, 1023, ent->clipmask);
+            G_MissileTrace(&tr, org, origin, ENTITYNUM_NONE, ent->clipmask);
         }
         if (tr.startsolid)
         {
@@ -3194,7 +3270,7 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
         }
         else
         {
-            if ((tr.surfaceFlags & 0x3F00000) == 0x900000)
+            if ((tr.surfaceFlags & 0x1F00000) == 0x900000)
                 Missile_PenetrateGlass(&tr, ent, org, origin, weapDef->damage, 1);
             Vec3Lerp(org, origin, tr.fraction, endpos);
             //DrawMissilePredictDebug(org, endpos);
@@ -3220,10 +3296,10 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
                     }
                     else
                     {
-                        G_MissileTrace(&tr, traceStart, origin, 1023, ent->clipmask);
+                        G_MissileTrace(&tr, traceStart, origin, ENTITYNUM_NONE, ent->clipmask);
                     }
                     Vec3Lerp(traceStart, origin, tr.fraction, endpos);
-                    if (tr.fraction != 1.0 && Trace_GetEntityHitId(&tr) == 1022)
+                    if (tr.fraction != 1.0 && Trace_GetEntityHitId(&tr) == ENTITYNUM_WORLD)
                     {
                         org[0] = endpos[0] + (float)(endpos[0] - origin[0]);
                         org[1] = endpos[1] + (float)(endpos[1] - origin[1]);
@@ -3248,7 +3324,7 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
                 }
                 else
                 {
-                    G_MissileTrace(&tr, traceStart, origin, 1023, ent->clipmask);
+                    G_MissileTrace(&tr, traceStart, origin, ENTITYNUM_NONE, ent->clipmask);
                 }
                 Vec3Lerp(traceStart, origin, tr.fraction, endpos);
                 if (tr.fraction != 1.0)

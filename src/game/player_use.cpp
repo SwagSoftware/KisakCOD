@@ -239,7 +239,7 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     //float v53; // [sp+A4h] [-22ECh]
     //float v54; // [sp+A8h] [-22E8h]
     float areaMins[3]; // [sp+B0h] [-22E0h] BYREF
-    int v56[180]; // [sp+C0h] [-22D0h] BYREF
+    int v56[MAX_GENTITIES];
 
     v6 = 0;
     client = ent->client;
@@ -264,11 +264,8 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
     //v51[2] = v44 + (float)96.0;
 
     {
-        // PPC: _FP12 = 192.0f - radius; fsel f31, f12, f13, f0
-        // fsel(192-radius, radius, 192) = (192 >= radius) ? radius : 192 = min(radius, 192)
-        // i.e. clamp player_throwbackOuterRadius to at most 192.0f
         float radius = player_throwbackOuterRadius->current.value;
-        float searchRadius = (radius <= 192.0f) ? radius : 192.0f;
+        float searchRadius = (radius <= 192.0f) ? 192.0f : radius;
 
         G_GetPlayerViewOrigin(&client->ps, viewOrigin);
         G_GetPlayerViewDirection(ent, forward, 0, 0);
@@ -894,10 +891,10 @@ void __cdecl Player_BanNodesInFront(gentity_s *ent, float dist, const float *sta
     endPoint[2] = (dist * dir[2]) + start[2];
 
 
-    dist2D = Vec2Distance(dir, endPoint);
-    center[0] = (dir[0] + endPoint[0]) * 0.5f;
-    center[1] = (dir[1] + endPoint[1]) * 0.5f;
-    center[2] = (dir[2] + endPoint[2]) * 0.5f;
+    dist2D = Vec2Distance(start, endPoint);
+    center[0] = (start[0] + endPoint[0]) * 0.5f;
+    center[1] = (start[1] + endPoint[1]) * 0.5f;
+    center[2] = (start[2] + endPoint[2]) * 0.5f;
 
     iNodeCount = Path_NodesInCylinder(center, (dist2D * 0.5f), 80.0f, nodes, 4, 270332);
 
@@ -1001,7 +998,7 @@ void __cdecl Player_GrenadeThrowBlockFriendlies(
         end[0] = (dir[0] * dist) + start[0];
         end[1] = (dir[1] * dist) + start[1];
         end[2] = (dir[2] * dist) + start[2];
-        Actor_BroadcastLineEvent(ent, AI_EV_BULLET, 1 << ent->sentient->eTeam, dir, end, 0.0f);
+        Actor_BroadcastLineEvent(ent, AI_EV_BULLET, 1 << ent->sentient->eTeam, start, end, 0.0f);
     }
 }
 

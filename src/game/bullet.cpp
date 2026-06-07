@@ -262,6 +262,20 @@ void __cdecl Bullet_Fire(
         range = 8192.0f;
     }
 
+#ifdef KISAK_SP
+    // SP Bullet_Fire (0x8221b0b8) seeds spread with G_rand() (NOT the passed gameTime),
+    // and zeroes the attacker's lean head-hit box contents across the traces.
+    int randSeed = G_rand();
+    int savedHitContents = 0;
+    if (attacker->client && attacker->client->pHitHitEnt)
+    {
+        savedHitContents = attacker->client->pHitHitEnt->r.contents;
+        attacker->client->pHitHitEnt->r.contents = 0;
+    }
+#else
+    int32_t randSeed = gameTime;
+#endif
+
     for (shotIndex = 0; shotIndex < shotCount; ++shotIndex)
     {
         if (weaponEnt)
@@ -278,12 +292,16 @@ void __cdecl Bullet_Fire(
         v9.start[0] = wp->muzzleTrace[0];
         v9.start[1] = wp->muzzleTrace[1];
         v9.start[2] = wp->muzzleTrace[2];
-        Bullet_Endpos(shotIndex + gameTime, spread, v9.end, v9.dir, wp, range);
+        Bullet_Endpos(shotIndex + randSeed, spread, v9.end, v9.dir, wp, range);
         if (bullet_penetrationEnabled->current.enabled && wp->weapDef->penetrateType)
-            Bullet_FirePenetrate(&v9, wp->weapDef, attacker, gameTime);
+            Bullet_FirePenetrate(&v9, wp->weapDef, attacker, randSeed);
         else
-            Bullet_FireExtended(&v9, wp->weapDef, attacker, gameTime);
+            Bullet_FireExtended(&v9, wp->weapDef, attacker, randSeed);
     }
+#ifdef KISAK_SP
+    if (attacker->client && attacker->client->pHitHitEnt)
+        attacker->client->pHitHitEnt->r.contents = savedHitContents;
+#endif
 #ifdef KISAK_MP
     G_AntiLag_RestoreClientPos(&antilagClients);
 #endif
@@ -844,6 +862,12 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                 return;
 
             traceHit = Bullet_Trace(bp, weapDef, attacker, &br, br.depthSurfaceType);
+
+#ifdef KISAK_SP
+            // IDA: stop penetrating once the advanced trace reaches a player, or an AI-vs-AI hit.
+            if (br.hitEnt && (br.hitEnt->client || (br.hitEnt->actor && attacker->actor)))
+                return;
+#endif
 
             Com_Memcpy((char *)&revBp, (char *)bp, 64);
 

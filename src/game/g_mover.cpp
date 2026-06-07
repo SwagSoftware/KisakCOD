@@ -380,10 +380,10 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     float v17; // [esp+78h] [ebp-201Ch]
     char v18; // [esp+7Fh] [ebp-2015h]
     float maxBound[3]; // [esp+80h] [ebp-2014h]
-    int entityList[1024]; // [esp+8Ch] [ebp-2008h] BYREF
+    int entityList[MAX_GENTITIES];
     int i; // [esp+108Ch] [ebp-1008h]
     gentity_s *ent; // [esp+1090h] [ebp-1004h]
-    uint32_t v23[1024]; // [esp+1094h] [ebp-1000h]
+    uint32_t v23[MAX_GENTITIES];
 
     *obstacle = 0;
     v18 = 1;
@@ -439,7 +439,11 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
     }
 
     SV_UnlinkEntity(pusher);
-    v9 = CM_AreaEntities(minPos, maxPos, entityList, 1024, 0x6000180);
+#ifdef KISAK_MP // KISAKTODO: flag fixes
+    v9 = CM_AreaEntities(minPos, maxPos, entityList, MAX_GENTITIES, 0x6000180);
+#elif KISAK_SP
+    v9 = CM_AreaEntities(minPos, maxPos, entityList, MAX_GENTITIES, 0x2000180);
+#endif
     Vec3Add(pusher->r.currentOrigin, move, pusher->r.currentOrigin);
     Vec3Add(pusher->r.currentAngles, amove, pusher->r.currentAngles);
     SV_LinkEntity(pusher);

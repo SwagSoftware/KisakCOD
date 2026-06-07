@@ -71,7 +71,7 @@ actor_prone_info_s *__cdecl G_BypassForCG_GetClientActorProneInfo(int iEntNum)
             v2->r.inuse,
             v2->s.eType,
             v6,
-            HIDWORD(v5),
+            v1,
             v5,
             v4,
             v3);

@@ -1456,7 +1456,7 @@ int __cdecl G_RadiusDamage(
     float v82[4]; // [sp+78h] [-22F8h] BYREF
     float dir[4]; // [sp+88h] [-22E8h] BYREF
     float v84[6]; // [sp+98h] [-22D8h] BYREF
-    int v85[176]; // [sp+B0h] [-22C0h] BYREF
+    int v85[MAX_GENTITIES];
 
     v44 = 0;
     Actor_BroadcastPointEvent(attacker, 7, 14, origin, 0.0);

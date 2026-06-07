@@ -171,7 +171,7 @@ void __cdecl Touch_Item(gentity_s *ent, gentity_s *other, int32_t touched)
                         G_AddEvent(other, pickupEvent, weapIndex);
                     if (pickedUp)
                     {
-                        if (ent->s.eType == ET_ITEM)
+                        if (ent->s.eType == ET_MISSILE)
                             Scr_Notify(ent, scr_const.death, 0);
                         G_FreeEntity(ent);
                     }
@@ -302,7 +302,7 @@ LABEL_12:
         {
             droppedEnt->spawnflags = ent->spawnflags & 0xFFFFFFFE;
             droppedEnt->s.groundEntityNum = ent->s.groundEntityNum;
-            if ((droppedEnt->flags & 0x1000) != 0 && ent->tagInfo && ent->tagInfo->parent)
+            if ((droppedEnt->flags & FL_SUPPORTS_LINKTO) != 0 && ent->tagInfo && ent->tagInfo->parent)
             {
                 G_SetOrigin(droppedEnt, ent->r.currentOrigin);
                 G_SetAngle(droppedEnt, ent->r.currentAngles);
@@ -771,7 +771,7 @@ int32_t __cdecl GetFreeDropCueIdx()
             return i;
 
         ent = level.droppedWeaponCue[i].ent();
-        if ((ent->flags & 0x1000000) == 0)
+        if ((ent->flags & FL_WEAPON_BEING_GRABBED) == 0)
         {
             if (bg_itemlist[ent->s.index.brushmodel].giType != IT_WEAPON)
                 MyAssertHandler(".\\game\\g_items.cpp", 670, 0, "%s", "bg_itemlist[ ent->s.index.item ].giType == IT_WEAPON");

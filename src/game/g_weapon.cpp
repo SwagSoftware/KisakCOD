@@ -182,12 +182,34 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
         return 0;
     hitEntId = Trace_GetEntityHitId(&tr);
     traceEnt = &g_entities[hitEntId];
+
+#ifdef KISAK_SP
+    // SP: AI must not melee a same-team sentient.
+    if (!ent->client && ent->sentient && traceEnt->sentient
+        && ent->sentient->eTeam == traceEnt->sentient->eTeam)
+        return 0;
+    // SP: rumble the client victim on melee impact.
+    if (traceEnt->client && wp->weapDef->meleeImpactRumble && *wp->weapDef->meleeImpactRumble)
+    {
+        traceEnt->r.svFlags &= ~1u;
+        G_AddEvent(traceEnt, 70, G_RumbleIndex(wp->weapDef->meleeImpactRumble));
+    }
+    if (ent->client && traceEnt->sentient)
+        G_AddEvent(ent, EV_MELEE_BLOOD, 0);
+
+    if (traceEnt->client || traceEnt->actor)
+        tent = G_TempEntity(endpos, 35);
+    else
+        tent = G_TempEntity(endpos, 36);
+#elif KISAK_MP
     if (ent->client && traceEnt->client)
         G_AddEvent(ent, EV_MELEE_BLOOD, 0);
     if (traceEnt->client)
         tent = G_TempEntity(endpos, 35);
     else
         tent = G_TempEntity(endpos, 36);
+#endif
+
     tent->s.otherEntityNum = traceEnt->s.number;
     v10 = wp->weapDef->knifeModel && ent->client;
     tent->s.eventParm = v10;
@@ -463,7 +485,6 @@ bool __cdecl LogAccuracyHit(gentity_s *target, gentity_s *attacker)
 
 void __cdecl FireWeapon(gentity_s *ent, int gametime)
 {
-    double v2; // st7
     float offset[3]; // [esp+18h] [ebp-60h] BYREF
     float fAimSpreadAmount; // [esp+24h] [ebp-54h]
     float minSpread; // [esp+28h] [ebp-50h] BYREF
@@ -476,8 +497,6 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
 #elif KISAK_SP
 	if ((ent->client->ps.eFlags & 0x20300) == 0 || !ent->active)
 #endif
-
-    if ((ent->client->ps.eFlags & 0x300) == 0 || !ent->active)
     {
         Scr_Notify(ent, scr_const.weapon_fired, 0);
         wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
@@ -485,10 +504,10 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
         aimSpreadScale = ent->client->currentAimSpreadScale;
         BG_GetSpreadForWeapon(&ent->client->ps, wp.weapDef, &minSpread, &maxSpread);
         if (ent->client->ps.fWeaponPosFrac == 1.0)
-            v2 = (maxSpread - wp.weapDef->fAdsSpread) * aimSpreadScale + wp.weapDef->fAdsSpread;
+            fAimSpreadAmount = (maxSpread - wp.weapDef->fAdsSpread) * aimSpreadScale + wp.weapDef->fAdsSpread;
         else
-            v2 = (maxSpread - minSpread) * aimSpreadScale + minSpread;
-        fAimSpreadAmount = v2;
+            fAimSpreadAmount = (maxSpread - minSpread) * aimSpreadScale + minSpread;
+
         if (wp.weapDef->weapType)
         {
             if (wp.weapDef->weapType == WEAPTYPE_GRENADE)
@@ -503,10 +522,22 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
                 }
                 else
                 {
-                    offset[0] = 0.0;
-                    offset[1] = 0.0;
-                    offset[2] = 0.0;
-                    Weapon_RocketLauncher_Fire(ent, ent->s.weapon, fAimSpreadAmount, &wp, vec3_origin, 0, offset);
+                    gentity_s *target;
+#ifdef KISAK_SP
+                    // IDA: lock-on rockets pass the locked target + its offset
+                    if ((ent->client->ps.weapLockFlags & 2) != 0)
+                    {
+                        target = &level.gentities[ent->client->ps.weapLockedEntnum];
+                        G_TargetGetOffset(target, offset);
+                    }
+                    else
+#endif
+                    {
+                        target = NULL;
+                        Vec3Clear(offset);
+                    }
+
+                    Weapon_RocketLauncher_Fire(ent, ent->s.weapon, fAimSpreadAmount, &wp, vec3_origin, target, offset);
                 }
             }
             else
@@ -569,7 +600,11 @@ void __cdecl FireWeaponMelee(gentity_s *ent, int gametime)
 {
     weaponParms wp; // [esp+10h] [ebp-40h] BYREF
 
+#ifdef KISAK_MP
     if ((ent->client->ps.eFlags & 0x300) == 0 || !ent->active)
+#elif KISAK_SP
+    if ((ent->client->ps.eFlags & 0x20300) == 0 || !ent->active)
+#endif
     {
         wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
         G_GetPlayerViewOrigin(&ent->client->ps, wp.muzzleTrace);
