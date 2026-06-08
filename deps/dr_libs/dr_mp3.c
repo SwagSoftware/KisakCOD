@@ -3489,6 +3489,25 @@ DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata(drmp3* pMP3, const char* pF
     return DRMP3_TRUE;
 }
 
+DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata2(drmp3* pMP3, FILE* pFile, drmp3_meta_proc onMeta, void* pUserDataMeta, const drmp3_allocation_callbacks* pAllocationCallbacks)
+{
+    drmp3_bool32 result;
+
+    if (pMP3 == NULL) {
+        return DRMP3_FALSE;
+    }
+
+    DRMP3_ZERO_OBJECT(pMP3);
+
+    result = drmp3_init_internal(pMP3, drmp3__on_read_stdio, drmp3__on_seek_stdio, drmp3__on_tell_stdio, onMeta, (void*)pFile, pUserDataMeta, pAllocationCallbacks);
+    if (result != DRMP3_TRUE) {
+        fclose(pFile);
+        return result;
+    }
+
+    return DRMP3_TRUE;
+}
+
 DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata_w(drmp3* pMP3, const wchar_t* pFilePath, drmp3_meta_proc onMeta, void* pUserDataMeta, const drmp3_allocation_callbacks* pAllocationCallbacks)
 {
     drmp3_bool32 result;
@@ -3516,6 +3535,11 @@ DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata_w(drmp3* pMP3, const wchar_
 DRMP3_API drmp3_bool32 drmp3_init_file(drmp3* pMP3, const char* pFilePath, const drmp3_allocation_callbacks* pAllocationCallbacks)
 {
     return drmp3_init_file_with_metadata(pMP3, pFilePath, NULL, NULL, pAllocationCallbacks);
+}
+
+DRMP3_API drmp3_bool32 drmp3_init_file2(drmp3* pMP3, FILE* pFilePath, const drmp3_allocation_callbacks* pAllocationCallbacks)
+{
+    return drmp3_init_file_with_metadata2(pMP3, pFilePath, NULL, NULL, pAllocationCallbacks);
 }
 
 DRMP3_API drmp3_bool32 drmp3_init_file_w(drmp3* pMP3, const wchar_t* pFilePath, const drmp3_allocation_callbacks* pAllocationCallbacks)

@@ -13,6 +13,60 @@
 #include <cgame/cg_main.h>
 #endif
 
+#if defined(_WIN32)
+#include <stdio.h>
+#include <Windows.h>
+#include <io.h>
+#include <fcntl.h>
+
+FILE* fmemopen(void* buf, size_t size, const char* mode) {
+    char temp_path[MAX_PATH + 1];
+    char temp_file[MAX_PATH + 1];
+
+    // Only basic reading/updating modes are straightforward to map this way
+    if (strcmp(mode, "r") != 0 && strcmp(mode, "r+") != 0 && strcmp(mode, "rb") != 0) {
+        return NULL;
+    }
+
+    if (!GetTempPathA(MAX_PATH, temp_path)) return NULL;
+    if (!GetTempFileNameA(temp_path, "fmem", 0, temp_file)) return NULL;
+
+    // Create file with system flags to delete it on close and cache aggressively in RAM
+    HANDLE hFile = CreateFileA(temp_file,
+        GENERIC_READ | GENERIC_WRITE,
+        0,
+        NULL,
+        CREATE_ALWAYS,
+        FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
+        NULL);
+
+    if (hFile == INVALID_HANDLE_VALUE) return NULL;
+
+    // Convert Win32 HANDLE to a standard runtime file descriptor, then to FILE*
+    int fd = _open_osfhandle((intptr_t)hFile, _O_BINARY);
+    if (fd == -1) {
+        CloseHandle(hFile);
+        return NULL;
+    }
+
+    FILE* fp = _fdopen(fd, "w+b");
+    if (!fp) {
+        _close(fd);
+        return NULL;
+    }
+
+    // Pre-populate the temp file with your memory buffer
+    if (buf && size) {
+        if (fwrite(buf, 1, size, fp) != size) {
+            fclose(fp);
+            return NULL;
+        }
+        rewind(fp); // Reset stream pointer back to the beginning
+    }
+
+    return fp;
+}
+#endif
 void __cdecl TRACK_snd_driver()
 {
     track_static_alloc_internal(&paGlob, sizeof(paGlob), "paGlob", 13);
@@ -474,8 +528,8 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     double LerpedSlavePercentage;
     double Stream3DVolumeFallOff;
     float *org;
-    char filename[132];
-    char realname[256];
+    char filename[132] = { 0 };
+    char realname[256] = { 0 };
     int start_msec;
     int listenerIndex;
     int playbackId;
@@ -513,16 +567,82 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
 
     {
         PROF_SCOPED("SND_open_stream");
-        if (!drmp3_init_file(&st->wav, realname, NULL))
+        // Kisak: We need to figure out if this is a wav or mp3 and open the correct decoder
+        // Since LWSS hates C++, I'll do it the old fashion way
+        // NOTE/TODO: This should be done by peeking the header, takes out any variable randomness that the game could throw
+        // But I'll handle that later
+        const char* extension = strrchr(filename, '.');
+        if (extension != nullptr)
         {
-            Com_PrintError(9, "Couldn't open stream '%s' from alias '%s'\n",
+#if defined(_WIN32)
+            bool isWav = _stricmp(extension, ".wav") == 0;
+            bool isMp3 = _stricmp(extension, ".mp3") == 0;
+#else
+            bool isWav = strcasecmp(extension, ".wav") == 0;
+            bool isMp3 = strcasecmp(extension, ".mp3") == 0;
+#endif
+            if (isWav)
+            {
+                void* fileData = nullptr;
+                int fileLength = FS_ReadFile(realname, &fileData);
+                if (fileLength == -1 || fileData == nullptr)
+                {
+                    st->drType = DR_TYPE_NONE;
+                    Com_PrintError(9, "Couldn't open wav stream data '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
+                    return SND_SetPlaybackIdNotPlayed(index);
+                }
+
+                FILE* fileHandle = fmemopen(fileData, fileLength, "r");
+
+                FS_FreeMem((char*)fileData);
+
+                st->drType = DR_TYPE_WAV;
+                if (!drwav_init_file2(&st->dr.wav, fileHandle, nullptr))
+                {
+                    st->drType = DR_TYPE_NONE;
+                    Com_PrintError(9, "Couldn't open wav stream '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
+                    return SND_SetPlaybackIdNotPlayed(index);
+                }
+            }
+            else if (isMp3)
+            {
+                void* fileData = nullptr;
+                int fileLength = FS_ReadFile(realname, &fileData);
+                
+                FILE* fileHandle = fmemopen(fileData, fileLength, "r");
+
+                FS_FreeMem((char*)fileData);
+
+                st->drType = DR_TYPE_MP3;
+                if (!drmp3_init_file2(&st->dr.mp3, fileHandle, NULL))
+                {
+                    st->drType = DR_TYPE_NONE;
+                    Com_PrintError(9, "Couldn't open mp3 stream '%s' from alias '%s'\n",
+                        realname, startAliasInfo->alias0->aliasName);
+                    return SND_SetPlaybackIdNotPlayed(index);
+                }
+            }
+            else
+            {
+                st->drType = DR_TYPE_NONE;
+                Com_PrintError(9, "Couldn't open stream '%s' from alias '%s', no decoder available.\n",
+                    realname, startAliasInfo->alias0->aliasName);
+                return SND_SetPlaybackIdNotPlayed(index);
+            }
+        }
+        else
+        {
+            st->drType = DR_TYPE_NONE;
+            Com_PrintError(9, "Couldn't open stream '%s' from alias '%s', no extension available.\n",
                 realname, startAliasInfo->alias0->aliasName);
             return SND_SetPlaybackIdNotPlayed(index);
         }
     }
 
-    srcChannelCount = (int)st->wav.channels;
-    uint32_t baserate = st->wav.sampleRate;
+    // srcChannelCount = (int)st->wav.channels;
+    srcChannelCount = st->drType == DR_TYPE_WAV ? st->dr.wav.channels : st->dr.mp3.channels;
+    // uint32_t baserate = st->wav.sampleRate;
+    uint32_t baserate = st->drType == DR_TYPE_WAV ? st->dr.wav.sampleRate : st->dr.mp3.sampleRate;
 
     float pitchScale = startAliasInfo->timescale ? (float)g_snd.timescale : 1.0f;
     paGlob.channels[index].pitch   = startAliasInfo->pitch * pitchScale;
@@ -540,19 +660,33 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     st->looping = (startAliasInfo->alias0->flags & 1) != 0;
     paGlob.channels[index].looping = st->looping;
 
-    drwav_uint64 totalFrames = st->wav.totalPCMFrameCount;
+    // drwav_uint64 totalFrames = st->wav.totalPCMFrameCount;
+    drwav_uint64 totalFrames = st->drType == DR_TYPE_WAV ? st->dr.wav.totalPCMFrameCount : drmp3_get_pcm_frame_count(&st->dr.mp3);
     int total_msec = (baserate > 0) ? (int)(totalFrames * 1000 / baserate) : 0;
 
     if (startAliasInfo->timeshift >= total_msec)
     {
-        drmp3_uninit(&st->wav);
+        //drmp3_uninit(&st->wav);
+        if (st->drType == DR_TYPE_WAV)
+            drwav_uninit(&st->dr.wav);
+        else if (st->drType == DR_TYPE_MP3)
+            drmp3_uninit(&st->dr.mp3);
+
+        st->drType = DR_TYPE_NONE;
         return SND_SetPlaybackIdNotPlayed(index);
     }
 
     if (!total_msec)
     {
         Com_PrintError(1, "ERROR: Sound file '%s' is zero length, invalid\n", realname);
-        drmp3_uninit(&st->wav);
+
+        // drmp3_uninit(&st->wav);
+        if (st->drType == DR_TYPE_WAV)
+            drwav_uninit(&st->dr.wav);
+        else if (st->drType == DR_TYPE_MP3)
+            drmp3_uninit(&st->dr.mp3);
+
+        st->drType = DR_TYPE_NONE;
         return SND_SetPlaybackIdNotPlayed(index);
     }
 
@@ -576,7 +710,11 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     if (start_msec && baserate > 0)
     {
         drmp3_uint64 startFrame = (drmp3_uint64)((float)start_msec * baserate / 1000.0f);
-        drmp3_seek_to_pcm_frame(&st->wav, startFrame);
+
+        if (st->drType == DR_TYPE_WAV)
+            drwav_seek_to_pcm_frame(&st->dr.wav, startFrame);
+        else if (st->drType == DR_TYPE_MP3)
+            drmp3_seek_to_pcm_frame(&st->dr.mp3, startFrame);
     }
 
     total_msec += startAliasInfo->startDelay;
@@ -873,38 +1011,41 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
 
 int __cdecl SND_Get2DChannelLength(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1567, 0, "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)", index);
+    iassert((index >= 0 && index < 0 + g_snd.max_2D_channels));
+
     PaChannelState *ch = &paGlob.channels[index];
+
     return (ch->srcRate > 0) ? (ch->pcmFrames * 1000 / ch->srcRate) : 0;
 }
 
 int __cdecl SND_Get3DChannelLength(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1578, 0, "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)", index);
+    iassert((index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels));
+
     PaChannelState *ch = &paGlob.channels[index];
+
     return (ch->srcRate > 0) ? (ch->pcmFrames * 1000 / ch->srcRate) : 0;
 }
 
 int __cdecl SND_GetStreamChannelLength(int index)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1590, 0, "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)", index);
+    iassert((index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels));
+
     PaStreamState *st = &paGlob.streamStates[index - 40];
-    if (!st->active || st->wav.sampleRate == 0)
+
+    auto sampleRate = st->drType == DR_TYPE_WAV ? st->dr.wav.sampleRate : st->dr.mp3.sampleRate;
+    auto totalPcmFrameCount = st->drType == DR_TYPE_WAV ? st->dr.wav.totalPCMFrameCount : drmp3_get_pcm_frame_count(&st->dr.mp3);
+
+    if (!st->active || sampleRate == 0)
         return 0;
-    return (int)(st->wav.totalPCMFrameCount * 1000 / st->wav.sampleRate);
+
+    return (int)(totalPcmFrameCount * 1000 / sampleRate);
 }
 
 void __cdecl SND_Get2DChannelSaveInfo(int index, snd_save_2D_sample_t *info)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1603, 0, "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)", index);
+    iassert((index >= 0 && index < 0 + g_snd.max_2D_channels));
+
     PaChannelState *ch = &paGlob.channels[index];
     info->fraction = (ch->pcmFrames > 0) ? (ch->pcmPos / (float)ch->pcmFrames) : 0.0f;
     info->pitch    = g_snd.chaninfo[index].pitch;
@@ -917,18 +1058,17 @@ void __cdecl SND_Get2DChannelSaveInfo(int index, snd_save_2D_sample_t *info)
 
 void __cdecl SND_Set2DChannelFromSaveInfo(int index, snd_save_2D_sample_t *info)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1620, 0, "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)", index);
+    iassert((index >= 0 && index < 0 + g_snd.max_2D_channels));
+
     float volume = info->volume * g_snd.volume;
+
     SND_Set2DChannelVolume(index, volume);
 }
 
 void __cdecl SND_Get3DChannelSaveInfo(int index, snd_save_3D_sample_t *info)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1632, 0, "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)", index);
+    iassert((index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels));
+
     PaChannelState *ch = &paGlob.channels[index];
     info->fraction = (ch->pcmFrames > 0) ? (ch->pcmPos / (float)ch->pcmFrames) : 0.0f;
     info->pitch    = g_snd.chaninfo[index].pitch;
@@ -945,22 +1085,19 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
 {
     float *org;
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1656,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert((index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels));
 
     PaStreamState *st = &paGlob.streamStates[index - 40];
-    if (st->active && st->wav.totalPCMFrameCount > 0)
-        info->fraction = (float)((double)st->readPos / (double)st->wav.totalPCMFrameCount);
+    
+    auto totalPcmFrameCount = st->drType == DR_TYPE_WAV ? st->dr.wav.totalPCMFrameCount : drmp3_get_pcm_frame_count(&st->dr.mp3);
+    auto sampleRate = st->drType == DR_TYPE_WAV ? st->dr.wav.sampleRate : st->dr.mp3.sampleRate;
+
+    if (st->active && totalPcmFrameCount > 0)
+        info->fraction = (float)((double)st->readPos / (double)totalPcmFrameCount);
     else
         info->fraction = 0.0f;
 
-    info->rate       = (int)(paGlob.channels[index].pitch * (float)st->wav.sampleRate);
+    info->rate       = (int)(paGlob.channels[index].pitch * (float)sampleRate);
     info->basevolume = g_snd.chaninfo[index].basevolume;
     info->pan        = 0.0f;
     if (g_snd.volume == 0.0f)

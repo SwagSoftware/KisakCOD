@@ -112,16 +112,31 @@ static void PA_StreamFillThread(int param) {
         }
 
         s->lock.lock();
-        drmp3_uint64 got = drmp3_read_pcm_frames_s16(&s->wav, CHUNK, tmp);
-        if (got == 0 && s->looping) {
-            drmp3_seek_to_pcm_frame(&s->wav, 0);
-            got = drmp3_read_pcm_frames_s16(&s->wav, CHUNK, tmp);
+        drmp3_uint64 got = 0;
+        if (s->drType == DR_TYPE_WAV)
+            got = drwav_read_pcm_frames_s16(&s->dr.wav, CHUNK, tmp);
+        else if (s->drType == DR_TYPE_MP3)
+            got = drmp3_read_pcm_frames_s16(&s->dr.mp3, CHUNK, tmp);
+
+        if (got == 0 && s->looping) 
+        {
+            if (s->drType == DR_TYPE_WAV)
+            {
+                drwav_seek_to_pcm_frame(&s->dr.wav, 0);
+                got = drwav_read_pcm_frames_s16(&s->dr.wav, CHUNK, tmp);
+            }
+            else if (s->drType == DR_TYPE_MP3)
+            {
+                drmp3_seek_to_pcm_frame(&s->dr.mp3, 0);
+                got = drmp3_read_pcm_frames_s16(&s->dr.mp3, CHUNK, tmp);
+            }
         }
         s->lock.unlock();
 
         if (got == 0) { s->stopThread = true; break; }
 
-        int ch = (int)s->wav.channels;
+        // int ch = (int)s->wav.channels;
+        int32_t ch = s->drType == DR_TYPE_WAV ? s->dr.wav.channels : s->dr.mp3.channels;
         for (drmp3_uint64 f = 0; f < got; f++) {
             int w = s->writePos % PA_RING_FRAMES;
             if (ch == 2) {
@@ -155,7 +170,13 @@ void PA_StopStreamFillThread(int si) {
         // WaitForSingleObject(s->fillThread, 2000);
         if (s->fillThread.joinable())
             s->fillThread.join();
-        drmp3_uninit(&s->wav);
+
+        if (s->drType == DR_TYPE_WAV)
+            drwav_uninit(&s->dr.wav);
+        else if (s->drType == DR_TYPE_MP3)
+            drmp3_uninit(&s->dr.mp3);
+
+        s->drType == DR_TYPE_NONE;
         s->active = false;
     }
 }
@@ -198,7 +219,7 @@ bool PA_Init() {
         return false;
     }
 
-    g_snd.Initialized2d = 1;
+    g_snd.Initialized2d = 1; 
     g_snd.Initialized3d = 1;
     g_snd.max_2D_channels = 8;
     g_snd.max_3D_channels = 32;
@@ -240,7 +261,13 @@ void PA_ShutdownCleanup() {
             s->stopThread = true;
             if (s->fillThread.joinable())
                 s->fillThread.join();
-            drmp3_uninit(&s->wav);
+
+            if (s->drType == DR_TYPE_WAV)
+                drwav_uninit(&s->dr.wav);
+            else if (s->drType == DR_TYPE_MP3)
+                drmp3_uninit(&s->dr.mp3);
+
+            s->drType == DR_TYPE_NONE;
         }
     }
     if (paGlob.stream) {

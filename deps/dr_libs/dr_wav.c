@@ -4126,6 +4126,10 @@ DRWAV_API drwav_bool32 drwav_init_file(drwav* pWav, const char* filename, const 
     return drwav_init_file_ex(pWav, filename, NULL, NULL, 0, pAllocationCallbacks);
 }
 
+DRWAV_API drwav_bool32 drwav_init_file2(drwav* pWav, FILE* file, const drwav_allocation_callbacks* pAllocationCallbacks)
+{
+    return drwav_init_file_ex2(pWav, file, NULL, NULL, 0, pAllocationCallbacks);
+}
 
 DRWAV_PRIVATE drwav_bool32 drwav_init_file__internal_FILE(drwav* pWav, FILE* pFile, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
 {
@@ -4153,6 +4157,12 @@ DRWAV_API drwav_bool32 drwav_init_file_ex(drwav* pWav, const char* filename, drw
         return DRWAV_FALSE;
     }
 
+    /* This takes ownership of the FILE* object. */
+    return drwav_init_file__internal_FILE(pWav, pFile, onChunk, pChunkUserData, flags, pAllocationCallbacks);
+}
+
+DRWAV_API drwav_bool32 drwav_init_file_ex2(drwav* pWav, FILE* pFile, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+{
     /* This takes ownership of the FILE* object. */
     return drwav_init_file__internal_FILE(pWav, pFile, onChunk, pChunkUserData, flags, pAllocationCallbacks);
 }

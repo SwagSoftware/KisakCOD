@@ -146,11 +146,22 @@ enum {
     PA_RING_FRAMES = 8192 // per-stream ring buffer size in frames
 };
 
+typedef enum _DR_TYPE : int32_t {
+    DR_TYPE_NONE = 0,
+    DR_TYPE_WAV,
+    DR_TYPE_MP3,
+    DR_TYPE_COUNT
+} DR_TYPE;
+
 struct PaStreamState {
     float    ring[PA_RING_FRAMES * PA_OUTPUT_CHANNELS];  // stereo float, pre-converted
     volatile int writePos;      // advanced by fill thread (in frames, never wraps)
     volatile int readPos;       // advanced by audio callback (in frames, never wraps)
-    drmp3    wav;
+    DR_TYPE drType;
+    union {
+        drmp3 mp3;
+        drwav wav;
+    } dr;    
     bool     looping;
     volatile bool active;
     volatile bool stopThread;

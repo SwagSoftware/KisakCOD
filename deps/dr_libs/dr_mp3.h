@@ -76,6 +76,7 @@ extern "C" {
 #define DRMP3_VERSION_STRING    DRMP3_XSTRINGIFY(DRMP3_VERSION_MAJOR) "." DRMP3_XSTRINGIFY(DRMP3_VERSION_MINOR) "." DRMP3_XSTRINGIFY(DRMP3_VERSION_REVISION)
 
 #include <stddef.h> /* For size_t. */
+#include <stdio.h>
 
 /* Sized Types */
 typedef   signed char           drmp3_int8;
@@ -471,9 +472,11 @@ objects because the operating system may restrict the number of file handles an 
 any given time.
 */
 DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata(drmp3* pMP3, const char* pFilePath, drmp3_meta_proc onMeta, void* pUserDataMeta, const drmp3_allocation_callbacks* pAllocationCallbacks);
+DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata2(drmp3* pMP3, FILE* pFile, drmp3_meta_proc onMeta, void* pUserDataMeta, const drmp3_allocation_callbacks* pAllocationCallbacks);
 DRMP3_API drmp3_bool32 drmp3_init_file_with_metadata_w(drmp3* pMP3, const wchar_t* pFilePath, drmp3_meta_proc onMeta, void* pUserDataMeta, const drmp3_allocation_callbacks* pAllocationCallbacks);
 
 DRMP3_API drmp3_bool32 drmp3_init_file(drmp3* pMP3, const char* pFilePath, const drmp3_allocation_callbacks* pAllocationCallbacks);
+DRMP3_API drmp3_bool32 drmp3_init_file2(drmp3* pMP3, FILE* pFile, const drmp3_allocation_callbacks* pAllocationCallbacks);
 DRMP3_API drmp3_bool32 drmp3_init_file_w(drmp3* pMP3, const wchar_t* pFilePath, const drmp3_allocation_callbacks* pAllocationCallbacks);
 #endif
 
