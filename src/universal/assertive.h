@@ -1,8 +1,12 @@
 #pragma once
 
+#if defined(_DEBUG) || defined(RELEASE_ASSERTS)
+#define USE_ASSERTS
+#endif
+
 void MyAssertHandler(const char* filename, int line, int type, const char* fmt, ...);
 
-#ifdef _DEBUG 
+#ifdef USE_ASSERTS
 #define iassert(expression) (void)(                                                       \
             (!!(expression)) ||                                                          \
             (MyAssertHandler(__FILE__, (unsigned)(__LINE__), 0, "%s", #expression), 0) \

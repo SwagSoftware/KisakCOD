@@ -45,7 +45,6 @@ ShadowCookieCmd g_shadowCookieBuf[1];
 
 WorkerCmds g_workerCmds[WRKCMD_COUNT];
 
-
 int __cdecl R_FXNonDependentOrSpotLightPending(void* args)
 {
     return R_FXSpotLightPending() || R_FXNonDependentPending();
@@ -77,7 +76,13 @@ void __cdecl TRACK_r_workercmds()
     track_static_alloc_internal(g_workerCmds, 2176, "g_workerCmds", 18);
 }
 
-WorkerCmdType g_workerCmdMinType;
+volatile LONG g_workerCmdMinType;
+
+static LONG R_GetWorkerCmdMinType()
+{
+    return InterlockedCompareExchange(&g_workerCmdMinType, 0, 0);
+}
+
 int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
 {
     int processed; // [esp+0h] [ebp-Ch]
@@ -101,8 +106,8 @@ int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
                 processed = 1;
             }
         }
-        minType = g_workerCmdMinType;
-        if (g_workerCmdMinType == 0x7FFFFFFF)
+        minType = (WorkerCmdType)R_GetWorkerCmdMinType();
+        if (minType == INT_MAX)
             minType = WRKCMD_FIRST_FRONTEND;
         for (type = minType; type < WRKCMD_COUNT; ++type)
         {
@@ -112,12 +117,12 @@ int __cdecl R_ProcessWorkerCmdsWithTimeoutInternal(int(__cdecl *timeout)())
                 {
                     if (timeout())
                         return 1;
-                    if (g_workerCmdMinType < type)
+                    if (R_GetWorkerCmdMinType() < type)
                         goto restart_2;
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange((volatile uint32_t*)&g_workerCmdMinType, 0x7FFFFFFF, type);
+            InterlockedCompareExchange(&g_workerCmdMinType, INT_MAX, type);
         }
         if (timeout())
             return 1;
@@ -157,8 +162,10 @@ void __cdecl R_WaitWorkerCmdsOfType(WorkerCmdType type)
 
 void __cdecl R_NotifyWorkerCmdType(WorkerCmdType type)
 {
-    if (g_workerCmdMinType > type)
-        InterlockedCompareExchange((volatile uint32_t *)&g_workerCmdMinType, type, g_workerCmdMinType);
+    LONG value = InterlockedCompareExchange(&g_workerCmdMinType, 0, 0);
+    if (value > type)
+     	InterlockedCompareExchange(&g_workerCmdMinType, type, g_workerCmdMinType);
+        
     if (g_workerCmdWaitCount)
         Sys_SetWorkerCmdEvent();
 }
@@ -185,21 +192,22 @@ void __cdecl R_ProcessWorkerCmds()
             while (R_ProcessWorkerCmd(type))
                 processed = 1;
         }
-        minType = g_workerCmdMinType;
-        if (g_workerCmdMinType == 0x7FFFFFFF)
+        minType = (WorkerCmdType)R_GetWorkerCmdMinType();
+        if (minType == INT_MAX)
             minType = WRKCMD_FIRST_FRONTEND;
         for (type = minType; type < WRKCMD_COUNT; ++type)
         {
+            bcassert(type, WRKCMD_COUNT);
             if (g_workerCmds[type].outSize > 0)
             {
                 while (R_ProcessWorkerCmd(type))
                 {
-                    if (g_workerCmdMinType < type)
+                    if (R_GetWorkerCmdMinType() < type)
                         goto restart_1;
                     processed = 1;
                 }
             }
-            InterlockedCompareExchange((volatile uint32_t*)&g_workerCmdMinType, 0x7FFFFFFF, type);
+            InterlockedCompareExchange(&g_workerCmdMinType, INT_MAX, type);
         }
     } while (processed || minType);
 }
@@ -218,6 +226,7 @@ int __cdecl R_ProcessWorkerCmd(WorkerCmdType type)
     uint32_t i; // [esp+79Ch] [ebp-8h]
     uint32_t count; // [esp+7A0h] [ebp-4h]
 
+    bcassert(type, WRKCMD_COUNT);
     workerCmds = &g_workerCmds[type];
     dataSize = workerCmds->dataSize;
     bufCount = workerCmds->bufCount;

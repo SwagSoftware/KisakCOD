@@ -642,7 +642,7 @@ void __cdecl FixWindowsDesktop()
 bool __cdecl QuitOnError();
 void MyAssertHandler(const char *filename, int line, int type, const char *fmt, ...)
 {
-//#ifdef KISAK_PURE
+#ifdef KISAK_PURE
     char shouldBreak; // [esp+3h] [ebp-5h]
     va_list va; // [esp+20h] [ebp+18h] BYREF
     
@@ -682,7 +682,11 @@ void MyAssertHandler(const char *filename, int line, int type, const char *fmt, 
     Sys_LeaveCriticalSection(CRITSECT_ASSERT);
     if (shouldBreak)
         DebugBreak();
-//#else
-//        __debugbreak();
-//#endif
+#else
+
+#ifdef USE_ASSERTS
+        __debugbreak();
+#endif
+
+#endif
 }

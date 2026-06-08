@@ -1019,10 +1019,7 @@ void __cdecl CL_CheckForResend(netsrc_t localClientNum)
     char steamIDbuf[25];
     unsigned char steamTicketBase64[2048]{ 0 };
     bool got;
-
-#ifdef _DEBUG
     unsigned char steamTicketDecodeBuf[1024]{ 0 };
-#endif
 
     iassert(localClientNum == 0);
     connectionState = clientUIActives[0].connectionState;

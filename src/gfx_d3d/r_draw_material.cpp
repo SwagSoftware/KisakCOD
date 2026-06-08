@@ -22,7 +22,7 @@ int __cdecl R_SetupMaterial(
     {
         if (baseTechType == TECHNIQUE_LIT_BEGIN)
         {
-            iassert(drawSurf.fields.primaryLightIndex < info->viewInfo->shadowableLightCount);
+            bcassert(drawSurf.fields.primaryLightIndex, info->viewInfo->shadowableLightCount);
             if (!R_SetMaterial(context, drawSurf, (MaterialTechniqueType)context.source->input.data->primaryLightTechType[surfType][drawSurf.fields.primaryLightIndex]))
             {
                 return 0;
