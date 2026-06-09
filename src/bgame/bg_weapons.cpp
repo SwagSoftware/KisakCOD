@@ -3422,24 +3422,9 @@ void __cdecl PM_ResetWeaponState(playerState_s *ps)
 
 void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, float *kickAVel)
 {
-    double v3; // st7
-    double v4; // [esp+0h] [ebp-58h]
-    double v5; // [esp+8h] [ebp-50h]
-    double v6; // [esp+10h] [ebp-48h]
-    double v7; // [esp+18h] [ebp-40h]
-    double v8; // [esp+20h] [ebp-38h]
-    double v9; // [esp+28h] [ebp-30h]
-    double v10; // [esp+30h] [ebp-28h]
-    double v11; // [esp+38h] [ebp-20h]
     float fReducePercent; // [esp+40h] [ebp-18h]
     float fYawKick; // [esp+44h] [ebp-14h]
-    float fYawKickb; // [esp+44h] [ebp-14h]
-    float fYawKicka; // [esp+44h] [ebp-14h]
-    float fYawKickc; // [esp+44h] [ebp-14h]
     float fPitchKick; // [esp+48h] [ebp-10h]
-    float fPitchKickb; // [esp+48h] [ebp-10h]
-    float fPitchKicka; // [esp+48h] [ebp-10h]
-    float fPitchKickc; // [esp+48h] [ebp-10h]
     int weapIndex; // [esp+4Ch] [ebp-Ch]
     float fPosLerp; // [esp+50h] [ebp-8h]
     WeaponDef *weapDef; // [esp+54h] [ebp-4h]
@@ -3447,52 +3432,49 @@ void __cdecl BG_WeaponFireRecoil(const playerState_s *ps, float *vGunSpeed, floa
     weapIndex = BG_GetViewmodelWeaponIndex(ps);
     weapDef = BG_GetWeaponDef(weapIndex);
     fPosLerp = ps->fWeaponPosFrac;
+
     fReducePercent = 1.0;
     if (ps->weaponRestrictKickTime > 0)
     {
         if (fPosLerp == 1.0)
-            v3 = weapDef->adsGunKickReducedKickPercent * 0.009999999776482582;
+            fReducePercent = weapDef->adsGunKickReducedKickPercent * 0.01f;
         else
-            v3 = weapDef->hipGunKickReducedKickPercent * 0.009999999776482582;
-        fReducePercent = v3;
+            fReducePercent = weapDef->hipGunKickReducedKickPercent * 0.01f;
     }
+
     if (fPosLerp == 1.0)
     {
-        v11 = weapDef->fAdsViewKickPitchMax - weapDef->fAdsViewKickPitchMin;
-        fPitchKick = random() * v11 + weapDef->fAdsViewKickPitchMin;
-        v10 = weapDef->fAdsViewKickYawMax - weapDef->fAdsViewKickYawMin;
-        fYawKick = random() * v10 + weapDef->fAdsViewKickYawMin;
+        fPitchKick = random() * (weapDef->fAdsViewKickPitchMax - weapDef->fAdsViewKickPitchMin) + weapDef->fAdsViewKickPitchMin;
+        fYawKick = random() * (weapDef->fAdsViewKickYawMax - weapDef->fAdsViewKickYawMin) + weapDef->fAdsViewKickYawMin;
     }
     else
     {
-        v9 = weapDef->fHipViewKickPitchMax - weapDef->fHipViewKickPitchMin;
-        fPitchKick = random() * v9 + weapDef->fHipViewKickPitchMin;
-        v8 = weapDef->fHipViewKickYawMax - weapDef->fHipViewKickYawMin;
-        fYawKick = random() * v8 + weapDef->fHipViewKickYawMin;
+        fPitchKick = random() * (weapDef->fHipViewKickPitchMax - weapDef->fHipViewKickPitchMin) + weapDef->fHipViewKickPitchMin;
+        fYawKick = random() * (weapDef->fHipViewKickYawMax - weapDef->fHipViewKickYawMin) + weapDef->fHipViewKickYawMin;
     }
-    fPitchKickb = fPitchKick * fReducePercent;
-    fYawKickb = fYawKick * fReducePercent;
-    *kickAVel = -fPitchKickb;
-    kickAVel[1] = fYawKickb;
+
+    fPitchKick *= fReducePercent;
+    fYawKick *= fReducePercent;
+
+    kickAVel[0] = -fPitchKick;
+    kickAVel[1] = fYawKick;
     kickAVel[2] = kickAVel[1] * -0.5;
+
     if (fPosLerp <= 0.0)
     {
-        v5 = weapDef->fHipGunKickPitchMax - weapDef->fHipGunKickPitchMin;
-        fPitchKicka = random() * v5 + weapDef->fHipGunKickPitchMin;
-        v4 = weapDef->fHipGunKickYawMax - weapDef->fHipGunKickYawMin;
-        fYawKicka = random() * v4 + weapDef->fHipGunKickYawMin;
+        fPitchKick = random() * (weapDef->fHipGunKickPitchMax - weapDef->fHipGunKickPitchMin) + weapDef->fHipGunKickPitchMin;
+        fYawKick = random() * (weapDef->fHipGunKickYawMax - weapDef->fHipGunKickYawMin) + weapDef->fHipGunKickYawMin;
     }
     else
     {
-        v7 = weapDef->fAdsGunKickPitchMax - weapDef->fAdsGunKickPitchMin;
-        fPitchKicka = random() * v7 + weapDef->fAdsGunKickPitchMin;
-        v6 = weapDef->fAdsGunKickYawMax - weapDef->fAdsGunKickYawMin;
-        fYawKicka = random() * v6 + weapDef->fAdsGunKickYawMin;
+        fPitchKick = random() * (weapDef->fAdsGunKickPitchMax - weapDef->fAdsGunKickPitchMin) + weapDef->fAdsGunKickPitchMin;
+        fYawKick = random() * (weapDef->fAdsGunKickYawMax - weapDef->fAdsGunKickYawMin) + weapDef->fAdsGunKickYawMin;
     }
-    fPitchKickc = fPitchKicka * fReducePercent;
-    fYawKickc = fYawKicka * fReducePercent;
-    *vGunSpeed = *vGunSpeed + fPitchKickc;
-    vGunSpeed[1] = vGunSpeed[1] + fYawKickc;
+
+    fPitchKick *= fReducePercent;
+    fYawKick *= fReducePercent;
+    vGunSpeed[0] += fPitchKick;
+    vGunSpeed[1] += fYawKick;
 }
 
 float __cdecl BG_GetBobCycle(const playerState_s *ps)

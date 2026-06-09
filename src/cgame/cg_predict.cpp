@@ -369,42 +369,23 @@ void __cdecl CG_InterpolateGroundTilt(int localClientNum)
 {
     snapshot_s *nextSnap; // r28
     snapshot_s *snap; // r29
-    float *groundTiltAngles; // r31
-    int v4; // r28
-    double frameInterpolation; // fp31
-    int v6; // r30
-    char *v7; // r29
 
     if (cg_paused->current.integer != 2)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
-                910,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        nextSnap = cgArray[0].nextSnap;
-        snap = cgArray[0].snap;
-        if (!cgArray[0].nextSnap)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_predict.cpp", 191, 0, "%s", "nextSnap");
+        cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+        nextSnap = cgameGlob->nextSnap;
+        snap = cgameGlob->snap;
+
+        iassert(nextSnap);
+
         if (nextSnap->serverTime > snap->serverTime)
         {
-            groundTiltAngles = snap->ps.groundTiltAngles;
-            v4 = (char *)nextSnap - (char *)snap;
-            frameInterpolation = cgArray[0].frameInterpolation;
-            v6 = 3;
-            v7 = (char *)((char *)&cgArray[0].oldTime - (char *)snap);
-            do
+            const float frac = cgameGlob->frameInterpolation;
+
+            for (int i = 0; i < 3; ++i)
             {
-                --v6;
-                *(float *)((char *)groundTiltAngles + (unsigned int)v7) = LerpAngle(
-                    *groundTiltAngles,
-                    *(float *)((char *)groundTiltAngles + v4),
-                    frameInterpolation);
-                ++groundTiltAngles;
-            } while (v6);
+                cgameGlob->predictedPlayerState.groundTiltAngles[i] = LerpAngle( snap->ps.groundTiltAngles[i], nextSnap->ps.groundTiltAngles[i], frac );
+            }
         }
     }
 }

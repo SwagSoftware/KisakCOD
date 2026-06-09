@@ -1484,9 +1484,9 @@ void __cdecl G_PlayerEvent(int32_t clientNum, int32_t event)
     float kickAVel[3]; // [esp+8h] [ebp-Ch] BYREF
 
     client = g_entities[clientNum].client;
-    if (!client)
-        MyAssertHandler(".\\game_mp\\g_active_mp.cpp", 1718, 0, "%s", "client");
-    if (event >= 26 && (event <= 27 || event == 38))
+    iassert(client);
+
+    if (event >= EV_FIRE_WEAPON && (event <= EV_FIRE_WEAPON_LASTSHOT || event == EV_FIRE_WEAPON_MG42))
         BG_WeaponFireRecoil(&client->ps, client->vGunSpeed, kickAVel);
 }
 

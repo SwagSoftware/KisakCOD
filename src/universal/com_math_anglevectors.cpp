@@ -1,82 +1,78 @@
 #include "com_math.h"
 
 #include <math.h> //sin(), cos()
+#include "q_shared.h"
+
+// guessing this is in its own file because they have some fancy XBOX ifdef with handmade ASM
 
 void __cdecl AngleVectors(const float *angles, float *forward, float *right, float *up)
 {
-    float cy; // [esp+18h] [ebp-1Ch]
-    float angle; // [esp+1Ch] [ebp-18h]
-    float anglea; // [esp+1Ch] [ebp-18h]
-    float angleb; // [esp+1Ch] [ebp-18h]
-    float sr; // [esp+20h] [ebp-14h]
-    float v9; // [esp+24h] [ebp-10h]
-    float cr; // [esp+28h] [ebp-Ch]
-    float cp; // [esp+2Ch] [ebp-8h]
-    float sy; // [esp+30h] [ebp-4h]
+    float		angle;
+    float		sr, sp, sy, cr, cp, cy;
 
-    angle = angles[1] * 0.01745329238474369;
+    angle = angles[YAW] * (M_PI * 2 / 360.0);
     cy = cos(angle);
     sy = sin(angle);
-    anglea = *angles * 0.01745329238474369;
-    cp = cos(anglea);
-    v9 = sin(anglea);
-    if (forward)
-    {
-        *forward = cp * cy;
-        forward[1] = cp * sy;
-        forward[2] = -v9;
-    }
-    if (right || up)
-    {
-        angleb = angles[2] * 0.01745329238474369;
-        cr = cos(angleb);
-        sr = sin(angleb);
-        if (right)
-        {
-            *right = sr * -1.0 * v9 * cy + cr * -1.0 * -sy;
-            right[1] = sr * -1.0 * v9 * sy + cr * -1.0 * cy;
-            right[2] = sr * -1.0 * cp;
-        }
-        if (up)
-        {
-            *up = cr * v9 * cy + -sr * -sy;
-            up[1] = cr * v9 * sy + -sr * cy;
-            up[2] = cr * cp;
-        }
-    }
+    angle = angles[PITCH] * (M_PI * 2 / 360.0);
+    sp = sin(angle);
+    cp = cos(angle);
+
+	if (forward)
+	{
+		forward[0] = cp*cy;
+		forward[1] = cp*sy;
+		forward[2] = -sp;
+	}
+	if (right || up)
+	{
+		angle = angles[ROLL] * (M_PI*2 / 360.0);
+		sr = sin(angle);
+		cr = cos(angle);
+		if (right)
+		{
+			right[0] = (-sr*sp*cy + cr*sy);
+			right[1] = (-sr*sp*sy + -cr*cy);
+			right[2] = -sr*cp;
+		}
+		if (up)
+		{
+			up[0] = (cr*sp*cy + sr*sy);
+			up[1] = (cr*sp*sy + -sr*cy);
+			up[2] = cr*cp;
+		}
+	}
 }
 
 void __cdecl AnglesToAxis(const float *angles, float axis[3][3])
 {
-    float cy; // [esp+18h] [ebp-1Ch]
-    float angle; // [esp+1Ch] [ebp-18h]
-    float anglea; // [esp+1Ch] [ebp-18h]
-    float angleb; // [esp+1Ch] [ebp-18h]
-    float sr; // [esp+20h] [ebp-14h]
-    float v7; // [esp+24h] [ebp-10h]
-    float cr; // [esp+28h] [ebp-Ch]
-    float cp; // [esp+2Ch] [ebp-8h]
-    float sy; // [esp+30h] [ebp-4h]
+    // This is basically AngleVectors() and then a right subtract, 
+    // but it's been optimized to not calculate and then negate right in this function
+    float		angle;
+    /*static*/ float		sr, sp, sy, cr, cp, cy;
 
-    angle = angles[1] * 0.01745329238474369;
+    angle = angles[YAW] * (M_PI * 2 / 360.0);
     cy = cos(angle);
     sy = sin(angle);
-    anglea = angles[0] * 0.01745329238474369;
-    cp = cos(anglea);
-    v7 = sin(anglea);
+    angle = angles[PITCH] * (M_PI * 2 / 360.0);
+    cp = cos(angle);
+    sp = sin(angle);
 
-    axis[0][0] = cp * cy;
-    axis[0][1] = cp * sy;
-    axis[0][2] = -v7;
-    angleb = angles[2] * 0.01745329238474369;
-    cr = cos(angleb);
-    sr = sin(angleb);
-    axis[1][0] = sr * v7 * cy + -sy * cr;
-    axis[1][1] = sr * v7 * sy + cr * cy;
-    axis[1][2] = sr * cp;
-    axis[2][0] = cr * v7 * cy + -sr * -sy;
-    axis[2][1] = cr * v7 * sy + -sr * cy;
-    axis[2][2] = cr * cp;
+    //forward
+    axis[0][0] = cp*cy;
+    axis[0][1] = cp*sy;
+    axis[0][2] = -sp;
+
+    angle = angles[ROLL] * (M_PI * 2 / 360.0);
+    cr = cos(angle);
+    sr = sin(angle);
+    //right (negated)
+    axis[1][0] = sr*sp*cy + -sy*cr;
+    axis[1][1] = sr*sp*sy + cr*cy;
+    axis[1][2] = sr*cp;
+    //up
+    axis[2][0] = cr*sp*cy + -sr*-sy;
+    axis[2][1] = cr*sp*sy + -sr*cy;
+    axis[2][2] = cr*cp;
 }
 
 float __cdecl Vec4Normalize(float *v)

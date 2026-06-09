@@ -2111,7 +2111,7 @@ void __cdecl CG_FireWeapon(
             if (isPlayer && weaponDef->fireSoundPlayer)
                 firesound = weaponDef->fireSoundPlayer;
 
-            if (event == 27) // SAME IN SP
+            if (event == EV_FIRE_WEAPON_LASTSHOT)
             {
                 if (isPlayer && weaponDef->fireLastSoundPlayer)
                 {

@@ -22,6 +22,7 @@
 #include <game/g_local.h>
 #include "cg_snapshot.h"
 #include <client/cl_scrn.h>
+#include <universal/profile.h>
 
 ClientViewParams clientViewParamsArray[1][1] = { { { 0.0, 0.0, 1.0, 1.0 } } };
 TestEffect s_testEffect[1];
@@ -470,9 +471,9 @@ void __cdecl CG_CalculateView_BobAngles(const cg_s *cgameGlob, float *angles)
 
 void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const cg_s *cgameGlob)
 {
-    float v4[4][3]; // [sp+50h] [-A0h] BYREF
-    float v5[4][3]; // [sp+80h] [-70h] BYREF
-    float v6[4][3]; // [sp+B0h] [-40h] BYREF
+    mat3x3 v4; // [sp+50h] [-A0h] BYREF
+    mat3x3 v5; // [sp+80h] [-70h] BYREF
+    mat3x3 v6; // [sp+B0h] [-40h] BYREF
 
     if (cgameGlob->predictedPlayerState.groundTiltAngles[0] != 0.0
         || cgameGlob->predictedPlayerState.groundTiltAngles[1] != 0.0
@@ -480,8 +481,8 @@ void __cdecl CG_AddGroundTiltToAngles(int localClientNum, float *angles, const c
     {
         AnglesToAxis(cgameGlob->predictedPlayerState.groundTiltAngles, v4);
         AnglesToAxis(angles, v5);
-        MatrixMultiply((const mat3x3&)v5, (const mat3x3 &)v4, (mat3x3 &)v6);
-        AxisToAngles((const mat3x3 &)v6, angles);
+        MatrixMultiply(v5, v4, v6);
+        AxisToAngles(v6, angles);
     }
 }
 
@@ -1701,15 +1702,19 @@ int __cdecl CG_DrawActiveFrame(
     CG_ModelPreviewerFrame(cgArray);
     CG_AddModelPreviewerModel(cgArray[0].frametime);
 #endif
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player state");
-    CG_PredictPlayerState(localClientNum);
-    //PIXEndNamedEvent();
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "view anim");
-    CG_UpdateViewWeaponAnim(localClientNum);
-    //PIXEndNamedEvent();
-    //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "view values");
-    CG_CalcViewValues(localClientNum);
-    //PIXEndNamedEvent();
+    {
+        PROF_SCOPED("player state");
+        CG_PredictPlayerState(localClientNum);
+    }
+    {
+        PROF_SCOPED("view anim");
+        CG_UpdateViewWeaponAnim(localClientNum);
+    }
+    {
+        PROF_SCOPED("view values");
+        CG_CalcViewValues(localClientNum);
+    }
+
     //PIXBeginNamedEvent_Copy_NoVarArgs(0xFFFFFFFF, "player entity");
     if (cl_freemove->current.integer)
         R_SetLodOrigin(&cgArray[0].refdef);
