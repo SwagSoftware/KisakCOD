@@ -902,7 +902,7 @@ void __cdecl G_FreeVehiclePaths()
         do
         {
             v1 = &s_nodes[v0];
-            Scr_FreeEntityNum(v1->index, 3u);
+            Scr_FreeEntityNum(v1->index, CLASS_NUM_VEHICLENODE);
             Scr_SetString(&v1->name, 0);
             Scr_SetString(&v1->target, 0);
             Scr_SetString(&v1->script_linkname, 0);
@@ -922,7 +922,7 @@ void __cdecl G_FreeVehiclePathsScriptInfo()
         v0 = 0;
         do
         {
-            Scr_FreeEntityNum(s_nodes[v0].index, 3u);
+            Scr_FreeEntityNum(s_nodes[v0].index, CLASS_NUM_VEHICLENODE);
             v0 = (__int16)(v0 + 1);
         } while (v0 < s_numNodes);
     }
@@ -1338,7 +1338,7 @@ int __cdecl GScr_GetVehicleNodeIndex(int index)
     scr_entref_t EntityRef; // [sp+50h] [-20h]
 
     EntityRef = Scr_GetEntityRef(index);
-    if (EntityRef.classnum == 3)
+    if (EntityRef.classnum == CLASS_NUM_VEHICLENODE)
     {
         if (EntityRef.entnum >= s_numNodes)
             MyAssertHandler(
@@ -1454,7 +1454,7 @@ void __cdecl GScr_GetVehicleNode()
                 v7 = (__int16)(v7 + 1);
             } while (v7 < v6);
             if (v5)
-                Scr_AddEntityNum(v5->index, 3u);
+                Scr_AddEntityNum(v5->index, CLASS_NUM_VEHICLENODE);
         }
     }
 }
@@ -1499,7 +1499,7 @@ void __cdecl GScr_GetVehicleNodeArray()
                 {
                     if (*(unsigned __int16 *)((char *)&v7->name + v4->ofs) == ConstString)
                     {
-                        Scr_AddEntityNum(v7->index, 3u);
+                        Scr_AddEntityNum(v7->index, CLASS_NUM_VEHICLENODE);
                         Scr_AddArray();
                         v6 = s_numNodes;
                     }
@@ -1521,7 +1521,7 @@ void __cdecl GScr_GetAllVehicleNodes()
         v0 = 0;
         do
         {
-            Scr_AddEntityNum(s_nodes[v0].index, 3u);
+            Scr_AddEntityNum(s_nodes[v0].index, CLASS_NUM_VEHICLENODE);
             Scr_AddArray();
             v0 = (__int16)(v0 + 1);
         } while (v0 < s_numNodes);

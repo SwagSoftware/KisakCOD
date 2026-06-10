@@ -438,7 +438,7 @@ void GScr_PostLoadScripts()
 {
     int32_t classnum; // [esp+0h] [ebp-4h]
 
-    for (classnum = 0; classnum < 4; ++classnum)
+    for (classnum = 0; classnum < CLASS_NUM_COUNT; ++classnum)
         Scr_SetClassMap(classnum);
     GScr_AddFieldsForEntity();
     GScr_AddFieldsForHudElems();
@@ -449,7 +449,7 @@ void __cdecl GScr_FreeScripts()
 {
     int32_t classnum; // [esp+0h] [ebp-4h]
 
-    for (classnum = 0; classnum < 4; ++classnum)
+    for (classnum = 0; classnum < CLASS_NUM_COUNT; ++classnum)
         Scr_RemoveClassMap(classnum);
 }
 

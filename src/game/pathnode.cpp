@@ -406,7 +406,7 @@ void __cdecl GScr_AddFieldsForPathnode()
     for (node_field_t *f = fields_3; f->name; ++f)
     {
         iassert((f - fields_3) == (unsigned short)(f - fields_3));
-        Scr_AddClassField(2, (char *)f->name, (unsigned __int16)(f - fields_3));
+        Scr_AddClassField(CLASS_NUM_PATHNODE, (char *)f->name, (unsigned __int16)(f - fields_3));
     }
 }
 
@@ -416,7 +416,7 @@ pathnode_t *__cdecl Scr_GetPathnode(unsigned int index)
 
     entref = Scr_GetEntityRef(index);
 
-    if (entref.classnum == 2)
+    if (entref.classnum == CLASS_NUM_PATHNODE)
     {
         bcassert(entref.entnum, g_path.actualNodeCount);
 
@@ -440,7 +440,7 @@ void __cdecl G_FreePathnodesScriptInfo()
         do
         {
             iassert(!gameWorldSp.path.nodes[nodeIndex].dynamic.pOwner.isDefined());
-            Scr_FreeEntityNum(nodeIndex++, 2);
+            Scr_FreeEntityNum(nodeIndex++, CLASS_NUM_PATHNODE);
         } while (nodeIndex < g_path.actualNodeCount);
     }
 }
@@ -3060,7 +3060,7 @@ void __cdecl Scr_FreePathnode(pathnode_t *node)
 {
     iassert(!node->dynamic.pOwner.isDefined());
 
-    Scr_FreeEntityNum(Path_ConvertNodeToIndex(node), 2u);
+    Scr_FreeEntityNum(Path_ConvertNodeToIndex(node), CLASS_NUM_PATHNODE);
 }
 
 void __cdecl Scr_AddPathnode(pathnode_t *node)
@@ -3068,7 +3068,7 @@ void __cdecl Scr_AddPathnode(pathnode_t *node)
     unsigned int v1; // r3
 
     v1 = Path_ConvertNodeToIndex(node);
-    Scr_AddEntityNum(v1, 2u);
+    Scr_AddEntityNum(v1, CLASS_NUM_PATHNODE);
 }
 
 void __cdecl Scr_GetNode()
@@ -3125,7 +3125,7 @@ void __cdecl Scr_GetNode()
             if (v5)
             {
                 v9 = Path_ConvertNodeToIndex(v5);
-                Scr_AddEntityNum(v9, 2u);
+                Scr_AddEntityNum(v9, CLASS_NUM_PATHNODE);
             }
         }
     }
@@ -3175,7 +3175,7 @@ void __cdecl Scr_GetNodeArray()
                 if (*(unsigned __int16 *)((char *)&v7->constant.type + v4->ofs) == ConstString)
                 {
                     v8 = Path_ConvertNodeToIndex(v7);
-                    Scr_AddEntityNum(v8, 2u);
+                    Scr_AddEntityNum(v8, CLASS_NUM_PATHNODE);
                     Scr_AddArray();
                     nodes = gameWorldSp.path.nodes;
                     actualNodeCount = g_path.actualNodeCount;
@@ -3200,7 +3200,7 @@ void __cdecl Scr_GetAllNodes()
         do
         {
             v2 = Path_ConvertNodeToIndex(&gameWorldSp.path.nodes[v1]);
-            Scr_AddEntityNum(v2, 2u);
+            Scr_AddEntityNum(v2, CLASS_NUM_PATHNODE);
             Scr_AddArray();
             ++v0;
             ++v1;
@@ -3230,7 +3230,7 @@ void __cdecl Path_Shutdown()
     for (g_path.originErrors = 0; node != &gameWorldSp.path.nodes[g_path.actualNodeCount]; ++node)
     {
         iassert(!node->dynamic.pOwner.isDefined());
-        Scr_FreeEntityNum(Path_ConvertNodeToIndex(node), 2);
+        Scr_FreeEntityNum(Path_ConvertNodeToIndex(node), CLASS_NUM_PATHNODE);
     }
     g_path.actualNodeCount = 0;
     g_pPath = 0;
