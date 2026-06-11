@@ -55,7 +55,15 @@ enum var_stat_t
 
 #define FIRST_DEAD_OBJECT 0x16
 
-#define CLASS_NUM_COUNT 4
+enum scr_classnum_t
+{
+    CLASS_NUM_ENTITY      = 0x0,
+    CLASS_NUM_HUDELEM     = 0x1,
+    CLASS_NUM_PATHNODE    = 0x2,
+    CLASS_NUM_VEHICLENODE = 0x3,
+    CLASS_NUM_COUNT       = 0x4,
+};
+
 #define VAR_NAME_BITS 8
 #define VAR_NAME_LOW_MASK 0x00FFFFFF
 
@@ -235,7 +243,7 @@ struct scr_entref_t // sizeof=0x4
     scr_entref_t()
     {
         entnum = 0;
-        classnum = 0;
+        classnum = CLASS_NUM_ENTITY;
     }
     scr_entref_t(int i)
     {
@@ -505,7 +513,7 @@ uint32_t Scr_InitStringSet();
 void Scr_ShutdownStringSet(uint32_t setId);
 int Scr_AddStringSet(uint32_t setId, const char *string);
 
-extern scr_classStruct_t g_classMap[4];
+extern scr_classStruct_t g_classMap[CLASS_NUM_COUNT];
 extern scrStringDebugGlob_t *scrStringDebugGlob;
 extern scrMemTreePub_t scrMemTreePub;
 extern scrVarGlob_t scrVarGlob;;

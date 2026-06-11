@@ -679,7 +679,7 @@ void __cdecl HECmd_SetText(scr_entref_t entref)
 
 game_hudelem_s *__cdecl HECmd_GetHudElem(scr_entref_t entref)
 {
-    if (entref.classnum == 1)
+    if (entref.classnum == CLASS_NUM_HUDELEM)
     {
         if (entref.entnum >= MAX_HUDELEMS_TOTAL)
             MyAssertHandler(".\\game\\g_hudelem.cpp", 832, 0, "%s", "entref.entnum < ARRAY_COUNT( g_hudelems )");

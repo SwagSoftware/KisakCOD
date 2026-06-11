@@ -406,7 +406,7 @@ void __cdecl GScr_AddFieldsForClient()
             MyAssertHandler(".\\game\\g_client_fields.cpp", 478, 0, "%s", "!((f - fields) & ENTFIELD_MASK)");
         if (f - fields != (uint16_t)(f - fields))
             MyAssertHandler(".\\game\\g_client_fields.cpp", 479, 0, "%s", "(f - fields) == (unsigned short)( f - fields )");
-        Scr_AddClassField(0, (char *)f->name, (uint16_t)(f - fields) | 0xC000);
+        Scr_AddClassField(CLASS_NUM_ENTITY, (char *)f->name, (uint16_t)(f - fields) | 0xC000);
     }
 #endif
 }

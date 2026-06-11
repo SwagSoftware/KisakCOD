@@ -828,7 +828,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
     v15->tree = v17;
     v15->entnum = self->s.number;
     Scr_Notify(self, death, 0);
-    Scr_FreeEntityNum(self->s.number, 0);
+    Scr_FreeEntityNum(self->s.number, CLASS_NUM_ENTITY);
     G_DObjUpdate(self);
     v20 = &g_scr_data.actorCorpseInfo[FreeActorCorpseIndex].proneInfo;
     v21 = (unsigned int*)v25;

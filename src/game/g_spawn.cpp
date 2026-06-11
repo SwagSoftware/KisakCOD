@@ -255,7 +255,7 @@ void __cdecl G_DuplicateScriptFields(gentity_s *dest, const gentity_s *source)
 {
     iassert(dest->s.number == dest - g_entities);
     iassert(source->s.number == source - g_entities);
-    Scr_CopyEntityNum(source->s.number, dest->s.number, 0);
+    Scr_CopyEntityNum(source->s.number, dest->s.number, CLASS_NUM_ENTITY);
 }
 
 const gitem_s *__cdecl G_GetItemForClassname(const char *classname, unsigned __int8 model)
@@ -360,7 +360,7 @@ void __cdecl GScr_AddFieldsForEntity()
         iassert(((f - fields_1) & ENTFIELD_MASK) == ENTFIELD_ENTITY);
         iassert((f - fields_1) == (unsigned short)(f - fields_1));
 
-        Scr_AddClassField(0, (char*)f->name, (unsigned __int16)(f - fields_1));
+        Scr_AddClassField(CLASS_NUM_ENTITY, (char*)f->name, (unsigned __int16)(f - fields_1));
     }
 
     GScr_AddFieldsForActor();
@@ -397,7 +397,7 @@ void __cdecl Scr_FreeEntity(gentity_s *ent)
             "(ent->r.inuse)",
             ent->s.number);
     Scr_FreeEntityFields(ent);
-    Scr_FreeEntityNum(ent->s.number, 0);
+    Scr_FreeEntityNum(ent->s.number, CLASS_NUM_ENTITY);
 }
 
 void __cdecl Scr_AddEntity(gentity_s *ent)
@@ -423,7 +423,7 @@ void __cdecl Scr_AddEntity(gentity_s *ent)
             "%s\n\t(ent->s.number) = %i",
             "(ent->r.inuse)",
             ent->s.number);
-    Scr_AddEntityNum(ent->s.number, 0);
+    Scr_AddEntityNum(ent->s.number, CLASS_NUM_ENTITY);
 }
 
 gentity_s *__cdecl Scr_GetEntityAllowNull(unsigned int index)
@@ -465,9 +465,9 @@ void __cdecl Scr_FreeHudElem(game_hudelem_s *hud)
     bcassert(hud - g_hudelems, MAX_HUDELEMS_TOTAL);
     iassert(hud->elem.type != HE_TYPE_FREE);
 
-    Scr_NotifyNum(hudIndex, 1u, scr_const.death, 0);
+    Scr_NotifyNum(hudIndex, CLASS_NUM_HUDELEM, scr_const.death, 0);
     Scr_FreeHudElemConstStrings(hud);
-    Scr_FreeEntityNum(hudIndex, 1u);
+    Scr_FreeEntityNum(hudIndex, CLASS_NUM_HUDELEM);
 }
 
 void __cdecl Scr_AddHudElem(game_hudelem_s *hud)
@@ -487,7 +487,7 @@ void __cdecl Scr_AddHudElem(game_hudelem_s *hud)
             256);
     if (hud->elem.type == HE_TYPE_FREE)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_spawn.cpp", 936, 0, "%s", "hud->elem.type != HE_TYPE_FREE");
-    Scr_AddEntityNum(v2, 1u);
+    Scr_AddEntityNum(v2, CLASS_NUM_HUDELEM);
 }
 
 game_hudelem_s *__cdecl Scr_GetHudElem(unsigned int index)
@@ -495,7 +495,7 @@ game_hudelem_s *__cdecl Scr_GetHudElem(unsigned int index)
     scr_entref_t entref; // [sp+50h] [-20h]
 
     entref = Scr_GetEntityRef(index);
-    if (entref.classnum == 1)
+    if (entref.classnum == CLASS_NUM_HUDELEM)
     {
         iassert(entref.entnum < MAX_HUDELEMS_TOTAL);
         return &g_hudelems[entref.entnum];
@@ -530,7 +530,7 @@ int __cdecl Scr_ExecEntThread(gentity_s *ent, int handle, unsigned int paramcoun
             "%s\n\t(ent->s.number) = %i",
             "(ent->r.inuse)",
             ent->s.number);
-    return Scr_ExecEntThreadNum(ent->s.number, 0, handle, paramcount);
+    return Scr_ExecEntThreadNum(ent->s.number, CLASS_NUM_ENTITY, handle, paramcount);
 }
 
 void __cdecl Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int paramcount)
@@ -556,7 +556,7 @@ void __cdecl Scr_AddExecEntThread(gentity_s *ent, int handle, unsigned int param
             "%s\n\t(ent->s.number) = %i",
             "(ent->r.inuse)",
             ent->s.number);
-    Scr_AddExecEntThreadNum(ent->s.number, 0, handle, paramcount);
+    Scr_AddExecEntThreadNum(ent->s.number, CLASS_NUM_ENTITY, handle, paramcount);
 }
 
 void __cdecl Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned int paramcount)
@@ -586,7 +586,7 @@ void __cdecl Scr_Notify(gentity_s *ent, unsigned __int16 stringValue, unsigned i
             "%s\n\t(ent->s.number) = %i",
             "(ent->r.inuse)",
             ent->s.number);
-    Scr_NotifyNum(ent->s.number, 0, stringValue, paramcount);
+    Scr_NotifyNum(ent->s.number, CLASS_NUM_ENTITY, stringValue, paramcount);
 }
 
 void __cdecl Scr_GetGenericEnt(unsigned int offset, unsigned int name)
@@ -1298,18 +1298,18 @@ int __cdecl Scr_SetObjectField(unsigned int classnum, unsigned int entnum, int o
 
     switch (classnum)
     {
-    case 0u:
+    case CLASS_NUM_ENTITY:
         result = Scr_SetEntityField(entnum, offset);
         break;
-    case 1u:
+    case CLASS_NUM_HUDELEM:
         Scr_SetHudElemField(entnum, offset);
         result = 1;
         break;
-    case 2u:
+    case CLASS_NUM_PATHNODE:
         Scr_SetPathnodeField(entnum, offset);
         result = 1;
         break;
-    case 3u:
+    case CLASS_NUM_VEHICLENODE:
         v4 = va("vehicle node is read-only", offset);
         Scr_Error(v4);
         result = 1;
@@ -1397,16 +1397,16 @@ void __cdecl Scr_GetObjectField(unsigned int classnum, unsigned int entnum, unsi
 
     switch (classnum)
     {
-    case 0u:
+    case CLASS_NUM_ENTITY:
         Scr_GetEntityField(entnum, offset);
         break;
-    case 1u:
+    case CLASS_NUM_HUDELEM:
         Scr_GetHudElemField(entnum, offset);
         break;
-    case 2u:
+    case CLASS_NUM_PATHNODE:
         Scr_GetPathnodeField(entnum, offset);
         break;
-    case 3u:
+    case CLASS_NUM_VEHICLENODE:
         GScr_GetVehicleNodeField(entnum, offset);
         break;
     default:
