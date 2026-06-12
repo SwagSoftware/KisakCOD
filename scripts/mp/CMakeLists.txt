@@ -15,6 +15,11 @@ include(${SCRIPTS_DIR}/source_groups.cmake)
 # message(${SRC_DIR})
 include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
+add_compile_definitions(PA_ENABLE_DEBUG_OUTPUT PA_LOG_API_CALLS)
+
+# Include Audio
+include(${SCRIPTS_DIR}/extern/portaudio.cmake)
+
 # Add the new executable
 add_executable(${PROJECT_NAME} 
     ${SRCROOT} 
@@ -35,7 +40,8 @@ add_executable(${PROJECT_NAME}
     ${GFX_D3D} 
     ${GROUPVOICE} 
     ${GROUPVOICE_SPEEX} 
-    ${MSSLIB} 
+    #${MSSLIB}
+    ${DR_LIBS}
     ${ODE} 
     ${PHYSICS} 
     ${PHYSICS_ODE} 
@@ -70,3 +76,7 @@ else()
 # Tracy
     include(${SCRIPTS_DIR}/extern/tracy.cmake)
 endif()
+
+# PortAudio
+target_link_libraries(${PROJECT_NAME} PRIVATE portaudio)
+target_include_directories(${PROJECT_NAME} PRIVATE "${PORTAUDIO_INCLUDE_DIR}")

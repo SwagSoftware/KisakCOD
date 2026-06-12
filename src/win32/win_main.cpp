@@ -602,6 +602,11 @@ void Sys_Net_Restart_f()
 
 void __cdecl Sys_CreateSplashWindow()
 {
+	std::string nul;
+	std::cout << "waiting for input" << std::endl;
+	std::cin.get();
+
+
 	HWND__* hwnd; // [esp+0h] [ebp-54h]
 	int bmpSize; // [esp+4h] [ebp-50h]
 	int bmpSize_4; // [esp+8h] [ebp-4Ch]
