@@ -1187,7 +1187,7 @@ void __cdecl CG_DrawCursorhint(
                                 UI_DrawHandlePic(
                                     &scrPlaceView[localClientNum],
                                     (float)((float)((float)(rect->w *(float)widthScale) + (float)scale) *(float)-0.5),
-                                    (float)((float)((float)height *(float)1.5) + (float)x),
+                                    (float)((float)((float)height *(float)1.5) + (float)y),
                                     (float)((float)(rect->w *(float)widthScale) + (float)scale),
                                     (float)((float)(rect->h *(float)heightScale) + (float)scale),
                                     rect->horzAlign,

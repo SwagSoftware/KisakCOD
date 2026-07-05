@@ -2750,7 +2750,11 @@ void LinkThread(uint32_t threadCountId, VariableValue *pos, bool allowFarCall)
 		}
 
 		*(const char **)value->codePosValue = pos->u.codePosValue;
+		
+		RemoveVariable(threadCountId, i + 2);// free the per-reference position temp
 	}
+
+	RemoveVariable(threadCountId, 0);// free the count temp
 }
 
 /*

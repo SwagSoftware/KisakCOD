@@ -2537,6 +2537,12 @@ int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction)
     iassert(ps);
 
     weapDef = BG_GetWeaponDef(ps->weapon);
+
+#ifdef KISAK_SP
+	if ((ps->weapFlags & 8) != 0)// g_friendlyfireDist
+		return 0;
+#endif
+
     shouldStartFiring = (pm->cmd.buttons & PM_GetWeaponFireButton(ps->weapon)) != 0;
     if (weapDef->freezeMovementWhenFiring && ps->groundEntityNum == ENTITYNUM_NONE)
         shouldStartFiring = 0;
