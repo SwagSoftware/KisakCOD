@@ -401,6 +401,7 @@ void GScr_LoadConsts()
 	scr_const.nogravity = GScr_AllocString("nogravity");
 	scr_const.nophysics = GScr_AllocString("nophysics");
 	scr_const.pain = GScr_AllocString("pain");
+	scr_const.path_changed = GScr_AllocString("path_changed");
 	scr_const.pickup = GScr_AllocString("pickup");
 	scr_const.receiver = GScr_AllocString("receiver");
 	scr_const.run = GScr_AllocString("run");

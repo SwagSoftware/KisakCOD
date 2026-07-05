@@ -28,7 +28,11 @@ void __cdecl Jump_RegisterDvars()
         mina,
         DVAR_CHEAT | DVAR_TEMP,
         "The maximum step up to the top of a jump arc");
+#ifdef KISAK_MP
     jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 1, DVAR_CHEAT | DVAR_TEMP, "Slow player movement after jumping");
+#elif KISAK_SP
+    jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 0, DVAR_CHEAT | DVAR_TEMP, "Slow player movement after jumping");
+#endif
     minb.value.max = 1024.0;
     minb.value.min = 0.0;
     jump_ladderPushVel = Dvar_RegisterFloat(

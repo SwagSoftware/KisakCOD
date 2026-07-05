@@ -394,7 +394,6 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
             if (loadScripts)
             {
                 SV_ClearPendingSaves();
-                SV_AddPendingSave("map_restart", "Start Level Save", "", SAVE_TYPE_AUTOSAVE, 2u, 1);
                 SV_ProcessPendingSaves();
             }
         }

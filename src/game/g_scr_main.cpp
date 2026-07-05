@@ -2443,6 +2443,20 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     LABEL_10:
         v8 = G_EntLinkTo(Entity, v5, ConstLowercaseString);
     }
+    if (v8 && Entity->client)
+    {
+        Entity->client->linkAnglesFrac = 1.0f;
+        Entity->client->linkAnglesLocked = 0;
+        Entity->client->link_rotationMovesEyePos = 0;
+        Entity->client->link_useTagAnglesForViewAngles = 1;
+        Entity->client->link_doCollision = 0;
+        Entity->client->linkAnglesMinClamp[0] = -180.0f;
+        Entity->client->linkAnglesMaxClamp[0] = 180.0f;
+        Entity->client->linkAnglesMinClamp[1] = -180.0f;
+        Entity->client->linkAnglesMaxClamp[1] = 180.0f;
+        Entity->client->ps.pm_flags |= 0x1000000u;
+        Entity->client->prevLinkAnglesSet = 0;
+    }
     if (!v8)
     {
         if (!SV_DObjExists(v5))
