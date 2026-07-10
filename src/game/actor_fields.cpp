@@ -1224,7 +1224,7 @@ void __cdecl GScr_AddFieldsForActor()
         iassert(!((f - aifields) & ENTFIELD_MASK));
         iassert((f - aifields) == (unsigned short)(f - aifields));
 
-        Scr_AddClassField(0, (char*)f->name, (unsigned __int16)(f - aifields) | ENTFIELD_ACTOR);
+        Scr_AddClassField(CLASS_NUM_ENTITY, (char*)f->name, (unsigned __int16)(f - aifields) | ENTFIELD_ACTOR);
     }
 }
 

@@ -22,7 +22,7 @@ scrVarDebugPub_t* scrVarDebugPub;
 scrVarDebugPub_t scrVarDebugPubBuf;
 scrVarGlob_t scrVarGlob;
 
-scr_classStruct_t g_classMap[4] =
+scr_classStruct_t g_classMap[CLASS_NUM_COUNT] =
 {
 	{ 0, 0, 0x65, "entity" },
 	{ 0, 0, 0x68, "hudelem" },
@@ -138,7 +138,7 @@ void Scr_InitVariableRange(uint32_t begin, uint32_t end)
 
 void Scr_InitClassMap()
 {
-	for (int classnum = 0; classnum < 4; ++classnum)
+	for (int classnum = 0; classnum < CLASS_NUM_COUNT; ++classnum)
 	{
 		g_classMap[classnum].entArrayId = 0;
 		g_classMap[classnum].id = 0;
@@ -1066,7 +1066,7 @@ int  Scr_GetClassnumForCharId(char charId)
 {
 	int i; // [esp+0h] [ebp-4h]
 
-	for (i = 0; i < 4; ++i)
+	for (i = 0; i < CLASS_NUM_COUNT; ++i)
 	{
 		if (g_classMap[i].charId == charId)
 			return i;
@@ -1491,7 +1491,7 @@ uint32_t  Scr_FindAllVariableField(uint32_t parentId, uint32_t* names)
 		goto $LN18_17;
 	case 0x14u:
 		classnum = parentValue->w.status >> 8;
-		if (classnum >= 4)
+		if (classnum >= CLASS_NUM_COUNT)
 			MyAssertHandler(".\\script\\scr_variable.cpp", 2558, 0, "%s", "classnum < CLASS_NUM_COUNT");
 		for (id = FindFirstSibling(g_classMap[classnum].id); id; id = FindNextSibling(id))
 		{
@@ -2455,7 +2455,7 @@ void Scr_DumpScriptThreads(void)
 			Com_Printf(23, "********************************\n");
 			Com_Printf(23, "var usage: %d, endon usage: %d\n", (int)varUsage, (int)endonUsage);
 			Com_Printf(23, "\n");
-			for (classnum = 0; classnum < 4; ++classnum)
+			for (classnum = 0; classnum < CLASS_NUM_COUNT; ++classnum)
 			{
 				if (g_classMap[classnum].entArrayId)
 				{

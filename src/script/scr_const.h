@@ -394,6 +394,7 @@ struct scr_const_t
     uint16_t nogravity;
     uint16_t nophysics;
     uint16_t pain;
+	uint16_t path_changed;
     uint16_t pickup;
     uint16_t receiver;
     uint16_t run;

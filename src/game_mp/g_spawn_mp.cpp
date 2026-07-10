@@ -170,7 +170,7 @@ void __cdecl GScr_AddFieldsForEntity()
             MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 531, 0, "%s", "((f - fields) & ENTFIELD_MASK) == ENTFIELD_ENTITY");
         if (f - fields_1 != (uint16_t)(f - fields_1))
             MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 532, 0, "%s", "(f - fields) == (unsigned short)( f - fields )");
-        Scr_AddClassField(0, (char *)f->name, (uint16_t)(f - fields_1));
+        Scr_AddClassField(CLASS_NUM_ENTITY, (char *)f->name, (uint16_t)(f - fields_1));
     }
     GScr_AddFieldsForClient();
 }
@@ -224,9 +224,9 @@ int32_t __cdecl Scr_SetObjectField(uint32_t classnum, uint32_t entnum, uint32_t 
 {
     const char *v4; // eax
 
-    if (!classnum)
+    if (classnum == CLASS_NUM_ENTITY)
         return Scr_SetEntityField(entnum, offset);
-    if (classnum == 1)
+    if (classnum == CLASS_NUM_HUDELEM)
     {
         Scr_SetHudElemField(entnum, offset);
     }
@@ -385,7 +385,7 @@ void __cdecl Scr_FreeEntity(gentity_s *ent)
     if (!ent->r.inuse)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 805, 0, "%s\n\t(ent->s.number) = %i", "(ent->r.inuse)", ent->s.number);
     Scr_FreeEntityConstStrings(ent);
-    Scr_FreeEntityNum(ent->s.number, 0);
+    Scr_FreeEntityNum(ent->s.number, CLASS_NUM_ENTITY);
 }
 
 void __cdecl Scr_AddEntity(gentity_s *ent)
@@ -402,7 +402,7 @@ void __cdecl Scr_AddEntity(gentity_s *ent)
             ent - g_entities);
     if (!ent->r.inuse)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 821, 0, "%s\n\t(ent->s.number) = %i", "(ent->r.inuse)", ent->s.number);
-    Scr_AddEntityNum(ent->s.number, 0);
+    Scr_AddEntityNum(ent->s.number, CLASS_NUM_ENTITY);
 }
 
 gentity_s *__cdecl Scr_GetEntityAllowNull(uint32_t index)
@@ -451,9 +451,9 @@ void __cdecl Scr_FreeHudElem(game_hudelem_s *hud)
             1024);
     if (hud->elem.type == HE_TYPE_FREE)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 883, 0, "%s", "hud->elem.type != HE_TYPE_FREE");
-    Scr_NotifyNum(hud - g_hudelems, 1u, scr_const.death, 0);
+    Scr_NotifyNum(hud - g_hudelems, CLASS_NUM_HUDELEM, scr_const.death, 0);
     Scr_FreeHudElemConstStrings(hud);
-    Scr_FreeEntityNum(hud - g_hudelems, 1u);
+    Scr_FreeEntityNum(hud - g_hudelems, CLASS_NUM_HUDELEM);
 }
 
 void __cdecl Scr_AddHudElem(game_hudelem_s *hud)
@@ -470,7 +470,7 @@ void __cdecl Scr_AddHudElem(game_hudelem_s *hud)
             1024);
     if (hud->elem.type == HE_TYPE_FREE)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 904, 0, "%s", "hud->elem.type != HE_TYPE_FREE");
-    Scr_AddEntityNum(hud - g_hudelems, 1u);
+    Scr_AddEntityNum(hud - g_hudelems, CLASS_NUM_HUDELEM);
 }
 
 uint16_t __cdecl Scr_ExecEntThread(gentity_s *ent, int32_t handle, uint32_t paramcount)
@@ -487,7 +487,7 @@ uint16_t __cdecl Scr_ExecEntThread(gentity_s *ent, int32_t handle, uint32_t para
             ent - g_entities);
     if (!ent->r.inuse)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 939, 0, "%s\n\t(ent->s.number) = %i", "(ent->r.inuse)", ent->s.number);
-    return Scr_ExecEntThreadNum(ent->s.number, 0, handle, paramcount);
+    return Scr_ExecEntThreadNum(ent->s.number, CLASS_NUM_ENTITY, handle, paramcount);
 }
 
 void __cdecl Scr_Notify(gentity_s *ent, uint16_t stringValue, uint32_t paramcount)
@@ -496,7 +496,7 @@ void __cdecl Scr_Notify(gentity_s *ent, uint16_t stringValue, uint32_t paramcoun
     iassert(ent->s.number == ent - g_entities);
     iassert(ent->r.inuse);
 
-    Scr_NotifyNum(ent->s.number, 0, stringValue, paramcount);
+    Scr_NotifyNum(ent->s.number, CLASS_NUM_ENTITY, stringValue, paramcount);
 }
 
 void __cdecl Scr_GetEnt()
@@ -891,9 +891,9 @@ void __cdecl Scr_GetObjectField(uint32_t classnum, int entnum, int offset)
 {
     const char *v3; // eax
 
-    if (classnum)
+    if (classnum != CLASS_NUM_ENTITY)
     {
-        if (classnum == 1)
+        if (classnum == CLASS_NUM_HUDELEM)
         {
             Scr_GetHudElemField(entnum, offset);
         }

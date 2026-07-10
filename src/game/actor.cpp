@@ -2113,7 +2113,21 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     vWishDir[1] = self->ent->r.currentOrigin[1];
     vWishDir[2] = self->ent->r.currentOrigin[2];
 
+	float vPrevLookaheadDir[3];
+
+	vPrevLookaheadDir[0] = pPath->lookaheadDir[0];
+	vPrevLookaheadDir[1] = pPath->lookaheadDir[1];
+	vPrevLookaheadDir[2] = pPath->lookaheadDir[2];
+
     Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1);
+
+	float pathDirDot = (pPath->lookaheadDir[0] * vPrevLookaheadDir[0]) + (pPath->lookaheadDir[1] * vPrevLookaheadDir[1]);
+	if (pathDirDot < 0.70700002f)
+	{
+		Scr_AddVector(pPath->lookaheadDir);
+		Scr_AddEntity(self->ent);
+		Scr_Notify(self->ent, scr_const.path_changed, 2u);
+	}
 
     perp[0] = pPath->lookaheadDir[0];
     perp[1] = pPath->lookaheadDir[1];

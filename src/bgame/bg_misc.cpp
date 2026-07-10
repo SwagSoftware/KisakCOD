@@ -459,6 +459,7 @@ void __cdecl BG_RegisterDvars()
         "The time interval before foliage sounds are reset after the player has stopped moving");
     minr.value.max = FLT_MAX;
     minr.value.min = 1.0f;
+#ifdef KISAK_MP
     bg_fallDamageMinHeight = Dvar_RegisterFloat(
         "bg_fallDamageMinHeight",
         128.0f,
@@ -473,6 +474,22 @@ void __cdecl BG_RegisterDvars()
         mins,
         DVAR_CHEAT | DVAR_TEMP | DVAR_SYSTEMINFO,
         "The height that a player will take maximum damage when falling");
+#elif KISAK_SP
+    bg_fallDamageMinHeight = Dvar_RegisterFloat(
+        "bg_fallDamageMinHeight",
+        200.0f,
+        minr,
+        DVAR_CHEAT | DVAR_TEMP | DVAR_SYSTEMINFO,
+        "The height that a player will start to take minimum damage if they fall");
+    mins.value.max = FLT_MAX;
+    mins.value.min = 1.0f;
+    bg_fallDamageMaxHeight = Dvar_RegisterFloat(
+        "bg_fallDamageMaxHeight",
+        350.0f,
+        mins,
+        DVAR_CHEAT | DVAR_TEMP | DVAR_SYSTEMINFO,
+        "The height that a player will take maximum damage when falling");
+#endif
     mint.value.max = 1000.0f;
     mint.value.min = 0.0f;
     inertiaMax = Dvar_RegisterFloat("inertiaMax", 50.0, mint, DVAR_CHEAT | DVAR_TEMP, "Maximum player inertia");

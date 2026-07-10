@@ -380,7 +380,7 @@ const dvar_s *G_RegisterServerDemoDvars()
         "Turn on debug lines for radius damage traces");
     g_useholdtime = Dvar_RegisterInt(
         "g_useholdtime",
-        250,
+        0,
         0,
         0x7FFFFFFF,
         2u,
