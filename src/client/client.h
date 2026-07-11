@@ -28,43 +28,51 @@ enum ConstStringOffsets
     CS_SUNLIGHT               = 7,        // confirmed                         (0x7)
     CS_SUNDIR                 = 8,        // confirmed                         (0x8)
     CS_FRIEND_OVERLAY         = 9,        // sub_437B20(10) used at 0x410E5E   (0x9)
-    CS_FRIEND_OVERLAY_LAST    = 10,       //                                   (0xA)
+    CS_FRIEND_OVERLAY_LAST    = CS_FRIEND_OVERLAY + 1,     //                  (0xA)
     CS_OBJECTIVES             = 11,       // same                              (0xB)
-    CS_OBJECTIVES_LAST        = 26,       //                                   (0x1A)
+    CS_OBJECTIVES_LAST        = CS_OBJECTIVES + 15,     //                     (0x1A)
     CS_TARGETS                = 27,       // same                              (0x1B)
-    CS_TARGETS_LAST           = 58,       //                                   (0x3A)
+    CS_TARGETS_LAST           = CS_TARGETS + 31,     //                        (0x3A)
     CS_USE_TRIG_STRINGS       = 59,       // same                              (0x3B)
-    CS_USE_TRIG_STRINGS_LAST  = 90,       //                                   (0x5A)
+    CS_USE_TRIG_STRINGS_LAST  = CS_USE_TRIG_STRINGS + 31,     //               (0x5A)
     CS_LOCALIZED_STRINGS      = 91,       // confirmed (bootstrap)             (0x5B)
-    CS_LOCALIZED_STRINGS_LAST = 1113,     //                                   (0x459)
+    CS_LOCALIZED_STRINGS_LAST = CS_LOCALIZED_STRINGS + 1022,     //            (0x459)
     CS_CASE_INSENSITIVE_BEGIN = 1114,     //                                   (0x45A)
     CS_AMBIENT                = 1114,     // confirmed                         (0x45A)
+#ifdef KISAK_XBOX
+    CS_RUMBLES                = 1115,
+    CS_RUMBLES_LAST           = CS_RUMBLES + 31,
     // CS_RUMBLES removed in PC SP - Xbox had 32 entries at 0x45B
-    CS_NORTHYAW               = 1115,     // Xbox 0x47B (-32)                  (0x45B)
+#endif
+    CS_NORTHYAW               = 1115,     // Xbox 1147 (-32)                   (0x45B)
     CS_MINIMAP                = 1116,     // confirmed (bootstrap)             (0x45C)
     CS_VISIONSET_NAKED        = 1117,     // confirmed                         (0x45D)
     CS_VISIONSET_NIGHT        = 1118,     // confirmed                         (0x45E)
     CS_NIGHTVISION            = 1119,     // confirmed                         (0x45F)
     CS_LOC_SEL_MTLS           = 1120,     // Xbox 0x480 (-32)                  (0x460)
-    CS_LOC_SEL_MTLS_LAST      = 1122,     //                                   (0x462)
+    CS_LOC_SEL_MTLS_LAST      = CS_LOC_SEL_MTLS + 2,     //                    (0x462)
     CS_MODELS                 = 1123,     // confirmed (bootstrap)             (0x463)
-    CS_MODELS_LAST            = 1634,     //                                   (0x662)
+    CS_MODELS_LAST            = CS_MODELS + 511,     //                        (0x662)
     CS_SOUNDALIASES           = 1635,     // confirmed (EV_SOUND_ALIAS + boot) (0x663)
-    CS_SOUNDALIASES_LAST      = 2146,     //                                   (0x862)
+    CS_SOUNDALIASES_LAST      = CS_SOUNDALIASES + 511,     //                  (0x862)
     CS_EFFECT_NAMES           = 2147,     // confirmed (bootstrap)             (0x863)
-    CS_EFFECT_NAMES_LAST      = 2246,     //                                   (0x8C6)
+    CS_EFFECT_NAMES_LAST      = CS_EFFECT_NAMES + 99,     //                   (0x8C6)
     CS_EFFECT_TAGS            = 2247,     // confirmed (bootstrap)             (0x8C7)
-    CS_EFFECT_TAGS_LAST       = 2502,     //                                   (0x9C6)
+    CS_EFFECT_TAGS_LAST       = CS_EFFECT_TAGS + 255,     //                   (0x9C6)
     CS_SHELLSHOCKS            = 2503,     // Xbox 0x9E7 (-32), NOT in boot     (0x9C7)
-    CS_SHELLSHOCKS_LAST       = 2518,     //                                   (0x9D6)
+    CS_SHELLSHOCKS_LAST       = CS_SHELLSHOCKS + 15,     //                    (0x9D6)
     CS_SCRIPT_MENUS           = 2519,     // Xbox 0x9F7 (-32)                  (0x9D7)
-    CS_SCRIPT_MENUS_LAST      = 2550,     //                                   (0x9F6)
+    CS_SCRIPT_MENUS_LAST      = CS_SCRIPT_MENUS + 31,     //                   (0x9F6)
     CS_SERVER_MATERIALS       = 2551,     // confirmed (bootstrap; Xbox 0xA17) (0x9F7)
-    CS_SERVER_MATERIALS_LAST  = 2678,     //                                   (0xA76)
+    CS_SERVER_MATERIALS_LAST  = CS_SERVER_MATERIALS + 127,     //              (0xA76)
     CS_ITEMS                  = 2679,     // Xbox 0xA97 (-32)                  (0xA77)
-	CS_RUMBLES                = 2680,     // appended for PC SP (32 entries)
-	CS_RUMBLES_LAST           = 2711,
-    CS_MAX                    = 2680,     // Xbox 0xA98 (-32)                  (0xA78)
+// KISAK: The PC Omits these rumble enums (gap above), but they're being re-added to fix the annoying script errors
+#ifndef KISAK_XBOX
+	CS_RUMBLES                = 2680,
+	CS_RUMBLES_LAST           = CS_RUMBLES + 31,
+#endif
+
+    CS_MAX                    //= 2680     // Xbox 0xA98 (-32)                  (0xA78)
 };
 #endif
 

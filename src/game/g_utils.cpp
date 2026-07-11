@@ -610,15 +610,8 @@ int __cdecl G_SoundAliasIndexPermanent(const char *name)
 
 int __cdecl G_RumbleIndex(const char *name)
 {
-    if (!name)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 432, 0, "%s", "name");
-    // KISAKTODO: CS_RUMBLES bucket (1115, size 32) existed in Xbox CoD3-SP but is
-    // ABSENT from the PC SP configstring layout (iw3sp_dump). The slots 1115..1146
-    // in PC SP are CS_NORTHYAW (1115), CS_MINIMAP (1116), CS_VISIONSET_NAKED (1117),
-    // CS_VISIONSET_NIGHT (1118), CS_NIGHTVISION (1119), CS_LOC_SEL_MTLS[0..2]
-    // (1120..1122), and the start of CS_MODELS (1123+). Calling this with the
-    // Xbox values writes garbage into singles + models — broken on PC SP.
-    return G_FindConfigstringIndex(name, 2680, 32, 1, 0);
+    iassert(name);
+    return G_FindConfigstringIndex(name, CS_RUMBLES, 32, 1, 0);
 }
 
 void __cdecl G_SetClientDemoTime(int time)

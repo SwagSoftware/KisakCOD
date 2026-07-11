@@ -10604,37 +10604,16 @@ void __cdecl ScrCmd_LogString(scr_entref_t entref)
 
 void(__cdecl *__cdecl BuiltIn_GetFunction(const char **pName, int *type))()
 {
-    int v2; // r6
-    unsigned int v3; // r31
-    BuiltinFunctionDef *i; // r7
-    const char *actionString; // r10
-    const char *v6; // r11
-    int v7; // r8
-
-    v2 = 0;
-    v3 = 0;
-    for (i = functions; ; ++i)
+    for (unsigned int i = 0; i < ARRAY_COUNT(functions); ++i)
     {
-        actionString = i->actionString;
-        v6 = *pName;
-        do
+        if (!strcmp(*pName, functions[i].actionString))
         {
-            v7 = (unsigned __int8)*v6 - *(unsigned __int8 *)actionString;
-            if (!*v6)
-                break;
-            ++v6;
-            ++actionString;
-        } while (!v7);
-        if (!v7)
-            break;
-        v3 += 12;
-        ++v2;
-        if (v3 >= 0xBC4)// [new 0xBC4 = 3012] [Old 0xBB8 = 3000]
-            return 0;
+            *pName = functions[i].actionString;
+            *type = functions[i].type;
+            return functions[i].actionFunc;
+        }
     }
-    *pName = functions[v2].actionString;
-    *type = functions[v2].type;
-    return functions[v2].actionFunc;
+    return NULL;
 }
 
 void(__cdecl *__cdecl Scr_GetFunction(const char **pName, int *type))()

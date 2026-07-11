@@ -378,23 +378,19 @@ const dvar_s *G_RegisterServerDemoDvars()
         0,
         0x80u,
         "Turn on debug lines for radius damage traces");
+
+    g_useholdtime = Dvar_RegisterInt(
+        "g_useholdtime",
 #ifdef KISAK_XBOX
-    g_useholdtime = Dvar_RegisterInt(
-        "g_useholdtime",
         250,
-        0,
-        0x7FFFFFFF,
-        2u,
-        "The time to hold down the 'use' button to activate a 'use' command");
 #else
-    g_useholdtime = Dvar_RegisterInt(
-        "g_useholdtime",
         0,
+#endif
         0,
         0x7FFFFFFF,
         2u,
         "The time to hold down the 'use' button to activate a 'use' command");
-#endif
+
     player_deathInvulnerableTime = Dvar_RegisterInt(
         "player_deathInvulnerableTime",
         1000,

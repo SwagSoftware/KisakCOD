@@ -3478,7 +3478,7 @@ void __cdecl CL_CheckAutoUpdate()
                     cls.autoupdateServer.ip[2],
                     cls.autoupdateServer.ip[3],
                     v0);
-                v1 = va("getUpdateInfo2 \"%s\" \"%s\" \"%s\"\n", "CoD4 MP", "1.0", "win-x86");
+                v1 = va("getUpdateInfo2 \"%s\" \"%s\" \"%s\"\n", "CoD4 MP", "1.0", CPUSTRING);
                 NET_OutOfBandPrint(NS_CLIENT1, cls.autoupdateServer, v1);
                 autoupdateChecked = 1;
             }
