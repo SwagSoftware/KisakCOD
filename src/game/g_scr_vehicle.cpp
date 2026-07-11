@@ -180,7 +180,9 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 
 void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx)
 {
+#ifdef KISAK_SP
     G_VehInitPathPos(&veh->pathPos);
+#endif
     VEH_InitPhysics(ent);
     veh->entNum = ent->s.number;
     veh->infoIdx = infoIdx;
@@ -225,11 +227,12 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx
     veh->idleSndLerp = 0.0f;
     veh->engineSndLerp = 0.0f;
     veh->turretHitNum = 0;
-
+#ifdef KISAK_SP
     if (s_vehicleInfos[infoIdx].sndIndices[0] && s_vehicleInfos[infoIdx].sndIndices[1])
         veh->idleSndEnt.setEnt(G_SpawnSoundBlend());
     if (s_vehicleInfos[infoIdx].sndIndices[2] && s_vehicleInfos[infoIdx].sndIndices[3])
         veh->engineSndEnt.setEnt(G_SpawnSoundBlend());
+#endif
     veh->hover.hoverRadius = 30.0f;
     veh->hover.hoverSpeed = 17.6f * 0.800000011920929f;
     veh->hover.hoverAccel = 17.6f * 0.5f;

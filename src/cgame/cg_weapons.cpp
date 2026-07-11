@@ -24,6 +24,7 @@
 #include "cg_servercmds.h"
 #include "cg_ents.h"
 #include "cg_main.h"
+#include "cg_view.h"
 #include <game/savememory.h>
 #include <xanim/xanim_readwrite.h>
 #include <gfx_d3d/r_model.h>
@@ -1159,6 +1160,351 @@ void __cdecl PlayNoteMappedSoundAliases(int32_t localClientNum, const char *note
     }
 }
 
+#ifdef KISAK_SP
+static void CalculateWeaponPosition_BobOffset(cg_s *cgameGlob)
+{
+    playerState_s *ps = &cgameGlob->predictedPlayerState;
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(ps);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+
+    float speed = cgameGlob->xyspeed * cg_bobWeaponAmplitude->current.value;
+    float cycle = cgameGlob->fBobCycle + cg_bobWeaponLag->current.value * 3.1415927f + 6.2831855f;
+
+    cgameGlob->vAngOfs[0] = -CG_GetVerticalBobFactor(ps, cycle, speed, cg_bobWeaponMax->current.value);
+    cgameGlob->vAngOfs[1] = -CG_GetHorizontalBobFactor(ps, cycle, speed, cg_bobWeaponMax->current.value);
+    float rollBob = CG_GetHorizontalBobFactor(
+        ps,
+        cycle - 0.47123894f,
+        cg_bobWeaponRollAmplitude->current.value * speed,
+        cg_bobWeaponMax->current.value);
+    cgameGlob->vAngOfs[2] = (rollBob <= 0.0f) ? rollBob : 0.0f;
+
+    if (ps->fWeaponPosFrac != 0.0f)
+    {
+        float adsScale = 1.0f - (1.0f - weapDef->fAdsBobFactor) * ps->fWeaponPosFrac;
+        cgameGlob->vAngOfs[0] = cgameGlob->vAngOfs[0] * adsScale;
+        cgameGlob->vAngOfs[1] = cgameGlob->vAngOfs[1] * adsScale;
+        cgameGlob->vAngOfs[2] = cgameGlob->vAngOfs[2] * adsScale;
+    }
+}
+
+static void CalculateWeaponPosition_BasePosition_angles(cg_s *cgameGlob, float *angles)
+{
+    playerState_s *ps = &cgameGlob->predictedPlayerState;
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(ps);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+    int eFlags = cgameGlob->predictedPlayerEntity.nextState.lerp.eFlags;
+    float minSpeed;
+    float targetAng[3];
+
+    if ((eFlags & 8) != 0)
+        minSpeed = weapDef->fProneRotMinSpeed;
+    else if ((eFlags & 4) != 0)
+        minSpeed = weapDef->fDuckedRotMinSpeed;
+    else
+        minSpeed = weapDef->fStandRotMinSpeed;
+    minSpeed = minSpeed + cg_gun_rot_minspeed->current.value;
+
+    if (cgameGlob->xyspeed <= minSpeed
+        || ps->weaponstate == 7
+        || ps->weaponstate == 25
+        || ps->weaponstate == 26)
+    {
+        targetAng[0] = 0.0f;
+        targetAng[1] = 0.0f;
+        targetAng[2] = 0.0f;
+    }
+    else
+    {
+        float scale = (cgameGlob->xyspeed - minSpeed) / ((float)ps->speed - minSpeed);
+        if (scale < 0.0f)
+            scale = 0.0f;
+        if (scale > 1.0f)
+            scale = 1.0f;
+        const float *rot;
+        if ((eFlags & 8) != 0)
+            rot = weapDef->vProneRot;
+        else if ((eFlags & 4) != 0)
+            rot = weapDef->vDuckedRot;
+        else
+            rot = weapDef->vStandRot;
+        targetAng[0] = cg_gun_rot_p->current.value * scale + rot[0] * scale;
+        targetAng[1] = cg_gun_rot_y->current.value * scale + rot[1] * scale;
+        targetAng[2] = cg_gun_rot_r->current.value * scale + rot[2] * scale;
+    }
+    if (ps->fWeaponPosFrac != 0.0f)
+    {
+        float invFrac = 1.0f - ps->fWeaponPosFrac;
+        targetAng[0] = invFrac * targetAng[0];
+        targetAng[1] = invFrac * targetAng[1];
+        targetAng[2] = invFrac * targetAng[2];
+    }
+    for (int i = 0; i < 3; ++i)
+    {
+        float last = cgameGlob->playerEntity.vLastMoveAng[i];
+        if (last == targetAng[i])
+            continue;
+        float rate;
+        if (ps->viewHeightCurrent == 11.0f)
+            rate = weapDef->fPosProneRotRate + cg_gun_rot_rate->current.value;
+        else
+            rate = weapDef->fPosRotRate + cg_gun_rot_rate->current.value;
+        float delta = rate * (targetAng[i] - last) * (float)cgameGlob->frametime * 0.001f;
+        if (last >= targetAng[i])
+        {
+            if (delta > (float)cgameGlob->frametime * -0.0001f)
+                delta = (float)cgameGlob->frametime * -0.0001f;
+            cgameGlob->playerEntity.vLastMoveAng[i] = last + delta;
+            if (cgameGlob->playerEntity.vLastMoveAng[i] < targetAng[i])
+                cgameGlob->playerEntity.vLastMoveAng[i] = targetAng[i];
+        }
+        else
+        {
+            if (delta < (float)cgameGlob->frametime * 0.0001f)
+                delta = (float)cgameGlob->frametime * 0.0001f;
+            cgameGlob->playerEntity.vLastMoveAng[i] = last + delta;
+            if (cgameGlob->playerEntity.vLastMoveAng[i] > targetAng[i])
+                cgameGlob->playerEntity.vLastMoveAng[i] = targetAng[i];
+        }
+    }
+    if (ps->fWeaponPosFrac == 0.0f)
+    {
+        Vec3Add(angles, cgameGlob->playerEntity.vLastMoveAng, angles);
+    }
+    else if (ps->fWeaponPosFrac < 0.5f)
+    {
+        float blend = 1.0f - (ps->fWeaponPosFrac * 2.0f);
+        Vec3Mad(angles, blend, cgameGlob->playerEntity.vLastMoveAng, angles);
+    }
+}
+
+static void CalculateWeaponPosition_BaseAngles(cg_s *cgameGlob, float *angles)
+{
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+    float vAng[3] = { 0.0f, 0.0f, 0.0f };
+
+    if (BG_IsAimDownSightWeapon(weapIndex))
+    {
+        float frac = cgameGlob->predictedPlayerState.fWeaponPosFrac;
+        if (frac == 1.0f)
+            cgameGlob->playerEntity.bPositionToADS = 0;
+        else if (frac == 0.0f)
+            cgameGlob->playerEntity.bPositionToADS = 1;
+        cgameGlob->playerEntity.fLastWeaponPosFrac = frac;
+        vAng[0] = weapDef->fAdsAimPitch * frac;
+    }
+    CalculateWeaponPosition_BasePosition_angles(cgameGlob, vAng);
+    Vec3Copy(vAng, cgameGlob->playerEntity.vPositionLastAng);
+    Vec3Add(angles, vAng, angles);
+}
+
+static void CalculateWeaponPosition_IdleAngles(cg_s *cgameGlob, float *angles)
+{
+    playerEntity_t *pe = &cgameGlob->playerEntity;
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+    float fIdleAmount;
+    float fIdleSpeed;
+
+    if (BG_IsAimDownSightWeapon(weapIndex))
+    {
+        fIdleAmount = (weapDef->fAdsIdleAmount - weapDef->fHipIdleAmount)
+            * cgameGlob->predictedPlayerState.fWeaponPosFrac
+            + weapDef->fHipIdleAmount;
+        fIdleSpeed = ((float)weapDef->adsIdleSpeed - (float)weapDef->hipIdleSpeed)
+            * cgameGlob->predictedPlayerState.fWeaponPosFrac
+            + (float)weapDef->hipIdleSpeed;
+    }
+    else if (weapDef->fHipIdleAmount == 0.0f)
+    {
+        fIdleSpeed = 1.0f;
+        fIdleAmount = 80.0f;
+    }
+    else
+    {
+        fIdleSpeed = weapDef->hipIdleSpeed;
+        fIdleAmount = weapDef->fHipIdleAmount;
+    }
+
+    int eFlags = cgameGlob->predictedPlayerEntity.nextState.lerp.eFlags;
+    float fIdleFactor;
+    if ((eFlags & 8) != 0)
+        fIdleFactor = weapDef->fIdleProneFactor;
+    else if ((eFlags & 4) != 0)
+        fIdleFactor = weapDef->fIdleCrouchFactor;
+    else
+        fIdleFactor = 1.0f;
+
+    if ((!weapDef->overlayReticle || cgameGlob->predictedPlayerState.fWeaponPosFrac == 0.0f)
+        && fIdleFactor != pe->fLastIdleFactor)
+    {
+        if (fIdleFactor <= pe->fLastIdleFactor)
+        {
+            pe->fLastIdleFactor = pe->fLastIdleFactor - (float)cgameGlob->frametime * 0.00050000002f;
+            if (pe->fLastIdleFactor < fIdleFactor)
+                pe->fLastIdleFactor = fIdleFactor;
+        }
+        else
+        {
+            pe->fLastIdleFactor = pe->fLastIdleFactor + (float)cgameGlob->frametime * 0.00050000002f;
+            if (pe->fLastIdleFactor > fIdleFactor)
+                pe->fLastIdleFactor = fIdleFactor;
+        }
+    }
+
+    float amount = pe->fLastIdleFactor * fIdleAmount;
+    if (weapDef->overlayReticle)
+        amount = (1.0f - cgameGlob->predictedPlayerState.fWeaponPosFrac) * amount;
+
+    cgameGlob->weapIdleTime += (int)((float)cgameGlob->frametime * fIdleSpeed);
+    angles[2] = (float)sin((float)cgameGlob->weapIdleTime * 0.00050000002f) * amount * 0.0099999998f + angles[2];
+    angles[1] = (float)sin((float)cgameGlob->weapIdleTime * 0.00069999998f) * amount * 0.0099999998f + angles[1];
+    angles[0] = (float)sin((float)cgameGlob->weapIdleTime * 0.001f) * amount * 0.0099999998f + angles[0];
+}
+
+static void CalculateWeaponPosition_BobAngles(const cg_s *cgameGlob, float *angles)
+{
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    if (BG_GetWeaponDef(weapIndex)->overlayReticle)
+    {
+        Vec3Mad(angles, 1.0f - cgameGlob->predictedPlayerState.fWeaponPosFrac, cgameGlob->vAngOfs, angles);
+    }
+    else
+    {
+        Vec3Add(cgameGlob->vAngOfs, angles, angles);
+    }
+}
+
+static void CalculateWeaponPosition_GunRecoil(cg_s *cgameGlob, float *angles)
+{
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+    float frac = cgameGlob->predictedPlayerState.fWeaponPosFrac;
+
+    if (!BG_IsAimDownSightWeapon(weapIndex))
+        return;
+
+    float fGunKickAccel = (weapDef->fAdsGunKickAccel - weapDef->fHipGunKickAccel) * frac + weapDef->fHipGunKickAccel;
+    float fGunKickSpeedMax = (weapDef->fAdsGunKickSpeedMax - weapDef->fHipGunKickSpeedMax) * frac + weapDef->fHipGunKickSpeedMax;
+    float fGunKickSpeedDecay = (weapDef->fAdsGunKickSpeedDecay - weapDef->fHipGunKickSpeedDecay) * frac + weapDef->fHipGunKickSpeedDecay;
+    float fGunKickStaticDecay = (weapDef->fAdsGunKickStaticDecay - weapDef->fHipGunKickStaticDecay) * frac + weapDef->fHipGunKickStaticDecay;
+
+    for (int iTimeRemaining = cgameGlob->frametime; iTimeRemaining > 0; iTimeRemaining -= 5)
+    {
+        int iTimeStep = (iTimeRemaining <= 5) ? iTimeRemaining : 5;
+        float fTimeStep = (float)iTimeStep * 0.001f;
+        int bPitchDone = BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
+            &cgameGlob->vGunOffset[0],
+            &cgameGlob->vGunSpeed[0],
+            fTimeStep,
+            weapDef->fGunMaxPitch,
+            fGunKickAccel,
+            fGunKickSpeedMax,
+            fGunKickSpeedDecay,
+            fGunKickStaticDecay);
+        if (BG_CalculateWeaponPosition_GunRecoil_SingleAngle(
+                &cgameGlob->vGunOffset[1],
+                &cgameGlob->vGunSpeed[1],
+                fTimeStep,
+                weapDef->fGunMaxYaw,
+                fGunKickAccel,
+                fGunKickSpeedMax,
+                fGunKickSpeedDecay,
+                fGunKickStaticDecay)
+            && bPitchDone)
+        {
+            break;
+        }
+    }
+    angles[0] = cgameGlob->vGunOffset[0] + angles[0];
+    angles[1] = cgameGlob->vGunOffset[1] + angles[1];
+    angles[2] = cgameGlob->vGunOffset[2] + angles[2];
+}
+
+static void CalculateWeaponPosition_SwayAngles(const cg_s *cgameGlob, float *angles)
+{
+    angles[0] = AngleDelta(angles[0], cgameGlob->swayAngles[0]);
+    angles[1] = AngleDelta(angles[1], cgameGlob->swayAngles[1]);
+}
+
+static void CalculateWeaponPosition_SaveOffsetAngles(cg_s *cgameGlob, float (*axis)[3])
+{
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    float fZoom;
+    float outAngles[3];
+
+    AxisToAngles((const mat3x3&)*axis, outAngles);
+    if (!BG_IsAimDownSightWeapon(weapIndex)
+        || cgameGlob->predictedPlayerState.fWeaponPosFrac == 0.0f
+        || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
+    {
+        cgameGlob->gunPitch = cgameGlob->refdefViewAngles[0];
+        cgameGlob->gunYaw = cgameGlob->refdefViewAngles[1];
+    }
+    else
+    {
+        cgameGlob->gunPitch = AngleNormalize360(outAngles[0]);
+        cgameGlob->gunYaw = AngleNormalize360(outAngles[1]);
+    }
+}
+
+static void CalculateWeaponAxis(cg_s *cgameGlob, float (*axis)[3])
+{
+    unsigned int weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
+    WeaponDef *weapDef = BG_GetWeaponDef(weapIndex);
+    float angles[3];
+    float localAxis[3][3];
+
+    Vec3Clear(angles);
+
+    if (cgameGlob->predictedPlayerState.leanf != 0.0f)
+        angles[2] -= GetLeanFraction(cgameGlob->predictedPlayerState.leanf) * 2.0f;
+
+    CalculateWeaponPosition_BaseAngles(cgameGlob, angles);
+    CalculateWeaponPosition_IdleAngles(cgameGlob, angles);
+    CalculateWeaponPosition_BobAngles(cgameGlob, angles);
+
+    if (!BG_IsAimDownSightWeapon(weapIndex))
+    {
+        angles[0] = angles[0] - cgameGlob->kickAngles[0];
+        angles[1] = angles[1] - cgameGlob->kickAngles[1];
+        angles[2] = angles[2] - cgameGlob->kickAngles[2];
+    }
+
+    if (cgameGlob->damageTime)
+    {
+        float kickScale = (cgameGlob->predictedPlayerState.fWeaponPosFrac + 1.0f) * 0.5f;
+        float kickAmount = kickScale;
+        if (cgameGlob->predictedPlayerState.fWeaponPosFrac != 0.0f && weapDef->overlayReticle)
+            kickAmount = -(cgameGlob->predictedPlayerState.fWeaponPosFrac * 0.75f - 1.0f) * kickScale;
+        float delta = (float)(cgameGlob->time - cgameGlob->damageTime);
+        float riseTime = kickScale * 100.0f;
+        float v11;
+        if (delta < riseTime)
+        {
+            v11 = GetLeanFraction(delta / riseTime) * kickAmount;
+            goto applyDamageKick;
+        }
+        if (1.0f - (delta - riseTime) / (kickScale * 400.0f) > 0.0f)
+        {
+            v11 = (1.0f - GetLeanFraction((delta - riseTime) / (kickScale * 400.0f))) * kickAmount;
+        applyDamageKick:
+            float roll = cgameGlob->v_dmg_roll * v11;
+            angles[0] = cgameGlob->v_dmg_pitch * v11 * 0.5f + angles[0];
+            angles[1] = angles[1] - roll;
+            angles[2] = roll * 0.5f + angles[2];
+        }
+    }
+
+    CalculateWeaponPosition_GunRecoil(cgameGlob, angles);
+    CalculateWeaponPosition_SwayAngles(cgameGlob, angles);
+    AnglesToAxis(angles, localAxis);
+    MatrixMultiply((const mat3x3&)*localAxis, (const mat3x3&)*cgameGlob->viewModelAxis, (mat3x3&)*axis);
+    CalculateWeaponPosition_SaveOffsetAngles(cgameGlob, axis);
+}
+#endif // KISAK_SP
+
 // KISAKTODO: would like to have this function more like blops, it's cleaner
 void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 {
@@ -1191,12 +1537,18 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 #ifdef KISAK_MP
     if (ps->pm_type != PM_SPECTATOR && ps->pm_type != PM_INTERMISSION && !cgameGlob->renderingThirdPerson)
 #elif KISAK_SP
-    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP)
+    if (ps->pm_type != PM_UFO && ps->pm_type != PM_NOCLIP && ps->pm_type != PM_DEAD)
 #endif
     {
         if (cgameGlob->cubemapShot || !cg_drawGun->current.enabled || CG_GetWeapReticleZoom(cgameGlob, &fZoom))
             drawgun = 0;
+#ifdef KISAK_SP
+        if (cgameGlob->hideViewModel)
+            drawgun = 0;
+        if ((ps->eFlags & 0x300) == 0 && (ps->eFlags & 0x20000) == 0)
+#else
         if ((ps->eFlags & 0x300) == 0)
+#endif
         {
             weaponIndex = BG_GetViewmodelWeaponIndex(ps);
             if (weaponIndex <= 0)
@@ -1209,6 +1561,18 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
             }
             else
             {
+#ifdef KISAK_SP
+                CalculateWeaponPosition_BobOffset(cgameGlob);
+                CalculateWeaponPosition_Sway(cgameGlob);
+                CalculateWeaponPosition(cgameGlob, placement.base.origin);
+                Vec3Mad(placement.base.origin, cg_gun_x->current.value, cgameGlob->viewModelAxis[0], placement.base.origin);
+                Vec3Mad(placement.base.origin, cg_gun_y->current.value, cgameGlob->viewModelAxis[1], placement.base.origin);
+                Vec3Mad(placement.base.origin, cg_gun_z->current.value, cgameGlob->viewModelAxis[2], placement.base.origin);
+                CalculateWeaponAxis(cgameGlob, axis);
+                AxisToQuat(axis, placement.base.quat);
+                placement.scale = 1.0f;
+                CG_AddPlayerWeapon(localClientNum, &placement, ps, &cgameGlob->predictedPlayerEntity, drawgun);
+#else
                 CalculateWeaponPosition_Sway(cgameGlob);
                 CalculateWeaponPostion_PositionToADS(cgameGlob, ps);
                 CalculateWeaponPosition(cgameGlob, placement.base.origin);
@@ -1283,6 +1647,7 @@ void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 
                 placement.scale = 1.0f;
                 CG_AddPlayerWeapon(localClientNum, &placement, ps, &cgameGlob->predictedPlayerEntity, drawgun);
+#endif
             }
         }
     }
@@ -1332,14 +1697,11 @@ void __cdecl CalculateWeaponPosition(cg_s *cgameGlob, float *origin)
     float fDist; // [esp+24h] [ebp-10h]
     float tempAngles[3]; // [esp+28h] [ebp-Ch] BYREF
 
-    *origin = 0.0f;
-    origin[1] = 0.0f;
-    origin[2] = 0.0f;
+    Vec3Clear(origin);
+
     if (cgameGlob->predictedPlayerState.leanf != 0.0f && cgameGlob->predictedPlayerState.fWeaponPosFrac < 1.0f)
     {
-        tempAngles[0] = 0.0f;
-        tempAngles[1] = 0.0f;
-        tempAngles[2] = 0.0f;
+        Vec3Clear(tempAngles);
         fLean = GetLeanFraction(cgameGlob->predictedPlayerState.leanf);
         tempAngles[2] = 0.0f - (fLean + fLean);
         fDist = (1.0f - cgameGlob->predictedPlayerState.fWeaponPosFrac) * fLean * 1.6f;
@@ -1347,6 +1709,16 @@ void __cdecl CalculateWeaponPosition(cg_s *cgameGlob, float *origin)
         Vec3Mad(origin, fDist, right, origin);
     }
     CalculateWeaponPosition_BasePosition(cgameGlob, origin);
+#ifdef KISAK_SP
+    {
+        float vOfs[3];
+        float bobAxis[3][3];
+
+        Vec3Copy(origin, vOfs);
+        AnglesToAxis(cgameGlob->vAngOfs, bobAxis);
+        MatrixTransformVector(vOfs, (const mat3x3&)*bobAxis, origin);
+    }
+#endif
     CalculateWeaponPosition_SwayMovement(cgameGlob, origin);
     CalculateWeaponPosition_ToWorldPosition(cgameGlob, origin);
     delta = cgameGlob->time - cgameGlob->landTime;
