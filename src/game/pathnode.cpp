@@ -884,20 +884,18 @@ void Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
         destNode[7] + 16.0f
     };
 
-    int linkCount = bShowAll ? *((uint16_t *)destNode + 31) : *((int16_t *)destNode + 46);
+    const pathnode_t *otherNode = (const pathnode_t *)destNode;
+    int linkCount = bShowAll ? otherNode->constant.totalLinkCount : otherNode->dynamic.wLinkCount;
     int found = 0;
+    int reverseIndex = 0;
 
-    if (linkCount > 0)
+    for (; reverseIndex < linkCount; ++reverseIndex)
     {
-        uint16_t *linkedNodes = (uint16_t *)((char *)destNode + 64); // Offset assumption
-        for (int j = 0; j < linkCount; ++j)
+        const pathnode_t *linked = (const pathnode_t *)((char *)gameWorldSp.path.nodes + (otherNode->constant.Links[reverseIndex].nodeNum << 7));
+        if (linked == node)
         {
-            const pathnode_t *linked = (const pathnode_t *)((char *)gameWorldSp.path.nodes + (linkedNodes[j * 3] << 7));
-            if (linked == node)
-            {
-                found = 1;
-                break;
-            }
+            found = 1;
+            break;
         }
     }
 
@@ -923,64 +921,51 @@ void Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
             0.5f * (start[2] + end[2])
         };
 
-        float dx = end[0] - start[0];
-        float dy = end[1] - start[1];
-        float dz = end[2] - start[2];
+        float dx = start[0] - end[0];
+        float dy = start[1] - end[1];
+        float dz = start[2] - end[2];
 
         float length = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (length == 0.0f)
+            length = 1.0f; // retail fsel zero-guard (1.0f)
 
-        if (length != 0.0f)
+        float invLen = 1.0f / length;
+        float arrowBase[3] =
         {
-            float invLen = 1.0f / length;
-            float dir[3] =
-            {
-                dx * invLen,
-                dy * invLen,
-                dz * invLen
-            };
+            mid[0] + dx * invLen * 8.0f,
+            mid[1] + dy * invLen * 8.0f,
+            mid[2] + dz * invLen * 8.0f
+        };
+        float arrow1[3] = { arrowBase[0], arrowBase[1], arrowBase[2] + 8.0f };
+        float arrow2[3] = { arrowBase[0], arrowBase[1], arrowBase[2] - 8.0f };
 
-            float arrowStart[3] =
-            {
-                mid[0] + dir[0] * 8.0f,
-                mid[1] + dir[1] * 8.0f,
-                mid[2] + dir[2] * 8.0f
-            };
-
-            float arrowEnd[3] =
-            {
-                mid[0] + dir[0] * 8.0f,
-                mid[1] + dir[1] * 8.0f,
-                mid[2] - dir[2] * 8.0f
-            };
-
-            G_DebugLine(arrowStart, mid, colorRed, 0);
-            G_DebugLine(mid, arrowEnd, colorRed, 0);
-        }
+        G_DebugLine(arrow1, mid, colorRed, 0);
+        G_DebugLine(arrow2, mid, colorRed, 0);
 
         return;
     }
 
+    if (node <= (const pathnode_t *)destNode)
+        return;
+
     int flags = 0;
 
-    if (node > (const pathnode_t *)destNode)
+    for (int j = 3; j >= 0; --j)
     {
-        for (int j = 3; j >= 0; --j)
+        if (link->ubBadPlaceCount[j])
         {
-            if (link->ubBadPlaceCount[j])
-            {
-                flags |= 1;
-                break;
-            }
+            flags |= 1;
+            break;
         }
+    }
 
-        uint8_t *badLinkData = (uint8_t *)((uint8_t *)destNode + 64 + 12 * i + 11);
-        for (int j = 3; j >= 0; --j)
+    pathlink_s *reverseLink = &otherNode->constant.Links[reverseIndex];
+    for (int j = 3; j >= 0; --j)
+    {
+        if (reverseLink->ubBadPlaceCount[j])
         {
-            if (badLinkData[-j])
-            {
-                flags |= 2;
-                break;
-            }
+            flags |= 2;
+            break;
         }
     }
 
@@ -1010,46 +995,40 @@ void Path_DrawDebugLink(const pathnode_t *node, const int i, bool bShowAll)
             0.5f * (start[2] + end[2])
         };
 
-        float dx = end[0] - start[0];
-        float dy = end[1] - start[1];
-        float dz = end[2] - start[2];
+        float dx = start[0] - end[0];
+        float dy = start[1] - end[1];
+        float dz = start[2] - end[2];
 
         float length = sqrtf(dx * dx + dy * dy + dz * dz);
+        if (length == 0.0f)
+            length = 1.0f; // retail fsel zero-guard (1.0f)
 
-        if (length != 0.0f)
+        float invLen = 1.0f / length;
+        float dir[3] =
         {
-            float invLen = 1.0f / length;
-            float dir[3] =
-            {
-                dx * invLen,
-                dy * invLen,
-                dz * invLen
-            };
+            dx * invLen,
+            dy * invLen,
+            dz * invLen
+        };
 
-            if (flags == 1)
-            {
-                dir[0] = -dir[0];
-                dir[1] = -dir[1];
-                dir[2] = -dir[2];
-            }
-
-            float arrowStart[3] =
-            {
-                mid[0] + dir[0] * 8.0f,
-                mid[1] + dir[1] * 8.0f,
-                mid[2] + dir[2] * 8.0f
-            };
-
-            float arrowEnd[3] =
-            {
-                mid[0] + dir[0] * 8.0f,
-                mid[1] + dir[1] * 8.0f,
-                mid[2] - dir[2] * 8.0f
-            };
-
-            G_DebugLine(arrowStart, mid, colorBlue, 1);
-            G_DebugLine(mid, arrowEnd, (flags == 1 ? colorBlue : colorRed), 1);
+        if (flags == 1)
+        {
+            dir[0] = -dir[0];
+            dir[1] = -dir[1];
+            dir[2] = -dir[2];
         }
+
+        float arrowBase[3] =
+        {
+            mid[0] + dir[0] * 8.0f,
+            mid[1] + dir[1] * 8.0f,
+            mid[2] + dir[2] * 8.0f
+        };
+        float arrow1[3] = { arrowBase[0], arrowBase[1], arrowBase[2] + 8.0f };
+        float arrow2[3] = { arrowBase[0], arrowBase[1], arrowBase[2] - 8.0f };
+
+        G_DebugLine(arrow1, mid, colorBlue, 1);
+        G_DebugLine(arrow2, mid, colorBlue, 1);
     }
 }
 
@@ -1110,7 +1089,7 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node)
 
     iassert(node);
 
-    G_DebugBox(node->constant.vOrigin, mins, maxs, node->constant.fAngle, nodeColorTable[node->constant.type], 1, 1);
+    G_DebugBox(node->constant.vOrigin, mins, maxs, node->constant.fAngle, nodeColorTable[node->constant.type], 1, 0);
     if ((node->constant.spawnflags & 0x8000) != 0)
     {
         v6 = (float)(node->constant.fAngle * (float)0.017453292);
@@ -1773,7 +1752,7 @@ void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int
                         if (*(unsigned __int16 *)((char *)&nodes->constant.targetname + __ROL4__(nodeForChainNode[v12], 7)) == v4)
                         {
                             v13 = SL_ConvertToString(v4);
-                            Com_Error(ERR_DROP, "node '%s' is not part of a friendly chain", v13);
+                            Com_Error(ERR_DROP, "\x15Node '%s' is not part of a friendly chain\n", v13);
                             nodeForChainNode = gameWorldSp.path.nodeForChainNode;
                             nodes = gameWorldSp.path.nodes;
                             actualNodeCount = g_path.actualNodeCount;
@@ -1783,7 +1762,7 @@ void __cdecl Path_AttachSentientToChainNode(sentient_s *sentient, unsigned __int
                     } while (v6 < actualNodeCount);
                 }
                 v14 = SL_ConvertToString(v4);
-                Com_Error(ERR_DROP, "friendly chain node '%s' does not exist", v14);
+                Com_Error(ERR_DROP, "\x15" "Friendly chain node '%s' does not exist\n", v14);
             }
         }
     }
@@ -2165,7 +2144,7 @@ int __cdecl Path_SaveIndex(const pathnode_t *node)
 pathnode_t *__cdecl Path_LoadNode(unsigned int index)
 {
     if (index > g_path.actualNodeCount)
-        Com_Error(ERR_DROP, "Path_LoadNode: node out of range (%i)", index);
+        Com_Error(ERR_DROP, "\x15Path_LoadNode: node out of range (%i)", index);
     if (index)
         return &gameWorldSp.path.nodes[index - 1];
     else
@@ -2545,7 +2524,7 @@ void __cdecl Path_DisconnectPath_0(gentity_s *ent, pathnode_t *node, pathlink_s 
     next = g_path.pathLinkInfoArray[0].next;
     v7 = g_path.pathLinkInfoArray[0].next;
     if (!g_path.pathLinkInfoArray[0].next)
-        Com_Error(ERR_DROP, "max number of disconnected paths exceeded");
+        Com_Error(ERR_DROP, "\x15Max number of disconnected paths exceeded");
     v8 = &g_path.pathLinkInfoArray[next];
     v9 = node - gameWorldSp.path.nodes;
     g_path.pathLinkInfoArray[0].next = v8->next;
@@ -2661,74 +2640,125 @@ void __cdecl Path_UpdateBadPlaceCountForLink(pathlink_s *link, int teamflags, in
     }
 }
 
-// 
 void Path_UpdateArcBadPlaceCount(badplace_arc_t *arc, int teamFlags, int delta)
 {
-    // Compute angular difference between arc start and end
-    float angleDelta = arc->angle1 - arc->angle0;
+    float n0[3];
+    float n1[3];
+    float vForwardMid[3];
+    float arcCenter[3];
+
+    YawVectors(arc->angle0, 0, n0);
+    YawVectors(arc->angle1, 0, n1);
+    float angleDelta = (float)(arc->angle1 - arc->angle0);
+    n0[1] = -n0[1];
+    n0[0] = -n0[0];
+    float d1 = (float)(arc->origin[1] * n1[1]) + (float)(arc->origin[0] * n1[0]);
+    float d0 = (float)(arc->origin[0] * n0[0]) + (float)(arc->origin[1] * n0[1]);
     if (angleDelta < 0.0f)
-        angleDelta += 360.0f;
+        angleDelta = (float)(angleDelta + 360.0f);
+    int lessThan180 = angleDelta < 180.0f;
+    YawVectors((float)((float)(angleDelta * 0.5f) + arc->angle0), vForwardMid, 0);
+    float sinHalfAngle = sinf((float)(angleDelta * 0.0087266462f));
+    float halfHeightSq = (float)(arc->halfheight * arc->halfheight);
+    float radiusSq = (float)(arc->radius * arc->radius);
+    float extRadius = (float)(arc->radius + 256.0f);
+    float extHeight = (float)(arc->halfheight + 128.0f);
+    float extRadiusSq = (float)(extRadius * extRadius);
+    float extHeightSq = (float)(extHeight * extHeight);
+    float centerDist = (float)((float)((float)(sinHalfAngle / angleDelta) * 76.394371f) * arc->radius);
+    arcCenter[0] = (float)(vForwardMid[0] * centerDist) + arc->origin[0];
+    arcCenter[1] = (float)(vForwardMid[1] * centerDist) + arc->origin[1];
+    arcCenter[2] = (float)(vForwardMid[2] * centerDist) + arc->origin[2];
 
-    bool clockwise = angleDelta < 180.0f;
-
-    // Compute unit vectors for Yaw
-    float arcMidAngle = arc->angle0 + (angleDelta * 0.5f);
-    float direction[3], rightVec[3], upVec[3];
-
-    float startDir[3];
-    YawVectors(arc->angle0, startDir, 0);
-    YawVectors(arc->angle1, direction, 0);
-    YawVectors(arcMidAngle, rightVec, upVec);
-
-    float angleRad = angleDelta * 0.0087266462f;  // Convert degrees to radians
-    float sinAngle = sinf(angleRad);
-
-    float arcRadiusSq = arc->radius * arc->radius;
-    float arcHalfHeightSq = arc->halfheight * arc->halfheight;
-
-    float extendedRadius = arc->radius + 256.0f;
-    float extendedHeight = arc->halfheight + 128.0f;
-    float extendedRadiusSq = extendedRadius * extendedRadius;
-    float extendedHeightSq = extendedHeight * extendedHeight;
-
-    // Compute center point of the arc
-    float scalar = ((sinAngle / angleDelta) * 76.394371f) * arc->radius;
-    float arcCenter[3] = {
-        arc->origin[0] + (rightVec[0] * scalar),
-        arc->origin[1] + (rightVec[1] * scalar),
-        arc->origin[2] + (rightVec[2] * scalar)
-    };
-
-    if (!g_path.actualNodeCount)
-        return;
-
-    for (int nodeIdx = 0; nodeIdx < g_path.actualNodeCount; ++nodeIdx)
+    for (unsigned int nodeIdx = 0; nodeIdx < g_path.actualNodeCount; ++nodeIdx)
     {
         pathnode_t *node = &gameWorldSp.path.nodes[nodeIdx];
-        float *nodeOrigin = node->constant.vOrigin;
+        float *vOrigin = node->constant.vOrigin;
 
-        float dx = nodeOrigin[0] - arc->origin[0];
-        float dy = nodeOrigin[1] - arc->origin[1];
-        float dz = nodeOrigin[2] - arc->origin[2];
+        float dx = (float)(vOrigin[0] - arc->origin[0]);
+        float dz = (float)(vOrigin[2] - arc->origin[2]);
+        float dy = (float)(vOrigin[1] - arc->origin[1]);
+        float horizDistSq = (float)((float)(dy * dy) + (float)(dx * dx));
 
-        float horizontalDistSq = dx * dx + dy * dy;
-        float verticalDistSq = dz * dz;
-
-        if (horizontalDistSq >= extendedRadiusSq || verticalDistSq >= extendedHeightSq)
+        if (horizDistSq >= extRadiusSq || (float)(dz * dz) >= extHeightSq)
             continue;
 
-        float distToArcCenterSq = Vec2DistanceSq(nodeOrigin, arcCenter);
+        float centroidDistSq = Vec2DistanceSq(vOrigin, arcCenter);
 
-        for (int linkIdx = 0; linkIdx < node->constant.totalLinkCount; ++linkIdx)
+        for (unsigned int linkIdx = 0; linkIdx < node->constant.totalLinkCount; ++linkIdx)
         {
             pathlink_s *link = &node->constant.Links[linkIdx];
+            float *vOtherOrigin = (float *)((char *)gameWorldSp.path.nodes + __ROL4__(link->nodeNum, 7)) + 5;
+            float dx2 = (float)(vOtherOrigin[0] - arc->origin[0]);
+            float dy2 = (float)(vOtherOrigin[1] - arc->origin[1]);
+            float dz2 = (float)(vOtherOrigin[2] - arc->origin[2]);
+            float horizDistSq2 = (float)((float)(dy2 * dy2) + (float)(dx2 * dx2));
 
-            // Convert link->nodeNum to real pointer using PPC-specific __ROL4__ trick
-            float *targetNode = (float *)((char *)gameWorldSp.path.nodes + __ROL4__(link->nodeNum, 7));
-            float *targetOrigin = targetNode + 5;
+            if (Vec2DistanceSq(vOtherOrigin, arcCenter) > centroidDistSq)
+                continue;
 
-            // TODO: Insert further checks & cleanup inside the loop
-            // We'll handle this in the next step.
+            if (dz >= arc->halfheight)
+            {
+                if (dz2 >= arc->halfheight)
+                    continue; // both endpoints above the arc
+            }
+            else if (dz <= -arc->halfheight && dz2 <= -arc->halfheight)
+            {
+                continue; // both endpoints below the arc
+            }
+
+            if (horizDistSq > radiusSq && horizDistSq2 > radiusSq)
+            {
+                float negDot = -(float)((float)((float)(vOtherOrigin[1] - vOrigin[1]) * dy)
+                    + (float)((float)(vOtherOrigin[0] - vOrigin[0]) * dx));
+                if (negDot <= 0.0f)
+                    continue;
+                float segDy = (float)(vOtherOrigin[1] - vOrigin[1]);
+                float segLenSq = (float)((float)(segDy * segDy)
+                    + (float)((float)(vOtherOrigin[0] - vOrigin[0]) * (float)(vOtherOrigin[0] - vOrigin[0])));
+                float disc = (float)((float)(negDot * negDot) - (float)((float)(horizDistSq - radiusSq) * segLenSq));
+                if (disc <= 0.0f)
+                    continue;
+                float root = sqrtf(disc);
+                float invSegLenSq = (float)(1.0f / segLenSq);
+                float tEnter = (float)((float)(negDot - root) * invSegLenSq);
+                if (tEnter >= 1.0f)
+                    continue;
+                float zEnter = (float)((float)((float)(vOtherOrigin[2] - vOrigin[2]) * tEnter) + dz);
+                if ((float)(zEnter * zEnter) > halfHeightSq)
+                {
+                    float tExit = (float)((float)(root + negDot) * invSegLenSq);
+                    if (tExit >= 1.0f)
+                        continue;
+                    float zExit = (float)((float)((float)(vOtherOrigin[2] - vOrigin[2]) * tExit) + dz);
+                    if ((float)(zExit * zExit) > halfHeightSq && (float)(zExit * zEnter) >= 0.0f)
+                        continue;
+                }
+            }
+
+            if (arc->angle0 != 0.0f || arc->angle1 != 360.0f)
+            {
+                float s0 = (float)((float)((float)(vOrigin[1] * n0[1]) + (float)(vOrigin[0] * n0[0])) - d0);
+                float s0other = (float)((float)((float)(vOtherOrigin[1] * n0[1]) + (float)(vOtherOrigin[0] * n0[0])) - d0);
+                if (lessThan180)
+                {
+                    // wedge < 180: skip if both endpoints outside EITHER boundary plane
+                    if (s0 < 0.0f && s0other < 0.0f)
+                        continue;
+                    if ((float)((float)((float)(vOrigin[1] * n1[1]) + (float)(vOrigin[0] * n1[0])) - d1) < 0.0f
+                        && (float)((float)((float)(vOtherOrigin[1] * n1[1]) + (float)(vOtherOrigin[0] * n1[0])) - d1) < 0.0f)
+                        continue;
+                }
+                else if (s0 < 0.0f && s0other < 0.0f)
+                {
+                    // wedge >= 180: skip only if both endpoints outside BOTH boundary planes
+                    if ((float)((float)((float)(vOrigin[1] * n1[1]) + (float)(vOrigin[0] * n1[0])) - d1) < 0.0f
+                        && (float)((float)((float)(vOtherOrigin[1] * n1[1]) + (float)(vOtherOrigin[0] * n1[0])) - d1) < 0.0f)
+                        continue;
+                }
+            }
+
+            Path_UpdateBadPlaceCountForLink(link, teamFlags, delta);
         }
     }
 }
@@ -2750,12 +2780,13 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
     unsigned int v17; // r29
     int v18; // r31
     pathlink_s *v19; // r3
-    pathsort_t nodes[768]; // [sp+50h] [-3870h] BYREF
+    pathsort_t nodes[512]; // [sp+50h] [-3870h] BYREF
+    unsigned char nodeInBrush[0x2000]; // [sp+1850h] [-2070h] BYREF
 
     iassert(brushEnt);
     iassert(brushEnt->r.currentAngles[PITCH] == 0.f && brushEnt->r.currentAngles[ROLL] == 0.f);
 
-    memset(nodes, 0, sizeof(nodes));
+    memset(nodeInBrush, 0, sizeof(nodeInBrush));
 
     radius = RadiusFromBounds2D(brushEnt->r.mins, brushEnt->r.maxs);
     height = (float)(brushEnt->r.maxs[2] - brushEnt->r.mins[2]);
@@ -2775,7 +2806,7 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
             node = nodePtr->node;
 
             if (SV_EntityContact(nodePtr->node->constant.vOrigin, nodePtr->node->constant.vOrigin, brushEnt))
-                *((_BYTE *)&nodes[512].node + (uintptr_t)node - (uintptr_t)gameWorldSp.path.nodes) = 1; // KISAKTODO 
+                nodeInBrush[node - gameWorldSp.path.nodes] = 1;
 
             nodeCount--;
             ++nodePtr;
@@ -2790,7 +2821,7 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
         do
         {
             v16 = &gameWorldSp.path.nodes[v15];
-            if (!*((_BYTE *)&nodes[512].node + v13))// KISAKTODO 
+            if (!nodeInBrush[v13])
             {
                 v17 = 0;
                 if (v16->constant.totalLinkCount)
@@ -2799,7 +2830,7 @@ void __cdecl Path_UpdateBrushBadPlaceCount(gentity_s *brushEnt, int teamflags, i
                     do
                     {
                         v19 = &v16->constant.Links[v18];
-                        if (*((_BYTE *)&nodes[512].node + v19->nodeNum))// KISAKTODO 
+                        if (nodeInBrush[v19->nodeNum])
                             Path_UpdateBadPlaceCountForLink(v19, teamflags, delta);
                         ++v17;
                         ++v18;
@@ -4246,7 +4277,7 @@ void __cdecl Path_DrawDebugNearestNode(float *vOrigin, int numNodes)
         if (v5)
             Path_DrawDebugNode(vOrigin, v5);
         else
-            G_DebugCircle(vOrigin, 192.0, 0, (int)colorRed, 1, 1);
+            G_DebugCircle(vOrigin, 192.0, colorRed, 1, 1, 0);
     }
     else
     {

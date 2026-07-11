@@ -465,7 +465,7 @@ int __cdecl G_WorldDirToScreenPos(
     if (fov_x <= 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_targets.cpp", 360, 0, "%s", "fov_x > 0");
     AnglesToAxis(player->s.lerp.apos.trBase, v17);
-    MatrixTransposeTransformVector(outScreenPos, (const mat3x3&)v17, v16);
+    MatrixTransposeTransformVector(worldDir, (const mat3x3&)v17, v16);
     if (v16[0] <= 0.0)
         return 0;
     *(double *)&v9 = (float)((float)((float)fov_x * (float)0.017453292) * (float)0.5);

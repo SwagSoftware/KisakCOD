@@ -169,6 +169,25 @@ struct  CustomSearchInfo_FindPathAway
         Vec3Sub(pSuccessor->constant.vOrigin, this->m_vAwayFromPos, diff);
         return this->m_fDistAway - (Vec3Length(diff));
     }
+
+
+    bool IsGoal(pathnode_t *pCurrent)
+    {
+        float dx = pCurrent->constant.vOrigin[0] - this->m_vAwayFromPos[0];
+        float dy = pCurrent->constant.vOrigin[1] - this->m_vAwayFromPos[1];
+        float dz = pCurrent->constant.vOrigin[2] - this->m_vAwayFromPos[2];
+        float distSq = (float)(dz * dz) + (float)((float)(dx * dx) + (float)(dy * dy));
+        if (distSq < this->m_fDistAwaySqrd)
+        {
+            if (distSq > this->m_fBestScore)
+            {
+                this->m_fBestScore = distSq;
+                this->m_pBestNode = pCurrent;
+            }
+            return false;
+        }
+        return true;
+    }
 };
 
 /* 10047 */
@@ -400,7 +419,25 @@ struct  CustomSearchInfo_FindPathClosestPossible
     pathnode_t *m_pNodeTo;
     float negotiationOverlapCost;
 
-    bool IsGoal(pathnode_t *pCurrent) { return pCurrent == m_pNodeTo; }
+
+    bool IsGoal(pathnode_t *pCurrent)
+    {
+        if (pCurrent == m_pNodeTo)
+        {
+            m_pBestNode = m_pNodeTo;
+            return true;
+        }
+        float dx = pCurrent->constant.vOrigin[0] - m_pNodeTo->constant.vOrigin[0];
+        float dy = pCurrent->constant.vOrigin[1] - m_pNodeTo->constant.vOrigin[1];
+        float dz = pCurrent->constant.vOrigin[2] - m_pNodeTo->constant.vOrigin[2];
+        float distSq = (float)(dz * dz) + (float)((float)(dx * dx) + (float)(dy * dy));
+        if (distSq < this->m_fBestScore)
+        {
+            this->m_fBestScore = distSq;
+            this->m_pBestNode = pCurrent;
+        }
+        return false;
+    }
 
     float EvaluateHeuristic(pathnode_t *pSuccessor, const float *vGoalPos)
     {
@@ -1251,12 +1288,12 @@ bool __cdecl Path_PredictionTrace(
 
         if (trace.fraction < 0.0001) // blops fix
         {
-            break;
+            return 0;
         }
 
         if (trace.startsolid && !allowStartSolid)
         {
-            break;
+            return 0;
         }
 
         if (!trace.allsolid && trace.fraction == 1.0f)
@@ -1280,7 +1317,7 @@ bool __cdecl Path_PredictionTrace(
             if (vTraceEndPos[2] < vSource[2] || trace.fraction == 1.0 || trace.normal[2] >= 0.7f)
             {
                 vTraceEndPos[2] += stepheight;
-                return I_fabs(((vTraceEndPos[2] + stepheight) - vEndPos[2])) < 72.0f;
+                return I_fabs(vTraceEndPos[2] - vEndPos[2]) < 72.0f;
             }
             else
             {
@@ -1587,8 +1624,8 @@ void __cdecl Path_TrimCompletedPath(path_t *pPath, const float *vStartPos)
         d1 = (float)((float)(pPath->lookaheadDir[1] * (float)(vCurrPoint->vOrigPoint[1] - vStartPos[1]))
             + (float)((float)(vCurrPoint->vOrigPoint[0] - *vStartPos) * pPath->lookaheadDir[0]))
             - (float)0.000099999997;
-        iassert(d1);
-        iassert(d2);
+        iassert(d1 <= 0);
+        iassert(d2 > 0);
         iassert(d1 - d2 < 0);
         fraction = (float)(d1 / (float)(d1 - d2));
         iassert(fraction >= 0);
@@ -3851,8 +3888,8 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
 
             iassert(pt->fDir2D[0] || pt->fDir2D[1]);
 
-            offset[0] = (-dist * pt->fDir2D[0]) + pt->vOrigPoint[0];
-            offset[1] = (-dist * pt->fDir2D[1]) + pt->vOrigPoint[1];
+            offset[0] = ((-dist * pt->fDir2D[0]) + pt->vOrigPoint[0]) - vStartPos[0];
+            offset[1] = ((-dist * pt->fDir2D[1]) + pt->vOrigPoint[1]) - vStartPos[1];
             Vec2Normalize(offset);
 
             float forwardDot = (vDir[0] * offset[0]) + (vDir[1] * offset[1]);
@@ -4377,8 +4414,7 @@ int __cdecl Path_AttemptDodge(
                 lookaheadNextNode = pPath->lookaheadNextNode;
                 wNegotiationStartNode = (unsigned __int16)pPath->wNegotiationStartNode;
 
-                //v48 = lookaheadNextNode;
-                //a20 = lookaheadNextNode;
+                startIndex = lookaheadNextNode;
                 iassert(pPath->wNegotiationStartNode >= 0);
                 iassert(pPath->wNegotiationStartNode <= startIndex);
                 iassert(startIndex < pPath->wPathLen - 1);
@@ -4740,7 +4776,7 @@ bool __cdecl Path_FindPathFromAway(
             * (float)(info.m_vAwayFromPos[0] - (float)vStartPos[0]))
             + (float)((float)(vAwayFromPos[2] - vStartPos[2]) * (float)(vAwayFromPos[2] - vStartPos[2])));
 
-    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAway, false, false>(pPath, eTeam, vStartPos, pNodeFrom, 0, 0, bAllowNegotiationLinks, &info))
+    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAway, false, true>(pPath, eTeam, vStartPos, pNodeFrom, 0, 0, bAllowNegotiationLinks, &info))
         return 1;
 
     m_pBestNode = info.m_pBestNode;
@@ -4793,7 +4829,7 @@ bool __cdecl Path_FindPathFromAwayNotCrossPlanes(
     if (info.IgnoreNode(pNodeFrom))
         return 0;
 
-    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAwayNotCrossPlanes, false, false>(
+    if (Path_AStarAlgorithm<CustomSearchInfo_FindPathAwayNotCrossPlanes, true, true>(
         pPath,
         eTeam,
         vStartPos,

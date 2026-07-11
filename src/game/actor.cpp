@@ -1206,7 +1206,8 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
         {
             Com_Printf(
                 18,
-                "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
+                "%sAI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
+                "^1",
                 self->ent->s.number,
                 self->ent->r.currentOrigin[0],
                 self->ent->r.currentOrigin[1],
@@ -1906,9 +1907,9 @@ void __cdecl Actor_UpdateMoveHistory(actor_s *self)
         v4 = 10;
     v7 = self->moveHistory[v3];
     v8 = self->moveHistory[v3][1];
-    v9 = v4 - 1 + 466;
     v6 = self->moveHistory[moveHistoryIndex];
-    v10 = (float *)((char *)self + 8 * v9);
+
+    v10 = self->moveHistory[v4 - 1];
     if ((float)((float)((float)(v10[1] * (float)-*v7) + (float)(*v10 * (float)v8))
         * (float)((float)(v6[1] * (float)-*v7) + (float)(*v6 * (float)v8))) <= 0.0
         && (float)((float)(v7[1] * v6[1]) + (float)(*v7 * *v6)) >= 0.0
@@ -1958,9 +1959,8 @@ void __cdecl Actor_UpdateMoveHistory(actor_s *self)
     }
     if (v11 < 10)
     {
-        v33 = (char *)self + 8 * v11;
         v32 = 10 - v11;
-        v34 = (float *)(v33 + 3732);
+        v34 = &self->moveHistory[v11][1];
         do
         {
             v35 = v12;
@@ -2113,21 +2113,21 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     vWishDir[1] = self->ent->r.currentOrigin[1];
     vWishDir[2] = self->ent->r.currentOrigin[2];
 
-	float vPrevLookaheadDir[3];
+    float vPrevLookaheadDir[3];
 
-	vPrevLookaheadDir[0] = pPath->lookaheadDir[0];
-	vPrevLookaheadDir[1] = pPath->lookaheadDir[1];
-	vPrevLookaheadDir[2] = pPath->lookaheadDir[2];
+    vPrevLookaheadDir[0] = pPath->lookaheadDir[0];
+    vPrevLookaheadDir[1] = pPath->lookaheadDir[1];
+    vPrevLookaheadDir[2] = pPath->lookaheadDir[2];
 
     Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1);
 
-	float pathDirDot = (pPath->lookaheadDir[0] * vPrevLookaheadDir[0]) + (pPath->lookaheadDir[1] * vPrevLookaheadDir[1]);
-	if (pathDirDot < 0.70700002f)
-	{
-		Scr_AddVector(pPath->lookaheadDir);
-		Scr_AddEntity(self->ent);
-		Scr_Notify(self->ent, scr_const.path_changed, 2u);
-	}
+    float pathDirDot = (pPath->lookaheadDir[0] * vPrevLookaheadDir[0]) + (pPath->lookaheadDir[1] * vPrevLookaheadDir[1]);
+    if (pathDirDot < 0.70700002f)
+    {
+        Scr_AddVector(pPath->lookaheadDir);
+        Scr_AddEntity(self->ent);
+        Scr_Notify(self->ent, scr_const.path_changed, 2u);
+    }
 
     perp[0] = pPath->lookaheadDir[0];
     perp[1] = pPath->lookaheadDir[1];
@@ -2391,10 +2391,6 @@ void __cdecl Actor_UpdateDesiredChainPosInternal(
     pathnode_t *pDesiredChainPos; // r3
     pathnode_t *pActualChainPos; // r30
     gentity_s *ent; // r31
-    double v13; // fp29
-    double v14; // fp28
-    double v15; // fp27
-    double v16; // fp26
     pathnode_t *v17; // r11
     int v18; // r11
     pathnode_t *v19; // r11
@@ -2418,14 +2414,17 @@ void __cdecl Actor_UpdateDesiredChainPosInternal(
     if (!pActualChainPos)
     {
         ent = self->ent;
-        v13 = pGoalSentient->ent->r.currentOrigin[0];
-        SL_ConvertToString(pGoalSentient->ent->classname);
-        v14 = ent->r.currentOrigin[2];
-        v15 = ent->r.currentOrigin[1];
-        v16 = ent->r.currentOrigin[0];
-        SL_ConvertToString(ent->classname);
-        //Com_Error(ERR_DROP, byte_82021D00, HIDWORD(v16), HIDWORD(v15), v14, v13);
-        Com_Error(ERR_DROP, "sentient following someone else not on a friendly chain"); // KISAKTODO: not proper
+        Com_Error(
+            ERR_DROP,
+            "\x15Sentient %s at (%.0f %.0f %.0f) is following the sentient %s at (%.0f %.0f %.0f) that is not on a friendly chain",
+            SL_ConvertToString(ent->classname),
+            ent->r.currentOrigin[0],
+            ent->r.currentOrigin[1],
+            ent->r.currentOrigin[2],
+            SL_ConvertToString(pGoalSentient->ent->classname),
+            pGoalSentient->ent->r.currentOrigin[0],
+            pGoalSentient->ent->r.currentOrigin[1],
+            pGoalSentient->ent->r.currentOrigin[2]);
     }
     v17 = self->pDesiredChainPos;
     if (!v17
@@ -2533,26 +2532,23 @@ bool __cdecl Actor_IsInsideArc(
 
 void __cdecl SentientInfo_Copy(actor_s *pTo, const actor_s *pFrom, int index)
 {
-    char *v6; // r9
-    char *v7; // r11
-
     if (!pTo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 153, 0, "%s", "pTo");
     if (!pFrom)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 154, 0, "%s", "pFrom");
     if (((1 << pTo->species) & pFrom->talkToSpecies) != 0)
     {
-        v6 = (char *)pTo + 40 * index;
-        v7 = (char *)pFrom + 40 * index;
-        if (*((unsigned int *)v6 + 529) < *((unsigned int *)v7 + 529))
+        sentient_info_t *to = &pTo->sentientInfo[index];
+        const sentient_info_t *from = &pFrom->sentientInfo[index];
+        if (to->lastKnownPosTime < from->lastKnownPosTime)
         {
-            *((unsigned int *)v6 + 528) = 0;
-            *((unsigned int *)v6 + 530) = 0;
-            *((unsigned int *)v6 + 529) = *((unsigned int *)v7 + 529);
-            *((float *)v6 + 531) = *((float *)v7 + 531);
-            *((float *)v6 + 532) = *((float *)v7 + 532);
-            *((float *)v6 + 533) = *((float *)v7 + 533);
-            *((unsigned int *)v6 + 534) = *((unsigned int *)v7 + 534);
+            to->iLastAttackMeTime = 0;
+            to->attackTime = 0;
+            to->lastKnownPosTime = from->lastKnownPosTime;
+            to->vLastKnownPos[0] = from->vLastKnownPos[0];
+            to->vLastKnownPos[1] = from->vLastKnownPos[1];
+            to->vLastKnownPos[2] = from->vLastKnownPos[2];
+            to->pLastKnownNode = from->pLastKnownNode;
         }
     }
 }
@@ -3436,11 +3432,11 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
         if (actor->pGrenade.isDefined())
         {
             G_DebugLine(xyz, actor->pGrenade.ent()->missile.predictLandPos, colorOrange, 1);
-            G_DebugCircle(actor->pGrenade.ent()->missile.predictLandPos, 8.0, colorOrange, 0, 1, 1);// KISAKTODO: argcheck
+            G_DebugCircle(actor->pGrenade.ent()->missile.predictLandPos, 8.0, colorOrange, 0, 1, 0);
             weapDef = BG_GetWeaponDef(actor->pGrenade.ent()->s.weapon);
 
             iassert(weapDef);
-            G_DebugCircle(actor->pGrenade.ent()->missile.predictLandPos, (float)weapDef->iExplosionRadius, colorOrange, 0, 1, 1); // KISAKTODO: argcheck
+            G_DebugCircle(actor->pGrenade.ent()->missile.predictLandPos, (float)weapDef->iExplosionRadius, colorOrange, 0, 1, 0);
         }
     }
     else if (!drawGoalLineRadius)
@@ -3479,7 +3475,7 @@ void __cdecl Actor_EntInfo(gentity_s *self, float *source)
 
         if (!actor->pDesiredChainPos)
             G_DebugLine(xyz, pos, timingColor, 0);
-        G_DebugCircle(pos, actor->scriptGoal.radius, timingColor, 0, 1, 1);
+        G_DebugCircle(pos, actor->scriptGoal.radius, timingColor, 0, 1, 0);
     }
     if (actor->fixedNode)
     {
@@ -3592,7 +3588,6 @@ LABEL_87:
 
     if (drawGoalLineRadius)
     {
-    LABEL_171:
         G_AddDebugString(xyz, color, infoScale * 0.6f, va("%i", self->s.number));
         return;
     }
@@ -3681,8 +3676,8 @@ LABEL_87:
                 hitCount = actor->hitCount;
                 v80 = "HIT";
             }
-            ;
-            G_AddDebugString(xyz, colorWhite, infoScale * 0.6f, va("range: %.2f ac: %.2f %s %u", range, actor->debugLastAccuracy, v80, missCount));
+
+            G_AddDebugString(xyz, colorWhite, infoScale * 0.6f, va("range: %.2f ac: %.2f %s %u", range, actor->debugLastAccuracy, v80, hitCount));
             xyz[2] = xyz[2] - (float)((float)infoScale * (float)7.0);
             G_AddDebugString(xyz, colorWhite, infoScale * 0.6f, va("talkto: %d", actor->talkToSpecies));
         }
@@ -3798,26 +3793,19 @@ LABEL_87:
         if (actor->ignoreSuppression)
         {
             xyz[2] = -(float)((float)((float)infoScale * (float)7.0) - xyz[2]);
-            G_AddDebugString(xyz, colorRed, infoScale * 0.6f, "Ignoring Suppression");
+            G_AddDebugString(xyz, colorRed, infoScale * 0.6f, "Ignore suppression"); // KISAKFIX: retail string @0x82022544
         }
-        //if (Actor_IsSuppressed(actor) || actor->suppressionMeter > 0.0)
-        //{
-        //    xyz[2] = -(float)((float)((float)infoScale * (float)7.0) - xyz[2]);
-        //    //va(
-        //    //    (const char *)(const char *)HIDWORD(COERCE_UNSIGNED_INT64(actor->suppressionMeter)),
-        //    //    (unsigned int)COERCE_UNSIGNED_INT64(actor->suppressionMeter));
-        //    v61 = v65;
-        //    color = colorRed;
-        //}
-        //else
-        //{
-        //    if (!Actor_IsMoveSuppressed(actor))
-        //        return;
-        //    color = colorCyan;
-        //    xyz[2] = -(float)((float)((float)infoScale * (float)7.0) - xyz[2]);
-        //    v61 = v65;
-        //}
-        goto LABEL_171;
+
+        if (Actor_IsSuppressed(actor) || actor->suppressionMeter > 0.0)
+        {
+            xyz[2] = -(float)((float)((float)infoScale * (float)7.0) - xyz[2]);
+            G_AddDebugString(xyz, colorRed, infoScale * 0.6f, va("Suppressed %0.2f", actor->suppressionMeter));
+        }
+        else if (Actor_IsMoveSuppressed(actor))
+        {
+            xyz[2] = -(float)((float)((float)infoScale * (float)7.0) - xyz[2]);
+            G_AddDebugString(xyz, colorCyan, infoScale * 0.6f, "Move Suppressed");
+        }
     }
 }
 
@@ -4321,7 +4309,7 @@ void __cdecl Actor_FindPathInGoalWithLOS(
             (float*)vGoalPos,
             &self->codeGoal,
             fWithinDistSqrd,
-            false);
+            true);
     else
     {
         int iPlaneCount = Actor_GetSuppressionPlanes(self, vNormals, fDists);
@@ -4334,7 +4322,7 @@ void __cdecl Actor_FindPathInGoalWithLOS(
                 (float *)vGoalPos,
                 &self->codeGoal,
                 fWithinDistSqrd,
-                false);
+                true);
             return;
         }
         else
@@ -4349,7 +4337,7 @@ void __cdecl Actor_FindPathInGoalWithLOS(
                 (float(*)[2])vNormals[0],
                 fDists,
                 iPlaneCount,
-                true); // KISAKTODO: idk if 'true'
+                true);
         }
     }
 }
@@ -4367,12 +4355,14 @@ void __cdecl Actor_FindPathAway(
     Path_FindPathAway(&self->Path, self->sentient->eTeam, self->ent->r.currentOrigin, (float*)vBadPos, fMinSafeDist, bAllowNegotiationLinks);
 }
 
+
 void __cdecl Actor_FindPathAwayNotCrossPlanes(
     actor_s *self,
     const float *vBadPos,
     float fMinSafeDist,
     float *normal,
     float dist,
+    int bUseSuppressionPlanes,
     int bAllowNegotiationLinks)
 {
     int SuppressionPlanes; // r10
@@ -4385,7 +4375,7 @@ void __cdecl Actor_FindPathAwayNotCrossPlanes(
 
     Actor_ClearPath(self);
 
-    if (bAllowNegotiationLinks)
+    if (bUseSuppressionPlanes)
         SuppressionPlanes = Actor_GetSuppressionPlanes(self, vNormals, vDists);
     else
         SuppressionPlanes = 0;

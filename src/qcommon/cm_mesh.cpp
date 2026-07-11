@@ -239,7 +239,7 @@ void __cdecl CM_TraceCapsuleThroughTriangle(
         hitDist = Vec3Dot(start_v0, normal);
         if (hitDist >= 0.0)
         {
-            hitFrac = -(hitDist - 0.125) * areaX2 / projTriAreaScaledByTraceLenX2;
+            hitFrac = -((hitDist - 0.125f) / projTriAreaScaledByTraceLenX2) * areaX2;
             if (trace->fraction <= (double)hitFrac)
                 return;
             startSolid = 0;

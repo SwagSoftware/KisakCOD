@@ -597,6 +597,7 @@ void __cdecl Actor_FindPathAwayNotCrossPlanes(
     float fMinSafeDist,
     float *normal,
     float dist,
+    int bUseSuppressionPlanes,
     int bAllowNegotiationLinks);
 void __cdecl Actor_BadPlacesChanged();
 void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self);

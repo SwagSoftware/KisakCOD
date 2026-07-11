@@ -371,8 +371,7 @@ bool __cdecl Actor_Dog_IsEnemyInAttackRange(actor_s *self, sentient_s *enemy, in
             enemyToMe[0] = self->ent->r.currentOrigin[0] - enemyPos[0];
             enemyToMe[1] = self->ent->r.currentOrigin[1] - enemyPos[1];
             Vec2Normalize(enemyToMe);
-            //enemyInAttackRange = ((enemyToAttackSpot[0] * enemyToMe[0]) + (enemyToAttackSpot[1] * enemyToMe[1])) > 0.707f;
-            enemyInAttackRange = ((enemyToAttackSpot[0] * enemyToMe[0]) + (enemyToAttackSpot[1] * enemyToMe[1])) > cosf(DEG2RAD(45.0f));
+            enemyInAttackRange = ((enemyToAttackSpot[0] * enemyToMe[0]) + (enemyToAttackSpot[1] * enemyToMe[1])) > 0.707f; 
         }
         Actor_UpdateMeleeGoalPos(self, attackPos);
         *goalPosSet = 1;

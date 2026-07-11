@@ -2443,20 +2443,6 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     LABEL_10:
         v8 = G_EntLinkTo(Entity, v5, ConstLowercaseString);
     }
-    if (v8 && Entity->client)
-    {
-        Entity->client->linkAnglesFrac = 1.0f;
-        Entity->client->linkAnglesLocked = 0;
-        Entity->client->link_rotationMovesEyePos = 0;
-        Entity->client->link_useTagAnglesForViewAngles = 1;
-        Entity->client->link_doCollision = 0;
-        Entity->client->linkAnglesMinClamp[0] = -180.0f;
-        Entity->client->linkAnglesMaxClamp[0] = 180.0f;
-        Entity->client->linkAnglesMinClamp[1] = -180.0f;
-        Entity->client->linkAnglesMaxClamp[1] = 180.0f;
-        Entity->client->ps.pm_flags |= 0x1000000u;
-        Entity->client->prevLinkAnglesSet = 0;
-    }
     if (!v8)
     {
         if (!SV_DObjExists(v5))
@@ -3345,9 +3331,9 @@ void __cdecl GScr_SetFriendlyChain(scr_entref_t entref)
     v3 = (float *)Pathnode;
     if (Pathnode->constant.wChainId < 1)
     {
-        Path_ConvertNodeToIndex(Pathnode);
         v4 = va(
             "Node %d (%.2f, %.2f, %.2f) is not a friendly chain node.\n",
+            Path_ConvertNodeToIndex(Pathnode),
             v3[5],
             v3[6],
             v3[7]
@@ -3983,7 +3969,7 @@ void __cdecl ScrCmd_DoDamage(scr_entref_t entref)
         0, //dflags
         0, // mod
         0xFFFFFFFF, // weapon
-        HITLOC_HEAD, // KISAKTODO (weird?)
+        HITLOC_HEAD, // weird but accurate
         0,
         0);
 }
@@ -6464,9 +6450,10 @@ void GScr_PrecacheLocationSelector()
     char v4[1032]; // [sp+50h] [-420h] BYREF
 
     String = Scr_GetString(0);
+
     for (i = 0; i < 3; ++i)
     {
-        SV_GetConfigstring(i + 1152, v4, 1024);
+        SV_GetConfigstring(i + CS_LOC_SEL_MTLS, v4, 1024);
         if (!I_stricmp(v4, String))
         {
             Com_DPrintf(23, "Script tried to precache the location selector '%s' more than once\n", String);
@@ -6475,7 +6462,7 @@ void GScr_PrecacheLocationSelector()
     }
     for (j = 0; j < 3; ++j)
     {
-        SV_GetConfigstring(j + 1152, v4, 1024);
+        SV_GetConfigstring(j + CS_LOC_SEL_MTLS, v4, 1024);
         if (!v4[0])
             break;
     }
@@ -6484,7 +6471,7 @@ void GScr_PrecacheLocationSelector()
         v3 = va("Too many location selectors precached. Max allowed is %i", 3);
         Scr_Error(v3);
     }
-    SV_SetConfigstring(j + 1152, String);
+    SV_SetConfigstring(j + CS_LOC_SEL_MTLS, String);
 }
 
 void Scr_PrecacheNightvisionCodeAssets()
@@ -6508,7 +6495,7 @@ int __cdecl GScr_GetLocSelIndex(const char *mtlName)
     v2 = 0;
     while (1)
     {
-        SV_GetConfigstring(v2 + 1152, v5, 1024);
+        SV_GetConfigstring(v2 + CS_LOC_SEL_MTLS, v5, 1024);
         if (!I_stricmp(v5, mtlName))
             break;
         if (++v2 >= 3)
@@ -7996,7 +7983,7 @@ void Scr_SetExponentialFog()
     Dvar_SetFloat((dvar_s*)g_fogStartDistReadOnly, startDist);
     Dvar_SetFloat((dvar_s*)g_fogHalfDistReadOnly, halfwayDist);
 
-    iassert(density > 0.0f && density <= 1.0f);
+    iassert(density > 0.0f && density < 1.0f);
     
     Scr_SetFog("setExpFog", startDist, density, v3, v4, v5, v6);
 }
@@ -9404,12 +9391,12 @@ void __cdecl GScr_SetDepthOfField(scr_entref_t entref)
         Scr_ParamError(3u, "far end must be >= 0");
     if (v6 < 4.0 || v6 > 10.0)
     {
-        v8 = va((const char *)0x40100000, 0, 0);
+        v8 = va("near blur should be between %g and %g", 4.0, 10.0);
         Scr_ParamError(4u, v8);
     }
     if (v7 < 0.0 || v7 > v6)
     {
-        v9 = va(0, 0);
+        v9 = va("far blur should be >= %g and <= near blur", 0.0);
         Scr_ParamError(5u, v9);
     }
     if (Float >= v3)
@@ -10056,15 +10043,10 @@ void GScr_OpenFile()
         } while (!v8);
         if (!v8)
         {
-            // KISAKTODO??
-            //v9 = va("%s/%s", "scriptdata", String);
-            //if (FS_IsUsingRemotePCSharing())
-            //    Remote = FS_FOpenFileReadRemote(v9, 0, v23);
-            //else
-            //    Remote = FS_FOpenFileByMode(v9, v23, FS_READ);
-            //v11 = Remote;
-            //if (Remote >= 0)
-            if (0) // ^^^^^^^^^^^^^^^^^^^^^^
+            v9 = va("%s/%s", "scriptdata", String);
+            Remote = FS_FOpenFileByMode((char *)v9, (int *)v23, FS_READ);
+            v11 = Remote;
+            if (Remote >= 0)
             {
                 v12 = (unsigned char *)Z_VirtualAlloc(Remote + 1, "GScr_OpenFile", 10);
                 v13 = v23[0];
@@ -10880,8 +10862,7 @@ void GScr_SetLightFovRange(scr_entref_t entref) // KISAKTODO: another cleanup pa
     if (outerFov < 0.99900001f || outerFov >= 120.001f)
         Scr_ParamError(0, "outer fov must be in the range of 1 to 120");
 
-    //cosOuter = cosf(outerFov * 0.017453292f * 0.5f);
-    cosOuter = cosf(outerFov * 0.017453292f) * 0.5f; // blops bug fix? This seems more right to me
+    cosOuter = cosf(outerFov * 0.017453292f * 0.5f);
     if (cosOuter < refLight->cosHalfFovOuter - 0.001f)
         Scr_ParamError(0, "outer fov cannot be larger than the fov when the map was compiled");
 
@@ -10898,8 +10879,7 @@ void GScr_SetLightFovRange(scr_entref_t entref) // KISAKTODO: another cleanup pa
         if (innerFov < -0.001f || innerFov >= outerFov + 0.001f)
             Scr_ParamError(1, "inner fov must be in the range of 0 to outer fov");
 
-        //float rawCosInner = cosf(innerFov * 0.017453292f * 0.5f);
-        float rawCosInner = cosf(innerFov * 0.017453292f) * 0.5f;// blops bug fix? This seems more right to me
+        float rawCosInner = cosf(innerFov * 0.017453292f * 0.5f);
 
         float upperClampedInner = (rawCosInner >= 1.0f) ? 1.0f : rawCosInner;
         cosInner = ((clampedCosOuter + 0.001f) >= rawCosInner)
