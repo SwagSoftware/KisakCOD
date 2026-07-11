@@ -1285,6 +1285,71 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
 #endif
 }
 
+#ifdef KISAK_SP
+bool __cdecl ViewModelOverride(playerState_s *ps, pml_t *pml)
+{
+    WeaponDef *weapDef;
+
+    iassert(ps);
+
+    if ((ps->weapFlags & 0x400) == 0)
+        return false;
+
+    // Already playing the forced anim for the forced weapon: just tick it out.
+    if (ps->weaponstate == ps->forcedViewAnimWeaponState && ps->weapon == ps->forcedViewAnimWeaponIdx)
+    {
+        ps->weaponTime -= pml->msec;
+        if (ps->weaponTime <= 0)
+        {
+            ps->weapFlags &= ~0x400u;
+            ps->weapon = ps->forcedViewAnimOriginalWeaponIdx;
+            ps->weaponTime = 0;
+            PM_StartWeaponAnim(ps, 0);
+        }
+        return true;
+    }
+
+    weapDef = BG_GetWeaponDef(ps->forcedViewAnimWeaponIdx);
+    iassert(weapDef);
+
+    switch (ps->forcedViewAnimWeaponState)
+    {
+    case WEAPON_FIRING:
+        PM_StartWeaponAnim(ps, 2);
+        ps->weaponTime = weapDef->iFireTime;
+        PM_AddEvent(ps, EV_FIRE_WEAPON);
+        break;
+    case WEAPON_RELOADING:
+        PM_StartWeaponAnim(ps, 13);
+        ps->weaponTime = weapDef->iReloadTime;
+        PM_AddEvent(ps, EV_RELOAD);
+        break;
+    case WEAPON_NIGHTVISION_WEAR:            // "NVG_down"
+        PM_StartWeaponAnim(ps, 28);
+        ps->weaponTime = weapDef->nightVisionWearTime;
+        PM_AddEvent(ps, EV_NIGHTVISION_WEAR);
+        break;
+    case WEAPON_NIGHTVISION_REMOVE:          // "NVG_up"
+        PM_StartWeaponAnim(ps, 29);
+        ps->weaponTime = weapDef->nightVisionRemoveTime;
+        PM_AddEvent(ps, EV_NIGHTVISION_REMOVE);
+        break;
+    default:
+        Com_PrintWarning(
+            19,
+            "Trying to force viewmodel to play an animation not supported by code: %u.\n",
+            ps->forcedViewAnimWeaponState);
+        ps->weapFlags &= ~0x400u;
+        return false;
+    }
+
+    ps->forcedViewAnimOriginalWeaponIdx = ps->weapon;
+    ps->weapon = ps->forcedViewAnimWeaponIdx;
+    ps->weaponstate = (weaponstate_t)ps->forcedViewAnimWeaponState;
+    return true;
+}
+#endif
+
 void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
 {
     const char *v2 = NULL; // eax
@@ -1305,7 +1370,12 @@ void __cdecl PM_Weapon(pmove_t *pm, pml_t *pml)
     }
     if (ps->pm_type < PM_DEAD)
     {
-        if (!G_ExitAfterConnectPaths() && (ps->pm_flags & PMF_RESPAWNED) == 0 && (ps->eFlags & 0x300) == 0)
+        bool viewmodelOverridden = false;
+#ifdef KISAK_SP
+        viewmodelOverridden = ViewModelOverride(ps, pml);
+#endif
+		
+        if (!viewmodelOverridden && !G_ExitAfterConnectPaths() && (ps->pm_flags & PMF_RESPAWNED) == 0 && (ps->eFlags & 0x300) == 0)
         {
             PM_UpdateAimDownSightLerp(pm, pml);
             PM_UpdateHoldBreath(pm, pml);
@@ -3312,14 +3382,40 @@ void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm)
     BG_GetWeaponDef(ps->weapon);
     if ((pm->oldcmd.buttons & 0x40000) == 0 && (pm->cmd.buttons & 0x40000) != 0)
     {
+#ifdef KISAK_SP
+		WeaponDef *weapDef = BG_GetWeaponDef(ps->weapon);
+
+		if (ps->weaponstate == WEAPON_NIGHTVISION_WEAR || ps->weaponstate == WEAPON_NIGHTVISION_REMOVE)
+			return;
+#endif
         if ((ps->weapFlags & 0x40) != 0)
         {
             ps->weapFlags &= ~0x40u;
+			
+#ifdef KISAK_SP
+			if (weapDef->nightVisionRemoveTime > 0)
+			{
+				ps->weaponstate = WEAPON_NIGHTVISION_REMOVE;   // 0x1A
+				ps->weaponTime  = weapDef->nightVisionRemoveTime;
+				PM_StartWeaponAnim(ps, 29);                    // NVG_up
+			}
+#endif
+			
             PM_AddEvent(ps, EV_NIGHTVISION_REMOVE);
         }
         else
         {
             ps->weapFlags |= 0x40u;
+			
+#ifdef KISAK_SP
+			if (weapDef->nightVisionWearTime > 0)
+			{
+				ps->weaponstate = WEAPON_NIGHTVISION_WEAR;     // 0x19
+				ps->weaponTime  = weapDef->nightVisionWearTime;
+				PM_StartWeaponAnim(ps, 28);                    // NVG_down
+			}
+#endif
+			
             PM_AddEvent(ps, EV_NIGHTVISION_WEAR);
         }
     }

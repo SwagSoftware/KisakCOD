@@ -636,7 +636,11 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
     }
     oldViewYaw = ps->viewangles[1];
     PM_UpdateViewAngles_Clamp(ps, cmd);
-    if ((ps->eFlags & 0x300) != 0)
+    if ((ps->eFlags & 0x300) != 0
+#ifdef KISAK_SP
+        || ((ps->pm_type == PM_NORMAL_LINKED || ps->pm_type == PM_DEAD_LINKED) && (ps->pm_flags & 0x1000000) == 0)
+#endif
+        )
     {
         PM_UpdateViewAngles_RangeLimited(ps, oldViewYaw);
         return;
@@ -1739,6 +1743,9 @@ void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, in
     ps->sprintState.sprintStartMaxLength = sprintLeft;
     ps->sprintState.lastSprintStart = pm->cmd.serverTime;
     ps->pm_flags |= PMF_SPRINTING;
+#ifndef KISAK_XBOX
+    PM_ExitAimDownSight(ps);
+#endif
 }
 
 void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
@@ -1767,8 +1774,13 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
     if (ps->leanf != 0.0)
         return true;
 
-    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
+#ifdef KISAK_XBOX
+	if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
+		return true;
+#else
+    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SHELLSHOCKED)) != 0)
         return true;
+#endif
 
     if ((ps->pm_flags & PMF_JUMPING) != 0 && !ps->pm_time)
         return false;

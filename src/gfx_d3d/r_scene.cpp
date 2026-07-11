@@ -484,11 +484,10 @@ GfxDrawSurf *__cdecl R_AddBModelSurfaces(
         {
             bcassert(surfId, (1 << MTL_SORT_OBJECT_ID_BITS));
 
-            //newDrawSurf_4 = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF/*MINUS surfType*/ | 0x180000;
-            //*(uint32_t *)&drawSurf->fields = (uint16_t)surfId | *(uint32_t *)&material->info.drawSurf.fields & 0xFFFF0000;
-            drawSurf->fields.objectId = surfId;
-            HIDWORD(drawSurf->packed) = HIDWORD(material->info.drawSurf.packed) & 0xFFC3FFFF/*MINUS surfType*/ | 0x180000; // 0x180000 sets bits 48-49 to 1 (primaryLightIndex?)
-            ++drawSurf;
+			drawSurf->packed = material->info.drawSurf.packed;
+			drawSurf->fields.objectId = surfId;
+			drawSurf->fields.surfType = SF_BMODEL;
+			++drawSurf;
         }
         ++modelSurf;
         surfId += 2;

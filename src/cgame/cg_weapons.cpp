@@ -1040,6 +1040,35 @@ void __cdecl ResetWeaponAnimTrees(int32_t localClientNum, const playerState_s *p
     }
 }
 
+#ifdef KISAK_SP
+bool __cdecl CG_NVGViewModelShouldBeAttached(int32_t localClientNum)
+{
+    cg_s *cgameGlob;
+    playerState_s *ps;
+    WeaponDef *weapDef;
+    int timeLeft;
+
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    ps = &cgameGlob->predictedPlayerState;
+    // BG_GetViewmodelWeaponIndex resolves offHandIndex vs weapon via (weapFlags & 2),
+    // matching the inline logic in CoD3SP.exe CG_NVGViewModelShouldBeAttached.
+    weapDef = BG_GetWeaponDef(BG_GetViewmodelWeaponIndex(ps));
+
+    if (ps->weaponstate == WEAPON_NIGHTVISION_WEAR)
+    {
+        timeLeft = weapDef->nightVisionWearTime - ps->weaponTime;
+        if (timeLeft > 100 && timeLeft <= weapDef->nightVisionWearTimeFadeOutEnd)
+            return true;
+    }
+    else if (ps->weaponstate == WEAPON_NIGHTVISION_REMOVE
+        && weapDef->nightVisionRemoveTime - ps->weaponTime >= weapDef->nightVisionRemoveTimePowerDown)
+    {
+        return true;
+    }
+    return false;
+}
+#endif
+
 char __cdecl UpdateViewmodelAttachments(
     int32_t localClientNum,
     uint32_t weaponNum,
@@ -1049,6 +1078,7 @@ char __cdecl UpdateViewmodelAttachments(
     XModel *newKnife; // [esp+0h] [ebp-14h]
     WeaponDef *weapDef; // [esp+8h] [ebp-Ch]
     XModel *newRocket; // [esp+10h] [ebp-4h]
+	XModel *newGoggles;
     weaponInfo_s *weapInfoa; // [esp+28h] [ebp+14h]
 
     iassert(weapInfo);
@@ -1056,14 +1086,26 @@ char __cdecl UpdateViewmodelAttachments(
     weapInfoa = &cg_weaponsArray[0][weaponNum];
     newRocket = 0;
     newKnife = 0;
+	newGoggles = 0;
     weapDef = BG_GetWeaponDef(weaponNum);
+
+#ifdef KISAK_SP
+    if (CG_NVGViewModelShouldBeAttached(localClientNum))
+    {
+        if (overrideNVGModelWithKnife->current.enabled)
+            newGoggles = weapDef->knifeModel;
+        else
+            newGoggles = cgMedia.nightVisionGoggles;
+    }
+#endif
+
     if (ViewmodelRocketShouldBeAttached(localClientNum, weapDef))
         newRocket = weapDef->rocketModel;
     if (ViewmodelKnifeShouldBeAttached(localClientNum, weapDef))
         newKnife = weapDef->knifeModel;
-    if (!weapInfoa->gogglesModel && newRocket == weapInfoa->rocketModel && newKnife == weapInfoa->knifeModel)
+    if (newGoggles == weapInfoa->gogglesModel && newRocket == weapInfoa->rocketModel && newKnife == weapInfoa->knifeModel)
         return 0;
-    ChangeViewmodelDobj(localClientNum, weaponNum, weaponModel, weapInfoa->handModel, 0, newRocket, newKnife, 0);
+    ChangeViewmodelDobj(localClientNum, weaponNum, weaponModel, weapInfoa->handModel, newGoggles, newRocket, newKnife, 0);
     return 1;
 }
 

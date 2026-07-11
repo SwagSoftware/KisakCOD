@@ -321,7 +321,7 @@ const BuiltinMethodDef methods_2[166] =
   { "logstring", ScrCmd_LogString, 0 }
 };
 
-BuiltinFunctionDef functions[250] =
+BuiltinFunctionDef functions[251] =
 {
   { "createprintchannel", GScr_CreatePrintChannel, 1 },
   { "setprintchannel", GScr_printChannelSet, 1 },
@@ -520,6 +520,7 @@ BuiltinFunctionDef functions[250] =
     0
   },
   { "stopcinematicingame", GScr_StopCinematicInGame, 0 },
+  { "iscinematicplaying", GScr_IsCinematicPlaying, 0 },
   { "earthquake", GScr_Earthquake, 0 },
   { "drawcompassfriendlies", (void(*)())GScr_DrawCompassFriendlies, 0 },
   { "bulletspread", Scr_BulletSpread, 0 },
@@ -2442,6 +2443,20 @@ void __cdecl ScrCmd_LinkTo(scr_entref_t entref)
     {
     LABEL_10:
         v8 = G_EntLinkTo(Entity, v5, ConstLowercaseString);
+    }
+    if (v8 && Entity->client)
+    {
+        Entity->client->linkAnglesFrac = 1.0f;
+        Entity->client->linkAnglesLocked = 0;
+        Entity->client->link_rotationMovesEyePos = 0;
+        Entity->client->link_useTagAnglesForViewAngles = 1;
+        Entity->client->link_doCollision = 0;
+        Entity->client->linkAnglesMinClamp[0] = -180.0f;
+        Entity->client->linkAnglesMaxClamp[0] = 180.0f;
+        Entity->client->linkAnglesMinClamp[1] = -180.0f;
+        Entity->client->linkAnglesMaxClamp[1] = 180.0f;
+        Entity->client->ps.pm_flags |= 0x1000000u;
+        Entity->client->prevLinkAnglesSet = 0;
     }
     if (!v8)
     {
@@ -7123,6 +7138,13 @@ void GScr_StopCinematicInGame()
     R_Cinematic_StopPlayback();
 }
 
+void GScr_IsCinematicPlaying()
+{
+    if (Scr_GetNumParam())
+        Scr_Error("iscinematicplaying takes no parameters: iscinematicplaying()\n");
+    Scr_AddInt(R_Cinematic_IsStarted() || R_Cinematic_IsPending() || R_Cinematic_IsNextReady());
+}
+
 void GScr_Earthquake()
 {
     double Float; // fp30
@@ -10607,7 +10629,7 @@ void(__cdecl *__cdecl BuiltIn_GetFunction(const char **pName, int *type))()
             break;
         v3 += 12;
         ++v2;
-        if (v3 >= 0xBB8)
+        if (v3 >= 0xBC4)// [new 0xBC4 = 3012] [Old 0xBB8 = 3000]
             return 0;
     }
     *pName = functions[v2].actionString;

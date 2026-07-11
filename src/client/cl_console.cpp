@@ -3114,7 +3114,11 @@ char *__cdecl Con_GetVersionString()
     const char *BuildNumber; // eax
 
     BuildNumber = getBuildNumber();
-    return va("Build %s %s", BuildNumber, "win-x86");
+#ifdef _DEBUG
+	return va("Debug Build %s %s", BuildNumber, "win-x86");
+#else
+	return va("Build %s %s", BuildNumber, "win-x86");
+#endif
 }
 
 void __cdecl Con_PageUp()

@@ -465,7 +465,7 @@ void __cdecl R_AddAllSceneEntSurfacesRangeSunShadow(uint32_t partitionIndex)
         {
             dynEntDef = DynEnt_GetEntityDef(sceneDynBrush->dynEntId, DYNENT_DRAW_BRUSH);
             bmodel = R_GetBrushModel(dynEntDef->brushModel);
-            R_AddBModelSurfaces((BModelDrawInfo *)sceneDynBrush, bmodel, shadowmapBuildTechType, drawSurf, lastDrawSurf);
+            drawSurf = R_AddBModelSurfaces((BModelDrawInfo *)sceneDynBrush, bmodel, shadowmapBuildTechType, drawSurf, lastDrawSurf);
         }
     }
 
@@ -566,7 +566,7 @@ void __cdecl R_AddAllSceneEntSurfacesSpotShadow(
         {
             dynEntDefa = DynEnt_GetEntityDef(dynEntIda, DYNENT_DRAW_BRUSH);
             bmodel = R_GetBrushModel(dynEntDefa->brushModel);
-            R_AddBModelSurfaces((BModelDrawInfo *)sceneDynBrush, bmodel, shadowmapBuildTechType, drawSurf, lastDrawSurf);
+            drawSurf = R_AddBModelSurfaces((BModelDrawInfo *)sceneDynBrush, bmodel, shadowmapBuildTechType, drawSurf, lastDrawSurf);
         }
     }
     drawSurfCount = drawSurf - scene.drawSurfs[stage];

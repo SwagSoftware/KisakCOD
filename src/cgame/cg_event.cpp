@@ -846,29 +846,24 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionRemoveSound);
                 return;
 #ifdef KISAK_SP
-                // KISAKTODO: Rumbling (This also requires re-adding the CS_RUMBLES inside enum 'ConstStringOffsets'(SP)
+                // KISAKTODO: Implement the missing CG rumble functions (CG_PlayRumbleOnEntity, CG_PlayRumbleOnPosition, CG_PlayRumbleLoopOnEntity, CG_PlayRumbleLoopOnPosition, CG_StopRumble, CG_StopAllRumbles).
             case EV_PLAY_RUMBLE_ON_ENT:
-                //v109 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
-                //CG_PlayRumbleOnEntity(localClientNum, v109, clientNum);
+				//CG_PlayRumbleOnEntity(localClientNum, CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_RUMBLES), clientNum);
                 return;
             case EV_PLAY_RUMBLE_ON_POS:
-                //v110 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
-                //CG_PlayRumbleOnPosition(localClientNum, v110, cent->pose.origin);
+				//CG_PlayRumbleOnPosition(localClientNum, CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_RUMBLES), cent->pose.origin);
                 return;
             case EV_PLAY_RUMBLELOOP_ON_ENT:
-                //v111 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
-                //CG_PlayRumbleLoopOnEntity(localClientNum, v111, clientNum);
+				//CG_PlayRumbleLoopOnEntity(localClientNum, CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_RUMBLES), clientNum);
                 return;
             case EV_PLAY_RUMBLELOOP_ON_POS:
-                //v112 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
-                //CG_PlayRumbleLoopOnPosition(localClientNum, v112, cent->pose.origin);
+				//CG_PlayRumbleLoopOnPosition(localClientNum, CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_RUMBLES), cent->pose.origin);
                 return;
             case EV_STOP_RUMBLE:
-                //v113 = CL_GetConfigString(localClientNum, cent->nextState.eventParm + 1115);
-                //CG_StopRumble(localClientNum, clientNum, v113);
+				//CG_StopRumble(localClientNum, clientNum, CL_GetConfigString(localClientNum, cent->nextState.eventParm + CS_RUMBLES));
                 return;
             case EV_STOP_ALL_RUMBLES:
-                //CG_StopAllRumbles(localClientNum);
+				//CG_StopAllRumbles(localClientNum);
                 return;
 #endif
 #ifdef KISAK_MP
