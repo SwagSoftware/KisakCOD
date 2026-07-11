@@ -2063,54 +2063,37 @@ void __cdecl SP_turret_XAnimPrecache(ScriptFunctions *functions, const char *cla
     }
 }
 
-// aislop
 bool turret_behind(gentity_s *self, gentity_s *other)
 {
     iassert(other->client);
 
-    TurretInfo *turretInfo = self->pTurretInfo;
+    TurretInfo *pTurretInfo = self->pTurretInfo;
 
-    float arcRange = fabsf(turretInfo->arcmax[1]) + fabsf(turretInfo->arcmin[1]);
-    float halfArc = arcRange * 0.5f;
+    // Center of the usable yaw arc, wrapped to [-180, 180]
+    float minYaw = self->r.currentAngles[1] + pTurretInfo->arcmin[1];
+    float yawSpan = (I_fabs(pTurretInfo->arcmin[1]) + I_fabs(pTurretInfo->arcmax[1])) * 0.5f;
 
-    // Calculate normalized angle in turns (1 turn = 360 degrees)
-    float baseAngle = self->r.currentAngles[1] + turretInfo->arcmin[1] + halfArc;
-    float normalized = baseAngle * (1.0f / 360.0f);
+    float wrap = (yawSpan + minYaw) * (1.0f / 360.0f);
+    float centerYaw = (wrap - floorf(wrap + 0.5f)) * 360.0f;
 
-    // Wrap angle to [-0.5, 0.5] turns
-    float frac = normalized - floorf(normalized + 0.5f);
+    float forward[3];
+    YawVectors(centerYaw, forward, NULL);
+    Vec3Normalize(forward);
 
-    // Convert to degrees [-180, 180]
-    float yawAngle = frac * 360.0f;
+    float dir[3];
+    Vec3Sub(self->r.currentOrigin, other->r.currentOrigin, dir);
+    dir[2] = 0.0f;
+    Vec3Normalize(dir);
 
-    float yawVec[3];
-    YawVectors(yawAngle, NULL, yawVec);
+    float dot = Vec3Dot(forward, dir);
+    if (dot > 1.0f)
+        dot = 1.0f;
+    if (dot < -1.0f)
+        dot = -1.0f;
 
-    float lenYawVec = sqrtf(yawVec[0] * yawVec[0] + yawVec[1] * yawVec[1] + yawVec[2] * yawVec[2]);
-    if (lenYawVec == 0.0f)
-        return false;
-
-    yawVec[0] /= lenYawVec;
-    yawVec[1] /= lenYawVec;
-    yawVec[2] /= lenYawVec;
-
-    float dx = self->r.currentOrigin[0] - other->r.currentOrigin[0];
-    float dy = self->r.currentOrigin[1] - other->r.currentOrigin[1];
-    float distLen = sqrtf(dx * dx + dy * dy);
-    if (distLen == 0.0f)
-        return false;
-
-    float ndx = dx / distLen;
-    float ndy = dy / distLen;
-
-    // Dot product (2D)
-    float dot = yawVec[0] * ndx + yawVec[1] * ndy;
-
-    float angleDeg = Q_acos(dot) * (180.0f / 3.14159265f);
-
-    return angleDeg <= halfArc;
+    float angle = Q_acos(dot) * (180.0f / 3.14159265f);
+    return yawSpan >= angle;
 }
-
 
 bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner)
 {
@@ -2120,6 +2103,20 @@ bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner)
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp", 2015, 0, "%s", "pTurretInfo");
+#ifdef KISAK_SP
+    if (!self->active
+        && self->pTurretInfo
+        && turret_behind(self, owner)
+        && (client = owner->client, !client->ps.grenadeTimeLeft))
+    {
+        //return (_cntlzw(client->ps.groundEntityNum - 2175) & 0x20) == 0;
+        return (client->ps.groundEntityNum - 2175) != 0;
+    }
+    else
+    {
+        return 0;
+    }
+#else
     if ((pTurretInfo->flags & 0x1000) != 0
         && !self->active
         && self->pTurretInfo
@@ -2133,6 +2130,7 @@ bool __cdecl G_IsTurretUsable(gentity_s *self, gentity_s *owner)
     {
         return 0;
     }
+#endif
 }
 
 void __cdecl G_DeactivateTurret(gentity_s *self)

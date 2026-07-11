@@ -87,14 +87,14 @@ void __cdecl XAnimSaveAnimTree_r(const XAnimTree_s *tree, MemoryFile *memFile, i
     MemFile_WriteData(memFile, 2, &animIndex);
     XAnimSaveAnimInfo(info, memFile);
     children = info->children;
-    if (info->children)
+    if (info->children > 0 && info->children < 4096)
     {
         do
         {
             v8 = GetAnimInfo(children);
             XAnimSaveAnimTree_r(tree, memFile, children);
             children = v8->next;
-        } while (v8->next);
+        } while (v8->next > 0 && v8->next < 4096);
     }
 }
 
@@ -109,7 +109,7 @@ void __cdecl XAnimSaveAnimTree(const DObj_s *obj, MemoryFile *memFile)
 
     if (obj->tree)
     {
-        if (tree->children)
+        if (tree->children > 0 && tree->children < 4096)
             XAnimSaveAnimTree_r(tree, memFile, tree->children);
         v5[0] = -1;
         MemFile_WriteData(memFile, 2, v5);

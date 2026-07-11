@@ -355,6 +355,14 @@ void __cdecl CG_Missile(int localClientNum, centity_s *cent)
         if (projectileSound)
             CG_PlaySoundAlias(localClientNum, cent->nextState.number, cent->pose.origin, projectileSound);
         ClientDObj = Com_GetClientDObj(cent->nextState.number, 0);
+		if (!ClientDObj && WeaponDef->projectileModel)
+		{
+			DObjModel_s dobjModel;
+			dobjModel.model = WeaponDef->projectileModel;
+			dobjModel.boneName = 0;
+			dobjModel.ignoreCollision = 1;
+			ClientDObj = Com_ClientDObjCreate(&dobjModel, 1u, 0, cent->nextState.number, 0);
+		}
         if (ClientDObj)
         {
             if (!cent->bTrailMade

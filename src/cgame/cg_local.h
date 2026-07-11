@@ -355,6 +355,11 @@ char __cdecl UpdateViewmodelAttachments(
     weaponInfo_s *weapInfo);
 bool __cdecl ViewmodelRocketShouldBeAttached(int32_t localClientNum, WeaponDef *weapDef);
 bool __cdecl ViewmodelKnifeShouldBeAttached(int32_t localClientNum, WeaponDef *weapDef);
+
+#ifdef KISAK_SP
+bool __cdecl CG_NVGViewModelShouldBeAttached(int32_t localClientNum);
+#endif
+
 void __cdecl ProcessWeaponNoteTracks(int32_t localClientNum, const playerState_s *predictedPlayerState);
 void __cdecl PlayNoteMappedSoundAliases(int32_t localClientNum, const char *noteName, const WeaponDef *weapDef);
 void __cdecl CG_AddViewWeapon(int32_t localClientNum);

@@ -62,6 +62,8 @@ enum ConstStringOffsets
     CS_SERVER_MATERIALS       = 2551,     // confirmed (bootstrap; Xbox 0xA17) (0x9F7)
     CS_SERVER_MATERIALS_LAST  = 2678,     //                                   (0xA76)
     CS_ITEMS                  = 2679,     // Xbox 0xA97 (-32)                  (0xA77)
+	CS_RUMBLES                = 2680,     // appended for PC SP (32 entries)
+	CS_RUMBLES_LAST           = 2711,
     CS_MAX                    = 2680,     // Xbox 0xA98 (-32)                  (0xA78)
 };
 #endif

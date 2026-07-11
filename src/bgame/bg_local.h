@@ -2262,6 +2262,11 @@ void __cdecl PM_Detonate(playerState_s *ps, int32_t delayedAction);
 void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm);
 void __cdecl PM_Weapon_FinishNightVisionWear(playerState_s *ps);
 void __cdecl PM_Weapon_FinishNightVisionRemove(playerState_s *ps);
+
+#ifdef KISAK_SP
+bool __cdecl ViewModelOverride(playerState_s *ps, pml_t *pml);
+#endif
+
 void __cdecl Sprint_State_Loop(playerState_s *ps);
 void __cdecl PM_Weapon_CheckForSprint(pmove_t *pm);
 void __cdecl Sprint_State_Raise(playerState_s *ps);

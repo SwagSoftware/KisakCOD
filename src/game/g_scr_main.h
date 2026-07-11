@@ -377,6 +377,7 @@ void GScr_CinematicInGameLoop();
 void GScr_CinematicInGameLoopResident();
 void GScr_CinematicInGameLoopFromFastfile();
 void GScr_StopCinematicInGame();
+void GScr_IsCinematicPlaying();
 void GScr_Earthquake();
 int GScr_DrawCompassFriendlies();
 void GScr_WeaponFireTime();
@@ -606,4 +607,4 @@ extern scr_data_t g_scr_data;
 
 extern const BuiltinMethodDef methods[104];
 extern const BuiltinMethodDef methods_2[166];
-extern BuiltinFunctionDef functions[250];
+extern BuiltinFunctionDef functions[251];
