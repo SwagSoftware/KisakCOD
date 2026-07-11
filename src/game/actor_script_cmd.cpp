@@ -1170,7 +1170,7 @@ void __cdecl ActorCmd_AllowedStances(scr_entref_t entref)
         ConstString = Scr_GetConstString(v3);
         if (ConstString == scr_const.stand)
         {
-            v1->eAllowedStances |= STANCE_STAND; // KISAKTODO: check this |= operator works
+            v1->eAllowedStances |= STANCE_STAND;
         }
         else if (ConstString == scr_const.crouch)
         {

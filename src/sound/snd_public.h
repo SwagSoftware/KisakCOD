@@ -9,6 +9,18 @@
 
 static const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "highshelf", "bell", NULL }; // idb
 
+enum SND_CHANNELVOLPRIO : __int32
+{
+    SND_CHANNELVOLPRIO_NONE      = 0,
+#ifdef KISAK_SP
+    SND_CHANNELVOLPRIO_VICTORYSCREEN,
+#endif
+    SND_CHANNELVOLPRIO_HOLDBREATH,
+    SND_CHANNELVOLPRIO_PAIN,
+    SND_CHANNELVOLPRIO_SHELLSHOCK,
+    SND_CHANNELVOLPRIO_COUNT
+};
+
 enum SND_EQTYPE : __int32
 {                                       // ...
     SND_EQTYPE_FIRST = 0x0,
@@ -370,7 +382,7 @@ struct snd_local_t // sizeof=0x7EF8
     snd_local_t_restore restore; // ...
     float volume;                       // ...
     snd_volume_info_t mastervol;        // ...
-    snd_channelvolgroup channelVolGroups[4]; // ...
+    snd_channelvolgroup channelVolGroups[SND_CHANNELVOLPRIO_COUNT];
     snd_channelvolgroup *channelvol;    // ...
     snd_background_info_t background[5]; // ...
     int ambient_track;                  // ...

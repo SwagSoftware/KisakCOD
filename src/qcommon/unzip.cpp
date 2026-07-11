@@ -1096,11 +1096,14 @@ extern int unzReadCurrentFile  (unzFile file, void *buf, unsigned len)
 				uReadThis = (uInt)pfile_in_zip_read_info->rest_read_compressed;
 			if (uReadThis == 0)
 				return UNZ_EOF;
-			if (s->cur_file_info.compressed_size == pfile_in_zip_read_info->rest_read_compressed)
-				if (ZIP_fseek(pfile_in_zip_read_info->file,
-						  pfile_in_zip_read_info->pos_in_zipfile + 
-							 pfile_in_zip_read_info->byte_before_the_zipfile,2)!=0)
-					return UNZ_ERRNO;
+
+			// LWSS: Removing this line is accurate to COD4
+			//if (s->cur_file_info.compressed_size == pfile_in_zip_read_info->rest_read_compressed)
+
+			if (ZIP_fseek(pfile_in_zip_read_info->file,
+					  pfile_in_zip_read_info->pos_in_zipfile +
+						 pfile_in_zip_read_info->byte_before_the_zipfile,2)!=0)
+				return UNZ_ERRNO;
 			if (ZIP_fread(pfile_in_zip_read_info->read_buffer,uReadThis, pfile_in_zip_read_info->file)!= uReadThis)
 				return UNZ_ERRNO;
 			pfile_in_zip_read_info->pos_in_zipfile += uReadThis;

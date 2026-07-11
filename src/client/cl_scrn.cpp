@@ -420,15 +420,16 @@ LABEL_20:
         }
         if (v9)
             R_LightingFromCubemapShots(&v30);
+
         v27 = CUBEMAPSHOT_RIGHT;
-        v28 = (const char **)&WeaponStateNames_51[23];
+        v28 = (const char **)&szShotName[0];
         do
         {
             v29 = va("env/%s%s.tga", v33, *v28);
             R_SaveCubemapShot((char*)v29, v27, v10, v11);
             ++v28;
             ++v27;
-        } while ((int)v28 < (int)&szShotName[2]);
+        } while ((int)v28 < (int)&szShotName[6]);
     }
     else
     {

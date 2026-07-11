@@ -959,7 +959,7 @@ bool __cdecl Actor_Grenade_IsPointSafe(actor_s *self, const float *vPoint)
     grenadeEnt = p_pGrenade;
     centerPos = p_pGrenade->ent()->missile.predictLandPos;
     inflictor = grenadeEnt->ent();
-    return G_CanRadiusDamageFromPos(self->ent, vPoint, inflictor, centerPos, radius, 1.0f, NULL, 0.0f, 1, 0x802011) == 0; // KISAKTODO: check args...
+    return G_CanRadiusDamageFromPos(self->ent, vPoint, inflictor, centerPos, radius, 1.0f, NULL, 0.0f, 1, 0x802011) == 0;
 }
 
 float __cdecl Actor_Grenade_EscapePlane(actor_s *self, float *normal)

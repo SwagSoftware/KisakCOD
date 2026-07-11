@@ -2762,18 +2762,10 @@ void __cdecl SND_SetChannelVolumes(int priority, const float *channelvolume, int
     int i; // [esp+Ch] [ebp-4h]
     int ia; // [esp+Ch] [ebp-4h]
 
-    if (priority <= 0 || priority >= 4)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2413,
-            0,
-            "%s\n\t(priority) = %i",
-            "(priority > SND_CHANNELVOLPRIO_NONE && priority < SND_CHANNELVOLPRIO_COUNT)",
-            priority);
-    if (!channelvolume)
-        MyAssertHandler(".\\snd.cpp", 2414, 0, "%s", "channelvolume");
-    if (fademsec < 0)
-        MyAssertHandler(".\\snd.cpp", 2415, 0, "%s", "fademsec >= 0");
+    iassert(priority > SND_CHANNELVOLPRIO_NONE && priority < SND_CHANNELVOLPRIO_COUNT);
+    iassert(channelvolume);
+    iassert(fademsec >= 0);
+
     channelVolGroup = &g_snd.channelVolGroups[priority];
     channelVolGroup->active = 1;
     if (fademsec < 1)
@@ -2789,7 +2781,7 @@ void __cdecl SND_SetChannelVolumes(int priority, const float *channelvolume, int
     }
     if (channelVolGroup != g_snd.channelvol)
     {
-        for (ia = priority + 1; ia < 4; ++ia)
+        for (ia = priority + 1; ia < SND_CHANNELVOLPRIO_COUNT; ++ia)
         {
             if (g_snd.channelVolGroups[ia].active)
                 return;
@@ -2806,24 +2798,16 @@ void __cdecl SND_DeactivateChannelVolumes(int priority, int fademsec)
 
     if (g_snd.Initialized2d)
     {
-        if (priority <= 0 || priority >= 4)
-            MyAssertHandler(
-                ".\\snd.cpp",
-                2457,
-                0,
-                "%s\n\t(priority) = %i",
-                "(priority > SND_CHANNELVOLPRIO_NONE && priority < SND_CHANNELVOLPRIO_COUNT)",
-                priority);
-        if (fademsec < 0)
-            MyAssertHandler(".\\snd.cpp", 2458, 0, "%s", "fademsec >= 0");
+    	iassert(priority > SND_CHANNELVOLPRIO_NONE && priority < SND_CHANNELVOLPRIO_COUNT);
+    	iassert(fademsec >= 0);
+    	
         channelVolGroup = &g_snd.channelVolGroups[priority];
         channelVolGroup->active = 0;
         if (channelVolGroup == g_snd.channelvol)
         {
             for (i = priority - 1; i >= 0 && !g_snd.channelVolGroups[i].active; --i)
                 ;
-            if (i < 0)
-                MyAssertHandler(".\\snd.cpp", 2471, 0, "%s", "i >= SND_CHANNELVOLPRIO_NONE");
+            iassert(i >= SND_CHANNELVOLPRIO_NONE);
             if (fademsec < 1)
                 fademsec = 1;
             g_snd.channelvol = &g_snd.channelVolGroups[i];
@@ -2875,8 +2859,8 @@ void __cdecl SND_UpdateLoopingSounds()
                     MyAssertHandler(".\\snd.cpp", 2556, 0, "%s", "g_snd.chaninfo[i].alias0");
                 if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0 && g_snd.chaninfo[ib].looptime != g_snd.looptime)
                     SND_StopStreamChannel(ib);
+                }
             }
-        }
         g_snd.looptime = g_snd.time;
     }
 }
@@ -3582,7 +3566,7 @@ void __cdecl SND_StopSounds(snd_stopsounds_arg_t which)
         }
         if ((which & 0x10) == 0)
         {
-            for (id = 1; id < 4; ++id)
+            for (id = 1; id < SND_CHANNELVOLPRIO_COUNT; ++id)
                 SND_DeactivateChannelVolumes(id, 0);
         }
         for (ie = 0; ie < 2; ++ie)
@@ -3992,7 +3976,7 @@ void __cdecl SND_Save(MemoryFile *memFile)
     int ic; // [esp+0h] [ebp-4h]
     int id; // [esp+0h] [ebp-4h]
 
-    for (i = 1; i < 4; ++i)
+    for (i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
         MemFile_WriteData(memFile, 772, &g_snd.channelVolGroups[i]);
     for (ia = 1; ia < 3; ++ia)
         MemFile_WriteData(memFile, 32, &g_snd.envEffects[ia]);
@@ -4225,9 +4209,9 @@ void __cdecl SND_Restore(MemoryFile *memFile)
 
     if (g_snd.Initialized2d)
     {
-        for (i = 1; i < 4; ++i)
+        for (i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
             MemFile_ReadData(memFile, 772, (uint8_t *)&g_snd.channelVolGroups[i]);
-        for (ia = 0; ia < 4; ++ia)
+        for (ia = 0; ia < SND_CHANNELVOLPRIO_COUNT; ++ia)
         {
             if (g_snd.channelVolGroups[ia].active)
                 g_snd.channelvol = &g_snd.channelVolGroups[ia];
