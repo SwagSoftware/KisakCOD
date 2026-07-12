@@ -251,7 +251,7 @@ uint32_t __cdecl R_AllocModelLighting(
         pixelFreeRover = modelLightGlob.pixelFreeRover;
         while (1)
         {
-            if (!_BitScanReverse(&v7, modelLightGlob.prevPrevPixelFreeBits[pixelFreeRover] & modelLightGlob.prevPixelFreeBits[pixelFreeRover & modelLightGlob.currPixelFreeBits[pixelFreeRover]]))
+            if (!_BitScanReverse(&v7, modelLightGlob.prevPrevPixelFreeBits[pixelFreeRover] & modelLightGlob.prevPixelFreeBits[pixelFreeRover] & modelLightGlob.currPixelFreeBits[pixelFreeRover]))
                 v7 = 63;// `CountLeadingZeros'::`2': : notFound;
             usedCount = v7 ^ 0x1F;
             if ((v7 ^ 0x1Fu) < 0x20)
