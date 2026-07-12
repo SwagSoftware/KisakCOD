@@ -265,7 +265,7 @@ void __cdecl ActorScr_Clamp_0_Positive(actor_s *pSelf, const actor_fields_s *pFi
         Scr_Error(v5);
         Float = 0.0;
     }
-    *(float *)((char *)&pSelf->ent + pField->ofs) = Float;
+    *(float *)((char *)pSelf + pField->ofs) = Float;
 }
 
 void __cdecl ActorScr_ReadOnly(actor_s *pSelf, const actor_fields_s *pField)
@@ -290,6 +290,7 @@ void __cdecl ActorScr_SetGoalRadius(actor_s *pSelf, const actor_fields_s *pField
     if (Float < 0.0)
         Scr_ParamError(0, "radius must be >= 0");
     Actor_SetGoalRadius(&pSelf->scriptGoal, Float);
+	Actor_SetGoalRadius(&pSelf->codeGoal, Float);
 }
 
 void __cdecl ActorScr_SetGoalHeight(actor_s *pSelf, const actor_fields_s *pField)
@@ -300,6 +301,7 @@ void __cdecl ActorScr_SetGoalHeight(actor_s *pSelf, const actor_fields_s *pField
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_fields.cpp", 382, 0, "%s", "pSelf");
     Float = Scr_GetFloat(0);
     Actor_SetGoalHeight(&pSelf->scriptGoal, Float);
+	Actor_SetGoalHeight(&pSelf->codeGoal, Float);
 }
 
 void __cdecl ActorScr_SetTime(actor_s *pSelf, const actor_fields_s *pField)
@@ -919,6 +921,7 @@ void __cdecl Cmd_AI_SetValue(actor_s *pSelf, int argc, unsigned __int8 *pBase, c
         SV_Cmd_ArgvBuffer(3, v20, 256);
         v11 = atof(v20);
         Actor_SetGoalRadius(&pSelf->scriptGoal, (float)*(double *)&v11);
+		Actor_SetGoalRadius(&pSelf->codeGoal, (float)*(double *)&v11);
     }
     else
     {

@@ -766,6 +766,32 @@ void CL_StanceButtonUpdate()
 void __cdecl CL_AddCurrentStanceToCmd(usercmd_s *cmd)
 {
     StanceState stance = clients[0].stance;
+
+#ifdef KISAK_SP
+    if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_PRONE) != 0 && stance == CL_STANCE_PRONE)
+    {
+        if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
+            stance = CL_STANCE_CROUCH;
+        else if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_STAND) == 0)
+            stance = CL_STANCE_STAND;
+    }
+    if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_CROUCH) != 0 && stance == CL_STANCE_CROUCH)
+    {
+        if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_STAND) == 0)
+            stance = CL_STANCE_STAND;
+        else if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_PRONE) == 0)
+            stance = CL_STANCE_PRONE;
+    }
+    if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_STAND) != 0 && stance == CL_STANCE_STAND)
+    {
+        if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
+            stance = CL_STANCE_CROUCH;
+        else if ((clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_PRONE) == 0)
+            stance = CL_STANCE_PRONE;
+    }
+    clients[0].stance = stance;
+#endif
+
     if (stance == CL_STANCE_CROUCH)
     {
         cmd->buttons |= BUTTON_CROUCH;
@@ -784,6 +810,7 @@ void __cdecl CL_AddCurrentStanceToCmd(usercmd_s *cmd)
     cmd->buttons &= ~BUTTON_TEMP_STANCE;
 }
 
+#ifdef KISAK_MP
 void __cdecl CL_KeyMove(usercmd_s *cmd)
 {
     int		forward, side, up;
@@ -850,6 +877,97 @@ void __cdecl CL_KeyMove(usercmd_s *cmd)
     cmd->rightmove   = ClampChar(side);
     cmd->upmove      = ClampChar(up);
 }
+#elif KISAK_SP
+static bool s_scriptWasNoProne;
+static bool s_scriptWasNoCrouch;
+static bool s_scriptSuppressProne;
+static bool s_scriptSuppressCrouch;
+
+void __cdecl CL_KeyMove(usercmd_s *cmd)
+{
+    int		forward, side, up;
+    bool noProne;
+    bool noCrouch;
+    bool allowProne;
+    bool allowCrouch;
+
+    noProne = (clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_PRONE) != 0;
+    noCrouch = (clients[0].snap.ps.pm_flags & PMF_SCRIPT_NO_CROUCH) != 0;
+
+    if (s_scriptWasNoProne && !noProne && kb[KEY_PRONE].active)
+        s_scriptSuppressProne = true;
+    if (s_scriptWasNoCrouch && !noCrouch && kb[KEY_DOWN].active)
+        s_scriptSuppressCrouch = true;
+
+    s_scriptWasNoProne = noProne;
+    s_scriptWasNoCrouch = noCrouch;
+
+    allowProne = !noProne && !s_scriptSuppressProne;
+    allowCrouch = !noCrouch && !s_scriptSuppressCrouch;
+
+    if ((kb[KEY_PRONE].active && allowProne) || (kb[KEY_DOWN].active && allowCrouch))
+    {
+        if (kb[KEY_PRONE].active && allowProne)
+        {
+            cmd->buttons |= BUTTON_PRONE;
+            cmd->buttons &= ~BUTTON_CROUCH;
+        }
+        else
+        {
+            cmd->buttons |= BUTTON_CROUCH;
+            cmd->buttons &= ~BUTTON_PRONE;
+        }
+        cmd->buttons |= BUTTON_TEMP_STANCE;
+    }
+    else
+    {
+        CL_StanceButtonUpdate();
+        CL_AddCurrentStanceToCmd(cmd);
+    }
+
+    if (kb[KEY_SPEED].active != CL_GetLocalClientGlobals(0)->usingAds)
+        cmd->buttons |= BUTTON_ADS;
+    else
+        cmd->buttons &= ~BUTTON_ADS;
+
+    if (kb[KEY_SPRINT].active || kb[KEY_SPRINT].wasPressed)
+    {
+        cmd->buttons |= BUTTON_SPRINT;
+        kb[KEY_SPRINT].wasPressed = 0;
+    }
+    else
+    {
+        cmd->buttons &= ~BUTTON_SPRINT;
+    }
+
+    forward = 0;
+    side = 0;
+    up = 0;
+    if (kb[KEY_STRAFE].active)
+    {
+        side += (int)(CL_KeyState(&kb[KEY_RIGHT]) * 127.0f);
+        side -= (int)(CL_KeyState(&kb[KEY_LEFT])  * 127.0f);
+    }
+    side += (int)(CL_KeyState(&kb[KEY_MOVERIGHT]) * 127.0f);
+    side -= (int)(CL_KeyState(&kb[KEY_MOVELEFT])  * 127.0f);
+
+    forward += (int)(CL_KeyState(&kb[KEY_FORWARD]) * 127.0f);
+    forward -= (int)(CL_KeyState(&kb[KEY_BACK])    * 127.0f);
+
+    up += (int)(CL_KeyState(&kb[KEY_LEANRIGHT]) * 127.0f);
+    up -= (int)(CL_KeyState(&kb[KEY_LEANLEFT])  * 127.0f);
+
+    if (kb[KEY_STRAFE].active && !(cmd->buttons & BUTTON_SPRINT))
+    {
+        side += (int)(CL_KeyState(&kb[KEY_RIGHT]) * 127.0f);
+        side -= (int)(CL_KeyState(&kb[KEY_LEFT])  * 127.0f);
+    }
+
+    cmd->forwardmove = ClampChar(forward);
+    cmd->rightmove   = ClampChar(side);
+    cmd->upmove      = ClampChar(up);
+}
+#endif
 
 int __cdecl CL_AllowInput()
 {

@@ -3512,12 +3512,12 @@ void __cdecl ScrCmd_IsTouching(scr_entref_t entref)
 
     Entity = GetEntity(entref);
     ent = Entity;
-    if (Entity->r.bmodel || (Entity->r.svFlags & 0x30) != 0)
+    if (Entity->r.bmodel || (Entity->r.svFlags & 0x60) != 0)
     {
         v4 = Entity;
         v5 = Scr_GetEntity(0);
         ent = v5;
-        if (v5->r.bmodel || (v5->r.svFlags & 0x30) != 0)
+        if (v5->r.bmodel || (v5->r.svFlags & 0x60) != 0)
             Scr_Error("istouching cannot be called on 2 brush/cylinder entities");
         v3 = v4;
     }

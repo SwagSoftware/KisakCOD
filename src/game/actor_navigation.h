@@ -173,6 +173,7 @@ pathnode_t *__cdecl Path_FindPathFrom(
     pathnode_t *pNodeFrom,
     float *vStartPos,
     const float *vGoalPos,
+    float fMaxNodeDist,
     bool bAllowNegotiationLinks);
 void __cdecl Path_UpdateLookahead(
     path_t *pPath,

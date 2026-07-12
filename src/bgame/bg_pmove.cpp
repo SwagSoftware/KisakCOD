@@ -372,8 +372,13 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
 
     iassert(ps);
 
+#ifdef KISAK_MP
     if (BG_WeaponBlocksProne(ps->weapon))
         return false;
+#elif KISAK_SP
+	if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) != 0)
+		return false;
+#endif
 
     if ((ps->pm_flags & PMF_PRONE) != 0)
         return true;
@@ -520,7 +525,11 @@ void __cdecl PM_UpdateLean(
     int32_t leaning = 0; // [esp+90h] [ebp-4h]
 
     // Patched from 1.7
+#ifdef KISAK_MP
     if ((cmd->buttons & 0xC0) != 0 && (ps->pm_flags & PMF_FROZEN) == 0)
+#elif KISAK_SP
+	if ((cmd->buttons & 0xC0) != 0 && (ps->pm_flags & PMF_FROZEN) == 0 && (ps->pm_flags & PMF_SCRIPT_NO_LEAN) == 0)
+#endif
     {
         if (ps->pm_type < PM_DEAD && (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED))
         {
@@ -3097,7 +3106,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 #ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
 #elif KISAK_SP
-    if (ps->pm_type == PM_DEAD)
+    if (ps->pm_type >= PM_DEAD)
 #endif
     {
         pm->mins[0] = -8.0;
@@ -3125,7 +3134,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 15.0;
         pm->maxs[1] = 15.0;
         pm->maxs[2] = 70.0;
+#ifdef KISAK_MP
         if (ps->pm_type == PM_DEAD)
+#elif KISAK_SP
+        if (ps->pm_type >= PM_DEAD)
+#endif
         {
             ps->viewHeightTarget = 8;
             PM_ViewHeightAdjust(pm, pml);
@@ -3151,7 +3164,66 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         }
         else
         {
-            if ((ps->eFlags & 0x300) != 0)
+#ifdef KISAK_SP
+            if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) != 0)
+                pm->cmd.buttons &= ~0x100u;
+            if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) != 0)
+                pm->cmd.buttons &= ~0x200u;
+
+            if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) != 0 && (ps->pm_flags & PMF_PRONE) != 0)
+            {
+                pm->cmd.buttons &= ~0x300u;
+                if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
+                {
+                    ps->pm_flags &= ~PMF_PRONE;
+                    ps->pm_flags |= PMF_DUCKED;
+                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
+                }
+                else if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) == 0)
+                {
+                    ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
+                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
+                }
+				else
+				{
+					ps->pm_flags &= ~PMF_PRONE;
+				}
+            }
+            else if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) != 0 && (ps->pm_flags & PMF_DUCKED) != 0)
+            {
+                pm->cmd.buttons &= ~0x300u;
+                if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) == 0)
+                {
+                    ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
+                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
+                }
+                else if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) == 0 && PlayerProneAllowed(pm))
+                {
+                    ps->pm_flags |= PMF_PRONE;
+                    ps->pm_flags &= ~PMF_DUCKED;
+                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_PRONE, 0, ps);
+                }
+            }
+            else if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) != 0 && (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0)
+            {
+                pm->cmd.buttons &= ~0x300u;
+                if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
+                {
+                    ps->pm_flags |= PMF_DUCKED;
+                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
+                }
+                else if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) == 0 && PlayerProneAllowed(pm))
+                {
+                    ps->pm_flags |= PMF_PRONE;
+                    BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_PRONE, 0, ps);
+                }
+            }
+#endif
+            if ((ps->eFlags & 0x300) != 0
+#ifdef KISAK_SP
+			&& (ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0
+#endif
+			)
             {
                 if ((ps->eFlags & 0x100) == 0 || (ps->eFlags & 0x200) != 0)
                 {
@@ -3211,17 +3283,28 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 {
 #ifdef KISAK_MP
                                     BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_CROUCH, 0, 0);
-#endif
                                     ps->pm_flags &= ~PMF_PRONE;
                                     ps->pm_flags |= PMF_DUCKED;
+#elif KISAK_SP
+                                    if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
+                                    {
+                                        ps->pm_flags &= ~PMF_PRONE;
+                                        ps->pm_flags |= PMF_DUCKED;
+                                    }
+#endif
                                 }
                             }
                             else
                             {
 #ifdef KISAK_MP
                                 BG_AnimScriptEvent(ps, ANIM_ET_STAND_TO_CROUCH, 0, 0);
-#endif
                                 ps->pm_flags |= PMF_DUCKED;
+#elif KISAK_SP
+                                if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
+                                {
+                                    ps->pm_flags |= PMF_DUCKED;
+                                }
+#endif
                             }
                         }
                         else if ((ps->pm_flags & PMF_PRONE) != 0)
@@ -3260,8 +3343,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             {
 #ifdef KISAK_MP
                                 BG_AnimScriptEvent(ps, ANIM_ET_PRONE_TO_STAND, 0, 0);
-#endif
                                 ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
+#elif KISAK_SP
+                                if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) == 0)
+                                {
+                                    ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
+                                }
+#endif
                             }
                         }
                         else if ((ps->pm_flags & PMF_DUCKED) != 0)
@@ -3283,8 +3371,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                             {
 #ifdef KISAK_MP
                                 BG_AnimScriptEvent(ps, ANIM_ET_CROUCH_TO_STAND, 0, 0);
-#endif
                                 ps->pm_flags &= ~PMF_DUCKED;
+#elif KISAK_SP
+                                if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) == 0)
+                                {
+                                    ps->pm_flags &= ~PMF_DUCKED;
+                                }
+#endif
                             }
                         }
                     }
@@ -3296,13 +3389,6 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
                         ps->pm_flags |= PMF_NO_PRONE;
-                        if ((pm->cmd.buttons & 0x1000) == 0)
-                        {
-                            if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & PMF_DUCKED) != 0)
-                                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
-                            else
-                                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
-                        }
                     }
                 }
             }

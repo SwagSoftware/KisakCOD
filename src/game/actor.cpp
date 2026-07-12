@@ -2510,7 +2510,7 @@ void __cdecl Actor_SetGoalHeight(actor_goal_s *goal, double height)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5700, 0, "%s", "goal");
     if (height < 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5701, 0, "%s", "height >= 0");
-    if (height >= 80.0)
+    if (height <= 80.0)
         goal->height = height;
     else
         goal->height = 80.0;
@@ -4085,16 +4085,24 @@ bool __cdecl Actor_FindPath(
         Actor_ClearPath(self);
         return 1;
     }
-    if (Path_Exists(&self->Path))
-    {
-        if (!Path_NeedsReevaluation(&self->Path) && Actor_PointAt(self->Path.vFinalGoal, vGoalPos))
-            return 1;
-        Actor_ClearPath(self);
-    }
-    else if (Actor_PointAt(self->ent->r.currentOrigin, vGoalPos))
-    {
-        return 1;
-    }
+	const bool pathToCodeGoal = vGoalPos[0] == self->codeGoal.pos[0]
+		&& vGoalPos[1] == self->codeGoal.pos[1]
+		&& vGoalPos[2] == self->codeGoal.pos[2];
+	if (Path_Exists(&self->Path))
+	{
+		if (!Path_NeedsReevaluation(&self->Path)
+			&& (pathToCodeGoal
+				? Actor_PointAtGoal(self->Path.vFinalGoal, &self->codeGoal)
+				: Actor_PointAt(self->Path.vFinalGoal, vGoalPos)))
+			return 1;
+		Actor_ClearPath(self);
+	}
+	else if (pathToCodeGoal
+		? Actor_PointAtGoal(self->ent->r.currentOrigin, &self->codeGoal)
+		: Actor_PointAt(self->ent->r.currentOrigin, vGoalPos))
+	{
+		return 1;
+	}
     if (ignoreSuppression)
         SuppressionPlanes = 0;
     else
@@ -4129,6 +4137,7 @@ bool __cdecl Actor_FindPath(
             v12,
             self->ent->r.currentOrigin,
             vGoalPos,
+			pathToCodeGoal ? self->codeGoal.radius : 192.0f,
             bAllowNegotiationLinks);
         return Actor_HasPath(self);
     }
@@ -4155,7 +4164,7 @@ void __cdecl Actor_RecalcPath(actor_s *self)
         v4 = Sentient_NearestNode(self->sentient);
         if (v4)
         {
-            Path_FindPathFrom(&self->Path, self->sentient->eTeam, v4, self->ent->r.currentOrigin, self->Path.vFinalGoal, v2);
+            Path_FindPathFrom(&self->Path, self->sentient->eTeam, v4, self->ent->r.currentOrigin, self->Path.vFinalGoal, 192.0f, v2);
             self->Path.flags |= 0x80u;
         }
     }
@@ -4641,7 +4650,7 @@ void __cdecl Actor_UpdateGoalPos(actor_s *self)
                 self->codeGoal.pos[2] = pDesiredChainPos->constant.vOrigin[2];
                 fRadius = pDesiredChainPos->constant.fRadius;
                 if (fRadius == 0.0)
-                    goto LABEL_25;
+                    fRadius = self->scriptGoal.radius;
             LABEL_24:
                 Actor_SetGoalRadius(&self->codeGoal, fRadius);
                 Actor_SetGoalHeight(&self->codeGoal, self->scriptGoal.height);
@@ -5432,7 +5441,7 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
             self->codeGoal.pos,
             nodes,
             -2,
-            192.0,
+            self->codeGoal.radius,
             vNormal,
             fDist,
             iPlaneCount,
@@ -5445,7 +5454,7 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
         pNearestNode = Sentient_NearestNode(self->sentient);
         if (!pNearestNode)
             return 0;
-        pNodeTo = Path_NearestNode(self->codeGoal.pos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+        pNodeTo = Path_NearestNode(self->codeGoal.pos, nodes, -2, self->codeGoal.radius, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
     }
     if (!pNodeTo)
         return 0;
@@ -5489,6 +5498,11 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
         Path_FindPathFromToNotCrossPlanes(&self->Path, self->sentient->eTeam, pNearestNode, self->ent->r.currentOrigin, pNodeTo, vGoalPos, vNormal, fDist, iPlaneCount, 1);
     else
         Path_FindPathFromTo(&self->Path, self->sentient->eTeam, pNearestNode, self->ent->r.currentOrigin, pNodeTo, vGoalPos, 1);
+	if (Actor_HasPath(self))
+	{
+		self->Path.pathEndAnimDistSq = self->codeGoal.radius * self->codeGoal.radius;
+		self->Path.pathEndAnimNotified = 0;
+	}
     return Actor_HasPath(self);
 }
 

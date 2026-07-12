@@ -1866,10 +1866,10 @@ void __cdecl PlayerCmd_AllowCrouch(scr_entref_t entref)
     Int = Scr_GetInt(0);
     client = v1->client;
     pm_flags = client->ps.pm_flags;
-    if (Int)
-        v6 = pm_flags & 0xFFDFFFFF;
-    else
-        v6 = pm_flags | 0x200000;
+	if (Int)
+		v6 = pm_flags & ~PMF_SCRIPT_NO_CROUCH;
+	else
+		v6 = pm_flags | PMF_SCRIPT_NO_CROUCH;
     client->ps.pm_flags = v6;
 }
 
@@ -1908,10 +1908,10 @@ void __cdecl PlayerCmd_AllowProne(scr_entref_t entref)
     Int = Scr_GetInt(0);
     client = v1->client;
     pm_flags = client->ps.pm_flags;
-    if (Int)
-        v6 = pm_flags & 0xFFBFFFFF;
-    else
-        v6 = pm_flags | 0x400000;
+	if (Int)
+		v6 = pm_flags & ~PMF_SCRIPT_NO_PRONE;
+	else
+		v6 = pm_flags | PMF_SCRIPT_NO_PRONE;
     client->ps.pm_flags = v6;
 }
 
@@ -1950,10 +1950,10 @@ void __cdecl PlayerCmd_AllowLean(scr_entref_t entref)
     Int = Scr_GetInt(0);
     client = v1->client;
     pm_flags = client->ps.pm_flags;
-    if (Int)
-        v6 = pm_flags & 0xFF7FFFFF;
-    else
-        v6 = pm_flags | 0x800000;
+	if (Int)
+		v6 = pm_flags & ~PMF_SCRIPT_NO_LEAN;
+	else
+		v6 = pm_flags | PMF_SCRIPT_NO_LEAN;
     client->ps.pm_flags = v6;
 }
 

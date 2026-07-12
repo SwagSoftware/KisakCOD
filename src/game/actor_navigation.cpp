@@ -270,6 +270,11 @@ struct  CustomSearchInfo_FindPathInCylinderWithLOS : CustomSearchInfo_FindPathWi
         }
         return dist;
     }
+
+	bool IgnoreNode(pathnode_t *pNode)
+	{
+		return !Actor_PointAtGoal(pNode->constant.vOrigin, this->goal);
+	}
 };
 
 /* 10050 */
@@ -332,7 +337,7 @@ struct  CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes : CustomSearchI
 /* 10051 */
 struct  CustomSearchInfo_FindPathFromInCylinder : CustomSearchInfo_FindPath
 {
-    float m_vOrigin[2];
+    float m_vOrigin[3];
     float m_fRadiusSqrd;
     float m_fHalfHeightSqrd;
 
@@ -342,7 +347,7 @@ struct  CustomSearchInfo_FindPathFromInCylinder : CustomSearchInfo_FindPath
 /* 10052 */
 struct  CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes : CustomSearchInfo_FindPath
 {
-    float m_vOrigin[2];
+    float m_vOrigin[3];
     float m_fRadiusSqrd;
     float m_fHalfHeightSqrd;
     int m_iPlaneCount;
@@ -361,7 +366,7 @@ struct  CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes : CustomSearchInfo
         float *fDist; // r10
         float *i; // r11
 
-        v2 = (float)(pNode->constant.vOrigin[2] - this->m_fRadiusSqrd);
+        v2 = (float)(pNode->constant.vOrigin[2] - this->m_vOrigin[2]);
         if ((float)((float)v2 * (float)v2) > (double)this->m_fHalfHeightSqrd)
             return 1;
         v4 = (float)(pNode->constant.vOrigin[0] - this->m_vOrigin[0]);
@@ -3636,13 +3641,14 @@ pathnode_t *__cdecl Path_FindPathFrom(
     pathnode_t *pNodeFrom,
     float *vStartPos,
     const float *vGoalPos,
+	float fMaxNodeDist,
     bool bAllowNegotiationLinks)
 {
     pathnode_t *result; // r3
     int nodeCount;
     pathsort_t v14[64];
 
-    result = Path_NearestNode(vGoalPos, v14, -2, 192.0f, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+    result = Path_NearestNode(vGoalPos, v14, -2, fMaxNodeDist, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
     if (result)
         return (pathnode_t *)Path_FindPathFromTo(
             pPath,
@@ -4890,7 +4896,7 @@ bool __cdecl Path_FindPathInCylinderWithLOS(
     info.m_fWithinDistSqrd = fWithinDistSqrd;
     info.goal = goal;
 
-    return Path_AStarAlgorithm<CustomSearchInfo_FindPathInCylinderWithLOS>(
+    return Path_AStarAlgorithm<CustomSearchInfo_FindPathInCylinderWithLOS, true>(
         pPath,
         eTeam,
         vStartPos,
@@ -4949,7 +4955,7 @@ bool __cdecl Path_FindPathInCylinderWithLOSNotCrossPlanes(
     info.m_vNormal = vNormal;
     info.m_fDist = fDist;
 
-    return Path_AStarAlgorithm<CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes>(
+    return Path_AStarAlgorithm<CustomSearchInfo_FindPathInCylinderWithLOSNotCrossPlanes, true>(
         pPath,
         eTeam,
         vStartPos,
@@ -4984,6 +4990,7 @@ bool __cdecl Path_FindPathFromInCylinder(
     {
         info.m_vOrigin[0] = vOrigin[0];
         info.m_vOrigin[1] = vOrigin[1];
+		info.m_vOrigin[2] = vOrigin[2];
 
         info.startPos[0] = vStartPos[0];
         info.startPos[1] = vStartPos[1];
@@ -5038,6 +5045,7 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
 
     info.m_vOrigin[0] = vOrigin[0];
     info.m_vOrigin[1] = vOrigin[1];
+	info.m_vOrigin[2] = vOrigin[2];
     info.m_pNodeTo = pNodeTo;
     info.m_iPlaneCount = iPlaneCount;
     info.m_vNormal = vNormal;
@@ -5051,7 +5059,7 @@ int __cdecl Path_FindPathFromInCylinderNotCrossPlanes(
     if (info.IgnoreNode(pNodeFrom))
         return 0;
     else
-        return Path_AStarAlgorithm<CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes>(
+        return Path_AStarAlgorithm<CustomSearchInfo_FindPathFromInCylinderNotCrossPlanes, true>(
             pPath,
             eTeam,
             vStartPos,

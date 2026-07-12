@@ -105,7 +105,11 @@ bool __cdecl SV_EntityContact(const float *mins, const float *maxs, const gentit
             center[1] = 0.5 * center[1];
             dista = *maxs - center[0] + gEnt->r.maxs[0] - 64.0;
             distSqrda = dista * dista;
+#ifdef KISAK_MP
             return distSqrda <= Vec2DistanceSq(gEnt->r.currentOrigin, center);
+#elif KISAK_SP
+			return distSqrda > Vec2DistanceSq(gEnt->r.currentOrigin, center);
+#endif
         }
     }
     else
