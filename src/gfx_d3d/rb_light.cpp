@@ -230,6 +230,7 @@ void __cdecl R_SetLightGridColors(
     pixels[3] = (packedSunWeight << 24) | colors->rgb[33][2] | (colors->rgb[33][1] << 8) | (colors->rgb[33][0] << 16);
 
     pixels = (uint32_t *)((char *)pixels + s_lightGridRowDelta);
+    pixels[0] = (packedSunWeight << 24) | colors->rgb[34][2] | (colors->rgb[34][1] << 8) | (colors->rgb[34][0] << 16);
     pixels[1] = (packedSunWeight << 24) | colors->rgb[52][2] | (colors->rgb[52][1] << 8) | (colors->rgb[52][0] << 16);
     pixels[2] = (packedSunWeight << 24) | colors->rgb[55][2] | (colors->rgb[55][1] << 8) | (colors->rgb[55][0] << 16);
     pixels[3] = (packedSunWeight << 24) | colors->rgb[35][2] | (colors->rgb[35][1] << 8) | (colors->rgb[35][0] << 16);
@@ -986,7 +987,7 @@ GfxModelLightingPatch *__cdecl R_BackEndDataAllocAndClearModelLightingPatch(GfxB
     if (patchIndex >= 0x1000)
         Com_Error(ERR_FATAL, "modelLightingPatchList ran out of elements.");
     v1 = &frontEndDataOut->modelLightingPatchList[patchIndex];
-    memset(v1, 0, sizeof(v1));
+    memset(v1, 0, sizeof(*v1));
     return v1;
 }
 
