@@ -1229,6 +1229,8 @@ void __cdecl Path_IncreaseLookaheadAmount(path_t *pPath)
 
     pPath->fLookaheadAmount *= 1.1764705f;
 
+    // LWSS: this is not needed atm, it's some kind of lookahead exponential growth that pushes the amount further, much faster. 
+    // I'm guessing for moving straight across giant levels. (Notably disabled in Zombie mode)
     //if (ai_useBetterLookahead->current.enabled && !zombiemode->current.enabled)
     //{
     //    v3 = _Pow_int<float>(momentumFactor, pPath->numIncreases - 1);
@@ -3328,96 +3330,60 @@ bool __cdecl Path_LookaheadPredictionTrace(path_t *pPath, float *vStartPos, floa
     return Path_PredictionTrace(vStartPos, vEndPos, ENTITYNUM_NONE, mask, endpos, 18.0, 1);
 }
 
+static const float minLookaheadDist = 24.0f; // USEBETTERLOOKAHEAD
+
 void __cdecl Path_UpdateLookaheadAmount(
     path_t *pPath,
     float *vStartPos,
     float *vLookaheadPos,
     int bReduceLookaheadAmount,
-    double dist,
+    float dist,
     int lookaheadNextNode,
-    double maxLookaheadAmountIfReduce)
+    float maxLookaheadAmountIfReduce,
+    bool bAllowRestore) // USEBETTERLOOKAHEAD
 {
-    int v15; // r11
     int flags; // r10
-    double v17; // fp0
-    double v18; // fp0
-    int v19; // r9
-    int v20; // r11
     float fOrigLength; // fp0
-    int v22; // r4
-    double v23; // fp1
-    double v24; // fp0
-    int wPathLen; // r11
     float fCurrLength; // fp1
-    double v28; // fp2
-    const char *v29; // r3
+    float prevLength;
+    float prevHeight;
+    float prevLookaheadAmount;
+    bool restorePrevLookahead;
+    bool lookaheadTrace;
+    bool bNewIsForward;
+    float prevLookaheadPos[3];
+    pathpoint_t *nextPathPt;
+    pathpoint_t *prevPathPt;
 
-    if (pPath->wPathLen <= 0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 2716, 0, "%s", "pPath->wPathLen > 0");
-    v15 = pPath->wPathLen - 1;
-    if (pPath->lookaheadNextNode >= v15)
+    iassert(pPath->wPathLen > 0);
+
+    if (pPath->lookaheadNextNode >= pPath->wPathLen - 1)
     {
         pPath->fLookaheadDistToNextNode = 0.0;
-        pPath->lookaheadNextNode = v15;
+        pPath->lookaheadNextNode = pPath->wPathLen - 1;
     }
+
+    // USEBETTERLOOKAHEAD
+    prevLength = 0.0f;
+    prevHeight = 0.0f;
+    prevLookaheadAmount = pPath->fLookaheadAmount;
+    restorePrevLookahead = false;
+    lookaheadTrace = false;
+    // END USEBETTERLOOKAHEAD
+
     if (bReduceLookaheadAmount)
     {
         flags = pPath->flags;
         if ((flags & 2) != 0)
-            v17 = 0.75;
+            pPath->fLookaheadAmount = (maxLookaheadAmountIfReduce * 0.75f);
         else
-            v17 = 0.5625;
-        v18 = (float)((float)maxLookaheadAmountIfReduce * (float)v17);
-        pPath->fLookaheadAmount = v18;
-        if (v18 < 0.001)
+            pPath->fLookaheadAmount = (maxLookaheadAmountIfReduce * 0.5625f);
+
+        if (pPath->fLookaheadAmount < 0.001)
             pPath->fLookaheadAmount = 0.001;
+
         pPath->flags = flags & 0xFFFFFDFC;
-    LABEL_28:
-        pPath->lookaheadDir[0] = *vLookaheadPos - *vStartPos;
-        pPath->lookaheadDir[1] = vLookaheadPos[1] - vStartPos[1];
-        pPath->lookaheadDir[2] = vLookaheadPos[2] - vStartPos[2];
-        v23 = Vec2Normalize(pPath->lookaheadDir);
-        pPath->fLookaheadDist = v23;
-        if (v23 == 0.0)
-            v24 = 0.0;
-        else
-            v24 = (float)(pPath->lookaheadDir[2] / (float)v23);
-        pPath->lookaheadDir[2] = v24;
-        pPath->fLookaheadDistToNextNode = dist;
-        pPath->lookaheadNextNode = lookaheadNextNode;
-
-        iassert(pPath->wNegotiationStartNode <= pPath->lookaheadNextNode);
-        iassert(pPath->lookaheadNextNode < pPath->wPathLen);
-        iassert(pPath->pts[pPath->lookaheadNextNode].fOrigLength > 0);
-        iassert(pPath->fLookaheadDistToNextNode <= pPath->pts[pPath->lookaheadNextNode].fOrigLength);
-
-        wPathLen = pPath->wPathLen;
-        if (wPathLen > 1)
-        {
-            fCurrLength = pPath->fCurrLength;
-            v28 = *((float *)&pPath->pts[wPathLen - 1] - 2);
-            if (fCurrLength > v28)
-            {
-                v29 = va((const char *)HIDWORD(fCurrLength), LODWORD(fCurrLength), LODWORD(v28));
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-                    2762,
-                    0,
-                    "%s\n\t%s",
-                    "pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength",
-                    v29);
-            }
-        }
-
-        iassert(!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1));
-        iassert(pPath->lookaheadNextNode < pPath->wPathLen);
-
-        if (pPath->fLookaheadDistToNextNode != 0.0 && pPath->lookaheadNextNode >= pPath->wPathLen - 1)
-        {
-            v22 = 2765;
-            goto LABEL_50;
-        }
-        return;
+        goto LABEL_28;
     }
     if (Path_LookaheadPredictionTrace(pPath, vStartPos, vLookaheadPos))
     {
@@ -3425,37 +3391,107 @@ void __cdecl Path_UpdateLookaheadAmount(
         goto LABEL_28;
     }
     iassert(pPath->lookaheadNextNode >= 0);
-    v19 = pPath->wPathLen;
-    v20 = pPath->lookaheadNextNode;
-    if (v20 == v19 - 2)
+
+    if (pPath->lookaheadNextNode == pPath->wPathLen - 2)
         fOrigLength = pPath->fCurrLength;
     else
-        fOrigLength = pPath->pts[v20].fOrigLength;
-    if ((pPath->flags & 2) == 0 || v20 >= v19 || pPath->fLookaheadDistToNextNode > fOrigLength)
+        fOrigLength = pPath->pts[pPath->lookaheadNextNode].fOrigLength;
+
+    if ((pPath->flags & 2) == 0 || pPath->lookaheadNextNode >= pPath->wPathLen || pPath->fLookaheadDistToNextNode > fOrigLength)
     {
         Path_ReduceLookaheadAmount(pPath, maxLookaheadAmountIfReduce);
         goto LABEL_28;
     }
+
     Path_ReduceLookaheadAmount(pPath, maxLookaheadAmountIfReduce);
     iassert(pPath->lookaheadNextNode < pPath->wPathLen);
-    if (pPath->fLookaheadDistToNextNode != 0.0 && pPath->lookaheadNextNode >= pPath->wPathLen - 1)
+    iassert(!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1));
+    return;
+
+LABEL_28:
+    // USEBETTERLOOKAHEAD
+    bNewIsForward = lookaheadNextNode > pPath->lookaheadNextNode || (lookaheadNextNode == pPath->lookaheadNextNode && dist > pPath->fLookaheadDistToNextNode);
+
+    if (ai_useBetterLookahead->current.enabled
+        && bAllowRestore
+        && (prevLookaheadAmount > pPath->fLookaheadAmount || bNewIsForward)
+        && pPath->lookaheadNextNode <= pPath->wPathLen - 2
+        && pPath->pts[pPath->lookaheadNextNode].fOrigLength >= pPath->fLookaheadDistToNextNode
+        && pPath->wNegotiationStartNode <= 0
+        && pPath->fLookaheadDist > minLookaheadDist)
     {
-        v22 = 2739;
-    LABEL_50:
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp",
-            v22,
-            0,
-            "%s",
-            "!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1)");
+        nextPathPt = &pPath->pts[pPath->lookaheadNextNode];
+        prevPathPt = &pPath->pts[pPath->lookaheadNextNode + 1];
+        prevHeight = Path_GetDistToPathSegment(vStartPos, nextPathPt);
+        if (pPath->lookaheadNextNode == pPath->wPathLen - 2)
+            fOrigLength = pPath->fCurrLength;
+        else
+            fOrigLength = nextPathPt->fOrigLength;
+        prevLength = fOrigLength;
+        prevLookaheadPos[0] = (float)((float)-pPath->fLookaheadDistToNextNode * nextPathPt->fDir2D[0]) + nextPathPt->vOrigPoint[0];
+        prevLookaheadPos[1] = (float)((float)-pPath->fLookaheadDistToNextNode * nextPathPt->fDir2D[1]) + nextPathPt->vOrigPoint[1];
+        prevLookaheadPos[2] = nextPathPt->vOrigPoint[2]
+            - (((nextPathPt->vOrigPoint[2] - prevPathPt->vOrigPoint[2]) * pPath->fLookaheadDistToNextNode) / fOrigLength);
+        lookaheadTrace = Path_LookaheadPredictionTrace(pPath, vStartPos, prevLookaheadPos);
+        if (pPath->fLookaheadAmount < prevLookaheadAmount)
+        {
+            if (!lookaheadTrace)
+            {
+                Path_SetLookaheadToStart(pPath, vStartPos, 0);
+                return;
+            }
+            restorePrevLookahead = true;
+        }
+        else
+        {
+            restorePrevLookahead = lookaheadTrace;
+        }
     }
+    if (restorePrevLookahead)
+    {
+        Vec3Sub(prevLookaheadPos, vStartPos, pPath->lookaheadDir);
+
+        pPath->fLookaheadDist = Vec2Normalize(pPath->lookaheadDir);
+
+        if (pPath->fLookaheadDist == 0.0)
+            pPath->lookaheadDir[2] = 0.0;
+        else
+            pPath->lookaheadDir[2] = (pPath->lookaheadDir[2] / pPath->fLookaheadDist);
+
+        if (pPath->lookaheadNextNode != lookaheadNextNode || pPath->fLookaheadAmount >= prevLookaheadAmount)
+            pPath->fLookaheadAmount = (prevHeight * prevLength);
+    }
+    else
+    {
+        Vec3Sub(vLookaheadPos, vStartPos, pPath->lookaheadDir);
+
+        pPath->fLookaheadDist = Vec2Normalize(pPath->lookaheadDir);
+
+        if (pPath->fLookaheadDist == 0.0)
+            pPath->lookaheadDir[2] = 0.0;
+        else
+            pPath->lookaheadDir[2] = (float)(pPath->lookaheadDir[2] / pPath->fLookaheadDist);
+
+        pPath->fLookaheadDistToNextNode = dist;
+        pPath->lookaheadNextNode = lookaheadNextNode;
+    }
+    // END USEBETTERLOOKAHEAD
+
+    iassert(pPath->wNegotiationStartNode <= pPath->lookaheadNextNode);
+    iassert(pPath->lookaheadNextNode < pPath->wPathLen);
+    iassert(pPath->pts[pPath->lookaheadNextNode].fOrigLength > 0);
+    iassert(pPath->fLookaheadDistToNextNode <= pPath->pts[pPath->lookaheadNextNode].fOrigLength);
+    iassert(pPath->wPathLen <= 1 || pPath->fCurrLength <= pPath->pts[pPath->wPathLen - 2].fOrigLength);
+    iassert(!pPath->fLookaheadDistToNextNode || (pPath->lookaheadNextNode < pPath->wPathLen - 1));
+    iassert(pPath->lookaheadNextNode < pPath->wPathLen);
 }
 
 void __cdecl Path_CalcLookahead_Completed(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
-    double totalArea)
+    float totalArea,
+    bool bAllowRestore) // USEBETTERLOOKAHEAD
 {
     float *vLookaheadPos;
 
@@ -3475,12 +3511,13 @@ void __cdecl Path_CalcLookahead_Completed(
         bReduceLookaheadAmount,
         0.0,
         pPath->wNegotiationStartNode,
-        totalArea);
+        totalArea,
+        bAllowRestore); // USEBETTERLOOKAHEAD
 
     pPath->fLookaheadAmount = fmaxf(pPath->fLookaheadAmount, fmaxf(totalArea, 32768.0f));
 }
 
-void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount)
+void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, bool bAllowRestore) // USEBETTERLOOKAHEAD
 {
     pathpoint_t *vCurrPoint; // [esp+10h] [ebp-58h]
     float fCurrLength; // [esp+14h] [ebp-54h]
@@ -3512,7 +3549,7 @@ void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLook
     {
         if (i < pPath->wNegotiationStartNode)
         {
-            Path_CalcLookahead_Completed(pPath, vStartPos, bReduceLookaheadAmount, totalArea);
+            Path_CalcLookahead_Completed(pPath, vStartPos, bReduceLookaheadAmount, totalArea, bAllowRestore); // USEBETTERLOOKAHEAD
             return;
         }
         pt = &pPath->pts[i];
@@ -3554,7 +3591,8 @@ void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLook
         bReduceLookaheadAmount,
         dist,
         i,
-        lookaheadAmount
+        lookaheadAmount,
+        bAllowRestore // USEBETTERLOOKAHEAD
         );
 }
 
@@ -3666,7 +3704,8 @@ void __cdecl Path_UpdateLookahead(
     float *vStartPos,
     bool bReduceLookaheadAmount,
     bool bTrimAmount,
-    bool bAllowBacktrack)
+    bool bAllowBacktrack,
+    bool bAllowRestore) // USEBETTERLOOKAHEAD
 {
     int v10; // r7
     int v11; // r6
@@ -3745,7 +3784,7 @@ void __cdecl Path_UpdateLookahead(
         if (bAllowBacktrack && pPath->fLookaheadAmount >= 64.0)
             Path_BacktrackCompletedPath(pPath, vStartPos);
     LABEL_20:
-        Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount);
+        Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount, bAllowRestore); // USEBETTERLOOKAHEAD
         goto LABEL_25;
     }
     v18 = Path_NeedsReevaluation(pPath);
@@ -3761,7 +3800,7 @@ void __cdecl Path_UpdateLookahead(
     if (!bTrimAmount)
         goto LABEL_20;
     Path_SubtractTrimmedAmount(pPath, vStartPos);
-    Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount);
+    Path_CalcLookahead(pPath, vStartPos, bReduceLookaheadAmount, bAllowRestore); // USEBETTERLOOKAHEAD
 LABEL_25:
     Path_UpdateForwardLookahead(pPath, vStartPos);
     //Profile_EndInternal(0);
@@ -3790,7 +3829,13 @@ void __cdecl Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrim
     pPath->lookaheadDir[2] = v9;
     pPath->fLookaheadDistToNextNode = 0.0;
     pPath->lookaheadNextNode = wPathLen - 1;
-    Path_UpdateLookahead(pPath, vStartPos, 0, bTrimAmount, 1);
+    // USEBETTERLOOKAHEAD
+    int numIter = 1;
+    if (ai_useBetterLookahead->current.enabled)
+        numIter = 3;
+    for (int i = 0; i < numIter; ++i)
+        Path_UpdateLookahead(pPath, vStartPos, 0, bTrimAmount, 1, 0);
+    // END USEBETTERLOOKAHEAD
 }
 
 void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
@@ -3874,7 +3919,7 @@ void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos)
 
         if (bInFront && (float)(dot * prevDot) < 0.0)
         {
-            Path_UpdateLookahead(pPath, vStartPos, 0, 1, 1);
+            Path_UpdateLookahead(pPath, vStartPos, 0, 1, 1, 0); // USEBETTERLOOKAHEAD
             return;
         }
 
@@ -4175,7 +4220,7 @@ LABEL_18:
             pPath->lookaheadDir[0] = 0.0;
             pPath->lookaheadDir[1] = 0.0;
             pPath->lookaheadDir[2] = 0.0;
-            Path_UpdateLookahead(pPath, vStartPos, 0, 0, 1);
+            Path_UpdateLookahead(pPath, vStartPos, 0, 0, 1, 0); // USEBETTERLOOKAHEAD
             pPath->minLookAheadNodes = 0;
         }
         else
@@ -4290,7 +4335,7 @@ LABEL_16:
 
     pPath->fLookaheadAmount = fmaxf(pPath->fLookaheadAmount, 1024.0f);
 
-    Path_UpdateLookahead(pPath, vStartPos, 0, 0, 0);
+    Path_UpdateLookahead(pPath, vStartPos, 0, 0, 0, 1); // USEBETTERLOOKAHEAD
 }
 
 int __cdecl Path_AttemptDodge(

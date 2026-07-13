@@ -2119,7 +2119,7 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     vPrevLookaheadDir[1] = pPath->lookaheadDir[1];
     vPrevLookaheadDir[2] = pPath->lookaheadDir[2];
 
-    Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1);
+    Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1, 1); // USEBETTERLOOKAHEAD
 
     float pathDirDot = (pPath->lookaheadDir[0] * vPrevLookaheadDir[0]) + (pPath->lookaheadDir[1] * vPrevLookaheadDir[1]);
     if (pathDirDot < 0.70700002f)
@@ -4475,7 +4475,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
             if (Actor_HasPath(self))
             {
                 IsDodgeEntity = Actor_IsDodgeEntity(self, self->Physics.iHitEntnum);
-                Path_UpdateLookahead(&self->Path, ent->r.currentOrigin, IsDodgeEntity, 0, 1);
+                Path_UpdateLookahead(&self->Path, ent->r.currentOrigin, IsDodgeEntity, 0, 1, 1); // USEBETTERLOOKAHEAD
                 Actor_AddStationaryMoveHistory(self);
             }
             yawChange = 0.0;
