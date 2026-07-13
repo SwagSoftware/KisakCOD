@@ -161,6 +161,7 @@ extern const dvar_t *g_vehHudTargetScreenEdgeClampBufferLeft;
 extern const dvar_t *ai_ShowCanshootChecks;
 extern const dvar_t *player_throwbackInnerRadius;
 extern const dvar_t *ai_showPaths;
+extern const dvar_t *ai_useBetterLookahead; // USEBETTERLOOKAHEAD
 extern const dvar_t *ai_accuracyDistScale;
 extern const dvar_t *g_vehHudTargetSize;
 extern const dvar_t *ai_debugMeleeAttackSpots;

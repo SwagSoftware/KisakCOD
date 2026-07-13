@@ -286,7 +286,6 @@ void __cdecl player_die(
         }
         v24 = self->r.mins[2];
         self->s.loopSound = 0;
-		SV_UnlinkEntity(self);
         self->r.maxs[2] = 16.0;
         if (v24 > 16.0)
             MyAssertHandler(

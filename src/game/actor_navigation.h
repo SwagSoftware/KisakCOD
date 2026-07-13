@@ -150,15 +150,17 @@ void __cdecl Path_UpdateLookaheadAmount(
     float *vStartPos,
     float *vLookaheadPos,
     int bReduceLookaheadAmount,
-    double dist,
+    float dist,
     int lookaheadNextNode,
-    double maxLookaheadAmountIfReduce);
+    float maxLookaheadAmountIfReduce,
+    bool bAllowRestore); // USEBETTERLOOKAHEAD
 void __cdecl Path_CalcLookahead_Completed(
     path_t *pPath,
     float *vStartPos,
     int bReduceLookaheadAmount,
-    double totalArea);
-void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount);
+    float totalArea,
+    bool bAllowRestore); // USEBETTERLOOKAHEAD
+void __cdecl Path_CalcLookahead(path_t *pPath, float *vStartPos, int bReduceLookaheadAmount, bool bAllowRestore);
 void __cdecl Path_CheckNodeCountForDodge(path_t *pPath, int numNeeded, pathpoint_t **pt, int *startIndex);
 void __cdecl Path_TrimToBadPlaceLink(path_t *pPath, team_t eTeam);
 int __cdecl Path_FindPath(
@@ -180,7 +182,8 @@ void __cdecl Path_UpdateLookahead(
     float *vStartPos,
     bool bReduceLookaheadAmount,
     bool bTrimAmount,
-    bool bAllowBacktrack);
+    bool bAllowBacktrack,
+    bool bAllowRestore); // USEBETTERLOOKAHEAD
 void __cdecl Path_SetLookaheadToStart(path_t *pPath, float *vStartPos, int bTrimAmount);
 void __cdecl Path_TransferLookahead(path_t *pPath, float *vStartPos);
 int __cdecl Path_GeneratePath(

@@ -66,12 +66,8 @@ void __cdecl Actor_SetScriptGoalPos(actor_s *self, const float *vGoalPos, pathno
     self->scriptGoal.pos[0] = *vGoalPos;
     self->scriptGoal.pos[1] = vGoalPos[1];
     self->scriptGoal.pos[2] = vGoalPos[2];
-	self->codeGoal.pos[0] = *vGoalPos;
-	self->codeGoal.pos[1] = vGoalPos[1];
-	self->codeGoal.pos[2] = vGoalPos[2];
     volume = self->scriptGoal.volume;
     self->scriptGoal.node = node;
-	self->codeGoal.node = node;
     if (volume)
     {
         if (!SV_EntityContact(vGoalPos, vGoalPos, volume))

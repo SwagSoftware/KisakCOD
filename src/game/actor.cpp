@@ -2119,7 +2119,7 @@ void __cdecl Path_UpdateMovementDelta(actor_s *self, double fMoveDist)
     vPrevLookaheadDir[1] = pPath->lookaheadDir[1];
     vPrevLookaheadDir[2] = pPath->lookaheadDir[2];
 
-    Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1);
+    Path_UpdateLookahead(pPath, vWishDir, Actor_IsDodgeEntity(self, self->Physics.iHitEntnum), 0, 1, 1); // USEBETTERLOOKAHEAD
 
     float pathDirDot = (pPath->lookaheadDir[0] * vPrevLookaheadDir[0]) + (pPath->lookaheadDir[1] * vPrevLookaheadDir[1]);
     if (pathDirDot < 0.70700002f)
@@ -4085,24 +4085,16 @@ bool __cdecl Actor_FindPath(
         Actor_ClearPath(self);
         return 1;
     }
-	const bool pathToCodeGoal = vGoalPos[0] == self->codeGoal.pos[0]
-		&& vGoalPos[1] == self->codeGoal.pos[1]
-		&& vGoalPos[2] == self->codeGoal.pos[2];
-	if (Path_Exists(&self->Path))
-	{
-		if (!Path_NeedsReevaluation(&self->Path)
-			&& (pathToCodeGoal
-				? Actor_PointAtGoal(self->Path.vFinalGoal, &self->codeGoal)
-				: Actor_PointAt(self->Path.vFinalGoal, vGoalPos)))
-			return 1;
-		Actor_ClearPath(self);
-	}
-	else if (pathToCodeGoal
-		? Actor_PointAtGoal(self->ent->r.currentOrigin, &self->codeGoal)
-		: Actor_PointAt(self->ent->r.currentOrigin, vGoalPos))
-	{
-		return 1;
-	}
+    if (Path_Exists(&self->Path))
+    {
+        if (!Path_NeedsReevaluation(&self->Path) && Actor_PointAt(self->Path.vFinalGoal, vGoalPos))
+            return 1;
+        Actor_ClearPath(self);
+    }
+    else if (Actor_PointAt(self->ent->r.currentOrigin, vGoalPos))
+    {
+        return 1;
+    }
     if (ignoreSuppression)
         SuppressionPlanes = 0;
     else
@@ -4137,7 +4129,7 @@ bool __cdecl Actor_FindPath(
             v12,
             self->ent->r.currentOrigin,
             vGoalPos,
-			pathToCodeGoal ? self->codeGoal.radius : 192.0f,
+			192.0f,
             bAllowNegotiationLinks);
         return Actor_HasPath(self);
     }
@@ -4475,7 +4467,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
             if (Actor_HasPath(self))
             {
                 IsDodgeEntity = Actor_IsDodgeEntity(self, self->Physics.iHitEntnum);
-                Path_UpdateLookahead(&self->Path, ent->r.currentOrigin, IsDodgeEntity, 0, 1);
+                Path_UpdateLookahead(&self->Path, ent->r.currentOrigin, IsDodgeEntity, 0, 1, 1); // USEBETTERLOOKAHEAD
                 Actor_AddStationaryMoveHistory(self);
             }
             yawChange = 0.0;
@@ -4650,7 +4642,7 @@ void __cdecl Actor_UpdateGoalPos(actor_s *self)
                 self->codeGoal.pos[2] = pDesiredChainPos->constant.vOrigin[2];
                 fRadius = pDesiredChainPos->constant.fRadius;
                 if (fRadius == 0.0)
-                    fRadius = self->scriptGoal.radius;
+                    goto LABEL_25;
             LABEL_24:
                 Actor_SetGoalRadius(&self->codeGoal, fRadius);
                 Actor_SetGoalHeight(&self->codeGoal, self->scriptGoal.height);
@@ -5441,7 +5433,7 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
             self->codeGoal.pos,
             nodes,
             -2,
-            self->codeGoal.radius,
+            192.0,
             vNormal,
             fDist,
             iPlaneCount,
@@ -5454,7 +5446,7 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
         pNearestNode = Sentient_NearestNode(self->sentient);
         if (!pNearestNode)
             return 0;
-        pNodeTo = Path_NearestNode(self->codeGoal.pos, nodes, -2, self->codeGoal.radius, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
+        pNodeTo = Path_NearestNode(self->codeGoal.pos, nodes, -2, 192.0, &nodeCount, 64, NEAREST_NODE_DO_HEIGHT_CHECK);
     }
     if (!pNodeTo)
         return 0;
