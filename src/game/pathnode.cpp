@@ -1268,7 +1268,7 @@ LABEL_11:
         v12 = ai_debugFindPath->current.integer;
         if (v12 == 4 || v12 == 5)
         {
-            Path_UpdateLookahead(v3, vStartPos, 0, 0, 1);
+            Path_UpdateLookahead(v3, vStartPos, 0, 0, 1, 1); // USEBETTERLOOKAHEAD
             Path_DebugDraw((path_t *)g_pPath, vStartPos, 1);
         }
         else
