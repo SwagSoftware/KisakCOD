@@ -4702,13 +4702,13 @@ int __cdecl PrintObjectiveUpdate(unsigned int state, const char *objectiveDesc)
     }
     else if (state == scr_const.done)
     {
-        v2 = va("obj_complete \"GAME_OBJECTIVECOMPLETED\x15%s\"", objectiveDesc);
+        v2 = va("obj_complete \"GAME_OBJECTIVECOMPLETED\"");
     }
     else
     {
         if (state != scr_const.failed)
             return 0;
-        v2 = va("obj_failed \"GAME_OBJECTIVEFAILED\x15%s\"", objectiveDesc);
+        v2 = va("obj_failed \"GAME_OBJECTIVEFAILED\"");
     }
     SV_GameSendServerCommand(-1, v2);
     return 1;

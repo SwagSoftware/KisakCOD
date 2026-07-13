@@ -5387,7 +5387,7 @@ pathnode_t *__cdecl Path_FindPathAwayNotCrossPlanes(
         nodes,
         -2,
         192.0,
-        0,
+        vNormal,
         fDist,
         iPlaneCount,
         &nodeCount,
