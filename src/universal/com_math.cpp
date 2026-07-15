@@ -1390,11 +1390,85 @@ void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
 void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4 &mat, vec4r out)
 {
     iassert(vec != out);
+
+    // The original x86 build evaluates each dot product on the x87 stack, so
+    // its multiply/add intermediates retain substantially more precision than
+    // the float SSE2 arithmetic emitted by modern MSVC.  That matters when
+    // R_DeriveShadowLookupMatrix cancels a large world-space eye offset against
+    // the lookup-matrix translation: movement can otherwise change the rounded
+    // shadow depth even though the light and receiver are stationary.  Keep
+    // the intermediates at double precision and round to float at the output,
+    // matching the original x87 calculation's effective precision.
+
+    // LWSS: to add to the above ^^ Basically there was a bug where spot shadows would flicker with position movement (camera rotation was fine).
+    // TL;DR it ended up being float precision Errors.
+    out[0] = (float)((double)vec[0] * (double)(mat)[0][0]
+        + (double)vec[1] * (double)(mat)[1][0]
+        + (double)vec[2] * (double)(mat)[2][0]
+        + (double)vec[3] * (double)(mat)[3][0]);
+    out[1] = (float)((double)vec[0] * (double)(mat)[0][1]
+        + (double)vec[1] * (double)(mat)[1][1]
+        + (double)vec[2] * (double)(mat)[2][1]
+        + (double)vec[3] * (double)(mat)[3][1]);
+    out[2] = (float)((double)vec[0] * (double)(mat)[0][2]
+        + (double)vec[1] * (double)(mat)[1][2]
+        + (double)vec[2] * (double)(mat)[2][2]
+        + (double)vec[3] * (double)(mat)[3][2]);
+    out[3] = (float)((double)vec[0] * (double)(mat)[0][3]
+        + (double)vec[1] * (double)(mat)[1][3]
+        + (double)vec[2] * (double)(mat)[2][3]
+        + (double)vec[3] * (double)(mat)[3][3]);
+}
+
+#pragma region FLOAT_TEST
+// This is an exact copy of the above Function, except it's constexpr. The other one cannot be made constexpr without moving it into the header. Which I don't wanna do.
+static constexpr void MatrixTransformVector44Constexpr(const vec4r vec, const mat4x4 &mat, vec4r out)
+{
+    iassert(vec != out);
+#if 0 // previous broken code
+    iassert(vec != out);
     out[0] = vec[0] * (mat)[0][0] + vec[1] * (mat)[1][0] + vec[2] * (mat)[2][0] + vec[3] * (mat)[3][0];
     out[1] = vec[0] * (mat)[0][1] + vec[1] * (mat)[1][1] + vec[2] * (mat)[2][1] + vec[3] * (mat)[3][1];
     out[2] = vec[0] * (mat)[0][2] + vec[1] * (mat)[1][2] + vec[2] * (mat)[2][2] + vec[3] * (mat)[3][2];
     out[3] = vec[0] * (mat)[0][3] + vec[1] * (mat)[1][3] + vec[2] * (mat)[2][3] + vec[3] * (mat)[3][3];
+#else
+    out[0] = (float)((double)vec[0] * (double)(mat)[0][0]
+        + (double)vec[1] * (double)(mat)[1][0]
+        + (double)vec[2] * (double)(mat)[2][0]
+        + (double)vec[3] * (double)(mat)[3][0]);
+    out[1] = (float)((double)vec[0] * (double)(mat)[0][1]
+        + (double)vec[1] * (double)(mat)[1][1]
+        + (double)vec[2] * (double)(mat)[2][1]
+        + (double)vec[3] * (double)(mat)[3][1]);
+    out[2] = (float)((double)vec[0] * (double)(mat)[0][2]
+        + (double)vec[1] * (double)(mat)[1][2]
+        + (double)vec[2] * (double)(mat)[2][2]
+        + (double)vec[3] * (double)(mat)[3][2]);
+    out[3] = (float)((double)vec[0] * (double)(mat)[0][3]
+        + (double)vec[1] * (double)(mat)[1][3]
+        + (double)vec[2] * (double)(mat)[2][3]
+        + (double)vec[3] * (double)(mat)[3][3]);
+#endif
 }
+
+static constexpr bool MatrixTransformVector44PrecisionTest()
+{
+    float vec[4] = { 8192.0f, 1.0f, -8192.0f, 0.0f };
+    float mat[4][4] =
+    {
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.00048828125f, 0.0f, 0.0f, 0.0f },
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f, 0.0f }
+    };
+
+    float out[4];
+    MatrixTransformVector44Constexpr(vec, mat, out);
+    return out[0] == 0.00048828125f;
+}
+#pragma endregion
+
+static_assert(MatrixTransformVector44PrecisionTest());
 
 void __cdecl InvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
 {

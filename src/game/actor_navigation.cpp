@@ -2348,87 +2348,53 @@ void __cdecl Path_UpdateForwardLookahead(path_t *pPath, const float *vStartPos)
 
 void __cdecl Path_DebugDraw(path_t *pPath, float *vStartPos, int bDrawLookahead)
 {
-    float fLookaheadDist; // fp0
-    double v6; // fp10
-    double v7; // fp13
-    double v8; // fp9
-    double v9; // fp7
-    double v10; // fp11
-    __int16 wPathLen; // r11
-    int v12; // r29
-    double v13; // fp0
-    int v14; // r30
-    int wNegotiationStartNode; // r11
-    double v16; // fp0
-    const float *v17; // r5
-    float *v18; // r29
-    int v19; // r11
-    const float *v20; // r5
-    // KISAKFIX: IDA had v21/v22/v23 at sp+0x50/0x54/0x58 (end vec3) and v24/v25/v26 at
-    // sp+0x60/0x64/0x68 (start vec3). Passed as &v24 / &v21 to G_DebugLine expecting float[3].
-    // Pack into arrays.
-    float endPt[3];   // was v21 (BYREF) + v22 + v23
-    float startPt[3]; // was v24 (BYREF) + v25 + v26
+    float startPt[3];
+    float endPt[3];
+    const float *color;
+    int i;
 
-    if (pPath->wPathLen)
+    if (!pPath->wPathLen)
+        return;
+
+    if (bDrawLookahead)
     {
-        if (bDrawLookahead)
-        {
-            fLookaheadDist = pPath->fLookaheadDist;
-            v6 = (float)(pPath->lookaheadDir[2] * pPath->fLookaheadDist);
-            v7 = vStartPos[2];
-            v8 = pPath->lookaheadDir[0];
-            v9 = pPath->lookaheadDir[1];
-            v10 = vStartPos[1];
-            startPt[0] = *vStartPos;
-            startPt[1] = v10;
-            endPt[0] = startPt[0] + (float)((float)v8 * (float)fLookaheadDist);
-            endPt[1] = (float)v10 + (float)((float)v9 * (float)fLookaheadDist);
-            startPt[2] = (float)v7 + (float)16.0;
-            endPt[2] = (float)((float)v7 + (float)v6) + (float)16.0;
-            G_DebugLine(startPt, endPt, colorRed, 0);
-        }
-        wPathLen = pPath->wPathLen;
-        startPt[2] = vStartPos[2] + (float)16.0;
-        v12 = wPathLen;
-        v13 = vStartPos[1];
-        startPt[0] = *vStartPos;
-        startPt[1] = v13;
-        if (!wPathLen)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_navigation.cpp", 3615, 0, "%s", "i");
-        v14 = v12 - 1;
-        wNegotiationStartNode = pPath->wNegotiationStartNode;
-        endPt[2] = pPath->vCurrPoint[2] + (float)16.0;
-        v16 = pPath->vCurrPoint[1];
-        endPt[0] = pPath->vCurrPoint[0];
-        endPt[1] = v16;
-        v17 = colorBlue;
-        if (v12 - 1 == wNegotiationStartNode - 1)
-            v17 = colorCyan;
-        G_DebugLine(startPt, endPt, v17, 0);
-        startPt[0] = endPt[0];
-        startPt[1] = endPt[1];
-        startPt[2] = endPt[2];
-        if (v12 != 1)
-        {
-            v18 = &pPath->pts[v14].vOrigPoint[2];
-            do
-            {
-                v18 -= 7;
-                --v14;
-                v19 = pPath->wNegotiationStartNode - 1;
-                endPt[0] = *(v18 - 2);
-                endPt[1] = *(v18 - 1);
-                v20 = colorBlue;
-                endPt[2] = *v18 + (float)16.0;
-                if (v14 == v19)
-                    v20 = colorCyan;
-                G_DebugLine(startPt, endPt, v20, 0);
-                startPt[0] = endPt[0];
-                startPt[1] = endPt[1];
-                startPt[2] = endPt[2];
-            } while (v14);
-        }
+        startPt[0] = vStartPos[0];
+        startPt[1] = vStartPos[1];
+        startPt[2] = vStartPos[2] + 16.0f;
+        endPt[0] = vStartPos[0] + (pPath->lookaheadDir[0] * pPath->fLookaheadDist);
+        endPt[1] = vStartPos[1] + (pPath->lookaheadDir[1] * pPath->fLookaheadDist);
+        endPt[2] = vStartPos[2] + (pPath->lookaheadDir[2] * pPath->fLookaheadDist) + 16.0f;
+        G_DebugLine(startPt, endPt, colorRed, 0);
+    }
+
+    i = pPath->wPathLen;
+    iassert(i);
+
+    startPt[0] = vStartPos[0];
+    startPt[1] = vStartPos[1];
+    startPt[2] = vStartPos[2] + 16.0f;
+
+    --i;
+    endPt[0] = pPath->vCurrPoint[0];
+    endPt[1] = pPath->vCurrPoint[1];
+    endPt[2] = pPath->vCurrPoint[2] + 16.0f;
+
+    color = (i == pPath->wNegotiationStartNode - 1) ? colorCyan : colorBlue;
+    G_DebugLine(startPt, endPt, color, 0);
+
+    Vec3Copy(endPt, startPt);
+
+    while (i)
+    {
+        --i;
+        endPt[0] = pPath->pts[i].vOrigPoint[0];
+        endPt[1] = pPath->pts[i].vOrigPoint[1];
+        endPt[2] = pPath->pts[i].vOrigPoint[2] + 16.0f;
+
+        color = (i == pPath->wNegotiationStartNode - 1) ? colorCyan : colorBlue;
+        G_DebugLine(startPt, endPt, color, 0);
+
+        Vec3Copy(endPt, startPt);
     }
 }
 
