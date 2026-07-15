@@ -729,7 +729,7 @@ struct gentity_s // sizeof=0x274
 };
 #elif KISAK_SP
 
-struct missile_ent_t
+struct missile_ent_t // sizeof=0x54
 {
     float predictLandPos[3];
     int predictLandTime;
@@ -745,6 +745,7 @@ struct missile_ent_t
     MissileStage stage;
     MissileFlightMode flightMode;
 };
+static_assert(sizeof(missile_ent_t) == 0x54);
 
 struct gentity_s_tag
 {

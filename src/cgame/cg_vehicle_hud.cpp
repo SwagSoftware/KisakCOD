@@ -504,34 +504,7 @@ LABEL_16:
 
 void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial)
 {
-    float *v6; // r29
-    centity_s *Entity; // r31
-    double v8; // fp12
-    Clip_t v9; // r31
-    Material *v10; // r7
-    const float *v11; // r6
-    int v12; // r5
-    int v13; // r4
-    double v15; // fp0
-    double angle; // fp5
-    float v17; // [sp+8h] [-178h]
-    float v18; // [sp+10h] [-170h]
-    float v19; // [sp+18h] [-168h]
-    float v20; // [sp+20h] [-160h]
-    float v21; // [sp+28h] [-158h]
-    float v22; // [sp+30h] [-150h]
-    float v23; // [sp+38h] [-148h]
-    float v24; // [sp+40h] [-140h]
-    float v25; // [sp+48h] [-138h]
-    float v26; // [sp+50h] [-130h]
-    float v27; // [sp+58h] [-128h]
-    float v28; // [sp+60h] [-120h]
-    float v29; // [sp+80h] [-100h] BYREF
-    float v30; // [sp+84h] [-FCh]
-    float v31; // [sp+88h] [-F8h]
-    float screenpos[2]; // [sp+90h] [-F0h] BYREF
-    //float v33; // [sp+94h] [-ECh]
-    char v34[120]; // [sp+A0h] [-E0h] BYREF
+    int targetIndex;
 
     if (localClientNum)
         MyAssertHandler(
@@ -541,125 +514,99 @@ void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *c
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    v6 = &cgArray[0].targets[0].offset[2];
-    do
+
+    for (targetIndex = 0; targetIndex < ARRAY_COUNT(cgArray[0].targets); ++targetIndex)
     {
-        if (*((unsigned int *)v6 - 3) != ENTITYNUM_NONE && (((unsigned int)v6[3] & 2) == 0 || CG_JavelinADS(localClientNum)))
+        targetInfo_t *target = &cgArray[0].targets[targetIndex];
+        centity_s *targetEnt;
+        Material *material;
+        Clip_t clip;
+        int materialIndex;
+        float worldDir[3];
+        float screenPos[2];
+        float halfSize;
+        float angle;
+        char materialName[64];
+
+        if (target->entNum == ENTITYNUM_NONE)
+            continue;
+        if ((target->flags & 2) != 0 && !CG_JavelinADS(localClientNum))
+            continue;
+
+        targetEnt = CG_GetEntity(localClientNum, target->entNum);
+        if (!targetEnt)
+            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 209, 0, "%s", "targetEnt");
+
+        worldDir[0] = targetEnt->pose.origin[0] + target->offset[0] - cgArray[0].refdef.vieworg[0];
+        worldDir[1] = targetEnt->pose.origin[1] + target->offset[1] - cgArray[0].refdef.vieworg[1];
+        worldDir[2] = targetEnt->pose.origin[2] + target->offset[2] - cgArray[0].refdef.vieworg[2];
+        WorldDirToScreenPos(localClientNum, worldDir, screenPos);
+        clip = ClampScreenPosToEdges_0(localClientNum, screenPos);
+
+        if (clip != CLIP_NONE && target->offscreenMaterialIndex != -1)
+            materialIndex = target->offscreenMaterialIndex;
+        else
+            materialIndex = target->materialIndex;
+
+        material = defaultMaterial;
+        if (materialIndex != -1 && CG_ServerMaterialName(localClientNum, materialIndex, materialName, sizeof(materialName)))
+            material = Material_RegisterHandle(materialName, 7);
+
+        halfSize = vehHudTargetSize->current.value * 0.5f;
+        if (clip == CLIP_NONE || target->offscreenMaterialIndex == -1)
         {
-            Entity = CG_GetEntity(localClientNum, *((unsigned int *)v6 - 3));
-            if (!Entity)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 209, 0, "%s", "targetEnt");
-            v29 = *(v6 - 2) + Entity->pose.origin[0];
-            v30 = *(v6 - 1) + Entity->pose.origin[1];
-            v8 = (float)(Entity->pose.origin[2] + *v6);
-            v29 = v29 - cgArray[0].refdef.vieworg[0];
-            v30 = v30 - cgArray[0].refdef.vieworg[1];
-            v31 = (float)v8 - cgArray[0].refdef.vieworg[2];
-            WorldDirToScreenPos(localClientNum, &v29, screenpos);
-            v9 = ClampScreenPosToEdges_0(localClientNum, screenpos);
-            if (v9 && (v13 = *((unsigned int *)v6 + 2), v13 != -1) || (v13 = *((unsigned int *)v6 + 1), v13 != -1))
-            {
-                if (CG_ServerMaterialName(localClientNum, v13, v34, 0x40u))
-                    Material_RegisterHandle(v34, 7);
-            }
-            v15 = (float)(vehHudTargetSize->current.value * (float)0.5);
-            if (v9 == CLIP_NONE || *((unsigned int *)v6 + 2) == -1)
-            {
-                CL_DrawStretchPic(
-                    &scrPlaceView[localClientNum],
-                    (float)(screenpos[0] - (float)v15),
-                    (float)(screenpos[1] - (float)v15),
-                    vehHudTargetSize->current.value,
-                    vehHudTargetSize->current.value,
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    color,
-                    defaultMaterial); // KISAKTODO: args sus
-            }
-            else
-            {
-                angle = 0.0;
-                switch (v9)
-                {
-                case CLIP_BOTTOM:
-                    angle = 180.0;
-                    break;
-                case CLIP_RIGHT:
-                    angle = 90.0;
-                    break;
-                case CLIP_LEFT:
-                    angle = 270.0;
-                    break;
-                }
-                CG_DrawRotatedPic(
-                    &scrPlaceView[localClientNum],
-                    (float)(screenpos[0] - (float)v15),
-                    (float)(screenpos[1] - (float)v15),
-                    vehHudTargetSize->current.value,
-                    vehHudTargetSize->current.value,
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    angle,
-                    color,
-                    defaultMaterial); // KISAKTODO: sus args
-            }
+            CL_DrawStretchPic(
+                &scrPlaceView[localClientNum],
+                screenPos[0] - halfSize,
+                screenPos[1] - halfSize,
+                vehHudTargetSize->current.value,
+                vehHudTargetSize->current.value,
+                rect->horzAlign,
+                rect->vertAlign,
+                0.0,
+                0.0,
+                1.0,
+                1.0,
+                color,
+                material);
+            continue;
         }
-        v6 += 7;
-    } while ((int)v6 < (int)&cgArray[0].shellshock.loopEndTime);
+
+        angle = 0.0f;
+        switch (clip)
+        {
+        case CLIP_BOTTOM:
+            angle = 180.0f;
+            break;
+        case CLIP_RIGHT:
+            angle = 90.0f;
+            break;
+        case CLIP_LEFT:
+            angle = 270.0f;
+            break;
+        }
+
+        CG_DrawRotatedPic(
+            &scrPlaceView[localClientNum],
+            screenPos[0] - halfSize,
+            screenPos[1] - halfSize,
+            vehHudTargetSize->current.value,
+            vehHudTargetSize->current.value,
+            rect->horzAlign,
+            rect->vertAlign,
+            angle,
+            color,
+            material);
+    }
 }
 
 void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *color, Material *defaultMaterial)
 {
-    const playerState_s *PredictedPlayerState; // r3
-    const playerState_s *v7; // r30
-    int weapLockedEntnum; // r4
-    int v9; // r29
-    targetInfo_t *v10; // r11
-    centity_s *targetEnt; // r30
-    float *offset; // r11
-    double v13; // fp12
-    double v14; // fp0
-    double v15; // fp10
-    double v16; // fp11
-    const float *v17; // r6
-    int v18; // r5
-    int v19; // r4
-    Material *v20; // r7
-    const float *v21; // r6
-    int v22; // r5
-    int v23; // r4
-    float v24; // [sp+8h] [-108h]
-    float v25; // [sp+8h] [-108h]
-    float v26; // [sp+10h] [-100h]
-    float v27; // [sp+10h] [-100h]
-    float v28; // [sp+18h] [-F8h]
-    float v29; // [sp+18h] [-F8h]
-    float v30; // [sp+20h] [-F0h]
-    float v31; // [sp+20h] [-F0h]
-    float v32; // [sp+28h] [-E8h]
-    float v33; // [sp+28h] [-E8h]
-    float v34; // [sp+30h] [-E0h]
-    float v35; // [sp+30h] [-E0h]
-    float v36; // [sp+38h] [-D8h]
-    float v37; // [sp+38h] [-D8h]
-    float v38; // [sp+40h] [-D0h]
-    float v39; // [sp+40h] [-D0h]
-    float v40; // [sp+48h] [-C8h]
-    float v41; // [sp+48h] [-C8h]
-    float v42; // [sp+50h] [-C0h]
-    float v43; // [sp+50h] [-C0h]
-    float v44; // [sp+58h] [-B8h]
-    float v45; // [sp+58h] [-B8h]
-    float v46; // [sp+60h] [-B0h]
-    float v47; // [sp+60h] [-B0h]
-    float v48; // [sp+80h] [-90h] BYREF
-    float v49; // [sp+84h] [-8Ch]
-    float v50; // [sp+88h] [-88h]
-    float screenpos[6]; // [sp+90h] [-80h] BYREF
+    const playerState_s *ps;
+    centity_s *targetEnt;
+    int targetIndex;
+    float worldDir[3];
+    float screenPos[2];
 
     if (localClientNum)
         MyAssertHandler(
@@ -669,91 +616,66 @@ void __cdecl CG_DrawJavelinTargets(int localClientNum, rectDef_s *rect, float *c
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    PredictedPlayerState = CG_GetPredictedPlayerState(localClientNum);
-    v7 = PredictedPlayerState;
-    if ((PredictedPlayerState->weapLockFlags & 2) != 0)
+
+    ps = CG_GetPredictedPlayerState(localClientNum);
+    if ((ps->weapLockFlags & 2) == 0)
+        return;
+
+    if (ps->weapLockedEntnum == ENTITYNUM_NONE)
+        MyAssertHandler(
+            "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp",
+            271,
+            0,
+            "%s",
+            "ps->weapLockedEntnum != ENTITYNUM_NONE");
+
+    for (targetIndex = 0; targetIndex < ARRAY_COUNT(cgArray[0].targets); ++targetIndex)
     {
-        if (PredictedPlayerState->weapLockedEntnum == ENTITYNUM_NONE)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp",
-                271,
-                0,
-                "%s",
-                "ps->weapLockedEntnum != ENTITYNUM_NONE");
-        weapLockedEntnum = v7->weapLockedEntnum;
-        v9 = 0;
-        v10 = &cgArray[0].targets[1];
-        while (v10[-1].entNum != weapLockedEntnum)
-        {
-            if (v10->entNum == weapLockedEntnum)
-            {
-                ++v9;
-                break;
-            }
-            if (v10[1].entNum == weapLockedEntnum)
-            {
-                v9 += 2;
-                break;
-            }
-            if (v10[2].entNum == weapLockedEntnum)
-            {
-                v9 += 3;
-                break;
-            }
-            v10 += 4;
-            v9 += 4;
-            if ((int)v10 >= (int)&cgArray[0].shellshock.hasSavedScreen)
-                break;
-        }
-        if (v9 != 32)
-        {
-            targetEnt = CG_GetEntity(localClientNum, weapLockedEntnum);
-            if (!targetEnt)
-                MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 283, 0, "%s", "targetEnt");
-            offset = cgArray[0].targets[v9].offset;
-            v13 = offset[1];
-            v14 = (float)(*offset + targetEnt->pose.origin[0]);
-            v15 = offset[2];
-            v48 = *offset + targetEnt->pose.origin[0];
-            v49 = targetEnt->pose.origin[1] + (float)v13;
-            v16 = targetEnt->pose.origin[2];
-            v48 = (float)v14 - cgArray[0].refdef.vieworg[0];
-            v49 = v49 - cgArray[0].refdef.vieworg[1];
-            v50 = (float)((float)v16 + (float)v15) - cgArray[0].refdef.vieworg[2];
-            WorldDirToScreenPos(localClientNum, &v48, screenpos);
-            if (ClampScreenPosToEdges_0(localClientNum, screenpos) == CLIP_NONE)
-            {
-                CL_DrawStretchPic(
-                    &scrPlaceView[localClientNum],
-                    screenpos[0], // x
-                    -240.0, // y
-                    2.0, // w
-                    480.0, // height
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    color,
-                    defaultMaterial); // KISAKTODO: again sus args
-                CL_DrawStretchPic(
-                    &scrPlaceView[localClientNum],
-                    -320.0, // x
-                    screenpos[1], // y
-                    640.0, // w
-                    2.0, // h
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    0.0,
-                    0.0,
-                    1.0,
-                    1.0,
-                    color,
-                    defaultMaterial); // KISAKTODO: ^^
-            }
-        }
+        if (cgArray[0].targets[targetIndex].entNum == ps->weapLockedEntnum)
+            break;
     }
+    if (targetIndex == ARRAY_COUNT(cgArray[0].targets))
+        return;
+
+    targetEnt = CG_GetEntity(localClientNum, ps->weapLockedEntnum);
+    if (!targetEnt)
+        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_vehicle_hud.cpp", 283, 0, "%s", "targetEnt");
+
+    worldDir[0] = targetEnt->pose.origin[0] + cgArray[0].targets[targetIndex].offset[0] - cgArray[0].refdef.vieworg[0];
+    worldDir[1] = targetEnt->pose.origin[1] + cgArray[0].targets[targetIndex].offset[1] - cgArray[0].refdef.vieworg[1];
+    worldDir[2] = targetEnt->pose.origin[2] + cgArray[0].targets[targetIndex].offset[2] - cgArray[0].refdef.vieworg[2];
+    WorldDirToScreenPos(localClientNum, worldDir, screenPos);
+    if (ClampScreenPosToEdges_0(localClientNum, screenPos) != CLIP_NONE)
+        return;
+
+    CL_DrawStretchPic(
+        &scrPlaceView[localClientNum],
+        screenPos[0],
+        -240.0,
+        2.0,
+        480.0,
+        rect->horzAlign,
+        rect->vertAlign,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        color,
+        defaultMaterial);
+    CL_DrawStretchPic(
+        &scrPlaceView[localClientNum],
+        -320.0,
+        screenPos[1],
+        640.0,
+        2.0,
+        rect->horzAlign,
+        rect->vertAlign,
+        0.0,
+        0.0,
+        1.0,
+        1.0,
+        color,
+        defaultMaterial);
 }
 
 void CG_DrawPipOnAStickReticle(int localClientNum, rectDef_s *rect, float *color)

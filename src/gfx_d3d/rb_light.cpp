@@ -1107,7 +1107,7 @@ char __cdecl R_CanLightInfluenceLightGridCorner(
 
     gridPos[0] = floor(samplePos[0] * 0.03125f) * 32.0f;
     gridPos[1] = floor(samplePos[1] * 0.03125f) * 32.0f;
-    gridPos[2] = floor(samplePos[2] * 0.015625f) * 64.0f;
+    gridPos[2] = floor(samplePos[0] * 0.015625f) * 64.0f;
     //gridPos[lightGrid->rowAxis] = (float)((cornerIndex & 4) != 0 ? 0x20 : 0) + gridPos[lightGrid->rowAxis];
     gridPos[lightGrid->rowAxis] += ((cornerIndex & 4) != 0 ? 32.0f : 0.0f);
     //gridPos[lightGrid->colAxis] = (float)((cornerIndex & 2) != 0 ? 0x20 : 0) + gridPos[lightGrid->colAxis];

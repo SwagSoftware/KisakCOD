@@ -9,6 +9,29 @@ ScreenPlacement scrPlaceFull;
 float cg_hudSplitscreenScale;
 ScreenPlacement scrPlaceFullUnsafe;
 
+#ifdef KISAK_XBOX
+const dvar_t *safeArea_horizontal;
+const dvar_t *safeArea_vertical;
+
+void __cdecl ScrPlace_Init()
+{
+    safeArea_horizontal = Dvar_RegisterFloat(
+        "safeArea_horizontal",
+        0.85000002f,
+        0.0f,
+        1.0f,
+        DVAR_ARCHIVE,
+        "Horizontal safe area as a fraction of the screen width");
+    safeArea_vertical = Dvar_RegisterFloat(
+        "safeArea_vertical",
+        0.85000002f,
+        0.0f,
+        1.0f,
+        DVAR_ARCHIVE,
+        "Vertical safe area as a fraction of the screen height");
+}
+#endif
+
 void __cdecl ScrPlace_SetupFloatViewport(
     ScreenPlacement *scrPlace,
     float viewportX,
@@ -85,9 +108,14 @@ void __cdecl ScrPlace_CalcSafeAreaOffsets(
     float safeAreaSize; // [esp+98h] [ebp-10h]
     float safeAreaSize_4; // [esp+9Ch] [ebp-Ch]
 
-    safeAreaRatioHorz = 1.0;
-    safeAreaRatioVert = 1.0;
-    if ((float)1.0 < 0.0 || safeAreaRatioHorz > 1.0)
+#ifdef KISAK_XBOX
+    safeAreaRatioHorz = safeArea_horizontal->current.value;
+    safeAreaRatioVert = safeArea_vertical->current.value;
+#else
+    safeAreaRatioHorz = 1.0f;
+    safeAreaRatioVert = 1.0f;
+#endif
+    if (safeAreaRatioHorz < 0.0 || safeAreaRatioHorz > 1.0)
         MyAssertHandler(
             ".\\client\\screen_placement.cpp",
             51,
@@ -211,11 +239,24 @@ void __cdecl ScrPlace_SetupViewport(
     float v7; // [esp+8h] [ebp-8h]
     float v8; // [esp+Ch] [ebp-4h]
 
+#ifdef KISAK_XBOX
+    float safeAreaRatioHorz = safeArea_horizontal->current.value;
+    float safeAreaRatioVert = safeArea_vertical->current.value;
+
+    Dvar_SetFloat(safeArea_horizontal, 1.0f);
+    Dvar_SetFloat(safeArea_vertical, 1.0f);
+#endif
+
     v8 = (float)viewportHeight;
     v7 = (float)viewportWidth;
     v6 = (float)viewportY;
     v5 = (float)viewportX;
     ScrPlace_SetupFloatViewport(scrPlace, v5, v6, v7, v8);
+
+#ifdef KISAK_XBOX
+    Dvar_SetFloat(safeArea_horizontal, safeAreaRatioHorz);
+    Dvar_SetFloat(safeArea_vertical, safeAreaRatioVert);
+#endif
 }
 
 void __cdecl ScrPlace_SetupUnsafeViewport(

@@ -2511,9 +2511,9 @@ void __cdecl Actor_SetGoalHeight(actor_goal_s *goal, double height)
     if (height < 0.0)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5701, 0, "%s", "height >= 0");
     if (height <= 80.0)
-        goal->height = height;
-    else
         goal->height = 80.0;
+    else
+        goal->height = height;
 }
 
 bool __cdecl Actor_IsInsideArc(

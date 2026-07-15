@@ -716,9 +716,10 @@ int __cdecl Actor_BadPlace_FindSafeNodeOutsideBadPlace(
 
     nodeCount = Path_NodesInCylinder(self->ent->r.currentOrigin, maxFleeDist, 80.0, nodes, 256, -2);
 
+    nodesWritten = 0;
+
     if (nodeCount > 0)
     {
-        nodesWritten = 0;
         pOutNode = potentialNodes;
         pNode = &nodes[0];
         do

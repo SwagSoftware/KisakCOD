@@ -67,10 +67,17 @@ bool __cdecl SV_EntityContact(const float *mins, const float *maxs, const gentit
     trace_t trace; // [esp+14h] [ebp-34h] BYREF
     float center[2]; // [esp+40h] [ebp-8h] BYREF
 
+#ifdef KISAK_MP
     if ((gEnt->r.svFlags & 0x60) != 0)
     {
         if ((gEnt->r.svFlags & 0x20) != 0)
         {
+#elif defined(KISAK_SP)
+    if ((gEnt->r.svFlags & 0x30) != 0)
+    {
+        if ((gEnt->r.svFlags & 0x10) != 0)
+        {
+#endif
             if (gEnt->r.mins[2] != 0.0)
                 MyAssertHandler(".\\server\\sv_game.cpp", 337, 0, "%s", "!gEnt->r.mins[2]");
             if (gEnt->r.currentOrigin[2] < (double)maxs[2])
@@ -97,7 +104,11 @@ bool __cdecl SV_EntityContact(const float *mins, const float *maxs, const gentit
         }
         else
         {
-            if ((gEnt->r.svFlags & 0x40) == 0)
+#ifdef KISAK_MP
+            if ((gEnt->r.svFlags & 0x40) == 0) // MP SVF_DISK
+#elif defined(KISAK_SP)
+            if ((gEnt->r.svFlags & 0x20) == 0) // SP SVF_DISK
+#endif
                 MyAssertHandler(".\\server\\sv_game.cpp", 350, 0, "%s", "gEnt->r.svFlags & SVF_DISK");
             center[0] = *mins + *maxs;
             center[1] = mins[1] + maxs[1];

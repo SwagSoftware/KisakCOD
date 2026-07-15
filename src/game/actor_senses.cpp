@@ -529,8 +529,8 @@ int Actor_CanSeeEntityEx(actor_s *self, const gentity_s *ent, double fovDot, dou
     iassert(self);
     iassert(self->sentient);
     iassert(ent);
-    iassert(fovDot);
-    iassert(fMaxDistSqrd);
+    iassert(fovDot >= 0);
+    iassert(fMaxDistSqrd >= 0);
 
     sentient_s *targetSentient;
     float fMaxSightDistSqrd; // [esp+14h] [ebp-54h]

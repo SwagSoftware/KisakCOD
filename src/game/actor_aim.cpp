@@ -554,7 +554,7 @@ void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float 
     float vec[3];
     float crossVec[3]; // [sp+60h] [-80h] BYREF
 
-    if (outerRadius_0 == 0.0f)
+    if (outerRadius_0 == 6969.0f)
     {
         float a = actorMaxs[1];
         outerRadius_0 = sqrtf(a * a * 2.0f * 3.0f);

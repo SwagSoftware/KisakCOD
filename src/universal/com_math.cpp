@@ -1138,45 +1138,45 @@ void __cdecl MatrixMultiply43(const mat4x3 &in1, const mat4x3 &in2, mat4x3 &out)
     iassert(&in1 != &out);
     iassert(&in2 != &out);
 
-    (out)[0][0] = (in1)[0][0] * (in2)[0][0]
-        + (float)(in1)[0][1] * (float)(in2)[1][0]
-        + (float)(in1)[0][2] * (float)(in2)[2][0];
-    (out)[1][0] = (float)(in1)[1][0] * (in2)[0][0]
-        + (float)(in1)[1][1] * (float)(in2)[1][0]
-        + (float)(in1)[1][2] * (float)(in2)[2][0];
-    (out)[2][0] = (float)(in1)[2][0] * (in2)[0][0]
-        + (float)(in1)[2][1] * (float)(in2)[1][0]
-        + (float)(in1)[2][2] * (float)(in2)[2][0];
-    (out)[0][1] = (in1)[0][0] * (float)(in2)[0][1]
-        + (float)(in1)[0][1] * (float)(in2)[1][1]
-        + (float)(in1)[0][2] * (float)(in2)[2][1];
-    (out)[1][1] = (float)(in1)[1][0] * (float)(in2)[0][1]
-        + (float)(in1)[1][1] * (float)(in2)[1][1]
-        + (float)(in1)[1][2] * (float)(in2)[2][1];
-    (out)[2][1] = (float)(in1)[2][0] * (float)(in2)[0][1]
-        + (float)(in1)[2][1] * (float)(in2)[1][1]
-        + (float)(in1)[2][2] * (float)(in2)[2][1];
-    (out)[0][2] = (in1)[0][0] * (float)(in2)[0][2]
-        + (float)(in1)[0][1] * (float)(in2)[1][2]
-        + (float)(in1)[0][2] * (float)(in2)[2][2];
-    (out)[1][2] = (float)(in1)[1][0] * (float)(in2)[0][2]
-        + (float)(in1)[1][1] * (float)(in2)[1][2]
-        + (float)(in1)[1][2] * (float)(in2)[2][2];
-    (out)[2][2] = (float)(in1)[2][0] * (float)(in2)[0][2]
-        + (float)(in1)[2][1] * (float)(in2)[1][2]
-        + (float)(in1)[2][2] * (float)(in2)[2][2];
-    (out)[3][0] = (float)(in1)[3][0] * (in2)[0][0]
-        + (float)(in1)[3][1] * (float)(in2)[1][0]
-        + (float)(in1)[3][2] * (float)(in2)[2][0]
-        + (float)(in2)[3][0];
-    (out)[3][1] = (float)(in1)[3][0] * (float)(in2)[0][1]
-        + (float)(in1)[3][1] * (float)(in2)[1][1]
-        + (float)(in1)[3][2] * (float)(in2)[2][1]
-        + (float)(in2)[3][1];
-    (out)[3][2] = (float)(in1)[3][0] * (float)(in2)[0][2]
-        + (float)(in1)[3][1] * (float)(in2)[1][2]
-        + (float)(in1)[3][2] * (float)(in2)[2][2]
-        + (float)(in2)[3][2];
+    (out)[0][0] = (float)((double)(in1)[0][0] * (double)(in2)[0][0]
+        + (double)(in1)[0][1] * (double)(in2)[1][0]
+        + (double)(in1)[0][2] * (double)(in2)[2][0]);
+    (out)[1][0] = (float)((double)(in1)[1][0] * (double)(in2)[0][0]
+        + (double)(in1)[1][1] * (double)(in2)[1][0]
+        + (double)(in1)[1][2] * (double)(in2)[2][0]);
+    (out)[2][0] = (float)((double)(in1)[2][0] * (double)(in2)[0][0]
+        + (double)(in1)[2][1] * (double)(in2)[1][0]
+        + (double)(in1)[2][2] * (double)(in2)[2][0]);
+    (out)[0][1] = (float)((double)(in1)[0][0] * (double)(in2)[0][1]
+        + (double)(in1)[0][1] * (double)(in2)[1][1]
+        + (double)(in1)[0][2] * (double)(in2)[2][1]);
+    (out)[1][1] = (float)((double)(in1)[1][0] * (double)(in2)[0][1]
+        + (double)(in1)[1][1] * (double)(in2)[1][1]
+        + (double)(in1)[1][2] * (double)(in2)[2][1]);
+    (out)[2][1] = (float)((double)(in1)[2][0] * (double)(in2)[0][1]
+        + (double)(in1)[2][1] * (double)(in2)[1][1]
+        + (double)(in1)[2][2] * (double)(in2)[2][1]);
+    (out)[0][2] = (float)((double)(in1)[0][0] * (double)(in2)[0][2]
+        + (double)(in1)[0][1] * (double)(in2)[1][2]
+        + (double)(in1)[0][2] * (double)(in2)[2][2]);
+    (out)[1][2] = (float)((double)(in1)[1][0] * (double)(in2)[0][2]
+        + (double)(in1)[1][1] * (double)(in2)[1][2]
+        + (double)(in1)[1][2] * (double)(in2)[2][2]);
+    (out)[2][2] = (float)((double)(in1)[2][0] * (double)(in2)[0][2]
+        + (double)(in1)[2][1] * (double)(in2)[1][2]
+        + (double)(in1)[2][2] * (double)(in2)[2][2]);
+    (out)[3][0] = (float)((double)(in1)[3][0] * (double)(in2)[0][0]
+        + (double)(in1)[3][1] * (double)(in2)[1][0]
+        + (double)(in1)[3][2] * (double)(in2)[2][0]
+        + (double)(in2)[3][0]);
+    (out)[3][1] = (float)((double)(in1)[3][0] * (double)(in2)[0][1]
+        + (double)(in1)[3][1] * (double)(in2)[1][1]
+        + (double)(in1)[3][2] * (double)(in2)[2][1]
+        + (double)(in2)[3][1]);
+    (out)[3][2] = (float)((double)(in1)[3][0] * (double)(in2)[0][2]
+        + (double)(in1)[3][1] * (double)(in2)[1][2]
+        + (double)(in1)[3][2] * (double)(in2)[2][2]
+        + (double)(in2)[3][2]);
 }
 
 void __cdecl MatrixMultiply44(const mat4x4 &in1, const mat4x4 &in2, mat4x4 &out)
@@ -1291,9 +1291,15 @@ void __cdecl MatrixTransformVector(const vec3r in1, const mat3x3& in2, vec3r out
 {
     iassert(in1 != out);
 
-    (out)[0] = (in1)[0] * (in2)[0][0] + (in1)[1] * (in2)[1][0] + (in1)[2] * (in2)[2][0];
-    (out)[1] = (in1)[0] * (in2)[0][1] + (in1)[1] * (in2)[1][1] + (in1)[2] * (in2)[2][1];
-    (out)[2] = (in1)[0] * (in2)[0][2] + (in1)[1] * (in2)[1][2] + (in1)[2] * (in2)[2][2];
+    (out)[0] = (float)((double)(in1)[0] * (double)(in2)[0][0]
+        + (double)(in1)[1] * (double)(in2)[1][0]
+        + (double)(in1)[2] * (double)(in2)[2][0]);
+    (out)[1] = (float)((double)(in1)[0] * (double)(in2)[0][1]
+        + (double)(in1)[1] * (double)(in2)[1][1]
+        + (double)(in1)[2] * (double)(in2)[2][1]);
+    (out)[2] = (float)((double)(in1)[0] * (double)(in2)[0][2]
+        + (double)(in1)[1] * (double)(in2)[1][2]
+        + (double)(in1)[2] * (double)(in2)[2][2]);
 }
 
 void __cdecl MatrixInverseOrthogonal43(const mat4x3& in, mat4x3& out)
@@ -1390,11 +1396,85 @@ void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
 void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4 &mat, vec4r out)
 {
     iassert(vec != out);
+
+    // The original x86 build evaluates each dot product on the x87 stack, so
+    // its multiply/add intermediates retain substantially more precision than
+    // the float SSE2 arithmetic emitted by modern MSVC.  That matters when
+    // R_DeriveShadowLookupMatrix cancels a large world-space eye offset against
+    // the lookup-matrix translation: movement can otherwise change the rounded
+    // shadow depth even though the light and receiver are stationary.  Keep
+    // the intermediates at double precision and round to float at the output,
+    // matching the original x87 calculation's effective precision.
+
+    // LWSS: to add to the above ^^ Basically there was a bug where spot shadows would flicker with position movement (camera rotation was fine).
+    // TL;DR it ended up being float precision Errors.
+    out[0] = (float)((double)vec[0] * (double)(mat)[0][0]
+        + (double)vec[1] * (double)(mat)[1][0]
+        + (double)vec[2] * (double)(mat)[2][0]
+        + (double)vec[3] * (double)(mat)[3][0]);
+    out[1] = (float)((double)vec[0] * (double)(mat)[0][1]
+        + (double)vec[1] * (double)(mat)[1][1]
+        + (double)vec[2] * (double)(mat)[2][1]
+        + (double)vec[3] * (double)(mat)[3][1]);
+    out[2] = (float)((double)vec[0] * (double)(mat)[0][2]
+        + (double)vec[1] * (double)(mat)[1][2]
+        + (double)vec[2] * (double)(mat)[2][2]
+        + (double)vec[3] * (double)(mat)[3][2]);
+    out[3] = (float)((double)vec[0] * (double)(mat)[0][3]
+        + (double)vec[1] * (double)(mat)[1][3]
+        + (double)vec[2] * (double)(mat)[2][3]
+        + (double)vec[3] * (double)(mat)[3][3]);
+}
+
+#pragma region FLOAT_TEST
+// This is an exact copy of the above Function, except it's constexpr. The other one cannot be made constexpr without moving it into the header. Which I don't wanna do.
+static constexpr void MatrixTransformVector44Constexpr(const vec4r vec, const mat4x4 &mat, vec4r out)
+{
+    iassert(vec != out);
+#if 0 // previous broken code
+    iassert(vec != out);
     out[0] = vec[0] * (mat)[0][0] + vec[1] * (mat)[1][0] + vec[2] * (mat)[2][0] + vec[3] * (mat)[3][0];
     out[1] = vec[0] * (mat)[0][1] + vec[1] * (mat)[1][1] + vec[2] * (mat)[2][1] + vec[3] * (mat)[3][1];
     out[2] = vec[0] * (mat)[0][2] + vec[1] * (mat)[1][2] + vec[2] * (mat)[2][2] + vec[3] * (mat)[3][2];
     out[3] = vec[0] * (mat)[0][3] + vec[1] * (mat)[1][3] + vec[2] * (mat)[2][3] + vec[3] * (mat)[3][3];
+#else
+    out[0] = (float)((double)vec[0] * (double)(mat)[0][0]
+        + (double)vec[1] * (double)(mat)[1][0]
+        + (double)vec[2] * (double)(mat)[2][0]
+        + (double)vec[3] * (double)(mat)[3][0]);
+    out[1] = (float)((double)vec[0] * (double)(mat)[0][1]
+        + (double)vec[1] * (double)(mat)[1][1]
+        + (double)vec[2] * (double)(mat)[2][1]
+        + (double)vec[3] * (double)(mat)[3][1]);
+    out[2] = (float)((double)vec[0] * (double)(mat)[0][2]
+        + (double)vec[1] * (double)(mat)[1][2]
+        + (double)vec[2] * (double)(mat)[2][2]
+        + (double)vec[3] * (double)(mat)[3][2]);
+    out[3] = (float)((double)vec[0] * (double)(mat)[0][3]
+        + (double)vec[1] * (double)(mat)[1][3]
+        + (double)vec[2] * (double)(mat)[2][3]
+        + (double)vec[3] * (double)(mat)[3][3]);
+#endif
 }
+
+static constexpr bool MatrixTransformVector44PrecisionTest()
+{
+    float vec[4] = { 8192.0f, 1.0f, -8192.0f, 0.0f };
+    float mat[4][4] =
+    {
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.00048828125f, 0.0f, 0.0f, 0.0f },
+        { 1.0f, 0.0f, 0.0f, 0.0f },
+        { 0.0f, 0.0f, 0.0f, 0.0f }
+    };
+
+    float out[4];
+    MatrixTransformVector44Constexpr(vec, mat, out);
+    return out[0] == 0.00048828125f;
+}
+#pragma endregion
+
+static_assert(MatrixTransformVector44PrecisionTest());
 
 void __cdecl InvMatrixTransformVectorQuatTrans(const float *in, const DObjAnimMat *mat, float *out)
 {
@@ -1423,9 +1503,18 @@ void __cdecl MatrixTransformVector43(const vec3r in1, const mat4x3 &in2, vec3r o
 {
     iassert(in1 != out);
 
-    out[0] = in1[0] * (in2)[0][0] + in1[1] * (in2)[1][0] + in1[2] * (in2)[2][0] + (in2)[3][0];
-    out[1] = in1[0] * (in2)[0][1] + in1[1] * (in2)[1][1] + in1[2] * (in2)[2][1] + (in2)[3][1];
-    out[2] = in1[0] * (in2)[0][2] + in1[1] * (in2)[1][2] + in1[2] * (in2)[2][2] + (in2)[3][2];
+    out[0] = (float)((double)in1[0] * (double)(in2)[0][0]
+        + (double)in1[1] * (double)(in2)[1][0]
+        + (double)in1[2] * (double)(in2)[2][0]
+        + (double)(in2)[3][0]);
+    out[1] = (float)((double)in1[0] * (double)(in2)[0][1]
+        + (double)in1[1] * (double)(in2)[1][1]
+        + (double)in1[2] * (double)(in2)[2][1]
+        + (double)(in2)[3][1]);
+    out[2] = (float)((double)in1[0] * (double)(in2)[0][2]
+        + (double)in1[1] * (double)(in2)[1][2]
+        + (double)in1[2] * (double)(in2)[2][2]
+        + (double)(in2)[3][2]);
 }
 
 void __cdecl MatrixTransposeTransformVector43(const vec3r in1, const mat4x3 &in2, vec3r out)
@@ -2318,38 +2407,57 @@ void __cdecl QuatMultiplyEquals(const float *in, float *inout)
 
 void __cdecl ConvertQuatToInverseMat(const DObjAnimMat *mat, float (*axis)[3])
 {
-    float scaledQuat[3]; // [esp+28h] [ebp-20h]
+    double scaledQuat[3];
+    double inverseAxis[3][3];
 
     iassert(!IS_NAN(mat->quat[0]) && !IS_NAN(mat->quat[1]) && !IS_NAN(mat->quat[2]) && !IS_NAN(mat->quat[3]));
     iassert(!IS_NAN(mat->transWeight));
 
-    float transWeight = mat->transWeight;
+    double transWeight = (double)mat->transWeight;
 
-    Vec3Scale(mat->quat, transWeight, scaledQuat);
+    scaledQuat[0] = transWeight * (double)mat->quat[0];
+    scaledQuat[1] = transWeight * (double)mat->quat[1];
+    scaledQuat[2] = transWeight * (double)mat->quat[2];
 
-    float xx = scaledQuat[0] * mat->quat[0];
-    float xy = scaledQuat[0] * mat->quat[1];
-    float xz = scaledQuat[0] * mat->quat[2];
-    float xw = scaledQuat[0] * mat->quat[3];
-    float yy = scaledQuat[1] * mat->quat[1];
-    float yz = scaledQuat[1] * mat->quat[2];
-    float yw = scaledQuat[1] * mat->quat[3];
-    float zz = scaledQuat[2] * mat->quat[2];
-    float zw = scaledQuat[2] * mat->quat[3];
+    double xx = scaledQuat[0] * (double)mat->quat[0];
+    double xy = scaledQuat[0] * (double)mat->quat[1];
+    double xz = scaledQuat[0] * (double)mat->quat[2];
+    double xw = scaledQuat[0] * (double)mat->quat[3];
+    double yy = scaledQuat[1] * (double)mat->quat[1];
+    double yz = scaledQuat[1] * (double)mat->quat[2];
+    double yw = scaledQuat[1] * (double)mat->quat[3];
+    double zz = scaledQuat[2] * (double)mat->quat[2];
+    double zw = scaledQuat[2] * (double)mat->quat[3];
 
-    (*axis)[0] = 1.0 - (yy + zz);
-    (*axis)[1] = xy - zw;
-    (*axis)[2] = xz + yw;
-    (*axis)[3] = xy + zw;
-    (*axis)[4] = 1.0 - (xx + zz);
-    (*axis)[5] = yz - xw;
-    (*axis)[6] = xz - yw;
-    (*axis)[7] = yz + xw;
-    (*axis)[8] = 1.0 - (xx + yy);
+    inverseAxis[0][0] = 1.0 - (yy + zz);
+    inverseAxis[0][1] = xy - zw;
+    inverseAxis[0][2] = xz + yw;
+    inverseAxis[1][0] = xy + zw;
+    inverseAxis[1][1] = 1.0 - (xx + zz);
+    inverseAxis[1][2] = yz - xw;
+    inverseAxis[2][0] = xz - yw;
+    inverseAxis[2][1] = yz + xw;
+    inverseAxis[2][2] = 1.0 - (xx + yy);
 
-    (*axis)[9] =  -(mat->trans[0] * (*axis)[0] + mat->trans[1] * (*axis)[3] + mat->trans[2] * (*axis)[6]);
-    (*axis)[10] = -(mat->trans[0] * (*axis)[1] + mat->trans[1] * (*axis)[4] + mat->trans[2] * (*axis)[7]);
-    (*axis)[11] = -(mat->trans[0] * (*axis)[2] + mat->trans[1] * (*axis)[5] + mat->trans[2] * (*axis)[8]);
+    (*axis)[0] = (float)inverseAxis[0][0];
+    (*axis)[1] = (float)inverseAxis[0][1];
+    (*axis)[2] = (float)inverseAxis[0][2];
+    (*axis)[3] = (float)inverseAxis[1][0];
+    (*axis)[4] = (float)inverseAxis[1][1];
+    (*axis)[5] = (float)inverseAxis[1][2];
+    (*axis)[6] = (float)inverseAxis[2][0];
+    (*axis)[7] = (float)inverseAxis[2][1];
+    (*axis)[8] = (float)inverseAxis[2][2];
+
+    (*axis)[9] = (float)(-((double)mat->trans[0] * inverseAxis[0][0]
+        + (double)mat->trans[1] * inverseAxis[1][0]
+        + (double)mat->trans[2] * inverseAxis[2][0]));
+    (*axis)[10] = (float)(-((double)mat->trans[0] * inverseAxis[0][1]
+        + (double)mat->trans[1] * inverseAxis[1][1]
+        + (double)mat->trans[2] * inverseAxis[2][1]));
+    (*axis)[11] = (float)(-((double)mat->trans[0] * inverseAxis[0][2]
+        + (double)mat->trans[1] * inverseAxis[1][2]
+        + (double)mat->trans[2] * inverseAxis[2][2]));
 }
 
 void __cdecl ConvertQuatToMat(const DObjAnimMat *mat, float (*axis)[3])
@@ -3023,7 +3131,10 @@ float __cdecl Vec3Dot(const vec3r a, const vec3r b)
 
 float __cdecl Vec4Dot(const float *a, const float *b)
 {
-    return (float)(*a * *b + a[1] * b[1] + a[2] * b[2] + a[3] * b[3]);
+    return (float)((double)a[0] * (double)b[0]
+        + (double)a[1] * (double)b[1]
+        + (double)a[2] * (double)b[2]
+        + (double)a[3] * (double)b[3]);
 }
 
 void __cdecl Vec4Mul(const float *a, const float *b, float *product)
@@ -3040,21 +3151,27 @@ void __cdecl MatrixForViewer(mat4x4 &mtx, const vec3r origin, const mat3x3 &axis
     iassert(origin);
     iassert(axis);
 
-    (mtx)[0][0] = -(axis)[1][0];
-    (mtx)[1][0] = -(axis)[1][1];
-    (mtx)[2][0] = -(axis)[1][2];
-    (mtx)[3][0] = -(*origin * (mtx)[0][0] + origin[1] * (mtx)[1][0] + origin[2] * (mtx)[2][0]);
+    (mtx)[0][0] = (float)(-(double)(axis)[1][0]);
+    (mtx)[1][0] = (float)(-(double)(axis)[1][1]);
+    (mtx)[2][0] = (float)(-(double)(axis)[1][2]);
+    (mtx)[3][0] = (float)(-((double)origin[0] * (double)(mtx)[0][0]
+        + (double)origin[1] * (double)(mtx)[1][0]
+        + (double)origin[2] * (double)(mtx)[2][0]));
 
     (mtx)[0][1] = (axis)[2][0];
     (mtx)[1][1] = (axis)[2][1];
     (mtx)[2][1] = (axis)[2][2];
-    (mtx)[3][1] = -(*origin * (mtx)[0][1] + origin[1] * (mtx)[1][1] + origin[2] * (mtx)[2][1]);
+    (mtx)[3][1] = (float)(-((double)origin[0] * (double)(mtx)[0][1]
+        + (double)origin[1] * (double)(mtx)[1][1]
+        + (double)origin[2] * (double)(mtx)[2][1]));
 
     (mtx)[0][2] = (axis)[0][0];
 
     (mtx)[1][2] = (axis)[0][1];
     (mtx)[2][2] = (axis)[0][2];
-    (mtx)[3][2] = -(*origin * (mtx)[0][2] + origin[1] * (mtx)[1][2] + origin[2] * (mtx)[2][2]);
+    (mtx)[3][2] = (float)(-((double)origin[0] * (double)(mtx)[0][2]
+        + (double)origin[1] * (double)(mtx)[1][2]
+        + (double)origin[2] * (double)(mtx)[2][2]));
 
     (mtx)[0][3] = 0.0f;
     (mtx)[1][3] = 0.0f;
@@ -3249,53 +3366,72 @@ void __cdecl ConvertQuatToSkelMat(const DObjAnimMat *const mat, DObjSkelMat *ske
 
 void __cdecl ConvertQuatToInverseSkelMat(const DObjAnimMat *const mat, DObjSkelMat *skelMat)
 {
-    float scaledQuat[3];
+    double scaledQuat[3];
+    double inverseAxis[3][3];
 
-    float yy;
-    float xy;
-    float zz;
-    float zw;
-    float yw;
-    float xz;
-    float yz;
-    float xx;
-    float xw;
+    double yy;
+    double xy;
+    double zz;
+    double zw;
+    double yw;
+    double xz;
+    double yz;
+    double xx;
+    double xw;
 
     iassert((!IS_NAN((mat->quat)[0]) && !IS_NAN((mat->quat)[1]) && !IS_NAN((mat->quat)[2]) && !IS_NAN((mat->quat)[3])));
     iassert((!IS_NAN(mat->transWeight)));
 
-    Vec3Scale(mat->quat, mat->transWeight, scaledQuat);
+    scaledQuat[0] = (double)mat->transWeight * (double)mat->quat[0];
+    scaledQuat[1] = (double)mat->transWeight * (double)mat->quat[1];
+    scaledQuat[2] = (double)mat->transWeight * (double)mat->quat[2];
 
-    xx = scaledQuat[0] * mat->quat[0];
-    xy = scaledQuat[0] * mat->quat[1];
-    xz = scaledQuat[0] * mat->quat[2];
-    xw = scaledQuat[0] * mat->quat[3];
+    xx = scaledQuat[0] * (double)mat->quat[0];
+    xy = scaledQuat[0] * (double)mat->quat[1];
+    xz = scaledQuat[0] * (double)mat->quat[2];
+    xw = scaledQuat[0] * (double)mat->quat[3];
 
-    yy = scaledQuat[1] * mat->quat[1];
-    yz = scaledQuat[1] * mat->quat[2];
-    yw = scaledQuat[1] * mat->quat[3];
+    yy = scaledQuat[1] * (double)mat->quat[1];
+    yz = scaledQuat[1] * (double)mat->quat[2];
+    yw = scaledQuat[1] * (double)mat->quat[3];
 
-    zz = scaledQuat[2] * mat->quat[2];
-    zw = scaledQuat[2] * mat->quat[3];
+    zz = scaledQuat[2] * (double)mat->quat[2];
+    zw = scaledQuat[2] * (double)mat->quat[3];
 
-    skelMat->axis[0][0] = 1.0f - (yy + zz);
-    skelMat->axis[0][1] = xy - zw;
-    skelMat->axis[0][2] = xz + yw;
+    inverseAxis[0][0] = 1.0 - (yy + zz);
+    inverseAxis[0][1] = xy - zw;
+    inverseAxis[0][2] = xz + yw;
+    inverseAxis[1][0] = xy + zw;
+    inverseAxis[1][1] = 1.0 - (xx + zz);
+    inverseAxis[1][2] = yz - xw;
+    inverseAxis[2][0] = xz - yw;
+    inverseAxis[2][1] = yz + xw;
+    inverseAxis[2][2] = 1.0 - (xx + yy);
+
+    skelMat->axis[0][0] = (float)inverseAxis[0][0];
+    skelMat->axis[0][1] = (float)inverseAxis[0][1];
+    skelMat->axis[0][2] = (float)inverseAxis[0][2];
     skelMat->axis[0][3] = 0.0f;
 
-    skelMat->axis[1][0] = xy + zw;
-    skelMat->axis[1][1] = 1.0f - (xx + zz);
-    skelMat->axis[1][2] = yz - xw;
+    skelMat->axis[1][0] = (float)inverseAxis[1][0];
+    skelMat->axis[1][1] = (float)inverseAxis[1][1];
+    skelMat->axis[1][2] = (float)inverseAxis[1][2];
     skelMat->axis[1][3] = 0.0f;
 
-    skelMat->axis[2][0] = xz - yw;
-    skelMat->axis[2][1] = yz + xw;
-    skelMat->axis[2][2] = 1.0f - (xx + yy);
+    skelMat->axis[2][0] = (float)inverseAxis[2][0];
+    skelMat->axis[2][1] = (float)inverseAxis[2][1];
+    skelMat->axis[2][2] = (float)inverseAxis[2][2];
     skelMat->axis[2][3] = 0.0f;
 
-    skelMat->origin[0] = -((mat->trans[0] * skelMat->axis[0][0]) + (mat->trans[1] * skelMat->axis[1][0]) + (mat->trans[2] * skelMat->axis[2][0]));// ^_mask__NegFloat_;
-    skelMat->origin[1] = -((mat->trans[0] * skelMat->axis[0][1]) + (mat->trans[1] * skelMat->axis[1][1]) + (mat->trans[2] * skelMat->axis[2][1]));// ^_mask__NegFloat_;
-    skelMat->origin[2] = -((mat->trans[0] * skelMat->axis[0][2]) + (mat->trans[1] * skelMat->axis[1][2]) + (mat->trans[2] * skelMat->axis[2][2]));// ^_mask__NegFloat_;
+    skelMat->origin[0] = (float)(-((double)mat->trans[0] * inverseAxis[0][0]
+        + (double)mat->trans[1] * inverseAxis[1][0]
+        + (double)mat->trans[2] * inverseAxis[2][0])); // ^_mask__NegFloat_;
+    skelMat->origin[1] = (float)(-((double)mat->trans[0] * inverseAxis[0][1]
+        + (double)mat->trans[1] * inverseAxis[1][1]
+        + (double)mat->trans[2] * inverseAxis[2][1])); // ^_mask__NegFloat_;
+    skelMat->origin[2] = (float)(-((double)mat->trans[0] * inverseAxis[0][2]
+        + (double)mat->trans[1] * inverseAxis[1][2]
+        + (double)mat->trans[2] * inverseAxis[2][2])); // ^_mask__NegFloat_;
     skelMat->origin[3] = 1.0f;
 }
 

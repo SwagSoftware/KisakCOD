@@ -1143,7 +1143,7 @@ int __cdecl G_CanRadiusDamageFromPos(
             if (coneAngleCos == -1.0 || !coneDirection)
             {
                 if (G_LocationalTracePassed(centerPos, dest[i], targ->s.number, inflictorNum, contentMask, 0))
-                    break;
+                    return 1;
             }
             else
             {
@@ -1161,7 +1161,7 @@ int __cdecl G_CanRadiusDamageFromPos(
                 if (dot >= coneAngleCos)
                 {
                     if (G_LocationalTracePassed(centerPos, dest[i], targ->s.number, inflictorNum, contentMask, 0))
-                        break;
+                        return 1;
                 }
             }
         }

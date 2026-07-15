@@ -9696,13 +9696,11 @@ void __cdecl GScr_MissileSetTarget(scr_entref_t entref)
     Entity->missileTargetEnt.setEnt(v2);
     if (Scr_GetNumParam() <= 1)
     {
-        Entity->mover.apos1[1] = 0.0;
-        Entity->mover.apos1[2] = 0.0;
-        Entity->mover.apos2[0] = 0.0;
+        Vec3Clear(Entity->missile.targetOffset);
     }
     else
     {
-        Scr_GetVector(1u, &Entity->mover.apos1[1]);
+        Scr_GetVector(1u, Entity->missile.targetOffset);
     }
 }
 
