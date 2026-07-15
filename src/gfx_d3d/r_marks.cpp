@@ -354,8 +354,6 @@ void __cdecl R_AABBTreeSurfacesTwoLists_r(
     uint32_t surfListSize,
     uint32_t *surfCounts)
 {
-    uint32_t i; // [esp+0h] [ebp-20h]
-    uint32_t listIndex; // [esp+4h] [ebp-1Ch]
     GfxAabbTree *children; // [esp+8h] [ebp-18h]
     uint32_t surfIndex; // [esp+Ch] [ebp-14h]
     uint32_t childIndex; // [esp+10h] [ebp-10h]
@@ -399,11 +397,11 @@ void __cdecl R_AABBTreeSurfacesTwoLists_r(
                     && mins[2] <= (double)surf->bounds[1][2]
                     && maxs[2] >= (double)surf->bounds[0][2])
                 {
-                    for (listIndex = 0; listIndex < *surfCounts; ++listIndex)
+                    for (uint32_t listIndex = 0; listIndex < *surfCounts; ++listIndex)
                     {
                         iassert( surfLists[0][listIndex] != surf );
                     }
-                    for (i = 0; i < surfCounts[1]; ++i)
+                    for (uint32_t listIndex = 0; listIndex < surfCounts[1]; ++listIndex)
                     {
                         iassert( surfLists[1][listIndex] != surf );
                     }
