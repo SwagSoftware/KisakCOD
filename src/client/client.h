@@ -568,6 +568,9 @@ extern field_t g_consoleField;
 
 
 // screen_placement
+#ifdef KISAK_XBOX
+void __cdecl ScrPlace_Init();
+#endif
 void __cdecl ScrPlace_SetupFloatViewport(
     ScreenPlacement *scrPlace,
     float viewportX,

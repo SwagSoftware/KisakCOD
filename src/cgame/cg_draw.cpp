@@ -726,10 +726,7 @@ void __cdecl CG_ClearBlur(int localClientNum)
 
 float __cdecl CG_GetBlurRadius(int localClientNum)
 {
-    double radius; // fp1
-
-    radius = s_screenBlur[localClientNum].radius;
-    return *((float *)&radius + 1);
+    return s_screenBlur[localClientNum].radius;
 }
 
 void __cdecl CG_ScreenBlur(int localClientNum)

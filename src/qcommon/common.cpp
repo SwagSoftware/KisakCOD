@@ -1357,6 +1357,9 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #ifdef KISAK_MP
     NET_Init();
 #endif
+#ifdef KISAK_XBOX
+    ScrPlace_Init();
+#endif
 
 #ifdef KISAK_MP
     Dvar_ClearModified((dvar_s*)com_dedicated);
