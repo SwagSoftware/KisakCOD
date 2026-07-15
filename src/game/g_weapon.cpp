@@ -492,12 +492,9 @@ void __cdecl FireWeapon(gentity_s *ent, int gametime)
     weaponParms wp; // [esp+30h] [ebp-48h] BYREF
     float aimSpreadScale; // [esp+74h] [ebp-4h]
 
-// Optional
-// Prevents AI from taking damage while being shot at.
-//#ifdef KISAK_SP
-//	if ((ent->client->ps.weapFlags & 8) != 0)// g_friendlyfireDist
-//		return;
-//#endif
+#ifdef KISAK_SP
+    if ((ent->client->ps.eFlags & 0x20300) == 0 || !ent->active)
+#endif
     {
         Scr_Notify(ent, scr_const.weapon_fired, 0);
         wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
