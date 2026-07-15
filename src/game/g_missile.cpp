@@ -2921,8 +2921,6 @@ gentity_s *__cdecl G_FireRocket(
     float *currentOrigin; // [esp+38h] [ebp-74h]
     float *trBase; // [esp+48h] [ebp-64h]
     float *trDelta; // [esp+4Ch] [ebp-60h]
-    float *v18; // [esp+50h] [ebp-5Ch]
-    float *v19; // [esp+54h] [ebp-58h]
     float sinT; // [esp+70h] [ebp-3Ch]
     float theta; // [esp+74h] [ebp-38h]
     float r; // [esp+78h] [ebp-34h]

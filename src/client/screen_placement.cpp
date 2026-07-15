@@ -271,11 +271,24 @@ void __cdecl ScrPlace_SetupUnsafeViewport(
     float v7; // [esp+8h] [ebp-10h]
     float v8; // [esp+Ch] [ebp-Ch]
 
+#ifdef KISAK_XBOX
+    float safeAreaRatioHorz = safeArea_horizontal->current.value;
+    float safeAreaRatioVert = safeArea_vertical->current.value;
+
+    Dvar_SetFloat(safeArea_horizontal, 1.0f);
+    Dvar_SetFloat(safeArea_vertical, 1.0f);
+#endif
+
     v8 = (float)viewportHeight;
     v7 = (float)viewportWidth;
     v6 = (float)viewportY;
     v5 = (float)viewportX;
     ScrPlace_SetupFloatViewport(scrPlace, v5, v6, v7, v8);
+
+#ifdef KISAK_XBOX
+    Dvar_SetFloat(safeArea_horizontal, safeAreaRatioHorz);
+    Dvar_SetFloat(safeArea_vertical, safeAreaRatioVert);
+#endif
 }
 
 double __cdecl ScrPlace_ApplyX(const ScreenPlacement *scrPlace, float x, int32_t horzAlign)
