@@ -2508,7 +2508,7 @@ void Actor_SetGoalHeight(actor_goal_s *goal, float height)
     iassert(goal);
     iassert(height >= 0);
     
-    if (height < 80.0)
+    if (height < 80.0f)
         height = 80.0f;
 
     goal->height = height;
