@@ -600,6 +600,7 @@ void __cdecl CG_SetNextSnap(int localClientNum)
             centity_s *cent = CG_GetEntity(localClientNum, entityIndex);
 
             CG_ShutdownEntity(localClientNum, cent);
+			CG_UnlinkEntity(localClientNum, entityIndex);// KISAK ADD: Delete AI collision.
             FX_MarkEntDetachAll(localClientNum, entityIndex);
             dobj = Com_GetClientDObj(entityIndex, localClientNum);
             if (dobj)

@@ -265,7 +265,7 @@ void __cdecl ActorScr_Clamp_0_Positive(actor_s *pSelf, const actor_fields_s *pFi
         Scr_Error(v5);
         Float = 0.0;
     }
-    *(float *)((char *)&pSelf->ent + pField->ofs) = Float;
+    *(float *)((char *)pSelf + pField->ofs) = Float;
 }
 
 void __cdecl ActorScr_ReadOnly(actor_s *pSelf, const actor_fields_s *pField)

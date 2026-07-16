@@ -2883,6 +2883,11 @@ void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction)
 
     weapDef = BG_GetWeaponDef(ps->weapon);
 
+#ifdef KISAK_SP
+    if ((ps->weapFlags & 8) != 0) // g_friendlyfireDist
+        return;
+#endif
+
     if (ps->weaponstate != WEAPON_MELEE_INIT
         && ps->weaponstate != WEAPON_MELEE_FIRE
         && ps->weaponstate != WEAPON_MELEE_END

@@ -4,6 +4,7 @@
 #include <server/sv_world.h>
 #include <script/scr_vm.h>
 #include <script/scr_const.h>
+#include <stringed/stringed_hooks.h>
 
 #ifdef KISAK_MP
 #include <game_mp/g_utils_mp.h>
@@ -464,17 +465,21 @@ void __cdecl PrintPlayerPickupMessage(gentity_s *player, uint32_t weapIdx, Weapo
     iassert(player);
     iassert(weapDef);
 
+	const char *displayName = SEH_StringEd_GetString(weapDef->szDisplayName);
+	if (!displayName)
+		displayName = weapDef->szDisplayName;
+
 #ifdef KISAK_MP
     if (BG_WeaponIsClipOnly(weapIdx))
-        text = va("%c \"GAME_PICKUP_CLIPONLY_AMMO\x15%s\"", 'f', weapDef->szDisplayName);
+        text = va("%c \"GAME_PICKUP_CLIPONLY_AMMO\x15%s\"", 'f', displayName);
     else
-        text = va("%c \"GAME_PICKUP_AMMO\x15%s\"", 'f', weapDef->szDisplayName);
+        text = va("%c \"GAME_PICKUP_AMMO\x15%s\"", 'f', displayName);
     SV_GameSendServerCommand(player - g_entities, SV_CMD_CAN_IGNORE, text);
 #elif KISAK_SP
     if (BG_WeaponIsClipOnly(weapIdx))
-        text = va("gm \"GAME_PICKUP_CLIPONLY_AMMO\x15%s\"", weapDef->szDisplayName);
+        text = va("gm \"GAME_PICKUP_CLIPONLY_AMMO\x15%s\"", displayName);
     else
-        text = va("gm \"GAME_PICKUP_AMMO\x15%s\"", weapDef->szDisplayName);
+        text = va("gm \"GAME_PICKUP_AMMO\x15%s\"", displayName);
     SV_GameSendServerCommand(player - g_entities, text);
 #endif
 }
@@ -580,8 +585,12 @@ void __cdecl PrintMessage_CannotGrabItem(gentity_s *ent, gentity_s *player, int3
             iassert(ps);
             if (Com_BitCheckAssert(ps->ps.weapons, weapIndex, 16))
             {
+				const char *displayName;
                 WeaponDef = BG_GetWeaponDef(weapIndex);
-                v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO\x15%s\"", 102, WeaponDef->szDisplayName);
+				displayName = SEH_StringEd_GetString(WeaponDef->szDisplayName);
+				if (!displayName)
+					displayName = WeaponDef->szDisplayName;
+                v6 = va("%c \"GAME_PICKUP_CANTCARRYMOREAMMO\x15%s\"", 102, displayName);
             }
             else
             {
@@ -592,8 +601,12 @@ void __cdecl PrintMessage_CannotGrabItem(gentity_s *ent, gentity_s *player, int3
             const char *v10;
             if (BG_PlayerHasWeapon(&player->client->ps, weapIndex))
             {
+				const char *displayName;
                 WeaponDef = BG_GetWeaponDef(weapIndex);
-                v10 = va("gm \"GAME_PICKUP_CANTCARRYMOREAMMO\x15%s\"", WeaponDef->szDisplayName);
+				displayName = SEH_StringEd_GetString(WeaponDef->szDisplayName);
+				if (!displayName)
+					displayName = WeaponDef->szDisplayName;
+                v10 = va("gm \"GAME_PICKUP_CANTCARRYMOREAMMO\x15%s\"", displayName);
             }
             else
             {

@@ -906,7 +906,7 @@ void __cdecl Actor_PredictGrenadeLandPos(gentity_s *pGrenade)
 
     if (!pGrenade)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_grenade.cpp", 967, 0, "%s", "pGrenade");
-    if (pGrenade->mover.decelTime == 0.0 && pGrenade->mover.aDecelTime == 0.0 && pGrenade->mover.speed == 0.0)
+    if (!pGrenade->missile.predictLandTime)
     {
         clipmask = pGrenade->clipmask;
         nextthink = pGrenade->nextthink;

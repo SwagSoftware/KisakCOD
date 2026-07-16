@@ -2509,6 +2509,11 @@ void __cdecl CG_FireWeapon(
                 isPlayer = 1;
             }
 
+#ifdef KISAK_SP
+            if (p_nextState->eType == ET_ACTOR)
+                WeaponFlash(localClientNum, p_nextState->number, weapon, 0, tagName);
+#endif
+
             if (p_nextState->eType == ET_MG42)
                 WeaponFlash(localClientNum, p_nextState->number, weapon, playerUsingTurret, tagName);
 

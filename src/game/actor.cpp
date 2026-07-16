@@ -2492,28 +2492,26 @@ void __cdecl Actor_CheckOverridePos(actor_s *self, const float *prevGoalPos)
     }
 }
 
-void __cdecl Actor_SetGoalRadius(actor_goal_s *goal, double radius)
+void Actor_SetGoalRadius(actor_goal_s *goal, float radius)
 {
-    if (!goal)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5686, 0, "%s", "goal");
-    if (radius < 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5687, 0, "%s", "radius >= 0");
-    if (radius >= 4.0)
-        goal->radius = radius;
-    else
-        goal->radius = 4.0;
+    iassert(goal);
+    iassert(radius >= 0);
+
+    if (radius < 4.0f)
+        radius = 4.0f;
+
+    goal->radius = radius;
 }
 
-void __cdecl Actor_SetGoalHeight(actor_goal_s *goal, double height)
+void Actor_SetGoalHeight(actor_goal_s *goal, float height)
 {
-    if (!goal)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5700, 0, "%s", "goal");
-    if (height < 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5701, 0, "%s", "height >= 0");
-    if (height >= 80.0)
-        goal->height = height;
-    else
-        goal->height = 80.0;
+    iassert(goal);
+    iassert(height >= 0);
+    
+    if (height < 80.0f)
+        height = 80.0f;
+
+    goal->height = height;
 }
 
 bool __cdecl Actor_IsInsideArc(
@@ -4129,6 +4127,7 @@ bool __cdecl Actor_FindPath(
             v12,
             self->ent->r.currentOrigin,
             vGoalPos,
+			192.0f,
             bAllowNegotiationLinks);
         return Actor_HasPath(self);
     }
@@ -4155,7 +4154,7 @@ void __cdecl Actor_RecalcPath(actor_s *self)
         v4 = Sentient_NearestNode(self->sentient);
         if (v4)
         {
-            Path_FindPathFrom(&self->Path, self->sentient->eTeam, v4, self->ent->r.currentOrigin, self->Path.vFinalGoal, v2);
+            Path_FindPathFrom(&self->Path, self->sentient->eTeam, v4, self->ent->r.currentOrigin, self->Path.vFinalGoal, 192.0f, v2);
             self->Path.flags |= 0x80u;
         }
     }
@@ -5489,6 +5488,11 @@ bool __cdecl Actor_FindPathToGoalDirectInternal(actor_s *self)
         Path_FindPathFromToNotCrossPlanes(&self->Path, self->sentient->eTeam, pNearestNode, self->ent->r.currentOrigin, pNodeTo, vGoalPos, vNormal, fDist, iPlaneCount, 1);
     else
         Path_FindPathFromTo(&self->Path, self->sentient->eTeam, pNearestNode, self->ent->r.currentOrigin, pNodeTo, vGoalPos, 1);
+	if (Actor_HasPath(self))
+	{
+		self->Path.pathEndAnimDistSq = self->codeGoal.radius * self->codeGoal.radius;
+		self->Path.pathEndAnimNotified = 0;
+	}
     return Actor_HasPath(self);
 }
 

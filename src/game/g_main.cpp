@@ -682,7 +682,7 @@ void G_RegisterDebugDvars()
     ai_showPaths = Dvar_RegisterInt("ai_showPaths", 0, 0, 2, 0x80u, "Show AI navigation paths");
     // USEBETTERLOOKAHEAD
     // LWSS: This 'Use Better Lookahead' is backported from BLOPS. It helps avoid the wrong pathnodes being taken when navigating obstacles like stairs with a walkable area underneath and above.
-    ai_useBetterLookahead = Dvar_RegisterBool("ai_useBetterLookahead", 0, 0x80u, "(BLOPS) Better AI Pathing Lookahead");
+    ai_useBetterLookahead = Dvar_RegisterBool("ai_useBetterLookahead", 1, 0x80u, "(BLOPS) Better AI Pathing Lookahead");
     // END USEBETTERLOOKAHEAD
     ai_debugFindPath = Dvar_RegisterInt(
         "ai_debugFindPath",

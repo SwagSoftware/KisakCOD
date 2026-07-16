@@ -198,7 +198,7 @@ float __cdecl Actor_GetPlayerMovementAccuracy(const actor_s *self, const sentien
     float dirY = dy * inv_dist;
     float dirZ = dz * inv_dist;
 
-    float dot = velocity[0] * dirY + (velocity[2] * dirZ - velocity[1] * dirX);
+    float dot = velocity[0] * dirX + velocity[1] * dirY + velocity[2] * dirZ;
 
     float absDot = fabsf(dot);
     float clampedDot = I_fmin(absDot, 250.0f);
@@ -294,7 +294,7 @@ float __cdecl Actor_GetFinalAccuracy(actor_s *self, weaponParms *wp, double accu
         WeaponAccuracy = Actor_GetWeaponAccuracy(self, enemy, weapDef, WEAP_ACCURACY_AI_VS_PLAYER);
         PlayerStanceAccuracy = Actor_GetPlayerStanceAccuracy(self, enemy);
         PlayerMovementAccuracy = Actor_GetPlayerMovementAccuracy(self, enemy);
-        playerSightAccuracy = self->playerSightAccuracy;
+        playerSightAccuracy = Actor_GetPlayerSightAccuracy(self, enemy);
     }
     else
     {
@@ -380,8 +380,9 @@ void Actor_HitSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
     float vertMax, horizMax;
     if (enemy->ent->client)
     {
-        vertMax = 8.0f;
-        horizMax = -44.0f;
+		iassert(accuracy >= 0.0f && accuracy <= 1.0f);
+		horizMax = ((1.0f - accuracy) + 1.0f) * 0.5f * -44.0f;
+		vertMax = ((1.0f - accuracy) * 0.9f + 0.1f) * 8.0f;
     }
     else
     {
@@ -448,7 +449,7 @@ void __cdecl Actor_HitEnemy(actor_s *self, weaponParms *wp, double accuracy)
     Actor_HitSentient(wp, self->sentient->targetEnt.ent()->sentient, accuracy);
 }
 
-float outerRadius;
+static float outerRadius = 6969.0f;
 void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, float accuracy)
 {
     gentity_s *ent = enemy->ent;
@@ -537,7 +538,7 @@ void __cdecl Actor_MissSentient(weaponParms *wp, sentient_s *enemy, float accura
 
 
 // some aislop
-float outerRadius_0;
+static float outerRadius_0 = 6969.0f;
 void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float *forward)
 {
     float startX; // fp0
@@ -553,7 +554,7 @@ void __cdecl Actor_MissTarget(const weaponParms *wp, const float *target, float 
     float vec[3];
     float crossVec[3]; // [sp+60h] [-80h] BYREF
 
-    if (outerRadius_0 == 6969.0)
+    if (outerRadius_0 == 6969.0f)
     {
         float a = actorMaxs[1];
         outerRadius_0 = sqrtf(a * a * 2.0f * 3.0f);

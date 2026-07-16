@@ -888,7 +888,11 @@ void CG_ReachedCheckpoint()
     const char *v0; // r3
     const char *v1; // r3
 
-    v0 = SEH_LocalizeTextMessage("EXE_CHECKPOINT_REACHED", "game message", LOCMSG_SAFE);
+#ifdef KISAK_XBOX
+	v0 = SEH_LocalizeTextMessage("EXE_CHECKPOINT_REACHED", "game message", LOCMSG_SAFE);
+#else
+	v0 = SEH_LocalizeTextMessage("EXE_GAMESAVED", "game message", LOCMSG_SAFE);
+#endif
     v1 = va("^7%s", v0);
     CG_GameMessage(v1, 17);
 }

@@ -517,11 +517,13 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         if (cgameGlob->predictedPlayerState.pm_type != PM_UFO && cgameGlob->predictedPlayerState.pm_type != PM_NOCLIP)
         {
             pm_type = cgameGlob->nextSnap->ps.pm_type;
-            if (pm_type == PM_DEAD)
+            if (pm_type >= PM_DEAD)
             {
                 cgameGlob->refdefViewAngles[0] = -15.0;
                 cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[1];
                 cgameGlob->refdefViewAngles[2] = 40.0;
+				if (cgameGlob->refdef.vieworg[2] < (float)(cgameGlob->predictedPlayerState.origin[2] + 8.0f))
+					cgameGlob->refdef.vieworg[2] = cgameGlob->predictedPlayerState.origin[2] + 8.0f;
                 return;
             }
             if (pm_type != PM_DEAD_LINKED)

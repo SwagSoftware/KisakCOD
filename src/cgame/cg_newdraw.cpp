@@ -2634,6 +2634,7 @@ void __cdecl CG_DrawPlayerStance(
             }
             verts = proneBlockedEndTime > cgArray[0].time;
         LABEL_17:
+#ifdef KISAK_MP
             if (verts)
             {
                 if (BG_WeaponBlocksProne(cgArray[0].predictedPlayerState.weapon))
@@ -2682,6 +2683,7 @@ void __cdecl CG_DrawPlayerStance(
                     v49,
                     v50);
             }
+#endif
         }
     }
 #else
@@ -2721,6 +2723,7 @@ if (fadeAlpha != 0.0)
     drawColor[2] = color[2];
     if ((cgameGlob->predictedPlayerState.pm_flags & 0x1000) != 0 && cgameGlob->proneBlockedEndTime < cgameGlob->time)
         cgameGlob->proneBlockedEndTime = cgameGlob->time + 1500;
+#ifdef KISAK_MP
     if (cgameGlob->proneBlockedEndTime > cgameGlob->time)
     {
         if (BG_WeaponBlocksProne(cgameGlob->predictedPlayerState.weapon))
@@ -2745,6 +2748,7 @@ if (fadeAlpha != 0.0)
             drawColor,
             textStyle);
     }
+#endif
     if (cg_hudStanceHintPrints->current.enabled && cgameGlob->lastStanceChangeTime + 3000 > cgameGlob->time)
         CG_DrawStanceHintPrints(localClientNum, rect, x, color, fadeAlpha, font, scale, textStyle);
     drawColor[3] = color[3] * fadeAlpha;
