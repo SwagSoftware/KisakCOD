@@ -628,9 +628,19 @@ void __cdecl DynEnt_LoadEntities(MemoryFile *memFile)
             uint8_t hasPhys = 0;
             MemFile_ReadData(memFile, 1, &hasPhys);
             if (hasPhys)
+            {
                 cm.dynEntClientList[drawType][dynEntId].physObjId = (uintptr_t)Phys_ObjLoad(PHYS_WORLD_DYNENT, memFile);
+                DynEnt_SetPhysObjCollision(
+                    &cm.dynEntDefList[drawType][dynEntId],
+                    (dxBody *)cm.dynEntClientList[drawType][dynEntId].physObjId);
+            }
             else
+            {
                 cm.dynEntClientList[drawType][dynEntId].physObjId = 0;
+            }
+            
+            if ((cm.dynEntClientList[drawType][dynEntId].flags & DYNENT_CL_LINKED) == 0)
+                DynEntCl_UnlinkEntity(dynEntId, (DynEntityCollType)drawType);
         }
     }
 }
