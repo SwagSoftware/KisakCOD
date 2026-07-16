@@ -2492,28 +2492,26 @@ void __cdecl Actor_CheckOverridePos(actor_s *self, const float *prevGoalPos)
     }
 }
 
-void __cdecl Actor_SetGoalRadius(actor_goal_s *goal, double radius)
+void Actor_SetGoalRadius(actor_goal_s *goal, float radius)
 {
-    if (!goal)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5686, 0, "%s", "goal");
-    if (radius < 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5687, 0, "%s", "radius >= 0");
-    if (radius >= 4.0)
-        goal->radius = radius;
-    else
-        goal->radius = 4.0;
+    iassert(goal);
+    iassert(radius >= 0);
+
+    if (radius < 4.0f)
+        radius = 4.0f;
+
+    goal->radius = radius;
 }
 
-void __cdecl Actor_SetGoalHeight(actor_goal_s *goal, double height)
+void Actor_SetGoalHeight(actor_goal_s *goal, float height)
 {
-    if (!goal)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5700, 0, "%s", "goal");
-    if (height < 0.0)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor.cpp", 5701, 0, "%s", "height >= 0");
-    if (height <= 80.0)
-        goal->height = 80.0;
-    else
-        goal->height = height;
+    iassert(goal);
+    iassert(height >= 0);
+    
+    if (height < 80.0)
+        height = 80.0f;
+
+    goal->height = height;
 }
 
 bool __cdecl Actor_IsInsideArc(
