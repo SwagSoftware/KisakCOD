@@ -1752,7 +1752,7 @@ void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, in
     ps->sprintState.sprintStartMaxLength = sprintLeft;
     ps->sprintState.lastSprintStart = pm->cmd.serverTime;
     ps->pm_flags |= PMF_SPRINTING;
-#ifndef KISAK_XBOX
+#ifdef KISAK_SP
     PM_ExitAimDownSight(ps);
 #endif
 }
@@ -1783,11 +1783,11 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
     if (ps->leanf != 0.0)
         return true;
 
-#ifdef KISAK_XBOX
-	if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
-		return true;
-#else
+#ifdef KISAK_SP
     if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SHELLSHOCKED)) != 0)
+        return true;
+#else
+    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
         return true;
 #endif
 
@@ -3389,6 +3389,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
                         ps->pm_flags |= PMF_NO_PRONE;
+                        if ((pm->cmd.buttons & 0x1000) == 0)
+                        {
+                            if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & PMF_DUCKED) != 0)
+                                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
+                            else
+                                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
+                        }
                     }
                 }
             }
