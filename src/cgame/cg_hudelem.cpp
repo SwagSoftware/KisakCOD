@@ -1777,7 +1777,8 @@ void __cdecl CopyInUseHudElems(hudelem_s **elems, int32_t *elemCount, hudelem_s 
 void __cdecl CG_AddDrawSurfsFor3dHudElems(int32_t localClientNum)
 {
     int32_t i; // [esp+0h] [ebp-104h]
-    hudelem_s *elems[62]; // [esp+4h] [ebp-100h] BYREF
+    //hudelem_s *elems[62]; // [esp+4h] [ebp-100h] BYREF
+    hudelem_s *elems[264]; // LWSS: 264 in SP (KISAKTODO #define)
     int32_t elemCount; // [esp+100h] [ebp-4h]
 
 #ifdef KISAK_MP
