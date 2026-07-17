@@ -517,7 +517,6 @@ void __cdecl CG_CompassDrawVehicles(
     double picWidth; // fp31
     double picHeight; // fp30
     double v22; // fp0
-    int v23; // r11
     double angle; // fp1
     float picXY[2]; // [sp+60h] [-100h] BYREF
     float up[2]; // [sp+68h] [-F8h] BYREF
@@ -565,11 +564,11 @@ void __cdecl CG_CompassDrawVehicles(
                 v22 = (float)-(float)((float)((float)(compassSize->current.value * (float)value) * (float)0.5) - (float)v14);
                 picXY[1] = picXY[1] - (float)((float)((float)(compassSize->current.value * v19->current.value) * (float)0.5) - (float)v15);
                 picXY[0] = (float)v22 + picXY[0];
+
                 if (compassType || !compassRotation->current.enabled)
-                    v23 = 171408;
+                    angle = AngleNormalize360(cgameGlob->compassNorthYaw - v17->lastYaw);
                 else
-                    v23 = 170872;
-                angle = AngleNormalize360((float)(*(float *)((char *)&cgameGlob->clientNum + v23) - v17->lastYaw));
+                    angle = AngleNormalize360(cgameGlob->refdefViewAngles[1] - v17->lastYaw);
                 if (v13 < colorVec[3])
                     colorVec[3] = v13;
                 CG_DrawRotatedPic(&scrPlaceView[localClientNum], picXY[0], picXY[1], picWidth, picHeight, rect->horzAlign, rect->vertAlign, angle, colorVec, material);

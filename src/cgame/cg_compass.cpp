@@ -10,6 +10,7 @@
 #elif KISAK_SP
 #include "cg_main.h"
 #include "cg_newdraw.h"
+#include "cg_servercmds.h"
 
 #endif
 
@@ -1576,6 +1577,71 @@ void __cdecl CG_CompassUpYawVector(const cg_s *cgameGlob, float *result)
     }
 }
 
+#ifdef KISAK_SP
+static void DrawTickerTapeObjectivePing(
+    int localClientNum,
+    const objectiveInfo_t *objective,
+    const float *color,
+    float fadeAlpha,
+    const rectDef_s *rect,
+    float iconX,
+    float iconY)
+{
+    Material *ringMaterial;
+    float ringColor[4];
+    float ringLen;
+    float ringTimeMs;
+    float phase;
+    float alpha;
+    float size;
+    int ringIndex;
+
+    iassert(localClientNum == 0);
+
+    ringColor[0] = color[0];
+    ringColor[1] = color[1];
+    ringColor[2] = color[2];
+    ringColor[3] = color[3];
+    if (objective->ringTime <= -1)
+        return;
+    if (compassObjectiveRingTime->current.integer + objective->ringTime <= cgArray[0].time)
+        return;
+
+    ringLen = (float)compassObjectiveRingTime->current.integer
+        / (float)compassObjectiveNumRings->current.integer;
+    iassert(ringLen > 0);
+    iassert(cgArray[0].time >= objective->ringTime);
+    ringTimeMs = (float)(cgArray[0].time - objective->ringTime);
+    CG_MenuShowNotify(localClientNum, 2);
+    for (ringIndex = 0; ringTimeMs > ringLen; ++ringIndex)
+        ringTimeMs = ringTimeMs - ringLen;
+    iassert(ringTimeMs >= 0);
+    phase = ringTimeMs / ringLen;
+    if (phase <= 0.5f)
+        alpha = phase * 2.0f;
+    else
+        alpha = -((phase - 0.5f) * 2.0f - 1.0f);
+    ringColor[3] = alpha;
+    if (fadeAlpha < alpha)
+        ringColor[3] = fadeAlpha;
+    size = compassObjectiveRingSize->current.value * phase;
+    if (ringIndex)
+        size = size * 0.5f;
+    size = compassSize->current.value * size;
+    ringMaterial = CG_ObjectiveIcon(objective->icon, 1);
+    UI_DrawHandlePic(
+        &scrPlaceView[localClientNum],
+        iconX - size * 0.5f,
+        iconY - size * 0.5f,
+        size,
+        size,
+        rect->horzAlign,
+        rect->vertAlign,
+        ringColor,
+        ringMaterial);
+}
+#endif
+
 void __cdecl CG_CompassDrawTickertape(
     int32_t localClientNum,
     CompassType compassType,
@@ -1674,12 +1740,8 @@ void __cdecl CG_CompassDrawTickertape(
             {
 #ifdef KISAK_MP
                 objective = &cgameGlob->nextSnap->ps.objective[objIdx];
-#elif KISAK_SP
-                objective = cgArray[0].objectives;
-#endif
                 if (objective->state == OBJST_CURRENT || objective->state == OBJST_ACTIVE)
                 {
-#ifdef KISAK_MP
                     if (objective->entNum == ENTITYNUM_NONE)
                     {
                         goalOrig = objective->origin;
@@ -1690,7 +1752,12 @@ void __cdecl CG_CompassDrawTickertape(
                         goalOrig = cent->pose.origin;
                     }
 #elif KISAK_SP
-                    goalOrig = (const float*)objective->origin;
+                objective = &cgArray[0].objectives[objIdx];
+                if (objective->state == OBJST_CURRENT)
+                {
+                  for (int orgIdx = 0; orgIdx < 8; ++orgIdx)
+                  {
+                    goalOrig = objective->origin[orgIdx];
 #endif
 
                     colorMod[3] = defAlpha;
@@ -1755,7 +1822,13 @@ void __cdecl CG_CompassDrawTickertape(
                             textFont,
                             textScale,
                             textStyle);
+#ifdef KISAK_SP
+                        DrawTickerTapeObjectivePing(localClientNum, objective, color, defAlpha, rect, iconX, iconY);
+#endif
                     }
+#ifdef KISAK_SP
+                  }
+#endif
                 }
             }
 
@@ -2077,8 +2150,10 @@ void CG_CompassDrawPlayerPointers_SP(
     float xyClipped[2];
     //float v46; // [sp+70h] [-150h] BYREF
     //float v47; // [sp+74h] [-14Ch]
-    float north[5]; // [sp+78h] [-148h] BYREF
-    float v49; // [sp+8Ch] [-134h]
+
+    float north[2]; // [sp+78h] [-148h] BYREF
+    float newColor[4];
+    Material *iconMaterial;
     rectDef_s scaledRect; // [sp+90h] [-130h] BYREF
 
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -2113,27 +2188,27 @@ void CG_CompassDrawPlayerPointers_SP(
                     {
                         x = (float)(*v18 - cgArray[0].refdef.vieworg[0]);
                         v21 = (float)(v18[1] - cgArray[0].refdef.vieworg[1]);
-                        north[2] = *color;
-                        north[3] = color[1];
-                        north[4] = color[2];
+                        newColor[0] = *color;
+                        newColor[1] = color[1];
+                        newColor[2] = color[2];
                         v22 = sqrtf((float)((float)((float)v21 * (float)v21) + (float)((float)x * (float)x)));
-                        v49 = v22;
+                        newColor[3] = v22;
                         value = compassObjectiveMaxRange->current.value;
                         if (v22 > value || (value = compassMaxRange->current.value, v22 < value))
                         {
                             v22 = value;
-                            v49 = value;
+                            newColor[3] = value;
                         }
                         if ((float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value) == 0.0)
                         {
-                            v49 = 0.0;
+                            newColor[3] = 0.0;
                         }
                         else
                         {
-                            v49 = (float)v22 - compassMaxRange->current.value;
-                            v24 = (float)(v49 / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value));
-                            v49 = v49 / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value);
-                            v49 = (float)((float)(compassObjectiveMinAlpha->current.value - (float)1.0) * (float)v24) + (float)1.0;
+                            newColor[3] = (float)v22 - compassMaxRange->current.value;
+                            v24 = (float)(newColor[3] / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value));
+                            newColor[3] = newColor[3] / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value);
+                            newColor[3] = (float)((float)(compassObjectiveMinAlpha->current.value - (float)1.0) * (float)v24) + (float)1.0;
                         }
                         xyClipped[0] = 0.0f;
                         xyClipped[1] = 0.0f;
@@ -2145,12 +2220,12 @@ void CG_CompassDrawPlayerPointers_SP(
                         xy[1] += centerY;
                         v28 = (xyClipped[1] + centerY);
                         CalcCompassPointerSize(compassType, &w, &h);
-                        CG_ObjectiveIcon(objectives->icon, 0);
-                        txt = v49;
-                        if (fadeAlpha < v49)
+                        iconMaterial = CG_ObjectiveIcon(objectives->icon, 0);
+                        txt = newColor[3];
+                        if (fadeAlpha < newColor[3])
                         {
                             txt = fadeAlpha;
-                            v49 = fadeAlpha;
+                            newColor[3] = fadeAlpha;
                         }
                         v34 = w;
                         v35 = 0.0;
@@ -2182,7 +2257,7 @@ void CG_CompassDrawPlayerPointers_SP(
                         if (v40 > 0.5 && compassObjectiveDrawLines->current.enabled)
                         {
                             v41 = 2.0;
-                            v49 = (float)((float)((float)v40 - (float)0.5) * (float)txt) * 2.0;
+                            newColor[3] = (float)((float)((float)v40 - (float)0.5) * (float)txt) * 2.0;
                             if (v26 >= y && v26 <= (float)(scaledRect.h + (float)y))
                             {
                                 UI_DrawHandlePic(
@@ -2193,13 +2268,13 @@ void CG_CompassDrawPlayerPointers_SP(
                                     2.0,
                                     rect->horzAlign,
                                     rect->vertAlign,
-                                    color, // KISAKTODO: probably need 'newColor'
+                                    newColor,
                                     material);
                                 v41 = 2.0;
                             }
                             if (v25 >= x && v25 <= v39)
-                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, rect->horzAlign, rect->vertAlign, color, material); // KISAKTODO: probably need 'newColor'
-                            v49 = txt;
+                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, rect->horzAlign, rect->vertAlign, newColor, material);
+                            newColor[3] = txt;
                         }
                         UI_DrawHandlePic(
                             &scrPlaceView[localClientNum],
@@ -2209,8 +2284,8 @@ void CG_CompassDrawPlayerPointers_SP(
                             v37,
                             rect->horzAlign,
                             rect->vertAlign,
-                            color, // KISAKTODO: probably need 'newColor'
-                            material);
+                            newColor,
+                            iconMaterial);
                     }
                     --v19;
                     v18 += 3;

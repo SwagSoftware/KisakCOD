@@ -13,7 +13,7 @@
 
 void __cdecl PitchToQuat(float pitch, float *quat)
 {
-    pitch = DEG2RAD(pitch);
+    pitch = pitch * 0.0087266462f;
 
     quat[0] = 0.0;
     quat[1] = sin(pitch);
@@ -21,9 +21,9 @@ void __cdecl PitchToQuat(float pitch, float *quat)
     quat[3] = cos(pitch);
 }
 
-void __cdecl RollToQuat(float  roll, float *quat)
+void __cdecl RollToQuat(float roll, float *quat)
 {
-    roll = DEG2RAD(roll);
+    roll = roll * 0.0087266462f;
 
     quat[0] = sin(roll);
     quat[1] = 0.0;

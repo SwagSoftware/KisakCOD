@@ -400,9 +400,6 @@ void __cdecl CG_CloseScriptMenu(bool allowResponse)
 
 void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
 {
-    int time; // r10
-    const char *v4; // r4
-    int v5; // r9
     int v6; // r11
 
     if (localClientNum)
@@ -413,15 +410,14 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
+
     switch (menuToShow)
     {
     case 0:
-        time = cgArray[0].time;
         if (cgArray[0].healthFadeTime < cgArray[0].time)
         {
-            v4 = "Health";
-            v5 = 171444;
-            goto LABEL_18;
+            cgArray[0].healthFadeTime = cgArray[0].time;
+            Menus_ShowByName(&cgDC, "Health");
         }
         break;
     case 1:
@@ -436,48 +432,36 @@ void __cdecl CG_MenuShowNotify(int localClientNum, int menuToShow)
         }
         if (cgArray[0].offhandFadeTime < v6)
         {
-            v4 = "offhandinfo";
             cgArray[0].offhandFadeTime = v6;
-            goto LABEL_19;
+            Menus_ShowByName(&cgDC, "offhandinfo");
         }
         break;
     case 2:
-        time = cgArray[0].time;
         if (cgArray[0].compassFadeTime < cgArray[0].time)
         {
-            v4 = "Compass";
-            v5 = 171440;
-            goto LABEL_18;
+            cgArray[0].compassFadeTime = cgArray[0].time;
+            Menus_ShowByName(&cgDC, "Compass");
         }
         break;
     case 3:
-        time = cgArray[0].time;
         if (cgArray[0].stanceFadeTime < cgArray[0].time)
         {
-            v4 = "stance";
-            v5 = 171452;
-            goto LABEL_18;
+            cgArray[0].stanceFadeTime = cgArray[0].time;
+            Menus_ShowByName(&cgDC, "stance");
         }
         break;
     case 5:
-        time = cgArray[0].time;
         if (cgArray[0].scoreFadeTime < cgArray[0].time)
         {
-            v4 = "objectiveinfo";
-            v5 = 170992;
-            goto LABEL_18;
+            cgArray[0].scoreFadeTime = cgArray[0].time;
+            Menus_ShowByName(&cgDC, "objectiveinfo");
         }
         break;
     case 6:
-        time = cgArray[0].time;
         if (cgArray[0].sprintFadeTime < cgArray[0].time)
         {
-            v4 = "sprintMeter";
-            v5 = 171456;
-        LABEL_18:
-            *(int *)((char *)&cgArray[0].clientNum + v5) = time;
-        LABEL_19:
-            Menus_ShowByName(&cgDC, v4);
+            cgArray[0].sprintFadeTime = cgArray[0].time;
+            Menus_ShowByName(&cgDC, "sprintMeter");
         }
         break;
     default:

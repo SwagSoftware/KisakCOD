@@ -140,7 +140,8 @@ const char *__cdecl CG_WordWrap(
             v15 = UI_TextWidth(inputText, v17, font, scale);
         if (v19 <= 32)
             goto LABEL_14;
-        if (v17 > maxPixelWidth || font && v15 > (int)charCount)
+
+        if (v17 > maxChars || (font && v15 > maxPixelWidth))
         {
             if (!v16)
             {
@@ -348,15 +349,16 @@ void __cdecl CG_DrawObjectiveList(
                     wrapDvar = cg_objectiveListWrapCountWidescreen;
                 do
                 {
-                    v32 = CG_WordWrap(drawText, font, scale, -1, wrapDvar->current.integer, &lineCharCount);
+                    lineCharCount = 0;
+                    v32 = CG_WordWrap(drawText, font, scale, 0x7FFFFFFF, wrapDvar->current.integer, &lineCharCount);
                     wordwrapNext = v32;
-                    if (HIDWORD(v64))
+                    if (lineCharCount)
                     {
                         textY = (float)((float)((float)((float)v19 - rect->h) * (float)0.5) + (float)y);
                         UI_DrawText(
                             &scrPlaceView[localClientNum],
                             drawText,
-                            -1,
+                            lineCharCount,
                             font,
                             textX,
                             textY,
@@ -376,7 +378,8 @@ void __cdecl CG_DrawObjectiveList(
                 break;
             }
             p_icon += 284;
-        } while ((int)p_icon < (int)&cgArray[0].visionSetPreLoaded[0].filmLightTint[2]);
+
+        } while (p_icon < (int *)(cgArray[0].objectives + 16));
         if (textY != 0.0)
         {
             height = (float)((float)textY - (float)y);
@@ -452,22 +455,25 @@ int __cdecl CG_DrawScoreboard(int localClientNum)
     return 1;
 }
 
+static void CG_ClearObjectiveInfo(objectiveInfo_t *obj)
+{
+    obj->state = OBJST_EMPTY;
+    memset(obj->origin, 0, sizeof(obj->origin));
+    obj->string[0] = 0;
+    obj->ringTime = -1;
+    obj->ringToggle = 0;
+    obj->icon = 0;
+}
+
 void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
 {
     const char *ConfigString; // r26
-    float *v5; // r30
-    int v6; // r31
-    const char *v7; // r3
-    int v8; // r7
-    const char *v9; // r4
-    int v10; // r29
-    float *v11; // r31
-    const char *v12; // r3
-    int v13; // r31
-    const char *v14; // r3
-    int v15; // r3
-    const char *v16; // r3
-    char v17[16]; // [sp+50h] [-60h] BYREF
+    objectiveInfo_t *obj;
+    const char *val;
+    int oldState;
+    int oldRingToggle;
+    int i;
+    char key[16]; // [sp+50h] [-60h] BYREF
 
     if (localClientNum)
         MyAssertHandler(
@@ -486,93 +492,59 @@ void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
             "objectiveIndex doesn't index MAX_OBJECTIVES\n\t%i not in [0, %i)",
             num - 11,
             16);
-    v5 = &cgArray[0].refdef.primaryLights[69].origin[284 * num + 1];
+
+    obj = &cgArray[0].objectives[num - 11];
     if (!*ConfigString)
     {
-        *v5 = 0.0;
-    LABEL_17:
-        v5[1] = 0.0;
-        v5[4] = 0.0;
-        v5[2] = 0.0;
-        v5[3] = 0.0;
-        v5[5] = 0.0;
-        v5[6] = 0.0;
-        v5[7] = 0.0;
-        v5[8] = 0.0;
-        v5[9] = 0.0;
-        v5[10] = 0.0;
-        v5[11] = 0.0;
-        v5[12] = 0.0;
-        v5[13] = 0.0;
-        v5[14] = 0.0;
-        v5[15] = 0.0;
-        v5[16] = 0.0;
-        v5[17] = 0.0;
-        v5[18] = 0.0;
-        v5[19] = 0.0;
-        v5[20] = 0.0;
-        v5[21] = 0.0;
-        v5[22] = 0.0;
-        v5[23] = 0.0;
-        v5[24] = 0.0;
-        *((_BYTE *)v5 + 100) = 0;
-        v5[281] = NAN;
-        v5[282] = 0.0;
-        v5[283] = 0.0;
+        CG_ClearObjectiveInfo(obj);
         return;
     }
-    v6 = *(unsigned int *)v5;
-    v7 = Info_ValueForKey(ConfigString, "state");
-    if (*v7)
-        *(unsigned int *)v5 = atol(v7);
+    oldState = obj->state;
+    val = Info_ValueForKey(ConfigString, "state");
+    if (*val)
+        obj->state = (objectiveState_t)atol(val);
     else
-        *v5 = 0.0;
-    v8 = *(unsigned int *)v5;
-    if (*(int *)v5 < 0 || v8 > 5)
+        obj->state = OBJST_EMPTY;
+    if ((int)obj->state < 0 || (int)obj->state > 5)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_scoreboard.cpp",
             439,
             0,
             "objectiveInfo->state not in [OBJST_EMPTY, OBJST_NUMSTATES - 1]\n\t%i not in [%i, %i]",
-            v8,
+            obj->state,
             0,
             5);
-    if (v6 != 4 && *(unsigned int *)v5 == 4)
-        v5[281] = *(float *)&cgArray[0].time;
-    if (!*(unsigned int *)v5)
-        goto LABEL_17;
-    v9 = Info_ValueForKey(ConfigString, "str");
-    if (*v9)
-        I_strncpyz((char *)v5 + 100, v9, 1024);
-    else
-        *((_BYTE *)v5 + 100) = 0;
-    v10 = 0;
-    v11 = v5 + 3;
-    do
+    if (oldState != OBJST_CURRENT && obj->state == OBJST_CURRENT)
+        obj->ringTime = cgArray[0].time;
+    if (obj->state == OBJST_EMPTY)
     {
-        snprintf(v17, ARRAYSIZE(v17), "org%d", v10);
-        v12 = Info_ValueForKey(ConfigString, v17);
-        *(v11 - 2) = 0.0;
-        *(v11 - 1) = 0.0;
-        *v11 = 0.0;
-        if (*v12)
-            sscanf(v12, "%f %f %f", v11 - 2, v11 - 1, v11);
-        ++v10;
-        v11 += 3;
-    } while (v10 < 8);
-    v13 = *((unsigned int *)v5 + 282);
-    v14 = Info_ValueForKey(ConfigString, "ring");
-    if (*v14)
-        v15 = atol(v14);
+        CG_ClearObjectiveInfo(obj);
+        return;
+    }
+    val = Info_ValueForKey(ConfigString, "str");
+    if (*val)
+        I_strncpyz(obj->string, val, 1024);
     else
-        v15 = 0;
-    *((unsigned int *)v5 + 282) = v15;
-    if (v13 != v15)
-        v5[281] = *(float *)&cgArray[0].time;
-    v16 = Info_ValueForKey(ConfigString, "icon");
-    if (*v16)
-        *((unsigned int *)v5 + 283) = atol(v16);
+        obj->string[0] = 0;
+    for (i = 0; i < 8; ++i)
+    {
+        snprintf(key, ARRAYSIZE(key), "org%d", i);
+        val = Info_ValueForKey(ConfigString, key);
+        obj->origin[i][0] = 0.0f;
+        obj->origin[i][1] = 0.0f;
+        obj->origin[i][2] = 0.0f;
+        if (*val)
+            sscanf(val, "%f %f %f", &obj->origin[i][0], &obj->origin[i][1], &obj->origin[i][2]);
+    }
+    oldRingToggle = obj->ringToggle;
+    val = Info_ValueForKey(ConfigString, "ring");
+    obj->ringToggle = *val ? atol(val) : 0;
+    if (oldRingToggle != obj->ringToggle)
+        obj->ringTime = cgArray[0].time;
+    val = Info_ValueForKey(ConfigString, "icon");
+    if (*val)
+        obj->icon = atol(val);
     else
-        v5[283] = 0.0;
+        obj->icon = 0;
 }
 

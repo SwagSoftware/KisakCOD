@@ -64,10 +64,7 @@ void __cdecl CL_GetScreenDimensions(int *width, int *height, float *aspect)
 
 float __cdecl CL_GetScreenAspectRatioDisplayPixel()
 {
-    double aspectRatioDisplayPixel; // fp1
-
-    aspectRatioDisplayPixel = cls.vidConfig.aspectRatioDisplayPixel;
-    return *((float *)&aspectRatioDisplayPixel + 1);
+    return cls.vidConfig.aspectRatioDisplayPixel;
 }
 
 int __cdecl CL_GetUserCmd(int localClientNum, int cmdNumber, usercmd_s *ucmd)

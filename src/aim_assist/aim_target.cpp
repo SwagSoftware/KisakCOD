@@ -158,22 +158,20 @@ void __cdecl AimTarget_GetTargetBounds(const gentity_s *targetEnt, float *mins, 
 
 float __cdecl AimTarget_GetTargetRadius(const gentity_s *targetEnt)
 {
-    double value; // fp1
-    float v4[4]; // [sp+50h] [-30h] BYREF
-    float v5[4]; // [sp+60h] [-20h] BYREF
+    float maxs[3]; // [sp+50h] [-30h] BYREF
+    float mins[3]; // [sp+60h] [-20h] BYREF
 
     iassert(targetEnt);
 
     if (targetEnt->s.eType == ET_ACTOR)
     {
-        value = aim_target_sentient_radius->current.value;
+        return aim_target_sentient_radius->current.value;
     }
     else
     {
-        AimTarget_GetTargetBounds(targetEnt, v5, v4);
-        value = RadiusFromBounds(v5, v4);
+        AimTarget_GetTargetBounds(targetEnt, mins, maxs);
+        return RadiusFromBounds(mins, maxs);
     }
-    return *((float *)&value + 1);
 }
 
 void __cdecl AimTarget_GetTargetCenter(const gentity_s *targetEnt, float *center)

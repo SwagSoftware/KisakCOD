@@ -556,16 +556,16 @@ void __cdecl Actor_GetBodyPlantAngles(
     traceEnd[2] = (float)v15 - (float)30.0;
     YawVectors(fYaw, forward, right);
     v16 = Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, forward, pfPitch);
-    if (pfHeight)
+    if (pfRoll)
     {
         if (fabsf(*pfPitch) >= 30.0)
-            *pfHeight = 0.0;
+            *pfRoll = 0.0;
         else
-            v16 = (float)((float)(Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, right, pfHeight)
+            v16 = (float)((float)(Actor_SetBodyPlantAngle((int)iEntNum, iClipMask, vOrigin, vOrigin, right, pfRoll)
                 + (float)v16)
                 * (float)0.5);
     }
-    if (pfRoll)
+    if (pfHeight)
     {
         v17 = (float)((float)v16 - vOrigin[2]);
         if (v17 < 0.0)
@@ -581,7 +581,7 @@ void __cdecl Actor_GetBodyPlantAngles(
             if (G_TraceCapsuleComplete(traceStart, actorMins, actorMaxs, traceEnd, (int)iEntNum, iClipMask))
                 v17 = 0.0;
         }
-        *pfRoll = v17;
+        *pfHeight = v17;
     }
 }
 

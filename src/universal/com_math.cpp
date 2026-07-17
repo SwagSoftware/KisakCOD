@@ -1782,10 +1782,8 @@ float AngleNormalize180(float angle)
 
 float AngleSubtract(float a1, float a2)
 {
-    float delta = fmodf(a1 - a2, 360.0f);
-    if (delta < 0.0f)
-        delta += 360.0f;
-    return delta;
+    float scaled = (a1 - a2) * 0.0027777778f;
+    return (scaled - floorf(scaled + 0.5f)) * 360.0f;
 }
 
 float __cdecl RadiusFromBounds(const float *mins, const float *maxs)
