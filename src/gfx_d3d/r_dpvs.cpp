@@ -954,14 +954,10 @@ int __cdecl R_DrawBModel(BModelDrawInfo *bmodelInfo, const GfxBrushModel *bmodel
 void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
 {
     DynEntityPose *dynEntPose; // [esp+38h] [ebp-38h]
-    DynEntityPose *dynEntPosea; // [esp+38h] [ebp-38h]
     GfxSceneDynBrush *sceneDynBrush; // [esp+3Ch] [ebp-34h]
     uint32_t dynEntIndex; // [esp+40h] [ebp-30h]
-    uint32_t dynEntIndexa; // [esp+40h] [ebp-30h]
     uint32_t dynEntCount; // [esp+44h] [ebp-2Ch]
-    uint32_t dynEntCounta; // [esp+44h] [ebp-2Ch]
     const DynEntityDef *dynEntDef; // [esp+48h] [ebp-28h]
-    const DynEntityDef *dynEntDefa; // [esp+48h] [ebp-28h]
     uint8_t *dynEntVisData[3]; // [esp+54h] [ebp-1Ch]
     GfxSceneDynModel *sceneDynModel; // [esp+60h] [ebp-10h]
     uint32_t viewIndex; // [esp+64h] [ebp-Ch]
@@ -1000,30 +996,30 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
         scene.sceneDynModelCount = 0;
     for (viewIndex = 0; viewIndex < 3; ++viewIndex)
         dynEntVisData[viewIndex] = rgp.world->dpvsDyn.dynEntVisData[1][viewIndex];
-    dynEntCounta = rgp.world->dpvsDyn.dynEntClientCount[1];
-    for (dynEntIndexa = 0; dynEntIndexa < dynEntCounta; ++dynEntIndexa)
+    dynEntCount = rgp.world->dpvsDyn.dynEntClientCount[1];
+    for (dynEntIndex = 0; dynEntIndex < dynEntCount; ++dynEntIndex)
     {
-        visData = dynEntVisData[2][dynEntIndexa] | dynEntVisData[1][dynEntIndexa] | dynEntVisData[0][dynEntIndexa];
+        visData = dynEntVisData[2][dynEntIndex] | dynEntVisData[1][dynEntIndex] | dynEntVisData[0][dynEntIndex];
         if ((visData & 1) != 0)
         {
-            dynEntPosea = DynEnt_GetClientPose(dynEntIndexa, DYNENT_DRAW_BRUSH);
-            dynEntDefa = DynEnt_GetEntityDef(dynEntIndexa, DYNENT_DRAW_BRUSH);
+            dynEntPose = DynEnt_GetClientPose(dynEntIndex, DYNENT_DRAW_BRUSH);
+            dynEntDef = DynEnt_GetEntityDef(dynEntIndex, DYNENT_DRAW_BRUSH);
             iassert( !dynEntDef->xModel );
             iassert( dynEntDef->brushModel );
-            bmodel = R_GetBrushModel(dynEntDefa->brushModel);
+            bmodel = R_GetBrushModel(dynEntDef->brushModel);
             if (bmodel->surfaceCount)
             {
                 sceneDynBrush = &rgp.world->sceneDynBrush[scene.sceneDynBrushCount];
-                if (R_DrawBModel((BModelDrawInfo *)sceneDynBrush, bmodel, &dynEntPosea->pose))
+                if (R_DrawBModel((BModelDrawInfo *)sceneDynBrush, bmodel, &dynEntPose->pose))
                 {
-                    sceneDynBrush->dynEntId = dynEntIndexa;
+                    sceneDynBrush->dynEntId = dynEntIndex;
                     ++scene.sceneDynBrushCount;
                 }
                 else
                 {
-                    dynEntVisData[0][dynEntIndexa] = 0;
-                    dynEntVisData[1][dynEntIndexa] = 0;
-                    dynEntVisData[2][dynEntIndexa] = 0;
+                    dynEntVisData[0][dynEntIndex] = 0;
+                    dynEntVisData[1][dynEntIndex] = 0;
+                    dynEntVisData[2][dynEntIndex] = 0;
                 }
             }
         }

@@ -1391,7 +1391,9 @@ void __cdecl BG_AddPredictableEventToPlayerstate(entity_event_t newEvent, uint32
     if (newEvent)
     {
         iassert(newEvent < 0x100);
+#ifdef KISAK_MP
         iassert(eventParm <= EVENT_PARM_MAX);
+#endif
 
         if (Dvar_GetBool("showevents"))
             Com_Printf(
@@ -1402,8 +1404,13 @@ void __cdecl BG_AddPredictableEventToPlayerstate(entity_event_t newEvent, uint32
                 eventnames[newEvent],
                 eventParm);
         ps->events[ps->eventSequence & 3] = (uint8_t)newEvent;
+#ifdef KISAK_MP
         ps->eventParms[ps->eventSequence & 3] = (uint8_t)eventParm;
         ps->eventSequence = (uint8_t)(ps->eventSequence + 1);
+#elif KISAK_SP
+        ps->eventParms[ps->eventSequence & 3] = eventParm;
+        ps->eventSequence = ps->eventSequence + 1;
+#endif
     }
 }
 
@@ -1419,6 +1426,7 @@ void __cdecl BG_PlayerStateToEntityState(playerState_s *ps, entityState_s *s, in
 
 void __cdecl BG_PlayerToEntityEventParm(playerState_s *ps, entityState_s *s)
 {
+#ifdef KISAK_MP
     int32_t v2; // [esp+4h] [ebp-Ch]
     int32_t entityEventSequence; // [esp+8h] [ebp-8h]
     int32_t seq; // [esp+Ch] [ebp-4h]
@@ -1445,6 +1453,18 @@ void __cdecl BG_PlayerToEntityEventParm(playerState_s *ps, entityState_s *s)
     }
 
     iassert(s->eventParm <= EVENT_PARM_MAX);
+#elif KISAK_SP
+    if (ps->entityEventSequence - ps->eventSequence >= 0)
+    {
+        s->eventParm = 0;
+    }
+    else
+    {
+        if (ps->eventSequence - ps->entityEventSequence > 4)
+            ps->entityEventSequence = ps->eventSequence - 4;
+        s->eventParm = ps->eventParms[ps->entityEventSequence++ & 3];
+    }
+#endif
 }
 
 void __cdecl BG_PlayerToEntityProcessEvents(playerState_s *ps, entityState_s *s, uint8_t handler)
@@ -1476,8 +1496,13 @@ void __cdecl BG_PlayerToEntityProcessEvents(playerState_s *ps, entityState_s *s,
             if (singleClientEvents[ja] < 0)
             {
                 s->events[s->eventSequence & 3] = event;
+#ifdef KISAK_MP
                 s->eventParms[s->eventSequence & 3] = LOBYTE(ps->eventParms[i & 3]);
                 s->eventSequence = (uint8_t)(s->eventSequence + 1);
+#elif KISAK_SP
+                s->eventParms[s->eventSequence & 3] = ps->eventParms[i & 3];
+                s->eventSequence = s->eventSequence + 1;
+#endif
             }
         }
     }
