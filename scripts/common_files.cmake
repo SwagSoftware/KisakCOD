@@ -576,6 +576,8 @@ set(WIN32
 	
     "${SRC_DIR}/win32/win_steam.cpp"
     "${SRC_DIR}/win32/win_steam.h"
+
+    "${SRC_DIR}/win32/kisakcod.rc"
 )
 
 set(XANIM
