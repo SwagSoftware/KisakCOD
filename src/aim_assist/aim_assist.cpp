@@ -820,7 +820,7 @@ uint32_t __cdecl AimAssist_GetWeaponIndex(int32_t localClientNum, const playerSt
     if ((ps->eFlags & 0x300) != 0)
     {
         iassert(ps->viewlocked_entNum != ENTITYNUM_NONE);
-        iassert(((ps->viewlocked_entNum >= 0) && (ps->viewlocked_entNum < (1 << 10))));
+        iassert((ps->viewlocked_entNum >= 0) && (ps->viewlocked_entNum < MAX_GENTITIES));
         weapIndex = CG_GetEntity(localClientNum, ps->viewlocked_entNum)->nextState.weapon;
     }
     else
