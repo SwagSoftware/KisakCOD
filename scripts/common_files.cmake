@@ -469,7 +469,8 @@ set(SOUND
     "${SRC_DIR}/sound/snd_driver.cpp"
     "${SRC_DIR}/sound/snd_driver_load_obj.cpp"
     "${SRC_DIR}/sound/snd_local.h"
-    "${SRC_DIR}/sound/snd_mss.cpp"
+    #"${SRC_DIR}/sound/snd_mss.cpp"
+    "${SRC_DIR}/sound/snd_pa.cpp"
     "${SRC_DIR}/sound/snd_public.h"
     "${SRC_DIR}/sound/snd_utils.cpp"
 )
@@ -609,8 +610,17 @@ set(BINKLIB
     "${DEPS_DIR}/binklib/radbase.h"
 )
 
-set(MSSLIB
-    "${DEPS_DIR}/msslib/mss.h"
+# Miles Library
+#set(MSSLIB
+#    "${DEPS_DIR}/msslib/mss.h"
+#)
+
+# DR WAV for WAV decoding
+set(DR_LIBS
+    "${DEPS_DIR}/dr_libs/dr_wav.h"
+    "${DEPS_DIR}/dr_libs/dr_wav.c"
+    "${DEPS_DIR}/dr_libs/dr_mp3.h"
+    "${DEPS_DIR}/dr_libs/dr_mp3.c"
 )
 
 set(ODE
