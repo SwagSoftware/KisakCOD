@@ -23,6 +23,7 @@
 #include "cg_snapshot.h"
 #include <client/cl_scrn.h>
 #include <universal/profile.h>
+#include <game/g_main.h>
 
 ClientViewParams clientViewParamsArray[1][1] = { { { 0.0, 0.0, 1.0, 1.0 } } };
 TestEffect s_testEffect[1];
@@ -505,6 +506,8 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     float *v27; // r11
     double v28; // fp0
     float vRight[6]; // [sp+58h] [-98h] BYREF
+    gentity_s *ent;
+    int linkedTo;
 
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
     {
@@ -517,7 +520,9 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         if (cgameGlob->predictedPlayerState.pm_type != PM_UFO && cgameGlob->predictedPlayerState.pm_type != PM_NOCLIP)
         {
             pm_type = cgameGlob->nextSnap->ps.pm_type;
-            if (pm_type >= PM_DEAD)
+			ent = &g_entities[localClientNum];
+			linkedTo = (ent->tagInfo != 0);
+            if (pm_type >= PM_DEAD && !linkedTo)
             {
                 cgameGlob->refdefViewAngles[0] = -15.0;
                 cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[1];
@@ -967,7 +972,7 @@ void __cdecl CG_CalcLinkedViewValues(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cgArray[0].predictedPlayerState.pm_type == 1
+    if ((cgArray[0].predictedPlayerState.pm_type == PM_NORMAL_LINKED || cgArray[0].predictedPlayerState.pm_type == PM_DEAD_LINKED)
         && (cgArray[0].predictedPlayerState.eFlags & 0x20300) == 0
         && (cgArray[0].predictedPlayerState.pm_flags & 0x1000000) == 0)
     {

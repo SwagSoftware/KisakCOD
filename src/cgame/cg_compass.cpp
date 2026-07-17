@@ -177,6 +177,22 @@ void __cdecl CG_CompassRegisterDvars()
         "The size of the friendly icon on the compass");
     ming.value.max = FLT_MAX;
     ming.value.min = 0.0f;
+#ifdef KISAK_SP
+    compassPlayerWidth = Dvar_RegisterFloat(
+        "compassPlayerWidth",
+        25.0f,
+        ming,
+        DVAR_ARCHIVE,
+        "The size of the player's icon on the compass");
+    minh.value.max = FLT_MAX;
+    minh.value.min = 0.0f;
+    compassPlayerHeight = Dvar_RegisterFloat(
+        "compassPlayerHeight",
+        25.0f,
+        minh,
+        DVAR_ARCHIVE,
+        "The size of the player's icon on the compass");
+#else
     compassPlayerWidth = Dvar_RegisterFloat(
         "compassPlayerWidth",
         18.75f,
@@ -191,6 +207,7 @@ void __cdecl CG_CompassRegisterDvars()
         minh,
         DVAR_ARCHIVE,
         "The size of the player's icon on the compass");
+#endif
     mini.value.max = FLT_MAX;
     mini.value.min = 0.0f;
     compassCoords = Dvar_RegisterVec3(
