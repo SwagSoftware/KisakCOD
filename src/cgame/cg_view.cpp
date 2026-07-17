@@ -1362,50 +1362,35 @@ void __cdecl CG_UpdateViewOffset(int localClientNum)
 
 void __cdecl UpdateTurretScopeZoom(cg_s *cgameGlob)
 {
-    unsigned int v2; // r3
-    int CurrentCmdNumber; // r3
-    int v4[4]; // r11
-    double value; // fp31
-    const dvar_s *v6; // r3
-    double v7; // fp0
-    double v8; // fp1
-    unsigned int v9; // r3
-    snd_alias_list_t *fireStopSoundPlayer; // r4
-    usercmd_s v11; // [sp+60h] [-60h] BYREF
+    usercmd_s usercmd; // [sp+60h] [-60h] BYREF
 
-    if (CG_PlayerUsingScopedTurret(cgameGlob->localClientNum))
+    if (!CG_PlayerUsingScopedTurret(cgameGlob->localClientNum))
+        return;
+
+    if (BG_GetWeaponDef(CG_PlayerTurretWeaponIdx(cgameGlob->localClientNum))->overlayInterface != WEAPOVERLAYINTERFACE_TURRETSCOPE)
+        return;
+
+    CL_GetUserCmd(cgameGlob->localClientNum, CL_GetCurrentCmdNumber(cgameGlob->localClientNum), &usercmd);
+
+    float oldZoom = turretScopeZoom->current.value;
+
+    Dvar_SetFloat(turretScopeZoom,
+        oldZoom
+        + ((float)cgameGlob->frametime * 0.001f)
+        * ((float)usercmd.forwardmove * -(1.0f/127.0f))
+        * turretScopeZoomRate->current.value);
+
+    float newZoom = turretScopeZoom->current.value;
+    if (newZoom < turretScopeZoomMin->current.value)
+        Dvar_SetFloat(turretScopeZoom, turretScopeZoomMin->current.value);
+    else if (newZoom > turretScopeZoomMax->current.value)
+        Dvar_SetFloat(turretScopeZoom, turretScopeZoomMax->current.value);
+
+    if (fabsf(turretScopeZoom->current.value - oldZoom) > 0.0f)
     {
-        v2 = CG_PlayerTurretWeaponIdx(cgameGlob->localClientNum);
-        if (BG_GetWeaponDef(v2)->overlayInterface == WEAPOVERLAYINTERFACE_TURRETSCOPE)
-        {
-            CurrentCmdNumber = CL_GetCurrentCmdNumber(cgameGlob->localClientNum);
-            CL_GetUserCmd(cgameGlob->localClientNum, CurrentCmdNumber, &v11);
-            v4[1] = (unsigned __int8)v11.forwardmove;
-            v4[2] = cgameGlob->frametime;
-            value = turretScopeZoom->current.value;
-            v4[3] = v11.forwardmove;
-            Dvar_SetFloat(
-                turretScopeZoom,
-                (float)((float)((float)((float)((float)*(__int64 *)&v4[1] * (float)0.001)
-                    * (float)((float)*(__int64 *)&v4[2] * (float)-0.0078740157))
-                    * turretScopeZoomRate->current.value)
-                    + turretScopeZoom->current.value));
-            v6 = turretScopeZoom;
-            v7 = turretScopeZoom->current.value;
-            v8 = turretScopeZoomMin->current.value;
-            if (v7 < v8 || (v8 = turretScopeZoomMax->current.value, v7 > v8))
-            {
-                Dvar_SetFloat(turretScopeZoom, v8);
-                v6 = turretScopeZoom;
-            }
-            if (fabsf((float)(v6->current.value - (float)value)) > 0.0f)
-            {
-                v9 = CG_PlayerTurretWeaponIdx(cgameGlob->localClientNum);
-                fireStopSoundPlayer = BG_GetWeaponDef(v9)->fireStopSoundPlayer;
-                if (fireStopSoundPlayer)
-                    CG_PlayClientSoundAlias(cgameGlob->localClientNum, fireStopSoundPlayer);
-            }
-        }
+        snd_alias_list_t *zoomSound = BG_GetWeaponDef(CG_PlayerTurretWeaponIdx(cgameGlob->localClientNum))->fireStopSoundPlayer;
+        if (zoomSound)
+            CG_PlayClientSoundAlias(cgameGlob->localClientNum, zoomSound);
     }
 }
 
