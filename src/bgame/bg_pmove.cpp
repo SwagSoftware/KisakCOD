@@ -463,22 +463,26 @@ entity_event_t PM_FootstepType(playerState_s *ps, pml_t *pml)
     if ((ps->pm_flags & PMF_PRONE) != 0)
         return EV_FOOTSTEP_PRONE;
 
-#ifdef KISAK_SP
-	if ((ps->pm_flags & PMF_DUCKED) != 0)
-		return EV_FOOTSTEP_WALK;
-#endif
-
     if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0)
         return EV_FOOTSTEP_WALK;
 
+#ifdef KISAK_SP
+    if (ps->sprintState.lastSprintStart
+        && ps->sprintState.lastSprintStart > ps->sprintState.lastSprintEnd)
+        return EV_FOOTSTEP_SPRINT;
+#else
     if (PM_IsSprinting(ps))
         return EV_FOOTSTEP_SPRINT;
+#endif
 
     return EV_FOOTSTEP_RUN;
 }
 
 bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
 {
+#ifdef KISAK_SP
+    return true;
+#else
     int32_t iStance; // [esp+8h] [ebp-Ch]
     int32_t bWalking; // [esp+Ch] [ebp-8h]
     playerState_s *ps; // [esp+10h] [ebp-4h]
@@ -490,13 +494,11 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
     bWalking = ps->pm_flags & PMF_WALKING;
 
     iStance = PM_GetEffectiveStance(ps);
-#ifdef KISAK_MP
     if (iStance == 1)
         return false;
 
     if (iStance == 2)
         return false;
-#endif
 
     if ((ps->pm_flags & PMF_BACKWARDS_RUN) != 0)
     {
@@ -509,6 +511,7 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
     }
 
     return false;
+#endif
 }
 
 void __cdecl PM_UpdateLean(
@@ -3108,50 +3111,26 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 
 #ifdef KISAK_MP
     pm->proneChange = 0;
-#elif KISAK_SP
-    gentity_s *ent;
-    int linkedTo;
 
-	ent = &level.gentities[ps->clientNum];
-	linkedTo = (ent->tagInfo != 0);
-#endif
-
-#ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
-#elif KISAK_SP
-    if (ps->pm_type >= PM_DEAD && !linkedTo)
-#endif
     {
+        pm->mins[0] = -8.0;
+        pm->mins[1] = -8.0;
+        pm->mins[2] = -8.0;
+        pm->maxs[0] = 8.0;
+        pm->maxs[1] = 8.0;
+        pm->maxs[2] = 16.0;
         ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
         if ((pm->cmd.buttons & 0x100) != 0)
         {
             pm->cmd.buttons &= ~0x100u;
             BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
         }
-
-        if (ps->viewHeightCurrent <= 8.0f)
-        {
-            pm->mins[0] = -8.0;
-            pm->mins[1] = -8.0;
-            pm->mins[2] = -8.0;
-            pm->maxs[0] = 8.0;
-            pm->maxs[1] = 8.0;
-            pm->maxs[2] = 16.0;
-            ps->viewHeightTarget = 0;
-        }
-        else
-        {
-            pm->mins[0] = -15.0;
-            pm->mins[1] = -15.0;
-            pm->mins[2] = 0.0;
-            pm->maxs[0] = 15.0;
-            pm->maxs[1] = 15.0;
-            pm->maxs[2] = 70.0;
-            ps->viewHeightTarget = 8;
-        }
-        PM_ViewHeightAdjust(pm, pml);
+        ps->viewHeightTarget = 0;
+        ps->viewHeightCurrent = 0.0;
     }
     else
+#endif
     {
         bWasProne = (ps->pm_flags & PMF_PRONE) != 0;
         bWasStanding = (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0;
@@ -3161,6 +3140,14 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 15.0;
         pm->maxs[1] = 15.0;
         pm->maxs[2] = 70.0;
+#ifdef KISAK_SP
+        if (ps->pm_type == PM_DEAD)
+        {
+            ps->viewHeightTarget = 8;
+            PM_ViewHeightAdjust(pm, pml);
+            return;
+        }
+#endif
 #ifdef KISAK_MP
         if (ps->pm_type == PM_DEAD)
         {

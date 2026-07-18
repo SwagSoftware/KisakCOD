@@ -506,8 +506,6 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     float *v27; // r11
     double v28; // fp0
     float vRight[6]; // [sp+58h] [-98h] BYREF
-    gentity_s *ent;
-    int linkedTo;
 
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
     {
@@ -520,15 +518,12 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         if (cgameGlob->predictedPlayerState.pm_type != PM_UFO && cgameGlob->predictedPlayerState.pm_type != PM_NOCLIP)
         {
             pm_type = cgameGlob->nextSnap->ps.pm_type;
-			ent = &g_entities[localClientNum];
-			linkedTo = (ent->tagInfo != 0);
-            if (pm_type >= PM_DEAD && !linkedTo)
+
+            if (pm_type == PM_DEAD)
             {
                 cgameGlob->refdefViewAngles[0] = -15.0;
                 cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[1];
                 cgameGlob->refdefViewAngles[2] = 40.0;
-				if (cgameGlob->refdef.vieworg[2] < (float)(cgameGlob->predictedPlayerState.origin[2] + 8.0f))
-					cgameGlob->refdef.vieworg[2] = cgameGlob->predictedPlayerState.origin[2] + 8.0f;
                 return;
             }
             if (pm_type != PM_DEAD_LINKED)
@@ -972,7 +967,8 @@ void __cdecl CG_CalcLinkedViewValues(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((cgArray[0].predictedPlayerState.pm_type == PM_NORMAL_LINKED || cgArray[0].predictedPlayerState.pm_type == PM_DEAD_LINKED)
+
+    if (cgArray[0].predictedPlayerState.pm_type == PM_NORMAL_LINKED
         && (cgArray[0].predictedPlayerState.eFlags & 0x20300) == 0
         && (cgArray[0].predictedPlayerState.pm_flags & 0x1000000) == 0)
     {
