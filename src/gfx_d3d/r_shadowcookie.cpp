@@ -208,12 +208,7 @@ void __cdecl R_GenerateShadowCookies(
 
         R_PopulateCandidates(viewParmsDraw, &candidates[0]);
 
-        //std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
-        //    candidates,
-        //    &cookieIndex,
-        //    24,
-        //    R_ShadowCandidatePred);
-        std::sort(&candidates[0], &candidates[23], R_ShadowCandidatePred);
+        std::sort(candidates, candidates + 24, R_ShadowCandidatePred);
 
         R_AddCasters(localClientNum, viewParmsDraw, candidates, shadowCookieList);
     }

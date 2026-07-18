@@ -1053,7 +1053,7 @@ uint16_t __cdecl FX_FindModelHead(FxMarksSystem *marksSystem, uint16_t modelInde
     return -1;
 }
 
-int32_t __cdecl FX_CompareMarkTris(const FxMarkTri &tri0, const FxMarkTri &tri1)
+bool __cdecl FX_CompareMarkTris(const FxMarkTri &tri0, const FxMarkTri &tri1)
 {
     int32_t contextCompareResult; // [esp+10h] [ebp-4h]
 

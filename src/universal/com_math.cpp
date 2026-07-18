@@ -1184,70 +1184,72 @@ void __cdecl MatrixMultiply44(const mat4x4 &in1, const mat4x4 &in2, mat4x4 &out)
     iassert(&in1 != &out);
     iassert(&in2 != &out);
 
-    (out)[0][0] = (in1)[0][0] * (in2)[0][0]
-        + (in1)[0][1] * (in2)[1][0]
-        + (in1)[0][2] * (in2)[2][0]
-        + (in1)[0][3] * (in2)[3][0];
-    (out)[0][1] = (in1)[0][0] * (in2)[0][1]
-        + (in1)[0][1] * (in2)[1][1]
-        + (in1)[0][2] * (in2)[2][1]
-        + (in1)[0][3] * (in2)[3][1];
-    (out)[0][2] = (in1)[0][0] * (in2)[0][2]
-        + (in1)[0][1] * (in2)[1][2]
-        + (in1)[0][2] * (in2)[2][2]
-        + (in1)[0][3] * (in2)[3][2];
-    (out)[0][3] = (in1)[0][0] * (in2)[0][3]
-        + (in1)[0][1] * (in2)[1][3]
-        + (in1)[0][2] * (in2)[2][3]
-        + (in1)[0][3] * (in2)[3][3];
-    (out)[1][0] = (in1)[1][0] * (in2)[0][0]
-        + (in1)[1][1] * (in2)[1][0]
-        + (in1)[1][2] * (in2)[2][0]
-        + (in1)[1][3] * (in2)[3][0];
-    (out)[1][1] = (in1)[1][0] * (in2)[0][1]
-        + (in1)[1][1] * (in2)[1][1]
-        + (in1)[1][2] * (in2)[2][1]
-        + (in1)[1][3] * (in2)[3][1];
-    (out)[1][2] = (in1)[1][0] * (in2)[0][2]
-        + (in1)[1][1] * (in2)[1][2]
-        + (in1)[1][2] * (in2)[2][2]
-        + (in1)[1][3] * (in2)[3][2];
-    (out)[1][3] = (in1)[1][0] * (in2)[0][3]
-        + (in1)[1][1] * (in2)[1][3]
-        + (in1)[1][2] * (in2)[2][3]
-        + (in1)[1][3] * (in2)[3][3];
-    (out)[2][0] = (in1)[2][0] * (in2)[0][0]
-        + (in1)[2][1] * (in2)[1][0]
-        + (in1)[2][2] * (in2)[2][0]
-        + (in1)[2][3] * (in2)[3][0];
-    (out)[2][1] = (in1)[2][0] * (in2)[0][1]
-        + (in1)[2][1] * (in2)[1][1]
-        + (in1)[2][2] * (in2)[2][1]
-        + (in1)[2][3] * (in2)[3][1];
-    (out)[2][2] = (in1)[2][0] * (in2)[0][2]
-        + (in1)[2][1] * (in2)[1][2]
-        + (in1)[2][2] * (in2)[2][2]
-        + (in1)[2][3] * (in2)[3][2];
-    (out)[2][3] = (in1)[2][0] * (in2)[0][3]
-        + (in1)[2][1] * (in2)[1][3]
-        + (in1)[2][2] * (in2)[2][3]
-        + (in1)[2][3] * (in2)[3][3];
-    (out)[3][0] = (in1)[3][0] * (in2)[0][0]
-        + (in1)[3][1] * (in2)[1][0]
-        + (in1)[3][2] * (in2)[2][0]
-        + (in1)[3][3] * (in2)[3][0];
-    (out)[3][1] = (in1)[3][0] * (in2)[0][1]
-        + (in1)[3][1] * (in2)[1][1]
-        + (in1)[3][2] * (in2)[2][1]
-        + (in1)[3][3] * (in2)[3][1];
-    (out)[3][2] = (in1)[3][0] * (in2)[0][2]
-        + (in1)[3][1] * (in2)[1][2]
-        + (in1)[3][2] * (in2)[2][2]
-        + (in1)[3][3] * (in2)[3][2];
-    (out)[3][3] = (in1)[3][0] * (in2)[0][3]
-        + (in1)[3][1] * (in2)[1][3]
-        + (in1)[3][2] * (in2)[2][3]
-        + (in1)[3][3] * (in2)[3][3];
+    // CoD3MP keeps each complete four-term dot product on the x87 stack and
+    // rounds only when the matrix element is stored.
+    (out)[0][0] = (float)((double)(in1)[0][0] * (double)(in2)[0][0]
+        + (double)(in1)[0][1] * (double)(in2)[1][0]
+        + (double)(in1)[0][2] * (double)(in2)[2][0]
+        + (double)(in1)[0][3] * (double)(in2)[3][0]);
+    (out)[0][1] = (float)((double)(in1)[0][0] * (double)(in2)[0][1]
+        + (double)(in1)[0][1] * (double)(in2)[1][1]
+        + (double)(in1)[0][2] * (double)(in2)[2][1]
+        + (double)(in1)[0][3] * (double)(in2)[3][1]);
+    (out)[0][2] = (float)((double)(in1)[0][0] * (double)(in2)[0][2]
+        + (double)(in1)[0][1] * (double)(in2)[1][2]
+        + (double)(in1)[0][2] * (double)(in2)[2][2]
+        + (double)(in1)[0][3] * (double)(in2)[3][2]);
+    (out)[0][3] = (float)((double)(in1)[0][0] * (double)(in2)[0][3]
+        + (double)(in1)[0][1] * (double)(in2)[1][3]
+        + (double)(in1)[0][2] * (double)(in2)[2][3]
+        + (double)(in1)[0][3] * (double)(in2)[3][3]);
+    (out)[1][0] = (float)((double)(in1)[1][0] * (double)(in2)[0][0]
+        + (double)(in1)[1][1] * (double)(in2)[1][0]
+        + (double)(in1)[1][2] * (double)(in2)[2][0]
+        + (double)(in1)[1][3] * (double)(in2)[3][0]);
+    (out)[1][1] = (float)((double)(in1)[1][0] * (double)(in2)[0][1]
+        + (double)(in1)[1][1] * (double)(in2)[1][1]
+        + (double)(in1)[1][2] * (double)(in2)[2][1]
+        + (double)(in1)[1][3] * (double)(in2)[3][1]);
+    (out)[1][2] = (float)((double)(in1)[1][0] * (double)(in2)[0][2]
+        + (double)(in1)[1][1] * (double)(in2)[1][2]
+        + (double)(in1)[1][2] * (double)(in2)[2][2]
+        + (double)(in1)[1][3] * (double)(in2)[3][2]);
+    (out)[1][3] = (float)((double)(in1)[1][0] * (double)(in2)[0][3]
+        + (double)(in1)[1][1] * (double)(in2)[1][3]
+        + (double)(in1)[1][2] * (double)(in2)[2][3]
+        + (double)(in1)[1][3] * (double)(in2)[3][3]);
+    (out)[2][0] = (float)((double)(in1)[2][0] * (double)(in2)[0][0]
+        + (double)(in1)[2][1] * (double)(in2)[1][0]
+        + (double)(in1)[2][2] * (double)(in2)[2][0]
+        + (double)(in1)[2][3] * (double)(in2)[3][0]);
+    (out)[2][1] = (float)((double)(in1)[2][0] * (double)(in2)[0][1]
+        + (double)(in1)[2][1] * (double)(in2)[1][1]
+        + (double)(in1)[2][2] * (double)(in2)[2][1]
+        + (double)(in1)[2][3] * (double)(in2)[3][1]);
+    (out)[2][2] = (float)((double)(in1)[2][0] * (double)(in2)[0][2]
+        + (double)(in1)[2][1] * (double)(in2)[1][2]
+        + (double)(in1)[2][2] * (double)(in2)[2][2]
+        + (double)(in1)[2][3] * (double)(in2)[3][2]);
+    (out)[2][3] = (float)((double)(in1)[2][0] * (double)(in2)[0][3]
+        + (double)(in1)[2][1] * (double)(in2)[1][3]
+        + (double)(in1)[2][2] * (double)(in2)[2][3]
+        + (double)(in1)[2][3] * (double)(in2)[3][3]);
+    (out)[3][0] = (float)((double)(in1)[3][0] * (double)(in2)[0][0]
+        + (double)(in1)[3][1] * (double)(in2)[1][0]
+        + (double)(in1)[3][2] * (double)(in2)[2][0]
+        + (double)(in1)[3][3] * (double)(in2)[3][0]);
+    (out)[3][1] = (float)((double)(in1)[3][0] * (double)(in2)[0][1]
+        + (double)(in1)[3][1] * (double)(in2)[1][1]
+        + (double)(in1)[3][2] * (double)(in2)[2][1]
+        + (double)(in1)[3][3] * (double)(in2)[3][1]);
+    (out)[3][2] = (float)((double)(in1)[3][0] * (double)(in2)[0][2]
+        + (double)(in1)[3][1] * (double)(in2)[1][2]
+        + (double)(in1)[3][2] * (double)(in2)[2][2]
+        + (double)(in1)[3][3] * (double)(in2)[3][2]);
+    (out)[3][3] = (float)((double)(in1)[3][0] * (double)(in2)[0][3]
+        + (double)(in1)[3][1] * (double)(in2)[1][3]
+        + (double)(in1)[3][2] * (double)(in2)[2][3]
+        + (double)(in1)[3][3] * (double)(in2)[3][3]);
 }
 
 void __cdecl MatrixTranspose(const mat3x3& in, mat3x3& out)
@@ -1313,20 +1315,23 @@ void __cdecl MatrixInverseOrthogonal43(const mat4x3& in, mat4x3& out)
 
 void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
 {
-    float src[16]; // [esp+0h] [ebp-78h]
-    float tmp[12]; // [esp+44h] [ebp-34h]
-
-    float det; // [esp+40h] [ebp-38h]
+    // Camera and shadow view-projection matrices are especially sensitive to
+    // rounding in the cofactor/determinant chain. Keep the complete inverse in
+    // double and round once when the destination matrix is written.
+    double src[16];
+    double tmp[12];
+    double inverse[16];
+    double det;
     int i; // [esp+74h] [ebp-4h]
 
     iassert(mat != dst);
 
     for (i = 0; i < 4; ++i)
     {
-        src[i] = (mat)[i][0];
-        src[i + 4] = (mat)[i][1];
-        src[i + 8] = (mat)[i][2];
-        src[i + 12] = (mat)[i][3];
+        src[i] = (double)(mat)[i][0];
+        src[i + 4] = (double)(mat)[i][1];
+        src[i + 8] = (double)(mat)[i][2];
+        src[i + 12] = (double)(mat)[i][3];
     }
     tmp[0] = src[10] * src[15];
     tmp[1] = src[11] * src[14];
@@ -1340,22 +1345,22 @@ void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
     tmp[9] = src[10] * src[12];
     tmp[10] = src[8] * src[13];
     tmp[11] = src[9] * src[12];
-    (dst)[0][0] = tmp[0] * src[5] + tmp[3] * src[6] + tmp[4] * src[7];
-    (dst)[0][0] = (dst)[0][0] - (tmp[1] * src[5] + tmp[2] * src[6] + tmp[5] * src[7]);
-    (dst)[0][1] = tmp[1] * src[4] + tmp[6] * src[6] + tmp[9] * src[7];
-    (dst)[0][1] = (dst)[0][1] - (tmp[0] * src[4] + tmp[7] * src[6] + tmp[8] * src[7]);
-    (dst)[0][2] = tmp[2] * src[4] + tmp[7] * src[5] + tmp[10] * src[7];
-    (dst)[0][2] = (dst)[0][2] - (tmp[3] * src[4] + tmp[6] * src[5] + tmp[11] * src[7]);
-    (dst)[0][3] = tmp[5] * src[4] + tmp[8] * src[5] + tmp[11] * src[6];
-    (dst)[0][3] = (dst)[0][3] - (tmp[4] * src[4] + tmp[9] * src[5] + tmp[10] * src[6]);
-    (dst)[1][0] = tmp[1] * src[1] + tmp[2] * src[2] + tmp[5] * src[3];
-    (dst)[1][0] = (dst)[1][0] - (tmp[0] * src[1] + tmp[3] * src[2] + tmp[4] * src[3]);
-    (dst)[1][1] = tmp[0] * src[0] + tmp[7] * src[2] + tmp[8] * src[3];
-    (dst)[1][1] = (dst)[1][1] - (tmp[1] * src[0] + tmp[6] * src[2] + tmp[9] * src[3]);
-    (dst)[1][2] = tmp[3] * src[0] + tmp[6] * src[1] + tmp[11] * src[3];
-    (dst)[1][2] = (dst)[1][2] - (tmp[2] * src[0] + tmp[7] * src[1] + tmp[10] * src[3]);
-    (dst)[1][3] = tmp[4] * src[0] + tmp[9] * src[1] + tmp[10] * src[2];
-    (dst)[1][3] = (dst)[1][3] - (tmp[5] * src[0] + tmp[8] * src[1] + tmp[11] * src[2]);
+    inverse[0] = tmp[0] * src[5] + tmp[3] * src[6] + tmp[4] * src[7]
+        - (tmp[1] * src[5] + tmp[2] * src[6] + tmp[5] * src[7]);
+    inverse[1] = tmp[1] * src[4] + tmp[6] * src[6] + tmp[9] * src[7]
+        - (tmp[0] * src[4] + tmp[7] * src[6] + tmp[8] * src[7]);
+    inverse[2] = tmp[2] * src[4] + tmp[7] * src[5] + tmp[10] * src[7]
+        - (tmp[3] * src[4] + tmp[6] * src[5] + tmp[11] * src[7]);
+    inverse[3] = tmp[5] * src[4] + tmp[8] * src[5] + tmp[11] * src[6]
+        - (tmp[4] * src[4] + tmp[9] * src[5] + tmp[10] * src[6]);
+    inverse[4] = tmp[1] * src[1] + tmp[2] * src[2] + tmp[5] * src[3]
+        - (tmp[0] * src[1] + tmp[3] * src[2] + tmp[4] * src[3]);
+    inverse[5] = tmp[0] * src[0] + tmp[7] * src[2] + tmp[8] * src[3]
+        - (tmp[1] * src[0] + tmp[6] * src[2] + tmp[9] * src[3]);
+    inverse[6] = tmp[3] * src[0] + tmp[6] * src[1] + tmp[11] * src[3]
+        - (tmp[2] * src[0] + tmp[7] * src[1] + tmp[10] * src[3]);
+    inverse[7] = tmp[4] * src[0] + tmp[9] * src[1] + tmp[10] * src[2]
+        - (tmp[5] * src[0] + tmp[8] * src[1] + tmp[11] * src[2]);
     tmp[0] = src[2] * src[7];
     tmp[1] = src[3] * src[6];
     tmp[2] = src[1] * src[7];
@@ -1368,29 +1373,29 @@ void __cdecl MatrixInverse44(const mat4x4 &mat, mat4x4& dst)
     tmp[9] = src[2] * src[4];
     tmp[10] = src[0] * src[5];
     tmp[11] = src[1] * src[4];
-    (dst)[2][0] = tmp[0] * src[13] + tmp[3] * src[14] + tmp[4] * src[15];
-    (dst)[2][0] = (dst)[2][0] - (tmp[1] * src[13] + tmp[2] * src[14] + tmp[5] * src[15]);
-    (dst)[2][1] = tmp[1] * src[12] + tmp[6] * src[14] + tmp[9] * src[15];
-    (dst)[2][1] = (dst)[2][1] - (tmp[0] * src[12] + tmp[7] * src[14] + tmp[8] * src[15]);
-    (dst)[2][2] = tmp[2] * src[12] + tmp[7] * src[13] + tmp[10] * src[15];
-    (dst)[2][2] = (dst)[2][2] - (tmp[3] * src[12] + tmp[6] * src[13] + tmp[11] * src[15]);
-    (dst)[2][3] = tmp[5] * src[12] + tmp[8] * src[13] + tmp[11] * src[14];
-    (dst)[2][3] = (dst)[2][3] - (tmp[4] * src[12] + tmp[9] * src[13] + tmp[10] * src[14]);
-    (dst)[3][0] = tmp[2] * src[10] + tmp[5] * src[11] + tmp[1] * src[9];
-    (dst)[3][0] = (dst)[3][0] - (tmp[4] * src[11] + tmp[0] * src[9] + tmp[3] * src[10]);
-    (dst)[3][1] = tmp[8] * src[11] + tmp[0] * src[8] + tmp[7] * src[10];
-    (dst)[3][1] = (dst)[3][1] - (tmp[6] * src[10] + tmp[9] * src[11] + tmp[1] * src[8]);
-    (dst)[3][2] = tmp[6] * src[9] + tmp[11] * src[11] + tmp[3] * src[8];
-    (dst)[3][2] = (dst)[3][2] - (tmp[10] * src[11] + tmp[2] * src[8] + tmp[7] * src[9]);
-    (dst)[3][3] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9];
-    (dst)[3][3] = (dst)[3][3] - (tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8]);
-    det = src[0] * (dst)[0][0] + src[1] * (dst)[0][1] + src[2] * (dst)[0][2] + src[3] * (dst)[0][3];
-    
+    inverse[8] = tmp[0] * src[13] + tmp[3] * src[14] + tmp[4] * src[15]
+        - (tmp[1] * src[13] + tmp[2] * src[14] + tmp[5] * src[15]);
+    inverse[9] = tmp[1] * src[12] + tmp[6] * src[14] + tmp[9] * src[15]
+        - (tmp[0] * src[12] + tmp[7] * src[14] + tmp[8] * src[15]);
+    inverse[10] = tmp[2] * src[12] + tmp[7] * src[13] + tmp[10] * src[15]
+        - (tmp[3] * src[12] + tmp[6] * src[13] + tmp[11] * src[15]);
+    inverse[11] = tmp[5] * src[12] + tmp[8] * src[13] + tmp[11] * src[14]
+        - (tmp[4] * src[12] + tmp[9] * src[13] + tmp[10] * src[14]);
+    inverse[12] = tmp[2] * src[10] + tmp[5] * src[11] + tmp[1] * src[9]
+        - (tmp[4] * src[11] + tmp[0] * src[9] + tmp[3] * src[10]);
+    inverse[13] = tmp[8] * src[11] + tmp[0] * src[8] + tmp[7] * src[10]
+        - (tmp[6] * src[10] + tmp[9] * src[11] + tmp[1] * src[8]);
+    inverse[14] = tmp[6] * src[9] + tmp[11] * src[11] + tmp[3] * src[8]
+        - (tmp[10] * src[11] + tmp[2] * src[8] + tmp[7] * src[9]);
+    inverse[15] = tmp[10] * src[10] + tmp[4] * src[8] + tmp[9] * src[9]
+        - (tmp[8] * src[9] + tmp[11] * src[10] + tmp[5] * src[8]);
+    det = src[0] * inverse[0] + src[1] * inverse[1] + src[2] * inverse[2] + src[3] * inverse[3];
+
     iassert(det != 0.0);
 
     det = 1.0 / det;
     for (i = 0; i < 16; ++i)
-        (dst)[0][i] = (dst)[0][i] * det;
+        (dst)[i >> 2][i & 3] = (float)(inverse[i] * det);
 }
 
 void __cdecl MatrixTransformVector44(const vec4r vec, const mat4x4 &mat, vec4r out)
@@ -3184,11 +3189,11 @@ void __cdecl InfinitePerspectiveMatrix(float (*mtx)[4], float tanHalfFovX, float
 
     memset((uint8_t *)mtx, 0, sizeof(mat4x4));
 
-    (*mtx)[0] = MAX_11BIT_FLT / tanHalfFovX;
-    (*mtx)[5] = MAX_11BIT_FLT / tanHalfFovY;
+    (*mtx)[0] = (float)((double)MAX_11BIT_FLT / (double)tanHalfFovX);
+    (*mtx)[5] = (float)((double)MAX_11BIT_FLT / (double)tanHalfFovY);
     (*mtx)[10] = MAX_11BIT_FLT;
     (*mtx)[11] = 1.0f;
-    (*mtx)[14] = -zNear * MAX_11BIT_FLT;
+    (*mtx)[14] = (float)(-(double)zNear * (double)MAX_11BIT_FLT);
 }
 
 void __cdecl ClearBounds(float *mins, float *maxs)

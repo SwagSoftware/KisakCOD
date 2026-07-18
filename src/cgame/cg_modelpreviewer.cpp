@@ -525,8 +525,7 @@ bool __cdecl CG_ModPrvCompareString(const char *string1, const char *string2)
         ++string1;
         ++string2;
     } while (!v3);
-    //return _cntlzw(v3) == 0;
-    return v3 != 0;
+    return (int)v3 < 0;
 }
 
 void __cdecl CG_ModPrvGetAssetName(const XModel *header, unsigned int *data)
@@ -3446,12 +3445,10 @@ void CG_ModPrvEnumerateModels_FastFile()
             v1,
             0);
 
-        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-        //    (Material **)g_mdlprv.system.modelNames,
-        //    (Material **)&g_mdlprv.system.modelNames[g_mdlprv.system.modelCount],
-        //    (4 * g_mdlprv.system.modelCount) >> 2,
-        //    (bool(__cdecl *)(const Material *, const Material *))CG_ModPrvCompareString);
-        //std::sort(g_mdlprv.system.modelNames, &g_mdlprv.system.modelNames[g_mdlprv.system.modelCount], CG_ModPrvCompareString); // KISAKTODO: fix sorting of model names here, std::sort with raw pointers is annoying
+        std::sort(
+            g_mdlprv.system.modelNames,
+            g_mdlprv.system.modelNames + g_mdlprv.system.modelCount,
+            CG_ModPrvCompareString);
     }
 }
 
@@ -3486,14 +3483,10 @@ void CG_ModPrvEnumerateAnimations_FastFile()
             (void(__cdecl *)(XAssetHeader, void *))CG_ModPrvGetAssetName,
             v1,
             0);
-        //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-        //    (Material **)g_mdlprv.system.animNames,
-        //    (Material **)&g_mdlprv.system.animNames[g_mdlprv.system.animCount],
-        //    (4 * g_mdlprv.system.animCount) >> 2,
-        //    (bool(__cdecl *)(const Material *, const Material *))CG_ModPrvCompareString);
-
-        //std::sort(g_mdlprv.system.animNames, &g_mdlprv.system.animNames[g_mdlprv.system.animCount], CG_ModPrvCompareString); // KISAKTODO: fix sorting of model names here, std::sort with raw pointers is annoying
-
+        std::sort(
+            g_mdlprv.system.animNames,
+            g_mdlprv.system.animNames + g_mdlprv.system.animCount,
+            CG_ModPrvCompareString);
     }
 }
 

@@ -36,7 +36,7 @@ void R_SetDefaultLitTechTypes()
     gfxDrawMethod.litTechType[0][0] = TECHNIQUE_LIT_BEGIN;
     gfxDrawMethod.litTechType[0][1] = TECHNIQUE_LIT_SUN;
     gfxDrawMethod.litTechType[0][2] = TECHNIQUE_LIT_SPOT;
-    gfxDrawMethod.litTechType[0][2] = TECHNIQUE_LIT_OMNI;
+    gfxDrawMethod.litTechType[0][3] = TECHNIQUE_LIT_OMNI;
     gfxDrawMethod.litTechType[0][4] = TECHNIQUE_LIT_SUN_SHADOW;
     gfxDrawMethod.litTechType[0][5] = TECHNIQUE_LIT_SPOT_SHADOW;
     gfxDrawMethod.litTechType[0][6] = TECHNIQUE_LIT_OMNI_SHADOW;

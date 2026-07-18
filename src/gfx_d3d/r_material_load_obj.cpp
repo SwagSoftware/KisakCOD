@@ -6383,7 +6383,7 @@ int __cdecl Material_ComparePixelConsts(const Material *mtl0, const Material *mt
     return R_ComparePixelConsts(mtl, pass);
 }
 
-INT __cdecl Material_Compare(const void *arg0, const void *arg1)
+bool __cdecl Material_Compare(const Material *mtl0, const Material *mtl1)
 {
     int writesDepth; // [esp+98h] [ebp-148h]
     int writesDepth_4; // [esp+9Ch] [ebp-144h]
@@ -6399,9 +6399,6 @@ INT __cdecl Material_Compare(const void *arg0, const void *arg1)
     const MaterialTechniqueSet *techSet[2]; // [esp+1CCh] [ebp-14h]
     int comparison; // [esp+1D4h] [ebp-Ch]
     int hasLightmap[2]; // [esp+1D8h] [ebp-8h]
-
-    Material *mtl0 = *(Material **)arg0;
-    Material *mtl1 = *(Material **)arg1;
 
     iassert( mtl0 );
     iassert( mtl1 );
@@ -6521,13 +6518,7 @@ void __cdecl Material_SortInternal(Material **sortedMaterials, uint32_t material
     uint32_t sortedIndex; // [esp+98h] [ebp-Ch]
     Material *material; // [esp+A0h] [ebp-4h]
 
-    //std::_Sort<int *, int, bool(__cdecl *)(int, int)>(
-    //    sortedMaterials,
-    //    &sortedMaterials[materialCount],
-    //    (4 * materialCount) >> 2,
-    //    Material_Compare);
-    qsort(sortedMaterials, materialCount, sizeof(Material *), Material_Compare);
-    //std::sort(sortedMaterials + 0, sortedMaterials + materialCount, Material_Compare);
+    std::sort(sortedMaterials, sortedMaterials + materialCount, Material_Compare);
     for (sortedIndex = 0; sortedIndex < materialCount; ++sortedIndex)
     {
         material = sortedMaterials[sortedIndex];

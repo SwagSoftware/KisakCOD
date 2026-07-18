@@ -1829,21 +1829,21 @@ void __cdecl FS_SortFileList(const char **filelist, int numfiles)
     int k; // [esp+8h] [ebp-10h]
     int numsortedfiles; // [esp+Ch] [ebp-Ch]
     int i; // [esp+10h] [ebp-8h]
-    char *sortedlist; // [esp+14h] [ebp-4h]
+    const char **sortedlist; // [esp+14h] [ebp-4h]
 
-    sortedlist = (char*)Z_Malloc(4 * numfiles + 4, "FS_SortFileList", 3);
-    *(_DWORD *)sortedlist = 0;
+    sortedlist = (const char **)Z_Malloc(sizeof(*sortedlist) * (numfiles + 1), "FS_SortFileList", 3);
+    sortedlist[0] = 0;
     numsortedfiles = 0;
     for (i = 0; i < numfiles; ++i)
     {
-        for (j = 0; j < numsortedfiles && FS_PathCmp(filelist[i], *(const char **)&sortedlist[4 * j]) >= 0; ++j)
+        for (j = 0; j < numsortedfiles && FS_PathCmp(filelist[i], sortedlist[j]) >= 0; ++j)
             ;
         for (k = numsortedfiles; k > j; --k)
-            *(_DWORD *)&sortedlist[4 * k] = *(_DWORD *)&sortedlist[4 * k - 4];
-        *(_DWORD *)&sortedlist[4 * j] = (char)filelist[i]; // KISAKTODO: probably cooked
+            sortedlist[k] = sortedlist[k - 1];
+        sortedlist[j] = filelist[i];
         ++numsortedfiles;
     }
-    Com_Memcpy(filelist, sortedlist, 4 * numfiles);
+    Com_Memcpy(filelist, sortedlist, sizeof(*sortedlist) * numfiles);
     Z_Free(sortedlist, 3);
 }
 
