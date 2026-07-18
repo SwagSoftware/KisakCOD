@@ -22,7 +22,7 @@ char __cdecl CG_ShouldInterpolatePlayerStateViewClamp(int localClientNum, const 
     //const vehicle_info_t *vehInfo; // [esp+8h] [ebp-8h]
     centity_s *cent; // [esp+Ch] [ebp-4h]
 
-    if (prevSnap->ps.pm_type == 1)
+    if (prevSnap->ps.pm_type == PM_NORMAL_LINKED || prevSnap->ps.pm_type == PM_DEAD_LINKED)
         return 1;
     if ((prevSnap->ps.eFlags & 0x300) != 0)
         return 1;
@@ -473,7 +473,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
     }
     cg_pmove.handler = 0;
     cg_pmove.ps = &cgArray[0].predictedPlayerState;
-    if (cgArray[0].predictedPlayerState.pm_type < 5)
+    if (cgArray[0].predictedPlayerState.pm_type < PM_DEAD)
         v3 = 42057745;
     else
         v3 = 8454161;
@@ -499,7 +499,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
     CurrentCmdNumber = CL_GetCurrentCmdNumber(localClientNum);
     if (CL_GetUserCmd(localClientNum, CurrentCmdNumber, &v38))
     {
-        if ((cgArray[0].predictedPlayerState.pm_type == 1 || cgArray[0].predictedPlayerState.pm_type == 6)
+        if ((cgArray[0].predictedPlayerState.pm_type == PM_NORMAL_LINKED || cgArray[0].predictedPlayerState.pm_type == PM_DEAD_LINKED)
             && cg_paused->current.integer != 2)
         {
             CG_InterpolatePlayerState(localClientNum, 0, 0);

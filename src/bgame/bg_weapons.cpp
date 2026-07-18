@@ -2608,14 +2608,21 @@ int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction)
 
     weapDef = BG_GetWeaponDef(ps->weapon);
 
-#ifdef KISAK_SP
-	if ((ps->weapFlags & 8) != 0)// g_friendlyfireDist
-		return 0;
-#endif
-
     shouldStartFiring = (pm->cmd.buttons & PM_GetWeaponFireButton(ps->weapon)) != 0;
     if (weapDef->freezeMovementWhenFiring && ps->groundEntityNum == ENTITYNUM_NONE)
         shouldStartFiring = 0;
+
+#ifdef KISAK_SP
+	if ((ps->weapFlags & 8) != 0)// g_friendlyfireDist
+		return 0;
+
+	// Weapon lock for javelin and stinger.
+    if (shouldStartFiring && weapDef->requireLockonToFire)
+    {
+        if ((ps->weapLockFlags & 2) == 0 || ps->weapLockFlags & 0x30)// not WeaponLockFinalized & too close (0x10) or no clearance (0x20)
+            shouldStartFiring = 0;
+    }
+#endif
 
     v3 = delayedAction || BurstFirePending(ps);
 

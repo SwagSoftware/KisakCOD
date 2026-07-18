@@ -1548,9 +1548,14 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     iassert(!IS_NAN((vOffset)[0]) && !IS_NAN((vOffset)[1]) && !IS_NAN((vOffset)[2]));
     iassert(!IS_NAN((vTargetPos)[0]) && !IS_NAN((vTargetPos)[1]) && !IS_NAN((vTargetPos)[2]));
     
+	unsigned int grenadeWeapID = self->iGrenadeWeaponIndex;
+	if (self->pGrenade.isDefined() && bRechecking)
+		grenadeWeapID = self->pGrenade.ent()->s.weapon;
+	
     if (g_gravity->current.value <= 0.0
         || self->pGrenade.isDefined() && !bRechecking
-        || !Actor_Grenade_IsSafeTarget(self, vTargetPos, self->iGrenadeWeaponIndex))
+		|| !grenadeWeapID
+        || !Actor_Grenade_IsSafeTarget(self, vTargetPos, grenadeWeapID))
     {
         return 0;
     }
@@ -1570,7 +1575,7 @@ bool __cdecl Actor_Grenade_CheckTossPos(
     TossPositionsFromHints = 0;
     if (trace.fraction == 1.0)
     {
-        Actor_Grenade_GetTossPositions(vPosOut, endPos, lineEnd, self->iGrenadeWeaponIndex);
+        Actor_Grenade_GetTossPositions(vPosOut, endPos, lineEnd, grenadeWeapID);
         if (g_drawGrenadeHints->current.integer <= 0)
             goto LABEL_37;
         v43 = colorRed;

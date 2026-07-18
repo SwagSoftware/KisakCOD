@@ -356,7 +356,6 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int 
 
 int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChannel)
 {
-    float v3; // [esp+0h] [ebp-B0h]
     float baseSlavePercentage; // [esp+4h] [ebp-ACh]
     double timescale; // [esp+10h] [ebp-A0h]
     float v6; // [esp+1Ch] [ebp-94h]
@@ -462,8 +461,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     SND_Set2DChannelVolume(index, realVolume);
     AIL_set_sample_loop_count(handle, (startAliasInfo->alias0->flags & 1) == 0);
     baseSlavePercentage = MSS_GetWetLevel(startAliasInfo->alias0);
-    v3 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(handle, v3, baseSlavePercentage);
+    AIL_set_sample_reverb_levels(handle, MSS_GetDryLevel(), baseSlavePercentage);
     AIL_sample_ms_position(handle, &total_msec, 0);
     if (startAliasInfo->timeshift >= total_msec)
         return SND_SetPlaybackIdNotPlayed(index);
@@ -692,7 +690,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     SND_Set3DPosition(index, startAliasInfo->org);
     AIL_set_sample_loop_count(handle, (startAliasInfo->alias0->flags & 1) == 0);
     maxdist = MSS_GetWetLevel(startAliasInfo->alias0);
-    mindist = CG_BannerScoreboardScaleMultiplier();
+    mindist = MSS_GetDryLevel();
     AIL_set_sample_reverb_levels(handle, mindist, maxdist);
     if (!rate)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 1004, 0, "%s", "rate");
@@ -807,7 +805,6 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     const char *error; // eax
     double LerpedSlavePercentage; // st7
     double Stream3DVolumeFallOff; // st7
-    float v6; // [esp+4h] [ebp-244h]
     float baseSlavePercentage; // [esp+8h] [ebp-240h]
     float *org; // [esp+Ch] [ebp-23Ch]
     float v9; // [esp+18h] [ebp-230h]
@@ -899,8 +896,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
             }
             AIL_set_stream_loop_count((HSTREAM)handle, (startAliasInfo->alias0->flags & 1) == 0);
             baseSlavePercentage = MSS_GetWetLevel(startAliasInfo->alias0);
-            v6 = CG_BannerScoreboardScaleMultiplier();
-            AIL_set_sample_reverb_levels(handle_sample, v6, baseSlavePercentage);
+            AIL_set_sample_reverb_levels(handle_sample, MSS_GetDryLevel(), baseSlavePercentage);
             AIL_stream_ms_position((HSTREAM)handle, total_msec, 0);
             if (startAliasInfo->timeshift < total_msec[0])
             {
@@ -1007,13 +1003,8 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
 
 void __cdecl SND_SetRoomtype(int roomtype)
 {
-    float v1; // [esp+0h] [ebp-8h]
-    float WetLevel; // [esp+4h] [ebp-4h]
-
     AIL_set_room_type(milesGlob.driver, roomtype);
-    WetLevel = MSS_GetWetLevel(0);
-    v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_digital_master_reverb_levels(milesGlob.driver, v1, WetLevel);
+    AIL_set_digital_master_reverb_levels(milesGlob.driver, MSS_GetDryLevel(), MSS_GetWetLevel(0));
 }
 
 void __cdecl SND_UpdateEqs()
@@ -1431,9 +1422,6 @@ void __cdecl SND_SetStreamChannelPlaybackRate(int index, int rate)
 
 void __cdecl SND_Update2DChannelReverb(int index)
 {
-    float v1; // [esp+0h] [ebp-8h]
-    float WetLevel; // [esp+4h] [ebp-4h]
-
     if (index < 0 || index >= g_snd.max_2D_channels)
         MyAssertHandler(
             ".\\win32\\snd_driver.cpp",
@@ -1442,16 +1430,12 @@ void __cdecl SND_Update2DChannelReverb(int index)
             "%s\n\t(index) = %i",
             "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
             index);
-    WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
-    v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], v1, WetLevel);
+
+    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], MSS_GetDryLevel(), MSS_GetWetLevel(g_snd.chaninfo[index].alias0));
 }
 
 void __cdecl SND_Update3DChannelReverb(int index)
 {
-    float v1; // [esp+0h] [ebp-8h]
-    float WetLevel; // [esp+4h] [ebp-4h]
-
     if (index < 8 || index >= g_snd.max_3D_channels + 8)
         MyAssertHandler(
             ".\\win32\\snd_driver.cpp",
@@ -1460,17 +1444,11 @@ void __cdecl SND_Update3DChannelReverb(int index)
             "%s\n\t(index) = %i",
             "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
             index);
-    WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
-    v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], v1, WetLevel);
+    AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], MSS_GetDryLevel(), MSS_GetWetLevel(g_snd.chaninfo[index].alias0));
 }
 
 void __cdecl SND_UpdateStreamChannelReverb(int index)
 {
-    float v1; // [esp+0h] [ebp-Ch]
-    float WetLevel; // [esp+4h] [ebp-8h]
-    _SAMPLE *handle_sample; // [esp+8h] [ebp-4h]
-
     if (index < 40 || index >= g_snd.max_stream_channels + 40)
         MyAssertHandler(
             ".\\win32\\snd_driver.cpp",
@@ -1479,10 +1457,12 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
             "%s\n\t(index) = %i",
             "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
             index);
-    handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
-    WetLevel = MSS_GetWetLevel(g_snd.chaninfo[index].alias0);
-    v1 = CG_BannerScoreboardScaleMultiplier();
-    AIL_set_sample_reverb_levels(handle_sample, v1, WetLevel);
+
+    AIL_set_sample_reverb_levels(
+        (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]),
+        MSS_GetDryLevel(),
+        MSS_GetWetLevel(g_snd.chaninfo[index].alias0)
+    );
 }
 
 int __cdecl SND_Get2DChannelLength(int index)

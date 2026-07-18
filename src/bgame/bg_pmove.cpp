@@ -6,7 +6,7 @@
 #ifdef KISAK_MP
 #include <game_mp/g_main_mp.h>
 #elif KISAK_SP
-
+#include <game/g_main.h>
 #endif
 #include <cgame/cg_local.h>
 
@@ -466,14 +466,23 @@ entity_event_t PM_FootstepType(playerState_s *ps, pml_t *pml)
     if ((ps->pm_flags & PMF_WALKING) != 0 || ps->leanf != 0.0)
         return EV_FOOTSTEP_WALK;
 
+#ifdef KISAK_SP
+    if (ps->sprintState.lastSprintStart
+        && ps->sprintState.lastSprintStart > ps->sprintState.lastSprintEnd)
+        return EV_FOOTSTEP_SPRINT;
+#else
     if (PM_IsSprinting(ps))
         return EV_FOOTSTEP_SPRINT;
+#endif
 
     return EV_FOOTSTEP_RUN;
 }
 
 bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
 {
+#ifdef KISAK_SP
+    return true;
+#else
     int32_t iStance; // [esp+8h] [ebp-Ch]
     int32_t bWalking; // [esp+Ch] [ebp-8h]
     playerState_s *ps; // [esp+10h] [ebp-4h]
@@ -502,6 +511,7 @@ bool __cdecl PM_ShouldMakeFootsteps(pmove_t *pm)
     }
 
     return false;
+#endif
 }
 
 void __cdecl PM_UpdateLean(
@@ -1752,7 +1762,7 @@ void __cdecl PM_StartSprint(playerState_s *ps, pmove_t *pm, const pml_t *pml, in
     ps->sprintState.sprintStartMaxLength = sprintLeft;
     ps->sprintState.lastSprintStart = pm->cmd.serverTime;
     ps->pm_flags |= PMF_SPRINTING;
-#ifdef KISAK_SP
+#ifndef KISAK_XBOX
     PM_ExitAimDownSight(ps);
 #endif
 }
@@ -1783,11 +1793,11 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
     if (ps->leanf != 0.0)
         return true;
 
-#ifdef KISAK_SP
-    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SHELLSHOCKED)) != 0)
+#ifdef KISAK_XBOX
+    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
         return true;
 #else
-    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SIGHT_AIMING | PMF_SHELLSHOCKED)) != 0)
+    if ((ps->pm_flags & (PMF_MANTLE | PMF_LADDER | PMF_SHELLSHOCKED)) != 0)
         return true;
 #endif
 
@@ -3101,13 +3111,8 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 
 #ifdef KISAK_MP
     pm->proneChange = 0;
-#endif
 
-#ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
-#elif KISAK_SP
-    if (ps->pm_type >= PM_DEAD)
-#endif
     {
         pm->mins[0] = -8.0;
         pm->mins[1] = -8.0;
@@ -3125,6 +3130,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         ps->viewHeightCurrent = 0.0;
     }
     else
+#endif
     {
         bWasProne = (ps->pm_flags & PMF_PRONE) != 0;
         bWasStanding = (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0;
@@ -3134,16 +3140,20 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 15.0;
         pm->maxs[1] = 15.0;
         pm->maxs[2] = 70.0;
+#ifdef KISAK_SP
+        if (ps->pm_type == PM_DEAD)
+        {
+            ps->viewHeightTarget = 8;
+            PM_ViewHeightAdjust(pm, pml);
+            return;
+        }
+#endif
 #ifdef KISAK_MP
         if (ps->pm_type == PM_DEAD)
-#elif KISAK_SP
-        if (ps->pm_type >= PM_DEAD)
-#endif
         {
             ps->viewHeightTarget = 8;
             PM_ViewHeightAdjust(pm, pml);
         }
-#ifdef KISAK_MP
         else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
 #elif KISAK_SP
         if ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0)

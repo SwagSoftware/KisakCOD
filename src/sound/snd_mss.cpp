@@ -211,22 +211,23 @@ void MSS_ShutdownCleanup()
   memset((uint8_t *)&milesGlob, 0, sizeof(milesGlob));
 }
 
-double __cdecl MSS_GetWetLevel(const snd_alias_t *pAlias)
+float MSS_GetDryLevel()
 {
-  if ( g_snd.effect->wetlevel < 0.0 || g_snd.effect->wetlevel > 1.0 )
-    MyAssertHandler(
-      ".\\win32\\snd_driver.cpp",
-      188,
-      0,
-      "%s\n\t(g_snd.effect->wetlevel) = %g",
-      "(g_snd.effect->wetlevel >= 0 && g_snd.effect->wetlevel <= 1)",
-      g_snd.effect->wetlevel);
-  if ( !pAlias )
-    return g_snd.effect->wetlevel;
-  if ( !snd_enableReverb->current.enabled || (pAlias->flags & 0x10) != 0 )
-    return (float)0.0;
-  else
-    return g_snd.effect->wetlevel;
+    return 1.0f;
+    //return g_snd.effect->drylevel;
+}
+
+float MSS_GetWetLevel(const snd_alias_t *pAlias)
+{
+    iassert(g_snd.effect->wetlevel >= 0 && g_snd.effect->wetlevel <= 1);
+
+    if ( !pAlias )
+        return g_snd.effect->wetlevel;
+
+    if ( !snd_enableReverb->current.enabled || (pAlias->flags & 0x10) != 0 )
+        return 0.0f;
+    else
+        return g_snd.effect->wetlevel;
 }
 
 const char *MSS_EQ_ENABLED[3] = { "Enable 0", "Enable 1", "Enable 2" }; // idb
