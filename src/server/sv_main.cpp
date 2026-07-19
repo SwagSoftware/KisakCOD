@@ -17,6 +17,7 @@
 #include <universal/profile.h>
 #include <client/cl_scrn.h>
 #include <game/savedevice.h>
+#include <qcommon/cmd.h>
 
 server_t sv;
 serverStatic_t svs;
@@ -101,6 +102,16 @@ void __cdecl AppendCommandsForInternalSave(const char *filename)
 {
     if (!filename)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 191, 0, "%s", "filename");
+	if (!strcmp(filename, "internal/vid_restart"))
+	{
+		Com_Printf(15, "Game saved for vid_restart\n");
+		Cbuf_InsertText(0, "disconnect;vid_restart;loadgame internal/vid_restart\n");
+	}
+	else if (!strcmp(filename, "internal/snd_restart"))
+	{
+		Com_Printf(15, "Game saved for snd_restart\n");
+		Cbuf_InsertText(0, "disconnect;snd_restart;loadgame internal/snd_restart\n");
+	}
 }
 
 void __cdecl SV_InitiatePendingSave(
@@ -190,49 +201,45 @@ int __cdecl SV_AddPendingSave(
 
 int __cdecl SV_ProcessPendingSave(PendingSave *pendingSave)
 {
-    int v2; // r3
-    int v3; // r28
+    int checksum; // r3
+    int result; // r28
 
     if (!pendingSave)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 292, 0, "%s", "pendingSave");
-    v2 = SV_GetCheckSum();
-    v3 = G_SaveGame(pendingSave, v2);
+    checksum = SV_GetCheckSum();
+    result = G_SaveGame(pendingSave, checksum);
     if (!pendingSave)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 191, 0, "%s", "filename");
-    return v3;
+    //if (result)
+        AppendCommandsForInternalSave(pendingSave->filename);
+    return result;
 }
 
 int __cdecl SV_ProcessPendingSaves()
 {
-    int result; // r3
-    int v1; // r28
-    volatile int v2; // r30
-    PendingSaveList *v3; // r29
+	int anySaved;
+	int i;
 
-    if (!pendingSaveGlob.count)
-        return 0;
-    if (Dvar_GetInt("g_reloading"))
-    {
-        Com_Printf(15, "savegame request ignored\n");
-        return 0;
-    }
-    v1 = 0;
-    v2 = 0;
-    if (pendingSaveGlob.count > 0)
-    {
-        v3 = &pendingSaveGlob;
-        do
-        {
-            if (SV_ProcessPendingSave(v3->pendingSaves))
-                v1 = 1;
-            ++v2;
-            v3 = (PendingSaveList *)((char *)v3 + 400);
-        } while (v2 < pendingSaveGlob.count);
-    }
-    result = v1;
-    pendingSaveGlob.count = 0;
-    pendingSaveGlob.isAutoSaving = 0;
-    return result;
+	if (!pendingSaveGlob.count)
+		return 0;
+
+	if (Dvar_GetInt("g_reloading"))
+	{
+		Com_Printf(15, "savegame request ignored\n");
+		return 0;
+	}
+
+	anySaved = 0;
+	for (i = 0; i < pendingSaveGlob.count; ++i)
+	{
+		if (SV_ProcessPendingSave(&pendingSaveGlob.pendingSaves[i]))
+			anySaved = 1;
+	}
+
+	pendingSaveGlob.count = 0;
+	pendingSaveGlob.isAutoSaving = 0;
+
+	return anySaved;
 }
 
 void __cdecl SV_ClearPendingSaves()

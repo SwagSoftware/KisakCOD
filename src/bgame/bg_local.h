@@ -1781,6 +1781,17 @@ char __cdecl BG_CheckProne(
     uint8_t handler,
     proneCheckType_t proneCheckType,
     float prone_feet_dist);
+#ifdef KISAK_SP
+char __cdecl BG_CheckProneView(
+    uint8_t handler,
+    const float *vPos,
+    int32_t passEntityNum,
+    float fHeight,
+    float fYaw,
+    float *pfTorsoPitch,
+    float *pfWaistPitch,
+    float prone_feet_dist);
+#endif
 void __cdecl BG_LerpHudColors(const hudelem_s *elem, int32_t time, hudelem_color_t *toColor);
 int32_t __cdecl BG_LoadShellShockDvars(const char *name);
 void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms);

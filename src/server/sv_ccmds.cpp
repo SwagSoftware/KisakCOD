@@ -16,6 +16,7 @@
 #include <ui/ui.h>
 #include <universal/com_files.h>
 #include "sv_public.h"
+#include <cgame/cg_main.h>
 
 int sv_loadScripts;
 int sv_map_restart;
@@ -372,6 +373,8 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
     int v5; // r3
     SaveGame *v6; // [sp+50h] [-40h] BYREF
 
+	CG_FreeWeapons(0);
+
     Com_SyncThreads();
     track_hunk_ClearToStart();
     integer = cl_paused->current.integer;
@@ -394,6 +397,7 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
             if (loadScripts)
             {
                 SV_ClearPendingSaves();
+                SV_AddPendingSave("map_restart", "Start Level Save", "", SAVE_TYPE_AUTOSAVE, 2u, 1);
                 SV_ProcessPendingSaves();
             }
         }
@@ -597,7 +601,12 @@ void __cdecl SV_LoadGame_f()
         I_strncat(v7, 64, ".svg");
     for (i = strchr(v7, 92); i; i = strchr(i, 92))
         *i = 47;
+
+// PC retail never sets a dev-save flag on loadgame
+#ifdef KISAK_XBOX
     g_useDevSaveArea = 1;
+#endif
+
     if (Com_BuildPlayerProfilePath(sv_save_filename, 64, v7) < 0)
     {
         Com_Printf(0, "filename '%s' is too long", v7);
@@ -610,7 +619,11 @@ void __cdecl SV_LoadGame_f()
 void __cdecl SV_ForceSelectSaveDevice_f()
 {
     //
+#ifdef KISAK_XBOX
     bool exists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+#else
+    bool exists = sv_lastSaveGame->current.string[0] && SaveExists(sv_lastSaveGame->current.string);
+#endif
     Dvar_SetBool(sv_saveGameAvailable, exists);
 }
 
@@ -624,7 +637,11 @@ void __cdecl SV_SelectSaveDevice_f()
             "select_save_device is not available while a game is running - use force_select_save_device instead\n");
         return;
     }
+#ifdef KISAK_XBOX
     bool exists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+#else
+    bool exists = sv_lastSaveGame->current.string[0] && SaveExists(sv_lastSaveGame->current.string);
+#endif
     Dvar_SetBool(sv_saveGameAvailable, exists);
 }
 
@@ -651,7 +668,11 @@ void __cdecl SV_LoadGameContinue_f()
     else
     {
         g_useDevSaveArea = 0;
+#ifdef KISAK_XBOX
         I_strncpyz(sv_save_filename, CONSOLE_DEFAULT_SAVE_NAME, 64);
+#else
+        I_strncpyz(sv_save_filename, sv_lastSaveGame->current.string, 64);
+#endif
         CheckSaveExists(sv_save_filename);
         if (!com_sv_running->current.enabled && !SV_CheckLoadGame())
         {
