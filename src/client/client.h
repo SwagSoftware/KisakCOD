@@ -1232,6 +1232,8 @@ void __cdecl CL_UpdateSound();
 void __cdecl CL_ShutdownAll(bool destroyWindow);
 void __cdecl CL_DisconnectLocalClient();
 void __cdecl CL_Disconnect_f();
+void __cdecl CL_Vid_Restart_f();
+void __cdecl CL_Snd_Restart_f();
 void __cdecl CL_ShutdownRef();
 void __cdecl CL_DrawLogo();
 void __cdecl CL_Init(int32_t localClientNum);

@@ -26,6 +26,8 @@
 #include "cl_scrn.h"
 #include <qcommon/com_bsp.h>
 #include <universal/profile.h>
+#include <sound/snd_local.h>
+#include <server/server.h>
 
 enum MovieToPlayScriptOp : __int32
 {
@@ -1387,6 +1389,8 @@ void __cdecl CL_Shutdown(int localClientNum)
         CL_ShutdownInput();
         Cmd_RemoveCommand("cmd");
         Cmd_RemoveCommand("disconnect");
+		Cmd_RemoveCommand("vid_restart");
+		Cmd_RemoveCommand("snd_restart");
         Cmd_RemoveCommand("record");
         Cmd_RemoveCommand("demo");
         Cmd_RemoveCommand("cinematic");
@@ -1622,6 +1626,48 @@ void __cdecl CL_Disconnect_f()
     CL_DisconnectLocalClient();
 }
 
+void __cdecl CL_Vid_Restart_f()
+{
+    if (com_sv_running->current.enabled)
+    {
+        SV_AddPendingSave("internal/vid_restart", "", "", SAVE_TYPE_INTERNAL, 4u, 0);
+    }
+    else
+    {
+        SND_StopSounds(SND_STOP_ALL);
+        CL_ShutdownHunkUsers();
+        CL_ShutdownRef();
+        cls.rendererStarted = 0;
+        Com_Restart();
+        Dvar_RegisterInt("loc_language", 0, (DvarLimits)0xE00000000LL, DVAR_ARCHIVE | DVAR_LATCH, "The current language locale");
+        Dvar_RegisterBool("loc_translate", true, DVAR_LATCH, "Turn on string translation");
+        Dvar_RegisterBool("fs_ignoreLocalized", false, DVAR_LATCH | DVAR_CHEAT, "Ignore localized assets");
+        if (!com_sv_running->current.enabled && fs_gameDirVar->modified)
+            FS_Restart(0, 0);
+        SEH_UpdateLanguageInfo();
+        Dvar_SetInt(cl_paused, 0);
+        Com_InitXAssets();
+        CL_InitRef();
+        CL_InitRenderer();
+        CL_StartHunkUsers();
+    }
+}
+
+void __cdecl CL_Snd_Restart_f()
+{
+    if (com_sv_running->current.enabled)
+    {
+        SV_AddPendingSave("internal/snd_restart", "", "", SAVE_TYPE_INTERNAL, 4u, 0);
+    }
+    else
+    {
+        SND_Shutdown();
+        SND_InitDriver();
+        SND_Init();
+        CL_Vid_Restart_f();
+    }
+}
+
 void __cdecl CL_ShutdownRef()
 {
     R_SyncRenderThread();
@@ -1704,6 +1750,10 @@ void __cdecl CL_DrawLogo()
 cmd_function_s CL_ForwardToServer_f_VAR;
 cmd_function_s CL_Disconnect_f_VAR;
 cmd_function_s CL_Disconnect_f_VAR_SERVER;
+cmd_function_s CL_Vid_Restart_f_VAR;
+cmd_function_s CL_Vid_Restart_f_VAR_SERVER;
+cmd_function_s CL_Snd_Restart_f_VAR;
+cmd_function_s CL_Snd_Restart_f_VAR_SERVER;
 cmd_function_s CL_PlayDemo_f_VAR_0;
 cmd_function_s CL_PlayDemo_f_VAR_SERVER_0;
 cmd_function_s CL_PlayDemo_f_VAR;
@@ -1830,6 +1880,10 @@ void __cdecl CL_Init(int localClientNum)
     Cmd_AddServerCommandInternal("demo", CL_PlayDemo_f, &CL_PlayDemo_f_VAR_SERVER_0);
     Cmd_AddCommandInternal("timedemo", Cbuf_AddServerText_f, &CL_PlayDemo_f_VAR);
     Cmd_AddServerCommandInternal("timedemo", CL_PlayDemo_f, &CL_PlayDemo_f_VAR_SERVER);
+	Cmd_AddCommandInternal("vid_restart", Cbuf_AddServerText_f, &CL_Vid_Restart_f_VAR);
+	Cmd_AddServerCommandInternal("vid_restart", CL_Vid_Restart_f, &CL_Vid_Restart_f_VAR_SERVER);
+	Cmd_AddCommandInternal("snd_restart", Cbuf_AddServerText_f, &CL_Snd_Restart_f_VAR);
+	Cmd_AddServerCommandInternal("snd_restart", CL_Snd_Restart_f, &CL_Snd_Restart_f_VAR_SERVER);
     Cmd_SetAutoComplete("demo", "demos", "spd");
     Cmd_SetAutoComplete("timedemo", "demos", "spd");
     Cmd_AddCommandInternal("record", CL_Record_f, &CL_Record_f_VAR);

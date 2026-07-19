@@ -574,11 +574,11 @@ void AIPhys_GroundTrace()
     memcpy(&g_apl.groundTrace, &trace, sizeof(g_apl.groundTrace));
     if (!trace.startsolid)
         goto LABEL_10;
-    if ((trace.contents & 0x2000000) != 0)
+    if ((trace.contents & 0x200C000) != 0)
     {
         EntityHitId = Trace_GetEntityHitId(&trace);
         AIPhys_AddTouchEnt(EntityHitId);
-        g_apl.iTraceMask &= ~0x2000000u;
+        g_apl.iTraceMask &= ~0x200C000;
         G_TraceCapsule(&trace, start, g_pPhys->vMins, g_pPhys->vMaxs, end, g_pPhys->iEntNum, g_apl.iTraceMask);
         memcpy(&g_apl.groundTrace, &trace, sizeof(g_apl.groundTrace));
     }

@@ -4,9 +4,9 @@
 #error This file is for SinglePlayer only 
 #endif
 
-
+#ifdef KISAK_XBOX
 static const char *CONSOLE_DEFAULT_SAVE_NAME = "savegame.svg";
-
+#endif
 
 void __cdecl Memcard_InitializeSystem(void);
 void __cdecl SaveDevice_Init(void);
