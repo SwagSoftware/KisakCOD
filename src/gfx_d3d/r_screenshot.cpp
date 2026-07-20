@@ -10,6 +10,49 @@
 #include <qcommon/cmd.h>
 #include "r_reflection_probe.h"
 
+#ifdef _WIN32
+#include <objidl.h>
+#include <gdiplus.h>
+#pragma comment(lib, "gdiplus.lib")
+namespace
+{
+    ULONG_PTR g_gdiplusToken;
+    bool g_gdiplusStarted;
+    void R_EnsureGdiplusStarted()
+    {
+        if (!g_gdiplusStarted)
+        {
+            Gdiplus::GdiplusStartupInput input;
+            if (Gdiplus::GdiplusStartup(&g_gdiplusToken, &input, NULL) == Gdiplus::Ok)
+                g_gdiplusStarted = true;
+        }
+    }
+    int R_GetJpegEncoderClsid(CLSID *pClsid)
+    {
+        UINT numEncoders = 0;
+        UINT size = 0;
+        Gdiplus::GetImageEncodersSize(&numEncoders, &size);
+        if (!size)
+            return 0;
+        Gdiplus::ImageCodecInfo *pCodecInfo = (Gdiplus::ImageCodecInfo *)Z_Malloc(size, "R_GetJpegEncoderClsid", 22);
+        if (!pCodecInfo)
+            return 0;
+        Gdiplus::GetImageEncoders(numEncoders, size, pCodecInfo);
+        for (UINT i = 0; i < numEncoders; ++i)
+        {
+            if (wcscmp(pCodecInfo[i].MimeType, L"image/jpeg") == 0)
+            {
+                *pClsid = pCodecInfo[i].Clsid;
+                Z_Free((char *)pCodecInfo, 22);
+                return 1;
+            }
+        }
+        Z_Free((char *)pCodecInfo, 22);
+        return 0;
+    }
+}
+#endif
+
 #define ratio 4
 
 struct $EF604BEDDA69129AF7FD28DC5064E1AD // sizeof=0x18
@@ -1180,48 +1223,99 @@ void __cdecl R_LevelShot()
         buffer[12] = 0x80;
         buffer[14] = 0x80;
         buffer[16] = 24;
-        FS_WriteFile(checkname, (char *)buffer, 0xC012u);
+		if (FS_WriteFile(checkname, (char *)buffer, 0xC012u))
+			Com_Printf(8, "Wrote %s\n", checkname);
+		else
+			Com_Printf(8, "ScreenShot: Couldn't create a file\n");
+		
         Z_Free((char *)buffer, 22);
-        Com_Printf(8, "Wrote %s\n", checkname);
     }
 }
 
-void __cdecl R_SaveJpg(
+int __cdecl R_SaveJpg(
     char *filename,
     int quality,
     uint32_t image_width,
     uint32_t image_height,
     uint8_t *image_buffer)
 {
-    // KISAKTODO: Add JPEG
-#if 0
-    uint8_t *out; // [esp+0h] [ebp-214h]
-    uint8_t *row_pointer[1]; // [esp+8h] [ebp-20Ch] BYREF
-    jpeg_compress_struct cinfo; // [esp+Ch] [ebp-208h] BYREF
-    jpeg_error_mgr jerr; // [esp+17Ch] [ebp-98h] BYREF
-
-    cinfo.err = jpeg_std_error(&jerr, (void (*)(...))ExitJpeg, PrintfJpeg);
-    cinfo.alloc.malloc = (void *(__cdecl *)(uint32_t))Z_MallocJpeg;
-    cinfo.alloc.free = (void(__cdecl *)(void *, uint32_t))Com_FreeEvent;
-    jpeg_CreateCompress((jpeg_common_struct *)&cinfo, 62, 0x170u);
-    out = (uint8_t *)Hunk_AllocateTempMemory(3 * image_height * image_width, "SaveJPG");
-    jpegDest((jpeg_common_struct *)&cinfo, out, 3 * image_height * image_width);
-    cinfo.image_width = image_width;
-    cinfo.image_height = image_height;
-    cinfo.input_components = 3;
-    cinfo.in_color_space = JCS_RGB;
-    jpeg_set_defaults((jpeg_common_struct *)&cinfo);
-    jpeg_set_quality((jpeg_common_struct *)&cinfo, quality, 1u);
-    jpeg_start_compress((jpeg_common_struct *)&cinfo, 1u);
-    while (cinfo.next_scanline < cinfo.image_height)
+#ifndef _WIN32
+    (void)filename;
+    (void)quality;
+    (void)image_width;
+    (void)image_height;
+    (void)image_buffer;
+    return 0;
+#else
+    CLSID jpegClsid;
+    Gdiplus::Bitmap *bitmap;
+    Gdiplus::BitmapData bmpData;
+    Gdiplus::Rect rect(0, 0, (INT)image_width, (INT)image_height);
+    Gdiplus::EncoderParameters encoderParams;
+    ULONG qualityValue;
+    IStream *stream;
+    HGLOBAL hGlobal;
+    void *jpegData;
+    ULARGE_INTEGER streamSize;
+    LARGE_INTEGER zero;
+    int ok;
+    uint32_t row;
+    int srcStride;
+    int dstStride;
+    if (!filename || !image_buffer || !image_width || !image_height)
+        return 0;
+    R_EnsureGdiplusStarted();
+    if (!g_gdiplusStarted || !R_GetJpegEncoderClsid(&jpegClsid))
+        return 0;
+    bitmap = new Gdiplus::Bitmap((INT)image_width, (INT)image_height, PixelFormat24bppRGB);
+    if (!bitmap || bitmap->GetLastStatus() != Gdiplus::Ok)
     {
-        row_pointer[0] = &image_buffer[3 * image_width * cinfo.next_scanline];
-        jpeg_write_scanlines((jpeg_common_struct *)&cinfo, row_pointer, 1u);
+        delete bitmap;
+        return 0;
     }
-    jpeg_finish_compress((jpeg_common_struct *)&cinfo);
-    FS_WriteFile(filename, (char *)out, hackSize);
-    Hunk_FreeTempMemory((char *)out);
-    jpeg_destroy_compress((jpeg_common_struct *)&cinfo);
+    if (bitmap->LockBits(&rect, Gdiplus::ImageLockModeWrite, PixelFormat24bppRGB, &bmpData) != Gdiplus::Ok)
+    {
+        delete bitmap;
+        return 0;
+    }
+    srcStride = 3 * (int)image_width;
+    dstStride = bmpData.Stride;
+    for (row = 0; row < image_height; ++row)
+        memcpy((uint8_t *)bmpData.Scan0 + row * dstStride, image_buffer + row * srcStride, srcStride);
+    bitmap->UnlockBits(&bmpData);
+    if (quality < 1)
+        quality = 1;
+    if (quality > 100)
+        quality = 100;
+    qualityValue = (ULONG)quality;
+    encoderParams.Count = 1;
+    encoderParams.Parameter[0].Guid = Gdiplus::EncoderQuality;
+    encoderParams.Parameter[0].Type = Gdiplus::EncoderParameterValueTypeLong;
+    encoderParams.Parameter[0].NumberOfValues = 1;
+    encoderParams.Parameter[0].Value = &qualityValue;
+    stream = NULL;
+    ok = 0;
+    if (CreateStreamOnHGlobal(NULL, TRUE, &stream) != S_OK)
+    {
+        delete bitmap;
+        return 0;
+    }
+    if (bitmap->Save(stream, &jpegClsid, &encoderParams) == Gdiplus::Ok)
+    {
+        zero.QuadPart = 0;
+        if (stream->Seek(zero, STREAM_SEEK_END, &streamSize) == S_OK
+            && stream->Seek(zero, STREAM_SEEK_SET, NULL) == S_OK
+            && GetHGlobalFromStream(stream, &hGlobal) == S_OK)
+        {
+            jpegData = GlobalLock(hGlobal);
+            if (jpegData && streamSize.LowPart > 0)
+                ok = FS_WriteFile(filename, (char *)jpegData, streamSize.LowPart);
+            GlobalUnlock(hGlobal);
+        }
+    }
+    stream->Release();
+    delete bitmap;
+    return ok;
 #endif
 }
 
@@ -1892,20 +1986,25 @@ void __cdecl R_ScreenshotFilename(uint32_t lastNumber, const char *extension, ch
         Com_sprintf(fileName, 0x100u, "screenshots/shot9999.%s", extension);
 }
 
-void __cdecl R_TakeScreenshotJpg(int x, int y, int width, int height, const char *filename)
+int __cdecl R_TakeScreenshotJpg(int x, int y, int width, int height, const char *filename)
 {
     uint8_t *buffer; // [esp+0h] [ebp-4h]
+	int ok;
 
+	ok = 0;
     buffer = (uint8_t *)Z_Malloc(3 * height * width, "R_TakeScreenshotJpg", 22);
     if (R_GetFrontBufferData(x, y, width, height, 3, buffer))
-        R_SaveJpg((char*)filename, 90, width, height, buffer);
+		ok = R_SaveJpg((char*)filename, 90, width, height, buffer);
     Z_Free((char *)buffer, 22);
+	return ok;
 }
 
-void __cdecl R_TakeScreenshotTga(int x, int y, int width, int height, char *filename)
+int __cdecl R_TakeScreenshotTga(int x, int y, int width, int height, char *filename)
 {
     uint8_t *buffer; // [esp+0h] [ebp-8h]
+	int ok;
 
+	ok = 0;
     buffer = (uint8_t *)Z_Malloc(3 * height * width + 18, "R_TakeScreenshotTga", 22);
     *(_DWORD *)buffer = 0;
     *((_DWORD *)buffer + 1) = 0;
@@ -1918,8 +2017,9 @@ void __cdecl R_TakeScreenshotTga(int x, int y, int width, int height, char *file
     buffer[16] = 24;
     buffer[17] = 32;
     if (R_GetFrontBufferData(x, y, width, height, 3, buffer + 18))
-        FS_WriteFile(filename, (char *)buffer, 3 * height * width + 18);
+        ok = FS_WriteFile(filename, (char *)buffer, 3 * height * width + 18);
     Z_Free((char *)buffer, 22);
+	return ok;
 }
 
 int lastNumber;
@@ -1930,6 +2030,8 @@ void __cdecl R_ScreenshotCommand(GfxScreenshotType type)
     char filename[260]; // [esp+44h] [ebp-110h] BYREF
     int silent; // [esp+14Ch] [ebp-8h]
     const char *extension; // [esp+150h] [ebp-4h]
+    int ok;
+    int autoNumbered;
 
     if (type)
     {
@@ -1957,7 +2059,9 @@ void __cdecl R_ScreenshotCommand(GfxScreenshotType type)
         return;
     }
     silent = strcmp(Cmd_Argv(1), "silent") == 0;
-    if (Cmd_Argc() != 2 || silent)
+	autoNumbered = Cmd_Argc() != 2 || silent;
+	ok = 0;
+    if (autoNumbered)
     {
         while (lastNumber <= 9999)
         {
@@ -1971,7 +2075,6 @@ void __cdecl R_ScreenshotCommand(GfxScreenshotType type)
             Com_Printf(8, "ScreenShot: Couldn't create a file\n");
             return;
         }
-        ++lastNumber;
     }
     else
     {
@@ -1979,9 +2082,19 @@ void __cdecl R_ScreenshotCommand(GfxScreenshotType type)
         Com_sprintf(filename, 0x100u, "screenshots/%s.%s", v2, extension);
     }
     if (type)
-        R_TakeScreenshotTga(0, 0, vidConfig.displayWidth, vidConfig.displayHeight, filename);
+		ok = R_TakeScreenshotTga(0, 0, vidConfig.displayWidth, vidConfig.displayHeight, filename);
     else
-        R_TakeScreenshotJpg(0, 0, vidConfig.displayWidth, vidConfig.displayHeight, filename);
-    if (!silent)
-        Com_Printf(8, "Wrote %s\n", filename);
+		ok = R_TakeScreenshotJpg(0, 0, vidConfig.displayWidth, vidConfig.displayHeight, filename);
+
+	if (ok)
+	{
+		if (autoNumbered)
+			++lastNumber;
+		if (!silent)
+			Com_Printf(8, "Wrote %s\n", filename);
+	}
+	else if (!silent)
+	{
+		Com_Printf(8, "ScreenShot: Couldn't create a file\n");
+	}
 }

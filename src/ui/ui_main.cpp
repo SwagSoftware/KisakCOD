@@ -1861,7 +1861,13 @@ void __cdecl UI_SavegameSort(int column, int force)
 void __cdecl UI_LoadSavegames(int /*unused*/)
 {
     int saveCount = 0;
+#ifdef KISAK_XBOX
     const char **saveFiles = FS_ListFiles("save", "svg", FS_LIST_ALL, &saveCount);
+#else
+    char saveDir[64];
+    Com_BuildPlayerProfilePath(saveDir, 64, "save");
+    const char **saveFiles = FS_ListFiles(saveDir, "svg", FS_LIST_ALL, &saveCount);
+#endif
 
     uiInfo.savegameCount = 0;
     if (saveFiles)
@@ -1922,12 +1928,22 @@ void __cdecl UI_DelSavegame()
         return;
 
     char path[64];
+#ifdef KISAK_XBOX
     Com_sprintf(path, sizeof(path), "save/%s.svg", file);
     if (FS_Delete(path))
+#else
+    Com_BuildPlayerProfilePath(path, 64, "save/%s.svg", file);
+    if (FS_DeleteInDir(path, (char*)"players"))
+#endif
     {
         Com_Printf(13, "Deleted savegame: %s.svg\n", file);
+#ifdef KISAK_XBOX
         Com_sprintf(path, sizeof(path), "save/%s.jpg", file);
         FS_Delete(path);
+#else
+        Com_BuildPlayerProfilePath(path, 64, "save/%s.jpg", file);
+        FS_DeleteInDir(path, (char*)"players");
+#endif
         UI_LoadSavegames(0);
     }
     else

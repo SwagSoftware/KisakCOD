@@ -620,7 +620,7 @@ void __cdecl Cmd_ExecuteServerString(char *text)
         if (SV_Cmd_Argc())
         {
             arg0 = SV_Cmd_Argv(0);
-            for (cmd_function_s *itr= sv_cmd_functions; itr->next; itr = itr->next)
+            for (cmd_function_s *itr= sv_cmd_functions; itr; itr = itr->next)
             {
                 if (!I_stricmp(arg0, itr->name))
                 {

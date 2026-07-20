@@ -451,7 +451,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                 }
                 goto LABEL_46;
             }
-            if (ent->s.eType != 1)
+            if (ent->s.eType != ET_PLAYER)
                 return;
             if (v8 >= 100)
                 break;
@@ -462,7 +462,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
             if (++v5 >= client->ps.eventSequence)
                 return;
         }
-        damage = 1.1;
+        damage = 1.1f;
     LABEL_9:
         G_Damage(ent, 0, 0, 0, 0, (int)((float)client->ps.stats[2] * damage), 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
         goto LABEL_46;

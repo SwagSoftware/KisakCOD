@@ -506,6 +506,8 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     float *v27; // r11
     double v28; // fp0
     float vRight[6]; // [sp+58h] [-98h] BYREF
+	gentity_s *ent;
+	int linkedTo;
 
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
     {
@@ -519,7 +521,12 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         {
             pm_type = cgameGlob->nextSnap->ps.pm_type;
 
-            if (pm_type == PM_DEAD)
+			// (SP) Temporary workaround until PM_DEAD and PM_DEAD_LINKED are fixed.
+			// Only apply the standard death view to unlinked dead players. Linked dead
+			// players should remain attached to their linked position.
+			ent = &g_entities[localClientNum];
+			linkedTo = (ent->tagInfo != 0);
+            if (pm_type >= PM_DEAD && !linkedTo)
             {
                 cgameGlob->refdefViewAngles[0] = -15.0;
                 cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[1];
@@ -720,7 +727,11 @@ void __cdecl CG_CalcFov(int localClientNum)
     float tanHalfFov = tanf(DEG2RAD(fov_x) * 0.5f);
     cgameGlob->refdef.tanHalfFovX = tanHalfFov * 0.75f * cgs->viewAspect;
     cgameGlob->refdef.tanHalfFovY = tanHalfFov * 0.75f;
-    cgameGlob->zoomSensitivity= tanHalfFov / tanf(DEG2RAD(cg_fov->current.value) * 0.5f);
+#ifdef KISAK_XBOX
+    cgameGlob->zoomSensitivity= tanHalfFov / tanf(DEG2RAD(cg_fov->current.value) * 0.5f);// Not sure if this is accurate, even for the Xbox version.
+#else
+	cgameGlob->zoomSensitivity = tanHalfFov / 0.6370702385902405f;
+#endif
 }
 
 float __cdecl CG_GetViewZoomScale()

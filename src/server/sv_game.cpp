@@ -527,7 +527,9 @@ static void SV_FreeReliableCommandsForClient(client_t *cl)
 static void SV_ShutdownGameVM(int clearScripts)
 {
     iassert(Sys_IsMainThread());
+#ifdef KISAK_MP
     SV_AutoSaveDemo("autosave/autoreplay", 0, 50, 0);
+#endif
     if (!sv.demo.nextLevelplaying)
         SV_ShutdownDemo();
     sv.state = SS_DEAD;

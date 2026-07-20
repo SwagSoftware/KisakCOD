@@ -227,6 +227,7 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
     if ((ps->pm_flags & PMF_PRONE) == 0)
         return 1;
 
+#ifdef KISAK_MP
     result = BG_CheckProne(
         ps->clientNum,
         ps->origin,
@@ -241,6 +242,17 @@ int __cdecl PM_VerifyPronePosition(pmove_t *pm, float *vFallbackOrg, float *vFal
         pm->handler,
         PCT_CLIENT,
         50.0);
+#elif KISAK_SP
+    result = BG_CheckProneView(
+        pm->handler,
+        ps->origin,
+        ps->clientNum,
+        30.0,
+        ps->proneDirection,
+        &ps->fTorsoPitch,
+        &ps->fWaistPitch,
+        50.0);
+#endif
 
     if (!(_BYTE)result)
     {

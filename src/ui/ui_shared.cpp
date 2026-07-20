@@ -18,6 +18,11 @@
 #include <game/savedevice.h>
 #include <game/savememory.h>
 #include <game/g_local.h>
+
+#ifndef KISAK_XBOX
+#include <server/server.h>
+#endif
+
 #endif
 
 
@@ -95,7 +100,11 @@ void Script_SaveGameHide(UiContext *dc, itemDef_s *item, const char **args)
     //    Menu_ShowItemByName(dc->localClientNum, item->parent, v9, (uint8_t)v8);
 
     char parsedName[1024];
+#ifdef KISAK_XBOX
     int saveExists = SaveExists(CONSOLE_DEFAULT_SAVE_NAME);
+#else
+    int saveExists = sv_lastSaveGame->current.string[0] && SaveExists(sv_lastSaveGame->current.string);
+#endif
     int shouldHide = !saveExists;  // 1 if save does not exist, 0 otherwise
 
     if (String_Parse(args, parsedName, sizeof(parsedName))) {
@@ -109,7 +118,11 @@ void Script_SaveGameShow(UiContext *dc, itemDef_s *item, const char **args)
     bool v8; // r31
     char v9[1056]; // [sp+50h] [-420h] BYREF
 
+#ifdef KISAK_XBOX
     v7 = SaveExists(CONSOLE_DEFAULT_SAVE_NAME) - 1;
+#else
+    v7 = (sv_lastSaveGame->current.string[0] && SaveExists(sv_lastSaveGame->current.string)) - 1;
+#endif
     v6 = args;
     v8 = v7 == 0;
     if (String_Parse(v6, v9, 1024))
@@ -144,42 +157,62 @@ void Script_ProfileShow(UiContext *dc, itemDef_s *item, const char **args)
 
 void Script_NoSaveHide(UiContext *dc, itemDef_s *item, const char **args)
 {
-    int localClientNum; // r30
     bool IsProfileLoggedIn; // r30
     int v8; // r3
     char v9[1072]; // [sp+50h] [-430h] BYREF
 
-    localClientNum = dc->localClientNum;
+#ifdef KISAK_XBOX
+	int controllerIndex;
+
+	IsProfileLoggedIn = false;
+
+	// leaving this commented out.
     //if (SaveMemory_IsCurrentCommittedSaveValid())
     //{
-    //    v8 = CL_ControllerIndexFromClientNum(localClientNum);
-    //    IsProfileLoggedIn = GamerProfile_IsProfileLoggedIn(v8);
+    //    controllerIndex = CL_ControllerIndexFromClientNum(dc->localClientNum);
+    //    IsProfileLoggedIn = GamerProfile_IsProfileLoggedIn(controllerIndex);
     //}
-    //else
-    {
-        IsProfileLoggedIn = 0;
-    }
+#else
+	bool hasSave;
+
+	hasSave = SaveMemory_IsCurrentCommittedSaveValid();
+	if (!hasSave && sv_lastSaveGame->current.string[0])
+		hasSave = SaveExists(sv_lastSaveGame->current.string);
+
+	IsProfileLoggedIn = hasSave;
+#endif
+
     if (String_Parse(args, v9, 1024))
         Menu_ShowItemByName(dc->localClientNum, item->parent, v9, IsProfileLoggedIn);
 }
 
 void Script_SaveAvailableHide(UiContext *dc, itemDef_s *item, const char **args)
 {
-    int localClientNum; // r30
     bool IsProfileLoggedIn; // r30
     int v8; // r3
     char v9[1072]; // [sp+50h] [-430h] BYREF
 
-    localClientNum = dc->localClientNum;
+#ifdef KISAK_XBOX
+	int controllerIndex;
+
+	IsProfileLoggedIn = false;
+
+	// leaving this commented out.
     //if (SaveMemory_IsCurrentCommittedSaveValid())
     //{
-    //    v8 = CL_ControllerIndexFromClientNum(localClientNum);
+    //    v8 = CL_ControllerIndexFromClientNum(dc->localClientNum);
     //    IsProfileLoggedIn = GamerProfile_IsProfileLoggedIn(v8);
     //}
-    //else
-    {
-        IsProfileLoggedIn = 0;
-    }
+#else
+	bool hasSave;
+
+	hasSave = SaveMemory_IsCurrentCommittedSaveValid();
+	if (!hasSave && sv_lastSaveGame->current.string[0])
+		hasSave = SaveExists(sv_lastSaveGame->current.string);
+
+	IsProfileLoggedIn = hasSave;
+#endif
+
     if (String_Parse(args, v9, 1024))
         Menu_ShowItemByName(dc->localClientNum, item->parent, v9, !IsProfileLoggedIn);
 }
@@ -2035,7 +2068,17 @@ void __cdecl Item_RunScript(UiContext *dc, itemDef_s *item, char *s)
             if (out[0] != 59 || out[1])
             {
                 v3 = 0;
-                for (i = 0; i < 0x2A; ++i)
+#ifdef KISAK_XBOX
+				for (i = 0; i < 0x2A; ++i)
+#else
+
+#ifdef KISAK_SP
+				for (i = 0; i < 0x2E; ++i)// Fix for (nosavehide "saveandquit") PC
+#else
+				for (i = 0; i < 0x2A; ++i)
+#endif
+
+#endif
                 {
                     if (!I_stricmp(out, commandList[i].name))
                     {

@@ -693,7 +693,11 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
         int t1 = Sys_Milliseconds();
         Com_Printf(10, "time to write: %i  ms\n", t1 - t0);
         if (!writeResult)
+		{
             save->isWrittenToDevice = 1;
+			if (!SV_IsInternalSave(save->header.filename))
+				SV_SetLastSaveName(save->header.filename);
+		}
         SaveMemory_FinalizeSaveCommit(save);
         return writeResult;
     }

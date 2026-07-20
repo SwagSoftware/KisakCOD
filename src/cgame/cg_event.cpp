@@ -240,11 +240,25 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (clientNum != cgameGlob->predictedPlayerState.clientNum)
                     goto LABEL_216;
                 CL_SetStance(localClientNum, CL_STANCE_CROUCH);
+				if ((cgameGlob->predictedPlayerState.pm_flags & PMF_DUCKED) == 0)
+				{
+					if (eventParm == 1)
+						CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_STAND_BLOCKED);
+					else if (eventParm == 2)
+						CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_CROUCH_BLOCKED);
+				}
                 return;
             case EV_STANCE_FORCE_PRONE:
                 if (clientNum != cgameGlob->predictedPlayerState.clientNum)
                     goto LABEL_216;
                 CL_SetStance(localClientNum, CL_STANCE_PRONE);
+				if ((cgameGlob->predictedPlayerState.pm_flags & PMF_PRONE) == 0)
+				{
+					if (eventParm == 1)
+						CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_STAND_BLOCKED);
+					else if (eventParm == 2)
+						CG_SetInvalidCmdHint(cgameGlob, INVALID_CMD_CROUCH_BLOCKED);
+				}
                 return;
             case EV_ITEM_PICKUP:
             case EV_AMMO_PICKUP:

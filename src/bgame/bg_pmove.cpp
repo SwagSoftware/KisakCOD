@@ -10,6 +10,18 @@
 #endif
 #include <cgame/cg_local.h>
 
+#ifdef KISAK_SP
+char __cdecl BG_CheckProneView(
+    uint8_t handler,
+    const float *vPos,
+    int32_t passEntityNum,
+    float fHeight,
+    float fYaw,
+    float *pfTorsoPitch,
+    float *pfWaistPitch,
+    float prone_feet_dist);
+#endif
+
 const scriptAnimMoveTypes_t moveAnimTable[6][2][2] =
 {
   {
@@ -161,6 +173,7 @@ void __cdecl PM_playerTrace(
     uint16_t EntityHitId; // ax
 
     pmoveHandlers[pm->handler].trace(results, start, mins, maxs, end, passEntityNum, contentMask);
+#if KISAK_MP
     if (results->startsolid && (results->contents & 0x2000000) != 0)
     {
         EntityHitId = Trace_GetEntityHitId(results);
@@ -168,6 +181,15 @@ void __cdecl PM_playerTrace(
         pm->tracemask &= ~0x2000000u;
         pmoveHandlers[pm->handler].trace(results, start, mins, maxs, end, passEntityNum, contentMask & 0xFDFFFFFF);
     }
+#elif KISAK_SP
+    if (results->startsolid && (results->contents & 0x200C000) != 0)
+    {
+        EntityHitId = Trace_GetEntityHitId(results);
+        PM_AddTouchEnt(pm, EntityHitId);
+        pm->tracemask &= ~0x200C000;
+        pmoveHandlers[pm->handler].trace(results, start, mins, maxs, end, passEntityNum, contentMask & 0xFDFF3FFF);
+    }
+#endif
 }
 
 void __cdecl PM_AddEvent(playerState_s *ps, entity_event_t newEvent)
@@ -383,6 +405,7 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
     if ((ps->pm_flags & PMF_PRONE) != 0)
         return true;
 
+#ifdef KISAK_MP
     return ps->groundEntityNum != ENTITYNUM_NONE
         && BG_CheckProne(
             ps->clientNum,
@@ -398,6 +421,17 @@ bool __cdecl PlayerProneAllowed(pmove_t *pm)
             pm->handler,
             PCT_CLIENT,
             50.0);
+#elif KISAK_SP
+	return BG_CheckProneView(
+		pm->handler,
+		ps->origin,
+		ps->clientNum,
+		30.0,
+		ps->viewangles[1],
+		&ps->fTorsoPitch,
+		&ps->fWaistPitch,
+		50.0) != 0;
+#endif
 }
 
 void __cdecl PM_FootstepEvent(pmove_t *pm, pml_t *pml, char iOldBobCycle, char iNewBobCycle, int32_t bFootStep)
@@ -812,6 +846,7 @@ void __cdecl PM_UpdateViewAngles_LadderClamp(playerState_s *ps)
     }
 }
 
+#ifdef KISAK_MP
 void __cdecl PM_UpdateViewAngles_Prone(
     playerState_s *ps,
     float msec,
@@ -993,6 +1028,241 @@ LABEL_46:
     PM_UpdateViewAngles_PronePitchClamp(ps);
 }
 
+#elif KISAK_SP
+
+static float BG_PitchFromDelta(const float *delta)
+{
+	float turns = vectopitch(delta) * 0.002777777845039964;
+	return (turns - floor(turns + 0.5)) * 360.0;
+}
+
+static float BG_PitchFromAngle(float pitch)
+{
+	float turns = pitch * 0.002777777845039964;
+	return (turns - floor(turns + 0.5)) * 360.0;
+}
+
+char __cdecl BG_CheckProneView(
+    uint8_t handler,
+    const float *vPos,
+    int32_t passEntityNum,
+    float fHeight,
+    float fYaw,
+    float *pfTorsoPitch,
+    float *pfWaistPitch,
+    float prone_feet_dist)
+{
+    void(__cdecl * traceFunc)(trace_t *, const float *, const float *, const float *, const float *, int, int);
+    trace_t trace;
+    float traceMins[3];
+    float traceMaxs[3];
+    float traceStart[3];
+    float traceEnd[3];
+    float forward[3];
+    float viewAngles[3];
+    float torsoPos[3];
+    float waistPos[3];
+    float delta[3];
+    float torsoPitch;
+    float waistPitch;
+    float pitchDiff;
+    float feetTraceDist;
+
+    traceFunc = pmoveHandlers[handler].trace;
+
+    iassert(traceFunc);
+
+    if (pfTorsoPitch)
+        *pfTorsoPitch = 0.0;
+    if (pfWaistPitch)
+        *pfWaistPitch = 0.0;
+
+    traceMins[0] = -6.0;
+    traceMins[1] = -6.0;
+    traceMins[2] = -6.0;
+    traceMaxs[0] = 6.0;
+    traceMaxs[1] = 6.0;
+    traceMaxs[2] = 6.0;
+    viewAngles[0] = 0.0;
+    viewAngles[1] = fYaw - 180.0;
+    viewAngles[2] = 0.0;
+
+    AngleVectors(viewAngles, forward, 0, 0);
+    Vec3Mad(vPos, 18.0, forward, traceStart);
+
+    traceEnd[0] = traceStart[0];
+    traceEnd[1] = traceStart[1];
+    traceEnd[2] = traceStart[2] + fHeight;
+    traceStart[2] = traceStart[2] - fHeight;
+    traceFunc(&trace, traceStart, traceMins, traceMaxs, traceEnd, passEntityNum, 0x810011);
+    torsoPos[0] = traceStart[0] + (traceEnd[0] - traceStart[0]) * trace.fraction;
+    torsoPos[1] = traceStart[1] + (traceEnd[1] - traceStart[1]) * trace.fraction;
+    torsoPos[2] = traceStart[2] + (traceEnd[2] - traceStart[2]) * trace.fraction - 6.0;
+
+    if (trace.startsolid || trace.allsolid)
+        torsoPos[2] = vPos[2];
+
+    feetTraceDist = prone_feet_dist - 6.0;
+    Vec3Mad(vPos, feetTraceDist, forward, traceStart);
+
+    traceEnd[0] = traceStart[0];
+    traceEnd[1] = traceStart[1];
+    traceEnd[2] = torsoPos[2] - fHeight;
+    traceStart[2] = traceStart[2] + fHeight;
+    traceFunc(&trace, traceStart, traceMins, traceMaxs, traceEnd, passEntityNum, 0x810011);
+    waistPos[0] = traceStart[0] + (traceEnd[0] - traceStart[0]) * trace.fraction;
+    waistPos[1] = traceStart[1] + (traceEnd[1] - traceStart[1]) * trace.fraction;
+    waistPos[2] = traceStart[2] + (traceEnd[2] - traceStart[2]) * trace.fraction - 6.0;
+
+    if (trace.startsolid || trace.allsolid)
+        waistPos[2] = vPos[2];
+
+    delta[0] = vPos[0] - torsoPos[0];
+    delta[1] = vPos[1] - torsoPos[1];
+    delta[2] = vPos[2] - torsoPos[2];
+    torsoPitch = BG_PitchFromDelta(delta);
+
+    delta[0] = torsoPos[0] - waistPos[0];
+    delta[1] = torsoPos[1] - waistPos[1];
+    delta[2] = torsoPos[2] - waistPos[2];
+    waistPitch = BG_PitchFromDelta(delta);
+
+    pitchDiff = AngleDelta(torsoPitch, waistPitch);
+    if (pitchDiff < -50.0)
+        waistPitch = BG_PitchFromAngle(torsoPitch - -50.0);
+    else if (pitchDiff > 70.0)
+        waistPitch = BG_PitchFromAngle(torsoPitch - 70.0);
+    if (pfTorsoPitch)
+        *pfTorsoPitch = torsoPitch;
+    if (pfWaistPitch)
+        *pfWaistPitch = waistPitch;
+
+    return 1;
+}
+
+void __cdecl PM_UpdateViewAngles_Prone(
+    playerState_s *ps,
+    float msec,
+    usercmd_s *cmd,
+    uint8_t handler,
+    float oldViewYaw)
+{
+    float startViewYaw;
+    int32_t proneBlocked;
+    float yawDelta;
+    float yawCapThreshold;
+    bool overYawCap;
+    bool canRetrySync;
+    bool movingWithYawOffset;
+    float maxDeltaYaw;
+    float newProneYaw;
+    float stepDelta;
+    float syncDelta;
+    float testProneYaw;
+    bool proneViewOk;
+    float yawStep;
+
+    startViewYaw = ps->viewangles[1];
+    proneBlocked = 0;
+    yawDelta = AngleDelta(ps->proneDirection, startViewYaw);
+    yawCapThreshold = bg_prone_yawcap->current.value - 5.0;
+
+    overYawCap = yawDelta > yawCapThreshold || yawDelta < -yawCapThreshold;
+    canRetrySync = true;
+    movingWithYawOffset = (cmd->forwardmove || cmd->rightmove) && yawDelta != 0.0;
+
+    if (overYawCap || movingWithYawOffset)
+    {
+        maxDeltaYaw = msec * 55.0 * EQUAL_EPSILON;
+
+        if (maxDeltaYaw <= I_fabs(yawDelta))
+        {
+            if (yawDelta <= 0.0)
+                newProneYaw = ps->proneDirection + maxDeltaYaw;
+            else
+                newProneYaw = ps->proneDirection - maxDeltaYaw;
+        }
+        else
+        {
+            newProneYaw = ps->viewangles[1];
+        }
+
+        if (BG_CheckProneTurned(ps, newProneYaw, handler))
+        {
+            goto commit_prone_yaw;
+        }
+
+        while (true)
+        {
+            stepDelta = AngleDelta(ps->proneDirection, newProneYaw);
+            if (I_fabs(stepDelta) <= 1.0)
+            {
+                proneBlocked = 1;
+                break;
+            }
+
+            stepDelta = (stepDelta <= 0.0) ? -1.0 : 1.0;
+            newProneYaw = AngleNormalize360(newProneYaw + stepDelta);
+
+            if (BG_CheckProneTurned(ps, newProneYaw, handler))
+                goto commit_prone_yaw;
+        }
+
+commit_prone_yaw:
+        if (BG_CheckProneView(handler, ps->origin, ps->clientNum, 30.0, ps->viewangles[1], 0, 0, 45.0)
+            && BG_CheckProneView(handler, ps->origin, ps->clientNum, 30.0, newProneYaw, 0, 0, 45.0))
+        {
+            ps->proneDirection = newProneYaw;
+        }
+        else
+        {
+            proneBlocked = 1;
+        }
+    }
+
+    syncDelta = AngleDelta(ps->proneDirection, ps->viewangles[1]);
+    if (syncDelta != 0.0)
+    {
+        testProneYaw = ps->proneDirection;
+
+        while (true)
+        {
+            proneViewOk = BG_CheckProneView(handler, ps->origin, ps->clientNum, 30.0, testProneYaw, 0, 0, 45.0);
+            if (proneViewOk && BG_CheckProneTurned(ps, testProneYaw, handler))
+                break;
+
+            if (!canRetrySync)
+                goto finish;
+
+            if (I_fabs(syncDelta) > 1.0)
+            {
+                canRetrySync = true;
+                yawStep = (syncDelta <= 0.0) ? -1.0 : 1.0;
+                syncDelta = yawStep;
+            }
+            else
+            {
+                canRetrySync = false;
+            }
+
+            proneBlocked = 1;
+            ps->delta_angles[1] = ps->delta_angles[1] + syncDelta;
+            ps->viewangles[1] = AngleNormalize360(ps->viewangles[1] + syncDelta);
+            syncDelta = AngleDelta(ps->proneDirection, ps->viewangles[1]);
+
+            if (!proneViewOk)
+                testProneYaw = AngleNormalize360(testProneYaw + syncDelta);
+        }
+
+        ps->proneDirection = testProneYaw;
+    }
+
+finish:
+    PM_UpdateViewAngles_ProneYawClamp(ps, syncDelta, proneBlocked, oldViewYaw, startViewYaw);
+    PM_UpdateViewAngles_PronePitchClamp(ps);
+}
+#endif
+
 int32_t __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, uint8_t handler)
 {
     float v4; // [esp+2Ch] [ebp-18h]
@@ -1008,6 +1278,7 @@ int32_t __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, uint8_
     v4 = newProneYaw - (1.0 - fraction) * delta;
     testYaw = AngleNormalize360(v4);
     prone_feet_dist = fraction * 45.0 + (1.0 - fraction) * 50.0;
+#ifdef KISAK_MP
     return (uint8_t)BG_CheckProne(
         ps->clientNum,
         ps->origin,
@@ -1022,6 +1293,17 @@ int32_t __cdecl BG_CheckProneTurned(playerState_s *ps, float newProneYaw, uint8_
         handler,
         PCT_CLIENT,
         prone_feet_dist);
+#elif KISAK_SP
+    return BG_CheckProneView(
+        handler,
+        ps->origin,
+        ps->clientNum,
+        30.0,
+        testYaw,
+        &ps->fTorsoPitch,
+        &ps->fWaistPitch,
+        prone_feet_dist);
+#endif
 }
 
 void __cdecl PM_UpdateViewAngles_ProneYawClamp(
@@ -1062,6 +1344,7 @@ void __cdecl PM_UpdateViewAngles_ProneYawClamp(
         }
         ps->viewangles[1] = v6;
     }
+#ifdef KISAK_MP
     if (proneBlocked)
     {
         ps->pm_flags |= PMF_NO_PRONE;
@@ -1079,6 +1362,7 @@ void __cdecl PM_UpdateViewAngles_ProneYawClamp(
             }
         }
     }
+#endif
 }
 
 void __cdecl PM_UpdateViewAngles_PronePitchClamp(playerState_s *ps)
@@ -1154,6 +1438,7 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
 
     if ((ps->pm_flags & PMF_PRONE) != 0)
     {
+#ifdef KISAK_MP
         if (ps->groundEntityNum == ENTITYNUM_NONE)
         {
             if (pml->groundPlane)
@@ -1196,6 +1481,28 @@ void __cdecl PM_UpdatePronePitch(pmove_t *pm, pml_t *pml)
         {
             BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
         }
+#elif KISAK_SP
+        if (ps->groundEntityNum == ENTITYNUM_NONE)
+        {
+            if (!BG_CheckProneView(
+                    pm->handler,
+                    ps->origin,
+                    ps->clientNum,
+                    30.0,
+                    ps->proneDirection,
+                    &ps->fTorsoPitch,
+                    &ps->fWaistPitch,
+                    50.0))
+            {
+                BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
+                ps->pm_flags |= PMF_NO_PRONE;
+            }
+        }
+        else if (pml->groundPlane && !pml->groundTrace.walkable)
+        {
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
+        }
+#endif
         if (pml->groundPlane)
         {
             fTargPitch = PitchForYawOnNormal(ps->proneDirection, pml->groundTrace.normal);
@@ -1839,6 +2146,7 @@ bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm)
     if ((ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0)
         return true;
 
+#if KISAK_MP
     pmoveHandlers[pm->handler].trace(
         &trace,
         ps->origin,
@@ -1847,6 +2155,16 @@ bool __cdecl PM_CanStand(playerState_s *ps, pmove_t *pm)
         ps->origin,
         ps->clientNum,
         pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+    pmoveHandlers[pm->handler].trace(
+        &trace,
+        ps->origin,
+        playerMins,
+        playerMaxs,
+        ps->origin,
+        ps->clientNum,
+        pm->tracemask & 0xFDFF3FFF);
+#endif
 
     return !trace.allsolid;
 }
@@ -3111,7 +3429,12 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 
 #ifdef KISAK_MP
     pm->proneChange = 0;
+#else
+    gentity_s *ent;
+    int linkedTo;
+#endif
 
+#ifdef KISAK_MP
     if (ps->pm_type == PM_SPECTATOR)
     {
         pm->mins[0] = -8.0;
@@ -3129,8 +3452,44 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         ps->viewHeightTarget = 0;
         ps->viewHeightCurrent = 0.0;
     }
-    else
+#elif KISAK_SP
+	// (SP) Temporary workaround until PM_DEAD and PM_DEAD_LINKED are fixed.
+	// Only allow unlinked dead players to fall to the ground. Linked dead
+	// players should remain fixed to their linked position instead.
+	ent = &g_entities[ps->clientNum];
+	linkedTo = (ent->tagInfo != 0);
+	if (ps->pm_type >= PM_DEAD && !linkedTo)
+    {
+        ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
+        if ((pm->cmd.buttons & 0x100) != 0)
+        {
+            pm->cmd.buttons &= ~0x100u;
+            BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
+        }
+        if (ps->viewHeightCurrent <= 8.0f)
+        {
+            pm->mins[0] = -8.0;
+            pm->mins[1] = -8.0;
+            pm->mins[2] = -8.0;
+            pm->maxs[0] = 8.0;
+            pm->maxs[1] = 8.0;
+            pm->maxs[2] = 16.0;
+            ps->viewHeightTarget = 8;
+        }
+        else
+        {
+            pm->mins[0] = -15.0;
+            pm->mins[1] = -15.0;
+            pm->mins[2] = 0.0;
+            pm->maxs[0] = 15.0;
+            pm->maxs[1] = 15.0;
+            pm->maxs[2] = 70.0;
+            ps->viewHeightTarget = 8;
+        }
+        PM_ViewHeightAdjust(pm, pml);
+    }
 #endif
+    else
     {
         bWasProne = (ps->pm_flags & PMF_PRONE) != 0;
         bWasStanding = (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0;
@@ -3140,20 +3499,12 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[0] = 15.0;
         pm->maxs[1] = 15.0;
         pm->maxs[2] = 70.0;
-#ifdef KISAK_SP
         if (ps->pm_type == PM_DEAD)
         {
             ps->viewHeightTarget = 8;
             PM_ViewHeightAdjust(pm, pml);
-            return;
         }
-#endif
 #ifdef KISAK_MP
-        if (ps->pm_type == PM_DEAD)
-        {
-            ps->viewHeightTarget = 8;
-            PM_ViewHeightAdjust(pm, pml);
-        }
         else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
 #elif KISAK_SP
         if ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0)
@@ -3283,7 +3634,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     pm->maxs,
                                     ps->origin,
                                     ps->clientNum,
+#ifdef KISAK_MP
                                     pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                                    pm->tracemask & 0xFDFF3FFF);
+#endif
                                 if (trace.allsolid)
                                 {
                                     if ((pm->cmd.buttons & 0x1000) == 0)
@@ -3326,7 +3681,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 pm->maxs,
                                 ps->origin,
                                 ps->clientNum,
+#ifdef KISAK_MP
                                 pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                                pm->tracemask & 0xFDFF3FFF);
+#endif
                             if (trace.allsolid)
                             {
                                 pm->maxs[2] = 50.0;
@@ -3337,7 +3696,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     pm->maxs,
                                     ps->origin,
                                     ps->clientNum,
+#ifdef KISAK_MP
                                     pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                                    pm->tracemask & 0xFDFF3FFF);
+#endif
                                 if (trace.allsolid)
                                 {
                                     if ((pm->cmd.buttons & 0x1000) == 0)
@@ -3371,7 +3734,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 pm->maxs,
                                 ps->origin,
                                 ps->clientNum,
+#ifdef KISAK_MP
                                 pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                                pm->tracemask & 0xFDFF3FFF);
+#endif
                             if (trace.allsolid)
                             {
                                 if ((pm->cmd.buttons & 0x1000) == 0)
@@ -3396,6 +3763,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                         ps->pm_flags |= PMF_PRONE;
                         ps->pm_flags &= ~PMF_DUCKED;
                     }
+#ifdef KISAK_MP
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
                         ps->pm_flags |= PMF_NO_PRONE;
@@ -3407,6 +3775,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
                         }
                     }
+#endif
                 }
             }
             if (!ps->viewHeightLerpTime)
@@ -3494,7 +3863,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     pm->maxs,
                     vEnd,
                     ps->clientNum,
+#ifdef KISAK_MP
                     pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                    pm->tracemask & 0xFDFF3FFF);
+#endif
                 Vec3Lerp(ps->origin, vEnd, trace.fraction, vEnd);
                 pmoveHandlers[pm->handler].trace(
                     &trace,
@@ -3503,7 +3876,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     pm->maxs,
                     ps->origin,
                     ps->clientNum,
+#ifdef KISAK_MP
                     pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                    pm->tracemask & 0xFDFF3FFF);
+#endif
                 Vec3Lerp(vEnd, ps->origin, trace.fraction, ps->origin);
                 ps->proneDirection = ps->viewangles[1];
                 vPoint[0] = ps->origin[0];
@@ -3517,7 +3894,11 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     pm->maxs,
                     vPoint,
                     ps->clientNum,
+#ifdef KISAK_MP
                     pm->tracemask & 0xFDFFFFFF);
+#elif KISAK_SP
+                    pm->tracemask & 0xFDFF3FFF);
+#endif
                 if (trace.startsolid || trace.fraction >= 1.0)
                 {
                     ps->proneDirectionPitch = 0.0;

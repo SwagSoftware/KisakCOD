@@ -9,6 +9,9 @@
 #include <client/client.h>      // SaveHeader
 #include "../server/server.h"
 #include <script/scr_readwrite.h>   // Scr_SaveSourceImmediate
+#ifndef KISAK_XBOX
+#include <qcommon/com_playerprofile.h>
+#endif
 
 // void __cdecl SaveDevice_Init(void)    8227fb88 f   savedevice_xenon.obj
 // void __cdecl SV_DisplaySaveErrorUI(void) 8227fba8 f   savedevice_xenon.obj
@@ -56,6 +59,7 @@ bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathS
 	if (!cleanSavePath)
 		MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savedevice_xenon.cpp", 84, 0, "%s", "cleanSavePath");
 
+#ifdef KISAK_XBOX
 	if (saveType == SAVE_TYPE_AUTOSAVE)
 	{
 		char *dst = cleanSavePath;
@@ -68,6 +72,7 @@ bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathS
 		} while (c);
 		return true;
 	}
+#endif
 
 	const char *p = filename;
 	while (*(unsigned char *)p++)
@@ -112,8 +117,18 @@ bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathS
 		}
 	}
 	buf[i] = 0;
+#ifdef KISAK_XBOX
 	Com_sprintf(cleanSavePath, 64, "save/%s.svg", buf);
 	return true;
+#else
+	if (Com_BuildPlayerProfilePath(cleanSavePath, (int)cleanSavePathSize, "save/%s.svg", buf) < 0
+		|| (unsigned int)Com_BuildPlayerProfilePath(cleanSavePath, (int)cleanSavePathSize, "save/%s.svg", buf) >= cleanSavePathSize)
+	{
+		Com_Printf(10, "filename '%s' is too long.\n", filename);
+		return false;
+	}
+	return true;
+#endif
 }
 
 bool __cdecl SaveDevice_IsAccessingDevice(void)
@@ -180,7 +195,11 @@ int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *save
 		return -1;
 	}
 
+#ifdef KISAK_XBOX
 	int handle = FS_FOpenFileWrite(saveHeader->filename);
+#else
+	int handle = FS_FOpenFileWriteToDir("save/temp.svg", fs_gamedir);
+#endif
 	if (!handle)
 	{
 		Com_PrintError(10, "WriteSaveToDevice: failed to open '%s' for writing\n", saveHeader->filename);
@@ -209,6 +228,8 @@ int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *save
 	g_saveDevice_lastSaveSucceeded = ok;
 	if (!ok)
 	{
+		FS_DeleteInDir((char*)"save/temp.svg", fs_gamedir);
+		g_saveDevice_lastSaveSucceeded = false;
 		Com_PrintError(10,
 			"WriteSaveToDevice: short write to '%s' (header %u/%u, body %u/%u)\n",
 			saveHeader->filename,
@@ -216,6 +237,14 @@ int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *save
 			wroteBody, bodySize);
 		return -1;
 	}
+
+#ifdef KISAK_XBOX
+	g_saveDevice_lastSaveSucceeded = true;
+#else
+	FS_Rename((char*)"save/temp.svg", fs_gamedir,
+		(char*)saveHeader->filename, (char*)"players");
+	g_saveDevice_lastSaveSucceeded = true;
+#endif
 	return 0;
 }
 
