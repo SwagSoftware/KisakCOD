@@ -7376,51 +7376,41 @@ void __cdecl Mark_SndAliasCustom(snd_alias_list_t **var)
 
 void __cdecl DB_SaveDObjs()
 {
-    int32_t handle; // [esp+0h] [ebp-Ch]
-    int32_t handlea; // [esp+0h] [ebp-Ch]
-    DObj_s *obj; // [esp+4h] [ebp-8h]
-    DObj_s *obja; // [esp+4h] [ebp-8h]
-    int32_t localClientNum; // [esp+8h] [ebp-4h]
-
-    for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+    for (int localClientNum = 0; localClientNum < STATIC_MAX_LOCAL_CLIENTS; ++localClientNum)
     {
-        for (handle = 0; handle < 1152; ++handle)
+        for (int handle = 0; handle < CLIENT_DOBJ_HANDLE_MAX; ++handle)
         {
-            obj = Com_GetClientDObj(handle, localClientNum);
+            DObj_s *obj = Com_GetClientDObj(handle, localClientNum);
             if (obj)
                 DObjArchive(obj);
         }
     }
-    for (handlea = 0; handlea < 1024; ++handlea)
+
+    for (int handle = 0; handle < MAX_GENTITIES; ++handle)
     {
-        obja = Com_GetServerDObj(handlea);
-        if (obja)
-            DObjArchive(obja);
+        DObj_s *obj = Com_GetServerDObj(handle);
+        if (obj)
+            DObjArchive(obj);
     }
 }
 
 void __cdecl DB_LoadDObjs()
 {
-    int32_t handle; // [esp+0h] [ebp-Ch]
-    int32_t handlea; // [esp+0h] [ebp-Ch]
-    DObj_s *obj; // [esp+4h] [ebp-8h]
-    DObj_s *obja; // [esp+4h] [ebp-8h]
-    int32_t localClientNum; // [esp+8h] [ebp-4h]
-
-    for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+    for (int localClientNum = 0; localClientNum < STATIC_MAX_LOCAL_CLIENTS; ++localClientNum)
     {
-        for (handle = 0; handle < 1152; ++handle)
+        for (int handle = 0; handle < CLIENT_DOBJ_HANDLE_MAX; ++handle)
         {
-            obj = Com_GetClientDObj(handle, localClientNum);
+            DObj_s *obj = Com_GetClientDObj(handle, localClientNum);
             if (obj)
                 DObjUnarchive(obj);
         }
     }
-    for (handlea = 0; handlea < 1024; ++handlea)
+
+    for (int handle = 0; handle < MAX_GENTITIES; ++handle)
     {
-        obja = Com_GetServerDObj(handlea);
-        if (obja)
-            DObjUnarchive(obja);
+        DObj_s *obj = Com_GetServerDObj(handle);
+        if (obj)
+            DObjUnarchive(obj);
     }
 }
 
