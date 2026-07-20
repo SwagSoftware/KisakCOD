@@ -114,6 +114,63 @@ int32_t g_poolSize[ASSET_TYPE_COUNT] =
 
 bool g_archiveBuf;
 
+// --- file-local forward declarations (moved out of database.h) ---
+static void __cdecl DB_InitSingleton(void *pool, int32_t size);
+static void __cdecl DB_RemoveClipMap(XAssetHeader ass);
+static void __cdecl DB_RemoveComWorld(XAssetHeader ass);
+static void __cdecl DB_RemoveGfxWorld(XAssetHeader ass);
+static void __cdecl DB_DynamicCloneMenu(XAssetHeader from, XAssetHeader to, int32_t swag = 0);
+static void __cdecl DB_RemoveWindowFocus(windowDef_t *window);
+static XAssetHeader __cdecl DB_AllocMaterial(void *arg);
+static void __cdecl DB_FreeMaterial(void *pool, XAssetHeader header);
+static void __cdecl DB_Sleep(uint32_t msec);
+static void __cdecl DB_LogMissingAsset(XAssetType type, const char *name);
+static void __cdecl DB_RegisteredReorderAsset(int32_t type, const char *assetName, XAssetEntry *assetEntry);
+static XAssetEntryPoolEntry *__cdecl DB_FindXAssetEntry(XAssetType type, const char *name);
+static uint32_t __cdecl DB_HashForName(const char *name, XAssetType type);
+static XAssetEntry *__cdecl DB_CreateDefaultEntry(XAssetType type, char *name);
+static XAssetEntryPoolEntry *__cdecl DB_AllocXAssetEntry(XAssetType type, uint8_t zoneIndex);
+static XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type);
+static void __cdecl DB_PrintAssetName(XAssetHeader header, int32_t *data);
+static void __cdecl DB_CloneXAssetInternal(const XAsset *from, XAsset *to);
+static XAssetHeader __cdecl DB_FindXAssetDefaultHeaderInternal(XAssetType type);
+static void __cdecl PrintWaitedError(XAssetType type, const char *name, int32_t waitedMsec);
+static bool __cdecl DB_GetInitializing();
+static XAssetHeader __cdecl DB_AddXAsset(XAssetType type, XAssetHeader header);
+static XAssetEntryPoolEntry *__cdecl DB_LinkXAssetEntry(XAssetEntryPoolEntry *newEntry, int32_t allowOverride);
+static void __cdecl DB_FreeXAssetEntry(XAssetEntryPoolEntry *assetEntry);
+static void __cdecl DB_FreeXAssetHeader(XAssetType type, XAssetHeader header);
+static void __cdecl DB_CloneXAssetEntry(const XAssetEntry *from, XAssetEntry *to);
+static void __cdecl DB_DynamicCloneXAsset(XAssetHeader from, XAssetHeader to, XAssetType type, int32_t fromDefault);
+static void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry);
+static bool __cdecl DB_OverrideAsset(uint32_t newZoneIndex, uint32_t existingZoneIndex);
+static void __cdecl DB_GetXAsset(XAssetType type, XAssetHeader header);
+static void DB_PostLoadXZone();
+static void DB_Init();
+static void __cdecl DB_InitPoolHeader(XAssetType type);
+static void __cdecl DB_LoadXZone(XZoneInfo *zoneInfo, uint32_t zoneCount);
+static void __cdecl DB_LoadZone_f();
+static void __cdecl  DB_Thread(uint32_t threadContext);
+static void DB_TryLoadXFile();
+static int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags);
+static void __cdecl DB_BuildOSPath(const char *zoneName, uint32_t size, char *filename);
+static int32_t __cdecl DB_GetZoneAllocType(int32_t zoneFlags);
+static void __cdecl DB_UnloadXZone(uint32_t zoneIndex, bool createDefault);
+static void __cdecl DB_RemoveXAsset(XAsset *asset);
+static void __cdecl DB_UnloadXZoneMemory(XZone *zone);
+static void DB_FreeDefaultEntries();
+static void __cdecl DB_UnloadXAssetsMemoryForZone(int32_t zoneFreeFlags, int32_t zoneFreeBit);
+static void __cdecl DB_UnloadXAssetsMemory(XZone *zone, int32_t sortedIndex);
+static void __cdecl DB_ReplaceXAsset(XAssetType type, const char *original, const char *replacement);
+static void __cdecl DB_CloneXAsset(const XAsset *from, XAsset *to);
+static void DB_SyncExternalAssets();
+static void DB_ArchiveAssets();
+static void DB_FreeUnusedResources();
+static void DB_ExternalInitAssets();
+static void DB_UnarchiveAssets();
+static int32_t __cdecl DB_GetAllXAssetOfType_LoadObj(XAssetType type, XAssetHeader* assets, int32_t maxCount);
+static void __cdecl DB_EnumXAssets_LoadObj(XAssetType type, void(* func)(void*, void*), void* inData);
+
 static XAssetHeader __cdecl node1_(void *pool)
 {
     return (XAssetHeader)pool;

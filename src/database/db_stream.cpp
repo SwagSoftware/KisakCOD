@@ -11,6 +11,9 @@ uint8_t *g_streamPos;
 StreamPosInfo g_streamPosStack[64];
 uint32_t g_streamPosStackIndex;
 
+// --- file-local forward declarations (moved out of database.h) ---
+static void __cdecl DB_SetStreamIndex(uint32_t index);
+
 void __cdecl DB_InitStreams(XZoneMemory *zoneMem)
 {
     int32_t i; // [esp+0h] [ebp-4h]

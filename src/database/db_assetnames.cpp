@@ -3,6 +3,10 @@
 
 //int32_t marker_db_assetnames 828ddeec     db_assetnames.obj
 
+const char *__cdecl DB_StringTableGetName(const XAssetHeader *header);
+const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header);
+const char *__cdecl DB_ImageGetName(const XAssetHeader *header);
+
 const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
 {
     // KISAKTODO: these got Identical COMDAT folded into 1 function because name is usually the 1st field.
@@ -40,6 +44,10 @@ const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
     DB_StringTableGetName,
     DB_StringTableGetName
 };
+
+void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
+void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name);
+void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name);
 
 void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
 {
@@ -79,6 +87,14 @@ void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
 };
 
 // KISAKTODO: make these non-fixed
+// --- file-local forward declarations (moved out of database.h) ---
+static void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
+static const char*__cdecl DB_ImageGetName(const XAssetHeader *header);
+static void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name);
+static const char *__cdecl DB_StringTableGetName(const XAssetHeader *header);
+static const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header);
+static void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name);
+
 int32_t __cdecl DB_SizeofXAsset_RawFile_()
 {
     return sizeof(RawFile);

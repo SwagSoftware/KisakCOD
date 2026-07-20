@@ -20,6 +20,9 @@ const char *g_block_mem_name[9] =
   "index"
 };
 
+// --- file-local forward declarations (moved out of database.h) ---
+static uint8_t *__cdecl DB_MemAlloc(uint32_t size, uint32_t type, uint32_t allocType);
+
 void __cdecl DB_RecoverGeometryBuffers(XZoneMemory *zoneMem)
 {
     uint8_t *lockedData; // [esp+4h] [ebp-4h]

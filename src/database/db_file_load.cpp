@@ -35,6 +35,14 @@ int32_t g_trackLoadProgress;
 
 XAssetList g_varXAssetList;
 
+// --- file-local forward declarations (moved out of database.h) ---
+static void __cdecl DB_CancelLoadXFile();
+static int32_t DB_WaitXFileStage();
+static void DB_ReadXFileStage();
+static int32_t __cdecl DB_ReadData();
+static void Load_XAssetListCustom();
+static void __cdecl Load_XAssetArrayCustom(int32_t count);
+
 void __cdecl DB_CancelLoadXFile()
 {
     if (g_load.compressBufferStart)
