@@ -29,7 +29,7 @@ void __cdecl DObjInit()
     int duplicatePartBits[5]; // [esp+0h] [ebp-14h] BYREF
 
     memset(duplicatePartBits, 0, sizeof(duplicatePartBits));
-    g_empty = SL_GetStringOfSize((char *)duplicatePartBits, 0, 0x11u, 12);
+    g_empty = SL_GetStringOfSize((char *)duplicatePartBits, 0, 0x11u, MT_TYPE_DUPLICATE_PARTS);
 }
 
 void __cdecl DObjShutdown()
@@ -337,7 +337,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, uint
     iassert(boneCount == (byte)boneCount);
     obj->numBones = boneCount;
     iassert(numModels > 0);
-    obj->models = (XModel **)MT_Alloc(5 * numModels, 13);
+    obj->models = (XModel **)MT_Alloc(5 * numModels, MT_TYPE_MODEL_LIST);
     memcpy((unsigned __int8 *)obj->models, (unsigned __int8 *)models, 4 * numModels);
     memcpy((unsigned __int8 *)&obj->models[numModels], modelParents, numModels);
     iassert(g_empty);
@@ -349,7 +349,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, uint
         size = ++len + 16;
         obj->duplicatePartsSize = len + 16;
         iassert(obj->duplicatePartsSize == size);
-        obj->duplicateParts = SL_GetStringOfSize((char *)duplicatePartBits, 0, obj->duplicatePartsSize, 12);
+        obj->duplicateParts = SL_GetStringOfSize((char *)duplicatePartBits, 0, obj->duplicatePartsSize, MT_TYPE_DUPLICATE_PARTS);
     }
     else
     {
@@ -1328,7 +1328,7 @@ void DObjClone(const DObj_s *from, DObj_s *obj)
     if (obj->duplicateParts && duplicateParts != g_empty)
         SL_AddRefToString(duplicateParts);
     obj->tree = 0;
-    v5 = (XModel **)MT_Alloc(from->numModels + __ROL4__(from->numModels, 2), 13);
+    v5 = (XModel **)MT_Alloc(from->numModels + __ROL4__(from->numModels, 2), MT_TYPE_MODEL_LIST);
     obj->models = v5;
     memcpy(v5, from->models, from->numModels + __ROL4__(from->numModels, 2));
 }

@@ -13,6 +13,9 @@
 struct snd_alias_t;
 
 #ifdef KISAK_SP
+
+#define MAX_CONFIGSTRINGS 2815
+
 // PC SP configstring layout, derived from iw3sp_dump bootstrap (sub_4C4240) and
 // per-bucket xrefs (EV_SOUND_ALIAS @ 0x419e97 confirms CS_SOUNDALIASES = 1635).
 // Differs from Xbox CoD3-SP by removing CS_RUMBLES (32 entries) — every bucket
@@ -887,7 +890,7 @@ struct clientActive_t
 {
     clSnapshot_t snap;
     int32_t serverTime;
-    uint16_t configstrings[2815];
+    uint16_t configstrings[MAX_CONFIGSTRINGS];
     char mapname[64];
     bool usingAds;
     int32_t parseEntitiesNum;

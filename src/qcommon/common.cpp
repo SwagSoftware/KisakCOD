@@ -2395,7 +2395,7 @@ void Com_XAnimFreeSmallTree(XAnimTree_s *animtree)
 
 static void *MT_AllocAnimTree(int size)
 {
-    return MT_Alloc(size, 5);
+    return MT_Alloc(size, MT_TYPE_SMALL_ANIM_TREE);
 }
 
 XAnimTree_s *Com_XAnimCreateSmallTree(XAnim_s *anims)

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include "scr_memorytree.h"
 
 #define HASH_STAT_FREE      0
 #define HASH_STAT_MOVABLE   0x10000
@@ -91,8 +92,8 @@ void SL_AddUserInternal(RefString* refStr, uint32_t user);
 
 void SL_AddRefToString(uint32_t stringValue);
 
-uint32_t SL_GetString_(const char* str, uint32_t user, int type);
-uint32_t SL_GetStringOfSize(const char* str, uint32_t user, uint32_t len, int type);
+uint32_t SL_GetString_(const char* str, uint32_t user, mtType_t type);
+uint32_t SL_GetStringOfSize(const char* str, uint32_t user, uint32_t len, mtType_t type);
 const char* SL_ConvertToString(uint32_t stringValue);
 const char *SL_ConvertToStringSafe(uint32_t stringValue);
 RefString* GetRefString(uint32_t stringValue);
@@ -104,7 +105,7 @@ uint32_t SL_GetStringForVector(const float* v);
 uint32_t SL_GetStringForInt(int i);
 uint32_t SL_GetStringForFloat(float f);
 uint32_t SL_GetString(const char* str, uint32_t user);
-uint32_t SL_GetLowercaseString_(const char* str, uint32_t user, int type);
+uint32_t SL_GetLowercaseString_(const char* str, uint32_t user, mtType_t type);
 uint32_t SL_GetLowercaseString(const char* str, uint32_t user);
 
 void __cdecl SL_TransferRefToUser(uint32_t stringValue, uint32_t user);
@@ -125,7 +126,7 @@ int SL_IsLowercaseString(uint32_t stringValue);
 
 void __cdecl Scr_SetString(uint16_t *to, uint32_t from);
 
-uint32_t __cdecl SL_ConvertToLowercase(uint32_t stringValue, uint32_t user, int type);
+uint32_t __cdecl SL_ConvertToLowercase(uint32_t stringValue, uint32_t user, mtType_t type);
 
 uint32_t __cdecl Scr_CreateCanonicalFilename(const char *filename);
 

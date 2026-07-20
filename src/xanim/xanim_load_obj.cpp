@@ -871,7 +871,7 @@ void __cdecl ReadNoteTracks(const char *name, unsigned char **pos, XAnimParts *p
     parts->notify = notify;
     for (i = 0; i < numNoteTracks; ++i)
     {
-        notify->name = SL_GetString_((const char*)*pos, 0, 3);
+        notify->name = SL_GetString_((const char*)*pos, 0, MT_TYPE_NOTETRACK);
         *pos += strlen((const char *)*pos) + 1;
 
         v6 = Buf_Read<unsigned short>(pos);
@@ -885,7 +885,7 @@ void __cdecl ReadNoteTracks(const char *name, unsigned char **pos, XAnimParts *p
         iassert(notify->time >= 0.0f && notify->time <= 1.0f);
         ++notify;
     }
-    notify->name = SL_GetString_("end", 0, 3);
+    notify->name = SL_GetString_("end", 0, MT_TYPE_NOTETRACK);
     notify->time = 1.0;
 }
 
@@ -1080,7 +1080,7 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
     for (i = 0; i < numBones; ++i)
     {
         count = strlen((const char *)pos) + 1;
-        prev = SL_GetStringOfSize((char *)pos, 0, count, 9);
+        prev = SL_GetStringOfSize((char *)pos, 0, count, MT_TYPE_ANIM_PART);
         v68[i] = prev;
         v27 = v69 || XAnimIsHighPrecisionPart((const char *)pos);
         g_highPrecisionPart[i] = v27;

@@ -1108,7 +1108,7 @@ LABEL_30:
 
                         if (!MT_Realloc(stackValue->bufLen, bufLen))
                         {
-                            newStackValue = (VariableStackBuffer*)MT_Alloc(bufLen, 1);
+                            newStackValue = (VariableStackBuffer*)MT_Alloc(bufLen, MT_TYPE_THREAD);
                             newStackValue->bufLen = bufLen;
                             newStackValue->pos = stackValue->pos;
                             newStackValue->localId = stackValue->localId;
@@ -1543,7 +1543,7 @@ VariableStackBuffer *__cdecl VM_ArchiveStack()
     bufLen = 5 * size + 11;
     if (bufLen != (uint16_t)bufLen)
         MyAssertHandler(".\\script\\scr_vm.cpp", 2770, 0, "%s", "bufLen == (unsigned short)bufLen");
-    stackValue = (VariableStackBuffer*) MT_Alloc(bufLen, 1);
+    stackValue = (VariableStackBuffer*) MT_Alloc(bufLen, MT_TYPE_THREAD);
     ++scrVarPub.numScriptThreads;
     localId = fs.localId;
     stackValue->localId = fs.localId;
@@ -1704,7 +1704,7 @@ VariableStackBuffer *VM_ArchiveStack2(int size, const char *codePos, VariableVal
     iassert(size == (unsigned short)size);
     iassert(bufLen == (unsigned short)bufLen);
 
-    stackBuf = (VariableStackBuffer *)MT_Alloc(bufLen, 1);
+    stackBuf = (VariableStackBuffer *)MT_Alloc(bufLen, MT_TYPE_THREAD);
     ++scrVarPub.numScriptThreads;
     id = *localId;
     stackBuf->localId = *localId;

@@ -1319,7 +1319,7 @@ XAnim_s *__cdecl CG_GetHelicopterAnims(centity_s *cent)
 
 char *__cdecl CG_AllocAnimTree(int32_t size)
 {
-    return (char*)MT_Alloc(size, 5);
+    return (char*)MT_Alloc(size, MT_TYPE_SMALL_ANIM_TREE);
 }
 
 void __cdecl CG_DObjCalcBone(const cpose_t *pose, DObj_s *obj, int32_t boneIndex)

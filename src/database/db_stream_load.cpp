@@ -14,14 +14,7 @@ void __cdecl Load_Stream(bool atStreamStart, uint8_t *ptr, int32_t size)
             }
             else
             {
-                if (g_streamDelayIndex >= 0x1000)
-                    MyAssertHandler(
-                        ".\\database\\db_stream_load.cpp",
-                        33,
-                        0,
-                        "g_streamDelayIndex doesn't index ARRAY_COUNT( g_streamDelayArray )\n\t%i not in [0, %i)",
-                        g_streamDelayIndex,
-                        4096);
+                bcassert(g_streamDelayIndex, ARRAY_COUNT(g_streamDelayArray));
                 g_streamDelayArray[g_streamDelayIndex].ptr = ptr;
                 g_streamDelayArray[g_streamDelayIndex++].size = size;
             }

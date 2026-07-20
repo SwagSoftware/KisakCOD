@@ -1123,8 +1123,8 @@ int __cdecl BG_ParseWeaponDefSpecificFieldType(uint8_t *pStruct, const char *pVa
                 break;
             if (numHideTags >= 8)
                 Com_Error(ERR_DROP, "maximum hide tags (%s) exceeded: %i > %i'", token, numHideTags, 8);
-            weapDef->hideTags[numHideTags] = SL_GetStringOfSize((char *)token, 0, strlen(token) + 1, 10);
-            weapDef->hideTags[numHideTags] = SL_ConvertToLowercase(weapDef->hideTags[numHideTags], 0, 10);
+            weapDef->hideTags[numHideTags] = SL_GetStringOfSize((char *)token, 0, strlen(token) + 1, MT_TYPE_MODEL_PART);
+            weapDef->hideTags[numHideTags] = SL_ConvertToLowercase(weapDef->hideTags[numHideTags], 0, MT_TYPE_MODEL_PART);
             ++numHideTags;
         }
         goto LABEL_86;

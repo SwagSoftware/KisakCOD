@@ -3153,7 +3153,7 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, unsigned int 
         p_parent = &i->tagInfo->parent;
         if (!p_parent)
         {
-            v10 = (tagInfo_s *)MT_Alloc(112, 17);
+            v10 = (tagInfo_s *)MT_Alloc(112, MT_TYPE_TAG_INFO);
             v10->parent = parent;
             v10->name = 0;
             if (tagName && !SL_IsLowercaseString(tagName))

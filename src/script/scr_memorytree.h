@@ -1,6 +1,37 @@
 #pragma once
 #include <cstdint>
 
+// Not a real enum - Derived from "mt_type_names"
+enum mtType_t : int
+{
+    // 0 = invalid
+    MT_TYPE_FIRST = 1,
+
+    MT_TYPE_THREAD = 1, 
+    MT_TYPE_VECTOR = 2, 
+    MT_TYPE_NOTETRACK = 3, 
+    MT_TYPE_ANIM_TREE = 4,
+    MT_TYPE_SMALL_ANIM_TREE = 5,
+    MT_TYPE_EXTERNAL = 6,
+    MT_TYPE_TEMP = 7, 
+    MT_TYPE_SURFACE = 8, 
+    MT_TYPE_ANIM_PART = 9,
+    MT_TYPE_MODEL_PART = 10,
+    MT_TYPE_MODEL_PART_MAP = 11,
+    MT_TYPE_DUPLICATE_PARTS = 12,
+    MT_TYPE_MODEL_LIST = 13,
+    MT_TYPE_SCRIPT_PARSE = 14,
+    MT_TYPE_SCRIPT_STRING = 15,
+    MT_TYPE_CLASS = 16,
+    MT_TYPE_TAG_INFO = 17,
+    MT_TYPE_ANIMSCRIPTED = 18,
+    MT_TYPE_CONFIG_STRING = 19,
+    MT_TYPE_DEBUGGER_STRING = 20,
+    MT_TYPE_GENERIC = 21,
+
+    MT_TYPE_COUNT = 22
+};
+
 struct MemoryNode // sizeof=0xC
 {                                       // XREF: scrMemTreeGlob_t/r
     uint16_t prev;              // XREF: MT_Init(void)+46/w
@@ -67,8 +98,8 @@ void MT_Free(unsigned char* p, int numBytes);
 bool MT_Realloc(int oldNumBytes, int newNumbytes);
 
 void MT_Init(void);
-unsigned short MT_AllocIndex(int numBytes, int type);
-void* MT_Alloc(int numBytes, int type);
+unsigned short MT_AllocIndex(int numBytes, mtType_t type);
+void* MT_Alloc(int numBytes, mtType_t type);
 
 //void TRACK_scr_memorytree(void);
 //uint32_t Scr_GetStringUsage(void);

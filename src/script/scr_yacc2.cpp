@@ -118,7 +118,7 @@ int StringValue(unsigned char *str, int len)
 			}
 		}
 		*pC1 = 0;
-		yylval.val.stringValue = SL_GetString_(string, g_parse_user, 14);
+		yylval.val.stringValue = SL_GetString_(string, g_parse_user, MT_TYPE_SCRIPT_PARSE);
 		return 1;
 	}
 	else
@@ -130,7 +130,7 @@ int StringValue(unsigned char *str, int len)
 
 uint32_t LowerCase(uint32_t strVal)
 {
-	return SL_ConvertToLowercase(strVal, g_parse_user, 14);
+	return SL_ConvertToLowercase(strVal, g_parse_user, MT_TYPE_SCRIPT_PARSE);
 }
 
 void yy_load_buffer_state()
@@ -270,7 +270,7 @@ yy_buffer_state *yy_create_buffer()
 
 void __cdecl TextValue(char *str, int len)
 {
-	yylval.val.stringValue = SL_GetStringOfSize(str, 0, len + 1, 14);
+	yylval.val.stringValue = SL_GetStringOfSize(str, 0, len + 1, MT_TYPE_SCRIPT_PARSE);
 }
 
 void yyrestart()

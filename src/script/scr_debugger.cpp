@@ -2312,7 +2312,7 @@ void __cdecl Scr_ReadRemoteFile()
     len = Sys_ReadDebugSocketInt();
     if (len >= 0)
     {
-        name = SL_GetString_(filename, 0, 7);
+        name = SL_GetString_(filename, 0, MT_TYPE_TEMP);
         if (FindVariable(scrCompilePub.loadedscripts, name))
             MyAssertHandler(".\\script\\scr_parser.cpp", 832, 0, "%s", "!FindVariable( scrCompilePub.loadedscripts, name )");
         GetNewVariable(scrCompilePub.loadedscripts, name);

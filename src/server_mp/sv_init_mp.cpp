@@ -69,7 +69,7 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
         {
             SL_RemoveRefToString(sv.configstrings[index]);
             caseSensitive = index < 821;
-            v2 = index < 821 ? SL_GetString_(val, 0, 19) : SL_GetLowercaseString_(val, 0, 19);
+            v2 = index < 821 ? SL_GetString_(val, 0, MT_TYPE_CONFIG_STRING) : SL_GetLowercaseString_(val, 0, MT_TYPE_CONFIG_STRING);
             sv.configstrings[index] = v2;
             if (SV_Loaded() || sv.restarting)
             {
@@ -527,11 +527,11 @@ void __cdecl SV_SpawnServer(char *mapname)
 
     {
         PROF_SCOPED("allocate empty config strings");
-        sv.emptyConfigString = SL_GetString_((char *)"", 0, 19);
+        sv.emptyConfigString = SL_GetString_((char *)"", 0, MT_TYPE_CONFIG_STRING);
         for (i = 0; i < MAX_CONFIGSTRINGS; ++i)
         {
             iassert(!sv.configstrings[i]);
-            sv.configstrings[i] = SL_GetString_((char *)"", 0, 19);
+            sv.configstrings[i] = SL_GetString_((char *)"", 0, MT_TYPE_CONFIG_STRING);
         }
     }
 

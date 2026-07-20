@@ -53,7 +53,7 @@ uint32_t __cdecl SL_GetCanonicalString(const char* str)
     v1 = SL_FindString(str);
     if (scrCompilePub.canonicalStrings[v1])
         return scrCompilePub.canonicalStrings[v1];
-    v3 = SL_GetString_(str, 0, 16);
+    v3 = SL_GetString_(str, 0, MT_TYPE_CLASS);
     return SL_TransferToCanonicalString(v3);
 }
 

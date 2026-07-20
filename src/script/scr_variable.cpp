@@ -1774,7 +1774,7 @@ void  Scr_CastDebugString(VariableValue* value)
 	{
 	case VAR_POINTER:
 		sa = (char*)var_typename[GetObjectType(value->u.intValue)];
-		v2 = SL_GetString_(sa, 0, 15);
+		v2 = SL_GetString_(sa, 0, MT_TYPE_SCRIPT_STRING);
 		goto LABEL_7;
 	case VAR_STRING:
 	case VAR_VECTOR:
@@ -1789,10 +1789,10 @@ void  Scr_CastDebugString(VariableValue* value)
 		intValue = value->u.intValue;
 		Anims = Scr_GetAnims(HIWORD(value->u.intValue));
 		s = XAnimGetAnimDebugName(Anims, intValue);
-		v2 = SL_GetString_(s, 0, 15);
+		v2 = SL_GetString_(s, 0, MT_TYPE_SCRIPT_STRING);
 		goto LABEL_7;
 	default:
-		v2 = SL_GetString_((char*)var_typename[value->type], 0, 15);
+		v2 = SL_GetString_((char*)var_typename[value->type], 0, MT_TYPE_SCRIPT_STRING);
 	LABEL_7:
 		stringValue = v2;
 		RemoveRefToValue(value->type, value->u);
@@ -2047,7 +2047,7 @@ void  Scr_EvalPlus(VariableValue* value1, VariableValue* value2)
 				v3 = *v5;
 				*v4++ = *v5++;
 			} while (v3);
-			v9.stringValue = SL_GetStringOfSize(str, 0, len, 15);
+			v9.stringValue = SL_GetStringOfSize(str, 0, len, MT_TYPE_SCRIPT_STRING);
 			SL_RemoveRefToString(value1->u.intValue);
 			SL_RemoveRefToString(value2->u.intValue);
 			value1->u = v9;
@@ -2298,7 +2298,7 @@ void  Scr_AddClassField(uint32_t classnum, char* name, uint32_t offset)
 	entryValue->w.status &= 0xFFFFFFE0;
 	entryValue->w.status |= 6u;
 	entryValue->u.u.intValue = offset;
-	str = SL_GetString_(name, 0, 16);
+	str = SL_GetString_(name, 0, MT_TYPE_CLASS);
 	iassert(!FindVariable(classId, str));
 	fieldId = GetNewVariable(classId, str);
 	SL_RemoveRefToString(str);
@@ -2858,7 +2858,7 @@ void  Scr_EvalArray(VariableValue* value, VariableValue* index)
 			c[0] = s[index->u.intValue];
 			c[1] = 0;
 
-			index->u.stringValue = SL_GetStringOfSize(c, 0, 2, 15);
+			index->u.stringValue = SL_GetStringOfSize(c, 0, 2, MT_TYPE_SCRIPT_STRING);
 			SL_RemoveRefToString(value->u.stringValue);
 		}
 		else
@@ -3466,7 +3466,7 @@ float* Scr_AllocVector(void)
 	RefVector* vec; // eax
 	float* result; // [esp+4h] [ebp-4h]
 	
-	vec = (RefVector *)MT_Alloc(sizeof(RefVector), 2);
+	vec = (RefVector *)MT_Alloc(sizeof(RefVector), MT_TYPE_VECTOR);
 	result = &vec->vec[0];
 	vec->head = 0;
 

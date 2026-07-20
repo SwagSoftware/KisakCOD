@@ -245,7 +245,7 @@ void __cdecl G_Animscripted(
     scripted = ent->scripted;
     if (!scripted)
     {
-        scripted = (animscripted_s *)MT_Alloc(sizeof(animscripted_s), 18);
+        scripted = (animscripted_s *)MT_Alloc(sizeof(animscripted_s), MT_TYPE_ANIMSCRIPTED);
         ent->scripted = scripted;
     }
     scripted->anim = anim;

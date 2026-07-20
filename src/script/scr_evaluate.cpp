@@ -942,11 +942,11 @@ void __cdecl Scr_EvalPrimitiveExpression(sval_u expr, uint32_t localId, Variable
         break;
     case ENUM_string:
         value->type = VAR_STRING;
-        value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, 20); // KISAKTODO is debugString the right union field????
+        value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, MT_TYPE_DEBUGGER_STRING); // KISAKTODO is debugString the right union field????
         break;
     case ENUM_istring:
         value->type = VAR_ISTRING;
-        value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, 20);
+        value->u.stringValue = SL_GetString_(expr.node[1].debugString, 0, MT_TYPE_DEBUGGER_STRING);
         break;
     case ENUM_variable:
         Scr_EvalVariableExpression(expr.node[1], localId, value);

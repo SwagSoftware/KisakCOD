@@ -314,7 +314,7 @@ void __cdecl SV_SetConfigstring(unsigned int index, const char *val)
         if (v7)
         {
             SL_RemoveRefToString(sv.configstrings[v4]);
-            v8 = (int)index < 1114 ? SL_GetString_(val, 0, 19) : SL_GetLowercaseString_(val, 0, 19);
+            v8 = (int)index < 1114 ? SL_GetString_(val, 0, MT_TYPE_CONFIG_STRING) : SL_GetLowercaseString_(val, 0, MT_TYPE_CONFIG_STRING);
             sv.configstrings[v4] = v8;
             if (sv.state == SS_GAME)
             {
@@ -540,11 +540,11 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
     {
         PROF_SCOPED("allocate empty config strings");
-        sv.emptyConfigString = SL_GetString_((char *)"", 0, 19);
+        sv.emptyConfigString = SL_GetString_((char *)"", 0, MT_TYPE_CONFIG_STRING);
         for (int i = 0; i < MAX_CONFIGSTRINGS; ++i)
         {
             iassert(!sv.configstrings[i]);
-            sv.configstrings[i] = SL_GetString_((char *)"", 0, 19);
+            sv.configstrings[i] = SL_GetString_((char *)"", 0, MT_TYPE_CONFIG_STRING);
         }
 
         SCR_UpdateLoadScreen();

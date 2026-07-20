@@ -1913,7 +1913,7 @@ void __cdecl Load_MaterialPixelShaderPtr(bool atStreamStart)
 
 void __cdecl Load_MaterialVertexDeclaration(bool atStreamStart)
 {
-    Load_Stream(atStreamStart, &varMaterialVertexDeclaration->streamCount, 100);
+    Load_Stream(atStreamStart, &varMaterialVertexDeclaration->streamCount, sizeof(MaterialVertexDeclaration));
 }
 
 void __cdecl Load_MaterialArgumentCodeConst(bool atStreamStart)

@@ -994,7 +994,7 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
     case SF_TYPE_TAG_INFO:
         if (*(unsigned int *)v7)
         {
-            v25 = (unsigned __int8 *)MT_Alloc(112, 17);
+            v25 = (unsigned __int8 *)MT_Alloc(112, MT_TYPE_TAG_INFO);
             *(uintptr_t *)v7 = (uintptr_t)v25;
             G_ReadStruct(tagInfoFields, v25, 112, save);
         }
@@ -1002,7 +1002,7 @@ void __cdecl ReadField(const saveField_t *field, unsigned __int8 *base, SaveGame
     case SF_TYPE_SCRIPTED:
         if (*(unsigned int *)v7)
         {
-            v26 = (unsigned __int8 *)MT_Alloc(96, 17);
+            v26 = (unsigned __int8 *)MT_Alloc(96, MT_TYPE_TAG_INFO);
             *(uintptr_t *)v7 = (uintptr_t)v26;
             G_ReadStruct(animscriptedFields, v26, 96, save);
         }

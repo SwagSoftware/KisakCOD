@@ -559,7 +559,7 @@ int __cdecl G_EntLinkToInternal(gentity_s *ent, gentity_s *parent, uint32_t tagN
         if (!checkEnt->tagInfo)
             break;
     }
-    tagInfo = (char*)MT_Alloc(112, 17);
+    tagInfo = (char*)MT_Alloc(112, MT_TYPE_TAG_INFO);
     *(uint32_t *)tagInfo = (uint32_t)parent;
     *((_WORD *)tagInfo + 4) = 0;
 

@@ -69,12 +69,12 @@ void MT_Init()
 	Sys_LeaveCriticalSection(CRITSECT_MEMORY_TREE);
 }
 
-void* MT_Alloc(int numBytes, int type)
+void* MT_Alloc(int numBytes, mtType_t type)
 {
     return &scrMemTreeGlob.nodes[MT_AllocIndex(numBytes, type)];
 }
 
-unsigned short MT_AllocIndex(int numBytes, int type)
+unsigned short MT_AllocIndex(int numBytes, mtType_t type)
 {
     const char* v2; // eax
     const char* v3; // eax
@@ -541,10 +541,8 @@ char const* MT_NodeInfoString(uint32_t nodeNum)
 {
     int type = scrMemTreeDebugGlob.mt_usage[nodeNum];
 
-    if (!scrMemTreeDebugGlob.mt_usage[nodeNum])
+    if (!type)
         return "<FREE>";
 
-    int v3 = scrMemTreeDebugGlob.mt_usage_size[nodeNum];
-    const char* v1 = SL_DebugConvertToString(nodeNum);
-    return va("%s: '%s' (%d)", mt_type_names[type], v1, v3);
+    return va("%s: '%s' (%d)", mt_type_names[type], SL_DebugConvertToString(nodeNum), scrMemTreeDebugGlob.mt_usage_size[nodeNum]);
 }

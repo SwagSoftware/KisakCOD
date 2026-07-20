@@ -63,7 +63,7 @@ int __cdecl Scr_ReadString(MemoryFile *memFile)
     v2 = CString;
     while (*(unsigned __int8 *)v2++)
         ;
-    return (unsigned __int16)SL_GetStringOfSize(CString, 0, v2 - CString, 15);
+    return (unsigned __int16)SL_GetStringOfSize(CString, 0, v2 - CString, MT_TYPE_SCRIPT_STRING);
 }
 
 int __cdecl Scr_ReadOptionalString(MemoryFile *memFile)
@@ -79,7 +79,7 @@ int __cdecl Scr_ReadOptionalString(MemoryFile *memFile)
     v4 = CString;
     while (*(unsigned __int8 *)v4++)
         ;
-    return (unsigned __int16)SL_GetStringOfSize(CString, 0, v4 - CString, 15);
+    return (unsigned __int16)SL_GetStringOfSize(CString, 0, v4 - CString, MT_TYPE_SCRIPT_STRING);
 }
 
 void __cdecl WriteInt(int i, MemoryFile *memFile)
@@ -361,7 +361,7 @@ VariableStackBuffer *__cdecl Scr_ReadStack(MemoryFile *memFile)
             0,
             "%s",
             "bufLen == (unsigned short)bufLen");
-    v6 = (uint16*)MT_Alloc(v4, 1);
+    v6 = (uint16*)MT_Alloc(v4, MT_TYPE_THREAD);
     ++scrVarPub.numScriptThreads;
     v6[2] = v2;
     v6[3] = v5;

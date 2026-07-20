@@ -73,7 +73,7 @@ void __cdecl XAnimInit()
     g_xAnimInfo[0].state.weight = 0.0;
     g_xAnimInfo[0].state.rate = 0.0;
     g_xAnimInfo[0].state.instantWeightChange = 0;
-    g_endNotetrackName = SL_GetString_("end", 0, 3);
+    g_endNotetrackName = SL_GetString_("end", 0, MT_TYPE_NOTETRACK);
     g_anim_developer = 1;
     g_info_usage = 1;
     g_info_high_usage = 1;
@@ -535,7 +535,7 @@ uint32_t __cdecl XAnimGetAnimMap(const XAnimParts* parts, const XModelNameMap* m
     animToModel.boneCount = boneCount;
     if ((unsigned __int8)boneCount != boneCount)
         MyAssertHandler(".\\xanim\\xanim.cpp", 606, 0, "%s", "animToModel.boneCount == boneCount");
-    return SL_GetStringOfSize((char*)&animToModel, 0, boneCount + 17, 11);
+    return SL_GetStringOfSize((char*)&animToModel, 0, boneCount + 17, MT_TYPE_MODEL_PART_MAP);
 }
 
 double __cdecl XAnimGetLength(const XAnim_s* anims, uint32_t animIndex)

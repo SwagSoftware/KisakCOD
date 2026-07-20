@@ -223,7 +223,7 @@ void __cdecl Scr_LoadAnimTreeAtIndex(uint32_t index, void *(__cdecl *Alloc)(int)
             size = Scr_GetAnimTreeSize(scrAnimPub.animtree_node);
             iassert(size);
             animtree = XAnimCreateAnims(SL_ConvertToString(filenameId), size, Alloc);
-            name = SL_GetString_("root", 0, 4);
+            name = SL_GetString_("root", 0, MT_TYPE_ANIM_TREE);
             ConnectScriptToAnim(names, 0, filenameId, name, index);
             SL_RemoveRefToString(name);
 
@@ -529,7 +529,7 @@ bool __cdecl AnimTreeParseInternal(
                 if (bIgnore)
                     RemoveVariable(parentNode, animName);
 
-                animName = SL_GetLowercaseString_(token->token, 2u, 4);
+                animName = SL_GetLowercaseString_(token->token, 2u, MT_TYPE_ANIM_TREE);
                 if (FindVariable(parentNode, animName))
                     AnimTreeCompileError("duplicate animation");
 
@@ -612,9 +612,9 @@ end:
     if (bIncludeParent && !GetArraySize(parentNode))
     {
         if (bLoop)
-            animName = SL_GetString_("void_loop", 0, 4);
+            animName = SL_GetString_("void_loop", 0, MT_TYPE_ANIM_TREE);
         else
-            animName = SL_GetString_("void", 0, 4);
+            animName = SL_GetString_("void", 0, MT_TYPE_ANIM_TREE);
 
         GetVariable(parentNode, animName);
         SL_RemoveRefToString(animName);
@@ -708,7 +708,7 @@ void __cdecl Scr_FindAnim(const char *filename, const char *animName, scr_anim_s
     uint32_t name; // [esp+0h] [ebp-8h]
     uint32_t index; // [esp+4h] [ebp-4h] BYREF
 
-    name = SL_GetLowercaseString_(animName, 0, 4);
+    name = SL_GetLowercaseString_(animName, 0, MT_TYPE_ANIM_TREE);
     Scr_EmitAnimationInternal((char *)anim, name, Scr_UsingTreeInternal(filename, &index, user));
     SL_RemoveRefToString(name);
 }

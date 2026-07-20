@@ -225,12 +225,12 @@ void SL_TransferSystem(uint32_t from, uint32_t to)
 	Sys_LeaveCriticalSection(CRITSECT_SCRIPT_STRING);
 }
 
-uint32_t SL_GetString_(const char* str, uint32_t user, int type)
+uint32_t SL_GetString_(const char* str, uint32_t user, mtType_t type)
 {
 	return SL_GetStringOfSize(str, user, strlen(str) + 1, type);
 }
 
-uint32_t SL_GetStringOfSize(const char* str, uint32_t user, uint32_t len, int type)
+uint32_t SL_GetStringOfSize(const char* str, uint32_t user, uint32_t len, mtType_t type)
 {
 	PROF_SCOPED("SL_GetStringOfSize");
 
@@ -537,7 +537,7 @@ uint32_t SL_GetStringForVector(const float* v)
 	char tempString[132];
 
 	snprintf(tempString, ARRAYSIZE(tempString), "(%g, %g, %g)", *v, v[1], v[2]);
-	return SL_GetString_(tempString, 0, 15);
+	return SL_GetString_(tempString, 0, MT_TYPE_SCRIPT_STRING);
 }
 
 uint32_t SL_GetStringForInt(int i)
@@ -545,7 +545,7 @@ uint32_t SL_GetStringForInt(int i)
 	char tempString[132]; // [esp+0h] [ebp-88h] BYREF
 
 	snprintf(tempString, ARRAYSIZE(tempString), "%i", i);
-	return SL_GetString_(tempString, 0, 15);
+	return SL_GetString_(tempString, 0, MT_TYPE_SCRIPT_STRING);
 }
 
 uint32_t SL_GetStringForFloat(float f)
@@ -553,12 +553,12 @@ uint32_t SL_GetStringForFloat(float f)
 	char tempString[132]; // [esp+8h] [ebp-88h] BYREF
 
 	snprintf(tempString, ARRAYSIZE(tempString), "%g", f);
-	return SL_GetString_(tempString, 0, 15);
+	return SL_GetString_(tempString, 0, MT_TYPE_SCRIPT_STRING);
 }
 
 uint32_t SL_GetString(const char* str, uint32_t user)
 {
-	return SL_GetString_(str, user, 6);
+	return SL_GetString_(str, user, MT_TYPE_EXTERNAL);
 }
 
 //char *mt_buffer;  //     scrMemTreePub.mt_buffer = (char*)&scrMemTreeGlob.nodes;
@@ -582,7 +582,7 @@ static uint32_t GetLowercaseStringOfSize(
 	const char* str,
 	uint32_t user,
 	uint32_t len,
-	int type)
+	mtType_t type)
 {
 	char stra[8192]; // [esp+4Ch] [ebp-2008h] BYREF
 	uint32_t i; // [esp+2050h] [ebp-4h]
@@ -601,13 +601,13 @@ static uint32_t GetLowercaseStringOfSize(
 	}
 }
 
-uint32_t SL_GetLowercaseString_(const char* str, uint32_t user, int type)
+uint32_t SL_GetLowercaseString_(const char* str, uint32_t user, mtType_t type)
 {
 	return GetLowercaseStringOfSize(str, user, strlen(str) + 1, type);
 }
 uint32_t SL_GetLowercaseString(const char* str, uint32_t user)
 {
-	return SL_GetLowercaseString_(str, user, 6);
+	return SL_GetLowercaseString_(str, user, MT_TYPE_EXTERNAL);
 }
 
 void SL_RemoveRefToString(uint32_t stringValue)
@@ -796,7 +796,7 @@ void __cdecl Scr_SetString(uint16_t *to, uint32_t from)
 	*to = from;
 }
 
-uint32_t __cdecl SL_ConvertToLowercase(uint32_t stringValue, uint32_t user, int type)
+uint32_t __cdecl SL_ConvertToLowercase(uint32_t stringValue, uint32_t user, mtType_t type)
 {
 	const char *v4; // [esp+4Ch] [ebp-2014h]
 	char str[8192]; // [esp+50h] [ebp-2010h] BYREF
@@ -856,7 +856,7 @@ uint32_t __cdecl Scr_CreateCanonicalFilename(const char *filename)
 	char newFilename[1028]; // [esp+0h] [ebp-408h] BYREF
 
 	CreateCanonicalFilename(newFilename, filename, 1024);
-	return SL_GetString_(newFilename, 0, 7);
+	return SL_GetString_(newFilename, 0, MT_TYPE_TEMP);
 }
 
 void Scr_SetStringFromCharString(uint16_t *to, const char *from)
@@ -870,7 +870,7 @@ void Scr_SetStringFromCharString(uint16_t *to, const char *from)
 	v5 = from;
 	while (*(uint8_t *)v5++)
 		;
-	*to = SL_GetStringOfSize(from, 0, v5 - from, 6);
+	*to = SL_GetStringOfSize(from, 0, v5 - from, MT_TYPE_EXTERNAL);
 }
 
 uint32_t SL_GetUser(uint32_t stringValue)

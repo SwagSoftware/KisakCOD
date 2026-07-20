@@ -89,7 +89,7 @@ const char* CopyString(const char* in)
 
 	iassert(in);
 
-	out = SL_GetString_(in, 0, 21);
+	out = SL_GetString_(in, 0, MT_TYPE_GENERIC);
 	return SL_ConvertToString(out);
 }
 
@@ -218,7 +218,7 @@ const char* __cdecl CopyString(char* in)
 {
     iassert(in);
 
-    return SL_ConvertToString(SL_GetString_(in, 0, 21));
+    return SL_ConvertToString(SL_GetString_(in, 0, MT_TYPE_GENERIC));
 }
 
 void __cdecl ReplaceString(const char** str, const char* in)

@@ -254,24 +254,24 @@ void CL_ConfigstringModified()
     if (v9)
     {
         SL_RemoveRefToString(clients[0].configstrings[index]);
-        clients[0].configstrings[index] = SL_GetString_(v4, 0, 19);
+        clients[0].configstrings[index] = SL_GetString_(v4, 0, MT_TYPE_CONFIG_STRING);
     }
 }
 
 void __cdecl CL_Restart()
 {
-    unsigned __int16 *configstrings; // r31
-
     SND_ResetPauseSettingsToDefaults();
     //CG_StopAllRumbles(0); // KISAKTODO: cg_rumble
     R_Cinematic_StopPlayback();
-    configstrings = clients[0].configstrings;
-    do
+
+    clientActive_t *cl = CL_GetLocalClientGlobals(0);
+
+    for (int i = 0; i < MAX_CONFIGSTRINGS; i++)
     {
-        if (*configstrings)
-            MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp", 279, 0, "%s", "!cl->configstrings[i]");
-        *configstrings++ = SL_GetString_("", 0, 19);
-    } while ((int)configstrings < (int)clients[0].mapname);
+        iassert(!cl->configstrings[i]);
+        cl->configstrings[i] = SL_GetString_("", 0, MT_TYPE_CONFIG_STRING);
+    }
+
     Con_ClearNotify(0);
     Con_ClearErrors(0);
     Con_InitMessageBuffer();
@@ -616,33 +616,12 @@ void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration
 
 const char *__cdecl CL_GetConfigString(int localClientNum, unsigned int configStringIndex)
 {
-    unsigned int v3; // r30
+    clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp",
-            526,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (configStringIndex >= 0xAFF)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp",
-            527,
-            0,
-            "configStringIndex doesn't index MAX_CONFIGSTRINGS\n\t%i not in [0, %i)",
-            configStringIndex,
-            2815);
-    v3 = configStringIndex;
-    if (!clients[0].configstrings[v3])
-        MyAssertHandler(
-            "c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp",
-            531,
-            0,
-            "%s",
-            "cl->configstrings[configStringIndex]");
-    return SL_ConvertToString(clients[0].configstrings[v3]);
+    bcassert(configStringIndex, MAX_CONFIGSTRINGS);
+    iassert(cl->configstrings[configStringIndex]);
+
+    return SL_ConvertToString(cl->configstrings[configStringIndex]);
 }
 
 // attributes: thunk
