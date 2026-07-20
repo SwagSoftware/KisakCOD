@@ -1,7 +1,42 @@
+#ifdef KISAK_ANDROID_WAVELET_STANDALONE
+#include <cstdint>
+#define __cdecl
+#define __int16 int
+#define WORD uint16_t
+#define iassert(expr) ((void)0)
+
+struct WaveletDecode
+{
+    uint16_t value;
+    uint16_t bit;
+    const unsigned char *data;
+    int width;
+    int height;
+    int channels;
+    int bpp;
+    int mipLevel;
+    bool dataInitialized;
+};
+
+struct WaveletHuffmanDecode;
+void __cdecl Wavelet_DecompressLevel(uint8_t *src, uint8_t *dst, WaveletDecode *decode);
+void __cdecl Wavelet_ConsumeBits(uint16_t bitCount, WaveletDecode *decode);
+int __cdecl Wavelet_DecodeValue(
+    const WaveletHuffmanDecode *decodeTable,
+    uint16_t bitCount,
+    int bias,
+    WaveletDecode *decode);
+void __cdecl Wavelet_AddDeltaToMipmap(
+    uint8_t *inout,
+    int size,
+    WaveletDecode *decode,
+    const int *dstChanOffset);
+#else
 #include "r_image.h"
 #include <qcommon/mem_track.h>
 #include <universal/assertive.h>
 #include <universal/com_memory.h>
+#endif
 
 struct WaveletHuffmanDecode // sizeof=0x4
 {                                       // ...
@@ -14361,14 +14396,17 @@ const uint16_t waveletEncodeAlpha[511] =
 
 void __cdecl TRACK_r_image_wavelet()
 {
+#ifndef KISAK_ANDROID_WAVELET_STANDALONE
 	track_static_alloc_internal((void *)waveletDecodeBlue, 0x4000, "waveletDecodeBlue", 18);
 	track_static_alloc_internal((void *)waveletEncodeBlue, 1022, "waveletEncodeBlue", 18);
 	track_static_alloc_internal((void *)waveletDecodeRedGreen, 0x4000, "waveletDecodeRedGreen", 18);
 	track_static_alloc_internal((void *)waveletEncodeRedGreen, 2042, "waveletEncodeRedGreen", 18);
 	track_static_alloc_internal((void *)waveletDecodeAlpha, 0x4000, "waveletDecodeAlpha", 18);
 	track_static_alloc_internal((void *)waveletEncodeAlpha, 1022, "waveletEncodeAlpha", 18);
+#endif
 }
 
+#ifndef KISAK_ANDROID_WAVELET_STANDALONE
 void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHeader, const unsigned char *data, _D3DFORMAT format, int bytesPerPixel)
 {
     uint8_t *from[6]; // [esp+14h] [ebp-88h]
@@ -14439,6 +14477,7 @@ void __cdecl Image_LoadWavelet(GfxImage *image, const GfxImageFileHeader *fileHe
         Image_FreeTempMemory(pixels[--faceIndex], totalSize);
     while (faceIndex);
 }
+#endif
 
 
 void __cdecl Wavelet_DecompressLevel(uint8_t *src, uint8_t *dst, WaveletDecode *decode)
@@ -14628,7 +14667,11 @@ int __cdecl Wavelet_DecodeValue(
     index = decode->value & 0xFFF;
     Wavelet_ConsumeBits(decodeTable[index].bits, decode);
     value = decodeTable[index].value;
+#ifdef KISAK_ANDROID_WAVELET_STANDALONE
+    if (value == 32768)
+#else
     if (value == -(int)0x8000u)
+#endif
     {
         value = (((1 << bitCount) - 1) & decode->value) - bias;
         Wavelet_ConsumeBits(bitCount, decode);

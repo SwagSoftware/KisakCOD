@@ -423,7 +423,16 @@ FodyWeavers.xsd
 
 # Resources
 res/
+!android/app/src/main/res/
+!android/app/src/main/res/**
 
 .idea/*
 IDA/*
 KisakCOD/.idea/*
+
+# Android/Gradle bootstrap
+.gradle/
+**/.gradle/
+**/.cxx/
+**/build/
+local.properties
