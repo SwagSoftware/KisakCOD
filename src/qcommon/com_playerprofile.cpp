@@ -1,7 +1,7 @@
+#include <universal/q_shared.h>
 #include "com_playerprofile.h"
 #include <universal/assertive.h>
 #include <cstdarg>
-#include <universal/q_shared.h>
 #include "qcommon.h"
 #include <universal/q_parse.h>
 #include <universal/com_files.h>

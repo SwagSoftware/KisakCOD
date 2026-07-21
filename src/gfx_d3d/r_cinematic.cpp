@@ -1,6 +1,6 @@
+#include <universal/q_shared.h>
 #include "r_cinematic.h"
 
-#include <universal/q_shared.h>
 #include <universal/assertive.h>
 #include <qcommon/threads.h>
 #include <universal/com_memory.h>

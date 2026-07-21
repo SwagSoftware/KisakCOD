@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "cg_local.h"
 #include "cg_public.h"
 #include <qcommon/mem_track.h>

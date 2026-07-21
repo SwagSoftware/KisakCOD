@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "com_convexhull.h"
 #include "com_math.h"
 #include "assertive.h"

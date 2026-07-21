@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "turret.h"
 #include <qcommon/mem_track.h>
 #include <bgame/bg_public.h>

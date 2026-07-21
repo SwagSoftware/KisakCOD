@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "dobj_utils.h"
 #include "xmodel.h"
 #include <universal/assertive.h>

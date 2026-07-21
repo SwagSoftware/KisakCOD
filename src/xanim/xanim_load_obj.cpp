@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "xanim.h"
 #include "xmodel.h"
 #include <gfx_d3d/r_model.h>

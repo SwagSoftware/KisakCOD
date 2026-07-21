@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "bullet.h"
 
 #include "game_public.h"

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "scr_debugger.h"
 #include "scr_animtree.h"
 #include "scr_parser.h"

@@ -1,8 +1,8 @@
+#include <universal/q_shared.h>
 #include "scr_main.h"
 #include "scr_stringlist.h"
 
 #include <universal/assertive.h>
-#include <universal/q_shared.h>
 #include "scr_compiler.h"
 #include <win32/win_net_debug.h>
 #include "scr_vm.h"

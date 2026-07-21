@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "xmodel.h"
 #include <universal/com_files.h>
 #include <universal/q_parse.h>

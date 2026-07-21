@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include <win32/win_local.h>
 #include <win32/win_net.h>
 

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor.h"
 #include "actor_animapi.h"
 #include <script/scr_vm.h>

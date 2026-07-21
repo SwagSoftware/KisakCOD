@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_material.h"
 #include "r_utils.h"
 #include <universal/com_files.h>
@@ -3579,37 +3580,44 @@ char __cdecl Material_ParseShaderArguments(
 
 uint8_t __cdecl Material_GetStreamDestForSemantic(const _D3DXSEMANTIC *semantic)
 {
-    uint32_t v1; // eax
-
     switch (semantic->Usage)
     {
-    case 0u:
+    case 0:
         if (semantic->UsageIndex)
-            goto LABEL_13;
-        LOBYTE(v1) = 0;
-        break;
-    case 3u:
+        {
+            Com_Error(ERR_DROP, "Unknown shader input/output usage %i:%i\n", semantic->Usage, semantic->UsageIndex);
+            return 0;
+        }
+        return 0;
+
+    case 3:
         if (semantic->UsageIndex)
-            goto LABEL_13;
-        LOBYTE(v1) = 1;
-        break;
-    case 5u:
+        {
+            Com_Error(ERR_DROP, "Unknown shader input/output usage %i:%i\n", semantic->Usage, semantic->UsageIndex);
+            return 0;
+        }
+        return 1;
+
+    case 5:
         if (semantic->UsageIndex >= 8)
-            goto LABEL_13;
-        v1 = semantic->UsageIndex + 4;
-        break;
-    case 0xAu:
+        {
+            Com_Error(ERR_DROP, "Unknown shader input/output usage %i:%i\n", semantic->Usage, semantic->UsageIndex);
+            return 0;
+        }
+        return semantic->UsageIndex + 4;
+
+    case 10:
         if (semantic->UsageIndex >= 2)
-            goto LABEL_13;
-        v1 = semantic->UsageIndex + 2;
-        break;
+        {
+            Com_Error(ERR_DROP, "Unknown shader input/output usage %i:%i\n", semantic->Usage, semantic->UsageIndex);
+            return 0;
+        }
+        return semantic->UsageIndex + 2;
+
     default:
-    LABEL_13:
         Com_Error(ERR_DROP, "Unknown shader input/output usage %i:%i\n", semantic->Usage, semantic->UsageIndex);
-        LOBYTE(v1) = 0;
-        break;
+        return 0;
     }
-    return v1;
 }
 
 void __cdecl Material_SetVaryingParameterDef(const _D3DXSEMANTIC *semantic, ShaderVaryingDef *paramDef)
@@ -5769,27 +5777,20 @@ uint32_t __cdecl Material_GetUsesStencilBufferFlags(const Material *mtl)
 
 void __cdecl Material_UpdateStateFlags(Material *mtl)
 {
-    uint32_t CullFlags; // esi
-    uint32_t v2; // esi
-    int v3; // esi
-    int v4; // esi
-    uint32_t v5; // esi
-    uint32_t stateFlags; // [esp+4h] [ebp-8h]
-
     if (mtl->techniqueSet)
     {
-        CullFlags = Material_GetCullFlags(mtl);
-        v2 = Material_GetCullShadowFlags(mtl) | CullFlags;
-        v3 = Material_GetDecalFlags(mtl) | v2;
-        v4 = Material_GetWritesDepthFlags(mtl) | v3;
-        v5 = Material_GetUsesDepthBufferFlags(mtl) | v4;
-        stateFlags = Material_GetUsesStencilBufferFlags(mtl) | v5;
+        mtl->stateFlags = 
+            Material_GetUsesStencilBufferFlags(mtl) 
+            | Material_GetUsesDepthBufferFlags(mtl) 
+            | Material_GetWritesDepthFlags(mtl) 
+            | Material_GetDecalFlags(mtl) 
+            | Material_GetCullShadowFlags(mtl) 
+            | Material_GetCullFlags(mtl);
     }
     else
     {
-        LOBYTE(stateFlags) = 0;
+        mtl->stateFlags = 0;
     }
-    mtl->stateFlags = stateFlags;
 }
 
 void __cdecl Material_SetStateBits(Material *material, uint32_t (*stateBitsTable)[2], uint32_t stateBitsCount)
@@ -5878,12 +5879,10 @@ uint32_t __cdecl Material_GetTechniqueSetDrawRegion(MaterialTechniqueSet *techni
 
 void __cdecl Material_SetMaterialDrawRegion(Material *material)
 {
-    uint32_t cameraRegion; // [esp+0h] [ebp-4h]
+    material->cameraRegion = Material_GetTechniqueSetDrawRegion(material->techniqueSet);
 
-    cameraRegion = Material_GetTechniqueSetDrawRegion(material->techniqueSet);
-    if (!cameraRegion)
-        LOBYTE(cameraRegion) = material->info.sortKey >= 0x18u;
-    material->cameraRegion = cameraRegion;
+    if (!material->cameraRegion)
+        material->cameraRegion = material->info.sortKey >= 0x18u;
 }
 
 Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, uint32_t materialType, int imageTrack)

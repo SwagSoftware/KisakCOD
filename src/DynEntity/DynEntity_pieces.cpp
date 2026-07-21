@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "DynEntity_client.h"
 #include <win32/win_local.h>
 #include <gfx_d3d/r_dpvs.h>

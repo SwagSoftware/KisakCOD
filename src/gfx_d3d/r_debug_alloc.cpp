@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_debug.h"
 
 #include <qcommon/qcommon.h>

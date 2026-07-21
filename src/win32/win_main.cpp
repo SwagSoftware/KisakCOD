@@ -1,6 +1,7 @@
 //#include "../qcommon/exe_headers.h"
 
 //#include "../client/client.h
+#include <universal/q_shared.h>
 #include "win_configure.h"
 #include "win_local.h"
 #include "win_localize.h"

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_negotiation.h"
 #include "actor_orientation.h"
 #include <universal/com_math.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ui_shared.h"
 #include <win32/win_net_debug.h>
 #include <script/scr_parser.h>

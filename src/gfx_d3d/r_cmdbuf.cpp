@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_cmdbuf.h"
 #include "r_utils.h"
 

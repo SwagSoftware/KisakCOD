@@ -1,9 +1,9 @@
+#include <universal/q_shared.h>
 #include "ui_shared.h"
 #include <universal/com_files.h>
 #include <universal/q_parse.h>
 #include <universal/com_sndalias.h>
 
-#include <universal/q_shared.h> // LOBYTE()
 #include <gfx_d3d/r_material.h>
 
 $F99A9AECA2B60514CA5C8024B8EAC369 g_load_0;

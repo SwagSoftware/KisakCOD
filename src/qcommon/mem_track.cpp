@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "mem_track.h"
 
 #include <universal/assertive.h>

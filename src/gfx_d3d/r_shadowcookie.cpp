@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_shadowcookie.h"
 #include "r_pretess.h"
 #include "r_scene.h"

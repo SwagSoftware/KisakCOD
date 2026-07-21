@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "phys_local.h"
 #include "phys_coll_local.h"
 #include <cgame/cg_local.h>
@@ -71,37 +72,21 @@ bool __cdecl Phys_ContactBetter(const LocalContactData *ca, const LocalContactDa
     return cb->depth < ca->depth;
 }
 
-int Phys_CancelSimilarContacts()
+void Phys_CancelSimilarContacts()
 {
-    int result; // eax
-    int j; // [esp+0h] [ebp-Ch]
-    int i; // [esp+4h] [ebp-8h]
-    int numContacts; // [esp+8h] [ebp-4h]
-
-    result = numLocalContacts;
-    numContacts = numLocalContacts;
-    for (i = 0; i < numContacts - 1; ++i)
+    for (int i = 0; i < numLocalContacts - 1; ++i)
     {
-        result = i + 1;
-        for (j = i + 1; j < numContacts; ++j)
+        for (int j = i + 1; j < numLocalContacts; ++j)
         {
-            LOBYTE(result) = Phys_SimilarContacts(&localContacts[i], &localContacts[j]);
-            if (result)
+            if (Phys_SimilarContacts(&localContacts[i], &localContacts[j]))
             {
-                LOBYTE(result) = Phys_ContactBetter(&localContacts[i], &localContacts[j]);
-                if (result)
-                {
-                    result = 36 * j;
+                if (Phys_ContactBetter(&localContacts[i], &localContacts[j]))
                     localContacts[j].inUse = 0;
-                }
                 else
-                {
                     localContacts[i].inUse = 0;
-                }
             }
         }
     }
-    return result;
 }
 
 void __cdecl Phys_CapsuleOptimizeLocalResults(Results *results)

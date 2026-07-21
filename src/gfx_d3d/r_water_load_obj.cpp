@@ -1,6 +1,6 @@
+#include <universal/q_shared.h>
 #include "r_water.h"
 #include <qcommon/qcommon.h>
-#include <universal/q_shared.h>
 #include "r_image.h"
 
 

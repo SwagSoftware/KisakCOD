@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_shade.h"
 #include "rb_logfile.h"
 #include "rb_state.h"

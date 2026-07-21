@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "fx_system.h"
 
 const dvar_t *fx_mark_profile;

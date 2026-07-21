@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "sv_world.h"
 #include "sv_game.h"
 #include <xanim/dobj.h>

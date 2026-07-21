@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_sky.h"
 #include <universal/com_files.h>
 #include "r_init.h"

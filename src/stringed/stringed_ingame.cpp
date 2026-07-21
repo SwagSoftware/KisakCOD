@@ -1,7 +1,7 @@
+#include <universal/q_shared.h>
 #include "stringed_ingame.h"
 #include <universal/assertive.h>
 #include <universal/com_memory.h>
-#include <universal/q_shared.h>
 #include <database/database.h>
 #include <universal/com_files.h>
 

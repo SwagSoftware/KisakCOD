@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "client.h"
 #include <qcommon/cmd.h>
 #include <gfx_d3d/r_devgui.h>

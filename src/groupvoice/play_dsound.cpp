@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "directsound.h"
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>

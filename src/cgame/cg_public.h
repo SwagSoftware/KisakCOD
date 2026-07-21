@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 
 const int32_t iEdgePairs[12][2] =
 {

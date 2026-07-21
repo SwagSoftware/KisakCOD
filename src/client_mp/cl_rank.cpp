@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "client_mp.h"
 
 int __cdecl CL_GetRankForXp(int xp)

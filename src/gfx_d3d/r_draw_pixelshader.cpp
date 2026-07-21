@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_shade.h"
 
 uint32_t __cdecl R_SkipDrawSurfListMaterial(const GfxDrawSurf *drawSurfList, uint32_t drawSurfCount)

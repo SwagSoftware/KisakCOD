@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "com_files.h"
 #include "q_shared.h"
 

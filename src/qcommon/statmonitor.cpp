@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "qcommon.h"
 #include "mem_track.h"
 #include <win32/win_local.h>

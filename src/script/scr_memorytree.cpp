@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "scr_memorytree.h"
 #include "scr_stringlist.h"
 

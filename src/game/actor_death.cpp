@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_death.h"
 #include "actor_events.h"
 #include "actor_grenade.h"

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_servercmds.h"
 #include <client/client.h>
 #include <qcommon/com_bsp.h>

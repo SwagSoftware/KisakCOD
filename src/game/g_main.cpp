@@ -2,9 +2,9 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "g_main.h"
 #include "g_local.h"
-#include <universal/q_shared.h>
 #include <cgame/cg_public.h>
 #include <script/scr_main.h>
 #include "g_scr_load_obj.h"

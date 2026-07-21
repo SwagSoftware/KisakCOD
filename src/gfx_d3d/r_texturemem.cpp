@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_texturemem.h"
 #include <universal/assertive.h>
 #include "r_init.h"

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "win_net.h"
 #include "win_net_debug.h"
 #include <script/scr_vm.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_logfile.h"
 
 struct $7272244CE635036285CD968BA6FC5DEE // sizeof=0x4

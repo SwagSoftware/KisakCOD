@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_font.h"
 #include <stringed/stringed_hooks.h>
 #include <qcommon/mem_track.h>

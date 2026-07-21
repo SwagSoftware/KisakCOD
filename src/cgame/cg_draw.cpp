@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_draw.h"
 #include <stringed/stringed_hooks.h>
 #include "cg_main.h"

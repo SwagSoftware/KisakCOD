@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_tess.h"
 #include "r_dvars.h"
 #include "r_shade.h"

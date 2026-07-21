@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 
 char __cdecl Com_SetInitialPlayerProfile(int localClientNum);
 int Com_BuildPlayerProfilePath(char *path, int pathSize, const char *format, ...);

@@ -3,6 +3,7 @@
 //Anything above this #include will be ignored by the compiler
 //#include "../qcommon/exe_headers.h"
 
+#include <universal/q_shared.h>
 #include "../client/client.h"
 #include "win_local.h"
 #include <gfx_d3d/r_dvars.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_draw_shadowable_light.h"
 #include "r_dvars.h"
 #include "r_utils.h"

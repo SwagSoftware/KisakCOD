@@ -5,6 +5,7 @@
 // You can try to disable this code, but you really shouldn't since Server GUID's are set to the SteamID64
 // An added benefit of Steam is that their SteamID can't be changed without them spending another 20$
 
+#include <universal/q_shared.h>
 #include "win_steam.h"
 
 #include <Windows.h>

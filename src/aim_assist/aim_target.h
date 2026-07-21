@@ -4,7 +4,6 @@
 #error This file is for SinglePlayer only
 #endif
 
-#include <universal/q_shared.h>
 #include "aim_assist.h"
 #include <client/client.h>
 

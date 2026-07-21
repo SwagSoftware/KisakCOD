@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "q_parse.h"
 #include <math.h>
 #include <stdlib.h>

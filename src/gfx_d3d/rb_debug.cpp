@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_debug.h"
 #include "r_gfx.h"
 #include "rb_shade.h"

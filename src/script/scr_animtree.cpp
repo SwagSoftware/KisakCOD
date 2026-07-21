@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "scr_animtree.h"
 
 #include <qcommon/mem_track.h>
@@ -326,7 +327,7 @@ int __cdecl Scr_CreateAnimationTree(
     int treeIndex,
     uint16_t flags)
 {
-    int varFlags; // [esp+0h] [ebp-20h]
+    ushort varFlags; // [esp+0h] [ebp-20h]
     uint32_t node; // [esp+4h] [ebp-1Ch]
     uint32_t nodeRef; // [esp+8h] [ebp-18h]
     uint32_t nodeRefa; // [esp+8h] [ebp-18h]
@@ -394,7 +395,7 @@ LABEL_13:
                 if (flagsId)
                     varFlags = GetVariableValueAddress(flagsId)->u.intValue;
                 else
-                    LOWORD(varFlags) = 0;
+                    varFlags = 0;
                 if (((varFlags & 0x10) != 0) == processAdditive) 
                 {
                     childIndexa = Scr_CreateAnimationTree(

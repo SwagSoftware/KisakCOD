@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "win_storage.h"
 #include <qcommon/qcommon.h>
 #include <stringed/stringed_hooks.h>

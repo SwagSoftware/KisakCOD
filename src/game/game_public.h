@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 
 #ifdef KISAK_MP
 #include <cgame_mp/cg_local_mp.h>

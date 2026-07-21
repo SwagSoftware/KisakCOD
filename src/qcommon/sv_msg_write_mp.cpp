@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "sv_msg_write_mp.h"
 
 #include "qcommon.h"

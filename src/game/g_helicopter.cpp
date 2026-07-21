@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "game_public.h"
 #include <script/scr_vm.h>
 #include <script/scr_const.h>

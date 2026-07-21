@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_image.h"
 #include <universal/com_memory.h>
 #include <universal/com_files.h>

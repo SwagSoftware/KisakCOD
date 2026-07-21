@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "pathnode.h"
 #include "g_scr_main.h"
 #include <script/scr_vm.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_state.h"
 #include "rb_logfile.h"
 #include "r_dvars.h"

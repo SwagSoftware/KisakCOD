@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 
 void __cdecl R_ReflectionProbeRegisterDvars();
 void __cdecl R_RegisterDvars();

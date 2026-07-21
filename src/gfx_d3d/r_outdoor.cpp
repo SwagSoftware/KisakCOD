@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_outdoor.h"
 #include <universal/assertive.h>
 #include "r_image.h"

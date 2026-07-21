@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "devgui.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>

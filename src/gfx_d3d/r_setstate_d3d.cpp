@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_setstate_d3d.h"
 #include "r_init.h"
 

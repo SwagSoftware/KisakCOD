@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ragdoll.h"
 
 //float *unitQuaternion     827c055c     ragdoll_quat.obj

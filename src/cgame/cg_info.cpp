@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "cg_local.h"
 #include <sound/snd_public.h>
 #include <client/client.h>

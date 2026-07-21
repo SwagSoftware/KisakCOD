@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_bsp.h"
 #include "r_rendercmds.h"
 #include "r_drawsurf.h"

@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_local_mp.h"
 
 #include <aim_assist/aim_assist.h>

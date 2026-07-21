@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_light.h"
 
 #include "r_dvars.h"

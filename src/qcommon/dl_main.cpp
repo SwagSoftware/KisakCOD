@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "dl_main.h"
 #include "qcommon.h"
 

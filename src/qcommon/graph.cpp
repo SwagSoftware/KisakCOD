@@ -1,5 +1,5 @@
-#include "graph.h"
 #include <universal/q_shared.h>
+#include "graph.h"
 #include <universal/assertive.h>
 #include "qcommon.h"
 

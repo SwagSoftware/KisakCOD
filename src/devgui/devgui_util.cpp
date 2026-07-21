@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "devgui.h"
 #include <cgame/cg_local.h>
 #include <gfx_d3d/r_rendercmds.h>

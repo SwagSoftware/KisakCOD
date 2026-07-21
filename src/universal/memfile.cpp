@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "memfile.h"
 
 #include <qcommon/qcommon.h>

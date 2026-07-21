@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "g_public_mp.h"
 
 #include <script/scr_vm.h>
@@ -13,7 +14,7 @@
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
 {
     int32_t wasGivenWeapon; // eax
-    int32_t weaponModel; // [esp+0h] [ebp-60h]
+    byte weaponModel; // [esp+0h] [ebp-60h]
     gentity_s *pSelf; // [esp+4h] [ebp-5Ch]
     const char *weaponName; // [esp+8h] [ebp-58h]
     bool hadWeapon; // [esp+Ch] [ebp-54h]
@@ -50,16 +51,16 @@ void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref)
         weaponModel = Scr_GetInt(1);
         if ((uint32_t)weaponModel >= 0x100)
         {
-            LOBYTE(weaponModel) = 0;
+            weaponModel = 0;
             wasGivenWeapon = G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, 0);
             goto LABEL_20;
         }
         if (!weapDef->gunXModel[weaponModel])
-            LOBYTE(weaponModel) = 0;
+            weaponModel = 0;
     }
     else
     {
-        LOBYTE(weaponModel) = 0;
+        weaponModel = 0;
     }
     wasGivenWeapon = G_GivePlayerWeapon(&pSelf->client->ps, weaponIndex, weaponModel);
 LABEL_20:

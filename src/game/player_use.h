@@ -1,5 +1,4 @@
 #pragma once
-#include <universal/q_shared.h>
 
 #ifndef KISAK_SP 
 #error This file is for SinglePlayer only 

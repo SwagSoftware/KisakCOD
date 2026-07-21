@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_sunshadow.h"
 #include <qcommon/mem_track.h>
 #include "r_dvars.h"

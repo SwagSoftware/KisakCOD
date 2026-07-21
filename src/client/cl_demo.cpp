@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cl_demo.h"
 #include <xanim/xmodel.h>
 #include <xanim/dobj.h>

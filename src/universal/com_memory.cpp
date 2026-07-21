@@ -1,10 +1,10 @@
+#include <universal/q_shared.h>
 #include "com_memory.h"
 #include "assertive.h"
 
 #include "script/scr_stringlist.h"
 
 #include <string.h>
-#include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>
 

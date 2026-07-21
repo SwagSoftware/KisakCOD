@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_lookat.h"
 #include <xanim/xanim.h>
 #include "g_main.h"

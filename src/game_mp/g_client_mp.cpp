@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "g_public_mp.h"
 #include "g_utils_mp.h"
 #include <server_mp/server_mp.h>

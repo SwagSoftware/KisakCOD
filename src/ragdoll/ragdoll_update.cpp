@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ragdoll.h"
 #include <xanim/dobj.h>
 #include <physics/phys_local.h>

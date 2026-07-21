@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_cover_arrival.h"
 #include "g_local.h"
 #include "actor_state.h"

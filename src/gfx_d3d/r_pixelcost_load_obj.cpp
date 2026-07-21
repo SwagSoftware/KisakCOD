@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_pixelcost_load_obj.h"
 #include <qcommon/qcommon.h>
 

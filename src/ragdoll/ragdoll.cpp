@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ragdoll.h"
 #include <qcommon/threads.h>
 #include <qcommon/mem_track.h>

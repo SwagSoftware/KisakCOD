@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "profile.h"
 #include <qcommon/qcommon.h>
 #include <qcommon/threads.h>

@@ -1,5 +1,5 @@
-#include <qcommon/qcommon.h>
 #include <universal/q_shared.h>
+#include <qcommon/qcommon.h>
 
 #include "r_buffers.h"
 

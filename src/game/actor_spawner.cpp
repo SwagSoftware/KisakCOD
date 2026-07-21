@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_spawner.h"
 #include "g_main.h"
 #include <universal/com_math.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_add_staticmodel.h"
 #include <qcommon/qcommon.h>
 #include "r_dvars.h"
@@ -69,13 +70,13 @@ char __cdecl R_PreTessStaticModelCachedList(
         }
     }
 
-    //HIDWORD(drawSurf.packed) = HIDWORD(drawSurf.packed) & 0xFFC3FFFF | 0xC0000;
     drawSurf.fields.surfType = SF_STATICMODEL_PRETESS;
     if (R_AllocDrawSurf(delayedCmdBuf, drawSurf, drawSurfList, 3u))
     {
-        BYTE1(preTessSurf) = lod;
-        LOBYTE(preTessSurf) = surfaceIndex;
-        HIWORD(preTessSurf) = *list;
+        // pack: byte0 = surfaceIndex, byte1 = lod, high word = list[0]
+        preTessSurf = (uint8_t)surfaceIndex
+                    | ((uint32_t)(uint8_t)lod << 8)
+                    | ((uint32_t)*list << 16);
         firstIndex = preTessIndices - gfxBuf.preTessIndexBuffer->indices;
         iassert(firstIndex < R_MAX_PRETESS_INDICES);
 

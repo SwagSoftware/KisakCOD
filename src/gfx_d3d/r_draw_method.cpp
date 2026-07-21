@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_draw_method.h"
 #include "r_dvars.h"
 #include <bgame/bg_local.h>

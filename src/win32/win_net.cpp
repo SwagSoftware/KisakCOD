@@ -2,6 +2,7 @@
 //Anything above this #include will be ignored by the compiler
 //#include "../qcommon/exe_headers.h"
 
+#include <universal/q_shared.h>
 #include "win_local.h"
 #include "win_net.h"
 #include "win_net_debug.h"

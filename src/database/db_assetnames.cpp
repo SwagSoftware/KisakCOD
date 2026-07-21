@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "database.h"
 #include <game/g_bsp.h>
 

@@ -1,9 +1,9 @@
+#include <universal/q_shared.h>
 #include "scr_stringlist.h"
 
 #include <string.h> // strlen()
 #include <universal/assertive.h>
 #include <win32/win_local.h>
-#include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 
 #include "scr_memorytree.h"

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "scr_parsetree.h"
 #include <universal/assertive.h>
 #include <universal/com_memory.h>

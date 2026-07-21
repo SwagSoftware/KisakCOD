@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "phys_local.h"
 #include <cgame/cg_local.h>
 #include "ode/collision_trimesh_KISAK.h"

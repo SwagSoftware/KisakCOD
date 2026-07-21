@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "pathnode.h"
 #include "actor_badplace.h"
 #include "g_main.h"

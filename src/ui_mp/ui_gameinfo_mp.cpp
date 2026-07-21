@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "ui_mp.h"
 #include <universal/q_parse.h>
 #include <database/database.h>

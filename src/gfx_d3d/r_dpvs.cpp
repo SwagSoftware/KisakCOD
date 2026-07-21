@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_dpvs.h"
 #include <qcommon/mem_track.h>
 #include "r_model_lighting.h"
@@ -1108,7 +1109,8 @@ void __cdecl R_FilterXModelIntoScene(
     const DpvsView *view; // [esp+58h] [ebp-1Ch]
     GfxEntity *gfxEnt; // [esp+5Ch] [ebp-18h]
     uint32_t sceneEntIndex; // [esp+60h] [ebp-14h]
-    uint32_t gfxEntIndex; // [esp+64h] [ebp-10h]
+    //uint32_t gfxEntIndex; // [esp+64h] [ebp-10h]
+    ushort gfxEntIndex; // [esp+64h] [ebp-10h]
     uint32_t cullCount; // [esp+68h] [ebp-Ch]
     uint8_t sceneEntVisData[4]; // [esp+6Ch] [ebp-8h]
     uint32_t viewIndex; // [esp+70h] [ebp-4h]
@@ -1172,7 +1174,7 @@ void __cdecl R_FilterXModelIntoScene(
         }
         else
         {
-            LOWORD(gfxEntIndex) = 0;
+            gfxEntIndex = 0;
         }
         sceneEntIndex = R_AllocSceneModel();
         if (sceneEntIndex < 0x400)

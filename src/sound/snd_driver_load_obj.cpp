@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "snd_local.h"
 #include "snd_public.h"
 #include <universal/com_files.h>

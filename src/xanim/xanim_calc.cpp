@@ -1,5 +1,5 @@
-#include "xanim_calc.h"
 #include <universal/q_shared.h>
+#include "xanim_calc.h"
 #include <qcommon/qcommon.h>
 #include <universal/profile.h>
 

@@ -3,7 +3,6 @@
 
 #include <xanim/xanim.h>
 
-#include <universal/q_shared.h>
 #include "scr_debugger.h"
 #include <bgame/bg_local.h>
 

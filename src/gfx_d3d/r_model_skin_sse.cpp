@@ -1,3 +1,6 @@
+#if 0 // KISAKTODO
+
+#include <universal/q_shared.h>
 #include "r_model_skin.h"
 
 #include <xanim/xanim.h>
@@ -1845,3 +1848,5 @@ void __cdecl R_SkinXSurfaceSkinnedSse(
             R_SkinXSurfaceRigidSse(xsurf, xsurf->vertCount, boneMatrix, skinVerticesOut);
     }
 }
+
+#endif

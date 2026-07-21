@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_workercmds_common.h"
 #include <qcommon/threads.h>
 #include "r_workercmds.h"

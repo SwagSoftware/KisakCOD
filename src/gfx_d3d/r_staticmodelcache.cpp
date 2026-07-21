@@ -1,7 +1,7 @@
+#include <universal/q_shared.h>
 #include "r_staticmodelcache.h"
 #include <qcommon/mem_track.h>
 #include <universal/assertive.h>
-#include <universal/q_shared.h>
 #include "r_init.h"
 #include <xanim/xmodel.h>
 #include "r_dvars.h"

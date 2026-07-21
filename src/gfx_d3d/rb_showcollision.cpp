@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_showcollision.h"
 #include <qcommon/mem_track.h>
 #include <universal/assertive.h>

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 #include <universal/com_math.h>
 
 constexpr size_t MAX_EFFECTS = 1024;

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_utils.h"
 #include <universal/com_memory.h>
 #include <aim_assist/aim_assist.h>

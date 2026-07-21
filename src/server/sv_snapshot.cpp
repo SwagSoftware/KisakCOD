@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "server.h"
 #include <client/cl_parse.h>
 #include "sv_game.h"

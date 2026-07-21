@@ -6,7 +6,6 @@
 #include <qcommon/net_chan.h>
 #endif
 
-#include <universal/q_shared.h>
 
 void		NET_Init(void);
 void		NET_Shutdown(void);

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "xmodel.h"
 #include <universal/com_math.h>
 #include <universal/com_memory.h>

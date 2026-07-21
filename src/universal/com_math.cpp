@@ -1,7 +1,7 @@
+#include <universal/q_shared.h>
 #include "com_math.h"
 
 #include <universal/assertive.h>
-#include <universal/q_shared.h>
 #include <qcommon/mem_track.h>
 #include <math.h>
 #include <xanim/dobj.h>

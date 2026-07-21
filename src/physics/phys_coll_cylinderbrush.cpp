@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "phys_local.h"
 #include "phys_coll_local.h"
 #include <cgame/cg_local.h>

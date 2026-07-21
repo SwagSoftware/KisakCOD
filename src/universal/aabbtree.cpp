@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "aabbtree.h"
 #include "assertive.h"
 #include "com_math.h"

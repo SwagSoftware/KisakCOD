@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include <d3d9.h>
 
 #include <qcommon/qcommon.h>

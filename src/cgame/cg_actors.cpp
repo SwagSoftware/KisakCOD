@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_actors.h"
 #include "cg_main.h"
 #include <bgame/bg_public.h>

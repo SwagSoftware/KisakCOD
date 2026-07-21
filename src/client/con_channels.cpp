@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "client.h"
 #include <bgame/bg_local.h>
 #include <universal/com_files.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "com_constantconfigstrings.h"
 #include "assertive.h"
 #include <string.h>

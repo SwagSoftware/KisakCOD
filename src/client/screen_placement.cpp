@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "client.h"
 
 #ifdef KISAK_MP

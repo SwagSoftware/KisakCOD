@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_image.h"
 
 void __cdecl R_DownsampleMipMapBilinear(

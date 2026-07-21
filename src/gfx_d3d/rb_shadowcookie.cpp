@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_shadowcookie.h"
 #include "r_rendercmds.h"
 #include <universal/profile.h>

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_snapshot.h"
 #include <EffectsCore/fx_system.h>
 #include <ragdoll/ragdoll.h>

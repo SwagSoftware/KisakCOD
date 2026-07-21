@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_water.h"
 #include <qcommon/mem_track.h>
 #include "r_image.h"

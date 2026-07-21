@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_dpvs.h"
 #include "r_dvars.h"
 #include <cgame/cg_local.h>

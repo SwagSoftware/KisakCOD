@@ -2,8 +2,8 @@
 #error This file is for SinglePlayer only
 #endif
 
-#include "cl_ui.h"
 #include <universal/q_shared.h>
+#include "cl_ui.h"
 #include "client.h"
 #include <ui/ui.h>
 #include <universal/com_sndalias.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "aim_target.h"
 #include <qcommon/cmd.h>
 

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "xanim.h"
 #include "xanim_calc.h"
 

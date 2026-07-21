@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "g_vehicle_path.h"
 #include "game_public.h"
 

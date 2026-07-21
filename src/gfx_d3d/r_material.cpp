@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_material.h"
 #include "r_init.h"
 #include "r_state.h"

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_state.h"
 #include <qcommon/mem_track.h>
 #include "g_main.h"

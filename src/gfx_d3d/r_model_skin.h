@@ -1,6 +1,5 @@
 #pragma once
 #include "r_material.h"
-#include <universal/q_shared.h>
 
 void  R_SkinXModelCmd(_WORD *data);
 void __cdecl R_SkinXSurfaceSkinned(

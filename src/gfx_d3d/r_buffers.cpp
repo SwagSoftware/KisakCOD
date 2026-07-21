@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_buffers.h"
 #include <qcommon/mem_track.h>
 #include "r_init.h"

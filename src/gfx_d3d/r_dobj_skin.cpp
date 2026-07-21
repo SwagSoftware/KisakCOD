@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_dobj_skin.h"
 
 #include <xanim/dobj.h>

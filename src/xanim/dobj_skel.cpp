@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "dobj.h"
 #include <universal/profile.h>
 #include "xanim.h"

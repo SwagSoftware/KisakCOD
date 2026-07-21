@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_postfx.h"
 #include "r_dvars.h"
 #include "rb_state.h"

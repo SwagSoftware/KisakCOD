@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ragdoll.h"
 
 #include <gfx_d3d/r_scene.h>

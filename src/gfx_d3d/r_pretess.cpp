@@ -1,6 +1,6 @@
+#include <universal/q_shared.h>
 #include "r_pretess.h"
 #include <qcommon/threads.h>
-#include <universal/q_shared.h>
 #include "r_scene.h"
 #include "r_buffers.h"
 #include "r_drawsurf.h"

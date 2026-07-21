@@ -1,7 +1,7 @@
+#include <universal/q_shared.h>
 #include "snd_local.h"
 #include "snd_public.h"
 #include <qcommon/mem_track.h>
-#include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
 #include <universal/com_sndalias.h>

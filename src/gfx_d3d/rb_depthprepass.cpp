@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_depthprepass.h"
 #include "r_rendercmds.h"
 #include "rb_backend.h"

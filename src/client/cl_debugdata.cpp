@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "client.h"
 
 #include <gfx_d3d/r_debug.h>

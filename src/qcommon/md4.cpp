@@ -1,7 +1,8 @@
+#include <universal/q_shared.h>
+
 #include "md4.h"
 
 #include <cstring>
-#include <universal/q_shared.h>
 
 uint8_t PADDING[64] =
 {

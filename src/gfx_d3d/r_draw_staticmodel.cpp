@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_draw_staticmodel.h"
 #include "rb_stats.h"
 #include <database/database.h>

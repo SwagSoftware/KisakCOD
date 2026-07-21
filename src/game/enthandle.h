@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 
 struct gentity_s;
 

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_draw_material.h"
 #include "rb_logfile.h"
 #include "r_draw_shadowable_light.h"

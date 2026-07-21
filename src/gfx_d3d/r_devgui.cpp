@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_devgui.h"
 #include <qcommon/cmd.h>
 #include <qcommon/mem_track.h>

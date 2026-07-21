@@ -2,10 +2,10 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor.h"
 #include "actor_physics.h"
 #include <qcommon/mem_track.h>
-#include <universal/q_shared.h>
 #include <universal/com_math.h>
 #include "g_local.h"
 #include "g_main.h"

@@ -1,5 +1,4 @@
 #pragma once
-#include <universal/q_shared.h>
 #include <cgame/cg_local.h>
 #include <qcommon/graph.h>
 #include <cstdint>

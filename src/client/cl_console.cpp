@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "client.h"
 #include <qcommon/mem_track.h>
 

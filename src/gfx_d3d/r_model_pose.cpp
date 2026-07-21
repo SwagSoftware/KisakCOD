@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_model_pose.h"
 #include <xanim/dobj_utils.h>
 #include "r_dobj_skin.h"

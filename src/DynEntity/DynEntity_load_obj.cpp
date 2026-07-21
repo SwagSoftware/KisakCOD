@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "DynEntity_client.h"
 #include <xanim/xmodel.h>
 #include <universal/com_memory.h>

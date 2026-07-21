@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "com_sndalias.h"
 #include "com_memory.h"
 #include <devgui/devgui.h>

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor.h"
 #include "actor_exposed.h"
 #include "actor_generic.h"

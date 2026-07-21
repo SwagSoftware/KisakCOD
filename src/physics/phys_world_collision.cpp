@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "phys_local.h"
 
 #include "ode/common.h"

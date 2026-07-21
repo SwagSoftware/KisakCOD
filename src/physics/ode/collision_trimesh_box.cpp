@@ -38,11 +38,11 @@
 #include "collision_trimesh_internal.h"
 
 // LWSS ADD 
+#include <universal/q_shared.h> // va()
 #include "collision_trimesh_KISAK.h"
 
 #include <Windows.h>
 #include <universal/com_math.h>
-#include <universal/q_shared.h>
 #include "collision_kernel.h"
 
 struct collData_t // sizeof=0xC4

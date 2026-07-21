@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "database.h"
 
 void __cdecl Load_ScriptStringCustom(uint16_t *var)

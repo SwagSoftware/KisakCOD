@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_draw_sunshadow.h"
 #include "rb_backend.h"
 #include "r_state.h"

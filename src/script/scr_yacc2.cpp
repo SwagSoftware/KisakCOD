@@ -1,6 +1,7 @@
 // adapted from: https://github.com/voron00/CoD2rev_Server/blob/41e33ed97d0339ac631772f25eee3910ddef87e5/src/script/scr_yacc.cpp
 // (GPL v3.0) (Thanks)
 
+#include <universal/q_shared.h>
 #include "../qcommon/qcommon.h"
 //#include "script_public.h"
 #include "scr_yacc.h"

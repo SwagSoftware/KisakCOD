@@ -1,5 +1,5 @@
-#include "win_localize.h"
 #include <universal/q_shared.h>
+#include "win_localize.h"
 #include <universal/q_parse.h>
 #include <stringed/stringed_hooks.h>
 #include <qcommon/com_fileaccess.h>

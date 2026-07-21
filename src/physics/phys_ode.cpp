@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "phys_local.h"
 #include <DynEntity/DynEntity_client.h>
 #include <qcommon/mem_track.h>
@@ -451,7 +452,7 @@ dxBody *__cdecl Phys_ObjCreateAxis(
     state.state = 0;
     state.timeLastAsleep = physGlob.worldData[worldIndex].timeLastSnapshot; // LWSS: might wanna use timeLastUpdate instead here?
     state.type = physPreset->type;
-    LOBYTE(state.underwater) = 1;
+    state.enabled = 1;
 
     return Phys_CreateBodyFromState(worldIndex, &state);
 }
@@ -514,7 +515,7 @@ dxBody *__cdecl Phys_CreateBodyFromState(PhysWorld worldIndex, const BodyState *
         userData->timeLastAsleep = state->timeLastAsleep;
         Phys_BodyGetCenterOfMass(body, userData->awakeTooLongLastPos);
         userData->sndClass = state->type;
-        if (!LOBYTE(state->underwater))
+        if (!state->enabled)
             dBodyDisable(body);
         return body;
     }
@@ -2457,7 +2458,7 @@ void __cdecl Phys_GetStateFromBody(dxBody *body, BodyState *state)
     state->state = userData->state;
     state->timeLastAsleep = userData->timeLastAsleep;
     state->type = userData->sndClass;
-    LOBYTE(state->underwater) = dBodyIsEnabled(body);
+    state->enabled = dBodyIsEnabled(body);
 }
 
 dxBody *__cdecl Phys_ObjLoad(PhysWorld worldIndex, MemoryFile *memFile)

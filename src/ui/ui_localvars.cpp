@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ui_shared.h"
 #include <universal/com_memory.h>
 

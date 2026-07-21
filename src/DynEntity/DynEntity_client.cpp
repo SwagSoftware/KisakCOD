@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include <qcommon/qcommon.h>
 
 #include "dynentity_client.h"

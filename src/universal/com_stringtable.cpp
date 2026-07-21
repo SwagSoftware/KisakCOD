@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "q_shared.h"
 #include <qcommon/qcommon.h>
 #include <database/database.h>

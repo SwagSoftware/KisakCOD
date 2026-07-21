@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ui_shared.h"
 #include <universal/q_parse.h>
 #include <client/client.h>

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_fields.h"
 #include "actor.h"
 #include <script/scr_vm.h>

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_cmds.h"
 #include <qcommon/cmd.h>
 

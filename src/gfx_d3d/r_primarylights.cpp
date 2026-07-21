@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_primarylights.h"
 #include <bgame/bg_local.h>
 #include <qcommon/com_bsp.h>

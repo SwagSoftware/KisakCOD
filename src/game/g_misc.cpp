@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "g_local.h"
 #include <cgame/cg_view.h>
 #include "g_main.h"

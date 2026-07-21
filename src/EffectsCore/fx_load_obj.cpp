@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "fx_system.h"
 #include <universal/com_files.h>
 #include <universal/q_parse.h>

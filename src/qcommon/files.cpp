@@ -1,6 +1,6 @@
+#include <universal/q_shared.h>
 #include "files.h"
 #include <universal/assertive.h>
-#include <universal/q_shared.h>
 #include <universal/com_files.h>
 #include "qcommon.h"
 #include <database/database.h>

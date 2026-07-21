@@ -1,5 +1,5 @@
-#include "r_image.h"
 #include <universal/q_shared.h>
+#include "r_image.h"
 #include "rb_logfile.h"
 #include <universal/profile.h>
 #include "r_init.h"
@@ -45,19 +45,18 @@ void __cdecl Image_PicmipForSemantic(uint8_t semantic, Picmip *picmip)
         if (picmipUsed >= 0)
         {
             if (picmipUsed > 3)
-                LOBYTE(picmipUsed) = 3;
+                picmipUsed = 3;
         }
         else
         {
-            LOBYTE(picmipUsed) = 0;
+            picmipUsed = 0;
         }
         picmip->platform[0] = picmipUsed;
         break;
     default:
         if (!alwaysfails)
         {
-            v2 = va("unhandled case: %d", semantic);
-            MyAssertHandler(".\\r_image.cpp", 644, 1, v2);
+            MyAssertHandler(".\\r_image.cpp", 644, 1, va("unhandled case: %d", semantic));
         }
     $LN7_78:
         *picmip = 0;
@@ -413,9 +412,6 @@ void __cdecl Image_GetMipmapResolution(
     uint16_t *mipWidth,
     uint16_t *mipHeight)
 {
-    uint32_t v5; // [esp+0h] [ebp-10h]
-    uint32_t v6; // [esp+4h] [ebp-Ch]
-
     iassert(baseWidth > 0);
     iassert(baseHeight > 0);
     iassert(mipmap >= 0);
@@ -423,16 +419,14 @@ void __cdecl Image_GetMipmapResolution(
     iassert(mipHeight);
 
     if ((int)((uint32_t)baseWidth >> mipmap) > 1)
-        v6 = (uint32_t)baseWidth >> mipmap;
+        *mipWidth = (uint32_t)baseWidth >> mipmap;
     else
-        LOWORD(v6) = 1;
+        *mipWidth = 1;
 
-    *mipWidth = v6;
     if ((int)((uint32_t)baseHeight >> mipmap) > 1)
-        v5 = (uint32_t)baseHeight >> mipmap;
+        *mipHeight = (uint32_t)baseHeight >> mipmap;
     else
-        LOWORD(v5) = 1;
-    *mipHeight = v5;
+        *mipHeight = 1;
 
     iassert(*mipWidth > 0);
     iassert(*mipHeight > 0);

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_light.h"
 #include <qcommon/qcommon.h>
 #include <universal/com_files.h>

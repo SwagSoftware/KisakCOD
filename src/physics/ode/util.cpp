@@ -26,7 +26,6 @@
 #include "util.h"
 #include <universal/assertive.h>
 #include "quickstep.h"
-#include <universal/q_shared.h>
 
 #include <algorithm>
 

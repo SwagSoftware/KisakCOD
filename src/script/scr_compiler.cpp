@@ -1,6 +1,7 @@
 // Some functions adapted from: https://github.com/voron00/CoD2rev_Server/blob/41e33ed97d0339ac631772f25eee3910ddef87e5/src/script/scr_compiler.cpp
 // (GPL v3.0) (Thanks)
 
+#include <universal/q_shared.h>
 #include "scr_compiler.h"
 #include "scr_main.h"
 #include "scr_debugger.h"

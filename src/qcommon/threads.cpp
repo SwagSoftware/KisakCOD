@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "threads.h"
 
 #include <Windows.h>

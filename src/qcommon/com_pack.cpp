@@ -1,5 +1,5 @@
-#include "com_pack.h"
 #include <universal/q_shared.h>
+#include "com_pack.h"
 #include <qcommon/qcommon.h>
 
 // KISAKTODO: Move more stuff into here. The Bgra/4byte stuff probably belongs in here.

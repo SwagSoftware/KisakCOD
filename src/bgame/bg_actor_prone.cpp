@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "bg_actor_prone.h"
 
 #ifndef KISAK_SP

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "g_bsp.h"
 
 #include "game_public.h"

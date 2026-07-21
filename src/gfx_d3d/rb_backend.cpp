@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_backend.h"
 #include <qcommon/mem_track.h>
 
@@ -2914,7 +2915,8 @@ void __cdecl RB_RenderCommandFrame(const GfxBackEndData *data)
     bool allowRendering; // [esp+2Fh] [ebp-1h]
 
     //Profile_EndInternal(0);
-    LOBYTE(drawType) = 0;
+    drawType = 0;
+
     if (R_CheckLostDevice())
         allowRendering = g_disableRendering == 0;
     else

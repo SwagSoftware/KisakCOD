@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_sunshadow.h"
 #include "r_dvars.h"
 #include "r_init.h"

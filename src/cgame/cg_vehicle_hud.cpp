@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_vehicle_hud.h"
 #include "cg_local.h"
 #include <client/client.h>

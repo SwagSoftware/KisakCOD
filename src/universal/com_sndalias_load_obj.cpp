@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "com_sndalias.h"
 #include "q_parse.h"
 #include "com_files.h"

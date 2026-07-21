@@ -10,6 +10,7 @@
 	http://www.codeproject.com/Tips/813146/Fast-base-functions-for-encode-decode
 */
 
+#include <universal/q_shared.h>
 #include "base64.h"
 
 //Base64 char table - used internally for encoding

@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "database.h"
 
 #include <xanim/xanim.h>

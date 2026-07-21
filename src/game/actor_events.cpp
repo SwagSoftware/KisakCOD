@@ -2,9 +2,9 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_events.h"
 #include "actor.h"
-#include <universal/q_shared.h>
 
 #include "g_main.h"
 #include "actor_senses.h"

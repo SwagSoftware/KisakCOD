@@ -2,8 +2,8 @@
 #error This file is for SinglePlayer only 
 #endif
 
-#include "savedevice.h"
 #include <universal/q_shared.h>
+#include "savedevice.h"
 #include <qcommon/qcommon.h>
 #include <universal/com_files.h>
 #include <client/client.h>      // SaveHeader

@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "cl_input.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>

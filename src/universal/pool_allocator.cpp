@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "pool_allocator.h"
 #include "assertive.h"
 #include <cstdint>

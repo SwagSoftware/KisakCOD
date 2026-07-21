@@ -43,7 +43,7 @@ struct BodyState // sizeof=0x70
     int state;
     int timeLastAsleep;
     int type;
-    int underwater;
+    int enabled; // ODE body awake/enabled flag (dBodyIsEnabled)
 };
 
 enum physStuckState_t : __int32

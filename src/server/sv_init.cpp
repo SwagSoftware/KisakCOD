@@ -2,9 +2,9 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "server.h"
 #include "sv_public.h"
-#include <universal/q_shared.h>
 #include <ui/ui.h>
 #include <database/database.h>
 #include <qcommon/cmd.h>

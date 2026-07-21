@@ -1,6 +1,7 @@
+#include <universal/q_shared.h>
+
 #include "huffman.h"
 #include <universal/assertive.h>
-#include <universal/q_shared.h>
 
 int bloc;
 

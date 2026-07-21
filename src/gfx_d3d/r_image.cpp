@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_image.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
@@ -84,24 +85,22 @@ void __cdecl TRACK_r_image()
 
 void __cdecl R_DelayLoadImage(XAssetHeader header)
 {
-    LONG externalDataSize; // [esp+4h] [ebp-8h]
-    HRESULT hr; // [esp+8h] [ebp-4h]
-
-    if (HIBYTE(header.xmodelPieces[2].numpieces))
+    GfxImage *image = header.image;
+    if (image->delayLoadPixels)
     {
-        HIBYTE(header.xmodelPieces[2].numpieces) = 0;
-        externalDataSize = header.xmodelPieces[1].numpieces;
-        header.xmodelPieces[1].numpieces = 0;
-        header.xmodelPieces[1].pieces = 0;
+        image->delayLoadPixels = false;
+        int externalDataSize = image->cardMemory.platform[0];
+        image->cardMemory.platform[0] = 0;
+        image->cardMemory.platform[1] = 0;
         if (r_loadForRenderer->current.enabled && !dx.deviceLost)
         {
-            if (!Image_LoadFromFile(header.image))
-                Image_AssignDefaultTexture(header.image);
-            if (!header.xmodelPieces->numpieces)
+            if (!Image_LoadFromFile(image))
+                Image_AssignDefaultTexture(image);
+            if (!image->texture.basemap)
             {
-                hr = dx.device->TestCooperativeLevel();
+                HRESULT hr = dx.device->TestCooperativeLevel();
                 if (hr != 0x88760868 && hr != 0x88760869)
-                    Com_Error(ERR_DROP, "Couldn't load image '%s'\n", header.xmodelPieces[2].pieces);
+                    Com_Error(ERR_DROP, "Couldn't load image '%s'\n", image->name);
             }
         }
         DB_LoadedExternalData(externalDataSize);

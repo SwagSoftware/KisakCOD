@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "qcommon.h"
 #include "mem_track.h"
 #include <server/sv_world.h>

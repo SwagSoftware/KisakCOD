@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "cmd.h"
 
 #include <universal/assertive.h>

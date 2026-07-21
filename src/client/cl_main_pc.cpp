@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include "client.h"
 
 //      int __cdecl Cmd_LocalControllerIndex(void) 8217b9c8 f i cl_main_xenon.obj

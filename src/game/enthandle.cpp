@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "enthandle.h"
 
 #ifdef KISAK_MP

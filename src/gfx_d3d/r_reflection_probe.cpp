@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_reflection_probe.h"
 #include "r_dvars.h"
 #include <qcommon/com_bsp.h>

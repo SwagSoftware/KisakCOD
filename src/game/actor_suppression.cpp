@@ -2,6 +2,7 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_suppression.h"
 #include "game_public.h"
 #include "g_local.h"

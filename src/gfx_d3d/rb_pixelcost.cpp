@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_pixelcost.h"
 #include "rb_sky.h"
 #include <universal/timing.h>

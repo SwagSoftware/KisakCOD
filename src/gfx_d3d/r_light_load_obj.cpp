@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_light.h"
 #include <qcommon/com_bsp.h>
 #include "r_bsp.h"

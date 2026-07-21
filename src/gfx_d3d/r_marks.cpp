@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_marks.h"
 
 #include "r_gfx.h"

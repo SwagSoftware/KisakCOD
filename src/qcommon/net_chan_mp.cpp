@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "net_chan_mp.h"
 #include "qcommon.h"
 #include <client_mp/client_mp.h>

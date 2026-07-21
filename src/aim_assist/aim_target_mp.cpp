@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "aim_assist.h"
 #include <qcommon/mem_track.h>
 #include <qcommon/cmd.h>

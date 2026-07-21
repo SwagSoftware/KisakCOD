@@ -2,8 +2,8 @@
 #error This File is SinglePlayer Only
 #endif
 
-#include "net_chan.h"
 #include <universal/q_shared.h>
+#include "net_chan.h"
 
 
 const char *NET_AdrToString(netadr_t a)

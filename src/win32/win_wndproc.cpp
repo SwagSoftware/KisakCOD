@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "win_local.h"
 #include "win_input.h"
 

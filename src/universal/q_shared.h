@@ -1,7 +1,5 @@
 #pragma once
 
-// LWSS: Not complete. It's going to be somewhat game-specific
-
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
@@ -28,7 +26,7 @@
 #pragma warning(disable : 4786)		// identifier was truncated
 #endif // _WIN32
 
-#include "../universal/assertive.h" // LWSS add
+#include <universal/assertive.h> // LWSS add
 
 #include <assert.h>
 #include <math.h>
@@ -308,6 +306,7 @@ typedef unsigned char uchar;
 typedef unsigned short ushort;
 typedef unsigned long ulong;
 
+// (IDA Types)
 typedef   signed char   int8; // LWSS: slight changes here made to conform with steam api...
 typedef   signed char   sint8;
 typedef unsigned char   uint8;

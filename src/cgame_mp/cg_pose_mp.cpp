@@ -2,6 +2,7 @@
 #error This File is MultiPlayer Only
 #endif
 
+#include <universal/q_shared.h>
 #include "cg_local_mp.h"
 #include "cg_public_mp.h"
 #include <xanim/dobj_utils.h>

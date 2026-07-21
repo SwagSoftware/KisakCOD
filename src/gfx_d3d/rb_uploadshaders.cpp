@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "rb_uploadshaders.h"
 #include <qcommon/threads.h>
 #include "r_dvars.h"

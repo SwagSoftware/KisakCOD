@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "ui_shared.h"
 
 int __cdecl compare_impact_files(const char **pe0, const char **pe1)

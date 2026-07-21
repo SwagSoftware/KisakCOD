@@ -4,7 +4,6 @@
 #error This file is for SinglePlayer only
 #endif
 
-#include <universal/q_shared.h>
 #include <xanim/dobj.h>
 #include <xanim/xanim.h>
 #include "cg_local.h"

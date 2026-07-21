@@ -1,6 +1,5 @@
 #pragma once
 
-#include <universal/q_shared.h>
 
 #ifdef KISAK_MP
 enum entityType_t : __int32

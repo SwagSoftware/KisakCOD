@@ -2,9 +2,9 @@
 #error This file is for SinglePlayer only
 #endif
 
+#include <universal/q_shared.h>
 #include <qcommon/msg.h>
 #include <qcommon/mem_track.h>
-#include <universal/q_shared.h>
 #include "client.h"
 #include <cgame/cg_main.h>
 #include <server/server.h>

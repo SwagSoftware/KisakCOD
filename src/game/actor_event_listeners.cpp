@@ -2,9 +2,9 @@
 #error This file is for SinglePlayer only 
 #endif
 
+#include <universal/q_shared.h>
 #include "actor_event_listeners.h"
 
-#include <universal/q_shared.h>
 #include <qcommon/mem_track.h>
 
 #include <script/scr_const.h>

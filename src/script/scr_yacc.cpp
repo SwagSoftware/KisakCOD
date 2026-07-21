@@ -20,6 +20,7 @@
 // as an extern variable.The original YACC neglects to do this for you, so you should add the following to
 // your lexter, just beneath #include <y.tab.h>:
 
+#include <universal/q_shared.h>
 #include <Windows.h>
 
 #include "scr_yacc.h"

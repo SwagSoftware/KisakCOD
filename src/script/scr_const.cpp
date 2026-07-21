@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "scr_const.h"
 
 scr_const_t scr_const;

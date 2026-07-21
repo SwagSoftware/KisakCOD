@@ -1,3 +1,4 @@
+#include <universal/q_shared.h>
 #include "r_rendertarget.h"
 #include "r_init.h"
 #include "r_image.h"
