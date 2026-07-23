@@ -19,8 +19,7 @@
 //  int g_breakonHit         8304323c     scr_evaluate.obj
 //  uint32_t g_breakonString      83043244     scr_evaluate.obj
 
-debugger_sval_s *g_debugExprHead = NULL;
-int g_breakonExpr; // thread_local in blops?
+int g_breakonExpr; // thread_slocal in blops?
 int g_breakonHit;
 uint32_t g_breakonObject;
 uint32_t g_breakonString;

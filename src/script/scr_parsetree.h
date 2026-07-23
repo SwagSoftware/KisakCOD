@@ -54,7 +54,7 @@ inline sval_u __cdecl node8(int type, sval_u val1, sval_u val2, sval_u val3, sva
 }
 
 
-sval_u linked_list_end(sval_u val1);
+sval_u linked_list_end(sval_u val);
 sval_u prepend_node(sval_u val1, sval_u val2);
 sval_u append_node(sval_u val1, sval_u val2);
 
@@ -74,3 +74,5 @@ sval_u __cdecl debugger_string(Enum_t type, char *s);
 
 
 extern HunkUser *g_allocNodeUser;
+
+extern debugger_sval_s *g_debugExprHead;

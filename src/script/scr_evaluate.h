@@ -99,6 +99,5 @@ void __cdecl Scr_FreeDebugExprValue(sval_u val);
 
 
 extern scrEvaluateGlob_t scrEvaluateGlob;
-extern debugger_sval_s *g_debugExprHead;
 extern int g_script_error_level;
 extern jmp_buf g_script_error[33];

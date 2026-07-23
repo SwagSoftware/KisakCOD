@@ -1200,24 +1200,17 @@ void __cdecl G_UpdateViewAngleClamp(gclient_s *client, const float *worldAnglesC
 
 void __cdecl G_UpdateGroundTilt(gclient_s *client)
 {
-    int groundTiltEntNum; // r10
-    gentity_s *v2; // r11
-
-    groundTiltEntNum = client->groundTiltEntNum;
+    int groundTiltEntNum = client->groundTiltEntNum;
     if (groundTiltEntNum == ENTITYNUM_NONE)
     {
-        client->ps.groundTiltAngles[0] = 0.0;
-        client->ps.groundTiltAngles[1] = 0.0;
-        client->ps.groundTiltAngles[2] = 0.0;
+        Vec3Clear(client->ps.groundTiltAngles);
     }
     else
     {
-        v2 = &g_entities[groundTiltEntNum];
-        if (v2->r.inuse)
+        gentity_s *ent = &g_entities[groundTiltEntNum];
+        if (ent->r.inuse)
         {
-            client->ps.groundTiltAngles[0] = v2->r.currentAngles[0];
-            client->ps.groundTiltAngles[1] = v2->r.currentAngles[1];
-            client->ps.groundTiltAngles[2] = v2->r.currentAngles[2];
+            Vec3Copy(ent->r.currentAngles, client->ps.groundTiltAngles);
         }
     }
 }

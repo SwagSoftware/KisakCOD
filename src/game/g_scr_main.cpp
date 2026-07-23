@@ -2542,7 +2542,7 @@ void __cdecl ScrCmd_PlayerSetGroundReferenceEnt(scr_entref_t entref)
         Scr_ObjectError("not a player entity");
     if (Scr_GetType(0))
     {
-        if (Scr_GetType(0) != 1 || Scr_GetPointerType(0) != 20)
+        if (Scr_GetType(0) != VAR_POINTER || Scr_GetPointerType(0) != VAR_ENTITY)
             Scr_ParamError(0, "not an entity");
         number = Scr_GetEntity(0)->s.number;
     }

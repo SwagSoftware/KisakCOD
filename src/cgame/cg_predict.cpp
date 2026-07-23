@@ -381,11 +381,9 @@ void __cdecl CG_InterpolateGroundTilt(int localClientNum)
 
         if (nextSnap->serverTime > snap->serverTime)
         {
-            const float frac = cgameGlob->frameInterpolation;
-
             for (int i = 0; i < 3; ++i)
             {
-                cgameGlob->predictedPlayerState.groundTiltAngles[i] = LerpAngle( snap->ps.groundTiltAngles[i], nextSnap->ps.groundTiltAngles[i], frac );
+                cgameGlob->predictedPlayerState.groundTiltAngles[i] = LerpAngle( snap->ps.groundTiltAngles[i], nextSnap->ps.groundTiltAngles[i], cgameGlob->frameInterpolation );
             }
         }
     }
