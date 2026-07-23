@@ -60,8 +60,8 @@ void R_SkinXModelCmd(_WORD *data)
 
     PROF_SCOPED("R_SkinXModel");
 
-    //bool sseEnabled = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
-    //bool sseStateUsed = false;
+    bool sseEnabled = sys_SSE->current.enabled && r_sse_skinning->current.enabled;
+    bool sseStateUsed = false;
 
     SkinXModelCmd* skinCmd = (SkinXModelCmd*)data;
 
@@ -96,11 +96,11 @@ void R_SkinXModelCmd(_WORD *data)
                 if ((skinCmd->surfacePartBits[j >> 5] & (0x80000000 >> (j & 0x1F))) == 0)
                     continue;
 
-                //if (sseStateUsed)
-                //{
-                //    sseStateUsed = false;
-                //    /*_m_empty();*/
-                //}
+                if (sseStateUsed)
+                {
+                    sseStateUsed = false;
+                    _m_empty();
+                }
 
                 DObjSkelMat mat0, mat1;
 
@@ -139,35 +139,32 @@ void R_SkinXModelCmd(_WORD *data)
             skinVerticesOut = (GfxPackedVertex*)&gfxBuf.skinnedCacheLockAddr[skinnedSurf->skinnedCachedOffset];
         }
 
-        // LWSS: this makes the viewmodels flicker. Decomp is not fully accurate (should just have templated functions)
-        //if (sseEnabled)
-        //{
-        //    if (!sseStateUsed)
-        //    {
-        //        sseStateUsed = true;
-        //        //_m_empty();
-        //    }
-        //
-        //    GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
-        //    if (gfxBuf.fastSkin)
-        //    {
-        //        if (skinnedSurf->skinnedCachedOffset >= 0)
-        //            skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
-        //        if (skinnedSurf->skinnedVert)
-        //            skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
-        //    }
-        //    R_SkinXSurfaceSkinnedSse(xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinnedVert);
-        //}
-        //else
-        //{
-
+        if (sseEnabled)
+        {
+            if (!sseStateUsed)
+            {
+                sseStateUsed = true;
+                _m_empty();
+            }
+        
+            GfxPackedVertexNormal *skinVertNormalIn = 0, *skinVertNormalOut = 0;
+            if (gfxBuf.fastSkin)
+            {
+                if (skinnedSurf->skinnedCachedOffset >= 0)
+                    skinVertNormalOut = &gfxBuf.skinnedCacheNormalsAddr[skinnedSurf->skinnedCachedOffset >> 5];
+                if (skinnedSurf->skinnedVert)
+                    skinVertNormalIn = &gfxBuf.oldSkinnedCacheNormalsAddr[(int)skinnedSurf->skinnedVert >> 5];
+            }
+            R_SkinXSurfaceSkinnedSse(xsurf, &boneSkelMats[boneIndex], skinVertNormalIn, skinVertNormalOut, skinVerticesOut);
+        }
+        else
+        {
             R_SkinXSurfaceSkinned(xsurf, &boneSkelMats[boneIndex], skinVerticesOut);
-
-        //}
+        }
     }
 
-    //if (sseStateUsed)
-        /*_m_empty();*/
+    if (sseStateUsed)
+        _m_empty();
 }
 
 

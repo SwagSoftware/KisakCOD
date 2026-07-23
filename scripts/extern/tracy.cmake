@@ -16,8 +16,9 @@ FetchContent_Declare (
 FetchContent_MakeAvailable ( tracy )
 
 set_property(TARGET TracyClient PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
+#Tracy is default off, but turned on by simply defining TRACY_ENABLE
+set_property(TARGET TracyClient PROPERTY INTERFACE_COMPILE_DEFINITIONS TRACY_ON_DEMAND TRACY_ONLY_LOCALHOST)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_BINARY_DIR}/_deps/tracy-src/public)
-target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ENABLE>)
-target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:TRACY_ON_DEMAND>)
-target_link_libraries(${PROJECT_NAME} PUBLIC $<$<CONFIG:Debug>:TracyClient>) # Enable Profiler in Debug
+target_link_libraries(${PROJECT_NAME} PUBLIC TracyClient)
 #################
