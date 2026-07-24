@@ -308,6 +308,7 @@ void __cdecl BG_RegisterDvars()
 
     min.value.max = 10.0f;
     min.value.min = 0.0f;
+#ifdef KISAK_MP
     bg_viewKickScale = Dvar_RegisterFloat(
         "bg_viewKickScale",
         0.2f,
@@ -328,6 +329,28 @@ void __cdecl BG_RegisterDvars()
         minc,
         DVAR_CHEAT,
         "The random direction scale view kick");
+#elif KISAK_SP
+    bg_viewKickScale = Dvar_RegisterFloat(
+        "bg_viewKickScale",
+        0.8f,
+        min,
+        DVAR_SAVED | DVAR_CHEAT,
+        "The scale to apply to the damage done to caluclate damage view kick");
+    mina.value.max = 90.0f;
+    mina.value.min = 0.0f;
+    bg_viewKickMax = Dvar_RegisterFloat("bg_viewKickMax", 90.0f, mina, DVAR_SAVED | DVAR_CHEAT, "The maximum view kick");
+    minb.value.max = 90.0f;
+    minb.value.min = 0.0f;
+    bg_viewKickMin = Dvar_RegisterFloat("bg_viewKickMin", 5.0f, minb, DVAR_SAVED | DVAR_CHEAT, "The minimum view kick");
+    minc.value.max = 1.0f;
+    minc.value.min = 0.0f;
+    bg_viewKickRandom = Dvar_RegisterFloat(
+        "bg_viewKickRandom",
+        0.40000001f,
+        minc,
+        DVAR_SAVED | DVAR_CHEAT,
+        "The random direction scale view kick");
+#endif
     mind.value.max = 90.0f;
     mind.value.min = 0.0f;
     player_view_pitch_up = Dvar_RegisterFloat(
@@ -408,6 +431,7 @@ void __cdecl BG_RegisterDvars()
         minm,
         DVAR_CHEAT | DVAR_TEMP,
         "Amount to rotate the player 3rd person model when crouch leaning right");
+#ifdef KISAK_MP
     minn.value.max = 360.0f;
     minn.value.min = 0.0f;
     bg_ladder_yawcap = Dvar_RegisterFloat(
@@ -460,7 +484,6 @@ void __cdecl BG_RegisterDvars()
         "The time interval before foliage sounds are reset after the player has stopped moving");
     minr.value.max = FLT_MAX;
     minr.value.min = 1.0f;
-#ifdef KISAK_MP
     bg_fallDamageMinHeight = Dvar_RegisterFloat(
         "bg_fallDamageMinHeight",
         128.0f,
@@ -475,22 +498,6 @@ void __cdecl BG_RegisterDvars()
         mins,
         DVAR_CHEAT | DVAR_TEMP | DVAR_SYSTEMINFO,
         "The height that a player will take maximum damage when falling");
-#elif KISAK_SP
-    bg_fallDamageMinHeight = Dvar_RegisterFloat(
-        "bg_fallDamageMinHeight",
-        200.0f,
-        minr,
-        DVAR_CHEAT | DVAR_TEMP | DVAR_SYSTEMINFO,
-        "The height that a player will start to take minimum damage if they fall");
-    mins.value.max = FLT_MAX;
-    mins.value.min = 1.0f;
-    bg_fallDamageMaxHeight = Dvar_RegisterFloat(
-        "bg_fallDamageMaxHeight",
-        350.0f,
-        mins,
-        DVAR_CHEAT | DVAR_TEMP | DVAR_SYSTEMINFO,
-        "The height that a player will take maximum damage when falling");
-#endif
     mint.value.max = 1000.0f;
     mint.value.min = 0.0f;
     inertiaMax = Dvar_RegisterFloat("inertiaMax", 50.0, mint, DVAR_CHEAT | DVAR_TEMP, "Maximum player inertia");
@@ -506,6 +513,89 @@ void __cdecl BG_RegisterDvars()
     minv.value.max = 100.0f;
     minv.value.min = 0.0f;
     friction = Dvar_RegisterFloat("friction", 5.5f, minv, DVAR_CHEAT | DVAR_TEMP, "Player friction");
+#elif KISAK_SP
+    minn.value.max = 360.0f;
+    minn.value.min = 0.0f;
+    bg_ladder_yawcap = Dvar_RegisterFloat(
+        "bg_ladder_yawcap",
+        100.0f,
+        minn,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The maximum angle that a player can look around while on a ladder");
+    mino.value.max = 360.0f;
+    mino.value.min = 0.0f;
+    bg_prone_yawcap = Dvar_RegisterFloat(
+        "bg_prone_yawcap",
+        85.0f,
+        mino,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The maximum angle that a player can look around quickly while prone");
+    minp.value.max = FLT_MAX;
+    minp.value.min = 0.0f;
+    bg_foliagesnd_minspeed = Dvar_RegisterFloat(
+        "bg_foliagesnd_minspeed",
+        40.0f,
+        minp,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The speed that a player must be going to make minimum noise while moving through foliage");
+    minq.value.max = FLT_MAX;
+    minq.value.min = 0.0f;
+    bg_foliagesnd_maxspeed = Dvar_RegisterFloat(
+        "bg_foliagesnd_maxspeed",
+        180.0f,
+        minq,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The speed that a player must be going to make maximum noise while moving through foliage");
+    bg_foliagesnd_slowinterval = Dvar_RegisterInt(
+        "bg_foliagesnd_slowinterval",
+        1500,
+        (DvarLimits)0x7FFFFFFF00000000LL,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The time between each foliage sound when moving slowly");
+    bg_foliagesnd_fastinterval = Dvar_RegisterInt(
+        "bg_foliagesnd_fastinterval",
+        500,
+        (DvarLimits)0x7FFFFFFF00000000LL,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The time between each foliage sound when moving quickly");
+    bg_foliagesnd_resetinterval = Dvar_RegisterInt(
+        "bg_foliagesnd_resetinterval",
+        500,
+        (DvarLimits)0x7FFFFFFF00000000LL,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The time interval before foliage sounds are reset after the player has stopped moving");
+    minr.value.max = FLT_MAX;
+    minr.value.min = 1.0f;
+    bg_fallDamageMinHeight = Dvar_RegisterFloat(
+        "bg_fallDamageMinHeight",
+        200.0f,
+        minr,
+        DVAR_CHEAT | DVAR_SYSTEMINFO | DVAR_USERINFO,
+        "The height that a player will start to take minimum damage if they fall");
+    mins.value.max = FLT_MAX;
+    mins.value.min = 1.0f;
+    bg_fallDamageMaxHeight = Dvar_RegisterFloat(
+        "bg_fallDamageMaxHeight",
+        350.0f,
+        mins,
+        DVAR_CHEAT | DVAR_SYSTEMINFO | DVAR_USERINFO,
+        "The height that a player will take maximum damage when falling");
+    mint.value.max = 1000.0f;
+    mint.value.min = 0.0f;
+    inertiaMax = Dvar_RegisterFloat("inertiaMax", 50.0, mint, DVAR_CHEAT | DVAR_USERINFO, "Maximum player inertia");
+    inertiaDebug = Dvar_RegisterBool("inertiaDebug", 0, DVAR_CHEAT | DVAR_USERINFO, "Show inertia debug information");
+    minu.value.max = 1.0f;
+    minu.value.min = -1.0f;
+    inertiaAngle = Dvar_RegisterFloat(
+        "inertiaAngle",
+        -1000.0f,
+        minu,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The cosine of the angle at which inertia occurs");
+    minv.value.max = 100.0f;
+    minv.value.min = 0.0f;
+    friction = Dvar_RegisterFloat("friction", 5.5f, minv, DVAR_CHEAT | DVAR_USERINFO, "Player friction");
+#endif
     minw.value.max = 1000.0f;
     minw.value.min = 0.0f;
     stopspeed = Dvar_RegisterFloat("stopspeed", 100.0f, minw, DVAR_CHEAT | DVAR_TEMP, "The player deceleration");
@@ -527,6 +617,7 @@ void __cdecl BG_RegisterDvars()
         "The amount the player's leg yaw can differ from his torso before moving ta match");
     minz.value.max = 1.0f;
     minz.value.min = 0.0f;
+#ifdef KISAK_MP
     bg_bobAmplitudeSprinting = Dvar_RegisterVec2(
         "bg_bobAmplitudeSprinting",
         0.02f,
@@ -580,6 +671,61 @@ void __cdecl BG_RegisterDvars()
         minbf,
         DVAR_CHEAT | DVAR_TEMP,
         "Maximum speed of grenade that will show up in indicator and can be thrown back.");
+#elif KISAK_SP
+    bg_bobAmplitudeSprinting = Dvar_RegisterVec2(
+        "bg_bobAmplitudeSprinting",
+        0.02f,
+        0.014f,
+        minz,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The multiplier to apply to the player's speed to get the bob amplitude while sprinting");
+    minba.value.max = 1.0f;
+    minba.value.min = 0.0f;
+    bg_bobAmplitudeStanding = Dvar_RegisterVec2(
+        "bg_bobAmplitudeStanding",
+        0.0070000002f,
+        0.0070000002f,
+        minba,
+        DVAR_SAVED | DVAR_CHEAT | DVAR_USERINFO,
+        "The multiplier to apply to the player's speed to get the bob amplitude while standing");
+    minbb.value.max = 1.0f;
+    minbb.value.min = 0.0f;
+    bg_bobAmplitudeDucked = Dvar_RegisterVec2(
+        "bg_bobAmplitudeDucked",
+        0.0074999998f,
+        0.0074999998f,
+        minbb,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The multiplier to apply to the player's speed to get the bob amplitude while ducking");
+    minbc.value.max = 1.0f;
+    minbc.value.min = 0.0f;
+    bg_bobAmplitudeProne = Dvar_RegisterVec2(
+        "bg_bobAmplitudeProne",
+        0.02f,
+        0.0049999999f,
+        minbc,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The multiplier to apply to the player's speed to get the bob amplitude while prone");
+    minbd.value.max = 36.0f;
+    minbd.value.min = 0.0f;
+    bg_bobMax = Dvar_RegisterFloat("bg_bobMax", 8.0f, minbd, DVAR_CHEAT | DVAR_USERINFO, "The maximum allowed bob amplitude");
+    minbe.value.max = 300.0f;
+    minbe.value.min = 0.0f;
+    bg_aimSpreadMoveSpeedThreshold = Dvar_RegisterFloat(
+        "bg_aimSpreadMoveSpeedThreshold",
+        11.0f,
+        minbe,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "When player is moving faster than this speed, the aim spread will increase");
+    minbf.value.max = 1000.0f;
+    minbf.value.min = 0.0f;
+    bg_maxGrenadeIndicatorSpeed = Dvar_RegisterFloat(
+        "bg_maxGrenadeIndicatorSpeed",
+        20.0f,
+        minbf,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "Maximum speed of grenade that will show up in indicator and can be thrown back.");
+#endif
     minbg.value.max = 30.0f;
     minbg.value.min = 0.0f;
     player_breath_hold_time = Dvar_RegisterFloat(
@@ -850,6 +996,7 @@ void __cdecl BG_RegisterDvars()
         "The amount of time in seconds for the shellshock effect to fade");
     mincg.value.max = 1000.0f;
     mincg.value.min = 0.0f;
+#ifdef KISAK_MP
     bg_shock_screenFlashWhiteFadeTime = Dvar_RegisterFloat(
         "bg_shock_screenFlashWhiteFadeTime",
         1.0f,
@@ -864,6 +1011,22 @@ void __cdecl BG_RegisterDvars()
         minch,
         DVAR_CHEAT,
         "In seconds, how soon from the end of the effect to start blending out the screengrab layer.");
+#elif KISAK_SP
+    bg_shock_screenFlashWhiteFadeTime = Dvar_RegisterFloat(
+        "bg_shock_screenFlashWhiteFadeTime",
+        0.0f,
+        mincg,
+        DVAR_CHEAT,
+        "In seconds, how soon from the end of the effect to start blending out the whiteout layer.");
+    minch.value.max = 1000.0f;
+    minch.value.min = 0.0f;
+    bg_shock_screenFlashShotFadeTime = Dvar_RegisterFloat(
+        "bg_shock_screenFlashShotFadeTime",
+        0.0f,
+        minch,
+        DVAR_CHEAT,
+        "In seconds, how soon from the end of the effect to start blending out the screengrab layer.");
+#endif
     minci.value.max = 1000.0f;
     minci.value.min = 0.001f;
     bg_shock_viewKickPeriod = Dvar_RegisterFloat(
@@ -888,7 +1051,11 @@ void __cdecl BG_RegisterDvars()
         minck,
         DVAR_CHEAT,
         "The time for the shellshock kick effect to fade");
+#ifdef KISAK_MP
     bg_shock_sound = Dvar_RegisterBool("bg_shock_sound", 1, DVAR_CHEAT, "Play shell shock sound");
+#elif KISAK_SP
+    bg_shock_sound = Dvar_RegisterBool("bg_shock_sound", 0, DVAR_CHEAT, "Play shell shock sound");
+#endif
     mincl.value.max = 1000.0f;
     mincl.value.min = 0.001f;
     bg_shock_soundFadeInTime = Dvar_RegisterFloat(
@@ -952,7 +1119,11 @@ void __cdecl BG_RegisterDvars()
         DVAR_CHEAT,
         "The delay from the end of the shell shock to the end of the sound modification");
     BG_RegisterShockVolumeDvars();
+#ifdef KISAK_MP
     bg_shock_lookControl = Dvar_RegisterBool("bg_shock_lookControl", 1, DVAR_CHEAT, "Alter player control during shellshock");
+#elif KISAK_SP
+    bg_shock_lookControl = Dvar_RegisterBool("bg_shock_lookControl", 0, DVAR_CHEAT, "Alter player control during shellshock");
+#endif
     mincs.value.max = FLT_MAX;
     mincs.value.min = 0.0f;
     bg_shock_lookControl_maxpitchspeed = Dvar_RegisterFloat(
@@ -985,11 +1156,19 @@ void __cdecl BG_RegisterDvars()
         mincv,
         DVAR_CHEAT,
         "The time for the shellshock player control to fade in seconds");
+#ifdef KISAK_MP
     bg_shock_movement = Dvar_RegisterBool(
         "bg_shock_movement",
         1,
         DVAR_CHEAT,
         "Affect player's movement speed duringi shellshock");
+#elif KISAK_SP
+    bg_shock_movement = Dvar_RegisterBool(
+        "bg_shock_movement",
+        0,
+        DVAR_CHEAT,
+        "Affect player's movement speed duringi shellshock");
+#endif
     mincw.value.max = 1000.0f;
     mincw.value.min = 0.0f;
     player_meleeRange = Dvar_RegisterFloat(

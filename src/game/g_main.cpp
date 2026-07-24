@@ -5,6 +5,7 @@
 #include <universal/q_shared.h>
 #include "g_main.h"
 #include "g_local.h"
+#include <universal/q_shared.h>
 #include <cgame/cg_public.h>
 #include <script/scr_main.h>
 #include "g_scr_load_obj.h"
@@ -290,9 +291,9 @@ const dvar_s *G_RegisterServerDemoDvars()
 {
     // KISAKTODO: missing some flags and descriptions (it is extremely tedious to extract these from the asm)
 
-    Dvar_RegisterString("gamename", "main", 0x46u, "The name of the game");
-    Dvar_RegisterString("gamedate", "Sep  7 2007", 0x42u, "The date compiled");
-    Dvar_RegisterString("sv_mapname", "", 0x46u, "The current map name");
+    Dvar_RegisterString("gamename", "main", DVAR_ROM | DVAR_SERVERINFO | DVAR_USERINFO, "The name of the game");
+    Dvar_RegisterString("gamedate", "Sep  7 2007", DVAR_ROM | DVAR_USERINFO, "The date compiled");
+    Dvar_RegisterString("sv_mapname", "", DVAR_ROM | DVAR_SERVERINFO | DVAR_USERINFO, "The current map name");
     Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
     //compassMaxRange = Dvar_RegisterFloat("compassMaxRange", 3500.0, 0.0, FLT_MAX, 0, "The maximum range from the player that objects will show on the compass"); // LWSS: already defined in cg_compass.cpp
     g_reloading = Dvar_RegisterInt("g_reloading", 0, 0, 4, 0x40u, "True if the game is reloading");
@@ -303,11 +304,11 @@ const dvar_s *G_RegisterServerDemoDvars()
     player_maxGrenadeCatchHeight = Dvar_RegisterFloat("player_maxGrenadeCatchHeight", 80.0, 0.0, 200.0, 0x1082u, "The maximum height difference from grenade to player viewheight at which the player can catch a grenade");
     player_throwbackInnerRadius = Dvar_RegisterFloat("player_throwbackInnerRadius", 72.0, 0.0, FLT_MAX, 0x1082u, "The radius to a live grenade player must be within initially to do a throwback");
     player_throwbackOuterRadius = Dvar_RegisterFloat("player_throwbackOuterRadius", 192.0, 0.0, FLT_MAX, 0x1082u, "The radius player is allow to throwback a grenade once the player has been in the inner radius");
-    g_minGrenadeDamageSpeed = Dvar_RegisterFloat("g_minGrenadeDamageSpeed", 400.0, 0.0, FLT_MAX, 0x1082u, "Minimum speed at which getting hit be a grenade will do damage (not the grenade explosion damage)");
-    g_speed = Dvar_RegisterInt("g_speed", 190, 0x80000000, 0x7FFFFFFF, 0x1002u, "Maximum player speed");
-    g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, 1.0, FLT_MAX, 2u, "Game gravity in inches per second per second");
-    g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, -FLT_MAX, FLT_MAX, 2u, "Maximum knockback");
-    bullet_penetrationEnabled = Dvar_RegisterBool("bullet_penetrationEnabled", 1, 0x82u, "Enable/Disable bullet penetration.");
+    g_minGrenadeDamageSpeed = Dvar_RegisterFloat("g_minGrenadeDamageSpeed", 400.0, 0.0, FLT_MAX, DVAR_SAVED | DVAR_CHEAT | DVAR_USERINFO, "Minimum speed at which getting hit be a grenade will do damage (not the grenade explosion damage)");
+    g_speed = Dvar_RegisterInt("g_speed", 190, 0x80000000, 0x7FFFFFFF, DVAR_SAVED | DVAR_USERINFO, "Maximum player speed");
+    g_gravity = Dvar_RegisterFloat("g_gravity", 800.0, 1.0, FLT_MAX, DVAR_USERINFO, "Game gravity in inches per second per second");
+    g_knockback = Dvar_RegisterFloat("g_knockback", 1000.0, -FLT_MAX, FLT_MAX, DVAR_USERINFO, "Maximum knockback");
+    bullet_penetrationEnabled = Dvar_RegisterBool("bullet_penetrationEnabled", 1, DVAR_CHEAT | DVAR_USERINFO, "Enable/Disable bullet penetration.");
     g_ai = Dvar_RegisterBool("g_ai", 1, 0x82u, "Enable AI");
     g_spawnai = Dvar_RegisterBool("g_spawnai", 1, 0xA2u, "Enable AI spawning");
     ai_corpseCount = Dvar_RegisterInt("ai_corpseCount", 16, 0, 16, 3u, "Maximum number of AI corpses");
@@ -370,9 +371,9 @@ const dvar_s *G_RegisterServerDemoDvars()
         "Time for player 'trail' for AI missing");
     ai_disableSpawn = Dvar_RegisterBool("ai_disableSpawn", 0, 0x82u, "Do not spawn AI");
     g_changelevel_time = Dvar_RegisterFloat("g_changelevel_time", 4.0, 0.0, FLT_MAX, 2u, "Time for change level fade out");
-    g_debugLocDamage = Dvar_RegisterBool("g_debugLocDamage", 0, 0x82u, "Display locational damage debug information");
-    g_friendlyNameDist = Dvar_RegisterFloat("g_friendlyNameDist", 15000.0, 0.0, 15000.0, 0x1082u, "Maximum distance at which a friendly name shows when the crosshairs is over them");
-    g_friendlyfireDist = Dvar_RegisterFloat("g_friendlyfireDist", 175.0, 0.0, 15000.0, 0x1082u, "Maximum distance at which the player channot shoot while the crosshair is over a friendly");
+    g_debugLocDamage = Dvar_RegisterBool("g_debugLocDamage", 0, DVAR_CHEAT | DVAR_USERINFO, "Display locational damage debug information");
+    g_friendlyNameDist = Dvar_RegisterFloat("g_friendlyNameDist", 15000.0, 0.0, 15000.0, DVAR_SAVED | DVAR_CHEAT | DVAR_USERINFO, "Maximum distance at which a friendly name shows when the crosshairs is over them");
+    g_friendlyfireDist = Dvar_RegisterFloat("g_friendlyfireDist", 175.0, 0.0, 15000.0, DVAR_SAVED | DVAR_CHEAT | DVAR_USERINFO, "Maximum distance at which the player channot shoot while the crosshair is over a friendly");
     melee_debug = Dvar_RegisterBool("melee_debug", 0, 0x80u, "Turn on debug lines for melee traces");
     radius_damage_debug = Dvar_RegisterBool(
         "radius_damage_debug",
@@ -389,7 +390,7 @@ const dvar_s *G_RegisterServerDemoDvars()
 #endif
         0,
         0x7FFFFFFF,
-        2u,
+        DVAR_USERINFO,
         "The time to hold down the 'use' button to activate a 'use' command");
 
     player_deathInvulnerableTime = Dvar_RegisterInt(
@@ -577,9 +578,9 @@ const dvar_s *G_RegisterServerDemoDvars()
     turretPlayerAvoidScale = Dvar_RegisterFloat("turretPlayerAvoidScale", 1.7, 0.0, FLT_MAX, 0x80u, 0);
     G_RegisterMissileDvars();
     BG_RegisterDvars();
-    g_fogColorReadOnly = Dvar_RegisterColor("g_fogColorReadOnly", 1.0, 0.0, 0.0, 1.0, 0x10c0u, 0);
-    g_fogStartDistReadOnly = Dvar_RegisterFloat("g_fogStartDistReadOnly", 0.0, 0.0, FLT_MAX, 0x10c0u, 0);
-    g_fogHalfDistReadOnly = Dvar_RegisterFloat("g_fogHalfDistReadOnly", 0.1, 0.0, FLT_MAX, 0x10c0u, 0);
+    g_fogColorReadOnly = Dvar_RegisterColor("g_fogColorReadOnly", 1.0, 0.0, 0.0, 1.0, DVAR_SAVED | DVAR_CHEAT | DVAR_ROM, 0);
+    g_fogStartDistReadOnly = Dvar_RegisterFloat("g_fogStartDistReadOnly", 0.0, 0.0, FLT_MAX, DVAR_SAVED | DVAR_CHEAT | DVAR_ROM, 0);
+    g_fogHalfDistReadOnly = Dvar_RegisterFloat("g_fogHalfDistReadOnly", 0.1, 0.0, FLT_MAX, DVAR_SAVED | DVAR_CHEAT | DVAR_ROM, 0);
     chaplinCheat = Dvar_RegisterBool("chaplinCheat", 0, 0x1080u, "");
     return Dvar_RegisterBool("scr_dof_enable", 1, 0x1082u, "enable dof");
 }

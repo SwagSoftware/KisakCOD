@@ -380,8 +380,8 @@ void __cdecl CG_RegisterDvars()
     minc.value.min = -200.0f;
     cg_debugInfoCornerOffset = Dvar_RegisterVec2(
         "cg_debugInfoCornerOffset",
-        0.0f,
-        0.0f,
+        5.0f,
+        -5.0f,
         minc,
         DVAR_ARCHIVE,
         "Offset from top-right corner, for cg_drawFPS, etc");

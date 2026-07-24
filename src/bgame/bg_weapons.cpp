@@ -2452,7 +2452,11 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 1);
         }
+#ifdef KISAK_MP
         else if ((ps->weapFlags & 0x80) != 0)
+#elif KISAK_SP
+        else if ((ps->weapFlags & 0x80) != 0 || ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0))
+#endif
         {
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 0);
@@ -2614,7 +2618,7 @@ int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction)
         shouldStartFiring = 0;
 
 #ifdef KISAK_SP
-	if ((ps->weapFlags & 8) != 0)// g_friendlyfireDist
+	if ((ps->weapFlags & 8) != 0 || (ps->weapFlags & 0x80) != 0)// g_friendlyfireDist & disableweapons
 		return 0;
 
 	// Weapon lock for javelin and stinger.
@@ -2892,7 +2896,7 @@ void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction)
     weapDef = BG_GetWeaponDef(ps->weapon);
 
 #ifdef KISAK_SP
-    if ((ps->weapFlags & 8) != 0) // g_friendlyfireDist
+    if ((ps->weapFlags & 8) != 0 || (ps->weapFlags & 0x80) != 0) // g_friendlyfireDist & disableweapons
         return;
 #endif
 

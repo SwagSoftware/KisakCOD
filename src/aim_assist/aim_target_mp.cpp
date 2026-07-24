@@ -31,12 +31,21 @@ const dvar_s *AimTarget_RegisterDvars()
 
     min.value.max = 128.0;
     min.value.min = 0.0;
+#ifdef KISAK_MP
     result = Dvar_RegisterFloat(
         "aim_target_sentient_radius",
         10.0,
         min,
         DVAR_CHEAT,
         "The radius used to calculate target bounds for a sentient(actor or player)");
+#elif KISAK_SP
+    result = Dvar_RegisterFloat(
+        "aim_target_sentient_radius",
+        10.0,
+        min,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The radius used to calculate target bounds for a sentient(actor or player)");
+#endif
     aim_target_sentient_radius = result;
     return result;
 }

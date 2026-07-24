@@ -18,6 +18,7 @@ void __cdecl Jump_RegisterDvars()
     DvarLimits minb; // [esp+4h] [ebp-14h]
     DvarLimits minc; // [esp+4h] [ebp-14h]
 
+#ifdef KISAK_MP
     min.value.max = 1000.0;
     min.value.min = 0.0;
     jump_height = Dvar_RegisterFloat("jump_height", 39.0, min, DVAR_CHEAT | DVAR_TEMP, "The maximum height of a player's jump");
@@ -29,11 +30,7 @@ void __cdecl Jump_RegisterDvars()
         mina,
         DVAR_CHEAT | DVAR_TEMP,
         "The maximum step up to the top of a jump arc");
-#ifdef KISAK_MP
     jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 1, DVAR_CHEAT | DVAR_TEMP, "Slow player movement after jumping");
-#elif KISAK_SP
-    jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 0, DVAR_CHEAT | DVAR_TEMP, "Slow player movement after jumping");
-#endif
     minb.value.max = 1024.0;
     minb.value.min = 0.0;
     jump_ladderPushVel = Dvar_RegisterFloat(
@@ -50,6 +47,36 @@ void __cdecl Jump_RegisterDvars()
         minc,
         DVAR_CHEAT | DVAR_TEMP,
         "The amount of spread scale to add as a side effect of jumping");
+#elif KISAK_SP
+    min.value.max = 1000.0;
+    min.value.min = 0.0;
+    jump_height = Dvar_RegisterFloat("jump_height", 39.0, min, DVAR_CHEAT | DVAR_USERINFO, "The maximum height of a player's jump");
+    mina.value.max = 64.0;
+    mina.value.min = 0.0;
+    jump_stepSize = Dvar_RegisterFloat(
+        "jump_stepSize",
+        18.0,
+        mina,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The maximum step up to the top of a jump arc");
+    jump_slowdownEnable = Dvar_RegisterBool("jump_slowdownEnable", 0, DVAR_CHEAT | DVAR_USERINFO, "Slow player movement after jumping");
+    minb.value.max = 1024.0;
+    minb.value.min = 0.0;
+    jump_ladderPushVel = Dvar_RegisterFloat(
+        "jump_ladderPushVel",
+        128.0,
+        minb,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The velocity of a jump off of a ladder");
+    minc.value.max = 512.0;
+    minc.value.min = 0.0;
+    jump_spreadAdd = Dvar_RegisterFloat(
+        "jump_spreadAdd",
+        64.0,
+        minc,
+        DVAR_CHEAT | DVAR_USERINFO,
+        "The amount of spread scale to add as a side effect of jumping");
+#endif
 }
 
 void __cdecl Jump_ClearState(playerState_s *ps)

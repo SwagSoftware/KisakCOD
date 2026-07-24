@@ -1807,7 +1807,7 @@ void __cdecl CL_Init(int localClientNum)
     cl_anglespeedkey = Dvar_RegisterFloat("cl_anglespeedkey", 1.5, 0.0, FLT_MAX, 0, "Multiplier for max angle speed for gamepad and keyboard");
     cl_sensitivity = Dvar_RegisterFloat("sensitivity", 5.0, 0.01f, 100.0, 0, "Mouse sensitivity");
     cl_mouseAccel = Dvar_RegisterFloat("cl_mouseAccel", 0.0, 0.0, 100.0, 0, "Mouse acceleration");
-    cl_freelook = Dvar_RegisterBool("cl_freelook", 1, 1u, "Enable looking with mouse");
+    cl_freelook = Dvar_RegisterBool("cl_freelook", 1, DVAR_ARCHIVE, "Enable looking with mouse");
     cl_showMouseRate = Dvar_RegisterBool(
         "cl_showmouserate",
         0,
