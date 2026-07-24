@@ -99,16 +99,9 @@ int __cdecl SND_GetEntChannelCount()
 
 bool __cdecl SND_IsStreamChannelLoading(int index)
 {
-    if (!g_snd.max_stream_channels)
-        MyAssertHandler(".\\snd.cpp", 148, 0, "%s", "g_snd.max_stream_channels");
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            149,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(g_snd.max_stream_channels);
+    iassert((index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels));
+
     return g_snd.chaninfo[index].soundFileInfo.loadingState == SFLS_LOADING;
 }
 
@@ -117,22 +110,9 @@ bool __cdecl SND_HasFreeVoice(int entchannel)
     int loadingStreamCount; // [esp+0h] [ebp-8h]
     int index; // [esp+4h] [ebp-4h]
 
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            156,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
-    if (g_snd.entchaninfo[entchannel].maxVoices <= 0)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            157,
-            0,
-            "%s\n\t(g_snd.entchaninfo[entchannel].maxVoices) = %i",
-            "(g_snd.entchaninfo[entchannel].maxVoices > 0)",
-            g_snd.entchaninfo[entchannel].maxVoices);
+    iassert((entchannel >= 0 && entchannel < g_snd.entchannel_count));
+    iassert((g_snd.entchaninfo[entchannel].maxVoices > 0));
+
     loadingStreamCount = 0;
     for (index = 40; index < 53; ++index)
     {
@@ -149,14 +129,8 @@ void __cdecl SND_AddVoice(int entchannel)
 {
     const char *v1; // eax
 
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            175,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     if (g_snd.entchaninfo[entchannel].voiceCount >= g_snd.entchaninfo[entchannel].maxVoices)
     {
         v1 = va(
@@ -176,87 +150,44 @@ void __cdecl SND_AddVoice(int entchannel)
 
 void __cdecl SND_RemoveVoice(int entchannel)
 {
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            184,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
-    if (g_snd.entchaninfo[entchannel].voiceCount <= 0)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            185,
-            0,
-            "%s\n\t(g_snd.entchaninfo[entchannel].voiceCount) = %i",
-            "(g_snd.entchaninfo[entchannel].voiceCount > 0)",
-            g_snd.entchaninfo[entchannel].voiceCount);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+    iassert(g_snd.entchaninfo[entchannel].voiceCount > 0);
+
     --g_snd.entchaninfo[entchannel].voiceCount;
 }
 
 int __cdecl SND_GetPriority(int entchannel)
 {
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            193,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     return g_snd.entchaninfo[entchannel].priority;
 }
 
 bool __cdecl SND_IsRestricted(int entchannel)
 {
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            200,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     return g_snd.entchaninfo[entchannel].isRestricted;
 }
 
 bool __cdecl SND_IsAliasChannel3D(int entchannel)
 {
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            207,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     return g_snd.entchaninfo[entchannel].is3d;
 }
 
 bool __cdecl SND_IsPausable(int entchannel)
 {
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            214,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     return g_snd.entchaninfo[entchannel].isPausable;
 }
 
 snd_entchannel_info_t *__cdecl SND_GetEntChannelName(int entchannel)
 {
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            221,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     return &g_snd.entchaninfo[entchannel];
 }
 
@@ -264,13 +195,14 @@ int __cdecl SND_GetEntChannelFromName(const char *channelName)
 {
     int chanIdx; // [esp+0h] [ebp-4h]
 
-    if (!channelName)
-        MyAssertHandler(".\\snd.cpp", 230, 0, "%s", "channelName");
+    iassert(channelName);
+
     for (chanIdx = 0; chanIdx < g_snd.entchannel_count; ++chanIdx)
     {
         if (!I_stricmp(channelName, g_snd.entchaninfo[chanIdx].name))
             return chanIdx;
     }
+
     return -1;
 }
 
@@ -282,10 +214,10 @@ char __cdecl SND_ValidateEnvEffectsPriorityValue(const char *priorityName, int *
     priorityStrings[0] = "none";
     priorityStrings[1] = "level";
     priorityStrings[2] = "shellshock";
-    if (!priorityName)
-        MyAssertHandler(".\\snd.cpp", 255, 0, "%s", "priorityName");
-    if (!priority)
-        MyAssertHandler(".\\snd.cpp", 256, 0, "%s", "priority");
+
+    iassert(priorityName);
+    iassert(priority);
+
     for (stringIndex = 1; stringIndex < 3; ++stringIndex)
     {
         if (!I_stricmp(priorityName, priorityStrings[stringIndex]))
@@ -294,6 +226,7 @@ char __cdecl SND_ValidateEnvEffectsPriorityValue(const char *priorityName, int *
             return 1;
         }
     }
+
     Com_Printf(9, "invalid priority string '%s', it must be one of the following strings:\n", priorityName);
     for (stringIndex = 1; stringIndex < 3; ++stringIndex)
         Com_Printf(9, "  %s\n", priorityStrings[stringIndex]);
@@ -361,19 +294,22 @@ int __cdecl SND_RoomtypeFromString(const char *string)
     int stringIndex; // [esp+0h] [ebp-4h]
     int stringIndexa; // [esp+0h] [ebp-4h]
 
-    if (!string)
-        MyAssertHandler(".\\snd.cpp", 279, 0, "%s", "string");
+    iassert(string);
+
     for (stringIndex = 0; snd_roomStrings[stringIndex]; ++stringIndex)
     {
         if (!I_stricmp(string, snd_roomStrings[stringIndex]))
             return stringIndex;
     }
+
     Com_Printf(9, "invalid roomtype string '%s', it must be one of the following strings:\n", string);
+
     for (stringIndexa = 0; snd_roomStrings[stringIndexa]; ++stringIndexa)
     {
         if (*snd_roomStrings[stringIndexa])
             Com_Printf(9, "  %s\n", snd_roomStrings[stringIndexa]);
     }
+
     return 0;
 }
 
@@ -459,20 +395,23 @@ SND_EQTYPE __cdecl SND_EqTypeFromString(const char *typeString)
     int stringIndex; // [esp+0h] [ebp-4h]
     int stringIndexa; // [esp+0h] [ebp-4h]
 
-    if (!typeString)
-        MyAssertHandler(".\\snd.cpp", 375, 0, "%s", "typeString");
+    iassert(typeString);
+
     for (stringIndex = 0; snd_eqTypeStrings[stringIndex]; ++stringIndex)
     {
         if (!I_stricmp(typeString, snd_eqTypeStrings[stringIndex]))
             return (SND_EQTYPE)stringIndex;
     }
+
     Com_Printf(9, "invalid eq type string '%s', it must be one of the following strings:\n", typeString);
+
     for (stringIndexa = 0; snd_eqTypeStrings[stringIndexa]; ++stringIndexa)
     {
         if (*snd_eqTypeStrings[stringIndexa])
             Com_Printf(9, "  %s\n", snd_eqTypeStrings[stringIndexa]);
     }
-    return (SND_EQTYPE)5;
+
+    return (SND_EQTYPE)5; // SND_EQTYPE_COUNT
 }
 
 char __cdecl SND_ParseChannelAndBand_f(int *entchannel, int *eqIndex, int *band)
@@ -481,14 +420,14 @@ char __cdecl SND_ParseChannelAndBand_f(int *entchannel, int *eqIndex, int *band)
     const char *v5; // eax
     const char *channelName; // [esp+0h] [ebp-4h]
 
-    if (!entchannel)
-        MyAssertHandler(".\\snd.cpp", 398, 0, "%s", "entchannel");
-    if (!band)
-        MyAssertHandler(".\\snd.cpp", 399, 0, "%s", "band");
-    if (!eqIndex)
-        MyAssertHandler(".\\snd.cpp", 400, 0, "%s", "eqIndex");
+    iassert(entchannel);
+    iassert(band);
+    iassert(eqIndex);
+
     channelName = Cmd_Argv(1);
+
     *entchannel = SND_GetEntChannelFromName(channelName);
+
     if (*entchannel >= 0)
     {
         v4 = Cmd_Argv(2);
@@ -687,8 +626,8 @@ int __cdecl SND_GetListenerIndexNearestToOrigin(const float *origin)
     float dist[2]; // [esp+18h] [ebp-Ch]
     int i; // [esp+20h] [ebp-4h]
 
-    if (!origin)
-        MyAssertHandler(".\\snd.cpp", 648, 0, "%s", "origin");
+    iassert(origin);
+
     for (i = 0; i < 2; ++i)
     {
         if (g_snd.listeners[i].active)
@@ -717,14 +656,8 @@ int __cdecl SND_GetListenerIndexNearestToOrigin(const float *origin)
 
 void __cdecl SND_DisconnectListener(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            669,
-            0,
-            "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-            localClientNum,
-            1);
+    bcassert(localClientNum, 1);
+
     memset((uint8_t *)&g_snd.listeners[localClientNum], 0, sizeof(g_snd.listeners[localClientNum]));
 }
 
@@ -734,18 +667,10 @@ void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *ori
 
     if (g_snd.Initialized2d)
     {
-        if (!origin)
-            MyAssertHandler(".\\snd.cpp", 680, 0, "%s", "origin");
-        if (!axis)
-            MyAssertHandler(".\\snd.cpp", 681, 0, "%s", "axis");
-        if (localClientNum)
-            MyAssertHandler(
-                ".\\snd.cpp",
-                682,
-                0,
-                "localClientNum doesn't index STATIC_MAX_LOCAL_CLIENTS\n\t%i not in [0, %i)",
-                localClientNum,
-                1);
+        iassert(origin);
+        iassert(axis);
+        bcassert(localClientNum, 1);
+
         AxisCopy(*(const mat3x3 *)axis, g_snd.listeners[localClientNum].orient.axis);
         v4 = &g_snd.listeners[localClientNum];
         v4->orient.origin[0] = *origin;
@@ -760,22 +685,22 @@ void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *ori
 
 void __cdecl SND_SaveListeners(snd_listener *listeners)
 {
-    if (!listeners)
-        MyAssertHandler(".\\snd.cpp", 697, 0, "%s", "listeners");
+    iassert(listeners);
+
     memcpy(listeners, g_snd.listeners, 0x70u);
 }
 
 void __cdecl SND_RestoreListeners(snd_listener *listeners)
 {
-    if (!listeners)
-        MyAssertHandler(".\\snd.cpp", 705, 0, "%s", "listeners");
+    iassert(listeners);
+
     memcpy(g_snd.listeners, listeners, sizeof(g_snd.listeners));
 }
 
 int __cdecl SND_SetPlaybackIdNotPlayed(uint32_t index)
 {
-    if (index > 0x34)
-        MyAssertHandler(".\\snd.cpp", 713, 0, "%s", "index >= 0 && index < SND_MAX_CHANNELS");
+    iassert(index >= 0 && index < SND_MAX_CHANNELS);
+
     g_snd.chaninfo[index].playbackId = -1;
     return -1;
 }
@@ -784,8 +709,8 @@ int __cdecl SND_AcquirePlaybackId(uint32_t index, int totalMsec)
 {
     snd_channel_info_t *chanInfo; // [esp+0h] [ebp-4h]
 
-    if (index > 0x34)
-        MyAssertHandler(".\\snd.cpp", 725, 0, "%s", "index >= 0 && index < SND_MAX_CHANNELS");
+    iassert(index >= 0 && index < SND_MAX_CHANNELS);
+
     chanInfo = &g_snd.chaninfo[index];
     if ((chanInfo->alias0->flags & 1) != 0)
     {
@@ -797,8 +722,10 @@ int __cdecl SND_AcquirePlaybackId(uint32_t index, int totalMsec)
         chanInfo->totalMsec = totalMsec;
         chanInfo->playbackId = g_snd.playbackIdCounter++;
     }
+
     if (g_snd.playbackIdCounter < 1)
         g_snd.playbackIdCounter = 1;
+
     return chanInfo->playbackId;
 }
 
@@ -808,8 +735,8 @@ char __cdecl SND_AddLengthNotify(int playbackId, const snd_alias_t *lengthNotify
     int lengthNotifyIndex; // [esp+4h] [ebp-8h]
     int chanInfoIndex; // [esp+8h] [ebp-4h]
 
-    if ((uint32_t)id >= SndLengthNotifyCount)
-        MyAssertHandler(".\\snd.cpp", 776, 0, "id doesn't index SndLengthNotifyCount\n\t%i not in [0, %i)", id, 2);
+    bcassert(id, SndLengthNotifyCount);
+
     if (playbackId != -1 && playbackId)
     {
         for (chanInfoIndex = 0; chanInfoIndex < 53 && g_snd.chaninfo[chanInfoIndex].playbackId != playbackId; ++chanInfoIndex)
@@ -831,14 +758,8 @@ char __cdecl SND_AddLengthNotify(int playbackId, const snd_alias_t *lengthNotify
                         return 1;
                     }
                 }
-                if ((uint32_t)lengthNotifyIndex >= 4)
-                    MyAssertHandler(
-                        ".\\snd.cpp",
-                        806,
-                        0,
-                        "lengthNotifyIndex doesn't index SND_LENGTHNOTIFY_COUNT\n\t%i not in [0, %i)",
-                        lengthNotifyIndex,
-                        4);
+                bcassert(lengthNotifyIndex, SND_LENGTHNOTIFY_COUNT);
+
                 ++chanInfo->lengthNotifyInfo.count;
                 chanInfo->lengthNotifyInfo.id[lengthNotifyIndex] = id;
                 chanInfo->lengthNotifyInfo.data[lengthNotifyIndex] = (void *)lengthNotifyData;
@@ -880,17 +801,22 @@ char __cdecl SND_GetKnownLength(int playbackId, int *msec)
 {
     int chanInfoIndex; // [esp+0h] [ebp-4h]
 
-    if (!msec)
-        MyAssertHandler(".\\snd.cpp", 822, 0, "%s", "msec");
+    iassert(msec);
+
     *msec = 0;
+
     if (playbackId == -1 || !playbackId)
         return 1;
+
     for (chanInfoIndex = 0; chanInfoIndex < 53 && g_snd.chaninfo[chanInfoIndex].playbackId != playbackId; ++chanInfoIndex)
         ;
+
     if (chanInfoIndex == 53)
         return 0;
+
     if (g_snd.chaninfo[chanInfoIndex].totalMsec < 0)
         return 0;
+
     *msec = g_snd.chaninfo[chanInfoIndex].totalMsec;
     return 1;
 }
@@ -905,14 +831,16 @@ double __cdecl SND_Attenuate(SndCurve *volumeFalloffCurve, float radius, float m
     float radiusa; // [esp+10h] [ebp+Ch]
     float radiusb; // [esp+10h] [ebp+Ch]
 
-    if (!volumeFalloffCurve)
-        MyAssertHandler(".\\snd.cpp", 877, 0, "%s", "volumeFalloffCurve");
+    iassert(volumeFalloffCurve);
+
     radiusa = radius - mindist;
     if (radiusa <= 0.0)
         return 1.0;
-    if (mindist >= (double)maxdist)
-        MyAssertHandler(".\\snd.cpp", 883, 0, "%s", "maxdist > mindist");
+
+    iassert(maxdist > mindist);
+
     radiusb = radiusa / (maxdist - mindist);
+
     if (radiusb < 1.0)
         return Com_GetVolumeFalloffCurveValue(volumeFalloffCurve, radiusb);
     else
@@ -924,10 +852,9 @@ void __cdecl SND_GetCurrent3DPosition(SndEntHandle sndEnt, float *offset, float 
     float org[3]; // [esp+Ch] [ebp-30h] BYREF
     float axis[3][3]; // [esp+18h] [ebp-24h] BYREF
 
-    if (!offset)
-        MyAssertHandler(".\\snd.cpp", 898, 0, "%s", "offset");
-    if (!pos_out)
-        MyAssertHandler(".\\snd.cpp", 899, 0, "%s", "pos_out");
+    iassert(offset);
+    iassert(pos_out);
+
     CG_GetSoundEntityOrientation(sndEnt, org, axis);
     Vec3Mad(org, *offset, axis[0], org);
     Vec3Mad(org, offset[1], axis[1], org);
@@ -939,14 +866,8 @@ void __cdecl SND_GetCurrent3DPosition(SndEntHandle sndEnt, float *offset, float 
 
 void __cdecl SND_ResetChannelInfo(int index)
 {
-    if (g_snd.chaninfo[index].entchannel < 0 || g_snd.chaninfo[index].entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            911,
-            0,
-            "%s\n\t(g_snd.chaninfo[index].entchannel) = %i",
-            "(g_snd.chaninfo[index].entchannel >= 0 && g_snd.chaninfo[index].entchannel < g_snd.entchannel_count)",
-            g_snd.chaninfo[index].entchannel);
+    iassert(g_snd.chaninfo[index].entchannel >= 0 && g_snd.chaninfo[index].entchannel < g_snd.entchannel_count);
+
     g_snd.chaninfo[index].paused = 0;
     g_snd.chaninfo[index].startDelay = 0;
     g_snd.chaninfo[index].soundFileInfo.loadingState = SFLS_UNLOADED;
@@ -966,20 +887,11 @@ void __cdecl SND_SetChannelStartInfo(uint32_t index, SndStartAliasInfo *SndStart
     float axis[3][3]; // [esp+20h] [ebp-28h] BYREF
     snd_channel_info_t *chanInfo; // [esp+44h] [ebp-4h]
 
-    if (index > 0x34)
-        MyAssertHandler(".\\snd.cpp", 925, 0, "%s", "index >= 0 && index < SND_MAX_CHANNELS");
-    if (SndStartAliasInfo->system > (uint32_t)SASYS_GAME)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            926,
-            0,
-            "%s\n\t(SndStartAliasInfo->system) = %i",
-            "(SndStartAliasInfo->system >= 0 && SndStartAliasInfo->system < SASYS_COUNT)",
-            SndStartAliasInfo->system);
-    if (!SndStartAliasInfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 927, 0, "%s", "SndStartAliasInfo->alias0");
-    if (!SndStartAliasInfo->alias1)
-        MyAssertHandler(".\\snd.cpp", 928, 0, "%s", "SndStartAliasInfo->alias1");
+    iassert(index >= 0 && index < SND_MAX_CHANNELS);
+    iassert(SndStartAliasInfo->system >= 0 && SndStartAliasInfo->system < SASYS_COUNT);
+    iassert(SndStartAliasInfo->alias0);
+    iassert(SndStartAliasInfo->alias1);
+
     chanInfo = &g_snd.chaninfo[index];
     if (SndStartAliasInfo->sndEnt.field.entIndex != 0xFFFF
         && SND_IsAliasChannel3D((SndStartAliasInfo->alias0->flags & 0x3F00) >> 8))
@@ -1035,8 +947,8 @@ void __cdecl SND_SetSoundFileChannelInfo(
     int start_msec,
     SndFileLoadingState loadingState)
 {
-    if (index > 0x34)
-        MyAssertHandler(".\\snd.cpp", 971, 0, "%s", "index >= 0 && index < SND_MAX_CHANNELS");
+    iassert(index >= 0 && index < SND_MAX_CHANNELS);
+
     g_snd.chaninfo[index].soundFileInfo.loadingState = loadingState;
     g_snd.chaninfo[index].soundFileInfo.srcChannelCount = srcChannelCount;
     g_snd.chaninfo[index].soundFileInfo.baserate = baserate;
@@ -1075,11 +987,13 @@ int __cdecl SND_FindFree2DChannel(SndStartAliasInfo *startAliasInfo, int entchan
     SND_DebugAliasPrint(!HasFreeVoice, alias0, v17);
     if (!SND_HasFreeVoice(entchannel))
         return -1;
+
     for (i = 0; i < g_snd.max_2D_channels; ++i)
     {
         if (SND_Is2DChannelFree(i))
             return i;
     }
+
     ia = SND_FindReplaceableChannel(startAliasInfo, entchannel, 0, g_snd.max_2D_channels);
     if (ia >= 0)
     {
@@ -1119,7 +1033,9 @@ int __cdecl SND_FindFree2DChannel(SndStartAliasInfo *startAliasInfo, int entchan
         }
         SND_Stop2DChannel(ia);
     }
+
     SND_DebugAliasPrint(ia < 0, startAliasInfo->alias0, "No free channels");
+
     return ia;
 }
 
@@ -1151,32 +1067,11 @@ int __cdecl SND_FindReplaceableChannel(
     snd_channel_info_t *chaninfo; // [esp+68h] [ebp-8h]
     float metric; // [esp+6Ch] [ebp-4h]
 
-    if (!startAliasInfo)
-        MyAssertHandler(".\\snd.cpp", 996, 0, "%s", "startAliasInfo");
-    if (first > 0x34)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            997,
-            0,
-            "%s\n\t(first) = %i",
-            "(first >= 0 && first < (32 + (SND_TRACK_COUNT + 8) + 8))",
-            first);
-    if (count < 0 || count >(int)(53 - first))
-        MyAssertHandler(
-            ".\\snd.cpp",
-            998,
-            0,
-            "%s\n\t(count) = %i",
-            "(count >= 0 && count <= (32 + (SND_TRACK_COUNT + 8) + 8) - first)",
-            count);
-    if (entchannel < 0 || entchannel >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            999,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < g_snd.entchannel_count)",
-            entchannel);
+    iassert(startAliasInfo);
+    iassert(first >= 0 && first < (32 + (SND_TRACK_COUNT + 8) + 8));
+    iassert(count >= 0 && count <= (32 + (SND_TRACK_COUNT + 8) + 8) - first);
+    iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+
     applySameSndEntCondition = 0;
     is3d = SND_IsAliasChannel3D(entchannel);
     prio = SND_GetPriority(entchannel);
@@ -1192,22 +1087,26 @@ int __cdecl SND_FindReplaceableChannel(
     }
     minMetric = v6;
     replaceable = -1;
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 1007, 0, "%s", "startAliasInfo->alias0");
+
+    iassert(startAliasInfo->alias0);
+
     newSubtitle = startAliasInfo->alias0->subtitle != 0;
     for (i = first; i < (int)(count + first); ++i)
     {
-        if (i >= 53)
-            MyAssertHandler(".\\snd.cpp", 1012, 0, "%s", "i < SND_MAX_CHANNELS");
+        iassert(i < SND_MAX_CHANNELS);
+
         chaninfo = &g_snd.chaninfo[i];
-        if (!chaninfo)
-            MyAssertHandler(".\\snd.cpp", 1014, 0, "%s", "chaninfo");
+
+        iassert(chaninfo);
+
         alias = chaninfo->alias0;
-        if (!alias)
-            MyAssertHandler(".\\snd.cpp", 1017, 0, "%s", "alias");
+        iassert(alias);
+
         timeLeft = chaninfo->totalMsec + chaninfo->startTime - g_snd.time;
+
         if ((alias->flags & 1) == 0 && timeLeft <= 0)
             return i;
+
         if (newSubtitle || !alias->subtitle)
         {
             chanprio = SND_GetPriority(chaninfo->entchannel);
@@ -1290,11 +1189,13 @@ int __cdecl SND_FindFree3DChannel(SndStartAliasInfo *startAliasInfo, int entchan
 
     if (!SND_HasFreeVoice(entchannel))
         return -1;
+
     for (i = 0; i < g_snd.max_3D_channels; ++i)
     {
         if (SND_Is3DChannelFree(i + 8))
             return i + 8;
     }
+
     i = SND_FindReplaceableChannel(startAliasInfo, entchannel, 8u, g_snd.max_3D_channels);
     if (i >= 0)
     {
@@ -1359,27 +1260,26 @@ void __cdecl DB_SaveSounds()
 void __cdecl SND_Archive(snd_channel_info_t *chaninfo)
 {
     snd_alias_list_t *aliasList; // [esp+8h] [ebp-8h]
-    snd_alias_list_t *aliasLista; // [esp+8h] [ebp-8h]
     const snd_alias_t *alias; // [esp+Ch] [ebp-4h]
-    const snd_alias_t *aliasa; // [esp+Ch] [ebp-4h]
 
     alias = chaninfo->alias0;
     if (alias)
     {
         aliasList = DB_FindXAssetHeader(ASSET_TYPE_SOUND, alias->aliasName).sound;
-        if (!aliasList)
-            MyAssertHandler(".\\snd.cpp", 1328, 0, "%s", "aliasList");
+        iassert(aliasList);
+
         chaninfo->saveIndex0 = SND_GetAliasOffset(alias);
         chaninfo->alias0 = (const snd_alias_t *)aliasList;
     }
-    aliasa = chaninfo->alias1;
-    if (aliasa)
+
+    alias = chaninfo->alias1;
+    if (alias)
     {
-        aliasLista = DB_FindXAssetHeader(ASSET_TYPE_SOUND, aliasa->aliasName).sound;
-        if (!aliasLista)
-            MyAssertHandler(".\\snd.cpp", 1338, 0, "%s", "aliasList");
-        chaninfo->saveIndex1 = SND_GetAliasOffset(aliasa);
-        chaninfo->alias1 = (const snd_alias_t *)aliasLista;
+        aliasList = DB_FindXAssetHeader(ASSET_TYPE_SOUND, alias->aliasName).sound;
+        iassert(aliasList);
+
+        chaninfo->saveIndex1 = SND_GetAliasOffset(alias);
+        chaninfo->alias1 = (const snd_alias_t *)aliasList;
     }
 }
 
@@ -1394,21 +1294,20 @@ void __cdecl DB_LoadSounds()
 void __cdecl SND_Unarchive(snd_channel_info_t *chaninfo)
 {
     snd_alias_list_t *aliasList; // [esp+0h] [ebp-4h]
-    snd_alias_list_t *aliasLista; // [esp+0h] [ebp-4h]
 
     aliasList = (snd_alias_list_t *)chaninfo->alias0;
     if (aliasList)
     {
-        if (!aliasList->head)
-            MyAssertHandler(".\\snd.cpp", 1353, 0, "%s", "aliasList->head");
+        iassert(aliasList->head);
+
         chaninfo->alias0 = SND_GetAliasWithOffset(aliasList->aliasName, chaninfo->saveIndex0);
     }
-    aliasLista = (snd_alias_list_t *)chaninfo->alias1;
-    if (aliasLista)
+
+    aliasList = (snd_alias_list_t *)chaninfo->alias1;
+    if (aliasList)
     {
-        if (!aliasLista->head)
-            MyAssertHandler(".\\snd.cpp", 1364, 0, "%s", "aliasList->head");
-        chaninfo->alias1 = SND_GetAliasWithOffset(aliasLista->aliasName, chaninfo->saveIndex1);
+        iassert(aliasList->head);
+        chaninfo->alias1 = SND_GetAliasWithOffset(aliasList->aliasName, chaninfo->saveIndex1);
     }
 }
 
@@ -1461,8 +1360,9 @@ void __cdecl StopSoundAliasesOnEnt(SndEntHandle sndEnt, const char *aliasName)
                         continue;
                     stopChannel = SND_Stop2DChannel;
                 }
-                if (!stopChannel)
-                    MyAssertHandler(".\\snd.cpp", 1738, 1, "%s", "stopChannel");
+
+                iassert(stopChannel);
+
                 if (aliasName)
                 {
                     if (chaninfo->alias0 && !I_stricmp(chaninfo->alias0->aliasName, aliasName)
@@ -1519,16 +1419,8 @@ void __cdecl SND_AddPlayFXSoundAlias(snd_alias_t *alias, SndEntHandle sndEnt, co
 
 void __cdecl Snd_AssertAliasValid(snd_alias_t *alias)
 {
-    if (!alias)
-        MyAssertHandler(".\\snd.cpp", 1798, 0, "%s", "alias");
-    if ((uint32_t)((alias->flags & 0x3F00) >> 8) >= g_snd.entchannel_count)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1799,
-            0,
-            "SNDALIASFLAGS_GET_CHANNEL( alias->flags ) doesn't index g_snd.entchannel_count\n\t%i not in [0, %i)",
-            (alias->flags & 0x3F00) >> 8,
-            g_snd.entchannel_count);
+    iassert(alias);
+    bcassert(SNDALIASFLAGS_GET_CHANNEL(alias->flags), g_snd.entchannel_count);
 }
 
 void __cdecl SND_PlayFXSounds()
@@ -1589,18 +1481,19 @@ int __cdecl SND_PlaySoundAlias_Internal(
     int secondaryAliasRecursionCounter; // [esp+98h] [ebp-8h]
     float distMax; // [esp+9Ch] [ebp-4h]
 
-    if (!alias0)
-        MyAssertHandler(".\\snd.cpp", 1542, 0, "%s", "alias0");
-    if (!alias1)
-        MyAssertHandler(".\\snd.cpp", 1543, 0, "%s", "alias1");
-    if (!org)
-        MyAssertHandler(".\\snd.cpp", 1544, 0, "%s", "org");
+    iassert(alias0);
+    iassert(alias1);
+    iassert(org);
+
     playbackId = -1;
     outOfRange = 0;
+
     if (!g_snd.Initialized2d)
         return playbackId;
+
     if (pChannel)
         *pChannel = -1;
+
     alias0Channel = (alias0->flags & 0x3F00) >> 8;
     if (SND_IsAliasChannel3D(alias0Channel))
     {
@@ -1644,8 +1537,10 @@ int __cdecl SND_PlaySoundAlias_Internal(
         }
         if (SND_IsRestricted(alias0Channel))
             SND_StopEntityChannel(sndEnt, alias0Channel);
+
         if (SND_IsNullSoundFile(alias0->soundFile))
             return -1;
+
         SND_ChoosePitchAndVolume(alias0, alias1, lerp, volumeScale, &startAliasInfo.volume, &startAliasInfo.pitch);
         startAliasInfo.alias0 = alias0;
         startAliasInfo.alias1 = alias1;
@@ -1761,6 +1656,7 @@ void __cdecl SND_StopEntityChannel(SndEntHandle sndEnt, int entchannel)
             SND_Stop3DChannel(i);
         }
     }
+
     for (ia = 40; ia < g_snd.max_stream_channels + 40; ++ia)
     {
         if (g_snd.chaninfo[ia].sndEnt.field.entIndex == sndEnt.field.entIndex
@@ -1770,6 +1666,7 @@ void __cdecl SND_StopEntityChannel(SndEntHandle sndEnt, int entchannel)
             SND_StopStreamChannel(ia);
         }
     }
+
     for (ib = 0; ib < g_snd.max_2D_channels; ++ib)
     {
         if (g_snd.chaninfo[ib].sndEnt.field.entIndex == sndEnt.field.entIndex
@@ -1785,24 +1682,11 @@ int __cdecl SND_StartAliasSample(SndStartAliasInfo *startAliasInfo, int *pChanne
 {
     char filename[132]; // [esp+0h] [ebp-88h] BYREF
 
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 1237, 0, "%s", "startAliasInfo->alias0");
-    if ((startAliasInfo->alias0->flags & 0xC0) >> 6 != 1)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1238,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_LOADED");
-    if (!startAliasInfo->alias1)
-        MyAssertHandler(".\\snd.cpp", 1239, 0, "%s", "startAliasInfo->alias1");
-    if ((startAliasInfo->alias1->flags & 0xC0) >> 6 != 1)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1240,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias1->flags ) == SAT_LOADED");
+    iassert(startAliasInfo->alias0);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias0->flags) == SAT_LOADED);
+    iassert(startAliasInfo->alias1);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias1->flags) == SAT_LOADED);
+
     if (startAliasInfo->alias0->soundFile->exists)
     {
         if (SND_IsAliasChannel3D((startAliasInfo->alias0->flags & 0x3F00) >> 8))
@@ -1855,45 +1739,30 @@ int __cdecl SND_StartAliasStream(SndStartAliasInfo *startAliasInfo, int *pChanne
 {
     int index; // [esp+4h] [ebp-4h]
 
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 1292, 0, "%s", "startAliasInfo->alias0");
-    if ((startAliasInfo->alias0->flags & 0xC0) >> 6 != 2)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1293,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_STREAMED");
-    if (!startAliasInfo->alias1)
-        MyAssertHandler(".\\snd.cpp", 1294, 0, "%s", "startAliasInfo->alias1");
-    if ((startAliasInfo->alias1->flags & 0xC0) >> 6 != 2)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1295,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias1->flags ) == SAT_STREAMED");
+    iassert(startAliasInfo->alias0);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias0->flags) == SAT_STREAMED);
+    iassert(startAliasInfo->alias1);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias1->flags) == SAT_STREAMED);
+
     index = SND_FindFreeStreamChannel(startAliasInfo, (startAliasInfo->alias0->flags & 0x3F00) >> 8);
     if (pChannel)
         *pChannel = index;
+
     if (index < 0)
         return -1;
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1305,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     if (!snd_enableStream->current.enabled)
         return -1;
+
     if (SND_IsAliasChannel3D((startAliasInfo->alias0->flags & 0x3F00) >> 8) && !SND_AnyActiveListeners())
         Com_Error(
             ERR_DROP,
             "attempted to play spatialized alias '%s' while there is no active listener. Most likely this means you tried to pl"
             "ay a spatialized sound while not in a level.\n",
             startAliasInfo->alias0->aliasName);
+
     return SND_StartAliasStreamOnChannel(startAliasInfo, index);
 }
 
@@ -1927,11 +1796,13 @@ int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int ent
 
     if (!SND_HasFreeVoice(entchannel))
         return -1;
+
     for (i = 5; i < g_snd.max_stream_channels; ++i)
     {
         if (SND_IsStreamChannelFree(i + 40))
             return i + 40;
     }
+
     i = SND_FindReplaceableChannel(startAliasInfo, entchannel, 0x2Du, g_snd.max_stream_channels - 5);
     if (i >= 0)
     {
@@ -1993,6 +1864,7 @@ int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int ent
             }
         }
     }
+
     SND_DebugAliasPrint(i < 0, startAliasInfo->alias0, "No free channels");
     return i;
 }
@@ -2015,14 +1887,11 @@ void __cdecl SND_ChoosePitchAndVolume(
     float volMin; // [esp+2Ch] [ebp-8h]
     float pitchMin; // [esp+30h] [ebp-4h]
 
-    if (!alias0)
-        MyAssertHandler(".\\snd.cpp", 1401, 0, "%s", "alias0");
-    if (!alias1)
-        MyAssertHandler(".\\snd.cpp", 1402, 0, "%s", "alias1");
-    if (!volume)
-        MyAssertHandler(".\\snd.cpp", 1403, 0, "%s", "volume");
-    if (!pitch)
-        MyAssertHandler(".\\snd.cpp", 1404, 0, "%s", "pitch");
+    iassert(alias0);
+    iassert(alias1);
+    iassert(volume);
+    iassert(pitch);
+
     volMin = (1.0 - lerp) * alias0->volMin + alias1->volMin * lerp;
     volMax = (1.0 - lerp) * alias0->volMax + alias1->volMax * lerp;
     pitchMin = (1.0 - lerp) * alias0->pitchMin + alias1->pitchMin * lerp;
@@ -2031,15 +1900,18 @@ void __cdecl SND_ChoosePitchAndVolume(
     *volume = *volume * volumeScale;
     v9 = *volume;
     v8 = v9 - 1.0;
+
     if (v8 < 0.0)
         v10 = v9;
     else
         v10 = 1.0;
+
     v7 = 0.0 - v9;
     if (v7 < 0.0)
         v6 = v10;
     else
         v6 = 0.0;
+
     *volume = v6;
     *pitch = random() * (pitchMax - pitchMin) + pitchMin;
 }
@@ -2062,10 +1934,9 @@ char __cdecl SND_ContinueLoopingSound(
     {
         if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is3DChannelFree(i))
         {
-            if (!g_snd.chaninfo[i].alias0)
-                MyAssertHandler(".\\snd.cpp", 1456, 0, "%s", "g_snd.chaninfo[i].alias0");
-            if (!g_snd.chaninfo[i].alias1)
-                MyAssertHandler(".\\snd.cpp", 1457, 0, "%s", "g_snd.chaninfo[i].alias1");
+            iassert(g_snd.chaninfo[i].alias0);
+            iassert(g_snd.chaninfo[i].alias1);
+
             if ((g_snd.chaninfo[i].alias0->flags & 1) != 0
                 && g_snd.chaninfo[i].alias0->aliasName == alias0->aliasName
                 && g_snd.chaninfo[i].alias1->aliasName == alias1->aliasName)
@@ -2080,10 +1951,9 @@ char __cdecl SND_ContinueLoopingSound(
     {
         if (g_snd.chaninfo[ia].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is2DChannelFree(ia))
         {
-            if (!g_snd.chaninfo[ia].alias0)
-                MyAssertHandler(".\\snd.cpp", 1477, 0, "%s", "g_snd.chaninfo[i].alias0");
-            if (!g_snd.chaninfo[ia].alias1)
-                MyAssertHandler(".\\snd.cpp", 1478, 0, "%s", "g_snd.chaninfo[i].alias1");
+            iassert(g_snd.chaninfo[i].alias0);
+            iassert(g_snd.chaninfo[i].alias1);
+
             if ((g_snd.chaninfo[ia].alias0->flags & 1) != 0
                 && g_snd.chaninfo[ia].alias0->aliasName == alias0->aliasName
                 && g_snd.chaninfo[ia].alias1->aliasName == alias1->aliasName)
@@ -2097,10 +1967,9 @@ char __cdecl SND_ContinueLoopingSound(
     {
         if (g_snd.chaninfo[ib].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_IsStreamChannelFree(ib))
         {
-            if (!g_snd.chaninfo[ib].alias0)
-                MyAssertHandler(".\\snd.cpp", 1497, 0, "%s", "g_snd.chaninfo[i].alias0");
-            if (!g_snd.chaninfo[ib].alias1)
-                MyAssertHandler(".\\snd.cpp", 1498, 0, "%s", "g_snd.chaninfo[i].alias1");
+            iassert(g_snd.chaninfo[i].alias0);
+            iassert(g_snd.chaninfo[i].alias1);
+
             if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0
                 && g_snd.chaninfo[ib].alias0->aliasName == alias0->aliasName
                 && g_snd.chaninfo[ib].alias1->aliasName == alias1->aliasName)
@@ -2135,18 +2004,10 @@ void __cdecl SND_ContinueLoopingSound_Internal(
     float basevolume; // [esp+3Ch] [ebp-Ch]
     float v14; // [esp+40h] [ebp-8h]
 
-    if (chanIndex > 0x34)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1422,
-            0,
-            "%s\n\t(chanIndex) = %i",
-            "(chanIndex >= 0 && chanIndex < (32 + (SND_TRACK_COUNT + 8) + 8))",
-            chanIndex);
-    if (lerp < 0.0 || lerp > 1.0)
-        MyAssertHandler(".\\snd.cpp", 1423, 0, "%s\n\t(lerp) = %g", "(lerp >= 0 && lerp <= 1)", lerp);
-    if (!setPlaybackRateFunc)
-        MyAssertHandler(".\\snd.cpp", 1424, 0, "%s", "setPlaybackRateFunc");
+    iassert(chanIndex >= 0 && chanIndex < (32 + (SND_TRACK_COUNT + 8) + 8));
+    iassert(lerp >= 0 && lerp <= 1);
+    iassert(setPlaybackRateFunc);
+
     v10 = (1.0 - lerp) * g_snd.chaninfo[chanIndex].alias0->volMin + g_snd.chaninfo[chanIndex].alias1->volMin * lerp;
     g_snd.chaninfo[chanIndex].basevolume = v10;
     g_snd.chaninfo[chanIndex].basevolume = g_snd.chaninfo[chanIndex].basevolume * volumeScale;
@@ -2156,17 +2017,19 @@ void __cdecl SND_ContinueLoopingSound_Internal(
         v14 = basevolume;
     else
         v14 = 1.0;
+
     v8 = 0.0 - basevolume;
     if (v8 < 0.0)
         v7 = v14;
     else
         v7 = 0.0;
+
     g_snd.chaninfo[chanIndex].basevolume = v7;
     v6 = (1.0 - lerp) * g_snd.chaninfo[chanIndex].alias0->pitchMin + g_snd.chaninfo[chanIndex].alias1->pitchMin * lerp;
     g_snd.chaninfo[chanIndex].pitch = v6;
     if (g_snd.chaninfo[chanIndex].timescale)
     {
-               setPlaybackRateFunc(chanIndex, SnapFloatToInt(g_snd.timescale * (float)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch));
+        setPlaybackRateFunc(chanIndex, SnapFloatToInt(g_snd.timescale * (float)g_snd.chaninfo[chanIndex].soundFileInfo.baserate * g_snd.chaninfo[chanIndex].pitch));
     }
     else
     {
@@ -2185,10 +2048,11 @@ BOOL __cdecl StreamFileNameIsNullSound(const StreamFileName *streamFileName)
 
 bool __cdecl SND_IsNullSoundFile(const SoundFile *soundFile)
 {
-    if (soundFile->type == 2)
+    if (soundFile->type == SAT_STREAMED)
         return StreamFileNameIsNullSound((const StreamFileName *)&soundFile->u);
-    if (soundFile->type != 1)
-        MyAssertHandler(".\\snd.cpp", 1522, 0, "soundFile->type == SAT_LOADED\n\t%i, %i", soundFile->type, 1);
+
+    iassert(soundFile->type == SAT_LOADED);
+
     return I_stricmp("null.wav", soundFile->u.loadSnd->name) == 0;
 }
 
@@ -2199,8 +2063,8 @@ int __cdecl SND_PlaySoundAliasAsMaster(
     int timeshift,
     snd_alias_system_t system)
 {
-    if (!org)
-        MyAssertHandler(".\\snd.cpp", 1829, 0, "%s", "org");
+    iassert(org);
+
     if (alias)
         return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, 0, timeshift, 1, 1, system);
     else
@@ -2217,22 +2081,23 @@ int __cdecl SND_PlayBlendedSoundAliases(
     int timeshift,
     snd_alias_system_t system)
 {
-    if (!org)
-        MyAssertHandler(".\\snd.cpp", 1958, 0, "%s", "org");
+    iassert(org);
+
     if (!alias0 || !alias1)
         return -1;
+
     SND_ValidateSoundAliasBlend(alias0, alias1, 1);
     return SND_PlaySoundAlias_Internal(alias0, alias1, lerp, volumeScale, sndEnt, org, 0, timeshift, 0, 1, system);
 }
 
 char __cdecl SND_ValidateSoundAliasBlend(const snd_alias_t *alias0, const snd_alias_t *alias1, bool bReport)
 {
-    if (!alias0)
-        MyAssertHandler(".\\snd.cpp", 1839, 0, "%s", "alias0");
-    if (!alias1)
-        MyAssertHandler(".\\snd.cpp", 1840, 0, "%s", "alias1");
+    iassert(alias0);
+    iassert(alias1);
+
     if (alias0 == alias1)
         return 1;
+
     if (alias0->soundFile == alias1->soundFile)
     {
         if (alias0->volumeFalloffCurve == alias1->volumeFalloffCurve)
@@ -2366,16 +2231,8 @@ char __cdecl SND_ValidateSoundAliasBlend(const snd_alias_t *alias0, const snd_al
 
 int __cdecl SND_PlayLocalSoundAlias(uint32_t localClientNum, const snd_alias_t *alias, snd_alias_system_t system)
 {
-    if ((uint32_t)system >= SASYS_COUNT)
-        MyAssertHandler(".\\snd.cpp", 2010, 0, "system doesn't index SASYS_COUNT\n\t%i not in [0, %i)", system, 3);
-    if (localClientNum >= 2)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2011,
-            0,
-            "localClientNum doesn't index ARRAY_COUNT( g_snd.listeners )\n\t%i not in [0, %i)",
-            localClientNum,
-            2);
+    bcassert(system, SASYS_COUNT);
+    bcassert(localClientNum, ARRAY_COUNT(g_snd.listeners));
 
     //int __cdecl SND_PlaySoundAlias_Internal(
     //    const snd_alias_t * alias0,
@@ -2457,21 +2314,18 @@ void __cdecl SND_StartBackground(
     int channel; // [esp+DCh] [ebp-8h]
     float pitch; // [esp+E0h] [ebp-4h]
 
-    if (track > 4)
-        MyAssertHandler(".\\snd.cpp", 2168, 0, "%s\n\t(track) = %i", "(track >= 0 && track < SND_TRACK_COUNT)", track);
-    if (fraction < 0.0 || fraction > 1.0)
-        MyAssertHandler(".\\snd.cpp", 2169, 0, "%s\n\t(fraction) = %g", "(fraction >= 0 && fraction <= 1)", fraction);
-    if (!alias)
-        MyAssertHandler(".\\snd.cpp", 2170, 0, "%s", "alias");
-    if (fadetime < 0)
-        MyAssertHandler(".\\snd.cpp", 2171, 0, "%s\n\t(fadetime) = %i", "(fadetime >= 0)", fadetime);
+    iassert(track >= 0 && track < SND_TRACK_COUNT);
+    iassert(fraction >= 0 && fraction <= 1);
+    iassert(alias);
+    iassert(fadetime >= 0);
+
     SND_UpdatePause();
-    if (SND_IsAliasChannel3D((alias->flags & 0x3F00) >> 8))
+    if (SND_IsAliasChannel3D(SNDALIASFLAGS_GET_CHANNEL(alias->flags)))
     {
         Com_GetSoundFileName(alias, filename, 128);
         Com_Error(ERR_DROP, "lias %s sound %s played as an ambient / music track uses a 3D channel type; should probably be channel 'local'", alias->aliasName, filename);
     }
-    if ((alias->flags & 0xC0) >> 6 != 2)
+    if (SNDALIASFLAGS_GET_TYPE(alias->flags) != SAT_STREAMED)
     {
         Com_GetSoundFileName(alias, filename, 128);
         Com_Error(ERR_DROP, "alias %s sound %s played as an ambient / music track is not streamed; type must be 'streamed'", alias->aliasName, filename);
@@ -2481,16 +2335,12 @@ void __cdecl SND_StartBackground(
     v7 = alias->pitchMax - alias->pitchMin;
     pitch = random() * v7 + alias->pitchMin;
     channel = track + 40;
-    if ((int)(track + 40) < 40 || channel >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2190,
-            0,
-            "%s\n\t(channel) = %i",
-            "(channel >= ((0 + 8) + 32) && channel < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            channel);
+
+    iassert(channel >= ((0 + 8) + 32) && channel < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     if (!SND_IsStreamChannelFree(channel))
         SND_StopStreamChannel(channel);
+
     g_snd.chaninfo[channel].basevolume = volume;
     g_snd.background[track].goalvolume = g_snd.chaninfo[channel].basevolume;
     if (fadetime <= 0)
@@ -2502,6 +2352,7 @@ void __cdecl SND_StartBackground(
         g_snd.background[track].goalrate = g_snd.chaninfo[channel].basevolume / (double)fadetime;
         g_snd.chaninfo[channel].basevolume = 0.0;
     }
+
     startAliasInfo.alias0 = alias;
     startAliasInfo.alias1 = alias;
     startAliasInfo.lerp = 0.0;
@@ -2517,6 +2368,7 @@ void __cdecl SND_StartBackground(
     startAliasInfo.master = (alias->flags & 2) != 0;
     startAliasInfo.system = system;
     startAliasInfo.timescale = useTimescale;
+
     if (snd_enableStream->current.enabled)
         SND_StartAliasStreamOnChannel(&startAliasInfo, channel);
 }
@@ -2533,8 +2385,8 @@ void SND_UpdatePause()
         else
             SND_UnpauseSounds();
     }
-    if (paused != g_snd.paused)
-        MyAssertHandler(".\\snd.cpp", 2156, 0, "%s", "paused == g_snd.paused");
+
+    iassert(paused == g_snd.paused);
 }
 
 int SND_PauseSounds()
@@ -2609,10 +2461,9 @@ void __cdecl SND_StopMusic(int fadetime)
 
 void __cdecl SND_StopBackground(uint32_t track, int fadetime)
 {
-    if (track > 4)
-        MyAssertHandler(".\\snd.cpp", 2228, 0, "%s\n\t(track) = %i", "(track >= 0 && track < SND_TRACK_COUNT)", track);
-    if (fadetime < 0)
-        MyAssertHandler(".\\snd.cpp", 2229, 0, "%s\n\t(fadetime) = %i", "(fadetime >= 0)", fadetime);
+    iassert(track >= 0 && track < SND_TRACK_COUNT);
+    iassert(fadetime >= 0);
+
     if (!SND_IsStreamChannelFree(track + 40))
     {
         if (fadetime)
@@ -2650,15 +2501,9 @@ void __cdecl SND_PlayAmbientAlias(
 
     if (g_snd.Initialized2d)
     {
-        if (fadetime < 0)
-            MyAssertHandler(".\\snd.cpp", 2290, 0, "%s", "fadetime >= 0");
-        if (g_snd.ambient_track != 1 && g_snd.ambient_track != 3)
-            MyAssertHandler(
-                ".\\snd.cpp",
-                2291,
-                0,
-                "%s",
-                "g_snd.ambient_track == SND_TRACK_AMBIENT_PRIMARY_0 || g_snd.ambient_track == SND_TRACK_AMBIENT_PRIMARY_1");
+        iassert(fadetime >= 0);
+        iassert(g_snd.ambient_track == SND_TRACK_AMBIENT_PRIMARY_0 || g_snd.ambient_track == SND_TRACK_AMBIENT_PRIMARY_1);
+
         if (alias)
         {
             hasSecondary = alias->secondaryAliasName != 0;
@@ -2666,12 +2511,15 @@ void __cdecl SND_PlayAmbientAlias(
             aliases[1] = 0;
             nextTrack = 4 - g_snd.ambient_track;
             playedNew = 0;
+
             if ((alias->flags & 0x20) != 0)
                 fraction = random();
             else
                 fraction = 0.0;
+
             if (hasSecondary)
                 aliases[1] = Com_PickSoundAlias(alias->secondaryAliasName);
+
             for (i = 0; ; ++i)
             {
                 if (i >= 2)
@@ -2680,11 +2528,14 @@ void __cdecl SND_PlayAmbientAlias(
                         g_snd.ambient_track = nextTrack;
                     return;
                 }
+
                 tracknum = g_snd.ambient_track + i + 40;
                 if (!aliases[i] || SND_IsStreamChannelFree(tracknum))
                     goto LABEL_32;
+
                 if (g_snd.chaninfo[tracknum].alias0->aliasName == aliases[i]->aliasName)
                     continue;
+
                 if (g_snd.chaninfo[tracknum].alias0->soundFile == aliases[i]->soundFile
                     && (g_snd.chaninfo[tracknum].alias0->flags & 1) == (aliases[i]->flags & 1)
                     && aliases[i]->pitchMin == g_snd.chaninfo[tracknum].alias0->pitchMin
@@ -2728,8 +2579,8 @@ void __cdecl SND_StopAmbient(int localClientNum, int fadetime)
 {
     if (g_snd.Initialized2d)
     {
-        if (fadetime < 0)
-            MyAssertHandler(".\\snd.cpp", 2380, 0, "%s", "fadetime >= 0");
+        iassert(fadetime >= 0);
+
         SND_StopBackground(1u, fadetime);
         SND_StopBackground(2u, fadetime);
         SND_StopBackground(3u, fadetime);
@@ -2739,10 +2590,9 @@ void __cdecl SND_StopAmbient(int localClientNum, int fadetime)
 
 void __cdecl SND_FadeAllSounds(float volume, int fadetime)
 {
-    if (volume < 0.0)
-        MyAssertHandler(".\\snd.cpp", 2391, 0, "%s", "volume >= 0");
-    if (fadetime < 0)
-        MyAssertHandler(".\\snd.cpp", 2392, 0, "%s", "fadetime >= 0");
+    iassert(volume >= 0);
+    iassert(fadetime >= 0);
+
     g_snd.mastervol.goalvolume = volume;
     g_snd.mastervol.goalrate = volume - g_snd.mastervol.volume;
     if (fadetime)
@@ -2770,10 +2620,11 @@ void __cdecl SND_SetChannelVolumes(int priority, const float *channelvolume, int
     channelVolGroup->active = 1;
     if (fademsec < 1)
         fademsec = 1;
+
     for (i = 0; i < SND_GetEntChannelCount(); ++i)
     {
-        if (channelvolume[i] < 0.0 || channelvolume[i] > 1.0)
-            MyAssertHandler(".\\snd.cpp", 2425, 0, "%s", "channelvolume[i] >= 0.0f && channelvolume[i] <= 1.0f");
+        iassert(channelvolume[i] >= 0.0f && channelvolume[i] <= 1.0f);
+
         channelVolGroup->channelvol[i].goalvolume = channelvolume[i];
         channelVolGroup->channelvol[i].volume = g_snd.channelvol->channelvol[i].volume;
         v3 = (channelvolume[i] - channelVolGroup->channelvol[i].volume) / (double)fademsec;
@@ -2835,8 +2686,8 @@ void __cdecl SND_UpdateLoopingSounds()
         {
             if (!SND_Is3DChannelFree(i))
             {
-                if (!g_snd.chaninfo[i].alias0)
-                    MyAssertHandler(".\\snd.cpp", 2534, 0, "%s", "g_snd.chaninfo[i].alias0");
+                iassert(g_snd.chaninfo[i].alias0);
+
                 if ((g_snd.chaninfo[i].alias0->flags & 1) != 0 && g_snd.chaninfo[i].looptime != g_snd.looptime)
                     SND_Stop3DChannel(i);
             }
@@ -2845,8 +2696,8 @@ void __cdecl SND_UpdateLoopingSounds()
         {
             if (!SND_Is2DChannelFree(ia))
             {
-                if (!g_snd.chaninfo[ia].alias0)
-                    MyAssertHandler(".\\snd.cpp", 2545, 0, "%s", "g_snd.chaninfo[i].alias0");
+                iassert(g_snd.chaninfo[i].alias0);
+
                 if ((g_snd.chaninfo[ia].alias0->flags & 1) != 0 && g_snd.chaninfo[ia].looptime != g_snd.looptime)
                     SND_Stop2DChannel(ia);
             }
@@ -2855,8 +2706,8 @@ void __cdecl SND_UpdateLoopingSounds()
         {
             if (!SND_IsStreamChannelFree(ib))
             {
-                if (!g_snd.chaninfo[ib].alias0)
-                    MyAssertHandler(".\\snd.cpp", 2556, 0, "%s", "g_snd.chaninfo[i].alias0");
+                iassert(g_snd.chaninfo[i].alias0);
+
                 if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0 && g_snd.chaninfo[ib].looptime != g_snd.looptime)
                     SND_StopStreamChannel(ib);
                 }
@@ -2870,16 +2721,18 @@ char __cdecl SND_UpdateBackgroundVolume(uint32_t track, int frametime)
     float volume; // [esp+0h] [ebp-8h]
     int channel; // [esp+4h] [ebp-4h]
 
-    if (track > 4)
-        MyAssertHandler(".\\snd.cpp", 2581, 0, "%s\n\t(track) = %i", "(track >= 0 && track < SND_TRACK_COUNT)", track);
+    iassert(track >= 0 && track < SND_TRACK_COUNT);
+
     channel = track + 40;
-    if (SND_IsAliasChannel3D((g_snd.chaninfo[track + 40].alias0->flags & 0x3F00) >> 8))
+
+    if (SND_IsAliasChannel3D(SNDALIASFLAGS_GET_CHANNEL(g_snd.chaninfo[channel].alias0->flags)))
         MyAssertHandler(
             ".\\snd.cpp",
             2584,
             0,
             "%s",
             "!SND_IsAliasChannel3D( SNDALIASFLAGS_GET_CHANNEL( g_snd.chaninfo[channel].alias0->flags ) )");
+
     volume = (double)frametime * g_snd.background[track].goalrate + g_snd.chaninfo[channel].basevolume;
     if (g_snd.background[track].goalrate <= 0.0)
     {
@@ -2913,22 +2766,12 @@ void __cdecl SND_SetEnvironmentEffects(
     int i; // [esp+4h] [ebp-8h]
     int roomtype; // [esp+8h] [ebp-4h]
 
-    if (priority <= 0 || priority >= 3)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2773,
-            0,
-            "%s\n\t(priority) = %i",
-            "(priority > SND_ENVEFFECTPRIO_NONE && priority < SND_ENVEFFECTPRIO_COUNT)",
-            priority);
-    if (!roomstring)
-        MyAssertHandler(".\\snd.cpp", 2774, 0, "%s", "roomstring");
-    if (fademsec < 0)
-        MyAssertHandler(".\\snd.cpp", 2775, 0, "%s", "fademsec >= 0");
-    if (drylevel < 0.0 || drylevel > 1.0)
-        MyAssertHandler(".\\snd.cpp", 2776, 0, "%s", "drylevel >= 0 && drylevel <= 1");
-    if (wetlevel < 0.0 || wetlevel > 1.0)
-        MyAssertHandler(".\\snd.cpp", 2777, 0, "%s", "wetlevel >= 0 && wetlevel <= 1");
+    iassert(priority > SND_ENVEFFECTPRIO_NONE && priority < SND_ENVEFFECTPRIO_COUNT);
+    iassert(roomstring);
+    iassert(fademsec >= 0);
+    iassert(drylevel >= 0 && drylevel <= 1);
+    iassert(wetlevel >= 0 && wetlevel <= 1);
+
     if (g_snd.Initialized2d)
     {
         effect = &g_snd.envEffects[priority];
@@ -2965,26 +2808,20 @@ void __cdecl SND_DeactivateEnvironmentEffects(int priority, int fademsec)
     snd_enveffect *effect; // [esp+0h] [ebp-8h]
     int i; // [esp+4h] [ebp-4h]
 
-    if (priority <= 0 || priority >= 3)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2825,
-            0,
-            "%s\n\t(priority) = %i",
-            "(priority > SND_ENVEFFECTPRIO_NONE && priority < SND_ENVEFFECTPRIO_COUNT)",
-            priority);
-    if (fademsec < 0)
-        MyAssertHandler(".\\snd.cpp", 2826, 0, "%s", "fademsec >= 0");
+    iassert(priority > SND_ENVEFFECTPRIO_NONE && priority < SND_ENVEFFECTPRIO_COUNT);
+    iassert(fademsec >= 0);
+
     effect = &g_snd.envEffects[priority];
     effect->active = 0;
     if (effect == g_snd.effect)
     {
         for (i = priority - 1; i >= 0 && !g_snd.envEffects[i].active; --i)
             ;
-        if (i < 0)
-            MyAssertHandler(".\\snd.cpp", 2839, 0, "%s", "i >= SND_ENVEFFECTPRIO_NONE");
+
+        iassert(i >= SND_ENVEFFECTPRIO_NONE);
         if (fademsec < 1)
             fademsec = 1;
+
         g_snd.effect = &g_snd.envEffects[i];
         SND_SetRoomtype(g_snd.envEffects[i].roomtype);
         g_snd.effect->drylevel = effect->drylevel;
@@ -3073,8 +2910,9 @@ void __cdecl SND_Update()
                 MemFile_InitForReading(&memFile, g_snd.restore.size, g_snd.restore.buffer, g_snd.restore.compress);
                 SND_Restore(&memFile);
                 MemFile_MoveToSegment(&memFile, -1);
-                if (memFile.bytesUsed != g_snd.restore.size)
-                    MyAssertHandler(".\\snd.cpp", 3279, 0, "%s", "memFile.bytesUsed == g_snd.restore.size");
+
+                iassert(memFile.bytesUsed == g_snd.restore.size);
+
                 g_snd.restore.size = 0;
             }
             SND_UpdateTimeScale();
@@ -3107,6 +2945,7 @@ void __cdecl SND_UpdateMasterVolumes(int frametime)
         if (g_snd.mastervol.volume == 0.0 && g_snd.mastervol.goalrate == 0.0)
             SND_StopSounds(SND_STOP_ALL);
     }
+
     Dvar_ClearModified((dvar_s*)snd_volume);
     g_snd.volume = g_snd.mastervol.volume * snd_volume->current.value * 0.75;
 }
@@ -3182,6 +3021,7 @@ void __cdecl SND_UpdateSlaveLerp(int frametime)
         if (SND_Is2DChannelPlaying(ib))
             masterPlaying = g_snd.chaninfo[ib].master;
     }
+
     if (snd_slaveFadeTime->current.integer)
     {
         if (masterPlaying)
@@ -3213,40 +3053,22 @@ void __cdecl SND_UpdateSlaveLerp(int frametime)
 
 bool __cdecl SND_Is2DChannelPlaying(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2660,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     return !SND_Is2DChannelFree(index) && !g_snd.chaninfo[index].startDelay;
 }
 
 bool __cdecl SND_Is3DChannelPlaying(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2668,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     return !SND_Is3DChannelFree(index) && !g_snd.chaninfo[index].startDelay;
 }
 
 bool __cdecl SND_IsStreamChannelPlaying(int index)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            2676,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     return !SND_IsStreamChannelFree(index) && g_snd.chaninfo[index].startDelay <= 0;
 }
 
@@ -3308,10 +3130,9 @@ void SND_UpdateTimeScale()
         timescale = 1.0;
     if (g_snd.timescale != timescale)
     {
-        if (timescale == 0.0)
-            MyAssertHandler(".\\snd.cpp", 2997, 0, "%s", "timescale");
-        if (g_snd.timescale == 0.0)
-            MyAssertHandler(".\\snd.cpp", 2998, 0, "%s", "g_snd.timescale");
+        iassert(timescale);
+        iassert(g_snd.timescale);
+
         factor = timescale / g_snd.timescale;
         g_snd.timescale = timescale;
         for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
@@ -3346,8 +3167,8 @@ void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
     float closestIdDotProd; // [esp+120Ch] [ebp-8h] BYREF
     int entchannel; // [esp+1210h] [ebp-4h]
 
-    if (!g_snd.Initialized2d)
-        MyAssertHandler(".\\snd.cpp", 3157, 0, "%s", "g_snd.Initialized2d");
+    iassert(g_snd.Initialized2d);
+
     if (debugDrawStyle)
     {
         closestId = -1;
@@ -3362,9 +3183,9 @@ void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
         {
             if (!SND_IsStreamChannelFree(index))
             {
-                if (!g_snd.chaninfo[index].alias0)
-                    MyAssertHandler(".\\snd.cpp", 3178, 0, "%s", "g_snd.chaninfo[idx].alias0");
-                entchannel = (g_snd.chaninfo[index].alias0->flags & 0x3F00) >> 8;
+                iassert(g_snd.chaninfo[index].alias0);
+
+                entchannel = SNDALIASFLAGS_GET_CHANNEL(g_snd.chaninfo[index].alias0->flags);
                 if (SND_IsAliasChannel3D(entchannel))
                     DebugDrawWorldSound3D(index, debugDrawStyle, dst, &closestId, &closestIdDotProd);
             }
@@ -3395,17 +3216,11 @@ void __cdecl DebugDrawWorldSound3D(
     const char *text; // [esp+188h] [ebp-8h]
     snd_channel_info_t *chaninfo; // [esp+18Ch] [ebp-4h]
 
-    if (idx > 0x34)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            3050,
-            0,
-            "%s\n\t(idx) = %i",
-            "(( idx >= 0 ) && ( idx < (32 + (SND_TRACK_COUNT + 8) + 8) ))",
-            idx);
+    iassert((idx >= 0) && (idx < (32 + (SND_TRACK_COUNT + 8) + 8)));
+
     chaninfo = &g_snd.chaninfo[idx];
-    if (!chaninfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 3053, 0, "%s", "chaninfo->alias0");
+    iassert(chaninfo->alias0);
+
     SND_GetCurrent3DPosition(chaninfo->sndEnt, chaninfo->offset, org);
     listenerId = SND_GetListenerIndexNearestToOrigin(org);
     Vec3Sub(g_snd.listeners[listenerId].orient.origin, org, diff);
@@ -3417,10 +3232,9 @@ void __cdecl DebugDrawWorldSound3D(
         time = g_snd.time - chaninfo->startTime;
     if (debugDrawStyle != 3)
     {
-        if (!closestId)
-            MyAssertHandler(".\\snd.cpp", 3070, 0, "%s", "closestId");
-        if (!closestIdDotProd)
-            MyAssertHandler(".\\snd.cpp", 3071, 0, "%s", "closestIdDotProd");
+        iassert(closestId);
+        iassert(closestIdDotProd);
+
         Vec3Sub(org, g_snd.listeners[listenerId].orient.origin, sndDir);
         Vec3Normalize(sndDir);
         dot = Vec3Dot(sndDir, g_snd.listeners[listenerId].orient.axis[0]);
@@ -3448,12 +3262,14 @@ void __cdecl DebugDrawWorldSound3D(
             {
                 fontsize = fontsize * 0.8500000238418579;
                 text = va("Details: %s", chaninfo->alias0->aliasName);
+
                 if (offsets[chaninfo->sndEnt.field.entIndex])
                     CL_AddDebugString(org, colorWhiteFaded, fontsize, (char *)text, 0, 1);
                 else
                     CL_AddDebugStarWithText(org, starColor, colorWhiteFaded, (char *)text, fontsize, 1, 0);
-                if (!chaninfo->alias0->soundFile)
-                    MyAssertHandler(".\\snd.cpp", 3114, 0, "%s", "chaninfo->alias0->soundFile");
+
+                iassert(chaninfo->alias0->soundFile);
+
                 org[2] = org[2] - fontsize * 12.0;
                 strcpy(buffer, "File: ");
                 Com_GetSoundFileName(
@@ -3507,8 +3323,8 @@ void SND_UpdatePhysics()
     g_sndPhysics.count = 0;
     if (SND_AnyActiveListeners())
     {
-        if (count > 32)
-            MyAssertHandler(".\\snd.cpp", 3211, 0, "%s", "count <= SND_MAX_PHYSICS");
+        iassert(count <= SND_MAX_PHYSICS);
+
         for (i = 0; i < count; ++i)
         {
             alias = Com_PickSoundAliasFromList(g_sndPhysics.info[i].aliasList);
@@ -3592,6 +3408,7 @@ void __cdecl SND_Init()
     int ia; // [esp+1Ch] [ebp-8h]
 
     Com_Printf(9, "\n------- sound system initialization -------\n");
+
     snd_errorOnMissing = Dvar_RegisterBool("snd_errorOnMissing", 0, DVAR_ARCHIVE, "Cause a Com_Error if a sound file is missing.");
     min.value.max = 1.0f;
     min.value.min = 0.0f;
@@ -3618,8 +3435,10 @@ void __cdecl SND_Init()
         (DvarLimits)0x138800000000LL,
         DVAR_CHEAT | DVAR_ARCHIVE,
         "The amout of time in milliseconds for all audio to fade in at the start of a level");
+
     mina.value.max = 1.0f;
     mina.value.min = 0.0f;
+
     snd_cinematicVolumeScale = Dvar_RegisterFloat(
         "snd_cinematicVolumeScale",
         0.85000002f,
@@ -3647,6 +3466,7 @@ void __cdecl SND_Init()
         0,
         DVAR_ARCHIVE,
         "Check whether stream sound files exist while loading");
+
     g_snd.effect = g_snd.envEffects;
     g_snd.envEffects[0].roomtype = 0;
     g_snd.envEffects[0].drylevel = 1.0f;
@@ -3657,12 +3477,15 @@ void __cdecl SND_Init()
     g_snd.effect->wetrate = 0.0f;
     g_snd.effect->active = 1;
     g_snd.amplifier.listener = &g_snd.listeners[1];
+
     SND_InitEntChannels();
+
     g_snd.playbackIdCounter = 1;
     g_snd.mastervol.volume = 1.0f;
     g_snd.mastervol.goalvolume = 1.0f;
     g_snd.mastervol.goalrate = 0.0f;
     g_snd.channelvol = g_snd.channelVolGroups;
+
     for (i = 0; i < SND_GetEntChannelCount(); ++i)
     {
         g_snd.channelvol->channelvol[i].volume = 1.0f;
@@ -3674,18 +3497,23 @@ void __cdecl SND_Init()
     g_snd.looptime = g_snd.time;
     g_snd.slaveLerp = 0.0f;
     g_snd.volume = snd_volume->current.value * 0.75f;
+
     for (ia = 0; ia < SND_GetEntChannelCount(); ++ia)
         g_snd.defaultPauseSettings[ia] = SND_IsPausable(ia);
+
     SND_ResetPauseSettingsToDefaults();
     g_sndPhysics.count = 0;
+
     Cmd_AddCommandInternal(
         "snd_setEnvironmentEffects",
         SND_SetEnvironmentEffects_f,
         &SND_SetEnvironmentEffects_f_VAR);
+
     Cmd_AddCommandInternal(
         "snd_deactivateEnvironmentEffects",
         SND_DeactivateEnvironmentEffects_f,
         &SND_DeactivateEnvironmentEffects_f_VAR);
+
     Cmd_AddCommandInternal("snd_playLocal", SND_PlayLocal_f, &SND_PlayLocal_f_VAR);
     Cmd_AddCommandInternal("snd_setEq", SND_SetEq_f, &SND_SetEq_f_VAR);
     Cmd_AddCommandInternal("snd_setEqFreq", SND_SetEqFreq_f, &SND_SetEqFreq_f_VAR);
@@ -3693,6 +3521,7 @@ void __cdecl SND_Init()
     Cmd_AddCommandInternal("snd_setEqQ", SND_SetEqQ_f, &SND_SetEqQ_f_VAR);
     Cmd_AddCommandInternal("snd_setEqType", SND_SetEqType_f, &SND_SetEqType_f_VAR);
     Cmd_AddCommandInternal("snd_deactivateEq", SND_DeactivateEq_f, &SND_DeactivateEq_f_VAR);
+
     Com_Printf(9, "------- sound system successfully initialized -------\n");
 #ifdef KISAK_MP
     Voice_Init();
@@ -3797,11 +3626,11 @@ void __cdecl RelativeToListener(const snd_listener *listener, float yaw, float p
 
 void SND_InitEntChannels()
 {
-    char *buffer; // [esp+0h] [ebp-4h]
+    char* buffer = Com_LoadRawTextFile("soundaliases/channels.def");
 
-    buffer = Com_LoadRawTextFile("soundaliases/channels.def");
     if (!buffer)
         Com_Error(ERR_DROP, "unable to load entity channel file [%s].\n", "soundaliases/channels.def");
+
     SND_ParseEntChannelFile(buffer);
     Com_UnloadRawTextFile(buffer);
     BG_RegisterShockVolumeDvars();
@@ -3819,11 +3648,12 @@ void __cdecl SND_ParseEntChannelFile(const char *buffer)
     int maxVoices; // [esp+78h] [ebp-8h]
     const char *value; // [esp+7Ch] [ebp-4h]
 
-    if (!buffer)
-        MyAssertHandler(".\\snd.cpp", 3523, 0, "%s", "buffer");
+    iassert(buffer);
+
     g_snd.entchannel_count = 0;
     Com_BeginParseSession("soundaliases/channels.def");
     Com_SetCSV(1);
+
     while (1)
     {
         value = (const char *)Com_Parse(&buffer);
@@ -3919,10 +3749,13 @@ char __cdecl SND_BooleanFromString(const char *value, const char *trueValue, con
 {
     if (!*value)
         return defaultValue;
+
     if (!I_stricmp(value, trueValue))
         return 1;
+
     if (!I_stricmp(value, falseValue))
         return 0;
+
     Com_PrintError(
         9,
         "unknown value (%s), should be either '%s' or '%s'.  using default: %d.\n",
@@ -3930,6 +3763,7 @@ char __cdecl SND_BooleanFromString(const char *value, const char *trueValue, con
         trueValue,
         falseValue,
         defaultValue);
+
     return defaultValue;
 }
 
@@ -3978,27 +3812,35 @@ void __cdecl SND_Save(MemoryFile *memFile)
 
     for (i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
         MemFile_WriteData(memFile, 772, &g_snd.channelVolGroups[i]);
+
     for (ia = 1; ia < 3; ++ia)
         MemFile_WriteData(memFile, 32, &g_snd.envEffects[ia]);
+
     SND_SaveEq(memFile);
     MemFile_WriteData(memFile, 8, g_snd.background);
+
     if (g_snd.Initialized2d)
     {
         for (ib = 8; ib < g_snd.max_3D_channels + 8; ++ib)
             SND_Save3DChannel(ib, memFile);
     }
+
     MemFile_WriteCString(memFile, (char *)"");
+
     if (g_snd.Initialized2d)
     {
         for (ic = 0; ic < g_snd.max_2D_channels; ++ic)
             SND_Save2DChannel(ic, memFile);
     }
+
     MemFile_WriteCString(memFile, (char *)"");
+
     if (g_snd.Initialized2d)
     {
         for (id = 40; id < g_snd.max_stream_channels + 40; ++id)
             SND_SaveStreamChannel(id, memFile);
     }
+
     MemFile_WriteCString(memFile, (char *)"");
 }
 
@@ -4006,14 +3848,8 @@ void __cdecl SND_Save3DChannel(int chanIndex, MemoryFile *memFile)
 {
     snd_save_3D_sample_t info; // [esp+0h] [ebp-18h] BYREF
 
-    if (chanIndex < 8 || chanIndex >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            3930,
-            0,
-            "%s\n\t(chanIndex) = %i",
-            "(chanIndex >= (0 + 8) && chanIndex < (0 + 8) + g_snd.max_3D_channels)",
-            chanIndex);
+    iassert(chanIndex >= (0 + 8) && chanIndex < (0 + 8) + g_snd.max_3D_channels);
+
     if (!SND_Is3DChannelFree(chanIndex)
         && g_snd.chaninfo[chanIndex].system == SASYS_CGAME
         && SND_Get3DChannelLength(chanIndex))
@@ -4049,24 +3885,10 @@ void __cdecl SND_SaveChanInfo(const snd_channel_info_t *chaninfo, MemoryFile *me
     char entchannel; // [esp+15h] [ebp-3h] BYREF
     __int16 p; // [esp+16h] [ebp-2h] BYREF
 
-    if (!chaninfo)
-        MyAssertHandler(".\\snd.cpp", 3893, 0, "%s", "chaninfo");
-    if (chaninfo->sndEnt.field.entIndex != (uint16_t)chaninfo->sndEnt.field.entIndex)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            3894,
-            0,
-            "%s\n\t(chaninfo->sndEnt.handle) = %i",
-            "(chaninfo->sndEnt.handle == (chaninfo->sndEnt.handle & 0xFFFF))",
-            chaninfo->sndEnt.field.entIndex);
-    if (chaninfo->entchannel != (uint8_t)chaninfo->entchannel)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            3895,
-            0,
-            "%s\n\t(chaninfo->entchannel) = %i",
-            "(chaninfo->entchannel == (chaninfo->entchannel & 0xFF))",
-            chaninfo->entchannel);
+    iassert(chaninfo);
+    iassert(chaninfo->sndEnt.handle == (chaninfo->sndEnt.handle & 0xFFFF));
+    iassert(chaninfo->entchannel == (chaninfo->entchannel & 0xFF));
+
     p = chaninfo->sndEnt.handle;
     MemFile_WriteData(memFile, 2, &p);
     entchannel = chaninfo->entchannel;
@@ -4095,18 +3917,10 @@ void __cdecl SND_SaveLengthNotifyInfo(const sndLengthNotifyInfo *info, MemoryFil
     int p; // [esp+Ch] [ebp-8h] BYREF
     int i; // [esp+10h] [ebp-4h]
 
-    if (!info)
-        MyAssertHandler(".\\snd.cpp", 3827, 0, "%s", "info");
-    if (info->count >= 4u)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            3828,
-            0,
-            "info->count doesn't index SND_LENGTHNOTIFY_COUNT\n\t%i not in [0, %i)",
-            info->count,
-            4);
-    if (!memFile)
-        MyAssertHandler(".\\snd.cpp", 3829, 0, "%s", "memFile");
+    iassert(info);
+    bcassert(info->count, SND_LENGTHNOTIFY_COUNT);
+    iassert(memFile);
+
     p = info->count;
     MemFile_WriteData(memFile, 4, &p);
     if (info->count)
@@ -4134,14 +3948,8 @@ void __cdecl SND_Save2DChannel(int chanIndex, MemoryFile *memFile)
 {
     snd_save_2D_sample_t info; // [esp+0h] [ebp-10h] BYREF
 
-    if (chanIndex < 0 || chanIndex >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            4011,
-            0,
-            "%s\n\t(chanIndex) = %i",
-            "(chanIndex >= 0 && chanIndex < 0 + g_snd.max_2D_channels)",
-            chanIndex);
+    iassert(chanIndex >= 0 && chanIndex < 0 + g_snd.max_2D_channels);
+
     if (!SND_Is2DChannelFree(chanIndex)
         && g_snd.chaninfo[chanIndex].system == SASYS_CGAME
         && SND_Get2DChannelLength(chanIndex))
@@ -4162,14 +3970,8 @@ void __cdecl SND_SaveStreamChannel(int chanIndex, MemoryFile *memFile)
     snd_save_stream_t info; // [esp+8h] [ebp-24h] BYREF
     bool isStreamForUi; // [esp+2Bh] [ebp-1h]
 
-    if (chanIndex < 40 || chanIndex >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            4092,
-            0,
-            "%s\n\t(chanIndex) = %i",
-            "(chanIndex >= ((0 + 8) + 32) && chanIndex < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            chanIndex);
+    iassert(chanIndex >= ((0 + 8) + 32) && chanIndex < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     if (chanIndex < 45)
     {
         if (chanIndex >= 41)
@@ -4254,15 +4056,15 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
     alias0 = SND_RestoreSoundAlias(memFile);
     if (!alias0)
         return 0;
+
     alias1 = SND_RestoreSoundAlias(memFile);
-    if (!alias1)
-        MyAssertHandler(".\\snd.cpp", 3964, 0, "%s", "alias1");
+    iassert(alias1);
+
     SND_RestoreChanInfo(&chaninfo, memFile);
     MemFile_ReadData(memFile, 24, (uint8_t *)&info);
-    if (alias0->soundFile->type != (alias0->flags & 0xC0) >> 6)
-        MyAssertHandler(".\\snd.cpp", 3969, 0, "%s", "alias0->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias0->flags )");
-    if (alias1->soundFile->type != (alias1->flags & 0xC0) >> 6)
-        MyAssertHandler(".\\snd.cpp", 3970, 0, "%s", "alias1->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias1->flags )");
+    iassert(alias0->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias0->flags ));
+    iassert(alias1->soundFile->type == SNDALIASFLAGS_GET_TYPE(alias1->flags));
+
     if (alias0->soundFile == alias1->soundFile
         && alias0->soundFile->exists
         && alias0->soundFile->type == 1
@@ -4270,8 +4072,10 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
     {
         if (!SND_AnyActiveListeners())
             MyAssertHandler(".\\snd.cpp", 3975, 0, "%s", "SND_AnyActiveListeners()");
+
         if (!snd_enable3D->current.enabled)
             return 1;
+
         startAliasInfo.alias0 = alias0;
         startAliasInfo.alias1 = alias1;
         startAliasInfo.lerp = chaninfo.lerp;
@@ -4290,14 +4094,8 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
         playbackId = SND_StartAlias3DSample(&startAliasInfo, &channel);
         if (playbackId != -1)
         {
-            if (channel < 8 || channel >= g_snd.max_3D_channels + 8)
-                MyAssertHandler(
-                    ".\\snd.cpp",
-                    3996,
-                    0,
-                    "%s\n\t(channel) = %i",
-                    "(channel >= (0 + 8) && channel < (0 + 8) + g_snd.max_3D_channels)",
-                    channel);
+            iassert(channel >= (0 + 8) && channel < (0 + 8) + g_snd.max_3D_channels);
+
             offset = g_snd.chaninfo[channel].offset;
             *offset = chaninfo.offset[0];
             offset[1] = chaninfo.offset[1];
@@ -4320,11 +4118,13 @@ snd_alias_t *__cdecl SND_RestoreSoundAlias(MemoryFile *memFile)
     name = MemFile_ReadCString(memFile);
     if (!*name)
         return 0;
+
     MemFile_ReadData(memFile, 2, (uint8_t *)p);
     p[2] = p[0];
     alias = SND_GetAliasWithOffset(name, p[0]);
-    if (!alias)
-        MyAssertHandler(".\\snd.cpp", 3820, 0, "%s", "alias");
+    
+    iassert(alias);
+
     return alias;
 }
 
@@ -4367,28 +4167,22 @@ void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInf
     int i; // [esp+10h] [ebp-8h]
     SndLengthId id; // [esp+14h] [ebp-4h]
 
-    if (!info)
-        MyAssertHandler(".\\snd.cpp", 3855, 0, "%s", "info");
-    if (!memFile)
-        MyAssertHandler(".\\snd.cpp", 3856, 0, "%s", "memFile");
+    iassert(info);
+    iassert(memFile);
+
     MemFile_ReadData(memFile, 4, (uint8_t *)&p);
     info->count = p;
-    if (info->count >= 4u)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            3862,
-            0,
-            "info->count doesn't index SND_LENGTHNOTIFY_COUNT\n\t%i not in [0, %i)",
-            info->count,
-            4);
+
+    bcassert(info->count, SND_LENGTHNOTIFY_COUNT);
+
     if (info->count)
     {
         for (i = 0; i < info->count; ++i)
         {
             MemFile_ReadData(memFile, 1, &v4);
             id = (SndLengthId)v4;
-            if (v4 >= 2u)
-                MyAssertHandler(".\\snd.cpp", 3869, 0, "id doesn't index SndLengthNotifyCount\n\t%i not in [0, %i)", id, 2);
+            bcassert(id, SndLengthNotifyCount);
+
             info->id[i] = id;
             if (id)
             {
@@ -4422,14 +4216,13 @@ char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
     if (!alias0)
         return 0;
     alias1 = SND_RestoreSoundAlias(memFile);
-    if (!alias1)
-        MyAssertHandler(".\\snd.cpp", 4045, 0, "%s", "alias1");
+    iassert(alias1);
+
     SND_RestoreChanInfo(&chaninfo, memFile);
     MemFile_ReadData(memFile, 16, (uint8_t *)&info);
-    if (alias0->soundFile->type != (alias0->flags & 0xC0) >> 6)
-        MyAssertHandler(".\\snd.cpp", 4050, 0, "%s", "alias0->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias0->flags )");
-    if (alias1->soundFile->type != (alias1->flags & 0xC0) >> 6)
-        MyAssertHandler(".\\snd.cpp", 4051, 0, "%s", "alias1->soundFile->type == SNDALIASFLAGS_GET_TYPE( alias1->flags )");
+    iassert(alias0->soundFile->type == SNDALIASFLAGS_GET_TYPE(alias0->flags));
+    iassert(alias1->soundFile->type == SNDALIASFLAGS_GET_TYPE(alias1->flags));
+
     if (alias0->soundFile == alias1->soundFile
         && alias0->soundFile->exists
         && alias0->soundFile->type == 1
@@ -4452,19 +4245,14 @@ char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
         playbackId = SND_StartAlias2DSample(&startAliasInfo, &channel);
         if (playbackId != -1)
         {
-            if (channel < 0 || channel >= g_snd.max_2D_channels)
-                MyAssertHandler(
-                    ".\\snd.cpp",
-                    4075,
-                    0,
-                    "%s\n\t(channel) = %i",
-                    "(channel >= 0 && channel < 0 + g_snd.max_2D_channels)",
-                    channel);
+            iassert(channel >= 0 && channel < 0 + g_snd.max_2D_channels);
+
             SND_Set2DChannelFromSaveInfo(channel, &info);
             offset = g_snd.chaninfo[channel].offset;
             *offset = chaninfo.offset[0];
             offset[1] = chaninfo.offset[1];
             offset[2] = chaninfo.offset[2];
+
             memcpy(
                 &g_snd.chaninfo[channel].lengthNotifyInfo,
                 &chaninfo.lengthNotifyInfo,
@@ -4491,9 +4279,10 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
     alias0 = SND_RestoreSoundAlias(memFile);
     if (!alias0)
         return 0;
+
     alias1 = SND_RestoreSoundAlias(memFile);
-    if (!alias1)
-        MyAssertHandler(".\\snd.cpp", 4144, 0, "%s", "alias1");
+    iassert(alias1);
+
     SND_RestoreChanInfo(&chaninfo, memFile);
     MemFile_ReadData(memFile, 32, (uint8_t *)&info);
     if ((alias0->flags & 0xC0) >> 6 == 2
@@ -4516,7 +4305,7 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
         startAliasInfo.timescale = chaninfo.timescale;
         if (channel >= 0)
         {
-            if (SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8) || channel >= 45)
+            if (SND_IsAliasChannel3D(SNDALIASFLAGS_GET_CHANNEL(alias0->flags) ) || channel >= 45)
             {
                 v3 = va(
                     "sound alias '%s' on aliaschannel #%d tried to play on stream channel #%d",
@@ -4531,8 +4320,10 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
                     "!SND_IsAliasChannel3D( SNDALIASFLAGS_GET_CHANNEL( alias0->flags ) ) && channel < SND_FIRST_STREAM_CHANNEL + SND_TRACK_COUNT",
                     v3);
             }
+
             if (!snd_enableStream->current.enabled)
                 return 1;
+
             startAliasInfo.master = chaninfo.master;
             playbackId = SND_StartAliasStreamOnChannel(&startAliasInfo, channel);
         }
@@ -4569,14 +4360,16 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
 
 int __cdecl SND_GetSoundOverlay(snd_overlay_type_t type, snd_overlay_info_t *info, int maxcount, int *cpu)
 {
-    if (!info)
-        MyAssertHandler(".\\snd.cpp", 4465, 0, "%s", "info");
-    if (maxcount <= 0)
-        MyAssertHandler(".\\snd.cpp", 4466, 0, "%s", "maxcount > 0");
+    iassert(info);
+
+    iassert(maxcount > 0);
+
     if (!g_snd.Initialized2d)
         return 0;
+
     if (cpu)
         *cpu = g_snd.cpu;
+
     switch (type)
     {
     case SND_OVERLAY_3D:
@@ -4593,35 +4386,39 @@ int __cdecl SND_GetSoundOverlay2D(snd_overlay_info_t *info, int maxcount)
 {
     snd_entchannel_info_t *EntChannelName; // eax
     int rate; // [esp+0h] [ebp-Ch]
-    int i; // [esp+8h] [ebp-4h]
+    int channel; // [esp+8h] [ebp-4h]
 
     if (maxcount > g_snd.max_2D_channels)
         maxcount = g_snd.max_2D_channels;
-    for (i = 0; i < maxcount; ++i)
+
+    for (channel = 0; channel < maxcount; ++channel)
     {
-        if (!SND_Is2DChannelFree(i) && g_snd.chaninfo[i].soundFileInfo.loadingState == SFLS_LOADED)
+        if (!SND_Is2DChannelFree(channel) && g_snd.chaninfo[channel].soundFileInfo.loadingState == SFLS_LOADED)
         {
-            if (g_snd.chaninfo[i].soundFileInfo.baserate <= 0)
-                MyAssertHandler(".\\snd.cpp", 4333, 0, "%s", "g_snd.chaninfo[channel].soundFileInfo.baserate > 0");
-            if (!g_snd.chaninfo[i].alias0)
-                MyAssertHandler(".\\snd.cpp", 4334, 0, "%s", "g_snd.chaninfo[channel].alias0");
-            Com_GetSoundFileName(g_snd.chaninfo[i].alias0, info[i].pszSampleName, 128);
-            Com_sprintf(info[i].aliasName, 0x40u, "%s", g_snd.chaninfo[i].alias0->aliasName);
-            EntChannelName = SND_GetEntChannelName(g_snd.chaninfo[i].entchannel);
-            Com_sprintf(info[i].entchannel, 0x40u, "%s", EntChannelName->name);
-            rate = SND_Get2DChannelPlaybackRate(i);
+            iassert(g_snd.chaninfo[channel].soundFileInfo.baserate > 0);
+            iassert(g_snd.chaninfo[channel].alias0);
+
+            Com_GetSoundFileName(g_snd.chaninfo[channel].alias0, info[channel].pszSampleName, 128);
+            Com_sprintf(info[channel].aliasName, 0x40u, "%s", g_snd.chaninfo[channel].alias0->aliasName);
+            EntChannelName = SND_GetEntChannelName(g_snd.chaninfo[channel].entchannel);
+            Com_sprintf(info[channel].entchannel, 0x40u, "%s", EntChannelName->name);
+            rate = SND_Get2DChannelPlaybackRate(channel);
+
             if (!rate)
-                rate = g_snd.chaninfo[i].soundFileInfo.baserate;
-            info[i].fPitch = (double)rate / (double)g_snd.chaninfo[i].soundFileInfo.baserate;
-            info[i].fBaseVolume = g_snd.chaninfo[i].basevolume;
-            info[i].fCurVolume = SND_Get2DChannelVolume(i);
+                rate = g_snd.chaninfo[channel].soundFileInfo.baserate;
+
+            info[channel].fPitch = (double)rate / (double)g_snd.chaninfo[channel].soundFileInfo.baserate;
+            info[channel].fBaseVolume = g_snd.chaninfo[channel].basevolume;
+            info[channel].fCurVolume = SND_Get2DChannelVolume(channel);
+
             if (g_snd.volume != 0.0)
-                info[i].fCurVolume = info[i].fCurVolume / g_snd.volume;
-            info[i].dist = -1;
+                info[channel].fCurVolume = info[channel].fCurVolume / g_snd.volume;
+
+            info[channel].dist = -1;
         }
         else
         {
-            info[i].pszSampleName[0] = 0;
+            info[channel].pszSampleName[0] = 0;
         }
     }
     return maxcount;
@@ -4646,23 +4443,26 @@ int __cdecl SND_GetSoundOverlay3D(snd_overlay_info_t *info, int maxcount)
         channel = i + 8;
         if (!SND_Is3DChannelFree(i + 8) && g_snd.chaninfo[channel].soundFileInfo.loadingState == SFLS_LOADED)
         {
-            if (g_snd.chaninfo[channel].soundFileInfo.baserate <= 0)
-                MyAssertHandler(".\\snd.cpp", 4375, 0, "%s", "g_snd.chaninfo[channel].soundFileInfo.baserate > 0");
-            if (!g_snd.chaninfo[channel].alias0)
-                MyAssertHandler(".\\snd.cpp", 4376, 0, "%s", "g_snd.chaninfo[channel].alias0");
+            iassert(g_snd.chaninfo[channel].soundFileInfo.baserate > 0);
+            iassert(g_snd.chaninfo[channel].alias0);
+
             Com_GetSoundFileName(g_snd.chaninfo[channel].alias0, info[i].pszSampleName, 128);
             Com_sprintf(info[i].aliasName, 0x40u, "%s", g_snd.chaninfo[channel].alias0->aliasName);
             EntChannelName = SND_GetEntChannelName(g_snd.chaninfo[channel].entchannel);
             Com_sprintf(info[i].entchannel, 0x40u, "%s", EntChannelName->name);
             rate = SND_Get3DChannelPlaybackRate(channel);
+
             if (!rate)
                 rate = g_snd.chaninfo[channel].soundFileInfo.baserate;
+
             info[i].fPitch = (double)rate / (double)g_snd.chaninfo[channel].soundFileInfo.baserate;
             info[i].fBaseVolume = g_snd.chaninfo[channel].basevolume;
             v3 = SND_Get3DChannelVolume(channel);
             info[i].fCurVolume = v3;
+
             if (g_snd.volume != 0.0)
                 info[i].fCurVolume = info[i].fCurVolume / g_snd.volume;
+
             SND_GetCurrent3DPosition(g_snd.chaninfo[channel].sndEnt, g_snd.chaninfo[channel].offset, org);
             a = &g_snd.listeners[SND_GetListenerIndexNearestToOrigin(org)];
             Vec3Sub(a->orient.origin, org, diff);
@@ -4696,10 +4496,9 @@ int __cdecl SND_GetSoundOverlayStream(snd_overlay_info_t *info, int maxcount)
         channel = i + 40;
         if (!SND_IsStreamChannelFree(i + 40) && g_snd.chaninfo[channel].soundFileInfo.loadingState == SFLS_LOADED)
         {
-            if (g_snd.chaninfo[channel].soundFileInfo.baserate <= 0)
-                MyAssertHandler(".\\snd.cpp", 4427, 0, "%s", "g_snd.chaninfo[channel].soundFileInfo.baserate > 0");
-            if (!g_snd.chaninfo[channel].alias0)
-                MyAssertHandler(".\\snd.cpp", 4428, 0, "%s", "g_snd.chaninfo[channel].alias0");
+            iassert(g_snd.chaninfo[channel].soundFileInfo.baserate > 0);
+            iassert(g_snd.chaninfo[channel].alias0);
+
             Com_GetSoundFileName(g_snd.chaninfo[channel].alias0, info[i].pszSampleName, 128);
             Com_sprintf(info[i].aliasName, 0x40u, "%s", g_snd.chaninfo[channel].alias0->aliasName);
             EntChannelName = SND_GetEntChannelName(g_snd.chaninfo[channel].entchannel);
@@ -4709,8 +4508,10 @@ int __cdecl SND_GetSoundOverlayStream(snd_overlay_info_t *info, int maxcount)
             info[i].fBaseVolume = g_snd.chaninfo[channel].basevolume;
             StreamChannelVolume = SND_GetStreamChannelVolume(channel);
             info[i].fCurVolume = StreamChannelVolume;
+
             if (g_snd.volume != 0.0)
                 info[i].fCurVolume = info[i].fCurVolume / g_snd.volume;
+
             dist = 0.0;
             if (SND_IsAliasChannel3D((g_snd.chaninfo[channel].alias0->flags & 0x3F00) >> 8))
             {
@@ -4740,17 +4541,11 @@ void __cdecl SND_StopChannelAndPlayChainAlias(uint32_t chanId)
     float org[3]; // [esp+8h] [ebp-10h] BYREF
     snd_channel_info_t *chaninfo; // [esp+14h] [ebp-4h]
 
-    if (chanId > 0x34)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            4507,
-            0,
-            "%s\n\t(chanId) = %i",
-            "(( chanId >= 0 ) && ( chanId < (32 + (SND_TRACK_COUNT + 8) + 8) ))",
-            chanId);
+    iassert(((chanId >= 0) && (chanId < (32 + (SND_TRACK_COUNT + 8) + 8))));
+
     chaninfo = &g_snd.chaninfo[chanId];
-    if (!chaninfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 4510, 0, "%s", "chaninfo->alias0");
+    iassert(chaninfo->alias0);
+
     if (chaninfo->alias0->chainAliasName)
     {
         sndEnt = chaninfo->sndEnt.field.entIndex;
@@ -4779,14 +4574,8 @@ void __cdecl SND_StopChannelAndPlayChainAlias(uint32_t chanId)
 
 void __cdecl StopChannel(int chanId)
 {
-    if ((uint32_t)chanId > 0x34)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            4490,
-            0,
-            "%s\n\t(chanId) = %i",
-            "(( chanId >= 0 ) && ( chanId < (32 + (SND_TRACK_COUNT + 8) + 8) ))",
-            chanId);
+    iassert(((chanId >= 0) && (chanId < (32 + (SND_TRACK_COUNT + 8) + 8))));
+
     if (chanId < 40)
     {
         if (chanId < 8)
@@ -4804,8 +4593,8 @@ void __cdecl SND_AddPhysicsSound(snd_alias_list_t *aliasList, float *org)
 {
     float *v2; // [esp+0h] [ebp-4h]
 
-    if (!aliasList)
-        MyAssertHandler(".\\snd.cpp", 4548, 0, "%s", "aliasList");
+    iassert(aliasList);
+
     Sys_EnterCriticalSection(CRITSECT_AUDIO_PHYSICS);
     if (g_sndPhysics.count < 32)
     {

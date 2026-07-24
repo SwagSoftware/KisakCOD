@@ -9,8 +9,8 @@ LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, const char *soundName)
     _AILSOUNDINFO info; // [esp+8h] [ebp-28h] BYREF
     LoadedSound *loadSnd; // [esp+2Ch] [ebp-4h]
 
-    if (!buffer)
-        MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 134, 0, "%s", "buffer");
+    iassert(buffer);
+
     if (AIL_WAV_info(buffer, &info))
     {
         if (info.data_len)
@@ -42,8 +42,9 @@ LoadedSound *__cdecl SND_LoadSoundFile(const char *name)
 
     if (IsFastFileLoad())
         MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 175, 0, "%s", "IsObjFileLoad()");
-    if (!name)
-        MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 176, 0, "%s", "name");
+
+    iassert(name);
+
     Com_sprintf(realname, 0x100u, "sound/%s", name);
     if (FS_ReadFile(realname, &buffer) >= 0)
     {

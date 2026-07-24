@@ -5,9 +5,40 @@
 #include <gfx_d3d/fxprimitives.h>
 #include <universal/memfile.h>
 
+// Kisak from assert
+#define SNDALIASFLAGS_GET_CHANNEL(flags) (((flags) & 0x3F00) >> 8)
+#define SNDALIASFLAGS_GET_TYPE(flags) (((flags) & 0xC0) >> 6)
 // snd
 
 static const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "highshelf", "bell", NULL }; // idb
+
+enum SND_CHANNELS : __int32 // KISAK
+{
+    SND_MAX_CHANNELS = 0x34
+};
+
+enum SND_LENGTHNOTIFY : __int32 // KISAK
+{
+    SND_LENGTHNOTIFY_COUNT = 4
+};
+
+enum SND_TRACK : __int32 // KISAK
+{
+    SND_TRACK_AMBIENT_PRIMARY_0 = 1,
+    SND_TRACK_AMBIENT_PRIMARY_1 = 3,
+    SND_TRACK_COUNT = 5
+};
+
+enum SND_ENVEFFECTPRIO : __int32 // KISAK
+{
+    SND_ENVEFFECTPRIO_NONE = 0,
+    SND_ENVEFFECTPRIO_COUNT = 3
+};
+
+enum SND_PHYSICS : __int32 // KISAK
+{
+    SND_MAX_PHYSICS = 32
+};
 
 enum SND_CHANNELVOLPRIO : __int32
 {
