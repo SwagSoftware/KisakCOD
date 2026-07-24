@@ -89,14 +89,8 @@ void __cdecl SND_Set3DPosition(int index, const float *org)
     int listenerIndex; // [esp+18h] [ebp-10h]
     float transformed[3]; // [esp+1Ch] [ebp-Ch] BYREF
 
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            602,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     listenerIndex = SND_GetListenerIndexNearestToOrigin(org);
     Vec3Sub(org, g_snd.listeners[listenerIndex].orient.origin, delta);
     MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
@@ -110,14 +104,8 @@ void __cdecl SND_Set3DPosition(int index, const float *org)
 
 void __cdecl SND_Stop2DChannel(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            642,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert((index >= 0 && index < 0 + g_snd.max_2D_channels));
+
     AIL_end_sample(milesGlob.handle_sample[index]);
     SND_ResetChannelInfo(index);
     SND_RemoveVoice(g_snd.chaninfo[index].entchannel);
@@ -125,30 +113,19 @@ void __cdecl SND_Stop2DChannel(int index)
 
 void __cdecl SND_Pause2DChannel(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            653,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     AIL_stop_sample(milesGlob.handle_sample[index]);
     g_snd.chaninfo[index].paused = 1;
 }
 
 void __cdecl SND_Unpause2DChannel(int index, int timeshift)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            662,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     if (!g_snd.chaninfo[index].startDelay)
         AIL_resume_sample(milesGlob.handle_sample[index]);
+
     g_snd.chaninfo[index].soundFileInfo.endtime += timeshift;
     g_snd.chaninfo[index].startTime += timeshift;
     g_snd.chaninfo[index].paused = 0;
@@ -156,27 +133,15 @@ void __cdecl SND_Unpause2DChannel(int index, int timeshift)
 
 bool __cdecl SND_Is2DChannelFree(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            674,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     return !g_snd.chaninfo[index].paused && !g_snd.chaninfo[index].startDelay && g_snd.chaninfo[index].alias0 == 0;
 }
 
 void __cdecl SND_Stop3DChannel(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            683,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     AIL_end_sample(milesGlob.handle_sample[index]);
     SND_ResetChannelInfo(index);
     SND_RemoveVoice(g_snd.chaninfo[index].entchannel);
@@ -184,30 +149,19 @@ void __cdecl SND_Stop3DChannel(int index)
 
 void __cdecl SND_Pause3DChannel(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            694,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     AIL_stop_sample(milesGlob.handle_sample[index]);
     g_snd.chaninfo[index].paused = 1;
 }
 
 void __cdecl SND_Unpause3DChannel(int index, int timeshift)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            703,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     if (!g_snd.chaninfo[index].startDelay)
         AIL_resume_sample(milesGlob.handle_sample[index]);
+
     g_snd.chaninfo[index].soundFileInfo.endtime += timeshift;
     g_snd.chaninfo[index].startTime += timeshift;
     g_snd.chaninfo[index].paused = 0;
@@ -215,27 +169,15 @@ void __cdecl SND_Unpause3DChannel(int index, int timeshift)
 
 bool __cdecl SND_Is3DChannelFree(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            715,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     return !g_snd.chaninfo[index].paused && !g_snd.chaninfo[index].startDelay && g_snd.chaninfo[index].alias0 == 0;
 }
 
 void __cdecl SND_StopStreamChannel(int index)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            724,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     if (!milesGlob.handle_sample[index])
         MyAssertHandler(
             ".\\win32\\snd_driver.cpp",
@@ -258,30 +200,19 @@ void __cdecl SND_StopStreamChannel(int index)
 
 void __cdecl SND_PauseStreamChannel(int index)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            737,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 1);
     g_snd.chaninfo[index].paused = 1;
 }
 
 void __cdecl SND_UnpauseStreamChannel(int index, int timeshift)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            745,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     if (!g_snd.chaninfo[index].startDelay)
         AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 0);
+
     g_snd.chaninfo[index].soundFileInfo.endtime += timeshift;
     g_snd.chaninfo[index].startTime += timeshift;
     g_snd.chaninfo[index].paused = 0;
@@ -289,18 +220,14 @@ void __cdecl SND_UnpauseStreamChannel(int index, int timeshift)
 
 bool __cdecl SND_IsStreamChannelFree(int index)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            756,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     if (!milesGlob.handle_sample[index])
         return 1;
+
     if (g_snd.chaninfo[index].paused || g_snd.chaninfo[index].startDelay)
         return 0;
+
     return g_snd.chaninfo[index].alias0 == 0;
 }
 
@@ -331,10 +258,9 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int 
     MSSChannelMap *channelMap; // [esp+58h] [ebp-8h]
     int i; // [esp+5Ch] [ebp-4h]
 
-    if (!handle)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 771, 0, "%s", "handle");
-    if (!alias)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 772, 0, "%s", "alias");
+    iassert(handle);
+    iassert(alias);
+
     channelMap = Com_GetSpeakerMap(alias->speakerMap, srcChannelCount);
     if (channelMap)
     {
@@ -372,56 +298,32 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     int entchannel; // [esp+A8h] [ebp-8h]
     int index; // [esp+ACh] [ebp-4h]
 
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 835, 0, "%s", "startAliasInfo->alias0");
-    if ((startAliasInfo->alias0->flags & 0xC0) >> 6 != 1)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            836,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_LOADED");
-    if (!startAliasInfo->alias0->soundFile)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 837, 0, "%s", "startAliasInfo->alias0->soundFile");
-    if (startAliasInfo->alias0->soundFile->type != 1)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 838, 0, "%s", "startAliasInfo->alias0->soundFile->type == SAT_LOADED");
-    if (!startAliasInfo->alias0->soundFile->u.loadSnd)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 839, 0, "%s", "startAliasInfo->alias0->soundFile->u.loadSnd");
-    if (!startAliasInfo->alias0->soundFile->exists)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 840, 0, "%s", "startAliasInfo->alias0->soundFile->exists");
-    if (!startAliasInfo->alias1)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 841, 0, "%s", "startAliasInfo->alias1");
-    if ((startAliasInfo->alias1->flags & 0xC0) >> 6 != 1)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            842,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias1->flags ) == SAT_LOADED");
-    if (!startAliasInfo->alias1->soundFile)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 843, 0, "%s", "startAliasInfo->alias1->soundFile");
-    if (startAliasInfo->alias1->soundFile->type != 1)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 844, 0, "%s", "startAliasInfo->alias1->soundFile->type == SAT_LOADED");
-    if (!startAliasInfo->alias1->soundFile->u.loadSnd)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 845, 0, "%s", "startAliasInfo->alias1->soundFile->u.loadSnd");
-    if (!startAliasInfo->alias1->soundFile->exists)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 846, 0, "%s", "startAliasInfo->alias1->soundFile->exists");
-    entchannel = (startAliasInfo->alias0->flags & 0x3F00) >> 8;
+    iassert(startAliasInfo->alias0);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias0->flags) == SAT_LOADED);
+    iassert(startAliasInfo->alias0->soundFile);
+    iassert(startAliasInfo->alias0->soundFile->type == SAT_LOADED);
+    iassert(startAliasInfo->alias0->soundFile->u.loadSnd);
+    iassert(startAliasInfo->alias0->soundFile->exists);
+    iassert(startAliasInfo->alias1);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias1->flags) == SAT_LOADED);
+    iassert(startAliasInfo->alias1->soundFile);
+    iassert(startAliasInfo->alias1->soundFile->type == SAT_LOADED);
+    iassert(startAliasInfo->alias1->soundFile->u.loadSnd);
+    iassert(startAliasInfo->alias1->soundFile->exists);
+
+    entchannel = SNDALIASFLAGS_GET_CHANNEL(startAliasInfo->alias0->flags);
     if (!SND_HasFreeVoice(entchannel))
         return -1;
+
     index = SND_FindFree2DChannel(startAliasInfo, entchannel);
     if (pChannel)
         *pChannel = index;
+
     if (index < 0)
         return -1;
-    if (index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            858,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     handle = milesGlob.handle_sample[index];
     sound = &startAliasInfo->alias0->soundFile->u.loadSnd->sound;
 
@@ -455,17 +357,21 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     }
     realVolume = startAliasInfo->volume
         * g_snd.volume
-        * g_snd.channelvol->channelvol[(startAliasInfo->alias0->flags & 0x3F00) >> 8].volume;
+        * g_snd.channelvol->channelvol[SNDALIASFLAGS_GET_CHANNEL(startAliasInfo->alias0->flags)].volume;
+
     if (g_snd.slaveLerp != 0.0 && !startAliasInfo->master && (startAliasInfo->alias0->flags & 4) != 0)
         realVolume = SND_GetLerpedSlavePercentage(startAliasInfo->alias0->slavePercentage) * realVolume;
+
     SND_ApplyChannelMap(handle, startAliasInfo->alias0, sound->info.channels);
     SND_Set2DChannelVolume(index, realVolume);
     AIL_set_sample_loop_count(handle, (startAliasInfo->alias0->flags & 1) == 0);
     baseSlavePercentage = MSS_GetWetLevel(startAliasInfo->alias0);
     AIL_set_sample_reverb_levels(handle, MSS_GetDryLevel(), baseSlavePercentage);
     AIL_sample_ms_position(handle, &total_msec, 0);
+
     if (startAliasInfo->timeshift >= total_msec)
         return SND_SetPlaybackIdNotPlayed(index);
+
     if (startAliasInfo->fraction == 0.0)
     {
         if (startAliasInfo->timeshift)
@@ -487,20 +393,24 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     }
     if (start_msec)
         startAliasInfo->startDelay = 0;
+
     AIL_set_sample_ms_position(handle, start_msec);
     if (!startAliasInfo->startDelay
         && (!g_snd.paused || !g_snd.pauseSettings[(startAliasInfo->alias0->flags & 0x3F00) >> 8]))
     {
         AIL_resume_sample(handle);
     }
+
     total_msec += startAliasInfo->startDelay;
     if ((startAliasInfo->alias0->flags & 1) != 0)
         total_msec = 0;
     SND_SetChannelStartInfo(index, startAliasInfo);
     SND_SetSoundFileChannelInfo(index, sound->info.channels, sound->info.rate, total_msec, start_msec, SFLS_LOADED);
     playbackId = SND_AcquirePlaybackId(index, total_msec);
+
     if (playbackId != -1)
         SND_AddVoice(entchannel);
+
     return playbackId;
 }
 
@@ -527,10 +437,9 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
     float notCenterPercentage; // [esp+50h] [ebp-8h]
     DWORD numChannels; // [esp+54h] [ebp-4h] BYREF
 
-    if (!handle)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 797, 0, "%s", "handle");
-    if (!alias)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 798, 0, "%s", "alias");
+    iassert(handle);
+    iassert(alias);
+
     if (SND_IsMultiChannel())
     {
         // LWSS ADD - get channel count
@@ -541,14 +450,17 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
 
         for (index = 0; index < numChannels; ++index)
             outVolumes[index] = 1.0;
+
         if (alias->centerPercentage != 0.0 && SND_IsMultiChannel())
         {
             notCenterPercentage = 1.0 - alias->centerPercentage;
             for (index = 0; index < numChannels; ++index)
                 outVolumes[index] = outVolumes[index] * notCenterPercentage;
         }
+
         outVolumes[2] = alias->centerPercentage;
         outVolumes[3] = alias->lfePercentage;
+
         //AIL_set_sample_channel_levels(handle, outVolumes, numChannels);
         AIL_set_sample_channel_levels(handle, src_list, dst_list, outVolumes, numChannels);
     }
@@ -582,15 +494,9 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     int index; // [esp+104h] [ebp-8h]
     float distMax; // [esp+108h] [ebp-4h]
 
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 942, 0, "%s", "startAliasInfo->alias0");
-    if ((startAliasInfo->alias0->flags & 0xC0) >> 6 != 1)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            943,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_LOADED");
+    iassert(startAliasInfo->alias0);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias0->flags) == SAT_LOADED);
+
     if (!startAliasInfo->alias0->soundFile)
         MyAssertHandler(".\\win32\\snd_driver.cpp", 944, 0, "%s", "startAliasInfo->alias0->soundFile");
     if (startAliasInfo->alias0->soundFile->type != 1)
