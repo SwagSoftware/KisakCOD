@@ -75,6 +75,10 @@ struct MssLocal // sizeof=0x26D0
     _STREAM *handle_stream[13];
     MssEqInfo eq[2];                    // ...
     uint32_t eqFilter;              // ...
+#ifndef KISAK_XBOX
+	float eqLerp;
+#endif
+
     MssFileHandle fileHandle[13];
     MssFileHandle *freeFileHandle;
     bool isMultiChannel;                // ...

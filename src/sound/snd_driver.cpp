@@ -1066,6 +1066,10 @@ void __cdecl SND_SetEqParams(
     milesGlob.eq[eqIndex].params[band][entchannel].freq = freq;
     milesGlob.eq[eqIndex].params[band][entchannel].q = q;
     milesGlob.eq[eqIndex].params[band][entchannel].type = type;
+
+#ifndef KISAK_XBOX
+	SND_UpdateEqs();
+#endif
 }
 
 void __cdecl SND_SetEqType(uint32_t entchannel, int eqIndex, uint32_t band, SND_EQTYPE type)
@@ -1138,6 +1142,10 @@ void __cdecl SND_SetEqQ(uint32_t entchannel, int eqIndex, uint32_t band, float q
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].q = q;
+
+#ifndef KISAK_XBOX
+	SND_UpdateEqs();
+#endif
 }
 
 void __cdecl SND_DisableEq(uint32_t entchannel, int eqIndex, uint32_t band)
@@ -1657,7 +1665,9 @@ int __cdecl SND_GetSoundFileSize(uint32_t *pSoundFile)
 
 void __cdecl SND_DriverPostUpdate()
 {
+#ifndef KISAK_XBOX
     SND_UpdateEqs();
+#endif
     KISAK_NULLSUB();
 }
 
@@ -1863,7 +1873,6 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
 #ifdef KISAK_SP
 void SND_SetEqLerp(double lerp)
 {
-#if KISAK_XBOX
     if (lerp < 0.0 || lerp > 1.0)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\xenon\\snd_driver.cpp",
@@ -1872,7 +1881,11 @@ void SND_SetEqLerp(double lerp)
             "%s\n\t(lerp) = %g",
             HIDWORD(lerp),
             LODWORD(lerp));
+#if KISAK_XBOX
     xaGlob.eqLerp = lerp;
+#else
+	milesGlob.eqLerp = (float)lerp;
+	SND_UpdateEqs();
 #endif
 }
 #endif

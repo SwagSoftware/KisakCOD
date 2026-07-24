@@ -4,6 +4,7 @@
 #include <universal/com_files.h>
 #include <qcommon/qcommon.h>
 #include <universal/com_memory.h>
+#include <math.h>
 
 uint32_t __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle)
 {
@@ -163,6 +164,10 @@ void MSS_InitEq()
   int eqIndex; // [esp+10h] [ebp-4h]
 
   milesGlob.eqFilter = 0;
+#ifndef KISAK_XBOX
+  milesGlob.eqLerp = 1.0f;
+#endif
+
   for ( eqIndex = 0; eqIndex < 2; ++eqIndex )
   {
     for ( band = 0; band < 3; ++band )
@@ -239,6 +244,8 @@ const char *MSS_EQ_Q[3] = { "Q 0", "Q 1", "Q 2" }; // idb
 
 void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
 {
+#ifndef KISAK_XBOX
+
   int enabled; // [esp+0h] [ebp-14h] BYREF
   int band; // [esp+4h] [ebp-10h]
   SAMPLESTAGE stage; // [esp+8h] [ebp-Ch]
@@ -268,6 +275,74 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
         stage = SP_FILTER_1;
     }
   }
+
+#else
+
+	int enabled; // [esp+0h] [ebp-14h] BYREF
+	int band; // [esp+4h] [ebp-10h]
+	SAMPLESTAGE stage; // [esp+8h] [ebp-Ch]
+	SndEqParams *params; // [esp+Ch] [ebp-8h]
+	int eqIndex; // [esp+10h] [ebp-4h]
+	float eqWeight[2];
+	float gain;
+	const float eqCap = 0.99f;// Clamp the EQ blend before full interpolation. Overlapping filters become too aggressive.
+
+#ifdef KISAK_SP
+	if (milesGlob.eqLerp >= eqCap)
+	{
+		eqWeight[0] = milesGlob.eqLerp;
+		eqWeight[1] = 0.0f;
+	}
+	else
+	{
+		eqWeight[0] = 0.0f;
+		eqWeight[1] = 1.0f - milesGlob.eqLerp;
+	}
+#else
+	eqWeight[0] = 1.0f;
+	eqWeight[1] = 0.0f;
+#endif
+
+	if ( !snd_enableEq->current.enabled || !milesGlob.eqFilter )
+	{
+		AIL_set_sample_processor(s, SP_FILTER, 0);
+		AIL_set_sample_processor(s, SP_FILTER_1, 0);
+		return;
+	}
+
+	for (eqIndex = 0; eqIndex < 2; ++eqIndex)
+	{
+		stage = (eqIndex == 0) ? SP_FILTER : SP_FILTER_1;
+		if ( eqWeight[eqIndex] <= 0.0f )
+		{
+			AIL_set_sample_processor(s, stage, 0);
+			continue;
+		}
+		AIL_set_sample_processor(s, stage, milesGlob.eqFilter);
+		for (band = 0; band < 3; ++band)
+		{
+			params = &milesGlob.eq[eqIndex].params[band][entchannel];
+			enabled = params->enabled;
+			if ( !enabled )
+			{
+				AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], -1, 0, &enabled, 0);
+				continue;
+			}
+			
+			enabled = 1;
+			AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], -1, 0, &enabled, 0);
+			gain = params->gain;
+			if ( eqWeight[eqIndex] < 1.0f )
+				gain += 20.0f * log10f(eqWeight[eqIndex]);
+			
+			AIL_sample_stage_property(s, stage, MSS_EQ_TYPE[band], -1, 0, params, 0);
+			AIL_sample_stage_property(s, stage, MSS_EQ_FREQ[band], -1, 0, &params->freq, 0);
+			AIL_sample_stage_property(s, stage, MSS_EQ_GAIN[band], -1, 0, &gain, 0);
+			AIL_sample_stage_property(s, stage, MSS_EQ_Q[band], -1, 0, &params->q, 0);
+		}
+  }
+
+#endif
 }
 
 void __cdecl MSS_ResumeSample(int i, int frametime)

@@ -125,12 +125,21 @@ void __cdecl CG_CompassRegisterDvars()
     compassSize = Dvar_RegisterFloat("compassSize", 1.0f, min, DVAR_ARCHIVE, "Scale the compass");
     mina.value.max = FLT_MAX;
     mina.value.min = 0.000099999997f;
+#ifdef KISAK_MP
     compassMaxRange = Dvar_RegisterFloat(
         "compassMaxRange",
         2500.0f,
         mina,
         DVAR_ARCHIVE | DVAR_CHEAT | DVAR_SAVED,
         "The maximum range from the player in world space that objects will be shown on the compass");
+#elif KISAK_SP
+    compassMaxRange = Dvar_RegisterFloat(
+        "compassMaxRange",
+        3500.0f,
+        mina,
+        DVAR_ARCHIVE | DVAR_CHEAT | DVAR_SAVED,
+        "The maximum range from the player in world space that objects will be shown on the compass");
+#endif
     minb.value.max = FLT_MAX;
     minb.value.min = 0.000099999997f;
     compassMinRange = Dvar_RegisterFloat(
@@ -375,6 +384,7 @@ void __cdecl CG_CompassRegisterDvars()
         "The size of the objective on the full map");
     minbb.value.max = FLT_MAX;
     minbb.value.min = 0.0099999998f;
+#ifdef KISAK_MP
     compassObjectiveNearbyDist = Dvar_RegisterFloat(
         "compassObjectiveNearbyDist",
         4.0f,
@@ -390,6 +400,23 @@ void __cdecl CG_CompassRegisterDvars()
         minbc,
         DVAR_SAVED,
         "The distance that objective transition effects play over, centered on compassObjectiveNearbyDist.");
+#elif KISAK_SP
+    compassObjectiveNearbyDist = Dvar_RegisterFloat(
+        "compassObjectiveNearbyDist",
+        8.0f,
+        minbb,
+        DVAR_SAVED,
+        "When an objective is closer than this distance (in meters), an \"Objective Nearby\" typ"
+        "e of indicator is shown.");
+    minbc.value.max = FLT_MAX;
+    minbc.value.min = 0.0099999998f;
+    compassObjectiveMinDistRange = Dvar_RegisterFloat(
+        "compassObjectiveMinDistRange",
+        2.0f,
+        minbc,
+        DVAR_SAVED,
+        "The distance that objective transition effects play over, centered on compassObjectiveNearbyDist.");
+#endif
     minbd.value.max = FLT_MAX;
     minbd.value.min = 0.0099999998f;
     compassObjectiveDetailDist = Dvar_RegisterFloat(

@@ -426,7 +426,7 @@ void __cdecl SaveMemory_CreateHeader(
     save->header.gameCheckSum = checksum;
     save->header.saveCheckSum = Com_BlockChecksumKey32(buffer, bytesUsed, 0);
     Scr_GetChecksum((unsigned int*)save->header.scrCheckSum);
-    v40 = Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
+    v40 = Dvar_RegisterString("ui_campaign", "american", DVAR_SAVED, "The current campaign");
     I_strncpyz(save->header.campaign, v40->current.string, 256);
     if (screenshot)
         I_strncpyz(save->header.screenShotName, screenshot, 64);

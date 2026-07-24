@@ -111,7 +111,11 @@ void AimAssist_RegisterDvars()
     DvarLimits mint; // [esp+4h] [ebp-14h]
     DvarLimits minu; // [esp+4h] [ebp-14h]
 
+#ifdef KISAK_MP
     aim_input_graph_enabled = Dvar_RegisterBool("aim_input_graph_enabled", 1, DVAR_CHEAT, "Use graph for adjusting view input");
+#elif KISAK_SP
+    aim_input_graph_enabled = Dvar_RegisterBool("aim_input_graph_enabled", 0, DVAR_CHEAT, "Use graph for adjusting view input");
+#endif
     aim_input_graph_debug = Dvar_RegisterBool("aim_input_graph_debug", 0, DVAR_CHEAT, "Debug the view input graphs");
     aim_input_graph_index = Dvar_RegisterInt(
         "aim_input_graph_index",
@@ -151,11 +155,19 @@ void AimAssist_RegisterDvars()
         minc,
         DVAR_CHEAT,
         "The horizontal turn rate for aim assist when aiming down the sight");
+#ifdef KISAK_MP
     aim_accel_turnrate_enabled = Dvar_RegisterBool(
         "aim_accel_turnrate_enabled",
         1,
         DVAR_CHEAT,
         "Enable/disable acceleration of the turnrates");
+#elif KISAK_SP
+    aim_accel_turnrate_enabled = Dvar_RegisterBool(
+        "aim_accel_turnrate_enabled",
+        0,
+        DVAR_CHEAT,
+        "Enable/disable acceleration of the turnrates");
+#endif
     aim_accel_turnrate_debug = Dvar_RegisterBool(
         "aim_accel_turnrate_debug",
         0,
@@ -169,11 +181,19 @@ void AimAssist_RegisterDvars()
         mind,
         DVAR_CHEAT,
         "The acceleration of the turnrates");
+#ifdef KISAK_MP
     aim_slowdown_enabled = Dvar_RegisterBool(
         "aim_slowdown_enabled",
         1,
         DVAR_CHEAT,
         "Slowdown the turn rate when the cross hair passes over a target");
+#elif KISAK_SP
+    aim_slowdown_enabled = Dvar_RegisterBool(
+        "aim_slowdown_enabled",
+        0,
+        DVAR_CHEAT,
+        "Slowdown the turn rate when the cross hair passes over a target");
+#endif
     aim_slowdown_debug = Dvar_RegisterBool("aim_slowdown_debug", 0, 0x80u, "Turn on debugging info for aim slowdown");
     mine.value.max = 640.0f;
     mine.value.min = 0.0f;
@@ -249,7 +269,11 @@ void AimAssist_RegisterDvars()
         minm,
         DVAR_CHEAT,
         "The height of the auto aim region in virtual screen coordinates (0 - 480)");
+#ifdef KISAK_MP
     aim_automelee_enabled = Dvar_RegisterBool("aim_automelee_enabled", 1, 0x80u, "Turn on auto melee");
+#elif KISAK_SP
+    aim_automelee_enabled = Dvar_RegisterBool("aim_automelee_enabled", 0, DVAR_CHEAT, "Turn on auto melee");
+#endif
     aim_automelee_debug = Dvar_RegisterBool("aim_automelee_debug", 0, 0x80u, "Turn on auto melee debugging");
     minn.value.max = 100.0f;
     minn.value.min = 0.0f;
@@ -278,11 +302,19 @@ void AimAssist_RegisterDvars()
     minq.value.max = 255.0f;
     minq.value.min = 0.0f;
     aim_automelee_range = Dvar_RegisterFloat("aim_automelee_range", 128.0f, minq, 0x80u, "The range of the auto melee");
+#ifdef KISAK_MP
     aim_lockon_enabled = Dvar_RegisterBool(
         "aim_lockon_enabled",
         1,
         DVAR_CHEAT,
         "Aim lock on helps the player to stay on target");
+#elif KISAK_SP
+    aim_lockon_enabled = Dvar_RegisterBool(
+        "aim_lockon_enabled",
+        0,
+        DVAR_CHEAT,
+        "Aim lock on helps the player to stay on target");
+#endif
     aim_lockon_debug = Dvar_RegisterBool("aim_lockon_debug", 0, 0x80u, "Turn on debugging info for aim lock on");
     minr.value.max = 1.0f;
     minr.value.min = 0.0f;
@@ -316,11 +348,19 @@ void AimAssist_RegisterDvars()
         minu,
         DVAR_CHEAT,
         "The height of the auto aim region in virtual screen coordinates(0-480)");
+#ifdef KISAK_MP
     aim_scale_view_axis = Dvar_RegisterBool(
         "aim_scale_view_axis",
         1,
         DVAR_CHEAT,
         "Scale the influence of each input axis so that the major axis has more influence on the control");
+#elif KISAK_SP
+    aim_scale_view_axis = Dvar_RegisterBool(
+        "aim_scale_view_axis",
+        0,
+        DVAR_CHEAT,
+        "Scale the influence of each input axis so that the major axis has more influence on the control");
+#endif
 }
 
 static bool __cdecl AimAssist_DoBoundsIntersectCenterBox(

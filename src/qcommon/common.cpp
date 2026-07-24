@@ -1525,7 +1525,12 @@ void Com_InitDvars()
     #endif
 #endif
 
+#ifdef KISAK_MP
     com_maxfps = Dvar_RegisterInt("com_maxfps", 85, 0, 1000, DVAR_ARCHIVE, "Cap frames per second");
+#elif KISAK_SP
+    com_maxfps = Dvar_RegisterInt("com_maxfps", 0, 0, 1000, DVAR_ARCHIVE, "Cap frames per second");
+#endif
+
     useFastFile = Dvar_RegisterBool(
         "useFastFile",
         1,
@@ -1564,7 +1569,11 @@ void Com_InitDvars()
         DVAR_NOFLAG,
         "Write to log file - 0 = disabled, 1 = async file write, 2 = Sync every write");
     com_statmon = Dvar_RegisterBool("com_statmon", 0, 0, "Draw stats monitor");
+#ifdef KISAK_MP
     com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001f, 1000.0f, DVAR_SYSTEMINFO | DVAR_ROM | DVAR_CHEAT | DVAR_TEMP | DVAR_SAVED, "Scale time of each frame");
+#elif KISAK_SP
+    com_timescale = Dvar_RegisterFloat("com_timescale", 1.0, 0.001f, 1000.0f, DVAR_SAVED | DVAR_CHEAT | DVAR_ROM | DVAR_SYSTEMINFO, "Scale time of each frame");
+#endif
     dev_timescale = Dvar_RegisterFloat("timescale", 1.0, 0.001f, 1000.0f, DVAR_CHEAT | DVAR_SYSTEMINFO, "Scale time of each frame");
     com_fixedtime = Dvar_RegisterInt("fixedtime", 0, 0, 1000, 0x80u, "Use a fixed time rate for each frame");
     com_maxFrameTime = Dvar_RegisterInt(

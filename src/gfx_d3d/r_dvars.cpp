@@ -884,6 +884,7 @@
          DVAR_ARCHIVE | DVAR_LATCH,
          "Enable v-sync before drawing the next frame to avoid 'tearing' artifacts.");
      r_clear = Dvar_RegisterEnum("r_clear", r_clearNames, 1, DVAR_NOFLAG, "Controls how the color buffer is cleared");
+#ifdef KISAK_XBOX
      r_clearColor = Dvar_RegisterColor(
          "r_clearColor",
          0.5f,
@@ -900,6 +901,24 @@
          1.0f,
          DVAR_NOFLAG,
          "Color to clear every second frame to (for use during development)");
+#else
+     r_clearColor = Dvar_RegisterColor(
+         "r_clearColor",
+         0.0f,
+         0.0f,
+         0.0f,
+         0.0f,
+         DVAR_NOFLAG,
+         "Color to clear the screen to when clearing the frame buffer");
+     r_clearColor2 = Dvar_RegisterColor(
+         "r_clearColor2",
+         0.0f,
+         0.0f,
+         0.0f,
+         0.0f,
+         DVAR_NOFLAG,
+         "Color to clear every second frame to (for use during development)");
+#endif
      r_drawSun = Dvar_RegisterBool("r_drawSun", true, DVAR_ARCHIVE, "Enable sun effects");
      r_drawDecals = Dvar_RegisterBool("r_drawDecals", true, DVAR_ARCHIVE, "Enable world decal rendering");
      r_drawWorld = Dvar_RegisterBool("r_drawWorld", true, DVAR_CHEAT, "Enable world rendering");

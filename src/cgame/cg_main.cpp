@@ -212,7 +212,7 @@ const char *debugOverlayNames[4] =
 
 void CG_RegisterDvars()
 {
-    cg_drawGun = Dvar_RegisterBool("cg_drawGun", 1, 0x80u, "Draw the view model");
+    cg_drawGun = Dvar_RegisterBool("cg_drawGun", 1, DVAR_CHEAT, "Draw the view model");
     cg_cursorHints = Dvar_RegisterInt(
         "cg_cursorHints",
         3,
@@ -228,7 +228,7 @@ void CG_RegisterDvars()
     cg_weaponHintsCoD1Style = Dvar_RegisterBool(
         "cg_weaponHintsCoD1Style",
         1,
-        0x1000u,
+        DVAR_SAVED,
         "Draw weapon hints in CoD1 style: with the weapon name, and with the icon below");
     cg_hintFadeTime = Dvar_RegisterInt(
         "cg_hintFadeTime",
@@ -237,21 +237,21 @@ void CG_RegisterDvars()
         0x7FFFFFFF,
         1u,
         "Time in milliseconds for the cursor hint to fade");
-    cg_fov = Dvar_RegisterFloat("cg_fov", 65.0, 1.0, 160.0, DVAR_ARCHIVE, "The field of view angle in degrees");
+    cg_fov = Dvar_RegisterFloat("cg_fov", 65.0, 1.0, 160.0, DVAR_SAVED, "The field of view angle in degrees");
     cg_viewVehicleInfluence = Dvar_RegisterFloat("cg_viewVehicleInfluence", 1.0, 0.0, 1.0, 0, "The influence on the view from being in a vehicle");
     cg_draw2D = Dvar_RegisterBool("cg_draw2D", 1, 0, "Draw 2D screen elements");
     cg_drawHUD = Dvar_RegisterBool("cg_drawHUD", 1, 0, "Draw HUD elements");
     cg_drawHealth = Dvar_RegisterBool("cg_drawHealth", 0, 0x80u, "Draw health bar");
-    cg_drawBreathHint = Dvar_RegisterBool("cg_drawBreathHint", 1, 1u, "Draw a 'hold breath to steady' hint");
-    cg_drawMantleHint = Dvar_RegisterBool("cg_drawMantleHint", 1, 1u, "Draw a 'press key to mantle' hint");
-    replay_time = Dvar_RegisterBool("replay_time", 0, 1u, "Draw replay time");
-    cg_drawFPS = Dvar_RegisterEnum("cg_drawFPS", cg_drawFpsNames, 1, 1u, "Draw frames per second");
-    cg_drawFPSLabels = Dvar_RegisterBool("cg_drawFPSLabels", 1, 1u, "Draw FPS Info Labels");
+    cg_drawBreathHint = Dvar_RegisterBool("cg_drawBreathHint", 1, DVAR_ARCHIVE, "Draw a 'hold breath to steady' hint");
+    cg_drawMantleHint = Dvar_RegisterBool("cg_drawMantleHint", 1, DVAR_ARCHIVE, "Draw a 'press key to mantle' hint");
+    replay_time = Dvar_RegisterBool("replay_time", 0, DVAR_ARCHIVE, "Draw replay time");
+    cg_drawFPS = Dvar_RegisterEnum("cg_drawFPS", cg_drawFpsNames, 1, DVAR_ARCHIVE, "Draw frames per second");
+    cg_drawFPSLabels = Dvar_RegisterBool("cg_drawFPSLabels", 1, DVAR_ARCHIVE, "Draw FPS Info Labels");
     DvarLimits limits;
     limits.value.min = -200.0f;
     limits.value.max = 640.0f;
     //cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, -200.0, 640.0, v5, v4);
-    cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 20.0, -20.0, limits, DVAR_ARCHIVE, "Offset from top-right corner, for cg_drawFPS, etc");
+    cg_debugInfoCornerOffset = Dvar_RegisterVec2("cg_debugInfoCornerOffset", 5.0, -5.0, limits, DVAR_ARCHIVE, "Offset from top-right corner, for cg_drawFPS, etc");
     cg_drawVersion = Dvar_RegisterBool("cg_drawVersion", 1, 0, "Draw the game version");
     cg_drawVersionX = Dvar_RegisterFloat("cg_drawVersionX", 50.0, 0.0, 512.0, DVAR_NOFLAG, "X offset for the version string");
     cg_drawVersionY = Dvar_RegisterFloat("cg_drawVersionY", 18.0, 0.0, 512.0, DVAR_NOFLAG, "Y offset for the version string");
@@ -263,8 +263,8 @@ void CG_RegisterDvars()
         0,
         0x80u,
         "Draw debugging information for materials");
-    cg_drawTurretCrosshair = Dvar_RegisterBool("cg_drawTurretCrosshair", 1, 1u, "Draw a cross hair when using a turret");
-    cg_drawShellshock = Dvar_RegisterBool("cg_drawShellshock", 1, 0x80u, "Draw shellshock & flashbang screen effects.");
+    cg_drawTurretCrosshair = Dvar_RegisterBool("cg_drawTurretCrosshair", 1, DVAR_ARCHIVE, "Draw a cross hair when using a turret");
+    cg_drawShellshock = Dvar_RegisterBool("cg_drawShellshock", 1, DVAR_CHEAT, "Draw shellshock & flashbang screen effects.");
     cg_drawPlayerPosInFreeMove = Dvar_RegisterBool(
         "cg_drawPlayerPosInFreeMove",
         1,
@@ -296,9 +296,9 @@ void CG_RegisterDvars()
         0,
         1u,
         "Draw damage icons when aiming down the sight of a scoped weapon");
-    cg_hudGrenadeIconMaxRangeFrag = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFrag", 256.0, 0.0, 1000.0, DVAR_CHEAT | DVAR_SAVED,
+    cg_hudGrenadeIconMaxRangeFrag = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFrag", 256.0, 0.0, 1000.0, DVAR_ARCHIVE,
         "The minimum distance that a grenade has to be from a player in order to be shown on the grenade indicator");
-    cg_hudGrenadeIconMaxRangeFlash = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFlash", 500.0, 0.0, 2000.0, DVAR_CHEAT | DVAR_SAVED,
+    cg_hudGrenadeIconMaxRangeFlash = Dvar_RegisterFloat("cg_hudGrenadeIconMaxRangeFlash", 500.0, 0.0, 2000.0, DVAR_ARCHIVE,
         "The minimum distance that a flashbang has to be from a player in order to be shown "
         "on the grenade indicator");
     cg_hudGrenadeIconMaxHeight = Dvar_RegisterFloat("cg_hudGrenadeIconMaxHeight", 104.0, 0.0, 1000.0, DVAR_ARCHIVE,
@@ -351,14 +351,14 @@ void CG_RegisterDvars()
     cg_crosshairEnemyColor = Dvar_RegisterBool(
         "cg_crosshairEnemyColor",
         1,
-        0x81u,
+        DVAR_CHEAT | DVAR_ARCHIVE,
         "The crosshair color when over an enemy");
     cg_drawFriendlyFireCrosshair = Dvar_RegisterBool(
         "cg_drawFriendlyFireCrosshair",
         0,
         0x81u,
         "draw the friendly fire crosshair (friendly move)");
-    cg_brass = Dvar_RegisterBool("cg_brass", 1, 1u, "Weapons eject brass");
+    cg_brass = Dvar_RegisterBool("cg_brass", 1, DVAR_ARCHIVE, "Weapons eject brass");
     cg_gun_x = Dvar_RegisterFloat("cg_gun_x", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "x position of the viewmodel");
     cg_gun_y = Dvar_RegisterFloat("cg_gun_y", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "y position of the viewmodel");
     cg_gun_z = Dvar_RegisterFloat("cg_gun_z", 0.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT, "z position of the viewmodel");
@@ -382,10 +382,10 @@ void CG_RegisterDvars()
     cg_bobWeaponLag = Dvar_RegisterFloat("cg_bobWeaponLag", 0.25, -1.0, 1.0, DVAR_CHEAT, "The lag on the weapon bob");
     cg_debugEvents = Dvar_RegisterBool("cg_debugevents", 0, 0x80u, "Output event debug information");
     cg_errorDecay = Dvar_RegisterFloat("cg_errordecay", 100.0, 0.0, FLT_MAX, DVAR_CHEAT, "Decay for predicted error");
-    cg_nopredict = Dvar_RegisterBool("cg_nopredict", 0, 1u, "Don't do client side prediction");
+    cg_nopredict = Dvar_RegisterBool("cg_nopredict", 0, DVAR_ARCHIVE, "Don't do client side prediction");
     cg_cinematicFullscreen = Dvar_RegisterBool("cg_cinematicFullscreen", 1, 0x1000u, "Draw ingame cinematics full screen");
     cg_showmiss = Dvar_RegisterInt("cg_showmiss", 0, 0, 2, 0, "Show prediction errors");
-    cg_footsteps = Dvar_RegisterBool("cg_footsteps", 1, 0x1080u, "Play footstep sounds");
+    cg_footsteps = Dvar_RegisterBool("cg_footsteps", 1, DVAR_SAVED | DVAR_CHEAT, "Play footstep sounds");
     cg_laserForceOn = Dvar_RegisterBool(
         "cg_laserForceOn",
         0,
@@ -397,7 +397,7 @@ void CG_RegisterDvars()
     cg_laserLight = Dvar_RegisterBool(
         "cg_laserLight",
         1,
-        0,
+        DVAR_ARCHIVE,
         "Whether to draw the light emitted from a laser (not the laser itself)");
     cg_laserLightBodyTweak = Dvar_RegisterFloat("cg_laserLightBodyTweak", 15.0, -FLT_MAX, FLT_MAX, DVAR_CHEAT,
         "Amount to add to length of beam for light when laser hits a body (for hitboxes).");
@@ -423,7 +423,7 @@ void CG_RegisterDvars()
         "Marks on entities from player's bullets only.");
     cg_tracerChance = Dvar_RegisterFloat("cg_tracerchance", 0.2, 0.0, 1.0, DVAR_CHEAT,
         "The probability that a bullet is a tracer round");
-    cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, 0.0, FLT_MAX, DVAR_CHEAT, "The width of the tracer round");
+    cg_tracerWidth = Dvar_RegisterFloat("cg_tracerwidth", 4.0, 0.0, FLT_MAX, DVAR_SAVED | DVAR_CHEAT, "The width of the tracer round");
     cg_tracerSpeed = Dvar_RegisterFloat("cg_tracerSpeed", 7500.0, 0.0, FLT_MAX, DVAR_CHEAT,
         "The speed of a tracer round in units per second");
     cg_tracerLength = Dvar_RegisterFloat("cg_tracerlength", 160.0, 0.0, FLT_MAX, DVAR_CHEAT, "The length of a tracer round");
