@@ -656,14 +656,8 @@ void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *
     _SAMPLE *handle_sample; // [esp+18h] [ebp-10h]
     float transformed[3]; // [esp+1Ch] [ebp-Ch] BYREF
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            619,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     Vec3Sub(org, g_snd.listeners[listenerIndex].orient.origin, delta);
     MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
     handle_sample = AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
@@ -681,17 +675,11 @@ double __cdecl SND_GetStream3DVolumeFallOff(int index, int listenerIndex)
     const snd_alias_t *alias0; // [esp+2Ch] [ebp-8h]
     float mindist; // [esp+30h] [ebp-4h]
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            581,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < g_snd.max_stream_channels + ((0 + 8) + 32))",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < g_snd.max_stream_channels + ((0 + 8) + 32));
+
     alias0 = g_snd.chaninfo[index].alias0;
     alias1 = g_snd.chaninfo[index].alias1;
-    if (!SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8))
+    if (!SND_IsAliasChannel3D(SNDALIASFLAGS_GET_CHANNEL(alias0->flags)))
         MyAssertHandler(
             ".\\win32\\snd_driver.cpp",
             585,
@@ -732,37 +720,20 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     int entchannel; // [esp+240h] [ebp-8h]
     int baserate; // [esp+244h] [ebp-4h]
 
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1060, 0, "%s", "startAliasInfo->alias0");
-    if ((startAliasInfo->alias0->flags & 0xC0) >> 6 != 2)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1061,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_STREAMED");
-    if (!startAliasInfo->alias1)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1062, 0, "%s", "startAliasInfo->alias1");
-    if ((startAliasInfo->alias1->flags & 0xC0) >> 6 != 2)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1063,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias1->flags ) == SAT_STREAMED");
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1064,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
-    if (!FS_Initialized())
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1067, 0, "%s", "FS_Initialized()");
-    entchannel = (startAliasInfo->alias0->flags & 0x3F00) >> 8;
+    iassert(startAliasInfo->alias0);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias0->flags) == SAT_STREAMED);
+    iassert(startAliasInfo->alias1);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias1->flags) == SAT_STREAMED);
+    iassert((index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels));
+
+    bool fsInitialized = FS_Initialized();
+    iassert(fsInitialized);
+
+    entchannel = SNDALIASFLAGS_GET_CHANNEL(startAliasInfo->alias0->flags);
+
     if (!SND_HasFreeVoice(entchannel))
         return -1;
+
     if (startAliasInfo->alias0->soundFile->exists)
     {
         if (milesGlob.handle_sample[index])
@@ -930,6 +901,7 @@ void __cdecl SND_UpdateEqs()
                 {
                     if (SND_IsStreamChannelFree(channelIndex))
                         continue;
+
                     handle = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[channelIndex]);
                 }
             }
@@ -937,6 +909,7 @@ void __cdecl SND_UpdateEqs()
             {
                 if (SND_Is3DChannelFree(channelIndex))
                     continue;
+
                 handle = milesGlob.handle_sample[channelIndex];
             }
         }
@@ -944,6 +917,7 @@ void __cdecl SND_UpdateEqs()
         {
             if (SND_Is2DChannelFree(channelIndex))
                 continue;
+
             handle = milesGlob.handle_sample[channelIndex];
         }
         if (handle)
@@ -980,52 +954,32 @@ void __cdecl SND_SetEqParams(
 
 void __cdecl SND_SetEqType(uint32_t entchannel, int eqIndex, uint32_t band, SND_EQTYPE type)
 {
-    if (entchannel >= 0x40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1264,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < 64)",
-            entchannel);
-    if (band > 2)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1265, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
+    iassert(entchannel >= 0 && entchannel < 64);
+    iassert(band >= 0 && band < 3);
+
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
+
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].type = type;
 }
 
 void __cdecl SND_SetEqFreq(uint32_t entchannel, int eqIndex, uint32_t band, float freq)
 {
-    if (entchannel >= 0x40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1276,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < 64)",
-            entchannel);
-    if (band > 2)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1277, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
-    if (freq < 0.0 || freq > 20000.0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1278, 0, "%s\n\t(freq) = %g", "(freq >= 0 && freq <= 20000)", freq);
+    iassert(entchannel >= 0 && entchannel < 64);
+    iassert(band >= 0 && band < 3);
+    iassert(freq >= 0 && freq <= 20000);
+
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
+
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].freq = freq;
 }
 
 void __cdecl SND_SetEqGain(uint32_t entchannel, int eqIndex, uint32_t band, float gain)
 {
-    if (entchannel >= 0x40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1289,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < 64)",
-            entchannel);
-    if (band > 2)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1290, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
+    iassert(entchannel >= 0 && entchannel < 64);
+    iassert(band >= 0 && band < 3);
+
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].gain = gain;
@@ -1033,19 +987,12 @@ void __cdecl SND_SetEqGain(uint32_t entchannel, int eqIndex, uint32_t band, floa
 
 void __cdecl SND_SetEqQ(uint32_t entchannel, int eqIndex, uint32_t band, float q)
 {
-    if (entchannel >= 0x40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1303,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < 64)",
-            entchannel);
-    if (band > 2)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1304, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
-    if (q <= 0.0)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1305, 0, "%s\n\t(q) = %g", "(q > 0)", q);
+    iassert(entchannel >= 0 && entchannel < 64);
+    iassert(band >= 0 && band < 3);
+    iassert(q > 0);
+
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
+
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].q = q;
 
@@ -1056,17 +1003,11 @@ void __cdecl SND_SetEqQ(uint32_t entchannel, int eqIndex, uint32_t band, float q
 
 void __cdecl SND_DisableEq(uint32_t entchannel, int eqIndex, uint32_t band)
 {
-    if (entchannel >= 0x40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1316,
-            0,
-            "%s\n\t(entchannel) = %i",
-            "(entchannel >= 0 && entchannel < 64)",
-            entchannel);
-    if (band > 2)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1317, 0, "%s\n\t(band) = %i", "(band >= 0 && band < 3)", band);
+    iassert(entchannel >= 0 && entchannel < 64);
+    iassert(band >= 0 && band < 3);
+
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
+    
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 0;
 }
 
@@ -1132,30 +1073,20 @@ double __cdecl SND_Get2DChannelVolume(int index)
     float right; // [esp+4h] [ebp-8h] BYREF
     float left; // [esp+8h] [ebp-4h] BYREF
 
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1399,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     AIL_sample_volume_levels(milesGlob.handle_sample[index], &left, &right);
+
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2)
         return left;
+
     return (float)(left + right);
 }
 
 void __cdecl SND_Set2DChannelVolume(int index, float volume)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1412,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     AIL_set_sample_volume_levels(milesGlob.handle_sample[index], volume, volume);
 }
 
@@ -1164,17 +1095,12 @@ double __cdecl SND_Get3DChannelVolume(int index)
     float right; // [esp+4h] [ebp-8h] BYREF
     float left; // [esp+8h] [ebp-4h] BYREF
 
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1423,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     AIL_sample_volume_levels(milesGlob.handle_sample[index], &left, &right);
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2)
         return left;
+
     return (float)(left + right);
 }
 
@@ -1182,14 +1108,8 @@ void __cdecl SND_Set3DChannelVolume(int index, float volume)
 {
     float v2; // [esp+Ch] [ebp-4h]
 
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1436,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2)
     {
         AIL_set_sample_volume_levels(milesGlob.handle_sample[index], volume, volume);
@@ -1207,21 +1127,17 @@ double __cdecl SND_GetStreamChannelVolume(int index)
     float right; // [esp+8h] [ebp-8h] BYREF
     float left; // [esp+Ch] [ebp-4h] BYREF
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1452,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     AIL_sample_volume_levels(handle_sample, &left, &right);
+
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2
         || !SND_IsAliasChannel3D((g_snd.chaninfo[index].alias0->flags & 0x3F00) >> 8))
     {
         return left;
     }
+
     return (float)(left + right);
 }
 
@@ -1230,14 +1146,8 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
     float v2; // [esp+Ch] [ebp-8h]
     _SAMPLE *handle_sample; // [esp+10h] [ebp-4h]
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1469,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2
         || !SND_IsAliasChannel3D((g_snd.chaninfo[index].alias0->flags & 0x3F00) >> 8))
@@ -1253,53 +1163,29 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
 
 int __cdecl SND_Get2DChannelPlaybackRate(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1482,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     return AIL_sample_playback_rate(milesGlob.handle_sample[index]);
 }
 
 void __cdecl SND_Set2DChannelPlaybackRate(int index, int rate)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1489,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     AIL_set_sample_playback_rate(milesGlob.handle_sample[index], rate);
 }
 
 int __cdecl SND_Get3DChannelPlaybackRate(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1496,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     return AIL_sample_playback_rate(milesGlob.handle_sample[index]);
 }
 
 void __cdecl SND_Set3DChannelPlaybackRate(int index, int rate)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1504,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     AIL_set_sample_playback_rate(milesGlob.handle_sample[index], rate);
 }
 
@@ -1307,14 +1193,8 @@ int __cdecl SND_GetStreamChannelPlaybackRate(int index)
 {
     _SAMPLE *handle_sample; // [esp+0h] [ebp-4h]
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1514,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     return AIL_sample_playback_rate(handle_sample);
 }
@@ -1323,55 +1203,29 @@ void __cdecl SND_SetStreamChannelPlaybackRate(int index, int rate)
 {
     _SAMPLE *handle_sample; // [esp+0h] [ebp-4h]
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1526,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     AIL_set_sample_playback_rate(handle_sample, rate);
 }
 
 void __cdecl SND_Update2DChannelReverb(int index)
 {
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1536,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
     AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], MSS_GetDryLevel(), MSS_GetWetLevel(g_snd.chaninfo[index].alias0));
 }
 
 void __cdecl SND_Update3DChannelReverb(int index)
 {
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1544,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], MSS_GetDryLevel(), MSS_GetWetLevel(g_snd.chaninfo[index].alias0));
 }
 
 void __cdecl SND_UpdateStreamChannelReverb(int index)
 {
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1555,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
 
     AIL_set_sample_reverb_levels(
         (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]),
@@ -1384,14 +1238,8 @@ int __cdecl SND_Get2DChannelLength(int index)
 {
     int length; // [esp+0h] [ebp-4h] BYREF
 
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1567,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     AIL_sample_ms_position(milesGlob.handle_sample[index], &length, 0);
     return length;
 }
@@ -1400,14 +1248,8 @@ int __cdecl SND_Get3DChannelLength(int index)
 {
     int length; // [esp+0h] [ebp-4h] BYREF
 
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1578,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     AIL_sample_ms_position(milesGlob.handle_sample[index], &length, 0);
     return length;
 }
@@ -1416,14 +1258,8 @@ int __cdecl SND_GetStreamChannelLength(int index)
 {
     int length; // [esp+0h] [ebp-4h] BYREF
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1590,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     AIL_stream_ms_position((HSTREAM)milesGlob.handle_sample[index], &length, 0);
     return length;
 }
@@ -1434,21 +1270,16 @@ void __cdecl SND_Get2DChannelSaveInfo(int index, snd_save_2D_sample_t *info)
     int offset; // [esp+4h] [ebp-8h] BYREF
     int length; // [esp+8h] [ebp-4h] BYREF
 
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1603,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     handle = milesGlob.handle_sample[index];
-    if (!handle)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1605, 0, "%s", "handle");
+    iassert(handle);
+
     AIL_sample_ms_position(handle, &length, &offset);
     info->fraction = (double)offset / (double)length;
     info->pitch = g_snd.chaninfo[index].pitch;
     AIL_sample_volume_pan(handle, &info->volume, 0);
+
     if (g_snd.volume == 0.0)
         info->volume = g_snd.chaninfo[index].basevolume;
     else
@@ -1459,14 +1290,8 @@ void __cdecl SND_Set2DChannelFromSaveInfo(int index, snd_save_2D_sample_t *info)
 {
     float volume; // [esp+4h] [ebp-4h]
 
-    if (index < 0 || index >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1620,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= 0 && index < 0 + g_snd.max_2D_channels)",
-            index);
+    iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
+
     volume = info->volume * g_snd.volume;
     SND_Set2DChannelVolume(index, volume);
 }
@@ -1477,25 +1302,20 @@ void __cdecl SND_Get3DChannelSaveInfo(int index, snd_save_3D_sample_t *info)
     int offset; // [esp+4h] [ebp-8h] BYREF
     int length; // [esp+8h] [ebp-4h] BYREF
 
-    if (index < 8 || index >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1632,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels)",
-            index);
+    iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
+
     handle = milesGlob.handle_sample[index];
-    if (!handle)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1635, 0, "%s", "handle");
+    iassert(handle);
     AIL_sample_ms_position(handle, &length, &offset);
     info->fraction = (double)offset / (double)length;
     info->pitch = g_snd.chaninfo[index].pitch;
     AIL_sample_volume_pan(handle, &info->volume, 0);
+
     if (g_snd.volume == 0.0)
         info->volume = g_snd.chaninfo[index].basevolume;
     else
         info->volume = info->volume / g_snd.volume;
+
     AIL_sample_3D_position(handle, info->org, &info->org[2], &info->org[1]);
 }
 
@@ -1510,17 +1330,10 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     int offset; // [esp+34h] [ebp-8h] BYREF
     int length; // [esp+38h] [ebp-4h] BYREF
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1656,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     handle = (_STREAM *)milesGlob.handle_sample[index];
-    if (!handle)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1658, 0, "%s", "handle");
+    iassert(handle);
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
     AIL_stream_ms_position(handle, &length, &offset);
     info->fraction = (double)offset / (double)length;
@@ -1536,10 +1349,12 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     info->rate = v2;
     info->basevolume = g_snd.chaninfo[index].basevolume;
     AIL_sample_volume_pan(handle_sample, &info->volume, 0);
+
     if (g_snd.volume == 0.0)
         info->volume = g_snd.chaninfo[index].basevolume;
     else
         info->volume = info->volume / g_snd.volume;
+
     org = g_snd.chaninfo[index].org;
     info->org[0] = *org;
     info->org[1] = org[1];
@@ -1550,22 +1365,16 @@ void __cdecl SND_SetStreamChannelFromSaveInfo(int index, snd_save_stream_t *info
 {
     float volume; // [esp+4h] [ebp-4h]
 
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1676,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     volume = info->volume * g_snd.volume;
     SND_SetStreamChannelVolume(index, volume);
 }
 
 int __cdecl SND_GetSoundFileSize(uint32_t *pSoundFile)
 {
-    if (!pSoundFile)
-        MyAssertHandler(".\\win32\\snd_driver.cpp", 1705, 0, "%s", "pSoundFile");
+    iassert(pSoundFile);
+
     return pSoundFile[2];
 }
 
@@ -1586,23 +1395,16 @@ void __cdecl SND_Update2DChannel(int i, int frametime)
     const snd_alias_t *alias0; // [esp+10h] [ebp-Ch]
     snd_channel_info_t *chaninfo; // [esp+18h] [ebp-4h]
 
-    if (i < 0 || i >= g_snd.max_2D_channels)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1745,
-            0,
-            "%s\n\t(i) = %i",
-            "(i >= 0 && i < 0 + g_snd.max_2D_channels)",
-            i);
+    iassert(i >= 0 && i < 0 + g_snd.max_2D_channels);
+
     chaninfo = &g_snd.chaninfo[i];
     if (!chaninfo->paused)
     {
         alias0 = chaninfo->alias0;
         alias1 = chaninfo->alias1;
-        if (!alias0)
-            MyAssertHandler(".\\win32\\snd_driver.cpp", 1753, 0, "%s", "alias0");
-        if (!alias1)
-            MyAssertHandler(".\\win32\\snd_driver.cpp", 1754, 0, "%s", "alias1");
+        iassert(alias0);
+        iassert(alias1);
+
         volume = chaninfo->basevolume;
         if (!chaninfo->startDelay && AIL_sample_status(milesGlob.handle_sample[i]) == 2
             || alias0->chainAliasName && chaninfo->totalMsec + chaninfo->startTime - g_snd.time <= 0)
@@ -1613,15 +1415,7 @@ void __cdecl SND_Update2DChannel(int i, int frametime)
         {
             if (g_snd.slaveLerp != 0.0 && !g_snd.chaninfo[i].master && (alias0->flags & 4) != 0)
                 volume = SND_GetLerpedSlavePercentage(alias0->slavePercentage) * volume;
-            if ((alias0->flags & 0x3F00) >> 8 >= 64)
-                MyAssertHandler(
-                    ".\\win32\\snd_driver.cpp",
-                    1773,
-                    0,
-                    "%s\n\t((((alias0->flags) & (((1 << 6) - 1) << ((6 + 2)))) >> ((6 + 2)))) = %i",
-                    "((((alias0->flags) & (((1 << 6) - 1) << ((6 + 2)))) >> ((6 + 2))) >= 0 && (((alias0->flags) & (((1 << 6) - 1) "
-                    "<< ((6 + 2)))) >> ((6 + 2))) < 64)",
-                    (alias0->flags & 0x3F00) >> 8);
+            iassert(SNDALIASFLAGS_GET_CHANNEL(alias0->flags) < 64);
             volumea = volume * g_snd.channelvol->channelvol[(alias0->flags & 0x3F00) >> 8].volume;
             v2 = volumea * g_snd.volume;
             SND_Set2DChannelVolume(i, v2);
@@ -1648,23 +1442,14 @@ void __cdecl SND_Update3DChannel(int i, int frametime)
     float distMax; // [esp+4Ch] [ebp-8h]
     snd_channel_info_t *chaninfo; // [esp+50h] [ebp-4h]
 
-    if (i < 8 || i >= g_snd.max_3D_channels + 8)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1793,
-            0,
-            "%s\n\t(i) = %i",
-            "(i >= (0 + 8) && i < (0 + 8) + g_snd.max_3D_channels)",
-            i);
+    iassert(i >= (0 + 8) && i < (0 + 8) + g_snd.max_3D_channels);
     chaninfo = &g_snd.chaninfo[i];
     if (!chaninfo->paused)
     {
         alias0 = chaninfo->alias0;
         alias1 = chaninfo->alias1;
-        if (!alias0)
-            MyAssertHandler(".\\win32\\snd_driver.cpp", 1802, 0, "%s", "alias0");
-        if (!alias1)
-            MyAssertHandler(".\\win32\\snd_driver.cpp", 1803, 0, "%s", "alias1");
+        iassert(alias0);
+        iassert(alias1);
         lerp = chaninfo->lerp;
         volume = chaninfo->basevolume;
         if (!chaninfo->startDelay && AIL_sample_status(milesGlob.handle_sample[i]) == 2
@@ -1688,15 +1473,7 @@ void __cdecl SND_Update3DChannel(int i, int frametime)
                 LerpedSlavePercentage = SND_GetLerpedSlavePercentage(alias0->slavePercentage);
                 volume = LerpedSlavePercentage * volume;
             }
-            if ((alias0->flags & 0x3F00) >> 8 >= 64)
-                MyAssertHandler(
-                    ".\\win32\\snd_driver.cpp",
-                    1830,
-                    0,
-                    "%s\n\t((((alias0->flags) & (((1 << 6) - 1) << ((6 + 2)))) >> ((6 + 2)))) = %i",
-                    "((((alias0->flags) & (((1 << 6) - 1) << ((6 + 2)))) >> ((6 + 2))) >= 0 && (((alias0->flags) & (((1 << 6) - 1) "
-                    "<< ((6 + 2)))) >> ((6 + 2))) < 64)",
-                    (alias0->flags & 0x3F00) >> 8);
+            iassert(SNDALIASFLAGS_GET_CHANNEL(alias0->flags) < 64);
             volume = volume * g_snd.channelvol->channelvol[(alias0->flags & 0x3F00) >> 8].volume;
             v4 = volume * g_snd.volume;
             SND_Set3DChannelVolume(i, v4);
@@ -1716,27 +1493,19 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
     const snd_alias_t *alias0; // [esp+18h] [ebp-8h]
     snd_channel_info_t *chaninfo; // [esp+1Ch] [ebp-4h]
 
-    if (i < 40 || i >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\win32\\snd_driver.cpp",
-            1846,
-            0,
-            "%s\n\t(i) = %i",
-            "(i >= ((0 + 8) + 32) && i < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            i);
+    iassert(i >= ((0 + 8) + 32) && i < ((0 + 8) + 32) + g_snd.max_stream_channels);
+
     chaninfo = &g_snd.chaninfo[i];
     if (!chaninfo->paused && (i >= 45 || SND_UpdateBackgroundVolume(i - 40, frametime)))
     {
         alias0 = chaninfo->alias0;
         alias1 = chaninfo->alias1;
-        if (!alias0)
-            MyAssertHandler(".\\win32\\snd_driver.cpp", 1860, 0, "%s", "alias0");
-        if (!alias1)
-            MyAssertHandler(".\\win32\\snd_driver.cpp", 1861, 0, "%s", "alias1");
+        iassert(alias0);
+        iassert(alias1);
         volume = chaninfo->basevolume;
         if (g_snd.chaninfo[i].startDelay || AIL_stream_status((HSTREAM)milesGlob.handle_sample[i]) != 2)
         {
-            if (SND_IsAliasChannel3D((alias0->flags & 0x3F00) >> 8))
+            if (SND_IsAliasChannel3D(SNDALIASFLAGS_GET_CHANNEL(alias0->flags)))
             {
                 SND_GetCurrent3DPosition(g_snd.chaninfo[i].sndEnt, g_snd.chaninfo[i].offset, g_snd.chaninfo[i].org);
                 listenerIndex = SND_GetListenerIndexNearestToOrigin(g_snd.chaninfo[i].org);
@@ -1745,15 +1514,9 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
             }
             if (g_snd.slaveLerp != 0.0 && !g_snd.chaninfo[i].master && (alias0->flags & 4) != 0)
                 volume = SND_GetLerpedSlavePercentage(alias0->slavePercentage) * volume;
-            if ((alias0->flags & 0x3F00) >> 8 >= 64)
-                MyAssertHandler(
-                    ".\\win32\\snd_driver.cpp",
-                    1882,
-                    0,
-                    "%s\n\t((((alias0->flags) & (((1 << 6) - 1) << ((6 + 2)))) >> ((6 + 2)))) = %i",
-                    "((((alias0->flags) & (((1 << 6) - 1) << ((6 + 2)))) >> ((6 + 2))) >= 0 && (((alias0->flags) & (((1 << 6) - 1) "
-                    "<< ((6 + 2)))) >> ((6 + 2))) < 64)",
-                    (alias0->flags & 0x3F00) >> 8);
+
+            iassert(SNDALIASFLAGS_GET_CHANNEL(alias0->flags) < 64);
+
             volumea = volume * g_snd.channelvol->channelvol[(alias0->flags & 0x3F00) >> 8].volume;
             volumeb = volumea * g_snd.volume;
             SND_SetStreamChannelVolume(i, volumeb);
