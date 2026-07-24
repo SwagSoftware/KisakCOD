@@ -50,7 +50,7 @@ add_executable(${PROJECT_NAME}
     ${UI} 
     ${UI_MP} 
     ${UNIVERSAL} 
-    ${WIN32} 
+    ${WIN32_SRC} 
     ${XANIM} 
     ${ZLIB} 
     ${STEAM_HEADERS}

@@ -13,60 +13,6 @@
 #include <cgame/cg_main.h>
 #endif
 
-#if defined(_WIN32)
-#include <stdio.h>
-#include <Windows.h>
-#include <io.h>
-#include <fcntl.h>
-
-FILE* fmemopen(void* buf, size_t size, const char* mode) {
-    char temp_path[MAX_PATH + 1];
-    char temp_file[MAX_PATH + 1];
-
-    // Only basic reading/updating modes are straightforward to map this way
-    if (strcmp(mode, "r") != 0 && strcmp(mode, "r+") != 0 && strcmp(mode, "rb") != 0) {
-        return NULL;
-    }
-
-    if (!GetTempPathA(MAX_PATH, temp_path)) return NULL;
-    if (!GetTempFileNameA(temp_path, "fmem", 0, temp_file)) return NULL;
-
-    // Create file with system flags to delete it on close and cache aggressively in RAM
-    HANDLE hFile = CreateFileA(temp_file,
-        GENERIC_READ | GENERIC_WRITE,
-        0,
-        NULL,
-        CREATE_ALWAYS,
-        FILE_ATTRIBUTE_TEMPORARY | FILE_FLAG_DELETE_ON_CLOSE,
-        NULL);
-
-    if (hFile == INVALID_HANDLE_VALUE) return NULL;
-
-    // Convert Win32 HANDLE to a standard runtime file descriptor, then to FILE*
-    int fd = _open_osfhandle((intptr_t)hFile, _O_BINARY);
-    if (fd == -1) {
-        CloseHandle(hFile);
-        return NULL;
-    }
-
-    FILE* fp = _fdopen(fd, "w+b");
-    if (!fp) {
-        _close(fd);
-        return NULL;
-    }
-
-    // Pre-populate the temp file with your memory buffer
-    if (buf && size) {
-        if (fwrite(buf, 1, size, fp) != size) {
-            fclose(fp);
-            return NULL;
-        }
-        rewind(fp); // Reset stream pointer back to the beginning
-    }
-
-    return fp;
-}
-#endif
 void __cdecl TRACK_snd_driver()
 {
     track_static_alloc_internal(&paGlob, sizeof(paGlob), "paGlob", 13);
@@ -588,19 +534,40 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                 if (fileLength == -1 || fileData == nullptr)
                 {
                     st->drType = DR_TYPE_NONE;
+                    st->data = nullptr;
+                    st->dataLength = 0;
+
                     Com_PrintError(9, "Couldn't open wav stream data '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
                     return SND_SetPlaybackIdNotPlayed(index);
                 }
 
-                FILE* fileHandle = fmemopen(fileData, fileLength, "r");
+                st->data = Z_Malloc(fileLength, realname, 15);
+                if (st->data == nullptr)
+                {
+                    st->drType = DR_TYPE_NONE;
+                    st->data = nullptr;
+                    st->dataLength = 0;
 
-                FS_FreeMem((char*)fileData);
+                    Com_PrintError(9, "Couldn't alloc wav stream data '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
+                    FS_FreeFile((char*)fileData);
+                    return SND_SetPlaybackIdNotPlayed(index);
+                }
+
+                // Copy over our data so we can free the COD allocated one
+                memcpy(st->data, fileData, fileLength);
 
                 st->drType = DR_TYPE_WAV;
-                if (!drwav_init_file2(&st->dr.wav, fileHandle, nullptr))
+                st->dataLength = fileLength;
+
+                FS_FreeFile((char*)fileData);
+                fileData = nullptr;
+                fileLength = 0;
+                
+                if (!drwav_init_memory(&st->dr.wav, st->data, st->dataLength, nullptr))
                 {
                     st->drType = DR_TYPE_NONE;
                     Com_PrintError(9, "Couldn't open wav stream '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
+
                     return SND_SetPlaybackIdNotPlayed(index);
                 }
             }
@@ -608,17 +575,41 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
             {
                 void* fileData = nullptr;
                 int fileLength = FS_ReadFile(realname, &fileData);
+                if (fileData == nullptr || fileLength == -1)
+                {
+                    st->drType = DR_TYPE_NONE;
+                    Com_PrintError(9, "Couldn't open wav stream data '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
+                    return SND_SetPlaybackIdNotPlayed(index);
+                }
+
+                st->data = Z_Malloc(fileLength, realname, 15);
+                if (st->data == nullptr)
+                {
+                    st->drType = DR_TYPE_NONE;
+                    st->data = nullptr;
+                    st->dataLength = 0;
+
+                    Com_PrintError(9, "Couldn't alloc wav stream data '%s' from alias '%s'\n", realname, startAliasInfo->alias0->aliasName);
+                    FS_FreeFile((char*)fileData);
+                    return SND_SetPlaybackIdNotPlayed(index);
+                }
+
+                // Copy over our data so we can free the COD allocated one
+                memcpy(st->data, fileData, fileLength);
                 
-                FILE* fileHandle = fmemopen(fileData, fileLength, "r");
-
-                FS_FreeMem((char*)fileData);
-
                 st->drType = DR_TYPE_MP3;
-                if (!drmp3_init_file2(&st->dr.mp3, fileHandle, NULL))
+                st->dataLength = fileLength;
+
+                FS_FreeFile((char*)fileData);
+                fileData = nullptr;
+                fileLength = 0;
+
+                if (!drmp3_init_memory(&st->dr.mp3, st->data, st->dataLength, nullptr))
                 {
                     st->drType = DR_TYPE_NONE;
                     Com_PrintError(9, "Couldn't open mp3 stream '%s' from alias '%s'\n",
                         realname, startAliasInfo->alias0->aliasName);
+
                     return SND_SetPlaybackIdNotPlayed(index);
                 }
             }
@@ -673,6 +664,11 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
             drmp3_uninit(&st->dr.mp3);
 
         st->drType = DR_TYPE_NONE;
+
+        Z_Free(st->data, 15);
+        st->data = nullptr;
+        st->dataLength = 0;
+
         return SND_SetPlaybackIdNotPlayed(index);
     }
 
@@ -687,6 +683,11 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
             drmp3_uninit(&st->dr.mp3);
 
         st->drType = DR_TYPE_NONE;
+
+        Z_Free(st->data, 15);
+        st->data = nullptr;
+        st->dataLength = 0;
+
         return SND_SetPlaybackIdNotPlayed(index);
     }
 

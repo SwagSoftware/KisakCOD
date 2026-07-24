@@ -556,7 +556,7 @@ set(UNIVERSAL
     "${SRC_DIR}/universal/win_shared.cpp"
 )
 
-set(WIN32
+set(WIN32_SRC
     "${SRC_DIR}/win32/win_configure.cpp"
     "${SRC_DIR}/win32/win_configure.h"
     "${SRC_DIR}/win32/win_input.cpp"

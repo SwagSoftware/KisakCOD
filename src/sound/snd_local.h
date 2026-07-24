@@ -161,7 +161,9 @@ struct PaStreamState {
     union {
         drmp3 mp3;
         drwav wav;
-    } dr;    
+    } dr;
+    void* data;
+    uint32_t dataLength;
     bool     looping;
     volatile bool active;
     volatile bool stopThread;

@@ -8,16 +8,13 @@ LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, int bufSize, const char *s
     drmp3 wav;
     LoadedSound *loadSnd;
 
-    if (!buffer)
-        MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 134, 0, "%s", "buffer");
+    iassert(buffer);
 
     if (!drmp3_init_memory(&wav, buffer, (size_t)bufSize, NULL))
     {
         Com_PrintError(1, "ERROR: Sound file '%s' is in an invalid or corrupted format\n", soundName);
         return NULL;
     }
-
-    
 
     if (wav.totalPCMFrameCount == 0)
     {
@@ -56,8 +53,9 @@ LoadedSound *__cdecl SND_LoadSoundFile(const char *name)
 
     if (IsFastFileLoad())
         MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 175, 0, "%s", "IsObjFileLoad()");
-    if (!name)
-        MyAssertHandler(".\\win32\\snd_driver_load_obj.cpp", 176, 0, "%s", "name");
+
+    iassert(name);
+
     Com_sprintf(realname, 0x100u, "sound/%s", name);
     fileSize = FS_ReadFile(realname, &buffer);
     if (fileSize >= 0)

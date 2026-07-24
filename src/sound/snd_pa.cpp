@@ -5,6 +5,7 @@
 #include <cstring>
 #include <cmath>
 #include <Windows.h>
+#include <universal/com_memory.h>
 
 PaLocal paGlob;
 const dvar_t* snd_khz;
@@ -177,6 +178,12 @@ void PA_StopStreamFillThread(int si) {
             drmp3_uninit(&s->dr.mp3);
 
         s->drType == DR_TYPE_NONE;
+
+        if (s->data)
+            Z_Free(s->data, 15);
+        s->data = nullptr;
+        s->dataLength = 0;
+
         s->active = false;
     }
 }
@@ -268,6 +275,11 @@ void PA_ShutdownCleanup() {
                 drmp3_uninit(&s->dr.mp3);
 
             s->drType == DR_TYPE_NONE;
+
+            if (s->data)
+                Z_Free(s->data, 15);
+            s->data = nullptr;
+            s->dataLength = 0;
         }
     }
     if (paGlob.stream) {

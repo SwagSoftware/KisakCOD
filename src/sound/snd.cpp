@@ -1855,45 +1855,30 @@ int __cdecl SND_StartAliasStream(SndStartAliasInfo *startAliasInfo, int *pChanne
 {
     int index; // [esp+4h] [ebp-4h]
 
-    if (!startAliasInfo->alias0)
-        MyAssertHandler(".\\snd.cpp", 1292, 0, "%s", "startAliasInfo->alias0");
-    if ((startAliasInfo->alias0->flags & 0xC0) >> 6 != 2)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1293,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_STREAMED");
-    if (!startAliasInfo->alias1)
-        MyAssertHandler(".\\snd.cpp", 1294, 0, "%s", "startAliasInfo->alias1");
-    if ((startAliasInfo->alias1->flags & 0xC0) >> 6 != 2)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1295,
-            0,
-            "%s",
-            "SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias1->flags ) == SAT_STREAMED");
+    iassert(startAliasInfo->alias0);
+    iassert(SNDALIASFLAGS_GET_TYPE( startAliasInfo->alias0->flags ) == SAT_STREAMED);
+    iassert(startAliasInfo->alias1);
+    iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias1->flags) == SAT_STREAMED);
+
     index = SND_FindFreeStreamChannel(startAliasInfo, (startAliasInfo->alias0->flags & 0x3F00) >> 8);
     if (pChannel)
         *pChannel = index;
+
     if (index < 0)
         return -1;
-    if (index < 40 || index >= g_snd.max_stream_channels + 40)
-        MyAssertHandler(
-            ".\\snd.cpp",
-            1305,
-            0,
-            "%s\n\t(index) = %i",
-            "(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels)",
-            index);
+
+    iassert((index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels));
+
     if (!snd_enableStream->current.enabled)
         return -1;
+
     if (SND_IsAliasChannel3D((startAliasInfo->alias0->flags & 0x3F00) >> 8) && !SND_AnyActiveListeners())
         Com_Error(
             ERR_DROP,
             "attempted to play spatialized alias '%s' while there is no active listener. Most likely this means you tried to pl"
             "ay a spatialized sound while not in a level.\n",
             startAliasInfo->alias0->aliasName);
+
     return SND_StartAliasStreamOnChannel(startAliasInfo, index);
 }
 
@@ -4564,7 +4549,7 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
             SND_SetStreamChannelFromSaveInfo(channel, &info);
             if (g_snd.chaninfo[channel].timescale)
             {
-                               SND_SetStreamChannelPlaybackRate(channel, SnapFloatToInt(g_snd.timescale * ((float)info.rate * g_snd.chaninfo[channel].pitch)));
+                SND_SetStreamChannelPlaybackRate(channel, SnapFloatToInt(g_snd.timescale * ((float)info.rate * g_snd.chaninfo[channel].pitch)));
             }
             else
             {

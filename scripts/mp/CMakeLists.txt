@@ -19,6 +19,7 @@ add_compile_definitions(PA_ENABLE_DEBUG_OUTPUT PA_LOG_API_CALLS)
 
 # Include Audio
 include(${SCRIPTS_DIR}/extern/portaudio.cmake)
+include(${SCRIPTS_DIR}/extern/openal.cmake)
 
 # Add the new executable
 add_executable(${PROJECT_NAME} 
@@ -56,7 +57,7 @@ add_executable(${PROJECT_NAME}
     ${UI} 
     ${UI_MP} 
     ${UNIVERSAL} 
-    ${WIN32} 
+    ${WIN32_SRC} 
     ${XANIM} 
     ${ZLIB} 
     ${STEAM_HEADERS}
