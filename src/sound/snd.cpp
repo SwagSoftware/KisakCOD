@@ -4615,14 +4615,19 @@ double __cdecl SND_GetVolumeNormalized()
 
 void __cdecl SND_SetHWND(HWND hwnd)
 {
+#ifndef KISAK_SOUND
     if (g_snd.Initialized2d)
         AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);
+#else
+    // OpenAL has no window-handle dependency (no DirectSound backend to bind).
+#endif
 }
 
 void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 {
     // KISAKTODO: double check MssSound struct usage here. It looks 'okay' at first glance
 
+#ifndef KISAK_SOUND
     _AILMIXINFO mixinfo; // [esp+Ch] [ebp-80h] BYREF
     int digitalFormat; // [esp+88h] [ebp-4h]
 
@@ -4666,6 +4671,13 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
         mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
         Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
     }
+#else
+    // KISAK_SOUND TODO: resample down to g_snd.playback_rate for OpenAL, matching the Miles
+    // path above (belongs to the data-loading phase). For now, copy the decoded PCM through
+    // unmodified so loaded sounds are at least present at their native rate.
+    mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
+    Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
+#endif
     mssSound->info.data_ptr = mssSound->data;
     mssSound->info.initial_ptr = mssSound->data;
 }

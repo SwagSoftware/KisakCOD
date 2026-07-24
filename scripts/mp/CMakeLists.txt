@@ -15,9 +15,16 @@ include(${SCRIPTS_DIR}/source_groups.cmake)
 # message(${SRC_DIR})
 include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
+# Select the sound backend source file: OpenAL when KISAK_SOUND is enabled, otherwise Miles.
+if (KISAK_SOUND)
+    set(SOUND_BACKEND "${SRC_DIR}/sound/snd_al.cpp")
+else()
+    set(SOUND_BACKEND "${SRC_DIR}/sound/snd_mss.cpp")
+endif()
+
 # Add the new executable
-add_executable(${PROJECT_NAME} 
-    ${SRCROOT} 
+add_executable(${PROJECT_NAME}
+    ${SRCROOT}
     ${DYNENTITY} 
     ${EFFECTSCORE} 
     ${AIM_ASSIST} 
@@ -44,13 +51,14 @@ add_executable(${PROJECT_NAME}
     ${SCRIPT} 
     ${SERVER} 
     ${SERVER_MP} 
-    ${SOUND} 
-    ${SPEEX} 
+    ${SOUND}
+    ${SOUND_BACKEND}
+    ${SPEEX}
     ${STRINGED} 
     ${UI} 
     ${UI_MP} 
     ${UNIVERSAL} 
-    ${WIN32} 
+    ${WIN32_SRC}
     ${XANIM} 
     ${ZLIB} 
     ${STEAM_HEADERS}
@@ -58,6 +66,11 @@ add_executable(${PROJECT_NAME}
 
 # Add multiplayer flag
 target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_MP CINEMA USE_SEPARATE_BLIT_TEXTURE)
+
+# Feature flag to swap the sound backend from Miles/MSS to OpenAL (see SOUND_BACKEND above).
+if (KISAK_SOUND)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_SOUND)
+endif()
 
 # We need all of the pre/post-build commands
 include(${SCRIPTS_DIR}/pre_build.cmake)
@@ -69,4 +82,9 @@ if (USE_ASAN)
 else()
 # Tracy
     include(${SCRIPTS_DIR}/extern/tracy.cmake)
+endif()
+
+# OpenAL (sound backend, only needed when KISAK_SOUND is enabled)
+if (KISAK_SOUND)
+    include(${SCRIPTS_DIR}/extern/openal.cmake)
 endif()

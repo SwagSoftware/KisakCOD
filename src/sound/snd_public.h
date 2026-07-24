@@ -1,7 +1,56 @@
 #pragma once
 
 #include <qcommon/qcommon.h>
+#ifndef KISAK_SOUND
 #include <msslib/mss.h>
+#else
+// snd_public.h is included very widely across the codebase, and msslib/mss.h's own
+// "IS_WINDOWS" fallback block (see mss.h ~line 397) was silently acting as a de facto
+// mini-windows.h for basic types project-wide - several files outside sound/ (e.g.
+// com_sndalias_load_obj.cpp needing BOOL, r_cinematic.cpp needing HWND) depend on that
+// transitively despite never including <windows.h> or <msslib/mss.h> themselves. Reproduce
+// the same type set here rather than pulling in the real <windows.h>. Guard against both the
+// real windef.h (_WINDEF_) and msslib/mss.h's own declarations (its include guard is MSS_H)
+// so files that still include mss.h directly (regardless of KISAK_SOUND) don't conflict.
+#if !defined(_WINDEF_) && !defined(MSS_H)
+typedef char CHAR;
+typedef short SHORT;
+typedef int BOOL;
+typedef long LONG;
+typedef CHAR *LPSTR, *PSTR;
+typedef unsigned long ULONG_PTR, *PULONG_PTR;
+typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
+typedef unsigned long DWORD;
+typedef unsigned short WORD;
+typedef unsigned int UINT;
+typedef void *LPVOID;
+typedef struct HWND__ *HWND;
+typedef struct HINSTANCE__ *HINSTANCE;
+typedef HINSTANCE HMODULE;
+typedef struct HWAVE__ *HWAVE;
+typedef struct HWAVEIN__ *HWAVEIN;
+typedef struct HWAVEOUT__ *HWAVEOUT;
+typedef HWAVEIN *LPHWAVEIN;
+typedef HWAVEOUT *LPHWAVEOUT;
+typedef struct waveformat_tag *LPWAVEFORMAT;
+typedef struct wavehdr_tag *LPWAVEHDR;
+typedef struct HMIDIOUT__ *HMIDIOUT;
+typedef HMIDIOUT *LPHMIDIOUT;
+typedef DWORD FOURCC;
+
+#ifndef WAVE_MAPPER
+#define WAVE_MAPPER ((UINT)-1)
+#endif
+#ifndef MAKEFOURCC
+#define MAKEFOURCC(ch0, ch1, ch2, ch3) \
+    ((uint32_t)(uint8_t)(ch0) | ((uint32_t)(uint8_t)(ch1) << 8) | \
+    ((uint32_t)(uint8_t)(ch2) << 16) | ((uint32_t)(uint8_t)(ch3) << 24))
+#endif
+#ifndef mmioFOURCC
+#define mmioFOURCC(w, x, y, z) MAKEFOURCC(w, x, y, z)
+#endif
+#endif
+#endif
 #include <gfx_d3d/fxprimitives.h>
 #include <universal/memfile.h>
 

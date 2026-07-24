@@ -15,9 +15,13 @@ include(${SCRIPTS_DIR}/source_groups.cmake)
 # Handle platform configs and overrides
 include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
+# The dedicated server never links OpenAL (see scripts/extern/openal.cmake, only included
+# for mp/sp), so it always builds the sound module against Miles regardless of KISAK_SOUND.
+set(SOUND_BACKEND "${SRC_DIR}/sound/snd_mss.cpp")
+
 # Add the new executable
-add_executable(${PROJECT_NAME} 
-    ${SRCROOT} 
+add_executable(${PROJECT_NAME}
+    ${SRCROOT}
     ${DYNENTITY} 
     ${EFFECTSCORE} 
     ${AIM_ASSIST} 
@@ -44,13 +48,14 @@ add_executable(${PROJECT_NAME}
     ${SCRIPT} 
     ${SERVER} 
     ${SERVER_MP} 
-    ${SOUND} 
-    ${SPEEX} 
+    ${SOUND}
+    ${SOUND_BACKEND}
+    ${SPEEX}
     ${STRINGED} 
     ${UI} 
     ${UI_MP} 
     ${UNIVERSAL} 
-    ${WIN32} 
+    ${WIN32_SRC}
     ${XANIM} 
     ${ZLIB} 
     ${STEAM_HEADERS}

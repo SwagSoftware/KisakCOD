@@ -464,12 +464,13 @@ set(SERVER
     "${SRC_DIR}/server/sv_world.h"
 )
 
+# snd_mss.cpp (Miles) vs snd_al.cpp (OpenAL) is selected per-project (see mp/sp/dedi
+# CMakeLists.txt) since only mp/sp ever build against OpenAL - dedi always uses Miles.
 set(SOUND
     "${SRC_DIR}/sound/snd.cpp"
     "${SRC_DIR}/sound/snd_driver.cpp"
     "${SRC_DIR}/sound/snd_driver_load_obj.cpp"
     "${SRC_DIR}/sound/snd_local.h"
-    "${SRC_DIR}/sound/snd_mss.cpp"
     "${SRC_DIR}/sound/snd_public.h"
     "${SRC_DIR}/sound/snd_utils.cpp"
 )
@@ -555,7 +556,7 @@ set(UNIVERSAL
     "${SRC_DIR}/universal/win_shared.cpp"
 )
 
-set(WIN32
+set(WIN32_SRC
     "${SRC_DIR}/win32/win_configure.cpp"
     "${SRC_DIR}/win32/win_configure.h"
     "${SRC_DIR}/win32/win_input.cpp"

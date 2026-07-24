@@ -1,6 +1,12 @@
 #pragma once
 
+#ifndef KISAK_SOUND
 #include <msslib/mss.h>
+#else
+#include <AL/al.h>
+#include <AL/alc.h>
+#include <AL/efx.h>
+#endif
 #include "snd_public.h"
 
 static const char *snd_outputConfigurationStrings[6] = { "Windows default", "Mono", "Stereo", "4 speakers", "5.1 speakers", NULL }; // idb
@@ -31,6 +37,9 @@ struct snd_save_stream_t // sizeof=0x20
     float org[3];                       // ...
 };
 
+#ifndef KISAK_SOUND
+// Miles' file-callback bridge (see MSS_File*Callback in snd_mss.cpp). The OpenAL path reads
+// directly via FS_Read when refilling stream buffers, so it has no equivalent bookkeeping.
 struct MssFileHandle // sizeof=0x9C
 {                                       // ...
     uint32_t id;
@@ -42,6 +51,7 @@ struct MssFileHandle // sizeof=0x9C
     int fileOffset;
     int fileLength;
 };
+#endif
 
 struct SndEqParams // sizeof=0x14
 {                                       // ...
@@ -66,6 +76,7 @@ struct MssEqInfo // sizeof=0xF00
     SndEqParams params[3][64];
 };
 
+#ifndef KISAK_SOUND
 typedef struct _SAMPLE FAR *HSAMPLE;           // Handle to sample
 
 struct MssLocal // sizeof=0x26D0
@@ -86,6 +97,27 @@ struct MssLocal // sizeof=0x26D0
     // padding byte
     // padding byte
 };
+#else
+// OpenAL equivalent of MssLocal. Unlike Miles (which split 2D/3D "samples" from "streams"
+// into separate handle types/arrays), OpenAL sources are uniform, so a single array covers
+// all 53 channels (indices match g_snd.chaninfo[] exactly: 0-7 2D, 8-39 3D, 40-52 stream).
+struct AlLocal
+{
+    ALCdevice *device;
+    ALCcontext *context;
+    ALuint source[53];
+
+    MssEqInfo eq[2];                    // same EQ band data as Miles; DSP application TBD
+    ALuint eqFilter;                    // reserved for a future EFX filter object (unused for now)
+#ifndef KISAK_XBOX
+    float eqLerp;
+#endif
+
+    ALuint auxSlot;                     // global reverb auxiliary effect slot (unused for now)
+    ALuint reverbEffect;                // global reverb effect object (unused for now)
+    bool isMultiChannel;
+};
+#endif
 
 // snd_driver
 void __cdecl TRACK_snd_driver();
@@ -162,13 +194,23 @@ void SND_SetEqLerp(double lerp);
 
 
 
-// snd_mss
+// snd_mss (!KISAK_SOUND: implemented in snd_mss.cpp against Miles)
+// snd_al  ( KISAK_SOUND: implemented in snd_al.cpp against OpenAL)
+//
+// Function names keep their historical MSS_ prefix even on the OpenAL side, so that shared
+// callers (snd.cpp, snd_driver.cpp) can call them without their own #ifdef KISAK_SOUND -
+// only one of snd_mss.cpp/snd_al.cpp is compiled for a given build, and it provides the body.
+#ifndef KISAK_SOUND
+// Miles routes all its file I/O (including stream reads) through these callbacks, bridged
+// to FS_* in snd_mss.cpp. OpenAL has no equivalent hook; its streaming path (added in a later
+// phase) calls FS_Read directly when refilling buffers, so these have no OpenAL counterpart.
 uint32_t __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle);
 void __stdcall MSS_FileCloseCallback(UINTa hFileHandle);
 int __stdcall MSS_FileSeekCallback(UINTa hFileHandle, int offset, uint32_t type);
 uint32_t __stdcall MSS_FileReadCallback(UINTa hFileHandle, void *pBuffer, uint32_t bytes);
 
 _DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels);
+#endif
 void MSS_InitFailed();
 char __cdecl MSS_Init();
 void MSS_InitChannels();
@@ -177,16 +219,26 @@ bool __cdecl MSS_Startup();
 void MSS_ShutdownCleanup();
 float MSS_GetDryLevel();
 float MSS_GetWetLevel(const snd_alias_t *pAlias);
+#ifndef KISAK_SOUND
 void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel);
+#else
+void __cdecl MSS_ApplyEqFilter(ALuint source, int entchannel);
+#endif
 void __cdecl MSS_ResumeSample(int i, int frametime);
+#ifndef KISAK_SOUND
 _DIG_DRIVER *__cdecl MSS_GetDriver();
+#endif
 int __cdecl MSS_DigitalFormatType(int waveFormat, int bits, int channels);
 uint8_t *__cdecl MSS_Alloc(uint32_t bytes, uint32_t rate);
 uint8_t *__cdecl MSS_Alloc_LoadObj(uint32_t bytes, uint32_t rate);
 uint32_t *__cdecl MSS_Alloc_FastFile(int bytes);
 
 
+#ifndef KISAK_SOUND
 extern MssLocal milesGlob;
+#else
+extern AlLocal alGlob;
+#endif
 extern snd_local_t g_snd;
 
 extern const dvar_t *snd_khz;
