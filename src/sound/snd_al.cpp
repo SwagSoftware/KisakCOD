@@ -18,18 +18,99 @@ void MSS_InitFailed()
         Com_Printf(9, "OpenAL sound system initialization failed\n");
 }
 
-// KISAK_SOUND TODO (Phase 2 - driver init): open the ALC device/context, size g_snd's
-// channel counts/playback rate, and allocate alGlob.source[53]. Mirrors MSS_Init +
-// MSS_open_digital_driver in snd_mss.cpp.
+// Mirrors MSS_Init + MSS_open_digital_driver in snd_mss.cpp. Unlike Miles (which opens a
+// throwaway probe driver first to detect multichannel capability, then reopens for real -
+// see MSS_open_digital_driver's comments), MSS_Startup already does an equivalent
+// open-then-close sanity probe, so this just opens the real device/context once.
 char __cdecl MSS_Init()
 {
-    Com_PrintError(9, "ERROR: OpenAL sound system not yet implemented (KISAK_SOUND).\n");
-    return 0;
+    int integer = snd_khz->current.integer;
+    int hertz;
+    if (integer == 11)
+    {
+        hertz = 11025;
+    }
+    else if (integer == 44)
+    {
+        hertz = 44100;
+    }
+    else
+    {
+        if (integer != 22)
+            Com_Printf(9, "invalid value %i for snd_khz, using 22 khz instead\n", snd_khz->current.integer);
+        hertz = 22050;
+    }
+
+    Com_Printf(
+        9,
+        "Attempting %i kHz %i bit [%s] sound\n",
+        hertz / 1000,
+        16,
+        snd_outputConfigurationStrings[snd_outputConfiguration->current.integer]);
+
+    alGlob.device = alcOpenDevice(NULL);
+    if (!alGlob.device)
+    {
+        Com_PrintError(9, "ERROR: Couldn't open OpenAL device\n");
+        return 0;
+    }
+
+    ALCint attrs[] = { ALC_FREQUENCY, hertz, 0 };
+    alGlob.context = alcCreateContext(alGlob.device, attrs);
+    if (!alGlob.context || !alcMakeContextCurrent(alGlob.context))
+    {
+        Com_PrintError(9, "ERROR: Couldn't create OpenAL context\n");
+        if (alGlob.context)
+            alcDestroyContext(alGlob.context);
+        alcCloseDevice(alGlob.device);
+        alGlob.device = NULL;
+        alGlob.context = NULL;
+        return 0;
+    }
+
+    // Distance falloff is computed entirely by SND_Attenuate's curve and baked directly
+    // into AL_GAIN (see the Phase 4 playback functions); disable OpenAL's own automatic
+    // distance attenuation so it isn't applied a second time. Mirrors Miles'
+    // AIL_set_3D_rolloff_factor(driver, 0.0f) in the original MSS_Init.
+    alDistanceModel(AL_NONE);
+
+    // Miles' listener never moves either - SND_Set3DPosition (snd_driver.cpp) always
+    // pre-transforms each source's world position into listener-space before handing it
+    // to the driver. Fix the AL listener at the origin with identity orientation once,
+    // and never touch it again; this is also why split-screen's 2 listeners already work
+    // today despite only one physical AL listener existing.
+    alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+    alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+    ALfloat orientation[6] = { 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f };
+    alListenerfv(AL_ORIENTATION, orientation);
+
+    g_snd.Initialized2d = 1;
+    g_snd.Initialized3d = 1;
+    g_snd.max_2D_channels = 8;
+    g_snd.max_3D_channels = 32;
+    g_snd.max_stream_channels = 13;
+    g_snd.playback_rate = hertz + hertz / 2;
+    if (g_snd.playback_rate >= 0xAC44)
+        g_snd.playback_rate = 0x7FFFFFFF;
+    // KISAK_SOUND TODO (Phase 4): derive from snd_outputConfiguration once speaker-config
+    // mapping is ported; Miles derives this from its opened mss_spec[] channel count.
+    g_snd.playback_channels = 2;
+    g_snd.timescale = 1.0;
+    return 1;
 }
 
-// KISAK_SOUND TODO (Phase 2): alGenSources for all 53 channels. Mirrors MSS_InitChannels.
+// Unlike Miles (which splits 40 pre-allocated 2D/3D "sample" handles from lazily-opened
+// stream handles), OpenAL sources are uniform - allocate all 53 up front.
 void MSS_InitChannels()
 {
+    int totalChannels = g_snd.max_2D_channels + g_snd.max_3D_channels + g_snd.max_stream_channels;
+    alGenSources(totalChannels, alGlob.source);
+    for (int i = 0; i < totalChannels; ++i)
+    {
+        if (!alGlob.source[i])
+            Com_Error(ERR_DROP, "OpenAL source allocation failed on channel %i", i + 1);
+    }
+    g_snd.ambient_track = 1;
 }
 
 // KISAK_SOUND TODO (Phase 7 - EQ): set up the EFX filter/aux-slot state. Mirrors MSS_InitEq.
@@ -57,15 +138,28 @@ void MSS_InitEq()
     }
 }
 
-// KISAK_SOUND TODO (Phase 2): alcOpenDevice/alcCreateContext. Mirrors MSS_Startup.
+// Mirrors MSS_Startup (AIL_startup). Miles' AIL_startup is a global one-time SDK init with
+// no device involved yet; OpenAL has no equivalent 2-stage init, so do an equivalent
+// open-then-close sanity probe here instead - the real device open happens in MSS_Init.
 bool __cdecl MSS_Startup()
 {
-    return false;
+    ALCdevice *probe = alcOpenDevice(NULL);
+    if (!probe)
+        return false;
+    alcCloseDevice(probe);
+    return true;
 }
 
-// KISAK_SOUND TODO (Phase 2): alcDestroyContext/alcCloseDevice. Mirrors MSS_ShutdownCleanup.
+// Mirrors MSS_ShutdownCleanup.
 void MSS_ShutdownCleanup()
 {
+    if (alGlob.context)
+    {
+        alcMakeContextCurrent(NULL);
+        alcDestroyContext(alGlob.context);
+    }
+    if (alGlob.device)
+        alcCloseDevice(alGlob.device);
     memset(&alGlob, 0, sizeof(alGlob));
 }
 
