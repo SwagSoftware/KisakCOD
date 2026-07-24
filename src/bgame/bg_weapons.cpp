@@ -2452,7 +2452,11 @@ void __cdecl PM_Weapon_CheckForChangeWeapon(pmove_t *pm)
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 1);
         }
+#ifdef KISAK_MP
+        else if ((ps->weapFlags & 0x80) != 0)
+#elif KISAK_SP
         else if ((ps->weapFlags & 0x80) != 0 || ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0))
+#endif
         {
             if (ps->weapon)
                 PM_BeginWeaponChange(ps, 0, 0);
