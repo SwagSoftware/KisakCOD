@@ -512,7 +512,7 @@ void __cdecl SND_StopStreamChannel(int index)
     return;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     if (!milesGlob.handle_sample[index])
@@ -546,7 +546,7 @@ void __cdecl SND_PauseStreamChannel(int index)
     return;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 1);
@@ -564,7 +564,7 @@ void __cdecl SND_UnpauseStreamChannel(int index, int timeshift)
     return;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
     if (!g_snd.chaninfo[index].startDelay)
     {
@@ -583,7 +583,11 @@ void __cdecl SND_UnpauseStreamChannel(int index, int timeshift)
 
 bool __cdecl SND_IsStreamChannelFree(int index)
 {
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+#ifdef KIASK_DEDICATED
+    return false;
+#else
+
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     if (!milesGlob.handle_sample[index])
@@ -601,7 +605,9 @@ bool __cdecl SND_IsStreamChannelFree(int index)
         return 0;
 
     return g_snd.chaninfo[index].alias0 == 0;
-#endif
+#endif // KISAK_SOUND
+
+#endif // KISAK_DEDICATED
 }
 
 #ifdef KISAK_DEDICATED
@@ -1310,11 +1316,10 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
 
 void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *org)
 {
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
-
 #ifdef KISAK_DEDICATED
     return;
 #else
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     float v3; // [esp+0h] [ebp-28h]
@@ -1603,17 +1608,6 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
         Com_PrintError(9, "Couldn't play stream '%s' from alias '%s' - file not found\n", realname, startAliasInfo->alias0->aliasName);
         return SND_SetPlaybackIdNotPlayed(index);
     }
-    
-    /*auto fileSeekResult = FS_Seek(stream->fsHandle, 0, 1);
-    auto fileLength2 = FS_FTell(stream->fsHandle);
-    auto fileLength = FS_filelength(stream->fsHandle);
-    auto fileStartPos = FS_Seek(stream->fsHandle, 0, 2);
-
-    auto fileData = new uint8_t[fileLength];
-    auto fileReadData = FS_Read(fileData, fileLength, stream->fsHandle);
-
-    if (fileReadData == 0)
-        std::ofstream("output.bin", std::ios::binary).write((const char*)fileData, fileLength);*/
 
     size_t nameLen = strlen(filename);
     stream->isMp3 = nameLen >= 4 && I_stricmp(filename + nameLen - 4, ".mp3") == 0;
@@ -2209,7 +2203,7 @@ double __cdecl SND_GetStreamChannelVolume(int index)
     return 0;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     _SAMPLE *handle_sample; // [esp+4h] [ebp-Ch]
@@ -2241,7 +2235,7 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
     return;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     float v2; // [esp+Ch] [ebp-8h]
@@ -2349,7 +2343,7 @@ int __cdecl SND_GetStreamChannelPlaybackRate(int index)
     return 0;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     _SAMPLE *handle_sample; // [esp+0h] [ebp-4h]
@@ -2373,7 +2367,7 @@ void __cdecl SND_SetStreamChannelPlaybackRate(int index, int rate)
 
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     _SAMPLE *handle_sample; // [esp+0h] [ebp-4h]
@@ -2428,7 +2422,7 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
     return;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     AIL_set_sample_reverb_levels(
@@ -2494,7 +2488,7 @@ int __cdecl SND_GetStreamChannelLength(int index)
     return 0;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     int length; // [esp+0h] [ebp-4h] BYREF
@@ -2718,7 +2712,7 @@ void __cdecl SND_SetStreamChannelFromSaveInfo(int index, snd_save_stream_t *info
 {
     float volume; // [esp+4h] [ebp-4h]
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
     volume = info->volume * g_snd.volume;
     SND_SetStreamChannelVolume(index, volume);
