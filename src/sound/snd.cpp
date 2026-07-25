@@ -1951,8 +1951,8 @@ char __cdecl SND_ContinueLoopingSound(
     {
         if (g_snd.chaninfo[ia].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is2DChannelFree(ia))
         {
-            iassert(g_snd.chaninfo[i].alias0);
-            iassert(g_snd.chaninfo[i].alias1);
+            iassert(g_snd.chaninfo[ia].alias0);
+            iassert(g_snd.chaninfo[ia].alias1);
 
             if ((g_snd.chaninfo[ia].alias0->flags & 1) != 0
                 && g_snd.chaninfo[ia].alias0->aliasName == alias0->aliasName
@@ -1967,8 +1967,8 @@ char __cdecl SND_ContinueLoopingSound(
     {
         if (g_snd.chaninfo[ib].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_IsStreamChannelFree(ib))
         {
-            iassert(g_snd.chaninfo[i].alias0);
-            iassert(g_snd.chaninfo[i].alias1);
+            iassert(g_snd.chaninfo[ib].alias0);
+            iassert(g_snd.chaninfo[ib].alias1);
 
             if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0
                 && g_snd.chaninfo[ib].alias0->aliasName == alias0->aliasName
@@ -2696,7 +2696,7 @@ void __cdecl SND_UpdateLoopingSounds()
         {
             if (!SND_Is2DChannelFree(ia))
             {
-                iassert(g_snd.chaninfo[i].alias0);
+                iassert(g_snd.chaninfo[ia].alias0);
 
                 if ((g_snd.chaninfo[ia].alias0->flags & 1) != 0 && g_snd.chaninfo[ia].looptime != g_snd.looptime)
                     SND_Stop2DChannel(ia);
@@ -2706,7 +2706,7 @@ void __cdecl SND_UpdateLoopingSounds()
         {
             if (!SND_IsStreamChannelFree(ib))
             {
-                iassert(g_snd.chaninfo[i].alias0);
+                iassert(g_snd.chaninfo[ib].alias0);
 
                 if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0 && g_snd.chaninfo[ib].looptime != g_snd.looptime)
                     SND_StopStreamChannel(ib);
@@ -4615,16 +4615,23 @@ double __cdecl SND_GetVolumeNormalized()
 
 void __cdecl SND_SetHWND(HWND hwnd)
 {
+#ifdef KISAK_DEDICATED
+    return;
+#else
 #ifndef KISAK_SOUND
     if (g_snd.Initialized2d)
         AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);
 #else
     // OpenAL has no window-handle dependency (no DirectSound backend to bind).
-#endif
+#endif // KISAK_SOUND
+#endif // KISAK_DEDICATED
 }
 
 void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 {
+#if KISAK_DEDICATED
+    return;
+#else
     // KISAKTODO: double check MssSound struct usage here. It looks 'okay' at first glance
 
 #ifndef KISAK_SOUND
@@ -4715,6 +4722,7 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 #endif
     mssSound->info.data_ptr = mssSound->data;
     mssSound->info.initial_ptr = mssSound->data;
+#endif // KISAK_DEDICATED
 }
 
 #ifdef KISAK_SP

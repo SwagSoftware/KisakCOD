@@ -67,6 +67,13 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_SP CINEMA USE_SEPARATE_B
 # Feature flag to swap the sound backend from Miles/MSS to OpenAL (see SOUND_BACKEND above).
 if (KISAK_SOUND)
     target_compile_definitions(${PROJECT_NAME} PUBLIC KISAK_SOUND)
+
+    # Generate the dr_wav/dr_mp3 single-header implementations in exactly this one TU (see
+    # comment in snd_driver_load_obj.cpp). Must stay scoped to this file only, not target-wide,
+    # since dr_wav.h/dr_mp3.h are also included (declarations only) elsewhere in the sound module.
+    set_source_files_properties(${SRC_DIR}/sound/snd_driver_load_obj.cpp PROPERTIES
+        COMPILE_DEFINITIONS "DR_WAV_IMPLEMENTATION;DR_MP3_IMPLEMENTATION"
+    )
 endif()
 
 # We need all of the pre/post-build commands

@@ -6,15 +6,23 @@
 
 #ifdef KISAK_SOUND
 // Single-header decoders (public domain / MIT-0), vendored in deps/dr_libs. This is the
-// one translation unit that generates their implementations. dr_mp3's implementation is
-// compiled in now so it's ready, but nothing calls it yet - "loaded" sounds are always WAV
-// per the original Miles code's own MSS_DigitalFormatType format check (snd_al.cpp); dr_mp3
-// is reserved for the streaming path (Phase 5) in case any streamed content is actually MP3.
-#define DR_WAV_IMPLEMENTATION
+// one translation unit that generates their implementations - DR_WAV_IMPLEMENTATION/
+// DR_MP3_IMPLEMENTATION are defined for this file only via CMake (set_source_files_properties
+// in mp/sp CMakeLists.txt), not target-wide, since dr_wav.h/dr_mp3.h are also included
+// (declarations only) elsewhere in the sound module. dr_mp3's implementation is compiled in
+// now so it's ready, but nothing calls it yet - "loaded" sounds are always WAV per the
+// original Miles code's own MSS_DigitalFormatType format check (snd_al.cpp); dr_mp3 is
+// reserved for the streaming path (Phase 5) in case any streamed content is actually MP3.
 #include <dr_libs/dr_wav.h>
-#define DR_MP3_IMPLEMENTATION
 #include <dr_libs/dr_mp3.h>
 #endif
+
+#ifdef KISAK_DEDICATED
+LoadedSound* __cdecl SND_LoadFromBuffer(void* buffer, const char* soundName)
+{
+    return NULL;
+}
+#else
 
 #ifndef KISAK_SOUND
 LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, const char *soundName)
@@ -99,7 +107,9 @@ LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, uint32_t bufferSize, const
 
     return loadSnd;
 }
-#endif
+#endif // KISAK_SOUND
+
+#endif // KISAK_DEDICATED
 
 LoadedSound *__cdecl SND_LoadSoundFile(const char *name)
 {
