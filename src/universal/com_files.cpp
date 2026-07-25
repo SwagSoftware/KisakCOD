@@ -2112,6 +2112,15 @@ uint32_t __cdecl FS_FTell(int f)
     return ftell(v1);
 }
 
+// Whether handle f refers to a file packed inside a zip/.iwd archive rather than a loose file on
+// disk. Exposed so callers outside this file can work around FS_Seek's zip-archive origin
+// handling (see the comment above AL_FixupZipSeekOrigin in snd_driver.cpp) without needing direct
+// access to fsh, which is private to this translation unit.
+bool __cdecl FS_IsFileInZip(int f)
+{
+    return fsh[f].zipFile != NULL;
+}
+
 int __cdecl FS_GetModList(char *listbuf, int bufsize)
 {
     char v3; // [esp+3h] [ebp-18Dh]

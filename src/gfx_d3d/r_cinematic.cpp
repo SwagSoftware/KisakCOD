@@ -497,9 +497,14 @@ char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, uint32_t playba
     R_Cinematic_CheckBinkError();
     BinkSetMemory(R_Cinematic_Bink_Alloc, R_Cinematic_Bink_Free);
     R_Cinematic_CheckBinkError();
+#ifndef KISAK_SOUND
     Driver = MSS_GetDriver();
     BinkSetSoundSystem(BinkOpenMiles, (uint32_t)Driver);
     R_Cinematic_CheckBinkError();
+#else
+    // KISAK_SOUND TODO: Bink has no OpenAL sound-system adapter.
+    // Cinematics currently play without synced audio under OpenAL.
+#endif
     BinkSetSoundTrack(5, TrackIDsToPlay);
     R_Cinematic_CheckBinkError();
     cinematicGlob.timeInMsec = 0;

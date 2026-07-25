@@ -15,6 +15,10 @@ set(KISAK_PLATFORM win32)
 # C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.44.35207\bin\Hostx86\x86
 set(USE_ASAN OFF)
 
+# Set to ON to build the sound system against OpenAL instead of Miles/MSS.
+# When OFF (default), the original Miles Sound System (MSS/AIL) backend is used.
+set(KISAK_SOUND OFF)
+
 # Set the gloabl directory variables
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 set(DEPS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/deps)

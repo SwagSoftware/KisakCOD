@@ -15,4 +15,4 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ot /MP /W3 /Zi 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /MTd /Od /MP /W3 /Zi ${MSVC_WARNING_DISABLES} /permissive-")
 
 #target_compile_options(${PROJECT_NAME} PRIVATE /we4700)
-add_compile_options(/we4700 /intentionallbreakthisshit)
+add_compile_options(/we4700)

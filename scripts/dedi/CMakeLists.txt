@@ -16,8 +16,8 @@ include(${SCRIPTS_DIR}/source_groups.cmake)
 include (${PLATFORM_DIR}/${KISAK_PLATFORM}/platform.cmake)
 
 # Add the new executable
-add_executable(${PROJECT_NAME} 
-    ${SRCROOT} 
+add_executable(${PROJECT_NAME}
+    ${SRCROOT}
     ${DYNENTITY} 
     ${EFFECTSCORE} 
     ${AIM_ASSIST} 
@@ -44,13 +44,13 @@ add_executable(${PROJECT_NAME}
     ${SCRIPT} 
     ${SERVER} 
     ${SERVER_MP} 
-    ${SOUND} 
-    ${SPEEX} 
+    ${SOUND}
+    ${SPEEX}
     ${STRINGED} 
     ${UI} 
     ${UI_MP} 
     ${UNIVERSAL} 
-    ${WIN32} 
+    ${WIN32_SRC}
     ${XANIM} 
     ${ZLIB} 
     ${STEAM_HEADERS}

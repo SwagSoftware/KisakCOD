@@ -66,7 +66,10 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${DEPS_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${DXSDK_INC_DIR})
 
 target_link_directories(${PROJECT_NAME} PUBLIC ${DXSDK_LIB_DIR})
-target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
+if (NOT KISAK_SOUND)
+    target_include_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
+    target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
+endif()
 target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/steamsdk")
 target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/binklib")
 
@@ -78,8 +81,11 @@ target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:ICF>")
 target_link_options(${PROJECT_NAME} PRIVATE /machine:x86)
 set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 
+if (NOT KISAK_SOUND)
+    target_link_libraries(${PROJECT_NAME} PUBLIC mss32.lib)
+endif()
+
 target_link_libraries(${PROJECT_NAME} PUBLIC
-        mss32.lib
         dsound.lib
         ${D3DX_LIB}
         d3d9.lib

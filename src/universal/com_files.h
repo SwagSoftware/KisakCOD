@@ -99,6 +99,7 @@ int __cdecl FS_OpenFileOverwrite(char *qpath);
 int __cdecl FS_LoadStack();
 int __cdecl FS_HashFileName(const char *fname, int hashSize);
 int __cdecl FS_filelength(int f);
+bool __cdecl FS_IsFileInZip(int f);
 void __cdecl FS_ReplaceSeparators(char *path);
 void __cdecl FS_BuildOSPath(const char *base, const char *game, const char *qpath, char *ospath);
 void __cdecl FS_BuildOSPathForThread(const char *base, const char *game, const char *qpath, char *ospath, FsThread thread);
