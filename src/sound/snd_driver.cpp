@@ -2624,7 +2624,7 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     return;
 #else
 
-    iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
+    iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
 #ifndef KISAK_SOUND
     int v2; // [esp+0h] [ebp-3Ch]

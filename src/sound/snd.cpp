@@ -1642,11 +1642,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
 
 void __cdecl SND_StopEntityChannel(SndEntHandle sndEnt, int entchannel)
 {
-    int i; // [esp+0h] [ebp-4h]
-    int ia; // [esp+0h] [ebp-4h]
-    int ib; // [esp+0h] [ebp-4h]
-
-    for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
+    for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
     {
         if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex
             && g_snd.chaninfo[i].entchannel == entchannel
@@ -1657,23 +1653,23 @@ void __cdecl SND_StopEntityChannel(SndEntHandle sndEnt, int entchannel)
         }
     }
 
-    for (ia = 40; ia < g_snd.max_stream_channels + 40; ++ia)
+    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
     {
-        if (g_snd.chaninfo[ia].sndEnt.field.entIndex == sndEnt.field.entIndex
-            && g_snd.chaninfo[ia].entchannel == entchannel
-            && !SND_IsStreamChannelFree(ia))
+        if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex
+            && g_snd.chaninfo[i].entchannel == entchannel
+            && !SND_IsStreamChannelFree(i))
         {
-            SND_StopStreamChannel(ia);
+            SND_StopStreamChannel(i);
         }
     }
 
-    for (ib = 0; ib < g_snd.max_2D_channels; ++ib)
+    for (int i = 0; i < g_snd.max_2D_channels; ++i)
     {
-        if (g_snd.chaninfo[ib].sndEnt.field.entIndex == sndEnt.field.entIndex
-            && g_snd.chaninfo[ib].entchannel == entchannel
-            && !SND_Is2DChannelFree(ib))
+        if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex
+            && g_snd.chaninfo[i].entchannel == entchannel
+            && !SND_Is2DChannelFree(i))
         {
-            SND_Stop2DChannel(ib);
+            SND_Stop2DChannel(i);
         }
     }
 }
@@ -1926,11 +1922,8 @@ char __cdecl SND_ContinueLoopingSound(
     int *pChannel)
 {
     float *v8; // [esp+10h] [ebp-8Ch]
-    int i; // [esp+98h] [ebp-4h]
-    signed int ia; // [esp+98h] [ebp-4h]
-    int ib; // [esp+98h] [ebp-4h]
 
-    for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
+    for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
     {
         if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is3DChannelFree(i))
         {
@@ -1947,35 +1940,35 @@ char __cdecl SND_ContinueLoopingSound(
             }
         }
     }
-    for (ia = 0; ia < g_snd.max_2D_channels; ++ia)
+    for (int i = 0; i < g_snd.max_2D_channels; ++i)
     {
-        if (g_snd.chaninfo[ia].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is2DChannelFree(ia))
+        if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is2DChannelFree(i))
         {
-            iassert(g_snd.chaninfo[ia].alias0);
-            iassert(g_snd.chaninfo[ia].alias1);
+            iassert(g_snd.chaninfo[i].alias0);
+            iassert(g_snd.chaninfo[i].alias1);
 
-            if ((g_snd.chaninfo[ia].alias0->flags & 1) != 0
-                && g_snd.chaninfo[ia].alias0->aliasName == alias0->aliasName
-                && g_snd.chaninfo[ia].alias1->aliasName == alias1->aliasName)
+            if ((g_snd.chaninfo[i].alias0->flags & 1) != 0
+                && g_snd.chaninfo[i].alias0->aliasName == alias0->aliasName
+                && g_snd.chaninfo[i].alias1->aliasName == alias1->aliasName)
             {
-                SND_ContinueLoopingSound_Internal(ia, lerp, volumeScale, pChannel, SND_Set2DChannelPlaybackRate);
+                SND_ContinueLoopingSound_Internal(i, lerp, volumeScale, pChannel, SND_Set2DChannelPlaybackRate);
                 return 1;
             }
         }
     }
-    for (ib = 40; ib < g_snd.max_stream_channels + 40; ++ib)
+    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
     {
-        if (g_snd.chaninfo[ib].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_IsStreamChannelFree(ib))
+        if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_IsStreamChannelFree(i))
         {
-            iassert(g_snd.chaninfo[ib].alias0);
-            iassert(g_snd.chaninfo[ib].alias1);
+            iassert(g_snd.chaninfo[i].alias0);
+            iassert(g_snd.chaninfo[i].alias1);
 
-            if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0
-                && g_snd.chaninfo[ib].alias0->aliasName == alias0->aliasName
-                && g_snd.chaninfo[ib].alias1->aliasName == alias1->aliasName)
+            if ((g_snd.chaninfo[i].alias0->flags & 1) != 0
+                && g_snd.chaninfo[i].alias0->aliasName == alias0->aliasName
+                && g_snd.chaninfo[i].alias1->aliasName == alias1->aliasName)
             {
-                SND_ContinueLoopingSound_Internal(ib, lerp, volumeScale, pChannel, SND_SetStreamChannelPlaybackRate);
-                v8 = g_snd.chaninfo[ib].org;
+                SND_ContinueLoopingSound_Internal(i, lerp, volumeScale, pChannel, SND_SetStreamChannelPlaybackRate);
+                v8 = g_snd.chaninfo[i].org;
                 *v8 = *org;
                 v8[1] = org[1];
                 v8[2] = org[2];
@@ -2392,31 +2385,31 @@ void SND_UpdatePause()
 int SND_PauseSounds()
 {
     int result; // eax
-    int i; // [esp+0h] [ebp-4h]
-    int ia; // [esp+0h] [ebp-4h]
-    int ib; // [esp+0h] [ebp-4h]
 
     result = g_snd.Initialized2d;
     if (g_snd.Initialized2d && !g_snd.paused)
     {
-        for (i = 0; i < g_snd.max_2D_channels; ++i)
+        for (int i = 0; i < g_snd.max_2D_channels; ++i)
         {
             if (!SND_Is2DChannelFree(i) && g_snd.pauseSettings[(g_snd.chaninfo[i].alias0->flags & 0x3F00) >> 8])
                 SND_Pause2DChannel(i);
         }
-        for (ia = 8; ia < g_snd.max_3D_channels + 8; ++ia)
+
+        for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
         {
-            if (!SND_Is3DChannelFree(ia) && g_snd.pauseSettings[(g_snd.chaninfo[ia].alias0->flags & 0x3F00) >> 8])
-                SND_Pause3DChannel(ia);
+            if (!SND_Is3DChannelFree(i) && g_snd.pauseSettings[(g_snd.chaninfo[i].alias0->flags & 0x3F00) >> 8])
+                SND_Pause3DChannel(i);
         }
-        for (ib = 40; ; ++ib)
+
+        for (int i = 40; ; ++i)
         {
             result = g_snd.max_stream_channels + 40;
-            if (ib >= g_snd.max_stream_channels + 40)
+            if (i >= g_snd.max_stream_channels + 40)
                 break;
-            if (!SND_IsStreamChannelFree(ib) && g_snd.pauseSettings[(g_snd.chaninfo[ib].alias0->flags & 0x3F00) >> 8])
-                SND_PauseStreamChannel(ib);
+            if (!SND_IsStreamChannelFree(i) && g_snd.pauseSettings[(g_snd.chaninfo[i].alias0->flags & 0x3F00) >> 8])
+                SND_PauseStreamChannel(i);
         }
+
         g_snd.paused = 1;
         g_snd.pausetime = g_snd.time;
     }
@@ -2425,29 +2418,29 @@ int SND_PauseSounds()
 
 void SND_UnpauseSounds()
 {
-    int i; // [esp+0h] [ebp-8h]
-    int ia; // [esp+0h] [ebp-8h]
-    int ib; // [esp+0h] [ebp-8h]
     int timeshift; // [esp+4h] [ebp-4h]
 
     if (g_snd.Initialized2d && g_snd.paused)
     {
         timeshift = g_snd.time - g_snd.pausetime;
-        for (i = 0; i < g_snd.max_2D_channels; ++i)
+        for (int i = 0; i < g_snd.max_2D_channels; ++i)
         {
             if (!SND_Is2DChannelFree(i) && g_snd.chaninfo[i].paused)
                 SND_Unpause2DChannel(i, timeshift);
         }
-        for (ia = 8; ia < g_snd.max_3D_channels + 8; ++ia)
+
+        for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
         {
-            if (!SND_Is3DChannelFree(ia) && g_snd.chaninfo[ia].paused)
-                SND_Unpause3DChannel(ia, timeshift);
+            if (!SND_Is3DChannelFree(i) && g_snd.chaninfo[i].paused)
+                SND_Unpause3DChannel(i, timeshift);
         }
-        for (ib = 40; ib < g_snd.max_stream_channels + 40; ++ib)
+
+        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
         {
-            if (!SND_IsStreamChannelFree(ib) && g_snd.chaninfo[ib].paused)
-                SND_UnpauseStreamChannel(ib, timeshift);
+            if (!SND_IsStreamChannelFree(i) && g_snd.chaninfo[i].paused)
+                SND_UnpauseStreamChannel(i, timeshift);
         }
+
         g_snd.paused = 0;
         g_snd.pausetime = 0;
     }
@@ -2675,14 +2668,10 @@ void __cdecl SND_DeactivateChannelVolumes(int priority, int fademsec)
 
 void __cdecl SND_UpdateLoopingSounds()
 {
-    int i; // [esp+30h] [ebp-4h]
-    int ia; // [esp+30h] [ebp-4h]
-    int ib; // [esp+30h] [ebp-4h]
-
     if (g_snd.Initialized2d && !g_snd.paused)
     {
         PROF_SCOPED("SND_UpdateLoopingSounds");
-        for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
+        for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
         {
             if (!SND_Is3DChannelFree(i))
             {
@@ -2692,26 +2681,29 @@ void __cdecl SND_UpdateLoopingSounds()
                     SND_Stop3DChannel(i);
             }
         }
-        for (ia = 0; ia < g_snd.max_2D_channels; ++ia)
-        {
-            if (!SND_Is2DChannelFree(ia))
-            {
-                iassert(g_snd.chaninfo[ia].alias0);
 
-                if ((g_snd.chaninfo[ia].alias0->flags & 1) != 0 && g_snd.chaninfo[ia].looptime != g_snd.looptime)
-                    SND_Stop2DChannel(ia);
+        for (int i = 0; i < g_snd.max_2D_channels; ++i)
+        {
+            if (!SND_Is2DChannelFree(i))
+            {
+                iassert(g_snd.chaninfo[i].alias0);
+
+                if ((g_snd.chaninfo[i].alias0->flags & 1) != 0 && g_snd.chaninfo[i].looptime != g_snd.looptime)
+                    SND_Stop2DChannel(i);
             }
         }
-        for (ib = 40; ib < g_snd.max_stream_channels + 40; ++ib)
-        {
-            if (!SND_IsStreamChannelFree(ib))
-            {
-                iassert(g_snd.chaninfo[ib].alias0);
 
-                if ((g_snd.chaninfo[ib].alias0->flags & 1) != 0 && g_snd.chaninfo[ib].looptime != g_snd.looptime)
-                    SND_StopStreamChannel(ib);
-                }
+        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+        {
+            if (!SND_IsStreamChannelFree(i))
+            {
+                iassert(g_snd.chaninfo[i].alias0);
+
+                if ((g_snd.chaninfo[i].alias0->flags & 1) != 0 && g_snd.chaninfo[i].looptime != g_snd.looptime)
+                    SND_StopStreamChannel(i);
             }
+        }
+
         g_snd.looptime = g_snd.time;
     }
 }
@@ -2833,24 +2825,22 @@ void __cdecl SND_DeactivateEnvironmentEffects(int priority, int fademsec)
 
 void __cdecl SND_UpdateReverbs()
 {
-    int i; // [esp+0h] [ebp-4h]
-    int ia; // [esp+0h] [ebp-4h]
-    int ib; // [esp+0h] [ebp-4h]
-
-    for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
+    for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
     {
         if (!SND_Is3DChannelFree(i))
             SND_Update3DChannelReverb(i);
     }
-    for (ia = 0; ia < g_snd.max_2D_channels; ++ia)
+
+    for (int i = 0; i < g_snd.max_2D_channels; ++i)
     {
-        if (!SND_Is2DChannelFree(ia))
-            SND_Update2DChannelReverb(ia);
+        if (!SND_Is2DChannelFree(i))
+            SND_Update2DChannelReverb(i);
     }
-    for (ib = 40; ib < g_snd.max_stream_channels + 40; ++ib)
+
+    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
     {
-        if (!SND_IsStreamChannelFree(ib))
-            SND_UpdateStreamChannelReverb(ib);
+        if (!SND_IsStreamChannelFree(i))
+            SND_UpdateStreamChannelReverb(i);
     }
 }
 
@@ -2970,25 +2960,23 @@ void __cdecl SND_UpdateVolume(snd_volume_info_t *volinfo, int frametime)
 
 void __cdecl SND_UpdateAllChannels(int frametime)
 {
-    int i; // [esp+0h] [ebp-4h]
-    int ia; // [esp+0h] [ebp-4h]
-    int ib; // [esp+0h] [ebp-4h]
-
     SND_UpdateSlaveLerp(frametime);
-    for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
+    for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
     {
         if (!SND_Is3DChannelFree(i))
             SND_Update3DChannel(i, frametime);
     }
-    for (ia = 40; ia < g_snd.max_stream_channels + 40; ++ia)
+
+    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
     {
-        if (!SND_IsStreamChannelFree(ia))
-            SND_UpdateStreamChannel(ia, frametime);
+        if (!SND_IsStreamChannelFree(i))
+            SND_UpdateStreamChannel(i, frametime);
     }
-    for (ib = 0; ib < g_snd.max_2D_channels; ++ib)
+
+    for (int i = 0; i < g_snd.max_2D_channels; ++i)
     {
-        if (!SND_Is2DChannelFree(ib))
-            SND_Update2DChannel(ib, frametime);
+        if (!SND_Is2DChannelFree(i))
+            SND_Update2DChannel(i, frametime);
     }
 }
 
@@ -3001,25 +2989,24 @@ void __cdecl SND_UpdateSlaveLerp(int frametime)
     float v5; // [esp+Ch] [ebp-10h]
     float slaveLerp; // [esp+10h] [ebp-Ch]
     bool masterPlaying; // [esp+17h] [ebp-5h]
-    int i; // [esp+18h] [ebp-4h]
-    int ia; // [esp+18h] [ebp-4h]
-    int ib; // [esp+18h] [ebp-4h]
 
     masterPlaying = 0;
-    for (i = 8; !masterPlaying && i < g_snd.max_3D_channels + 8; ++i)
+    for (int i = 8; !masterPlaying && i < g_snd.max_3D_channels + 8; ++i)
     {
         if (SND_Is3DChannelPlaying(i))
             masterPlaying = g_snd.chaninfo[i].master;
     }
-    for (ia = 40; !masterPlaying && ia < g_snd.max_stream_channels + 40; ++ia)
+
+    for (int i = 40; !masterPlaying && i < g_snd.max_stream_channels + 40; ++i)
     {
-        if (SND_IsStreamChannelPlaying(ia))
-            masterPlaying = g_snd.chaninfo[ia].master;
+        if (SND_IsStreamChannelPlaying(i))
+            masterPlaying = g_snd.chaninfo[i].master;
     }
-    for (ib = 0; !masterPlaying && ib < g_snd.max_2D_channels; ++ib)
+
+    for (int i = 0; !masterPlaying && i < g_snd.max_2D_channels; ++i)
     {
-        if (SND_Is2DChannelPlaying(ib))
-            masterPlaying = g_snd.chaninfo[ib].master;
+        if (SND_Is2DChannelPlaying(i))
+            masterPlaying = g_snd.chaninfo[i].master;
     }
 
     if (snd_slaveFadeTime->current.integer)
@@ -3121,9 +3108,6 @@ void SND_UpdateTimeScale()
     float v2; // [esp+44h] [ebp-20h]
     float timescale; // [esp+58h] [ebp-Ch]
     float factor; // [esp+5Ch] [ebp-8h]
-    int i; // [esp+60h] [ebp-4h]
-    int ia; // [esp+60h] [ebp-4h]
-    int ib; // [esp+60h] [ebp-4h]
 
     timescale = Com_GetTimescaleForSnd();
     if (timescale <= 0.0)
@@ -3135,25 +3119,27 @@ void SND_UpdateTimeScale()
 
         factor = timescale / g_snd.timescale;
         g_snd.timescale = timescale;
-        for (i = 8; i < g_snd.max_3D_channels + 8; ++i)
+        for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
         {
             if (!SND_Is3DChannelFree(i) && g_snd.chaninfo[i].timescale)
             {
                 SND_Set3DChannelPlaybackRate(i, SnapFloatToInt((float)SND_Get3DChannelPlaybackRate(i) * factor));
             }
         }
-        for (ia = 40; ia < g_snd.max_stream_channels + 40; ++ia)
+
+        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
         {
-            if (!SND_IsStreamChannelFree(ia) && g_snd.chaninfo[ia].timescale)
+            if (!SND_IsStreamChannelFree(i) && g_snd.chaninfo[i].timescale)
             {
-                SND_SetStreamChannelPlaybackRate(ia, SnapFloatToInt((float)SND_GetStreamChannelPlaybackRate(ia) * factor));
+                SND_SetStreamChannelPlaybackRate(i, SnapFloatToInt((float)SND_GetStreamChannelPlaybackRate(i) * factor));
             }
         }
-        for (ib = 0; ib < g_snd.max_2D_channels; ++ib)
+
+        for (int i = 0; i < g_snd.max_2D_channels; ++i)
         {
-            if (!SND_Is2DChannelFree(ib) && g_snd.chaninfo[ib].timescale)
+            if (!SND_Is2DChannelFree(i) && g_snd.chaninfo[i].timescale)
             {
-                SND_Set2DChannelPlaybackRate(ib, SnapFloatToInt((float)SND_Get2DChannelPlaybackRate(ib) * factor));
+                SND_Set2DChannelPlaybackRate(i, SnapFloatToInt((float)SND_Get2DChannelPlaybackRate(i) * factor));
             }
         }
     }
@@ -3345,48 +3331,47 @@ bool __cdecl SND_ShouldGiveCpuWarning()
 void __cdecl SND_StopSounds(snd_stopsounds_arg_t which)
 {
     char v1; // [esp+0h] [ebp-8h]
-    int i; // [esp+4h] [ebp-4h]
-    int ia; // [esp+4h] [ebp-4h]
-    int ib; // [esp+4h] [ebp-4h]
-    int ic; // [esp+4h] [ebp-4h]
-    int id; // [esp+4h] [ebp-4h]
-    int ie; // [esp+4h] [ebp-4h]
 
     if (g_snd.Initialized2d)
     {
         if ((which & 8) == 0)
         {
-            for (i = 0; i < g_snd.max_2D_channels; ++i)
+            for (int i = 0; i < g_snd.max_2D_channels; ++i)
             {
                 if (!SND_Is2DChannelFree(i))
                     SND_Stop2DChannel(i);
             }
-            for (ia = 8; ia < g_snd.max_3D_channels + 8; ++ia)
+
+            for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
             {
-                if (!SND_Is3DChannelFree(ia))
-                    SND_Stop3DChannel(ia);
+                if (!SND_Is3DChannelFree(i))
+                    SND_Stop3DChannel(i);
             }
         }
-        for (ib = 40; ib < g_snd.max_stream_channels + 40; ++ib)
+
+        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
         {
-            if (!SND_IsStreamChannelFree(ib) && ((which & 2) == 0 || ib != 40))
+            if (!SND_IsStreamChannelFree(i) && ((which & 2) == 0 || i != 40))
             {
-                if ((which & 4) == 0 || (ib < 41 || ib > 44 ? (v1 = 0) : (v1 = 1), !v1))
-                    SND_StopStreamChannel(ib);
+                if ((which & 4) == 0 || (i < 41 || i > 44 ? (v1 = 0) : (v1 = 1), !v1))
+                    SND_StopStreamChannel(i);
             }
         }
+
         if ((which & 1) == 0)
         {
-            for (ic = 1; ic < 3; ++ic)
-                SND_DeactivateEnvironmentEffects(ic, 0);
+            for (int i = 1; i < 3; ++i)
+                SND_DeactivateEnvironmentEffects(i, 0);
         }
+
         if ((which & 0x10) == 0)
         {
-            for (id = 1; id < SND_CHANNELVOLPRIO_COUNT; ++id)
-                SND_DeactivateChannelVolumes(id, 0);
+            for (int i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
+                SND_DeactivateChannelVolumes(i, 0);
         }
-        for (ie = 0; ie < 2; ++ie)
-            SND_DeactivateAllEq(ie);
+
+        for (int i = 0; i < 2; ++i)
+            SND_DeactivateAllEq(i);
     }
 }
 
@@ -3804,41 +3789,35 @@ void __cdecl SND_ErrorCleanup()
 
 void __cdecl SND_Save(MemoryFile *memFile)
 {
-    int i; // [esp+0h] [ebp-4h]
-    int ia; // [esp+0h] [ebp-4h]
-    int ib; // [esp+0h] [ebp-4h]
-    int ic; // [esp+0h] [ebp-4h]
-    int id; // [esp+0h] [ebp-4h]
-
-    for (i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
+    for (int i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
         MemFile_WriteData(memFile, 772, &g_snd.channelVolGroups[i]);
 
-    for (ia = 1; ia < 3; ++ia)
-        MemFile_WriteData(memFile, 32, &g_snd.envEffects[ia]);
+    for (int i = 1; i < 3; ++i)
+        MemFile_WriteData(memFile, 32, &g_snd.envEffects[i]);
 
     SND_SaveEq(memFile);
     MemFile_WriteData(memFile, 8, g_snd.background);
 
     if (g_snd.Initialized2d)
     {
-        for (ib = 8; ib < g_snd.max_3D_channels + 8; ++ib)
-            SND_Save3DChannel(ib, memFile);
+        for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
+            SND_Save3DChannel(i, memFile);
     }
 
     MemFile_WriteCString(memFile, (char *)"");
 
     if (g_snd.Initialized2d)
     {
-        for (ic = 0; ic < g_snd.max_2D_channels; ++ic)
-            SND_Save2DChannel(ic, memFile);
+        for (int i = 0; i < g_snd.max_2D_channels; ++i)
+            SND_Save2DChannel(i, memFile);
     }
 
     MemFile_WriteCString(memFile, (char *)"");
 
     if (g_snd.Initialized2d)
     {
-        for (id = 40; id < g_snd.max_stream_channels + 40; ++id)
-            SND_SaveStreamChannel(id, memFile);
+        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+            SND_SaveStreamChannel(i, memFile);
     }
 
     MemFile_WriteCString(memFile, (char *)"");
@@ -4003,40 +3982,43 @@ void __cdecl SND_SaveStreamChannel(int chanIndex, MemoryFile *memFile)
 
 void __cdecl SND_Restore(MemoryFile *memFile)
 {
-    int i; // [esp+8h] [ebp-4h]
-    int ia; // [esp+8h] [ebp-4h]
-    int ib; // [esp+8h] [ebp-4h]
-    int ic; // [esp+8h] [ebp-4h]
-    int id; // [esp+8h] [ebp-4h]
-
     if (g_snd.Initialized2d)
     {
-        for (i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
+        for (int i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
             MemFile_ReadData(memFile, 772, (uint8_t *)&g_snd.channelVolGroups[i]);
-        for (ia = 0; ia < SND_CHANNELVOLPRIO_COUNT; ++ia)
+
+        for (int i = 0; i < SND_CHANNELVOLPRIO_COUNT; ++i)
         {
-            if (g_snd.channelVolGroups[ia].active)
-                g_snd.channelvol = &g_snd.channelVolGroups[ia];
+            if (g_snd.channelVolGroups[i].active)
+                g_snd.channelvol = &g_snd.channelVolGroups[i];
         }
-        for (ib = 1; ib < 3; ++ib)
-            MemFile_ReadData(memFile, 32, (uint8_t *)&g_snd.envEffects[ib]);
+
+        for (int i = 1; i < 3; ++i)
+            MemFile_ReadData(memFile, 32, (uint8_t *)&g_snd.envEffects[i]);
+
         SND_RestoreEq(memFile);
-        for (ic = 0; ic < 3; ++ic)
+
+        for (int i = 0; i < 3; ++i)
         {
-            if (g_snd.envEffects[ic].active)
-                g_snd.effect = &g_snd.envEffects[ic];
+            if (g_snd.envEffects[i].active)
+                g_snd.effect = &g_snd.envEffects[i];
         }
+
         SND_SetRoomtype(g_snd.effect->roomtype);
         MemFile_ReadData(memFile, 8, (uint8_t *)g_snd.background);
+
         while (SND_Restore3DChannel(memFile))
             ;
+
         while (SND_Restore2DChannel(memFile))
             ;
-        for (id = 0; id < 5; ++id)
+
+        for (int i = 0; i < 5; ++i)
         {
-            if (id + 40 < 41 || id + 40 > 44)
-                SND_RestoreStreamChannel(id + 40, memFile);
+            if (i + 40 < 41 || i + 40 > 44)
+                SND_RestoreStreamChannel(i + 40, memFile);
         }
+
         while (SND_RestoreStreamChannel(-1, memFile))
             ;
     }

@@ -612,12 +612,6 @@ void __cdecl Sys_CreateSplashWindow()
 	tagSIZE screenSize; // [esp+3Ch] [ebp-18h]
 	tagRECT rc; // [esp+44h] [ebp-10h] BYREF
 
-#if defined(KISAK_SOUND)
-	std::string nul;
-	std::cout << "early debugger attach: waiting for input" << std::endl;
-	std::cin.get();
-#endif
-
 	wc.style = 0;
 	wc.cbClsExtra = 0;
 	wc.cbWndExtra = 0;
