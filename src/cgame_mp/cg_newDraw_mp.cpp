@@ -2276,7 +2276,7 @@ void __cdecl CG_DrawInvalidCmdHint(
         blinkInterval = cg_invalidCmdHintBlinkInterval->current.integer;
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
-        color[3] = ((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / blinkInterval;
+        color[3] = (float)((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / (float)blinkInterval;
         x = rect->x - SnapFloat(UI_TextWidth(string, 0, font, fontscale) * 0.5f);
         UI_DrawText(
             &scrPlaceView[localClientNum],

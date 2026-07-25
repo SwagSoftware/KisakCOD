@@ -7,6 +7,10 @@
 
 #undef DrawText
 
+#define ITEM_ALIGN_LEFT     0
+#define ITEM_ALIGN_CENTER   1
+#define ITEM_ALIGN_RIGHT    2
+
 struct Scr_WatchElement_s;
 
 enum Scr_ConsoleOpenMode : __int32

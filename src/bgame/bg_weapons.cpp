@@ -2622,10 +2622,23 @@ int32_t __cdecl PM_Weapon_ShouldBeFiring(pmove_t *pm, int32_t delayedAction)
 		return 0;
 
 	// Weapon lock for javelin and stinger.
-    if (shouldStartFiring && weapDef->requireLockonToFire)
+    if (shouldStartFiring && weapDef->requireLockonToFire)// not WeaponLockFinalized & too close (0x10) or no clearance (0x20)
     {
-        if ((ps->weapLockFlags & 2) == 0 || ps->weapLockFlags & 0x30)// not WeaponLockFinalized & too close (0x10) or no clearance (0x20)
-            shouldStartFiring = 0;
+		if ((ps->weapLockFlags & 2) == 0)
+		{
+			PM_AddEvent(ps, EV_LOCKON_REQUIRED_HINT);
+			shouldStartFiring = 0;
+		}
+		if (ps->weapLockFlags & 0x10)
+		{
+			PM_AddEvent(ps, EV_TARGET_TOO_CLOSE_HINT);
+			shouldStartFiring = 0;
+		}
+		if (ps->weapLockFlags & 0x20)
+		{
+			PM_AddEvent(ps, EV_TARGET_NOT_ENOUGH_CLEARANCE);
+			shouldStartFiring = 0;
+		}
     }
 #endif
 

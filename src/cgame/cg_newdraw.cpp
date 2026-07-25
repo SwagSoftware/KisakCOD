@@ -1413,7 +1413,13 @@ void __cdecl CG_DrawMantleHint(
 
 void __cdecl CG_DrawSaving(int localClientNum, const rectDef_s *rect, float *color, Material *material)
 {
-    ;
+	if (!ui_isSaving->current.enabled)
+		return;
+
+	if (!material)
+		material = Material_RegisterHandle("saving", 3);
+
+	UI_DrawHandlePic(&scrPlaceView[localClientNum], rect->x, rect->y, rect->w, rect->h, rect->horzAlign, rect->vertAlign, color, material);
 }
 
 int __cdecl CG_OwnerDrawVisible(int flags)
@@ -1447,7 +1453,7 @@ void __cdecl CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *mate
                 rect->horzAlign,
                 rect->vertAlign,
                 angle,
-                colorWhite, //KISAKTODO
+                color,
                 material);
         }
     }
@@ -1462,57 +1468,49 @@ void __cdecl CG_DrawDeadQuote(
     float *color,
     int textStyle,
     double text_x,
-    double text_y)
+    double text_y,
+	char textAlignMode)
 {
-    const int *p_deadquoteStartTime; // r30
-    int deadquoteStartTime; // r11
-    const int *p_time; // r29
-    const dvar_s *Var; // r3
-    int v18; // r9
-    float v20; // fp0
-    const char *string; // r3
-    const char *text; // r3
-    rectDef_s textrect;
+	rectDef_s textrect;
 
-    p_deadquoteStartTime = &cgameGlob->deadquoteStartTime;
-    deadquoteStartTime = cgameGlob->deadquoteStartTime;
-    if (deadquoteStartTime)
-    {
-        p_time = &cgameGlob->time;
-        if (deadquoteStartTime < cgameGlob->time)
-        {
-            Var = Dvar_FindVar("ui_deadquote");
-            if (Var)
-            {
-                if ((*p_time - *p_deadquoteStartTime) > (hud_deathQuoteFadeTime->current.integer))
-                {
-                    v20 = 1.0f;
-                }
-                else
-                {
-                    v18 = *p_deadquoteStartTime;
-                    v20 = (float)(*p_time - *p_deadquoteStartTime) / (float)(hud_deathQuoteFadeTime->current.integer);
-                }
-                string = Var->current.string;
-                rect->h = v20;
-                if (*string == 64)
-                    ++string;
-                text = SEH_LocalizeTextMessage(string, "game message", LOCMSG_SAFE);
-                UI_DrawWrappedText(
-                    &scrPlaceFull,
-                    text,
-                    rect,
-                    font,
-                    (float)(rect->x + (float)text_x),
-                    (float)(rect->y + (float)text_y),
-                    fontscale,
-                    color,
-                    textStyle,
-                    true,
-                    &textrect); // KISAKTODO: prob wrong args
-            }
-        }
-    }
+	if (!cgameGlob->deadquoteStartTime || cgameGlob->deadquoteStartTime >= cgameGlob->time)
+		return;
+
+	const dvar_s *var = Dvar_FindVar("ui_deadquote");
+	if (!var)
+		return;
+
+	float fadeAlpha;
+	int elapsed = cgameGlob->time - cgameGlob->deadquoteStartTime;
+	if (elapsed > hud_deathQuoteFadeTime->current.integer)
+		fadeAlpha = 1.0f;
+	else
+		fadeAlpha = (float)elapsed / (float)hud_deathQuoteFadeTime->current.integer;
+
+	const char *string = var->current.string;
+	if (*string == '@')
+		++string;
+
+	const char *text = SEH_LocalizeTextMessage(string, "game message", LOCMSG_SAFE);
+
+	float drawColor[4];
+	drawColor[0] = color[0];
+	drawColor[1] = color[1];
+	drawColor[2] = color[2];
+	drawColor[3] = color[3] * fadeAlpha;
+
+	UI_DrawWrappedText(
+		&scrPlaceView[0],
+		text,
+		rect,
+		font,
+		(float)(rect->x + text_x),
+		(float)(rect->y + text_y),
+		(float)fontscale,
+		drawColor,
+		textStyle,
+		textAlignMode,
+		&textrect);
 }
 
 void __cdecl CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Material *material, const float *color)
@@ -1630,7 +1628,7 @@ void __cdecl CG_DrawInvalidCmdHint(
         blinkInterval = cg_invalidCmdHintBlinkInterval->current.integer;
         if (blinkInterval <= 0)
             MyAssertHandler(".\\cgame_mp\\cg_newDraw_mp.cpp", 1667, 0, "%s", "blinkInterval > 0");
-        color[3] = ((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / blinkInterval;
+        color[3] = (float)((cgameGlob->time - cgameGlob->invalidCmdHintTime) % blinkInterval) / (float)blinkInterval;
         x = rect->x - SnapFloat(UI_TextWidth(string, 0, font, fontscale) * 0.5f);
         UI_DrawText(
             &scrPlaceView[localClientNum],
@@ -1682,65 +1680,51 @@ void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile)
 
 float __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration)
 {
-    double v8; // fp1
-    char v9; // r11
-    int LocalClientTime; // r3
-    float *v11; // r3
-
     if (CG_GetPredictedPlayerState(localClientNum)->pm_type == 4)
-        goto LABEL_2;
-    if (!cg_paused->current.integer || (v9 = 1, cg_drawpaused->current.enabled))
-        v9 = 0;
-    if (v9)
-    {
-    LABEL_2:
-        v8 = 0.0;
-    }
-    else if (fadeDvar->current.value == 0.0)
-    {
-        v8 = 1.0;
-    }
-    else
-    {
-        LocalClientTime = CG_GetLocalClientTime(localClientNum);
-        v11 = CG_FadeColor(LocalClientTime, displayStartTime, duration, 700);
-        if (v11)
-            v8 = v11[3];
-        else
-            v8 = 0.0;
-    }
-    return *((float *)&v8 + 1);
+		return 0.0f;
+
+	if (!cg_paused->current.integer || cg_drawpaused->current.enabled)
+	{
+		if (fadeDvar->current.value == 0.0f)
+			return 1.0f;
+		
+		int localTime = CG_GetLocalClientTime(localClientNum);
+		float *fadeColor = CG_FadeColor(localTime, displayStartTime, duration, 700);
+		return fadeColor ? fadeColor[3] : 0.0f;
+	}
+
+	return 0.0f;
 }
 
 void __cdecl CG_DrawPlayerAmmoBackdrop(int localClientNum, const rectDef_s *rect, float *color, Material *material)
 {
-    float duration; // fp2
-
     cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+	float drawColor[4];
 
-    if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) == 0)
-    {
-        if (CG_GetSelectedWeaponIndex(cgArray))
-        {
-            duration = floor(((hud_fade_ammodisplay->current.value * 1000.0f) + 0.5f));
-            if (CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgameGlob->ammoFadeTime, (int)duration) != 0.0f)
-            {
-                if (!material)
-                    Material_RegisterHandle("$default", 3);
-                CG_CheckPlayerForLowAmmo(cgArray);
-                UI_DrawHandlePic(
-                    &scrPlaceView[localClientNum],
-                    rect->x,
-                    rect->y,
-                    rect->w,
-                    rect->h,
-                    rect->horzAlign,
-                    rect->vertAlign,
-                    colorWhite, // KISAKTODO:
-                    material);
-            }
-        }
-    }
+	if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) != 0)
+		return;
+
+	if (!CG_GetSelectedWeaponIndex(cgameGlob))
+		return;
+
+    drawColor[3] = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgameGlob->ammoFadeTime, SnapFloatToInt(hud_fade_ammodisplay->current.value * 1000.0f));
+	if (drawColor[3] == 0.0f)
+		return;
+
+	if (CG_CheckPlayerForLowAmmo(cgameGlob))
+	{
+		drawColor[0] = 0.89f;
+		drawColor[1] = 0.18f;
+		drawColor[2] = 0.01f;
+	}
+	else
+	{
+		drawColor[0] = color[0];
+		drawColor[1] = color[1];
+		drawColor[2] = color[2];
+	}
+
+	UI_DrawHandlePic(&scrPlaceView[localClientNum], rect->x, rect->y, rect->w, rect->h, rect->horzAlign, rect->vertAlign, drawColor, material);
 }
 
 // local variable allocation has failed, the output may be wrong!
@@ -2422,6 +2406,7 @@ void __cdecl CG_DrawPlayerWeaponName(
     const char *translatedDisplayName; // r4
     const char *v15; // r3
     const char *string; // r31
+	float drawColor[4];
 
     if (localClientNum)
         MyAssertHandler(
@@ -2431,9 +2416,8 @@ void __cdecl CG_DrawPlayerWeaponName(
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) == 0
-        && (cgArray[0].predictedPlayerState.weapFlags & 0x80) == 0
-        && CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].weaponSelectTime, 1800) != 0.0)
+	drawColor[3] = CG_FadeHudMenu(localClientNum, hud_fade_ammodisplay, cgArray[0].weaponSelectTime, 1800);
+	if ((cgArray[0].predictedPlayerState.eFlags & 0x20000) == 0 && (cgArray[0].predictedPlayerState.weapFlags & 0x80) == 0 && drawColor[3] != 0.0f)
     {
         SelectedWeaponIndex = CG_GetSelectedWeaponIndex(cgArray);
         v11 = SelectedWeaponIndex;
@@ -2448,7 +2432,11 @@ void __cdecl CG_DrawPlayerWeaponName(
                 v15 = va("%s", translatedDisplayName);
             string = v15;
             float x = (rect->w + rect->x) - UI_TextWidth(string, 0, font, scale) - 28.0f;
-
+			
+			drawColor[0] = color[0];
+			drawColor[1] = color[1];
+			drawColor[2] = color[2];
+			
             UI_DrawText(
                 &scrPlaceView[localClientNum],
                 string,
@@ -2459,7 +2447,7 @@ void __cdecl CG_DrawPlayerWeaponName(
                 rect->horzAlign,
                 rect->vertAlign,
                 scale,
-                color,
+                drawColor,
                 textStyle);
         }
     }
@@ -3121,8 +3109,8 @@ void __cdecl CG_OwnerDraw(
         return;
     }
 
-    LocalClientGlobals = CG_GetLocalClientGlobals(0);
-    ps = CG_GetPredictedPlayerState(0);
+    LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
+    ps = CG_GetPredictedPlayerState(localClientNum);
 
     iassert(ps);
     //iassert(ps->offhandSecondary == PLAYER_OFFHAND_SECONDARY_FLASH);
@@ -3184,7 +3172,7 @@ void __cdecl CG_OwnerDraw(
         CG_DrawTankBarrel(localClientNum, &rect, material, color);
         break;
     case 97:
-        CG_DrawDeadQuote(LocalClientGlobals, &rect, font, scale, color, textStyle, text_x, text_y);
+        CG_DrawDeadQuote(LocalClientGlobals, &rect, font, scale, color, textStyle, text_x, text_y, textAlignMode);
         break;
     case 98:
         CG_DrawPlayerBarHealthBack(localClientNum, &rect, material, color);
@@ -3225,6 +3213,9 @@ void __cdecl CG_OwnerDraw(
     case 110:
         CG_DrawOffHandHighlight(localClientNum, &rect, scale, color, material, offSecond);
         break;
+	case 111:
+		CG_DrawSaving(localClientNum, &rect, color, material);
+		break;
     case 112:
         CG_DrawPlayerLowHealthOverlay(localClientNum, &rect, material, color);
         break;
@@ -3262,18 +3253,11 @@ void __cdecl CG_OwnerDraw(
             material);
         break;
     case 145:
+		CG_CompassDrawTickertape(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color, font, scale, textStyle, 1);
+    break;
     case 146:
-        CG_CompassDrawTickertape(
-            localClientNum,
-            COMPASS_TYPE_PARTIAL,
-            &parentRect,
-            &rect,
-            material,
-            color,
-            font,
-            scale,
-            textStyle,
-            1);
+		CG_CompassDrawTickertape(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color, font, scale, textStyle, 0);
+    break;
         break;
     case 150:
         CG_CompassDrawPlayer(localClientNum, COMPASS_TYPE_PARTIAL, &parentRect, &rect, material, color);
