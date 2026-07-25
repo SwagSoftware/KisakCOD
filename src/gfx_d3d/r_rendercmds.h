@@ -315,7 +315,7 @@ struct PointLightPartition // sizeof=0x68
     GfxLight light;
     GfxDrawSurfListInfo info;
 };
-struct __declspec(align(16)) ShadowCookie // sizeof=0xC0
+struct __attribute__((aligned(16))) ShadowCookie // sizeof=0xC0
 {                                       // ...
     GfxMatrix shadowLookupMatrix;
     float boxMin[3];
@@ -338,7 +338,7 @@ struct __declspec(align(16)) ShadowCookie // sizeof=0xC0
     // padding byte
     // padding byte
 };
-struct __declspec(align(16)) ShadowCookieList // sizeof=0x1210
+struct __attribute__((aligned(16))) ShadowCookieList // sizeof=0x1210
 {                                       // ...
     ShadowCookie cookies[24];
     uint32_t cookieCount;
@@ -375,7 +375,7 @@ struct GfxSunShadowBoundingPoly // sizeof=0x78
     float points[9][2];
     int pointIsNear[9];
 };
-struct __declspec(align(16)) GfxSunShadowPartition // sizeof=0x200
+struct __attribute__((aligned(16))) GfxSunShadowPartition // sizeof=0x200
 {                                       // ...
     GfxViewParms shadowViewParms;
     int partitionIndex;
@@ -401,7 +401,7 @@ struct GfxSunShadow // sizeof=0x4A0
     GfxSunShadowProjection sunProj;
     GfxSunShadowPartition partition[2]; // 0 = partitionNear, 1 = partitionFar
 };
-struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
+struct __attribute__((aligned(16))) GfxSpotShadow // sizeof=0x1F0
 {                                       // ...
     GfxViewParms shadowViewParms;
     GfxMatrix lookupMatrix;
@@ -432,7 +432,7 @@ struct __declspec(align(16)) GfxSpotShadow // sizeof=0x1F0
 
 struct GfxBackEndData;
 
-struct __declspec(align(8)) GfxCmdBufInput // sizeof=0x430
+struct __attribute__((aligned(8))) GfxCmdBufInput // sizeof=0x430
 {                                       // ...
     float consts[58][4];
     const GfxImage* codeImages[27];     // ...
@@ -513,7 +513,7 @@ const struct GfxViewInfo // sizeof=0x67B0
     // padding byte
     GfxCmdBufInput input;
 };
-const struct __declspec(align(16)) GfxBackEndData // sizeof=0x11E780
+const struct __attribute__((aligned(16))) GfxBackEndData // sizeof=0x11E780
 {                                       // ...
     uint8_t surfsBuffer[0x20000];
     FxCodeMeshData codeMeshes[2048];

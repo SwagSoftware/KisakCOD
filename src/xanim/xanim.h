@@ -378,7 +378,7 @@ struct cbrushside_t // sizeof=0xC
     // padding byte
 };
 
-struct __declspec(align(16)) cbrush_t // sizeof=0x50
+struct __attribute__((aligned(16))) cbrush_t // sizeof=0x50
 {                                       // ...
     float mins[3];
     int contents;

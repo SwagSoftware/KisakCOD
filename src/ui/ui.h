@@ -21,7 +21,7 @@ extern const dvar_t *mis_01;
 extern const dvar_t *mis_difficulty;
 
 // ui_main
-struct __declspec(align(4)) SaveTimeGlob
+struct __attribute__((aligned(4))) SaveTimeGlob
 {
     bool isSaving;
     bool callWrite;

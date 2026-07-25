@@ -29,6 +29,7 @@ build/
 build-dedi/
 build-mp/
 build-sp/
+build-mingw/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/

@@ -34,6 +34,20 @@ option ( ALSOFT_INSTALL_AMBDEC_PRESETS "" OFF )
 option ( ALSOFT_INSTALL_EXAMPLES "" OFF )
 option ( ALSOFT_INSTALL_UTILS "" OFF )
 
+# Disable host-OS audio backends when cross-compiling (e.g. PipeWire, JACK, ALSA, OSS,
+# PulseAudio all get auto-detected on the Linux host but can't build for Windows).
+if (KISAK_PLATFORM STREQUAL "mingw")
+    option ( ALSOFT_BACKEND_PIPEWIRE  "" OFF )
+    option ( ALSOFT_BACKEND_PULSEAUDIO "" OFF )
+    option ( ALSOFT_BACKEND_ALSA      "" OFF )
+    option ( ALSOFT_BACKEND_OSS       "" OFF )
+    option ( ALSOFT_BACKEND_JACK      "" OFF )
+    option ( ALSOFT_BACKEND_SDL2      "" OFF )
+    option ( ALSOFT_BACKEND_SNDIO     "" OFF )
+    option ( ALSOFT_BACKEND_PORTAUDIO "" OFF )
+    # DirectSound / WinMM are the Windows-relevant ones; let them stay ON.
+endif()
+
 FetchContent_Declare (
 	openal
 	GIT_REPOSITORY https://github.com/kcat/openal-soft.git
@@ -42,6 +56,10 @@ FetchContent_Declare (
 	GIT_PROGRESS TRUE
 )
 FetchContent_MakeAvailable ( openal )
+
+if (NOT MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error=function-effects")
+endif()
 
 set_property(TARGET OpenAL PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 

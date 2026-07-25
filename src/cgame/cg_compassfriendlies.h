@@ -7,7 +7,7 @@
 
 enum CompassType : __int32;
 
-struct __declspec(align(4)) CompassActor
+struct __attribute__((aligned(4))) CompassActor
 {
     int lastUpdate;
     float lastPos[2];

@@ -468,7 +468,7 @@ void __cdecl Com_SaveLump(LumpType type, const void *newLump, uint32_t size, Com
     BspGlob *v6; // [esp+Ch] [ebp-52Ch]
     char savedName[68]; // [esp+10h] [ebp-528h] BYREF
     uint32_t chunkIter; // [esp+58h] [ebp-4E0h]
-    uint32_t zero; // [esp+5Ch] [ebp-4DCh] BYREF
+    uint32_t zero = 0; // [esp+5Ch] [ebp-4DCh] BYREF
     BspHeader newHeader; // [esp+60h] [ebp-4D8h] BYREF
     uint32_t offset; // [esp+394h] [ebp-1A4h]
     const BspChunk *chunk; // [esp+398h] [ebp-1A0h]

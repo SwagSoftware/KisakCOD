@@ -8,7 +8,7 @@
 #include "scr_compiler.h"
 
 #include <qcommon/qcommon.h>
-#include <Windows.h>
+#include <windows.h>
 #include <universal/com_files.h>
 #include "scr_parser.h"
 #include <database/database.h>

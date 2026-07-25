@@ -220,6 +220,6 @@ void __cdecl R_DebugFree(void **dataPtr);
 // r_warn
 void R_WarnOncePerFrame(GfxWarningType warnType, ...);
 double __cdecl R_UpdateFrameRate();
-void __cdecl R_WarnInitDvars();
+static void __cdecl R_WarnInitDvars();
 
 extern DebugGlobals debugGlobals;

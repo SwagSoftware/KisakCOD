@@ -18,7 +18,7 @@ enum ai_animmode_t : __int32
     AI_ANIM_POINT_RELATIVE = 0x9,
 };
 
-struct __declspec(align(4)) scr_animscript_t
+struct __attribute__((aligned(4))) scr_animscript_t
 {
     int func;
     unsigned __int16 name;

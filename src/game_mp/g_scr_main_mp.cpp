@@ -1105,7 +1105,7 @@ void GScr_AnimHasNotetrack()
     anim = Scr_GetAnim(0, 0).linkPointer;
     floatValue = Scr_GetConstString(1);
     Anims = Scr_GetAnims(HIWORD(anim));
-    v1 = XAnimNotetrackExists(Anims, (uint16_t)anim, floatValue);
+    v1 = XAnimNotetrackExists(Anims, (uint16_t)(uintptr_t)anim, floatValue);
     Scr_AddBool(v1);
 }
 
@@ -1119,7 +1119,7 @@ void GScr_GetNotetrackTimes()
     name.intValue = Scr_GetConstString(1);
     Scr_MakeArray();
     Anims = Scr_GetAnims(HIWORD(anim));
-    XAnimAddNotetrackTimesToScriptArray(Anims, (uint16_t)anim, name.stringValue);
+    XAnimAddNotetrackTimesToScriptArray(Anims, (uint16_t)(uintptr_t)anim, name.stringValue);
 }
 
 void GScr_GetBrushModelCenter()
@@ -1877,7 +1877,7 @@ void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
         normalHealth = 1.0;
     if (ent->client)
     {
-        newHealth = SnapFloatToInt((float)ent->client->sess.maxHealth * normalHealth);        
+        newHealth = SnapFloatToInt((float)ent->client->sess.maxHealth * normalHealth);
         SV_GameSendServerCommand(ent - g_entities, SV_CMD_CAN_IGNORE, va("%c \"%i\"", 74, 0));
     }
     else if (ent->maxHealth)
@@ -2011,7 +2011,7 @@ void __cdecl GScr_SetCursorHint(scr_entref_t entref)
     int32_t ia; // [esp+8h] [ebp-4h]
 
     pEnt = GetEntity(entref);
-    
+
     iassert(pEnt->s.eType != ET_MISSILE);
 
     pszHint = Scr_GetString(0);

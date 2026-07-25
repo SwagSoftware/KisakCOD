@@ -136,7 +136,7 @@ enum SaveType : __int32
     SAVE_TYPE_CONSOLE = 0x2,
 };
 
-struct __declspec(align(4)) PendingSave
+struct __attribute__((aligned(4))) PendingSave
 {
     char filename[64];
     char description[256];
@@ -404,7 +404,7 @@ struct serverStatic_t
     int playerScore;
 };
 
-struct __declspec(align(4)) PendingSaveList
+struct __attribute__((aligned(4))) PendingSaveList
 {
     PendingSave pendingSaves[3];
     volatile int count;

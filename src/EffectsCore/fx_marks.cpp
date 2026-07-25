@@ -1522,13 +1522,13 @@ void __cdecl FX_EmitMarkTri(
         indexa.value[0] = marksSystem->carryIndex;
         indexa.value[1] = *indices + baseVertex;
         pIndexa = (r_double_index_t *)&outSurf->indices[outSurf->indexCount - 1];
-        if (((uint8_t)pIndexa & 3) != 0)
+        if (((uint32_t)pIndexa & 3) != 0)
             MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1267, 0, "%s", "!((uint)pIndex & 3)");
         *pIndexa = indexa;
         indexb.value[0] = indices[1] + baseVertex;
         indexb.value[1] = indices[2] + baseVertex;
         pIndexb = pIndexa + 1;
-        if (((uint8_t)pIndexb & 3) != 0)
+        if (((uint32_t)pIndexb & 3) != 0)
             MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1274, 0, "%s", "!((uint)pIndex & 3)");
         *pIndexb = indexb;
         marksSystem->hasCarryIndex = 0;
@@ -1538,7 +1538,7 @@ void __cdecl FX_EmitMarkTri(
         index.value[0] = *indices + baseVertex;
         index.value[1] = indices[1] + baseVertex;
         pIndex = (r_double_index_t *)&outSurf->indices[outSurf->indexCount];
-        if (((uint8_t)pIndex & 3) != 0)
+        if (((uint32_t)pIndex & 3) != 0)
             MyAssertHandler(".\\EffectsCore\\fx_marks.cpp", 1255, 0, "%s", "!((uint)pIndex & 3)");
         *pIndex = index;
         marksSystem->hasCarryIndex = 1;

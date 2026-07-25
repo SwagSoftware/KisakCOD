@@ -2406,7 +2406,7 @@ void __cdecl PlayerCmd_DeactivateReverb(scr_entref_t e)
     const char *v6; // r3
 
     v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    if ((uint16)(uintptr_t)entref)
     {
         v2 = "not an entity";
     }
@@ -2511,7 +2511,7 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t e)
     const char *v6; // r3
 
     v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    if ((uint16)(uintptr_t)entref)
     {
         v2 = "not an entity";
     }

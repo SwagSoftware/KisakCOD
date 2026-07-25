@@ -1,7 +1,7 @@
 #include <universal/q_shared.h>
 #include "timing.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <qcommon/threads.h>
 
 long double msecPerRawTimerTick;

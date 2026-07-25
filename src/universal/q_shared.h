@@ -26,6 +26,11 @@
 #pragma warning(disable : 4786)		// identifier was truncated
 #endif // _WIN32
 
+#undef max
+#define max(a,b) ((a) > (b) ? (a) : (b))
+#undef min
+#define min(a,b) ((a) < (b) ? (a) : (b))
+
 #include <universal/assertive.h> // LWSS add
 
 #include <assert.h>
@@ -78,7 +83,7 @@
 #define	YAW					1		// left / right
 #define	ROLL				2		// fall over
 
-#define ID_INLINE __inline 
+#define ID_INLINE __inline
 
 int __cdecl ShortSwap(__int16 l);
 int __cdecl LongSwap(int l);
@@ -491,7 +496,7 @@ enum DvarFlags : uint16
                                     // a Cvar_Get(), so it can't be changed
                                     // without proper initialization.  modified
                                     // will be set, even though the value hasn't changed yet
-	
+
 	DVAR_ROM                = 0x40, // display only, cannot be set by user at all (can be set by code)
 	DVAR_CHEAT              = 0x80, // can not be changed if cheats are disabled
 
@@ -504,8 +509,8 @@ enum DvarFlags : uint16
 	DVAR_CHANGEABLE_RESET   = 0x8000,
 };
 
-union DvarValue 
-{                
+union DvarValue
+{
 	DvarValue()
 	{
 		integer = 0;
@@ -550,7 +555,7 @@ struct DvarLimits_Integer
 };
 struct DvarLimits_Value
 {
-	float min; 
+	float min;
 	float max;
 };
 struct DvarLimits_Vector
@@ -573,7 +578,7 @@ union DvarLimits
 	}
 	DvarLimits(int min, int max)
 	{
-		integer.min = min; 
+		integer.min = min;
 		integer.max = max;
 	}
 	DvarLimits_Enumeration enumeration;
@@ -735,7 +740,7 @@ enum TraceHitType : __int32
 #define SURF_INVALID -1
 
 struct trace_t // sizeof=0x2C
-{   
+{
 	trace_t()
 	{
 		memset(this, 0, sizeof(trace_t)); // Blops added this, might help
@@ -786,7 +791,7 @@ inline bool __cdecl Com_BitCheckAssert(const uint32_t *array, int bitNum, int si
 {
 	iassert(array);
 	iassert(bitNum < (8 * size));
-	
+
 	return (array[bitNum / 32] & (1 << (bitNum & 31))) != 0;
 }
 
@@ -802,7 +807,7 @@ inline void __cdecl Com_BitSetAssert(uint32_t *array, int bitNum, int size)
 {
 	iassert(array);
 	iassert(bitNum < (8 * size));
-	
+
 	array[bitNum / 32] |= 1 << (bitNum & 31);
 }
 
@@ -836,7 +841,7 @@ struct trajectory_t // sizeof=0x24 // (SP/MP same)
 inline bool __cdecl Com_IsRagdollTrajectory(const trajectory_t *trajectory)
 {
 	iassert(trajectory);
-	
+
 	return trajectory->trType >= TR_FIRST_RAGDOLL && trajectory->trType <= TR_RAGDOLL_INTERPOLATE;
 }
 

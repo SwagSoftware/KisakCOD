@@ -4,7 +4,7 @@
 #include <universal/assertive.h>
 #include <qcommon/qcommon.h>
 
-#include <Windows.h>
+#include <windows.h>
 #include "threads.h"
 #include <xanim/xanim.h>
 #include <mutex>
@@ -15,7 +15,7 @@ const char* g_mem_track_filename;
 // The TRACK_* functions call lock on the g_crit again when holding the lock (re-entrant), meaning we need a recursive_mutex
 // which is slower, but should mimic functionality 1:1
 // TODO: In the future we should refactor this behavior to use the faster, single std::mutex
-// 
+//
 #if defined(_WIN32)
 static _RTL_CRITICAL_SECTION g_crit;
 #else
@@ -162,7 +162,7 @@ void __cdecl TRACK_memtrack()
 #endif
 }
 
-static void __cdecl track_addbasicinfo(meminfo_t* info, int type, int size)
+void __cdecl track_addbasicinfo(meminfo_t* info, int type, int size)
 {
     int v3; // [esp+8h] [ebp-8h]
     int v4; // [esp+Ch] [ebp-4h]
@@ -719,7 +719,7 @@ void __cdecl track_shutdown(int project)
     const char* v1; // eax
     mem_track_node_s* node; // [esp+0h] [ebp-8h]
     int leak_size; // [esp+4h] [ebp-4h]
-    
+
     EnterCriticalSection(&g_crit);
     leak_size = 0;
     for (node = g_head; node; node = node->next)
@@ -1146,7 +1146,7 @@ void __cdecl track_z_alloc(int size, const char* name, int type, char* pos, int 
 {
 #if 0
     mem_track_node_s* node; // [esp+8h] [ebp-4h]
-    
+
     EnterCriticalSection(&g_crit);
     g_mem_track[0].size += overhead;
     track_addbasicinfo(&g_info, 0, overhead);

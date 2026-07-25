@@ -99,7 +99,7 @@ struct MdlPrvBtnTimes
     int ragdollSpeed;
 };
 
-struct __declspec(align(4)) ModelPreviewer_System
+struct __attribute__((aligned(4))) ModelPreviewer_System
 {
     int modelCount;
     const char **modelNames;

@@ -322,6 +322,12 @@ set(GFX_D3D
     "${SRC_DIR}/gfx_d3d/r_xsurface.h"
 )
 
+if(KISAK_PLATFORM STREQUAL "mingw")
+    list(APPEND GFX_D3D
+        "${SRC_DIR}/gfx_d3d/d3dx_stub.cpp"
+    )
+endif()
+
 set(PHYSICS
     "${SRC_DIR}/physics/physpreset_load_obj.cpp"
     "${SRC_DIR}/physics/phys_coll_boxbrush.cpp"
@@ -574,12 +580,16 @@ set(WIN32_SRC
     "${SRC_DIR}/win32/win_syscon.cpp"
     "${SRC_DIR}/win32/win_voice.cpp"
     "${SRC_DIR}/win32/win_wndproc.cpp"
-	
+
     "${SRC_DIR}/win32/win_steam.cpp"
     "${SRC_DIR}/win32/win_steam.h"
-
-    "${SRC_DIR}/win32/kisakcod.rc"
 )
+
+if (NOT KISAK_PLATFORM STREQUAL "mingw")
+    list(APPEND WIN32_SRC
+      "${SRC_DIR}/win32/kisakcod.rc"
+    )
+endif()
 
 set(XANIM
     "${SRC_DIR}/xanim/dobj.cpp"
@@ -657,7 +667,7 @@ set(ZLIB
     "${DEPS_DIR}/zlib/inftrees.h"
     "${DEPS_DIR}/zlib/infutil.c"
     "${DEPS_DIR}/zlib/infutil.h"
-    "${DEPS_DIR}/zlib/maketree.c"
+    #"${DEPS_DIR}/zlib/maketree.c"
     "${DEPS_DIR}/zlib/trees.c"
     "${DEPS_DIR}/zlib/trees.h"
     "${DEPS_DIR}/zlib/uncompr.c"

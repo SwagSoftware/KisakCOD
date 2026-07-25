@@ -1,10 +1,4 @@
 # === Increment Build ===
-if (WIN32)
-  set(SCRIPT_EXT .cmd)
-else()
-  set(SCRIPT_EXT .sh)
-endif()
-
 # We want to update the build number before building
 add_dependencies(${PROJECT_NAME} update_build_number)
 
@@ -21,14 +15,13 @@ endif()
 # Set Win32 compiler flag
 target_compile_definitions(${PROJECT_NAME} PUBLIC WIN32 _CONSOLE _MBCS)
 
-# Set the generator platform
-set(CMAKE_GENERATOR_PLATFORM "WIN32")
+# Set the generator platform (VS generator only)
+if (KISAK_PLATFORM STREQUAL "win32")
+    set(CMAKE_GENERATOR_PLATFORM "WIN32")
+endif()
 
-# If we are building on windows
-if (WIN32)
-  # Set the generator platform
-  set(CMAKE_GENERATOR_PLATFORM "WIN32")
-
+# If we are building with the MSVC toolchain (native Windows build)
+if (WIN32 AND NOT KISAK_PLATFORM STREQUAL "mingw")
   # Check to see if we are running a github action
   if (DEFINED CICD)
     message("===== BUILDING FOR GITHUB ACTIONS =====")
@@ -50,7 +43,7 @@ if (WIN32)
     set(DXSDK_INC_DIR ${DXSDK_DIR}/include)
     set(DXSDK_LIB_DIR ${DXSDK_DIR}/lib/x86)
   endif() # DEFINED CICD
-  
+
   # Set the required library
   if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(D3DX_LIB d3dx9d.lib)
@@ -58,56 +51,65 @@ if (WIN32)
     set(D3DX_LIB d3dx9.lib)
   endif() # CMAKE_BUILD_TYPE Debug
 
-endif() # WIN32
+endif() # WIN32 AND NOT mingw
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${SRC_DIR})
 target_include_directories(${PROJECT_NAME} PUBLIC ${DEPS_DIR})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${DXSDK_INC_DIR})
+if (KISAK_PLATFORM STREQUAL "mingw")
+    # TODO: unhardcode..
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        $ENV{HOME}/git/llvm-mingw-20260721-msvcrt-ubuntu-22.04-x86_64/i686-w64-mingw32/include
+    )
+elseif(WIN32)
+  target_include_directories(${PROJECT_NAME} PUBLIC ${DXSDK_INC_DIR})
 
-target_link_directories(${PROJECT_NAME} PUBLIC ${DXSDK_LIB_DIR})
-if (NOT KISAK_SOUND)
-    target_include_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
-    target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
-endif()
-target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/steamsdk")
-target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/binklib")
-
-#Enable PDB for "Release" Build. (There is also RelWithDebInfo, but it has different settings)
-target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/DEBUG>")
-target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:REF>")
-target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:ICF>")
-
-target_link_options(${PROJECT_NAME} PRIVATE /machine:x86)
-set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
-
-if (NOT KISAK_SOUND)
-    target_link_libraries(${PROJECT_NAME} PUBLIC mss32.lib)
+  target_link_directories(${PROJECT_NAME} PUBLIC ${DXSDK_LIB_DIR})
+  target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/msslib")
+  target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/steamsdk")
+  target_link_directories(${PROJECT_NAME} PUBLIC "${DEPS_DIR}/binklib")
 endif()
 
-target_link_libraries(${PROJECT_NAME} PUBLIC
-        dsound.lib
-        ${D3DX_LIB}
-        d3d9.lib
-        ddraw.lib
-        ws2_32.lib
-        winmm.lib
-        kernel32.lib
-        user32.lib
-        gdi32.lib
-        winspool.lib
-        comdlg32.lib
-        advapi32.lib
-        shell32.lib
-        ole32.lib
-        oleaut32.lib
-        uuid.lib
-        odbc32.lib
-        odbccp32.lib
-        binkw32.lib
-        steam_api.lib
-        dxguid.lib
-)
+if (KISAK_PLATFORM STREQUAL "win32")
+    #Enable PDB for "Release" Build. (There is also RelWithDebInfo, but it has different settings)
+    target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/DEBUG>")
+    target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:REF>")
+    target_link_options(${PROJECT_NAME} PRIVATE "$<$<CONFIG:Release>:/OPT:ICF>")
 
-set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    target_link_options(${PROJECT_NAME} PRIVATE /machine:x86)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
 
+if (MSVC OR KISAK_PLATFORM STREQUAL "win32")
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+        mss32.lib dsound.lib ${D3DX_LIB} d3d9.lib ddraw.lib
+        ws2_32.lib winmm.lib kernel32.lib user32.lib gdi32.lib
+        winspool.lib comdlg32.lib advapi32.lib shell32.lib
+        ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib
+        binkw32.lib steam_api.lib dxguid.lib
+    )
+    target_link_options(${PROJECT_NAME} PRIVATE /machine:x86)
+    set_target_properties(${PROJECT_NAME} PROPERTIES
+        MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+        WIN32_EXECUTABLE TRUE
+    )
+elseif(KISAK_PLATFORM STREQUAL "mingw")
+    target_link_libraries(${PROJECT_NAME} PUBLIC
+        dsound d3d9 ddraw ws2_32 winmm gdiplus
+        kernel32 user32 gdi32 winspool comdlg32 advapi32
+        shell32 ole32 oleaut32 uuid odbc32 odbccp32 dxguid
+    )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${DEPS_DIR}/msslib/libmss32.a
+        ${DEPS_DIR}/binklib/libbinkw32.a
+        ${DEPS_DIR}/steamsdk/libsteam_api.a
+    )
+
+    target_link_options(${PROJECT_NAME} PRIVATE -m32 -static)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+
+if (KISAK_PLATFORM STREQUAL "win32")
+    set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+endif()

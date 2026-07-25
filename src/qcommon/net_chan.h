@@ -21,7 +21,7 @@ enum netsrc_t : __int32
 	NS_PACKET = 0x2,
 };
 
-struct __declspec(align(4)) netadr_t
+struct __attribute__((aligned(4))) netadr_t
 {
 	netadrtype_t type;
 	unsigned __int8 ip[4];

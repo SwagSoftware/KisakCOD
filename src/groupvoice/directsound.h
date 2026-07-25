@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-#include <Windows.h>
+#include <windows.h>
 #include <dsound.h>
 
 static const int32_t MIN_COMFORTABLE_BUFFER_AMOUNT = 0x140;

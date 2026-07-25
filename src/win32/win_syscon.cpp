@@ -7,7 +7,7 @@
 #include "../client/client.h"
 #include "win_local.h"
 
-#include <Windows.h>
+#include <windows.h>
 
 #include <errno.h>
 #include <float.h>

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Windows.h> // literally just for some of the extern types at the bottom
+#include <windows.h> // literally just for some of the extern types at the bottom
 #include <gfx_d3d/rb_backend.h> // THREAD_CONTEXT_COUNT
 
 enum ThreadOwner : __int32

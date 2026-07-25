@@ -661,7 +661,7 @@ struct operator_s // sizeof=0x14
     operator_s *prev;
     operator_s *next;
 };
-struct __declspec(align(8)) token_s // sizeof=0x430
+struct __attribute__((aligned(8))) token_s // sizeof=0x430
 {                                       // ...
     char string[1024];                  // ...
     int type;                           // ...
@@ -682,7 +682,7 @@ struct __declspec(align(8)) token_s // sizeof=0x430
     // padding byte
     // padding byte
 };
-struct __declspec(align(8)) value_s // sizeof=0x20
+struct __attribute__((aligned(8))) value_s // sizeof=0x20
 {                                       // ...
     int intvalue;
     // padding byte
@@ -698,7 +698,7 @@ struct __declspec(align(8)) value_s // sizeof=0x20
     // padding byte
     // padding byte
 };
-struct __declspec(align(8)) script_s // sizeof=0x4B0
+struct __attribute__((aligned(8))) script_s // sizeof=0x4B0
 {
     char filename[64];
     char *buffer;
@@ -1402,7 +1402,7 @@ struct KeywordHashEntry
     }
     int KeywordHash_PickSeed(int count)
     {
-        for (int seed = 0; !IsValidSeed(count, HASH_SEED); seed++)
+        for (int seed = 0; !KeywordHash_IsValidSeed(count, HASH_SEED); seed++)
         {
             iassert(seed != 65536);
         }

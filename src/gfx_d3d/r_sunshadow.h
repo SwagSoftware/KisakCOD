@@ -20,7 +20,7 @@ void __cdecl R_SunShadowMapBoundingPoly(
     float sampleSize,
     float (*polyInClipSpace)[9][2],
     int *pointIsNear);
-void __cdecl R_GetSunAxes(float (*sunAxis)[3][3]);
+static void __cdecl R_GetSunAxes(float (*sunAxis)[3][3]);
 void __cdecl R_SetupSunShadowMaps(const GfxViewParms *viewParms, GfxSunShadow *sunShadow);
 void __cdecl R_GetSceneExtentsAlongDir(const float *origin, const float *forward, float *nearCap, float *farCap);
 void __cdecl R_SetupSunShadowMapProjection(

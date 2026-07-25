@@ -3,7 +3,7 @@
 
 #include <cmath>
 
-#include <Windows.h>
+#include <windows.h>
 #include <qcommon/qcommon.h>
 
 int initialized_1 = 0;

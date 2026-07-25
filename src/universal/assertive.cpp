@@ -536,6 +536,7 @@ char g_module[MAX_PATH];
 
 // KISAKX64
 // this is broken right now
+#if 0
 int __cdecl DoStackTrace(char* msg, int nIgnore)
 {
     int* v2; // ecx
@@ -563,9 +564,11 @@ int __cdecl DoStackTrace(char* msg, int nIgnore)
     }
     return LoadMapFiles(msg);
 }
+#endif
 
 void __cdecl BuildAssertMessage(const char* expr, const char* filename, int line, int type, int skipLevels, char* message)
 {
+#if 0
     const char* String; // eax
     int v7; // eax
     char* curPos; // [esp+0h] [ebp-14h]
@@ -588,6 +591,7 @@ void __cdecl BuildAssertMessage(const char* expr, const char* filename, int line
         filename,
         line);
     DoStackTrace(&curPos[v7], skipLevels + 1);
+#endif
 }
 
 HWND g_hwndGame[4];
@@ -646,7 +650,7 @@ void MyAssertHandler(const char *filename, int line, int type, const char *fmt, 
 #ifdef KISAK_PURE
     char shouldBreak; // [esp+3h] [ebp-5h]
     va_list va; // [esp+20h] [ebp+18h] BYREF
-    
+
     va_start(va, fmt);
     Sys_EnterCriticalSection(CRITSECT_ASSERT);
     _vsnprintf(message, 0x400u, fmt, va);

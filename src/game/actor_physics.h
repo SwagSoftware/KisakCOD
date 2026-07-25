@@ -21,7 +21,7 @@ enum SlideMoveResult : __int32
     SLIDEMOVE_FAIL = 0x2,
 };
 
-struct __declspec(align(4)) actor_physics_t
+struct __attribute__((aligned(4))) actor_physics_t
 {
     float vOrigin[3];
     float vVelocity[3];

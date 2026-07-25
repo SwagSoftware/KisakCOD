@@ -3,7 +3,7 @@
 
 void __cdecl Load_ScriptStringCustom(uint16_t *var)
 {
-    *var = (uint16_t)varXAssetList->stringList.strings[*var];
+    *var = (uint16_t)(uintptr_t)varXAssetList->stringList.strings[*var];
 }
 
 void __cdecl Mark_ScriptStringCustom(uint16_t *var)

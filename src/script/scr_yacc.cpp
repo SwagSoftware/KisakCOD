@@ -21,7 +21,7 @@
 // your lexter, just beneath #include <y.tab.h>:
 
 #include <universal/q_shared.h>
-#include <Windows.h>
+#include <windows.h>
 
 #include "scr_yacc.h"
 

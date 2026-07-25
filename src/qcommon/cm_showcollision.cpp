@@ -3,7 +3,7 @@
 #include "mem_track.h"
 #include <xanim/xanim.h>
 
-#include <Windows.h>
+#include <windows.h>
 
 
 uint8_t windingPool[12292];
@@ -669,7 +669,11 @@ BOOL __cdecl BoxOnPlaneSide(const float *emins, const float *emaxs, const cplane
         __debugbreak();
         __debugbreak();
         __debugbreak();
+#if defined(__clang__) || defined(__GNUC__)
+        __builtin_unreachable();
+#else
         break;
+#endif
     }
     
     return (2 * (v4 < p->dist)) | (v3 > p->dist); // KISAKTODO: probably BoxDistSqrdExceeds()

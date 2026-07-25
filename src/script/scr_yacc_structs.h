@@ -1,14 +1,14 @@
 #pragma once
 #include <cstdint>
 
-// LWSS: Note alignment and order matters here. 
+// LWSS: Note alignment and order matters here.
 
 #define YYTABLESIZE 1348
 
 #pragma optimize("", off)
 
 /* YYTRANSLATE[YYLEX] -- Bison token number corresponding to YYLEX. */
-static alignas(1) const char yytranslate[352] =
+alignas(1) static const char yytranslate[352] =
 {
 	0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
 	2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -47,7 +47,7 @@ static alignas(1) const char yytranslate[352] =
 	86,   87,    88,    89,    90, //,    91,
 	0, 0, 0, 0, 0, 0, 0 // LWSS: alignment
 };
-static alignas(2) const short yyr1[136] =
+alignas(2) static const short yyr1[136] =
 {
   0,  91,  91,  91,  91,  92,  92,  92,  92,  92,
   92, 92,  92,  92,  92,  92,  92,  92,  92,  92,
@@ -65,7 +65,7 @@ static alignas(2) const short yyr1[136] =
   116,  117,  118,  118,
   0, 0 // LWSS: alignment
 };
-static alignas(2) const short yyr2[136] =
+alignas(2) static const short yyr2[136] =
 {
   0,  3,  2,  2,  2,  1,  3,  3,  3,  3,
   3,  3,  3,  3,  3,  3,  3,  3,  3,  3,
@@ -86,7 +86,7 @@ static alignas(2) const short yyr2[136] =
 /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
    Performed when YYTABLE does not specify something else to do.  Zero
    means the default is an error.  */
-static alignas(2) const short yydefact[262] =
+alignas(2) static const short yydefact[262] =
 {
 	0,    133,    0,    130,    64,    45,    46,    110,    114,     0,
 	0,      0,    0,      0,    41,    42,    69,      0,      0,    49,
@@ -117,7 +117,7 @@ static alignas(2) const short yydefact[262] =
 	0, 0 // LWSS: alignment
 };
 /* YYDEFGOTO[NTERM-NUM].  */
-static alignas(2) const short yydefgoto[30] =
+alignas(2) static const short yydefgoto[30] =
 {
 	259,     57,     206,     42,     43,      44,     45,     46,     58,      59,
 	60,     141,      51,    245,    142,     143,     56,     61,     62,     222,
@@ -128,7 +128,7 @@ static alignas(2) const short yydefgoto[30] =
 
 /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
    STATE-NUM.  */
-static alignas(2) const short yypact[] =
+alignas(2) static const short yypact[] =
 {
   -15,
   32768,
@@ -394,7 +394,7 @@ static alignas(2) const short yypact[] =
   32768,
 };
 
-const __int16 yypgoto[] = 
+const __int16 yypgoto[] =
 {
   32768,
   33,
@@ -431,7 +431,7 @@ const __int16 yypgoto[] =
 /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
    positive, shift that token.  If negative, reduce the rule whose
    number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static alignas(2) const short yytable[1348] =
+alignas(2) static const short yytable[1348] =
 {
 	48,     130,     174,     -93,      47,      72,     231,      83,      72,      52,
 	113,      1,     105,       2,     177,     105,      49,     -31,      53,     -94,
@@ -569,7 +569,7 @@ static alignas(2) const short yytable[1348] =
 	101,    102,      87,      88,      89,      90,      91,      92,      93,      94,
 	95,      96,      97,      98,      99,     100,     101,     102,
 };
-static alignas(2) const short yycheck[1348] =
+alignas(2) static const short yycheck[1348] =
 {
 	2,      4,   104,    10,     2,     4,    10,    39,     4,     2,
 	48,    26,    11,    28,     4,    11,     2,     9,    68,    38,
@@ -707,7 +707,7 @@ static alignas(2) const short yycheck[1348] =
 	29,    30,    15,    16,    17,    18,    19,    20,    21,    22,
 	23,    24,    25,    26,    27,    28,    29,    30,
 };
-static alignas(2) const short yy_accept[260] =
+alignas(2) static const short yy_accept[260] =
 {
 	0,      0,     0,     0,     0,     0,     0,    95,    93,     1,
 	4,     33,    93,    93,    89,    32,    19,    11,    12,    30,
@@ -738,7 +738,7 @@ static alignas(2) const short yy_accept[260] =
 	0, 0 // LWSS: alignment
 };
 
-const alignas(4) int yy_ec[256] =
+alignas(4) const int yy_ec[256] =
 {
   0,
   1,
@@ -1002,7 +1002,7 @@ const alignas(4) int yy_ec[256] =
 
 
 
-static alignas(4) const int32_t yy_meta[60] =
+alignas(4) static const int32_t yy_meta[60] =
 {
 	0,    1,    1,    2,    1,    1,    1,    1,    1,    1,
 	1,    1,    1,    1,    1,    1,    1,    1,    3,    1,
@@ -1013,7 +1013,7 @@ static alignas(4) const int32_t yy_meta[60] =
 	0 // LWSS: alignment
 };
 
-static alignas(2) const short yy_base[268] =
+alignas(2) static const short yy_base[268] =
 {
 	0,      431,    430,      0,    0,       56,     57,    432,    435,    435,
 	429,    408,     56,     45,    435,    407,     58,    435,    435,    406,
@@ -1045,7 +1045,7 @@ static alignas(2) const short yy_base[268] =
 	0, 0 // LWSS: alignment
 };
 
-static alignas(2) const short yy_def[268] =
+alignas(2) static const short yy_def[268] =
 {
 	0,      258,    258,    257,      3,    259,    259,    257,    257,    257,
 	257,    257,    260,    257,    257,    257,    257,    257,    257,    257,
@@ -1077,7 +1077,7 @@ static alignas(2) const short yy_def[268] =
 	0, 0 // LWSS: alignment
 };
 
-static alignas(2) const short yy_nxt[496] =
+alignas(2) static const short yy_nxt[496] =
 {
 	0,       8,    10,     9,    11,    12,    13,    14,    15,    16,
 	17,     18,    19,    20,    21,    22,    23,    24,    25,    26,
@@ -1132,7 +1132,7 @@ static alignas(2) const short yy_nxt[496] =
 	0, 0 // LWSS: alignment
 };
 
-static alignas(2) const short yy_chk[494] =
+alignas(2) static const short yy_chk[494] =
 {
 	0,        3,      3,      3,      3,      3,      3,      3,      3,      3,
 	3,        3,      3,      3,      3,      3,      3,      3,      3,      3,

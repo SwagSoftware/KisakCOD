@@ -2544,7 +2544,7 @@ int __cdecl UI_GetPlayerProfileListIndexFromName(const char *name)
     {
         nameIndex = uiInfo->playerProfileStatus.displayProfile[profileIndex];
         bcassert(nameIndex, uiInfo->playerProfileCount);
-        
+
         if (!I_stricmp(name, uiInfo->playerProfileName[nameIndex]))
             return profileIndex;
     }
@@ -2643,7 +2643,7 @@ void UI_DeletePlayerProfile()
         {
             curSelected = UI_GetPlayerProfileListIndexFromName(ui_playerProfileSelected->current.string);
             bcassert(curSelected, uiInfo->playerProfileCount);
-            
+
             nameIndex = uiInfo->playerProfileStatus.displayProfile[curSelected];
             bcassert(nameIndex, uiInfo->playerProfileCount);
             iassert(!I_stricmp(uiInfo->playerProfileName[nameIndex], ui_playerProfileSelected->current.string));
@@ -2767,7 +2767,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
     char key[1024]; // [esp+15FCh] [ebp-1430h] BYREF
     char checksum[1028]; // [esp+19FCh] [ebp-1030h] BYREF
     char dest[20]; // [esp+1E00h] [ebp-C2Ch] BYREF
-    char buf; // [esp+1E14h] [ebp-C18h] BYREF
+    char buf = 0; // [esp+1E14h] [ebp-C18h] BYREF
     _BYTE v51[3]; // [esp+1E15h] [ebp-C17h] BYREF
     char src[4]; // [esp+1E18h] [ebp-C14h] BYREF
     char v53[4]; // [esp+1E1Ch] [ebp-C10h] BYREF
@@ -6113,4 +6113,3 @@ bool __cdecl UI_ShouldDrawCrosshair()
 {
     return ui_drawCrosshair->current.enabled;
 }
-

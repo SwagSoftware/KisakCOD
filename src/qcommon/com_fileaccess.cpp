@@ -137,7 +137,7 @@ int __cdecl FileWrapper_GetFileSize(FILE *h)
 }
 
 #ifdef KISAK_SP
-#include <Windows.h>
+#include <windows.h>
 #include <fileapi.h>
 uint32_t FS_FileTell(FILE *file)
 {

@@ -717,4 +717,3 @@ void __cdecl R_ResetShadowCookies()
     shadowCookieGlob.weightCap = 10.0;
     shadowCookieGlob.lastTime = -1;
 }
-

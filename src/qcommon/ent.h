@@ -57,7 +57,7 @@ struct LerpEntityStateLoopFx // sizeof=0x8
     int period;
 };
 #ifdef KISAK_SP
-struct __declspec(align(4)) LerpEntityStateActor
+struct __attribute__((aligned(4))) LerpEntityStateActor
 {
     float visionFov;
     float visionDist;

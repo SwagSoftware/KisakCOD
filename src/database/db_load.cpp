@@ -8,6 +8,13 @@
 
 #include <gfx_d3d/fxprimitives.h>
 #include <gfx_d3d/r_material.h>
+
+// Forward-declare enums used only as opaque pointer types below.
+// Standard C++ requires a fixed underlying type for forward-declared enums;
+// MSVC silently allows the un-fixed form.
+enum weapPositionAnimNum_t : int;
+enum weapAnimFiles_t : int;
+enum weaponAltModel_t : int;
 #include <gfx_d3d/r_gfx.h>
 #include <xanim/dobj.h>
 #include <gfx_d3d/r_buffers.h>

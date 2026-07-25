@@ -12,7 +12,7 @@
 #include "r_image.h"
 #include "r_fog.h"
 
-#include <Windows.h>
+#include <windows.h>
 #include <d3d9.h>
 
 enum GfxRenderer : __int32
@@ -106,7 +106,7 @@ struct trStatistics_t // sizeof=0x28
 };
 
 struct GfxWorld;
-struct __declspec(align(128)) r_global_permanent_t // sizeof=0x2180
+struct __attribute__((aligned(128))) r_global_permanent_t // sizeof=0x2180
 {                                       // ...
     Material *sortedMaterials[2048];    // ...
     int needSortMaterials;              // ...
@@ -198,7 +198,7 @@ struct GfxLodParms // sizeof=0x20
     // padding byte
 };
 
-struct __declspec(align(8)) r_globals_t // sizeof=0x8310
+struct __attribute__((aligned(8))) r_globals_t // sizeof=0x8310
 {                                       // ...
     GfxViewParms identityViewParms;     // ...
     bool inFrame;                       // ...
@@ -263,7 +263,7 @@ struct GfxWindowTarget // sizeof=0x10
     int height;                         // ...
 };
 
-struct __declspec(align(8)) DxGlobals // sizeof=0x2CE0
+struct __attribute__((aligned(8))) DxGlobals // sizeof=0x2CE0
 {                                       // ...
     HINSTANCE__ *hinst;
     IDirect3D9 *d3d9;                   // ...

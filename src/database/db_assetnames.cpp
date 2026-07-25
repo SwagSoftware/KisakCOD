@@ -4,9 +4,9 @@
 
 //int32_t marker_db_assetnames 828ddeec     db_assetnames.obj
 
-const char *__cdecl DB_StringTableGetName(const XAssetHeader *header);
-const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header);
-const char *__cdecl DB_ImageGetName(const XAssetHeader *header);
+static const char *__cdecl DB_StringTableGetName(const XAssetHeader *header);
+static const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header);
+static const char *__cdecl DB_ImageGetName(const XAssetHeader *header);
 
 const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
 {
@@ -46,9 +46,9 @@ const char *(__cdecl *DB_XAssetGetNameHandler[33])(const XAssetHeader *) =
     DB_StringTableGetName
 };
 
-void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
-void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name);
-void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name);
+static void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name);
+static void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name);
+static void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name);
 
 void(__cdecl *DB_XAssetSetNameHandler[33])(XAssetHeader *, const char *) =
 {
@@ -197,34 +197,34 @@ int(__cdecl *DB_GetXAssetSizeHandler[33])() =
     DB_SizeofXAsset_StringTable_,
 };
 
-void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name)
+static void __cdecl DB_StringTableSetName(XAssetHeader *header, const char *name)
 {
     header->xmodelPieces->name = name;
 }
 
-const char *__cdecl DB_ImageGetName(const XAssetHeader *header)
+static const char *__cdecl DB_ImageGetName(const XAssetHeader *header)
 {
     return header->image->name;
 }
 
-void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name)
+static void __cdecl DB_ImageSetName(XAssetHeader *header, const char *name)
 {
     //header->xmodelPieces[2].pieces = name;
     //header->xmodelPieces[2].name = name;
     header->image->name = name;
 }
 
-const char *__cdecl DB_StringTableGetName(const XAssetHeader *header)
+static const char *__cdecl DB_StringTableGetName(const XAssetHeader *header)
 {
     return header->stringTable->name;
 }
 
-const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header)
+static const char *__cdecl DB_LocalizeEntryGetName(const XAssetHeader *header)
 {
     return header->localize->name;
 }
 
-void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name)
+static void __cdecl DB_LocalizeEntrySetName(XAssetHeader *header, const char *name)
 {
     header->localize->name = name;
 }

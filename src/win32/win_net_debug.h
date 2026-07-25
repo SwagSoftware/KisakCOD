@@ -1,7 +1,5 @@
 #pragma once
 
-extern int g_debugClient;
-
 int __cdecl Sys_IsRemoteDebugClient();
 
 void __cdecl NET_ShutdownDebug();

@@ -70,7 +70,7 @@ struct pathlocal_t_tag
     int maxNodes;
     int nodeCount;
 };
-struct __declspec(align(128)) pathlocal_t
+struct __attribute__((aligned(128))) pathlocal_t
 {
     PathLinkInfo pathLinkInfoArray[2048];
     int pathLinkInfoArrayInited;

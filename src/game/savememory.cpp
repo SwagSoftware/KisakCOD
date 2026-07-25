@@ -12,7 +12,7 @@
 #include <server/sv_game.h>
 #include "savedevice.h"     // OpenDevice/CloseDevice/ReadFromDevice/WriteSaveToDevice
 
-struct __declspec(align(4)) SaveMemoryGlob
+struct __attribute__((aligned(4))) SaveMemoryGlob
 {
     SaveGame *committedGameSave;
     SaveGame *currentGameSave;

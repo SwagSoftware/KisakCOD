@@ -24,7 +24,7 @@
 #include <physics/phys_local.h>
 #include "cg_main.h"
 
-struct __declspec(align(4)) $59835072FC2CD3936CE4A4C9F556010B
+struct __attribute__((aligned(4))) $59835072FC2CD3936CE4A4C9F556010B
 {
     char name[64];
     int index;
