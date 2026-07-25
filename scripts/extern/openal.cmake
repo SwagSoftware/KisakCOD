@@ -5,6 +5,14 @@ include(FetchContent)
 # (no OpenAL32.dll to stage via post_build.cmake).
 set(LIBTYPE "STATIC")
 
+# Match the rest of the project's /MTd (static debug CRT). Setting this as a directory-scoped
+# default (rather than only via set_property on the OpenAL target below) is required: OpenAL-
+# Soft creates several internal sub-targets (alsoft.fmt, alsoft.common, alsoft.build_version,
+# etc.) that link into OpenAL32.lib, and those don't inherit a property set on OpenAL alone -
+# they'd stay on MSVC's default /MDd, causing CRT-mismatch link errors (LNK2005/LNK2038/
+# LNK2019) against the rest of the project.
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+
 # The VS-generator + FetchContent combination doesn't reliably wire up module dependency
 # scanning across separate vcxprojs; force plain headers instead of C++20 module partitions.
 option ( ALSOFT_ENABLE_MODULES "" OFF )

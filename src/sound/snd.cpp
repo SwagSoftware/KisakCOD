@@ -4672,11 +4672,46 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
         Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
     }
 #else
-    // KISAK_SOUND TODO: resample down to g_snd.playback_rate for OpenAL, matching the Miles
-    // path above (belongs to the data-loading phase). For now, copy the decoded PCM through
-    // unmodified so loaded sounds are at least present at their native rate.
-    mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
-    Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
+    // dr_wav (see SND_LoadFromBuffer, snd_driver_load_obj.cpp) always decodes to 16-bit PCM
+    // for us, so unlike the Miles branch above there's no ADPCM format to worry about here.
+    if (mssSound->info.rate > g_snd.playback_rate)
+    {
+        // Resample down to g_snd.playback_rate via simple decimation (nearest-frame
+        // resample), matching the halving loop in the Miles branch above. A real
+        // low-pass-filtered resample would sound better, but this matches WORK.md Phase 3's
+        // stated scope - revisit if downsampled loaded sounds turn out to sound too aliased.
+        uint32_t srcFrameCount = mssSound->info.samples;
+        uint32_t channels = mssSound->info.channels;
+        uint32_t rate = mssSound->info.rate;
+        uint32_t frameCount = srcFrameCount;
+
+        while (rate > g_snd.playback_rate)
+        {
+            rate /= 2;
+            frameCount /= 2;
+        }
+
+        uint32_t newDataLen = frameCount * channels * sizeof(int16_t);
+        mssSound->data = MSS_Alloc(newDataLen, rate);
+
+        const int16_t *src16 = (const int16_t *)srcData;
+        int16_t *dst16 = (int16_t *)mssSound->data;
+        for (uint32_t i = 0; i < frameCount; ++i)
+        {
+            uint32_t srcFrame = (uint32_t)((uint64_t)i * srcFrameCount / frameCount);
+            for (uint32_t c = 0; c < channels; ++c)
+                dst16[i * channels + c] = src16[srcFrame * channels + c];
+        }
+
+        mssSound->info.rate = rate;
+        mssSound->info.samples = frameCount;
+        mssSound->info.data_len = newDataLen;
+    }
+    else
+    {
+        mssSound->data = MSS_Alloc(mssSound->info.data_len, mssSound->info.rate);
+        Com_Memcpy(mssSound->data, srcData, mssSound->info.data_len);
+    }
 #endif
     mssSound->info.data_ptr = mssSound->data;
     mssSound->info.initial_ptr = mssSound->data;

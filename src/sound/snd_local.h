@@ -5,6 +5,11 @@
 #else
 #include <AL/al.h>
 #include <AL/alc.h>
+// efx.h only declares its functions as directly-linkable (rather than just LPALGENEFFECTS-
+// style function-pointer typedefs meant for dynamic alGetProcAddress loading) when this is
+// defined first. Since we statically link openal-soft ourselves and know EFX is compiled
+// in, direct linkage is simpler than the usual portable-extension-loading dance.
+#define AL_ALEXT_PROTOTYPES
 #include <AL/efx.h>
 #endif
 #include "snd_public.h"
@@ -106,6 +111,12 @@ struct AlLocal
     ALCdevice *device;
     ALCcontext *context;
     ALuint source[53];
+    // Per-channel AL buffer, generated fresh each time SND_StartAlias2D/3DSample plays a
+    // "loaded" sound and deleted when the channel is stopped/reused. Simpler than caching
+    // one buffer per SoundFile (which would need a lifetime-safe cache key working for both
+    // the raw-CSV load path and fastfile-preloaded LoadedSounds - see WORK.md Phase 4), at
+    // the cost of re-uploading PCM to the driver on every replay of the same sound.
+    ALuint channelBuffer[53];
 
     MssEqInfo eq[2];                    // same EQ band data as Miles; DSP application TBD
     ALuint eqFilter;                    // reserved for a future EFX filter object (unused for now)
@@ -113,8 +124,15 @@ struct AlLocal
     float eqLerp;
 #endif
 
-    ALuint auxSlot;                     // global reverb auxiliary effect slot (unused for now)
-    ALuint reverbEffect;                // global reverb effect object (unused for now)
+    ALuint auxSlot;                     // global reverb auxiliary effect slot
+    ALuint reverbEffect;                // global reverb effect object (EAXREVERB, one room preset active at a time)
+    // Per-channel AL_FILTER_LOWPASS object, allocated once at init (unlike channelBuffer,
+    // its params just get updated in place, not recreated per-play). Used purely as a
+    // per-source wet-send *gain* carrier for AL_AUXILIARY_SEND_FILTER (AL_LOWPASS_GAIN set
+    // to the desired send level, AL_LOWPASS_GAINHF left neutral at 1.0) - the standard EFX
+    // technique for per-source send level, since AL_AUXILIARY_SEND_FILTER has no gain
+    // parameter of its own. See SND_ApplyReverbSend in snd_driver.cpp.
+    ALuint sendFilter[53];
     bool isMultiChannel;
 };
 #endif

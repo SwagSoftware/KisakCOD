@@ -10,7 +10,8 @@
 #include <universal/com_memory.h>
 #include <math.h>
 
-AlLocal alGlob;
+// alGlob is declared extern in snd_local.h; its one definition lives in snd_driver.cpp
+// (KISAK_SOUND branch), matching where milesGlob's Miles-side definition already lives.
 
 void MSS_InitFailed()
 {
@@ -84,6 +85,14 @@ char __cdecl MSS_Init()
     ALfloat orientation[6] = { 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f };
     alListenerfv(AL_ORIENTATION, orientation);
 
+    // One global reverb bus, matching Miles' own model (a single active room type + a
+    // per-sample dry/wet send level - see SND_SetRoomtype/SND_ApplyReverbSend in
+    // snd_driver.cpp, Phase 6). The effect's actual EAXREVERB properties get filled in by
+    // SND_SetRoomtype whenever the room changes; just allocate the objects here.
+    alGenAuxiliaryEffectSlots(1, &alGlob.auxSlot);
+    alGenEffects(1, &alGlob.reverbEffect);
+    alEffecti(alGlob.reverbEffect, AL_EFFECT_TYPE, AL_EFFECT_EAXREVERB);
+
     g_snd.Initialized2d = 1;
     g_snd.Initialized3d = 1;
     g_snd.max_2D_channels = 8;
@@ -110,6 +119,13 @@ void MSS_InitChannels()
         if (!alGlob.source[i])
             Com_Error(ERR_DROP, "OpenAL source allocation failed on channel %i", i + 1);
     }
+
+    // Per-channel wet-send gain carrier (see AlLocal::sendFilter's comment in snd_local.h).
+    // Allocated once here, params updated in place per-channel by SND_ApplyReverbSend.
+    alGenFilters(totalChannels, alGlob.sendFilter);
+    for (int i = 0; i < totalChannels; ++i)
+        alFilteri(alGlob.sendFilter[i], AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+
     g_snd.ambient_track = 1;
 }
 
@@ -150,11 +166,22 @@ bool __cdecl MSS_Startup()
     return true;
 }
 
-// Mirrors MSS_ShutdownCleanup.
+// Mirrors MSS_ShutdownCleanup. Also frees the sources/filters MSS_InitChannels allocated
+// and the reverb objects MSS_Init allocated - a gap left over from Phase 2/6 that had gone
+// unnoticed since nothing previously exercised a full init-then-shutdown cycle.
 void MSS_ShutdownCleanup()
 {
     if (alGlob.context)
     {
+        int totalChannels = g_snd.max_2D_channels + g_snd.max_3D_channels + g_snd.max_stream_channels;
+        if (totalChannels > 0)
+        {
+            alDeleteSources(totalChannels, alGlob.source);
+            alDeleteFilters(totalChannels, alGlob.sendFilter);
+        }
+        alDeleteAuxiliaryEffectSlots(1, &alGlob.auxSlot);
+        alDeleteEffects(1, &alGlob.reverbEffect);
+
         alcMakeContextCurrent(NULL);
         alcDestroyContext(alGlob.context);
     }
@@ -188,7 +215,6 @@ void __cdecl MSS_ApplyEqFilter(ALuint source, int entchannel)
 {
 }
 
-// KISAK_SOUND TODO (Phase 4 - playback): resume the source once its start delay elapses.
 // Mirrors MSS_ResumeSample.
 void __cdecl MSS_ResumeSample(int i, int frametime)
 {
@@ -198,7 +224,7 @@ void __cdecl MSS_ResumeSample(int i, int frametime)
         g_snd.chaninfo[i].startDelay = (remaining > 0) ? remaining : 0;
         if (!g_snd.chaninfo[i].startDelay)
         {
-            // KISAK_SOUND TODO: alSourcePlay(alGlob.source[i]);
+            alSourcePlay(alGlob.source[i]);
         }
     }
 }
