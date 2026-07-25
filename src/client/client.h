@@ -1110,6 +1110,7 @@ void __cdecl CL_ShutdownDemo();
 void __cdecl CL_SaveSettings(MemoryFile *memFile);
 void __cdecl CL_RestoreSettings(MemoryFile *memFile);
 void __cdecl CL_MapLoading_CalcMovieToPlay(const char *buffer, const char *inMapName, char *outMovieName);
+void __cdecl CL_MapLoading_CalcMovieToPlay_LoadObj(const char *inMapName, char *outMovieName);
 void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName);
 void __cdecl CL_MapLoading_StartCinematic(const char *mapname, float volume);
 void __cdecl CL_MapLoading(const char *mapname);

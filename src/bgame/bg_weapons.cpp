@@ -1281,7 +1281,7 @@ void __cdecl PM_Weapon_Idle(playerState_s *ps)
     ps->weapFlags = v1;
     ps->pm_flags = v3;
     ps->weaponstate = WEAPON_READY;
-    if (pm_type < 5)
+    if (pm_type < PM_DEAD)
         ps->weapAnim = ~(uint16_t)ps->weapAnim & 0x200;
 #endif
 }

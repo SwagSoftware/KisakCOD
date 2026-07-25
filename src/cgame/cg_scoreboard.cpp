@@ -462,7 +462,7 @@ int __cdecl CG_DrawScoreboard(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cgArray[0].predictedPlayerState.pm_type >= 5 || !cgArray[0].showScores)
+    if (cgArray[0].predictedPlayerState.pm_type >= PM_DEAD || !cgArray[0].showScores)
         return 0;
     CG_HudMenuShowAllTimed(localClientNum);
     return 1;

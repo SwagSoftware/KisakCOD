@@ -490,7 +490,7 @@ char __cdecl R_EmitLightGridBlock_Version15(
     }
     else
     {
-        Com_PrintWarning(8, "light grid vertical variation is too extreme -- ignoring light grid");
+        Com_PrintWarning(8, "light grid vertical variation is too extreme -- ignoring light grid\n");
         return 0;
     }
 }

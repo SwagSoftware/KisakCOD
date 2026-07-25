@@ -1,3 +1,7 @@
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
+
 #include <universal/q_shared.h>
 #include "bg_public.h"
 #include "bg_local.h"

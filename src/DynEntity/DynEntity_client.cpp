@@ -1237,7 +1237,7 @@ dxBody *__cdecl DynEntCl_CreatePhysObj(const DynEntityDef *dynEntDef, const GfxP
     }
     else
     {
-        Com_PrintWarning(1, "DynEntCl_CreatePhysObj: Unable to create physic object.");
+        Com_PrintWarning(1, "DynEntCl_CreatePhysObj: Unable to create physic object.\n");
         return 0;
     }
 }

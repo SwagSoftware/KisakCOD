@@ -772,12 +772,12 @@ int __cdecl CG_IsValidRemoteInputState(int localClientNum)
             localClientNum);
     if (g_godModeRemoteInputValid)
         return 1;
-    if (cgArray[0].predictedPlayerState.pm_type == 3)
+    if (cgArray[0].predictedPlayerState.pm_type == PM_UFO)
         return 1;
-    if (cgArray[0].predictedPlayerState.pm_type == 2)
+    if (cgArray[0].predictedPlayerState.pm_type == PM_NOCLIP)
         return 1;
     result = 0;
-    if (cgArray[0].predictedPlayerState.pm_type == 4)
+    if (cgArray[0].predictedPlayerState.pm_type == PM_MPVIEWER)
         return 1;
     return result;
 }

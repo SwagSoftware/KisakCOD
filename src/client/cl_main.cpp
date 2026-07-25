@@ -570,6 +570,16 @@ void __cdecl CL_MapLoading_CalcMovieToPlay(const char *buffer, const char *inMap
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 622, 0, "%s", "outMovieName[0]");
 }
 
+void __cdecl CL_MapLoading_CalcMovieToPlay_LoadObj(const char *inMapName, char *outMovieName)
+{
+    void *buffer;
+
+    if (FS_ReadFile("video/cin_levels.txt", &buffer) < 0)
+        Com_Error(ERR_FATAL, "Could not open %s", "video/cin_levels.txt");
+    CL_MapLoading_CalcMovieToPlay((const char *)buffer, inMapName, outMovieName);
+    FS_FreeFile((char *)buffer);
+}
+
 void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char *outMovieName)
 {
     XAssetHeader asset; // r30
@@ -585,15 +595,22 @@ void __cdecl CL_MapLoading_CalcMovieToPlay_FastFile(const char *inMapName, char 
 void __cdecl CL_MapLoading_StartCinematic(const char *mapname, float volume)
 {
     XAssetHeader asset; // r30
-    char v7[264]; // [sp+50h] [-130h] BYREF
+    char movieName[264]; // [sp+50h] [-130h] BYREF
 
+#ifdef KISAK_XBOX
     asset = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, "video/cin_levels.txt");
 
     if (!asset.rawfile)
         Com_Error(ERR_FATAL, "Could not open %s", "video/cin_levels.txt");
 
-    CL_MapLoading_CalcMovieToPlay((const char *)asset.xmodelPieces->pieces, mapname, v7);
-    R_Cinematic_StartPlayback(v7, 5, volume);
+    CL_MapLoading_CalcMovieToPlay((const char *)asset.xmodelPieces->pieces, mapname, movieName);
+#else
+    if (IsFastFileLoad())
+        CL_MapLoading_CalcMovieToPlay_FastFile(mapname, movieName);
+    else
+        CL_MapLoading_CalcMovieToPlay_LoadObj(mapname, movieName);
+#endif
+    R_Cinematic_StartPlayback(movieName, 5, volume);
 }
 
 void __cdecl CL_MapLoading(const char *mapname)

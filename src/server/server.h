@@ -171,8 +171,10 @@ void __cdecl SV_FastRestart_f();
 void __cdecl SV_MapRestart_f();
 void __cdecl SV_NextLevel_f();
 void __cdecl SV_LoadGame_f();
+#ifdef KISAK_XBOX
 void __cdecl SV_ForceSelectSaveDevice_f();
 void __cdecl SV_SelectSaveDevice_f();
+#endif
 void __cdecl CheckSaveExists(const char *filename);
 void __cdecl SV_LoadGameContinue_f();
 void __cdecl SV_ScriptUsage_f();
@@ -249,6 +251,7 @@ void __cdecl SV_SaveDemoImmediate(SaveImmediate *save);
 void __cdecl SV_WriteDemo(SaveGame *save);
 void __cdecl SV_SaveDemo(const char *demoName, const char *description, unsigned __int32 saveType);
 void __cdecl SV_AutoSaveDemo(const char *baseName, const char *description, int demoCount, bool force);
+bool __cdecl SV_GetLatestAutoReplayName(char *filename, int filenameSize);
 void SV_EnableAutoDemo();
 void __cdecl SV_SaveDemo_f();
 void SV_DemoRestart();
@@ -477,15 +480,19 @@ extern const dvar_t *sv_player_maxhealth;
 extern const dvar_t *sv_saveOnStartMap;
 extern const dvar_t *sv_gameskill;
 extern const dvar_t *sv_mapname;
+#ifdef KISAK_XBOX
 extern const dvar_t *sv_saveDeviceAvailable;
+#endif
 extern const dvar_t *sv_cheats;
 extern const dvar_t *player_healthEasy;
 extern const dvar_t *player_healthHard;
 extern const dvar_t *sv_player_deathInvulnerableTime;
 extern const dvar_t *runForTime;
 extern const dvar_t *sv_saveGameSuccess;
+#ifdef KISAK_XBOX
 extern const dvar_t *sv_saveGameAvailable;
 extern const dvar_t *sv_saveGameNotReadable;
+#endif
 extern const dvar_t *replay_autosave;
 extern const dvar_t *player_healthMedium;
 extern const dvar_t *player_healthFu;

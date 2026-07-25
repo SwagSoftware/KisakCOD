@@ -58,7 +58,7 @@ char __cdecl Ragdoll_ValidateBodyObj(RagdollBody *body)
         if (!DObjGetBoneIndex(obj, boneDef->animBoneNames[0], &boneIdx) || boneIdx == 255)
             return 0;
         boneIdx = 0;
-        if (boneDef->animBoneNames[1] && !DObjGetBoneIndex(obj, boneDef->animBoneNames[1], &boneIdx) || boneIdx == 255)
+        if (boneDef->animBoneNames[1] && (!DObjGetBoneIndex(obj, boneDef->animBoneNames[1], &boneIdx) || boneIdx == 255))
             return 0;
         ++i;
         ++boneDef;
@@ -1631,13 +1631,14 @@ bool __cdecl Ragdoll_ExitDObjWait(RagdollBody *body, BodyState_t prevState, Body
         bone->animBones[0] = 0;
         if (!DObjGetBoneIndex(obj, boneDef->animBoneNames[0], bone->animBones) || bone->animBones[0] == 255)
             return 0;
-        if (boneDef->animBoneNames[1] == -1)
+        if (boneDef->animBoneNames[1])
         {
-            bone->animBones[1] = 0;
+			if (!DObjGetBoneIndex(obj, boneDef->animBoneNames[1], &bone->animBones[1]) || bone->animBones[0] == 255)
+				return 0;
         }
-        else if (!DObjGetBoneIndex(obj, boneDef->animBoneNames[1], &bone->animBones[1]) || bone->animBones[0] == 255)
+        else
         {
-            return 0;
+			bone->animBones[1] = 0;
         }
         ++bone;
         ++boneDef;

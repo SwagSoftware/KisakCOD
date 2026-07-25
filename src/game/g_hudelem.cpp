@@ -754,7 +754,7 @@ void __cdecl HECmd_SetTargetEnt(scr_entref_t entref)
     ent = Scr_GetEntity(0);
     hud->elem.targetEntNum = ent->s.number;
     if ((ent->r.svFlags & 0x10) == 0)
-        Com_PrintWarning(15, "SetTargetEnt() called on a non-broadcasting entity, may not show in client snapshots.");
+        Com_PrintWarning(15, "SetTargetEnt() called on a non-broadcasting entity, may not show in client snapshots.\n");
 }
 
 void __cdecl HECmd_ClearTargetEnt(scr_entref_t entref)

@@ -35,7 +35,7 @@ void __cdecl P_DamageFeedback(gentity_s *player)
     client = player->client;
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_active.cpp", 29, 0, "%s", "client");
-    if (client->ps.pm_type < 5)
+    if (client->ps.pm_type < PM_DEAD)
     {
         if (player_debugHealth->current.enabled
             && client->invulnerableActivated
@@ -588,7 +588,6 @@ void __cdecl ClientThink_real(gentity_s *ent)
     gclient_s *client; // r30
     usercmd_s *p_cmd; // r25
     unsigned int v5; // r11
-    int v6; // r11
     long double v7; // fp2
     int eventSequence; // r28
     double v9; // fp0
@@ -639,24 +638,24 @@ void __cdecl ClientThink_real(gentity_s *ent)
     client->ps.pm_flags = v5;
     if (client->noclip)
     {
-        v6 = 2;
+        client->ps.pm_type = PM_NOCLIP;
     }
     else if (client->ufo)
     {
-        v6 = 3;
+        client->ps.pm_type = PM_UFO;
     }
     else if (level.mpviewer)
     {
-        v6 = 4;
+        client->ps.pm_type = PM_MPVIEWER;
     }
-    else
-    {
-        //v6 = (_cntlzw((unsigned int)ent->tagInfo) & 0x20) == 0;
-        v6 = (ent->tagInfo != 0);
-        if (client->ps.stats[0] <= 0)
-            v6 += 5;
-    }
-    client->ps.pm_type = (pmtype_t)v6;
+	else if (client->ps.stats[0] <= 0)
+	{
+		client->ps.pm_type = ent->tagInfo ? PM_DEAD_LINKED : PM_DEAD;
+	}
+	else
+	{
+		client->ps.pm_type = ent->tagInfo ? PM_NORMAL_LINKED : PM_NORMAL;
+	}
     v7 = floor((g_gravity->current.value + 0.5f));
     eventSequence = client->ps.eventSequence;
     v9 = (float)(client->ps.aimSpreadScale * (float)0.0039215689);
@@ -668,7 +667,7 @@ void __cdecl ClientThink_real(gentity_s *ent)
     v39.ps = &client->ps;
     memcpy(&v39.cmd, p_cmd, sizeof(v39.cmd));
     memcpy(&v39.oldcmd, &client->pers.oldcmd, sizeof(v39.oldcmd));
-    if (client->ps.pm_type < 5)
+    if (client->ps.pm_type < PM_DEAD)
         clipmask = ent->clipmask;
     else
         clipmask = 8454161;
@@ -795,7 +794,7 @@ LABEL_35:
         client->ps.pm_flags &= ~0x10000u;
         v35 = level.time;
     }
-    if (client->ps.pm_type >= 5 && v35 > client->respawnTime)
+    if (client->ps.pm_type >= PM_DEAD && v35 > client->respawnTime)
         respawn(ent);
 }
 
@@ -856,7 +855,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             v6 = ent->client;
             pm_type = v6->ps.pm_type;
             
-            if (pm_type == 1 || pm_type == 6)
+            if (pm_type == PM_NORMAL_LINKED || pm_type == PM_DEAD_LINKED)
             {
                 --v6->ps.pm_type;
             }
@@ -928,7 +927,7 @@ void __cdecl G_UpdatePlayerTriggers(gentity_s *ent)
         Client_ClaimNode(ent);
         Sentient_BanNearNodes(ent->sentient);
         client = ent->client;
-        if (!client->noclip && !client->ufo && client->ps.pm_type < 5 && !level.mpviewer)
+        if (!client->noclip && !client->ufo && client->ps.pm_type < PM_DEAD && !level.mpviewer)
             G_DoTouchTriggers(ent);
     }
 }

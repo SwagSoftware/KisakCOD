@@ -86,6 +86,8 @@ struct CinematicGlob // sizeof=0x7AC
     // padding byte
 };
 
+extern CinematicGlob cinematicGlob;
+
 void R_Cinematic_RelinquishIO();
 void R_Cinematic_CheckBinkError();
 void __cdecl R_Cinematic_InitBinkVolumes();

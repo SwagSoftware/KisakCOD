@@ -1340,8 +1340,14 @@ char __cdecl Cmd_ExecFromFastFile(int32_t  localClientNum, int32_t  controllerIn
 {
     RawFile *rawfile; // [esp+4h] [ebp-4h]
 
+#ifdef KISAK_MP
     if (!DB_IsMinimumFastFileLoaded())
         return 0;
+#elif KISAK_SP
+	if (!g_anyFastFileLoaded)
+		return 0;
+#endif
+
     rawfile = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, filename).rawfile;
     if (!rawfile)
         return 0;

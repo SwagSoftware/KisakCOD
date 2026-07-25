@@ -25,7 +25,11 @@ struct DB_LoadData // sizeof=0x68
     int32_t allocType;                      // ...
 };
 
+#ifdef KISAK_MP
 bool g_minimumFastFileLoaded;
+#elif KISAK_SP
+bool g_anyFastFileLoaded;
+#endif
 
 DB_LoadData g_load;
 LONG g_loadedSize;
@@ -301,14 +305,22 @@ void __cdecl DB_LoadXFileInternal()
     DB_LoadDelayedImages();
     iassert(g_load.compressBufferStart);
     Com_Printf(10, "Loaded zone '%s'\n", g_load.filename);
+#ifdef KISAK_MP
     if (!g_minimumFastFileLoaded)
         g_minimumFastFileLoaded = I_stricmp("localized_code_post_gfx_mp", g_load.filename) == 0;
+#elif KISAK_SP
+	g_anyFastFileLoaded = true;
+#endif
     DB_CancelLoadXFile();
 }
 
 bool __cdecl DB_IsMinimumFastFileLoaded()
 {
+#ifdef KISAK_MP
     return g_minimumFastFileLoaded;
+#elif KISAK_SP
+	return g_anyFastFileLoaded;
+#endif
 }
 
 void Load_XAssetListCustom()

@@ -1462,7 +1462,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem
                 {
                     Com_PrintWarning(
                         1,
-                        "DrawOffscreenViewableWaypoint(): targetEnt %i not in snapshot, may not be a network-broadcasting entity.",
+                        "DrawOffscreenViewableWaypoint(): targetEnt %i not in snapshot, may not be a network-broadcasting entity.\n",
                         elem->targetEntNum);
                     return;
                 }

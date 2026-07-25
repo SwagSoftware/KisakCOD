@@ -175,16 +175,46 @@ int __cdecl ReadFromDevice(void *buffer, int size, void *fileHandle)
 	return (int)FS_Read((unsigned char *)buffer, (unsigned int)size, handle);
 }
 
-bool __cdecl SaveExists(char const *savename)
+static bool SaveExistsValidated(char const *path)
 {
-	if (!savename || !*savename)
-		return false;
 	int handle = 0;
-	FS_FOpenFileRead(savename, &handle);
+	SaveHeader header;
+
+	if (!path || !*path)
+		return false;
+
+	FS_FOpenFileRead(path, &handle);
 	if (!handle)
 		return false;
+
+	const int bytesRead = FS_Read((unsigned char *)&header, (unsigned int)sizeof(SaveHeader), handle);
 	FS_FCloseFile(handle);
-	return true;
+
+	return bytesRead == (int)sizeof(SaveHeader) && header.saveVersion == 287;
+}
+
+bool __cdecl SaveExists(char const *savename)
+{
+	char pathWithExt[256];
+	const char *ext;
+
+	if (!savename || !*savename)
+		return false;
+
+#ifdef KISAK_XBOX
+	return SaveExistsValidated(savename);
+#else
+	if (SaveExistsValidated(savename))
+		return true;
+
+	ext = strrchr(savename, '.');
+	if (!ext || I_stricmp(ext, ".svg") != 0)
+	{
+		Com_sprintf(pathWithExt, sizeof(pathWithExt), "%s.svg", savename);
+		return SaveExistsValidated(pathWithExt);
+	}
+	return false;
+#endif
 }
 
 int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *saveHeader, bool /*suppressPlayerNotify*/)

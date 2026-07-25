@@ -1032,6 +1032,8 @@ void __cdecl UI_OverrideCursorPos(int localClientNum, itemDef_s *item)
 
 int __cdecl UI_FeederCount(int localClientNum, float feederID)
 {
+	if (feederID == 9.0f)
+		return sharedUiInfo.modCount;
     if (feederID == 16.0f)
         return uiInfo.savegameCount;
     if (feederID == 24.0f)
@@ -1283,6 +1285,7 @@ void __cdecl UI_Init()
 
     if (IsFastFileLoad())
     {
+		uiInfo.videoSubtitles = DB_FindXAssetHeader(ASSET_TYPE_STRINGTABLE, "video/subtitles.csv").stringTable;
         UI_AddMenuList(&uiInfo.uiDC, UI_LoadMenus((char *)"ui/code.txt", 3));
     }
 
@@ -1657,6 +1660,36 @@ void UI_PlayerStart()
         R_Cinematic_StartNextPlayback();
     else
         R_Cinematic_StopPlayback();
+}
+
+void UI_LoadModsList()
+{
+	char dirlist[2048];
+	const char *dirptr;
+	char *descptr;
+	int numdirs;
+	int i;
+	int dirlen;
+
+	sharedUiInfo.modCount = 0;
+	sharedUiInfo.modIndex = 0;
+
+	numdirs = FS_GetFileList("$modlist", "", FS_LIST_ALL, dirlist, sizeof(dirlist));
+	dirptr = dirlist;
+
+	for (i = 0; i < numdirs; ++i)
+	{
+		dirlen = (int)strlen(dirptr) + 1;
+		descptr = (char *)&dirptr[dirlen];
+		
+		sharedUiInfo.modList[sharedUiInfo.modCount].modName = String_Alloc(dirptr);
+		sharedUiInfo.modList[sharedUiInfo.modCount].modDescr = String_Alloc(descptr);
+		
+		dirptr += dirlen + (int)strlen(descptr) + 1;
+		
+		if (++sharedUiInfo.modCount >= 64)
+			break;
+	}
 }
 
 void __cdecl UI_Refresh()
@@ -2319,17 +2352,27 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
         return;
     }
 
-    if (!I_stricmp(out, "LoadMods") || !I_stricmp(out, "RunMod"))
+    if (!I_stricmp(out, "LoadMods"))
     {
-        Com_DPrintf(13, "UI: %s ignored — SP has no mod list infrastructure\n", out);
+		UI_LoadModsList();
         return;
     }
 
+	if (!I_stricmp(out, "RunMod"))
+	{
+		if (sharedUiInfo.modIndex < 0 || sharedUiInfo.modIndex >= sharedUiInfo.modCount)
+			return;
+		
+		Dvar_SetStringByName("fs_game", (char *)sharedUiInfo.modList[sharedUiInfo.modIndex].modName);
+		Cbuf_AddText(0, "startSingleplayer\n");
+		return;
+	}
+
     if (!I_stricmp(out, "ClearMods"))
     {
-        Dvar_SetStringByName("fs_game", "");
-        Cbuf_AddText(0, "vid_restart\n");
-        return;
+		Dvar_SetStringByName("fs_game", (char *)"");
+		Cbuf_AddText(0, "startSingleplayer\n");
+		return;
     }
 
     if (!I_stricmp(out, "Quit"))
@@ -2475,7 +2518,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
             Menus_OpenByName(&uiInfo.uiDC, "error_popmenu");
             CL_StopControllerRumbles();
         }
-        SND_FadeAllSounds(1.0, (int)String);
+        SND_FadeAllSounds(1.0, 1000);
         return 1;
     case UIMENU_INGAME:
         if (v4 == UIMENU_CONTROLLERREMOVED)

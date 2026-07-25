@@ -2323,7 +2323,7 @@ void __cdecl MdlPrvControlsGamepad(int localClientNum, double forward, double si
     v12 = (float)((float)v11 * (float)0.001);
     if (v12 == 0.0)
         v12 = 0.015;
-    if (cgArray[0].predictedPlayerState.pm_type != 4)
+    if (cgArray[0].predictedPlayerState.pm_type != PM_MPVIEWER)
     {
         if (g_mdlprv.system.walkaboutActive
             && Key_IsDown(localClientNum, 16)
@@ -2520,7 +2520,7 @@ void __cdecl CG_ModelPreviewerHandleKeyEvents(int localClientNum, int key, int d
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (cgArray[0].predictedPlayerState.pm_type == 4)
+    if (cgArray[0].predictedPlayerState.pm_type == PM_MPVIEWER)
     {
         switch (key)
         {
@@ -2682,7 +2682,7 @@ bool __cdecl CG_ModelPreviewerNeedsVieworgInterpSkipped(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return cgArray[0].predictedPlayerState.pm_type == 4;
+    return cgArray[0].predictedPlayerState.pm_type == PM_MPVIEWER;
 }
 
 void __cdecl CG_AddModelPreviewerModel(int frametime)

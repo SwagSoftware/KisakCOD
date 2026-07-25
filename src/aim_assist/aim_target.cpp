@@ -354,7 +354,7 @@ bool __cdecl AimTarget_PlayerInValidState(const playerState_s *ps)
 {
     iassert(ps);
 
-    return (unsigned int)(ps->pm_type - 2) > 4;
+    return ps->pm_type == PM_NORMAL || ps->pm_type == PM_NORMAL_LINKED;
 }
 
 void __cdecl AimTarget_ProcessEntity(gentity_s *ent)
@@ -380,7 +380,7 @@ void __cdecl AimTarget_ProcessEntity(gentity_s *ent)
     client = playerEnt->client;
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\aim_assist\\aim_target.cpp", 410, 0, "%s", "ps");
-    if ((unsigned int)(client->ps.pm_type - 2) <= 4)
+    if (client->ps.pm_type >= PM_NOCLIP && client->ps.pm_type <= PM_DEAD_LINKED)
         goto LABEL_35;
     if (!ent->r.linked || !(unsigned __int8)AimTarget_IsTargetValid(ent))
     {

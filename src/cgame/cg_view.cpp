@@ -507,8 +507,6 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
     float *v27; // r11
     double v28; // fp0
     float vRight[6]; // [sp+58h] [-98h] BYREF
-	gentity_s *ent;
-	int linkedTo;
 
     if ((cgameGlob->predictedPlayerState.eFlags & 0x300) == 0)
     {
@@ -521,13 +519,7 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
         if (cgameGlob->predictedPlayerState.pm_type != PM_UFO && cgameGlob->predictedPlayerState.pm_type != PM_NOCLIP)
         {
             pm_type = cgameGlob->nextSnap->ps.pm_type;
-
-			// (SP) Temporary workaround until PM_DEAD and PM_DEAD_LINKED are fixed.
-			// Only apply the standard death view to unlinked dead players. Linked dead
-			// players should remain attached to their linked position.
-			ent = &g_entities[localClientNum];
-			linkedTo = (ent->tagInfo != 0);
-            if (pm_type >= PM_DEAD && !linkedTo)
+            if (pm_type == PM_DEAD)
             {
                 cgameGlob->refdefViewAngles[0] = -15.0;
                 cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[1];
@@ -1511,7 +1503,7 @@ void __cdecl CG_CalcViewValues(int localClientNum)
     CG_PerturbCamera(cgArray);
     CG_CalcFov(localClientNum);
 
-    if (cgameGlob->predictedPlayerState.pm_type == 4)
+    if (cgameGlob->predictedPlayerState.pm_type == PM_MPVIEWER)
         CG_ModelPreviewerUpdateView(
             cgameGlob->refdef.vieworg,
             cgameGlob->refdef.viewaxis,
