@@ -2014,7 +2014,26 @@ void __cdecl GetWeapLockBlink(int localClientNum, Operand *source, Operand *resu
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
+#ifdef KISAK_MP
     result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
+#elif KISAK_SP
+	if (clientUIActives[0].connectionState >= CA_LOADING)
+	{
+		cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+		playerState_s *ps = &cgameGlob->predictedPlayerState;
+
+		if (ps->weapLockFlags & 2)
+			result->internals.intVal = 1;
+		else if (!(ps->weapLockFlags & 1))
+			result->internals.intVal = 0;
+		else
+			result->internals.intVal = bps <= 0.0f || (int)(cgameGlob->time / (1000.0f / bps)) % 2 != 0;
+	}
+	else
+	{
+		result->internals.intVal = 0;
+	}
+#endif
     if (uiscript_debug->current.integer)
         Com_Printf(13, "weaplockblink( %.2f ) = %i\n", bps, result->internals.intVal);
 }
@@ -2030,7 +2049,11 @@ void __cdecl GetWeapAttackTop(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
+#ifdef KISAK_MP
     result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
+#elif KISAK_SP
+	result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && (CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.weapLockFlags & 4) != 0;
+#endif
     if (uiscript_debug->current.integer)
         Com_Printf(13, "weapattacktop() = %i\n", result->internals.intVal);
 }
@@ -2046,7 +2069,11 @@ void __cdecl GetWeapAttackDirect(int localClientNum, Operand *result)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
+#ifdef KISAK_MP
     result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
+#elif KISAK_SP
+	result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && (CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.weapLockFlags & 8) != 0;
+#endif
     if (uiscript_debug->current.integer)
         Com_Printf(13, "weapattackdirect() = %i\n", result->internals.intVal);
 }

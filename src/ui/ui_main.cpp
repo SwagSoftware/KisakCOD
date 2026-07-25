@@ -6,6 +6,8 @@
 
 #include <universal/q_shared.h>
 #include "ui.h"
+#include <client/client.h>
+#include <win32/win_local.h>
 #include <qcommon/cmd.h>
 #include <game/savedevice.h>
 #include <gfx_d3d/r_cinematic.h>
@@ -708,6 +710,31 @@ void __cdecl UI_DrawSaveGameShot(rectDef_s *rect, double scale, float *color)
     }
 LABEL_14:
     UI_DrawHandlePic(&scrPlaceFull, rect->x, rect->y, rect->w, rect->h, rect->horzAlign, rect->vertAlign, color, uiInfo.sshotImage);
+}
+
+void __cdecl UI_DrawSaveGameName(int localClientNum, rectDef_s *rect, Font_s *font, float scale, float *color, int textStyle)
+{
+	int idx = UI_SavegameIndexFromFilename(uiInfo.savegameName);
+	if (idx < 0)
+		return;
+
+	int slot = uiInfo.savegameStatus.displaySavegames[idx];
+	if (slot < 0)
+		return;
+
+	const char *name = uiInfo.savegameList[slot].savegameName;
+	if (!name || !*name)
+		return;
+
+	UI_DrawWrappedText(&scrPlaceView[localClientNum], name, rect, font, rect->x, rect->y, scale, color, textStyle, ITEM_ALIGN_CENTER, NULL);
+}
+
+void __cdecl UI_DrawGLInfo(int localClientNum, rectDef_s *rect, Font_s *font, float scale, float *color, int textStyle)
+{
+	char info[1024];
+
+    Com_sprintf(info, sizeof(info), "Video: %ux%u @ %.0fHz\nGPU: %s\nCPU: %s %s", cls.vidConfig.displayWidth, cls.vidConfig.displayHeight, cls.vidConfig.displayFrequency, sys_info.gpuDescription, sys_info.cpuVendor, sys_info.cpuName);
+    UI_DrawWrappedText(&scrPlaceView[localClientNum], info, rect, font, rect->x, rect->y, scale, color, textStyle, 0, NULL);
 }
 
 void UI_DrawCinematic()
@@ -2834,12 +2861,18 @@ void __cdecl UI_OwnerDraw(
 
     switch (ownerDraw)
     {
+	case 249:
+		UI_DrawGLInfo(localClientNum, &rect, font, scale, color, textStyle);
+		break;
     case 250:
         UI_DrawKeyBindStatus(localClientNum, &rect, font, scale, color, textStyle);
         break;
     case 258:
         UI_DrawSaveGameShot(&rect, scale, color);
         break;
+	case 262:
+		UI_DrawSaveGameName(localClientNum, &rect, font, scale, color, textStyle);
+		break;
     case 264:
         ProfLoad_DrawOverlay(&rect);
         break;

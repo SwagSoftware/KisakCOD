@@ -89,6 +89,8 @@ MenuList *__cdecl Load_ScriptMenu(const char *pszMenu, int imageTrack);
 int __cdecl UI_SavegameIndexFromFilename(const char *filename);
 int __cdecl UI_SavegameIndexFromFilename2(const char *filename);
 void __cdecl UI_DrawSaveGameShot(rectDef_s *rect, double scale, float *color);
+void __cdecl UI_DrawSaveGameName(int localClientNum, rectDef_s *rect, Font_s *font, float scale, float *color, int textStyle);
+void __cdecl UI_DrawGLInfo(int localClientNum, rectDef_s *rect, Font_s *font, float scale, float *color, int textStyle);
 void UI_DrawCinematic();
 void __cdecl UI_LoadIngameMenus();
 void __cdecl UI_SetMap(const char *mapname);

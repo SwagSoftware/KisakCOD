@@ -32,7 +32,7 @@ const float TEST_bullet_step_1[2] = { 20.0f, 12.0f };
 const float TEST_bullet_wh_1[2] = { 16.0f, 8.0f };
 const float TEST_bullet_step_2[2] = { 72.0f, 12.0f };
 const float TEST_bullet_wh_2[2] = {64.0f, 16.0f};
-const int32_t TEST_bullet_rowCnt = 1;
+const int32_t TEST_bullet_rowCnt = 20;
 const float TEST_bullet_wh_3[2] = { 8.0f, 4.0f };
 const float TEST_bullet_step_3[2] = { 8.0f, -2.0f };
 

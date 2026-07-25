@@ -75,7 +75,8 @@ void __cdecl CG_DrawDeadQuote(
     float *color,
     rectDef_s *textStyle,
     double text_x,
-    double text_y);
+    double text_y,
+    char textAlignMode);
 void __cdecl CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Material *material, const float *color);
 // local variable allocation has failed, the output may be wrong!
 void __cdecl CG_DrawInvalidCmdHint(

@@ -2160,184 +2160,151 @@ void CG_CompassDrawPlayerPointers_SP(
     Material *material,
     float *color)
 {
-    double fadeAlpha; // fp14
-    float *v12; // r3
-    double x; // fp18
-    double y; // fp17
-    double centerX; // fp16
-    double centerY; // fp15
-    objectiveInfo_t *objectives; // r25
-    float *v18; // r28
-    int v19; // r18
-    //double x; // fp0
-    double v21; // fp13
-    double v22; // fp0
-    double value; // fp13
-    double v24; // fp0
-    double v25; // fp26
-    double v26; // fp31
-    double v27; // fp20
-    double v28; // fp19
-    double txt; // fp30
-    double v34; // fp29
-    double v35; // fp0
-    double v36; // fp25
-    double v37; // fp28
-    double v38; // fp24
-    double v39; // fp27
-    double v40; // fp0
-    double v41; // fp3
-    float w; // [sp+60h] [-160h] BYREF
-    float h; // [sp+64h] [-15Ch] BYREF
+    float fadeAlpha;
+    float centerX;
+    float centerY;
+    objectiveInfo_t *objective;
+    float *origin;
+	int objIdx;
+    int orgIdx;
+	float delta[3];
+    float objDist;
+    float lerp;
     float xy[2];
-    //float v44; // [sp+68h] [-158h] BYREF
-    //float v45; // [sp+6Ch] [-154h]
     float xyClipped[2];
-    //float v46; // [sp+70h] [-150h] BYREF
-    //float v47; // [sp+74h] [-14Ch]
-
-    float north[2]; // [sp+78h] [-148h] BYREF
+    float north[2];
     float newColor[4];
+    float savedAlpha;
+    float iconX;
+    float iconY;
+    float clipfade;
+    float w;
+    float h;
     Material *iconMaterial;
-    rectDef_s scaledRect; // [sp+90h] [-130h] BYREF
+    rectDef_s scaledRect;
+    cg_s *cgameGlob;
 
-    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    fadeAlpha = CG_FadeCompass(localClientNum, cgameGlob->compassFadeTime, compassType);
+    if (fadeAlpha == 0.0)
+        return;
 
-    fadeAlpha = CG_FadeCompass(localClientNum, cgArray[0].compassFadeTime, compassType);
-    if (fadeAlpha != 0.0)
+    CG_CompassCalcDimensions(
+        compassType,
+        cgameGlob,
+        parentRect,
+        rect,
+        &scaledRect.x,
+        &scaledRect.y,
+        &scaledRect.w,
+        &scaledRect.h);
+    centerX = scaledRect.w * 0.5f + scaledRect.x;
+    centerY = scaledRect.h * 0.5f + scaledRect.y;
+    CG_CompassUpYawVector(cgameGlob, north);
+
+    for (objIdx = 0; objIdx < 16; ++objIdx)
     {
-        CG_CompassCalcDimensions(compassType, cgArray, parentRect, rect, &scaledRect.x, &scaledRect.y, &scaledRect.w, &scaledRect.h);
-        x = scaledRect.x;
-        y = scaledRect.y;
-        centerX = ((scaledRect.w * 0.5f) + scaledRect.x);
-        centerY = ((scaledRect.h * 0.5f) + scaledRect.y);
-        if (compassRotation->current.enabled)
+		objective = &cgameGlob->objectives[objIdx];
+        if (objective->state != OBJST_CURRENT)
+            continue;
+
+        for (orgIdx = 0; orgIdx < 8; ++orgIdx)
         {
-            YawVectors2D(cgArray[0].refdefViewAngles[1], north, NULL); // either arg2 or arg3 is null here
-        }
-        else
-        {
-            north[0] = cgArray[0].compassNorth[0];
-            north[1] = cgArray[0].compassNorth[1];
-        }
-        objectives = cgArray[0].objectives;
-        do
-        {
-            if (objectives->state == OBJST_CURRENT)
+            origin = objective->origin[orgIdx];
+            if (origin[0] == 0.0f && origin[1] == 0.0f && origin[2] == 0.0f)
+                continue;
+
+			Vec3Sub(origin, cgameGlob->refdef.vieworg, delta);
+			objDist = Vec2Length(delta);
+            newColor[0] = color[0];
+            newColor[1] = color[1];
+            newColor[2] = color[2];
+            if (compassMaxRange->current.value < objDist)
             {
-                v18 = objectives->origin[0];
-                v19 = 8;
-                do
+                if (compassObjectiveMaxRange->current.value > objDist)
                 {
-                    if (*v18 != 0.0 || v18[1] != 0.0 || v18[2] != 0.0)
-                    {
-                        x = (float)(*v18 - cgArray[0].refdef.vieworg[0]);
-                        v21 = (float)(v18[1] - cgArray[0].refdef.vieworg[1]);
-                        newColor[0] = *color;
-                        newColor[1] = color[1];
-                        newColor[2] = color[2];
-                        v22 = sqrtf((float)((float)((float)v21 * (float)v21) + (float)((float)x * (float)x)));
-                        newColor[3] = v22;
-                        value = compassObjectiveMaxRange->current.value;
-                        if (v22 > value || (value = compassMaxRange->current.value, v22 < value))
-                        {
-                            v22 = value;
-                            newColor[3] = value;
-                        }
-                        if ((float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value) == 0.0)
-                        {
-                            newColor[3] = 0.0;
-                        }
-                        else
-                        {
-                            newColor[3] = (float)v22 - compassMaxRange->current.value;
-                            v24 = (float)(newColor[3] / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value));
-                            newColor[3] = newColor[3] / (float)(compassObjectiveMaxRange->current.value - compassMaxRange->current.value);
-                            newColor[3] = (float)((float)(compassObjectiveMinAlpha->current.value - (float)1.0) * (float)v24) + (float)1.0;
-                        }
-                        xyClipped[0] = 0.0f;
-                        xyClipped[1] = 0.0f;
-                        CG_WorldPosToCompass(compassType, cgArray, &scaledRect, north, cgArray[0].refdef.vieworg, v18, xy, xyClipped);
-                        v25 = (xy[0] + centerX);
-                        v26 = (xy[1] + centerY);
-                        v27 = (xyClipped[0] + centerX);
-                        xy[0] += centerX;
-                        xy[1] += centerY;
-                        v28 = (xyClipped[1] + centerY);
-                        CalcCompassPointerSize(compassType, &w, &h);
-                        iconMaterial = CG_ObjectiveIcon(objectives->icon, 0);
-                        txt = newColor[3];
-                        if (fadeAlpha < newColor[3])
-                        {
-                            txt = fadeAlpha;
-                            newColor[3] = fadeAlpha;
-                        }
-                        v34 = w;
-                        v35 = 0.0;
-                        v36 = (float)(w * (float)0.5);
-                        v37 = h;
-                        v38 = (float)(h * (float)0.5);
-                        if ((float)((float)((float)x - (float)((float)v25 - (float)(w * (float)0.5))) * (float)((float)1.0 / w)) > 0.0)
-                            v35 = (float)((float)((float)x - (float)((float)v25 - (float)(w * (float)0.5)))
-                                * (float)((float)1.0 / w));
-                        if ((float)((float)((float)y - (float)((float)v26 - (float)(h * (float)0.5))) * (float)((float)1.0 / h)) > v35)
-                            v35 = (float)((float)((float)y - (float)((float)v26 - (float)(h * (float)0.5)))
-                                * (float)((float)1.0 / h));
-                        v39 = (float)(scaledRect.w + (float)x);
-                        if ((float)((float)((float)((float)((float)v25 - (float)(w * (float)0.5)) + w)
-                            - (float)(scaledRect.w + (float)x))
-                            * (float)((float)1.0 / w)) > v35)
-                            v35 = (float)((float)((float)((float)((float)v25 - (float)(w * (float)0.5)) + w)
-                                - (float)(scaledRect.w + (float)x))
-                                * (float)((float)1.0 / w));
-                        if ((float)((float)((float)((float)((float)v26 - (float)(h * (float)0.5)) + h)
-                            - (float)(scaledRect.h + (float)y))
-                            * (float)((float)1.0 / h)) > v35)
-                            v35 = (float)((float)((float)((float)((float)v26 - (float)(h * (float)0.5)) + h)
-                                - (float)(scaledRect.h + (float)y))
-                                * (float)((float)1.0 / h));
-                        if (v35 > 1.0)
-                            v35 = 1.0;
-                        v40 = (float)((float)1.0 - (float)v35);
-                        if (v40 > 0.5 && compassObjectiveDrawLines->current.enabled)
-                        {
-                            v41 = 2.0;
-                            newColor[3] = (float)((float)((float)v40 - (float)0.5) * (float)txt) * 2.0;
-                            if (v26 >= y && v26 <= (float)(scaledRect.h + (float)y))
-                            {
-                                UI_DrawHandlePic(
-                                    &scrPlaceView[localClientNum],
-                                    x,
-                                    (float)((float)v26 - (float)1.0),
-                                    scaledRect.w,
-                                    2.0,
-                                    rect->horzAlign,
-                                    rect->vertAlign,
-                                    newColor,
-                                    material);
-                                v41 = 2.0;
-                            }
-                            if (v25 >= x && v25 <= v39)
-                                CG_DrawVLine(&scrPlaceView[localClientNum], v25, y, v41, scaledRect.h, rect->horzAlign, rect->vertAlign, newColor, material);
-                            newColor[3] = txt;
-                        }
-                        UI_DrawHandlePic(
-                            &scrPlaceView[localClientNum],
-                            (float)((float)v27 - (float)v36),
-                            (float)((float)v28 - (float)v38),
-                            v34,
-                            v37,
-                            rect->horzAlign,
-                            rect->vertAlign,
-                            newColor,
-                            iconMaterial);
-                    }
-                    --v19;
-                    v18 += 3;
-                } while (v19);
+                    lerp = (objDist - compassMaxRange->current.value)
+                        / (compassObjectiveMaxRange->current.value - compassMaxRange->current.value);
+                    newColor[3] = 1.0f - (1.0f - compassObjectiveMinAlpha->current.value) * lerp;
+                }
+                else
+                {
+                    newColor[3] = compassObjectiveMinAlpha->current.value;
+                }
             }
-            ++objectives;
-        } while ((int)objectives < (int)cgArray[0].targets);
+            else
+            {
+                newColor[3] = 1.0f;
+            }
+
+            xyClipped[0] = 0.0f;
+            xyClipped[1] = 0.0f;
+            CG_WorldPosToCompass(
+                compassType,
+                cgameGlob,
+                &scaledRect,
+                north,
+                cgameGlob->refdef.vieworg,
+                origin,
+                xy,
+                xyClipped);
+            xy[0] = xy[0] + centerX;
+            xy[1] = xy[1] + centerY;
+            xyClipped[0] = xyClipped[0] + centerX;
+            xyClipped[1] = xyClipped[1] + centerY;
+
+            CalcCompassPointerSize(compassType, &w, &h);
+            iconMaterial = CG_ObjectiveIcon(objective->icon, 0);
+            savedAlpha = newColor[3];
+            if (savedAlpha > fadeAlpha)
+                newColor[3] = fadeAlpha;
+
+            iconX = xyClipped[0] - w * 0.5f;
+            iconY = xyClipped[1] - h * 0.5f;
+            clipfade = GetObjectiveFade(&scaledRect, iconX, iconY, w, h);
+            if (clipfade > 0.5f && compassObjectiveDrawLines->current.enabled)
+            {
+                newColor[3] = savedAlpha * (clipfade - 0.5f) * 2.0f;
+                if (scaledRect.y <= xy[1] && xy[1] <= scaledRect.y + scaledRect.h)
+                {
+                    UI_DrawHandlePic(
+                        &scrPlaceView[localClientNum],
+                        scaledRect.x,
+                        xy[1] - 1.0f,
+                        scaledRect.w,
+                        2.0f,
+                        rect->horzAlign,
+                        rect->vertAlign,
+                        newColor,
+                        material);
+                }
+                if (scaledRect.x <= xy[0] && xy[0] <= scaledRect.x + scaledRect.w)
+                {
+                    CG_DrawVLine(
+                        &scrPlaceView[localClientNum],
+                        xy[0],
+                        scaledRect.y,
+                        2.0f,
+                        scaledRect.h,
+                        rect->horzAlign,
+                        rect->vertAlign,
+                        newColor,
+                        material);
+                }
+                newColor[3] = savedAlpha;
+            }
+
+            UI_DrawHandlePic(
+                &scrPlaceView[localClientNum],
+                iconX,
+                iconY,
+                w,
+                h,
+                rect->horzAlign,
+                rect->vertAlign,
+                newColor,
+                iconMaterial);
+        }
     }
 }
 #endif

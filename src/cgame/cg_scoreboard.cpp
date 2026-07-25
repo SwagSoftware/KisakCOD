@@ -252,6 +252,10 @@ void __cdecl CG_DrawObjectiveList(
     float v80; // [sp+D4h] [-10Ch]
     float v81; // [sp+D8h] [-108h]
     float v82; // [sp+DCh] [-104h]
+	float activeColor[4];
+	float doneColor[4];
+	float currentColor[4];
+	float failColor[4];
 
     v9 = "%s\n\t(localClientNum) = %i";
     v11 = "(localClientNum == 0)";
@@ -268,22 +272,26 @@ void __cdecl CG_DrawObjectiveList(
     fadeAlpha = CG_FadeObjectives(cgArray);
     if (fadeAlpha != 0.0)
     {
-        v70 = fadeAlpha;
-        v78 = fadeAlpha;
-        v74 = fadeAlpha;
-        v82 = fadeAlpha;
-        v67 = 0.60000002;
-        v68 = 0.60000002;
-        v69 = 0.60000002;
-        v75 = 1.0;
-        v76 = 1.0;
-        v77 = 1.0;
-        v71 = 0.34999999;
-        v72 = 0.34999999;
-        v73 = 0.34999999;
-        v79 = 0.40000001;
-        v80 = 0.30000001;
-        v81 = 0.30000001;
+		activeColor[0] = 0.60000002f;
+		activeColor[1] = 0.60000002f;
+		activeColor[2] = 0.60000002f;
+		activeColor[3] = (float)fadeAlpha;
+		
+		doneColor[0] = 0.34999999f;
+		doneColor[1] = 0.34999999f;
+		doneColor[2] = 0.34999999f;
+		doneColor[3] = (float)fadeAlpha;
+		
+		currentColor[0] = 1.0f;
+		currentColor[1] = 1.0f;
+		currentColor[2] = 1.0f;
+		currentColor[3] = (float)fadeAlpha;
+		
+		failColor[0] = 0.40000001f;
+		failColor[1] = 0.30000001f;
+		failColor[2] = 0.30000001f;
+		failColor[3] = (float)fadeAlpha;
+		
         int textHeight = UI_TextHeight(font, scale);
         h = rect->h;
         v64 = textHeight;
@@ -294,7 +302,7 @@ void __cdecl CG_DrawObjectiveList(
             v20 = (float)textHeight;
         y = rect->y;
         textY = 0.0;
-        y = rect->y - (float)textHeight;
+        float baselineY = rect->y - (float)textHeight;
         //v24 = (Material *)0x82000000; // wtf is this 
         p_icon = &cgArray[0].objectives[0].icon;
         do
@@ -302,24 +310,28 @@ void __cdecl CG_DrawObjectiveList(
             switch (*(p_icon - 283))
             {
             case 1:
-                if (*p_icon)
-                    goto LABEL_11;
-                checkbox_active = cgMedia.checkbox_active;
+				color = activeColor;
+				if (*p_icon)
+					checkbox_active = CG_ObjectiveIcon(*p_icon, 0);
+				else
+					checkbox_active = cgMedia.checkbox_active;
                 goto LABEL_17;
             case 2:
                 y = (float)((float)((float)y + (float)v20) + (float)4.0);
                 break;
             case 3:
+				color = doneColor;
                 checkbox_active = cgMedia.checkbox_done;
                 goto LABEL_17;
             case 4:
+				color = currentColor;
                 if (*p_icon)
-                    LABEL_11 :
                     checkbox_active = CG_ObjectiveIcon(*p_icon, 0);
                 else
                     checkbox_active = cgMedia.checkbox_current;
                 goto LABEL_17;
             case 5:
+				color = failColor;
                 checkbox_active = cgMedia.checkbox_fail;
             LABEL_17:
                 if (checkbox_active)
@@ -337,7 +349,7 @@ void __cdecl CG_DrawObjectiveList(
                         0.0,
                         1.0,
                         1.0,
-                        colorWhite,// KISAKTODO: arg bad
+                        color,
                         checkbox_active);
                 }
                 drawText = SEH_LocalizeTextMessage((const char *)p_icon - 1032, "objective text", LOCMSG_SAFE);
@@ -366,8 +378,8 @@ void __cdecl CG_DrawObjectiveList(
                             rect->horzAlign,
                             rect->vertAlign,
                             scale,
-                            colorWhite, // KISAKTODO scuffed color
-                            1);
+                            color,
+                            textStyle);
                         y = (float)((float)((float)y + (float)v20) + (float)4.0);
                     }
                     drawText = wordwrapNext;
@@ -383,7 +395,7 @@ void __cdecl CG_DrawObjectiveList(
         } while (p_icon < (int *)(cgArray[0].objectives + 16));
         if (textY != 0.0)
         {
-            height = (float)((float)textY - (float)y);
+            height = textY - baselineY;
             if (height != 0.0)
             {
                 int scaledOne = (int)floorf(scrPlaceView[localClientNum].scaleVirtualToReal[0] + 0.5f);
@@ -394,7 +406,7 @@ void __cdecl CG_DrawObjectiveList(
                 x = ScrPlace_ApplyX(
                     &scrPlaceView[localClientNum],
                     ((12.0f - (float)scaledOne) * 0.5f + w) + x, rect->horzAlign);
-                UI_FillRect(&scrPlaceView[localClientNum], x, y, width, height, rect->horzAlign, rect->vertAlign, color);
+                UI_FillRect(&scrPlaceView[localClientNum], x, baselineY, width, height, 5, rect->vertAlign, color);
             }
         }
     }
