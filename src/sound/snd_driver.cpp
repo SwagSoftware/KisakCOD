@@ -1714,8 +1714,10 @@ void __cdecl SND_UpdateEqs()
             MSS_ApplyEqFilter(handle, g_snd.chaninfo[channelIndex].entchannel);
     }
 #else
-    // KISAK_SOUND TODO (Phase 7): mirrors the Miles loop above, applying alGlob.eq[][] to
-    // every occupied channel via MSS_ApplyEqFilter(alGlob.source[i], ...) once that's real.
+    // Mirrors the Miles loop above, but MSS_ApplyEqFilter (snd_al.cpp) is a deliberate
+    // no-op on this side - see its comment for why (no 1:1 EFX equivalent to Miles' 3-band
+    // parametric EQ). Left calling it anyway rather than skipping this loop entirely, so
+    // nothing needs to change here if MSS_ApplyEqFilter ever becomes real.
     for (int channelIndex = 0; channelIndex < 53; ++channelIndex)
     {
         MSS_ApplyEqFilter(alGlob.source[channelIndex], g_snd.chaninfo[channelIndex].entchannel);

@@ -129,7 +129,9 @@ void MSS_InitChannels()
     g_snd.ambient_track = 1;
 }
 
-// KISAK_SOUND TODO (Phase 7 - EQ): set up the EFX filter/aux-slot state. Mirrors MSS_InitEq.
+// Mirrors MSS_InitEq. Only the shared EQ *data* (alGlob.eq[][]) gets initialized here -
+// see MSS_ApplyEqFilter below for why alGlob.eqFilter is deliberately left at 0/unallocated
+// rather than an EFX filter object (Phase 7: no working EQ application on this side).
 void MSS_InitEq()
 {
     alGlob.eqFilter = 0;
@@ -209,8 +211,58 @@ float MSS_GetWetLevel(const snd_alias_t *pAlias)
         return g_snd.effect->wetlevel;
 }
 
-// KISAK_SOUND TODO (Phase 7 - EQ): apply alGlob.eq[][entchannel] via an EFX filter on the
-// given source. Mirrors MSS_ApplyEqFilter.
+// Mirrors MSS_ApplyEqFilter. Left as a genuine no-op: Miles does true 3-band parametric EQ
+// per entchannel (up to 2 EQ slots x 3 bands each, arbitrary type/freq/gain/Q per band -
+// see the Miles branch in snd_mss.cpp), and there's no 1:1 equivalent in OpenAL-Soft's EFX,
+// which only exposes single-band lowpass/highpass/bandpass filters. Real parity would need
+// custom biquad DSP via the AL_SOFT_callback_buffer extension (alBufferCallbackSOFT) -
+// genuine DSP work, budgeted separately if ever needed (see WORK.md Phase 7). Not a
+// regression from what players get today either way: snd_enableEq already defaults off in
+// the existing Miles code due to a documented crash bug (snd.cpp, SND_Init).
+//
+// Sketch of a crude single-band approximation, if this is ever revisited - uses only band 0
+// of EQ slot 0 (ignoring slot 1 entirely, which only matters for the Xbox-only crossfade
+// path anyway, and bands 1/2), and only handles the two band types EFX has a filter for.
+// LOWSHELF/HIGHSHELF/BELL have no EFX equivalent at all. This is illustrative only - not
+// wired up, not tested, and alGlob.eqFilter is deliberately left unallocated (0) above in
+// MSS_InitEq since nothing here uses it while this stays commented out.
+/*
+void __cdecl MSS_ApplyEqFilter(ALuint source, int entchannel)
+{
+    if (!snd_enableEq->current.enabled)
+    {
+        alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+        return;
+    }
+
+    SndEqParams *params = &alGlob.eq[0].params[0][entchannel];
+    if (!params->enabled)
+    {
+        alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+        return;
+    }
+
+    switch (params->type)
+    {
+    case SND_EQTYPE_LOWPASS:
+        alFilteri(alGlob.eqFilter, AL_FILTER_TYPE, AL_FILTER_LOWPASS);
+        alFilterf(alGlob.eqFilter, AL_LOWPASS_GAIN, params->gain);
+        alFilterf(alGlob.eqFilter, AL_LOWPASS_GAINHF, 1.0f - (params->freq / 20000.0f));
+        alSourcei(source, AL_DIRECT_FILTER, alGlob.eqFilter);
+        break;
+    case SND_EQTYPE_HIGHPASS:
+        alFilteri(alGlob.eqFilter, AL_FILTER_TYPE, AL_FILTER_HIGHPASS);
+        alFilterf(alGlob.eqFilter, AL_HIGHPASS_GAIN, params->gain);
+        alFilterf(alGlob.eqFilter, AL_HIGHPASS_GAINLF, params->freq / 20000.0f);
+        alSourcei(source, AL_DIRECT_FILTER, alGlob.eqFilter);
+        break;
+    default:
+        // SND_EQTYPE_LOWSHELF/HIGHSHELF/BELL: no EFX filter type covers these.
+        alSourcei(source, AL_DIRECT_FILTER, AL_FILTER_NULL);
+        break;
+    }
+}
+*/
 void __cdecl MSS_ApplyEqFilter(ALuint source, int entchannel)
 {
 }
