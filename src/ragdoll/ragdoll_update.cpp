@@ -1073,7 +1073,7 @@ void __cdecl Ragdoll_SnapshotBaseLerpBones(RagdollBody *body, BoneOrientation *s
                 }
                 else
                 {
-                    lerp = body->stateMsec / goalMsec;
+                    lerp = (double)body->stateMsec / (double)goalMsec;
                     v5 = lerp - 1.0;
                     if (v5 < 0.0)
                         v16 = lerp;

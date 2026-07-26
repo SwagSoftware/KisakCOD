@@ -1831,7 +1831,8 @@ void __cdecl Phys_RunToTime(int localClientNum, PhysWorld worldIndex, int timeNo
     }
     else
     {
-        data->timeNowLerpFrac = (timeNow - data->timeLastSnapshot) / (data->timeLastUpdate - data->timeLastSnapshot);
+        data->timeNowLerpFrac = (double)(timeNow - data->timeLastSnapshot)
+            / (double)(data->timeLastUpdate - data->timeLastSnapshot);
         if (data->timeNowLerpFrac < 0.0 || data->timeNowLerpFrac > 1.0)
             MyAssertHandler(
                 ".\\physics\\phys_ode.cpp",
