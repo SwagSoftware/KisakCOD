@@ -2282,7 +2282,7 @@ void __cdecl Phys_ObjTraceNewPos(dxBody *body)
                 && newPos[2] == userData->savedPos[2];
             if (!v5 || userData->state <= (uint32_t)PHYS_OBJ_STATE_STUCK)
             {
-                CM_BoxTrace(&trace, userData->savedPos, newPos, mins, maxs, 0, 0x2806C91);
+                CM_BoxTrace(&trace, userData->savedPos, newPos, mins, maxs, 0, PHYS_WORLD_CLIPMASK);
                 userData->state = trace.startsolid ? PHYS_OBJ_STATE_STUCK : PHYS_OBJ_STATE_FREE;
                 if (trace.fraction < 1.0 && !trace.startsolid)
                 {

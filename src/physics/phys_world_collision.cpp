@@ -612,7 +612,7 @@ static int dCollideWorldGeom(dxGeom *o1, dxGeom *o2, int flags, dContactGeomExt 
     CM_BoxLeafnums_r(&ll, 0);
     if (ll.count)
     {
-        input.clipMask = 0x2806C91;
+        input.clipMask = PHYS_WORLD_CLIPMASK;
         results.contacts = contact;
         results.contactCount = 0;
         results.maxContacts = flags;

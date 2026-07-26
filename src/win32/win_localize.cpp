@@ -35,7 +35,7 @@ int __cdecl Win_InitLocalization()
 
     if (!fp)
     {
-        iassert(0); // LWSS ADD: you probably need to change the working dir!
+        iassert(0); // LWSS ADD: No `localization.txt` - you probably need to change the working dir or copy the files Over!
         return 0;
     }
 

@@ -64,7 +64,7 @@ static const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "
 enum SND_CHANNELS : __int32 // KISAK
 {
     SND_FIRST_STREAM_CHANNEL = 40,
-    SND_MAX_CHANNELS = 0x34
+    SND_MAX_CHANNELS = 53
 };
 
 enum SND_LENGTHNOTIFY : __int32 // KISAK

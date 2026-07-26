@@ -5,6 +5,12 @@
 
 #include "../universal/q_shared.h"
 
+#ifdef KISAK_SP
+static const int PHYS_WORLD_CLIPMASK = 0x280E491;
+#elif KISAK_MP
+static const int PHYS_WORLD_CLIPMASK = 0x2806C91;
+#endif
+
 typedef enum
 {
     SE_NONE = 0x0,

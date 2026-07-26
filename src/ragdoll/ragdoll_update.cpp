@@ -1457,16 +1457,16 @@ int __cdecl Ragdoll_FindBoneChildren(RagdollBody *body, int boneIdx, int *childI
 
 char __cdecl Ragdoll_BoneTrace(trace_t *trace, trace_t *revTrace, float *start, float *end)
 {
-    CM_BoxTrace(trace, start, end, vec3_origin, vec3_origin, 0, 0x2806C91);
+    CM_BoxTrace(trace, start, end, vec3_origin, vec3_origin, 0, PHYS_WORLD_CLIPMASK);
     if (trace->startsolid)
     {
-        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, 0x2806C91);
+        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, PHYS_WORLD_CLIPMASK);
         if (revTrace->startsolid)
             return 0;
     }
     else if (trace->fraction != 1.0)
     {
-        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, 0x2806C91);
+        CM_BoxTrace(revTrace, end, start, vec3_origin, vec3_origin, 0, PHYS_WORLD_CLIPMASK);
         if (revTrace->fraction != 1.0)
             return 0;
     }
