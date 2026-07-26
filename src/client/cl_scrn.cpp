@@ -165,8 +165,10 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
         {
         case CA_DISCONNECTED:
         case CA_LOGO:
+            SCR_ClearScreen();
         case CA_LOADING:
             SCR_ClearScreen();
+			UI_Refresh();
             break;
         case CA_CINEMATIC:
         case CA_ACTIVE:
@@ -277,7 +279,10 @@ void __cdecl SCR_UpdateScreen()
 
 void __cdecl SCR_UpdateLoadScreen()
 {
-    ;
+#ifndef KISAK_XBOX
+	if (!IsFastFileLoad())
+		SCR_UpdateScreen();
+#endif
 }
 
 void CL_CubemapShotUsage()

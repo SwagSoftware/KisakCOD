@@ -71,10 +71,22 @@ struct uiInfo_s
     const char *playerProfileName[64];
     int playerProfileCount;
     playerProfileStatus_s playerProfileStatus;
+
+    StringTable *videoSubtitles;
 };
+
+struct modInfo_t
+{
+    const char *modName;
+    const char *modDescr;
+};
+
 struct sharedUiInfo_t // sizeof=0x1C5B0
 {                                       // ...
     CachedAssets_t assets;              // ...
+    modInfo_t modList[64];
+    int modCount;
+    int modIndex;
 };
 
 // LWSS: one of the main differences is that SP doesn't have `localClientNum` because there is no splitscreen
@@ -198,5 +210,6 @@ extern const dvar_t *ui_playerProfileCount;
 extern const dvar_t *ui_playerProfileSelected;
 extern const dvar_t *ui_playerProfileNameNew;
 
+extern uiInfo_s uiInfo;
 extern sharedUiInfo_t sharedUiInfo;
 extern SaveTimeGlob ui_saveTimeGlob;

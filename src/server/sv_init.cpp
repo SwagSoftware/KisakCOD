@@ -214,6 +214,7 @@ void __cdecl SV_Init()
     sv_mapname = Dvar_RegisterString("mapname", "", 0x44u, "current map name");
     sv_lastSaveGame = Dvar_RegisterString("sv_lastSaveGame", "", 1u, "Last save game file name");
     sv_saveOnStartMap = Dvar_RegisterBool("sv_saveOnStartMap", 0, 0x1004u, "Save at the start of a level");
+#ifdef KISAK_XBOX
     sv_saveGameAvailable = Dvar_RegisterBool(
         "sv_saveGameAvailable",
         0,
@@ -229,6 +230,7 @@ void __cdecl SV_Init()
         0,
         0x44u,
         "True if the save device is currently available");
+#endif
     sv_cheats = Dvar_RegisterBool("sv_cheats", 1, 0x48u, "Enable server cheats");
     replay_autosave = Dvar_RegisterInt(
         "replay_autosave",
@@ -531,6 +533,10 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
 
     R_BeginRemoteScreenUpdate();
 
+#ifndef KISAK_XBOX
+	ProfLoad_Activate();
+#endif
+
     UI_LoadIngameMenus();
     svs.nextSnapshotEntities = 0;
     Dvar_SetString(nextmap, "map_restart");
@@ -648,7 +654,10 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
     if (IsFastFileLoad())
         DB_SyncXAssets();
 
-    //ProfLoad_Deactivate();
+#ifndef KISAK_XBOX
+	ProfLoad_Deactivate();
+#endif
+
     UI_SetActiveMenu(0, UIMENU_PREGAME); // KISAKTODO: uimenu enum should be '5'
 
     if (saveError)

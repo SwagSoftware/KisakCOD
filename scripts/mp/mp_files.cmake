@@ -8,6 +8,8 @@ set(AIM_ASSIST
 set(BGAME
     ${BGAME}
     "${SRC_DIR}/bgame/bg_animation_mp.cpp"
+    "${SRC_DIR}/bgame/bg_perks_mp.cpp"
+    "${SRC_DIR}/bgame/bg_vehicles_mp.cpp"
 )
 
 set(CGAME_MP

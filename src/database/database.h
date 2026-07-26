@@ -8,6 +8,9 @@
 #include <xanim/xmodel.h>
 #include <win32/win_local.h>
 #
+
+extern bool g_anyFastFileLoaded;
+
 enum $D93A52C218787A3ED865FD745137F4B3 : int32_t
 {
     DM_MEMORY_TEMP = 0x0,

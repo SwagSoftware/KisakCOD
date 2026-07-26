@@ -549,14 +549,14 @@ void __cdecl CG_CheckHudSprintDisplay(int localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     p_ps = &cgArray[0].nextSnap->ps;
-    if (cgArray[0].nextSnap->ps.pm_type != 5)
+    if (cgArray[0].nextSnap->ps.pm_type != PM_DEAD)
     {
         v4 = (int)(float)(BG_GetWeaponDef(cgArray[0].nextSnap->ps.weapon)->sprintDurationScale
             * (float)(player_sprintTime->current.value * (float)1000.0));
         if (PM_GetSprintLeft(p_ps, cgArray[0].time) < v4)
             CG_MenuShowNotify(localClientNum, 6);
     }
-    if (p_ps->pm_type != 5
+    if (p_ps->pm_type != PM_DEAD
         && cgArray[0].predictedPlayerState.sprintState.lastSprintStart > cgArray[0].predictedPlayerState.sprintState.lastSprintEnd)
     {
         CG_MenuShowNotify(localClientNum, 6);
@@ -1180,7 +1180,7 @@ void __cdecl CG_Draw2D(int localClientNum)
 
     CG_UpdateTimeScale(localClientNum);
 
-    if (cgArray[0].predictedPlayerState.pm_type != 4 && cgArray[0].cubemapShot == CUBEMAPSHOT_NONE)
+    if (cgArray[0].predictedPlayerState.pm_type != PM_MPVIEWER && cgArray[0].cubemapShot == CUBEMAPSHOT_NONE)
     {
         nextSnap = cgArray[0].nextSnap;
         if (cg_draw2D->current.enabled)
@@ -1203,7 +1203,7 @@ void __cdecl CG_Draw2D(int localClientNum)
             if (cg_drawHUD->current.enabled && hud_drawHUD->current.enabled)
             {
                 CG_DrawDamageDirectionIndicators(localClientNum);
-                if (nextSnap->ps.pm_type < 5)
+                if (nextSnap->ps.pm_type < PM_DEAD)
                 {
                     if (!cg_drawFriendlyFireCrosshair->current.enabled || !(unsigned __int8)CG_DrawFriendlyFire(cgArray))
                         CG_DrawCrosshair(localClientNum);

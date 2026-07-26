@@ -198,7 +198,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
             && (ent->client->ps.pm_flags & PMF_SPRINTING) == 0
             && (ps->weaponstate < 15 || ps->weaponstate > 19))
         {
-            if (ps->pm_type == 6)
+            if (ps->pm_type == PM_LASTSTAND)
             {
                 ps->cursorHintEntIndex = ENTITYNUM_NONE;
             }

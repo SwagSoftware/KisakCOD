@@ -5310,7 +5310,7 @@ void CMD_VEH_AddVehicleToCompass(scr_entref_t entref)
     }
     if (!Scr_GetNumParam())
     {
-        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".");
+        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".\n");
         Vehicle->s.un1.scale = 1;
         return;
     }
@@ -5337,7 +5337,7 @@ void CMD_VEH_AddVehicleToCompass(scr_entref_t entref)
     }
     if (!*String)
     {
-        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".");
+        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".\n");
     LABEL_15:
         scr_vehicle = Vehicle->scr_vehicle;
         Vehicle->s.un1.scale = 1;

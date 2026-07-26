@@ -10,6 +10,7 @@
 #include <game/savememory.h>
 #include <win32/win_local.h>
 #include <universal/com_files.h>
+#include <qcommon/com_playerprofile.h>
 #include <client/cl_demo.h>
 #include <game/g_save.h>
 #include <qcommon/msg.h>
@@ -785,6 +786,44 @@ void __cdecl SV_AutoSaveDemo(const char *baseName, const char *description, int 
             SV_SaveDemo(v9, description, 0);
         }
     }
+}
+
+bool __cdecl SV_GetLatestAutoReplayName(char *filename, int filenameSize)
+{
+	char path[256];
+	char candidate[64];
+	SaveHeader header;
+	int bestIndex;
+	int i;
+
+	if (!filename || filenameSize <= 0)
+		return false;
+
+	filename[0] = 0;
+	bestIndex = -1;
+
+	for (i = 0; i < 50; ++i)
+	{
+		Com_sprintf(candidate, sizeof(candidate), "autosave/autoreplay%i", i);
+		if (Com_BuildPlayerProfilePath(path, sizeof(path), "save/%s.svg", candidate) < 0)
+			continue;
+
+		if (!ReadSaveHeader(path, &header))
+			continue;
+		if (!header.demoPlayback)
+			continue;
+
+		bestIndex = i;
+	}
+
+	if (bestIndex < 0)
+		return false;
+
+	Com_sprintf(candidate, sizeof(candidate), "autosave/autoreplay%i", bestIndex);
+	if (Com_BuildPlayerProfilePath(filename, filenameSize, "save/%s.svg", candidate) < 0)
+		return false;
+
+	return true;
 }
 
 void SV_EnableAutoDemo()

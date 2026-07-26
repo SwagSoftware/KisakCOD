@@ -1680,7 +1680,7 @@ void __cdecl CG_ArchiveState(int localClientNum, MemoryFile *memFile)
 
 float __cdecl CG_FadeHudMenu(int localClientNum, const dvar_s *fadeDvar, int displayStartTime, int duration)
 {
-    if (CG_GetPredictedPlayerState(localClientNum)->pm_type == 4)
+    if (CG_GetPredictedPlayerState(localClientNum)->pm_type == PM_MPVIEWER)
 		return 0.0f;
 
 	if (!cg_paused->current.integer || cg_drawpaused->current.enabled)

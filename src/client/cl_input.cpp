@@ -1374,8 +1374,8 @@ void __cdecl CL_CmdButtons(usercmd_s *cmd)
     CL_UpdateCmdButton(&cmd->buttons, 28, 0x40000);
     CL_UpdateCmdButton(&cmd->buttons, 26, 0x80000);
 
-    if (clients[0].snap.ps.pm_type == 2
-        || clients[0].snap.ps.pm_type == 3
+    if (clients[0].snap.ps.pm_type == PM_NOCLIP
+        || clients[0].snap.ps.pm_type == PM_UFO
         || (clients[0].snap.ps.eFlags & 0x20000) != 0 && (clients[0].snap.ps.eFlags & 0x80000) == 0)
     {
         if (kb[KEY_UP].active || kb[KEY_UP].wasPressed)

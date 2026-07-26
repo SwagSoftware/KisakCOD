@@ -16,6 +16,8 @@
 #include <client_mp/client_mp.h>
 #elif KISAK_SP
 #include "ui.h"
+#include <cgame/cg_main.h>
+#include <gfx_d3d/r_cinematic.h>
 #include <game/savedevice.h>
 #include <game/savememory.h>
 #include <game/g_local.h>
@@ -5174,6 +5176,93 @@ void __cdecl Item_Paint(UiContext *dc, itemDef_s *item)
     }
 }
 
+#ifdef KISAK_SP
+void __cdecl Item_Text_GetSubtitle(StringTable *table, char *outText)
+{
+	unsigned int timeMsec;
+	int timeRemaining;
+	int low;
+	int high;
+	int mid;
+	int columnCount;
+	const char **values;
+	const char *refName;
+	const char *startTimeStr;
+	const char *endTimeStr;
+	const char *subtitleText;
+	int compare;
+	char cinematicName[64];
+
+	*outText = 0;
+	timeRemaining = 1024;
+
+	if (!table)
+		return;
+
+	if (!cg_subtitles->current.enabled)
+		return;
+
+	if (R_Cinematic_IsFinished())
+		return;
+
+	if (!cinematicGlob.currentCinematicName[0])
+		return;
+
+	timeMsec = cinematicGlob.timeInMsec;
+	I_strncpyz(cinematicName, cinematicGlob.currentCinematicName, 64);
+
+	if (ui_cinematicsTimestamp->current.enabled)
+	{
+		Com_sprintf(outText, 1024, "%i.%01is ", timeMsec / 1000, (timeMsec % 1000) / 100);
+		timeRemaining = 1024 - (int)strlen(outText);
+	}
+
+	low = 0;
+	high = table->rowCount - 1;
+
+	while (high >= 0)
+	{
+		columnCount = table->columnCount;
+		mid = (low + high) >> 1;
+		if (columnCount > 0 && mid < table->rowCount && mid >= 0 && (values = table->values, values[mid * columnCount]))
+			refName = values[mid * columnCount];
+		else
+			refName = "";
+		
+		compare = strcmp(cinematicName, refName);
+		if (compare < 0)
+		{
+			high = mid - 1;
+			continue;
+		}
+		
+		if (compare <= 0)
+		{
+			startTimeStr = StringTable_GetColumnValueForRow(table, mid, 1);
+			if (timeMsec < (unsigned int)(atof(startTimeStr) * 1000.0))
+			{
+				high = mid - 1;
+				continue;
+			}
+			
+			endTimeStr = StringTable_GetColumnValueForRow(table, mid, 2);
+			if (timeMsec < (unsigned int)(atof(endTimeStr) * 1000.0))
+			{
+				subtitleText = StringTable_GetColumnValueForRow(table, mid, 3);
+				I_strncpyz(outText, subtitleText, timeRemaining > 0 ? timeRemaining : 0);
+				return;
+			}
+		}
+		
+		low = mid + 1;
+		if (low > high)
+			return;
+		
+		high = high;
+	}
+}
+#endif
+
 const float MY_SUBTITLE_GLOWCOLOR[4] = { 0.0f, 0.3f, 0.0f, 1.0f };
 void __cdecl Item_Text_Paint(UiContext *dc, itemDef_s *item)
 {
@@ -5192,8 +5281,17 @@ void __cdecl Item_Text_Paint(UiContext *dc, itemDef_s *item)
     cinematic = (item->itemFlags & 2) != 0;
     subtitle = cinematic;
     if (cinematic)
-        item->text = "NOT USING CINEMATIC_SUBTITLES";
-    if (item->text)
+	{
+#ifdef KISAK_SP
+		Item_Text_GetSubtitle(uiInfo.videoSubtitles, text);
+		if (!text[0])
+			return;
+		textPtr = text;
+#else
+		return;
+#endif
+	}
+    else if (item->text)
     {
         textPtr = (char *)item->text;
     }

@@ -1,4 +1,6 @@
-#ifdef KISAK_MP
+#ifndef KISAK_MP
+#error This File is MultiPlayer Only
+#endif
 
 #include <universal/q_shared.h>
 #include "bg_public.h"
@@ -18,4 +20,3 @@ uint16 BG_VehiclesGetSlotTagName(int32_t slotIndex)
     iassert(slotIndex == VEHICLE_RIDESLOT_GUNNER);
     return scr_const.tag_gunner;
 }
-#endif

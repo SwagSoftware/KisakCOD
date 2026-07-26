@@ -104,7 +104,7 @@ int __cdecl SpotWouldTelefrag(gentity_s *spot)
         client = v5->client;
         if (client)
         {
-            if (client->ps.pm_type < 5)
+            if (client->ps.pm_type < PM_DEAD)
                 break;
         }
         if (v5->actor && v5->health > 0)

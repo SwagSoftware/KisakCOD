@@ -3430,9 +3430,6 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
 
 #ifdef KISAK_MP
     pm->proneChange = 0;
-#else
-    gentity_s *ent;
-    int linkedTo;
 #endif
 
 #ifdef KISAK_MP
@@ -3454,12 +3451,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         ps->viewHeightCurrent = 0.0;
     }
 #elif KISAK_SP
-	// (SP) Temporary workaround until PM_DEAD and PM_DEAD_LINKED are fixed.
-	// Only allow unlinked dead players to fall to the ground. Linked dead
-	// players should remain fixed to their linked position instead.
-	ent = &g_entities[ps->clientNum];
-	linkedTo = (ent->tagInfo != 0);
-	if (ps->pm_type >= PM_DEAD && !linkedTo)
+    if (ps->pm_type == PM_DEAD)
     {
         ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
         if ((pm->cmd.buttons & 0x100) != 0)
@@ -3506,7 +3498,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             PM_ViewHeightAdjust(pm, pml);
         }
 #ifdef KISAK_MP
-        else if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
+        if ((ps->pm_flags & PMF_VEHICLE_ATTACHED) != 0)
 #elif KISAK_SP
         if ((ps->eFlags & 0x20000) != 0 && (ps->eFlags & 0x80000) == 0)
 #endif

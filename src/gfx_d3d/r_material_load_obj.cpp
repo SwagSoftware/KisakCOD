@@ -1913,7 +1913,7 @@ void __cdecl Material_CacheShader(
     }
     else
     {
-        Com_PrintWarning(10, "Material_CacheShader: Failed to open '%s'", filename);
+        Com_PrintWarning(10, "Material_CacheShader: Failed to open '%s'\n", filename);
     }
 }
 

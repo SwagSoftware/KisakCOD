@@ -1054,6 +1054,7 @@ void __cdecl Fade(
     UiContext *dc);
 void __cdecl Item_Paint(UiContext *dc, itemDef_s *item);
 void __cdecl Item_Text_Paint(UiContext *dc, itemDef_s *item);
+void __cdecl Item_Text_GetSubtitle(StringTable *table, char *outText);
 void __cdecl Item_SetTextExtents(int localClientNum, itemDef_s *item, const char *text);
 void __cdecl ToWindowCoords(float *x, float *y, const windowDef_t *window);
 void __cdecl Item_TextColor(UiContext *dc, itemDef_s *item, float (*newColor)[4]);

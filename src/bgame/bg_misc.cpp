@@ -1219,7 +1219,9 @@ void __cdecl BG_RegisterDvars()
         "Min distance a penetrated bullet must travel before it'll trigger the effects");
     Jump_RegisterDvars();
     Mantle_RegisterDvars();
+#ifdef KISAK_MP
     Perks_RegisterDvars();
+#endif
 }
 
 char *__cdecl BG_GetEntityTypeName(int32_t eType)
