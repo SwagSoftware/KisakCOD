@@ -256,12 +256,15 @@ GfxImage *__cdecl Image_FindExisting_LoadObj(const char *name)
     GfxImage *image; // [esp+14h] [ebp-8h]
     int hashIndex; // [esp+18h] [ebp-4h]
 
-    hashIndex = R_HashAssetName(name) & 0x7FF;
+    // idb Image_FindExisting @0x513200: `& 0x7FFF` (editor 32768-slot table). The probe is
+    // intentionally unbounded; matching the binary's 32768 table size is what keeps it from
+    // spinning forever once the editor has registered a few thousand material colormaps.
+    hashIndex = R_HashAssetName(name) & IMAGE_HASH_TABLE_MASK;
     for (image = imageGlobals.imageHashTable[hashIndex];
         image && strcmp(name, image->name);
         image = imageGlobals.imageHashTable[hashIndex])
     {
-        hashIndex = ((_WORD)hashIndex + 1) & 0x7FF;
+        hashIndex = ((_WORD)hashIndex + 1) & IMAGE_HASH_TABLE_MASK;
     }
     return !Image_IsProg(image) ? image : 0;
 }

@@ -671,10 +671,10 @@ void __cdecl Cbuf_SV_Execute()
             sv_cmd_text.cmdsize -= counta;
             memmove(src, &src[counta], sv_cmd_text.cmdsize);
         }
+#ifndef KISAK_RADIANT
         SV_WaitServer();
-
         iassert( !com_inServerFrame );
-
+#endif
         Cmd_ExecuteServerString(dst);
     }
 }
@@ -1216,8 +1216,10 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
                     {
                         if (itr->function == Cbuf_AddServerText_f)
                         {
+#ifndef KISAK_RADIANT
                             SV_WaitServer();
                             iassert( !com_inServerFrame );
+#endif
                             Cmd_ExecuteServerString(text);
                         }
                         else
@@ -1245,9 +1247,11 @@ void __cdecl Cmd_ExecuteSingleCommand(int32_t  localClientNum, int32_t  controll
             {
                 if (!Dvar_Command() && (!com_sv_running || !com_sv_running->current.enabled || !SV_GameCommand()))
                 {
+#ifndef KISAK_RADIANT
                     CL_ForwardCommandToServer(localClientNum, text);
                     Cmd_EndTokenizedString();
                     return;
+#endif
                 }
             }
 
@@ -1302,6 +1306,8 @@ void __cdecl Cmd_Exec_f()
 #ifdef KISAK_MP
         if (I_stricmp(pathname, "config_mp.cfg"))
 #elif KISAK_SP
+        if (I_stricmp(pathname, "config.cfg"))
+#elif defined(KISAK_RADIANT)
         if (I_stricmp(pathname, "config.cfg"))
 #endif
         {

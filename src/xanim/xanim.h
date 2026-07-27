@@ -14,7 +14,9 @@
 #include <gfx_d3d/r_material.h>
 #include <gfx_d3d/r_gfx.h>
 
+#ifndef KISAK_RADIANT
 #include <game/pathnode.h>
+#endif
 
 #include <ui/ui_shared.h>
 

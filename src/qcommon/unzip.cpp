@@ -6,7 +6,9 @@
  *****************************************************************************/
 //Anything above this #include will be ignored by the compiler
 //#include "../qcommon/exe_headers.h"
-#include "../client/client.h"
+
+#include <universal/q_shared.h>
+#include <universal/com_memory.h>
 
 //#define ZIP_fopen	fopen
 #define ZIP_fopen	FS_FileOpenReadBinary

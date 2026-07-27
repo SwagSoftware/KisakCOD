@@ -1152,6 +1152,8 @@ bool __cdecl XModelAllowLoadMesh()
     return com_dedicated->current.integer == 0;
 #elif KISAK_SP
     return true;
+#elif defined(KISAK_RADIANT)
+    return true;
 #endif
 }
 

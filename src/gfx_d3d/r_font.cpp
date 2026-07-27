@@ -101,8 +101,22 @@ Font_s *__cdecl R_LoadFont(const char *fontName, int imageTrack)
             font->fontName = &variableFontData[fontNameOffset - 16];
             materialName = &variableFontData[materialNameOffset - 16];
             font->material = Material_RegisterHandle((char *)materialName, imageTrack);
+#ifdef KISAK_RADIANT
+            // P5.5b: the editor never renders glow-pass text (it never sets
+            // TEXT_RENDERFLAG_GLOW / 0x10 — the XY/Z/coord labels draw through the
+            // plain RB_DrawText3D path), and the retail CoD4 install ships no
+            // "<font>_glow" material for the editor font (raw/materials/fonts has
+            // qerfont but not qerfont_glow — the glow variant was a modtools-only
+            // asset). Requesting it just prints a benign "Couldn't find material
+            // fonts/qerfont_glow" each launch. Alias the glow handle to the base
+            // font material so it stays a VALID handle (no error, no null deref if
+            // a glow pass is ever reached). SP/MP builds are unaffected.
+            (void)glowMaterialName;
+            v3 = font->material;
+#else
             Com_sprintf(glowMaterialName, 0x3Fu, "%s_glow", materialName);
             v3 = Material_RegisterHandle(glowMaterialName, imageTrack);
+#endif
             font->glowMaterial = v3;
             return font;
         }

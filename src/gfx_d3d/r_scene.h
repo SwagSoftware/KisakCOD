@@ -314,6 +314,16 @@ void __cdecl R_LinkBModelEntity(uint32_t localClientNum, uint32_t entnum, GfxBru
 void __cdecl R_UnlinkEntity(uint32_t localClientNum, uint32_t entnum);
 void __cdecl R_LinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType, float *mins, float *maxs);
 void __cdecl R_UnlinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType);
+#ifdef KISAK_RADIANT
+// Editor 2D-view scene setup (IDB R_SetSceneParms @ 0x5062b0); see r_scene.cpp.
+struct GfxMatrix;
+void __cdecl R_Ed_SetSceneParms(const float *org, const float (*axis)[3], const GfxMatrix *projection);
+// Side-effect-free dry run: would this org/axis/projection produce an engine-valid
+// inverse-VP (one that passes R_DeriveNearPlaneConstantsForView's r_state_utils.cpp:20
+// ortho/determinant asserts)? Lets the editor scene-setup call sites drop a degenerate
+// far-from-origin camera frame before submitting it, instead of crashing. See r_scene.cpp.
+bool R_Ed_ProjectionWouldBeValid(const float *org, const float (*axis)[3], const GfxMatrix *projection);
+#endif
 
 
 extern GfxScene scene;

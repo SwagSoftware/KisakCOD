@@ -61,6 +61,13 @@ enum ThreadContext_t : __int32
     THREAD_CONTEXT_SERVER_DEMO = 11,
     THREAD_CONTEXT_COUNT = 12,
 };
+#elif defined(KISAK_RADIANT)
+enum ThreadContext_t : __int32 {
+    THREAD_CONTEXT_MAIN     = 0x0,
+    THREAD_CONTEXT_BACKEND  = 0x1,
+    THREAD_CONTEXT_DATABASE = 0x2,
+    THREAD_CONTEXT_COUNT    = 0x3,
+};
 #endif
 
 struct GfxCmdSetMaterialColor // sizeof=0x14
@@ -68,6 +75,15 @@ struct GfxCmdSetMaterialColor // sizeof=0x14
     GfxCmdHeader header;
     float color[4];
 };
+
+#ifdef KISAK_RADIANT
+struct GfxCmdSetCustomConstant // sizeof=0x18
+{
+    GfxCmdHeader header;
+    unsigned int type;
+    float vec[4];
+};
+#endif
 
 struct GfxCmdDrawLines // sizeof=0x28
 {
@@ -470,6 +486,9 @@ void __cdecl RB_DrawTriangles_Internal(
     const float (*st)[2]);
 void __cdecl RB_DrawProfileCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState);
+#ifdef KISAK_RADIANT
+void __cdecl RB_SetCustomConstantCmd(GfxRenderCommandExecState *execState);  // #26 layer C2 sun preview
+#endif
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState);
 void __cdecl RB_LookupColor(uint8_t c, GfxColor *color);
 void __cdecl RB_DrawText(const char *text, Font_s *font, float x, float y, GfxColor color);

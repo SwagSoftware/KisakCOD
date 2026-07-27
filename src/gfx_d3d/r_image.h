@@ -92,7 +92,20 @@ struct Image_MemUsage // sizeof=0xC
     int minspec;                        // ...
 };
 
+#ifdef KISAK_RADIANT
+// CoD4Radiant.exe imageGlobals: Image_Alloc @0x5128b0 and Image_FindExisting @0x513200
+// both index imageGlobals[i] with `& 0x7FFF` (32768 entries, 0x20000-byte array; the
+// picmip scalar fields begin at imageGlobals+0x20000, verified). The editor browses
+// thousands of loose materials, lazily registering one GfxImage per material colormap;
+// the open-addressing probe is intentionally unbounded, so it relies on the 32768-slot
+// table never filling. kisak's game-engine value (2048, `// lwss add`) is 16x too small
+// for the editor and overflows the table -> the linear probe spins forever while scrolling.
+#define IMAGE_HASH_TABLE_SIZE 0x8000   // 32768 (idb & 0x7FFF)
+#define IMAGE_HASH_TABLE_MASK 0x7FFF
+#else
 #define IMAGE_HASH_TABLE_SIZE 2048 // lwss add
+#define IMAGE_HASH_TABLE_MASK 0x7FF
+#endif
 struct ImgGlobals //$C12090365A206BC63E0695BF82A7DA9E // sizeof=0x2014
 {                                       // ...
     GfxImage *imageHashTable[IMAGE_HASH_TABLE_SIZE];     // ...
@@ -147,6 +160,9 @@ char __cdecl Image_ValidateHeader(GfxImageFileHeader *imageFile, const char *fil
 IDirect3DSurface9 *__cdecl Image_GetSurface(GfxImage *image);
 void __cdecl R_InitImages();
 void R_InitCodeImages();
+#ifdef KISAK_RADIANT
+void __cdecl R_LoadCaseTextures();   // editor-only (idb 0x513690); loads bin/case_textures.txt
+#endif
 void __cdecl R_ImageList_f();
 bool __cdecl Image_IsCodeImage(int track);
 bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2);
@@ -409,3 +425,10 @@ void __cdecl Image_TrackFullscreenTexture(
 
 void __cdecl Image_Reload(GfxImage *image);
 void __cdecl Image_UpdatePicmip(GfxImage *image);
+
+#ifdef KISAK_RADIANT
+// Editor texture-refresh / resolution (Textures→Refresh F5, Texture Resolution).
+// idb R_ReloadImages @ 0x513D70 / R_UpdateMipMap @ 0x5139A0.
+void __cdecl R_ReloadImages();
+void __cdecl R_UpdateMipMap();
+#endif

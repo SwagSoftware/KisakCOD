@@ -16,6 +16,13 @@
 #include "r_marks.h"
 #include <universal/profile.h>
 
+#ifdef KISAK_RADIANT
+int __cdecl CL_GetLocalClientActiveCount()
+{
+    return 1;
+}
+#endif
+
 struct ShadowReceiverCallback // sizeof=0x4
 {                                       // ...
     uint8_t *surfaceVisData;    // ...

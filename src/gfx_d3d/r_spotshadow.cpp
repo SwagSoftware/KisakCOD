@@ -22,6 +22,8 @@
 #include <cgame_mp/cg_local_mp.h>
 #elif KISAK_SP
 #include <cgame/cg_local.h>
+#elif defined(KISAK_RADIANT)
+#include <cgame/cg_local.h>
 #endif
 
 void __cdecl R_AddSpotShadowEntCmd(const GfxSpotShadowEntCmd *data)

@@ -1,7 +1,9 @@
 #include <universal/q_shared.h>
 #include "r_draw_method.h"
 #include "r_dvars.h"
+#ifndef KISAK_RADIANT
 #include <bgame/bg_local.h>
+#endif
 
 
 //struct GfxDrawMethod gfxDrawMethod 85b93648     gfx_d3d : r_draw_method.obj

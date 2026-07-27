@@ -6,6 +6,15 @@
 #elif KISAK_SP
 #include <cgame/cg_local.h>
 #include <server/server.h>
+#elif defined(KISAK_RADIANT)
+// Editor has no server; forward-declare the types used in function signatures below.
+struct playerState_s;
+struct usercmd_s;
+struct gentity_s;
+struct svEntity_s;
+struct DObjAnimMat;
+struct DObj_s;
+struct XModel;
 #endif
 
 

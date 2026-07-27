@@ -36,7 +36,16 @@ const CodeSamplerSource s_lightSamplers[2] =
     {0}
 };
 
+#ifdef KISAK_RADIANT
+// One extra entry vs SP/MP: the editor's case_texture.tech binds sampler.caseTexture
+// (TEXTURE_SRC_CODE_CASE_TEXTURE). Without this entry Material_DefaultSamplerSourceFromTable
+// can't resolve the name -> Material_RegisterTechnique('case_texture') returns NULL -> the
+// whole l_sm_* world techset aborts -> world materials fall to "2d". The image is bound
+// per-surface at draw time by R_GetCaseTexture (r_shade.cpp), not from a static code image.
+const CodeSamplerSource s_codeSamplers[21] =
+#else
 const CodeSamplerSource s_codeSamplers[20] =
+#endif
 {
   { "white", TEXTURE_SRC_CODE_WHITE, NULL, 0, 0 },
   { "black", TEXTURE_SRC_CODE_BLACK, NULL, 0, 0 },
@@ -57,6 +66,9 @@ const CodeSamplerSource s_codeSamplers[20] =
   { "floatZ", TEXTURE_SRC_CODE_FLOATZ, NULL, 0, 0 },
   { "processedFloatZ", TEXTURE_SRC_CODE_PROCESSED_FLOATZ, NULL, 0, 0 },
   { "rawFloatZ", TEXTURE_SRC_CODE_RAW_FLOATZ, NULL, 0, 0 },
+#ifdef KISAK_RADIANT
+  { "caseTexture", TEXTURE_SRC_CODE_CASE_TEXTURE, NULL, 0, 0 },  // editor only (idb 0x6341cc)
+#endif
   { NULL, TEXTURE_SRC_CODE_BLACK, NULL, 0, 0 }
 }; // idb
 
@@ -689,43 +701,75 @@ int __cdecl Material_TechniqueTypeForName(const char *name)
     return 34;
 }
 
+// g_useTechnique gates which technique types Material_LoadTechniqueSet will actually
+// register (Material_UsingTechnique). The GAME (SP/MP) leaves the editor flat-shade
+// techniques OFF. The Radiant editor (KISAK_RADIANT) needs them: the modtools techsets
+// the editor loads (e.g. l_sm_r0c0n0s0.techset) list "case texture" / "fakelight normal" /
+// "fakelight view" / "shaded wireframe", and the matching .tech + compiled shaders ship in
+// raw/techniques + raw/shader_bin. With these slots OFF the loader silently DROPS those
+// techniques (techniqueSet->techniques[0x18/0x19/0x1B/0x1D] = NULL) so the editor camera can
+// only draw TECHNIQUE_UNLIT (the white-floor symptom). Enabling them lets the camera select
+// the binary's faithful draw_mode->technique (see camwnd.cpp Cam_TechForDrawMode). 0x1A
+// SUNLIGHT_PREVIEW stays OFF: it's a per-techset sunpre_* variant we don't drive (Stage 2
+// approximates the sun via MATERIAL_COLOR, default-off). SP/MP keep the table verbatim.
+// See PROGRESS "Session — matsys".
+#ifdef KISAK_RADIANT
+ #define KR_EDTECH true
+#else
+ #define KR_EDTECH false
+#endif
 const bool g_useTechnique[34] =
 {
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  true,
-  false,
-  false,
-  false,
-  false,
-  true,
-  false,
-  true,
-  true,
-  true,
-  true
-}; // idb
+  true,   // 0  DEPTH_PREPASS
+  true,   // 1  BUILD_FLOAT_Z
+  true,   // 2  BUILD_SHADOWMAP_DEPTH
+  true,   // 3  BUILD_SHADOWMAP_COLOR
+  true,   // 4  UNLIT
+  true,   // 5  EMISSIVE
+  true,   // 6  EMISSIVE_SHADOW
+  true,   // 7  LIT
+  true,   // 8  LIT_SUN
+  true,   // 9  LIT_SUN_SHADOW
+  true,   // 10 LIT_SPOT
+  true,   // 11 LIT_SPOT_SHADOW
+  true,   // 12 LIT_OMNI
+  true,   // 13 LIT_OMNI_SHADOW
+  true,   // 14 LIT_INSTANCED
+  true,   // 15 LIT_INSTANCED_SUN
+  true,   // 16 LIT_INSTANCED_SUN_SHADOW
+  true,   // 17 LIT_INSTANCED_SPOT
+  true,   // 18 LIT_INSTANCED_SPOT_SHADOW
+  true,   // 19 LIT_INSTANCED_OMNI
+  true,   // 20 LIT_INSTANCED_OMNI_SHADOW
+  true,   // 21 LIGHT_SPOT
+  true,   // 22 LIGHT_OMNI
+  true,   // 23 LIGHT_SPOT_SHADOW
+  KR_EDTECH,  // 24 FAKELIGHT_NORMAL  (editor — KISAK_RADIANT only)
+  KR_EDTECH,  // 25 FAKELIGHT_VIEW    (editor — KISAK_RADIANT only)
+  KR_EDTECH,  // 26 SUNLIGHT_PREVIEW  (editor — KISAK_RADIANT only). Now SUPPORTED (#26 layer C2):
+              //                      the world techsets (l_sm_*) list "sunlight preview": sunpre_r0c0n0s0,
+              //                      whose .tech needs ONLY the additive_stencil statemap + the sunpre
+              //                      vertex/pixel shaders + the material's own colorMap/normalMap/specularMap
+              //                      samplers — all present in the modtools shader_bin (no missing CODE sampler,
+              //                      unlike CASE_TEXTURE). PROVEN by MATPROBE: with this on, wc_l_sm_r0c0n0s0
+              //                      still loads (NOT demoted to "2d") and now carries slot 26(SUNPRE); the
+              //                      faithful-tex FAKELIGHT_NORMAL default draw is unaffected. The sun-preview
+              //                      pass (R_SunPrev_SetSunConstants + RC_SET_CUSTOM_CONSTANT + the C1 stencil
+              //                      shadow volumes) drives it behind g_PrefsDlg->preview_sun_aswell.
+  KR_EDTECH,  // 27 CASE_TEXTURE      (editor — KISAK_RADIANT only). Now SUPPORTED: the case_texture
+              //                      code sampler is registered (s_codeSamplers caseTexture entry +
+              //                      RB_InitCodeImages codeImageNames) and bound per-surface from the
+              //                      material colorMap dimensions by R_GetCaseTexture (r_shade.cpp).
+              //                      R_LoadCaseTextures (r_image.cpp) loads bin/case_textures.txt.
+              //                      Re-enabling this completes draw_mode 4 (the binary's default).
+  true,       // 28 WIREFRAME_SOLID
+  KR_EDTECH,  // 29 WIREFRAME_SHADED  (editor — KISAK_RADIANT only)
+  true,   // 30 SHADOWCOOKIE_CASTER
+  true,   // 31 SHADOWCOOKIE_RECEIVER
+  true,   // 32 DEBUG_BUMPMAP
+  true    // 33 DEBUG_BUMPMAP_INSTANCED
+}; // idb (editor slots 24/25/27/29 KISAK_RADIANT-gated)
+#undef KR_EDTECH
 bool __cdecl Material_UsingTechnique(uint32_t techType)
 {
     if (techType >= 0x22)
@@ -1768,8 +1812,11 @@ static bool Material_CopyTextToDXBuffer2(uint32_t shaderHash, ID3DXBuffer **shad
     int hr; // [esp+0h] [ebp-4h]
 
     char buffer[260];
-    //Com_sprintf(buffer, 260, "%s/raw/shader_bin/%s_%8.8x", fs_basepath->current.string, targetprefix, shaderHash);
-    Com_sprintf(buffer, 260, "%s/main/shader_bin/%s_%8.8x", fs_basepath->current.string, targetprefix, shaderHash);
+    // KisakCOD ships precompiled shaders under raw/shader_bin/ (the CoD4 mod-tools
+    // layout); there is no main/shader_bin/. shader_names is likewise found in
+    // raw/shader_bin/ via the FS search path, so read the individual binaries from raw/.
+    // TODO_RADIANT(P6): route through FS_ReadFile so search order (raw/main/iwd) is honored.
+    Com_sprintf(buffer, 260, "%s/raw/shader_bin/%s_%8.8x", fs_basepath->current.string, targetprefix, shaderHash);
 
     uint32_t shaderLen;
     void *cachedShader;
@@ -4442,6 +4489,10 @@ MaterialTechniqueSet *__cdecl Material_LoadTechniqueSet(char *name, GfxRenderer 
                     technique = Material_RegisterTechnique((char*)token, renderer);
                     if (!technique)
                     {
+#ifdef KISAK_RADIANT
+                        extern void Radiant_FL_Log( const char *fmt, ... );
+                        Radiant_FL_Log( "TECHSETFAIL techset='%s' FAILED registering technique '%s'", name, token );
+#endif
                         techniqueSet = 0;
                         break;
                     }
@@ -5458,40 +5509,45 @@ BOOL __cdecl R_IsWorldMaterialType(uint32_t materialType)
 
 water_t *__cdecl Material_RegisterWaterImage(const MaterialWaterDef *water)
 {
-    int v2; // [esp+0h] [ebp-5Ch]
-    int v3; // [esp+4h] [ebp-58h]
-    int textureWidth; // [esp+10h] [ebp-4Ch]
-    water_t setup; // [esp+14h] [ebp-48h] BYREF
+    int v3; // edi
+    int textureWidth; // eax
+    water_t setup; // [esp+8h] [ebp-44h] BYREF
 
+    // Match IDA Material_RegisterWaterImage @0x51af40 EXACTLY: textureWidth is read as an int,
+    // but the dimension fed into the FFT grid M/N is its low 16 bits only
+    // (v3 = (unsigned __int16)textureWidth). The original masks BEFORE deriving M/N, and the
+    // level-0 assert exists precisely because textureWidth can carry non-zero high bits. The
+    // prior port dropped the mask (and had the always-false `textureWidth != textureWidth`),
+    // feeding the full 32-bit value into M/N -> wildly out of range -> trips the [4,64] /
+    // IsPowerOf2 asserts in R_LoadWaterSetup (which silently closes the editor when no debugger
+    // is attached, since MyAssertHandler int3's). Crash repro: scrolling a water material into
+    // the texture browser.
     textureWidth = water->textureWidth;
-    if (textureWidth != textureWidth)
+    v3 = (unsigned __int16)textureWidth;
+    if (textureWidth != (unsigned __int16)textureWidth)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\qcommon\\../universal/assertive.h",
             281,
             0,
             "i == static_cast< Type >( i )\n\t%i, %i",
             textureWidth,
-            textureWidth);
-    setup.M = textureWidth;
-    setup.N = textureWidth;
+            (unsigned __int16)textureWidth);
     setup.Lx = water->horizontalWorldLength;
+    setup.M = v3;
     setup.Lz = water->verticalWorldLength;
+    setup.N = v3;
+    setup.image = 0;
     setup.gravity = 800.0;
     setup.windvel = water->windSpeed;
     setup.winddir[0] = water->windDirection[0];
     setup.winddir[1] = water->windDirection[1];
     setup.amplitude = water->amplitude;
-    setup.image = 0;
-    if (textureWidth >> r_picmip_water->current.integer < 4)
-        v3 = 4;
-    else
-        v3 = textureWidth >> r_picmip_water->current.integer;
-    setup.M = v3;
-    if (setup.N >> r_picmip_water->current.integer < 4)
-        v2 = 4;
-    else
-        v2 = setup.N >> r_picmip_water->current.integer;
-    setup.N = v2;
+    setup.M = v3 >> r_picmip_water->current.integer;
+    if (setup.M < 4)
+        setup.M = 4;
+    setup.N = v3 >> r_picmip_water->current.integer;
+    if (setup.N < 4)
+        setup.N = 4;
     return R_LoadWaterSetup(&setup);
 }
 
@@ -5529,8 +5585,17 @@ BOOL __cdecl Material_FinishLoadingTexdef(
         texdef->samplerState &= 0xE7u;
         texdef->samplerState |= 0x10u;
     }
+#ifdef KISAK_RADIANT
+    texdef->samplerState &= 0x1Fu;
+#endif
     if (texdef->semantic == 11)
-        return Material_RegisterWaterImage((const MaterialWaterDef*)(material + texdef->u.imageNameOffset)) != 0;
+        // BYTE offset into the material raw blob — disasm 0x51b057 is `add eax, edi` (offset + the
+        // MaterialRaw base, raw byte add), exactly like the image path's `add esi, edi`. `material`
+        // is a MaterialRaw*, so `material + offset` would scale by sizeof(MaterialRaw) → a wildly
+        // out-of-bounds water ptr → AV in Material_RegisterWaterImage (crash scrolling a water
+        // material into the texture browser). Cast to char* for byte arithmetic, like Material_
+        // RegisterImage below does with (const char*)material + imageNameOffset.
+        return Material_RegisterWaterImage((const MaterialWaterDef*)((const char*)material + texdef->u.imageNameOffset)) != 0;
     else
         return Material_RegisterImage(material, texdef->u.imageNameOffset, texdef->semantic, imageTrack);
 }
@@ -5624,11 +5689,13 @@ void __cdecl Material_RemapStateBits(
     stateBitsOut[1] = refStateBits[1];
     for (ruleSetIndex = 0; ruleSetIndex < 0xA; ++ruleSetIndex)
         Material_ApplyStateBitsRemapRuleSet(material, stateMap, ruleSetIndex, refStateBits, stateBitsOut);
+#ifndef KISAK_RADIANT
     if ((toolFlags & 0x200) == 0 && (stateBitsOut[1] & 0x30) == 0x10)
     {
         stateBitsOut[1] &= 0xFFFFFFCF;
         stateBitsOut[1] = stateBitsOut[1];
     }
+#endif
 }
 
 uint32_t __cdecl Material_GetCullFlags(Material *material)
@@ -5922,6 +5989,21 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, uint32_t materialT
     material->info.name = strDest;
     iassert(!material->info.drawSurf.fields.materialSortedIndex);
     material->info.gameFlags = mtlRaw->info.gameFlags;
+#ifdef KISAK_RADIANT
+    // EDITOR-ONLY: stash the on-disk surfaceFlags on the (widened) Material so
+    // Material_CastsStencilShadow (0x4FEE90) can read it. In CoD4Radiant.exe this is
+    // the embedded MaterialInfo.surfaceFlags @ info+0x2C; kisak's 24B MaterialInfo
+    // lacks it, so the editor build keeps it as a trailing Material field. SP/MP never
+    // compile this line (no field exists there) — they stay byte-identical.
+    material->surfaceFlags = mtlRaw->info.surfaceFlags;
+    // EDITOR-ONLY: stash the on-disk usage/locale so the runtime texture-browser
+    // registration path (Editor_AddRadiantMaterial, texwnd.cpp) can fill the
+    // qtexture's usage_index / localefilter — kisak's 24B runtime MaterialInfo drops
+    // both. In CoD4Radiant.exe these live in the embedded MaterialInfo @ +0x1C/+0x20.
+    material->editorToolFlags = mtlRaw->info.toolFlags;
+    material->editorUsage  = mtlRaw->info.usage;
+    material->editorLocale = mtlRaw->info.locale;
+#endif
     v4 = (mtlRaw->info.surfaceFlags & 0x1F00000) >> 20;
     surfIndex = v4;
     if (v4)
@@ -5968,7 +6050,10 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, uint32_t materialT
                     "material->textureTable[texIndex].samplerState & SAMPLER_FILTER_MASK");
             material->textureTable[texIndex].semantic = textureTableRaw[texIndex].semantic;
             if (material->textureTable[texIndex].semantic == 11)
-                material->textureTable[texIndex].u.image = (GfxImage*)Material_RegisterWaterImage((const MaterialWaterDef*)(mtlRaw + textureTableRaw[texIndex].u.imageNameOffset));
+                // BYTE offset (cast mtlRaw to char*) — same fix as Material_FinishLoadingTexdef; the
+                // Image_Register path just below already does (const char*)mtlRaw + offset. Without the
+                // cast, MaterialRaw* arithmetic scales by sizeof(MaterialRaw) → out-of-bounds → AV.
+                material->textureTable[texIndex].u.image = (GfxImage*)Material_RegisterWaterImage((const MaterialWaterDef*)((const char*)mtlRaw + textureTableRaw[texIndex].u.imageNameOffset));
             else
                 material->textureTable[texIndex].u.image = Image_Register(
                     (const char*)mtlRaw + textureTableRaw[texIndex].u.imageNameOffset,

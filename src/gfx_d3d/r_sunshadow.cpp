@@ -599,6 +599,18 @@ void __cdecl R_SetupSunShadowMapProjection(
     //    |                                     |
     //    X-------------------------------------X
     // 
+    // (Artist's Orthongonal Ascii Depiction)
+    // 
+    //              X--------X
+    //              |        |
+    //              |        |
+    //              X--------X
+    //
+    //                 
+    //                 \ /
+    //                  X
+    // 
+    // 
     //  Origin, (4x) zNear Frustum Corners
     R_SetupSunShadowBoundingPoly(
         frustumPointsInSunProj[0],

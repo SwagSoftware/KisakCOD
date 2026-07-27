@@ -222,7 +222,12 @@ void Com_Shutdown(const char* finalmsg);
 void __cdecl Debug_Frame(int localClientNum);
 
 void __cdecl Com_InitPlayerProfiles(int localClientNum);
+#ifdef KISAK_RADIANT
+// Radiant build: cmdlib.cpp provides Com_PrintMessage as a varargs console printer.
+void Com_PrintMessage(const char *fmt, ...);
+#else
 void __cdecl Com_PrintMessage(int channel, const char* msg, int error);
+#endif
 void __cdecl Com_LogPrintMessage(int channel, const char* msg);
 void Com_OpenLogFile();
 void Com_DPrintf(int channel, const char* fmt, ...);
@@ -1551,6 +1556,10 @@ inline char * stristr(const char *haystack, const char *needle)
 inline int __cdecl RETURN_ZERO32()
 {
     return 0;
+}
+inline int RETURN_ONE(int i = 0)
+{
+    return 1;
 }
 // LWSS: Note: Commonly used as a nullsub()
 inline void __cdecl KISAK_NULLSUB()

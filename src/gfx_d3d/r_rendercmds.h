@@ -35,7 +35,31 @@ enum GfxRenderCommand : __int32
     RC_DRAW_TRIANGLES = 0x13,
     RC_DRAW_PROFILE = 0x14,
     RC_PROJECTION_SET = 0x15,
+#ifdef KISAK_RADIANT
+    // Editor begin-view command (CoD4Radiant r_rendercmds.cpp). kisak's CoD3
+    // renderer has no such command — the editor draws lines/text directly in the
+    // command list (outside a scene render), so it needs a command to establish
+    // the active GfxViewParms (which RB_DrawLines3D reads via viewParms3D). Appended
+    // after RC_PROJECTION_SET so existing enum values are untouched; RC_COUNT bumps
+    // so R_GetCommandBuffer's `renderCmd < RC_COUNT` guard admits it.
+    RC_BEGIN_VIEW = 0x16,
+    // Editor surface-cache flush (CoD4Radiant r_ed_scene.cpp). Emitted by
+    // R_AddEditorSurfsCmd; the backend handler (RB_DrawEditorSkinnedCachedCmd) draws
+    // the accumulated brush/world meshes from the per-material editor VB pool. Lighting
+    // epic Stage 1 (2026-06-12). Appended after RC_BEGIN_VIEW so existing values hold.
+    RC_DRAW_EDITOR_SKINNEDCACHED = 0x17,
+    // Sun-light-preview custom shader constant (#26 layer C2, CoD4Radiant
+    // R_AddCmdSetCustomShaderConstant 0x4fd330). The editor has no scene sun
+    // (rgp.world->sunLight), so it injects the parsed worldspawn sun direction/colour
+    // into the active source-state as code constants (SUN_POSITION/DIFFUSE/SPECULAR)
+    // via this deferred command; RB_SetCustomConstantCmd writes them. kisak's CoD3
+    // renderer has no equivalent (the game sets sun constants in-scene). Appended so
+    // existing values hold; RC_COUNT bumps.
+    RC_SET_CUSTOM_CONSTANT = 0x18,
+    RC_COUNT = 0x19,
+#else
     RC_COUNT = 0x16,
+#endif
 };
 enum GfxRenderTargetId : __int32
 {                                       // ...
@@ -599,6 +623,66 @@ void __cdecl R_ClearClientCmdList2D();
 void __cdecl R_BeginSharedCmdList();
 void __cdecl R_AddCmdEndOfList();
 GfxCmdHeader *__cdecl R_GetCommandBuffer(GfxRenderCommand renderCmd, int bytes);
+#ifdef KISAK_RADIANT
+// Editor line-batching bridge (cod3src\src\gfx_d3d\r_rendercmds.cpp). See the
+// implementation at the end of r_rendercmds.cpp for the §11 signature notes.
+struct GfxPointVertex;
+void *__cdecl R_AddMultipleRendercommands(int bytes);
+void __cdecl R_AddLineCmd(short count, char width, char dimension, GfxPointVertex *verts);
+void __cdecl R_AddCmd_Line3D(short count, char width, GfxPointVertex *verts);
+void __cdecl R_AddCmd_Line3DNoDepth(short count, char width, GfxPointVertex *verts);
+void __cdecl R_AddCmd_Line2D(short count, char width, GfxPointVertex *verts);  // IDB 0x4fd180 (2D sibling)
+// Editor point-batching bridge — IDB R_AddPointCmd @ 0x4fcf60 / R_AddPointCmd_W
+// @ 0x4fd080 (the latter a thin dimension=3 wrapper). Emits RC_DRAW_POINTS (kisak
+// already has RB_DrawPointsCmd). The clipper draws its 1-3 placed clip points as
+// screen-space squares through R_AddPointCmd_W.
+struct GfxCmdDrawPoints;
+GfxCmdDrawPoints *__cdecl R_AddPointCmd(short pointCount, char size, char dimension, const GfxPointVertex *verts);
+GfxCmdDrawPoints *__cdecl R_AddPointCmd_W(short pointCount, char size, const GfxPointVertex *verts);
+
+// Editor begin-view command — IDB R_AddBeginViewCmd @ 0x4fc3a0 (r_rendercmds.cpp).
+// Emits an RC_BEGIN_VIEW carrying the scene def + the GfxViewParms* the backend
+// (RB_BeginViewCmd) hands to R_BeginView, establishing viewParms3D for the lines.
+struct GfxCmdBeginView // 28 bytes: header(4) + GfxSceneDef(0x14) + viewParms(4)
+{
+    GfxCmdHeader header;
+    GfxSceneDef sceneDef;
+    const GfxViewParms *viewParms;
+};
+void __cdecl R_AddBeginViewCmd(const GfxSceneDef *sceneDef, const GfxViewParms *viewParms);
+void __cdecl RB_BeginViewCmd(GfxRenderCommandExecState *execState);
+// Editor surface-cache flush command (RC_DRAW_EDITOR_SKINNEDCACHED). Front-end emit
+// is R_AddEditorSurfsCmd (r_ed_scene.cpp); the backend handler draws the accumulated
+// brush/world meshes from the per-material editor vertex-buffer pool (r_ed_vertbuf.cpp).
+void __cdecl RB_DrawEditorSkinnedCachedCmd(GfxRenderCommandExecState *execState);
+// Editor material-colour command — feeds CONST_SRC_CODE_MATERIAL_COLOR to the $line
+// shader (the editor's bare line draw skips normal per-material constant setup).
+void __cdecl R_AddCmdSetMaterialColor(const float *color);
+// Editor sun-preview custom shader-constant command — IDB R_AddCmdSetCustomShaderConstant
+// @ 0x4fd330 (#26 layer C2). Injects the parsed worldspawn sun (CONST_SRC_CODE_SUN_*) into
+// the source-state for the SUNLIGHT_PREVIEW pass; RB_SetCustomConstantCmd consumes it.
+void __cdecl R_AddCmdSetCustomShaderConstant(unsigned int constant, float x, float y, float z, float w);
+// Editor full-screen colored quad — IDB R_AddCmdDrawFullScreenColoredQuad @ 0x4fc260
+// (#26 sun-preview, R_SunPrev_Main). Emits RC_DRAW_FULL_SCREEN_COLORED_QUAD (the backend
+// RB_DrawFullScreenColoredQuadCmd already exists in the CoD3 base). Used for the black-world
+// multiply quad + the clear-stencil quad that frame the SUNLIGHT_PREVIEW lit draw.
+void __cdecl R_AddCmdDrawFullScreenColoredQuad(
+    float s0, float t0, float s1, float t1, const float *color, const Material *material);
+// Editor world-space text command — IDB R_AddCmdDrawTextAtPosition @ 0x4fbe20.
+// Emits an RC_DRAW_TEXT_3D (kisak already has RB_DrawText3DCmd); XY coordinate /
+// view-name / entity-name labels go through this (P5.5 text path).
+struct Font_s;
+void __cdecl R_AddCmdDrawTextAtPosition(
+    const char *text, Font_s *font, const float *origin,
+    const float *xPixelStep, const float *yPixelStep, const float *color);
+// Editor 2D image command — IDB R_AddCmdDraw2DImage @ 0x4fb5e0. A non-rejecting
+// R_AddCmdDrawStretchPic: draws a world ("wc/") material's colormap into the 2D pass
+// (the texture-window thumbnail grid). See the .cpp for the depth-buffer-rejection note.
+void __cdecl R_AddCmdDraw2DImage(
+    float x, float y, float w, float h,
+    float s0, float t0, float s1, float t1,
+    const float *color, Material *material);
+#endif
 DebugGlobals *R_ToggleSmpFrame();
 GfxViewParms *__cdecl R_AllocViewParms();
 void __cdecl R_AddCmdDrawStretchPic(

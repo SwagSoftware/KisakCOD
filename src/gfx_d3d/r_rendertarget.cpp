@@ -194,8 +194,24 @@ void __cdecl R_GetFullScreenRes(FullscreenType screenType, int *fullscreenWidth,
 
 void __cdecl R_GetFrameBufferDepthStencilRes(int *depthStencilWidth, int *depthStencilHeight)
 {
+#ifdef KISAK_RADIANT
+    // P5.3 multi-window: the editor shares ONE depth-stencil surface across all child
+    // views (the per-window swap chains carry only colour — d3dpp.EnableAutoDepthStencil
+    // is 0). D3D9 requires the depth surface to be >= the bound colour render target, so
+    // the shared depth must cover the LARGEST view at its LARGEST size. vidConfig.display
+    // is only the first (device-creating) window's initial client size, so a larger or
+    // grown view would undersize it. Size the shared depth to the whole virtual desktop
+    // → it covers any editor window at any resize without ever recreating the depth on
+    // resize (R_Hwnd_Resize only recreates colour swap chains). The real editor sizes the
+    // device for the camera view (the largest); virtual-desktop is a strictly-safe superset.
+    int vw = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+    int vh = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+    *depthStencilWidth  = vw > vidConfig.displayWidth  ? vw : vidConfig.displayWidth;
+    *depthStencilHeight = vh > vidConfig.displayHeight ? vh : vidConfig.displayHeight;
+#else
     *depthStencilWidth = vidConfig.displayWidth;
     *depthStencilHeight = vidConfig.displayHeight;
+#endif
 }
 
 IDirect3DSurface9 *__cdecl R_AssignSingleSampleDepthStencilSurface()

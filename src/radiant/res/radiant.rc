@@ -1,0 +1,1062 @@
+// radiant.rc — CoD4Radiant resource script
+// P5.5: the real CMainFrame menu (IDR_MENU_QUAKE3) + accelerator (IDR_MAIN_ACCEL),
+// reconstructed from the binary's resource table (raw/MENU/214.bin + raw/ACCELERATOR/
+// 101.bin, Phase-0 extraction). Numeric command IDs are the binary's; the New/Open/
+// Save/Undo/Redo items reuse MFC standard IDs (0xE100/01/03, 0xE12B/2C). Menu items
+// without an ON_COMMAND handler auto-grey (CFrameWnd m_bAutoMenuEnable) — Part 2
+// (porter batches) wires the command wrappers category by category.
+//
+// Toolbar/icon/dialog templates remain Phase 5/6 (raw/ under radiant_artifacts).
+
+#include "resource.h"
+#define APSTUDIO_READONLY_SYMBOLS
+#include "afxres.h"
+#undef APSTUDIO_READONLY_SYMBOLS
+
+IDR_MENU_QUAKE3 MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New map", 57600
+        MENUITEM SEPARATOR
+        MENUITEM "&Open...", 57601
+        MENUITEM "&Load...", 32844
+        MENUITEM "&Save", 57603
+        MENUITEM "Save &as...", 32952
+        MENUITEM "Save s&elected...", 32845
+        MENUITEM SEPARATOR
+        MENUITEM "Save re&gion...", 32827
+        MENUITEM SEPARATOR
+        MENUITEM "New p&roject...", 32791
+        MENUITEM "Set Startup Project...", 35018
+        MENUITEM "Pro&ject settings...", 32818
+        MENUITEM SEPARATOR
+        MENUITEM "&Pointfile...", 32967
+        MENUITEM "Error file...", 36109
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit", 32951
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl-Z", 57643
+        MENUITEM "&Redo\tShift-Ctrl-Z", 57644
+        MENUITEM SEPARATOR
+        MENUITEM "&Copy\tCtrl-C", 33039
+        MENUITEM "&Paste\tCtrl-V", 33040
+        MENUITEM "&Delete\tBackspace", 33003
+        MENUITEM SEPARATOR
+        MENUITEM "&Map Info...", 32786
+        MENUITEM "E&ntity Info...", 32787
+        MENUITEM SEPARATOR
+        MENUITEM "&Enter Prefab", 33173
+        MENUITEM "&Leave Prefab", 33174
+        MENUITEM SEPARATOR
+        MENUITEM "Pre&ferences...", 32784
+    END
+    POPUP "&View"
+    BEGIN
+        POPUP "Toggle"
+        BEGIN
+            MENUITEM "Camera View", 33069
+            MENUITEM "Console View", 33068
+            MENUITEM "Entity View", 33017
+            MENUITEM "Texture View", 33018
+            MENUITEM "XY (Top)", 33071
+            MENUITEM "YZ (Side)", 32797
+            MENUITEM "XZ (Front)", 32798
+            MENUITEM "Z View", 33070
+            MENUITEM "Layers", 33954
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Center\tEnd", 32953
+        MENUITEM "&Up Floor\tPage Up", 32954
+        MENUITEM "&Down Floor\tPage Down", 32955
+        MENUITEM SEPARATOR
+        MENUITEM "&Next (XY, YZ, XY)\tCtrl-Tab", 32789
+        POPUP "Layout"
+        BEGIN
+            MENUITEM "XY (Top)", 32772
+            MENUITEM "YZ", 32773
+            MENUITEM "XZ", 32774
+        END
+        POPUP "Zoom"
+        BEGIN
+            MENUITEM "&XY 100%", 32968
+            MENUITEM "XY Zoom &In\tDelete", 32995
+            MENUITEM "XY Zoom &Out\tInsert", 32996
+            MENUITEM SEPARATOR
+            MENUITEM "&Z 100%", 32998
+            MENUITEM "Z Zoo&m In\tCtrl-Delete", 32999
+            MENUITEM "Z Zoom O&ut\tCtrl-Insert", 33000
+            MENUITEM SEPARATOR
+            MENUITEM "Cubic Clip Zoom In\tCtrl-]", 32820
+            MENUITEM "Cubic Clip Zoom Out\tCtrl-[", 32819
+        END
+        MENUITEM SEPARATOR
+        POPUP "Show"
+        BEGIN
+            MENUITEM "Names", 33971, CHECKED
+            MENUITEM "Angles", 33972, CHECKED
+            MENUITEM "Blocks", 33973, CHECKED
+            MENUITEM "Connections", 33974, CHECKED
+            MENUITEM "Coordinates", 33975, CHECKED
+            MENUITEM "Reverse Filter", 36127, CHECKED
+        END
+        MENUITEM "Filter Settings", 33104
+        MENUITEM SEPARATOR
+        MENUITEM "Hide Selected", 32923
+        MENUITEM "Hide Unselected", 32934
+        MENUITEM "Show Last Hidden", 33246
+        MENUITEM "Show Hidden", 32924
+        MENUITEM SEPARATOR
+        POPUP "Entities as"
+        BEGIN
+            MENUITEM "Bounding box", 32909
+            MENUITEM "Wireframe", 32916
+            MENUITEM "Selected Wireframe", 32911
+            MENUITEM "Selected Skinned", 32912
+            MENUITEM "Skinned", 32913
+            MENUITEM "Skinned and Boxed", 32914
+        END
+        MENUITEM SEPARATOR
+        POPUP "Light Preview..."
+        BEGIN
+            MENUITEM "Enable light preview", 33950
+            MENUITEM "Preview sun as well", 36108
+            MENUITEM SEPARATOR
+            MENUITEM "Start previewing selected", 33951
+            MENUITEM "Stop previewing selected", 33952
+            MENUITEM "Clear preview list", 33953
+            MENUITEM SEPARATOR
+            MENUITEM "Toggle preview at max intensity", 36122
+            MENUITEM "Show regions for selected", 36125
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Cubic Clipping", 32817, CHECKED
+    END
+    POPUP "&Selection"
+    BEGIN
+        POPUP "Drag"
+        BEGIN
+            MENUITEM "Drag &Edges", 33006
+            MENUITEM "Drag &Vertices", 33005
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Clone", 33001
+        MENUITEM "Deselect\tEsc", 33002
+        MENUITEM SEPARATOR
+        POPUP "Flip"
+        BEGIN
+            MENUITEM "Flip &X", 32956
+            MENUITEM "Flip &Y", 32957
+            MENUITEM "Flip &Z", 32958
+        END
+        POPUP "Rotate"
+        BEGIN
+            MENUITEM "Rotate X", 32959
+            MENUITEM "Rotate Y", 32960
+            MENUITEM "Rotate Z", 32961
+            MENUITEM "Arbitrary rotation...", 33033
+        END
+        MENUITEM "Scale...", 32809
+        MENUITEM "Maya Export...", 33186
+        MENUITEM "Drop to Floor", 33183
+        MENUITEM SEPARATOR
+        POPUP "CSG"
+        BEGIN
+            MENUITEM "&Hollow", 32982
+            MENUITEM "&Merge", 32927
+            MENUITEM "&Auto Caulk", 33220
+        END
+        POPUP "Clipper"
+        BEGIN
+            MENUITEM "Toggle Clipper", 32783
+            MENUITEM SEPARATOR
+            MENUITEM "Clip selected", 32795
+            MENUITEM "Split selected", 32794
+            MENUITEM "Flip Clip orientation", 32796
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Select Targetname", 33132
+        MENUITEM "Select Classname", 202
+        MENUITEM "Select by Key/Value", 33133
+        MENUITEM "Select Connected", 33134
+        POPUP "Select"
+        BEGIN
+            MENUITEM "Select Complete &Tall", 32984
+            MENUITEM "Select &Partial Tall", 32983
+            MENUITEM "Select T&ouching", 32986
+            MENUITEM "Select &Inside", 33008
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Connect entities", 33021
+        MENUITEM "Ungroup entity", 33035
+        MENUITEM SEPARATOR
+        MENUITEM "Make Detail", 33042
+        MENUITEM "Make Structural", 33043
+        MENUITEM "Make Weapon Clip", 196
+        MENUITEM "Make Non-Colliding", 197
+        MENUITEM SEPARATOR
+        MENUITEM "Make Split Coplanar Geo", 33223
+        MENUITEM "Make Don't Split Coplanar Geo", 33224
+    END
+    POPUP "&Grid"
+    BEGIN
+        MENUITEM "Grid 0.5", 35021
+        MENUITEM "Grid 1\t&1", 35022
+        MENUITEM "Grid 2\t&2", 35023
+        MENUITEM "Grid 4\t&3", 35024
+        MENUITEM "Grid 8\t&4", 35025, CHECKED
+        MENUITEM "Grid 16\t&5", 35026
+        MENUITEM "Grid 32\t&6", 35027
+        MENUITEM "Grid 64\t&7", 35029
+        MENUITEM "Grid 128", 35031
+        MENUITEM "Grid 256\t&8", 35032
+        MENUITEM "Grid 512\t&9", 35033
+        MENUITEM SEPARATOR
+        MENUITEM "Snap to grid", 32793, CHECKED
+    END
+    POPUP "&Textures"
+    BEGIN
+        MENUITEM "Show &All\tCtrl-A", 32973
+        MENUITEM "Show In &Use\tU", 32974
+        MENUITEM "&Surface Inspector\tS", 33041
+        MENUITEM SEPARATOR
+        MENUITEM "Find / Replace...", 32812
+        POPUP "Render Method"
+        BEGIN
+            MENUITEM "&Wireframe", 32990
+            MENUITEM "&Fullbright", 32991
+            MENUITEM "&Normal-based Fake Lighting", 32992
+            MENUITEM "&View-based Fake Lighting", 32993
+            MENUITEM "&Case textures", 32994
+        END
+        POPUP "Texture Filter"
+        BEGIN
+            MENUITEM "Nearest", 33226
+            MENUITEM "Linear", 33227
+            MENUITEM "Bilinear", 33228
+            MENUITEM "Trilinear", 33229
+            MENUITEM "Anisotropic", 33230
+        END
+        POPUP "Texture Resolution"
+        BEGIN
+            MENUITEM "Maximum", 36115
+            MENUITEM "High", 36116
+            MENUITEM "Normal", 36117
+            MENUITEM "Low", 36118
+        END
+        POPUP "Texture Window Scale"
+        BEGIN
+            MENUITEM "200%", 32894
+            MENUITEM "100%", 32895
+            MENUITEM "50%", 32896
+            MENUITEM "25%", 32897
+            MENUITEM "10%", 32898
+        END
+        POPUP "Texture Lock"
+        BEGIN
+            MENUITEM "Moves", 32785, CHECKED
+            MENUITEM "Rotations", 32835, CHECKED
+            MENUITEM "Lightmaps", 33237, CHECKED
+        END
+        MENUITEM SEPARATOR
+        POPUP "Layered Materials"
+        BEGIN
+            MENUITEM "Toggle Tool Window", 35008
+            MENUITEM "Save", 35009
+        END
+        POPUP "Edit Layer"
+        BEGIN
+            MENUITEM "Cycle", 33238
+            MENUITEM SEPARATOR
+            MENUITEM "Material", 33232
+            MENUITEM "Lightmap", 33233
+            MENUITEM "Smoothing", 36100
+        END
+        MENUITEM "Refresh Textures", 33204
+    END
+    POPUP "&Misc"
+    BEGIN
+        MENUITEM "&Benchmark", 32978
+        POPUP "&Colors"
+        BEGIN
+            POPUP "Themes"
+            BEGIN
+                MENUITEM "QE4 Original", 32805
+                MENUITEM "Q3Radiant Original", 32806
+                MENUITEM "Black and Green", 32807
+                MENUITEM "Inverted", 33143
+                MENUITEM "Gray", 210
+            END
+            MENUITEM SEPARATOR
+            MENUITEM "Camera Background...", 209
+            MENUITEM "Texture Background...", 33013
+            MENUITEM SEPARATOR
+            MENUITEM "Grid Background...", 33014
+            MENUITEM "Grid Major...", 33019
+            MENUITEM "Grid Minor...", 33020
+            MENUITEM "Grid Text...", 32799
+            MENUITEM "Grid Block...", 32803
+            MENUITEM SEPARATOR
+            MENUITEM "Default Brush...", 32800
+            MENUITEM "Detail Brush...", 33131
+            MENUITEM "Weapon Clip Brush...", 195
+            MENUITEM "Selected Brush...", 32801
+            MENUITEM "Func Group...", 189
+            MENUITEM "Func Cullgroup...", 211
+            MENUITEM "Model...", 213
+            MENUITEM "Wireframe...", 33194
+            MENUITEM "Frozen Layers...", 35020
+            MENUITEM SEPARATOR
+            MENUITEM "Selected Brush Camera Tint...", 33171
+            MENUITEM "Selected Face Camera Tint...", 33137
+            MENUITEM SEPARATOR
+            MENUITEM "Clipper...", 32802
+            MENUITEM "Active View Name...", 32804
+            MENUITEM "Draw toggle surfs...", 33149
+            MENUITEM "Size Info...", 212
+        END
+        MENUITEM "Find brush...", 33023
+        MENUITEM "&Go to position...", 33107
+        MENUITEM "Next leak spot / error\tctrl-l", 33024
+        MENUITEM "Previous leak spot / error\tctrl-p", 33025
+        MENUITEM "&Print XY View", 33037
+        MENUITEM "&Select Entity Color...\tK", 33036
+        MENUITEM "Script group", 200
+        MENUITEM "Delete exportables", 206
+        MENUITEM "Vehicle Group", 33221
+        MENUITEM "Dyn Entities", 36106
+        MENUITEM "Models", 33240
+        MENUITEM "Cycle Preview Models", 35005
+        MENUITEM "Dynamic Lighting", 32854
+    END
+    POPUP "Reg&ion"
+    BEGIN
+        MENUITEM "&Off", 32979
+        MENUITEM "&Set XY", 32980
+        MENUITEM "Set &Tall Brush", 33007
+        MENUITEM "Set &Brush", 32981
+        MENUITEM "Set Se&lected Brushes", 33044
+    END
+    POPUP "Br&ush"
+    BEGIN
+        MENUITEM "&Arbitrary sided cylinder...", 33034
+        MENUITEM SEPARATOR
+        POPUP "Pri&mitives"
+        BEGIN
+            MENUITEM "Cone...", 32833
+            MENUITEM "Sphere...", 32892
+        END
+    END
+    POPUP "&Patch"
+    BEGIN
+        MENUITEM "Simple &Curve Patch...", 32856
+        MENUITEM "Simple &Terrain Patch...", 32939
+        MENUITEM "Cu&rve to Terrain", 35041
+        MENUITEM "Faces to Terrain", 36102
+        MENUITEM SEPARATOR
+        MENUITEM "&Inspector...\tShift+S", 33092
+        MENUITEM SEPARATOR
+        POPUP "Pri&mitives"
+        BEGIN
+            MENUITEM "Bevel", 32862
+            MENUITEM "Square Bevel", 32920
+            MENUITEM "End Cap", 32861
+            MENUITEM "Square End Cap", 32921
+            MENUITEM SEPARATOR
+            MENUITEM "Cylinder", 32859
+            MENUITEM "Dense Cylinder", 32883
+            MENUITEM "Very Dense Cylinder", 32884
+            MENUITEM "Square Cylinder", 32891
+            MENUITEM SEPARATOR
+            MENUITEM "Cone", 32860
+            MENUITEM "Sphere", 32922, GRAYED
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Advanced Edit Dialog", 33130
+        POPUP "&Insert"
+        BEGIN
+            MENUITEM "Insert (2) Columns", 32874
+            MENUITEM "Add (2) Columns", 32873
+            MENUITEM SEPARATOR
+            MENUITEM "Insert (2) Rows", 32876
+            MENUITEM "Add (2) Rows", 32875
+            MENUITEM SEPARATOR
+            MENUITEM "Add Terrain Row / Column", 33153
+        END
+        POPUP "&Delete"
+        BEGIN
+            MENUITEM "First (2) Columns", 32877
+            MENUITEM "Last (2) Columns", 32878
+            MENUITEM SEPARATOR
+            MENUITEM "First (2) Rows", 32879
+            MENUITEM "Last (2) Rows", 32880
+            MENUITEM SEPARATOR
+            MENUITEM "Remove Terrain Row / Column", 33154
+        END
+        POPUP "Matri&x"
+        BEGIN
+            MENUITEM "&Transpose", 32906
+            MENUITEM "Re-disperse &Columns", 32889
+            MENUITEM "Re-disperse &Rows", 32888
+        END
+        MENUITEM "&Split", 33158
+        MENUITEM "In&vert", 32881
+        MENUITEM "T&hicken", 32904
+        MENUITEM "Ca&p...", 32885
+        MENUITEM SEPARATOR
+        MENUITEM "Turn Terrain &Edges", 33142
+        MENUITEM "&Lock Vertices", 33140
+        MENUITEM "&Unlock Vertices", 33139
+        MENUITEM SEPARATOR
+        MENUITEM "C&ycle Cap Texture", 32905
+        MENUITEM "Vert Edit Dialo&g", 33199
+        MENUITEM "Cap Texture", 35040
+    END
+    POPUP "Ph&ysics"
+    BEGIN
+        POPUP "Primitives"
+        BEGIN
+            MENUITEM "Box", 36120
+            MENUITEM "Cylinder", 36113
+        END
+    END
+    POPUP "He&lp"
+    BEGIN
+        MENUITEM "Help\tF1", 57670
+        MENUITEM SEPARATOR
+        MENUITEM "Command list...", 32790
+        MENUITEM SEPARATOR
+        MENUITEM "&About...", 33038
+    END
+END
+
+// Main toolbar — the button order + bitmap are the binary's (CToolBar::LoadToolBar(152);
+// RT_TOOLBAR + RT_BITMAP id 152 extracted from CoD4Radiant.exe).  52 buttons + 13 separators;
+// the icon strip is toolbar.bmp (832x16, 4bpp).  Each BUTTON maps to a WM_COMMAND id — wired
+// handlers fire, the rest auto-grey like their menu items (CFrameWnd m_bAutoMenuEnable).
+IDR_TOOLBAR152 BITMAP "toolbar.bmp"
+
+IDR_TOOLBAR152 TOOLBAR 16, 16
+BEGIN
+    BUTTON      57601
+    BUTTON      57603
+    SEPARATOR
+    BUTTON      32956
+    BUTTON      32957
+    BUTTON      32958
+    SEPARATOR
+    BUTTON      32959
+    BUTTON      32960
+    BUTTON      32961
+    SEPARATOR
+    BUTTON      32984
+    BUTTON      32986
+    BUTTON      32983
+    BUTTON      33008
+    SEPARATOR
+    BUTTON      32783
+    BUTTON      32927
+    BUTTON      32982
+    SEPARATOR
+    BUTTON      33135
+    BUTTON      33136
+    BUTTON      33182
+    BUTTON      33238
+    SEPARATOR
+    BUTTON      32936
+    BUTTON      32817
+    BUTTON      32781
+    SEPARATOR
+    BUTTON      32810
+    BUTTON      32813
+    SEPARATOR
+    BUTTON      32814
+    BUTTON      32815
+    BUTTON      32816
+    SEPARATOR
+    BUTTON      32852
+    BUTTON      32857
+    BUTTON      32872
+    BUTTON      32858
+    BUTTON      32865
+    BUTTON      33140
+    BUTTON      33139
+    BUTTON      33141
+    SEPARATOR
+    BUTTON      33106
+    SEPARATOR
+    BUTTON      32915
+    BUTTON      33138
+    BUTTON      33142
+    BUTTON      33169
+    BUTTON      33144
+    BUTTON      33156
+    BUTTON      33159
+    BUTTON      33195
+    BUTTON      33206
+    BUTTON      33183
+    BUTTON      35042
+    SEPARATOR
+    BUTTON      33155
+    BUTTON      33207
+    BUTTON      33208
+    BUTTON      33209
+    SEPARATOR
+    BUTTON      35005
+END
+
+// Entity-display-mode popup (RT_MENU 160, extracted from CoD4Radiant.exe).  OnShowEntities
+// (toolbar 32915) loads this via HandlePopup and TrackPopupMenu's submenu 0.  Each item sets
+// g_PrefsDlg->m_nEntityShowState and re-checks the matching main-menu item (SetEntityCheck).
+IDR_ENTITYPOPUP160 MENU
+BEGIN
+    POPUP "Popup"
+    BEGIN
+        MENUITEM "Bounding box",        32909
+        MENUITEM "Wireframe",           32916
+        MENUITEM "Selected Wireframe",  32911
+        MENUITEM "Selected Skinned",    32912
+        MENUITEM "Skinned",             32913
+        MENUITEM "Skinned and Boxed",   32914
+    END
+END
+
+// The two remaining HandlePopup targets (CMainFrame::OnPopupRenderMethod 0x4263E0 pushes
+// 0x7C = 124, OnPopupSelection 0x4263F0 pushes 0x7D = 125).  Both templates extracted
+// verbatim from the PE MENU resources; every id already has a handler on CMainFrame.
+IDR_POPUP_RENDER_METH MENU
+BEGIN
+    POPUP "Popup"
+    BEGIN
+        MENUITEM "&Wireframe",                   32990
+        MENUITEM "&Fullbright",                  32991
+        MENUITEM "&Normal-based Fake Lighting",  32992
+        MENUITEM "&View-based Fake Lighting",    32993
+    END
+END
+
+IDR_POPUP_SELECTION MENU
+BEGIN
+    POPUP "Popup"
+    BEGIN
+        MENUITEM "Select Complete &Tall",  32984
+        MENUITEM "Select &Partial Tall",   32983
+        MENUITEM "Select T&ouching",       32986
+        MENUITEM "Select &Inside",         33008
+        MENUITEM "Select T&argetname",     33132
+    END
+END
+
+IDR_MAIN_ACCEL ACCELERATORS
+BEGIN
+    "X", 32951, VIRTKEY, CONTROL, NOINVERT
+    "O", 57601, VIRTKEY, CONTROL, NOINVERT
+    "S", 57603, VIRTKEY, CONTROL, NOINVERT
+    "L", 33024, VIRTKEY, CONTROL, NOINVERT
+    "P", 33025, VIRTKEY, CONTROL, NOINVERT
+    "K", 33021, VIRTKEY, CONTROL, NOINVERT
+    "M", 33042, VIRTKEY, CONTROL, NOINVERT
+    VK_DELETE, 32999, VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT, 33000, VIRTKEY, CONTROL, NOINVERT
+END
+
+// KISAK_RADIANT (P6) — minimal Preferences dialog. The binary's full CPrefsDlg
+// template (IDD 127, dozens of controls) was not reconstructed into this .rc; this
+// small template backs Edit->Preferences with the load-bearing toggles (snap, light
+// preview, sun preview, camera mouse-wheel). CPrefsDlg (prefs.cpp) binds these via
+// DDX and persists them with Prefs_SavePrefs on OK. Full faithful template = parked.
+IDD_RADIANT_PREFS_MINI DIALOGEX 0, 0, 248, 132
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "CoD4Radiant Preferences"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Editor preferences", IDC_STATIC, 7, 7, 234, 92
+    CONTROL         "Don't clamp plane points (disable grid snap)", IDC_DON_T_CLAMP_PLANE_POINTS,
+                    "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 22, 215, 12
+    CONTROL         "Enable light preview", IDC_RAD_LIGHT_PREVIEW,
+                    "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 38, 215, 12
+    CONTROL         "Preview sun light (sun shading in camera)", IDC_RAD_SUN_PREVIEW,
+                    "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 54, 215, 12
+    CONTROL         "Use mouse wheel in camera window", IDC_USE_MOUSE_WHEEL_IN_CAMERA_WINDOW,
+                    "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 16, 70, 215, 12
+    DEFPUSHBUTTON   "OK", IDOK, 130, 110, 52, 15
+    PUSHBUTTON      "Cancel", IDCANCEL, 188, 110, 52, 15
+END
+
+// Full CoD4Radiant Preferences (RT_DIALOG template 127, IW3xRadiant.exe). The IW3x
+// font "Roboto Slab Light" is normalized back to stock "MS Sans Serif" per the IW3X
+// caveat (matching the other IW3x-reconstructed dialogs — Surface Inspector, filter pane).
+// Numeric control ids match the binary DDX (CPrefsDlg::DoDataExchange 0x44de40).
+IDD_COD4RADIANT_PREFERENCES DIALOGEX 0, 0, 322, 359
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "CoD4Radiant Preferences"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "&2 button", 1003, "Button", 0x40020009, 18, 327, 42, 10
+    CONTROL         "&3 button", 1005, "Button", 0x40000009, 78, 327, 42, 10
+    CONTROL         "Views / Rendering", IDC_STATIC, "Button", 0x50000007, 7, 4, 307, 102
+    CONTROL         "", 134, "Static", 0x50000000, 13, 14, 21, 19
+    CONTROL         "n", 1006, "Button", 0x50020009, 18, 35, 10, 10
+    CONTROL         "", 137, "Static", 0x50000000, 63, 14, 21, 19
+    CONTROL         "", 1009, "Button", 0x50000009, 68, 35, 11, 10
+    CONTROL         "", 141, "Static", 0x50000000, 1, 340, 21, 19
+    CONTROL         "", 1012, "Button", 0x40000009, 5, 328, 11, 10
+    CONTROL         "", 142, "Static", 0x50000000, 38, 14, 21, 19
+    CONTROL         "", 1014, "Button", 0x50000009, 44, 35, 11, 10
+    CONTROL         "Ents use '_color' value", 1420, "Button", 0x50010003, 12, 44, 101, 10
+    CONTROL         "Texture brushes in 2d", 1423, "Button", 0x50010003, 216, 74, 84, 10
+    CONTROL         "Thick selection lines", 1486, "Button", 0x50010003, 12, 56, 78, 9
+    CONTROL         "Camera ", IDC_STATIC, "Button", 0x50000007, 126, 13, 82, 89
+    CONTROL         "Slider1", 1219, "msctls_trackbar32", 0x50010000, 128, 23, 76, 11
+    CONTROL         "slow", IDC_STATIC, "Static", 0x50020000, 131, 35, 15, 8
+    CONTROL         "fast", IDC_STATIC, "Static", 0x50020000, 188, 35, 12, 8
+    CONTROL         "Update XY on drag", 1223, "Button", 0x50012003, 129, 44, 77, 13
+    CONTROL         "", 1027, "Edit", 0x50810080, 129, 71, 35, 12
+    CONTROL         "Farplane", IDC_STATIC, "Static", 0x50020000, 167, 74, 28, 8
+    CONTROL         "Texturing", IDC_STATIC, "Button", 0x50000007, 210, 13, 99, 89
+    CONTROL         "Texture toolbar", 1047, "Button", 0x50010003, 216, 26, 63, 10
+    CONTROL         "Texture scrollbar", 1054, "Button", 0x50010003, 216, 38, 68, 10
+    CONTROL         "Texture subset", 1045, "Button", 0x50010003, 216, 50, 63, 10
+    CONTROL         "New functionality:", IDC_STATIC, "Button", 0x50000007, 7, 108, 307, 123
+    CONTROL         "Right click to drop entities", 1042, "Button", 0x50010003, 13, 119, 95, 10
+    CONTROL         "Face selection", 1040, "Button", 0x50010003, 13, 131, 62, 10
+    CONTROL         "Rotation inc:", IDC_STATIC, "Static", 0x50020000, 15, 145, 41, 8
+    CONTROL         "", 1204, "Edit", 0x50810080, 58, 143, 24, 12
+    CONTROL         "Linking keeps selection", 1085, "Button", 0x50010003, 14, 156, 90, 10
+    CONTROL         "", 1480, "Edit", 0x50812080, 14, 169, 34, 12
+    CONTROL         "Vehicle Arrow Time", IDC_STATIC, "Static", 0x50020000, 52, 170, 63, 8
+    CONTROL         "", 1481, "Edit", 0x50812080, 14, 184, 34, 12
+    CONTROL         "Vehicle Arrow Size", IDC_STATIC, "Static", 0x50020000, 52, 186, 61, 9
+    CONTROL         "ALT always move", 1246, "Button", 0x50010003, 123, 119, 68, 10
+    CONTROL         "Snap T to Grid", 1051, "Button", 0x50010003, 123, 131, 62, 10
+    CONTROL         "Mouse chaser", 1249, "Button", 0x50010003, 123, 142, 68, 10
+    CONTROL         "Paint sizing info", 1084, "Button", 0x50010003, 123, 153, 65, 10
+    CONTROL         "", 1456, "Edit", 0x50810080, 202, 119, 35, 12
+    CONTROL         "Tolerant Weld", IDC_STATIC, "Static", 0x50020000, 239, 121, 46, 8
+    CONTROL         "", 1457, "Edit", 0x50810080, 202, 134, 35, 12
+    CONTROL         "Splay Distance", IDC_STATIC, "Static", 0x50020000, 240, 136, 48, 8
+    CONTROL         "", 1459, "Edit", 0x50810080, 202, 149, 35, 12
+    CONTROL         "Drop Height", IDC_STATIC, "Static", 0x50020000, 240, 151, 39, 8
+    CONTROL         "", 1461, "Edit", 0x50810080, 202, 164, 35, 12
+    CONTROL         "Scale Base", IDC_STATIC, "Static", 0x50020000, 240, 166, 37, 8
+    CONTROL         "", 1463, "Edit", 0x50810080, 202, 179, 35, 12
+    CONTROL         "Scale Range", IDC_STATIC, "Static", 0x50020000, 240, 180, 42, 8
+    CONTROL         "Don't clamp plane points", 1255, "Button", 0x50010003, 13, 285, 93, 10
+    CONTROL         "Snapshots", 1094, "Button", 0x50010003, 13, 297, 49, 10
+    CONTROL         "Load last project on open", 1021, "Button", 0x50010003, 111, 285, 96, 10
+    CONTROL         "Load last map on open", 1024, "Button", 0x50010003, 111, 297, 88, 10
+    CONTROL         "Auto save every ", 1023, "Button", 0x50010003, 111, 309, 66, 10
+    CONTROL         "", 1065, "Edit", 0x50812080, 178, 309, 27, 12
+    CONTROL         "Spin1", 1079, "msctls_updown32", 0x50000037, 202, 307, 11, 14
+    CONTROL         "minutes", IDC_STATIC, "Static", 0x50020000, 213, 311, 25, 8
+    CONTROL         "Status point size:", IDC_STATIC, "Static", 0x50020000, 220, 285, 54, 8
+    CONTROL         "", 1201, "Edit", 0x50810082, 277, 283, 29, 12
+    CONTROL         "Spin1", 1098, "msctls_updown32", 0x50000037, 303, 282, 11, 14
+    CONTROL         "Undo Levels:", IDC_STATIC, "Static", 0x50020000, 220, 298, 43, 8
+    CONTROL         "", 1208, "Edit", 0x50810082, 277, 297, 29, 12
+    CONTROL         "Spin1", 1091, "msctls_updown32", 0x50000037, 303, 295, 11, 14
+    CONTROL         "User INI path:", IDC_STATIC, "Static", 0x50020000, 12, 251, 47, 8
+    CONTROL         "", 1026, "Edit", 0x50810080, 60, 250, 227, 12
+    CONTROL         "...", 1029, "Button", 0x50010000, 288, 250, 18, 12
+    CONTROL         "OK", IDOK, "Button", 0x50010001, 236, 327, 38, 14
+    CONTROL         "Cancel", IDCANCEL, "Button", 0x50010000, 276, 327, 38, 14
+    CONTROL         "Texture meshes in 2d", 1424, "Button", 0x50010003, 216, 62, 84, 10
+    CONTROL         "Cull sky on clip", 1517, "Button", 0x50012003, 129, 57, 75, 12
+    CONTROL         "Use mouse wheel in camera window", 1538, "Button", 0x40012003, 156, 327, 80, 16
+    CONTROL         "", 1559, "Edit", 0x50812080, 14, 199, 34, 13
+    CONTROL         "Model Origin Size", IDC_STATIC, "Static", 0x50020000, 51, 203, 79, 10
+    CONTROL         "Fast 2d view dragging", 1672, "Button", 0x50010003, 12, 68, 87, 9
+    CONTROL         "Maps / Undo / INI", IDC_STATIC, "Button", 0x50000007, 7, 234, 307, 92
+    CONTROL         "", 1685, "Edit", 0x50810080, 60, 265, 228, 12
+    CONTROL         "...", 1673, "Button", 0x50010000, 288, 265, 18, 12
+    CONTROL         "User Filters:", IDC_STATIC, "Static", 0x50020000, 12, 265, 48, 12
+    CONTROL         "Prefab Origin Size", IDC_STATIC, "Static", 0x50020000, 51, 218, 89, 10
+    CONTROL         "", 1560, "Edit", 0x50812080, 14, 214, 34, 13
+    CONTROL         "Detached Windows", 1674, "Button", 0x50010003, 12, 80, 87, 9
+    CONTROL         "Transparent background", 1687, "Button", 0x50010003, 12, 92, 94, 10
+    CONTROL         "Lose changes?", 1095, "Button", 0x50010003, 13, 309, 89, 10
+    CONTROL         "", 1700, "Edit", 0x50810080, 129, 86, 35, 12
+    CONTROL         "FOV", IDC_STATIC, "Static", 0x50020000, 167, 88, 15, 8
+END
+
+// Brush→Primitives sides dialog. The binary's IDD_ARBITRARY_SIDES (113) template was
+// not reconstructed; this minimal one backs the Cylinder/Cone/Sphere commands with the
+// single side-count edit field SidesDlgProc (mainfrm.cpp) reads. Faithful behaviour:
+// a number-of-sides prompt → Brush_MakeSided{,Cone,Sphere}.
+IDD_ARBITRARY_SIDES DIALOGEX 0, 0, 180, 66
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Brush Primitive"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LTEXT           "Number of sides:", IDC_STATIC, 12, 14, 70, 12
+    EDITTEXT        IDC_ARB_SIDES_IN, 86, 12, 80, 14, ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK", IDOK, 62, 44, 52, 15
+    PUSHBUTTON      "Cancel", IDCANCEL, 120, 44, 52, 15
+END
+
+// AdvPatchEditDlg — "Advanced Patch Editing Options" (terrain-paint settings).  CONTROL IDs
+// + LABELS are the binary's (PE resource 0xbb, ground-truthed from CoD4Radiant.exe).  Mode
+// radios 1435/1439/1437/1436/1438/1468/1440 -> sub_401DB0 modes 0..6; channel checkboxes
+// 1469-1474 -> sub_43E6F0 mask; "Color..."/"Alpha..." (1460/1464) drive sub_4021E0/sub_4022A0
+// and the owner-draw swatches 1462/1466 (CurvEditDlg::OnColorAlpha / OnDrawItem); 1467 shows
+// the picked height (OnHeightText).  Template extracted from CoD4Radiant.exe RT_DIALOG 0xBB:
+// 227x113, WS_EX_TOOLWINDOW, MS Sans Serif, compact trackbars 1424/1425/1426.
+IDD_ADVPATCHEDIT DIALOGEX 0, 0, 227, 113
+STYLE 0x00C000C0
+EXSTYLE 0x00000080
+CAPTION "Advanced Patch Editing Options"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    CONTROL         "", 1428, "Edit", 0x50810082, 175, 1, 22, 12
+    CONTROL         "", 1429, "Edit", 0x50810082, 175, 15, 22, 12
+    CONTROL         "", 1430, "Edit", 0x50810082, 175, 29, 22, 12
+    CONTROL         "&Paint Height", 1435, "Button", 0x50020009, 3, 45, 55, 10
+    CONTROL         "&Flatten", 1437, "Button", 0x50000009, 71, 45, 37, 10
+    CONTROL         "&Smooth", 1436, "Button", 0x50000009, 111, 45, 40, 10
+    CONTROL         "&Noise", 1438, "Button", 0x50000009, 154, 45, 34, 10
+    CONTROL         "&Drag Up / Down", 1439, "Button", 0x50000009, 3, 55, 69, 10
+    CONTROL         "Grab Value", 1468, "Button", 0x50000009, 71, 55, 51, 10
+    CONTROL         "Disabled", 1440, "Button", 0x50000009, 154, 55, 43, 10
+    CONTROL         "Only perform soft selection while this dialog is open", 1431, "Button", 0x50010003, 3, 76, 175, 10
+    CONTROL         "&Inner Radius", 1069, "Button", 0x50010000, 3, 1, 49, 12
+    CONTROL         "Slider2", 1424, "msctls_trackbar32", 0x50010018, 54, 2, 120, 12
+    CONTROL         "&Outer Radius", 1070, "Button", 0x50010000, 3, 15, 49, 12
+    CONTROL         "Slider2", 1425, "msctls_trackbar32", 0x50010018, 54, 16, 120, 12
+    CONTROL         "&Amplitude", 1071, "Button", 0x50010000, 3, 29, 49, 12
+    CONTROL         "Slider2", 1426, "msctls_trackbar32", 0x50010018, 54, 30, 120, 12
+    CONTROL         "Allow soft selection on unselected patches", 1432, "Button", 0x50010003, 3, 65, 162, 10
+    CONTROL         "Height", 1469, "Button", 0x50020009, 3, 87, 37, 10
+    CONTROL         "RGB", 1470, "Button", 0x50000009, 40, 87, 31, 10
+    CONTROL         "Red", 1471, "Button", 0x50000009, 71, 87, 29, 10
+    CONTROL         "Green", 1472, "Button", 0x50000009, 100, 87, 35, 10
+    CONTROL         "Blue", 1473, "Button", 0x50000009, 135, 87, 30, 10
+    CONTROL         "Alpha", 1474, "Button", 0x50000009, 165, 87, 34, 10
+    CONTROL         "Color...", 1460, "Button", 0x50010000, 3, 98, 32, 12
+    CONTROL         "", 1462, "Static", 0x5000100D, 38, 98, 22, 12
+    CONTROL         "Alpha...", 1464, "Button", 0x50010000, 71, 98, 32, 12
+    CONTROL         "", 1466, "Static", 0x5000100D, 105, 98, 22, 12
+    CONTROL         "", 1467, "Edit", 0x50810080, 165, 98, 32, 12, 0x00001000
+    CONTROL         "Height", IDC_STATIC, "Static", 0x50020000, 139, 100, 22, 8
+    CONTROL         "", 1482, "Edit", 0x50810082, 201, 1, 22, 12
+    CONTROL         "", 1483, "Edit", 0x50810082, 201, 14, 22, 12
+END
+
+// Patch Inspector "Patch Properties" (PE resource 0xAC = 172 = IDD_PATCH_PROPERTIES), the
+// CPatchDialog (g_PatchDialog / CWnd_PatchDialog).  Control IDs are the binary's.  Left half
+// = DETAILS (pick a control point by Row/Column -> show X/Y/Z/S/T + Type); right half =
+// TEXTURING (texture name + shift/stretch/rotate texdef + CAP/Set/Natural/Fit).  Extracted
+// faithfully from the image (dlgfind.py).  Texturing/Apply/Type wiring lands in later pieces.
+IDD_PATCH_PROPERTIES DIALOGEX 0, 0, 272, 178
+STYLE DS_SETFONT | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Patch Properties"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    GROUPBOX        "Details", IDC_STATIC, 7, 7, 87, 148
+    LTEXT           "Row:", IDC_STATIC, 15, 17, 18, 8
+    COMBOBOX        1301, 15, 29, 34, 79, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Column:", IDC_STATIC, 54, 17, 26, 8
+    COMBOBOX        1302, 54, 29, 34, 84, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "X:", IDC_STATIC, 21, 51, 8, 8
+    EDITTEXT        1089, 34, 49, 54, 12, ES_AUTOHSCROLL
+    LTEXT           "Y:", IDC_STATIC, 21, 66, 8, 8
+    EDITTEXT        1142, 33, 64, 55, 12, ES_AUTOHSCROLL
+    LTEXT           "Z:", IDC_STATIC, 21, 83, 8, 8
+    EDITTEXT        1147, 33, 81, 55, 12, ES_AUTOHSCROLL
+    LTEXT           "S:", IDC_STATIC, 21, 100, 8, 8
+    EDITTEXT        1102, 33, 98, 55, 12, ES_AUTOHSCROLL
+    LTEXT           "T:", IDC_STATIC, 21, 117, 8, 8
+    EDITTEXT        1106, 33, 115, 55, 12, ES_AUTOHSCROLL
+    LTEXT           "Type:", IDC_STATIC, 13, 136, 19, 8
+    COMBOBOX        1303, 33, 134, 55, 79, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+    GROUPBOX        "Texturing", IDC_STATIC, 99, 7, 166, 148
+    LTEXT           "Name:", IDC_STATIC, 106, 17, 22, 8
+    EDITTEXT        1033, 106, 29, 144, 12, ES_AUTOHSCROLL
+    EDITTEXT        1195, 107, 48, 45, 12, ES_AUTOHSCROLL
+    CONTROL         "Spin2", 1248, "msctls_updown32", 0x50000034, 141, 48, 11, 14
+    LTEXT           "Horizontal shift", IDC_STATIC, 157, 51, 65, 8
+    EDITTEXT        1196, 107, 64, 45, 12, ES_AUTOHSCROLL
+    CONTROL         "Spin2", 1251, "msctls_updown32", 0x50000034, 141, 64, 11, 14
+    LTEXT           "Vertical shift", IDC_STATIC, 157, 66, 65, 8
+    EDITTEXT        1211, 107, 81, 45, 12, ES_AUTOHSCROLL
+    CONTROL         "Spin2", 1257, "msctls_updown32", 0x50000034, 141, 81, 11, 14
+    LTEXT           "Horizontal stretch", IDC_STATIC, 157, 83, 65, 8
+    EDITTEXT        1213, 107, 98, 45, 12, ES_AUTOHSCROLL
+    CONTROL         "Spin2", 1254, "msctls_updown32", 0x50000034, 141, 98, 11, 14
+    LTEXT           "Vertical stretch", IDC_STATIC, 157, 100, 65, 8
+    EDITTEXT        1217, 107, 115, 45, 12, ES_AUTOHSCROLL
+    CONTROL         "Spin2", 1259, "msctls_updown32", 0x50000034, 141, 114, 11, 14
+    LTEXT           "Rotate", IDC_STATIC, 157, 117, 30, 8
+    PUSHBUTTON      "CAP", 1282, 109, 134, 32, 13
+    PUSHBUTTON      "Set...", 1283, 148, 134, 32, 13
+    PUSHBUTTON      "Natural", 1284, 185, 134, 32, 13
+    PUSHBUTTON      "Fit", 1286, 225, 134, 32, 13
+
+    PUSHBUTTON      "Apply", 3, 184, 159, 38, 12
+    DEFPUSHBUTTON   "Done", IDOK, 227, 159, 38, 12
+END
+
+// CTextureLayout "Patch texture layout" (PE resource 0x9F = 159 = IDD_PATCH_TEXTURE_LAYOUT),
+// the modal opened by the Patch Inspector's "Set..." button (sub_459860 ctor / sub_436980).
+// Enter a texture x/y scale + pick a layout mode -> Patch_SetTexturing(x, y, mode).  Extracted
+// faithfully from the image.  Modes: 2D distance -> 0 (natural), 3D distance -> 1 (arc-length),
+// emulates curves -> 2 (grid).
+IDD_PATCH_TEXTURE_LAYOUT DIALOGEX 0, 0, 186, 117
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Patch texture layout"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK", IDOK, 141, 7, 38, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 141, 24, 38, 14
+    LTEXT           "Texture will be fit across the patch based on the x and y values given. Values of 1x1 will ""fit"" the texture. 2x2 will repeat it twice, etc.", IDC_STATIC, 7, 7, 122, 36
+    LTEXT           "Texture x:", IDC_STATIC, 7, 48, 32, 8
+    EDITTEXT        1089, 42, 46, 36, 12, ES_AUTOHSCROLL
+    CONTROL         "", 1453, "msctls_updown32", 0x50020036, 95, 45, 11, 14
+    LTEXT           "Texture y:", IDC_STATIC, 7, 64, 32, 8
+    EDITTEXT        1142, 42, 62, 36, 12, ES_AUTOHSCROLL
+    CONTROL         "", 1455, "msctls_updown32", 0x50020036, 95, 60, 11, 14
+    CONTROL         "Terrain uses 2D distance (good for ground)", 1449, "Button", BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP, 7, 79, 151, 10
+    CONTROL         "Terrain uses 3d distance (good for curvy walls)", 1475, "Button", BS_AUTORADIOBUTTON, 7, 89, 162, 10
+    CONTROL         "Terrain emulates curves (backwards compatibility)", 1476, "Button", BS_AUTORADIOBUTTON, 7, 99, 172, 10
+END
+
+// CCapDialog "Cap" (PE resource 0xA1 = 161 = IDD_CAP), the modal opened by Curve→Cap
+// (CMainFrame::OnCapCurrentCurve → Patch_CapCurrent 0x43AA20) when the selected patch has no
+// closed seam edge.  The binary's DoDataExchange (0x40A900) is a single DDX_Radio bound to the
+// radio group starting at control id 1285 (member m_nType @ +0x74): index 0=Bevel, 1=Endcap,
+// 2=Inverted Bevel, 3=Inverted Endcap → Patch_CapSpecial(def, m_nType, 0/1).  Template
+// (rects/style/ids) extracted verbatim from CoD4Radiant.exe RT_DIALOG #161.  The four decorative
+// cap-shape preview icons (binary icon ordinals 0xA5/0xA6/0xA3/0xA2, id -1) are not extracted, so
+// they use IDI_RADIANT placeholders — cosmetic only; the radio ids are the load-bearing part.
+IDD_CAP DIALOGEX 0, 0, 171, 84
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Cap"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK", IDOK, 123, 7, 41, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 123, 25, 41, 14
+    CONTROL         "Bevel", 1285, "Button", BS_AUTORADIOBUTTON | WS_GROUP, 31, 10, 50, 10
+    CONTROL         "Endcap", 1287, "Button", BS_AUTORADIOBUTTON, 31, 28, 50, 10
+    CONTROL         "Inverted Bevel", 1289, "Button", BS_AUTORADIOBUTTON, 31, 47, 68, 10
+    CONTROL         "Inverted Endcap", 1291, "Button", BS_AUTORADIOBUTTON, 31, 65, 75, 10
+    ICON            IDI_RADIANT, IDC_STATIC, 7, 7, 18, 15
+    ICON            IDI_RADIANT, IDC_STATIC, 7, 44, 18, 15
+    ICON            IDI_RADIANT, IDC_STATIC, 7, 26, 18, 15
+    ICON            IDI_RADIANT, IDC_STATIC, 7, 63, 18, 15
+END
+
+// CDialogThick "Thicken Patch" (PE resource 0xA4 = 164 = IDD_THICKEN_PATCH), opened by
+// Curve->Thicken (CMainFrame::OnCurveThicken 0x42B0D0, cmd 32904).  DoDataExchange (0x40C060):
+// DDX_Check 1288 (member m_seam @+0x74, "Seams" checkbox) + DDX_Text 1290 (m_amount @+0x78, edit).
+// Template (rects/style/ids/text) extracted verbatim from CoD4Radiant.exe RT_DIALOG #164; the
+// IW3x font "Roboto Slab Light" is normalized back to stock "MS Sans Serif" per the IW3X caveat
+// (matches the sibling hand-built dialogs).  [2026-07-01: this template was missing, so
+// CDialogThick::DoModal returned -1 and Curve->Thicken silently no-op'd.]
+IDD_THICKEN_PATCH DIALOGEX 0, 0, 204, 63
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Thicken Patch"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK", IDOK, 158, 7, 39, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 158, 24, 39, 14
+    LTEXT           "This produces a func_grouped set of patches that contains the original patch along with the 'thick' patch and an optional set of seam patches. ", IDC_STATIC, 7, 7, 145, 33
+    EDITTEXT        1290, 38, 42, 26, 12, ES_AUTOHSCROLL
+    LTEXT           "Amount:", IDC_STATIC, 7, 44, 27, 8
+    CONTROL         "Seams", 1288, "Button", BS_AUTOCHECKBOX | WS_TABSTOP, 74, 43, 37, 10
+END
+
+// CCommandsDlg "Mapped Commands" (PE resource 0x84 = 132 = IDD_DLG_COMMANDLIST) — Help→
+// Command list... (32790, CMainFrame::OnHelpCommandlist 0x426E00).  A single tab-stopped
+// listbox (1036, DDX_Control at 0x40B850) filled by CCommandsDlg::OnInitDialog (0x40B890)
+// from the keyboard command table.  Template extracted verbatim from the PE RT_DIALOG #132.
+IDD_DLG_COMMANDLIST DIALOGEX 0, 0, 283, 223
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Mapped Commands"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "Close", IDOK, 241, 202, 35, 14
+    LISTBOX         1036, 7, 7, 221, 209, LBS_NOINTEGRALHEIGHT | LBS_USETABSTOPS | WS_VSCROLL | WS_TABSTOP
+END
+
+// CScaleDialog "Scale" (PE resource 0x91 = 145 = IDD_SCALE) — Selection→Scale... (32809,
+// CMainFrame::OnSelectScale 0x4283D0).  Three edits X/Y/Z bound by CScaleDialog::
+// DoDataExchange (0x451110): DDX_Text 1089 = X (@+0x78), 1142 = Y (@+0x7C), 1147 = Z (@+0x74).
+// Template (rects/style/ids/text/font) extracted verbatim from the PE RT_DIALOG #145.
+IDD_SCALE DIALOGEX 0, 0, 122, 74
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Scale"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    DEFPUSHBUTTON   "OK", IDOK, 79, 7, 36, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 79, 23, 36, 14
+    LTEXT           "X:", IDC_STATIC, 7, 15, 8, 8
+    LTEXT           "Y:", IDC_STATIC, 7, 32, 8, 8
+    LTEXT           "Z:", IDC_STATIC, 7, 49, 8, 8
+    EDITTEXT        1089, 22, 13, 32, 12, ES_AUTOHSCROLL
+    EDITTEXT        1142, 22, 30, 32, 12, ES_AUTOHSCROLL
+    EDITTEXT        1147, 22, 47, 32, 12, ES_AUTOHSCROLL
+END
+
+// CPatchDensityDlg "Patch density" (PE resource 0x9D = 157 = IDD_PATCH_DENSITY), the modal
+// opened by Curve→Simple Patch Mesh (CMainFrame::OnCurveSimplepatchmesh 0x429a20, cmd 32856).
+// Two CBS_DROPDOWNLIST combos (1280 width / 1281 height) → CPatchDensityDlg_OnOK reads
+// CB_GETCURSEL on each, maps via g_patchDensityDims {3,5,7,9,11,13,15} → Patch_GenericMesh.
+// Layout (units/rects) is the binary's own template, ground-truthed from CoD4Radiant.exe.
+IDD_PATCH_DENSITY DIALOGEX 0, 0, 129, 46
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Patch density"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "&Width:", IDC_STATIC, 9, 9, 22, 8
+    COMBOBOX        1280, 38, 7, 33, 121, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    LTEXT           "&Height:", IDC_STATIC, 7, 27, 24, 8
+    COMBOBOX        1281, 38, 25, 33, 121, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+    DEFPUSHBUTTON   "OK", IDOK, 90, 7, 32, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 90, 24, 32, 14
+END
+
+// IDD_PROJECT_SETTINGS (PE resource 0x99 = 153) — File→Project Settings / New Project.
+// The binary's ProjectDlgProc (0x495330) fills these five edit controls from the project
+// entity on WM_INITDIALOG and writes them back (SetKeyValue + Project_Write) on OK.  Control
+// ids are the binary's (1265 basepath / 1274 mapspath / 1253 entitypath / 1260 game / 1273
+// basegame).  Layout is a clean functional reconstruction (the binary's exact rects were not
+// extracted); the load-bearing part — the five control ids — matches the binary exactly.
+IDD_PROJECT_SETTINGS DIALOGEX 0, 0, 280, 128
+STYLE DS_SETFONT | DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Project Settings"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    LTEXT           "Base path:", IDC_STATIC, 7, 10, 60, 8
+    EDITTEXT        1265, 72, 8, 201, 12, ES_AUTOHSCROLL
+    LTEXT           "Maps path:", IDC_STATIC, 7, 26, 60, 8
+    EDITTEXT        1274, 72, 24, 201, 12, ES_AUTOHSCROLL
+    LTEXT           "Entity path:", IDC_STATIC, 7, 42, 60, 8
+    EDITTEXT        1253, 72, 40, 201, 12, ES_AUTOHSCROLL
+    LTEXT           "Game:", IDC_STATIC, 7, 58, 60, 8
+    EDITTEXT        1260, 72, 56, 201, 12, ES_AUTOHSCROLL
+    LTEXT           "Base game:", IDC_STATIC, 7, 74, 60, 8
+    EDITTEXT        1273, 72, 72, 201, 12, ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK", IDOK, 165, 104, 50, 14
+    PUSHBUTTON      "Cancel", IDCANCEL, 223, 104, 50, 14
+END
+
+// ── Surface Inspector (CSurfaceDlg, IDD_SURFACE_INSPECTOR = 116) ────────────────
+// The real 42-control layout, transcribed VERBATIM (rects/styles/text/ids) from the binary's
+// RT_DIALOG #116 (DLGTEMPLATEEX, F:\...\surf_inspector_template.txt) and confirmed against the
+// CSurfaceDlg cluster (msgmap 0x6e2e58, DoDataExchange 0x456c00, Select_SetTexture_2 0x4572d0,
+// SurfaceInspector_GetMaterialDef 0x457950).  The IW3x font "Roboto Slab Light" is normalized
+// back to stock "MS Sans Serif" per the IW3X caveat (as the other reconstructed dialogs do).
+// Control IDs are the binary's — CSurfaceDlg's DDX / message map / GetDlgItem reads bind to them.
+IDD_SURFACE_INSPECTOR DIALOGEX 400, 100, 259, 316
+STYLE DS_SETFONT | DS_3DLOOK | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Surface inspector"
+FONT 8, "MS Sans Serif", 400, 0, 0x0
+BEGIN
+    CONTROL         "Texture", IDC_STATIC, "Static", 0x50020002, 36, 10, 25, 8
+    CONTROL         "", IDC_SURFACE_INSP_CURR_TEX, "Edit", 0x50810880, 66, 7, 159, 12
+    CONTROL         "Horizontal shift", IDC_STATIC, "Static", 0x50020002, 6, 28, 55, 8
+    CONTROL         "", IDC_SURFACE_INSP_HORZ_SHIFT_IN, "Edit", 0x50810080, 66, 25, 45, 12
+    CONTROL         "Spin2", IDC_SURFACE_INSP_HORZ_SHIFT_SPIN, "msctls_updown32", 0x50000034, 112, 25, 11, 14
+    CONTROL         "Vertical shift", IDC_STATIC, "Static", 0x50020002, 6, 43, 55, 8
+    CONTROL         "", IDC_SURFACE_INSP_VERT_SHIFT_IN, "Edit", 0x50810080, 66, 41, 45, 12
+    CONTROL         "Spin2", IDC_SURFACE_INSP_VERT_SHIFT_SPIN, "msctls_updown32", 0x50000034, 112, 41, 11, 14
+    CONTROL         "Horizontal stretch", IDC_STATIC, "Static", 0x50020002, 132, 29, 55, 8
+    CONTROL         "", IDC_SURFACE_INSP_HORZ_STRETCH, "Edit", 0x50810080, 192, 26, 35, 12
+    CONTROL         "Spin2", IDC_SURFACE_INSP_HORZ_STRETCH_SPIN, "msctls_updown32", 0x50000034, 225, 26, 12, 12
+    CONTROL         "Vertical stretch", IDC_STATIC, "Static", 0x50020002, 132, 46, 55, 8
+    CONTROL         "", IDC_SURFACE_INSP_VERT_STRETCH, "Edit", 0x50810080, 192, 44, 35, 12
+    CONTROL         "Spin2", IDC_SURFACE_INSP_VERT_STRETCH_SPIN, "msctls_updown32", 0x50000034, 225, 44, 12, 12
+    CONTROL         "Rotate", IDC_STATIC, "Static", 0x50020002, 32, 67, 30, 8
+    CONTROL         "", IDC_SURFACE_INSP_ROTATE, "Edit", 0x50810080, 67, 65, 35, 12
+    CONTROL         "Spin2", IDC_SURFACE_INSP_ROTATE_SPIN, "msctls_updown32", 0x50000034, 100, 65, 12, 12
+    CONTROL         "Sample size", IDC_STATIC, "Static", 0x50020002, 139, 66, 47, 8
+    CONTROL         "", IDC_SURFACE_INSP_SAMPLE_SIZE, "Edit", 0x50810080, 192, 64, 35, 12
+    CONTROL         "", IDC_SURFACE_INSP_SAMPLE_SIZE_SPIN, "msctls_updown32", 0x50000034, 225, 64, 12, 12
+    CONTROL         "Patch Texturing", IDC_STATIC, "Button", 0x50000007, 5, 84, 247, 191
+    CONTROL         "CAP", IDC_SURFACE_INSP_BTN_CAP, "Button", 0x50010000, 21, 100, 52, 20
+    CONTROL         "Set...", IDC_SURFACE_INSP_BTN_SET, "Button", 0x50010000, 48, 212, 145, 20
+    CONTROL         "Natural", IDC_SURFACE_INSP_BTN_NATURAL, "Button", 0x50010000, 77, 100, 49, 20
+    CONTROL         "Fit", IDC_SURFACE_INSP_BTN_FIT, "Button", 0x50010000, 133, 100, 47, 20
+    CONTROL         "Lmap", IDC_SURFACE_INSP_BTN_LMAP, "Button", 0x50010000, 187, 100, 45, 20
+    CONTROL         "Done", IDC_SURFACE_INSP_BTN_DONE, "Button", 0x50010000, 74, 282, 49, 26
+    CONTROL         "Cancel", IDC_SURFACE_INSP_BTN_CANCEL, "Button", 0x50010000, 136, 282, 49, 24
+    CONTROL         "Texture will be fit across the patch based on the x and y values given. Values of 1x1 will ""fit"" the texture. 2x2 will repeat it twice, etc.", IDC_STATIC, "Static", 0x50020000, 45, 158, 153, 26
+    CONTROL         "Texture x:", IDC_STATIC, "Static", 0x50020000, 45, 199, 32, 8
+    CONTROL         "", IDC_SURFACE_INSP_TEX_REP_X, "Edit", 0x50810082, 81, 197, 21, 12
+    CONTROL         "", IDC_SURFACE_INSP_TEX_REP_X_SPIN, "msctls_updown32", 0x50020036, 103, 197, 12, 12
+    CONTROL         "Texture y:", IDC_STATIC, "Static", 0x50020000, 125, 199, 32, 8
+    CONTROL         "", IDC_SURFACE_INSP_TEX_REP_Y, "Edit", 0x50810082, 159, 197, 22, 12
+    CONTROL         "", IDC_SURFACE_INSP_TEX_REP_Y_SPIN, "msctls_updown32", 0x50020036, 184, 197, 12, 12
+    CONTROL         "Terrain uses 2D distance (good for ground)", IDC_SURFACE_INSP_PATCH_2D, "Button", 0x50020009, 46, 238, 151, 10
+    CONTROL         "Terrain uses 3d distance (good for curvy walls)", IDC_SURFACE_INSP_PATCH_3D, "Button", 0x50000009, 46, 249, 162, 10
+    CONTROL         "Terrain emulates curves (backwards compatibility)", IDC_SURFACE_INSP_PATCH_CURVE, "Button", 0x50000009, 46, 258, 172, 10
+    CONTROL         "Repeats in", IDC_STATIC, "Static", 0x50020000, 28, 140, 34, 8
+    CONTROL         "Repeats in", IDC_STATIC, "Static", 0x50020000, 164, 138, 34, 8
+    CONTROL         "88888", IDC_SURFACE_INSP_TXT_REPEATS_X, "Static", 0x50020002, 73, 140, 24, 12
+    CONTROL         "88888", IDC_SURFACE_INSP_TXT_REPEATS_Y, "Static", 0x50020002, 206, 138, 24, 12
+END
+
+/////////////////////////////////////////////////////////////////////////////
+// String Table — MFC command-prompt / tooltip strings (RT_STRING extracted from
+// IW3xRadiant.exe, 2026-07-03).  Format "Status-bar prompt\nTooltip": CFrameWnd's
+// default OnToolTipText (TTN_NEEDTEXT) reads these by command id and shows the text
+// after '\n' as the toolbar tooltip (CBRS_TOOLTIPS|CBRS_FLYBY are set on m_wndToolBar).
+// The port had NO STRINGTABLE, so every toolbar button's tooltip was blank.
+//
+STRINGTABLE
+BEGIN
+    57601   "Open an existing map\nOpen"
+    57603   "Save the active map\nSave"
+    32956   "Flip selected brushes along x-axis\nx-axis Flip"
+    32957   "Flip selected brushes along y-axis\ny-axis Flip"
+    32958   "Flip selected brushes along z-axis\nz-axis Flip"
+    32959   "Rotate selected brushes along x-axis\nx-axis Rotate"
+    32960   "Rotate selected brushes along y-axis\ny-axis Rotate"
+    32961   "Rotate selected brushes along z-axis\nz-axis Rotate"
+    32984   "Complete Tall\nComplete Tall"
+    32986   "Select Touching\nSelect Touching"
+    32983   "Select Partial Tall\nSelect Partial Tall"
+    33008   "Select Inside\nSelect Inside"
+    32783   "Set clipper mode\nClipper"
+    32927   "CSG Merge\nCSG Merge"
+    32982   "Hollow Selection\nHollow"
+    33135   "Flip Texture X\nFlip Texture X"
+    33136   "Flip Texture Y\nFlip Texture Y"
+    33182   "Rotate Texture 90\nRotate Texture 90"
+    33238   "Cycle Edited Texture Layer\nCycle Edited Texture Layer"
+    32936   "Toggle camera movement mode\nToggle camera movement mode"
+    32817   "Cubic clip the camera view\nCubic clip the camera view"
+    32781   "Change views\nChange views"
+    32810   "Free rotation\nFree Rotation"
+    32813   "Free Scaling\nFree Scaling"
+    32814   "Lock X\nLock X"
+    32815   "Lock Y\nLock Y"
+    32816   "Lock Z\nLock Z"
+    32852   "Don't select curved brushes\nDon't select curved brushes"
+    32857   "Show patches as wireframes\nShow patches as wireframes"
+    32872   "Redisperse patch points\nRedisperse patch points"
+    32858   "Welds equal patch points during moves\nWelds equal patch points during moves"
+    32865   "Selects drill down rows and columns\nSelects drill down rows and columns"
+    33140   "Toggles lock patch vertex mode\nToggles lock patch vertex mode"
+    33139   "Toggles unlock patch vertex mode\nToggles unlock patch vertex mode"
+    33141   "Cycles edge direction on terrain quads\nCycles edge direction on terrain quads"
+    33106   "Splines\nSplines"
+    32915   "Show Entities as...\nShow Entities as..."
+    33138   "Toggle alpha rendering of textures\nToggle alpha rendering of textures"
+    33142   "Disable selection of entities\nDisable selection of entities"
+    33169   "Disable selection of sky brushes\nDisable selection of sky brushes"
+    33144   "Toggle drawing of draw toggle surfs\nToggle drawing of draw toggle surfs"
+    33156   "Toggle if models are selectable\nToggle if models are selectable"
+    33159   "Plant models and apply random scale and rotation\nPlant models and apply random scale and rotation"
+    33195   "Orient dropped selection to floor\nOrient dropped selection to the floor"
+    33206   "Force drop height to 0\nForce drop height to 0"
+    33183   "Drop selected entites to the floor\nDrop selected entities to the floor"
+    35042   "Drop selected verts to floor with relative Z heights\nDrop selection to floor with relative Z heights"
+    33155   "Toggle drawing of tolerant weld lines\nToggle drawing of tolerant weld lines"
+    33207   "Toggle vert snap model vert display\nToggle vert snap model vert display"
+    33208   "Toggle vert snap brush vert display\nToggle vert snap brush vert display"
+    33209   "Toggle vert snap prefab vert display\nToggle vert snap prefab vert display"
+    35005   "Cycle Preview Model\nCycle Preview Model"
+END

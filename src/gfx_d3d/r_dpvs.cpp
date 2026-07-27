@@ -2466,7 +2466,11 @@ void __cdecl R_ShowCull()
         for (sceneEntIndex = 0; sceneEntIndex < sceneEntCount; ++sceneEntIndex)
         {
             sceneModel = &scene.sceneModel[sceneEntIndex];
+#ifndef KISAK_RADIANT
             origin = CG_GetEntityOrigin(scene.dpvs.localClientNum, sceneModel->entnum);
+#else
+            origin = sceneModel->placement.base.origin;
+#endif
             radius = XModelGetRadius(sceneModel->model);
             s = -radius;
             Vec3AddScalar(origin, s, mins);

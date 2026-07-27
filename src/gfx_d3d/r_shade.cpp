@@ -366,6 +366,74 @@ void __cdecl R_OverrideImage(GfxImage **image, const MaterialTextureDef *texdef)
     }
 }
 
+#ifdef KISAK_RADIANT
+// DOCUMENTED DIVERGENCE (white-xmodel root cause, 2026-07-02): many tools shaders keep
+// load-bearing constants as `def` immediates in their bytecode — e.g. the _dtex model
+// shaders' packed-UV half-float decompress (vs c8..c12; CTAB only binds the c0/c4
+// matrices) and vertcol_shaded's ps c0/c2. D3D9 is supposed to load def constants into
+// the register file when the shader is bound, and the binary relies on that. On the
+// live editor that guarantee does not hold: DEVPROBE at the model draw showed c10/c11
+// live (model positions need them and are correct) while c8/c9 were ZERO — which
+// collapses every UV to texel(0,0) and NaNs the fakelight vertex colour = the flat
+// white/brown models. Registers persist across shader binds, so any pass whose args
+// route a zero-valued code constant to those registers kills them for every later
+// def-reliant draw. Fix: re-apply the shader's own def constants whenever the shader
+// is bound. Idempotent when the runtime already applied them; def registers are
+// disjoint from CTAB-uniform registers within a shader, so no technique arg is
+// overridden. The tracked const state for each written dest is invalidated so a later
+// technique arg to the same register is not version-skipped. (Editor-only: the game
+// targets keep the binary's runtime-reliant behavior.)
+static void R_ApplyShaderDefConstants(GfxCmdBufState *state, const void *bytecode,
+                                      unsigned sizeDwords, bool pixel)
+{
+    const uint32_t *tok = (const uint32_t *)bytecode;
+    if (!tok || sizeDwords < 2)
+        return;
+    unsigned i = 1;                              // skip the version token
+    while (i < sizeDwords)
+    {
+        uint32_t t = tok[i];
+        if (t == 0x0000FFFF)                     // end token
+            break;
+        if ((t & 0xFFFF) == 0xFFFE)              // comment (CTAB etc): length in bits 16..30
+        {
+            i += ((t >> 16) & 0x7FFF) + 1;
+            continue;
+        }
+        uint32_t op = t & 0xFFFF;
+        if (op == 0x51 && i + 5 < sizeDwords)    // D3DSIO_DEF: dst token + 4 raw float dwords
+        {
+            uint32_t dst = tok[i + 1] & 0x7FF;
+            if (pixel)
+            {
+                if (dst < 0x100)
+                {
+                    LODWORD(state->pixelShaderConstState[dst]) = -1;
+                    HIDWORD(state->pixelShaderConstState[dst]) = -1;
+                    R_HW_SetPixelShaderConstant(state->prim.device, dst, (const float *)&tok[i + 2], 1u);
+                }
+            }
+            else
+            {
+                if (dst < 0x20)                  // tracked window; defs beyond it can't collide with args
+                {
+                    LODWORD(state->vertexShaderConstState[dst]) = -1;
+                    HIDWORD(state->vertexShaderConstState[dst]) = -1;
+                }
+                R_HW_SetVertexShaderConstant(state->prim.device, dst, (const float *)&tok[i + 2], 1u);
+            }
+            i += 6;
+            continue;
+        }
+        if (op == 0x30) { i += 6; continue; }    // D3DSIO_DEFI: dst + 4 ints
+        if (op == 0x2F) { i += 3; continue; }    // D3DSIO_DEFB: dst + 1 bool
+        ++i;                                     // other instruction: skip its param tokens
+        while (i < sizeDwords && (tok[i] & 0x80000000))
+            ++i;
+    }
+}
+#endif
+
 void __cdecl R_SetPixelShader(GfxCmdBufState *state, const MaterialPixelShader *pixelShader)
 {
     iassert(pixelShader);
@@ -377,6 +445,10 @@ void __cdecl R_SetPixelShader(GfxCmdBufState *state, const MaterialPixelShader *
 
         R_HW_SetPixelShader(state->prim.device, pixelShader);
         state->pixelShader = pixelShader;
+#ifdef KISAK_RADIANT
+        R_ApplyShaderDefConstants(state, pixelShader->prog.loadDef.program,
+                                  pixelShader->prog.loadDef.programSize, true);
+#endif
     }
 }
 
@@ -391,6 +463,10 @@ void __cdecl R_SetVertexShader(GfxCmdBufState *state, const MaterialVertexShader
 
         R_HW_SetVertexShader(state->prim.device, vertexShader);
         state->vertexShader = vertexShader;
+#ifdef KISAK_RADIANT
+        R_ApplyShaderDefConstants(state, vertexShader->prog.loadDef.program,
+                                  vertexShader->prog.loadDef.programSize, false);
+#endif
     }
 }
 
@@ -444,6 +520,16 @@ void __cdecl R_SetupPass(GfxCmdBufContext context, uint32_t passIndex)
     stateBits[0] = refStateBits->loadBits[0];
     stateBits[1] = refStateBits->loadBits[1];
     iassert( context.source->viewMode != VIEW_MODE_NONE );
+#ifdef KISAK_RADIANT
+    // IDB R_SetupPass @0x53c563: for 2D draws the binary forces the low 6 (depth-state) bits of
+    // stateBits[1] to 2 — BEFORE the state change — so every 2D pass gets the engine's 2D depth
+    // state regardless of the material's authored loadBits. The kisak port dropped this; restore it
+    // (gated to the editor: r_shade is shared with the CoD3-based game, which I can't verify against
+    // the CoD4Radiant IDB). Pixel-neutral for the depth-cleared texture browser, but correct for any
+    // 2D draw over a populated depth buffer (camera/XY overlays).
+    if ( context.source->viewMode == VIEW_MODE_2D )
+        stateBits[1] = stateBits[1] & 0xFFFFFFC0 | 2;
+#endif
     R_SetState(context.state, stateBits);
     if (r_logFile->current.integer)
     {
@@ -547,6 +633,58 @@ void __cdecl R_SetPassShaderPrimArguments(
         MyAssertHandler(".\\r_shade.cpp", 192, 0, "unreachable");
 }
 
+#ifdef KISAK_RADIANT
+// idb 0x53B630  R_GetCaseTexture — editor-only (CASE_TEXTURE technique / camera draw_mode 4).
+// Returns the rgp.caseTextures[] image whose width/height matches the material's colorMap
+// (texel-density visualization), else rgp.whiteImage. The binary keys off material->info.name2
+// (a CoD4-only MaterialInfo field absent from kisak's CoD3 MaterialInfo); we replicate the
+// INTENT by reading the colorMap GfxImage straight from material->textureTable (the same
+// colorMap-extraction the faithful camera draw / TEXPROOF uses). Avoids extending the core
+// MaterialInfo struct (CoD3<->CoD4 layout divergence — §11). NEVER returns NULL.
+static const GfxImage *R_GetCaseTexture(const Material *material)
+{
+    // colorMap = first material texture with a real (non-zero-width) image.
+    const GfxImage *colorMap = nullptr;
+    if (material && material->textureTable)
+    {
+        for (int ti = 0; ti < material->textureCount; ++ti)
+        {
+            const GfxImage *img = material->textureTable[ti].u.image;
+            if (img && img->width)
+            {
+                colorMap = img;
+                break;
+            }
+        }
+    }
+    if (!colorMap)
+        return rgp.whiteImage;
+
+    for (int i = 0; i < rgp.caseTextures_count; ++i)
+    {
+        iassert(rgp.caseTextures[i]);     // idb r_shade.cpp:171 "rgp.caseTextures[caseIndex]"
+        if (rgp.caseTextures[i]->width == colorMap->width
+            && rgp.caseTextures[i]->height == colorMap->height)
+        {
+            // One-shot proof (≤4 lines): the CASE_TEXTURE draw path bound a real case image
+            // sized to the surface colorMap. Zero overhead after a few faces.
+            static int s_caseProof = 0;
+            if (s_caseProof < 4)
+            {
+                ++s_caseProof;
+                extern void Radiant_FL_Log( const char *fmt, ... );
+                Radiant_FL_Log( "CASEPROOF#%d colorMap %dx%d -> case texture %s %dx%d",
+                                s_caseProof, colorMap->width, colorMap->height,
+                                rgp.caseTextures[i]->name ? rgp.caseTextures[i]->name : "?",
+                                rgp.caseTextures[i]->width, rgp.caseTextures[i]->height );
+            }
+            return rgp.caseTextures[i];
+        }
+    }
+    return rgp.whiteImage;
+}
+#endif
+
 void __cdecl R_SetPassShaderObjectArguments(
     GfxCmdBufContext context,
     uint32_t argCount,
@@ -566,7 +704,18 @@ void __cdecl R_SetPassShaderObjectArguments(
     {
         image = R_GetTextureFromCode(context.source, arg->u.codeSampler, &samplerState);
         if (!image)
+        {
+#ifdef KISAK_RADIANT
+            // idb: the CASE_TEXTURE code sampler (21) has no static code image — it resolves
+            // per-surface from the material's colorMap dimensions. Other missing code samplers
+            // are still a hard error.
+            if (arg->u.codeSampler != TEXTURE_SRC_CODE_CASE_TEXTURE)
+                R_TextureFromCodeError(context.source, arg->u.codeSampler);
+            image = R_GetCaseTexture(context.state->material);
+#else
             R_TextureFromCodeError(context.source, arg->u.codeSampler);
+#endif
+        }
         R_SetSampler(context, arg->dest, samplerState, image);
         ++arg;
         if (!--argCount)
@@ -715,7 +864,15 @@ void __cdecl R_SetPassShaderStableArguments(
             break;
         image = R_GetTextureFromCode(context.source, arg->u.codeSampler, &samplerState);
         if (!image)
+        {
+#ifdef KISAK_RADIANT
+            if (arg->u.codeSampler != TEXTURE_SRC_CODE_CASE_TEXTURE)
+                R_TextureFromCodeError(context.source, arg->u.codeSampler);
+            image = R_GetCaseTexture(material);
+#else
             R_TextureFromCodeError(context.source, arg->u.codeSampler);
+#endif
+        }
         R_SetSampler(context, arg->dest, samplerState, image);
         ++arg;
         --argCount;
@@ -782,13 +939,13 @@ int __cdecl R_SetVertexData(GfxCmdBufState *state, const void *data, int vertexC
             "%s\n\t(totalSize) = %i",
             "(totalSize <= gfxBuf.dynamicVertexBuffer->total)",
             totalSize);
+    // Binary 0x53C600 @0x53c66c: when the next write would run past the end, WRAP the
+    // dynamic VB ring to 0 (the used==0 path below then locks with DISCARD, renaming the
+    // buffer).  The port had replaced this wrap with an assert — after continuing past it,
+    // Lock(used, totalSize) ran off the buffer end -> D3DERR_INVALIDCALL -> R_FatalLockError.
+    // R_ReserveIndexData (above) kept the binary's identical wrap for the index ring.
     if (totalSize + gfxBuf.dynamicVertexBuffer->used > gfxBuf.dynamicVertexBuffer->total)
-        MyAssertHandler(
-            ".\\r_shade.cpp",
-            886,
-            0,
-            "%s",
-            "gfxBuf.dynamicVertexBuffer->used + totalSize <= gfxBuf.dynamicVertexBuffer->total");
+        gfxBuf.dynamicVertexBuffer->used = 0;
     vb = gfxBuf.dynamicVertexBuffer->buffer;
     iassert( vb );
     lockFlags = gfxBuf.dynamicVertexBuffer->used != 0 ? 4096 : 0x2000;

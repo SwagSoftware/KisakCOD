@@ -150,6 +150,18 @@ struct pathnode_dynamic_t
     __int16 turretEntNumber;
     __int16 userCount;
 };
+#elif defined(KISAK_RADIANT)
+struct pathnode_dynamic_t // sizeof=0x20 — same layout as MP; Radiant has no AI
+{
+    void *pOwner;
+    int iFreeTime;
+    int iValidTime[3];
+    int inPlayerLOSTime;
+    __int16 wLinkCount;
+    __int16 wOverlapCount;
+    __int16 turretEntNumber;
+    __int16 userCount;
+};
 #endif
 
 
@@ -218,7 +230,7 @@ struct PathData // sizeof=0x28
 };
 
 
-#ifndef KISAK_MP
+#ifdef KISAK_SP
 
 #include "actor_badplace.h"
 #include <client/client.h>

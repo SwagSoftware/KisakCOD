@@ -48,19 +48,25 @@ void __cdecl R_AddEntitySurfacesInFrustumCmd(uint16_t *data)
                 localSceneEnt->cull.mins,
                 localSceneEnt->cull.maxs))
         {
+#ifndef KISAK_RADIANT
             CG_CullIn(localSceneEnt->info.pose);
+#endif
             R_SkinSceneDObj(sceneEnt, localSceneEnt, obj, boneMatrix, 0);
             iassert( localSceneEnt->entnum != gfxCfg.entnumNone );
             *(_BYTE *)(localSceneEnt->entnum + *((uint32_t *)data + 3)) = 1;
         }
         else
         {
+#ifndef KISAK_RADIANT
             CG_UsedDObjCalcPose(localSceneEnt->info.pose);
+#endif
         }
     }
     else if (localSceneEnt)
     {
+#ifndef KISAK_RADIANT
         CG_UsedDObjCalcPose(localSceneEnt->info.pose);
+#endif
     }
 }
 

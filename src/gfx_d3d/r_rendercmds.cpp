@@ -146,8 +146,13 @@ void __cdecl R_InitRenderCommands()
 {
     uint32_t dataIndex; // [esp+4h] [ebp-4h]
 
+#ifdef KISAK_RADIANT
+    s_renderCmdBufferSize = 48u * 1024u * 1024u;   // 48 MB
+    s_renderCmdWarnSize   = (int)( 48u * 1024u * 1024u * 3 / 4 );
+#else
     s_renderCmdBufferSize = 98304 * gfxCfg.maxClientViews;
     s_renderCmdWarnSize = (signed int)(294912 * gfxCfg.maxClientViews) / 4;
+#endif
     R_InitModelLightingGlobals();
     for (dataIndex = 0; dataIndex < 2; ++dataIndex)
     {
@@ -1293,7 +1298,7 @@ void R_UpdateFrontEndDvarOptions()
     {
         R_EnvMapOverrideConstants();
     }
-    v0 = r_distortion->current.enabled && CL_GetLocalClientActiveCount() == 1;
+    v0 = r_distortion->current.enabled && RETURN_ONE() == 1;
     if (rg.distortion != v0)
         R_SyncRenderThread();
     rg.distortion = v0;
@@ -1622,6 +1627,13 @@ void __cdecl R_AddCmdProjectionSet(GfxProjectionTypes projection)
         cmd->projection = projection;
 }
 
+#ifdef KISAK_RADIANT
+bool __cdecl CL_IsLocalClientInGame(int32_t localClientNum)
+{
+    return true;
+}
+#endif
+
 void __cdecl R_BeginRemoteScreenUpdate()
 {
     if (IsFastFileLoad() && Sys_IsMainThread())
@@ -1736,7 +1748,11 @@ void __cdecl R_InitTempSkinBuf()
         data = &s_backEndData[i];
         iassert( !data->tempSkinPos );
         iassert( !data->tempSkinBuf );
-        data->tempSkinBuf = (uint8_t *)Z_VirtualReserve(0x480000);
+#ifdef KISAK_RADIANT
+        data->tempSkinBuf = (uint8_t *)Z_VirtualReserve(0x5000000);
+#else
+		data->tempSkinBuf = (uint8_t *)Z_VirtualReserve(0x480000);
+#endif
     }
 }
 
@@ -1820,3 +1836,522 @@ void __cdecl R_EndDebugFrame()
         rg.inFrame = s_debugFrameGlob.inFrame;
     }
 }
+
+#ifdef KISAK_RADIANT
+// ─────────────────────────────────────────────────────────────────────────────
+// Editor render-command additions — cod3src\src\gfx_d3d\r_rendercmds.cpp in the
+// CoD4Radiant binary (IDB port 13343). The editor's line bridge (draw.cpp
+// R_Add3DLine/Draw_02 and the XY/Z/Cam view draws) batches line geometry into
+// GfxCmdDrawLines render commands through these. KisakCOD's CoD3-era
+// r_rendercmds.cpp lacks them; ported verbatim from the IDB.
+//
+// SIGNATURE / §11 NOTES (validated against the kisak callsites above):
+//  • kisak R_GetCommandBuffer(renderCmd, bytes). The IDB pseudocode lists the
+//    args swapped — R_GetCommandBuffer(bytes, RC_DRAW_LINES) — a __usercall
+//    normalization artifact. kisak's own callers use (renderCmd, bytes); we follow
+//    the kisak prototype, NOT the IDB literal order.
+//  • The IDB compares lastCmd->header.id == 20 (the CoD4 RC_DRAW_LINES enum value).
+//    kisak's RC_DRAW_LINES == 0x12. We use the SYMBOL, never the literal.
+//  • GfxCmdDrawLines layout (rb_backend.h): header(4) + lineCount(2)+width(1)+
+//    dimensions(1) = 8-byte prefix, then verts. A line command of N line-segments
+//    is 8 + 0x20*N bytes (0x20 = two GfxPointVertex per segment).
+// ─────────────────────────────────────────────────────────────────────────────
+#include "rb_backend.h"   // GfxCmdDrawLines
+#include <string.h>       // memcpy
+
+// IDB R_AddMultipleRendercommands @ 0x4fb0d0 — extend the last command in place:
+// rewind usedTotal to the start of lastCmd, re-acquire the buffer at the bigger
+// byte count (same id), and hand back the old end-of-buffer where the new data
+// gets appended.
+void *__cdecl R_AddMultipleRendercommands(int bytes)
+{
+    GfxCmdHeader *lastCmd = s_cmdList->lastCmd;
+    uint8_t *cmds = s_cmdList->cmds;
+    int usedTotal = s_cmdList->usedTotal;
+    s_cmdList->usedTotal = (int)((uint8_t *)lastCmd - cmds);
+    uint8_t *appendPos = &cmds[usedTotal];
+    GfxCmdHeader *bufferStart =
+        R_GetCommandBuffer((GfxRenderCommand)lastCmd->id, bytes + lastCmd->byteCount);
+    iassert( s_cmdList->lastCmd == bufferStart );
+    return bufferStart ? appendPos : nullptr;
+}
+
+// IDB R_AddLineCmd @ 0x4fd0a0 — append `count` line-segments of `dimension`-D
+// geometry, merging into the previous RC_DRAW_LINES command when the widths and
+// dimensions match and the byte/line caps still fit.
+void __cdecl R_AddLineCmd(short count, char width, char dimension, GfxPointVertex *verts)
+{
+    iassert( (count > 0) );
+
+    GfxCmdDrawLines *lastCmd = (GfxCmdDrawLines *)s_cmdList->lastCmd;
+    if ( lastCmd
+        && lastCmd->header.id == RC_DRAW_LINES
+        && 0x20u * (unsigned)count + (unsigned)lastCmd->header.byteCount <= 0xFFFF
+        && lastCmd->width == (uint8_t)width
+        && lastCmd->dimensions == (uint8_t)dimension
+        && count + lastCmd->lineCount <= 0x7FFF )
+    {
+        void *dst = R_AddMultipleRendercommands(0x20 * count);
+        if ( dst )
+        {
+            memcpy(dst, verts, 0x20 * count);
+            lastCmd->lineCount += count;
+        }
+    }
+    else
+    {
+        int byteCount = 0x20 * count;
+        GfxCmdDrawLines *cmd =
+            (GfxCmdDrawLines *)R_GetCommandBuffer(RC_DRAW_LINES, byteCount + 8);
+        if ( cmd )
+        {
+            cmd->lineCount = count;
+            cmd->width = width;
+            cmd->dimensions = dimension;
+            memcpy(cmd->verts, verts, byteCount);
+        }
+    }
+}
+
+#ifdef KISAK_RADIANT
+// Editor-only: the last MATERIAL_COLOR pushed via RC_SET_MATERIAL_COLOR. R_AddCmd_Line3D sets the
+// $line colour per batch; without deduping, DrawGeo's one-Line3D-per-brush emits a redundant
+// SetMaterialColor EVERY brush AND breaks R_AddLineCmd's RC_DRAW_LINES merge (lastCmd becomes the
+// SetMaterialColor, so each brush starts a fresh DrawLines). On a large map (blackout) the per-brush
+// command pairs overflow s_renderCmdBufferSize -> R_GetCommandBuffer line-904 assert. Tracking the
+// last colour (updated by EVERY R_AddCmdSetMaterialColor caller, incl. the per-paint s_edWhite seed)
+// lets us skip the emit when unchanged, so same-colour line batches merge into one DrawLines.
+// Behaviourally identical: MATERIAL_COLOR persists in backend state until the next set.
+static float s_edLastMatColor[4] = { -2.0f, -2.0f, -2.0f, -2.0f };   // sentinel: never matches a real colour
+
+// TASK-1 EXPERIMENT (temporary, env-gated): RADIANT_LINEVCOL=1 pushes the BINARY's neutral
+// MATERIAL_COLOR {0,0,0,0} for every editor line batch instead of the port's first-vertex
+// override.  The binary never sets MATERIAL_COLOR per line batch — it leaves the value that
+// R_SetMaterialColor(NULL) parked (Cam_Draw 0x4080f7/0x408115, XY_Draw 0x46d8fa) — so if the
+// $line 'vertcol_shaded_tools' pixel shader really is
+//     rgb = lerp( sample(colorMap=$white) * vertexColour, matColor.rgb, matColor.w )
+// then w==0 reproduces the binary exactly and the PER-VERTEX colour drives the line.  If
+// instead the lines go black/white, the shader ignores vertex colour and the port's override
+// is a required adaptation.  One run decides it.
+static bool Ed_LineVertexColorMode()
+{
+    static const bool s_on = []{ const char *e = getenv( "RADIANT_LINEVCOL" );
+                                 return e && *e && *e != '0'; }();
+    return s_on;
+}
+static const float s_edNeutralMatColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ed_EmitLineBatch — the port's MATERIAL_COLOR line adaptation, split PER COLOUR RUN.
+//
+// WHY THE ADAPTATION EXISTS AT ALL:  $line resolves (LINEPROBE, mp_backlot) to
+//   mtl='$line' techSet='tools' tech='vertcol_shaded_tools' entry=0
+//   loadBits=18128812/0000000d  DEV[blendEn=0 src=2 dst=1 zwrite=1 ztest=1 zfunc=4 cwe=15]
+// i.e. the SHARED vertcol_shaded pixel shader, whose editor form is
+//   rgb = lerp( sample(colorMap) * vertexColour, materialColor.rgb, materialColor.w ).
+// The binary never sets MATERIAL_COLOR per line batch: it parks the neutral {0,0,0,0}
+// (R_SetMaterialColor(NULL) — Cam_Draw 0x4080f7 / 0x408115, XY_Draw 0x46d8fa) so w==0 and
+// the PER-VERTEX colour drives every line.  kisak's editor bring-up could not rely on that
+// (the grid draws outside a full scene render, so CONST_SRC_CODE_MATERIAL_COLOR has no
+// version and r_shade.cpp asserts), hence the per-batch push with w==1 = flat override.
+//
+// THE BUG THIS FIXES (TASK 1, 2026-07-26):  the push used verts[0]'s colour for the WHOLE
+// batch, so any batch carrying more than one colour was FLATTENED to its first colour.
+// DrawAngles (0x479d50) builds exactly such a batch: with drawType == -1 (the camera pass —
+// DrawGeneralWorld_ 0x407b9d and DrawBrush_SunPreview 0x406999 both pass 0xFFFFFFFF) it
+// emits base->tip and tip->wing1 in flt_6DE220 GREY (0.5,0.5,0.5) and tip->wing2 in
+// colorWhite, then ONE R_AddCmd_Line3D(3, 2, verts).  The port painted all three segments
+// grey; the binary paints two grey and one WHITE.  Measured on mp_backlot's camera pane:
+// 13695 px of flat 128,128,128 before, 10967 grey + 2728 pure white after — and the 2728
+// are exactly the pixels that flipped, i.e. the arrowhead barb the binary draws white.
+//
+// Splitting the emit at every colour change reproduces the binary's per-vertex result
+// through the mechanism kisak already needs, WITHOUT depending on the $white colorMap
+// sample being 1.0 (which the RADIANT_LINEVCOL experiment showed cannot be assumed: with
+// w==0 the XY brush wireframes came back at ~0.32x, so the neutral-matColor route needs the
+// colorMap binding verified first — see PROGRESS.md).  Single-colour batches (the common
+// case: the grid, one brush's wireframe) still emit exactly one SetMaterialColor+DrawLines
+// pair, so the command-buffer pressure the dedup was added for is unchanged.
+//
+// LIMITATION (documented, not a divergence in practice): a single line whose two endpoints
+// carry DIFFERENT colours would interpolate in the binary; here it takes its first vertex's
+// colour.  No editor line builder emits such a gradient (R_Add3DLine stamps one colour into
+// both endpoints; Draw_02 / the wireframe builders do the same).
+static void Ed_EmitLineBatch(short count, char width, char dimension, GfxPointVertex *verts)
+{
+    if ( count <= 0 || !verts )
+        { R_AddLineCmd(count, width, dimension, verts); return; }
+
+    const bool neutral = Ed_LineVertexColorMode();
+    int runStart = 0;
+    for ( int i = 0; i <= (int)count; ++i )
+    {
+        // GfxPointVertex.color is packed BGRA (Byte4PackVertexColor / Byte4PackPixelColor:
+        // array[2]=R, [1]=G, [0]=B, [3]=A) — unpack in that order or red<->blue swaps.
+        const bool last = ( i == (int)count );
+        const bool changed = last
+            || ( *(const unsigned int *)verts[2 * i].color
+              != *(const unsigned int *)verts[2 * runStart].color );
+        if ( !changed )
+            continue;
+
+        const unsigned char *c = (const unsigned char *)verts[2 * runStart].color;
+        float rgba[4] = { c[2] * (1.0f / 255.0f), c[1] * (1.0f / 255.0f),
+                          c[0] * (1.0f / 255.0f), c[3] * (1.0f / 255.0f) };
+        const float *push = neutral ? s_edNeutralMatColor : rgba;
+        // Only push when the colour CHANGES vs the last emitted one — keeps same-colour
+        // batches (hundreds of unselected brushes) merging into one RC_DRAW_LINES instead of
+        // a SetMaterialColor+DrawLines pair per brush (which overflowed s_renderCmdBufferSize
+        // on blackout).
+        if ( push[0] != s_edLastMatColor[0] || push[1] != s_edLastMatColor[1]
+          || push[2] != s_edLastMatColor[2] || push[3] != s_edLastMatColor[3] )
+            R_AddCmdSetMaterialColor( push );
+        R_AddLineCmd((short)(i - runStart), width, dimension, &verts[2 * runStart]);
+        runStart = i;
+    }
+}
+#endif
+
+// IDB R_AddCmd_Line3D @ 0x4fd1a0 — thin 3D wrapper over R_AddLineCmd.
+void __cdecl R_AddCmd_Line3D(short count, char width, GfxPointVertex *verts)
+{
+#ifdef KISAK_RADIANT
+    Ed_EmitLineBatch(count, width, 3, verts);
+#else
+    R_AddLineCmd(count, width, 3, verts);
+#endif
+}
+
+#ifdef KISAK_RADIANT
+void __cdecl R_AddCmd_Line3DNoDepth(short count, char width, GfxPointVertex *verts)
+{
+    Ed_EmitLineBatch(count, width, 4, verts);
+}
+#endif
+
+// IDB R_AddCmd_Line2D @ 0x4fd180 — thin 2D wrapper over R_AddLineCmd (the exact 2D
+// sibling of R_AddCmd_Line3D: dimension=2 vs 3).  Editor-only (the 2D pane line
+// renderer used by the texture window's layered-material outline rects).  The binary
+// is a pure forwarder; like Line3D we additionally push the first vertex's colour as
+// the MATERIAL colour under KISAK_RADIANT, because kisak's editor $line technique
+// colours from CODE_MATERIAL_COLOR (not the per-vertex GfxPointVertex.color the binary
+// relies on) — without it a 2D line batch would render whatever material colour was
+// last set instead of its own packed colour.
+void __cdecl R_AddCmd_Line2D(short count, char width, GfxPointVertex *verts)
+{
+#ifdef KISAK_RADIANT
+    Ed_EmitLineBatch(count, width, 2, verts);
+#else
+    R_AddLineCmd(count, width, 2, verts);
+#endif
+}
+
+// IDB R_AddPointCmd @ 0x4fcf60 — append `pointCount` points (each a 16-byte
+// GfxPointVertex) of `dimension`-D into the last RC_DRAW_POINTS command, or start a
+// fresh one. Mirrors R_AddLineCmd exactly (the merge path uses
+// R_AddMultipleRendercommands; the fresh path R_GetCommandBuffer). kisak's
+// GfxCmdDrawPoints names the per-point field `size` (the IDB calls it `width`) and the
+// flexible array `verts`. The clipper's DrawClipper draws its placed clip points here.
+static GfxCmdDrawPoints *__cdecl R_AddPointCmdRaw(short pointCount, char size, char dimension, const GfxPointVertex *verts)
+{
+    iassert( (pointCount > 0) );
+    iassert( (size > 0) );
+
+    GfxCmdDrawPoints *lastCmd = (GfxCmdDrawPoints *)s_cmdList->lastCmd;
+    if ( lastCmd
+        && lastCmd->header.id == RC_DRAW_POINTS
+        && 16u * (unsigned)pointCount + (unsigned)lastCmd->header.byteCount <= 0xFFFF
+        && lastCmd->size == (uint8_t)size
+        && lastCmd->dimensions == (uint8_t)dimension
+        && pointCount + lastCmd->pointCount <= 0x7FFF )
+    {
+        GfxCmdDrawPoints *dst = (GfxCmdDrawPoints *)R_AddMultipleRendercommands(16 * pointCount);
+        if ( dst )
+        {
+            memcpy(dst, verts, 16 * pointCount);
+            lastCmd->pointCount += pointCount;
+        }
+        return dst;
+    }
+
+    int byteCount = 16 * pointCount;
+    GfxCmdDrawPoints *cmd =
+        (GfxCmdDrawPoints *)R_GetCommandBuffer(RC_DRAW_POINTS, byteCount + 8);
+    if ( cmd )
+    {
+        cmd->pointCount = pointCount;
+        cmd->size = size;
+        cmd->dimensions = dimension;
+        memcpy(cmd->verts, verts, byteCount);
+    }
+    return cmd;
+}
+
+// Keep the IDA point-command batching in R_AddPointCmdRaw; Radiant wraps it below
+// to map per-vertex point colours onto kisak's material-colour point technique.
+GfxCmdDrawPoints *__cdecl R_AddPointCmd(short pointCount, char size, char dimension, const GfxPointVertex *verts)
+{
+#ifdef KISAK_RADIANT
+    iassert( (pointCount > 0) );
+    iassert( (size > 0) );
+
+    GfxCmdDrawPoints *lastCmd = nullptr;
+    int first = 0;
+
+    while ( first < pointCount )
+    {
+        const unsigned int packed = *(const unsigned int *)verts[first].color;
+        int runCount = 1;
+
+        while ( first + runCount < pointCount
+             && *(const unsigned int *)verts[first + runCount].color == packed )
+        {
+            ++runCount;
+        }
+
+        const unsigned char *c = (const unsigned char *)&packed;
+        float rgba[4] =
+        {
+            c[2] * ( 1.0f / 255.0f ),
+            c[1] * ( 1.0f / 255.0f ),
+            c[0] * ( 1.0f / 255.0f ),
+            c[3] * ( 1.0f / 255.0f )
+        };
+
+        if ( rgba[0] != s_edLastMatColor[0] || rgba[1] != s_edLastMatColor[1]
+          || rgba[2] != s_edLastMatColor[2] || rgba[3] != s_edLastMatColor[3] )
+            R_AddCmdSetMaterialColor( rgba );
+
+        lastCmd = R_AddPointCmdRaw( (short)runCount, size, dimension, &verts[first] );
+        first += runCount;
+    }
+
+    return lastCmd;
+#else
+    return R_AddPointCmdRaw( pointCount, size, dimension, verts );
+#endif
+}
+
+// IDB R_AddPointCmd_W @ 0x4fd080 - thin 3D wrapper over R_AddPointCmd.
+GfxCmdDrawPoints *__cdecl R_AddPointCmd_W(short pointCount, char size, const GfxPointVertex *verts)
+{
+    return R_AddPointCmd(pointCount, size, 3, verts);
+}
+
+// IDB R_AddRenderCmdDrawTris @ 0x4fd1c0 — immediate-mode textured/lit triangle
+// soup with a material + technique. The editor camera view draws each face's
+// triangle fan through this. kisak ALREADY has the consumer (RB_DrawTrianglesCmd,
+// rb_backend.cpp) and the GfxCmdDrawTriangles layout (xyzw@16, normal, color, st,
+// indices) — verified byte-identical to the IDB. §11: kisak
+// R_GetCommandBuffer(renderCmd, bytes) (IDB lists them swapped); RC_DRAW_TRIANGLES
+// symbol (kisak 0x13), never a literal.
+void __cdecl R_AddRenderCmdDrawTris(
+    Material *material, MaterialTechniqueType techType, short indexCount,
+    const uint16_t *indices, short vertexCount,
+    const float (*xyzw)[4], const float (*normal)[3], float *color,
+    const float (*st)[2])
+{
+    const Material *handle = material ? Material_FromHandle(material) : rgp.defaultMaterial;
+    iassert(handle);
+    if (!Material_GetTechnique((Material *)handle, techType))
+        return;                                  // material lacks this technique → skip
+
+    int vc           = vertexCount;
+    int xyzwOffset   = 16;                        // after the 16-byte GfxCmdDrawTriangles
+    int normalOffset = xyzwOffset   + 16 * vc;
+    int colorOffset  = normalOffset + 12 * vc;
+    int stOffset     = colorOffset  +  4 * vc;
+    int indexOffset  = stOffset     +  8 * vc;
+    int indexBytes   = 2 * ((indexCount + 1) & ~1);
+    int total        = indexOffset  + indexBytes;
+
+    GfxCmdDrawTriangles *cmd =
+        (GfxCmdDrawTriangles *)R_GetCommandBuffer(RC_DRAW_TRIANGLES, total);
+    if (!cmd)
+        return;
+    cmd->material    = handle;
+    cmd->techType    = techType;
+    cmd->indexCount  = indexCount;
+    cmd->vertexCount = vertexCount;
+    memcpy((char *)cmd + xyzwOffset,   xyzw,    16 * vc);
+    memcpy((char *)cmd + normalOffset, normal,  12 * vc);
+    memcpy((char *)cmd + colorOffset,  color,    4 * vc);
+    memcpy((char *)cmd + stOffset,     st,       8 * vc);
+    memcpy((char *)cmd + indexOffset,  indices, indexBytes);
+}
+
+// IDB R_AddBeginViewCmd @ 0x4fc3a0 — emit RC_BEGIN_VIEW carrying the scene def
+// and the GfxViewParms* that RB_BeginViewCmd will install as the active view.
+// The IDB's frontEndDataOut->viewParms[] bounds asserts are dropped: the editor
+// scene setup (R_Ed_SetSceneParms) uses a single static GfxViewParms (kisak's
+// GfxBackEndData has only one viewParms, and editor rendering is synchronous —
+// no SMP workers — so the pointer is valid front-end → back-end).
+// §11: kisak R_GetCommandBuffer(renderCmd, bytes); IDB lists them swapped.
+void __cdecl R_AddBeginViewCmd(const GfxSceneDef *sceneDef, const GfxViewParms *viewParms)
+{
+    GfxCmdBeginView *cmd = (GfxCmdBeginView *)R_GetCommandBuffer(RC_BEGIN_VIEW, sizeof(GfxCmdBeginView));
+    iassert( cmd );
+    cmd->sceneDef = *sceneDef;
+    cmd->viewParms = viewParms;
+}
+
+// Emit RC_SET_MATERIAL_COLOR → RB_SetMaterialColorCmd sets CONST_SRC_CODE_MATERIAL_COLOR.
+// The editor draws the grid via a bare RC_DRAW_LINES outside a full scene render, so the
+// per-material code-constant setup a normal scene does (which feeds MATERIAL_COLOR to the
+// $line UNLIT pixel shader) never runs → constVersions[MATERIAL_COLOR]==0 →
+// r_shade.cpp:282 (iassert newState.fields.version) + garbage (white) line output. Setting
+// it white before the lines (matching rb_sky.cpp's unlit-draw pattern) bumps the version
+// and gives the shader its colour. kisak ships only the RB handler, no emitter — add one.
+void __cdecl R_AddCmdSetMaterialColor(const float *color)
+{
+    GfxCmdSetMaterialColor *cmd = (GfxCmdSetMaterialColor *)R_GetCommandBuffer(RC_SET_MATERIAL_COLOR, sizeof(GfxCmdSetMaterialColor));
+#ifdef KISAK_RADIANT
+    // OVERFLOW GUARD (blackout crash): the editor's immediate-mode world draw + per-entity
+    // DrawAngles emit an RC_SET_MATERIAL_COLOR per brush/entity, so on a huge map the render
+    // command buffer fills and R_GetCommandBuffer returns NULL (its 904 overflow assert
+    // logs+continues in the non-fatal editor build).  R_AddLineCmd already null-guards its
+    // writes; this emitter did not, so line 2087 dereferenced NULL -> access violation
+    // (Cam_Draw -> DrawBrush -> DrawAngles -> R_AddCmd_Line3D -> here).  Drop the colour set on
+    // overflow (the batch draws with the persisted colour — cosmetic) and DON'T advance
+    // s_edLastMatColor, so a later successful emit re-pushes it.  The buffer is also grown for
+    // the editor in R_InitRenderCommands so this rarely fires.
+    if ( !cmd )
+        return;
+#else
+    iassert( cmd );
+#endif
+    cmd->color[0] = color[0];
+    cmd->color[1] = color[1];
+    cmd->color[2] = color[2];
+    cmd->color[3] = color[3];
+#ifdef KISAK_RADIANT
+    // Keep R_AddCmd_Line3D's per-batch colour dedup in sync (see s_edLastMatColor): every caller
+    // updates it, so the line path can skip redundant colour sets and let DrawLines batches merge.
+    s_edLastMatColor[0] = color[0]; s_edLastMatColor[1] = color[1];
+    s_edLastMatColor[2] = color[2]; s_edLastMatColor[3] = color[3];
+#endif
+}
+
+#ifdef KISAK_RADIANT
+// IDB R_AddCmdSetCustomShaderConstant @ 0x4fd330 — emit RC_SET_CUSTOM_CONSTANT carrying a
+// (constantType, vec4) pair. The sun-light preview (#26 layer C2, R_SunPrev_SetSunConstants)
+// uses it to inject the parsed worldspawn sun direction/colour into the active source-state
+// (the editor has no scene sun / rgp.world->sunLight, so the in-scene R_SetSunConstants never
+// runs). RB_SetCustomConstantCmd (rb_backend.cpp) consumes it. §11: kisak R_GetCommandBuffer
+// (renderCmd, bytes) — the IDB lists the args swapped (R_GetCommandBuffer(24, cmd)).
+void __cdecl R_AddCmdSetCustomShaderConstant(unsigned int constant, float x, float y, float z, float w)
+{
+    GfxCmdSetCustomConstant *cmd =
+        (GfxCmdSetCustomConstant *)R_GetCommandBuffer(RC_SET_CUSTOM_CONSTANT, sizeof(GfxCmdSetCustomConstant));
+    if ( !cmd )
+        return;
+    cmd->type   = constant;
+    cmd->vec[0] = x;
+    cmd->vec[1] = y;
+    cmd->vec[2] = z;
+    cmd->vec[3] = w;
+}
+
+// IDB R_AddCmdDrawFullScreenColoredQuad @ 0x4fc260 — emit RC_DRAW_FULL_SCREEN_COLORED_QUAD.
+// The backend handler (RB_DrawFullScreenColoredQuadCmd -> RB_DrawFullScreenColoredQuad),
+// the GfxCmdDrawFullScreenColoredQuad struct, and the dispatch-table entry ALL already
+// exist in kisak's CoD3 base (rb_backend.cpp) — only the EDITOR's front-end emitter was
+// missing (the game draws its full-screen colored quads via RB_FullScreenColoredFilter /
+// rb_sky.cpp's glare-blind, never through this command). The #26 sun-light preview
+// (R_SunPrev_Main 0x4069c0) uses it for the two full-screen passes that frame the lit
+// draw: the BLACK-WORLD multiply quad (mat_white_multiply, colour = worldspawn ambient)
+// that resets the already-textured framebuffer to its unlit/ambient state so the
+// SUNLIGHT_PREVIEW pass ADDS sun light rather than double-brightening, and the
+// CLEAR-STENCIL quad (rgp.clearAlphaStencilMaterial) that zeroes the stencil before the
+// shadow volumes build. The IDB takes a Material HANDLE (Material_FromHandle); kisak's
+// editor passes a resolved Material* directly (matching every other kisak render-command
+// material field), so no handle indirection is needed. §11: R_GetCommandBuffer is
+// (renderCmd, bytes) in kisak — the IDB lists them swapped.
+void __cdecl R_AddCmdDrawFullScreenColoredQuad(
+    float s0, float t0, float s1, float t1, const float *color, const Material *material)
+{
+    GfxCmdDrawFullScreenColoredQuad *cmd = (GfxCmdDrawFullScreenColoredQuad *)
+        R_GetCommandBuffer(RC_DRAW_FULL_SCREEN_COLORED_QUAD, sizeof(GfxCmdDrawFullScreenColoredQuad));
+    if ( !cmd )
+        return;
+    cmd->material = material ? material : rgp.defaultMaterial;   // IDB: NULL -> rgp.defaultMaterial
+    cmd->s0 = s0;
+    cmd->t0 = t0;
+    cmd->s1 = s1;
+    cmd->t1 = t1;
+    R_ConvertColorToBytes( color, &cmd->color );
+}
+#endif
+
+// IDB R_AddCmdDrawTextAtPosition @ 0x4fbe20 — emit an RC_DRAW_TEXT_3D command for a
+// string positioned in world space. `origin` is the world-space anchor; `xPixelStep`
+// and `yPixelStep` are the per-text-pixel world-space basis vectors (so the glyphs are
+// screen-aligned at the view's scale). The XY view uses this for its coordinate labels,
+// view-name hint, and entity-name labels (P5.5 text path). kisak ALREADY has the
+// consumer (RB_DrawText3DCmd, rb_backend.cpp, dispatch index RC_DRAW_TEXT_3D=0xE) and
+// the GfxCmdDrawText3D layout — only the editor's emitter was missing.
+// §11: kisak R_GetCommandBuffer(renderCmd, bytes) (IDB lists them swapped); the byte
+// size is (strlen(text)+sizeof(GfxCmdDrawText3D)) rounded DOWN to a multiple of 4,
+// matching the IDB's `(t_size + 0x34) & ~3` (0x34 == sizeof(GfxCmdDrawText3D)).
+void __cdecl R_AddCmdDrawTextAtPosition(
+    const char *text, Font_s *font, const float *origin,
+    const float *xPixelStep, const float *yPixelStep, const float *color)
+{
+    iassert( text );
+    if ( !*text )
+        return;
+    size_t tlen = strlen(text);
+    GfxCmdDrawText3D *cmd =
+        (GfxCmdDrawText3D *)R_GetCommandBuffer(RC_DRAW_TEXT_3D, (tlen + sizeof(GfxCmdDrawText3D)) & ~3u);
+    if ( !cmd )
+        return;
+    cmd->org[0] = origin[0];
+    cmd->org[1] = origin[1];
+    cmd->org[2] = origin[2];
+    cmd->font = font;
+    cmd->xPixelStep[0] = xPixelStep[0];
+    cmd->xPixelStep[1] = xPixelStep[1];
+    cmd->xPixelStep[2] = xPixelStep[2];
+    cmd->yPixelStep[0] = yPixelStep[0];
+    cmd->yPixelStep[1] = yPixelStep[1];
+    cmd->yPixelStep[2] = yPixelStep[2];
+    R_ConvertColorToBytes(color, (uint32_t *)&cmd->color);
+    memcpy(cmd->text, text, tlen);
+    cmd->text[tlen] = 0;
+}
+
+// IDB R_AddCmdDraw2DImage @ 0x4fb5e0 — the editor's OWN 2D image emitter, used by
+// the texture-window thumbnail grid (TexWnd_DrawMaterials @ 0x45cc40). It is a
+// STRIPPED R_AddCmdDrawStretchPic (above): it emits the SAME RC_STRETCH_PIC command
+// (44 bytes, consumed by the existing RB_DrawStretchPic which forces TECHNIQUE_UNLIT)
+// but WITHOUT the game version's depth-buffer / fogable-technique rejection. The game
+// R_AddCmdDrawStretchPic refuses any material whose stateFlags&0x10 ("uses the depth
+// buffer") and substitutes rgp.defaultMaterial — which is exactly why P5.7's StretchPic
+// path drew the default checkerboard for every wc/ world material instead of the real
+// texture (hence the name-list fallback). The editor draws world ("wc/<name>") materials
+// straight into the 2D pass: RB_DrawStretchPic selects each material's UNLIT technique,
+// which samples the colormap, so the thumbnail shows the actual texture image.
+// §11: kisak R_GetCommandBuffer(renderCmd, bytes) (IDB lists them swapped); RC_STRETCH_PIC
+// symbol (== RC_FIRST_NONCRITICAL), never a literal.
+void __cdecl R_AddCmdDraw2DImage(
+    float x, float y, float w, float h,
+    float s0, float t0, float s1, float t1,
+    const float *color, Material *material)
+{
+    Material *actualMaterial = material ? (Material *)Material_FromHandle(material) : rgp.defaultMaterial;
+    GfxCmdStretchPic *cmd = (GfxCmdStretchPic *)R_GetCommandBuffer(RC_STRETCH_PIC, 44);
+    if ( cmd )
+    {
+        cmd->material = actualMaterial;
+        cmd->x = x;
+        cmd->y = y;
+        cmd->w = w;
+        cmd->h = h;
+        cmd->s0 = s0;
+        cmd->t0 = t0;
+        cmd->s1 = s1;
+        cmd->t1 = t1;
+        R_ConvertColorToBytes(color, &cmd->color);
+    }
+}
+#endif // KISAK_RADIANT

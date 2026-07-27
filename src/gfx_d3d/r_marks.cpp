@@ -13,6 +13,9 @@
 #elif KISAK_SP
 #include <cgame/cg_pose.h>
 #include <cgame/cg_ents.h>
+#elif defined(KISAK_RADIANT)
+#include <cgame/cg_pose.h>
+#include <cgame/cg_ents.h>
 #endif
 
 
@@ -991,7 +994,7 @@ void __cdecl R_MarkFragments_Begin(
         markInfo->smodelCollidedCount = R_BoxStaticModels(
             markInfo->mins,
             markInfo->maxs,
-            (int(__cdecl *)(int))CL_GetLocalClientActiveCount,
+            RETURN_ONE,
             markInfo->smodelsCollided,
             32);
         markInfo->sceneDObjCollidedCount = 0;

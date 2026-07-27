@@ -412,17 +412,26 @@ void __cdecl Com_DvarDump(int channel, const char *match)
 
     if (channel != 6 || com_logfile && com_logfile->current.integer)
     {
+#ifndef KISAK_RADIANT
         Com_PrintMessage(channel, "=============================== DVAR DUMP ========================================\n", 0);
+#else
+        Com_PrintMessage("=============================== DVAR DUMP ========================================\n");
+#endif
         dumpInfo.count = 0;
         dumpInfo.channel = channel;
         dumpInfo.match = match;
         Dvar_ForEach(Com_DvarDumpSingle, &dumpInfo);
         Com_sprintf(summary, 0x80u, "\n%i total dvars\n%i dvar indexes\n", dumpInfo.count, dvarCount);
+#ifndef KISAK_RADIANT
         Com_PrintMessage(channel, summary, 0);
         Com_PrintMessage(
             channel,
             "=============================== END DVAR DUMP =====================================\n",
             0);
+#else
+        Com_PrintMessage("%s", summary);
+        Com_PrintMessage("=============================== END DVAR DUMP =====================================\n");
+#endif
     }
 }
 
@@ -447,7 +456,11 @@ void __cdecl Com_DvarDumpSingle(const dvar_s *dvar, void *userData)
             v3 = Dvar_DisplayableValue(dvar);
             Com_sprintf(message, 0x800u, "      %s \"%s\"\n", dvar->name, v3);
         }
+#ifndef KISAK_RADIANT
         Com_PrintMessage(*((uint32_t *)userData + 1), message, 0);
+#else
+        Com_PrintMessage("%s", message);
+#endif
     }
 }
 

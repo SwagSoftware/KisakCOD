@@ -1112,7 +1112,7 @@ struct CEntTurretInfo // sizeof=0x10
 };
 static_assert(sizeof(CEntTurretInfo) == 0x10);
 
-#ifdef KISAK_MP
+#if defined(KISAK_MP) || defined(KISAK_RADIANT)
 struct CEntVehicleInfo // sizeof=0x24
 {                                       // ...
     int16_t pitch;
@@ -1132,7 +1132,8 @@ struct CEntVehicleInfo // sizeof=0x24
     // padding byte
 };
 static_assert(sizeof(CEntVehicleInfo) == 0x24);
-#elif KISAK_SP
+#endif
+#ifdef KISAK_SP
 struct CEntVehicleInfo // sizeof=0x28
 {
     int16_t pitch;          // 0x00
@@ -1159,7 +1160,7 @@ struct CEntFx // sizeof=0x8  (SP/MP Same)
 };
 static_assert(sizeof(CEntFx) == 0x8);
 
-#ifdef KISAK_MP
+#if defined(KISAK_MP) || defined(KISAK_RADIANT) // radiant: for cpose_t
 struct GfxSkinCacheEntry // sizeof=0xC
 {                                       // ...
     uint32_t frameCount;
@@ -1610,6 +1611,7 @@ static_assert(sizeof(viewLerpWaypoint_s) == 0xC);
 
 struct pmove_t;
 struct pml_t;
+struct playerState_s;
 
 void __cdecl Jump_RegisterDvars();
 void __cdecl Jump_ClearState(playerState_s *ps);
@@ -1727,6 +1729,8 @@ extern bgs_t *bgs;
 // bg_misc
 enum entity_event_t : __int32;
 struct WeaponDef;
+struct playerState_s;
+struct entityState_s;
 void __cdecl BG_RegisterShockVolumeDvars();
 void __cdecl BG_RegisterDvars();
 char *__cdecl BG_GetEntityTypeName(int32_t eType);
@@ -1793,7 +1797,8 @@ char __cdecl BG_CheckProneView(
     float *pfWaistPitch,
     float prone_feet_dist);
 #endif
-void __cdecl BG_LerpHudColors(const hudelem_s *elem, int32_t time, hudelem_color_t *toColor);
+struct hudelem_s;
+void __cdecl BG_LerpHudColors(const hudelem_s *elem, int32_t time, union hudelem_color_t *toColor);
 int32_t __cdecl BG_LoadShellShockDvars(const char *name);
 void __cdecl BG_SetShellShockParmsFromDvars(shellshock_parms_t *parms);
 int32_t __cdecl BG_SaveShellShockDvars(const char *name);
@@ -1939,6 +1944,7 @@ extern const dvar_t *perk_sprintMultiplier;
 // bg_pmove
 struct pmove_t;
 struct trace_t;
+struct usercmd_s;
 
 void __cdecl PM_trace(
     pmove_t *pm,

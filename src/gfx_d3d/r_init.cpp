@@ -353,7 +353,7 @@ void __cdecl TRACK_r_init()
     track_static_alloc_internal(&rgp, 8576, "rgp", 18);
     track_static_alloc_internal(&rg, 33552, "rg", 18);
     track_static_alloc_internal(&vidConfig, 48, "vidConfig", 18);
-    track_static_alloc_internal(&dx, 11488, "dx", 18);
+    track_static_alloc_internal(&dx, sizeof(dx), "dx", 18);   // 11488 game / 11552 radiant (windows[5]) — use sizeof so the widened array stays self-consistent
 }
 
 void __cdecl Sys_DirectXFatalError()
@@ -361,6 +361,8 @@ void __cdecl Sys_DirectXFatalError()
     HWND ActiveWindow; // eax
     char *v1; // [esp-Ch] [ebp-Ch]
     char *v2; // [esp-8h] [ebp-8h]
+
+    iassert(0); // lwss add
 
     Sys_EnterCriticalSection(CRITSECT_FATAL_ERROR);
     v2 = Win_LocalizeRef("WIN_DIRECTX_INIT_TITLE");
@@ -3701,6 +3703,20 @@ void __cdecl R_UpdateGpuSyncType()
 
 void __cdecl R_FinishAttachingToWindow(const GfxWindowParms *wndParms)
 {
+#ifdef KISAK_RADIANT
+    // Editor multi-window: this is IDB R_CreateWindow (0x4ffb20) — it allows windowCount
+    // up to R_MAX_WINDOWS-1 (asserts windowCount > 4). The shipping macro below expands to
+    // the single-window bound (< 1); under KISAK_RADIANT the editor build's macro expands
+    // to < 5, so a new window slot at windowCount 0..4 is legal.
+    if (dx.windowCount > R_MAX_WINDOWS - 1)
+        MyAssertHandler(
+            ".\\r_init.cpp",
+            918,
+            0,
+            "%s\n\t(dx.windowCount) = %i",
+            "(dx.windowCount >= 0 && dx.windowCount < R_MAX_WINDOWS)",
+            dx.windowCount);
+#else
     if (dx.windowCount)
         MyAssertHandler(
             ".\\r_init.cpp",
@@ -3710,6 +3726,7 @@ void __cdecl R_FinishAttachingToWindow(const GfxWindowParms *wndParms)
             "(dx.windowCount >= 0 && dx.windowCount < ((123987 / ((((0) ? (123987) : (-123987)) * ((0) == 0 || (0) == 1))) == 1"
             "23987 / (123987)) ? 5 : 1))",
             dx.windowCount);
+#endif
     iassert( dx.windows[dx.windowCount].swapChain );
     dx.windows[dx.windowCount].hwnd = wndParms->hwnd;
     dx.windows[dx.windowCount].width = wndParms->displayWidth;
@@ -4317,6 +4334,15 @@ void R_ReleaseForShutdownOrReset()
             R_ReleaseAndSetNULL<IDirect3DDevice9>(pixelCountQuery, "gfxAssets.pixelCountQuery", ".\\r_init.cpp", 1039);
         } while (alwaysfails);
     }
+#ifdef KISAK_RADIANT
+    // The editor's immediate-mode VB pool (r_ed_vertbuf) allocates D3DPOOL_DEFAULT vertex buffers,
+    // which must ALSO be released before Reset() or the reset fails (→ R_FatalInitError → the
+    // alt-tab crash).  Not in the faithful shutdown (editor-only).  The pool re-creates buffers
+    // lazily after the device returns; the immediate camera draw re-uploads per frame and holds
+    // no persistent vertHandles (faceVis visCount stays 0 in all build modes), so nothing dangles.
+    extern void Editor_VB_ReleaseForReset();
+    Editor_VB_ReleaseForReset();
+#endif
 }
 
 void R_ResetDevice()
@@ -4355,11 +4381,41 @@ void R_ResetDevice()
     RB_InitSceneViewport();
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
+#ifdef KISAK_RADIANT
+    // EDITOR device-loss recovery (alt-tab crash fix): R_ReleaseForShutdownOrReset (above)
+    // released AND NULLed every editor per-window ADDITIONAL swap chain (dx.windows[i].swapChain),
+    // and R_CreateForInitOrReset does NOT recreate them — it only restores the engine's default-
+    // pool resources + the device's implicit swap chain. Without this, after a device-loss recovery
+    // dx.windows[i].swapChain stays NULL, and the next CXYWnd/CCamWnd/CZWnd OnPaint →
+    // R_SetupRendertarget_CheckDevice → R_SetupTargetWindow does swapChain->GetBackBuffer on NULL
+    // → read-AV crash. Recreate each window's additional swap chain at its current size (exactly
+    // R_Hwnd_Resize's release(null→skip)+CreateAdditionalSwapChain). R_ResetDevice is reached ONLY
+    // from R_RecoverLostDevice, so the windows are always set up here. (SP/MP build: no editor
+    // child windows → this loop is compiled out.)
+    for (int w = 0; w < dx.windowCount; ++w)
+        R_Hwnd_Resize(dx.windows[w].hwnd, dx.windows[w].width, dx.windows[w].height);
+#endif
 }
 
 char __cdecl R_RecoverLostDevice()
 {
     int remoteScreenUpdateNesting; // [esp+0h] [ebp-4h]
+
+#ifdef KISAK_RADIANT
+    // EDITOR alt-tab re-entrancy guard.  Device-loss recovery is NOT re-entrant: R_ResetDevice
+    // calls R_ReleaseForShutdownOrReset which releases + NULLs every dx.windows[].swapChain.  If
+    // a paint re-enters here mid-recovery — via Ed_InvalidateAllViews→RoutineProcessing forcing a
+    // synchronous repaint, or via the message loop MessageBoxA/ShellExecuteA pump inside
+    // Sys_DirectXFatalError when a Reset() fails — the nested R_ReleaseForShutdownOrReset re-releases
+    // the already-NULLed swap chains and trips iassert(var) in R_ReleaseAndSetNULL (r_utils.h:165),
+    // which is the alt-tab crash.  Bail on re-entry (skip the paint's device work); the OUTER
+    // recovery runs to completion atomically.  RAII-reset so every non-fatal return clears it.
+    static bool s_recovering = false;
+    if (s_recovering)
+        return 0;
+    s_recovering = true;
+    struct RecoverGuard { ~RecoverGuard() { s_recovering = false; } } recoverGuard;
+#endif
 
     iassert( dx.device );
     iassert( dx.deviceLost );
@@ -4425,5 +4481,353 @@ int R_IsHiDef()
     return vidConfig.isHiDef;
 #elif KISAK_MP
     return 1;
+#elif defined(KISAK_RADIANT)
+    return 0;
 #endif
 }
+
+#ifdef KISAK_RADIANT
+// ─────────────────────────────────────────────────────────────────────────────
+// Editor renderer bring-up — cod3src\src\gfx_d3d\r_init.cpp in the CoD4Radiant
+// binary (IDB port 13343). The editor creates one D3D9 device shared across its
+// child views (Camera / XY / Z / Texture / LayeredMaterial), each its own swap
+// chain. gfxwrapper.cpp's R_BeginRegistrationInternal drives this per window.
+//
+// R_InitRendererForWindow is the per-window entry. The first window (windowCount==0)
+// brings the device up via R_BeginRegistration_R_InitHardware; every later window
+// adds a swap chain via R_CreateSwapChains. KisakCOD is CoD3-single-window
+// (DxGlobals.windows[1]); these are KISAK_RADIANT-only additions.
+//
+// PART-1/Task-D status: R_InitRendererForWindow is the real port; the two device-
+// bring-up routines below are honest TODO_RADIANT stubs — they are the D3D device /
+// additional-swapchain creation, i.e. the "first light" archaeology, made real in the
+// First-Light step. R_BeginRegistrationInternal is never reached on the Gate-P4
+// round-trip path, so these stubs keep the link clean without affecting it.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// IDB R_InitRendererForWindow @ 0x5011d0.
+char __cdecl R_InitRendererForWindow(HWND hWnd)
+{
+    RECT rect;
+    GetClientRect(hWnd, &rect);
+
+    GfxWindowParms wnd;
+    wnd.hwnd          = hWnd;
+    wnd.hz            = 0;
+    wnd.fullscreen    = false;
+    wnd.x             = rect.left;
+    wnd.y             = rect.top;
+    wnd.sceneWidth    = rect.right - rect.left;
+    wnd.sceneHeight   = rect.bottom - rect.top;
+    wnd.displayWidth  = rect.right - rect.left;
+    wnd.displayHeight = rect.bottom - rect.top;
+    wnd.aaSamples     = 1;
+
+    if ( dx.windowCount )
+        return (char)(intptr_t)R_CreateSwapChains(rect.bottom - rect.top, &wnd, 0);
+
+    char ok = R_BeginRegistration_R_InitHardware(&wnd);
+    if ( !ok )
+        Com_Error(ERR_FATAL, "Couldn't attach to window");   // IDB: FatalError(0, ...)
+    return ok;
+}
+
+// ─── Editor render-target / device-test path (CXYWnd::OnPaint) ───────────────
+// These four (+R_RecoverLostDevice) are absent from kisak's CoD3 single-window
+// renderer; the editor draws into a target window each OnPaint via:
+//   R_SetupRendertarget_CheckDevice(hwnd)  → picks dx.windows[i] for hwnd, sets it
+//                                            as the active target (R_SetupTargetWindow)
+//   ... draw ...
+//   R_CheckTargetWindow(hwnd)              → clears the active target
+// Ported from the IDB (r_init.cpp @ 0x501a70 / 0x500660 / 0x501a10; rb_state.cpp
+// @ 0x52bb90), ADAPTED to kisak's single-window mechanism (see R_SetupTargetWindow).
+
+// IDB R_TestDevice @ 0x501a10 — verbatim. Happy path (device not lost,
+// TestCooperativeLevel OK) returns 1 without touching R_RecoverLostDevice.
+char __cdecl R_TestDevice()
+{
+    if ( !dx.deviceLost )
+    {
+        if ( dx.device->TestCooperativeLevel() >= 0 )
+        {
+            if ( !dx.deviceLost )
+                return 1;
+        }
+        else
+        {
+            dx.deviceLost = 1;
+        }
+    }
+    if ( !R_RecoverLostDevice() )
+        return 0;
+    iassert( !dx.deviceLost );
+    return 1;
+}
+
+// IDB R_SetupTargetWindow @ 0x52bb90 (rb_state.cpp) — REAL per-window port (P5.3).
+// The editor cycles ONE D3D9 device across its child views; each OnPaint makes its
+// window the active render target by re-acquiring that window's swap-chain back buffer
+// into gfxRenderTargets[FRAME_BUFFER].surface.color and re-pointing FRAME_BUFFER's size
+// at the window. The Present in RB (dx.windows[targetWindowIndex].swapChain->Present)
+// then targets the SAME swap chain we rendered into — color RT and Present stay coherent.
+//
+// §11 / kisak-idiom reconciliation vs the IDB:
+//  • The IDB also sets viewportWidth/viewportHeight/v_isFullscreen/v_aspectRatioWindow
+//    (editor-only viewport globals consumed by the 3D camera path). The 2D XY/Z line
+//    views read dx.windows[targetWindowIndex].width/height directly (XY_SetupScene /
+//    Z SetupScene), NOT those globals, so they are not needed for the line views and are
+//    omitted here (camera viewport plumbing is P5.4).
+//  • gfxCmdBufState.renderTargetId = R_RENDERTARGET_NONE is the KEYSTONE: it forces the
+//    backend's per-frame R_SetRenderTarget(FRAME_BUFFER) in RB_CallExecuteRenderCommands
+//    to actually re-bind — without it, R_SetRenderTarget early-outs (id already
+//    FRAME_BUFFER from the previous frame) and the device keeps the PREVIOUS window's
+//    back buffer bound → both views would draw into one window. The backend also re-runs
+//    R_SetRenderTargetSize + R_SetRenderTarget after this, so we don't duplicate the
+//    immediate bind (IDB's R_SetupRenderTarget/R_SetRenderTarget calls) here.
+void __cdecl R_SetupTargetWindow(int windowIndex)
+{
+    dx.targetWindowIndex = windowIndex;
+
+    GfxRenderTarget *fb = &gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER];
+    fb->width  = dx.windows[windowIndex].width;
+    fb->height = dx.windows[windowIndex].height;
+
+    // Release the previous frame's back-buffer reference and re-acquire the active
+    // window's. GetBackBuffer AddRefs; the matching Release here keeps the ref balanced
+    // frame-to-frame (the init GetBackBuffer in R_InitFrameBufferRenderTarget_Win32 is
+    // consumed by the first call). The SCENE render target shares the init color pointer
+    // but the editor's line views never render SCENE, so the stale share is inert.
+    if (fb->surface.color)
+        fb->surface.color->Release();
+    fb->surface.color = nullptr;
+    HRESULT hr = dx.windows[windowIndex].swapChain->GetBackBuffer(
+        0, D3DBACKBUFFER_TYPE_MONO, &fb->surface.color);
+    if (hr < 0)
+    {
+        ++g_disableRendering;
+        Com_Error(ERR_FATAL,
+            ".\\rb_state.cpp (185) dx.windows[windowIndex].swapChain->GetBackBuffer( 0, "
+            "D3DBACKBUFFER_TYPE_MONO, &gfxRenderTargets[FRAME_BUFFER].surface.color ) failed: %s\n",
+            R_ErrorDescription(hr));
+    }
+
+    gfxCmdBufState.renderTargetId = R_RENDERTARGET_NONE;   // force the backend rebind (keystone)
+
+    // IDB R_SetupTargetWindow (0x52bb90) tail that this port had OMITTED: set up the source
+    // state's render-target SIZE + viewportBehavior for FRAME_BUFFER (= IDB R_SetupRenderTarget
+    // 0x539670). Without it, gfxCmdBufSourceState.renderTargetWidth/viewportBehavior stayed stale
+    // from the previously-targeted window, so the texture browser's 2D projection (R_Set2D ->
+    // R_GetViewport) read the wrong viewport. With R_ViewportBehaviorForRenderTarget fixed to the
+    // editor's inline rule, FRAME_BUFFER now resolves to FULL -> R_GetViewport returns the full
+    // window. (The keystone above still drives the backend's R_SetRenderTarget bind.)
+    R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
+}
+
+// IDB R_SetupRendertarget_CheckDevice @ 0x501a70 — verbatim. Returns 0 (skip the
+// frame) when already targeting a window, rendering disabled, or the device test
+// fails; otherwise finds the dx.windows[] slot for `hwnd` and makes it the target.
+char __cdecl R_SetupRendertarget_CheckDevice(HWND__ *hwnd)
+{
+    int i;
+
+    iassert( hwnd );
+    iassert( dx.device );
+    if ( dx.targetWindowIndex >= 0 || g_disableRendering || !R_TestDevice() )
+        return 0;
+
+    for ( i = 0; ; ++i )
+    {
+        if ( i >= dx.windowCount )
+        {
+            MyAssertHandler(".\\r_init.cpp", 2127, 0, "invalid hwnd");
+            return 0;
+        }
+        if ( dx.windows[i].hwnd == hwnd )
+            break;
+    }
+    if ( dx.windows[i].width <= 0 || dx.windows[i].height <= 0 )
+        return 0;
+    if ( !dx.windows[i].swapChain )   // defensive: a window left without a swap chain (e.g. a
+        return 0;                     // 0-size window skipped during device-loss recovery) → skip
+                                      // the frame rather than null-deref in R_SetupTargetWindow.
+    R_SetupTargetWindow(i);
+    return 1;
+}
+
+// KISAK_RADIANT — non-asserting "is this hwnd a registered render target?" query.  Mirrors the
+// hwnd lookup inside R_SetupRendertarget_CheckDevice but returns false (instead of asserting
+// "invalid hwnd") for a window the renderer never registered, and requires a live swap chain +
+// nonzero size.  Used by CCamWnd::OnPaint to no-op-paint the dead Dynamic-Lighting popup window.
+bool __cdecl R_IsRegisteredRenderWindow(HWND__ *hwnd)
+{
+    if ( !hwnd || !dx.device )
+        return false;
+    for ( int i = 0; i < dx.windowCount; ++i )
+    {
+        if ( dx.windows[i].hwnd == hwnd )
+            return dx.windows[i].width > 0 && dx.windows[i].height > 0 && dx.windows[i].swapChain != nullptr;
+    }
+    return false;
+}
+
+// IDB R_CheckTargetWindow @ 0x500660 — verbatim. Releases the active target after
+// the frame's commands have been issued (Present consumed it in the backend).
+void __cdecl R_CheckTargetWindow(HWND__ *hwnd)
+{
+    iassert( dx.targetWindowIndex >= 0 );
+    iassert( dx.windows[dx.targetWindowIndex].hwnd == hwnd );
+    (void)hwnd;
+    dx.targetWindowIndex = -1;
+}
+
+// IDB R_Init @ 0x500820 — the EDITOR renderer init. Unlike kisak's game R_Init
+// (which calls R_InitGraphicsApi → creates its own game window + device), the editor
+// only creates the D3D9 object (R_PreCreateWindow) and registers dvars/cmds, leaving
+// dx.device == NULL so the device is created per editor child window by
+// R_InitRendererForWindow → R_BeginRegistration_R_InitHardware → R_CreateDevice.
+// The IDB's trailing `qmemcpy(vidConfigOut, &v_isFullscreen, 0x30)` out-param copy is
+// dropped — First-Light has no caller that reads the returned vidConfig.
+extern void Radiant_FL_Log( const char *fmt, ... );   // radiant/mainfrm.cpp (First-Light trace)
+
+void __cdecl R_InitEditor()
+{
+    iassert( !rg.registered );
+    Com_Printf(8, "----- R_Init -----\n");
+    Radiant_FL_Log( "    R_InitEditor: Swap_Init" );        Swap_Init();
+    Radiant_FL_Log( "    R_InitEditor: R_RegisterDvars" );  R_RegisterDvars();
+    Radiant_FL_Log( "    R_InitEditor: R_RegisterCmds" );   R_RegisterCmds();
+    Radiant_FL_Log( "    R_InitEditor: R_InitGlobalStructs" ); R_InitGlobalStructs();
+    Radiant_FL_Log( "    R_InitEditor: R_InitDrawMethod" ); R_InitDrawMethod();
+    Radiant_FL_Log( "    R_InitEditor: R_PreCreateWindow" ); R_PreCreateWindow(); // Direct3DCreate9 + adapter enum (dx.d3d9), NO device
+    dx.targetWindowIndex = -1;
+    Radiant_FL_Log( "    R_InitEditor: R_InitWater" );      R_InitWater();
+    iassert( dx.d3d9 != NULL );
+    iassert( dx.device == NULL );
+    iassert( !rg.registered );
+    Radiant_FL_Log( "    R_InitEditor: done (d3d9=%p)", (void *)dx.d3d9 );
+}
+
+// IDB R_CreateSwapChains @ 0x500570 — REAL per-window port (P5.3). The first editor
+// window brought the device up (R_BeginRegistration_R_InitHardware → R_CreateForInitOrReset
+// acquired the device's IMPLICIT swap chain as dx.windows[0]); every later window gets its
+// own ADDITIONAL swap chain here. Sized by `wnd` (the new window's client rect).
+//
+// §11 reconciliation vs the IDB:
+//  • The IDB's first arg (ecx) and `sharedHandle` (esi) feed R_SetD3DPresentParameters'
+//    AA second param / CreateAdditionalSwapChain's pSharedHandle. kisak's
+//    R_SetD3DPresentParameters is (d3dpp, wnd) — no AA-count arg — and the editor passes
+//    NULL for the shared handle. Both extra args are dropped (hz/sharedHandle unused).
+//  • R_CreateWindow (IDB 0x4ffb20) is byte-identical to kisak R_FinishAttachingToWindow
+//    (which now allows windowCount < R_MAX_WINDOWS under KISAK_RADIANT) — it finalises the
+//    new dx.windows[windowCount] slot (hwnd/width/height) and bumps windowCount.
+HWND __cdecl R_CreateSwapChains(int hz, GfxWindowParms *wnd, int sharedHandle)
+{
+    (void)hz; (void)sharedHandle;
+
+    iassert( dx.windowCount >= 0 && dx.windowCount <= R_MAX_WINDOWS );
+    iassert( dx.d3d9 );
+    iassert( dx.device );
+    if ( dx.windowCount == R_MAX_WINDOWS )
+        Com_Error(ERR_FATAL, "R_MAX_WINDOWS (%i) exceeded", R_MAX_WINDOWS);
+
+    _D3DPRESENT_PARAMETERS_ d3dpp;
+    R_SetD3DPresentParameters(&d3dpp, wnd);
+    HRESULT hr = dx.device->CreateAdditionalSwapChain(&d3dpp, &dx.windows[dx.windowCount].swapChain);
+    if ( hr < 0 )
+        Com_Error(ERR_FATAL, "Couldn't create an additional swap chain: %s\n", R_ErrorDescription(hr));
+
+    R_FinishAttachingToWindow(wnd);   // = IDB R_CreateWindow
+    return (HWND)wnd->hwnd;            // nonzero → R_InitRendererForWindow's bool cast = success
+}
+
+// IDB R_Hwnd_Resize @ 0x501260 — REAL port (P5.3). Called from each editor view's OnSize
+// (CCamWnd/CXYWnd/CZWnd::OnSize) when its client area changes. This is the fix for the
+// firstlight3 "Present stretches on resize" debt: instead of leaving the create-time back
+// buffer and letting Present blit-stretch it, the window's swap chain is RELEASED and
+// re-created at the new size, and dx.windows[i].width/height updated so the next frame's
+// R_SetupTargetWindow / XY(_Z)_SetupScene project at the new resolution → 1px grid lines,
+// no stretch blur. No device Reset is involved (that would destroy every additional swap
+// chain): the editor resizes per-window via CreateAdditionalSwapChain — including window 0,
+// whose implicit swap chain is simply replaced by an additional one at the new size.
+//
+// §11: the IDB's R_SetD3DPresentParameters(&wnd, dx.windowCount, &d3dpp) AA-count arg is
+// dropped (kisak signature is (d3dpp, wnd)); x/y/hz are left unset (unread in windowed mode).
+void __cdecl R_Hwnd_Resize(HWND__ *hwnd, int width, int height)
+{
+    iassert( hwnd );
+    if ( !width || !height )
+        return;
+
+    int idx = 0;
+    while ( idx < dx.windowCount && dx.windows[idx].hwnd != hwnd )
+        ++idx;
+    if ( idx >= dx.windowCount )
+        return;   // not one of our render windows (yet)
+
+    GfxWindowParms wnd;
+    wnd.hwnd          = hwnd;
+    wnd.fullscreen    = false;
+    wnd.x             = 0;
+    wnd.y             = 0;
+    wnd.hz            = 0;
+    wnd.displayWidth  = width;
+    wnd.displayHeight = height;
+    wnd.sceneWidth    = width;
+    wnd.sceneHeight   = height;
+    wnd.aaSamples     = 1;
+
+    _D3DPRESENT_PARAMETERS_ d3dpp;
+    R_SetD3DPresentParameters(&d3dpp, &wnd);
+
+    IDirect3DSwapChain9 *old = dx.windows[idx].swapChain;
+    dx.windows[idx].swapChain = nullptr;
+    if ( old )
+        old->Release();
+
+    HRESULT hr = dx.device->CreateAdditionalSwapChain(&d3dpp, &dx.windows[idx].swapChain);
+    if ( hr < 0 )
+    {
+        ++g_disableRendering;
+        Com_Error(ERR_FATAL,
+            ".\\r_init.cpp (2163) dx.device->CreateAdditionalSwapChain( &d3dpp, "
+            "&dx.windows[windowIndex].swapChain ) failed: %s\n",
+            R_ErrorDescription(hr));
+    }
+    dx.windows[idx].width  = width;
+    dx.windows[idx].height = height;
+}
+
+// IDB R_BeginRegistration_R_InitHardware @ 0x501120 — D3D device bring-up for the
+// first editor window. The editor sequence maps onto kisak's R_InitHardware
+// (r_init.cpp above) almost 1:1; the differences are all "the editor is a windowed,
+// loose-asset, single-threaded tool":
+//   • The IDB's R_LoadMaterialHashTable / R_TooManyFonts / R_TooManySceneWater /
+//     R_InitLightDef are NOT separate kisak functions — kisak bundles them inside
+//     R_InitSystems (Material_Init / R_InitFonts / R_InitLoadWater / R_InitLightDefs),
+//     so calling R_InitSystems covers them. (Material_Init → Material_LoadBuiltIn
+//     registers "$line" → rgp.lineMaterial, which RB_DrawLines3D needs for the grid.)
+//   • IDB R_CreateWindow @ 0x4ffb20 is byte-identical to kisak R_FinishAttachingToWindow.
+//   • DROPPED vs kisak R_InitHardware: IsFastFileLoad/R_LoadGraphicsAssets (editor uses
+//     loose assets, IsFastFileLoad()==0), R_InitGamma (windowed — gamma ramp is
+//     fullscreen-only; the IDB skips it too), and the SMP-worker resume loop (the editor
+//     renders synchronously — see R_Ed_SetSceneParms). Also skipped: the IDB's
+//     R_Cinematic_Init (nulled in the editor → R_Cinematic_Init_NULL) and the two tiny
+//     editor-scratch initialisers sub_53FF30/sub_528930 (zero r_ed_scene mesh-buffer
+//     globals that the empty-grid path never reads). nullsub_6/nullsub_11 are no-ops.
+char __cdecl R_BeginRegistration_R_InitHardware(GfxWindowParms *wnd)
+{
+    if (!R_CreateDevice(wnd))
+        return 0;
+    R_UpdateGpuSyncType();
+    R_StoreWindowSettings(wnd);
+    RB_InitSceneViewport();
+    if (!R_CreateForInitOrReset())
+        return 0;
+    Com_Printf(8, "Setting initial state...\n");
+    RB_SetInitialState();
+    R_InitScene();
+    R_InitSystems();                 // Material_Init/R_InitFonts/R_InitLoadWater/R_InitLightDefs + rg.registered=1
+    R_FinishAttachingToWindow(wnd);  // = IDB R_CreateWindow (0x4ffb20)
+    return 1;
+}
+#endif // KISAK_RADIANT

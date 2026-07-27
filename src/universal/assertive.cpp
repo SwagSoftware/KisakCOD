@@ -604,6 +604,8 @@ int __stdcall HideWindowCallback(HWND hwnd, LPARAM lParam)
         strcmp(caption, "Call of Duty 4 Multiplayer"))
 #elif KISAK_SP
         strcmp(caption, "Call of Duty 4"))
+#elif defined(KISAK_RADIANT)
+        strcmp(caption, "CoD4Radiant"))
 #endif
         return 1;
     style = GetWindowLongA(hwnd, -16);
@@ -685,8 +687,30 @@ void MyAssertHandler(const char *filename, int line, int type, const char *fmt, 
         DebugBreak();
 #else
 
-#ifdef USE_ASSERTS
-        __debugbreak();
+#ifdef KISAK_RADIANT
+    // Editor builds keep asserts NON-FATAL, matching the shipped CoD4Radiant. Its Assert
+    // (0x49cea0 -> sub_49CD50) pops an Abort/Retry/Ignore box and CONTINUES on Ignore, which is
+    // exactly what let the original survive the water-material / texture-browser asserts. We
+    // record every failing assert (file:line + text) to %TEMP%\radiant_firstlight.log, then fall
+    // through and continue. The previous port did an unconditional __debugbreak() below, which
+    // silently terminates the editor when no debugger is attached ("the editor just closes").
+    {
+        char m[1024];
+        va_list va;
+        va_start( va, fmt );
+        _vsnprintf( m, sizeof( m ), fmt ? fmt : "", va );
+        va_end( va );
+        m[1023] = 0;
+        char tmp[MAX_PATH], p2[MAX_PATH];
+        GetTempPathA( sizeof( tmp ), tmp );
+        _snprintf( p2, sizeof( p2 ), "%sradiant_firstlight.log", tmp );
+        FILE *f = fopen( p2, "a" );
+        if ( f )
+        {
+            fprintf( f, "ASSERT FAIL %s:%d (type %d): %s\n", filename ? filename : "?", line, type, m );
+            fclose( f );
+        }
+    }
 #endif
 
 #endif

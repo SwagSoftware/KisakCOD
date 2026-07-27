@@ -4,6 +4,24 @@
 #include "client_mp/client_mp.h"
 #elif KISAK_SP
 #include "client/client.h"
+#elif defined(KISAK_RADIANT)
+#include <cstdint>
+struct vidConfig_t // sizeof=0x30 — subset needed by r_init; matches client_mp.h layout
+{
+    uint32_t sceneWidth;
+    uint32_t sceneHeight;
+    uint32_t displayWidth;
+    uint32_t displayHeight;
+    uint32_t displayFrequency;
+    int32_t  isFullscreen;
+    float    aspectRatioWindow;
+    float    aspectRatioScenePixel;
+    float    aspectRatioDisplayPixel;
+    uint32_t maxTextureSize;
+    uint32_t maxTextureMaps;
+    bool     deviceSupportsGamma;
+    // 3 padding bytes
+};
 #endif
 
 #include "r_gfx.h"
@@ -167,6 +185,14 @@ struct __declspec(align(128)) r_global_permanent_t // sizeof=0x2180
     Material *glowConsistentSetupMaterial; // ...
     Material *glowApplyBloomMaterial;   // ...
     int savedScreenTimes[4];            // ...
+#ifdef KISAK_RADIANT
+    // Editor-only: the CASE_TEXTURE technique (camera draw_mode 4) selects, per world
+    // surface, the case-texture GfxImage whose width/height matches the surface's colorMap.
+    // R_LoadCaseTextures (case_textures.txt) populates these; R_GetCaseTexture reads them.
+    // Appended at the kisak struct's tail (standalone layout — binary offsets irrelevant).
+    int caseTextures_count;             // idb r_global_permanent_t+16540
+    GfxImage *caseTextures[64];         // idb r_global_permanent_t+16544
+#endif
     // LWSS: lots of padding
 };
 
@@ -263,7 +289,19 @@ struct GfxWindowTarget // sizeof=0x10
     int height;                         // ...
 };
 
-struct __declspec(align(8)) DxGlobals // sizeof=0x2CE0
+// R_MAX_WINDOWS — the device's window/swap-chain capacity. The shipping CoD3 game is
+// single-window (implicit swap chain only). The CoD4Radiant editor cycles ONE D3D9
+// device across up to five child views (Camera / XY / Z / Texture / LayeredMaterial),
+// each its own swap chain — the IDB's DxGlobals.windows is GfxWindowTarget[5] and
+// R_CreateSwapChains/R_CreateWindow assert windowCount <= 5. KISAK_RADIANT-only: this
+// is an engine-struct dimension change, so it is gated (SP/MP keep windows[1]).
+#ifdef KISAK_RADIANT
+#define R_MAX_WINDOWS 5
+#else
+#define R_MAX_WINDOWS 1
+#endif
+
+struct __declspec(align(8)) DxGlobals // sizeof=0x2CE0 (game) / 0x2D20 (radiant: windows[5])
 {                                       // ...
     HINSTANCE__ *hinst;
     IDirect3D9 *d3d9;                   // ...
@@ -296,7 +334,7 @@ struct __declspec(align(8)) DxGlobals // sizeof=0x2CE0
     // padding byte
     int targetWindowIndex;              // ...
     int windowCount;                    // ...
-    GfxWindowTarget windows[1];         // ...
+    GfxWindowTarget windows[R_MAX_WINDOWS]; // [1] game / [5] radiant editor (multi-window)
     int flushGpuQueryCount;             // ...
     IDirect3DQuery9 *flushGpuQuery;     // ...
     unsigned __int64 gpuSyncDelay;      // ...
@@ -355,6 +393,32 @@ void R_ReleaseForShutdownOrReset();
 void __cdecl R_UnloadWorld();
 void __cdecl R_BeginRegistration(vidConfig_t *vidConfigOut);
 void R_Init();
+#ifdef KISAK_RADIANT
+// Editor multi-window renderer bring-up (implementation at end of r_init.cpp).
+char __cdecl R_InitRendererForWindow(HWND hWnd);
+HWND __cdecl R_CreateSwapChains(int hz, GfxWindowParms *wnd, int sharedHandle);
+char __cdecl R_BeginRegistration_R_InitHardware(GfxWindowParms *wnd);
+// Editor per-window render-target / device-test path (CXYWnd::OnPaint pipeline).
+// Implementations at end of r_init.cpp; R_SortMaterials lives in radiant/r_ed_scene.cpp.
+// (R_RecoverLostDevice is already declared above — kisak ships the CoD3 recovery.)
+char __cdecl R_TestDevice();
+void __cdecl R_SetupTargetWindow(int windowIndex);
+// Editor renderer R_Init (IDB 0x500820): registers dvars/cmds + creates the D3D9
+// object, but does NOT create a game window/device (deferred to R_InitRendererForWindow).
+// Distinct from kisak's game R_Init, which creates its own window via R_InitGraphicsApi.
+void __cdecl R_InitEditor();
+char __cdecl R_SetupRendertarget_CheckDevice(HWND__ *hwnd);
+// Non-asserting test for "is this hwnd a registered render target with a live swap chain".
+// (KISAK_RADIANT — used by CCamWnd::OnPaint to skip painting a window the renderer never
+// registered, e.g. the dead Dynamic-Lighting popup, instead of tripping the CheckDevice
+// "invalid hwnd" assert.)
+bool __cdecl R_IsRegisteredRenderWindow(HWND__ *hwnd);
+void __cdecl R_CheckTargetWindow(HWND__ *hwnd);
+void __cdecl R_SortMaterials();
+// Editor per-window resize (IDB 0x501260): re-creates the window's swap chain at the new
+// size so Present is pixel-correct (no stretch). Called from each view's OnSize.
+void __cdecl R_Hwnd_Resize(HWND__ *hwnd, int width, int height);
+#endif
 void R_InitGraphicsApi();
 void R_InitSystems();
 char __cdecl R_PreCreateWindow();

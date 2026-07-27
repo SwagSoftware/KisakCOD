@@ -40,7 +40,7 @@
 #include <client/cl_scrn.h>
 #endif
 
-void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
+void(__cdecl *const RB_RenderCommandTable[RC_COUNT])(GfxRenderCommandExecState *) =
 {
   NULL,
   &RB_SetMaterialColorCmd,
@@ -63,8 +63,13 @@ void(__cdecl *const RB_RenderCommandTable[22])(GfxRenderCommandExecState *) =
   &RB_DrawLinesCmd,
   &RB_DrawTrianglesCmd,
   &RB_DrawProfileCmd,
-  &RB_ProjectionSetCmd
-}; // idb
+  &RB_ProjectionSetCmd,
+#ifdef KISAK_RADIANT
+  &RB_BeginViewCmd,                 // RC_BEGIN_VIEW = 0x16 (editor begin-view)
+  &RB_DrawEditorSkinnedCachedCmd,   // RC_DRAW_EDITOR_SKINNEDCACHED = 0x17 (r_ed_scene.cpp)
+  &RB_SetCustomConstantCmd,         // RC_SET_CUSTOM_CONSTANT = 0x18 (#26 layer C2 sun preview)
+#endif
+}; // idb (KISAK_RADIANT extends with RC_BEGIN_VIEW + RC_DRAW_EDITOR_SKINNEDCACHED + RC_SET_CUSTOM_CONSTANT; RC_COUNT sizes the table)
 
 GfxBackEndData *backEndData;
 GfxRenderTarget gfxRenderTargets[17]; // LWSS: changed to 17 to please ASAN. (GfxRenderTargetId)
@@ -1292,6 +1297,56 @@ void __cdecl RB_DrawLines3D(int count, int width, const GfxPointVertex *verts, b
         tess.vertexCount += 4;
     }
     RB_EndTessSurface();
+#ifdef KISAK_RADIANT
+    // LINEPROBE (TASK-1, temporary): what the DEVICE actually holds for an editor 3D line
+    // batch — the $line material/technique it resolved to, its stateBits, the blend/depth
+    // state, the CODE_MATERIAL_COLOR in effect, and the first vertex colour.  Bounded to 8
+    // lines, opt-in via RADIANT_LINEPROBE=1, so the default render path is untouched.
+    {
+        static const bool s_lineProbe = []{ const char *e = getenv("RADIANT_LINEPROBE");
+                                            return e && *e && *e != '0'; }();
+        static int s_lineProbes = 0;
+        if (s_lineProbe && s_lineProbes < 8 && count > 0)
+        {
+            ++s_lineProbes;
+            extern void Radiant_FL_Log(const char *fmt, ...);
+            const Material *m = depthTest ? rgp.lineMaterial : rgp.lineMaterialNoDepth;
+            const MaterialTechnique *tech =
+                (m && m->techniqueSet) ? m->techniqueSet->techniques[TECHNIQUE_UNLIT] : nullptr;
+            unsigned sb0 = 0, sb1 = 0; int entry = -1;
+            if (m && m->stateBitsTable)
+            {
+                entry = m->stateBitsEntry[TECHNIQUE_UNLIT];
+                if (entry != 0xFF) { sb0 = m->stateBitsTable[entry].loadBits[0];
+                                     sb1 = m->stateBitsTable[entry].loadBits[1]; }
+            }
+            IDirect3DDevice9 *dev = gfxCmdBufState.prim.device;
+            DWORD abe=9, sb=9, db=9, zw=9, zt=9, zf=9, cwe=9;
+            if (dev)
+            {
+                dev->GetRenderState(D3DRS_ALPHABLENDENABLE, &abe);
+                dev->GetRenderState(D3DRS_SRCBLEND, &sb);
+                dev->GetRenderState(D3DRS_DESTBLEND, &db);
+                dev->GetRenderState(D3DRS_ZWRITEENABLE, &zw);
+                dev->GetRenderState(D3DRS_ZENABLE, &zt);
+                dev->GetRenderState(D3DRS_ZFUNC, &zf);
+                dev->GetRenderState(D3DRS_COLORWRITEENABLE, &cwe);
+            }
+            const float *mc = gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_MATERIAL_COLOR];
+            const unsigned char *c0 = (const unsigned char *)verts[0].color;
+            Radiant_FL_Log("LINEPROBE: mtl='%s' techSet='%s' tech='%s' entry=%d loadBits=%08x/%08x "
+                           "DEV[blendEn=%lu src=%lu dst=%lu zwrite=%lu ztest=%lu zfunc=%lu cwe=%lu] "
+                           "matColor=%g %g %g %g vert0=%u,%u,%u,%u count=%d width=%d",
+                           (m && m->info.name) ? m->info.name : "?",
+                           (m && m->techniqueSet && m->techniqueSet->name) ? m->techniqueSet->name : "?",
+                           (tech && tech->name) ? tech->name : "?",
+                           entry, sb0, sb1, abe, sb, db, zw, zt, zf, cwe,
+                           mc[0], mc[1], mc[2], mc[3],
+                           (unsigned)c0[0], (unsigned)c0[1], (unsigned)c0[2], (unsigned)c0[3],
+                           count, width);
+        }
+    }
+#endif
 }
 
 void __cdecl RB_DrawLinesCmd(GfxRenderCommandExecState *execState)
@@ -1306,11 +1361,31 @@ void __cdecl RB_DrawLinesCmd(GfxRenderCommandExecState *execState)
     }
     else
     {
+#ifdef KISAK_RADIANT
+        iassert(cmd->dimensions == 3 || cmd->dimensions == 4);
+        RB_DrawLines3D(cmd->lineCount, cmd->width, cmd->verts, cmd->dimensions == 3);
+#else
         iassert(cmd->dimensions == 3);
         RB_DrawLines3D(cmd->lineCount, cmd->width, cmd->verts, 1);
+#endif
     }
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
+
+#ifdef KISAK_RADIANT
+// Editor begin-view backend handler (no kisak CoD3 equivalent). Installs the
+// view the editor set up in R_Ed_SetSceneParms as the active 3D view, so the
+// subsequent RC_DRAW_LINES (RB_DrawLines3D) transforms its world-space grid verts
+// by gfxCmdBufSourceState.viewParms3D->viewProjectionMatrix. Mirrors how kisak's
+// own scene path begins a view (rb_draw3d.cpp R_BeginView), but driven by a
+// render command instead of RB_Draw3DCommon.
+void __cdecl RB_BeginViewCmd(GfxRenderCommandExecState *execState)
+{
+    const GfxCmdBeginView *cmd = (const GfxCmdBeginView *)execState->cmd;
+    R_BeginView(&gfxCmdBufSourceState, &cmd->sceneDef, cmd->viewParms);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
+}
+#endif // KISAK_RADIANT
 
 void __cdecl RB_DrawTrianglesCmd(GfxRenderCommandExecState *execState)
 {
@@ -1415,8 +1490,37 @@ void __cdecl RB_SetMaterialColorCmd(GfxRenderCommandExecState *execState)
         RB_EndTessSurface();
     R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_MATERIAL_COLOR, (float*)cmd->color);
 
+#ifdef KISAK_RADIANT
+    // P5.4: the editor camera draws textured materials (R_AddRenderCmdDrawTris) OUTSIDE a
+    // full scene render, so the per-scene fog code-constant setup never runs and the
+    // material's "_fog" technique variants assert on constVersions[CONST_SRC_CODE_FOG]
+    // (r_shade.cpp). The editor uses no fog, so set the no-fog default (rb_fog.cpp:29:
+    // {0,1,0,0}) + a zero fog colour here — RB_SetMaterialColorCmd is editor-emitted only
+    // (R_AddCmdSetMaterialColor) and runs once per view per frame, before the draws.
+    {
+        static float s_edNoFog[4]      = { 0.0f, 1.0f, 0.0f, 0.0f };
+        static float s_edNoFogColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+        R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_FOG,       s_edNoFog);
+        R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_FOG_COLOR, s_edNoFogColor);
+    }
+#endif
+
     execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
 }
+
+#ifdef KISAK_RADIANT
+// #26 layer C2 — RB_SetCustomConstantCmd (CoD4Radiant 0x5338b0). Writes the editor
+// sun-preview custom code constant (CONST_SRC_CODE_SUN_*, carried by GfxCmdSetCustomConstant)
+// into the active source-state, so the SUNLIGHT_PREVIEW shaders read the parsed worldspawn
+// sun. The IDB wraps the set in a "changed?" guard (sub_5308F0); R_SetCodeConstantFromVec4
+// already version-stamps the constant, so the unconditional set is equivalent and simpler.
+void __cdecl RB_SetCustomConstantCmd(GfxRenderCommandExecState *execState)
+{
+    const GfxCmdSetCustomConstant *cmd = (const GfxCmdSetCustomConstant *)execState->cmd;
+    R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, (CodeConstant)cmd->type, (float *)cmd->vec);
+    execState->cmd = (char *)execState->cmd + cmd->header.byteCount;
+}
+#endif
 
 void __cdecl RB_SetViewportCmd(GfxRenderCommandExecState *execState)
 {
@@ -2071,7 +2175,13 @@ void __cdecl RB_DrawCursor(
     uint32_t newColor; // [esp+5Ch] [ebp-4h]
 
     iassert( font );
-    if (((CL_ScaledMilliseconds() / 256) & 1) == 0)
+    if ((((
+#ifndef KISAK_RADIANT
+        CL_ScaledMilliseconds()
+#else
+        Sys_Milliseconds()
+#endif
+        / 256) & 1) == 0))
     {
         cursorGlyph = R_GetCharacterGlyph(font, cursor);
         newColor = LongNoSwap(color);
@@ -2571,6 +2681,25 @@ GfxIndexBufferState *RB_SwapBuffers()
         hr = dx.windows[dx.targetWindowIndex].swapChain->Present(0, 0, 0, 0, 0);
     }
 
+#ifdef KISAK_RADIANT
+    // One-shot-per-window present proof (multi-window layout debug): confirms each editor
+    // view's swap chain actually Presents at its laid-out size with a success HRESULT.  A
+    // failed Present would Com_Error(ERR_FATAL) just below, so "alive + this logged ok for
+    // every window" means the views ARE presenting to screen (a white offline screen-grab is
+    // then a capture artifact, not a render failure).
+    {
+        static bool s_presentLogged[8] = { false };
+        int wi = dx.targetWindowIndex;
+        if ( wi >= 0 && wi < 8 && !s_presentLogged[wi] )
+        {
+            s_presentLogged[wi] = true;
+            extern void Radiant_FL_Log( const char *fmt, ... );
+            Radiant_FL_Log( "PRESENT: window[%d] %dx%d hr=0x%08x", wi,
+                            dx.windows[wi].width, dx.windows[wi].height, (unsigned)hr );
+        }
+    }
+#endif
+
     if (hr < 0 && hr != -2005530520)
     {
         Com_Error(ERR_FATAL, "Direct3DDevice9::Present failed: %s\n", R_ErrorDescription(hr));
@@ -2868,7 +2997,9 @@ void __cdecl  RB_RenderThread(uint32_t threadContext)
                 do
                 {
                     start = Sys_Milliseconds();
+#ifndef KISAK_RADIANT
                     SCR_UpdateScreen();
+#endif
                     wait = 33 - (Sys_Milliseconds() - start);
                     if (wait > 0)
                         NET_Sleep(wait);
@@ -3061,6 +3192,16 @@ void __cdecl RB_InitCodeImages()
     gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CINEMATIC_A] = 0;
     gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CINEMATIC_A] = (SAMPLER_CLAMP_V | SAMPLER_CLAMP_U | SAMPLER_FILTER_LINEAR);
     rg.codeImageNames[TEXTURE_SRC_CODE_CINEMATIC_A] = "cinematicA";
+
+#ifdef KISAK_RADIANT
+    // idb RB_InitCodeImages: name the CASE_TEXTURE code sampler so R_TextureFromCodeError /
+    // R_SetSampler have a label. The actual image stays 0 here (no static code image) — it is
+    // resolved per-surface from the material colorMap by R_GetCaseTexture (r_shade.cpp).
+    // Sampler state 0x0A == SAMPLER_MIPMAP_NEAREST | SAMPLER_FILTER_LINEAR (idb).
+    gfxCmdBufInput.codeImages[TEXTURE_SRC_CODE_CASE_TEXTURE] = 0;
+    gfxCmdBufInput.codeImageSamplerStates[TEXTURE_SRC_CODE_CASE_TEXTURE] = (SAMPLER_MIPMAP_NEAREST | SAMPLER_FILTER_LINEAR);
+    rg.codeImageNames[TEXTURE_SRC_CODE_CASE_TEXTURE] = "caseTexture";
+#endif
 }
 
 void __cdecl RB_RegisterBackendAssets()

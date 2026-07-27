@@ -3,7 +3,11 @@
 #include "assertive.h"
 #include "com_math.h"
 #include "q_shared.h"
+#ifndef KISAK_RADIANT
 #include <bgame/bg_public.h>
+#else
+#include <qcommon/qcommon.h>
+#endif
 
 int aabbTreeCount;
 float *sortedMaxs;

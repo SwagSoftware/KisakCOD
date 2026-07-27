@@ -182,7 +182,7 @@ struct LerpEntityState // sizeof=0x68
 };
 
 
-#ifdef KISAK_MP
+#if defined(KISAK_MP) || defined(KISAK_RADIANT) // radiant for entityState_s
 union entityState_s_type_index // sizeof=0x4
 {                                       // XREF: PM_UpdateLean(playerState_s *,float,usercmd_s *,void (*)(trace_t *,float const * const,float const * const,float const * const,float const * const,int,int))+2AC/o
     int brushmodel;

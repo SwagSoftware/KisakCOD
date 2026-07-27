@@ -158,6 +158,8 @@ TraceThreadInfo g_traceThreadInfo[THREAD_CONTEXT_COUNT];
 static char value1[2][2][8192];
 #elif KISAK_SP
 static char value1[3][2][8192]; // 3rd for server thread
+#elif defined(KISAK_RADIANT)
+static char value1[2][2][8192]; // main + render threads, no server
 #endif
 
 void __cdecl TRACK_q_shared()

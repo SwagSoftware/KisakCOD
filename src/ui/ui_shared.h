@@ -106,7 +106,11 @@ enum operationEnum : __int32
     OP_ISINTERMISSION = 0x50,
     NUM_OPERATORS = 0x51,
 };
-#elif KISAK_SP
+// Radiant (cod4 tools build) shares SP's operator set: no OP_ISINTERMISSION,
+// NUM_OPERATORS = 0x50. The UI expression evaluator (ui_shared.cpp) is not
+// compiled into the Radiant target, but operationEnum is declared transitively
+// via ui_shared.h, so it must exist — keep it identical to SP.
+#elif defined(KISAK_SP) || defined(KISAK_RADIANT)
 enum operationEnum : __int32
 {
     OP_NOOP = 0x0,
@@ -227,6 +231,8 @@ enum uiMenuCommand_t : __int32
     UIMENU_SAVE_LOADING = 0xA,
     UIMENU_CONTROLLERREMOVED = 0xB,
 };
+#elif defined(KISAK_RADIANT)
+enum uiMenuCommand_t : __int32 { UIMENU_NONE = 0x0, UIMENU_MAIN = 0x1, UIMENU_INGAME = 0x2 };
 #endif
 
 enum parseSkip_t : __int32

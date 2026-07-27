@@ -2124,7 +2124,9 @@ void __cdecl R_SetViewportStruct(GfxCmdBufSourceState *source, const GfxViewport
 {
     iassert(viewport->width > 0);
     iassert(viewport->height > 0);
+#ifndef KISAK_RADIANT
     iassert(source->viewportBehavior == GFX_USE_VIEWPORT_FOR_VIEW);
+#endif
 
     source->sceneViewport = *viewport;
     source->viewMode = VIEW_MODE_NONE;
@@ -2284,7 +2286,20 @@ GfxViewportBehavior __cdecl R_ViewportBehaviorForRenderTarget(GfxRenderTargetId 
     iassert(s_viewportBehaviorForRenderTarget);
     bcassert(renderTargetId, R_RENDERTARGET_COUNT);
 
+#ifdef KISAK_RADIANT
+    // FAITHFUL to the CoD4Radiant editor: its R_SetRenderTarget (IDB 0x5397a0) and
+    // R_SetupRenderTarget (IDB 0x539670) compute viewportBehavior INLINE as
+    // `id != SHADOWMAP_SUN && id != SHADOWMAP_SPOT` — i.e. every target except the two shadowmaps
+    // is FULL (FRAME_BUFFER included). The s_viewportBehaviorForRenderTarget table below is the
+    // CoD3 *game* variant (FRAME_BUFFER/SCENE = FOR_VIEW); used in the editor it made the plain-2D
+    // texture browser read its viewport from the stale sceneViewport (rendered into a small
+    // top-left rectangle). Use the editor's inline rule so FRAME_BUFFER resolves to FULL.
+    return (renderTargetId != R_RENDERTARGET_SHADOWMAP_SUN && renderTargetId != R_RENDERTARGET_SHADOWMAP_SPOT)
+               ? GFX_USE_VIEWPORT_FULL
+               : GFX_USE_VIEWPORT_FOR_VIEW;
+#else
     return s_viewportBehaviorForRenderTarget[renderTargetId];
+#endif
 }
 
 void __cdecl R_SetRenderTarget(GfxCmdBufContext context, GfxRenderTargetId newTargetId)

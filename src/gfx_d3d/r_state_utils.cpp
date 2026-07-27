@@ -9,6 +9,10 @@
 #include "rb_logfile.h"
 #include "rb_state.h"
 
+#ifdef KISAK_RADIANT
+#include <cgame/cg_local.h>
+#endif
+
 void __cdecl R_DeriveNearPlaneConstantsForView(GfxCmdBufSourceState *source)
 {
     const GfxViewParms *viewParms = &source->viewParms;

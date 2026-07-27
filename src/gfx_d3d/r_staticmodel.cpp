@@ -10,6 +10,8 @@
 #include <cgame_mp/cg_local_mp.h>
 #elif KISAK_SP
 #include <cgame/cg_ents.h>
+#elif defined(KISAK_RADIANT)
+#include <qcommon/com_bsp.h>
 #endif
 
 

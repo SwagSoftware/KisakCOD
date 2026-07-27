@@ -471,8 +471,37 @@ struct Material // sizeof=0x50
     MaterialTextureDef *textureTable;
     MaterialConstantDef *constantTable;
     GfxStateBits *stateBitsTable;
+#ifdef KISAK_RADIANT
+    // EDITOR-ONLY trailing field. The CoD4Radiant.exe Material embeds a 56-byte
+    // MaterialInfo whose surfaceFlags lives at info+0x2C; the kisak SP/MP build uses
+    // the reduced 24-byte MaterialInfo (CoD3 layout) which has no surfaceFlags. Rather
+    // than widen the shared MaterialInfo (which would shift every SP/MP offset), the
+    // editor build stores the on-disk MaterialInfoRaw.surfaceFlags as a trailing field
+    // on Material. Material_CastsStencilShadow (0x4FEE90) reads it; populated in
+    // Material_LoadRaw from mtlRaw->info.surfaceFlags. SP/MP never compile this branch,
+    // so their Material stays byte-identical at 80 bytes.
+    int surfaceFlags;
+    // EDITOR-ONLY: the on-disk MaterialInfoRaw.usage (@+0x11, char) + .locale (@+0x14,
+    // uint32). In CoD4Radiant.exe these live in the embedded 56-byte MaterialInfo
+    // (usage@+0x1C / locale@+0x20) that Editor_AddRadiantMaterial (0x45a5b0) reads into
+    // qtexture_s.usage_index / .tex_num_or_localefilter to drive the texture-browser
+    // usage/locale filters (TexWnd_IterateMaterials 0x45ba70 LABEL_37). kisak's reduced
+    // 24-byte runtime MaterialInfo drops both, so the editor build stashes them here
+    // (same pattern as surfaceFlags above); populated in Material_LoadRaw. SP/MP never
+    // compile these.
+    uint16_t editorToolFlags; // raw MaterialInfoRaw.toolFlags
+    uint8_t  editorUsage;     // raw MaterialInfoRaw.usage  (qtexture usage_index)
+    uint32_t editorLocale;    // raw MaterialInfoRaw.locale (qtexture localefilter mask)
+#endif
 };
+#ifdef KISAK_RADIANT
+// surfaceFlags lands at offset 80 (right after stateBitsTable@76), editorUsage@84,
+// editorLocale@88; sizeof rounds to 96 because GfxDrawSurf (in MaterialInfo) forces
+// 8-byte alignment. The pad is harmless — the fields are read/written by name.
+static_assert(sizeof(Material) == 96);
+#else
 static_assert(sizeof(Material) == 80);
+#endif
 
 struct MaterialMemory // sizeof=0x8
 {                                       // ...
@@ -591,6 +620,10 @@ struct $8E67C8D28114E56A26FBAF05ACADB66A // sizeof=0x11028
 
 const char* __cdecl Material_GetName(Material* handle);
 const Material* __cdecl Material_FromHandle(Material* handle);
+char __cdecl Material_GetConstantValue(Material* material, const char* name, float* outValue);
+#ifdef KISAK_RADIANT
+bool __cdecl Material_CastsStencilShadow(Material* handle); // 0x4FEE90 (editor-only)
+#endif
 
 void __cdecl Material_ReloadAll();
 void __cdecl Material_ReleaseAll();

@@ -4,6 +4,13 @@
 #include <qcommon/net_chan_mp.h>
 #elif KISAK_SP
 #include <qcommon/net_chan.h>
+#elif defined(KISAK_RADIANT)
+enum netsrc_t : int { NS_CLIENT1 = 0, NS_SERVER = 1, NS_MAXCLIENTS = 1, NS_PACKET = 2 };
+struct netchan_t  { int outgoingSequence; };
+#ifndef KISAK_RADIANT_NETADR_DEFINED
+#define KISAK_RADIANT_NETADR_DEFINED
+struct netadr_t { int type; unsigned char ip[4]; unsigned short port; unsigned char ipx[10]; };
+#endif
 #endif
 
 

@@ -4,6 +4,7 @@
 #include "assertive.h"
 
 #include <cstring> //memmove
+#include <cmath>    //ceilf (KISAK_RADIANT)
 
 #include "q_shared.h" // ARRAY_COUNT
 
@@ -364,3 +365,32 @@ uint32_t __cdecl Com_ConvexHull(float (*points)[2], uint32_t pointCount, float (
 
     return hullPointCount;
 }
+
+#ifdef KISAK_RADIANT
+// ── CoD4Radiant editor (common/polylib.cpp) ──────────────────────────────────
+// Index-returning 2D convex hull (IDA sub_49E150 @ 0x49E150). Same hull algorithm
+// as Com_ConvexHull above, but:
+//   (a) translates by -ceil(points[0]) rather than the exact first point, and
+//   (b) returns the hull as point INDICES (written into hullOrder) instead of
+//       copied coords — Winding_BaseForPlane's hull builder maps those indices
+//       back to the original 3D points.
+// Reuses the static Com_TranslatePoints/Com_InitialHull/Com_GrowInitialHull above
+// (which is why this lives here, not in the editor tree). Translates 'points' in
+// place; callers pass a throwaway projection-scratch buffer. Radiant-only.
+uint32_t __cdecl Com_ConvexHullIndices(float (*points)[2], uint32_t pointCount, uint32_t *hullOrder)
+{
+    uint32_t pointOrder[64];
+    float    offset[2];
+
+    iassert(pointCount >= 3 && pointCount < ARRAY_COUNT(pointOrder));
+
+    float (*pPoints)[64][2] = (float(*)[64][2])points;
+
+    offset[0] = -ceilf((*pPoints)[0][0]);
+    offset[1] = -ceilf((*pPoints)[0][1]);
+
+    Com_TranslatePoints(pPoints, pointCount, offset);
+    Com_InitialHull(pPoints, pointOrder, pointCount, hullOrder);
+    return Com_GrowInitialHull(pPoints, pointOrder, pointCount - 2, hullOrder);
+}
+#endif

@@ -8,6 +8,7 @@
 #include "r_init.h"
 #include "r_dvars.h"
 #include <universal/com_files.h>
+#include <universal/q_parse.h>
 #include "rb_logfile.h"
 #include <universal/profile.h>
 #include "r_pixelcost_load_obj.h"
@@ -605,9 +606,10 @@ int __cdecl Image_GetAvailableHashLocation(const char *name)
 {
     int hashIndex; // [esp+0h] [ebp-4h]
 
-    for (hashIndex = R_HashAssetName(name) & 0x7FF;
+    // idb Image_Alloc @0x5128b0: `& 0x7FFF` (editor 32768-slot table). See IMAGE_HASH_TABLE_MASK.
+    for (hashIndex = R_HashAssetName(name) & IMAGE_HASH_TABLE_MASK;
         imageGlobals.imageHashTable[hashIndex];
-        hashIndex = ((_WORD)hashIndex + 1) & 0x7FF)
+        hashIndex = ((_WORD)hashIndex + 1) & IMAGE_HASH_TABLE_MASK)
     {
         ;
     }
@@ -782,6 +784,11 @@ void __cdecl R_InitImages()
     RB_InitImages();
     R_InitRawImage();
     rg.waterFloatTime = rg.waterFloatTime + 1.0;
+#ifdef KISAK_RADIANT
+    // idb R_InitImages tail: load the editor's case-texture density-visualization images
+    // (bin/case_textures.txt). Drives the CASE_TEXTURE technique (camera draw_mode 4).
+    R_LoadCaseTextures();
+#endif
 }
 
 bool __cdecl Image_IsCodeImage(int track)
@@ -806,6 +813,54 @@ void R_InitCodeImages()
     rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", 1u, 0);
     iassert(rgp.pixelCostColorCodeImage);
 }
+
+#ifdef KISAK_RADIANT
+// idb 0x513690  R_LoadCaseTextures — editor-only. Reads bin/case_textures.txt (a flat
+// list of image names like "case1024x256") and registers each into rgp.caseTextures[].
+// The CASE_TEXTURE technique (camera draw_mode 4) later picks, per world surface, the case
+// image whose width/height matches that surface's colorMap (R_GetCaseTexture, r_shade.cpp).
+// Faithful port of the binary: missing file or failed image is non-fatal (count stays 0 ->
+// R_GetCaseTexture falls back to whiteImage). Image_Register == the binary's
+// Image_FindExisting-then-Image_Load(name,2,1) inner logic (r_image_load_obj Image_Register_LoadObj).
+void __cdecl R_LoadCaseTextures()
+{
+    char data[4096];           // idb char[4096] (FatalError if file >= 4096 bytes)
+    const char *data_p;
+    size_t numRead;
+    FILE *f;
+
+    rgp.caseTextures_count = 0;
+    f = fopen("case_textures.txt", "rb");
+    if (!f)
+        return;
+    numRead = fread(data, 1u, sizeof(data), f);
+    fclose(f);
+    if (numRead == sizeof(data))
+        Com_Error(ERR_FATAL, "case_textures.txt is bigger than %i bytes", (int)sizeof(data));
+    data[numRead] = 0;
+
+    data_p = data;
+    for (parseInfo_t *pi = Com_Parse(&data_p); pi->token[0]; pi = Com_Parse(&data_p))
+    {
+        if (rgp.caseTextures_count == 64)
+            Com_Error(ERR_FATAL, "more than %i case textures", 64);
+        GfxImage *image = Image_FindExisting(pi->token);
+        if (!image)
+        {
+            image = Image_Register(pi->token, 2u, 1);
+            // Image_Register already logs "ERROR: failed to load image" on miss.
+        }
+        rgp.caseTextures[rgp.caseTextures_count] = image;
+        if (rgp.caseTextures[rgp.caseTextures_count])
+            ++rgp.caseTextures_count;
+    }
+    {
+        // One-shot proof (≤1 line): how many case textures actually loaded.
+        extern void Radiant_FL_Log( const char *fmt, ... );
+        Radiant_FL_Log( "R_LoadCaseTextures: loaded %d case textures", rgp.caseTextures_count );
+    }
+}
+#endif
 
 void __cdecl R_ImageList_f()
 {
@@ -993,6 +1048,21 @@ char __cdecl R_DuplicateTexture(GfxImage *dstImage, const GfxImage *srcImage)
 
 char __cdecl Image_AssignDefaultTexture(GfxImage *image)
 {
+#ifdef KISAK_RADIANT
+    // Editor diagnostic (white-xmodel bug): every image that reaches here failed to
+    // load — log the first 32 so the runtime log NAMES the images behind solid-white
+    // model surfaces (a colormap falling back to whiteImage).
+    {
+        extern void Radiant_FL_Log(const char *fmt, ...);
+        static int s_defaultedLogged = 0;
+        if (s_defaultedLogged < 32)
+        {
+            ++s_defaultedLogged;
+            Radiant_FL_Log("IMGPROBE: image '%s' failed to load -> default (semantic=%d mapType=%d)",
+                           image->name ? image->name : "(null)", image->semantic, image->mapType);
+        }
+    }
+#endif
     if (image->mapType != MAPTYPE_2D)
         return 0;
     if (image->semantic == 5)
@@ -1349,3 +1419,76 @@ void __cdecl Image_Setup(GfxImage *image, int width, int height, int depth, int 
         iassert(!image->delayLoadPixels);
     }
 }
+
+#ifdef KISAK_RADIANT
+// ── Editor texture-refresh / resolution plumbing (Textures→Refresh F5, Textures→
+// Texture Resolution).  Ported from the CoD4Radiant binary; the "imageGlobals
+// divergence" the row was parked on is stale — see below. ─────────────────────────
+//
+// idb R_UpdateMipMap @ 0x5139A0.  The binary copies the r_picmip* dvars into the
+// standalone globals r_picmip_val / r_picmip_bump_val / r_picmip_spec_val that the
+// CoD4 renderer's Image_PicmipForSemantic reads.  Kisak's CoD3 renderer has no such
+// standalone globals — the SAME picmip values live in imageGlobals.picmip /
+// .picmipBump / .picmipSpec (read by Image_PicmipForSemantic, r_image_load_common.cpp).
+// So the faithful adaptation writes those fields instead.  Semantics identical:
+// propagate the r_picmip dvars into the picmip level the reloader (Image_GetPicmip →
+// Image_PicmipForSemantic) will use for the next disk load.  (The engine's own
+// R_SetPicmip already does exactly this copy on the manual-picmip path; this is the
+// on-demand refresh of it after the editor changes r_picmip.)
+void __cdecl R_UpdateMipMap()
+{
+    imageGlobals.picmip     = r_picmip->current.integer;
+    imageGlobals.picmipBump = r_picmip_bump->current.integer;
+    imageGlobals.picmipSpec = r_picmip_spec->current.integer;
+}
+
+// idb R_ReloadImages @ 0x513D70.  The binary iterates a flat imageGlobals[32768]
+// GfxImage* array and reloads every loose-file (category==3) image from disk.  Kisak's
+// imageGlobals.imageHashTable[IMAGE_HASH_TABLE_SIZE] (IMAGE_HASH_TABLE_SIZE==0x8000 in
+// the editor build) IS that same 32768-slot GfxImage* array — the "flat array vs struct"
+// divergence was illusory (the struct's first member is the 32768-entry table).  So the
+// port walks the hash table and reloads the same category-3 images.  Image_Reload
+// (r_image.cpp) is kisak's byte-exact R_ReloadImage @ 0x513490 (Image_Release →
+// Image_ReloadFromFile → Image_AssignDefaultTexture-on-fail → FATAL-on-fail).  After
+// this the texture browser + brushes show the edited TGA/DDS/IWI without a restart.
+void __cdecl R_ReloadImages()
+{
+    for (int i = 0; i < IMAGE_HASH_TABLE_SIZE; ++i)
+    {
+        GfxImage *image = imageGlobals.imageHashTable[i];
+        if (image && image->category == IMG_CATEGORY_LOAD_FROM_FILE)
+            Image_Reload(image);
+    }
+}
+
+#ifdef RADIANT_SELFTEST
+// Headless gate hook (map-free, device-free): drive the r_picmip dvars → R_UpdateMipMap →
+// imageGlobals.picmip* propagation (the actual adaptation that resolved the "imageGlobals
+// divergence" for the resolution path).  Sets the three dvars, runs R_UpdateMipMap, reads the
+// resulting imageGlobals fields back into the out params.  No D3D / no image reload involved.
+void __cdecl Radiant_TestPicmipUpdate(int picmip, int bump, int spec,
+                                      int *outPic, int *outBump, int *outSpec)
+{
+    // The headless selftest doesn't init the renderer, so the r_picmip* dvar globals may be
+    // null.  Register them idempotently (Dvar_RegisterInt returns the existing dvar if present)
+    // so R_UpdateMipMap can dereference r_picmip->current.integer.  Matches r_dvars.cpp's
+    // [0,3] int registration.
+    if (!r_picmip)
+        r_picmip = Dvar_RegisterInt("r_picmip", 0, (DvarLimits)0x300000000LL, DVAR_ARCHIVE,
+                                    "Picmip level of color maps.");
+    if (!r_picmip_bump)
+        r_picmip_bump = Dvar_RegisterInt("r_picmip_bump", 0, (DvarLimits)0x300000000LL, DVAR_ARCHIVE,
+                                         "Picmip level of normal maps.");
+    if (!r_picmip_spec)
+        r_picmip_spec = Dvar_RegisterInt("r_picmip_spec", 0, (DvarLimits)0x300000000LL, DVAR_ARCHIVE,
+                                         "Picmip level of specular maps.");
+    Dvar_SetIntByName("r_picmip",      picmip);
+    Dvar_SetIntByName("r_picmip_bump", bump);
+    Dvar_SetIntByName("r_picmip_spec", spec);
+    R_UpdateMipMap();
+    if (outPic)  *outPic  = imageGlobals.picmip;
+    if (outBump) *outBump = imageGlobals.picmipBump;
+    if (outSpec) *outSpec = imageGlobals.picmipSpec;
+}
+#endif
+#endif

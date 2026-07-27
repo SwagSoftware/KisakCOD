@@ -3,7 +3,10 @@
 #include <qcommon/qcommon.h>
 #include "r_image.h"
 
-
+// FFT water-grid bounds. Named so rangeassert() stringizes to the original message
+// "water->M not in [MIN_WATER_SIZE, MAX_WATER_SIZE]..."; values are the binary's 4 and 64.
+#define MIN_WATER_SIZE 4
+#define MAX_WATER_SIZE 64
 
 int sceneWaterMapSetupsCount;
 water_t sceneWaterMapSetups[16];
@@ -167,24 +170,8 @@ water_t *__cdecl R_LoadWaterSetup(const water_t *water)
 
     iassert( IsPowerOf2( water->N ) );
     iassert( IsPowerOf2( water->M ) );
-    if (water->M < 4 || water->M > 64)
-        MyAssertHandler(
-            ".\\r_water_load_obj.cpp",
-            143,
-            0,
-            "water->M not in [MIN_WATER_SIZE, MAX_WATER_SIZE]\n\t%i not in [%i, %i]",
-            water->M,
-            4,
-            64);
-    if (water->N < 4 || water->N > 64)
-        MyAssertHandler(
-            ".\\r_water_load_obj.cpp",
-            144,
-            0,
-            "water->N not in [MIN_WATER_SIZE, MAX_WATER_SIZE]\n\t%i not in [%i, %i]",
-            water->N,
-            4,
-            64);
+    rangeassert( water->M, MIN_WATER_SIZE, MAX_WATER_SIZE );
+    rangeassert( water->N, MIN_WATER_SIZE, MAX_WATER_SIZE );
     iassert( water->Lx > 0 );
     iassert( water->Lz > 0 );
     iassert( water->gravity > 0 );

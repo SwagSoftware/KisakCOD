@@ -183,7 +183,19 @@ void __cdecl R_CreateDynamicBuffers()
     int bufferIterc; // [esp+0h] [ebp-4h]
 
     for (bufferIter = 0; bufferIter != 1; ++bufferIter)
+#ifdef KISAK_RADIANT
+        // EDITOR VB-overflow fix (#26 render path): the radiant immediate-mode world draw
+        // streams the WHOLE map's brush faces + wireframe through this dynamic VB every frame
+        // (R_SetVertexData, 32 B/vert), which overflows the 1MB SP/MP size on large maps
+        // (blackout) -> the r_shade.cpp R_SetVertexData "used + totalSize <= total" assert /
+        // GUI crash. Grow to 16MB (512K verts) for the editor only — SP/MP keep 1MB. The
+        // surf-cache path (skinnedCacheVbPool, 4.5MB) avoids the immediate stream entirely; this
+        // makes the DEFAULT immediate path robust on the biggest maps. (Needs live-GUI confirm;
+        // if an even larger map still overflows, grow further or add flush-on-full to R_SetVertexData.)
+        R_InitDynamicVertexBufferState(&gfxBuf.dynamicVertexBufferPool[bufferIter], 0x1000000);
+#else
         R_InitDynamicVertexBufferState(&gfxBuf.dynamicVertexBufferPool[bufferIter], 0x100000);
+#endif
     gfxBuf.dynamicVertexBuffer = gfxBuf.dynamicVertexBufferPool;
     for (bufferItera = 0; bufferItera != 2; ++bufferItera)
         R_InitDynamicVertexBufferState(&gfxBuf.skinnedCacheVbPool[bufferItera], 0x480000);

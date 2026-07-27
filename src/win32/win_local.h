@@ -23,6 +23,55 @@
 #include <qcommon/net_chan_mp.h>
 #elif KISAK_SP
 #include <qcommon/net_chan.h>
+#elif defined(KISAK_RADIANT)
+// ─────────────────────────────────────────────────────────────────────────────
+// The Radiant tools build cannot include qcommon/net_chan.h or qcommon/msg.h —
+// both #error on anything but KISAK_SP. These local defs stand in, and their
+// layouts are pinned to the real engine structs with static_asserts (below) so
+// they can never silently drift from what compiled engine code expects.
+//
+//  netadr_t : 20 bytes, identical to win_net.h's KISAK_RADIANT branch — the
+//             cod4-accurate Q3-lineage layout WITH the legacy ipx[10] tail.
+//             Deliberately NOT net_chan.h's reduced 12-byte SP variant (no ipx);
+//             win_local.h and win_net.h share the KISAK_RADIANT_NETADR_DEFINED
+//             guard so the two definitions stay byte-identical.
+//  msg_t    : full 40-byte (0x28) layout copied verbatim from qcommon/msg.h, so
+//             that net / client code eventually pulled into the editor
+//             (remote-compile / live-reload) sees the correct field offsets.
+//             No compiled radiant TU references msg_t today — the
+//             Sys_GetPacket / Sys_GetBroadcastPacket decls that would are
+//             SP/MP-gated below.
+// ─────────────────────────────────────────────────────────────────────────────
+#ifndef KISAK_RADIANT_NETADR_DEFINED
+#define KISAK_RADIANT_NETADR_DEFINED
+struct netadr_t { int type; unsigned char ip[4]; unsigned short port; unsigned char ipx[10]; };
+#endif
+#ifndef KISAK_RADIANT_MSG_DEFINED
+#define KISAK_RADIANT_MSG_DEFINED
+struct msg_t   // == qcommon/msg.h (sizeof 0x28)
+{
+    int overflowed;
+    int readOnly;
+    unsigned char *data;
+    unsigned char *splitData;
+    int maxsize;
+    int cursize;
+    int splitSize;
+    int readcount;
+    int bit;
+    int lastEntityRef;
+};
+#endif
+// Permanent layout regression net — fail the build if either struct drifts from
+// the real engine layout documented above.
+static_assert(sizeof(netadr_t) == 20,            "radiant netadr_t must match win_net.h (cod4) layout");
+static_assert(offsetof(netadr_t, ip)   == 4,     "netadr_t.ip offset");
+static_assert(offsetof(netadr_t, port) == 8,     "netadr_t.port offset");
+static_assert(offsetof(netadr_t, ipx)  == 10,    "netadr_t.ipx offset");
+static_assert(sizeof(msg_t) == 40,               "radiant msg_t must match qcommon/msg.h layout");
+static_assert(offsetof(msg_t, data)      == 8,   "msg_t.data offset");
+static_assert(offsetof(msg_t, maxsize)   == 16,  "msg_t.maxsize offset");
+static_assert(offsetof(msg_t, readcount) == 28,  "msg_t.readcount offset");
 #endif
 
 void	IN_MouseEvent (int mstate);
@@ -33,6 +82,7 @@ void __cdecl Sys_ShowConsole();
 
 char	*Sys_ConsoleInput (void);
 
+#if defined(KISAK_MP) || defined(KISAK_SP)
 void Sys_ShowIP();
 bool Sys_IsLANAddress(netadr_t adr);
 bool Sys_IsLANAddress_IgnoreSubnet(netadr_t adr);
@@ -42,6 +92,7 @@ struct msg_t;
 
 qboolean	Sys_GetPacket ( netadr_t *net_from, msg_t *net_message );
 qboolean	Sys_GetBroadcastPacket( msg_t *net_message );
+#endif
 
 // Input subsystem
 
@@ -128,7 +179,48 @@ extern std::mutex s_criticalSections[];
 extern int client_state; // LWSS ADD. This looks similar to signonstate
 extern HWND g_splashWnd;
 
-#ifdef KISAK_MP
+#if defined(KISAK_RADIANT)
+// Radiant tools build: use SP-compatible critical section layout
+enum CriticalSection : __int32
+{
+	CRITSECT_CONSOLE = 0x0,
+	CRITSECT_DEBUG_SOCKET = 0x1,
+	CRITSECT_COM_ERROR = 0x2,
+	CRITSECT_STATMON = 0x3,
+	CRITSECT_SOUND_ALLOC = 0x4,
+	CRITSECT_MEM_ALLOC0 = 0x5,
+	CRITSECT_MEM_ALLOC1 = 0x6,
+	CRITSECT_DEBUG_LINE = 0x7,
+	CRITSECT_ALLOC_MARK = 0x8,
+	CRITSECT_STREAMED_SOUND = 0x9,
+	CRITSECT_FAKELAG = 0xA,
+	CRITSECT_CLIENT_MESSAGE = 0xB,
+	CRITSECT_CLIENT_CMD = 0xC,
+	CRITSECT_DOBJ_ALLOC = 0xD,
+	CRITSECT_START_SERVER = 0xE,
+	CRITSECT_XANIM_ALLOC = 0xF,
+	CRITSECT_KEY_BINDINGS = 0x10,
+	CRITSECT_FX_VIS = 0x11,
+	CRITSECT_SERVER_MESSAGE = 0x12,
+	CRITSECT_SCRIPT_STRING = 0x13,
+	CRITSECT_MEMORY_TREE = 0x14,
+	CRITSECT_ASSERT = 0x15,
+	CRITSECT_SCRIPT_DEBUGGER_ALLOC = 0x16,
+	CRITSECT_MISSING_ASSET = 0x17,
+	CRITSECT_PHYSICS = 0x18,
+	CRITSECT_LIVE = 0x19,
+	CRITSECT_AUDIO_PHYSICS = 0x1A,
+	CRITSECT_CINEMATIC = 0x1B,
+	CRITSECT_CINEMATIC_TARGET_CHANGE = 0x1C,
+	CRITSECT_FX_ALLOC = 0x1D,
+	CRITSECT_NETTHREAD_OVERRIDE = 0x1E,
+	CRITSECT_CBUF = 0x1F,
+	CRITSECT_SYS_EVENT_QUEUE,
+	CRITSECT_FATAL_ERROR,
+	CRITSECT_GPU_FENCE,
+	CRITSECT_COUNT,
+};
+#elif defined(KISAK_MP)
 enum CriticalSection : int
 {
 	CRITSECT_CONSOLE = 0x0,

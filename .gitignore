@@ -29,6 +29,7 @@ build/
 build-dedi/
 build-mp/
 build-sp/
+build-radiant-selftest/
 [Oo]bj/
 [Oo]ut/
 [Ll]og/
@@ -425,5 +426,9 @@ FodyWeavers.xsd
 res/
 
 .idea/*
+.claude/*
 IDA/*
 KisakCOD/.idea/*
+build-radiant/
+KisakCOD/
+radiant_artifacts/

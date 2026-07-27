@@ -38,6 +38,13 @@
 #elif KISAK_SP
 #include <cgame/cg_local.h>
 #include <cgame/cg_ents.h>
+#elif defined(KISAK_RADIANT)
+#include <cgame/cg_local.h>
+#include <cgame/cg_ents.h>
+#endif
+
+#ifdef KISAK_RADIANT
+void __cdecl CL_UpdateSound();
 #endif
 #include "r_state.h"
 #include "r_draw_sunshadow.h"
@@ -2245,4 +2252,177 @@ void __cdecl R_UnlinkDynEnt(uint32_t dynEntId, DynEntityDrawType drawType)
     R_UnfilterDynEntFromCells(dynEntId, drawType);
     R_UnlinkDynEntFromPrimaryLights(dynEntId, drawType);
 }
+
+#ifdef KISAK_RADIANT
+// ─────────────────────────────────────────────────────────────────────────────
+// Editor 2D-view scene setup — IDB R_SetSceneParms @ 0x5062b0 (cod3src r_scene.cpp).
+// Renamed R_Ed_SetSceneParms to avoid colliding with kisak's refdef-based
+// R_SetSceneParms above. The editor's variant takes an explicit view origin/axis
+// and a (typically orthographic) projection — built by xywnd.cpp's SetupProjectionMtx
+// — and sets up a single GfxViewParms, then emits the begin-view + viewport +
+// depth/stencil-clear commands the XY/Z/Camera draws render against.
+//
+// Single static GfxViewParms: kisak's GfxBackEndData carries only one view, and
+// editor rendering is SYNCHRONOUS (R_BeginRegistration_R_InitHardware starts no SMP
+// worker threads → R_HandOffToBackend returns false → the backend runs inside the
+// same R_IssueRenderCommands call), so the pointer handed through RC_BEGIN_VIEW is
+// valid front-end → back-end without double-buffering. (The IDB allocated from a
+// frontEndDataOut->viewParms[28] ring for its 5 simultaneous windows — Phase-5.)
+// scene.def time is left 0: the grid's line material is unlit/static, no animation.
+// ─────────────────────────────────────────────────────────────────────────────
+static GfxViewParms s_edViewParms;
+
+// Inverse-and-validate the editor VP in one pass, byte-for-byte mirroring com_math.cpp's
+// MatrixInverse44 (the transpose + 12-tmp "gluInvertMatrix" form — NOT the original binary's
+// distinct cofactor layout, whose float32 rounding differs) so the dry-run det MATCHES the
+// engine's bit-for-bit.  Returns false (degenerate) instead of ASSERTING on a singular det,
+// then applies the same r_state_utils.cpp:20 ortho check on the result.  outInv (optional)
+// receives the computed inverse VP.
+static bool Ed_InvertAndCheckVP(const float (*vp)[4], float (*outInv)[4])
+{
+    float src[16];
+    float tmp[12];
+    for (int i = 0; i < 4; ++i)
+    {
+        src[i]      = vp[i][0];
+        src[i + 4]  = vp[i][1];
+        src[i + 8]  = vp[i][2];
+        src[i + 12] = vp[i][3];
+    }
+    float dst[4][4];
+    tmp[0] = src[10] * src[15];  tmp[1] = src[11] * src[14];  tmp[2] = src[9] * src[15];
+    tmp[3] = src[11] * src[13];  tmp[4] = src[9] * src[14];   tmp[5] = src[10] * src[13];
+    tmp[6] = src[8] * src[15];   tmp[7] = src[11] * src[12];  tmp[8] = src[8] * src[14];
+    tmp[9] = src[10] * src[12];  tmp[10] = src[8] * src[13];  tmp[11] = src[9] * src[12];
+    dst[0][0] = tmp[0]*src[5] + tmp[3]*src[6] + tmp[4]*src[7];
+    dst[0][0] = dst[0][0] - (tmp[1]*src[5] + tmp[2]*src[6] + tmp[5]*src[7]);
+    dst[0][1] = tmp[1]*src[4] + tmp[6]*src[6] + tmp[9]*src[7];
+    dst[0][1] = dst[0][1] - (tmp[0]*src[4] + tmp[7]*src[6] + tmp[8]*src[7]);
+    dst[0][2] = tmp[2]*src[4] + tmp[7]*src[5] + tmp[10]*src[7];
+    dst[0][2] = dst[0][2] - (tmp[3]*src[4] + tmp[6]*src[5] + tmp[11]*src[7]);
+    dst[0][3] = tmp[5]*src[4] + tmp[8]*src[5] + tmp[11]*src[6];
+    dst[0][3] = dst[0][3] - (tmp[4]*src[4] + tmp[9]*src[5] + tmp[10]*src[6]);
+    dst[1][0] = tmp[1]*src[1] + tmp[2]*src[2] + tmp[5]*src[3];
+    dst[1][0] = dst[1][0] - (tmp[0]*src[1] + tmp[3]*src[2] + tmp[4]*src[3]);
+    dst[1][1] = tmp[0]*src[0] + tmp[7]*src[2] + tmp[8]*src[3];
+    dst[1][1] = dst[1][1] - (tmp[1]*src[0] + tmp[6]*src[2] + tmp[9]*src[3]);
+    dst[1][2] = tmp[3]*src[0] + tmp[6]*src[1] + tmp[11]*src[3];
+    dst[1][2] = dst[1][2] - (tmp[2]*src[0] + tmp[7]*src[1] + tmp[10]*src[3]);
+    dst[1][3] = tmp[4]*src[0] + tmp[9]*src[1] + tmp[10]*src[2];
+    dst[1][3] = dst[1][3] - (tmp[5]*src[0] + tmp[8]*src[1] + tmp[11]*src[2]);
+    tmp[0] = src[2]*src[7];   tmp[1] = src[3]*src[6];   tmp[2] = src[1]*src[7];
+    tmp[3] = src[3]*src[5];   tmp[4] = src[1]*src[6];   tmp[5] = src[2]*src[5];
+    tmp[6] = src[0]*src[7];   tmp[7] = src[3]*src[4];   tmp[8] = src[0]*src[6];
+    tmp[9] = src[2]*src[4];   tmp[10] = src[0]*src[5];  tmp[11] = src[1]*src[4];
+    dst[2][0] = tmp[0]*src[13] + tmp[3]*src[14] + tmp[4]*src[15];
+    dst[2][0] = dst[2][0] - (tmp[1]*src[13] + tmp[2]*src[14] + tmp[5]*src[15]);
+    dst[2][1] = tmp[1]*src[12] + tmp[6]*src[14] + tmp[9]*src[15];
+    dst[2][1] = dst[2][1] - (tmp[0]*src[12] + tmp[7]*src[14] + tmp[8]*src[15]);
+    dst[2][2] = tmp[2]*src[12] + tmp[7]*src[13] + tmp[10]*src[15];
+    dst[2][2] = dst[2][2] - (tmp[3]*src[12] + tmp[6]*src[13] + tmp[11]*src[15]);
+    dst[2][3] = tmp[5]*src[12] + tmp[8]*src[13] + tmp[11]*src[14];
+    dst[2][3] = dst[2][3] - (tmp[4]*src[12] + tmp[9]*src[13] + tmp[10]*src[14]);
+    dst[3][0] = tmp[2]*src[10] + tmp[5]*src[11] + tmp[1]*src[9];
+    dst[3][0] = dst[3][0] - (tmp[4]*src[11] + tmp[0]*src[9] + tmp[3]*src[10]);
+    dst[3][1] = tmp[8]*src[11] + tmp[0]*src[8] + tmp[7]*src[10];
+    dst[3][1] = dst[3][1] - (tmp[6]*src[10] + tmp[9]*src[11] + tmp[1]*src[8]);
+    dst[3][2] = tmp[6]*src[9] + tmp[11]*src[11] + tmp[3]*src[8];
+    dst[3][2] = dst[3][2] - (tmp[10]*src[11] + tmp[2]*src[8] + tmp[7]*src[9]);
+    dst[3][3] = tmp[10]*src[10] + tmp[4]*src[8] + tmp[9]*src[9];
+    dst[3][3] = dst[3][3] - (tmp[8]*src[9] + tmp[11]*src[10] + tmp[5]*src[8]);
+    float det = src[0]*dst[0][0] + src[1]*dst[0][1] + src[2]*dst[0][2] + src[3]*dst[0][3];
+    // Reject not just det==0 but a det whose magnitude is negligible vs the matrix scale: the
+    // engine's MatrixInverse44 asserts only on det EXACTLY 0, but a near-zero det means the float
+    // inverse is garbage (which is exactly when the ortho check below would fail anyway), and it
+    // gives a margin against any 1-ULP divergence between this mirror and the engine's own copy
+    // (so the guard never passes a frame the engine would then assert on).  The reference scale
+    // is |det of a non-degenerate VP| ~ 1; 1e-20f is far below any real editor projection's det.
+    if ( !(I_fabs(det) > 1.0e-20f) )
+        return false;   // singular / near-singular VP — MatrixInverse44 would assert. Drop frame.
+    det = 1.0f / det;
+    float *d = &dst[0][0];
+    for (int i = 0; i < 16; ++i)
+        d[i] = d[i] * det;
+    if ( outInv )
+        memcpy(outInv, dst, sizeof(dst));
+
+    // Now the exact quantity R_DeriveNearPlaneConstantsForView (r_state_utils.cpp:20) asserts on.
+    const float m03 = dst[0][3];
+    const float m13 = dst[1][3];
+    const float m33 = dst[3][3];
+    if ( m33 == 0.0f )
+        return false;
+    const float tol = 1.0e-5f * m33;   // engine compares fabs(m03/m13) against RAW m[3][3] (sign matters)
+    if ( !(I_fabs(m03) < tol) )
+        return false;
+    if ( !(I_fabs(m13) < tol) )
+        return false;
+    return true;
+}
+
+// Side-effect-free dry run of the editor scene-setup matrix math, returning whether the
+// resulting inverse-view-projection would PASS the engine's R_DeriveNearPlaneConstantsForView
+// ortho/determinant asserts (r_state_utils.cpp:20-22).  The editor scene-setup call sites
+// (CXYWnd/CCamWnd::SetupScene) call this BEFORE submitting the begin-view command, so a
+// degenerate projection (e.g. a far-from-origin perspective camera whose float32 4x4 inverse
+// loses the sign/orthogonality of m[3][3]/m[0][3]) is detected and the bad frame is dropped
+// radiant-side rather than tripping the shared assert.  Uses a local scratch GfxViewParms —
+// does NOT touch s_edViewParms or queue any command.
+bool R_Ed_ProjectionWouldBeValid(const float *org, const float (*axis)[3], const GfxMatrix *projection)
+{
+    GfxViewParms scratch;
+    memset((uint8_t *)&scratch, 0, sizeof(scratch));
+    scratch.origin[0] = org[0];
+    scratch.origin[1] = org[1];
+    scratch.origin[2] = org[2];
+    scratch.origin[3] = 1.0f;
+    memcpy(scratch.axis, axis, sizeof(scratch.axis));
+    MatrixForViewer(scratch.viewMatrix.m, scratch.origin, scratch.axis);
+    memcpy(&scratch.projectionMatrix, projection, sizeof(scratch.projectionMatrix));
+    MatrixMultiply44(scratch.viewMatrix.m, scratch.projectionMatrix.m, scratch.viewProjectionMatrix.m);
+    // Invert + validate with the assert-free mirror of com_math.cpp's MatrixInverse44 so a
+    // singular VP is reported degenerate instead of crashing the dry run.
+    return Ed_InvertAndCheckVP((const float (*)[4])scratch.viewProjectionMatrix.m, nullptr);
+}
+
+void __cdecl R_Ed_SetSceneParms(const float *org, const float (*axis)[3], const GfxMatrix *projection)
+{
+    iassert( org );
+    iassert( axis );
+    iassert( projection );
+
+    GfxViewParms *viewParms = &s_edViewParms;
+
+    scene.def.time         = 0;
+    scene.def.floatTime    = 0.0f;
+    scene.def.viewOffset[0] = 0.0f;
+    scene.def.viewOffset[1] = 0.0f;
+    scene.def.viewOffset[2] = 0.0f;
+
+    memset((uint8_t *)viewParms, 0, sizeof(GfxViewParms));
+    viewParms->origin[0] = org[0];
+    viewParms->origin[1] = org[1];
+    viewParms->origin[2] = org[2];
+    viewParms->origin[3] = 1.0f;
+    memcpy(viewParms->axis, axis, sizeof(viewParms->axis));          // IDB CopyAxis (0x4a8860)
+    MatrixForViewer(viewParms->viewMatrix.m, viewParms->origin, viewParms->axis);
+    memcpy(&viewParms->projectionMatrix, projection, sizeof(viewParms->projectionMatrix));
+    viewParms->depthHackNearClip = projection->m[3][2];
+    R_SetupViewProjectionMatrices(viewParms);                       // viewProj = view*proj; + inverse
+
+    rg.viewOrg[0] = org[0];
+    rg.viewOrg[1] = org[1];
+    rg.viewOrg[2] = org[2];
+    rg.viewDir[0] = axis[0][0];
+    rg.viewDir[1] = axis[0][1];
+    rg.viewDir[2] = axis[0][2];
+
+    R_AddBeginViewCmd(&scene.def, viewParms);
+    R_AddCmdSetViewportValues(0, 0, dx.windows[dx.targetWindowIndex].width, dx.windows[dx.targetWindowIndex].height);
+
+    float white[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    R_AddCmdClearScreen(6, white, 1.0f, 0);                         // IDB R_AddClearCmd(6, colorWhite, ...) depth+stencil
+}
+
+#endif // KISAK_RADIANT
 

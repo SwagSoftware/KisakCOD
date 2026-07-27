@@ -1271,6 +1271,43 @@ void FS_RegisterDvars()
     v1 = (char *)Sys_DefaultCDPath();
     fs_cdpath = Dvar_RegisterString("fs_cdpath", v1, DVAR_INIT, "CD path");
     v2 = Sys_Cwd();
+#ifdef KISAK_RADIANT
+    // The shipping editor lives in <install>\bin\ (the dev build in <install>\bin\Debug\),
+    // with the game data (raw\, main\, ...) at <install>\.  Derive fs_basepath from the EXE
+    // location by walking up from its directory to the first ancestor that actually contains
+    // a `raw\` folder — so the editor finds its materials/textures wherever it is run from,
+    // as long as it sits under the install's `bin` (the expected layout).  Falls back to the
+    // known CoD4 install when run from a build tree with no game data beside it (repo bin\Debug).
+    {
+        static char s_fsBase[MAX_PATH];
+        int   foundBase = 0;
+        char  exeDir[MAX_PATH];
+        if ( GetModuleFileNameA( NULL, exeDir, sizeof( exeDir ) ) )
+        {
+            char *slash = strrchr( exeDir, '\\' );
+            if ( slash ) *slash = 0;                       // strip the exe name -> its directory
+            for ( int up = 0; up < 6 && !foundBase; ++up )
+            {
+                char probe[MAX_PATH];
+                Com_sprintf( probe, sizeof( probe ), "%s\\raw", exeDir );
+                if ( GetFileAttributesA( probe ) != INVALID_FILE_ATTRIBUTES )
+                {
+                    I_strncpyz( s_fsBase, exeDir, sizeof( s_fsBase ) );
+                    v2 = s_fsBase;
+                    foundBase = 1;
+                }
+                else
+                {
+                    char *u = strrchr( exeDir, '\\' );     // climb one directory level
+                    if ( !u ) break;
+                    *u = 0;
+                }
+            }
+        }
+        if ( !foundBase )
+            v2 = (char *)"F:\\SteamLibrary\\steamapps\\common\\Call of Duty 4";
+    }
+#endif
     fs_basepath = Dvar_RegisterString("fs_basepath", v2, DVAR_INIT | DVAR_AUTOEXEC, "Base game path");
     fs_basegame = Dvar_RegisterString("fs_basegame", (char *)"", DVAR_INIT, "Base game name");
     fs_gameDirVar = Dvar_RegisterString(

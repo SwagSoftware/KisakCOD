@@ -1,6 +1,8 @@
 #include <universal/q_shared.h>
 #include "r_primarylights.h"
+#ifndef KISAK_RADIANT
 #include <bgame/bg_local.h>
+#endif
 #include <qcommon/com_bsp.h>
 #include "r_init.h"
 #include "r_scene.h"
@@ -12,6 +14,8 @@
 #elif KISAK_SP
 #include <cgame/cg_local.h>
 #include <cgame/cg_ents.h>
+#elif defined(KISAK_RADIANT)
+#include <cgame/cg_local.h>
 #endif
 
 GfxShadowedLightHistory s_shadowHistory[4];

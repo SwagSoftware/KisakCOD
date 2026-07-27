@@ -162,3 +162,11 @@ inline uint32_t Com_GetPrimaryLightCount()
 {
     return comWorld.primaryLightCount;
 }
+
+#ifdef KISAK_RADIANT
+// In SP/MP this lives in cgame/cg_ents.cpp; for Radiant we inline it here.
+inline const ComPrimaryLight *__cdecl Com_GetPrimaryLight(uint32_t primaryLightIndex)
+{
+    return &comWorld.primaryLights[primaryLightIndex];
+}
+#endif

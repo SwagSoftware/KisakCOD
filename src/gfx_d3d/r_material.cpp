@@ -680,6 +680,59 @@ const char *__cdecl Material_GetName(Material *handle)
     return Material_FromHandle(handle)->info.name;
 }
 
+// 0x51AD50  Material_GetConstantValue — look a constant up by name in the material's
+// constantTable (linear scan, hash-compared) and copy its vec4 literal into outValue.
+// Faithful transcription of CoD4Radiant.exe sub_51AD50.  NOTE: this takes a RESOLVED
+// Material* (it does NOT call Material_FromHandle); callers pass the resolved pointer.
+char __cdecl Material_GetConstantValue(Material *material, const char *name, float *outValue)
+{
+    int nameHash = R_HashString(name);
+    unsigned int i = 0;
+    if (!material->constantCount)
+        return 0;
+    MaterialConstantDef *c = material->constantTable;
+    while (c->nameHash != nameHash)
+    {
+        ++c;
+        if (++i >= (unsigned int)(unsigned char)material->constantCount)
+            return 0;
+    }
+    const float *literal = material->constantTable[i].literal;
+    outValue[0] = literal[0];
+    outValue[1] = literal[1];
+    outValue[2] = literal[2];
+    outValue[3] = literal[3];
+    return 1;
+}
+
+#ifdef KISAK_RADIANT
+// 0x4FEE90  Material_CastsStencilShadow — EDITOR-ONLY.  Faithful transcription of
+// CoD4Radiant.exe sub_4FEE90.  Returns whether the resolved material participates in
+// stencil-shadow casting: (1) surfaceFlags lacks 0x40000 (NO_DRAW for shadow purposes),
+// (2) the relevant GfxStateBits entry has the cull/blend pattern (loadBits[0] & 0x7000F00)
+// == 0x800 and (loadBits[1] & 1), and (3) its unlit/depth technique [1] matches the
+// shadow-caster reference material's technique [1].  The state-bits entry index uses
+// stateBitsEntry[4] only when technique [5] is present (else 0).  surfaceFlags is read
+// from the KISAK_RADIANT trailing Material field (CoD4 stores it in the 56B MaterialInfo
+// at info+0x2C; kisak's 24B MaterialInfo lacks it — see r_material.h / Material_LoadRaw).
+// Only consumer is MaterialDef_10_LayeredMatHandle (radiant/materialdef.cpp).
+bool __cdecl Material_CastsStencilShadow(Material *handle)
+{
+    const Material *m = Material_FromHandle(handle);
+    if ((m->surfaceFlags & 0x40000) != 0)
+        return false;
+    const MaterialTechniqueSet *techniqueSet = m->techniqueSet;
+    int idx = techniqueSet->techniques[5] ? (uint8_t)m->stateBitsEntry[4] : 0;
+    const GfxStateBits *sb = &m->stateBitsTable[idx];
+    if ((sb->loadBits[0] & 0x7000F00) != 0x800)
+        return false;
+    if ((sb->loadBits[1] & 1) == 0)
+        return false;
+    return techniqueSet->techniques[1]
+        == rgp.shadowCasterMaterial->techniqueSet->techniques[1];
+}
+#endif // KISAK_RADIANT
+
 void __cdecl Material_ReleasePassResources(MaterialPass *pass)
 {
     IDirect3DSurface9 *v1; // [esp+0h] [ebp-10h]

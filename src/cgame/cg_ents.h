@@ -1,7 +1,7 @@
 #pragma once
 
-#ifndef KISAK_SP
-#error This file is for SinglePlayer only
+#if !defined(KISAK_SP) && !defined(KISAK_RADIANT)
+#error This file is for SinglePlayer and Radiant only
 #endif
 
 
