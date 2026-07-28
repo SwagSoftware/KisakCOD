@@ -317,6 +317,9 @@ void Sys_LeaveCriticalSection(int critSect);
 void Sys_LockWrite(FastCriticalSection* critSect);
 void Sys_UnlockWrite(FastCriticalSection* critSect);
 
+int Sys_InterlockedIncrement(uint *addend);
+int Sys_InterlockedDecrement(uint *addend);
+
 void Sys_SetErrorText(const char* buf);
 void Sys_Error(const char *error, ...);
 void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line);

@@ -2322,34 +2322,18 @@ char __cdecl R_MarkFragments_EntirelyRigidXModel(
     float modelScale,
     GfxMarkContext *markContext)
 {
-    int surfIndex; // [esp+B0h] [ebp-10h]
-    int surfCount; // [esp+B4h] [ebp-Ch]
-    Material **materials; // [esp+B8h] [ebp-8h]
-    XSurface *surfaces; // [esp+BCh] [ebp-4h] BYREF
+    XSurface *surfaces; 
 
-    surfCount = XModelGetSurfaces(xmodel, &surfaces, 0);
-    materials = XModelGetSkins(xmodel, 0);
-    for (surfIndex = 0; surfIndex != surfCount && surfIndex <= 63; ++surfIndex)
+    int surfCount = XModelGetSurfaces(xmodel, &surfaces, 0);
+    Material **materials = XModelGetSkins(xmodel, 0);
+    for (int surfIndex = 0; surfIndex != surfCount && surfIndex <= 63; ++surfIndex)
     {
         if (R_Mark_MaterialAllowsMarks(materials[surfIndex], markInfo->material))
         {
-            if ((surfIndex & 0x3F) != surfIndex)
-                MyAssertHandler(
-                    ".\\r_marks.cpp",
-                    1541,
-                    0,
-                    "%s\n\t(surfIndex) = %i",
-                    "((surfIndex & MARK_MODEL_SURF_MASK) == surfIndex)",
-                    surfIndex);
+            iassert((surfIndex & MARK_MODEL_SURF_MASK) == surfIndex);
             markContext->modelTypeAndSurf = surfIndex | 0x40;
-            if (markContext->modelTypeAndSurf != (surfIndex | 0x40))
-                MyAssertHandler(
-                    ".\\r_marks.cpp",
-                    1543,
-                    0,
-                    "%s\n\t(surfIndex | MARK_MODEL_TYPE_WORLD_MODEL) = %i",
-                    "(markContext->modelTypeAndSurf == (surfIndex | MARK_MODEL_TYPE_WORLD_MODEL))",
-                    surfIndex | 0x40);
+            iassert(markContext->modelTypeAndSurf == (surfIndex | MARK_MODEL_TYPE_WORLD_MODEL));
+
             if (!R_MarkFragments_XModelSurface_Basic(
                 markInfo,
                 &surfaces[surfIndex],

@@ -18,6 +18,7 @@
 #include "r_draw_staticmodel.h"
 #include "r_draw_xmodel.h"
 #include "r_pretess.h"
+#include <EffectsCore/fx_marks.h>
 
 GfxScaledPlacement s_manualObjectPlacement;
 

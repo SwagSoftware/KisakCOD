@@ -22,6 +22,7 @@ set(EFFECTSCORE
     "${SRC_DIR}/EffectsCore/fx_graph.cpp"
     "${SRC_DIR}/EffectsCore/fx_load_obj.cpp"
     "${SRC_DIR}/EffectsCore/fx_marks.cpp"
+    "${SRC_DIR}/EffectsCore/fx_marks.h"
     "${SRC_DIR}/EffectsCore/fx_postlight.cpp"
     "${SRC_DIR}/EffectsCore/fx_profile.cpp"
     "${SRC_DIR}/EffectsCore/fx_random.cpp"

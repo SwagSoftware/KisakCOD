@@ -6,11 +6,14 @@
 #include <universal/memfile.h>
 
 #include <gfx_d3d/fxprimitives.h>
+#include "fx_marks.h"
 #include <gfx_d3d/r_gfx.h>
 
-#define FX_MARK_FREE -1
+#define FX_HANDLE_NONE 0xFFFF
 
 #define FX_EFFECT_LIMIT 1024
+
+#define GFX_ML_HANDLE_NONE 0
 
 enum $FFE723C3A54D7F6DDF86A219D7944B2F : int32_t
 {
@@ -42,7 +45,11 @@ enum $390C8AB619C5D27F330E671BCD9D689E : int32_t
     FX_ELEM_TYPE_LAST_DRAWN = 0x7,
 };
 
-#define FX_BONE_INDEX_NONE 2047
+#ifdef KISAK_SP
+#define FX_BONE_INDEX_NONE 0x3FF
+#else
+#define FX_BONE_INDEX_NONE 0x7FF
+#endif
 #define FX_DOBJ_HANDLE_NONE 4095
 
 void __cdecl TRACK_fx_system();
@@ -197,7 +204,6 @@ int FX_GetClientEffectIndex(int clientIndex, FxEffect *effect);
 
 extern FxSystem fx_systemPool[1];
 extern FxSystemBuffers fx_systemBufferPool[1];
-extern FxMarksSystem fx_marksSystemPool[1];
 
 
 // fx_Dvars
@@ -332,93 +338,13 @@ void __cdecl FX_CreateImpactMark(
     const FxSpatialFrame *spatialFrame,
     int32_t randomSeed,
     uint32_t markEntnum);
-void __cdecl FX_ImpactMark(
-    int32_t localClientNum,
-    Material *worldMaterial,
-    Material *modelMaterial,
-    float *origin,
-    const float *quat,
-    float orientation,
-    const uint8_t *nativeColor,
-    float radius,
-    uint32_t markEntnum);
-void __cdecl FX_ImpactMark_Generate(
-    int32_t localClientNum,
-    MarkFragmentsAgainstEnum markAgainst,
-    Material *material,
-    float *origin,
-    const float (*axis)[3],
-    float orientation,
-    const uint8_t *nativeColor,
-    float radius,
-    uint32_t markEntnum);
-void __cdecl FX_ImpactMark_Generate_AddEntityBrush(
-    int32_t localClientNum,
-    MarkInfo *markInfo,
-    uint32_t entityIndex,
-    const float *origin,
-    float radius);
-void __cdecl FX_ImpactMark_Generate_AddEntityModel(
-    int32_t localClientNum,
-    MarkInfo *markInfo,
-    uint32_t entityIndex,
-    const float *origin,
-    float radius);
-void __cdecl FX_ImpactMark_Generate_Callback(
-    void *context,
-    int32_t triCount,
-    FxMarkTri *tris,
-    int32_t pointCount,
-    FxMarkPoint *points,
-    const float *markOrigin,
-    const float *markTexCoordAxis);
-void __cdecl FX_AllocAndConstructMark(
-    int32_t localClientNum,
-    int32_t triCount,
-    int32_t pointCount,
-    Material *material,
-    FxMarkTri *markTris,
-    const FxMarkPoint *markPoints,
-    const float *origin,
-    float radius,
-    const float *texCoordAxis,
-    const uint8_t *nativeColor);
 FxMark *__cdecl FX_MarkFromHandle(FxMarksSystem *marksSystem, uint16_t handle);
-void __cdecl FX_FreeLruMark(FxMarksSystem *marksSystem);
-void __cdecl FX_FreeMark(FxMarksSystem *marksSystem, FxMark *mark);
-void __cdecl FX_FreeMarkFromList(FxMarksSystem *marksSystem, FxMark *mark, uint16_t *listHead);
-void __cdecl FX_FreeMarkTriGroups(FxMarksSystem *marksSystem, FxMark *mark);
-FxTriGroupPool *__cdecl FX_TriGroupFromHandle(FxMarksSystem *marksSystem, uint32_t handle);
-void __cdecl FX_FreeMarkPointGroups(FxMarksSystem *marksSystem, FxMark *mark);
-FxPointGroupPool *__cdecl FX_PointGroupFromHandle(FxMarksSystem *marksSystem, uint32_t handle);
-int32_t __cdecl FX_AllocMarkTris(FxMarksSystem *marksSystem, const FxMarkTri *markTris, int32_t triCount);
-int32_t __cdecl FX_TriGroupToHandle(FxMarksSystem *marksSystem, FxTriGroup *group);
-int32_t __cdecl FX_AllocMarkPoints(FxMarksSystem *marksSystem, int32_t pointCount);
-int32_t __cdecl FX_PointGroupToHandle(FxMarksSystem *marksSystem, FxPointGroup *group);
-void __cdecl FX_LinkMarkIntoList(FxMarksSystem *marksSystem, uint16_t *head, FxMark *mark);
-void __cdecl FX_CopyMarkTris(
-    FxMarksSystem *marksSystem,
-    const FxMarkTri *srcTris,
-    uint32_t dstGroupHandle,
-    int32_t triCount);
-void __cdecl FX_CopyMarkPoints(
-    FxMarksSystem *marksSystem,
-    const FxMarkPoint *srcPoints,
-    uint32_t dstGroupHandle,
-    int32_t pointCount);
-uint16_t __cdecl FX_FindModelHead(FxMarksSystem *marksSystem, uint16_t modelIndex, int32_t type);
-bool __cdecl FX_CompareMarkTris(const FxMarkTri &tri0, const FxMarkTri &tri1);
-int32_t __cdecl FX_MarkContextsCompare(const GfxMarkContext *context0, const GfxMarkContext *context1);
 void __cdecl FX_MarkEntDetachAll(int32_t localClientNum, int32_t entnum);
 void __cdecl FX_MarkEntUpdateHidePartBits(
     const uint32_t *oldHidePartBits,
     const uint32_t *newHidePartBits,
     int32_t localClientNum,
     int32_t entnum);
-void __cdecl FX_MarkEntDetachMatchingBones(
-    FxMarksSystem *marksSystem,
-    int32_t entnum,
-    const uint32_t *unsetHidePartBits);
 void __cdecl FX_MarkEntUpdateBegin(
     FxMarkDObjUpdateContext *context,
     DObj_s *obj,
@@ -431,9 +357,6 @@ void __cdecl FX_MarkEntUpdateEnd(
     DObj_s *obj,
     bool isBrush,
     uint16_t brushIndex);
-void __cdecl FX_MarkEntDetachAllOfType(int32_t localClientNum, int32_t entnum, int32_t markType);
-void __cdecl FX_MarkEntUpdateEndDObj(FxMarkDObjUpdateContext *context, int32_t localClientNum, int32_t entnum, DObj_s *obj);
-void __cdecl FX_MarkEntDetachModel(FxMarksSystem *marksSystem, int32_t entnum, int32_t oldModelIndex);
 void __cdecl FX_BeginGeneratingMarkVertsForEntModels(int32_t localClientNum, uint32_t *indexCount);
 void __cdecl FX_GenerateMarkVertsForEntXModel(
     int32_t localClientNum,
@@ -442,52 +365,6 @@ void __cdecl FX_GenerateMarkVertsForEntXModel(
     uint16_t lightHandle,
     uint8_t reflectionProbeIndex,
     const GfxScaledPlacement *placement);
-char __cdecl FX_GenerateMarkVertsForList_EntXModel(
-    FxMarksSystem *marksSystem,
-    uint16_t head,
-    const FxCamera *camera,
-    uint32_t *indexCount,
-    uint16_t lightHandleOverride,
-    uint8_t reflectionProbeIndexOverride,
-    const GfxScaledPlacement *placement);
-char __cdecl FX_GenerateMarkVertsForMark_Begin(
-    FxMarksSystem *marksSystem,
-    FxMark *mark,
-    uint32_t *indexCount,
-    uint16_t *outBaseVertex,
-    FxActiveMarkSurf *outDrawSurf);
-void __cdecl FX_DrawMarkTris(
-    FxMarksSystem *marksSystem,
-    const FxMark *mark,
-    uint16_t baseVertex,
-    uint16_t *indices,
-    FxActiveMarkSurf *outSurf);
-void __cdecl FX_EmitMarkTri(
-    FxMarksSystem *marksSystem,
-    const uint16_t *indices,
-    const GfxMarkContext *markContext,
-    uint16_t baseVertex,
-    FxActiveMarkSurf *outSurf);
-void __cdecl FX_GenerateMarkVertsForMark_SetLightHandle(
-    FxActiveMarkSurf *drawSurf,
-    uint16_t lightHandleOverride);
-void __cdecl FX_GenerateMarkVertsForMark_SetReflectionProbeIndex(
-    FxActiveMarkSurf *drawSurf,
-    uint8_t reflectionProbeIndexOverride);
-void __cdecl FX_GenerateMarkVertsForMark_FinishAnimated(
-    FxMarksSystem *marksSystem,
-    FxMark *mark,
-    uint16_t baseVertex,
-    FxActiveMarkSurf *drawSurf,
-    const float (*transform)[3]);
-void __cdecl FX_GenerateMarkVertsForMark_MatrixFromScaledPlacement(
-    const GfxScaledPlacement *placement,
-    const float *viewOffset,
-    float (*outTransform)[3]);
-void  FX_GenerateMarkVertsForMark_MatrixFromPlacement(
-    const GfxPlacement *placement,
-    const float *viewOffset,
-    float (*outTransform)[3]);
 void __cdecl FX_GenerateMarkVertsForEntDObj(
     int32_t localClientNum,
     int32_t entId,
@@ -496,56 +373,18 @@ void __cdecl FX_GenerateMarkVertsForEntDObj(
     uint8_t reflectionProbeIndex,
     const DObj_s *dobj,
     const cpose_t *pose);
-char __cdecl FX_GenerateMarkVertsForList_EntDObj(
-    FxMarksSystem *marksSystem,
-    uint16_t head,
-    const FxCamera *camera,
-    uint32_t *indexCount,
-    uint16_t lightHandleOverride,
-    uint8_t reflectionProbeIndexOverride,
-    const DObj_s *dobj,
-    const DObjAnimMat *boneMtxList);
-void  FX_GenerateMarkVertsForMark_MatrixFromAnim(
-    FxMark *mark,
-    const DObj_s *dobj,
-    const DObjAnimMat *boneMtxList,
-    const vec3r viewOffset,
-    mat4x3 &outTransform);
 void __cdecl FX_GenerateMarkVertsForEntBrush(
     int32_t localClientNum,
     int32_t entId,
     uint32_t *indexCount,
     uint8_t reflectionProbeIndex,
     const GfxPlacement *placement);
-char __cdecl FX_GenerateMarkVertsForList_EntBrush(
-    FxMarksSystem *marksSystem,
-    uint16_t head,
-    const FxCamera *camera,
-    uint32_t *indexCount,
-    const GfxPlacement *placement,
-    uint8_t reflectionProbeIndex);
 void __cdecl FX_EndGeneratingMarkVertsForEntModels(int32_t localClientNum);
-void __cdecl FX_FinishGeneratingMarkVerts(FxMarksSystem *marksSystem);
 void __cdecl FX_GenerateMarkVertsForStaticModels(
     int32_t localClientNum,
     int32_t smodelCount,
     const uint8_t *smodelVisLods);
-char __cdecl FX_GenerateMarkVertsForList_WorldXModel(
-    FxMarksSystem *marksSystem,
-    uint16_t head,
-    const FxCamera *camera,
-    uint32_t *indexCount);
-void __cdecl FX_GenerateMarkVertsForMark_FinishNonAnimated(
-    FxMarksSystem *marksSystem,
-    FxMark *mark,
-    uint16_t baseVertex,
-    FxActiveMarkSurf *drawSurf);
 void __cdecl FX_GenerateMarkVertsForWorld(int32_t localClientNum);
-char __cdecl FX_GenerateMarkVertsForList_WorldBrush(
-    FxMarksSystem *marksSystem,
-    uint16_t head,
-    const FxCamera *camera,
-    uint32_t *indexCount);
 
 
 

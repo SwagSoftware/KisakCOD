@@ -77,6 +77,16 @@ void Sys_UnlockWrite(FastCriticalSection* critSect)
     InterlockedDecrement(&critSect->writeCount);
 }
 
+int Sys_InterlockedIncrement(uint *addend)
+{
+    return InterlockedIncrement(addend);
+}
+
+int Sys_InterlockedDecrement(uint *addend)
+{
+    return InterlockedDecrement(addend);
+}
+
 uint32_t Win_InitThreads()
 {
     HANDLE CurrentProcess;

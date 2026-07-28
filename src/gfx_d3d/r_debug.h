@@ -133,51 +133,6 @@ enum GfxWarningType : __int32
     R_WARN_COUNT = 0x29,
 };
 
-const char * const s_warnFormat[41] =
-{
-    "entity buffer exceeded - not drawing model",
-    "too many existing models (more than %i)",
-    "too many existing special models (more than %i)",
-    "model light cache alloc failed - not drawing model",
-    "too many scene entities (more than %i)",
-    "TEMP_SKIN_BUF_SIZE exceeded - not skinning surface",
-    "R_MAX_SKINNED_CACHE_VERTICES((1024 * 144)) exceeded - not drawing surface",
-    "MAX_SCENE_SURFS_SIZE(131072) exceeded - not drawing surface",
-    "Portal plane buffer full - flushing",
-    "GFX_PARTICLE_CLOUD_LIMIT(256) exceeded - not drawing particle cloud",
-    "MAX_ADDED_DLIGHTS(32) exceeded.",
-    "Too many visible static models - not drawing static model",
-    "MAX_DRAWSURFS(32768) exceeded - not drawing geometry",
-    "GFX_CODE_MESH_LIMIT(2048) exceeded - not drawing code mesh",
-    "GFX_MARK_MESH_LIMIT(1536) exceeded - not drawing mark mesh",
-    "Max scene drawsurfs exceed from %s - not drawing surface",
-    "Max fx drawsurfs %i exceed for region %i - not drawing surface",
-    "non effect material ',27h,'%s',27h,' used for effect (or code geom)",
-    "non impact mark material ',27h,'%s',27h,' used for impact mark",
-    "PRIM_DRAW_SURF_BUFFER_SIZE((128 * 512)) exceeded - not drawing surface",
-    "command buffer overflow - not drawing surface",
-    "Missing decl %s techset %s tech %s shader %s (ignore for debug settings)",
-    "Max dyn ent refs exceeded",
-    "Max scene dobj refs (%i) exceeded",
-    "Max scene model refs (%i) exceeded",
-    "Max scene brush refs",
-    "GFX_CODE_MESH_INDEX_LIMIT((2048 * 6 * 2)) exceeded",
-    "GFX_CODE_MESH_VERT_LIMIT((2048 * 4 * 2)) exceeded",
-    "GFX_CODE_MESH_ARGS_LIMIT(256) exceeded",
-    "GFX_MARK_MESH_INDEX_LIMIT((1536 * 6)) exceeded",
-    "GFX_MARK_MESH_VERT_LIMIT((1536 * 4)) exceeded",
-    "Out of debug memory for (%s)",
-    "FX_SPOT_LIGHT_LIMIT(1) exceeded - not spawning spot light effect",
-    "FX_ELEM_LIMIT(2048) exceeded - not spawning fx elem",
-    "worker command size exceeded for type %i",
-    "Unknown static model shader",
-    "Unknown xmodel shader",
-    "DYNAMIC_INDEX_BUFFER_SIZE exceeded - speed warning",
-    "Too many light grid points",
-    "Fogable material %s used for 2D text %s",
-    "Fogable material %s used for 2D glyph",
-};
-
 void __cdecl TRACK_r_debug();
 void __cdecl R_AddDebugPolygon(DebugGlobals *debugGlobalsEntry, const float *color, int pointCount, float (*points)[3]);
 void __cdecl R_AddDebugLine(DebugGlobals *debugGlobalsEntry, const float *start, const float *end, const float *color);

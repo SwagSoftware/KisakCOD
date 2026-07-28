@@ -40,15 +40,21 @@ struct GfxMarkContext // sizeof=0x6
     uint8_t modelTypeAndSurf;   // ...
     uint16_t modelIndex;        // ...
 };
+static_assert(sizeof(GfxMarkContext) == 6);
 
 struct FxElemDef;
 
 /////////////////////////////////////////////////////////////////////////////////
 struct FxBoltAndSortOrder // sizeof=0x4
-{                                       // ...
+{
     unsigned __int32 dobjHandle : 12;
+#ifdef KISAK_SP
+    unsigned __int32 temporalBits : 2;
+    unsigned __int32 boneIndex : 10;
+#else
     unsigned __int32 temporalBits : 1;
     unsigned __int32 boneIndex : 11;
+#endif
     unsigned __int32 sortOrder : 8;
 };
 
@@ -274,23 +280,6 @@ struct FxMark // sizeof=0x44
     int points;
 };
 
-struct FxMarksSystem
-{                                       // ...
-    int frameCount;
-    uint16_t firstFreeMarkHandle;
-    uint16_t firstActiveWorldMarkHandle;
-    uint16_t entFirstMarkHandles[MAX_GENTITIES];
-    FxTriGroupPool *firstFreeTriGroup;
-    FxPointGroupPool *firstFreePointGroup;
-    FxMark marks[512];
-    FxTriGroupPool triGroups[2048];
-    FxPointGroupPool pointGroups[3072]; // ...
-    bool noMarks;
-    bool hasCarryIndex;
-    uint16_t carryIndex;
-    uint32_t allocedMarkCount;
-    uint32_t freedMarkCount;
-};
 struct FxUpdateElem // sizeof=0x7C
 {                                       // ...
     FxEffect *effect;

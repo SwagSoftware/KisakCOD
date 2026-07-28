@@ -11,6 +11,7 @@ struct XModel;
 #define DOBJ_HANDLE_NONE -1
 
 #define DOBJ_MAX_PARTS 0x80
+#define DOBJ_MAX_PART_BITS 4
 #define DOBJ_MAX_SUBMODELS 32
 
 #define HIGH_BIT 0x80000000

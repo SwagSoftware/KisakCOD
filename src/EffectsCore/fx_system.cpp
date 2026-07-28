@@ -351,7 +351,7 @@ void __cdecl FX_RunGarbageCollection_FreeTrails(FxSystem *system, FxEffect *effe
     uint16_t firstTrailHandle; // [esp+Ah] [ebp-6h]
     FxPool<FxTrail> *trail; // [esp+Ch] [ebp-4h]
 
-    while (effect->firstTrailHandle != 0xFFFF)
+    while (effect->firstTrailHandle != FX_HANDLE_NONE)
     {
         firstTrailHandle = effect->firstTrailHandle;
         if (!system)
@@ -390,8 +390,8 @@ void __cdecl FX_SpawnEffect_AllocTrails(FxSystem *system, FxEffect *effect)
 
             iassert(localTrail.defIndex == elemDefIter);
 
-            localTrail.firstElemHandle = 0xFFFF;
-            localTrail.lastElemHandle = 0xFFFF;
+            localTrail.firstElemHandle = FX_HANDLE_NONE;
+            localTrail.lastElemHandle = FX_HANDLE_NONE;
 
             localTrail.sequence = 0;
 
@@ -654,7 +654,7 @@ FxEffect* __cdecl FX_SpawnEffect(
 
         iassert((remoteEffect->status & FX_STATUS_OWNED_EFFECTS_MASK) == 0);
 
-        if (owner == 0xFFFF)
+        if (owner == FX_HANDLE_NONE)
         {
             remoteEffect->owner = effectHandle;
             remoteEffect->status |= 0x10000000u;
@@ -678,7 +678,7 @@ FxEffect* __cdecl FX_SpawnEffect(
 
         if (markEntnum == ENTITYNUM_NONE)
         {
-            iassert((!(boneIndex == ((1 << 11) - 1) && dobjHandle != ((1 << 12) - 1))));
+            iassert(!(boneIndex == FX_BONE_INDEX_NONE && dobjHandle != FX_DOBJ_HANDLE_NONE));
             iassert(boneIndex >= 0);
             remoteEffect->boltAndSortOrder.dobjHandle = dobjHandle;
             iassert(remoteEffect->boltAndSortOrder.dobjHandle == static_cast<uint>(dobjHandle));
@@ -896,7 +896,17 @@ FxEffect *__cdecl FX_SpawnOrientedEffect(
     system = FX_GetSystem(localClientNum);
     if (!system)
         MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1323, 0, "%s", "system");
-    return FX_SpawnEffect(system, def, msecBegin, origin, axis, 4095, 2047, 255, 0xFFFFu, markEntnum);
+    return FX_SpawnEffect(
+        system,
+        def,
+        msecBegin,
+        origin,
+        axis,
+        FX_DOBJ_HANDLE_NONE,
+        FX_BONE_INDEX_NONE,
+        255,
+        FX_HANDLE_NONE,
+        markEntnum);
 }
 
 void __cdecl FX_AssertAllocatedEffect(int32_t localClientNum, FxEffect *effect)
@@ -939,7 +949,7 @@ void __cdecl FX_PlayOrientedEffect(
     FxSystem *system; // [esp+8h] [ebp-4h]
 
     system = FX_GetSystem(localClientNum);
-    effect = FX_SpawnOrientedEffect(localClientNum, def, startMsec, origin, axis, 0x3FFu);
+    effect = FX_SpawnOrientedEffect(localClientNum, def, startMsec, origin, axis, ENTITYNUM_NONE);
     if (effect)
         FX_DelRefToEffect(system, effect);
 }
@@ -965,8 +975,8 @@ FxEffect *__cdecl FX_SpawnBoltedEffect(
     }
     else
     {
-        dobjHandle = 4095;
-        boneIndex = 2047;
+        dobjHandle = FX_DOBJ_HANDLE_NONE;
+        boneIndex = FX_BONE_INDEX_NONE;
     }
     system = FX_GetSystem(localClientNum);
     return FX_SpawnEffect(system, def, msecBegin, orient.origin, orient.axis, dobjHandle, boneIndex, 255, -1, ENTITYNUM_NONE);
@@ -1110,7 +1120,7 @@ void __cdecl FX_GetTrailHandleList_Last(
     uint32_t trailIndex; // [esp+8h] [ebp-4h]
 
     trailIndex = 0;
-    for (trailHandle = effect->firstTrailHandle; trailHandle != 0xFFFF; trailHandle = trail->item.nextTrailHandle)
+    for (trailHandle = effect->firstTrailHandle; trailHandle != FX_HANDLE_NONE; trailHandle = trail->item.nextTrailHandle)
     {
         if (!system)
             MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 362, 0, "%s", "system");
@@ -1287,15 +1297,15 @@ void __cdecl FX_RemoveAllEffectElems(FxSystem *system, FxEffect *effect)
     FX_StopEffect(system, effect);
     for (elemClass = 0; elemClass < 3; ++elemClass)
     {
-        while (effect->firstElemHandle[elemClass] != 0xFFFF)
+        while (effect->firstElemHandle[elemClass] != FX_HANDLE_NONE)
             FX_FreeElem(system, effect->firstElemHandle[elemClass], effect, elemClass);
     }
-    for (trailHandle = effect->firstTrailHandle; trailHandle != 0xFFFF; trailHandle = trail->item.nextTrailHandle)
+    for (trailHandle = effect->firstTrailHandle; trailHandle != FX_HANDLE_NONE; trailHandle = trail->item.nextTrailHandle)
     {
         if (!system)
             MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 362, 0, "%s", "system");
         for (trail = FX_PoolFromHandle_Generic<FxTrail, 128>(system->trails, trailHandle);
-            trail->item.firstElemHandle != 0xFFFF;
+            trail->item.firstElemHandle != FX_HANDLE_NONE;
             FX_FreeTrailElem(system, trail->item.firstElemHandle, effect, (FxTrail *)trail))
         {
             ;
@@ -1433,9 +1443,9 @@ void __cdecl FX_SpawnTrailElem_NoCull(
             if (!system)
                 MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 341, 0, "%s", "system");
             trailElemHandle = FX_PoolToHandle_Generic<FxTrailElem, 2048>(system->trailElems, (FxTrailElem *)remoteTrailElem);
-            if (trail->lastElemHandle == 0xFFFF)
+            if (trail->lastElemHandle == FX_HANDLE_NONE)
             {
-                if (trail->firstElemHandle != 0xFFFF)
+                if (trail->firstElemHandle != FX_HANDLE_NONE)
                     MyAssertHandler(".\\EffectsCore\\fx_system.cpp", 1954, 0, "%s", "trail->firstElemHandle == FX_HANDLE_NONE");
                 trail->firstElemHandle = trailElemHandle;
             }
@@ -1582,7 +1592,8 @@ void __cdecl FX_SpawnElem(
             FX_SpawnRunner(system, effect, elemDef, effectFrameWhenPlayed, randomSeed, msecBegin);
             break;
         case 9u:
-            if (effect->boltAndSortOrder.boneIndex != 0x7FF || effect->boltAndSortOrder.dobjHandle == 0xFFF)
+            if (effect->boltAndSortOrder.boneIndex != FX_BONE_INDEX_NONE
+                || effect->boltAndSortOrder.dobjHandle == FX_DOBJ_HANDLE_NONE)
             {
                 FX_CreateImpactMark(system->localClientNum, elemDef, effectFrameWhenPlayed, randomSeed, ENTITYNUM_NONE);
             }
@@ -1663,7 +1674,7 @@ void __cdecl FX_SpawnElem(
                         if (!system)
                             MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 327, 0, "%s", "system");
                         effect->firstElemHandle[elemClass] = FX_PoolToHandle_Generic<FxElem, 2048>(system->elems, (FxElem *)elem);
-                        if (elem->item.nextElemHandleInEffect != 0xFFFF)
+                        if (elem->item.nextElemHandleInEffect != FX_HANDLE_NONE)
                         {
                             nextElemHandleInEffect = elem->item.nextElemHandleInEffect;
                             if (!system)
@@ -1737,17 +1748,17 @@ void __cdecl FX_SpawnRunner(
         v6 = sortOrder;
     else
         v6 = 0;
-    if (effect->boltAndSortOrder.boneIndex == 0x7FF)
+    if (effect->boltAndSortOrder.boneIndex == FX_BONE_INDEX_NONE)
     {
-        if (effect->boltAndSortOrder.dobjHandle == 0xFFF)
+        if (effect->boltAndSortOrder.dobjHandle == FX_DOBJ_HANDLE_NONE)
             spawnedEffect = FX_SpawnEffect(
                 system,
                 effectDef,
                 msecWhenPlayed,
                 spawnOrigin,
                 (const float (*)[3])usedAxis,
-                4095,
-                2047,
+                FX_DOBJ_HANDLE_NONE,
+                FX_BONE_INDEX_NONE,
                 v6,
                 effect->owner,
                 ENTITYNUM_NONE);
@@ -1758,8 +1769,8 @@ void __cdecl FX_SpawnRunner(
                 msecWhenPlayed,
                 spawnOrigin,
                 (const float (*)[3])usedAxis,
-                4095,
-                2047,
+                FX_DOBJ_HANDLE_NONE,
+                FX_BONE_INDEX_NONE,
                 v6,
                 effect->owner,
                 effect->boltAndSortOrder.dobjHandle);
@@ -1924,14 +1935,14 @@ void __cdecl FX_FreeElem(FxSystem* system, uint16_t elemHandle, FxEffect* effect
     elem = FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, elemHandle);
     if (!elemClass && effect->firstSortedElemHandle == elemHandle)
         effect->firstSortedElemHandle = elem->item.nextElemHandleInEffect;
-    if (elem->item.nextElemHandleInEffect != 0xFFFF)
+    if (elem->item.nextElemHandleInEffect != FX_HANDLE_NONE)
     {
         nextElemHandleInEffect = elem->item.nextElemHandleInEffect;
         if (!system)
             MyAssertHandler("c:\\trees\\cod3\\src\\effectscore\\fx_system.h", 334, 0, "%s", "system");
         FX_PoolFromHandle_Generic<FxElem, 2048>(system->elems, nextElemHandleInEffect)->item.prevElemHandleInEffect = elem->item.prevElemHandleInEffect;
     }
-    if (elem->item.prevElemHandleInEffect == 0xFFFF)
+    if (elem->item.prevElemHandleInEffect == FX_HANDLE_NONE)
     {
         if (effect->firstElemHandle[elemClass] != elemHandle)
             MyAssertHandler(

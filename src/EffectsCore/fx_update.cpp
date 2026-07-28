@@ -1591,8 +1591,8 @@ void __cdecl FX_SpawnImpactEffect(
         msecOnImpact,
         update->posWorld,
         axis,
-        4095,
-        2047,
+        FX_DOBJ_HANDLE_NONE,
+        FX_BONE_INDEX_NONE,
         255,
         update->effect->owner,
         ENTITYNUM_NONE);
@@ -1655,8 +1655,8 @@ void __cdecl FX_SpawnDeathEffect(FxSystem* system, FxUpdateElem* update)
         update->msecUpdateBegin,
         frame.origin,
         orientPrev.axis,
-        4095,
-        2047,
+        FX_DOBJ_HANDLE_NONE,
+        FX_BONE_INDEX_NONE,
         255,
         update->effect->owner,
         ENTITYNUM_NONE);
@@ -1837,8 +1837,8 @@ uint8_t __cdecl FX_ProcessEmitting(
             msecAtSpawn,
             frameElemNow.origin,
             axisSpawn,
-            4095,
-            2047,
+            FX_DOBJ_HANDLE_NONE,
+            FX_BONE_INDEX_NONE,
             255,
             update->effect->owner,
             ENTITYNUM_NONE);
@@ -2216,7 +2216,7 @@ void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect)
     orientation_t orient; // [esp+8h] [ebp-34h] BYREF
     bool temporalBitsValid; // [esp+3Bh] [ebp-1h]
 
-    if (effect->boltAndSortOrder.boneIndex != 0x7FF)
+    if (effect->boltAndSortOrder.boneIndex != FX_BONE_INDEX_NONE)
     {
         localClientNum = system->localClientNum;
         temporalBitsValid = FX_GetBoltTemporalBits(localClientNum, effect->boltAndSortOrder.dobjHandle) == effect->boltAndSortOrder.temporalBits;
@@ -2235,8 +2235,8 @@ void __cdecl FX_UpdateEffectBolt(FxSystem *system, FxEffect *effect)
         else
         {
             FX_StopEffect(system, effect);
-            effect->boltAndSortOrder.boneIndex = 0x7FF;
-            effect->boltAndSortOrder.dobjHandle = 0xFFF;
+            effect->boltAndSortOrder.boneIndex = FX_BONE_INDEX_NONE;
+            effect->boltAndSortOrder.dobjHandle = FX_DOBJ_HANDLE_NONE;
         }
     }
 }
@@ -2307,7 +2307,7 @@ void __cdecl FX_UpdateEffect(FxSystem* system, FxEffect* effect)
 
 bool __cdecl FX_ShouldProcessEffect(FxSystem *system, FxEffect *effect, bool nonBoltedEffectsOnly)
 {
-    return (!nonBoltedEffectsOnly || effect->boltAndSortOrder.boneIndex == 0x7FF)
+    return (!nonBoltedEffectsOnly || effect->boltAndSortOrder.boneIndex == FX_BONE_INDEX_NONE)
         && InterlockedExchange(&effect->frameCount, system->frameCount) != system->frameCount;
 }
 
