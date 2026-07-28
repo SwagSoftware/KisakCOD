@@ -2364,6 +2364,10 @@ void __cdecl Com_SyncThreads()
     iassert( Sys_IsMainThread() );
 #endif
     R_SyncRenderThread();
+#ifdef KISAK_SP
+    if (com_sv_running->current.enabled)
+        SV_WaitServer();
+#endif
     R_WaitWorkerCmds();
 }
 
