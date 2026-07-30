@@ -3150,7 +3150,7 @@ void GScr_sin()
 {
     float v1; // [esp+8h] [ebp-4h]
 
-    v1 = Scr_GetFloat(0) * 0.01745329238474369;
+    v1 = DEG2RAD( Scr_GetFloat(0) );
     Scr_AddFloat(sin(v1));
 }
 
@@ -3158,7 +3158,7 @@ void GScr_cos()
 {
     float v1; // [esp+8h] [ebp-4h]
 
-    v1 = Scr_GetFloat(0) * 0.01745329238474369;
+    v1 = DEG2RAD( Scr_GetFloat(0) );
     Scr_AddFloat(cos(v1));
 }
 
@@ -3168,7 +3168,7 @@ void GScr_tan()
     float sinT; // [esp+14h] [ebp-8h]
     float cosT; // [esp+18h] [ebp-4h]
 
-    v1 = Scr_GetFloat(0) * 0.01745329238474369;
+    v1 = DEG2RAD( Scr_GetFloat(0) );
 
     cosT = cos(v1);
     sinT = sin(v1);
@@ -3192,7 +3192,7 @@ void GScr_asin()
         Scr_Error(v0);
     }
     v2 = asin(x);
-    Scr_AddFloat(v2 * 57.2957763671875);
+    Scr_AddFloat(RAD2DEG( v2 ));
 }
 
 void GScr_acos()
@@ -3208,7 +3208,7 @@ void GScr_acos()
         Scr_Error(v0);
     }
     v2 = acos(x);
-    Scr_AddFloat(v2 * 57.2957763671875);
+    Scr_AddFloat(RAD2DEG( v2 ));
 }
 
 void GScr_atan()
@@ -3218,7 +3218,7 @@ void GScr_atan()
 
     Float = Scr_GetFloat(0);
     v1 = atan(Float);
-    Scr_AddFloat(v1 * 57.2957763671875);
+    Scr_AddFloat(RAD2DEG( v1 ));
 }
 
 void GScr_abs()
@@ -5973,7 +5973,7 @@ void GScr_SetMiniMap()
     lowerRight[1] = Scr_GetFloat(4);
     SV_GetConfigstring(0x336u, northYawString, 32);
     v1 = atof(northYawString);
-    v2 = v1 * 0.01745329238474369;
+    v2 = DEG2RAD( v1 );
     north[0] = cos(v2);
     north[1] = sin(v2);
     diff = lowerRight[0] - upperLeft;

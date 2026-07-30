@@ -554,7 +554,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
         if (len >= 0.00009999999747378752)
         {
             dot = Vec3Dot(traceDir, mantleDir);
-            if (mantle_check_angle->current.value >= acos(dot) * 57.2957763671875)
+            if (mantle_check_angle->current.value >= RAD2DEG( acos(dot) ))
             {
                 return 1;
             }

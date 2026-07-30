@@ -707,7 +707,7 @@ void __cdecl ScriptEnt_DevAddRotate(scr_entref_t entref, uint32_t iAxis)
     if (Scr_GetNumParam() == 1)
     {
         fDelta = Scr_GetFloat(0);
-        v3 = fDelta * 0.01745329238474369;
+        v3 = DEG2RAD( fDelta );
         fCos = cos(v3);
         fSin = sin(v3);
         AnglesToAxis(pSelf->r.currentAngles, axisIn);

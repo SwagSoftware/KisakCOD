@@ -469,7 +469,7 @@ int __cdecl G_WorldDirToScreenPos(
     MatrixTransposeTransformVector(worldDir, (const mat3x3&)v17, v16);
     if (v16[0] <= 0.0)
         return 0;
-    *(double *)&v9 = (float)((float)((float)fov_x * (float)0.017453292) * (float)0.5);
+    *(double *)&v9 = (float)((float)(DEG2RAD( (float)fov_x )) * (float)0.5);
     v11 = (float)((float)((float)1.0 / v16[0]) * v16[1]);
     v12 = (float)((float)((float)1.0 / v16[0]) * v16[2]);
     v13 = tan(v9);

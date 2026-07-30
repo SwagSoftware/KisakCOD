@@ -361,7 +361,7 @@ void __cdecl CG_DrawGrenadePointer(
     pivot_4 = cg_hudGrenadePointerPivot->current.vector[1];
     angle = vectoyaw(grenadeOffset) - cgameGlob->predictedPlayerState.viewangles[1];
     yaw = AngleNormalize360(angle);
-    v13 = yaw * 0.01745329238474369;
+    v13 = DEG2RAD( yaw );
     cosYaw = cos(v13);
     sinYaw = sin(v13);
     v11 = radiusScale * sinYaw;
@@ -420,7 +420,7 @@ void __cdecl CG_DrawGrenadeIcon(
     radiusScale = cg_hudGrenadeIconOffset->current.value;
     angle = vectoyaw(grenadeOffset) - cgameGlob->predictedPlayerState.viewangles[1];
     yaw = AngleNormalize360(angle);
-    v15 = yaw * 0.01745329238474369;
+    v15 = DEG2RAD( yaw );
     cosYaw = cos(v15);
     sinYaw = sin(v15);
     v13 = -(width * 0.5) - radiusScale * sinYaw;

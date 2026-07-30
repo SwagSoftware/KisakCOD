@@ -88,7 +88,7 @@ bool CCamWnd::Cam_SetupScene()
     const float fov  = g_PrefsDlg->camera_fov;                      // "Fov" pref (default 65)
     const int   w    = camera.width  > 0 ? camera.width  : 1;
     const int   h    = camera.height > 0 ? camera.height : 1;
-    float tanY = tanf( fov * 0.01745329238474369f * 0.5f ) * 0.75f;
+    float tanY = tanf( DEG2RAD( fov ) * 0.5f ) * 0.75f;
     float tanX = tanY * (float)w / (float)h;
     // R_SetupScene 0x506570: zNear = max(r_znear, 0.01).  0.01 is the CLAMP FLOOR, not the near
     // plane — using it directly makes the depth range ~400x too coarse (coplanar tool faces Z-fight).
@@ -141,7 +141,7 @@ void CCamWnd::Cam_Fov()
 {
     float vec[3];
     // v4 = tan(fov/2) * 0.75 * (width/height); v3 = -v4  (0x405491..0x4054b0)
-    float v4 = (float)( tan( g_PrefsDlg->camera_fov * 0.01745329238474369 * 0.5 ) * 0.75 );
+    float v4 = (float)( tan( DEG2RAD( g_PrefsDlg->camera_fov ) * 0.5 ) * 0.75 );
     v4 = (float)( v4 * (double)camera.width / (double)camera.height );
     float v3 = -v4;
 
@@ -2085,7 +2085,7 @@ extern void  Sys_GetCursorPos( int *x, int *y );                         // win_
 static void CameraCalcRayDir( int y, float *dir, CCamWnd *cam, int x )
 {
     int    height = cam->camera.height;
-    double t      = tan( g_PrefsDlg->camera_fov * 0.01745329238474369 * 0.5 );
+    double t      = tan( DEG2RAD( g_PrefsDlg->camera_fov ) * 0.5 );
     float  s      = (float)( ( t * 0.75 + t * 0.75 ) / (double)height );
     float  yf     = (float)( (double)( y - height / 2 ) * s );
     float  xf     = (float)( s * (double)( x - cam->camera.width / 2 ) );
@@ -2929,9 +2929,8 @@ void Cam_CenterOnMap( CCamWnd *cam )
     float len  = sqrtf( L[0]*L[0] + L[1]*L[1] + L[2]*L[2] );
     if ( len < 1e-4f ) len = 1.0f;
     L[0]/=len; L[1]/=len; L[2]/=len;
-    const float RAD2DEG = 57.29577951308232f;
-    cam->camera.angles[0] = asinf( L[2] ) * RAD2DEG;          // pitch (look up/down)
-    cam->camera.angles[1] = atan2f( L[1], L[0] ) * RAD2DEG;   // yaw
+    cam->camera.angles[0] = RAD2DEG( asinf( L[2] ) );          // pitch (look up/down)
+    cam->camera.angles[1] = RAD2DEG( atan2f( L[1], L[0] ) );   // yaw
     cam->camera.angles[2] = 0.0f;
 
     Radiant_FL_Log( "cam fit: origin=(%g %g %g) angles=(%g %g) ext=%g",
@@ -3083,9 +3082,9 @@ static int Entity_Light( const float *worldPos, int defPtr, const orientation_t 
     if ( fovOuter == 0.0f )
         cosOuter = len / sqrtf( len * len + 4096.0f );
     else
-        cosOuter = (float)cos( fovOuter * 0.01745329238474369f * 0.5f );
+        cosOuter = (float)cos( DEG2RAD( fovOuter ) * 0.5f );
 
-    float cosInner = (float)cos( Entity_GetFloatValueForKey( defPtr, "fov_inner" ) * 0.01745329238474369f * 0.5f );
+    float cosInner = (float)cos( DEG2RAD( Entity_GetFloatValueForKey( defPtr, "fov_inner" ) ) * 0.5f );
     if ( cosOuter >= cosInner )
         return 3;
 
@@ -3098,7 +3097,7 @@ static int Entity_Light( const float *worldPos, int defPtr, const orientation_t 
     }
     else
     {
-        float c = (float)cos( maxturn * 0.01745329238474369f );
+        float c = (float)cos( DEG2RAD( maxturn ) );
         *outCosHalfFov = ( -cosOuter <= c ) ? Region_CosSum( cosOuter, c ) : -1.0f;
     }
     *outCosInner = cosInner;

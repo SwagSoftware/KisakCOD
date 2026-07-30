@@ -351,7 +351,7 @@ static void DrawCameraIcon( const XYViewState *wnd )
     else if ( wnd->viewType )          { v2 = 2; v5 = 0; ang = cam.angles[0]; }   // XZ → pitch
     else                               { v2 = 2; v5 = 1; ang = cam.angles[0]; }   // YZ → pitch
     const int   d3  = 3 - v2 - v5;                                 // out-of-plane axis
-    const float rad = ( ang + 45.0f ) * 0.01745329238474369f;
+    const float rad = DEG2RAD( ( ang + 45.0f ) );
     const float c   = (float)cos( rad );
     const float s   = (float)sin( rad );
     const float oh  = cam.origin[v5];                             // origin, in-plane horizontal
@@ -1677,7 +1677,7 @@ static void Ed_XY_MouseDown( CXYWnd *wnd, int x, int y, unsigned int buttons )
         {
             const double ang = Ed_Atan2_459A40( dir[a1], dir[a2] );
             g_nUpdateBits |= 0x104;
-            cam->angles[angIdx] = (float)( ang * 57.2957763671875 );
+            cam->angles[angIdx] = (float)( RAD2DEG( ang ) );
         }
     }
     if ( wnd->m_nButtonstate == (int)( v6 | MK_SHIFT ) )
@@ -1833,7 +1833,7 @@ static void Ed_XY_MouseMoved( CXYWnd *wnd, int x, int y, unsigned int buttons )
                     {
                         const double ang = Ed_Atan2_459A40( dir[a1], dir[a2] );
                         g_nUpdateBits |= 0x104;   // W_XY_OVERLAY | W_CAMERA_IFON (IDB 0x468516 = 0x104; W_CAMERA_IFON is 0x100)
-                        cam->angles[angIdx] = (float)( ang * 57.2957763671875 );
+                        cam->angles[angIdx] = (float)( RAD2DEG( ang ) );
                     }
                 }
             }

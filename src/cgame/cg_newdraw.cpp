@@ -2636,8 +2636,7 @@ void __cdecl CG_DrawPlayerStance(
                 DWORD2(v27) = v26;
                 v50 = *(float *)&v26;
                 v28 = (float)((float)*(__int64 *)((char *)&v27 + 4) * (float)0.5);
-                *(double *)&v29 = (float)((float)((float)((float)(__int64)v27 * (float)0.00066666666) * (float)540.0)
-                    * (float)0.017453292);
+                *(double *)&v29 = (float)DEG2RAD( (float)((float)((float)(__int64)v27 * (float)0.00066666666) * (float)540.0) );
                 v30 = sin(v29);
                 v52 = I_fabs((float)*(double *)&v30);
                 UI_DrawText(

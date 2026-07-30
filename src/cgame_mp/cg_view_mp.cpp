@@ -694,7 +694,7 @@ void __cdecl CG_OffsetThirdPersonView(cg_s *cgameGlob)
     if (v3 < 1.0)
         focusDist = 1.0;
     v2 = atan2(focusPoint[2], focusDist);
-    viewAngles[0] = v2 * -57.2957763671875;
+    viewAngles[0] = -RAD2DEG( v2 );
     AnglesToAxis(viewAngles, cgameGlob->refdef.viewaxis);
 }
 

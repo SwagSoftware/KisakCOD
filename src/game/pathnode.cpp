@@ -1093,7 +1093,7 @@ void __cdecl Path_DrawDebugNodeBox(const pathnode_t *node)
     G_DebugBox(node->constant.vOrigin, mins, maxs, node->constant.fAngle, nodeColorTable[node->constant.type], 1, 0);
     if ((node->constant.spawnflags & 0x8000) != 0)
     {
-        v6 = (float)(node->constant.fAngle * (float)0.017453292);
+        v6 = (float)(DEG2RAD( node->constant.fAngle ));
         *(double *)&v5 = v6;
         v7 = (float)((float)(node->constant.vOrigin[2] + maxs[2]) + (float)(node->constant.vOrigin[2] + mins[2]));
         v8 = (float)((float)((float)(node->constant.vOrigin[1] + maxs[1]) + (float)(node->constant.vOrigin[1] + mins[1]))

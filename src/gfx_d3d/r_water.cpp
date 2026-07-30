@@ -282,7 +282,7 @@ void __cdecl R_InitWater()
 
     for (tableIndex = 0; tableIndex < 1024; ++tableIndex)
     {
-        v1 = (double)tableIndex * 0.3515625 * 0.01745329238474369;
+        v1 = (double)tableIndex * 0.3515625 * PI_DIV_180;
         v0 = sin(v1);
         waterGlobStatic.sinTable[tableIndex] = v0;
     }

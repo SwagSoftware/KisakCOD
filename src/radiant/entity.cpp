@@ -1554,9 +1554,9 @@ static void sub_4859B0( float *angles_out, float *dir )
 {
     float matrix[9];   // row0 = forward', row1 = dir × forward', row2 = dir  (contiguous!)
 
-    const double yaw   = angles_out[1] * 0.01745329238474369;
+    const double yaw   = DEG2RAD( angles_out[1] );
     const float  cy = (float)cos( yaw ),   sy = (float)sin( yaw );
-    const double pitch = angles_out[0] * 0.01745329238474369;
+    const double pitch = DEG2RAD( angles_out[0] );
     const float  cp = (float)cos( pitch ), sp = (float)sin( pitch );
 
     matrix[0] = cp * cy;

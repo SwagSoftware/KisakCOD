@@ -710,7 +710,7 @@ void __cdecl CG_TransitionToAds(
     iassert(cgameGlob->refdef.tanHalfFovY != 0.0f);
 
     *transScale = 1.0 - fa * 0.5;
-    v6 = weapDef->fAdsAimPitch * 0.01745329238474369;
+    v6 = DEG2RAD( weapDef->fAdsAimPitch );
     v5 = tan(v6);
     *transShift = fa * 240.0 / cgameGlob->refdef.tanHalfFovY * v5;
 }
@@ -876,7 +876,7 @@ void __cdecl CG_CalcReticleSpread(
 
     BG_GetSpreadForWeapon(&cgameGlob->predictedPlayerState, weapDef, &f, &maxSpread);
     f = ((maxSpread - f) * (cgameGlob->predictedPlayerState.aimSpreadScale / 255.0) + f) * transScale;
-    v6 = f * 0.01745329238474369;
+    v6 = DEG2RAD( f );
     v5 = tan(v6);
     scale = v5 * 240.0 / cgameGlob->refdef.tanHalfFovY;
     if (scale < (double)weapDef->iReticleMinOfs)

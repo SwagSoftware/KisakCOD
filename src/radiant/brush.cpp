@@ -2192,7 +2192,7 @@ static char Ed_Patch_GetTexdef( patchMesh_t *patch, texdef_sub_t *texdef )
         // The size phase normalized rowT's (u,v) by lenT; the binary then calls
         // atan2(st1=rowT_u_norm, st0=rowT_v_norm) — i.e. CRT atan2(y=rowT_u, x=rowT_v).
         // Since lenT>0 the normalization cancels: atan2(rowT_u/lenT, rowT_v/lenT) == atan2(rowT_u, rowT_v).
-        float  rotRaw = (float)( atan2( rowT_u, rowT_v ) * 57.2957763671875 );  // dbl_6F4578
+        float  rotRaw = (float)( RAD2DEG( atan2( rowT_u, rowT_v ) ) );  // dbl_6F4578
         texdef->rotate = rotRaw;                                                // raw store (fst)
         float  rounded = floorf( rotRaw + 0.5f );                               // dbl_6F4160 = 0.5
         float  diff = rounded - rotRaw;
@@ -2352,7 +2352,7 @@ void Texture_Fit( int a1, float a2, float a3, int a4 )
     float        *v10 = &md->mat_texDef.size[7 * curLayer];   // [0]=size0 [1]=size1 [2]=shift0 [3]=shift1
     float         rotate = md->mat_texDef.size[7 * curLayer + 4];  // block CL's rotate
 
-    double rad  = (double)rotate * 0.01745329238474369;       // dbl_6F4298 (π/180)
+    double rad  = DEG2RAD( (double)rotate );       // dbl_6F4298 (π/180)
     float  cosv = (float)cos( rad );
     float  sinv = (float)sin( rad );
 

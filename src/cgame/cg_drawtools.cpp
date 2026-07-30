@@ -67,7 +67,7 @@ void __cdecl CG_DrawRotatedPicPhysical(
     float center[2]; // [esp+64h] [ebp-Ch]
     float sin; // [esp+6Ch] [ebp-4h]
 
-    v14 = angle * 0.01745329238474369;
+    v14 = DEG2RAD( angle );
     cos = cosf(v14);
     sin = sinf(v14);
     
@@ -132,7 +132,7 @@ void __cdecl CG_DrawRotatedQuadPic(
     float s; // [esp+50h] [ebp-8h]
     int32_t i; // [esp+54h] [ebp-4h]
 
-    v15 = angle * 0.01745329238474369;
+    v15 = DEG2RAD( angle );
     c = cos(v15);
     s = sin(v15);
     for (i = 0; i < 4; ++i)
@@ -349,7 +349,7 @@ void __cdecl CG_NorthDirectionChanged(int32_t localClientNum)
     pszString = CL_GetConfigString(localClientNum, CS_NORTHYAW);
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     cgameGlob->compassNorthYaw = atof(pszString);
-    v1 = cgameGlob->compassNorthYaw * 0.01745329238474369;
+    v1 = DEG2RAD( cgameGlob->compassNorthYaw );
     cgameGlob->compassNorth[0] = cos(v1);
     cgameGlob->compassNorth[1] = sin(v1);
     CG_MiniMapChanged(localClientNum);
@@ -396,7 +396,7 @@ void __cdecl CG_DebugBox(
     float v[25]; // [esp+2Ch] [ebp-68h] BYREF
     float fSin; // [esp+90h] [ebp-4h]
 
-    v8 = yaw * 0.01745329238474369;
+    v8 = DEG2RAD( yaw );
     fCos = cos(v8);
     fSin = sin(v8);
     for (i = 0; i < 8; ++i)

@@ -505,7 +505,7 @@ void __cdecl RB_StretchPicRotateXYCmd(GfxRenderCommandExecState *execState)
     halfHeight = cmd->h * 0.5;
     midX = cmd->x + halfWidth;
     midY = cmd->y + halfHeight;
-    v9 = cmd->rotation * 0.01745329238474369;
+    v9 = DEG2RAD( cmd->rotation );
     cosAngle = cos(v9);
     sinAngle = sin(v9);
     stepX = halfWidth * cosAngle;
@@ -567,7 +567,7 @@ void __cdecl RB_StretchPicRotateSTCmd(GfxRenderCommandExecState *execState)
     tess.indices[indexCount + 3] = vertCount + 2;
     tess.indices[indexCount + 4] = vertCount;
     tess.indices[indexCount + 5] = vertCount + 1;
-    v5 = cmd->rotation * 0.01745329238474369;
+    v5 = DEG2RAD( cmd->rotation );
     cosAngle = cos(v5);
     sinAngle = sin(v5);
     stepS = cmd->radiusST * cosAngle * cmd->scaleFinalS;
@@ -2538,7 +2538,7 @@ void __cdecl RB_DrawText2DCmd(GfxRenderCommandExecState *execState)
     const GfxCmdDrawText2D *cmd; // [esp+68h] [ebp-4h]
 
     cmd = (const GfxCmdDrawText2D *)execState->cmd;
-    v1 = cmd->rotation * 0.01745329238474369;
+    v1 = DEG2RAD( cmd->rotation );
     cosAngle = cos(v1);
     sinAngle = sin(v1);
     DrawText2D(

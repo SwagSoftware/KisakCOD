@@ -759,10 +759,10 @@ void __cdecl CG_VehSphereCoordsToPos(float sphereDistance, float sphereYaw, floa
     float yawSin; // [esp+20h] [ebp-8h]
     float yawCos; // [esp+24h] [ebp-4h]
 
-    v5 = (90.0 - sphereAltitude) * 0.01745329238474369;
+    v5 = DEG2RAD( (90.0 - sphereAltitude) );
     altitudeCos = cos(v5);
     altitudeSin = sin(v5);
-    v4 = (sphereYaw - 90.0) * 0.01745329238474369;
+    v4 = DEG2RAD( (sphereYaw - 90.0) );
     yawCos = cos(v4);
     yawSin = sin(v4);
     *result = sphereDistance * yawCos * altitudeSin;

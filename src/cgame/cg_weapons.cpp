@@ -3173,7 +3173,7 @@ void __cdecl CG_BulletEndpos(
 
     iassert(!IS_NAN(spread));
     iassert(end);
-    v10 = spread * 0.01745329238474369;
+    v10 = DEG2RAD( spread );
     v9 = tan(v10);
     aimOffset = v9 * maxRange;
     iassert(!IS_NAN(aimOffset));
@@ -3207,7 +3207,7 @@ void __cdecl RandomBulletDir(int32_t randSeed, float *x, float *y)
     iassert(y);
     theta = G_GoodRandomFloat(&randSeed) * 360.0;
     r = G_GoodRandomFloat(&randSeed);
-    v3 = theta * 0.01745329238474369;
+    v3 = DEG2RAD( theta );
     cosT = cos(v3);
     sinT = sin(v3);
     *x = r * cosT;

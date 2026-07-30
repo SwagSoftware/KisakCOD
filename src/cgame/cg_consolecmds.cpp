@@ -405,9 +405,9 @@ void __cdecl SphereCoordsToPos(
     float v20; // fp2
 
     v15 = sinf(sphereYaw);
-    v17 = cosf(((90.0f - sphereAltitude) * 0.017453292f));
-    v19 = sinf(((sphereYaw - 90.0f) * 0.017453292f));
-    v20 = cosf(((sphereYaw - 90.0f) * 0.017453292f));
+    v17 = cosf((DEG2RAD( (90.0f - sphereAltitude) )));
+    v19 = sinf((DEG2RAD( (sphereYaw - 90.0f) )));
+    v20 = cosf((DEG2RAD( (sphereYaw - 90.0f) )));
 
     result[0] = (v20 * v15) * sphereDistance;
     result[1] = (v19 * v15) * sphereDistance;

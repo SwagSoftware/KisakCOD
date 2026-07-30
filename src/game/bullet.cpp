@@ -119,7 +119,7 @@ void __cdecl Bullet_Endpos(int32_t randSeed, float spread, float *end, float *di
         MyAssertHandler(".\\game\\bullet.cpp", 94, 0, "%s", "end");
     if (!wp)
         MyAssertHandler(".\\game\\bullet.cpp", 95, 0, "%s", "wp");
-    v7 = spread * 0.01745329238474369f;
+    v7 = DEG2RAD( spread );
     v6 = tan(v7);
     aimOffset = v6 * maxRange;
     if ((LODWORD(aimOffset) & 0x7F800000) == 0x7F800000)
@@ -222,7 +222,7 @@ void __cdecl Bullet_RandomDir(int32_t time, float *x, float *y)
         MyAssertHandler(".\\game\\bullet.cpp", 69, 0, "%s", "y");
     theta = G_GoodRandomFloat(&time) * 360.0f;
     r = G_GoodRandomFloat(&time);
-    v3 = theta * 0.01745329238474369f;
+    v3 = DEG2RAD( theta );
     cosT = cos(v3);
     sinT = sin(v3);
     *x = r * cosT;

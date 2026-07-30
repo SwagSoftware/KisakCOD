@@ -423,7 +423,7 @@ gentity_s *__cdecl Weapon_RocketLauncher_Fire(
         MyAssertHandler(".\\game\\g_weapon.cpp", 362, 0, "%s", "ent");
     if (!wp)
         MyAssertHandler(".\\game\\g_weapon.cpp", 363, 0, "%s", "wp");
-    v9 = spread * 0.01745329238474369;
+    v9 = DEG2RAD( spread );
     v8 = tan(v9);
     fAimOffset = v8 * 16.0;
     gunrandom(&r, &u);
@@ -452,7 +452,7 @@ void __cdecl gunrandom(float *x, float *y)
 
     theta = G_random() * 360.0;
     r = G_random();
-    v2 = theta * 0.01745329238474369;
+    v2 = DEG2RAD( theta );
     cosT = cos(v2);
     sinT = sin(v2);
     *x = r * cosT;

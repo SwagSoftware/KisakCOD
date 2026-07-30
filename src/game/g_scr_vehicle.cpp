@@ -941,7 +941,7 @@ void __cdecl VEH_UpdateBody(gentity_s *ent)
     veh = ent->scr_vehicle;
     if (veh->joltTime > 0.0f)
     {
-        sinWave = sin((double)(veh->joltWave * 0.017453292f)); // deg→rad
+        sinWave = sin((double)(DEG2RAD( veh->joltWave ))); // deg→rad
         scaled = veh->joltTime * (float)sinWave;
         ent->s.lerp.u.turret.gunAngles[0] = veh->joltDir[0] * scaled;
         ent->s.lerp.u.turret.gunAngles[1] = veh->joltDir[1] * scaled;
@@ -2262,7 +2262,7 @@ void __cdecl VEH_UpdateMoveOrientation(gentity_s *ent, float *desiredDir)
     VEH_AddFakeDrag(veh->phys.vel, veh->maxDragSpeed, accelVec);
     horizontalAccel = Vec2Length(accelVec) / 0.05000000074505806f;
     Vec3Normalize(accelVec);
-    angle = veh->phys.angles[1] * 0.01745329238474369f;
+    angle = DEG2RAD( veh->phys.angles[1] );
     bodyDir = cos(angle);
     bodyDir_4 = sin(angle);
     accelFraction = VEH_CalcAccelFraction(horizontalAccel, veh->infoIdx);

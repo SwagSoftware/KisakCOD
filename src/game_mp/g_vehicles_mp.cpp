@@ -1467,7 +1467,7 @@ void __cdecl VEH_UpdateBody(gentity_s *ent, float frameTime)
     veh = ent->scr_vehicle;
     if (veh->joltTime > 0.0)
     {
-        v3 = veh->joltWave * 0.01745329238474369;
+        v3 = DEG2RAD( veh->joltWave );
         v2 = sin(v3);
         intensity = veh->joltTime / 1.0 * v2;
         ent->s.lerp.u.vehicle.bodyPitch = intensity * veh->joltDir[0];

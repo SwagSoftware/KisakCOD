@@ -693,7 +693,7 @@ void __cdecl RotatePointAroundVector(float* dst, const float* dir, const float* 
     zrot[2][2] = 1.0;
     zrot[1][1] = 1.0;
     zrot[0][0] = 1.0;
-    rad = degrees * 0.01745329238474369;
+    rad = DEG2RAD( degrees );
     iassert(!isnan(rad));
 
     zrot[0][0] = cos(rad);
@@ -885,7 +885,7 @@ void __cdecl YawVectors(float yaw, float *forward, float *right)
     float angle; // [esp+Ch] [ebp-8h]
     float sy; // [esp+10h] [ebp-4h]
 
-    angle = yaw * 0.01745329238474369;
+    angle = DEG2RAD( yaw );
     cy = cos(angle);
     sy = sin(angle);
     if (forward)
@@ -908,7 +908,7 @@ void __cdecl YawVectors2D(float yaw, float *forward, float *right)
     float angle; // [esp+Ch] [ebp-8h]
     float sy; // [esp+10h] [ebp-4h]
 
-    angle = yaw * 0.01745329238474369;
+    angle = DEG2RAD( yaw );
     cy = cos(angle);
     sy = sin(angle);
     if (forward)
@@ -1541,7 +1541,7 @@ void __cdecl VectorAngleMultiply(float *vec, float angle)
     float x; // [esp+10h] [ebp-8h]
     float y; // [esp+14h] [ebp-4h]
 
-    v2 = angle * 0.01745329238474369;
+    v2 = DEG2RAD( angle );
     x = cos(v2);
     y = sin(v2);
     temp = *vec * x - vec[1] * y;
@@ -1750,7 +1750,7 @@ float __cdecl RotationToYaw(const float *rot)
     v4 = ra * (rot[1] * *rot);
     v3 = 1.0 - ra * zz;
     v2 = atan2(v4, v3);
-    return (v2 * 57.2957763671875);
+    return (RAD2DEG( v2 ));
 }
 
 void __cdecl AnglesSubtract(float *v1, float *v2, float *v3)
@@ -2064,12 +2064,12 @@ void __cdecl AxisToAngles(const mat3x3 &axis, vec3r angles)
     right[0] = axis[1][0];
     right[1] = axis[1][1];
     right[2] = axis[1][2];
-    rad = -angles[1] * 0.01745329238474369;
+    rad = -DEG2RAD( angles[1] );
     fCos = cos(rad);
     fSin = sin(rad);
     temp = fCos * right[0] - fSin * right[1];
     right[1] = fSin * right[0] + fCos * right[1];
-    rada = -*angles * 0.01745329238474369;
+    rada = -DEG2RAD( *angles );
     fCos = cos(rada);
     fSin = sin(rada);
     right[0] = fSin * right[2] + fCos * temp;
@@ -2598,13 +2598,13 @@ void __cdecl AxisToSignedAngles(const float (*axis)[3], float *angles)
     right[1] = (*axis)[4];
     right[2] = (*axis)[5];
     //rad = COERCE_FLOAT(*((_DWORD *)angles + 1) ^ _mask__NegFloat_) * 0.017453292;
-    rad = (float)((float)-angles[1] * (float)0.017453292);
+    rad = -DEG2RAD( angles[1] );
     fCos = cos(rad);
     fSin = sin(rad);
     temp = (float)(fCos * right[0]) - (float)(fSin * right[1]);
     right[1] = (float)(fSin * right[0]) + (float)(fCos * right[1]);
     //rada = COERCE_FLOAT(*(_DWORD *)angles ^ _mask__NegFloat_) * 0.017453292;
-    rada = (float)((float)-*angles * (float)0.017453292);
+    rada = -DEG2RAD( *angles );
     fCos = cos(rada);
     fSin = sin(rada);
     right[0] = (float)(fSin * right[2]) + (float)(fCos * temp);

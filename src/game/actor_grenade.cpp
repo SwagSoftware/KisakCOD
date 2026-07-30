@@ -301,8 +301,7 @@ int __cdecl Actor_Grenade_GetTossPositionsFromHints(
     float dirHintToFrom[2];   // was v20 (BYREF) + v21
 
     //Profile_Begin(351);
-    *(double *)&v7 = (float)((float)((float)(ai_debugGrenadeHintArc->current.value * (float)0.5) + (float)180.0)
-        * (float)0.017453292);
+    *(double *)&v7 = (float)DEG2RAD( (float)((float)(ai_debugGrenadeHintArc->current.value * (float)0.5) + (float)180.0) );
     v8 = cos(v7);
     v9 = (float)*(double *)&v8;
     if (!level.grenadeHintCount)

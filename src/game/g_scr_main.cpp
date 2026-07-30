@@ -5530,7 +5530,7 @@ void GScr_sin()
     long double v0; // fp2
     long double v1; // fp2
 
-    *(double *)&v0 = (float)(Scr_GetFloat(0) * (float)0.017453292);
+    *(double *)&v0 = (float)(DEG2RAD( Scr_GetFloat(0) ));
     v1 = sin(v0);
     Scr_AddFloat((float)*(double *)&v1);
 }
@@ -5540,7 +5540,7 @@ void GScr_cos()
     long double v0; // fp2
     long double v1; // fp2
 
-    *(double *)&v0 = (float)(Scr_GetFloat(0) * (float)0.017453292);
+    *(double *)&v0 = (float)(DEG2RAD( Scr_GetFloat(0) ));
     v1 = cos(v0);
     Scr_AddFloat((float)*(double *)&v1);
 }
@@ -5554,7 +5554,7 @@ void GScr_tan()
     long double v4; // fp2
     double v5; // fp31
 
-    v0 = (float)(Scr_GetFloat(0) * (float)0.017453292);
+    v0 = (float)(DEG2RAD( Scr_GetFloat(0) ));
     *(double *)&v1 = v0;
     v2 = sin(v1);
     v3 = (float)*(double *)&v2;
@@ -5582,7 +5582,7 @@ void GScr_asin()
     }
     *(double *)&v0 = v1;
     v3 = asin(v0);
-    Scr_AddFloat((float)((float)*(double *)&v3 * (float)57.295776));
+    Scr_AddFloat((float)RAD2DEG( (float)*(double *)&v3 ));
 }
 
 void GScr_acos()
@@ -5601,7 +5601,7 @@ void GScr_acos()
     }
     *(double *)&v0 = v1;
     v3 = acos(v0);
-    Scr_AddFloat((float)((float)*(double *)&v3 * (float)57.295776));
+    Scr_AddFloat((float)RAD2DEG( (float)*(double *)&v3 ));
 }
 
 void GScr_atan()
@@ -5611,7 +5611,7 @@ void GScr_atan()
 
     *(double *)&v0 = Scr_GetFloat(0);
     v1 = atan(v0);
-    Scr_AddFloat((float)((float)*(double *)&v1 * (float)57.295776));
+    Scr_AddFloat((float)RAD2DEG( (float)*(double *)&v1 ));
 }
 
 void GScr_CastInt()
@@ -10848,7 +10848,7 @@ void GScr_SetLightFovRange(scr_entref_t entref) // KISAKTODO: another cleanup pa
     if (outerFov < 0.99900001f || outerFov >= 120.001f)
         Scr_ParamError(0, "outer fov must be in the range of 1 to 120");
 
-    cosOuter = cosf(outerFov * 0.017453292f * 0.5f);
+    cosOuter = cosf(DEG2RAD( outerFov ) * 0.5f);
     if (cosOuter < refLight->cosHalfFovOuter - 0.001f)
         Scr_ParamError(0, "outer fov cannot be larger than the fov when the map was compiled");
 
@@ -10865,7 +10865,7 @@ void GScr_SetLightFovRange(scr_entref_t entref) // KISAKTODO: another cleanup pa
         if (innerFov < -0.001f || innerFov >= outerFov + 0.001f)
             Scr_ParamError(1, "inner fov must be in the range of 0 to outer fov");
 
-        float rawCosInner = cosf(innerFov * 0.017453292f * 0.5f);
+        float rawCosInner = cosf(DEG2RAD( innerFov ) * 0.5f);
 
         float upperClampedInner = (rawCosInner >= 1.0f) ? 1.0f : rawCosInner;
         cosInner = ((clampedCosOuter + 0.001f) >= rawCosInner)

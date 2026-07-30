@@ -997,12 +997,12 @@ void AxisToAngles( float *angles, float (*axis)[3] )   // 0x4a8a00
 
     float rx = axis[1][0], ry = axis[1][1], rz = axis[1][2];
 
-    double cyaw = -(double)angles[1] * 0.01745329238474369;
+    double cyaw = -DEG2RAD( (double)angles[1] );
     float cy = (float)cos( cyaw ), sy = (float)sin( cyaw );
     float t  = rx * cy - ry * sy;
     ry       = ry * cy + sy * rx;
 
-    double cpit = -(double)angles[0] * 0.01745329238474369;
+    double cpit = -DEG2RAD( (double)angles[0] );
     float cp = (float)cos( cpit ), sp = (float)sin( cpit );
     float rolled[3];
     rolled[0] = t * cp + rz * sp;
@@ -1041,13 +1041,12 @@ void OrientationConcatenate( const orientation_t *orFirst, const orientation_t *
 
 float *AnglesToAxis( float *angles, float (*axis)[3] )
 {
-    const double D2R = 0.01745329238474369;
-    double yaw = angles[1] * D2R, cy = cos( yaw ), sy = sin( yaw );
-    double pit = angles[0] * D2R, cp = cos( pit ), sp = sin( pit );
+    double yaw = DEG2RAD( angles[1] ), cy = cos( yaw ), sy = sin( yaw );
+    double pit = DEG2RAD( angles[0] ), cp = cos( pit ), sp = sin( pit );
     axis[0][0] = (float)( cp * cy );
     axis[0][1] = (float)( cp * sy );
     axis[0][2] = (float)( -sp );
-    double rol = angles[2] * D2R, cr = cos( rol ), sr = sin( rol );
+    double rol = DEG2RAD( angles[2] ), cr = cos( rol ), sr = sin( rol );
     axis[1][0] = (float)( cy * ( sr * sp ) - cr * sy );
     axis[1][1] = (float)( ( sr * sp ) * sy + cr * cy );
     axis[1][2] = (float)( sr * cp );

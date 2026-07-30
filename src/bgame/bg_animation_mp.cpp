@@ -1352,7 +1352,7 @@ void __cdecl BG_Player_DoControllersInternal(const entityState_s *es, const clie
             if (fLeanFrac != 0.0)
                 vHeadAngles[2] = vHeadAngles[2] * 0.5;
             tag_origin_angles[0] = tag_origin_angles[0] + es->fTorsoPitch;
-            v14 = vTorsoAngles[1] * 0.01745329238474369f;
+            v14 = DEG2RAD( vTorsoAngles[1] );
             c = cos(v14);
             s = sin(v14);
             tag_origin_offset = (1.0f - c) * -24.0f + tag_origin_offset;

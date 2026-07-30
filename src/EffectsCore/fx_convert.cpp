@@ -984,7 +984,7 @@ void __cdecl FX_SampleVisualState(FxElemDef *elemDef, const FxEditorElemDef *edE
     FxSampleChannel routing[5]; // [esp+144h] [ebp-14h] BYREF
 
     FX_GetVisualSampleRouting(edElemDef, routing);
-    rotationScale = edElemDef->rotationScale * 0.01745329238474369 / ((double)elemDef->visStateIntervalCount * 1000.0);
+    rotationScale = DEG2RAD( edElemDef->rotationScale ) / ((double)elemDef->visStateIntervalCount * 1000.0);
     secondColorSrc = (edElemDef->editorFlags & 2) != 0;
     secondAlphaSrc = (edElemDef->editorFlags & 4) != 0;
     for (sampleIndex = 0; sampleIndex <= elemDef->visStateIntervalCount; ++sampleIndex)
@@ -1345,13 +1345,13 @@ void __cdecl FX_ConvertElemDef(
     FX_CopyCanonicalFloatRange(&elemDef->spawnOrigin[2], &edElemDef->spawnOrigin[2]);
     FX_CopyCanonicalFloatRange(&elemDef->spawnOffsetRadius, &edElemDef->spawnOffsetRadius);
     FX_CopyCanonicalFloatRange(&elemDef->spawnOffsetHeight, &edElemDef->spawnOffsetHeight);
-    FX_ScaleFloatRange(elemDef->spawnAngles, edElemDef->spawnAngles, 0.017453292f);
-    FX_ScaleFloatRange(&elemDef->spawnAngles[1], &edElemDef->spawnAngles[1], 0.017453292f);
-    FX_ScaleFloatRange(&elemDef->spawnAngles[2], &edElemDef->spawnAngles[2], 0.017453292f);
+    FX_ScaleFloatRange(elemDef->spawnAngles, edElemDef->spawnAngles, PI_DIV_180);
+    FX_ScaleFloatRange(&elemDef->spawnAngles[1], &edElemDef->spawnAngles[1], PI_DIV_180);
+    FX_ScaleFloatRange(&elemDef->spawnAngles[2], &edElemDef->spawnAngles[2], PI_DIV_180);
     FX_ScaleFloatRange(elemDef->angularVelocity, edElemDef->angularVelocity, 0.000017453292f);
     FX_ScaleFloatRange(&elemDef->angularVelocity[1], &edElemDef->angularVelocity[1], 0.000017453292f);
     FX_ScaleFloatRange(&elemDef->angularVelocity[2], &edElemDef->angularVelocity[2], 0.000017453292f);
-    FX_ScaleFloatRange(&elemDef->initialRotation, &edElemDef->initialRotation, 0.017453292f);
+    FX_ScaleFloatRange(&elemDef->initialRotation, &edElemDef->initialRotation, PI_DIV_180);
     FX_ScaleFloatRange(&elemDef->gravity, &edElemDef->gravity, 0.0099999998f);
     if (elemDef->gravity.base != 0.0 || elemDef->gravity.amplitude != 0.0)
         elemDef->flags |= 0x4000000u;

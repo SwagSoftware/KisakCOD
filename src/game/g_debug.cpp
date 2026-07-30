@@ -60,7 +60,7 @@ void __cdecl G_DebugBox(
     float v[25]; // [esp+2Ch] [ebp-68h] BYREF
     float fSin; // [esp+90h] [ebp-4h]
 
-    v8 = yaw * 0.01745329238474369;
+    v8 = DEG2RAD( yaw );
     fCos = cos(v8);
     fSin = sin(v8);
     for (i = 0; i < 8; ++i)
@@ -317,7 +317,7 @@ void __cdecl G_DebugArc(
     }
     for (i = 0; i < 0x10; ++i)
     {
-        fAngle = ((double)i * scale + angle0) * 0.017453292;
+        fAngle = DEG2RAD( ((double)i * scale + angle0) );
         fCos = cos(fAngle);
         fSin = sin(fAngle);
         v[i][0] = (float)(fCos * radius) + *center;

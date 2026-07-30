@@ -417,7 +417,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
         }
         if (weapDef->iExplosionInnerDamage)
         {
-            v16 = weapDef->damageConeAngle * 0.01745329238474369;
+            v16 = DEG2RAD( weapDef->damageConeAngle );
             v15 = cos(v16);
             v14 = weapDef->damageConeAngle - 180.0;
             if (v14 < 0.0)
@@ -1284,7 +1284,7 @@ LABEL_92:
             splashMethodOfDeath = GetSplashMethodOfDeath(ent);
             if (ent->parent.isDefined())
             {
-                v34 = weapDef->damageConeAngle * 0.01745329238474369f;
+                v34 = DEG2RAD( weapDef->damageConeAngle );
                 v27 = cos(v34);
                 v26 = weapDef->damageConeAngle - 180.0f;
                 if (v26 < 0.0f)
@@ -2634,7 +2634,7 @@ char __cdecl JavelinClimbExceededAngle(gentity_s *ent, const float *targetPos)
     deltaHorz = currentHorzDir[1] * toTarget[1] + currentHorzDir[0] * toTarget[0];
     v5 = deltaHorz / toTarget[2];
     v4 = atan(v5);
-    deg = v4 * 57.2957763671875f;
+    deg = RAD2DEG( v4 );
     v3 = I_fabs(deg);
     deg = v3;
     if (limit <= (double)v3)
@@ -3045,7 +3045,7 @@ gentity_s *__cdecl G_FireRocket(
         AngleVectors(bolt->r.currentAngles, 0, v, up);
         theta = G_random() * 360.0;
         r = G_random() * weapDef->projectileCurvature;
-        v14 = theta * 0.01745329238474369;
+        v14 = DEG2RAD( theta );
         cosT = cos(v14);
         sinT = sin(v14);
         v13 = r * cosT;

@@ -931,7 +931,7 @@ bool __cdecl turret_behind(gentity_s *self, gentity_s *other)
         v2 = Q_acos(v11);
     else
         v2 = Q_acos(-1.0);
-    angle = v2 * 57.2957763671875;
+    angle = RAD2DEG( v2 );
     return yawSpan >= (double)angle;
 }
 

@@ -474,7 +474,7 @@ void __cdecl AimAssist_FovScale(AimAssistGlobals *aaGlob, float tanHalfFovY)
 
     iassert(aaGlob);
     aaGlob->fovTurnRateScale = tanHalfFovY / (float)0.47780272;
-    v3 = cg_fov->current.value * 0.01745329238474369 * 0.5;
+    v3 = DEG2RAD( cg_fov->current.value ) * 0.5;
     v2 = tan(v3);
     tanHalfBaseFovY = v2 * 0.75;
     iassert(tanHalfBaseFovY != 0.0f);

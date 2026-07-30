@@ -432,7 +432,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
             else if (cosPitchError > 1.0f)
                 fAnimPitchError = 0.0f;
             else
-                fAnimPitchError = (float)(acos(cosPitchError) * 57.295776);
+                fAnimPitchError = (float)(RAD2DEG( acos(cosPitchError) ));
 
             float aimAngles[3];
             UnitQuatToAngles(tagAimMtx->quat, aimAngles);
