@@ -23,6 +23,8 @@ extern void Assert( const char *file, int line, int type, const char *fmt, ... )
 // ─────────────────────────────────────────────────────────────────────────────
 int Vec3_MajorAxis( const float *dir )
 {
+    // KEEP_VERBOSE: CoD3 com_math.cpp:690 fn kisak's engine doesn't carry; this is
+    // the canonical port copy (engine_stubs' duplicate was removed).
     if ( !dir )
         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
                 690, 0, "%s", "dir" );
@@ -261,13 +263,9 @@ void LinearMapping_Apply( LinearMapping *lm, float *out,
     out[lm->axisK] = 0.0f;
     out[3]         = (float)b[2];   // IDA: out[3] = solved sol[2] (the affine constant)
 
-    if ( ( *(unsigned int *)&out[0] & 0x7F800000 ) == 0x7F800000
-      || ( *(unsigned int *)&out[1] & 0x7F800000 ) == 0x7F800000
-      || ( *(unsigned int *)&out[2] & 0x7F800000 ) == 0x7F800000
-      || ( *(unsigned int *)&out[3] & 0x7F800000 ) == 0x7F800000 )
     {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\linearmapping.cpp",
-                159, 0, "%s",
-                "!IS_NAN((vec)[0]) && !IS_NAN((vec)[1]) && !IS_NAN((vec)[2]) && !IS_NAN((vec)[3])" );
+        // the binary's nan check was a vec-named macro body; vec = the solved row
+        const float *vec = out;
+        iassert( !IS_NAN((vec)[0]) && !IS_NAN((vec)[1]) && !IS_NAN((vec)[2]) && !IS_NAN((vec)[3]) );   // linearmapping.cpp:159
     }
 }

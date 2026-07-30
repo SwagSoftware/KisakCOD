@@ -655,8 +655,6 @@ static void Cam_DrawFaceSun( face_t *f, Material *mtl, MaterialTechniqueType tec
 }
 
 // ── g_SelectedFaces (select.cpp) — the Ctrl+Shift+LMB face-selection set ──────────
-extern selface_t *selFace;                           // select.cpp 0x73C710
-extern char g_ptrSelectedFaces_GetSize[4];           // *(int*) = live count (0x73C714)
 extern float world_orient_matrix[4][3];              // 0x6DE290 (orientation_t, world space)
 
 // brush.cpp line-outline batcher (reused) + the deferred-line flush command.
@@ -669,8 +667,8 @@ extern int DrawShadedWireframe( int cullMode, face_t *face, const orientation_t 
 // R_AddCmd_Line3D, because the UNLIT triangle shader carries no colour for immediate tris.
 static void Cam_DrawSelectedFaces()
 {
-    int count = *(int *)g_ptrSelectedFaces_GetSize;
-    if ( count <= 0 || !selFace )
+    int count = g_SelectedFaces.GetSize();
+    if ( count <= 0 || !g_SelectedFaces.m_pData )
         return;
 
     static GfxPointVertex s_hlVerts[4096];
@@ -679,10 +677,10 @@ static void Cam_DrawSelectedFaces()
     int vc = 0;
     for ( int i = 0; i < count; ++i )
     {
-        selbrush_t *b = selFace[i].brush;
+        selbrush_t *b = g_SelectedFaces.GetAt( i ).brush;
         if ( !b || !b->def )
             continue;
-        int idx = selFace[i].index;
+        int idx = g_SelectedFaces.GetAt( i ).index;
         if ( (unsigned)idx >= (unsigned)b->def->faceCount )
             continue;
         face_t *f = &b->def->faces[idx];
@@ -1135,7 +1133,7 @@ static void Cam_DrawTriggerRadius( selbrush_t *b )
     float center[3];
     center[0] = eDef->origin[0];
     center[1] = eDef->origin[1];
-    center[2] = *(float *)( (char *)eclass + 0x14 ) + eDef->origin[2];   // eclass.mins[2]
+    center[2] = eclass->mins[2] + eDef->origin[2];
 
     if ( radius > 0.0f )
     {
@@ -2676,8 +2674,8 @@ static const char *Cam_MaterialHandleName( Material *handle )
 // bits 29..40 (`>> 29 & 0xFFF`).  qsort wants a tri-state int, so derive it from two `<`.
 static int __cdecl Cam_TraceMtlLess( const edTrace_t *a, const edTrace_t *b )
 {
-    faceVis_s *fa = a->face;
-    faceVis_s *fb = b->face;
+    faceVis_s *fa = a->hit.face;
+    faceVis_s *fb = b->hit.face;
     // less(a,b):
     bool ab;
     if ( !fa )                ab = false;
@@ -2727,7 +2725,7 @@ void CCamWnd::Cam_ContextMenu( CCamWnd *cam, int x, int y )
     CameraCalcRayDir( y, dir, cam, x );                  // 0x404ddc
     Test_Ray( cam->camera.origin, dir, 0, camera_trace, CAM_TRACE_COUNT );   // 0x404df2
 
-    if ( !camera_trace[0].brush )                        // 0x404e00 — nothing hit
+    if ( !camera_trace[0].hit.brush )                        // 0x404e00 — nothing hit
         return;
 
     float nearDist = camera_trace[0].dist;               // 0x404e14
@@ -2743,7 +2741,7 @@ void CCamWnd::Cam_ContextMenu( CCamWnd *cam, int x, int y )
         float d = fabsf( tr->dist - nearDist );          // 0x404e38..0x404e42
         if ( d > 1.0f )                                  // 0x404e55 — beyond the near cluster
         {
-            tr->brush = nullptr;                         // 0x404e57 — drop it from the list
+            tr->hit.brush = nullptr;                         // 0x404e57 — drop it from the list
             continue;
         }
         UINT flags;
@@ -2757,8 +2755,8 @@ void CCamWnd::Cam_ContextMenu( CCamWnd *cam, int x, int y )
             flags = MF_UNCHECKED;                        // 0
             ++nUnselected;                               // 0x404e73
         }
-        iassert( tr->face->visCount == 1 );              // 0x404e7f (CamWnd.cpp:1108)
-        const char *name = Cam_MaterialHandleName( tr->face->visArray->mtlHandle );   // 0x404ea8
+        iassert( tr->hit.face->visCount == 1 );              // 0x404e7f (CamWnd.cpp:1108)
+        const char *name = Cam_MaterialHandleName( tr->hit.face->visArray->mtlHandle );   // 0x404ea8
         cam->m_contextMenu.AppendMenuA( flags, ID_BRUSH_LAYER_BASE + i, name );       // 0x404ec3
     }
 
@@ -2775,22 +2773,22 @@ void CCamWnd::Cam_ContextMenu( CCamWnd *cam, int x, int y )
     cam->m_contextMenu.TrackPopupMenu( TPM_RIGHTBUTTON, pt.x, pt.y, cam, nullptr );   // 0x404f61
 }
 
-// 0x404c20  ON_COMMAND_RANGE(0x8CA0..0x8CB3): toggle select/deselect of camera_trace[i].brush
+// 0x404c20  ON_COMMAND_RANGE(0x8CA0..0x8CB3): toggle select/deselect of camera_trace[i].hit.brush
 // and flip the cached selected flag so the next popup shows the new state.
 void CCamWnd::OnContextMenuBrushLayer( UINT nID )
 {
     // 0x404c35 (CamWnd.cpp:995): nID >= ID_BRUSH_LAYER_BASE && nID <= ID_BRUSH_LAYER_MAX
     iassert( nID >= ID_BRUSH_LAYER_BASE && nID <= ID_BRUSH_LAYER_MAX );
     int i = nID - ID_BRUSH_LAYER_BASE;                                   // 0x404c5b
-    iassert( camera_trace[i].brush );                                    // 0x404c5e (CamWnd.cpp:999 g_traces[nID].hit.brush)
+    iassert( camera_trace[i].hit.brush );                                    // 0x404c5e (CamWnd.cpp:999 g_traces[nID].hit.brush)
     if ( camera_trace[i].selected )                                      // 0x404c85
     {
-        Deselect_Brush( camera_trace[i].brush );                        // 0x404cb5
+        Deselect_Brush( camera_trace[i].hit.brush );                        // 0x404cb5
         camera_trace[i].selected = false;
     }
     else
     {
-        Select_Brush( camera_trace[i].brush, 0, 0, 0 );                 // 0x404c9a
+        Select_Brush( camera_trace[i].hit.brush, 0, 0, 0 );                 // 0x404c9a
         camera_trace[i].selected = true;
     }
 }
@@ -2800,9 +2798,9 @@ void CCamWnd::OnContextMenuSelectAll()
 {
     for ( int i = 0; i < CAM_TRACE_COUNT; ++i )                         // 0x404cd8..0x404d06
     {
-        if ( camera_trace[i].brush && !camera_trace[i].selected )
+        if ( camera_trace[i].hit.brush && !camera_trace[i].selected )
         {
-            Select_Brush( camera_trace[i].brush, 0, 0, 0 );            // 0x404cf2
+            Select_Brush( camera_trace[i].hit.brush, 0, 0, 0 );            // 0x404cf2
             camera_trace[i].selected = true;
         }
     }
@@ -2813,9 +2811,9 @@ void CCamWnd::OnContextMenuDeselectAll()
 {
     for ( int i = 0; i < CAM_TRACE_COUNT; ++i )                         // 0x404d12..0x404d34
     {
-        if ( camera_trace[i].brush && camera_trace[i].selected )
+        if ( camera_trace[i].hit.brush && camera_trace[i].selected )
         {
-            Deselect_Brush( camera_trace[i].brush );                   // 0x404d23
+            Deselect_Brush( camera_trace[i].hit.brush );                   // 0x404d23
             camera_trace[i].selected = false;
         }
     }
@@ -3203,7 +3201,7 @@ static void Region_BuildForLight( int cls, const float *coneCenter, const float 
 // 0x406E00  sub_406E00 — for one light brush, build its region if radius>0 & spawnflags&3.
 static void Region_ForOneLight( selbrush_t *inst, const orientation_t *orient )
 {
-    int defPtr = *(int *)( *(int *)( (char *)inst + 8 ) + 8 );   // inst->owner->def
+    int defPtr = (int)(intptr_t)inst->owner->def;
     float radius = Entity_GetFloatValueForKey( defPtr, "radius" );
     if ( radius <= 0.0f )
         return;

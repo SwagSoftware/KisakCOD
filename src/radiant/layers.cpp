@@ -30,7 +30,7 @@ extern selbrush_t filtered_brushes;    // 0x23F182C
 // ─── layerMap: layer name → flag bits ────────────────────────────────────────
 // std::map is sorted by key (operator<), which reproduces the binary's RB-tree
 // iteration order and therefore the on-disk layer-line order.
-static std::map<std::string, int> g_layerMap;
+static std::map<std::string, int> layerMap;
 
 // Layer flag bits (sub_418C10 / sub_418C80):
 //   hidden=1  prefab=2  expanded=4  frozen=8 ; 0x10 = internal prefab-dirty (not persisted)
@@ -61,7 +61,7 @@ static void LayerFlagsToString( char *out, int flags )   // sub_418C80 (0x418C80
 void Layers_AddLayerPath( const char *name, int flags )
 {
     if ( !name ) return;
-    g_layerMap[ std::string( name ) ] |= ( flags & ~0x10 );   // 0x10 never persisted here
+    layerMap[ std::string( name ) ] |= ( flags & ~0x10 );   // 0x10 never persisted here
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ void Layers_AddLayerPath( const char *name, int flags )
 void Map_InitlLayers()
 {
     strcpy( g_activeLayer_string, "000_Global" );
-    g_layerMap.clear();
+    layerMap.clear();
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -93,8 +93,8 @@ void Map_InitlLayers()
 // ─────────────────────────────────────────────────────────────────────────────
 void Layers_SetMapLayers()
 {
-    g_layerMap[ "The Map"    ];   // insert with 0 if absent
-    g_layerMap[ "000_Global" ];
+    layerMap[ "The Map"    ];   // insert with 0 if absent
+    layerMap[ "000_Global" ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -105,9 +105,9 @@ void Layers_SetMapLayers()
 //   ENTER:  sub_489810 → sub_41A5A0 (clear dest sentinels) + sub_489F30 (deep copy)
 //   LEAVE:  sub_41A5A0 (clear live tree) + sub_489F30 (copy slot → live tree)
 // i.e. a deep COPY of the layer map onto / off of the stack slot.  This port
-// models layerMap as a real std::map (g_layerMap, see top of file) and owns both
+// models layerMap as a real std::map (layerMap, see top of file) and owns both
 // the reader and writer, so the binary's RB-tree clone/erase collapses to ordinary
-// std::map value semantics — save = copy g_layerMap into a per-level slot, restore =
+// std::map value semantics — save = copy layerMap into a per-level slot, restore =
 // copy it back.  This reproduces the binary's behaviour without reversing the
 // MSVC RB-node layout (same architectural decision as the Gate-P4 layer subsystem).
 //
@@ -122,14 +122,14 @@ void Layers_SavePrefabLayers( int level )      // ENTER: snapshot before swappin
 {
     if ( level < 0 || level >= 16 )
         return;
-    g_prefabLayerStack[ level ] = g_layerMap;
+    g_prefabLayerStack[ level ] = layerMap;
 }
 
 void Layers_RestorePrefabLayers( int level )   // LEAVE: restore parent map's layers
 {
     if ( level < 0 || level >= 16 )
         return;
-    g_layerMap = g_prefabLayerStack[ level ];
+    layerMap = g_prefabLayerStack[ level ];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -163,7 +163,7 @@ void sub_41C9C0( const char * /*name*/ )
 // ─────────────────────────────────────────────────────────────────────────────
 void Layers_WriteToFile( FILE *f )
 {
-    for ( const auto &kv : g_layerMap )
+    for ( const auto &kv : layerMap )
     {
         int flags = kv.second & ~0x10;   // 0x10 is internal; matches sub_418C80 ignoring it
         if ( kv.second == 2 )            // transient prefab-only layer — skip (original: v12[10] != 2)
@@ -282,7 +282,7 @@ void Map_ParseEntityLayerKey( const char **text, const char *def, char *out, con
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  LAYERS DIALOG BACKEND (layersdlg.cpp drives these — the unit's core).
-//  All operate on the same g_layerMap + g_activeLayer_string the writer/parser use,
+//  All operate on the same layerMap + g_activeLayer_string the writer/parser use,
 //  so every dialog op round-trips through the .map.
 // ═════════════════════════════════════════════════════════════════════════════
 
@@ -291,19 +291,19 @@ void Map_ParseEntityLayerKey( const char **text, const char *def, char *out, con
 void Layers_Enumerate( std::vector<std::pair<std::string,int>> &out )
 {
     out.clear();
-    for ( const auto &kv : g_layerMap )
+    for ( const auto &kv : layerMap )
         out.push_back( kv );
 }
-int  Layers_Count() { return (int)g_layerMap.size(); }
+int  Layers_Count() { return (int)layerMap.size(); }
 
 bool        Layers_Exists( const char *name )
 {
-    return g_layerMap.find( std::string( name ) ) != g_layerMap.end();
+    return layerMap.find( std::string( name ) ) != layerMap.end();
 }
 int         Layers_GetFlags( const char *name )
 {
-    auto it = g_layerMap.find( std::string( name ) );
-    return ( it == g_layerMap.end() ) ? 0 : ( it->second & ~0x10 );
+    auto mapIter = layerMap.find( std::string( name ) );
+    return ( mapIter == layerMap.end() ) ? 0 : ( mapIter->second & ~0x10 );
 }
 const char *Layers_GetActive() { return g_activeLayer_string; }
 
@@ -313,27 +313,25 @@ const char *Layers_GetActive() { return g_activeLayer_string; }
 //  when the touched flag has bit 0 or 3, faithfully reproduced.)
 void Layers_SetFlag( const char *name, int flag )      // layers_01 0x4190F0
 {
-    auto it = g_layerMap.find( std::string( name ) );
-    if ( it == g_layerMap.end() )
+    auto mapIter = layerMap.find( std::string( name ) );
+    if ( mapIter == layerMap.end() )
     {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\layers.cpp",
-                203, 0, "%s", "mapIter != layerMap.end()" );
+        iassert( mapIter != layerMap.end() );   // layers.cpp:203
         return;
     }
-    it->second |= flag;
+    mapIter->second |= flag;
     if ( flag & 9 )
         ++g_qeglobals.g_layerCount_maybe;
 }
 void Layers_ClearFlag( const char *name, int flag )    // layers_02 0x419200
 {
-    auto it = g_layerMap.find( std::string( name ) );
-    if ( it == g_layerMap.end() )
+    auto mapIter = layerMap.find( std::string( name ) );
+    if ( mapIter == layerMap.end() )
     {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\layers.cpp",
-                218, 0, "%s", "mapIter != layerMap.end()" );
+        iassert( mapIter != layerMap.end() );   // layers.cpp:218
         return;
     }
-    it->second &= ~flag;
+    mapIter->second &= ~flag;
     if ( flag & 9 )
         ++g_qeglobals.g_layerCount_maybe;
 }
@@ -361,7 +359,7 @@ void Layers_ClearFlag( const char *name, int flag )    // layers_02 0x419200
 void sub_418A50( const char *path )
 {
     size_t plen = strlen( path );
-    for ( auto &kv : g_layerMap )
+    for ( auto &kv : layerMap )
     {
         if ( strncmp( kv.first.c_str(), path, plen ) == 0 )
             kv.second |= 0x10;
@@ -377,13 +375,13 @@ void sub_418A50( const char *path )
 // ─────────────────────────────────────────────────────────────────────────────
 static int Layers_KeyIsHidden( const char *key )     // sub_4188A0 (0x4188A0)
 {
-    auto it = g_layerMap.find( std::string( key ) );
-    return ( it == g_layerMap.end() ) ? 0 : ( it->second & 1 );
+    auto mapIter = layerMap.find( std::string( key ) );
+    return ( mapIter == layerMap.end() ) ? 0 : ( mapIter->second & 1 );
 }
 static bool Layers_KeyIsFrozen( const char *key )    // sub_418B20 (0x418B20)
 {
-    auto it = g_layerMap.find( std::string( key ) );
-    return it != g_layerMap.end() && ( it->second & 8 ) != 0;
+    auto mapIter = layerMap.find( std::string( key ) );
+    return mapIter != layerMap.end() && ( mapIter->second & 8 ) != 0;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -446,7 +444,7 @@ int Layers_DeleteLayer( const char *victim )
     size_t vlen = strlen( victim );
     std::vector<std::string> toErase;
 
-    for ( const auto &kv : g_layerMap )
+    for ( const auto &kv : layerMap )
     {
         const std::string &nm = kv.first;
         if ( nm.compare( 0, vlen, victim ) == 0 &&
@@ -466,7 +464,7 @@ int Layers_DeleteLayer( const char *victim )
         Layers_RelayerList( g_activeLayer_string, &selected_brushes, nm.c_str() );
         Layers_RelayerList( g_activeLayer_string, &filtered_brushes, nm.c_str() );
 
-        g_layerMap.erase( nm );
+        layerMap.erase( nm );
     }
 
     Sys_Printf( "Updating layers...\n" );
@@ -489,7 +487,7 @@ int Layers_RenameLayer( const char *oldFull, const char *newFull )
     size_t olen = strlen( oldFull );
     // Collect (oldName, newName, flags) for every affected layer (prefix match).
     std::vector<std::tuple<std::string,std::string,int>> moves;
-    for ( const auto &kv : g_layerMap )
+    for ( const auto &kv : layerMap )
     {
         const std::string &nm = kv.first;
         if ( nm.compare( 0, olen, oldFull ) == 0 &&
@@ -513,8 +511,8 @@ int Layers_RenameLayer( const char *oldFull, const char *newFull )
         if ( !strcmp( g_activeLayer_string, on.c_str() ) )
             strncpy( g_activeLayer_string, nn.c_str(), 255 );
 
-        g_layerMap.erase( on );
-        g_layerMap[ nn ] |= ( flags & ~0x10 );
+        layerMap.erase( on );
+        layerMap[ nn ] |= ( flags & ~0x10 );
     }
 
     Sys_Printf( "Updating layers...\n" );

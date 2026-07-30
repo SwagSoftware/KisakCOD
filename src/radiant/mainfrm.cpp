@@ -28,10 +28,9 @@ extern void track_init();                    // qcommon/mem_track.h
 extern void SL_Init();                        // script/scr_stringlist.cpp (also inits the script memory tree)
 
 // The real renderer bootstrap (gfxwrapper.cpp, IDB 0x416510). Asserts d_hwndCamera/XY/Z/
-// Texture + laymatwnd_content_HWND, attaches the device to each, registers fonts/qerfont
+// Texture + lyrMtlWndGlob.layerList, attaches the device to each, registers fonts/qerfont
 // (g_qeglobals.d_font_list) + white_tools/$opaque/$additive.
 extern Material *R_BeginRegistrationInternal();
-extern HWND      laymatwnd_content_HWND;     // gfxwrapper.cpp — LayeredMaterialWnd content HWND
 
 // Map / status pipeline.
 extern void       Load_Materials();                              // texwnd.cpp (0x45ae40) bulk material load
@@ -907,7 +906,7 @@ static bool Radiant_CreateRenderWindows( CMainFrame *frame, const EdLayout &L )
     frame->m_pLayMat = new CEdBlankPane();
     if ( !frame->m_pLayMat->Create( NULL, NULL, WS_CHILD, CRect( 0, 0, 64, 64 ), frame, AFX_IDW_PANE_FIRST + 4 ) )
         return false;
-    laymatwnd_content_HWND = frame->m_pLayMat->GetSafeHwnd();
+    lyrMtlWndGlob.layerList = frame->m_pLayMat->GetSafeHwnd();
 
     // Entity inspector (d_hwndEntity): CEntityWnd_WEnt_Create 0x496850 makes this a FLOATING
     // owned popup ("QENT": caption + resize frame + sysmenu, owner = the main frame), HIDDEN
@@ -964,7 +963,7 @@ static bool Radiant_CreateRenderWindows( CMainFrame *frame, const EdLayout &L )
     Radiant_FL_Log( "windows: XY=%p Cam=%p Z=%p Tex=%p LayMat=%p Ent=%p Console=%p",
         (void *)g_qeglobals.d_hwndXY, (void *)g_qeglobals.d_hwndCamera,
         (void *)g_qeglobals.d_hwndZ, (void *)g_qeglobals.d_hwndTexture,
-        (void *)laymatwnd_content_HWND, (void *)g_qeglobals.d_hwndEntity,
+        (void *)lyrMtlWndGlob.layerList, (void *)g_qeglobals.d_hwndEntity,
         (void *)g_qeglobals.d_hwndEdit );
     return true;
 }
@@ -1049,7 +1048,7 @@ static bool Radiant_PathLooksLikeMap( const char *p )
 extern void SetKeyValue( entity_s_def *e, const char *key, const char *value );
 
 // LayerdMatWnd (layeredmaterials.cpp 0x416D40) - load the library named by the project
-// entity's "layeredmaterials" epair into lyrMtlGlob_Layers[] (the binary calls it from
+// entity's "layeredmaterials" epair into lyrMtlGlob.Layers[] (the binary calls it from
 // QE_LoadProject right after Load_Textures).
 extern signed int LayerdMatWnd();
 
@@ -2876,7 +2875,7 @@ void CMainFrame::OnDropSelected()
 
         edTrace_t tr;
         Trace_AllDirectionsIfFailed( cam_origin, &tr, dir, 4610 );
-        if ( !tr.brush )
+        if ( !tr.hit.brush )
             continue;
 
         if ( *(int *)&def->eclass->fixedsize && g_PrefsDlg->m_bOrientModel )
@@ -4178,7 +4177,7 @@ void CMainFrame::OnDropSelectedRelativeZ()
             float heightAboveLowest = mp->xyz[2] - lowestZ;   // keep this point's offset
             edTrace_t tr;
             Trace_AllDirectionsIfFailed( mp->xyz, &tr, dir, 4610 );
-            if ( tr.brush )
+            if ( tr.hit.brush )
                 g_qeglobals.d_move_points[k]->xyz[2] -= ( tr.dist - heightAboveLowest );
         }
 
@@ -4575,7 +4574,7 @@ void CMainFrame::OnMiscMayaExport()                                          // 
 extern void Pointfile_Errorfile_Public();      // errorfile.cpp (0x4100B0 wrapper)
 extern void Pointfile_Clear();                 // points.cpp (0x410600)
 extern void Pointfile_ResetPoints();           // points.cpp (s_num_points = 0)
-extern int  g_qeglobals_d_pointfile_display_list; // points.cpp (== s_errLogCount @0x1814CE8)
+extern int  s_errLogCount; // points.cpp (== s_errLogCount @0x1814CE8)
 extern void Material_SetMode( int iMode );     // texwnd.cpp (0x45B910)
 extern void Texture_SetMode( int iTexMenu );   // texwnd.cpp (0x45A520)
 
@@ -4587,7 +4586,7 @@ void CMainFrame::OnHelpAbout() { CAboutDlg::Show(); }   // 0x4264F0
 void CMainFrame::OnErrorFile()
 {
     Pointfile_ResetPoints();
-    if ( g_qeglobals_d_pointfile_display_list )
+    if ( s_errLogCount )
         Pointfile_Clear();
     else
         Pointfile_Errorfile_Public();
@@ -4618,7 +4617,7 @@ void CMainFrame::OnMiscNextleakspot()
 {
     if ( Pointfile_GetNumPoints() )
         Pointfile_Next();
-    else if ( g_qeglobals_d_pointfile_display_list )
+    else if ( s_errLogCount )
         Errorfile_NextError();
 }
 
@@ -4627,7 +4626,7 @@ void CMainFrame::OnMiscPreviousleakspot()
 {
     if ( Pointfile_GetNumPoints() )
         Pointfile_Prev();
-    else if ( g_qeglobals_d_pointfile_display_list )
+    else if ( s_errLogCount )
         Errorfile_PrevError();
 }
 
@@ -4640,22 +4639,20 @@ void CMainFrame::OnRenderMethodSmoothing() { Material_SetMode( 2 ); }
 // OnToggleLayeredMaterials (0x42BFE0) show/hides the frame (body identical to
 // LayeredMaterialWnd_ToggleVisibility 0x4176B0); OnSaveLayeredMaterials (0x42C020) flushes the
 // library to disk (CRC-gated).  The real window is NOT auto-created at startup, so
-// laymatwnd_frame_HWND may be NULL - ShowWindow(NULL,...) is a harmless no-op.
-extern HWND laymatwnd_frame_HWND;                     // layeredmaterialwnd.cpp (0x181F500)
-extern int  dword_181F50C;                            // layeredmaterialwnd.cpp (liveAddActive)
+// lyrMtlWndGlob.hwnd may be NULL - ShowWindow(NULL,...) is a harmless no-op.
 extern "C" int LayeredMaterialWnd_UntoggleLiveAdd();  // layeredmaterialwnd.cpp (sub_417440)
 extern char LayeredMaterials_Save();                  // layeredmaterials.cpp (0x416F40)
 
 void CMainFrame::OnToggleLayeredMaterials()
 {
-    if ( !::IsWindowVisible( laymatwnd_frame_HWND ) )
+    if ( !::IsWindowVisible( lyrMtlWndGlob.hwnd ) )
     {
-        ::ShowWindow( laymatwnd_frame_HWND, SW_SHOW );
+        ::ShowWindow( lyrMtlWndGlob.hwnd, SW_SHOW );
         return;
     }
-    if ( (BYTE)dword_181F50C )
+    if ( (BYTE)lyrMtlWndGlob.liveAddActive )
         LayeredMaterialWnd_UntoggleLiveAdd();   // binary calls sub_417440 (un-toggle Live)
-    ::ShowWindow( laymatwnd_frame_HWND, SW_HIDE );
+    ::ShowWindow( lyrMtlWndGlob.hwnd, SW_HIDE );
 }
 
 void CMainFrame::OnSaveLayeredMaterials()
@@ -5346,23 +5343,21 @@ void CMainFrame::OnSelectionConnect()
 }
 
 // Face→Terrain (36102, IDB OnFaceToTerrain 0x429BE0): convert selected faces to terrain patches.
-extern char        g_ptrSelectedFaces_GetSize[4];   // select.cpp (selected-face count int alias)
-extern selface_t  *selFace;                         // select.cpp
 void CMainFrame::OnFaceToTerrain()
 {
     Undo_ClearRedo();
     Undo_GeneralStart( "convert faces to terrain" );
     Undo_AddBrushList( &selected_brushes );
 
-    int faceCount = *(int *)g_ptrSelectedFaces_GetSize;
+    int faceCount = g_SelectedFaces.GetSize();
     // collect the new terrain brushes (the binary uses a CArray<BrushInst*>; a plain
     // bounded buffer is faithful — one new brush per selected face).
     selbrush_t *newBrushes[256];
     int newCount = 0;
     for ( int i = 0; i < faceCount && newCount < 256; ++i )
     {
-        selbrush_t *brush = selFace[i].brush;
-        face_t     *face  = &brush->def->faces[selFace[i].index];
+        selbrush_t *brush = g_SelectedFaces.GetAt( i ).brush;
+        face_t     *face  = &brush->def->faces[g_SelectedFaces.GetAt( i ).index];
         brush_t    *nb    = PMESH_58( face, brush );
         if ( nb )
             newBrushes[newCount++] = (selbrush_t *)nb;
@@ -5464,11 +5459,7 @@ bool CMainFrame::ConfirmModified()
 // CRC half matches ErrorLog_01's already-shipped guard (errorfile.cpp).
 extern int      modified;                 // map.cpp 0x23f179c
 extern int      prefabStackLevel;         // map.cpp 0x25d5b34
-extern char     byte_25EB240[];           // engine_stubs.cpp 0x25eb240 (prefab stack slots)
 extern unsigned int CheckLayeredMaterial_Modifications( uint8_t *a1, int a2, int a3 ); // layeredmaterials.cpp
-extern int     lyrMtlGlob_entryCount;     // 0x1814cfc
-extern uint8_t lyrMtlGlob_Layers[];       // 0x1814d00
-extern int     dword_1814CF8;             // 0x1814cf8 (lyrMtlGlob_crcToken — clean-library CRC)
 
 static bool HasUnsavedChangesOrInsidePrefab_mf()   // mirror of errorfile.cpp's static (0x489d90)
 {
@@ -5476,10 +5467,10 @@ static bool HasUnsavedChangesOrInsidePrefab_mf()   // mirror of errorfile.cpp's 
         return true;
     if ( prefabStackLevel > 0 )
     {
-        char *p = byte_25EB240;
-        for ( int n = 0; ; p += 2168 )
+        prefabLevel_t *p = g_prefabStack;
+        for ( int n = 0; ; ++p )
         {
-            if ( *(int *)p )
+            if ( p->modified )
                 return true;
             if ( ++n >= prefabStackLevel )
                 return false;
@@ -5491,8 +5482,8 @@ static bool HasUnsavedChangesOrInsidePrefab_mf()   // mirror of errorfile.cpp's 
 bool CMainFrame::OkToDiscard()
 {
     if ( !HasUnsavedChangesOrInsidePrefab_mf()
-         && CheckLayeredMaterial_Modifications( lyrMtlGlob_Layers,
-                                                84 * lyrMtlGlob_entryCount, 0 ) == (unsigned)dword_1814CF8 )
+         && CheckLayeredMaterial_Modifications( lyrMtlGlob.Layers,
+                                                84 * lyrMtlGlob.entryCount, 0 ) == (unsigned)lyrMtlGlob.crcToken )
         return true;                       // nothing dirty → proceed silently
     return ConfirmModified();              // dirty → prompt
 }
@@ -6363,38 +6354,18 @@ extern void Assert( const char *file, int line, int type, const char *fmt, ... )
 void MainFrm_BrushList( int message, selbrush_t *brushList )
 {
     const char *msg = (const char *)(intptr_t)message;
-    if ( !brushList )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                6372, 0, "%s", "brushList" );
+    iassert( brushList );   // mainfrm.cpp:6372
 
     for ( selbrush_t *brush = brushList->next; brush != brushList; brush = brush->next )
     {
-        if ( !brush )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6375, 0, "%s\n\t(message) = %s", "(brush)", msg );
-        if ( !brush->prev )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6376, 0, "%s\n\t(message) = %s", "(brush->prev)", msg );
-        if ( !brush->next )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6377, 0, "%s\n\t(message) = %s", "(brush->next)", msg );
-        if ( brush->prev->next != brush )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6378, 0, "%s\n\t(message) = %s", "(brush->prev->next == brush)", msg );
-        if ( brush->next->prev != brush )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6379, 0, "%s\n\t(message) = %s", "(brush->next->prev == brush)", msg );
-        if ( !brush->def )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6381, 0, "%s\n\t(message) = %s", "(brush->def)", msg );
-        if ( !brush->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6382, 0, "%s\n\t(message) = %s", "(brush->owner)", msg );
-        if ( brush->def->owner != (entity_s *)brush->owner->def )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6383, 0, "%s\n\t(message) = %s", "(brush->def->owner == brush->owner->def)", msg );
-        if ( brush->def->refCount < 1 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MainFrm.cpp",
-                    6384, 0, "%s\n\t(message) = %s", "(brush->def->refCount >= 1)", msg );
+        vassert( (brush), "(message) = %s", msg );   // MainFrm.cpp:6375
+        vassert( (brush->prev), "(message) = %s", msg );   // MainFrm.cpp:6376
+        vassert( (brush->next), "(message) = %s", msg );   // MainFrm.cpp:6377
+        vassert( (brush->prev->next == brush), "(message) = %s", msg );   // MainFrm.cpp:6378
+        vassert( (brush->next->prev == brush), "(message) = %s", msg );   // MainFrm.cpp:6379
+        vassert( (brush->def), "(message) = %s", msg );   // MainFrm.cpp:6381
+        vassert( (brush->owner), "(message) = %s", msg );   // MainFrm.cpp:6382
+        vassert( (brush->def->owner == brush->owner->def), "(message) = %s", msg );   // MainFrm.cpp:6383
+        vassert( (brush->def->refCount >= 1), "(message) = %s", msg );   // MainFrm.cpp:6384
     }
 }

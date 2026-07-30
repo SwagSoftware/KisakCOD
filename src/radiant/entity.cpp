@@ -301,70 +301,27 @@ struct prefab_s
 };
 static_assert(sizeof(prefab_s) == 0x54, "prefab_s");
 
+
 // ─────────────────────────────────────────────────────────────────────────────
-// 0x475110  Entity_ColorSth  (brush.cpp:2167 assert — belongs here per IDB layout)
-// Sets the GfxColor of all faces in a brush from the owning entity's _color or eclass color.
-// Called after Entity_LinkBrush to paint the brush in the editor.
-// IDA: esi = brush_t* (passed as int to avoid include confusion in callers).
+// 0x483bf0  IncRef  (entity.cpp:690)
+// Links an entity into a list (circular, TAIL insertion).  Survives in the
+// binary as an uncalled standalone right before DecRef; every live use is
+// inlined (Entity_Create / Map_New / Map_LoadEntities / undo).
 // ─────────────────────────────────────────────────────────────────────────────
-// 0x475110: _color/eclass-color/default branches, Byte4PackPixelColor(src,dest), face-color
-// loop @+228 stride 232, version@0x4E 16-bit ++. brush.cpp:2167 assert KEEP_VERBOSE
-// (CROSS_FILE: preserves brush.cpp file/line iassert can't).
-unsigned int Entity_ColorSth( brush_t *b_in )
+void IncRef( entity_s *e, entity_s *list )
 {
-    int a1 = (int)(intptr_t)b_in;
-
-    if ( !a1 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2167, 0, "%s", "b" );
-
-    entity_s_def *entDef = *(entity_s_def **)((char *)b_in + 8); // b->owner
-
-    // IDA passes &rgba[0] to Entity_GetVec3ForKey, which writes rgba[0..2].  ONE float[4],
-    // never three loose locals: MSVC may reorder separate locals and the write runs off.
-    float rgba[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-    eclass_t *eclass = nullptr;
-    if ( entDef && ( eclass = entDef->eclass ) != nullptr && *(int *)&eclass->fixedsize )
-    {
-        if ( HasKeyValuePair( entDef, "_color" ) )
-        {
-            Entity_GetVec3ForKey( entDef, rgba, "_color" );
-        }
-        else
-        {
-            rgba[0] = eclass->color[0];
-            rgba[1] = eclass->color[1];
-            rgba[2] = eclass->color[2];
-            rgba[3] = eclass->unk;
-        }
-    }
-
-    GfxColor v11;
-    Byte4PackPixelColor( rgba, &v11 );
-
-    unsigned int result = 0;
-    int faceCount = b_in->faceCount;
-    if ( faceCount )
-    {
-        int v6 = 0;
-        do
-        {
-            // face_t at b_in->faces[result]; GfxColor at face+228
-            *(GfxColor *)( (char *)b_in->faces + v6 + 228 ) = v11;
-            ++result;
-            v6 += 232;  // sizeof(face_t)
-        }
-        while ( result < (unsigned)faceCount );
-    }
-    ++b_in->version;
-    return result;
+    iassert( !e->next && !e->prev );
+    e->next          = list;
+    e->prev          = list->prev;
+    list->prev->next = e;
+    list->prev       = e;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 0x483c30  DecRef  (entity.cpp:701)
 // Unlinks an entity from the global entities linked list.
 // ─────────────────────────────────────────────────────────────────────────────
-static void DecRef( entity_s *e )
+void DecRef( entity_s *e )
 {
     iassert( e->next && e->prev );
     e->next->prev = e->prev;
@@ -422,8 +379,7 @@ void Entity_Free_R( entity_s *e )
           b = (brush_t *)e->brushes.prev )
     {
         // 721 LEVEL 1 (disasm 0x483cf7 push 1) — per-iter list invariant; NOT iassert (would downgrade to L0).
-        if ( b->owner != e )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 721, 1, "%s", "b->owner == e" );
+        iassert( b->owner == e );   // entity.cpp:721
         // 722 KEEP_VERBOSE: binary string "&e->brushes" is the e+0x08 field the port renamed `def`;
         // converting would mis-target e->brushes@0x0C (the guard correctly uses &e->def = e+0x08).
         if ( (void *)b->oprev != (void *)&e->def )
@@ -441,8 +397,7 @@ void Entity_Free_R( entity_s *e )
         b->owner  = nullptr;
         // 724 LEVEL 1 (disasm 0x483d91 push 1) — post-decrement invariant; NOT vassert (would downgrade to L0).
         // b->refCount == newRef here (post-dec, pre-free); binary prints the post-dec value.
-        if ( newRef != 0 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 724, 1, "%s\n\t(b->refCount) = %i", "(b->refCount == 0)", newRef );
+        vassert( (b->refCount == 0), "(b->refCount) = %i", newRef );   // entity.cpp:724
         Brush_Free_R( b );
     }
 
@@ -480,7 +435,7 @@ void Entity_LinkBrush( brush_t *b, entity_s *world_ent )
     b->onext                          = (brush_t *)&world_ent->def;
     b->oprev                          = (brush_t *)world_ent->def;
     ( (entity_s *)world_ent->def )->next = (entity_s *)b;
-    world_ent->def                        = (void *)b;
+    world_ent->def                        = (entity_s *)b;
     Entity_ColorSth( b );
 }
 
@@ -650,7 +605,7 @@ void Entity_GetOrientation( entity_s_def *ent, orientation_t *orParent, orientat
     iassert( ent->eclass->fixedsize );   // binary reads *(int*); bool nonzero-check equivalent
     iassert( orParent );
     if ( !orOut )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 152, 0, "%s", "or" );
+        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 152, 0, "%s", "or" );   // "or" = C++ reserved word, KEEP_VERBOSE
     orientation_t v4;
     Entity_GetOrientationMatrix( (entity_s *)ent, (float (*)[3])&v4 );
     OrientationConcatenate( &v4, orParent, orOut );
@@ -689,22 +644,19 @@ void Entity_GetOrientationInverse( entity_s_def *ent, orientation_t *orParent, o
 // 0x482650: after the line-665 transform
 // fix below.  NOT a deferred stub: the whole bounds path is implemented.
 // ─────────────────────────────────────────────────────────────────────────────
-void Entity_UpdateModelInst( entity_s *ent, float *_org, float *out_maxs, float *out_mins )
+void Entity_UpdateModelInst( entity_s *ent, float *_org, float *maxs, float *mins )
 {
     iassert( ent );
     entity_s_def *def = (entity_s_def *)ent->def;
     iassert( ent->def );
     entitymodel_t *emc = (entitymodel_t *)def->modelClass;
-    if ( !emc )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 67, 0, "%s", "ent->def->modelClass" );
+    iassert( ent->def->modelClass );   // entity.cpp:67
     // IDB: ent->def->modelClass->model->handle.  modelClass (entitymodel_t*) ->model is the
     // models_t* sub-node; its handle (+4) holds the XModel* after Model_load → R_RegisterModel.
     models_t *mc = emc->model;
-    if ( !mc )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 68, 0, "%s", "ent->def->modelClass->model" );
+    iassert( ent->def->modelClass->model );   // entity.cpp:68
     XModel *xmodel = (XModel *)mc->handle;
-    if ( !xmodel )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 69, 0, "%s", "ent->def->modelClass->model->handle" );
+    iassert( ent->def->modelClass->model->handle );   // entity.cpp:69
 
     // modelscale epair (default 1.0; <= 0 → 1.0).
     float scale = 1.0f;
@@ -733,18 +685,16 @@ void Entity_UpdateModelInst( entity_s *ent, float *_org, float *out_maxs, float 
         ent->modelInst = AddModelToModelInstBuff( xmodel, &worldOrient.origin[0], scale );
 
     // Bounds out-params (both NULL or both non-NULL).
-    if ( (out_maxs == nullptr) != (out_mins == nullptr) )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 91, 0, "%s",
-                "(mins == NULL && maxs == NULL) || (mins != NULL && maxs != NULL)" );
+    iassert( (mins == NULL && maxs == NULL) || (mins != NULL && maxs != NULL) );   // entity.cpp:91
 
     int modelInst = ent->modelInst;
-    if ( modelInst && out_maxs && out_mins )
+    if ( modelInst && maxs && mins )
     {
         // Local-space model bounds → world-space AABB over the 8 corners.
         float lmin[3], lmax[3];
         Entity_GetModelInstBounds( modelInst, lmin, lmax );
-        out_maxs[0] = out_maxs[1] = out_maxs[2] =  131072.0f;
-        out_mins[0] = out_mins[1] = out_mins[2] = -131072.0f;
+        maxs[0] = maxs[1] = maxs[2] =  131072.0f;
+        mins[0] = mins[1] = mins[2] = -131072.0f;
         for ( int c = 0; c < 8; ++c )
         {
             float corner[3] = { (c & 1) ? lmin[0] : lmax[0],
@@ -762,30 +712,30 @@ void Entity_UpdateModelInst( entity_s *ent, float *_org, float *out_maxs, float 
                 o->axis[0][0]*rel[0] + o->axis[0][1]*rel[1] + o->axis[0][2]*rel[2],
                 o->axis[1][0]*rel[0] + o->axis[1][1]*rel[1] + o->axis[1][2]*rel[2],
                 o->axis[2][0]*rel[0] + o->axis[2][1]*rel[1] + o->axis[2][2]*rel[2] };
-            // VectorMaxValues(pt, out_maxs, out_mins) inlined (out_maxs holds the running
-            // MIN, out_mins the running MAX — the swapped-name convention sub 0x482650 uses
+            // VectorMaxValues(pt, maxs, mins) inlined (maxs holds the running
+            // MIN, mins the running MAX — the swapped-name convention sub 0x482650 uses
             // when it passes maxs as the "mins" arg).
             for ( int k = 0; k < 3; ++k )
             {
-                if ( out_maxs[k] > worldPt[k] ) out_maxs[k] = worldPt[k];   // running min
-                if ( out_mins[k] < worldPt[k] ) out_mins[k] = worldPt[k];   // running max
+                if ( maxs[k] > worldPt[k] ) maxs[k] = worldPt[k];   // running min
+                if ( mins[k] < worldPt[k] ) mins[k] = worldPt[k];   // running max
             }
         }
-        // Pad/clamp per axis (out_maxs holds the running MIN, out_mins the running MAX -- the
+        // Pad/clamp per axis (maxs holds the running MIN, mins the running MAX -- the
         // swapped convention).  The binary's verbose assert here ("maxs[axis] >= mins[axis]",
         // type-0) fires ONLY on a genuinely inverted box (running MIN > running MAX), NOT on
         // every model -- VERIFIED vs disasm 0x4828c2 (fcompp; jnp skips when maxs <= mins; the
-        // port condition out_mins[axis] < out_maxs[axis] is identical).  The message string is
+        // port condition mins[axis] < maxs[axis] is identical).  The message string is
         // inconsistent with the checked condition, so it can't be iassert/vassert 1:1 -> KEEP.
         for ( int axis = 0; axis < 3; ++axis )
         {
-            if ( out_mins[axis] < out_maxs[axis] )   // true MAX < true MIN => genuinely inverted
+            if ( mins[axis] < maxs[axis] )   // true MAX < true MIN => genuinely inverted
                 Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 107, 0, "%s", "maxs[axis] >= mins[axis]" );
-            if ( out_mins[axis] - out_maxs[axis] <= 8.0f )
+            if ( mins[axis] - maxs[axis] <= 8.0f )
             {
-                float mid = ( out_mins[axis] + out_maxs[axis] ) * 0.5f;
-                out_mins[axis] = mid + 4.0f;     // mins (MAX) := mid+4, maxs (MIN) := mid-4
-                out_maxs[axis] = mid - 4.0f;     // verbatim from sub 0x482650 (swapped names)
+                float mid = ( mins[axis] + maxs[axis] ) * 0.5f;
+                mins[axis] = mid + 4.0f;     // mins (MAX) := mid+4, maxs (MIN) := mid-4
+                maxs[axis] = mid - 4.0f;     // verbatim from sub 0x482650 (swapped names)
             }
         }
     }
@@ -824,13 +774,10 @@ void Entity_InitPrefabInst( entity_s *ent, int identMtx, float *mins, float *max
     entity_s_def *def = (entity_s_def *)ent->def;
     iassert( ent->def );
     models_t *modelClass = (models_t *)def->modelClass;
-    if ( !modelClass )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 184, 0, "%s", "ent->def->modelClass" );
+    iassert( ent->def->modelClass );   // entity.cpp:184
     models_t *model = (models_t *)modelClass->x88;          // +0x160 = loaded sub-node
-    if ( !model )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 185, 0, "%s", "ent->def->modelClass->model" );
-    if ( !model->entities_next__substruct )                 // +0xC = entities.next
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 186, 0, "%s", "ent->def->modelClass->model->entities.next" );
+    iassert( ent->def->modelClass->model );   // entity.cpp:185
+    iassert( ent->def->modelClass->model->entities.next );   // entity.cpp:186
     iassert( mins );
     iassert( maxs );
     iassert( ent->prefab == NULL );
@@ -849,7 +796,7 @@ void Entity_InitPrefabInst( entity_s *ent, int identMtx, float *mins, float *max
     // brush instances into pf->active_brushlist).  Circular list: sentinel = &model->x2
     // (model+8), first = model->entities_next (model+0xC), advance via entity_s.next (+4).
     entity_s_def *sentinel = (entity_s_def *)( (char *)model + 8 );
-    for ( entity_s_def *entDef = (entity_s_def *)model->entities_next__substruct;
+    for ( entity_s_def *entDef = (entity_s_def *)model->entities.next;
           entDef != sentinel;
           entDef = entDef->next )
     {
@@ -925,8 +872,7 @@ void MapLoad_ParsePrefab( const char *classname, int a2 )
     {
         // 0x48308E: a model/prefab class — resolve the model name epair.
         char *modelName = ValueForKey2( (int)(intptr_t)e, "model" );
-        if ( !modelName )                                // 0x48309e
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 292, 0, "%s", "modelName" );
+        iassert( modelName );                            // entity.cpp:292 (0x48309e)
 
         // 0x4830BD..0x4830FD: for misc_model / script_model whose model isn't already a .map,
         // synthesise the prefab path "prefabs/misc_models/<name>.map", store it back, and
@@ -993,8 +939,13 @@ void Checkkey_Color( entity_s_def *a1, const char *a2 )
     // (0x48324A) reads a1->brushes.oprev (entity+0x0C), not def (0x08);
     // for a single-brush fixedsize entity they coincide. Three asserts in the binary:
     // !oprev (344), oprev==sentinel (345), oprev->onext != sentinel (346).
+    // 344-346 KEEP_VERBOSE (sentinel-overlap): the source's brushes-head fields overlay
+    // the port's def(+0x08)/brushes(+0x0C) split, so 'ent->brushes.onext' cannot be
+    // expressed against the port layout without re-cutting entity_s.
     brush_t *b = (brush_t *)a1->brushes.prev;
     if ( !b )
+        // KEEP_VERBOSE (this trio): the binary's ent->brushes head overlays the port's
+        // def(+0x08)/brushes(+0x0C) split — the member path can't be expressed.
         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 344, 0, "%s", "ent->brushes.onext" );
     if ( b == (brush_t *)&a1->def )
         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 345, 0, "%s", "ent->brushes.onext != &ent->brushes" );
@@ -1041,9 +992,7 @@ void Checkkey_Color( entity_s_def *a1, const char *a2 )
 // ─────────────────────────────────────────────────────────────────────────────
 void Entity_UpdateCylinder( const char *key, int entPtr )
 {
-    if ( _stricmp( key, "radius" ) && _stricmp( key, "height" ) )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 374, 0,
-                "%s", "!stricmp( key, \"radius\" ) || !stricmp( key, \"height\" )" );
+    iassert( !stricmp( key, "radius" ) || !stricmp( key, "height" ) );   // entity.cpp:374
 
     entity_s_def *e = (entity_s_def *)(intptr_t)entPtr;
 
@@ -1148,12 +1097,8 @@ entity_s *ParseEntity( const char **text, int version, char a2, char a3 )
     char *ent_raw = (char *)operator new( 0x8Cu );
     memset( ent_raw, 0, 0x8Cu );
     entity_s     *ent45 = (entity_s *)ent_raw;
-    // Self-initialise the entity unique numberId.  IDA (0x483F17) writes
-    // `*((_DWORD*)v8 + 33) = dword_739DC4` — field index 33 == byte offset 0x84
-    // (entity_s.pad_0x0080[4]), the same id field undo.cpp matches on (see undo.cpp:676,
-    // 972-974). The prior port wrote someCount@0x54 instead, leaving 0x84 zeroed for every
-    // map-loaded entity → undo/redo entity-matching mis-identified them (all id 0).
-    *(int *)( ent_raw + 0x84 ) = dword_739DC4++;
+    // Unique entity numberId (IDA 0x483F17: v8[33]) — the id undo.cpp matches on.
+    ent45->numberId = dword_739DC4++;
     // Initialise the brush-def circular list sentinel. IDA sets BOTH the firstActive
     // head (offset 8) AND the embedded brushes node's prev link (offset 0xC) to &head
     // (= ent_raw+8) — an empty circular list. The porter set only offset 8; restore 0xC
@@ -1250,7 +1195,7 @@ entity_s *ParseEntity( const char **text, int version, char a2, char a3 )
             // brushes.oprev@0x0C point back at &def), discarding the
             // warned brushes so the bbox brush below is the sole def-list element. (The
             // prior port left the stray brushes linked and added the bbox on top.)
-            ent45->def = (void *)&ent45->def;
+            ent45->def = (entity_s *)&ent45->def;
             ent45->brushes.prev         = (selbrush_t *)&ent45->def;
         }
 
@@ -1464,10 +1409,11 @@ entity_s *Prefab_Init( prefab_s *a1, entity_s_def *entDef, selbrush_t *a3 )
     memset( v4, 0, 0x54u );
     v4->def = entDef;
 
-    if ( v4->modelInst )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1427, 1, "%s", "entInst->modelInst == NULL" );
-    if ( v4->prefab )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1428, 1, "%s", "entInst->prefab == NULL" );
+    {
+        entity_s *entInst = v4;                     // the binary's local
+        iassert( entInst->modelInst == NULL );   // entity.cpp:1427
+        iassert( entInst->prefab == NULL );      // entity.cpp:1428
+    }
 
     *(unsigned __int16 *)&v4->version = (unsigned __int16)entDef->version_prob_wrong - 1;   // IDA 0x4856bd mov ax,[ebx+78h]/sub ax,1/mov [esi+4Ch],ax -- DEF ver @0x78 -> instance ver @0x4C low word
     v4->mapLayer = nullptr;
@@ -1528,9 +1474,7 @@ void Entity_Free( char *a1 )
     iassert( e );
     iassert( e->def );
     entity_s_def *def = (entity_s_def *)e->def;
-    if ( def->refCount <= 0 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1455, 0,
-                "%s\n\t(e->def->refCount) = %i", "(e->def->refCount > 0)", def->refCount );
+    vassert( (e->def->refCount > 0), "(e->def->refCount) = %i", e->def->refCount );   // entity.cpp:1455
     iassert( e->next );
     iassert( e->prev );
 
@@ -1643,8 +1587,7 @@ static void sub_4859B0( float *angles_out, float *dir )
 // ─────────────────────────────────────────────────────────────────────────────
 void AlignEntityToFace_OrientToFloor( entity_s_def *ent, float *dir )
 {
-    if ( !*(int *)&ent->eclass->fixedsize )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1519, 0, "%s", "ent->eclass->fixedsize" );
+    iassert( ent->eclass->fixedsize );   // entity.cpp:1519 (binary reads the dword; pad is 0)
     float angles[3];
     if ( !Entity_GetVec3ForKey( ent, angles, "angles" ) )
         angles[0] = angles[1] = angles[2] = 0.0f;
@@ -1718,18 +1661,21 @@ entity_s *Entity_Create( eclass_t *eclass )
             // a brush ALREADY owned by the target is asserted-consistent and left in
             // place.  (No new entity is allocated here — the selection collapses into
             // the existing one.)
-            if ( !ownerInst )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1160, 1, "%s", "inst" );
+            entity_s *inst = ownerInst;              // the binary's local name
+            iassert( inst );   // entity.cpp:1160
 
             for ( selbrush_t *sb = selected_brushes.next; sb != &selected_brushes; sb = sb->next )
             {
                 if ( sb->owner != world_entity )
                 {
                     // Already in (the merge target's) instance — verify + skip.
-                    if ( sb->owner != ownerInst )
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1166, 1, "%s", "brushInst->owner == inst" );
-                    if ( sb->def->owner != targetDef )
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp", 1167, 1, "%s", "brushInst->def->owner == e" );
+                    {
+                        selbrush_t   *brushInst = sb;         // the binary's locals
+                        entity_s     *inst      = ownerInst;
+                        entity_s_def *e         = targetDef;
+                        iassert( brushInst->owner == inst );      // entity.cpp:1166
+                        iassert( brushInst->def->owner == e );    // entity.cpp:1167
+                    }
                     continue;
                 }
                 sub_476330( sb );                            // Brush_Deselect_Helper
@@ -1753,7 +1699,7 @@ entity_s *Entity_Create( eclass_t *eclass )
     // ── Allocate a fresh entity def + instance (the binary's LABEL_10) ─────────
     entity_s_def *e = (entity_s_def *)operator new( 0x8Cu );
     memset( e, 0, 0x8Cu );
-    *(int *)( (char *)e + 0x84 ) = dword_739DC4++;                   // entity numberId (IDA v5[33])
+    e->numberId = dword_739DC4++;                                    // IDA v5[33]
     // empty def-side brush-list sentinel — BOTH the head ptr (+0x08) AND brushes.prev
     // (+0x0C) point at &def (see Map_New / Entity_LinkBrush 0x484fc0).
     e->brushes.prev          = (selbrush_t *)&e->def;
@@ -1764,11 +1710,7 @@ entity_s *Entity_Create( eclass_t *eclass )
     for ( int node = eclass->xx8; node; node = *(int *)node )
         sub_483500( (int)e + 0x74, *(const char **)(node + 4), *(const char **)(node + 8) );
 
-    iassert( !e->next && !e->prev );
-    e->next             = &entities;                                 // TAIL insertion
-    e->prev             = entities.prev;
-    entities.prev->next = (entity_s *)e;
-    entities.prev       = (entity_s *)e;
+    IncRef( (entity_s *)e, &entities );                              // inlined in the binary
 
     ownerInst = Prefab_Init( (prefab_s *)&entityInsts, e, &active_brushes );
 
@@ -1849,65 +1791,6 @@ entity_s *Entity_Create( eclass_t *eclass )
     return ownerInst;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 0x486500  Map_LoadEntities  (map.cpp:304 asserts)
-// Loads entities from a file into the given doubly-linked entity list.
-// 0x486500: TAIL splice, ParseEntity(mapVer,0,1),
-// parse-session setup/teardown all match. 304/305 KEEP_VERBOSE (cross-file map.cpp); 690 CONVERTED.
-// ─────────────────────────────────────────────────────────────────────────────
-int Map_LoadEntities( const char *filename, entity_s *entList, char a3 )
-{
-    // CROSS_FILE: binary asserts are map.cpp:304/305 (0x486525/0x486547) -- an iassert here would
-    // stamp entity.cpp; keep verbose to preserve the binary's __FILE__/__LINE__.
-    if ( entList->next != entList )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp", 304, 0, "%s", "entList->next == entList" );
-    if ( entList->prev != entList )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp", 305, 0, "%s", "entList->prev == entList" );
-
-    int   count = 0;
-    void *buf   = nullptr;
-    if ( LoadFile( filename, &buf ) == -1 )
-        goto done;
-
-    {
-        Com_BeginParseSession( filename );
-        ParseThreadInfo *pi = Com_GetParseThreadInfo();
-        pi->parseInfo[pi->parseInfoNum].spaceDelimited  = 0;
-        pi->parseInfo[pi->parseInfoNum].negativeNumbers = 1;
-
-        const void *textPtr  = buf;
-        int         mapVer   = Map_ReadVersion( &textPtr );
-        if ( mapVer >= 0 )
-        {
-            if ( mapVer < 4 )
-                pi->parseInfo[pi->parseInfoNum].spaceDelimited = 1;
-            if ( mapVer > 3 )
-                Map_ParseLayers( &textPtr, a3 != 0 );
-
-            for ( entity_s *e = ParseEntity( (const char **)&textPtr, mapVer, 0, 1 );
-                  e;
-                  e = ParseEntity( (const char **)&textPtr, mapVer, 0, 1 ) )
-            {
-                ++count;
-                iassert( !e->next && !e->prev );
-                e->next            = entList;
-                e->prev            = entList->prev;
-                entList->prev->next = e;
-                entList->prev       = e;
-            }
-        }
-
-        // End parse session
-        ParseThreadInfo *pi2 = Com_GetParseThreadInfo();
-        if ( !pi2->parseInfoNum )
-            Com_Error( ERR_FATAL, "Com_EndParseSession: session underflow" );
-        --pi2->parseInfoNum;
-    }
-
-done:
-    free( buf );
-    return count;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 0x4870c0  Map_New  (entity.cpp:690 asserts) — THE File→New WORLDSPAWN INIT.
@@ -1934,8 +1817,7 @@ void Map_New()
     Layers_02();
 
     // Allocate worldspawn entity def (0x8C = 140 bytes)
-    // (Port var v0 renamed `e` to match the binary's identifier so the line-690
-    // iassert below stringizes byte-identically to the original "!e->next && !e->prev".)
+    // (Port var v0 renamed `e` to match the binary's identifier.)
     entity_s_def *e = (entity_s_def *)operator new( 0x8Cu );
     memset( e, 0, 0x8Cu );
     // Self-initialise the def-side brush-list sentinel. The head lives at
@@ -1952,12 +1834,8 @@ void Map_New()
     eclass_t *ec  = Eclass_ForName( 1, "worldspawn" );
     e->eclass    = ec;
 
-    // Link into entities list (circular, TAIL insertion)
-    iassert( !e->next && !e->prev );
-    e->next              = &entities;
-    e->prev              = entities.prev;
-    entities.prev->next   = (entity_s *)e;
-    entities.prev         = (entity_s *)e;
+    // Link into entities list (IncRef inlined in the binary)
+    IncRef( (entity_s *)e, &entities );
 
     entity_s *v3  = Prefab_Init( (prefab_s *)&entityInsts, e, &active_brushes );
     world_entity  = v3;
@@ -2001,176 +1879,6 @@ extern int         Map_GetNextAutoTarget();                                // ma
 extern bool        Model_SetModel( entity_brush_s *b, int orientMatrix );  // brush.cpp 0x478780 (prefab load-on-open)
 extern undo_s     *g_lastundo;                                             // undo.cpp 0x23F162C
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 0x487c90  Map_ImportBuffer  (map.cpp ~4051 bytes) — the PASTE parse-and-place.
-//
-// Parses a .map text buffer (produced by Entity_WriteSelected_R into the clipboard)
-// back into live brushes/entities and selects them. This is the engine behind
-// CXYWnd::Paste and (in the binary) Clone_Selection. The parse machinery is the
-// proven ParseEntity / Brush_Parse / Prefab_Init chain (same as Map_LoadEntities).
-// 0x487c90: SUBSET: Implemented core (worldspawn
-// merge, undo-stamp loops @0x10/0x7C, version bumps brush_t@0x4E 16-bit, classtype & 0x10) all
-// FAITHFUL; parked auto-target/targetname/script_link renumber + OLE clipboard documented. map.cpp asserts KEEP_VERBOSE.
-//
-// Faithful to the IDB control flow (0x487C90):
-//   1. Select_Deselect(1); Undo bracket ("import buffer"); d_parsed_brushes = 0.
-//   2. For each entity ParseEntity returns:
-//        * worldspawn: MERGE its brushes into world_entity's def-list (Entity_Unlink/
-//          LinkBrush), rebuild windings, instance (Brush_AddToList) + select
-//          (Brush_AddToList2); then Entity_Free_R the now-empty parsed worldspawn def.
-//        * other: Prefab_Init it into the entityInsts/active list, splice the DEF into
-//          the `entities` list, then SELECT every instance brush (Select_Brush). The
-//          undo records get stamped onto the new entity/brushes so the paste undoes.
-//   3. Final pass: instance the model for misc_model/prefab entities (classtype&0x10),
-//      rebuild windings on the freshly-selected brushes, MarkMapModified, Undo_End.
-//
-// KISAK, deliberate subset: the auto-target/targetname RENUMBERING (the binary's
-// CMapStringToString remap that rewrites pasted target/targetname/script_link* to fresh
-// "auto%i" ids via Map_GetNextAutoTarget so a paste-on-top doesn't collide) and the
-// script_linkName/script_linkTo link-number renumbering (Map_ParseLinkList @0x48BE20).
-// Effect: pasted entities keep their ORIGINAL target/targetname/link ids — identical to
-// the existing in-memory Clone_Selection (clones land coincident, references intact).
-// All map geometry, epairs, layers, selection, and undo are faithful and round-trippable.
-// ─────────────────────────────────────────────────────────────────────────────
-char *Map_ImportBuffer( const char **text, int version )
-{
-    Select_Deselect( 1 );
-    Undo_ClearRedo();
-    Undo_GeneralStart( "import buffer" );
-    g_qeglobals.d_parsed_brushes = 0;
-
-    // (PARKED) auto-target seed + link-number map are built here in the binary; skipped.
-    (void)Map_GetNextAutoTarget;
-
-    g_qeglobals.d_num_entities = 0;
-
-    for ( entity_s *ent = ParseEntity( text, version, 0, 0 ); ent; ent = ParseEntity( text, version, 0, 0 ) )
-    {
-        entity_s_def *eDef = (entity_s_def *)ent;
-        undo_s       *u    = g_lastundo;
-
-        // ── Undo-record stamping (IDB 0x488090-0x48810B). Associates the parsed entity
-        //    + its brush defs with the current undo record so Undo removes the paste.
-        if ( u && !u->done && ent != (entity_s *)world_entity->def )
-        {
-            eDef->epairEdits = u->id;                                   // entity+0x7C
-            brush_t *sentinel = (brush_t *)&eDef->def; // entity+0x08
-            for ( brush_t *b = (brush_t *)eDef->brushes.prev; b != sentinel; b = b->onext )
-                b->ownerPrev = (entity_s *)(intptr_t)u->id;            // brush+0x10
-        }
-        {
-            brush_t *sentinel = (brush_t *)&eDef->def;
-            for ( brush_t *b = (brush_t *)eDef->brushes.prev; b && b != sentinel; b = b->onext )
-            {
-                if ( u && !u->done )
-                {
-                    b->ownerPrev = (entity_s *)(intptr_t)u->id;        // brush+0x10
-                    entity_s_def *owner = (entity_s_def *)b->owner;    // brush+0x08
-                    if ( owner->eclass && *(int *)&owner->eclass->fixedsize )
-                    {
-                        owner->epairEdits = u->id;                     // owner+0x7C
-                        u = g_lastundo;
-                    }
-                }
-            }
-        }
-
-        if ( Entity_HasEpairMatch( ent, "classname", "worldspawn" ) )
-        {
-            // ── WORLDSPAWN MERGE (IDB 0x488127-0x488254). Move every brush DEF from the
-            //    parsed worldspawn entity onto the live worldspawn DEF, instance + select
-            //    each. The walk captures `next` BEFORE the relink (relink rewrites onext).
-            //
-            //    instance-vs-def: the brush DEF's owner must be the worldspawn DEF
-            //    (world_entity->def), NOT the world_entity INSTANCE —
-            //    Entity_LinkBrush links into a DEF's def-list and sets owner=that def, and
-            //    Brush_AddToList(def, instance) then asserts def->owner == instance->def
-            //    (brush.cpp:2386). Passing world_entity (the instance) sets owner=instance
-            //    and trips that assert. The binary's inline relinks into
-            //    world_entity->def->def with owner=the DEF.
-            entity_s *worldDef = (entity_s *)world_entity->def;
-            brush_t  *sentinel = (brush_t *)&eDef->def;
-            brush_t  *b        = (brush_t *)eDef->brushes.prev;   // def-list first element
-            while ( b != sentinel )
-            {
-                brush_t *next = b->onext;                        // capture before relink
-
-                Entity_UnlinkBrush( b );                         // off the parsed worldspawn def-list
-                Entity_LinkBrush( b, worldDef );                 // onto live worldspawn DEF (owner=DEF, refCount++, Entity_ColorSth)
-
-                g_bScreenUpdates = false;
-                Brush_BuildWindings( b, 1 );
-                if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
-                    SetupVertexSelection();
-                ++b->version;
-                selbrush_t *inst = Brush_AddToList( b, world_entity );   // instance (refCount->2; owner=world_entity)
-                if ( inst->next || inst->prev )
-                    Com_Error( ERR_FATAL, "Brush_AddToList: already linked" );
-                Brush_AddToList2( inst );                                // select it
-                g_bScreenUpdates = true;
-
-                b = next;
-            }
-            Entity_Free_R( ent );                               // drop the now-empty parsed worldspawn def
-            continue;
-        }
-
-        // ── NON-WORLDSPAWN ENTITY (IDB 0x488279-0x4888DD). Instance it, splice the DEF
-        //    into the `entities` list, then select every instance brush.
-        entity_s *inst = Prefab_Init( (prefab_s *)&entityInsts, eDef, &active_brushes );
-
-        // (PARKED) target/targetname/script_link* auto-renumber happens here in the binary.
-
-        // Splice the DEF onto the `entities` list (TAIL insert — IDB 0x488894).
-        eDef->next            = &entities;
-        eDef->prev            = entities.prev;
-        entities.prev->next   = ent;
-        entities.prev         = ent;
-        ++g_qeglobals.d_num_entities;
-
-        // Select every instance brush of this pasted entity (IDB LABEL: 0x4888BE).
-        for ( selbrush_t *ib = inst->brushes.ownerNext; ib != &inst->brushes; ib = ib->ownerNext )
-            Select_Brush( ib, 1, 0, 0 );
-    }
-
-    // ── Final pass A (0x48890F): instance the 3D model for prefab insts (classtype & 0x10).
-    for ( entity_s *ii = entityInsts.next; ii != &entityInsts; ii = ii->next )
-    {
-        if ( !ii )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp", 1242, 0, "%s", "entInst" );
-        entity_s_def *iDef = (entity_s_def *)ii->def;
-        if ( !iDef )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp", 1243, 0, "%s", "entInst->def" );
-        if ( !iDef->eclass )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp", 1244, 0, "%s", "entInst->def->eclass" );
-        if ( ( iDef->eclass->classtype & 0x10 ) != 0 )
-        {
-            entity_brush_s *fb = ii->brushes.ownerNext;
-            if ( fb != &ii->brushes )
-                Model_SetModel( fb, (int)(intptr_t)&world_orient_matrix );
-        }
-    }
-
-    // ── Final pass B: rebuild windings on the freshly-selected brushes (IDB 0x4889B8-end).
-    //    The binary also dedups a target/targetname pair between two newly-selected ents
-    //    when they accidentally collide; that belongs to the PARKED auto-rename path
-    //    (no collisions are introduced without renumbering), so only the windings rebuild
-    //    + MarkMapModified survive here.
-    for ( selbrush_t *sb = selected_brushes.next; sb != &selected_brushes; sb = sb->next )
-    {
-        brush_t *def = sb->def;
-        Brush_BuildWindings( def, 1 );
-        if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
-            SetupVertexSelection();
-        MarkMapModified();
-        ++def->version;
-    }
-
-    g_nUpdateBits = -1;
-    modified      = 1;
-    Undo_End();
-    return nullptr;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // In-app clipboard (the buffer half of CXYWnd::Copy / Paste).
@@ -2271,6 +1979,7 @@ void RadiantClipboard_Paste()
     pi->parseInfo[pi->parseInfoNum].spaceDelimited  = 0;
     pi->parseInfo[pi->parseInfoNum].negativeNumbers = 1;
 
+    extern char *Map_ImportBuffer( const char **text, int version );   // map.cpp 0x487C90
     Map_ImportBuffer( &cursor, 4 );
 
     ParseThreadInfo *pi2 = Com_GetParseThreadInfo();
@@ -2279,102 +1988,6 @@ void RadiantClipboard_Paste()
     --pi2->parseInfoNum;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 0x490780  Select_Ungroup  (select.cpp:1719 asserts)
-// Ungroups selected non-worldspawn brush entities by relinking brushes to worldspawn.
-// 0x490780: after BUG fix: added the gated
-// SetupVertexSelection() (sel_vertex/sel_edge) between Brush_BuildWindings and MarkMapModified
-// (IDA 0x490972), missing before -> dangling vtx/edge handles after ungroup. ++version brush_t@0x4E
-// 16-bit (correct). 6 select.cpp asserts KEEP_VERBOSE (cross-file).
-// ─────────────────────────────────────────────────────────────────────────────
-LRESULT Select_Ungroup()
-{
-    selbrush_t *v0 = selected_brushes.next;
-    if ( v0 == &selected_brushes )
-        return (LRESULT)Sys_Printf( "No grouped entities selected.\n" );
-
-    int numselectedgroups = 0;
-
-    // We need to iterate selected_brushes but it changes as we relink; snapshot owner list.
-    // IDA iterates by walking the sentinel forward and tracking the entity being processed.
-    selbrush_t *cur  = selected_brushes.next;
-    entity_s   *last = nullptr;
-
-    while ( cur != &selected_brushes )
-    {
-        if ( !cur->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1719, 0, "%s", "sb->owner" );
-        if ( !cur->def )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1720, 0, "%s", "sb->def" );
-        // IDA (0x4907FC) asserts the instance's owner and its def's owner agree (the def's
-        // owner is the entity DEF, reached via the instance's def). Was dropped.
-        if ( (void *)cur->owner->def != (void *)cur->def->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1721, 0, "%s", "sb->owner->def == sb->def->owner" );
-
-        entity_s *e      = cur->owner;
-        selbrush_t *next = cur->next;
-
-        if ( e != world_entity && !*(int *)&((entity_s_def *)e->def)->eclass->fixedsize )
-        {
-            // Walk this entity's brush instances, relinking each to worldspawn.
-            selbrush_t *bi = e->brushes.ownerNext;
-            while ( bi != &e->brushes )
-            {
-                selbrush_t *biNext = bi->ownerNext;
-                // IDA (0x490860) asserts the instance's def->owner == instance->owner->def. Dropped.
-                if ( (void *)bi->def->owner != (void *)bi->owner->def )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1730, 0, "%s", "b->def->owner == b->owner->def" );
-                bool wasSelected = ( ( bi->brushFlags & 0x80 ) != 0 );
-
-                if ( wasSelected )
-                    sub_476330( bi );
-
-                // Unlink brush def from old entity
-                brush_t *bDef = bi->def;
-                Entity_UnlinkBrush( bDef );
-
-                // Relink into worldspawn def
-                entity_s_def *worldDef = (entity_s_def *)world_entity->def;
-                Entity_LinkBrush( bDef, (entity_s *)worldDef );
-
-                // Relink brush instance into worldspawn's instance list
-                Entity_LinkBrush_0_extern( world_entity, bi );
-
-                Brush_BuildWindings( bDef, 1 );
-                if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
-                    SetupVertexSelection();   // IDA 0x490972 -- rebuild d_points/d_edges; missing -> dangling vtx handles after ungroup
-                MarkMapModified();
-                ++bDef->version;
-
-                if ( wasSelected )
-                    sub_476470( bi );
-
-                // IDA (0x49099A) re-asserts def->owner == owner->def after the relink (now both
-                // point at the worldspawn DEF). Dropped by the prior port.
-                if ( (void *)bi->def->owner != (void *)bi->owner->def )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1746, 0, "%s", "b->def->owner == b->owner->def" );
-
-                bi = biNext;
-            }
-
-            if ( e->brushes.ownerNext != &e->brushes )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1748, 1, "%s", "e->brushes.ownerNext == &e->brushes" );
-
-            Entity_Free( (char *)e );
-            ++numselectedgroups;
-        }
-
-        cur = next;
-    }
-
-    if ( numselectedgroups <= 0 )
-        return (LRESULT)Sys_Printf( "No grouped entities selected.\n" );
-
-    const char *suffix = ( numselectedgroups == 1 ) ? "y" : "ies";
-    LRESULT result     = (LRESULT)Sys_Printf( "Ungrouped %d entit%s.\n", numselectedgroups, suffix );
-    g_nUpdateBits      = -1;
-    return result;
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 0x483de0  Entity_MemorySize  (65 bytes)
@@ -2417,12 +2030,8 @@ entity_s *Entity_Clone_sub485090( int a1 )
     memset( clone, 0, 0x8Cu );
 
     // Assign unique entity ID.  IDA (0x4850BF) writes `v2[33] = dword_739DC4` —
-    // field index 33 == byte offset 0x84 (entity_s.pad_0x0080[4], the numberId), NOT
-    // epairEdits@0x7C. (Undo_AddEntity, the only caller, then overwrites BOTH 0x7C and
-    // 0x84 from the source — see undo.cpp:675-676 — so this was output-neutral in the
-    // undo path, but the prior 0x7C write diverged from the binary and clobbered the id
-    // slot a future caller could rely on.)
-    *(int *)&clone->pad_0x0080[4] = dword_739DC4++;
+    // numberId@0x84, NOT epairEdits@0x7C.
+    clone->numberId = dword_739DC4++;
 
     // Init the DEF-side brush-list sentinel. The binary does v2[2]=v2[3]=v2+2, i.e.
     // BOTH def (+0x08) AND brushes.prev (+0x0C) point at
@@ -2434,34 +2043,20 @@ entity_s *Entity_Clone_sub485090( int a1 )
     clone->brushes.prev         = (selbrush_t *)&clone->def;
 
     // Copy source fields
-    clone->eclass  = *(eclass_t **)((char *)src + 96);         // eclass @0x60
-    // IDA: *((float*)v2+26..28) = *(float*)(a1+104..112) = origin
-    clone->origin[0] = *(float *)((char *)src + 104);
-    clone->origin[1] = *(float *)((char *)src + 108);
-    clone->origin[2] = *(float *)((char *)src + 112);
+    entity_s *srcE = (entity_s *)(intptr_t)src;
+    clone->eclass    = srcE->eclass;
+    clone->origin[0] = srcE->origin[0];
+    clone->origin[1] = srcE->origin[1];
+    clone->origin[2] = srcE->origin[2];
 
     // Deep-copy epairs
-    epair_t *srcEp = *(epair_t **)((char *)src + 116); // a1->epairs
+    epair_t *srcEp = srcE->epairs;
     while ( srcEp )
     {
         epair_t *newEp = (epair_t *)::operator new( 0xCu );
-        const char *key = srcEp->key;
-        if ( !key )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp",
-                    56, 0, "%s", "str" );
-        size_t kLen = strlen( key );
-        void *kCopy = ::operator new( kLen + 1 );
-        memcpy( kCopy, key, kLen + 1 );
-        newEp->key = (char *)kCopy;
-
-        const char *val = srcEp->value;
-        if ( !val )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp",
-                    56, 0, "%s", "str" );
-        size_t vLen = strlen( val );
-        void *vCopy = ::operator new( vLen + 1 );
-        memcpy( vCopy, val, vLen + 1 );
-        newEp->value = (char *)vCopy;
+        // both dup calls inlined in the binary (AllocMaterialString, qe3.cpp:56)
+        newEp->key   = AllocMaterialString( srcEp->key );
+        newEp->value = AllocMaterialString( srcEp->value );
 
         // Prepend to clone's epair list (IDA: *v8 = v15[29]; v15[29] = v8)
         newEp->next  = clone->epairs;

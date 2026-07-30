@@ -85,32 +85,6 @@ extern void    MarkMapModified();                             // 0x499BB0
 // float (the flag&8 "Live" path seeds the layer mapping from it).
 //   2100 = 0x834 = the per-layer stride (a LayerMat block); the MaterialDef is at its head.
 
-// ══════════════════════════════════════════════════════════════════════════════
-//  Patch_FindReplaceTexture  (0x449520) — patch (pmesh) face material swap.
-//  a1 = the patch brush DEF; replaceName / findName; flags.  When (flags&2)==0 the
-//  patch's current-layer material name must equal findName.  On a match → SetMaterial
-//  (replaceName) into &patch->texture[layer] + ++version.  Returns 1 if it replaced.
-// ══════════════════════════════════════════════════════════════════════════════
-char Patch_FindReplaceTexture( brush_t *a1, const char *replaceName,
-                               const char *findName, char flags )
-{
-    if ( !a1 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 7120, 0, "%s", "b" );
-    if ( !a1->patch )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 7121, 0, "%s", "b->patch" );
-
-    patchMesh_t *patch = a1->patch;
-    patchMesh_material *slot = &patch->texture + g_qeglobals.current_edit_layer;
-    if ( ( flags & 2 ) == 0 )
-    {
-        const char *name = (const char *)Materialdef_GetName( (MaterialDef *)slot );
-        if ( _stricmp( name, findName ) )
-            return 0;                       // current name != find → skip
-    }
-    SetMaterial( replaceName, slot );
-    ++patch->version;
-    return 1;
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  FindReplaceTexture_Brush  (sub_492E20) — per-brush find/replace worker.
@@ -159,6 +133,8 @@ static char FindReplaceTexture_Brush( selbrush_t *inst, const char *findName,
     // Patch path: inst->patch (hex-rays "mins[0]") non-null → it's a patch brush.
     if ( inst->patch )
     {
+        extern char Patch_FindReplaceTexture( brush_t *b, const char *replaceName,
+                                              const char *findName, char flags );   // pmesh.cpp 0x449520
         if ( Patch_FindReplaceTexture( inst->def, replaceName, findName, flags ) )
             replaced = 1;
     }
@@ -187,12 +163,8 @@ static char FindReplaceTexture_Brush( selbrush_t *inst, const char *findName,
             {
                 // MtlDef_IsValid + name extraction (sub_492E20 inlined): exactly one of
                 // lyrMtl / radMtl; name = (char*)lyrMtl, or radMtl->name (qtexture_s+4).
-                if ( !md || ( (int)( md->lyrMtl != nullptr ) + (int)( md->radMtl != nullptr ) ) != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                            85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-                const char *name = (const char *)md->lyrMtl;
-                if ( !md->lyrMtl )
-                    name = md->radMtl->name;
+                // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+                const char *name = (const char *)Materialdef_GetName( md );
                 match = ( _stricmp( name, findName ) == 0 );
             }
 
@@ -225,10 +197,7 @@ static char FindReplaceTexture_Brush( selbrush_t *inst, const char *findName,
             // g_radiantFirstLightRendererReady).  This is the same call the texwnd
             // click-apply (proven) uses.
             patchMesh_material pair{};
-            SetMaterial( replaceName, &pair );
-            if ( ( (int)( pair.lyrMtl != nullptr ) + (int)( pair.radMtl != nullptr ) ) != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                        65, 0, "%s", "MtlDef_IsValid( mtlDef )" );
+            SetMaterial( replaceName, &pair );   // its tail iassert carries MaterialDef.cpp:65
             Brush_SetFaceTexdefSize( (const float *)&pair, faces, def );
             replaced = 1;
         }

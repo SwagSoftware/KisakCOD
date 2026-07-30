@@ -26,12 +26,12 @@ struct LayerMaterialDef
     char  name[64];        // 0x00  material name (Materialdef_GetName reads this)
     int   _pad_40;         // 0x40
     int   layerCount;      // 0x44
-    int   current_layer;   // 0x48
-    int   _pad_4C;         // 0x4C  (MaterialDef_13 reads this + 8*visIndex)
-    int   layers_ptr;      // 0x50  &layers[0]; each layer is 8 bytes {radMtl, ?}
-    int   _tail[9];        // 0x54..0x77
+    int   activeLayer;     // 0x48  (binary name — MaterialDef.cpp:321 string; was current_layer)
+    struct { int vis; qtexture_s *radMtl; } layers[5];   // 0x4C  interleaved {vis@+0, radMtl@+4}
+    int   _tail_74;        // 0x74
 };
 static_assert(sizeof(LayerMaterialDef) == 120, "LayerMaterialDef must be 120 bytes (IDB)");
+static_assert(offsetof(LayerMaterialDef, layers) == 0x4C, "LayerMaterialDef.layers");
 
 // MaterialDef realize-state (defined in engine_stubs.cpp). MaterialDef_05..09 AND
 // per-texture flag bits into it; MaterialDef_02 walks the layers feeding them.
@@ -47,12 +47,18 @@ extern char __cdecl Material_GetConstantValue( Material *material, const char *n
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MtlDef_IsValid — the invariant asserted throughout: exactly one of lyrMtl/radMtl.
+// (patchMesh_material overload below: same leading {lyrMtl,radMtl} pair.)
 // (Inlined as the assert condition in the binary; factored here for clarity.)
 // ─────────────────────────────────────────────────────────────────────────────
 static inline bool MtlDef_IsValid( const MaterialDef *m )
 {
     return m && ((m->lyrMtl != nullptr) + (m->radMtl != nullptr) == 1);
 }
+static inline bool MtlDef_IsValid( const patchMesh_material *m )
+{
+    return MtlDef_IsValid( (const MaterialDef *)m );
+}
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Headless layered-material intern table.
@@ -74,7 +80,7 @@ static LayerMaterialDef *MakeDegenerateLayerMtl( const char *name )
     strncpy( lm->name, key.c_str(), sizeof(lm->name) - 1 );
     lm->name[sizeof(lm->name) - 1] = '\0';
     lm->layerCount    = 0;     // degenerate: GetLayeredMaterial→0, Init loops 0×
-    lm->current_layer = 0;
+    lm->activeLayer = 0;
     DegenMtlTable()[key] = lm;
     return lm;
 }
@@ -92,21 +98,19 @@ extern qtexture_s *Texture_GetHandle( const char *name );     // texwnd.cpp 0x45
 // material layout differs from CoD4. The counter supports nested prefab loads.
 int g_radiantLoadingPrefab = 0;                               // bracketed by Eclass_RealizeModel
 
-void SetMaterial( const char *tex_name, patchMesh_material *out )
+void SetMaterial( const char *tex_name, patchMesh_material *mtlDef )
 {
     if ( g_radiantFirstLightRendererReady && g_radiantLoadingPrefab == 0 )
     {
-        out->lyrMtl = (LayerMaterialDef *)LayeredMaterials_GetMaterial( tex_name );
-        out->radMtl = out->lyrMtl ? nullptr : Texture_GetHandle( tex_name );
+        mtlDef->lyrMtl = (LayerMaterialDef *)LayeredMaterials_GetMaterial( tex_name );
+        mtlDef->radMtl = mtlDef->lyrMtl ? nullptr : Texture_GetHandle( tex_name );
     }
     else
     {
-        out->lyrMtl = MakeDegenerateLayerMtl( tex_name );     // headless gate / prefab-load fallback
-        out->radMtl = nullptr;
+        mtlDef->lyrMtl = MakeDegenerateLayerMtl( tex_name );     // headless gate / prefab-load fallback
+        mtlDef->radMtl = nullptr;
     }
-    if ( ((out->lyrMtl != nullptr) + (out->radMtl != nullptr)) != 1 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                65, 0, "%s", "MtlDef_IsValid( mtlDef )" );
+    iassert( MtlDef_IsValid( mtlDef ) );   // MaterialDef.cpp:65
 }
 
 // Materialdef_Realize — lazily upgrade a DEGENERATE material (built during headless / prefab
@@ -166,11 +170,9 @@ qtexture_s *MaterialDef_GetLayeredMaterial( MaterialDef *mtlDef )
     iassert( MtlDef_IsValid( mtlDef ) );                   // 0x4314a3 test esi,esi + invariant (level 0)
     if ( mtlDef->radMtl )
         return mtlDef->radMtl;
-    if ( !mtlDef->lyrMtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                30, 1, "%s", "mtlDef->lyrMtl" );           // LEVEL 1 sanity -> KEEP_VERBOSE
+    iassert( mtlDef->lyrMtl );   // MaterialDef.cpp:30
     if ( mtlDef->lyrMtl->layerCount )
-        return (qtexture_s *)(intptr_t)mtlDef->lyrMtl->layers_ptr;
+        return mtlDef->lyrMtl->layers[0].radMtl;
     return nullptr;                                        // degenerate (0 layers)
 }
 
@@ -185,7 +187,7 @@ void MaterialDef_02( MaterialDef *mtlDef, int (*cb)( qtexture_s * ) )
         return;
     }
     iassert( mtlDef->lyrMtl );                             // 0x431571 (level 0)
-    // layers[] live at offset 80 (layers_ptr), 8-byte stride; layer[i].radMtl@+0.
+    // layers[] live at 0x4C, 8-byte stride {vis, radMtl}.
     for ( int i = 0; i < mtlDef->lyrMtl->layerCount; ++i )
     {
         qtexture_s **layer = (qtexture_s **)( (char *)mtlDef->lyrMtl + 80 + 8 * i );
@@ -199,9 +201,7 @@ int MaterialDef_04( MaterialDef *mtlDef )
     iassert( MtlDef_IsValid( mtlDef ) );                   // 0x43175d (level 0)
     if ( mtlDef->lyrMtl )
         return mtlDef->lyrMtl->layerCount;
-    if ( !mtlDef->radMtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                113, 1, "%s", "mtlDef->radMtl" );           // LEVEL 1 sanity -> KEEP_VERBOSE
+    iassert( mtlDef->radMtl );   // MaterialDef.cpp:113
     return 1;
 }
 int MaterialDef_11( MaterialDef *mtlDef )   // 0x431AB0 — identical to MaterialDef_04
@@ -209,9 +209,7 @@ int MaterialDef_11( MaterialDef *mtlDef )   // 0x431AB0 — identical to Materia
     iassert( MtlDef_IsValid( mtlDef ) );                   // 0x431acd (level 0)
     if ( mtlDef->lyrMtl )
         return mtlDef->lyrMtl->layerCount;
-    if ( !mtlDef->radMtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                264, 1, "%s", "mtlDef->radMtl" );           // LEVEL 1 -> KEEP_VERBOSE
+    iassert( mtlDef->radMtl );   // MaterialDef.cpp:264
     return 1;
 }
 
@@ -255,10 +253,8 @@ namespace LayerMat
     {
         iassert( MtlDef_IsValid( mtlDef ) );               // 0x431b4d (level 0)
         if ( mtlDef->lyrMtl )
-            return mtlDef->lyrMtl->current_layer;
-        if ( !mtlDef->radMtl )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                    276, 1, "%s", "mtlDef->radMtl" );        // LEVEL 1 -> KEEP_VERBOSE
+            return mtlDef->lyrMtl->activeLayer;
+        iassert( mtlDef->radMtl );   // MaterialDef.cpp:276
         return 0;
     }
 }
@@ -269,15 +265,10 @@ int MaterialDef_13( int visIndex, MaterialDef *mtlDef )
     iassert( MtlDef_IsValid( mtlDef ) );                   // 0x431bbd (level 0)
     if ( mtlDef->lyrMtl )
     {
-        if ( (unsigned)visIndex >= (unsigned)mtlDef->lyrMtl->layerCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                    287, 0, "visIndex doesn't index mtlDef->lyrMtl->layerCount\n\t%i not in [0, %i)",
-                    visIndex, mtlDef->lyrMtl->layerCount );  // prose #expr -> KEEP_VERBOSE
-        return *(int *)( (char *)mtlDef->lyrMtl + 76 + 8 * visIndex );  // &xx020 + 2*visIndex
+        bcassert( (unsigned)visIndex, (unsigned)mtlDef->lyrMtl->layerCount );   // MaterialDef.cpp:287
+        return mtlDef->lyrMtl->layers[visIndex].vis;
     }
-    if ( !mtlDef->radMtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                291, 1, "%s", "mtlDef->radMtl" );            // LEVEL 1 -> KEEP_VERBOSE
+    iassert( mtlDef->radMtl );   // MaterialDef.cpp:291
     vassert( (visIndex == 0), "(visIndex) = %i", visIndex );
     return 0;
 }
@@ -288,24 +279,14 @@ Material *MaterialDef_14( unsigned int visIndex, MaterialDef *mtlDef )
     iassert( MtlDef_IsValid( mtlDef ) );                   // 0x431c7d (level 0)
     if ( mtlDef->lyrMtl )
     {
-        if ( visIndex >= (unsigned)mtlDef->lyrMtl->layerCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                    303, 0, "visIndex doesn't index mtlDef->lyrMtl->layerCount\n\t%i not in [0, %i)",
-                    visIndex, mtlDef->lyrMtl->layerCount );  // prose #expr -> KEEP_VERBOSE
-        qtexture_s **layer = (qtexture_s **)( (char *)mtlDef->lyrMtl + 80 + 8 * visIndex );
-        if ( !(*layer)->next )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                    304, 0, "%s", "mtlDef->lyrMtl->layers[visIndex].radMtl->handle" );  // member-name -> KEEP_VERBOSE
-        return (*layer)->next;
+        bcassert( visIndex, (unsigned)mtlDef->lyrMtl->layerCount );             // MaterialDef.cpp:303
+        iassert( mtlDef->lyrMtl->layers[visIndex].radMtl->handle );   // MaterialDef.cpp:304
+        return mtlDef->lyrMtl->layers[visIndex].radMtl->handle;
     }
-    if ( !mtlDef->radMtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                308, 1, "%s", "mtlDef->radMtl" );            // LEVEL 1 -> KEEP_VERBOSE
+    iassert( mtlDef->radMtl );   // MaterialDef.cpp:308
     iassert( visIndex == 0 );                                // 0x431d1d (level 0)
-    if ( !mtlDef->radMtl->next )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                310, 0, "%s", "mtlDef->radMtl->handle" );    // member-name (port: next) -> KEEP_VERBOSE
-    return mtlDef->radMtl->next;
+    iassert( mtlDef->radMtl->handle );   // MaterialDef.cpp:310
+    return mtlDef->radMtl->handle;
 }
 
 // 0x431D70  MaterialDef_GetActiveLayerHandle (sub_431D70) — handle of the active layer.
@@ -314,19 +295,12 @@ int MaterialDef_GetActiveLayerHandle( MaterialDef *mtlDef )
     iassert( MtlDef_IsValid( mtlDef ) );                   // 0x431d90 (level 0)
     if ( mtlDef->lyrMtl )
     {
-        int **layer = (int **)( (char *)mtlDef->lyrMtl + 80 + 8 * mtlDef->lyrMtl->current_layer );
-        if ( !**layer )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                    321, 0, "%s", "mtlDef->lyrMtl->layers[mtlDef->lyrMtl->activeLayer].radMtl->handle" );  // member-name -> KEEP_VERBOSE
-        return **layer;
+        iassert( mtlDef->lyrMtl->layers[mtlDef->lyrMtl->activeLayer].radMtl->handle );   // MaterialDef.cpp:321
+        return (int)(intptr_t)mtlDef->lyrMtl->layers[mtlDef->lyrMtl->activeLayer].radMtl->handle;
     }
-    if ( !mtlDef->radMtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                325, 1, "%s", "mtlDef->radMtl" );            // LEVEL 1 -> KEEP_VERBOSE
-    if ( !mtlDef->radMtl->next )               // radMtl->next (the Material* handle) @0
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                326, 0, "%s", "mtlDef->radMtl->handle" );    // member-name (port: next) -> KEEP_VERBOSE
-    return (int)(intptr_t)mtlDef->radMtl->next;
+    iassert( mtlDef->radMtl );   // MaterialDef.cpp:325
+    iassert( mtlDef->radMtl->handle );   // MaterialDef.cpp:326
+    return (int)(intptr_t)mtlDef->radMtl->handle;
 }
 
 // 0x431E90  MaterialDef_15_Drawflag_Multiply — drawflag/multiply gate.
@@ -334,10 +308,7 @@ bool MaterialDef_15_Drawflag_Multiply( int drawFlags, MaterialDef *m )
 {
     if ( (drawFlags & 0xC) == 0 )
         return true;
-    if ( (drawFlags & 4) != 0 && (drawFlags & 8) != 0 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                348, 0, "%s",
-                "!(drawFlags & DRAWFLAG_ONLY_MULTIPLY) || !(drawFlags & DRAWFLAG_SKIP_MULTIPLY)" );
+    iassert( !(drawFlags & DRAWFLAG_ONLY_MULTIPLY) || !(drawFlags & DRAWFLAG_SKIP_MULTIPLY) );   // MaterialDef.cpp:348
     qtexture_s *lm = MaterialDef_GetLayeredMaterial( m );
     int unk = lm ? (unsigned short)lm->unk_flags2 : 0;
     return ( drawFlags & ( 4 * ( (unk & 0x70) != 0x70 ) + 4 ) ) != 0;
@@ -350,17 +321,15 @@ bool MaterialDef_15_Drawflag_Multiply( int drawFlags, MaterialDef *m )
 // surfaceFlags is now carried on the KISAK_RADIANT-widened Material (populated in
 // Material_LoadRaw from the on-disk MaterialInfoRaw.surfaceFlags), so the gate is
 // byte-faithful to the IW3 56-byte MaterialInfo without disturbing SP/MP.
-// NOTE: the only binary caller is Brush_DrawSubmitFaceWindings (0x47b380, brush.cpp P5.4
-// TODO, unported), so this has no live caller in the port yet — it is correct and ready.
+// Callers: Brush_DrawSubmitFaceWindings (0x47b380, brush.cpp P5.4 TODO, unported) and
+// pmesh.cpp's stencil-shadow submit path (where the binary inlines this fn).
 bool MaterialDef_10_LayeredMatHandle( MaterialDef *mtlDef )
 {
-    qtexture_s *lm = MaterialDef_GetLayeredMaterial( mtlDef );   // 0x431a61
-    if ( !lm )                                                   // 0x431a6a
+    qtexture_s *radMtl = MaterialDef_GetLayeredMaterial( mtlDef );   // 0x431a61
+    if ( !radMtl )                                                   // 0x431a6a
         return false;
-    if ( !lm->next )                                             // 0x431a70
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                246, 0, "%s", "radMtl->handle" );  // member-name (port: next) -> KEEP_VERBOSE
-    return Material_CastsStencilShadow( lm->next );              // 0x431a96
+    iassert( radMtl->handle );   // MaterialDef.cpp:246
+    return Material_CastsStencilShadow( radMtl->handle );            // 0x431a96
 }
 
 // 0x431E40  MaterialDef_SetColorTint (sub_431E40) — reads the active
@@ -372,9 +341,7 @@ bool MaterialDef_10_LayeredMatHandle( MaterialDef *mtlDef )
 char MaterialDef_SetColorTint( MaterialDef *mtlDef, unsigned int visIndex, float *out )
 {
     Material *mtl = MaterialDef_14( visIndex, mtlDef );
-    if ( !mtl )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                336, 0, "%s", "mtl" );                // member-name -> KEEP_VERBOSE
+    iassert( mtl );   // materialdef.cpp:336
     return Material_GetConstantValue( mtl, "colorTint", out );
 }
 

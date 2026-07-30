@@ -1287,9 +1287,7 @@ static unsigned int Kdop_AddAxis( kdopAxis_t *axes, const float *dir, unsigned i
         if ( I_fabs( d ) > 0.9800000190734863f )
             return count;                       // already have a near-parallel axis
     }
-    if ( count >= 0x400 )
-        vassert( count < 0x400, "axisCount doesn't index HULL_CANDIDATE_DIR_LIMIT\n\t%i not in [0, %i)",
-                 count, 1024 );                 // :1019
+    bcassert( count, 0x400 );   // HULL_CANDIDATE_DIR_LIMIT (:1019)
     axes[count].dir[0] = dir[0];
     axes[count].dir[1] = dir[1];
     axes[count].dir[2] = dir[2];
@@ -1545,9 +1543,7 @@ static unsigned int Kdop_EnumPoints( const kdopAxis_t *axes, unsigned int count,
                     const float *p = box + 3 * corner;
                     if ( Kdop_PointInside( axes, p, count ) )
                     {
-                        if ( total >= 0x1540 )
-                            vassert( total < 0x1540, "hullPointCount doesn't index HULL_POINT_LIMIT_TOTAL\n\t%i not in [0, %i)",
-                                     total, 5440 );      // :860
+                        bcassert( total, 0x1540 );   // HULL_POINT_LIMIT_TOTAL (:860)
                         out[total].xyz[0] = p[0];
                         out[total].xyz[1] = p[1];
                         out[total].xyz[2] = p[2];
@@ -1572,9 +1568,7 @@ static unsigned int Kdop_FacePoints( unsigned int count, const kdopPoint_t *pts,
     {
         if ( pts[i].fa == axisVal || pts[i].fb == axisVal || pts[i].fc == axisVal )
         {
-            if ( n >= 0x88 )
-                vassert( n < 0x88, "ptCount doesn't index HULL_POINT_LIMIT_FACE\n\t%i not in [0, %i)",
-                         n, 136 );                       // :887
+            bcassert( n, 0x88 );   // HULL_POINT_LIMIT_FACE (:887)
             out[n][0] = pts[i].xyz[0];
             out[n][1] = pts[i].xyz[1];
             out[n][2] = pts[i].xyz[2];

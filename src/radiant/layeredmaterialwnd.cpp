@@ -65,23 +65,10 @@ extern void    LayeredMaterials_AddEntries( char *name, HWND hWnd );   // 0x4170
 extern void   *LayeredMaterials_texcoords( char *entry );              // 0x417190 (delete entry; ported)
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  lyrMtlWndGlob — the window's global state (IDB struct @ 0x181F500).
-//  Field offsets verified from the IDB field accesses:
-//    +0x00  hwnd            frame window           (laymatwnd_frame_HWND)
-//    +0x04  toolbar         COMCTL32 toolbar HWND   (LayeredMaterialWnd_HWND_Toolbar)
-//    +0x08  layerList       custom list-child HWND  (laymatwnd_content_HWND)
-//    +0x0C  liveAddActive   "clicking adds a layer" flag (byte; dword_181F50C)
-//    +0x10  activeLyrMtl    pointer into lyrMtlGlob_Layers[] of the entry being edited
-//    +0x14  selectedLayerIndex
-//  The HWND globals are defined in gfxwrapper.cpp (laymatwnd_content_HWND already is,
-//  to satisfy R_BeginRegistrationInternal); the rest live here.
+//  lyrMtlWndGlob — the window's global state (IDB struct @ 0x181F500; type in
+//  qe3.h — field names from the binary's assert strings).
 // ═══════════════════════════════════════════════════════════════════════════════
-extern HWND laymatwnd_content_HWND;        // 0x181F508 — defined in gfxwrapper.cpp
-HWND        laymatwnd_frame_HWND   = nullptr;   // 0x181F500
-HWND        LayeredMaterialWnd_HWND_Toolbar = nullptr;  // 0x181F504
-int         dword_181F50C          = 0;         // 0x181F50C (liveAddActive; only low byte used)
-int         lyrMtlWndGlob_active_layer_material = 0;    // 0x181F510 (pointer-as-int, per IDB)
-int         lyrMtlWndGlob_selected_layer_index  = 0;    // 0x181F514
+LyrMtlWndGlob_t lyrMtlWndGlob = {};
 
 // ── 84-byte library-entry view (the realised "activeLyrMtl" points into
 //    lyrMtlGlob_Layers[]).  Same layout the data layer (layeredmaterials.cpp) uses via
@@ -102,7 +89,7 @@ static_assert( sizeof( LyrMtlEntry ) == 84, "LyrMtlEntry must be the 84-byte lib
 // (0x4C + 8*i, 0x50 + 8*i).  Helpers keep the byte arithmetic identical to the IDB.
 static inline int  *EntryLayerId    ( LyrMtlEntry *e, int i ) { return (int *)( (char *)e + 0x4C + 8 * i ); }
 static inline void **EntryLayerHandle( LyrMtlEntry *e, int i ) { return (void **)( (char *)e + 0x50 + 8 * i ); }
-static inline LyrMtlEntry *ActiveEntry() { return (LyrMtlEntry *)(intptr_t)lyrMtlWndGlob_active_layer_material; }
+static inline LyrMtlEntry *ActiveEntry() { return (LyrMtlEntry *)(intptr_t)lyrMtlWndGlob.activeLyrMtl; }
 
 // Forward decls (mutual references within this TU).
 static LRESULT sub_417440();
@@ -113,7 +100,6 @@ static BOOL    LayeredMaterialWnd_Layer( unsigned int newLayerIndex );
 static int     sub_417D60();
 ATOM           LayeredMaterialWnd_PreCreateWindow();
 
-#define LMW_FILE "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\LayeredMaterialWnd.cpp"
 
 // ═══════════════════════════════════════════════════════════════════════════════
 //  CNameDlg — the "New Layered Material" name modal (IDB 0x435F10 + CNameDlg vftable).
@@ -243,7 +229,7 @@ void CNameDlg::OnOK()
 // ═══════════════════════════════════════════════════════════════════════════════
 BOOL LayeredMaterialWnd_Show()
 {
-    return ShowWindow( laymatwnd_frame_HWND, SW_SHOW );
+    return ShowWindow( lyrMtlWndGlob.hwnd, SW_SHOW );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -252,9 +238,9 @@ BOOL LayeredMaterialWnd_Show()
 // ═══════════════════════════════════════════════════════════════════════════════
 BOOL LayeredMaterialWnd_OnClose()
 {
-    if ( (BYTE)dword_181F50C )
+    if ( (BYTE)lyrMtlWndGlob.liveAddActive )
         sub_417440();
-    return ShowWindow( laymatwnd_frame_HWND, SW_HIDE );
+    return ShowWindow( lyrMtlWndGlob.hwnd, SW_HIDE );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -263,11 +249,11 @@ BOOL LayeredMaterialWnd_OnClose()
 // ═══════════════════════════════════════════════════════════════════════════════
 BOOL LayeredMaterialWnd_ToggleVisibility()
 {
-    if ( !IsWindowVisible( laymatwnd_frame_HWND ) )
-        return ShowWindow( laymatwnd_frame_HWND, SW_SHOW );
-    if ( (BYTE)dword_181F50C )
+    if ( !IsWindowVisible( lyrMtlWndGlob.hwnd ) )
+        return ShowWindow( lyrMtlWndGlob.hwnd, SW_SHOW );
+    if ( (BYTE)lyrMtlWndGlob.liveAddActive )
         sub_417440();
-    return ShowWindow( laymatwnd_frame_HWND, SW_HIDE );
+    return ShowWindow( lyrMtlWndGlob.hwnd, SW_HIDE );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -277,10 +263,10 @@ BOOL LayeredMaterialWnd_ToggleVisibility()
 static int sub_4173D0()
 {
     RECT rc;
-    GetClientRect( laymatwnd_content_HWND, &rc );
+    GetClientRect( lyrMtlWndGlob.layerList, &rc );
 
     int n = 0;
-    if ( lyrMtlWndGlob_active_layer_material )
+    if ( lyrMtlWndGlob.activeLyrMtl )
         n = ActiveEntry()->layerCount;
 
     SCROLLINFO si;
@@ -289,7 +275,7 @@ static int sub_4173D0()
     si.fMask  = SIF_RANGE | SIF_PAGE;   // 3
     si.nMin   = 0;
     si.nPage  = rc.bottom - rc.top;
-    return SetScrollInfo( laymatwnd_content_HWND, SB_VERT, &si, TRUE );
+    return SetScrollInfo( lyrMtlWndGlob.layerList, SB_VERT, &si, TRUE );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -299,12 +285,12 @@ static int sub_4173D0()
 // ═══════════════════════════════════════════════════════════════════════════════
 static LRESULT sub_417440()
 {
-    LRESULT st = SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_GETSTATE, 0x88C4u, 0 );
+    LRESULT st = SendMessageA( lyrMtlWndGlob.toolbar, TB_GETSTATE, 0x88C4u, 0 );
     if ( st != -1 )
     {
         char newChecked = (char)( st ^ 1 );
-        SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_SETSTATE, 0x88C4u, (LPARAM)( st ^ 1 ) );
-        *(BYTE *)&dword_181F50C = (BYTE)( newChecked & 1 );
+        SendMessageA( lyrMtlWndGlob.toolbar, TB_SETSTATE, 0x88C4u, (LPARAM)( st ^ 1 ) );
+        *(BYTE *)&lyrMtlWndGlob.liveAddActive = (BYTE)( newChecked & 1 );
         TexWnd_SetLayeredMaterialActive( newChecked & 1 );
         return st;
     }
@@ -319,32 +305,32 @@ static LRESULT sub_417440()
 // ═══════════════════════════════════════════════════════════════════════════════
 static LRESULT sub_4174E0()
 {
-    int sel = lyrMtlWndGlob_selected_layer_index;
-    int mtl = lyrMtlWndGlob_active_layer_material;
+    int sel = lyrMtlWndGlob.selectedLayerIndex;
+    int mtl = lyrMtlWndGlob.activeLyrMtl;
     int selCopy = sel;
 
-    LRESULT v2 = SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_GETSTATE, 0x88C3u, 0 );
+    LRESULT v2 = SendMessageA( lyrMtlWndGlob.toolbar, TB_GETSTATE, 0x88C3u, 0 );
     if ( v2 != -1 && ( ( ( v2 & 4 ) != 0 ) != ( mtl != 0 ) ) )
-        SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_SETSTATE, 0x88C3u, (LPARAM)( v2 ^ 4 ) );
+        SendMessageA( lyrMtlWndGlob.toolbar, TB_SETSTATE, 0x88C3u, (LPARAM)( v2 ^ 4 ) );
 
-    LRESULT v3 = SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_GETSTATE, 0x88C4u, 0 );
+    LRESULT v3 = SendMessageA( lyrMtlWndGlob.toolbar, TB_GETSTATE, 0x88C4u, 0 );
     if ( v3 != -1 && ( ( ( v3 & 4 ) != 0 ) != ( mtl != 0 ) ) )
-        SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_SETSTATE, 0x88C4u, (LPARAM)( v3 ^ 4 ) );
+        SendMessageA( lyrMtlWndGlob.toolbar, TB_SETSTATE, 0x88C4u, (LPARAM)( v3 ^ 4 ) );
 
     bool v4 = mtl && sel >= 0 && sel < ActiveEntry()->layerCount;
-    LRESULT v5 = SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_GETSTATE, 0x88C5u, 0 );
+    LRESULT v5 = SendMessageA( lyrMtlWndGlob.toolbar, TB_GETSTATE, 0x88C5u, 0 );
     if ( v5 != -1 && ( ( ( v5 & 4 ) != 0 ) != v4 ) )
-        SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_SETSTATE, 0x88C5u, (LPARAM)( v5 ^ 4 ) );
+        SendMessageA( lyrMtlWndGlob.toolbar, TB_SETSTATE, 0x88C5u, (LPARAM)( v5 ^ 4 ) );
 
     bool v6 = mtl && ( selCopy + 1 ) < ActiveEntry()->layerCount;
-    LRESULT v7 = SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_GETSTATE, 0x88C6u, 0 );
+    LRESULT v7 = SendMessageA( lyrMtlWndGlob.toolbar, TB_GETSTATE, 0x88C6u, 0 );
     if ( v7 != -1 && ( ( ( v7 & 4 ) != 0 ) != v6 ) )
-        SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_SETSTATE, 0x88C6u, (LPARAM)( v7 ^ 4 ) );
+        SendMessageA( lyrMtlWndGlob.toolbar, TB_SETSTATE, 0x88C6u, (LPARAM)( v7 ^ 4 ) );
 
     bool v8 = mtl && ( selCopy - 1 ) >= 0;
-    LRESULT result = SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_GETSTATE, 0x88C7u, 0 );
+    LRESULT result = SendMessageA( lyrMtlWndGlob.toolbar, TB_GETSTATE, 0x88C7u, 0 );
     if ( result != -1 && ( ( ( result & 4 ) != 0 ) != v8 ) )
-        return SendMessageA( LayeredMaterialWnd_HWND_Toolbar, TB_SETSTATE, 0x88C7u, (LPARAM)( result ^ 4 ) );
+        return SendMessageA( lyrMtlWndGlob.toolbar, TB_SETSTATE, 0x88C7u, (LPARAM)( result ^ 4 ) );
     return result;
 }
 
@@ -364,7 +350,7 @@ static BOOL sub_417710()
     sub_47D060( (int)(intptr_t)&selected_brushes );
     sub_47D060( (int)(intptr_t)&filtered_brushes );
     sub_4174E0();
-    BOOL result = InvalidateRect( laymatwnd_content_HWND, nullptr, FALSE );
+    BOOL result = InvalidateRect( lyrMtlWndGlob.layerList, nullptr, FALSE );
     g_nUpdateBits = -1;
     return result;
 }
@@ -377,7 +363,7 @@ static BOOL sub_417710()
 int LayeredMaterialWnd_OnNewMaterial()
 {
     CWnd parent;
-    parent.Attach( laymatwnd_frame_HWND );
+    parent.Attach( lyrMtlWndGlob.hwnd );
 
     int ret;
     {
@@ -388,7 +374,7 @@ int LayeredMaterialWnd_OnNewMaterial()
         ret = (int)dlg.DoModal();
         parent.Detach();
         if ( ret == IDOK )
-            LayeredMaterials_AddEntries( (char *)(LPCSTR)dlg.m_result, laymatwnd_frame_HWND );
+            LayeredMaterials_AddEntries( (char *)(LPCSTR)dlg.m_result, lyrMtlWndGlob.hwnd );
         // dlg destructor (the binary's sub_417820) releases the two CStrings (RAII).
     }
     return ret;
@@ -401,37 +387,20 @@ int LayeredMaterialWnd_OnNewMaterial()
 static BOOL LayeredMaterialWnd_Layer( unsigned int newLayerIndex )
 {
     LyrMtlEntry *e = ActiveEntry();
-    if ( !lyrMtlWndGlob_active_layer_material )
-    {
-        Assert( LMW_FILE, 200, 0, "%s", "lyrMtlWndGlob.activeLyrMtl" );
-        e = ActiveEntry();
-    }
-    if ( newLayerIndex >= (unsigned)e->layerCount )
-    {
-        Assert( LMW_FILE, 201, 0,
-                "newLayerIndex doesn't index lyrMtlWndGlob.activeLyrMtl->layerCount\n\t%i not in [0, %i)",
-                newLayerIndex, e->layerCount );
-        e = ActiveEntry();
-    }
-    int sel = lyrMtlWndGlob_selected_layer_index;
-    if ( (unsigned)sel >= (unsigned)e->layerCount )
-    {
-        Assert( LMW_FILE, 202, 0,
-                "lyrMtlWndGlob.selectedLayerIndex doesn't index lyrMtlWndGlob.activeLyrMtl->layerCount\n\t%i not in [0, %i)",
-                sel, e->layerCount );
-        sel = lyrMtlWndGlob_selected_layer_index;
-        e   = ActiveEntry();
-    }
+    iassert( lyrMtlWndGlob.activeLyrMtl );   // LayeredMaterialWnd.cpp:200
+    bcassert( newLayerIndex, (unsigned)e->layerCount );        // LayeredMaterialWnd.cpp:201
+    int sel = lyrMtlWndGlob.selectedLayerIndex;
+    bcassert( (unsigned)sel, (unsigned)e->layerCount );        // LayeredMaterialWnd.cpp:202
 
     // Swap layer[newLayerIndex] <-> layer[sel].
     int   tmpId     = *EntryLayerId( e, newLayerIndex );
     void *tmpHandle = *EntryLayerHandle( e, newLayerIndex );
     *EntryLayerId( e, newLayerIndex )     = *EntryLayerId( e, sel );
     *EntryLayerHandle( e, newLayerIndex ) = *EntryLayerHandle( e, sel );
-    *EntryLayerId( ActiveEntry(), lyrMtlWndGlob_selected_layer_index )     = tmpId;
-    *EntryLayerHandle( ActiveEntry(), lyrMtlWndGlob_selected_layer_index ) = tmpHandle;
+    *EntryLayerId( ActiveEntry(), lyrMtlWndGlob.selectedLayerIndex )     = tmpId;
+    *EntryLayerHandle( ActiveEntry(), lyrMtlWndGlob.selectedLayerIndex ) = tmpHandle;
 
-    lyrMtlWndGlob_selected_layer_index = newLayerIndex;
+    lyrMtlWndGlob.selectedLayerIndex = newLayerIndex;
     return sub_417710();
 }
 
@@ -447,15 +416,15 @@ LRESULT LayeredMaterialWnd_Commands( int cmd )
         return LayeredMaterialWnd_OnNewMaterial();
 
     case 1:   // Delete the active layered material.
-        SetWindowTextA( laymatwnd_frame_HWND, "(no layered material)" );
+        SetWindowTextA( lyrMtlWndGlob.hwnd, "(no layered material)" );
         // LayeredMaterials_texcoords (0x417190, layeredmaterials.cpp) — now a real port:
         // replaces the deleted material with "$default" on the live brushes (via the ported
         // FindReplaceTextures), then compacts the in-memory library.  Its only remaining
         // FATAL is the FindReplaceTextures flag&4 prefab-recursion branch, which fires ONLY
         // on an explicit operator delete with a REFERENCING prefab present (disk-mutating
         // Map_SaveFile of stock .maps — HARD RULE).  Faithful to the binary.
-        LayeredMaterials_texcoords( (char *)(intptr_t)lyrMtlWndGlob_active_layer_material );
-        lyrMtlWndGlob_active_layer_material = 0;
+        LayeredMaterials_texcoords( (char *)(intptr_t)lyrMtlWndGlob.activeLyrMtl );
+        lyrMtlWndGlob.activeLyrMtl = 0;
         return sub_417710();
 
     case 2:
@@ -464,33 +433,22 @@ LRESULT LayeredMaterialWnd_Commands( int cmd )
     case 3:   // Remove the selected layer (shift the rest down, shrink layerCount).
     {
         LyrMtlEntry *e = ActiveEntry();
-        if ( !lyrMtlWndGlob_active_layer_material )
-        {
-            Assert( LMW_FILE, 180, 0, "%s", "lyrMtlWndGlob.activeLyrMtl" );
-            e = ActiveEntry();
-        }
-        int sel = lyrMtlWndGlob_selected_layer_index;
-        if ( (unsigned)sel >= (unsigned)e->layerCount )
-        {
-            Assert( LMW_FILE, 181, 0,
-                    "lyrMtlWndGlob.selectedLayerIndex doesn't index lyrMtlWndGlob.activeLyrMtl->layerCount\n\t%i not in [0, %i)",
-                    sel, e->layerCount );
-            sel = lyrMtlWndGlob_selected_layer_index;
-            e   = ActiveEntry();
-        }
+        iassert( lyrMtlWndGlob.activeLyrMtl );   // LayeredMaterialWnd.cpp:180
+        int sel = lyrMtlWndGlob.selectedLayerIndex;
+        bcassert( (unsigned)sel, (unsigned)e->layerCount );    // LayeredMaterialWnd.cpp:181
         // memcpy( &layer[sel], &layer[sel+1], 8 * (--layerCount - sel) )
         int remaining = --e->layerCount - sel;
         memcpy( EntryLayerId( e, sel ), EntryLayerId( e, sel + 1 ), (size_t)8 * remaining );
-        if ( lyrMtlWndGlob_selected_layer_index )
-            --lyrMtlWndGlob_selected_layer_index;
+        if ( lyrMtlWndGlob.selectedLayerIndex )
+            --lyrMtlWndGlob.selectedLayerIndex;
         return sub_417710();
     }
 
     case 4:
-        return LayeredMaterialWnd_Layer( lyrMtlWndGlob_selected_layer_index + 1 );
+        return LayeredMaterialWnd_Layer( lyrMtlWndGlob.selectedLayerIndex + 1 );
 
     case 5:
-        return LayeredMaterialWnd_Layer( lyrMtlWndGlob_selected_layer_index - 1 );
+        return LayeredMaterialWnd_Layer( lyrMtlWndGlob.selectedLayerIndex - 1 );
     }
     return 0;
 }
@@ -529,8 +487,8 @@ static BOOL LayeredMaterialWnd_SavePosition( HWND hWnd )
 static LONG sub_417B40( int *x, LONG *y, LONG *w, int *h )
 {
     RECT toolbar, client;
-    GetClientRect( laymatwnd_frame_HWND, &client );
-    GetWindowRect( LayeredMaterialWnd_HWND_Toolbar, &toolbar );
+    GetClientRect( lyrMtlWndGlob.hwnd, &client );
+    GetWindowRect( lyrMtlWndGlob.toolbar, &toolbar );
     LONG toolbarH = toolbar.bottom - toolbar.top;
     *x = 0;
     *y = toolbarH;
@@ -545,14 +503,14 @@ static LONG sub_417B40( int *x, LONG *y, LONG *w, int *h )
 // ═══════════════════════════════════════════════════════════════════════════════
 static int LayeredMaterialWnd_SaveSize()
 {
-    if ( laymatwnd_content_HWND )
+    if ( lyrMtlWndGlob.layerList )
     {
         int  x, h;
         LONG y, w;
         sub_417B40( &x, &y, &w, &h );
-        SetWindowPos( laymatwnd_content_HWND, nullptr, x, y, (int)w, h, SWP_NOZORDER );
+        SetWindowPos( lyrMtlWndGlob.layerList, nullptr, x, y, (int)w, h, SWP_NOZORDER );
         RECT rc;
-        GetWindowRect( laymatwnd_frame_HWND, &rc );
+        GetWindowRect( lyrMtlWndGlob.hwnd, &rc );
         SaveRegistryInfo( "LayeredMaterialsRect", &rc, sizeof( rc ) );
         return sub_4173D0();
     }
@@ -564,21 +522,23 @@ static int LayeredMaterialWnd_SaveSize()
 // ═══════════════════════════════════════════════════════════════════════════════
 LRESULT CALLBACK LayeredMaterialWnd_WindowProc( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam )
 {
-    if ( hWnd != laymatwnd_frame_HWND && laymatwnd_frame_HWND )
-        Assert( LMW_FILE, 330, 0, "%s", "hwnd == lyrMtlWndGlob.hwnd || lyrMtlWndGlob.hwnd == NULL" );
+    HWND hwnd = hWnd;   // the binary's param name (assert string)
+    iassert( hwnd == lyrMtlWndGlob.hwnd || lyrMtlWndGlob.hwnd == NULL );   // LayeredMaterialWnd.cpp:330
 
     if ( Msg <= WM_NOTIFY )
     {
         switch ( Msg )
         {
         case WM_NOTIFY:
-            // TTN_NEEDTEXTA == ((UINT)-520).  NMHDR.code @ +8; TOOLTIPTEXT.lpszText @ +12.
-            if ( *(int *)( lParam + 8 ) == -520 )
+        {
+            TOOLTIPTEXTA *tt = (TOOLTIPTEXTA *)lParam;
+            if ( (int)tt->hdr.code == -520 )   // TTN_NEEDTEXTA
             {
-                *(int *)( lParam + 12 ) = (int)(intptr_t)sub_417AC0( *(int *)( lParam + 4 ) );
+                tt->lpszText = (char *)sub_417AC0( (int)tt->hdr.idFrom );
                 return DefWindowProcA( hWnd, Msg, wParam, lParam );
             }
             break;
+        }
         case WM_MOVE:
             LayeredMaterialWnd_SavePosition( hWnd );
             return DefWindowProcA( hWnd, WM_MOVE, wParam, lParam );
@@ -623,11 +583,11 @@ static int sub_417D60()
 {
     int result = 0;
     LyrMtlEntry *e = ActiveEntry();
-    if ( !lyrMtlWndGlob_active_layer_material )
+    if ( !lyrMtlWndGlob.activeLyrMtl )
         return result;
 
     R_AddCmdProjectionSet2D();   // IDB SetProjection2D
-    int baseY = 2 - GetScrollPos( laymatwnd_content_HWND, SB_VERT );   // v2
+    int baseY = 2 - GetScrollPos( lyrMtlWndGlob.layerList, SB_VERT );   // v2
     // IDB sub_5120A0 (R_GetFontHeight) just returns font->pixelHeight.
     int fontH = ( (Font_s *)g_qeglobals.d_font_list )->pixelHeight;    // result
 
@@ -644,10 +604,10 @@ static int sub_417D60()
     for ( ; v3 >= 0; --v3 )
     {
         const float *textColor;
-        if ( v3 == lyrMtlWndGlob_selected_layer_index )
+        if ( v3 == lyrMtlWndGlob.selectedLayerIndex )
         {
             RECT fr;
-            GetClientRect( laymatwnd_frame_HWND, &fr );
+            GetClientRect( lyrMtlWndGlob.hwnd, &fr );
             float fw = (float)( fr.right - fr.left );
             R_AddCmdDraw2DImage( 0.0f, (float)rowTop, fw, 68.0f, 0.0f, 0.0f, 1.0f, 1.0f,
                                  g_qeglobals.d_savedinfo.colors[25], g_qeglobals.d_white );
@@ -699,9 +659,9 @@ static int sub_417D60()
 static int CLayermatWnd_OnPaint()
 {
     PAINTSTRUCT ps;
-    BeginPaint( laymatwnd_content_HWND, &ps );
-    if ( !R_SetupRendertarget_CheckDevice( laymatwnd_content_HWND ) )
-        return EndPaint( laymatwnd_content_HWND, &ps );
+    BeginPaint( lyrMtlWndGlob.layerList, &ps );
+    if ( !R_SetupRendertarget_CheckDevice( lyrMtlWndGlob.layerList ) )
+        return EndPaint( lyrMtlWndGlob.layerList, &ps );
 
     R_BeginFrame();
     R_AddCmdClearScreen( 7, g_qeglobals.d_savedinfo.colors[0], 1.0f, 0 );   // IDB R_AddClearCmd
@@ -709,7 +669,7 @@ static int CLayermatWnd_OnPaint()
     R_EndFrame();
     R_IssueRenderCommands( (unsigned)-1 );
     R_SortMaterials();
-    R_CheckTargetWindow( laymatwnd_content_HWND );
+    R_CheckTargetWindow( lyrMtlWndGlob.layerList );
     // The IDB resets the hunk-temp watermark here (CLayermatWnd_OnPaint tail, hunk_low
     // .temp = hunk_low.permanent).  R_IssueRenderCommands already drained the frame; the
     // editor renderer manages its own hunk reset inside the shared OnPaint path, so the
@@ -726,7 +686,7 @@ static UINT CLayermatWnd_OnScroll( int pos, int code )
     SCROLLINFO si;
     si.cbSize = sizeof( SCROLLINFO );   // 28
     si.fMask  = SIF_RANGE | SIF_PAGE | SIF_POS;   // 7
-    BOOL got = GetScrollInfo( laymatwnd_content_HWND, SB_VERT, &si );
+    BOOL got = GetScrollInfo( lyrMtlWndGlob.layerList, SB_VERT, &si );
 
     switch ( code )
     {
@@ -747,8 +707,8 @@ static UINT CLayermatWnd_OnScroll( int pos, int code )
     UINT result = (UINT)maxPos;
     if ( pos != si.nPos )
     {
-        SetScrollPos( laymatwnd_content_HWND, SB_VERT, pos, TRUE );
-        result = (UINT)InvalidateRect( laymatwnd_content_HWND, nullptr, FALSE );
+        SetScrollPos( lyrMtlWndGlob.layerList, SB_VERT, pos, TRUE );
+        result = (UINT)InvalidateRect( lyrMtlWndGlob.layerList, nullptr, FALSE );
     }
     return result;
 }
@@ -760,16 +720,16 @@ static UINT CLayermatWnd_OnScroll( int pos, int code )
 // ═══════════════════════════════════════════════════════════════════════════════
 static int sub_4180E0( int y )
 {
-    int v1 = GetScrollPos( laymatwnd_content_HWND, SB_VERT ) + y;
+    int v1 = GetScrollPos( lyrMtlWndGlob.layerList, SB_VERT ) + y;
     int row = ( v1 - 2 ) / 66;
     if ( row >= 0 )
     {
         int n = ActiveEntry()->layerCount;
         if ( row < n && ( v1 - 2 ) % 66 < 64 )
         {
-            lyrMtlWndGlob_selected_layer_index = n - row - 1;
+            lyrMtlWndGlob.selectedLayerIndex = n - row - 1;
             sub_4174E0();
-            int result = InvalidateRect( laymatwnd_content_HWND, nullptr, FALSE );
+            int result = InvalidateRect( lyrMtlWndGlob.layerList, nullptr, FALSE );
             g_nUpdateBits |= 0x10u;   // W_TEXTURE
             return result;
         }
@@ -782,8 +742,8 @@ static int sub_4180E0( int y )
 // ═══════════════════════════════════════════════════════════════════════════════
 LRESULT CALLBACK LayeredMaterialWnd_WindowProcA( HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam )
 {
-    if ( hWnd != laymatwnd_content_HWND && laymatwnd_content_HWND )
-        Assert( LMW_FILE, 528, 0, "%s", "hwnd == lyrMtlWndGlob.layerList || lyrMtlWndGlob.layerList == NULL" );
+    HWND hwnd = hWnd;   // the binary's param name (assert string)
+    iassert( hwnd == lyrMtlWndGlob.layerList || lyrMtlWndGlob.layerList == NULL );   // LayeredMaterialWnd.cpp:528
 
     if ( Msg <= WM_VSCROLL )
     {
@@ -805,7 +765,7 @@ LRESULT CALLBACK LayeredMaterialWnd_WindowProcA( HWND hWnd, UINT Msg, WPARAM wPa
     if ( Msg != WM_LBUTTONDOWN )
         return DefWindowProcA( hWnd, Msg, wParam, lParam );
 
-    if ( lyrMtlWndGlob_active_layer_material )
+    if ( lyrMtlWndGlob.activeLyrMtl )
         sub_4180E0( (short)HIWORD( lParam ) );   // y = GET_Y_LPARAM(lParam)
     return 0;
 }
@@ -842,8 +802,8 @@ static LRESULT Create_ToolBar()
     HMODULE hInst = GetModuleHandleA( nullptr );
     HWND toolbar = CreateWindowExA( 0, TOOLBARCLASSNAMEA, nullptr,
                                     WS_CHILD | WS_VISIBLE | WS_BORDER | CCS_NORESIZE | TBSTYLE_TOOLTIPS | TBSTYLE_FLAT,
-                                    0, 0, 168, 23, laymatwnd_frame_HWND, nullptr, hInst, nullptr );
-    LayeredMaterialWnd_HWND_Toolbar = toolbar;
+                                    0, 0, 168, 23, lyrMtlWndGlob.hwnd, nullptr, hInst, nullptr );
+    lyrMtlWndGlob.toolbar = toolbar;
     if ( !toolbar )
         Com_Error( ERR_FATAL, "%s", "Couldn't create a toolbar; you may need a newer version of Internet Explorer" );
 
@@ -873,16 +833,16 @@ static LRESULT Create_ToolBar()
 static int Create_LayerList()
 {
     RECT toolbar, client;
-    GetClientRect( laymatwnd_frame_HWND, &client );
-    GetWindowRect( LayeredMaterialWnd_HWND_Toolbar, &toolbar );
+    GetClientRect( lyrMtlWndGlob.hwnd, &client );
+    GetWindowRect( lyrMtlWndGlob.toolbar, &toolbar );
     int toolbarH = toolbar.bottom - toolbar.top;
-    laymatwnd_content_HWND = CreateWindowExA( 0, "LayeredMaterialList", nullptr,
+    lyrMtlWndGlob.layerList = CreateWindowExA( 0, "LayeredMaterialList", nullptr,
                                               WS_CHILD | WS_VISIBLE | WS_VSCROLL,
                                               0, toolbarH,
                                               client.right - client.left,
                                               client.bottom - client.top - toolbarH,
-                                              laymatwnd_frame_HWND, nullptr, nullptr, nullptr );
-    if ( !laymatwnd_content_HWND )
+                                              lyrMtlWndGlob.hwnd, nullptr, nullptr, nullptr );
+    if ( !lyrMtlWndGlob.layerList )
         Com_Error( ERR_FATAL, "%s", "Couldn't create the material layer list" );
     return sub_4173D0();
 }
@@ -891,7 +851,7 @@ static int Create_LayerList()
 //  Create_LayerdMaterialWnd  (0x4184C0) — create the frame, toolbar, and list.
 //
 //  Integration: this is operator-attended.  It is NOT auto-invoked at startup because
-//  the editor shell (mainfrm.cpp OnCreateClient) already attaches laymatwnd_content_HWND
+//  the editor shell (mainfrm.cpp OnCreateClient) already attaches lyrMtlWndGlob.layerList
 //  to the renderer via a hidden placeholder pane, and replacing that with this real
 //  frame's list child changes the gate-critical renderer multi-window attach.  An
 //  attended session can call this (e.g. lazily on the first F4 toggle) once the attach
@@ -899,12 +859,12 @@ static int Create_LayerList()
 // ═══════════════════════════════════════════════════════════════════════════════
 int Create_LayerdMaterialWnd()
 {
-    laymatwnd_frame_HWND            = nullptr;
-    LayeredMaterialWnd_HWND_Toolbar = nullptr;
-    laymatwnd_content_HWND          = nullptr;
-    dword_181F50C                   = 0;
-    lyrMtlWndGlob_active_layer_material = 0;
-    lyrMtlWndGlob_selected_layer_index  = 0;
+    lyrMtlWndGlob.hwnd            = nullptr;
+    lyrMtlWndGlob.toolbar = nullptr;
+    lyrMtlWndGlob.layerList          = nullptr;
+    lyrMtlWndGlob.liveAddActive                   = 0;
+    lyrMtlWndGlob.activeLyrMtl = 0;
+    lyrMtlWndGlob.selectedLayerIndex  = 0;
 
     LayeredMaterialWnd_PreCreateWindow();
 
@@ -920,11 +880,11 @@ int Create_LayerdMaterialWnd()
         h = savedRect.bottom - savedRect.top;
     }
 
-    laymatwnd_frame_HWND = CreateWindowExA( WS_EX_PALETTEWINDOW, "LayeredMaterialWindow",
+    lyrMtlWndGlob.hwnd = CreateWindowExA( WS_EX_PALETTEWINDOW, "LayeredMaterialWindow",
                                             "(no layered material)",
                                             WS_THICKFRAME | WS_SYSMENU | WS_DLGFRAME | WS_BORDER | WS_POPUP,
                                             x, y, w, h, nullptr, nullptr, nullptr, nullptr );
-    if ( !laymatwnd_frame_HWND )
+    if ( !lyrMtlWndGlob.hwnd )
         Com_Error( ERR_FATAL, "%s", "Couldn't create layered material window." );
 
     Create_ToolBar();
@@ -932,13 +892,13 @@ int Create_LayerdMaterialWnd()
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  sub_418580  (0x418580) — attach the CoD renderer to the layer-list child.
+//  LayeredMaterialWnd_InitRenderer  (0x418580) — attach the CoD renderer to the
+//  layer-list child.  R_BeginRegistrationInternal (gfxwrapper.cpp) calls this.
 // ═══════════════════════════════════════════════════════════════════════════════
-static char sub_418580()
+char LayeredMaterialWnd_InitRenderer()
 {
-    if ( !laymatwnd_content_HWND )
-        Assert( LMW_FILE, 726, 0, "%s", "lyrMtlWndGlob.layerList" );
-    return R_InitRendererForWindow( laymatwnd_content_HWND );
+    iassert( lyrMtlWndGlob.layerList );   // LayeredMaterialWnd.cpp:726
+    return R_InitRendererForWindow( lyrMtlWndGlob.layerList );
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -949,14 +909,12 @@ static char sub_418580()
 // ═══════════════════════════════════════════════════════════════════════════════
 LRESULT LayeredMaterialWnd_RadMtl( qtexture_s *radMtl )
 {
-    if ( !radMtl )
-        Assert( LMW_FILE, 736, 0, "%s", "radMtl" );
+    iassert( radMtl );   // LayeredMaterialWnd.cpp:736
 
-    LyrMtlEntry *e = ActiveEntry();
-    if ( !lyrMtlWndGlob_active_layer_material )
-        Assert( LMW_FILE, 739, 0, "%s", "lyrMtl" );
+    LyrMtlEntry *lyrMtl = ActiveEntry();   // the binary's local name
+    iassert( lyrMtl );   // LayeredMaterialWnd.cpp:739
 
-    int count = e->layerCount;
+    int count = lyrMtl->layerCount;
     if ( count == 1 )
         return Sys_Printf( "Cannot have more than %i layers in a layered material.\n", 1 );
 
@@ -965,22 +923,22 @@ LRESULT LayeredMaterialWnd_RadMtl( qtexture_s *radMtl )
     {
         for ( int i = 0; i < count; ++i )
         {
-            if ( *EntryLayerHandle( e, i ) == radMtl )
+            if ( *EntryLayerHandle( lyrMtl, i ) == radMtl )
                 return Sys_Printf( "Material '%s' is already a layer in '%s'.\n",
-                                   radMtl->name, e->name );
+                                   radMtl->name, lyrMtl->name );
         }
     }
 
     // Append the new layer: handle then id (= nextId, post-incremented).
-    *EntryLayerHandle( e, count ) = radMtl;
-    *EntryLayerId( e, e->layerCount++ ) = e->nextId++;
+    *EntryLayerHandle( lyrMtl, count ) = radMtl;
+    *EntryLayerId( lyrMtl, lyrMtl->layerCount++ ) = lyrMtl->nextId++;
 
     sub_4173D0();
     sub_47D060( (int)(intptr_t)&active_brushes );
     sub_47D060( (int)(intptr_t)&selected_brushes );
     sub_47D060( (int)(intptr_t)&filtered_brushes );
     sub_4174E0();
-    LRESULT result = InvalidateRect( laymatwnd_content_HWND, nullptr, FALSE );
+    LRESULT result = InvalidateRect( lyrMtlWndGlob.layerList, nullptr, FALSE );
     g_nUpdateBits = -1;
     return result;
 }

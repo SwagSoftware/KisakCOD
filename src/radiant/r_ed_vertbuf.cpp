@@ -83,8 +83,7 @@ static edVbSlot *Editor_VB_AllocSlot_New(int vertCount, uint16_t firstIndex)
     iassert(vertCount > 0);                                   // 0x51c1d0 (level 0)
     iassert(vertCount <= ED_VERTBUF_VERTEX_COUNT);            // 0x51c1ef (level 0)
     edVbSlot *slot = (edVbSlot *)operator new(sizeof(edVbSlot));
-    if (!slot)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 83, 1, "%s", "slot");   // LEVEL 1 -> KEEP_VERBOSE
+    iassert( slot );   // r_ed_vertbuf.cpp:83
     uint16_t last = (uint16_t)(firstIndex + vertCount - 1);
     slot->firstIndex = firstIndex;
     slot->lastIndex  = last;
@@ -97,8 +96,7 @@ static edVbPool *Editor_VB_AllocPool(uint16_t buffer)
 {
     iassert(buffer);                                          // 0x51c280 (level 0)
     edVbPool *pool = (edVbPool *)operator new(sizeof(edVbPool));
-    if (!pool)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 104, 1, "%s", "pool");
+    iassert( pool );   // r_ed_vertbuf.cpp:104
     pool->buffer = buffer;
     pool->slots  = 0;
     return pool;
@@ -225,12 +223,9 @@ static unsigned int Editor_VB_AllocFromPools(edMatVertBuf *matVertBuf, int vertC
 
     if (!poolBest)
         return 0;
-    if (!slotBest)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 289, 1, "%s", "slotBest");
-    if (wasteBest >= ED_VERTBUF_VERTEX_COUNT)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 290, 1, "%s", "wasteBest < ED_VERTBUF_VERTEX_COUNT");
-    if (slotBest->lastIndex - slotBest->firstIndex + 1 <= vertCount)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 291, 1, "%s", "slotBest->lastIndex - slotBest->firstIndex + 1 > vertCount");
+    iassert( slotBest );   // r_ed_vertbuf.cpp:289
+    iassert( wasteBest < ED_VERTBUF_VERTEX_COUNT );   // r_ed_vertbuf.cpp:290
+    iassert( slotBest->lastIndex - slotBest->firstIndex + 1 > vertCount );   // r_ed_vertbuf.cpp:291
 
     uint16_t buffer = poolBest->buffer;
     uint16_t first  = slotBest->firstIndex;
@@ -239,8 +234,7 @@ static unsigned int Editor_VB_AllocFromPools(edMatVertBuf *matVertBuf, int vertC
     vassert(buffer > 0 && buffer <= editorGlobals.vbCount, "%s", va("%i %i", buffer, editorGlobals.vbCount));
 
     slotBest->firstIndex = (uint16_t)(slotBest->firstIndex + vertCount); // carve from front
-    if (slotBest->firstIndex < vertCount)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 295, 1, "%s", "slotBest->firstIndex >= vertCount");
+    iassert( slotBest->firstIndex >= vertCount );   // r_ed_vertbuf.cpp:295
     return (unsigned int)((buffer << 16) | first);
 }
 
@@ -249,8 +243,7 @@ static unsigned int Editor_VB_AllocFromPools(edMatVertBuf *matVertBuf, int vertC
 // a whole-buffer pool/slot covering it.
 static void Editor_CreateAdditionalVertexBuffer()
 {
-    if (editorGlobals.vbCount > ED_VERTBUF_MAX_VERTEX_BUFFERS)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 306, 1, "%s", "editorGlobals.vbCount <= ED_VERTBUF_MAX_VERTEX_BUFFERS");
+    iassert( editorGlobals.vbCount <= ED_VERTBUF_MAX_VERTEX_BUFFERS );   // r_ed_vertbuf.cpp:306
     if (editorGlobals.vbCount == ED_VERTBUF_MAX_VERTEX_BUFFERS)
         FatalError(0, "ED_VERTBUF_MAX_VERTEX_BUFFERS (%i) exceeded", ED_VERTBUF_MAX_VERTEX_BUFFERS);
     if (editorGlobals.vbCount >= 254)
@@ -267,8 +260,7 @@ static void Editor_CreateAdditionalVertexBuffer()
     ++editorGlobals.vbCount;
     edVbPool *pool = Editor_VB_AllocPool(editorGlobals.vbCount);
     edVbSlot *slot = (edVbSlot *)operator new(sizeof(edVbSlot));
-    if (!slot)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 83, 1, "%s", "slot");
+    iassert( slot );   // r_ed_vertbuf.cpp:83
     slot->firstIndex = 0;
     slot->lastIndex  = 0xFFFF;                  // whole 64K-vert buffer
     pool->slots      = slot;
@@ -285,22 +277,21 @@ static void Editor_VB_GrowPool(int minVertCount, edMatVertBuf *matVertBuf)
     iassert(matVertBuf);                                      // 0x51c816 (level 0)
     iassert(minVertCount > 0);                                // 0x51c83f (level 0)
 
-    int snapped = (minVertCount + (ED_VERTBUF_POOL_GRANULARITY - 1)) & ~(ED_VERTBUF_POOL_GRANULARITY - 1);
-    if (snapped <= 0 || snapped > ED_VERTBUF_VERTEX_COUNT)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 346, 1, "%s", "snappedVertCount > 0 && snappedVertCount <= ED_VERTBUF_VERTEX_COUNT");
-    if (snapped % ED_VERTBUF_POOL_GRANULARITY)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 347, 1, "%s", "(snappedVertCount % ED_VERTBUF_POOL_GRANULARITY) == 0");
-    if (editorGlobals.unusedVertBuf.material)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 349, 1, "%s", "editorGlobals.unusedVertBuf.material == NULL");
-    if (editorGlobals.unusedVertBuf.next)   // 0x51c8ec (level 1) — was MISSING vs the binary
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 350, 1, "%s", "editorGlobals.unusedVertBuf.next == NULL");
+    int snappedVertCount = (minVertCount + (ED_VERTBUF_POOL_GRANULARITY - 1)) & ~(ED_VERTBUF_POOL_GRANULARITY - 1);
+    iassert(snappedVertCount > 0 && snappedVertCount <= ED_VERTBUF_VERTEX_COUNT);   // r_ed_vertbuf.cpp:346
+    iassert((snappedVertCount % ED_VERTBUF_POOL_GRANULARITY) == 0);                 // r_ed_vertbuf.cpp:347
+    int snapped = snappedVertCount;      // (the shorter alias the port used below)
+    iassert( editorGlobals.unusedVertBuf.material == NULL );   // r_ed_vertbuf.cpp:349
+    iassert( editorGlobals.unusedVertBuf.next == NULL );   // r_ed_vertbuf.cpp:350
 
     unsigned int handle = Editor_VB_AllocFromPools(&editorGlobals.unusedVertBuf, snapped, 0);
     if (!handle) {
         Editor_CreateAdditionalVertexBuffer();
         handle = Editor_VB_AllocFromPools(&editorGlobals.unusedVertBuf, snapped, 0);
-        if (!handle)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 356, 1, "%s", "ev.handle");
+        {
+            struct { unsigned int handle; } ev = { handle };   // the binary's result record
+            iassert( ev.handle );   // r_ed_vertbuf.cpp:356
+        }
     }
 
     edVbPool *pool = Editor_VB_AllocPool((uint16_t)(handle >> 16));
@@ -397,8 +388,7 @@ unsigned int Editor_VB_Upload(Material *material, int vertCount,
     iassert(vertCount <= ED_VERTBUF_VERTEX_COUNT);            // 0x51d225 (level 0)
 
     edMatVertBuf *matVertBuf = Editor_GetMaterialVertexBuffer(material);
-    if (!matVertBuf)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 377, 1, "%s", "matVertBuf");
+    iassert( matVertBuf );   // r_ed_vertbuf.cpp:377
 
     unsigned int handle = Editor_VB_GetHandle(matVertBuf, vertCount);
     if (!handle)
@@ -406,19 +396,12 @@ unsigned int Editor_VB_Upload(Material *material, int vertCount,
     if (!handle) {
         Editor_VB_GrowPool(vertCount, matVertBuf);
         // 0x51d2f0-0x51d3a2: four grow-branch invariants (level 1).
-        if (!matVertBuf)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 394, 1, "%s", "matVertBuf");
-        if (!matVertBuf->pools)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 395, 1, "%s", "matVertBuf->pools");
-        if (!matVertBuf->pools->slots)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 396, 1, "%s", "matVertBuf->pools->slots");
-        if (matVertBuf->pools->slots->lastIndex - matVertBuf->pools->slots->firstIndex + 1 < vertCount)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 397, 1, "%s\n\t%s",
-                   "matVertBuf->pools->slots->lastIndex - matVertBuf->pools->slots->firstIndex + 1 >= vertCount",
-                   va("%i %i %i", matVertBuf->pools->slots->lastIndex, matVertBuf->pools->slots->firstIndex, vertCount));
+        iassert( matVertBuf );   // r_ed_vertbuf.cpp:394
+        iassert( matVertBuf->pools );   // r_ed_vertbuf.cpp:395
+        iassert( matVertBuf->pools->slots );   // r_ed_vertbuf.cpp:396
+        vassert( matVertBuf->pools->slots->lastIndex - matVertBuf->pools->slots->firstIndex + 1 >= vertCount, "%s", va("%i %i %i", matVertBuf->pools->slots->lastIndex, matVertBuf->pools->slots->firstIndex, vertCount) );   // r_ed_vertbuf.cpp:397
         handle = Editor_VB_AllocFromPools(matVertBuf, vertCount, 1);
-        if (!handle)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 400, 1, "%s\n\t(vertCount) = %i", "(handle)", vertCount);
+        vassert( (handle), "(vertCount) = %i", vertCount );   // r_ed_vertbuf.cpp:400
     }
 
     Editor_VB_WriteVertices(handle, tangent, vertCount, xyz, binormal, normal, texCoord, color);
@@ -449,8 +432,7 @@ static bool R_Ed_VB_FreeSlot_Coalesce(edVbPool *pool, int vertCount, uint16_t fi
         return false;
 
     int lastFreedIndex = firstIndex + vertCount;             // 0x51c9b9 (one past the freed run)
-    if (lastFreedIndex <= 0 || lastFreedIndex > ED_VERTBUF_VERTEX_COUNT)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 421, 1, "%s", "lastFreedIndex > 0 && lastFreedIndex <= ED_VERTBUF_VERTEX_COUNT");
+    iassert( lastFreedIndex > 0 && lastFreedIndex <= ED_VERTBUF_VERTEX_COUNT );   // r_ed_vertbuf.cpp:421
 
     edVbSlot *mergedSlot = 0;                                 // edi
     edVbSlot **pslot = &pool->slots;                         // ebx = &pool->slots, then &slot->next
@@ -464,8 +446,7 @@ static bool R_Ed_VB_FreeSlot_Coalesce(edVbPool *pool, int vertCount, uint16_t fi
         {
             if (mergedSlot)                                  // 0x51ca00 — bridge: mergedSlot ends at the gap
             {
-                if (mergedSlot->lastIndex != lastFreedIndex - 1)   // 0x51ca47
-                    Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 430, 1, "%s", "mergedSlot->lastIndex == lastFreedIndex - 1");
+                iassert( mergedSlot->lastIndex == lastFreedIndex - 1 );   // r_ed_vertbuf.cpp:430
                 mergedSlot->lastIndex = slot->lastIndex;     // 0x51ca70 — absorb `slot` into mergedSlot
                 *pslot = slot->next;                         // 0x51ca7c — unlink `slot`
                 free(slot);
@@ -478,6 +459,7 @@ static bool R_Ed_VB_FreeSlot_Coalesce(edVbPool *pool, int vertCount, uint16_t fi
         {
             if (mergedSlot)                                  // 0x51ca1f — bridge: mergedSlot starts at the gap
             {
+                // KEEP_VERBOSE: string reads ev.s.firstIndex (the binary's union view).
                 if (mergedSlot->firstIndex != firstIndex)    // 0x51ca8f
                     Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 444, 1, "%s", "mergedSlot->firstIndex == ev.s.firstIndex");
                 mergedSlot->lastIndex = (uint16_t)(slot->lastIndex + vertCount);  // 0x51cabf
@@ -500,8 +482,7 @@ static bool R_Ed_VB_FreeSlot_Coalesce(edVbPool *pool, int vertCount, uint16_t fi
 // a fresh slot (creating the pool first if the buffer had none).
 static char R_Ed_FreeVertices_Inner(edMatVertBuf *matVertBuf, int vertCount, int handle)
 {
-    if (!matVertBuf)                                          // 0x51caea
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 469, 0, "%s", "matVertBuf");  // binary pushes eax (=null matVertBuf) as the type arg
+    iassert(matVertBuf);   // r_ed_vertbuf.cpp:469 (binary quirk: pushed eax as the type arg)
 
     uint16_t buffer = (uint16_t)((unsigned int)handle >> 16);  // HIWORD(handle) = vb buffer index
 
@@ -538,8 +519,7 @@ char R_Ed_FreeVertices(Material *handle, int vertCount, int vertHandle)
     iassert(vertCount <= ED_VERTBUF_VERTEX_COUNT);           // 0x51cba0 (level 0)  r_ed_vertbuf.cpp:497
 
     edMatVertBuf *matVertBuf = Editor_GetMaterialVertexBuffer(handle);   // 0x51cbc3
-    if (!matVertBuf)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 500, 1, "%s", "matVertBuf");
+    iassert( matVertBuf );   // r_ed_vertbuf.cpp:500
 
     return R_Ed_FreeVertices_Inner(matVertBuf, vertCount, vertHandle);   // 0x51cbf3
 }
@@ -563,15 +543,13 @@ void editorVB_freeBuffers()
     }
     editorGlobals_matVertBufs = 0;
 
-    if (editorGlobals.unusedVertBuf.next)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 519, 1, "%s", "editorGlobals.unusedVertBuf.next == NULL");
+    iassert( editorGlobals.unusedVertBuf.next == NULL );   // r_ed_vertbuf.cpp:519
     Editor_VB_FreePoolList(editorGlobals.unusedVertBuf.pools);
     editorGlobals.unusedVertBuf.pools = 0;
 
     while (editorGlobals.vbCount) {
         uint16_t idx = --editorGlobals.vbCount;
-        if (!editorGlobals.vb[idx])
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_vertbuf.cpp", 526, 1, "%s", "editorGlobals.vb[editorGlobals.vbCount]");
+        iassert( editorGlobals.vb[editorGlobals.vbCount] );   // r_ed_vertbuf.cpp:526
         editorGlobals.vb[idx]->Release();
         // 0x51cccb only Releases — it does NOT null vb[idx] (the slot is dead once vbCount
         // is decremented).

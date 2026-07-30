@@ -71,13 +71,16 @@ extern bool  HasKeyValuePair( entity_s_def *e, const char *key );
 extern void  Entity_GetOrientation( entity_s_def *ent, orientation_t *orParent, orientation_t *orOut );
 
 // ─── progress counters (IDB dword_240A0EC = "this pass" count; dword_240A0E8 = total) ──
-// File-local: only the Maya emitters touch them (the binary's globals are private too).
-static int s_mayaObjCount = 0;   // dword_240A0EC
-static int s_mayaObjTotal = 0;   // dword_240A0E8
+// Not file-local: ExportTo3D bumps s_mayaObjCount and its source file is brush.cpp (its
+// asserts are brush.cpp:3499/3500), so it lives there and reads these through an extern.
+int s_mayaObjCount = 0;   // dword_240A0EC
+int s_mayaObjTotal = 0;   // dword_240A0E8
 
 // Forward decls (mutual recursion via the prefab emitter).
 static int  Patch_ExportToMaya( FILE *f, edPatchInst_t *patch, char groupAsBrush, char emitUVs, char polyList );
-static char ExportTo3D( selbrush_t *b, const orientation_t *orient, FILE *f,
+// ExportTo3D / ExportTo3D_CreatePolyFacet live in brush.cpp (asserts brush.cpp:241/242/
+// 250/265/266 and 3499/3500 — brush.cpp is their source file).
+extern char ExportTo3D( selbrush_t *b, const orientation_t *orient, FILE *f,
                         char groupAsBrush, char emitUVs, float scale );
 static int  Prefab_ExportToMaya( selbrush_t *b, orientation_t *parentOrient, FILE *f,
                                  char groupAsBrush, char emitUVs, char polyList, float scale );
@@ -108,14 +111,9 @@ extern int  dword_181F51C;                                               // real
 // can reach the binary's MtlDef_IsFaceFiltered (0x46FBE0) directly.
 char MtlDef_IsFaceFiltered( MaterialDef *mtlDef )
 {
-    // MtlDef_IsValid( mtlDef ): exactly one of lyrMtl / radMtl is set.
-    if ( !mtlDef || ( (mtlDef->lyrMtl != nullptr) + (mtlDef->radMtl != nullptr) != 1 ) )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-
-    // face material name: lyrMtl (its name is the layered-material name) else radMtl->name.
-    const char *name = mtlDef->lyrMtl ? (const char *)mtlDef->lyrMtl
-                                      : (const char *)mtlDef->radMtl->name;
+    extern LayerMaterialDef *Materialdef_GetName( MaterialDef *m );   // materialdef.cpp 0x431640
+    // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+    const char *name = (const char *)Materialdef_GetName( mtlDef );
 
     // faceTexMap substring filter (IDA: strstr(name, key) over the whole map).
     if ( FaceTexMap_HasSubstringOf( name ) )
@@ -132,219 +130,7 @@ char MtlDef_IsFaceFiltered( MaterialDef *mtlDef )
     return 0;
 }
 
-// ════════════════════════════════════════════════════════════════════════════
-//  0x46FDA0  ExportTo3D_CreatePolyFacet — emit ONE brush face winding as a
-//  `polyCreateFacet -p x y z ...` (points REVERSED) + optional per-vertex polyEditUV.
-//
-//  __usercall in the binary: faceDef (the brush DEF face_t*, ECX) + face (the per-
-//  instance faceVis_s*, first stack arg).  We pass both explicitly.  Returns 1 if a
-//  facet was emitted, 0 if skipped (no winding, or filtered).
-// ════════════════════════════════════════════════════════════════════════════
-static char ExportTo3D_CreatePolyFacet( faceVis_s *face, face_t *faceDef,
-                                        const orientation_t *orient, FILE *f,
-                                        char emitUVs, float scale )
-{
-    if ( !face )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 241, 0, "%s", "face" );
-    if ( !faceDef )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 242, 0, "%s", "def" );
 
-    winding_t *w = faceDef->w;            // [def+0xE0]
-    if ( !w )
-        return 0;
-
-    // world-space face normal (scratch; the binary fills per-vertex normal arrays it
-    // never emits — kept for fidelity, only the positions + UVs reach the .mel).
-    float worldNormal[3];
-    OrientationDirToWorldDir( worldNormal, orient, faceDef->plane.normal );  // dir = [def+0xC0]
-
-    // texdef + texture matrix (layer 0 — the export base layer; layerHandle=0 as in the binary).
-    MaterialDef *mtldef = &faceDef->mtldef[0];                     // [def+0x24]
-    int texdef = TexWnd_06_LayerCount( (int)mtldef, 0 );
-
-    // §11 (headless-vs-GUI material-realize invariant): the binary derefs `texdef`
-    // UNCONDITIONALLY (Face_MoveTexture + the texCoord matrix), relying on the GUI's
-    // material-realize pass having populated the layer (so texdef != 0).  A LAYERED
-    // material whose `lyrMtl->layerCount == 0` (not realized — the PARKED texture/material
-    // epic) makes TexWnd_06_LayerCount return 0; the binary would then deref a NULL texdef
-    // (it never does in the GUI).  We GUARD it: with no realized layer, emit the GEOMETRY
-    // (the whole point of the export — positions always exist) with identity UVs and skip
-    // the colour probe (sub_46F6C0 → MaterialDef_14 would also assert on the empty layer).
-    bool haveTex = ( texdef != 0 );
-    float texMat[8];
-    if ( haveTex )
-    {
-        Face_MoveTexture( texdef, faceDef->plane.normal, (int)texMat, texdef + 8,
-                          *(float *)( texdef + 16 ), *(float *)( texdef + 20 ) );
-    }
-    else
-    {
-        texMat[0] = texMat[1] = texMat[2] = texMat[3] = 0.0f;
-        texMat[4] = texMat[5] = texMat[6] = texMat[7] = 0.0f;
-    }
-
-    if ( w->numpoints > 1024 )            // MAX_POINTS_ON_WINDING
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 250, 0, "%s",
-                "w->ptCount <= MAX_POINTS_ON_WINDING" );
-
-    if ( MtlDef_IsFaceFiltered( mtldef ) )
-        return 0;
-
-    fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
-
-    if ( haveTex )                        // colour probe also needs a realized layer (MaterialDef_14)
-    {
-        unsigned int packedColor = 0;    // sub_46F6C0 result (unused by the -p emit, faithful)
-        sub_46F6C0( (int)mtldef, (int)faceDef, 0, (int *)&packedColor );
-    }
-
-    // texcoords are buffered then emitted in the SAME reverse order as the -p list.
-    float st[1024][2];
-
-    // Emit points in REVERSE (numpoints-1 .. 0), matching the binary's facet winding.
-    for ( int i = w->numpoints - 1; i >= 0; --i )
-    {
-        const float *p = w->p[i];        // x=p[0] y=p[1] z=p[2]
-
-        st[i][0] = texMat[0] * p[0] + texMat[1] * p[1] + texMat[2] * p[2] + texMat[3];
-        st[i][1] = texMat[4] * p[0] + texMat[5] * p[1] + texMat[6] * p[2] + texMat[7];
-
-        if ( ( *(int *)&st[i][0] & 0x7F800000 ) == 0x7F800000 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 265, 0, "%s",
-                    "!IS_NAN(texCoord[ptIndex][0])" );
-        if ( ( *(int *)&st[i][1] & 0x7F800000 ) == 0x7F800000 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 266, 0, "%s",
-                    "!IS_NAN(texCoord[ptIndex][1])" );
-
-        fprintf( f, " -p %f %f %f", scale * p[0], p[1] * scale, scale * p[2] );
-    }
-
-    fprintf( f, "`;\r\n" );
-
-    if ( emitUVs )
-    {
-        for ( int i = w->numpoints - 1; i >= 0; --i )
-            fprintf( f, "\t\tpolyEditUV -r false -u %f -v %f ($strPolyInfo[0]).map[%d];\r\n",
-                     st[i][0], st[i][1], i );
-    }
-    return 1;
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-//  0x477E00  ExportTo3D — emit ONE brush as a `{ ... }` MEL block: a polyCreateFacet
-//  per (filtered-in) face, then polyUnite/polyMergeVertex/parent.  Point (fixedsize)
-//  entities additionally get four small marker facets + move/rotate from origin/angles.
-// ════════════════════════════════════════════════════════════════════════════
-static char ExportTo3D( selbrush_t *b, const orientation_t *orient, FILE *f,
-                        char groupAsBrush, char emitUVs, float scale )
-{
-    if ( !b )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 3499, 0, "%s", "b" );
-    if ( !b->def )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 3500, 0, "%s", "b->def" );
-
-    char filtered = FilterBrush( b, 0 );
-    if ( filtered )
-        return filtered;                 // filtered-out brush -> emit nothing (returns nonzero)
-
-    // sync the per-instance faceVis array to the def's face count (rebuild if stale).
-    if ( b->faceCount != b->def->faceCount )
-    {
-        if ( b->faces )
-            Vis_Free( b->faceCount, b->faces, (int)(intptr_t)b );
-        b->faceCount = b->def->faceCount;
-        b->faces     = (faceVis_s *)PlanePts_Alloc( b->faceCount );
-    }
-
-    fprintf( f, "\t{\r\n" );
-    fprintf( f, "\t\tstring $strPolyInfo[];\r\n" );
-    if ( groupAsBrush )
-    {
-        fprintf( f, "\t\tstring $strPolyList[];\r\n" );
-        fprintf( f, "\t\tstring $strBrush[];\r\n\r\n" );
-    }
-
-    face_t    *defFaces = b->def->faces;        // [def+0x44]
-    faceVis_s *visFaces = (faceVis_s *)b->faces;       // [inst+0x1C]
-    int        polyIdx  = 0;
-    for ( int i = 0; (unsigned)i < (unsigned)b->faceCount; ++i )
-    {
-        if ( ExportTo3D_CreatePolyFacet( &visFaces[i], &defFaces[i], orient, f, emitUVs, scale ) )
-        {
-            if ( groupAsBrush )
-                fprintf( f, "\t\t$strPolyList[%d] = $strPolyInfo[0];\r\n", polyIdx );
-            ++polyIdx;
-        }
-    }
-
-    entity_s_def *ownerDef = (entity_s_def *)b->owner->def;   // owner entity def
-    if ( *(int *)&ownerDef->eclass->fixedsize )       // point entity: emit 4 marker facets
-    {
-        const float *o = ownerDef->origin;
-        // +X / +Z(8) / -Y(8) marker
-        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
-        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
-        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] + 8.0 );
-        fprintf( f, " -p %f %f %f", o[0],        o[1] - 8.0, o[2] );
-        fprintf( f, "`;\r\n" );
-        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
-        // +X / +Y(8) / +Z(8) marker
-        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
-        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
-        fprintf( f, " -p %f %f %f", o[0],        o[1] + 8.0, o[2] );
-        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] + 8.0 );
-        fprintf( f, "`;\r\n" );
-        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
-        // +X / -Z(8) / +Y(8) marker
-        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
-        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
-        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] - 8.0 );
-        fprintf( f, " -p %f %f %f", o[0],        o[1] + 8.0, o[2] );
-        fprintf( f, "`;\r\n" );
-        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
-        // +X / -Y(8) / -Z(8) marker
-        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
-        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
-        fprintf( f, " -p %f %f %f", o[0],        o[1] - 8.0, o[2] );
-        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] - 8.0 );
-        fprintf( f, "`;\r\n" );
-        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
-    }
-
-    if ( groupAsBrush )
-    {
-        fprintf( f, "\t\tif (size ($strPolyList) > 1)\r\n" );
-        fprintf( f, "\t\t\t$strBrush = `polyUnite -ch 0 ($strPolyList)`;\r\n" );
-        fprintf( f, "\t\telse\r\n" );
-        fprintf( f, "\t\t\t$strBrush[0] = $strPolyList[0];\r\n" );
-        fprintf( f, "\t\tpolyMergeVertex -d 0.01 -ch 0 $strBrush[0];\r\n" );
-        fprintf( f, "\t\tparent $strBrush[0] $strGroups[$iCurGroup];\r\n" );
-
-        if ( *(int *)&ownerDef->eclass->fixedsize )
-        {
-            float ang[3];
-            if ( !Entity_GetVec3ForKey( ownerDef, ang, "angles" ) )
-            {
-                ang[0] = 0.0f; ang[1] = 0.0f; ang[2] = 0.0f;
-            }
-            const float *o = ownerDef->origin;
-            fprintf( f, "\t\tmove -x %f -y %f -z %f (($strBrush[0]) + \".scalePivot\") "
-                        "(($strBrush[0]) + \".rotatePivot\");\r\n", o[0], o[1], o[2] );
-            if ( HasKeyValuePair( ownerDef, "angles" ) )
-                fprintf( f, "\t\trotate -os %f %f %f ($strBrush[0]);\r\n", ang[2], ang[0], ang[1] );
-        }
-    }
-    else
-    {
-        fprintf( f, "\t\tparent $strPolyList $strGroups[$iCurGroup];\r\n" );
-    }
-
-    ++s_mayaObjCount;
-    fprintf( f, "\t}\r\n" );
-    fprintf( f, "\tprogressWindow -edit -s 1;\r\n" );
-    return (char)fprintf( f, "\tprogressWindow -edit -st \"%d of %d objects\";\r\n",
-                          s_mayaObjCount, s_mayaObjTotal );
-}
 
 // ════════════════════════════════════════════════════════════════════════════
 //  0x4402C0  Patch_ExportToMaya — emit ONE patch.  polyList mode: one polyCreateFacet

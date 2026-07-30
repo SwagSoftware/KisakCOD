@@ -291,8 +291,7 @@ face_t *Face_Alloc( brush_t *b, face_t *f )
     iassert( f );             // brush.cpp:830
 
     face_t *faceList = Face_Alloc_R( b->faceCount + 1 );
-    if ( !faceList )          // brush.cpp:833 — LEVEL 1 in the binary; iassert is level 0, so KEEP_VERBOSE
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 833, 1, "%s", "faceList" );
+    iassert( faceList );   // brush.cpp:833
 
     // copy existing faces (INCLUDING their winding pointers) to faceList
     if ( b->faceCount )
@@ -481,7 +480,7 @@ brush_t *Brush_Alloc( const void *planeptsSrc, eclass_t *ecls )
         memcpy( &f->mtldef[0], planeptsSrc, 0x24u );
         // clear certain flags then set packed color
         *(int *)&f->contents &= 0xF7FFDF7B;
-        *(int *)((char *)f + 228) = col.packed;  // offset 228 = planepts0[57] in IDA = near end of face
+        f->packedColor = col.packed;
     }
     Brush_SetDefaultMaterials( b );
     return b;
@@ -590,12 +589,9 @@ static void Entity_LinkBrush( entity_s *entity, selbrush_t *b )
 
     // brush.cpp:2338/2339/2340 are LEVEL 1 in the binary (post-unlink invariants); iassert is
     // hardcoded level 0 (assertive.h), so converting downgrades the level — KEEP_VERBOSE.
-    if ( b->owner != NULL )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2338, 1, "%s", "b->owner == NULL" );
-    if ( b->ownerNext != NULL )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2339, 1, "%s", "b->ownerNext == NULL" );
-    if ( b->ownerPrev != NULL )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2340, 1, "%s", "b->ownerPrev == NULL" );
+    iassert( b->owner == NULL );   // brush.cpp:2338
+    iassert( b->ownerNext == NULL );   // brush.cpp:2339
+    iassert( b->ownerPrev == NULL );   // brush.cpp:2340
 
     if ( entity )
     {
@@ -673,16 +669,13 @@ selbrush_t *Brush_AddToList( brush_t *def, entity_s *owner )
         b->patch = patchInst;
         // brush.cpp:2397 is LEVEL 1 in the binary (push 1) — iassert is hardcoded level 0
         // (assertive.h), so converting downgrades the level.  KEEP_VERBOSE.
-        if ( b->patch->def != b->def->patch )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2397, 1, "%s", "b->patch->def == b->def->patch" );
+        iassert( b->patch->def == b->def->patch );   // brush.cpp:2397
     }
 
     Entity_LinkBrush( owner, b );
 
-    if ( b->owner != owner )            // brush.cpp:2401 — LEVEL 1, KEEP_VERBOSE (iassert would downgrade)
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2401, 1, "%s", "b->owner == owner" );
-    if ( b->owner->def != b->def->owner )   // brush.cpp:2402 — LEVEL 1, KEEP_VERBOSE
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 2402, 1, "%s", "b->owner->def == b->def->owner" );
+    iassert( b->owner == owner );   // brush.cpp:2401
+    iassert( b->owner->def == b->def->owner );   // brush.cpp:2402
 
     return b;
 }
@@ -748,9 +741,9 @@ brush_t *Brush_Clone( brush_t *def )
         // copy extra fields at stride 144 from planepts
         memcpy( &dst->mtldef[3], &srcc->mtldef[3], 0x24u );
         // copy packed color and flags verbatim
-        *(int *)((char *)dst + 228) = *(int *)((char *)srcc + 228);
-        *(int *)((char *)dst + 180) = *(int *)((char *)srcc + 180);
-        *(int *)((char *)dst + 184) = *(int *)((char *)srcc + 184);
+        dst->packedColor = srcc->packedColor;
+        dst->contents    = srcc->contents;
+        dst->toolflags   = srcc->toolflags;
         // copy planepts
         memcpy( dst->planepts, srcc->planepts, 0x24u );
     }
@@ -855,10 +848,8 @@ void Brush_Select_Helper( selbrush_t *b )
 
     if ( g_qeglobals.w_cyclePreviewMode )
     {
-        // eclass->default_model_name is a char* array; w_cyclePreviewMode indexes into it.
         eclass_t *cls = eDef->eclass;
-        if ( cls && *(int *)((char *)&cls->default_model_name
-                              + (unsigned short)g_qeglobals.w_cyclePreviewMode * 4) )
+        if ( cls && cls->cycleModelName[(unsigned short)g_qeglobals.w_cyclePreviewMode] )
         {
             b->brushFlags |= 0x100u;
             eDef->modelClass = nullptr;
@@ -1084,39 +1075,32 @@ static void CM_PickProjectionAxes( const float *normal, int *axis1, int *axis2 )
 // endpoint rather than inserting a new vertex.
 // 572/597/589 KEEP_VERBOSE (shared-winding w->pts form).
 static void CM_AddColinearExteriorPointToWindingProjected(
-        winding_t *w, const float *pt, int axisI, int axisJ, int index0, int index1 )
+        winding_t *w, const float *pt, int i, int j, int index0, int index1 )
 {
     float *pts = &w->p[0][0];
 
-    if ( pts[3 * index1 + axisI] == pts[3 * index0 + axisI] &&
-         pts[3 * index1 + axisJ] == pts[3 * index0 + axisJ] )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 572, 0, "%s",
-                "w->pts[index0][i] != w->pts[index1][i] || w->pts[index0][j] != w->pts[index1][j]" );
+    iassert( w->pts[index0][i] != w->pts[index1][i] || w->pts[index0][j] != w->pts[index1][j] );   // brush.cpp:572
 
-    float di = pts[3 * index1 + axisI] - pts[3 * index0 + axisI];
-    float dj = pts[3 * index1 + axisJ] - pts[3 * index0 + axisJ];
+    float di = pts[3 * index1 + i] - pts[3 * index0 + i];
+    float dj = pts[3 * index1 + j] - pts[3 * index0 + j];
     int   axis;
     float delta;
-    if ( fabsf( dj ) > fabsf( di ) ) { delta = dj; axis = axisJ; }
-    else                             { delta = di; axis = axisI; }
+    if ( fabsf( dj ) > fabsf( di ) ) { delta = dj; axis = j; }
+    else                             { delta = di; axis = i; }
 
     float p0 = pts[3 * index0 + axis];
     float p1 = pts[3 * index1 + axis];
     int   replaceIdx;
     if ( delta <= 0.0f )
     {
-        if ( p1 >= p0 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 597, 0, "%s",
-                    "w->pts[index0][axis] > w->pts[index1][axis]" );
+        iassert( w->pts[index0][axis] > w->pts[index1][axis] );   // brush.cpp:597
         if ( p0 < pt[axis] )            replaceIdx = index0;
         else if ( p1 <= pt[axis] )      return;
         else                            replaceIdx = index1;
     }
     else
     {
-        if ( p1 <= p0 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 589, 0, "%s",
-                    "w->pts[index0][axis] < w->pts[index1][axis]" );
+        iassert( w->pts[index0][axis] < w->pts[index1][axis] );   // brush.cpp:589
         if ( p0 <= pt[axis] )
         {
             if ( p1 >= pt[axis] )       return;
@@ -1625,24 +1609,9 @@ void CXYWnd_OnSelectionAddToActiveLayer()
 {
     for ( selbrush_t *i = selected_brushes.next; i != &selected_brushes; i = i->next )
     {
-        if ( !i )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    2365, 0, "%s", "b" );       // 0x46697a (nID line 0x93D)
-        brush_t *b = i->def;
-        if ( !b )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    2354, 0, "%s", "b" );       // 0x4669a1 (nID line 0x932)
-
-        if ( b->parent_layer_string )
-            j__free_0( b->parent_layer_string );
-
-        // operator new(strlen+1) + memcpy(strlen+1) (0x4669b9..0x4669e6).
-        unsigned int len = (unsigned int)strlen( g_activeLayer_string );
-        char *copy = (char *)operator new( len + 1 );
-        memcpy( copy, g_activeLayer_string, len + 1 );
-        b->parent_layer_string = copy;
-
-        i->xx7 = 0;                             // 0x4669e9 (mov dword ptr [esi+30h], 0)
+        // (the binary inlines Brush_SetInstanceLayerString here; the helper carries the
+        // brush.cpp:2365/2354 checks itself)
+        Brush_SetInstanceLayerString( i, g_activeLayer_string );   // free old + dup new + xx7=0
     }
 }
 
@@ -1661,13 +1630,11 @@ void Layers_KeepOnlySelectionInLayer( const char *a1 )
 {
     for ( selbrush_t *v1 = selected_brushes.next; v1 != &selected_brushes; )
     {
-        brush_t   *def    = v1->def;            // [edi+14h]
+        brush_t   *b      = v1->def;            // [edi+14h] — the binary's local `b`
         selbrush_t *next  = v1->next;           // [edi+4]  (captured before relink)
-        if ( !def )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    2374, 0, "%s", "b" );        // 0x48f027
+        iassert( b );   // brush.cpp:2374 (0x48f027)
 
-        if ( strcmp( a1, def->parent_layer_string ) )   // not in layer a1 → deselect
+        if ( strcmp( a1, b->parent_layer_string ) )   // not in layer a1 → deselect
         {
             Brush_RemoveFromList( v1 );          // 0x48f060
             if ( v1->next || v1->prev )
@@ -1797,10 +1764,11 @@ extern void     AxisToAngles( float *angles, float (*axis)[3] );
 extern void     vectoangles( float *angles, int vec );
 // sub_4AA220 (0x4AA220) — rotate a vec3 by sequential X/Y/Z Euler angles (engine_stubs.cpp).
 extern void     sub_4AA220( const float *in, const float *anglesDeg, float *out );
-// sub_4A59C0 (0x4A59C0, com_math.cpp:1399) — project a point onto a 2-vector basis,
-// solving for two scalars (engine_stubs.cpp).
-extern void     sub_4A59C0( const float *origin, const float *basis0, float *outS,
-                             float *outT, const float *point, const float *basis1 );
+// 0x4A59C0 (com_math.cpp:1399) is the engine's ClosestApproachOfTwoLines — the
+// radiant binary carried its own copy; the port calls the engine fn (com_math.cpp).
+extern void __cdecl ClosestApproachOfTwoLines( const float *p1, const float *dir1,
+                                               const float *p2, const float *dir2,
+                                               float *s, float *t );
 
 // Patch_ParseMesh (0x444ac0, was the mis-named PMESH_TexLayer) — parse a
 // mesh/curve block into a patchMesh_t + symbiont brush (pmesh.cpp). The text
@@ -1873,340 +1841,9 @@ extern void OrientationPosToWorldPos( float *out, const float *localPos, const o
 // renderer string hash (r_utils.cpp) — for the material constant lookup.
 extern unsigned int R_HashString( const char *string );
 
-// ── Ed_baseaxis (flt_6DE31C) — TextureAxisFromPlane table, verbatim from the IDB
-//    (6 entries × { xv[3], yv[3], normal[3] }; Ed_Normal_Calc reads only xv/yv). ──
-static const float Ed_baseaxis[6][9] =
-{
-    { 1, 0, 0,   0,-1, 0,   0, 0,-1 },
-    { 1, 0, 0,   0,-1, 0,   1, 0, 0 },
-    { 0, 1, 0,   0, 0,-1,  -1, 0, 0 },
-    { 0, 1, 0,   0, 0,-1,   0, 1, 0 },
-    { 1, 0, 0,   0, 0,-1,   0,-1, 0 },
-    { 1, 0, 0,   0, 0,-1,   0, 0, 0 },
-};
-
-// 0x459A60  Normal_Calc — pick the dominant ±axis of `normal` (dot-test order
-// +z,-z,+x,-x,+y,-y → index 0..5) and copy its base S/T vectors into xv/yv.
-// strict >/< compares, tie keeps the lower index.
-static void Ed_Normal_Calc( const float *normal, float *xv, float *yv )
-{
-    int   v3  = 0;
-    float v18 = 0.0f;
-    float v12 = normal[2];   if ( v12 > 0.0f )  v18 = v12;
-    float v13 = -normal[2];  if ( v18 < v13 ) { v18 = v13; v3 = 1; }
-    float v14 = normal[0];   if ( v18 < v14 ) { v18 = v14; v3 = 2; }
-    float v15 = -normal[0];  if ( v18 < v15 ) { v18 = v15; v3 = 3; }
-    float v16 = normal[1];   if ( v18 < v16 ) { v18 = v16; v3 = 4; }
-    float v17 = -normal[1];  if ( v18 < v17 ) {            v3 = 5; }
-    xv[0] = Ed_baseaxis[v3][0]; xv[1] = Ed_baseaxis[v3][1]; xv[2] = Ed_baseaxis[v3][2];
-    yv[0] = Ed_baseaxis[v3][3]; yv[1] = Ed_baseaxis[v3][4]; yv[2] = Ed_baseaxis[v3][5];
-}
-
-// 0x459BA0  texturevecs_xv_yv_s_t_normal — base S/T vectors + the s/t axis indices.
-// Normal_Calc(normal,xv,yv) + s/t axis selection; carries the 5
-// texturevecs.cpp:46-50 level-0 param-null asserts.
-static void Ed_texturevecs( float *yv, float *xv, const float *normal, int *s, int *t )
-{
-    if ( !normal ) Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp", 46, 0, "%s", "normal" );
-    if ( !xv )     Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp", 47, 0, "%s", "xv" );
-    if ( !yv )     Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp", 48, 0, "%s", "yv" );
-    if ( !s )      Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp", 49, 0, "%s", "s" );
-    if ( !t )      Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp", 50, 0, "%s", "t" );
-    Ed_Normal_Calc( normal, xv, yv );
-    if ( 0.0f == xv[0] ) *s = ( 0.0f == xv[1] ) ? 2 : 1; else *s = 0;
-    if ( 0.0f == yv[0] ) *t = ( 0.0f == yv[1] ) ? 2 : 1; else *t = 0;
-}
-
-// 0x4AABC0  SinCos (com_math) — degrees → (*sinOut, *cosOut), exact at 0/90/180/270.
-// radians/wrap narrow to FLOAT before fsincos (see inline); carries the 2
-// com_math.cpp:3864-3865 param-null asserts.
-static void Ed_SinCos( float deg, float *sinOut, float *cosOut )
-{
-    // com_math.cpp:3864-3865 param-null asserts (L0) — RESTORED (the math-only pass dropped them).
-    if ( !sinOut ) Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp", 3864, 0, "%s", "s" );
-    if ( !cosOut ) Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp", 3865, 0, "%s", "c" );
-    double v = deg;
-    if ( deg < 0.0 ) v = (float)( v + 360.0 );   // IDA 0x4aac21: fstp/fld [deg] narrows the +360 wrap to float
-    if      ( 0.0   == v ) { *cosOut = 1.0f;  *sinOut = 0.0f; }
-    else if ( 90.0  == v ) { *cosOut = 0.0f;  *sinOut = 1.0f; }
-    else if ( 180.0 == v ) { *cosOut = -1.0f; *sinOut = 0.0f; }
-    else if ( 270.0 == v ) { *cosOut = 0.0f;  *sinOut = -1.0f; }
-    // IDA 0x4aac9d: fstp/fld [deg] narrows radians to FLOAT before fsincos (deg is a 4-byte slot).
-    else { float r = (float)( v * 0.01745329238474369 ); *cosOut = (float)cos( (double)r ); *sinOut = (float)sin( (double)r ); }
-}
-
-// 0x4A47D0  Vec3Normalize (out-of-place) — normalize inVecs[0..2] into outS[0..2].
-// lensq narrows to float; zero-guard (-len >= 0 -> 1.0).
-void sub_4A47D0( int outS, int inVecs )
-{
-    float       *a1 = (float *)outS;
-    const float *a2 = (const float *)inVecs;
-    float len = (float)sqrt( (double)( a2[1]*a2[1] + a2[0]*a2[0] + a2[2]*a2[2] ) );
-    if ( -len >= 0.0f ) len = 1.0f;             // length <= 0 ⇒ divide by 1
-    float inv = 1.0f / len;
-    a1[0] = a2[0] * inv;
-    a1[1] = inv * a2[1];
-    a1[2] = inv * a2[2];
-}
-
-// 0x45A1C0  Face_MoveTexture — build the 2×4 texture-projection matrix `outVecs`
-// from a texdef (scale@surfDef[0,1], shift@uvBase[0,1], rotate, crossterm) and the
-// face normal. surfDef/outVecs/uvBase are byte-pointers (IDA usercall convention,
-// shared with Brush_ApplyTextureProjection's caller).
-// full 2x4 matrix chain, pure x87; bit-exact rotation depends on Ed_SinCos.
-// Carries the 7 texturevecs.cpp:157,160-166 level-1 output-contract asserts (s!=t +
-// xv/yv unit-vector properties).
-void Face_MoveTexture( int surfDef, const float *normal, int outVecs,
-                       int uvBase, float rotate, float crossterm )
-{
-    const float *scale = (const float *)surfDef;   // [0]=sizeX [1]=sizeY
-    const float *shift = (const float *)uvBase;     // [0]=shiftX [1]=shiftY
-    float       *a3    = (float *)outVecs;          // out matrix [0..7]
-
-    float sx = scale[0]; if ( 0.0f == sx ) sx = 128.0f;
-    float sy = scale[1]; if ( 0.0f == sy ) sy = 128.0f;
-
-    float xv[3], yv[3];
-    int   s, t;
-    Ed_texturevecs( yv, xv, normal, &s, &t );
-    // texturevecs output-contract validation (common/texturevecs.cpp:157,160-166; ALL LEVEL 1) —
-    // RESTORED (the prior port dropped these 7 asserts; the strings keep the original `pvecs` names).
-    if ( s == t )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                157, 1, "%s\n\t(s) = %i", "(s != t)", s );
-    int r = 3 - s - t;
-    if ( xv[s] != 1.0f && xv[s] != -1.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                160, 1, "%s\n\t(pvecs[0][s]) = %g", "(pvecs[0][s] == 1 || pvecs[0][s] == -1)", xv[s] );
-    if ( xv[t] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                161, 1, "%s\n\t(pvecs[0][t]) = %g", "(pvecs[0][t] == 0)", xv[t] );
-    if ( xv[r] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                162, 1, "%s\n\t(pvecs[0][r]) = %g", "(pvecs[0][r] == 0)", xv[r] );
-    if ( yv[s] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                164, 1, "%s\n\t(pvecs[1][s]) = %g", "(pvecs[1][s] == 0)", yv[s] );
-    if ( yv[t] != 1.0f && yv[t] != -1.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                165, 1, "%s\n\t(pvecs[1][t]) = %g", "(pvecs[1][t] == 1 || pvecs[1][t] == -1)", yv[t] );
-    if ( yv[r] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                166, 1, "%s\n\t(pvecs[1][r]) = %g", "(pvecs[1][r] == 0)", yv[r] );
-
-    float sinv, cosv;
-    Ed_SinCos( rotate, &sinv, &cosv );
-
-    float v10 = xv[s] / sx;
-    a3[s] = cosv * v10;
-    a3[t] = v10 * sinv;
-    a3[r] = 0.0f;
-    float v12 = yv[t] / sy;
-    a3[s + 4] = -sinv * v12;
-    a3[t + 4] = v12 * cosv;
-    a3[r + 4] = 0.0f;
-    a3[0] = a3[4] * crossterm + a3[0];
-    a3[1] = a3[5] * crossterm + a3[1];
-    a3[2] = crossterm * a3[6] + a3[2];
-    a3[3] = -shift[0] / sx;
-    a3[7] = -shift[1] / sy;
-}
-
-extern char *va( const char *fmt, ... );    // q_shared.cpp (0x4B9850) — sub_4AAD00 assert message
-
-// ════════════════════════════════════════════════════════════════════════════
-//  0x4AAD00  sub_4AAD00 (com_math.cpp:3929) — snap-to-granularity rounder.
-//
-//  Faithful port from DISASM (2026-06-27): cleans the low 12 mantissa bits of
-//  `value`, then snaps to a `granularity` grid via the fistp-rounding idiom
-//  (the +2^-30 epsilon is what makes the (int) cast ROUND rather than truncate —
-//  it is LOAD-BEARING; do not drop it).  If the snapped value drifts from the
-//  cleaned value by more than `epsilon`, the cleaned value is returned instead.
-//  Used ONLY by texturevecs_02 (6 sites: size×2, shift×2, rotate, crossterm).
-//  Asserts (L0): granularity>0, epsilon>0, epsilon<0.5/granularity.
-// ════════════════════════════════════════════════════════════════════════════
-static double sub_4AAD00( float value, float granularity, float epsilon )
-{
-    if ( granularity <= 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
-                3929, 0, "%s\n\t(granularity) = %g", "(granularity > 0)", granularity );
-    if ( epsilon <= 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
-                3930, 0, "%s\n\t(epsilon) = %g", "(epsilon > 0)", epsilon );
-    if ( 0.5 / granularity <= epsilon )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
-                3931, 0, "%s\n\t%s", "epsilon < 0.5f / granularity",
-                va( "%g, %g", epsilon, granularity ) );
-
-    // clean the low 12 mantissa bits of `value` (carried in a float slot, bit-tweaked).
-    float cleaned = value;
-    unsigned int low12 = *(unsigned int *)&cleaned & 0xFFF;
-    if ( (int)low12 > 4 )
-    {
-        if ( (int)( 4096 - low12 ) <= 4 )
-            *(unsigned int *)&cleaned = ( 4096 - low12 ) + *(unsigned int *)&value;
-    }
-    else
-    {
-        *(unsigned int *)&cleaned = *(unsigned int *)&value - low12;
-    }
-
-    // snap to the granularity grid with the fistp-rounding epsilon (KEEP the +2^-30).
-    double snapped = (double)(int)( (double)( granularity * cleaned ) + 9.313225746154785e-10 )
-                     / granularity;
-    double drift   = (double)snapped - (double)cleaned;
-    if ( drift < 0.0 ) drift = -drift;     // fabs (IDA: fabs)
-    if ( epsilon < drift )
-        return cleaned;
-    return snapped;
-}
-
-// ════════════════════════════════════════════════════════════════════════════
-//  0x459CC0  texturevecs_02 (common/texturevecs.cpp) — the INVERSE of
-//  Face_MoveTexture: decompose a world texture matrix `texMat` (8 floats =
-//  two 4-vec rows) back into a texdef (size/shift/rotate/crossterm).  Consumed
-//  by Brush_ApplyTextureProjection (0x476A30, Drag_FaceAlign).
-//
-//  __usercall in the binary:
-//    texturevecs_02(_EDI=outSize[2], _ESI=texMat[8] (in+scratch), <st1 phantom>,
-//                   a4=planeNormal[3], a5=planeDist, a6=outShift[2],
-//                   a7=outRotate, a8=outCrossterm)
-//  The `st1`/"st6_0" arg in hex-rays is an x87-stack artifact (it is the
-//  planeDist already on the FPU stack from the row-orthogonalize phase) — it is
-//  not a real parameter; the C signature drops it.
-//
-//  Ported from DISASM, x87 stack traced op-by-op (hex-rays renders this almost entirely
-//  as raw __asm with _ET1/phantom stack slots).  Output-contract asserts
-//  (texturevecs.cpp:85-97, all LEVEL 1) preserved verbatim.  FP constants from the IDB:
-//    flt_6F40C4 = -1.0          (pvecs ==-1 assert)
-//    dbl_6F40B8 =  0.0          (size[1] sign compare)
-//    flt_6F4580 =  1e-5,  flt_6F4308 = 1000.0   (crossterm snap: gran=1000, eps=1e-5)
-//    flt_6F44BC =  8.0,   flt_6F43E0 = 0.001    (size & shift snap: gran=8,  eps=0.001)
-//    flt_6F4300 =  4.0,   flt_6F4640 = 0.005    (rotate snap:       gran=4,  eps=0.005)
-//    dbl_6F4578 = 57.2957763671875              (radians -> degrees, 180/pi)
-// ════════════════════════════════════════════════════════════════════════════
-void texturevecs_02( int outSize, int texMatPtr, float /*st1_phantom*/,
-                     int planeNormalPtr, float planeDist,
-                     int outShift, int outRotate, int outCrossterm )
-{
-    float       *edi  = (float *)outSize;          // out size[2]
-    float       *esi  = (float *)texMatPtr;        // texMat[0..7] (in/scratch)
-    const float *pn   = (const float *)planeNormalPtr;  // a4 planeNormal
-
-    float xv[3], yv[3];                            // var_18 = xv (pvecs[0]), var_C = yv (pvecs[1])
-    int   s, t;                                    // var_20 = s, var_24 = t
-    Ed_texturevecs( yv, xv, pn, &s, &t );
-
-    // ── texturevecs output-contract validation (texturevecs.cpp:85-97, ALL LEVEL 1) ──
-    if ( s == t )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                85, 1, "%s\n\t(s) = %i", "(s != t)", s );
-    int r = 3 - s - t;
-    if ( xv[s] != 1.0f && xv[s] != -1.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                88, 1, "%s\n\t(pvecs[0][s]) = %g", "(pvecs[0][s] == 1 || pvecs[0][s] == -1)", xv[s] );
-    if ( xv[t] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                89, 1, "%s\n\t(pvecs[0][t]) = %g", "(pvecs[0][t] == 0)", xv[t] );
-    if ( xv[r] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                90, 1, "%s\n\t(pvecs[0][r]) = %g", "(pvecs[0][r] == 0)", xv[r] );
-    if ( yv[s] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                92, 1, "%s\n\t(pvecs[1][s]) = %g", "(pvecs[1][s] == 0)", yv[s] );
-    if ( yv[t] != 1.0f && yv[t] != -1.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                93, 1, "%s\n\t(pvecs[1][t]) = %g", "(pvecs[1][t] == 1 || pvecs[1][t] == -1)", yv[t] );
-    if ( yv[r] != 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                94, 1, "%s\n\t(pvecs[1][r]) = %g", "(pvecs[1][r] == 0)", yv[r] );
-    if ( pn[r] == 0.0f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\texturevecs.cpp",
-                97, 1, "%s", "planeNormal[r] != 0" );
-
-    // ── Phase B: orthogonalize each texMat row against the r-axis using the plane.
-    //    row0 (esi[0..3]) — only if texMat[r] != 0 (0x459EA7).
-    if ( esi[r] != 0.0f )
-    {
-        float ratio = esi[r] / pn[r];
-        esi[0] = esi[0] + (-ratio) * pn[0];
-        esi[1] = esi[1] + (-ratio) * pn[1];
-        esi[2] = esi[2] + (-ratio) * pn[2];
-        esi[3] = esi[3] + ratio * planeDist;
-    }
-    //    row1 (esi[4..7]) — only if texMat[4+r] != 0 (0x459EFA).
-    if ( esi[4 + r] != 0.0f )
-    {
-        float ratio = esi[4 + r] / pn[r];
-        esi[4] = esi[4] + (-ratio) * pn[0];
-        esi[5] = esi[5] + (-ratio) * pn[1];
-        esi[6] = esi[6] + (-ratio) * pn[2];
-        esi[7] = esi[7] + ratio * planeDist;
-    }
-
-    // ── Phase C: crossterm = dot(row0,row1) / |row1|^2, snapped (gran=1000, eps=1e-5).
-    {
-        float dot01    = esi[4] * esi[0] + esi[5] * esi[1] + esi[6] * esi[2];
-        float lenSqR1  = esi[4] * esi[4] + esi[5] * esi[5] + esi[6] * esi[6];
-        float crossRaw = dot01 / lenSqR1;
-        *(float *)outCrossterm = crossRaw;     // raw store (IDA fst), overwritten by snap below
-        float crossterm = (float)sub_4AAD00( crossRaw, 1000.0f, 1e-5f );
-        *(float *)outCrossterm = crossterm;
-
-        // ── Phase D: de-skew row0 by crossterm: row0 -= crossterm * row1 (m3 untouched).
-        esi[0] = esi[0] + (-crossterm) * esi[4];
-        esi[1] = esi[1] + (-crossterm) * esi[5];
-        esi[2] = esi[2] + (-crossterm) * esi[6];
-    }
-
-    // ── Phase E: size[0] = 1 / |row0| (de-skewed).
-    {
-        float lenSqR0 = esi[0] * esi[0] + esi[1] * esi[1] + esi[2] * esi[2];
-        float lenR0   = (float)sqrt( (double)lenSqR0 );      // _CIsqrt
-        edi[0] = 1.0f / lenR0;
-    }
-
-    // ── Phase F: size[1] = 1 / |row1|.
-    {
-        float lenSqR1 = esi[4] * esi[4] + esi[5] * esi[5] + esi[6] * esi[6];
-        float lenR1   = (float)sqrt( (double)lenSqR1 );      // _CIsqrt
-        edi[1] = 1.0f / lenR1;
-    }
-
-    // ── Phase G: sign of size[1] — negate when the orientation cross-term is < 0.
-    //    term = row1[t]*row0[s]*xv[s]*yv[t] - row1[s]*row0[t]*xv[s]*yv[t]; if (term<0) size[1] = -size[1].
-    {
-        float term1 = esi[4 + t] * esi[s] * xv[s] * yv[t];
-        float term2 = esi[4 + s] * esi[t] * xv[s] * yv[t];
-        float cross = term1 - term2;
-        if ( cross < 0.0f )                                  // fcomp vs dbl_6F40B8(0.0); >=0 keeps sign
-            edi[1] = -edi[1];
-    }
-
-    // ── Phase H: snap size[0], size[1] (gran=8, eps=0.001).
-    edi[0] = (float)sub_4AAD00( edi[0], 8.0f, 0.001f );
-    edi[1] = (float)sub_4AAD00( edi[1], 8.0f, 0.001f );
-
-    // ── Phase I: rotate = atan2(row0[t]*xv[s], row0[s]*xv[s]) * (180/pi).
-    {
-        float y = esi[t] * xv[s];
-        float x = esi[s] * xv[s];
-        float angleDeg = (float)( atan2( (double)y, (double)x ) * 57.2957763671875 );
-        *(float *)outRotate = angleDeg;        // raw store (IDA fst), overwritten by snap below
-        // ── Phase J: snap rotate (gran=4, eps=0.005).
-        *(float *)outRotate = (float)sub_4AAD00( angleDeg, 4.0f, 0.005f );
-    }
-
-    // ── Phase K: shift[0] = -row0[3]*size[0]; shift[1] = -row1[3]*size[1].
-    {
-        float *shift = (float *)outShift;
-        shift[0] = -esi[3]  * edi[0];
-        shift[1] = -esi[7]  * edi[1];
-        // ── Phase L: snap shift (gran=8, eps=0.001).
-        shift[0] = (float)sub_4AAD00( shift[0], 8.0f, 0.001f );
-        shift[1] = (float)sub_4AAD00( shift[1], 8.0f, 0.001f );
-    }
-}
+// ── texturevecs cluster — MOVED to texturevecs.cpp (the binary's common/texturevecs.cpp
+//    TU; its asserts name that file).  Externs for the brush.cpp users: ──
+extern void Ed_Normal_Calc( const float *normal, float *xv, float *yv );   // 0x459A60
 
 // ════════════════════════════════════════════════════════════════════════════
 //  Patch texture-PICK cluster (Drag_Begin middle-button, when the hit brush is a
@@ -2654,7 +2291,7 @@ void sub_46F6C0( int mtlDef, int faceDef, int visIdx, int *outData )
     }
     else
     {
-        *outData = *(int *)( a2 + 228 );          // packed per-face colour dword
+        *outData = ( (face_t *)a2 )->packedColor;
     }
 }
 
@@ -2916,8 +2553,9 @@ bool Face_BuildLayerGeom( face_t *faceDef, const orientation_t *orient,
     if ( !texdef )
         return false;
     float texMat[8];
+    texdef_sub_t *td = (texdef_sub_t *)(intptr_t)texdef;
     Face_MoveTexture( texdef, faceDef->plane.normal, (int)texMat, texdef + 8,
-                      *(float *)( texdef + 16 ), *(float *)( texdef + 20 ) );
+                      td->rotate, td->crossterm );
 
     float tang[3];   sub_4A47D0( (int)tang, (int)texMat );  // tangent = normalize(row0)
     float binorm[3]; Vec3Cross( wn, tang, binorm );          // binormal = N × T
@@ -3013,9 +2651,7 @@ int Visuals_InitFaceVis( faceVis_s *face, face_t *def, const orientation_t *orie
         Error( "Out of memory allocating face visuals" );
     face->vertcount = w->numpoints;
 
-    if ( w->numpoints > 0x400u )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                161, 0, "%s", "w->ptCount <= MAX_POINTS_ON_WINDING" );
+    iassert( w->ptCount <= MAX_POINTS_ON_WINDING );   // brush.cpp:161
 
     for ( int L = 0; L < layerCount; ++L )
     {
@@ -3196,8 +2832,9 @@ void sub_476ED0( brush_t *a1, MaterialDef *a2, char a3, float a4, char a5 )
     {
         if ( a5 )                                                            // 0x476fb3
         {
-            *(int *)( (char *)&patch->texture + 8 * layer + 0 ) = *(int *)( (char *)a2 + 0 ); // 0x476fc0 lyrMtl
-            *(int *)( (char *)&patch->texture + 8 * layer + 4 ) = *(int *)( (char *)a2 + 4 ); // 0x476fcd radMtl
+            patchMesh_material *pmDst = &patch->texture + layer;
+            pmDst->lyrMtl = ( (patchMesh_material *)a2 )->lyrMtl;   // 0x476fc0
+            pmDst->radMtl = ( (patchMesh_material *)a2 )->radMtl;   // 0x476fcd
             ++patch->version;                                                // 0x476fd1
             if ( g_PatchDialog_GetHwnd() )                                   // 0x476fd8 CWnd_PatchDialog.m_hWnd
             {
@@ -3275,27 +2912,20 @@ void sub_477020( brush_t *b, const texdef_sub_t *texdef )
 // Callers pass (srcFacePtr, brushPtr, dstFacePtr) — note a2 is the brush, not the face.
 brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
 {
-    // field offsets within a face (all as byte offsets from face start):
-    //   plane.normal = +192 (0xC0), plane.dist = +208 (0xD0)
-    //   surfDef[layer] = +44 + 36*layer (= face+36+8 = +44 for layer 0... wait)
-    //   Actually: mtldef starts at +36, current_edit_layer selects:
-    //   surfDef[layer] addr = srcFace + 36*(current_edit_layer) + 36 - actually
-    //   IDA says: 36*layer + a1 + 64 and 36*layer + a1 + 60 for size[1]/size[0]
-    //   and 36*layer + a1 + 44 for the MaterialDef start within the face.
-    //   face base = srcFace, MaterialDef starts at srcFace+36 for layer 0.
-    //   But IDA offset 44 for MaterialDef[0] suggests face starts at srcFace,
-    //   and offset 44 = srcFace+44. Since mtldef[0] is at face+36 (0x24),
-    //   srcFace+44 = &mtldef[0]+8 = mtldef[0].mat_texDef.shift[0]? No...
-    //   Actually IDA's arithmetic: 36*layer + a1 + 44
-    //   For layer 0: a1+44 = face+44 = face+36+8 = &mtldef[0].mat_texDef.size[1] (at +8)
-    //   But IDA says this is the "surfDef" base. Let's just translate verbatim.
+    // IDA's 36*layer+face+44 = &mtldef[layer].mat_texDef (MaterialDef @36+36*layer,
+    // texDef @+8); +60 rotate, +64 crossterm; plane.normal @+192, plane.dist @+208.
+    face_t *src = (face_t *)(intptr_t)srcFace;
+    face_t *dst = (face_t *)(intptr_t)dstFace;
 
     int layer = g_qeglobals.current_edit_layer;
 
-    float src_v19 = *(float *)(36 * layer + srcFace + 64);
-    float src_v17 = *(float *)(36 * layer + srcFace + 60);
-    float *src_normal = (float *)(srcFace + 192);
-    int dst_base = 36 * layer + dstFace + 44;
+    texdef_sub_t *srcTd = &src->mtldef[layer].mat_texDef;
+    texdef_sub_t *dstTd = &dst->mtldef[layer].mat_texDef;
+
+    float src_v19 = srcTd->crossterm;
+    float src_v17 = srcTd->rotate;
+    float *src_normal = src->plane.normal;
+    int dst_base = (int)(intptr_t)dstTd;
 
     {
         float tv39, tv40, tv41, tv42, tv43, tv44, tv45, tv46;
@@ -3303,21 +2933,21 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
         float tv55, tv56, tv57;
         float tv32, tv33, tv34, tv35, tv36, tv37;
 
-        Face_MoveTexture( 36 * layer + srcFace + 44, src_normal,
-                          (int)&tv39, 36 * layer + srcFace + 52,
+        Face_MoveTexture( (int)(intptr_t)srcTd, src_normal,
+                          (int)&tv39, (int)(intptr_t)srcTd->shift,
                           src_v17, src_v19 );
 
-        float *dst_normal = (float *)(dstFace + 192);
+        float *dst_normal = dst->plane.normal;
 
         // dot product of normals
-        float dot = *(float *)(srcFace + 200) * *(float *)(dstFace + 200)
-                  + *(float *)(srcFace + 196) * *(float *)(dstFace + 196)
-                  + *(float *)(srcFace + 192) * *(float *)(dstFace + 192);
+        float dot = src->plane.normal[2] * dst->plane.normal[2]
+                  + src->plane.normal[1] * dst->plane.normal[1]
+                  + src->plane.normal[0] * dst->plane.normal[0];
 
         if ( dot > 0.9990000128746033 || dot < -0.9989999999525025 )
         {
             // Parallel planes: direct copy of texdef values
-            float dist_val = *(float *)(dstFace + 208);
+            float dist_val = dst->plane.dist;
             int dst20 = dst_base + 20;
             int dst16 = dst_base + 16;
             texturevecs_02( dst_base, (int)&tv39, (float)dst_normal[2],
@@ -3328,25 +2958,25 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
         {
             // Non-parallel: build rotation matrix
             tv47 = *src_normal;
-            tv48 = *(float *)(srcFace + 196);
-            tv49 = *(float *)(srcFace + 200);
+            tv48 = src->plane.normal[1];
+            tv49 = src->plane.normal[2];
             tv51 = *dst_normal;
-            tv52 = *(float *)(dstFace + 196);
-            tv53 = *(float *)(dstFace + 200);
-            tv50 = -*(float *)(srcFace + 208);
-            tv54 = -*(float *)(dstFace + 208);
+            tv52 = dst->plane.normal[1];
+            tv53 = dst->plane.normal[2];
+            tv50 = -src->plane.dist;
+            tv54 = -dst->plane.dist;
 
             sub_4769A0( (int)&tv35, (int)&tv47, (int)&tv32 );
 
-            float v29 = *(float *)(srcFace + 200) * tv34
-                      + *(float *)(srcFace + 196) * tv33
-                      + tv32 * *(float *)(srcFace + 192);
-            float distFromMasterPlane = (float)(v29 - (double)*(float *)(srcFace + 208));
+            float v29 = src->plane.normal[2] * tv34
+                      + src->plane.normal[1] * tv33
+                      + tv32 * src->plane.normal[0];
+            float distFromMasterPlane = (float)(v29 - (double)src->plane.dist);
 
-            float v30 = tv34 * *(float *)(dstFace + 200)
-                      + tv33 * *(float *)(dstFace + 196)
-                      + tv32 * *(float *)(dstFace + 192);
-            float distFromSlavePlane = (float)(v30 - (double)*(float *)(dstFace + 208));
+            float v30 = tv34 * dst->plane.normal[2]
+                      + tv33 * dst->plane.normal[1]
+                      + tv32 * dst->plane.normal[0];
+            float distFromSlavePlane = (float)(v30 - (double)dst->plane.dist);
 
             vassert( (fabsf( distFromMasterPlane ) < 0.01f), "(distFromMasterPlane) = %g", (double)distFromMasterPlane );   // brush.cpp:2992
             vassert( (fabsf( distFromSlavePlane ) < 0.01f),  "(distFromSlavePlane) = %g",  (double)distFromSlavePlane );    // brush.cpp:2993
@@ -3381,11 +3011,11 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
             tv50 = tv44 * tv36 + tv43 * tv35 + tv45 * tv37;
 
             v58[8]  = *dst_normal;
-            v58[9]  = *(float *)(dstFace + 196);
-            v58[10] = *(float *)(dstFace + 200);
+            v58[9]  = dst->plane.normal[1];
+            v58[10] = dst->plane.normal[2];
 
-            tv51 = tv39 * *(float *)(srcFace + 192) + tv40 * *(float *)(srcFace + 196) + tv41 * *(float *)(srcFace + 200);
-            tv52 = tv44 * *(float *)(srcFace + 196) + tv43 * *(float *)(srcFace + 192) + *(float *)(srcFace + 200) * tv45;
+            tv51 = tv39 * src->plane.normal[0] + tv40 * src->plane.normal[1] + tv41 * src->plane.normal[2];
+            tv52 = tv44 * src->plane.normal[1] + tv43 * src->plane.normal[0] + src->plane.normal[2] * tv45;
 
             Vec3Cross( dst_normal, &tv35, &tv32 );
             Vec3Normalize_R( &tv32 );
@@ -3424,7 +3054,7 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
                 ++inVec;
             }
 
-            float dist_dst = *(float *)(dstFace + 208);
+            float dist_dst = dst->plane.dist;
             texturevecs_02( dst_base, (int)&tv39, (float)dst_normal[2],
                             (int)dst_normal, dist_dst,
                             dst_base + 8, dst_base + 16, dst_base + 20 );
@@ -3503,9 +3133,8 @@ static int Face_ParseSurfDef( const char **text, MaterialDef *surfDef, int versi
 
     SetMaterial( v6, v4 );
 
-    // 1478 kept verbose: the binary string is "surfDef->mtlDef.radMtl || ..." but the port
-    // FLATTENED MaterialDef (lyrMtl/radMtl direct, no nested mtlDef wrapper), so it can't
-    // stringize 1:1 without restructuring MaterialDef (used everywhere). Condition is faithful.
+    // 1478 KEEP_VERBOSE: this fn's surfDef param IS the MaterialDef (the binary's
+    // surfDef was the enclosing texdef); no member-path matches the string here.
     if ( !v4->radMtl && !v4->lyrMtl )
         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
                 1478, 0, "%s", "surfDef->mtlDef.radMtl || surfDef->mtlDef.lyrMtl" );
@@ -4340,18 +3969,18 @@ brush_t *Brush_Parse( const char **text, int version )
         if ( Com_Parse( text )->token[0] == '}' )
         {
             // Done — build the brush
-            brush_t **v39 = (brush_t **)operator new( 0x58u );
-            memset( v39, 0, 0x58u );
-            *(unsigned int *)((char *)v39 + 64) = (unsigned int)v16;  // faceCount
-            *(face_t **)((char *)v39 + 68) = Face_Alloc_R( v16 );    // faces
-            char **pLyr = (char **)((char *)v39 + 72);
-            if ( *pLyr ) j__free_0( *pLyr );
+            brush_t *nb = (brush_t *)operator new( 0x58u );
+            memset( nb, 0, 0x58u );
+            nb->faceCount = v16;
+            nb->faces     = Face_Alloc_R( v16 );
+            if ( nb->parent_layer_string )                 // always null after the memset
+                j__free_0( nb->parent_layer_string );      // (binary's inlined SetLayerString head)
             size_t ll = strlen( layerStr );
             void *lc = operator new( ll + 1 );
             memcpy( lc, layerStr, ll + 1 );
-            *pLyr = (char *)lc;
-            memcpy( *(face_t **)((char *)v39 + 68), s_faceStack, 232 * v16 );
-            return (brush_t *)v39;
+            nb->parent_layer_string = (char *)lc;
+            memcpy( nb->faces, s_faceStack, 232 * v16 );
+            return nb;
         }
 
         Com_UngetToken();   // unget the token we just tested for '}'
@@ -4398,32 +4027,25 @@ brush_t *Brush_Parse( const char **text, int version )
             // IDA: sub_472EC0(text, (MaterialDef*)v49+1, version, 0); &mtldef[0] = face+36.
             if ( Face_ParseSurfDef( text, &facePtr->mtldef[0], version, 0 ) )
             {
-                int *radMtl = (int *)facePtr->mtldef[0].radMtl;
-                if ( !radMtl )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                            1925, 1, "%s", "f->surfDef[0].mtlDef.radMtl" );
-                if ( radMtl && !radMtl[5] )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                            1926, 1, "%s", "f->surfDef[0].mtlDef.radMtl->size[0]" );
-                if ( radMtl && !radMtl[6] )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                            1927, 1, "%s", "f->surfDef[0].mtlDef.radMtl->size[1]" );
+                face_t *f = facePtr;                    // the binary's local
+                iassert( f->surfDef[0].mtlDef.radMtl );            // brush.cpp:1925
+                iassert( f->surfDef[0].mtlDef.radMtl->size[0] );   // brush.cpp:1926
+                iassert( f->surfDef[0].mtlDef.radMtl->size[1] );   // brush.cpp:1927
 
                 int curLayer2 = LayerMat::GetCurrentLayer( &facePtr->mtldef[0] );
-                // IDA: v28 = face+36 (&mtldef[0]); v32 = &v28[28*curLayer+8]
-                char *v28base = (char *)facePtr + 36;  // = &mtldef[0]
-                int v32 = (int)(uintptr_t)(v28base + 28 * curLayer2 + 8);
-                float v31 = *(float *)v32;
-                *(float *)(v32 + 8)  = -v31 * *(float *)(v32 + 8);
-                *(float *)(v32 + 12) = -*(float *)(v32 + 4) * *(float *)(v32 + 12);
-                // *(int*)(face+40) = mtldef[0].radMtl; radMtl->size[0]/[1] at +20/+24 (int[5]/[6])
-                // radMtl (qtexture) at mtldef[0].radMtl (face+40); IDA loads size[0]/size[1]
-                // (width/height) with FILD = INTEGER->double (0x474065/0x47406f), NOT a float
-                // reinterpret. radMtl[5]=+20=width(int), radMtl[6]=+24=height(int).
-                int *radMtlSz = (int *)(*(int *)((char *)facePtr + 40));
-                *(float *)v32       = (double)radMtlSz[5] * *(float *)v32;
-                *(float *)(v32 + 4) = (double)radMtlSz[6] * *(float *)(v32 + 4);
-                *((int *)v32 + 6) = 0;
+                // IDA: v32 = &mtldef[0] + 28*curLayer + 8 — NOTE the 28-byte (texdef-only)
+                // stride over the 36-byte MaterialDef array; kept bit-faithful via the cast.
+                texdef_sub_t *tdl =
+                    (texdef_sub_t *)( (char *)&facePtr->mtldef[0] + 28 * curLayer2 + 8 );
+                float v31 = tdl->size[0];
+                tdl->shift[0] = -v31 * tdl->shift[0];
+                tdl->shift[1] = -tdl->size[1] * tdl->shift[1];
+                // radMtl->size[0]/[1] loaded with FILD (0x474065/0x47406f) = int width/height,
+                // NOT a float reinterpret.
+                qtexture_s *rm = facePtr->mtldef[0].radMtl;
+                tdl->size[0] = (float)( (double)rm->width  * tdl->size[0] );
+                tdl->size[1] = (float)( (double)rm->height * tdl->size[1] );
+                tdl->sample_size = 0.0f;   // int-0 store in the binary; same bits
                 v27 = version;
             }
             else
@@ -4620,22 +4242,10 @@ int Brush_Write( WriteWriter_t writer, brush_t *brush )
             // &v12[0] = face->planepts[0][0]. 9*ch+9 floats forward = face+4*(9*ch+9).
             // For ch=0: 4*9=36 from planepts[0][0] = mtldef[0] start (+36 from face). Correct.
             MaterialDef *md = (MaterialDef *)((float *)f + (9 * ch + 9));
-            if ( !md || (md->lyrMtl != nullptr) + (md->radMtl != nullptr) != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                        85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-
-            const char *name;
-            char *mtlName;
-            if ( md->lyrMtl )
-            {
-                mtlName = (char *)md->lyrMtl;
-                name    = (const char *)md->lyrMtl;
-            }
-            else
-            {
-                name    = md->radMtl->name;
-                mtlName = (char *)name;
-            }
+            // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+            extern LayerMaterialDef *Materialdef_GetName( MaterialDef *m );   // materialdef.cpp 0x431640
+            const char *name    = (const char *)Materialdef_GetName( md );
+            char       *mtlName = (char *)name;
 
             float *v11 = &md->mat_texDef.size[ 7 * LayerMat::GetCurrentLayer( md ) ];
             iassert( mtlName[0] );
@@ -4662,7 +4272,8 @@ int Brush_Write( WriteWriter_t writer, brush_t *brush )
 // ════════════════════════════════════════════════════════════════════════════
 //  15. Brush_WritePhysicsBox  (0x4742c0)
 // ════════════════════════════════════════════════════════════════════════════
-// 1995/2001/2007/2008/2009 KEEP_VERBOSE (HELPER_FORM Vec3Dot/I_fabs inlined).
+// 1995/2001/2007/2008/2009 converted: the binary's axis[3][3] box frame is assembled
+// alongside the port's scalar math so the Vec3Dot/I_fabs condition strings compile 1:1.
 static int Brush_WritePhysicsBox( brush_t *b, WriteWriter_t file )
 {
     iassert( b );      // brush.cpp:1988
@@ -4675,14 +4286,13 @@ static int Brush_WritePhysicsBox( brush_t *b, WriteWriter_t file )
     float cz = (b->mins[2] + b->maxs[2]) * 0.5f;
 
     // axis[2] = faces[1].plane.normal
+    float axis[3][3];                     // the binary's box frame (assert strings)
     float a2x = faces[1].plane.normal[0];
     float a2y = faces[1].plane.normal[1];
     float a2z = faces[1].plane.normal[2];
+    axis[2][0] = a2x; axis[2][1] = a2y; axis[2][2] = a2z;
 
-    float dot0 = faces[0].plane.normal[0]*a2x + faces[0].plane.normal[1]*a2y + faces[0].plane.normal[2]*a2z;
-    if ( dot0 >= -0.9990000128746033f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                1995, 0, "%s", "Vec3Dot( axis[2], b->faces[0].plane.normal ) < -0.999f" );
+    iassert( Vec3Dot( axis[2], b->faces[0].plane.normal ) < -0.999f );   // brush.cpp:1995
 
     // Compute half-extents along axis[2] direction
     float d0 = faces[1].planepts[0][0]*a2x + faces[1].planepts[0][1]*a2y + faces[1].planepts[0][2]*a2z;
@@ -4693,11 +4303,9 @@ static int Brush_WritePhysicsBox( brush_t *b, WriteWriter_t file )
     float a1x = faces[4].plane.normal[0];
     float a1y = faces[4].plane.normal[1];
     float a1z = faces[4].plane.normal[2];
+    axis[1][0] = a1x; axis[1][1] = a1y; axis[1][2] = a1z;
 
-    float dot2 = faces[2].plane.normal[0]*a1x + faces[2].plane.normal[1]*a1y + faces[2].plane.normal[2]*a1z;
-    if ( dot2 >= -0.9990000128746033f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                2001, 0, "%s", "Vec3Dot( axis[1], b->faces[2].plane.normal ) < -0.999f" );
+    iassert( Vec3Dot( axis[1], b->faces[2].plane.normal ) < -0.999f );   // brush.cpp:2001
 
     float e0 = faces[4].planepts[0][0]*a1x + faces[4].planepts[0][1]*a1y + faces[4].planepts[0][2]*a1z;
     float e1 = faces[2].planepts[0][0]*a1x + faces[2].planepts[0][1]*a1y + faces[2].planepts[0][2]*a1z;
@@ -4706,23 +4314,11 @@ static int Brush_WritePhysicsBox( brush_t *b, WriteWriter_t file )
     // axis[0] = cross(axis[1], axis[2])
     float out[3];
     Vec3Cross( &a1x, &a2x, out );
+    axis[0][0] = out[0]; axis[0][1] = out[1]; axis[0][2] = out[2];
 
-    float dotF3 = faces[3].plane.normal[0]*out[0] + faces[3].plane.normal[1]*out[1] + faces[3].plane.normal[2]*out[2];
-    if ( fabsf(dotF3) <= 0.9990000128746033f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                2007, 0, "%s", "I_fabs( Vec3Dot( axis[0], b->faces[3].plane.normal ) ) > 0.999f" );
-
-    float dotF5 = faces[5].plane.normal[0]*out[0] + faces[5].plane.normal[1]*out[1] + faces[5].plane.normal[2]*out[2];
-    if ( fabsf(dotF5) <= 0.9990000128746033f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                2008, 0, "%s", "I_fabs( Vec3Dot( axis[0], b->faces[5].plane.normal ) ) > 0.999f" );
-
-    float dotF35 = faces[3].plane.normal[0]*faces[5].plane.normal[0]
-                 + faces[3].plane.normal[1]*faces[5].plane.normal[1]
-                 + faces[3].plane.normal[2]*faces[5].plane.normal[2];
-    if ( dotF35 >= -0.9990000128746033f )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                2009, 0, "%s", "Vec3Dot( b->faces[3].plane.normal, b->faces[5].plane.normal ) < -0.999f" );
+    iassert( I_fabs( Vec3Dot( axis[0], b->faces[3].plane.normal ) ) > 0.999f );   // brush.cpp:2007
+    iassert( I_fabs( Vec3Dot( axis[0], b->faces[5].plane.normal ) ) > 0.999f );   // brush.cpp:2008
+    iassert( Vec3Dot( b->faces[3].plane.normal, b->faces[5].plane.normal ) < -0.999f );   // brush.cpp:2009
 
     float f3d = faces[3].planepts[0][0]*out[0] + faces[3].planepts[0][1]*out[1] + faces[3].planepts[0][2]*out[2];
     float f5d = faces[5].planepts[0][0]*out[0] + faces[5].planepts[0][1]*out[1] + faces[5].planepts[0][2]*out[2];
@@ -4793,8 +4389,9 @@ static int Brush_WritePhysCylinder( brush_t *b, WriteWriter_t file )
                 // Non-parallel: solve for the intersection parameter t along fa's
                 // normal, then mid = fa.planepts[1] + fa.normal * t.
                 float t = 0.0f, tUnused = 0.0f;
-                sub_4A59C0( fb->planepts[0], fb->plane.normal, &t, &tUnused,
-                            fa->planepts[0], fa->plane.normal );
+                ClosestApproachOfTwoLines( fa->planepts[0], fa->plane.normal,
+                                           fb->planepts[0], fb->plane.normal,
+                                           &t, &tUnused );
                 mid[0] = fa->plane.normal[0]*t + fa->planepts[1][0];
                 mid[1] = fa->plane.normal[1]*t + fa->planepts[1][1];
                 mid[2] = t*fa->plane.normal[2] + fa->planepts[1][2];
@@ -4854,7 +4451,7 @@ static int Brush_WritePhysCylinder( brush_t *b, WriteWriter_t file )
 //  Brush_RemoveEmptyFaces01 / Brush_RemoveEmptyFaces02.
 // ════════════════════════════════════════════════════════════════════════════
 
-extern unsigned int Entity_ColorSth( brush_t *b );   // 0x475110 (entity.cpp — ported)
+extern unsigned int Entity_ColorSth( brush_t *b );   // 0x475110 (defined below, brush.cpp:2167)
 extern float Vec3Normalize_R( float *v );    // 0x40A5E0 (real impl in engine_stubs.cpp)
 
 // ─── Face_MakePlane  (0x470470) ─────────────────────────────────────────────
@@ -4981,35 +4578,15 @@ bool Brush_Convex( brush_t *b )
 // A clone survives only if it still has >= 4 faces after dropping empty/coincident
 // ones, else it is freed and the out-pointer nulled.
 //
-// The entity-link (IDA Entity_LinkBrush 0x484FC0, entity.cpp — distinct from the
-// brush.cpp file-static owner-chain Entity_LinkBrush) is inlined here to match
-// csg.cpp's verified Brush_MergeList port. Entity_ColorSth is a fatal stub until
-// entity.cpp is ported; SplitBrushByFace is a CSG-clip op, off the map-load path.
-// 0x484fc0 (inlined Entity_LinkBrush) — the inert if(*head) guard is dropped, matching
-// the binary; 1190 assert KEEP_VERBOSE (CROSS_FILE: preserves entity.cpp:1190).
+// The binary inlines entity.cpp's def-side Entity_LinkBrush (0x484FC0) here — a
+// DIFFERENT function from this file's static instance-side Entity_LinkBrush
+// (0x475730), hence the block-scope extern overload. (clone->owner = the ENTITY,
+// not its def — the prior inline set it to def, a §11 owner-vs-def confusion that
+// crashed once the clipper actually ran this path.)
 static void Split_LinkCloneToEntity( brush_t *clone, entity_s *ownerEntity )
 {
-    // Faithful to Entity_LinkBrush (0x484fc0): clone->owner = the ENTITY (NOT its def —
-    // the prior inline set it to def, a §11 owner-vs-def confusion that
-    // crashed once the clipper actually ran this path). The brush list is headed by the
-    // entity's def field (at ownerEntity+8): link the clone in front.
-    if ( clone->oprev || clone->onext )
-        Com_Error( ERR_FATAL, "Entity_LinkBrush: Allready linked" );
-    int rc = clone->refCount;
-    clone->owner = ownerEntity;                            // IDB: a1->owner = world_ent
-    if ( rc < 0 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                1190, 0, "%s\n\t(b->refCount) = %i", "(b->refCount >= 0)", rc );
-    ++clone->refCount;
-    // head = &ownerEntity->def (the entity's brush-list head, at +8).
-    brush_t **head = (brush_t **)( (char *)ownerEntity + 8 );
-    clone->onext = (brush_t *)head;                        // onext → the list sentinel
-    clone->oprev = *head;                                  // oprev → old first def
-    // IDA 0x485007: UNCONDITIONAL write — the brush list is circular with a self-ref sentinel
-    // (Entity_UnlinkBrush derefs both neighbors unguarded), so *head is never null here.
-    ( *head )->onext = clone;                              // old first def's onext → clone
-    *head = clone;                                         // entity's first def = clone
-    Entity_ColorSth( clone );
+    extern void Entity_LinkBrush( brush_t *b, entity_s *world_ent );   // entity.cpp 0x484fc0
+    Entity_LinkBrush( clone, ownerEntity );
 }
 
 void Brush_SplitBrushByFace( brush_t *in, face_t *face, brush_t **front, brush_t **back )
@@ -5291,24 +4868,23 @@ int Brush_MoveVertex( vec3_t delta, brush_t *b, vec3_t move_points, vec3_t end )
                     tmpl.p[2][0] = w->p[(pti + 1) % np][0];
                     tmpl.p[2][1] = w->p[(pti + 1) % np][1];
                     tmpl.p[2][2] = w->p[(pti + 1) % np][2];
-                    if ( pti >= np )
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Winding.cpp",
-                                72, 0, "ptIndex doesn't index w->ptCount\n\t%i not in [0, %i)", pti, np );
+                    bcassert( pti, np );   // inlined Winding.cpp:72 RemovePoint check
                     unsigned int newCount = (unsigned int)--w->numpoints;
                     if ( pti < newCount )
                         memcpy( w->p[pti], w->p[pti + 1], 12 * ( newCount - pti ) );
                     face_t *newface = Face_Alloc( b, fp );
-                    if ( newface != &b->faces[b->faceCount - 1] )   // brush.cpp:1146 — LEVEL 1 (post-alloc invariant)
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 1146, 1, "%s", "newface == &b->faces[b->faceCount - 1]" );
+                    iassert( newface == &b->faces[b->faceCount - 1] );   // brush.cpp:1146
                     originalFaceIndex[b->faceCount - 1] = originalFaceIndex[fi];
                     MV_NewWindingFromTemplate( newface, &tmpl );
-                    if ( newface != &b->faces[b->faceCount - 1] )   // brush.cpp:1152 — LEVEL 1
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 1152, 1, "%s", "newface == &b->faces[b->faceCount - 1]" );
+                    iassert( newface == &b->faces[b->faceCount - 1] );   // brush.cpp:1152
                     movefaces[nummovefaces] = b->faceCount - 1;
                     movefacepoints[nummovefaces + 1] = 1;   // dragged vertex is tmpl.p[1]
                     ++nummovefaces;
                     if ( !Point_Equal( start,
                              b->faces[movefaces[nummovefaces - 1]].w->p[movefacepoints[nummovefaces]], 0.2f ) )
+                        // KEEP_VERBOSE (also 1155/1166/1267): the binary string indexes
+                        // movefacepoints[nummovefaces - 1]; the port reads that slot as
+                        // [nummovefaces] before the -1 rebase — documented ±1 convention.
                         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
                                 1189, 1, "%s",
                                 "Point_Equal( start, b->faces[movefaces[nummovefaces - 1]].w->pts[movefacepoints[nummovefaces - 1]], 0.2f )" );
@@ -5333,12 +4909,10 @@ int Brush_MoveVertex( vec3_t delta, brush_t *b, vec3_t move_points, vec3_t end )
                             tmpl.p[2][2] = w->p[e % n2][2];
                             face_t *newface = Face_Alloc( b, fp );
                             fp = &b->faces[fi];   // re-fetch (Face_Alloc may realloc)
-                            if ( newface != &b->faces[b->faceCount - 1] )   // brush.cpp:1180 — LEVEL 1
-                                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 1180, 1, "%s", "newface == &b->faces[b->faceCount - 1]" );
+                            iassert( newface == &b->faces[b->faceCount - 1] );   // brush.cpp:1180
                             originalFaceIndex[b->faceCount - 1] = originalFaceIndex[fi];
                             MV_NewWindingFromTemplate( newface, &tmpl );
-                            if ( newface != &b->faces[b->faceCount - 1] )   // brush.cpp:1186 — LEVEL 1
-                                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 1186, 1, "%s", "newface == &b->faces[b->faceCount - 1]" );
+                            iassert( newface == &b->faces[b->faceCount - 1] );   // brush.cpp:1186
                             movefaces[nummovefaces] = b->faceCount - 1;
                             movefacepoints[nummovefaces + 1] = 0;   // dragged vertex is tmpl.p[0]
                             ++nummovefaces;
@@ -5653,9 +5227,7 @@ bool Model_SetModel( entity_brush_s *b, int orientMatrix )
              && ( inst->modelInst != 0 || inst->prefab != nullptr ) )
         {
             // Up to date.
-            if ( *Brush_ModelFailedByte( b->def ) )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                        3723, 0, "%s", "!b->def->modelFailed" );
+            iassert( !b->def->modelFailed );   // brush.cpp:3723
             return true;
         }
     }
@@ -5683,18 +5255,18 @@ bool Model_SetModel( entity_brush_s *b, int orientMatrix )
     // CRITICAL (model-render epic fix): when Eclass_hasModel(eclass) is TRUE, e is
     // the ECLASS itself — the prior port dropped this assignment, leaving e NULL
     // for a misc_model whose eclass resolved its model, so it never instanced.
-    models_t *e = (models_t *)ownerDef->modelClass;   // entity+0x64
+    entitymodel_t *e = (entitymodel_t *) (models_t *)ownerDef->modelClass;   // entity+0x64
     if ( !e )
     {
         eclass_t *eclass = ownerDef->eclass;                  // entity+0x60
         bool eclassHasModel = Eclass_hasModel( eclass );
-        e = (models_t *)eclass;                               // IDB: modelClass = ownerDef->eclass
+        e = (entitymodel_t *)eclass;                          // IDB: modelClass = ownerDef->eclass
         if ( !eclassHasModel )
         {
             // eclass has no built-in model node → resolve a per-entity model name.
-            // The dword at eclass+0x8 (fixedsize span) gates non-modelled classes
-            // out (misc_prefab is fixedsize → non-zero → proceeds).
-            if ( !*(int *)((char *)eclass + 8) )
+            // The dword at &fixedsize (+0x8, bool + 3 pad bytes) gates non-modelled
+            // classes out (misc_prefab is fixedsize → non-zero → proceeds).
+            if ( !*(int *)&eclass->fixedsize )
                 return *Brush_ModelFailedByte( b->def ) == 0;
 
             const char *modelName;
@@ -5705,12 +5277,11 @@ bool Model_SetModel( entity_brush_s *b, int orientMatrix )
                 //    model name from the eclass's default_model_name[] char* array, trace
                 //    straight down from the entity origin, and if the floor is hit, drop the
                 //    orientation matrix's origin onto it (VecMultiplyAdd by the hit distance).
-                modelName = (const char *)*(int *)( (char *)&eclass->default_model_name
-                                + (unsigned short)g_qeglobals.w_cyclePreviewMode * 4 );
+                modelName = eclass->cycleModelName[(unsigned short)g_qeglobals.w_cyclePreviewMode];
                 float dropDir[3] = { 0.0f, 0.0f, -1.0f };
                 edTrace_t tr;
                 Trace_AllDirectionsIfFailed( ownerDef->origin, &tr, dropDir, 4608 );
-                if ( tr.brush )
+                if ( tr.hit.brush )
                     VecMultiplyAdd( a2, tr.dist, dropDir, mtx );   // mtx.origin += dist*dir (to floor)
             }
             else
@@ -5721,12 +5292,11 @@ bool Model_SetModel( entity_brush_s *b, int orientMatrix )
             // brush.cpp:3763 — LEVEL 1 (binary asserts modelName != NULL post-resolve).
             // Binary does NOT guard the return on !modelName; after the assert it falls
             // straight through to the !*modelName deref (latent NULL-deref in release).
-            if ( !modelName )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 3763, 1, "%s", "modelName" );
+            iassert( modelName );   // brush.cpp:3763
             if ( !*modelName )
                 return *Brush_ModelFailedByte( b->def ) == 0;
 
-            e = Eclass_01( modelName, (int)(intptr_t)ownerDef );
+            e = (entitymodel_t *)Eclass_01( modelName, (int)(intptr_t)ownerDef );
         }
     }
 
@@ -5787,19 +5357,17 @@ static char Brush_IsInSelectedList( selbrush_t *b )
 // ─────────────────────────────────────────────────────────────────────────────
 char Entity_HasRenderableModel( brush_t_with_custom_def *a1, int orient )
 {
-    selbrush_t *sb = (selbrush_t *)a1;
-    entity_s_def *eDef = (entity_s_def *)sb->owner->def;
+    selbrush_t *b = (selbrush_t *)a1;
+    entity_s_def *eDef = (entity_s_def *)b->owner->def;
     if ( ( eDef->eclass->classtype & 0x10 ) == 0 )         // not a prefab class
     {
         int show = g_PrefsDlg->m_nEntityShowState;
-        if ( show == 4096 || ( ( show & 0x100 ) != 0 && !Brush_IsInSelectedList( sb ) ) )
+        if ( show == 4096 || ( ( show & 0x100 ) != 0 && !Brush_IsInSelectedList( b ) ) )
             return 0;                                      // hidden by the show-state filter
     }
     if ( !Model_SetModel( (entity_brush_s *)a1, orient ) )
     {
-        if ( !( *Brush_ModelFailedByte( sb->def ) & 0xFF ) )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    4037, 0, "%s", "b->def->modelFailed" );
+        iassert( b->def->modelFailed );   // brush.cpp:4037
         return 0;
     }
     return 1;
@@ -6186,17 +5754,13 @@ extern int  dword_181F51C;                                               // engi
 static void Brush_UpdateSpecialMaterialFlag( brush_t *def );             // fwd (mutually recursive)
 
 // 0x47b900 — walk a model's content brush tree, refreshing each brush's special-material
-// flag.  `node` is &model->x2 (model+8); the list head is at node[1] (= model+0xC =
-// entities_next__substruct), each entity at +4 is .next, and its brush list head is at +12
-// with the sentinel at +8.  Raw offsets: the model-content list nodes are untyped int fields
-// in models_t (the IDB walks them by offset).
+// flag.  `node` is &model->x2 (model+8); the entity list head is node[1] (entities.next
+// @+0xC) and each entity's brush list uses the def(+0x08)/brushes(+0x0C) head overlay.
 static void Brush_UpdateSpecialMaterialFlag_Recurse( int *node )
 {
-    int self = (int)(intptr_t)node;
-    for ( int ent = node[1]; ent != self; ent = *(int *)( ent + 4 ) )
+    for ( entity_s *ent = (entity_s *)node[1]; ent != (entity_s *)node; ent = ent->next )
     {
-        brush_t *sentinel = (brush_t *)( ent + 8 );          // brush-list sentinel @ent+0x8
-        for ( brush_t *b = *(brush_t **)( ent + 0xC ); b != sentinel; b = b->onext )  // head @ent+0xC, link via onext(+0x4)
+        for ( brush_t *b = (brush_t *)ent->brushes.prev; b != (brush_t *)&ent->def; b = b->onext )
             Brush_UpdateSpecialMaterialFlag( b );
     }
 }
@@ -6214,7 +5778,7 @@ static void Brush_UpdateSpecialMaterialFlag( brush_t *def )
             return;
         models_t *model = mc->model;                         // modelClass->model @0x160
         iassert( model );                                    // "b->owner->modelClass->model" (L0)
-        if ( model->entities_next__substruct )               // model+0xC non-empty
+        if ( model->entities.next )                          // model+0xC non-empty
             Brush_UpdateSpecialMaterialFlag_Recurse( &model->x2 );
         return;
     }
@@ -7190,11 +6754,13 @@ static void Ed_DrawScriptForceColor( selbrush_t *b )
 // brushDef = the entity's representative brush DEF; outRgba receives r,g,b,a; inRgba
 // supplies the default alpha. worldspawn→0 (no override); "_color" epair→that colour;
 // classname "actor*"→eclass.color (spawnflags!=0 forces g=0.8); classtype&0x20 +
-// "node_path*" + targetname!="auto"→green. Faithful vs IDA 0x47AA20 (the canonical
-// brush.cpp home; a relocated static copy also lives in xywnd.cpp for the connections
-// overlay). NULL owner/eclass guards are a defensive divergence on the never-run path.
-// Non-static so z.cpp's Z_Draw active/selected filled-column pass (IDB 0x49b520 calls
-// 0x47aa20 directly) can reuse the canonical body instead of a third duplicate.
+// "node_path*" + targetname!="auto"→green. Faithful vs IDA 0x47AA20 — this is the SOLE
+// definition; the connections overlay in xywnd.cpp used to carry a second static copy
+// that shadowed this one for its callers (the two bodies had drifted: only the copy had
+// the 4560 assert and the eclass+0x30 alpha, so the z.cpp/DrawModels callers of THIS one
+// silently got alpha=1.0). NULL owner/eclass guards are a defensive divergence on the
+// never-run path. Non-static so xywnd.cpp's connections overlay and z.cpp's Z_Draw
+// filled-column pass (IDB 0x49b520 calls 0x47aa20 directly) both reuse this body.
 // ─────────────────────────────────────────────────────────────────────────────
 char Brush_GetEntityLineColor( float *outRgba, brush_t *brushDef, const float *inRgba )
 {
@@ -7207,14 +6773,21 @@ char Brush_GetEntityLineColor( float *outRgba, brush_t *brushDef, const float *i
     if ( !_stricmp( ec->name, "worldspawn" ) )
         return 0;
 
-    const char *colStr = nullptr;
+    const char *colorString = nullptr;
     for ( epair_t *ep = owner->epairs; ep; ep = ep->next )
-        if ( !_stricmp( ep->key, "_color" ) ) { colStr = ep->value; break; }
-    if ( !colStr )
-        colStr = "";
+    {
+        if ( !_stricmp( ep->key, "_color" ) )
+        {
+            colorString = ep->value;
+            iassert( colorString );   // brush.cpp:4560 (0x47aa92)
+            break;
+        }
+    }
+    if ( !colorString )
+        colorString = "";                // IDB `zero` (empty string)
 
     float r = 0.0f, g = 0.0f, b = 0.0f;
-    if ( sscanf( colStr, "%f %f %f", &r, &g, &b ) == 3 )
+    if ( sscanf( colorString, "%f %f %f", &r, &g, &b ) == 3 )
     {
         outRgba[0] = r; outRgba[1] = g; outRgba[2] = b; outRgba[3] = inRgba[3];
         return 1;
@@ -7239,6 +6812,9 @@ char Brush_GetEntityLineColor( float *outRgba, brush_t *brushDef, const float *i
     }
 
     // actor*: eclass.color; spawnflags!=0 forces g=0.8 (keeps r/b/a from eclass).
+    // Alpha is the eclass slot at +0x30 (eclass_t::unk), NOT a constant: the binary reads
+    // it as a field in BOTH branches (0x47ab5d / 0x47ab3a) right after color[0..2] at
+    // +0x24/+0x28/+0x2C.  An earlier copy of this function hardcoded 1.0f here.
     char *sf = ValueForKey2( (int)(intptr_t)owner, "spawnflags" );
     bool sfZero = ( atol( sf ) == 0 );
     outRgba[0] = ec->color[0];
@@ -7246,13 +6822,13 @@ char Brush_GetEntityLineColor( float *outRgba, brush_t *brushDef, const float *i
     {
         outRgba[1] = ec->color[1];
         outRgba[2] = ec->color[2];
-        outRgba[3] = 1.0f;          // IDB reads eclass color[3] (==1.0)
+        outRgba[3] = ec->unk;
     }
     else
     {
-        outRgba[1] = 0.8f;
+        outRgba[1] = 0.80000001f;   // IDB flt_6F42DC
         outRgba[2] = ec->color[2];
-        outRgba[3] = 1.0f;
+        outRgba[3] = ec->unk;
     }
     return 1;
 }
@@ -7853,14 +7429,15 @@ static void Face_TexLock_Save( float *saveBuf, face_t *face )
             for ( int L = 0; L < layers; ++L )
             {
                 // Build the WORLD texture matrix from this layer's texdef + face normal.
-                //   scale = td-0x10 (size[2]); shift = td-8; rotate = [td]; crossterm = [td+4]
+                // td points at the layer's rotate field, so td-0x10 is the texdef base.
+                texdef_sub_t *tds = (texdef_sub_t *)( td - 0x10 );
                 float texMat[8];
-                Face_MoveTexture( (int)(intptr_t)( td - 0x10 ),       // size[2]
+                Face_MoveTexture( (int)(intptr_t)tds,                 // size[2]
                                   &face->plane.normal[0],             // edi + 0xC0
                                   (int)(intptr_t)texMat,              // out matrix (var_38..)
-                                  (int)(intptr_t)( td - 8 ),          // shift[2]
-                                  *(float *)( td ),                   // rotate
-                                  *(float *)( td + 4 ) );             // crossterm
+                                  (int)(intptr_t)tds->shift,          // shift[2]
+                                  tds->rotate,
+                                  tds->crossterm );
 
                 const float *pp = &face->planepts[0][0];   // edi (planepts[0..2])
                 // S/T at planepts[0], [1], [2] via the world tex matrix (texMat row0=S, row1=T).
@@ -8125,3 +7702,462 @@ void Brush_SnapToGrid( brush_t *a1 )
     ++a1->version;
     Brush_Free_R( clone );
 }
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — functions whose embedded Assert() calls name
+//  cod3src\Radiant\brush.cpp, i.e. brush.cpp is their original source file.
+//  They had been ported into the TU of their principal CALLER (mayaexport /
+//  entity / scriptgroup / surfacedlg / select); each is listed below in the order
+//  of the brush.cpp line its asserts cite, and each kept its own asserts.
+//  Functions elsewhere that carry a brush.cpp assert from an INLINED brush.cpp
+//  helper stay where they are — the assert rode in with the inlined callee and
+//  does not mean the enclosing function came from brush.cpp.
+// ═════════════════════════════════════════════════════════════════════════════
+
+// The maya object counters are IDB globals (dword_240A0EC / dword_240A0E8), defined
+// in mayaexport.cpp; ExportTo3D below bumps them for the progress readout.
+extern int s_mayaObjCount;
+extern int s_mayaObjTotal;
+
+// Callees of the relocated bodies that live in other TUs (previously declared in the
+// files these functions were ported into).
+extern void PMESH_56_extern( patchMesh_t *p );   // pmesh.cpp 0x44CFB0 (patch save)
+extern void PMESH_57_extern( patchMesh_t *p );   // pmesh.cpp 0x44D0C0 (patch restore + rebuild)
+extern void Patch_ApplyMatrix( const orientation_t *orient, patchMesh_t *p, char snap );  // pmesh.cpp 0x441E70
+
+// ── brush.cpp:241 — relocated from mayaexport.cpp ──
+// ════════════════════════════════════════════════════════════════════════════
+//  0x46FDA0  ExportTo3D_CreatePolyFacet — emit ONE brush face winding as a
+//  `polyCreateFacet -p x y z ...` (points REVERSED) + optional per-vertex polyEditUV.
+//
+//  __usercall in the binary: faceDef (the brush DEF face_t*, ECX) + face (the per-
+//  instance faceVis_s*, first stack arg).  We pass both explicitly.  Returns 1 if a
+//  facet was emitted, 0 if skipped (no winding, or filtered).
+// ════════════════════════════════════════════════════════════════════════════
+static char ExportTo3D_CreatePolyFacet( faceVis_s *face, face_t *def,
+                                        const orientation_t *orient, FILE *f,
+                                        char emitUVs, float scale )
+{
+    iassert( face );   // brush.cpp:241
+    iassert( def );    // brush.cpp:242
+
+    winding_t *w = def->w;            // [def+0xE0]
+    if ( !w )
+        return 0;
+
+    // world-space face normal (scratch; the binary fills per-vertex normal arrays it
+    // never emits — kept for fidelity, only the positions + UVs reach the .mel).
+    float worldNormal[3];
+    OrientationDirToWorldDir( worldNormal, orient, def->plane.normal );  // dir = [def+0xC0]
+
+    // texdef + texture matrix (layer 0 — the export base layer; layerHandle=0 as in the binary).
+    MaterialDef *mtldef = &def->mtldef[0];                     // [def+0x24]
+    int texdef = TexWnd_06_LayerCount( (int)mtldef, 0 );
+
+    // §11 (headless-vs-GUI material-realize invariant): the binary derefs `texdef`
+    // UNCONDITIONALLY (Face_MoveTexture + the texCoord matrix), relying on the GUI's
+    // material-realize pass having populated the layer (so texdef != 0).  A LAYERED
+    // material whose `lyrMtl->layerCount == 0` (not realized — the PARKED texture/material
+    // epic) makes TexWnd_06_LayerCount return 0; the binary would then deref a NULL texdef
+    // (it never does in the GUI).  We GUARD it: with no realized layer, emit the GEOMETRY
+    // (the whole point of the export — positions always exist) with identity UVs and skip
+    // the colour probe (sub_46F6C0 → MaterialDef_14 would also assert on the empty layer).
+    bool haveTex = ( texdef != 0 );
+    float texMat[8];
+    if ( haveTex )
+    {
+        texdef_sub_t *tdp = (texdef_sub_t *)(intptr_t)texdef;
+        Face_MoveTexture( texdef, def->plane.normal, (int)texMat, texdef + 8,
+                          tdp->rotate, tdp->crossterm );
+    }
+    else
+    {
+        texMat[0] = texMat[1] = texMat[2] = texMat[3] = 0.0f;
+        texMat[4] = texMat[5] = texMat[6] = texMat[7] = 0.0f;
+    }
+
+    iassert( w->ptCount <= MAX_POINTS_ON_WINDING );   // brush.cpp:250
+
+    if ( MtlDef_IsFaceFiltered( mtldef ) )
+        return 0;
+
+    fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
+
+    if ( haveTex )                        // colour probe also needs a realized layer (MaterialDef_14)
+    {
+        unsigned int packedColor = 0;    // sub_46F6C0 result (unused by the -p emit, faithful)
+        sub_46F6C0( (int)mtldef, (int)def, 0, (int *)&packedColor );
+    }
+
+    // texcoords are buffered then emitted in the SAME reverse order as the -p list.
+    float texCoord[1024][2];
+
+    // Emit points in REVERSE (numpoints-1 .. 0), matching the binary's facet winding.
+    for ( int ptIndex = w->numpoints - 1; ptIndex >= 0; --ptIndex )
+    {
+        const float *p = w->p[ptIndex];        // x=p[0] y=p[1] z=p[2]
+
+        texCoord[ptIndex][0] = texMat[0] * p[0] + texMat[1] * p[1] + texMat[2] * p[2] + texMat[3];
+        texCoord[ptIndex][1] = texMat[4] * p[0] + texMat[5] * p[1] + texMat[6] * p[2] + texMat[7];
+
+        iassert( !IS_NAN(texCoord[ptIndex][0]) );   // brush.cpp:265
+        iassert( !IS_NAN(texCoord[ptIndex][1]) );   // brush.cpp:266
+
+        fprintf( f, " -p %f %f %f", scale * p[0], p[1] * scale, scale * p[2] );
+    }
+
+    fprintf( f, "`;\r\n" );
+
+    if ( emitUVs )
+    {
+        for ( int ptIndex = w->numpoints - 1; ptIndex >= 0; --ptIndex )
+            fprintf( f, "\t\tpolyEditUV -r false -u %f -v %f ($strPolyInfo[0]).map[%d];\r\n",
+                     texCoord[ptIndex][0], texCoord[ptIndex][1], ptIndex );
+    }
+    return 1;
+}
+
+// ── brush.cpp:2167 — relocated from entity.cpp ──
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x475110  Entity_ColorSth  (brush.cpp:2167 assert — belongs here per IDB layout)
+// Sets the GfxColor of all faces in a brush from the owning entity's _color or eclass color.
+// Called after Entity_LinkBrush to paint the brush in the editor.
+// IDA: esi = brush_t* (passed as int to avoid include confusion in callers).
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x475110: _color/eclass-color/default branches, Byte4PackPixelColor(src,dest), face-color
+// loop @+228 stride 232, version@0x4E 16-bit ++. 2167 converted (same-file after the move).
+unsigned int Entity_ColorSth( brush_t *b )
+{
+    int a1 = (int)(intptr_t)b;
+
+    iassert( b );   // brush.cpp:2167
+
+    entity_s_def *entDef = *(entity_s_def **)((char *)b + 8); // b->owner
+
+    // IDA passes &rgba[0] to Entity_GetVec3ForKey, which writes rgba[0..2].  ONE float[4],
+    // never three loose locals: MSVC may reorder separate locals and the write runs off.
+    float rgba[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    eclass_t *eclass = nullptr;
+    if ( entDef && ( eclass = entDef->eclass ) != nullptr && *(int *)&eclass->fixedsize )
+    {
+        if ( HasKeyValuePair( entDef, "_color" ) )
+        {
+            Entity_GetVec3ForKey( entDef, rgba, "_color" );
+        }
+        else
+        {
+            rgba[0] = eclass->color[0];
+            rgba[1] = eclass->color[1];
+            rgba[2] = eclass->color[2];
+            rgba[3] = eclass->unk;
+        }
+    }
+
+    GfxColor v11;
+    Byte4PackPixelColor( rgba, &v11 );
+
+    unsigned int result = 0;
+    int faceCount = b->faceCount;
+    if ( faceCount )
+    {
+        int v6 = 0;
+        do
+        {
+            // face_t at b->faces[result]; GfxColor at face+228
+            *(GfxColor *)( (char *)b->faces + v6 + 228 ) = v11;
+            ++result;
+            v6 += 232;  // sizeof(face_t)
+        }
+        while ( result < (unsigned)faceCount );
+    }
+    ++b->version;
+    return result;
+}
+
+// ── brush.cpp:3499 — relocated from mayaexport.cpp ──
+// ════════════════════════════════════════════════════════════════════════════
+//  0x477E00  ExportTo3D — emit ONE brush as a `{ ... }` MEL block: a polyCreateFacet
+//  per (filtered-in) face, then polyUnite/polyMergeVertex/parent.  Point (fixedsize)
+//  entities additionally get four small marker facets + move/rotate from origin/angles.
+// ════════════════════════════════════════════════════════════════════════════
+char ExportTo3D( selbrush_t *b, const orientation_t *orient, FILE *f,
+                        char groupAsBrush, char emitUVs, float scale )
+{
+    iassert( b );   // brush.cpp:3499
+    iassert( b->def );   // brush.cpp:3500
+
+    char filtered = FilterBrush( b, 0 );
+    if ( filtered )
+        return filtered;                 // filtered-out brush -> emit nothing (returns nonzero)
+
+    // sync the per-instance faceVis array to the def's face count (rebuild if stale).
+    if ( b->faceCount != b->def->faceCount )
+    {
+        if ( b->faces )
+            Vis_Free( b->faceCount, b->faces, (int)(intptr_t)b );
+        b->faceCount = b->def->faceCount;
+        b->faces     = (faceVis_s *)PlanePts_Alloc( b->faceCount );
+    }
+
+    fprintf( f, "\t{\r\n" );
+    fprintf( f, "\t\tstring $strPolyInfo[];\r\n" );
+    if ( groupAsBrush )
+    {
+        fprintf( f, "\t\tstring $strPolyList[];\r\n" );
+        fprintf( f, "\t\tstring $strBrush[];\r\n\r\n" );
+    }
+
+    face_t    *defFaces = b->def->faces;        // [def+0x44]
+    faceVis_s *visFaces = (faceVis_s *)b->faces;       // [inst+0x1C]
+    int        polyIdx  = 0;
+    for ( int i = 0; (unsigned)i < (unsigned)b->faceCount; ++i )
+    {
+        if ( ExportTo3D_CreatePolyFacet( &visFaces[i], &defFaces[i], orient, f, emitUVs, scale ) )
+        {
+            if ( groupAsBrush )
+                fprintf( f, "\t\t$strPolyList[%d] = $strPolyInfo[0];\r\n", polyIdx );
+            ++polyIdx;
+        }
+    }
+
+    entity_s_def *ownerDef = (entity_s_def *)b->owner->def;   // owner entity def
+    if ( *(int *)&ownerDef->eclass->fixedsize )       // point entity: emit 4 marker facets
+    {
+        const float *o = ownerDef->origin;
+        // +X / +Z(8) / -Y(8) marker
+        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
+        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
+        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] + 8.0 );
+        fprintf( f, " -p %f %f %f", o[0],        o[1] - 8.0, o[2] );
+        fprintf( f, "`;\r\n" );
+        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
+        // +X / +Y(8) / +Z(8) marker
+        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
+        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
+        fprintf( f, " -p %f %f %f", o[0],        o[1] + 8.0, o[2] );
+        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] + 8.0 );
+        fprintf( f, "`;\r\n" );
+        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
+        // +X / -Z(8) / +Y(8) marker
+        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
+        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
+        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] - 8.0 );
+        fprintf( f, " -p %f %f %f", o[0],        o[1] + 8.0, o[2] );
+        fprintf( f, "`;\r\n" );
+        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
+        // +X / -Y(8) / -Z(8) marker
+        fprintf( f, "\t\t$strPolyInfo = `polyCreateFacet -ch off -tx 1 -s 1" );
+        fprintf( f, " -p %f %f %f", o[0] + 32.0, o[1],       o[2] );
+        fprintf( f, " -p %f %f %f", o[0],        o[1] - 8.0, o[2] );
+        fprintf( f, " -p %f %f %f", o[0],        o[1],       o[2] - 8.0 );
+        fprintf( f, "`;\r\n" );
+        fprintf( f, "\t$strPolyList[size($strPolyList)] = $strPolyInfo[0];\r\n" );
+    }
+
+    if ( groupAsBrush )
+    {
+        fprintf( f, "\t\tif (size ($strPolyList) > 1)\r\n" );
+        fprintf( f, "\t\t\t$strBrush = `polyUnite -ch 0 ($strPolyList)`;\r\n" );
+        fprintf( f, "\t\telse\r\n" );
+        fprintf( f, "\t\t\t$strBrush[0] = $strPolyList[0];\r\n" );
+        fprintf( f, "\t\tpolyMergeVertex -d 0.01 -ch 0 $strBrush[0];\r\n" );
+        fprintf( f, "\t\tparent $strBrush[0] $strGroups[$iCurGroup];\r\n" );
+
+        if ( *(int *)&ownerDef->eclass->fixedsize )
+        {
+            float ang[3];
+            if ( !Entity_GetVec3ForKey( ownerDef, ang, "angles" ) )
+            {
+                ang[0] = 0.0f; ang[1] = 0.0f; ang[2] = 0.0f;
+            }
+            const float *o = ownerDef->origin;
+            fprintf( f, "\t\tmove -x %f -y %f -z %f (($strBrush[0]) + \".scalePivot\") "
+                        "(($strBrush[0]) + \".rotatePivot\");\r\n", o[0], o[1], o[2] );
+            if ( HasKeyValuePair( ownerDef, "angles" ) )
+                fprintf( f, "\t\trotate -os %f %f %f ($strBrush[0]);\r\n", ang[2], ang[0], ang[1] );
+        }
+    }
+    else
+    {
+        fprintf( f, "\t\tparent $strPolyList $strGroups[$iCurGroup];\r\n" );
+    }
+
+    ++s_mayaObjCount;
+    fprintf( f, "\t}\r\n" );
+    fprintf( f, "\tprogressWindow -edit -s 1;\r\n" );
+    return (char)fprintf( f, "\tprogressWindow -edit -st \"%d of %d objects\";\r\n",
+                          s_mayaObjCount, s_mayaObjTotal );
+}
+
+// ── brush.cpp:4293 — relocated from scriptgroup.cpp ──
+// 0x479FF0  ScriptGroup_AssignNextNumber — assign the next free group NUMBER (under
+// g_PrefsDlg->ScriptGroupKey) to every selected entity.  Faithful to the disasm:
+//   * guard: only run when ScriptGroupKey != ScriptColorTeamKey (the colour-team key
+//     uses the colour-token path instead; a vehicle/group key is always != the team key)
+//   * pass 1: walk active_brushes, max = -1; for each non-world entity carrying the key,
+//     atol(value) and keep the max (skip empty values)
+//   * pass 2: itoa(max+1) and SetKeyValue it onto every selected non-world entity
+// (The asserts carry the binary's literal brush.cpp file/line — AssignNextNumber was
+//  inlined from a brush.cpp context; type 0 → log+continue, type 1 → would-be-fatal but
+//  ValueForKey2 returns the "" global, never null, so the *v guard handles it.)
+void ScriptGroup_AssignNextNumber()
+{
+    const char *groupKey = (const char *)g_PrefsDlg->ScriptGroupKey;
+    if ( !strcmp( groupKey, (const char *)g_PrefsDlg->ScriptColorTeamKey ) )
+        return;   // ScriptGroupKey == ScriptColorTeamKey → the colour-token path owns it.
+
+    // PASS 1 — find the highest existing number under groupKey across active brushes.
+    int maxNum = -1;
+    for ( selbrush_t *b = active_brushes.next; b != &active_brushes; b = b->next )
+    {
+        entity_s *owner = b->owner;
+        if ( !owner || owner == world_entity )
+            continue;
+        entity_s_def *def = (entity_s_def *)owner->def;
+        // Binary 0x47a080 derefs b->def->owner UNCONDITIONALLY (no `b->def &&` guard) — matches
+        // the sibling iterators; the prior port's `b->def &&` was an invented guard, dropped.
+        iassert( b->owner->def == b->def->owner );   // brush.cpp:4293 (0x47a080)
+
+        if ( !HasKeyValuePair( def, groupKey ) )
+            continue;
+        const char *group = ValueForKey2( (int)(intptr_t)def, groupKey );   // the binary's local
+        iassert( group );   // brush.cpp:4298
+        if ( group && *group )
+        {
+            int n = atol( group );
+            if ( maxNum < n )
+                maxNum = n;
+        }
+    }
+
+    // PASS 2 — assign maxNum+1 to every selected non-world entity.
+    char next[16];
+    _itoa( maxNum + 1, next, 10 );
+    for ( selbrush_t *b = selected_brushes.next; b != &selected_brushes; b = b->next )
+    {
+        entity_s *owner = b->owner;
+        if ( !owner || owner == world_entity )
+            continue;
+        entity_s_def *def = (entity_s_def *)owner->def;
+        // Binary 0x47a149 derefs b->def->owner UNCONDITIONALLY; `b->def &&` was invented, dropped.
+        iassert( b->owner->def == b->def->owner );   // brush.cpp:4313 (0x47a149)
+        SetKeyValue( def, groupKey, next );
+    }
+}
+
+// ── brush.cpp:5481 — relocated from surfacedlg.cpp ──
+// SurfaceInspector::PostDoSurface02 (0x47CA50) — SAVE one brush def's faces: copy every
+// face's CURRENT-layer mtldef into its mtldef[3] scratch, then PMESH_56 on the patch.
+//   qmemcpy(&face->mtldef[3], &face->mtldef[current], 0x24)  → mtldef[3] ← mtldef[current]
+void Surf_PostDoSurface02( brush_t *b )
+{
+    iassert( b );   // brush.cpp:5481
+    for ( unsigned int i = 0; i < (unsigned int)b->faceCount; ++i )
+    {
+        face_t *f = &b->faces[i];
+        iassert( f );   // brush.cpp:5464
+        f->mtldef[3] = f->mtldef[g_qeglobals.current_edit_layer];   // mtldef[3] ← mtldef[current]
+    }
+    if ( b->patch )
+        PMESH_56_extern( b->patch );
+}
+
+// ── brush.cpp:5495 — relocated from surfacedlg.cpp ──
+// SurfaceDlg_PostDoSurface02_Patch (0x47CAF0) — RESTORE one brush def's faces: copy each
+// face's mtldef[3] scratch BACK into its current-layer mtldef, ++def->version, then PMESH_57.
+//   qmemcpy(&face->mtldef[current], &face->mtldef[3], 0x24)  → mtldef[current] ← mtldef[3]
+void Surf_PostDoSurface02_Patch( brush_t *b )
+{
+    iassert( b );   // brush.cpp:5495
+    for ( unsigned int i = 0; i < (unsigned int)b->faceCount; ++i )
+    {
+        face_t *f = &b->faces[i];
+        iassert( f );   // brush.cpp:5471
+        f->mtldef[g_qeglobals.current_edit_layer] = f->mtldef[3];   // mtldef[current] ← mtldef[3]
+        ++b->version;                                             // ++*(WORD*)(b+0x4E)
+    }
+    if ( b->patch )
+        PMESH_57_extern( b->patch );
+}
+
+// ── brush.cpp:5598 — relocated from select.cpp ──
+// ═════════════════════════════════════════════════════════════════════════════
+//  0x47CDE0  Select_ApplyMatrix — transform one brush by the orientation block.
+//  `mat` is the orientation_t (origin + 3x3). bSnap = grid-snap on rebuild.
+//  deg != 0 routes fixed-size (prefab/model) entities to Select_RotateFixedSize.
+//  bSwap flips each face's planept winding order (planept[0]<->planept[2]) — used
+//  by the mirror (Select_FlipAxis) so reflected faces keep outward-facing normals.
+// ═════════════════════════════════════════════════════════════════════════════
+// KISAK SUBSET of 0x47cde0: geometry faithful; the loop bound uses def->faceCount (the
+// instance-vs-def adaptation below) and the texture-lock reproject (sub_470570/sub_4706F0)
+// is omitted (layer-gated no-op).  ++def->version is the brush_t int16 @0x4E.  Both
+// asserts (5598/5608) are now IN their own file.
+extern void Select_RotateFixedSize( selbrush_t *sb, float (*mid_point)[3], const float *rot );  // select.cpp 0x47CC90
+
+void Select_ApplyMatrix( float *mat, selbrush_t *b, int bSnap, float deg, char bSwap )
+{
+    if ( b->patch )
+    {
+        // Patch arm: transform the control points by the orientation block (rotate/flip).
+        iassert( b->def->patch == b->patch->def );   // brush.cpp:5598
+        Patch_ApplyMatrix( (const orientation_t *)mat, b->def->patch, (char)bSnap );
+        return;
+    }
+
+    entity_s_def *ownerDef = (entity_s_def *)b->owner->def;
+    iassert( b->owner->def == b->def->owner );   // brush.cpp:5608
+
+    eclass_t *eclass = ownerDef->eclass;
+    if ( *(int *)&eclass->fixedsize )
+    {
+        // Fixed-size entity (prefab / model bbox): rotate its origin + angles, no
+        // planept transform. Only meaningful for a real rotation (deg != 0); a pure
+        // mirror leaves the bbox where it is (matches the binary).
+        if ( deg != 0.0f )
+            Select_RotateFixedSize( b, (float (*)[3])mat, (const float *)eclass );
+        return;
+    }
+
+    // instance-vs-def: the IDB loops b->faceCount (the INSTANCE's cached count, set by
+    // Brush_BuildFaceVis on the camera draw, so 0 headless / before the first 3D draw).
+    // Loop the DEF count (authoritative, identical when valid) so the transform also
+    // applies headless.  Same adaptation as SetupVertexSelection.
+    if ( b->def->faceCount )
+    {
+        for ( int fi = 0; fi < b->def->faceCount; ++fi )
+        {
+            face_t *f = &b->def->faces[fi];
+            if ( bSwap )
+            {
+                // swap planepts[0] <-> planepts[2] (reverse winding for the mirror)
+                float t0 = f->planepts[0][0], t1 = f->planepts[0][1], t2 = f->planepts[0][2];
+                f->planepts[0][0] = f->planepts[2][0];
+                f->planepts[0][1] = f->planepts[2][1];
+                f->planepts[0][2] = f->planepts[2][2];
+                f->planepts[2][0] = t0;
+                f->planepts[2][1] = t1;
+                f->planepts[2][2] = t2;
+            }
+            // sub_470570 (texture-basis stash) is layer-gated → no-op in this build.
+            for ( int pi = 0; pi < 3; ++pi )
+            {
+                float rel[3];
+                rel[0] = f->planepts[pi][0] - mat[0];   // VectorSubtract(pt - origin)
+                rel[1] = f->planepts[pi][1] - mat[1];
+                rel[2] = f->planepts[pi][2] - mat[2];
+                OrientationPosToWorldPos( f->planepts[pi], rel,
+                                          reinterpret_cast<const orientation_t *>( mat ) );
+            }
+            // sub_4706F0 (Face_MakePlane + texture reproject) — Face_MakePlane is
+            // redundant with Brush_BuildWindings below; reproject is layer-gated → no-op.
+        }
+    }
+
+    Brush_BuildWindings( b->def, bSnap );
+    if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
+        SetupVertexSelection();
+    MarkMapModified();
+    ++b->def->version;
+}
+

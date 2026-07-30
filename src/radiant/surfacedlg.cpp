@@ -12,9 +12,7 @@
 
 // ── selection state (select.cpp) ──────────────────────────────────────────────
 extern selbrush_t   selected_brushes;                 // engine_stubs (0x23F1864)
-extern selface_t   *selFace;                          // select.cpp   (0x73C710)
-extern char         g_ptrSelectedFaces_GetSize[4];    // select.cpp   (0x73C714) int alias
-#define SEL_FACE_COUNT() (*(int *)g_ptrSelectedFaces_GetSize)
+#define SEL_FACE_COUNT() (g_SelectedFaces.GetSize())
 
 // ── texture edit core (select.cpp / materialdef.cpp / brush.cpp) ───────────────
 extern void         Brush_SetTexture( MaterialDef *a1, char a3 );           // 0x48F170
@@ -33,7 +31,7 @@ extern void         Material_SetMode( int iMode );                          // 0
 // readout shows / the apply reads back.  {MaterialDef def; int unk3; float sample_size}.
 struct patch_texdef_t
 {
-    MaterialDef def;          // 0x00 (36 B)
+    MaterialDef mtlDef;       // 0x00 (36 B)  (binary name — assert strings)
     int         unk3;         // 0x24
     float       sample_size;  // 0x28
 };
@@ -73,12 +71,12 @@ extern void  PMESH_57_extern( patchMesh_t *p );       // 0x44D0C0 (patch restore
 extern void Assert( const char *file, int line, int type, const char *fmt, ... );
 extern int  Sys_Printf( const char *fmt, ... );       // win_qe3.cpp (status/console print)
 
-// ── surface-inspector globals (IDB g_surfwin 0x23F1624 / the CSurfaceDlg instance) ──
-//  g_surfwin = the inspector HWND when open, 0 when closed (map.cpp reads it to know
+// ── surface-inspector globals (IDB surfDlgGlob.hwnd 0x23F1624 / the CSurfaceDlg instance) ──
+//  surfDlgGlob.hwnd = the inspector HWND when open, 0 when closed (map.cpp reads it to know
 //  whether to refresh the inspector after a load).  g_bNewFace (0x23F15D0) gates the
 //  "edit the picked face" vs "edit the current-texture window" path (the binary derives
 //  it from prefs m_bFace; this build keeps it on so a selected face is what you edit).
-int  g_surfwin   = 0;
+SurfDlgGlob_t surfDlgGlob = { 0 };
 char g_bNewFace  = 1;
 
 CSurfaceDlg *g_pSurfDlg = nullptr;     // the hand-built inspector instance (NULL until opened)
@@ -103,21 +101,15 @@ MaterialDef *Surf_TargetMaterialDef()
 {
     if ( g_bNewFace && SEL_FACE_COUNT() > 0 )
     {
-        selbrush_t *b = selFace[0].brush;
+        selface_t  &selFace = g_SelectedFaces.GetAt( 0 );
+        selbrush_t *b = selFace.brush;
         if ( b && b->def )
         {
-            // RESTORED (SurfaceDlg.cpp:420/421, type-0 = log+continue): the binary's
-            // SurfaceInspector_GetMaterialDef asserts the picked face is still live + the
-            // instance/def versions are in sync before reading the DEF face's mtldef.  Verbose:
-            // the binary string uses '.' member syntax ("selFace.face …") that a stringized '->'
-            // expr can't byte-match (same case as texturebar.cpp:160/161).
-            if ( selFace[0].face != &b->faces[selFace[0].index] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp",
-                        420, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( b->version != b->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp",
-                        421, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-            return &b->def->faces[selFace[0].index].mtldef[g_qeglobals.current_edit_layer];
+            // SurfaceDlg.cpp:420/421 (type-0): the picked face must still be live and the
+            // instance/def versions in sync before reading the DEF face's mtldef.
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );    // SurfaceDlg.cpp:420
+            iassert( selFace.brush->version == selFace.brush->def->version );   // SurfaceDlg.cpp:421
+            return &b->def->faces[selFace.index].mtldef[g_qeglobals.current_edit_layer];
         }
     }
     if ( selected_brushes.next != &selected_brushes )
@@ -204,16 +196,16 @@ float GetBrushfaceSampleSize()
     int count = SEL_FACE_COUNT();
     if ( count <= 0 )
         return 0.0f;
-    selbrush_t *b0 = selFace[0].brush;
+    selbrush_t *b0 = g_SelectedFaces.GetAt( 0 ).brush;
     float sz = b0->patch ? SurfaceDlg_GetMaterialSize_Patch( b0->def )
-                         : SurfaceDlg_GetMaterialSize( &b0->def->faces[selFace[0].index] );
+                         : SurfaceDlg_GetMaterialSize( &b0->def->faces[g_SelectedFaces.GetAt( 0 ).index] );
     if ( sz == 0.0f )
         return 0.0f;
     for ( int i = 1; i < count; ++i )
     {
-        selbrush_t *b = selFace[i].brush;
+        selbrush_t *b = g_SelectedFaces.GetAt( i ).brush;
         float s = b->patch ? SurfaceDlg_GetMaterialSize_Patch( b->def )
-                           : SurfaceDlg_GetMaterialSize( &b->def->faces[selFace[i].index] );
+                           : SurfaceDlg_GetMaterialSize( &b->def->faces[g_SelectedFaces.GetAt( i ).index] );
         if ( s != sz )
             return 0.0f;
     }
@@ -281,42 +273,11 @@ void Surf_ApplyTexdefRaw( float size0, float size1, float shift0, float shift1, 
 //   * MaterialDef = 0x24 = 36 bytes (the rep-movsd count is always 9 dwords).
 // ══════════════════════════════════════════════════════════════════════════════
 
-// SurfaceInspector::PostDoSurface02 (0x47CA50) — SAVE one brush def's faces: copy every
-// face's CURRENT-layer mtldef into its mtldef[3] scratch, then PMESH_56 on the patch.
-//   qmemcpy(&face->mtldef[3], &face->mtldef[current], 0x24)  → mtldef[3] ← mtldef[current]
-static void Surf_PostDoSurface02( brush_t *def )
-{
-    if ( !def )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 5481, 0, "%s", "b" );
-    for ( unsigned int i = 0; i < (unsigned int)def->faceCount; ++i )
-    {
-        face_t *f = &def->faces[i];
-        if ( !f )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 5464, 0, "%s", "f" );
-        f->mtldef[3] = f->mtldef[g_qeglobals.current_edit_layer];   // mtldef[3] ← mtldef[current]
-    }
-    if ( def->patch )
-        PMESH_56_extern( def->patch );
-}
+// Surf_PostDoSurface02 (0x47CA50) now lives in brush.cpp — assert brush.cpp:5481.
+extern void Surf_PostDoSurface02( brush_t *def );          // brush.cpp 0x47CA50
 
-// SurfaceDlg_PostDoSurface02_Patch (0x47CAF0) — RESTORE one brush def's faces: copy each
-// face's mtldef[3] scratch BACK into its current-layer mtldef, ++def->version, then PMESH_57.
-//   qmemcpy(&face->mtldef[current], &face->mtldef[3], 0x24)  → mtldef[current] ← mtldef[3]
-static void Surf_PostDoSurface02_Patch( brush_t *def )
-{
-    if ( !def )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 5495, 0, "%s", "b" );
-    for ( unsigned int i = 0; i < (unsigned int)def->faceCount; ++i )
-    {
-        face_t *f = &def->faces[i];
-        if ( !f )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 5471, 0, "%s", "f" );
-        f->mtldef[g_qeglobals.current_edit_layer] = f->mtldef[3];   // mtldef[current] ← mtldef[3]
-        ++def->version;                                             // ++*(WORD*)(def+0x4E)
-    }
-    if ( def->patch )
-        PMESH_57_extern( def->patch );
-}
+// Surf_PostDoSurface02_Patch (0x47CAF0) now lives in brush.cpp — assert brush.cpp:5495.
+extern void Surf_PostDoSurface02_Patch( brush_t *def );    // brush.cpp 0x47CAF0
 
 // SurfaceInspector::SetTexMods (0x458270) — open / layer-switch SAVE pass.  Snapshot the
 // current-texture TEMPLATE into the scratch, then save every selected brush's faces (mtldef
@@ -324,8 +285,7 @@ static void Surf_PostDoSurface02_Patch( brush_t *def )
 // scratch.  Clears the dirty flag.  (qmemcpy direction: scratch ← live, verified from disasm.)
 void SurfaceInspector_SetTexMods()
 {
-    if ( !g_surfwin )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp", 683, 0, "%s", "surfDlgGlob.hwnd" );
+    iassert( surfDlgGlob.hwnd );   // SurfaceDlg.cpp:683
 
     // scratch ← random_texture_stuff[current_edit_layer].mtl  (rep movsd, dst=scratch)
     g_surfTexModScratch = g_qeglobals.random_texture_stuff[g_qeglobals.current_edit_layer].mtl;
@@ -337,15 +297,14 @@ void SurfaceInspector_SetTexMods()
     int count = SEL_FACE_COUNT();
     for ( int i = 0; i < count; ++i )
     {
-        selbrush_t *brush = selFace[i].brush;
-        int index = selFace[i].index;
-        if ( selFace[i].face != &brush->faces[index] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp",
-                    695, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( brush->version != brush->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp",
-                    696, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        selface_t  &selFace = g_SelectedFaces.GetAt( i );
+        selbrush_t *brush = selFace.brush;
+        int index = selFace.index;
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );    // SurfaceDlg.cpp:695
+        iassert( selFace.brush->version == selFace.brush->def->version );   // SurfaceDlg.cpp:696
         face_t *f = &brush->def->faces[index];
+        // KEEP_VERBOSE: inlined per-face body of Surf_PostDoSurface02 (brush.cpp:5464 is
+        // its carrier iassert) — this loop walks g_SelectedFaces, not a brush, so no call.
         if ( !f )
             Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 5464, 0, "%s", "f" );
         f->mtldef[3] = f->mtldef[g_qeglobals.current_edit_layer];   // mtldef[3] ← mtldef[current]
@@ -358,8 +317,7 @@ void SurfaceInspector_SetTexMods()
 // FACE's mtldef[3] back into its current-layer texdef (++version).  Mirror of SetTexMods.
 void SurfaceInspector_Wnd02()
 {
-    if ( !g_surfwin )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp", 708, 0, "%s", "surfDlgGlob.hwnd" );
+    iassert( surfDlgGlob.hwnd );   // SurfaceDlg.cpp:708
 
     bool wasDirty = ( g_surfTexModDirty != 0 );
     // random_texture_stuff[current_edit_layer].mtl ← scratch  (rep movsd, src=scratch)
@@ -374,16 +332,15 @@ void SurfaceInspector_Wnd02()
     int count = SEL_FACE_COUNT();
     for ( int i = 0; i < count; ++i )
     {
-        selbrush_t *brush = selFace[i].brush;
-        int index = selFace[i].index;
-        if ( selFace[i].face != &brush->faces[index] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp",
-                    722, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( brush->version != brush->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\SurfaceDlg.cpp",
-                    723, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        selface_t  &selFace = g_SelectedFaces.GetAt( i );
+        selbrush_t *brush = selFace.brush;
+        int index = selFace.index;
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );    // SurfaceDlg.cpp:722
+        iassert( selFace.brush->version == selFace.brush->def->version );   // SurfaceDlg.cpp:723
         brush_t *def = brush->def;
         face_t *f = &def->faces[index];
+        // KEEP_VERBOSE: inlined per-face body of Surf_PostDoSurface02_Patch (brush.cpp:5471
+        // is its carrier iassert) — this loop walks g_SelectedFaces, not a brush, so no call.
         if ( !f )
             Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp", 5471, 0, "%s", "f" );
         f->mtldef[g_qeglobals.current_edit_layer] = f->mtldef[3];   // mtldef[current] ← mtldef[3]
@@ -438,7 +395,7 @@ static MaterialDef *SI_ReadControlsIntoTexdef( CSurfaceDlg *dlg )
     if ( onlyPatches )
     {
         // patch-only selection → the shared g_patch_texdef template (binary path).
-        md = &g_patch_texdef.def;
+        md = &g_patch_texdef.mtlDef;
         dlg->m_bPatchMode = 1;
     }
     else
@@ -494,7 +451,7 @@ static MaterialDef *SI_ReadControlsIntoTexdef( CSurfaceDlg *dlg )
 // shared g_patch_texdef.sample_size ("" when 0).  Also fills the "Repeats in" readouts (raw size).
 void Surf_RefreshFields()
 {
-    if ( !g_surfwin || !g_pSurfDlg || !::IsWindow( g_pSurfDlg->GetSafeHwnd() ) )
+    if ( !surfDlgGlob.hwnd || !g_pSurfDlg || !::IsWindow( g_pSurfDlg->GetSafeHwnd() ) )
         return;
     CSurfaceDlg *dlg = g_pSurfDlg;
 
@@ -514,10 +471,10 @@ void Surf_RefreshFields()
             SetMaterial( (const char *)Patch_GetTextureName(), (patchMesh_material *)&g_patch_texdef );
         else
         {
-            g_patch_texdef.def.lyrMtl = tmpl->lyrMtl;
-            g_patch_texdef.def.radMtl = tmpl->radMtl;
+            g_patch_texdef.mtlDef.lyrMtl = tmpl->lyrMtl;
+            g_patch_texdef.mtlDef.radMtl = tmpl->radMtl;
         }
-        md = &g_patch_texdef.def;
+        md = &g_patch_texdef.mtlDef;
         dlg->m_bPatchMode = 1;
         g_patch_texdef.sample_size = GetBrushSampleSize();
     }
@@ -573,7 +530,7 @@ void Surf_RefreshFields()
 
 // SurfaceInspector::UpdateSurfaceDialog (0x458590) — the global "selection/texture changed"
 // refresh, called from Brush_AddToList2 / Brush_RemoveFromList / drag apply etc.
-// Binary body: if (g_surfwin) { SurfaceInspector::SetTexMods(); Select_SetTexture_2(&g_dlgSurface); }
+// Binary body: if (surfDlgGlob.hwnd) { SurfaceInspector::SetTexMods(); Select_SetTexture_2(&g_dlgSurface); }
 // then if (g_pParentWnd && m_wndTextureBar.m_hWnd) CTextureBar::GetSurfaceAttributes(&bar).
 // Port names: SetTexMods → SurfaceInspector_SetTexMods; Select_SetTexture_2 → Surf_RefreshFields.
 extern CMainFrame *g_pParentWnd;                                 // 0x25D5A70
@@ -581,7 +538,7 @@ namespace SurfaceInspector
 {
     void UpdateSurfaceDialog()
     {
-        if ( g_surfwin )
+        if ( surfDlgGlob.hwnd )
         {
             SurfaceInspector_SetTexMods();          // 0x45859a  SurfaceInspector::SetTexMods
             Surf_RefreshFields();                   // 0x4585a4  Select_SetTexture_2
@@ -632,7 +589,7 @@ static void SI_UpdateSpinners( CSurfaceDlg *dlg, int idFrom, bool up )
     {
         // patch path (Patch_SetTextureInfo relative transform).
         SI_ReadControlsIntoTexdef( dlg );   // UpdateGPatchTexdef equivalent (commit current fields)
-        texdef_sub_t *pt = &g_patch_texdef.def.mat_texDef + LayerMat::GetCurrentLayer( &g_patch_texdef.def );
+        texdef_sub_t *pt = &g_patch_texdef.mtlDef.mat_texDef + LayerMat::GetCurrentLayer( &g_patch_texdef.mtlDef );
         texdef_sub_t rel; memset( &rel, 0, sizeof( rel ) );
         switch ( idFrom )
         {
@@ -751,7 +708,7 @@ void CSurfaceDlg::DoDataExchange( CDataExchange *pDX )
 BOOL CSurfaceDlg::OnInitDialog()
 {
     CDialog::OnInitDialog();
-    g_surfwin = (int)(intptr_t)GetSafeHwnd();
+    surfDlgGlob.hwnd = (int)(intptr_t)GetSafeHwnd();
     Surf_RefreshFields();
 
     // Up-down ranges (binary sets 0..1000 for the texdef spins, 0..1024 for tex-repeat).
@@ -797,23 +754,23 @@ void CSurfaceDlg::OnTexdefEdited() { m_texdefDirty = 1; }
 void CSurfaceDlg::OnSampleEdited() { m_sampleDirty = 1; }
 
 // OnOK (Done 1489 / Enter, 0x4589e0): commit pending edits (GetTexMods), then close.  This is
-// DestroyWindow fires OnDestroy (g_surfwin=0) then PostNcDestroy (g_pSurfDlg=0,
+// DestroyWindow fires OnDestroy (surfDlgGlob.hwnd=0) then PostNcDestroy (g_pSurfDlg=0,
 // delete this).  Do NOT call CDialog::OnOK (it ::EndDialog-hides a modeless dialog).
 void CSurfaceDlg::OnOK()
 {
     SI_GetTexMods( this );
     SurfaceInspector_Wnd02();   // commit the scratch back (SurfaceDlg_Wnd02 0x4583f0)
-    g_surfwin = 0;
+    surfDlgGlob.hwnd = 0;
     DestroyWindow();
 }
 
 // OnCancel (Cancel 1198 / Esc / [X], sub_458AB0): restore the template + flush pending dirty
-// face/patch edits (Wnd02) WHILE g_surfwin is still set, then really close.  Do NOT call
-// CDialog::OnCancel (it ::EndDialog-hides a modeless dialog, leaving g_surfwin/g_pSurfDlg set).
+// face/patch edits (Wnd02) WHILE surfDlgGlob.hwnd is still set, then really close.  Do NOT call
+// CDialog::OnCancel (it ::EndDialog-hides a modeless dialog, leaving surfDlgGlob.hwnd/g_pSurfDlg set).
 void CSurfaceDlg::OnCancel()
 {
     SurfaceInspector_Wnd02();
-    g_surfwin = 0;
+    surfDlgGlob.hwnd = 0;
     DestroyWindow();
 }
 
@@ -821,14 +778,14 @@ void CSurfaceDlg::OnCancel()
 void CSurfaceDlg::OnDone()    { OnOK();     }   // "Done"   button 1489
 void CSurfaceDlg::OnCancel2() { OnCancel(); }   // "Cancel" button 1198
 
-// Title-bar [X] (WM_CLOSE → SurfaceInspector::OnClose2 0x458a10): g_surfwin=0 +
+// Title-bar [X] (WM_CLOSE → SurfaceInspector::OnClose2 0x458a10): surfDlgGlob.hwnd=0 +
 // CWnd::OnClose ONLY — the binary does NOT commit pending texmods on [X]; the Wnd02
 // flush belongs to the Cancel button path (1198, 0x458ab0) alone (decoded msgmap
 // 0x6E2E58).  [audit U8/D6 — the port routed [X] to OnCancel, silently COMMITTING
 // scratch texdef edits the binary discards.]
 void CSurfaceDlg::OnClose()
 {
-    g_surfwin = 0;                  // 0x458a10
+    surfDlgGlob.hwnd = 0;                  // 0x458a10
     DestroyWindow();                // modeless port-form CWnd::OnClose (fires OnDestroy/PostNcDestroy)
 }
 
@@ -929,7 +886,7 @@ void CSurfaceDlg::OnDeltaPosSpin( NMHDR *pNMHDR, LRESULT *pResult )
         *pResult = 0;
 }
 
-// OnDestroy (0x458a50) — save the window rect + clear g_surfwin + invalidate the views.
+// OnDestroy (0x458a50) — save the window rect + clear surfDlgGlob.hwnd + invalidate the views.
 // [audit U8/D2 — the rect save was missing (this comment already claimed it); binary
 // order is save BEFORE CWnd::OnDestroy (0x458a69/0x458a7a → 0x458a84).]
 extern BOOL SaveRegistryInfo( const char *pszName, void *pvBuf, int lSize );   // win_qe3.cpp
@@ -942,13 +899,13 @@ void CSurfaceDlg::OnDestroy()
         SaveRegistryInfo( "Radiant::SurfaceWindow", &rect, 0x10 );   // 0x458a7a
     }
     CDialog::OnDestroy();                                    // 0x458a84
-    g_surfwin = 0;                                           // 0x458a89
+    surfDlgGlob.hwnd = 0;                                           // 0x458a89
     g_nUpdateBits = -1;                                      // 0x458a93
 }
 
 void CSurfaceDlg::PostNcDestroy()
 {
-    g_surfwin  = 0;
+    surfDlgGlob.hwnd  = 0;
     g_pSurfDlg = nullptr;
     delete this;                 // modeless self-cleanup
 }
@@ -961,7 +918,7 @@ void Surf_OpenInspector()
 
     if ( g_pSurfDlg && ::IsWindow( g_pSurfDlg->GetSafeHwnd() ) )
     {
-        g_surfwin = (int)(intptr_t)g_pSurfDlg->GetSafeHwnd();
+        surfDlgGlob.hwnd = (int)(intptr_t)g_pSurfDlg->GetSafeHwnd();
         Surf_RefreshFields();
         g_pSurfDlg->ShowWindow( SW_SHOW );
         g_pSurfDlg->SetForegroundWindow();
@@ -971,10 +928,10 @@ void Surf_OpenInspector()
 
     g_bNewFace = 1;
     // Seed g_patch_texdef defaults (DoSurface 0x4585d0: size/shift 0.05, rotate = prefs rotation).
-    g_patch_texdef.def.mat_texDef.size[0]  = 0.05f;
-    g_patch_texdef.def.mat_texDef.size[1]  = 0.05f;
-    g_patch_texdef.def.mat_texDef.shift[0] = 0.05f;
-    g_patch_texdef.def.mat_texDef.shift[1] = 0.05f;
+    g_patch_texdef.mtlDef.mat_texDef.size[0]  = 0.05f;
+    g_patch_texdef.mtlDef.mat_texDef.size[1]  = 0.05f;
+    g_patch_texdef.mtlDef.mat_texDef.shift[0] = 0.05f;
+    g_patch_texdef.mtlDef.mat_texDef.shift[1] = 0.05f;
 
     g_pSurfDlg = new CSurfaceDlg();
     if ( !g_pSurfDlg->Create( IDD_SURFACE_INSPECTOR, parent ) )
@@ -984,7 +941,7 @@ void Surf_OpenInspector()
         return;
     }
     g_pSurfDlg->ShowWindow( SW_SHOW );
-    g_surfwin = (int)(intptr_t)g_pSurfDlg->GetSafeHwnd();
+    surfDlgGlob.hwnd = (int)(intptr_t)g_pSurfDlg->GetSafeHwnd();
     Surf_RefreshFields();
     SurfaceInspector_SetTexMods();   // DoSurface: snapshot the current edit-layer into the scratch
 }
@@ -999,9 +956,9 @@ void Surf_OpenInspector()
 void Surf_UpdateInspector()
 {
     // Only when the inspector is a live, visible window.  The IsWindow/IsWindowVisible guard is
-    // defensive: a proper close now destroys the dialog (clearing g_surfwin/g_pSurfDlg), so this
+    // defensive: a proper close now destroys the dialog (clearing surfDlgGlob.hwnd/g_pSurfDlg), so this
     // is a true no-op once closed — but never operate on a hidden/dead HWND.
-    if ( g_surfwin && g_pSurfDlg && ::IsWindow( g_pSurfDlg->GetSafeHwnd() )
+    if ( surfDlgGlob.hwnd && g_pSurfDlg && ::IsWindow( g_pSurfDlg->GetSafeHwnd() )
          && g_pSurfDlg->IsWindowVisible() )
     {
         SurfaceInspector_SetTexMods();   // 0x458270 — re-snapshot (UpdateSurfaceDialog)

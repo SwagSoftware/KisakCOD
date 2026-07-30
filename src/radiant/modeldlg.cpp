@@ -52,11 +52,11 @@ void ModelDlg_DoReplace( const char *const *fromSet, int fromCount,
         entity_s *owner = b->owner;
         if ( !owner || owner == world_entity )                 { b = next; continue; }
 
-        // 0x434F55: the `brush->owner->def == brush->def->owner` invariant (type 0 → log+continue).
+        // 0x434F55 (type 0 → log+continue).  brush = the binary's local.
         entity_s_def *ent = (entity_s_def *)owner->def;
-        if ( b->def && ent != (entity_s_def *)b->def->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ModelDlg.cpp",
-                    292, 0, "%s", "brush->owner->def == brush->def->owner" );
+        selbrush_t *brush = b;
+        if ( brush->def )
+            iassert( brush->owner->def == brush->def->owner );   // ModelDlg.cpp:292
         if ( !ent )                                            { b = next; continue; }
 
         // 0x434FA6..: per FROM entry, test this entity by class + the class checkbox.

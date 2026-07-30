@@ -57,6 +57,9 @@ extern void     sub_476740( int texdef, face_t *face, brush_t *brush );        /
 
 // ─── externs from materialdef.cpp ────────────────────────────────────────────
 extern qtexture_s *MaterialDef_GetLayeredMaterial( MaterialDef *def );         // 0x4314a0
+extern LayerMaterialDef *Materialdef_GetName( MaterialDef *mtlDef );           // 0x431640
+extern void Entity_LinkBrush( brush_t *b, entity_s *world_ent );               // entity.cpp 0x484fc0
+extern void Entity_UnlinkBrush( brush_t *b );                                  // entity.cpp 0x485020
 // Sets *out to the material descriptor for name.
 extern void     SetMaterial( const char *name, patchMesh_material *out );      // 0x4315c0
 
@@ -205,10 +208,10 @@ bool Brush_IsCulled( brush_t *def )
 // so face.plane.dist is at face+0xC0+0x10 = 0xD0 — where the binary reads it.)
 // ─────────────────────────────────────────────────────────────────────────────
 bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
-                      selbrush_t *brushNode, unsigned int faceIdx )
+                      selbrush_t *b, unsigned int faceIndex )
 {
     // The binary zeroes a5 in the prologue regardless of what the caller passed.
-    faceIdx = 0;
+    faceIndex = 0;
 
     if ( !w )
         return false;
@@ -217,9 +220,9 @@ bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
     {
         // Next eligible node: not srcDef, not fixed/patch, and passing the filter
         // gate !(anyInUse & 0x20000000) && (allInUse & 1).
-        while ( brushNode != &selected_brushes )
+        while ( b != &selected_brushes )
         {
-            brush_t *def = brushNode->def;
+            brush_t *def = b->def;
 
             if ( def != srcDef && !Brush_IsFixedOrPatch( def ) )
             {
@@ -229,10 +232,10 @@ bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
                 if ( ( anyInUse & 0x20000000 ) == 0 && ( allInUse & 1 ) != 0 )
                     break;  // found eligible
             }
-            brushNode = brushNode->next;
+            b = b->next;
         }
 
-        if ( brushNode == &selected_brushes )
+        if ( b == &selected_brushes )
         {
             // Sentinel: nothing left to clip against, the winding survived → VISIBLE.
             --g_windingAlloc;
@@ -240,18 +243,13 @@ bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
             return true;
         }
 
-        brush_t *def = brushNode->def;
+        brush_t *def = b->def;
 
-        // The bound is the NODE's faceCount (+0x18), not def->faceCount.
-        unsigned int nodeFaceCount = (unsigned int)brushNode->faceCount;
-        // KEEP_VERBOSE: the port's locals don't byte-match the binary's #expr, so the
-        // verbose Assert form preserves the exact string.  faceIdx is unsigned, so the
-        // binary's `jb` reduces to the upper-bound test.
-        if ( faceIdx >= nodeFaceCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\csg.cpp",
-                    407, 0, "%s", "faceIndex >= 0 && faceIndex < b->faceCount" );
+        // The bound is the NODE's faceCount (+0x18), not def->faceCount.  faceIndex is
+        // unsigned, so the binary's `jb` reduces the >= 0 clause to the upper-bound test.
+        iassert( faceIndex >= 0 && faceIndex < b->faceCount );   // csg.cpp:407
 
-        face_t *clipFace = BrushFaceAt( def, faceIdx );
+        face_t *clipFace = BrushFaceAt( def, faceIndex );
         plane_t *clipPlane = &clipFace->plane;
 
         winding_t *front = nullptr, *back = nullptr;
@@ -262,7 +260,7 @@ bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
         free( w );
         w = back;  // back = piece on the clip plane's back side
 
-        selbrush_t *nextNode = brushNode->next;
+        selbrush_t *nextNode = b->next;
         if ( CSG_FaceVisible( front, faceNormal, srcDef, nextNode, 0 ) )
         {
             // The front piece is visible through the rest of the list → so is the face.
@@ -286,20 +284,20 @@ bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
             if ( dot > 0.0f )
             {
                 // Coplanar same-facing → next brush, face index reset.
-                brushNode = brushNode->next;
-                faceIdx = 0;
+                b = b->next;
+                faceIndex = 0;
                 if ( !w )
                     return false;
                 continue;
             }
         }
 
-        ++faceIdx;
+        ++faceIndex;
 
         if ( !w )
             return false;
 
-        if ( faceIdx >= nodeFaceCount )
+        if ( faceIndex >= (unsigned int)b->faceCount )
         {
             // Every face of this brush clipped it and it is still inside → HIDDEN.
             --g_windingAlloc;
@@ -319,25 +317,21 @@ bool CSG_FaceVisible( winding_t *w, float *faceNormal, brush_t *srcDef,
 // ─────────────────────────────────────────────────────────────────────────────
 void CSG_MakeHollow()
 {
-    selbrush_t *node = selected_brushes.next;
+    selbrush_t *b = selected_brushes.next;
 
-    while ( node != &selected_brushes )
+    while ( b != &selected_brushes )
     {
-        brush_t  *def   = node->def;     // selbrush_t.def → 88-byte geometry
-        entity_s *owner = node->owner;   // selbrush_t.owner
+        brush_t  *def   = b->def;     // selbrush_t.def → 88-byte geometry
+        entity_s *owner = b->owner;   // selbrush_t.owner
 
         // Saved before any free — see the header note.
-        selbrush_t *nextNode = node->next;
+        selbrush_t *nextNode = b->next;
 
-        // KEEP_VERBOSE: the port's pre-extracted locals would not byte-match the
-        // binary's #expr string, so the verbose Assert form is used.
-        if ( owner->def != def->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\csg.cpp",
-                    34, 0, "%s", "b->owner->def == b->def->owner" );
+        iassert( b->owner->def == b->def->owner );   // csg.cpp:34
 
         // Skip fixed-size entities, patches and xx5-flagged brushes.
-        patch_t *nodePatch = node->patch;   // selbrush_t.patch (instance)
-        int      nodeXx5   = node->xx5;     // selbrush_t.xx5
+        patch_t *nodePatch = b->patch;   // selbrush_t.patch (instance)
+        int      nodeXx5   = b->xx5;     // selbrush_t.xx5
 
         if ( !def->owner->eclass->fixedsize && !nodePatch && !nodeXx5 )
         {
@@ -369,25 +363,7 @@ void CSG_MakeHollow()
 
                 if ( back )
                 {
-                    // Inlined Entity_UnlinkBrush (assert entity.cpp:1208).
-                    if ( !back->onext || !back->oprev )
-                    {
-                        Com_Error( ERR_FATAL, "Entity_UnlinkBrush: Not currently linked" );
-                    }
-                    if ( back->refCount <= 0 )
-                    {
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                                1208, 0, "%s\n\t(b->refCount) = %i",
-                                "(b->refCount > 0)", back->refCount );
-                    }
-                    brush_t *bN = back->onext;
-                    brush_t *bP = back->oprev;
-                    --back->refCount;
-                    bN->oprev = bP;
-                    back->oprev->onext = back->onext;
-                    back->oprev = nullptr;
-                    back->onext = nullptr;
-                    back->owner = nullptr;
+                    Entity_UnlinkBrush( back );   // inlined in the binary (entity.cpp:1208)
                     Brush_Free_R( back );
                 }
 
@@ -405,10 +381,10 @@ void CSG_MakeHollow()
                 }
             }  // for each face
 
-            Brush_Free( node );
+            Brush_Free( b );
         }
 
-        node = nextNode;
+        b = nextNode;
     }
 
     // The binary sets this at the END of the whole list loop, unconditionally.
@@ -567,51 +543,19 @@ selbrush_t *Brush_MergeList( selbrush_t *brushList )
     }
 
     // Link the new brush to the entity and build its windings.
-    // KEEP_VERBOSE: the binary's string is brush.cpp:2354 "b" (cross-file + name mismatch).
-    if ( !newBrush )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                2354, 0, "%s", "b" );
+    // The binary inlines Brush_SetLayerString( newBrush, g_activeLayer_string ) here —
+    // its brush.cpp:2354 head-check lives in the helper.
+    extern void Brush_SetLayerString( brush_t *b, const char *str );   // brush.cpp 0x4758A0
+    Brush_SetLayerString( newBrush, g_activeLayer_string );
 
-    if ( newBrush->parent_layer_string )
-        j__free_0( newBrush->parent_layer_string );
-    unsigned int layerLen = (unsigned int)strlen( g_activeLayer_string );
-    char *layerCopy = (char *)operator new( layerLen + 1 );
-    memcpy( layerCopy, g_activeLayer_string, layerLen + 1 );
-    newBrush->parent_layer_string = layerCopy;
-
-    // Inlined Entity_LinkBrush (asserts entity.cpp:1190 / 1208).  The new DEF goes into
-    // the ENTITY DEF's brush list, headed by entity_s_def.def (+0x8) and threaded via
-    // brush_t onext (+0x4) / oprev (+0x0).  A brush DEF's .owner holds the
-    // entity_s_def*, not the entity_s* — that is the "b->owner == owner->def" invariant.
+    // The binary inlines Entity_LinkBrush( newBrush, listOwner->def ) here (entity.cpp:1190).
+    // A brush DEF's .owner holds the entity_s_def*, not the entity_s* — that is the
+    // "b->owner == owner->def" invariant checked below.
     entity_s *listOwner = brushList->owner;                  // selbrush_t.owner (entity_s*)
-    void     *entityDef = listOwner->def;   // entity_s_def*
+    Entity_LinkBrush( newBrush, (entity_s *)listOwner->def );
 
-    if ( newBrush->oprev || newBrush->onext )
-        Com_Error( ERR_FATAL, "Entity_LinkBrush: Allready linked" );
-
-    int rc = newBrush->refCount;
-    newBrush->owner = (entity_s *)entityDef;
-    if ( rc < 0 )
-    {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                1190, 0, "%s\n\t(b->refCount) = %i",
-                "(b->refCount >= 0)", rc );
-    }
-    ++newBrush->refCount;
-
-    // Insert newBrush at the head of the entity DEF's brush list (entity_s_def.def @ +0x8).
-    brush_t **entityBrushListHead = (brush_t **)&( (entity_s_def *)entityDef )->def;
-    newBrush->onext = (brush_t *)entityBrushListHead;  // onext = &entity_def.def (sentinel)
-    newBrush->oprev = *entityBrushListHead;            // oprev = current head def
-    ( *entityBrushListHead )->onext = newBrush;        // old head's onext → newBrush
-    *entityBrushListHead = newBrush;                   // entity def-list head → newBrush
-
-    Entity_ColorSth( newBrush );
-
-    // KEEP_VERBOSE: the binary's csg.cpp:190 string doesn't byte-match the port's locals.
-    if ( newBrush->owner != (entity_s *)entityDef )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\csg.cpp",
-                190, 0, "%s", "newBrushDef->owner == brushList->owner->def" );
+    brush_t *newBrushDef = newBrush;                 // the binary's local name
+    iassert( newBrushDef->owner == brushList->owner->def );   // csg.cpp:190
 
     selbrush_t *result = Brush_AddToList( newBrush, listOwner );
     Brush_BuildWindings( newBrush, 0 );
@@ -637,14 +581,8 @@ int CSG_Merge()
     if ( sel->next == &selected_brushes )
         return Sys_Printf( "At least two brushes have to be selected.\n" );
 
-    // Ownership invariant: node.owner->def == node.def->owner (both entity_s_def*).
-    if ( (void *)sel->owner->def != (void *)sel->def->owner )
-    {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\csg.cpp",
-                222, 0, "%s",
-                "selected_brushes.next->owner->def == selected_brushes.next->def->owner" );
-        sel = selected_brushes.next;
-    }
+    // Ownership invariant (both entity_s_def*).
+    iassert( selected_brushes.next->owner->def == selected_brushes.next->def->owner );   // csg.cpp:222
 
     void *ownerDef0 = sel->owner->def;
 
@@ -779,12 +717,8 @@ void Brush_AutoCaulk()
                         MaterialDef_02( md, MaterialDef_08 );
                         if ( !dword_181F51C )
                         {
-                            if ( !md || (int)( md->lyrMtl != nullptr ) + (int)( md->radMtl != nullptr ) != 1 )
-                                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                                        85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-                            const char *name = (const char *)md->lyrMtl;   // IDA: mov eax,[esi]  (lyrMtl* used as char*)
-                            if ( !md->lyrMtl )
-                                name = md->radMtl->name;          // IDA 0x47e1d8/db: mov ecx,[esi+4]; mov eax,[ecx+4] = radMtl->name (qtexture_s+4)
+                            // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+                            const char *name = (const char *)Materialdef_GetName( md );
                             if ( _stricmp( name, "caulk" ) )
                             {
                                 if ( Brush_AutoCaulkFace( def, fp ) )

@@ -35,8 +35,8 @@ extern void vectoangles( float *angles, int vec );
 extern int    LoadFile( const char *filename, void **bufferptr );   // cmdlib.cpp (0x40ABD0)
 extern void   StripExtension( char *path );                         // cmdlib.cpp (0x40AE90)
 
-// g_qeglobals_d_pointfile_display_list — defined in points.cpp (this is s_errLogCount).
-extern int g_qeglobals_d_pointfile_display_list;
+// s_errLogCount — defined in points.cpp (this is s_errLogCount).
+extern int s_errLogCount;
 
 // zero — empty string sentinel defined in engine_stubs.cpp.
 extern void *zero;
@@ -75,9 +75,6 @@ static char s_errLogMapPath[1024];
 // ── lyrMtlGlob globals (IDB 0x1814CFC / 0x1814D00) ──────────────────────────
 // Defined in layeredmaterials.cpp (ported 2026-06-11, unit 2).
 // Forward-declared here for the CheckLayeredMaterial_Modifications call below.
-extern int     lyrMtlGlob_entryCount;    // 0x1814CFC (layeredmaterials.cpp)
-extern uint8_t lyrMtlGlob_Layers[];     // 0x1814D00 inline array (layeredmaterials.cpp)
-extern int     dword_1814CF8;           // 0x1814CF8 (layeredmaterials.cpp)
 
 // ── 0x489D90  HasUnsavedChangesOrInsidePrefab ─────────────────────────────────
 // Returns true if the map has unsaved changes, or we are inside a prefab level
@@ -85,7 +82,6 @@ extern int     dword_1814CF8;           // 0x1814CF8 (layeredmaterials.cpp)
 // Globals: modified (0x23F179C), byte_25EB240 (0x25EB240), prefabStackLevel (0x25D5B34).
 // These are already defined in engine_stubs.cpp / map.cpp.
 extern int  modified;              // 0x23F179C (map.cpp or engine_stubs.cpp)
-extern char byte_25EB240[];        // 0x25EB240 (engine_stubs.cpp)
 extern int  prefabStackLevel;      // 0x25D5B34 (map.cpp)
 
 static bool HasUnsavedChangesOrInsidePrefab()
@@ -95,11 +91,11 @@ static bool HasUnsavedChangesOrInsidePrefab()
 
     if ( prefabStackLevel > 0 )
     {
-        // Walk the prefab stack; return true if any level is non-null (modified).
-        char *p = byte_25EB240;
-        for ( int v1 = 0; ; p += 2168 )
+        // Walk the prefab stack; return true if any level was modified.
+        prefabLevel_t *p = g_prefabStack;
+        for ( int v1 = 0; ; ++p )
         {
-            if ( *(int *)p )
+            if ( p->modified )
                 return true;
             if ( ++v1 >= prefabStackLevel )
                 return false;
@@ -171,18 +167,12 @@ char ErrorLog_01()
                     goto no_mapspath;
             }
             value = ep->value;
-            if ( !value )
-            {
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\q_shared.cpp",
-                        554, 0, "%s", "src" );
-            }
-            goto have_value;
+            goto have_value;   // (the null check is I_strncpyz's own iassert below)
         }
 no_mapspath:
         value = (const char *)zero;
 have_value:
-        strncpy( path, value, 0x3FFu );
-        path[1023] = 0;
+        I_strncpyz( path, value, 1024 );   // inlined in the binary (q_shared.cpp:554)
         pathlen = (unsigned int)strlen( path );
         v0 = pathlen;
         if ( !pathlen ||
@@ -196,25 +186,11 @@ have_value:
         }
     }
 
-    // Append the entry's map filename to path[v0..].
-    // IDA: strcpy(&path[v0], s_errLog[s_errLogIndex].mapfile, 1024 - v0)
-    // That's the 3-arg Radiant safe-strcpy (strncpy + null-terminate).
-    {
-        const char *src  = s_errLog[s_errLogIndex].mapfile;
-        int         room = 1024 - (int)v0;
-        if ( src && room >= 1 )
-        {
-            strncpy( path + v0, src, (size_t)(room - 1) );
-            path[v0 + (size_t)(room - 1)] = 0;
-        }
-    }
+    // Append the entry's map filename to path[v0..] — the binary's inlined
+    // I_strncpyz(&path[v0], mapfile, 1024 - v0).
+    I_strncpyz( path + v0, s_errLog[s_errLogIndex].mapfile, 1024 - (int)v0 );
 
-    // Assert that we have at least one error-log entry.
-    if ( !g_qeglobals_d_pointfile_display_list )
-    {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\errorfile.cpp",
-                47, 0, "%s", "s_errLogCount" );
-    }
+    iassert( s_errLogCount );   // errorfile.cpp:47
 
     // If the current map already matches, jump directly to positioning.
     if ( _stricmp( path, currentmap ) == 0 )
@@ -222,9 +198,9 @@ have_value:
 
     // Check for unsaved changes or layered-material modifications.
     if ( ( HasUnsavedChangesOrInsidePrefab()
-           || CheckLayeredMaterial_Modifications( lyrMtlGlob_Layers,
-                                                  84 * lyrMtlGlob_entryCount,
-                                                  0 ) != dword_1814CF8 )
+           || CheckLayeredMaterial_Modifications( lyrMtlGlob.Layers,
+                                                  84 * lyrMtlGlob.entryCount,
+                                                  0 ) != lyrMtlGlob.crcToken )
          && !( g_pParentWnd && g_pParentWnd->ConfirmModified() ) )
     {
         return 0;
@@ -233,7 +209,7 @@ have_value:
     Prefab_LevelBack();
     Map_LoadFromFile( path );
 
-    if ( !g_qeglobals_d_pointfile_display_list )
+    if ( !s_errLogCount )
         return 1;
 
 do_position:
@@ -298,7 +274,7 @@ static void ErrorLog_AddEntry( const float *dir, const char *mapfile,
                                int enum1, int enum2, const float *origin,
                                const char *matname )
 {
-    int count = g_qeglobals_d_pointfile_display_list;   // == s_errLogCount
+    int count = s_errLogCount;   // == s_errLogCount
 
     // De-dup scan over the existing entries (IDA: the while-loop on dword_180ACF4).
     for ( int i = 0; i < count; ++i )
@@ -324,7 +300,7 @@ static void ErrorLog_AddEntry( const float *dir, const char *mapfile,
     s_errLog[count].dir[1]    = dir[1];
     s_errLog[count].dir[2]    = dir[2];
 
-    ++g_qeglobals_d_pointfile_display_list;
+    ++s_errLogCount;
 }
 
 // ── 0x410070  ErrorLog_Compare (sub_410070) — qsort comparator ────────────────
@@ -389,13 +365,9 @@ char Pointfile_Errorfile()
         parseInfo_t *t = Com_Parse( &text );
         if ( !text )
             break;                                   // EOF (IDA: !v53)
-        if ( !t )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\q_shared.cpp",
-                    554, 0, "%s", "src" );
 
         char mapfile[1024];
-        strncpy( mapfile, t->token, 0x3FFu );
-        mapfile[1023] = 0;
+        I_strncpyz( mapfile, t->token, 1024 );       // inlined in the binary (q_shared.cpp:554)
 
         int   enum1 = atol( Com_Parse( &text )->token );
         int   enum2 = atol( Com_Parse( &text )->token );
@@ -409,28 +381,24 @@ char Pointfile_Errorfile()
         dir[2] = (float)atof( Com_Parse( &text )->token );
 
         parseInfo_t *mt = Com_Parse( &text );
-        if ( !mt )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\q_shared.cpp",
-                    554, 0, "%s", "src" );
 
         char matname[1024];
-        strncpy( matname, mt->token, 0x3FFu );
-        matname[1023] = 0;
+        I_strncpyz( matname, mt->token, 1024 );      // inlined in the binary (q_shared.cpp:554)
 
         ErrorLog_AddEntry( dir, mapfile, enum1, enum2, origin, matname );
     }
 
     free( buffer );
-    Sys_Printf( "%i error(s) loaded\n", g_qeglobals_d_pointfile_display_list );
+    Sys_Printf( "%i error(s) loaded\n", s_errLogCount );
 
     s_errLogIndex = 0;
-    if ( g_qeglobals_d_pointfile_display_list )
+    if ( s_errLogCount )
     {
-        qsort( &s_errLog[0], (size_t)g_qeglobals_d_pointfile_display_list,
+        qsort( &s_errLog[0], (size_t)s_errLogCount,
                sizeof( s_errLogEntry_t ), ErrorLog_Compare );
         return ErrorLog_01();
     }
-    return (char)g_qeglobals_d_pointfile_display_list;
+    return (char)s_errLogCount;
 }
 
 // ── menu-handler entry points (CMainFrame::OnErrorFile, mainfrm.cpp) ───────────
@@ -452,7 +420,7 @@ static void Errorfile_GotoMap()
 // 0x410670 — advance to the next error-log entry; wrap (with a prompt) at the end.
 void Errorfile_NextError()
 {
-    if ( ++s_errLogIndex == g_qeglobals_d_pointfile_display_list )
+    if ( ++s_errLogIndex == s_errLogCount )
     {
         if ( MessageBoxA( GetActiveWindow(),
                           "End of error list reached.\n\nContinue from start?",
@@ -468,7 +436,7 @@ void Errorfile_NextError()
     {
         int v1 = s_errLogIndex;
         if ( !s_errLogIndex )
-            v1 = g_qeglobals_d_pointfile_display_list;
+            v1 = s_errLogCount;
         s_errLogIndex = v1 - 1;
     }
 }
@@ -490,10 +458,10 @@ void Errorfile_PrevError()
                 return;
             }
         }
-        v0 = g_qeglobals_d_pointfile_display_list;
+        v0 = s_errLogCount;
     }
     s_errLogIndex = v0 - 1;
-    if ( !ErrorLog_01() && ++s_errLogIndex == g_qeglobals_d_pointfile_display_list )
+    if ( !ErrorLog_01() && ++s_errLogIndex == s_errLogCount )
         s_errLogIndex = 0;
 }
 

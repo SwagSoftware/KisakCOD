@@ -13,7 +13,7 @@
 
 // ─── Editor globals owned by this TU ────────────────────────────────────────────
 int  R_Initiated;             // IDB 0x25d5a68 — "editor renderer is up" flag.
-HWND laymatwnd_content_HWND;  // IDB 0x181f508 — LayeredMaterialWnd content-list HWND.
+// (the LayeredMaterialWnd HWNDs live in lyrMtlWndGlob — layeredmaterialwnd.cpp)
                               // LayeredMaterialWnd.cpp (Phase 6) takes ownership later;
                               // declared here so R_BeginRegistrationInternal links now.
 
@@ -68,13 +68,10 @@ Material *R_BeginRegistrationInternal()
     R_InitRendererForWindow(g_qeglobals.d_hwndZ);
     iassert( g_qeglobals.d_hwndTexture );
     R_InitRendererForWindow(g_qeglobals.d_hwndTexture);
-    // CROSS-FILE assert: the binary inlines LayeredMaterialWnd.cpp:726 here (its layer-list HWND
-    // check); KEEP VERBOSE to preserve that origin + the "lyrMtlWndGlob.layerList" string (the
-    // port's var is laymatwnd_content_HWND, which a stringized iassert can't byte-match).
-    if ( !laymatwnd_content_HWND )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\LayeredMaterialWnd.cpp",
-                726, 0, "%s", "lyrMtlWndGlob.layerList" );
-    R_InitRendererForWindow(laymatwnd_content_HWND);
+    // The binary inlines LayeredMaterialWnd_InitRenderer here (the standalone
+    // 0x418580 carries the LayeredMaterialWnd.cpp:726 check).
+    extern char LayeredMaterialWnd_InitRenderer();   // layeredmaterialwnd.cpp 0x418580
+    LayeredMaterialWnd_InitRenderer();
 
     g_qeglobals.d_font_list = R_RegisterFont("fonts/qerfont", 7);
     g_qeglobals.d_white     = Material_RegisterHandle("white_tools", 0);

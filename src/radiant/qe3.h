@@ -31,6 +31,7 @@ struct brush_t;
 struct selbrush_t;         // canonical 56-byte brush-instance / list node (ruling below)
 struct patchMesh_t;
 struct eclass_t;
+struct entitymodel_t;      // eclass-like model node (defined below)
 struct LayerMaterialDef;   // pointer-only (Phase 6 layeredmaterials)
 struct undo_s;             // forward-decl; full definition below (after entity_s)
 struct Material;           // gfx_d3d r_material.h — referenced pointer-only by faceVisuals_s
@@ -46,7 +47,10 @@ struct Material;           // gfx_d3d r_material.h — referenced pointer-only b
 // pmesh read width/height/in_use/color_or_surfacetype_filter back out.
 struct qtexture_s
 {
-    Material    *next;                        // 0x00  registered render material handle
+    union {                                   // 0x00  registered render material handle
+        Material *next;                       //       (port's historical name)
+        Material *handle;                     //       (the binary's name — assert strings)
+    };
     const char  *name;                        // 0x04
     bool         is_in_use;                   // 0x08
     char         unk1;                         // 0x09  (MaterialDef_07 ANDs this)
@@ -54,8 +58,10 @@ struct qtexture_s
     char         unk2;                         // 0x0B
     int          unk_flags2;                   // 0x0C  (MaterialDef_06 low word; MaterialDef_15)
     int          tex_num_or_localefilter;      // 0x10  (MaterialDef_05 ANDs this)
-    int          width;                        // 0x14  (autoTexScale)
-    int          height;                       // 0x18
+    union {                                    // 0x14/0x18  (autoTexScale)
+        struct { int width; int height; };
+        int size[2];                           //   (the binary's name — assert strings)
+    };
     int          color_or_surfacetype_filter;  // 0x1C  (MaterialDef_09 ANDs this)
     int          in_use;                       // 0x20  (contents; MaterialDef_08 ANDs this)
     qtexture_s  *prev;                         // 0x24  (texWndGlob list link)
@@ -120,7 +126,7 @@ static_assert(sizeof(patchMesh_material) == 8, "patchMesh_material");
 //    the full per-surface record used by the surface inspector) ────────────────
 struct texdef_t
 {
-    MaterialDef def;                  // 0x00
+    MaterialDef mtlDef;               // 0x00  (binary name — assert strings)
     int         unk3;                 // 0x24
     float       sample_size;          // 0x28
     int         xx001;                // 0x2C
@@ -138,7 +144,10 @@ static_assert(sizeof(texdef_t) == 72, "texdef_t");
 struct face_t
 {
     vec3_t      planepts[3];   // 0x00  three points defining the plane
-    MaterialDef mtldef[4];     // 0x24  base / lightmap / smoothing / unused layers
+    union {                    // 0x24  base / lightmap / smoothing / unused layers
+        MaterialDef mtldef[4];                       // (port's historical name)
+        struct { MaterialDef mtlDef; } surfDef[4];   // (the binary's names — assert strings)
+    };
     int         contents;      // 0xB4
     int         toolflags;     // 0xB8
     int         unk02;         // 0xBC
@@ -146,7 +155,10 @@ struct face_t
     int         unk03;         // 0xD8
     int         unk04;         // 0xDC
     winding_t  *w;             // 0xE0  computed winding
-    int         field_0xE4;    // 0xE4  (IDB "minus1____totalsize_0xE8")
+    union {                    // 0xE4  packed per-face RGBA (IDB "minus1____totalsize_0xE8")
+        int packedColor;
+        int field_0xE4;        //       (historical name; init -1)
+    };
 };
 static_assert(sizeof(face_t) == 232, "face_t");
 static_assert(offsetof(face_t, mtldef) == 36,  "face_t.mtldef");
@@ -222,15 +234,96 @@ struct selface_t
 };
 static_assert(sizeof(selface_t) == 12, "selface_t");
 
+// ── g_SelectedFaces — the face-selection array ───────────────────────────────
+// IDB: MFC CArray<selface_t, selface_t&> at 0x73C70C (m_pData@0x73C710,
+// m_nSize@0x73C714, m_nMaxSize@0x73C718).  The binary's assert strings reference
+// it by name ("g_SelectedFaces.GetAt( i ).brush", "g_SelectedFaces.GetSize()"),
+// so this is the original global's identity; the port used to model it as three
+// raw globals (selFace / g_ptrSelectedFaces_GetSize / g_selFaceSize).  The
+// `i < 0 || i >= size → unknown_libname_291()` checks the binary inlines at every
+// access site are MFC's ENSURE inside GetAt/SetSize — they live here now instead
+// of being copy-pasted at each call site.
+void unknown_libname_291();     // MFC ENSURE abort (engine_stubs.cpp)
+struct SelectedFaceArray
+{
+    selface_t *m_pData    = nullptr;   // 0x73C710
+    int        m_nSize    = 0;         // 0x73C714  live count
+    int        m_nMaxSize = 0;         // 0x73C718  allocated capacity
+    int GetSize() const { return m_nSize; }
+    int GetCount() const { return m_nSize; }   // MFC alias (drag.cpp:270 string)
+    selface_t &GetAt( int i )
+    {
+        if ( i < 0 || i >= m_nSize ) unknown_libname_291();
+        return m_pData[i];
+    }
+    void SetSize( int n );               // select.cpp (sub_494610)
+    int  Add( const selface_t &f );      // select.cpp (sub_4947A0 append)
+    void RemoveAt( int i, int count );   // select.cpp (sub_480670)
+};
+extern SelectedFaceArray g_SelectedFaces;
+
+// IDB surfDlgGlob (0x23F1624) — the surface-inspector global block; .hwnd is the
+// inspector HWND when open, 0 when closed (the binary's assert strings name it).
+// The port's old `int g_surfwin` was this member.
+struct SurfDlgGlob_t { int hwnd; };
+extern SurfDlgGlob_t surfDlgGlob;
+
+// IDB lyrMtlGlob (0x1814CF8) — the layered-material library block (assert strings
+// name its members).  Entry stride 84 bytes, 512 entries (== layeredmaterials.cpp's
+// LYR_ENTRY_SIZE/LYR_MAX_ENTRIES, static_asserted at the definition).
+struct LyrMtlGlob_t
+{
+    int     crcToken;              // 0x1814CF8  clean-library CRC (was dword_1814CF8)
+    int     entryCount;            // 0x1814CFC
+    uint8_t Layers[512 * 84];      // 0x1814D00  inline array
+};
+extern LyrMtlGlob_t lyrMtlGlob;    // layeredmaterials.cpp
+
+// ── LayeredMaterialWnd global state (IDB lyrMtlWndGlob @ 0x181F500) ───────────
+// Field names from the binary's assert strings (LayeredMaterialWnd.cpp).
+struct LyrMtlWndGlob_t
+{
+    HWND hwnd;               // 0x00  frame window
+    HWND toolbar;            // 0x04  COMCTL32 toolbar child
+    HWND layerList;          // 0x08  custom layer-list child
+    int  liveAddActive;      // 0x0C  "clicking adds a layer" flag (only low byte used)
+    int  activeLyrMtl;       // 0x10  pointer-as-int into lyrMtlGlob.Layers (IDB type)
+    int  selectedLayerIndex; // 0x14
+};
+extern LyrMtlWndGlob_t lyrMtlWndGlob;   // layeredmaterialwnd.cpp
+
+// ── editor draw-filter flags + skinned-surface sentinels ─────────────────────
+// Names from the binary's assert strings (r_ed_scene.cpp Editor_SurfFilter /
+// SkinModelInst, MaterialDef.cpp MaterialDef_15).  The multiply-pair assert is
+// symmetric in the two flags, and the filter comment maps 4=effect, 8=opaque.
+#define DRAWFLAG_ONLY_MULTIPLY 4
+#define DRAWFLAG_SKIP_MULTIPLY 8
+#define RIGID_SKINNED_CACHE_OFFSET (-2)
+#define MAX_POINTS_ON_WINDING 1024
+enum { PM_FRONT_FACE = 0, PM_BACK_FACE = 1 };   // patch index-buffer slots (assert strings)
+
+// ── LinkList_t — Map_ParseLinkList's parse buffer (qe3.cpp:567 names links.size) ──
+struct LinkList_t
+{
+    int  id[1024];     // 0x0000  parsed link ids; id[size] = -1 terminator
+    int  size;         // 0x1000  live count
+    bool overflowed;   // 0x1004  set when the 30-entry parse cap is hit
+};
+void Map_ParseLinkList( LinkList_t *buf, const char *linkTo );   // qe3.cpp 0x48BE20        // the winding cap the brush.cpp assert strings cite
+#define HIDDEN_SURFACE_OFFSET      (-3)
+#define ECLASS_PREFAB 0x10                // eclass_t.nShowFlags prefab-class bit (assert strings)
+
 // ── edTrace_t — editor ray-pick result (IDB trace_t, 88 bytes) ───────────────
-// Filled by Test_Ray. brush@0, face@4, dist@68, selected@72, normal@76. (Named
-// edTrace_t, not trace_t, because q_shared.h's engine trace_t — 44 bytes, totally
-// different — is already in scope via stdafx.h.)
+// Filled by Test_Ray. hit@0 {brush, face, index}, dist@68, selected@72,
+// normal@76. The binary's assert strings ("t.hit.face", "t.hit.brush->version ==
+// t.hit.brush->def->version") show the original nested the hit record as a
+// selface_t member named `hit` — layout-identical to the flat brush/face/xx1 the
+// port used before. (Named edTrace_t, not trace_t, because q_shared.h's engine
+// trace_t — 44 bytes, totally different — is already in scope via stdafx.h.)
 struct edTrace_t
 {
-    selbrush_t     *brush;     // 0x00  hit brush instance
-    faceVis_s      *face;      // 0x04  hit face (the def face_t*, cast)
-    int   xx1, xx2, xx3, xx4;  // 0x08..0x14  (xx4 begins a 0x30 orientation copy)
+    selface_t hit;             // 0x00  hit record {brush@0, face@4, index@8}
+    int   xx2, xx3, xx4;       // 0x0C..0x14  (xx4 begins a 0x30 orientation copy)
     int   xx5, xx6, xx7, xx8;  // 0x18..0x24
     int   xx9, xx10, xx11;     // 0x28..0x30
     short xx12, xx12_2;        // 0x34
@@ -316,8 +409,13 @@ struct patch_t
     unsigned char    pad_07;       // 0x07
     int              vertCount;    // 0x08  a1[2]  tessellated vert count (width*height)
     int              indexCount;   // 0x0C  a1[3]  triangle index count = (h-1)*(6w-6)
-    uint16_t        *indicesFront; // 0x10  a1[4]  PM_FRONT_FACE index buffer
-    uint16_t        *indicesBack;  // 0x14  a1[5]  PM_BACK_FACE  index buffer (reverse of front)
+    union {                        // 0x10/0x14 — the source indexed these as indices[2]
+        struct {
+            uint16_t *indicesFront; // 0x10  a1[4]  PM_FRONT_FACE index buffer
+            uint16_t *indicesBack;  // 0x14  a1[5]  PM_BACK_FACE  index buffer (reverse)
+        };
+        uint16_t *indices[2];
+    };
     int              visCount;     // 0x18  a1[6]  per-layer material count (MaterialDef_11)
     patchVisuals_s  *visArray;     // 0x1C  a1[7]  visCount * {material, vertHandle}
     unsigned char    pad_20[36];   // 0x20  (to the 68-byte IDB instance size)
@@ -389,7 +487,10 @@ struct brush_t
     int          faceCount;    // 0x40
     face_t      *faces;  // 0x44
     char        *parent_layer_string; // 0x48
-    __int16      unk01;        // 0x4C
+    union {                    // 0x4C
+        __int16      unk01;
+        unsigned char modelFailed; // 0x4C low byte (assert strings; == Brush_ModelFailedByte)
+    };
     __int16      version;      // 0x4E
     patchMesh_t *patch;        // 0x50
     int          numberId;     // 0x54  (IDB "total_size_0x58"; GtkRadiant id region — unverified)
@@ -414,7 +515,8 @@ struct entity_s
 {
     entity_s      *prev;                // 0x00
     entity_s      *next;                // 0x04
-    void          *def;// 0x08  entity_s_def*
+    entity_s      *def;                 // 0x08  entity_s_def* (== entity_s; typed so the
+                                        //       assert chains ent->def->modelClass… compile)
     entity_brush_s brushes;             // 0x0C  embedded brush-list head (0x38)
     int            modelInst;           // 0x44
     void          *prefab;              // 0x48  prefab_s*
@@ -427,12 +529,13 @@ struct entity_s
     bool           terrainBrush;        // 0x5B
     void          *pPatch;              // 0x5C
     eclass_t      *eclass;              // 0x60
-    void          *modelClass;          // 0x64  entitymodel_t*
+    entitymodel_t *modelClass;          // 0x64
     vec3_t         origin;              // 0x68
     epair_t       *epairs;              // 0x74
     int            version_prob_wrong;  // 0x78
-    int            epairEdits;          // 0x7C
-    char           pad_0x0080[8];       // 0x80
+    int            epairEdits;          // 0x7C  undo-id stamp (undo.cpp)
+    int            redoId;              // 0x80  redo-id stamp (undo.cpp phases 2/3)
+    int            numberId;            // 0x84  unique entity number (dword_739DC4++)
     int            refCount;            // 0x88
 };
 static_assert(sizeof(entity_s) == 140, "entity_s");
@@ -443,6 +546,7 @@ static_assert(offsetof(entity_s, eclass) == 96,  "entity_s.eclass");
 static_assert(offsetof(entity_s, modelClass) == 0x64, "entity_s.modelClass"); // IDB def->modelClass @+0x64
 static_assert(offsetof(entity_s, origin) == 104, "entity_s.origin");
 static_assert(offsetof(entity_s, epairs) == 116, "entity_s.epairs");
+static_assert(offsetof(entity_s, redoId) == 0x80 && offsetof(entity_s, numberId) == 0x84, "entity_s id stamps");
 
 // ── undo_s — full definition (shared by undo.cpp, select.cpp) ─────────────────
 // IDA-verified layout (sizeof = 256 = operator new(0x100)).
@@ -494,14 +598,22 @@ struct eclass_t
     char      flagname7[32];        // 0x120
     char      flagname8[32];        // 0x140
     int       xx1;                  // 0x160
-    const char *default_model_name; // 0x164
-    const char *xx3;                // 0x168
-    const char *xx4;                // 0x16C
-    const char *xx5;                // 0x170
-    const char *xx6;                // 0x174
+    union {                         // 0x164  five model names; w_cyclePreviewMode indexes them
+        struct {
+            const char *default_model_name; // 0x164
+            const char *xx3;        // 0x168
+            const char *xx4;        // 0x16C
+            const char *xx5;        // 0x170
+            const char *xx6;        // 0x174
+        };
+        const char *cycleModelName[5];
+    };
     int       modelpath;            // 0x178
     int       xx8;                  // 0x17C
-    int       classtype;            // 0x180
+    union {                         // 0x180
+        int classtype;              //   (port's historical name)
+        int nShowFlags;             //   (the binary's name — assert strings)
+    };
     int       xx10;                 // 0x184
     int       xx11;                 // 0x188
     int       xx12;                 // 0x18C
@@ -520,7 +632,7 @@ struct models_t
     int x0;          // 0x000  next node in g_models / g_eclass linked list
     int handle;      // 0x004  char* model name (heap string)
     int x2;          // 0x008
-    int entities_next__substruct; // 0x00C  from eclass field[3]
+    struct { int next; } entities; // 0x00C  from eclass field[3] (source name: entities.next)
     int x4;          // 0x010  from eclass field[4]
     int x5;          // 0x014  from eclass field[5]
     int x6;          // 0x018  from eclass field[6]
@@ -635,7 +747,10 @@ struct patchMesh_t
     texdef_t          *mat_unk;     // 0x34
     drawVert_t         ctrl[16][16];// 0x38  (0x5000 bytes)
     curvePatchDef_t   *curveDef;    // 0x5038  tessellated render mesh (Patch_GenericMesh2)
-    entity_brush_s    *pSymbiot;    // 0x503C
+    union {                         // 0x503C
+        entity_brush_s *pSymbiot;   //       (port's historical name/type)
+        brush_t        *symbiot;    //       (the binary's name — assert strings; refCount@+0x1C)
+    };
     __int16            version;     // 0x5040
     bool               xx22b;       // 0x5042
     bool               bDirty;      // 0x5043
@@ -733,9 +848,13 @@ struct curTexWndLayer_t
 {
     MaterialDef mtl;                  // 0x000  current MaterialDef template
     float       sampleSize;           // 0x024  default texture sample size/scale
-    char        pad_028[2100 - 0x28]; // 0x028  opaque template state
+    int         hasProjection;        // 0x028  patch ST-projection block valid
+    int         gridWidth;            // 0x02C  stored patch grid dims
+    int         gridHeight;           // 0x030
+    float       st[16][16][2];        // 0x034  stored ST pairs (row stride 128)
 };
 static_assert(sizeof(curTexWndLayer_t) == 2100, "curTexWndLayer_t");
+static_assert(offsetof(curTexWndLayer_t, st) == 0x34, "curTexWndLayer_t.st");
 
 // ── terrainVert_t (IDB terrainVert_t, 8 bytes) — qeglobals.d_terrapoints[i] points
 //    here.  Recovered from MoveSelection (0x47f0c0) + Brush_SideSelect (0x4777d0):
@@ -890,6 +1009,40 @@ struct entitymodel_t
     models_t *model;          // 0x160  the loaded model sub-node (model->handle@+4 = XModel*)
     int       rest[1];        // placeholder — do not index
 };
+
+// ── prefab-edit stack (IDB byte_25EB240 @ 0x25EB240) ──────────────────────────
+// One saved parent-map state per nested prefab level (Prefab_NextLevel writes,
+// Prefab_PrevLevel restores). 16 levels: the binary's storage runs to exactly
+// g_qeglobals (0x25EB240 + 16*2168 == 0x25F39C0) and the full-check is == 16.
+struct prefabLevel_t
+{
+    int         modified;             // +0x000
+    char        mapName[1024];        // +0x004  saved currentmap
+    selbrush_t *activeNext;           // +0x404  active_brushes.next  (dword 257)
+    selbrush_t *activePrev;           // +0x408  active_brushes.prev
+    selbrush_t *selectedNext;         // +0x40C  selected_brushes.next (0 = none saved)
+    selbrush_t *selectedPrev;         // +0x410  selected_brushes.prev
+    entity_s   *entitiesNext;         // +0x414  entities.next
+    entity_s   *entitiesPrev;         // +0x418  entities.prev
+    entity_s   *entityInstsPrev;      // +0x41C  entityInsts.prev
+    entity_s   *entityInstsNext;      // +0x420  entityInsts.next
+    selbrush_t *prefabBrush;          // +0x424  the brush being prefab-edited
+    char        activeLayer[1024];    // +0x428  saved g_activeLayer_string
+    char        layerSnapshot[12];    // +0x828  binary's layer RB-tree copy head (the
+                                      //         port snapshots via Layers_SavePrefabLayers)
+    float       camOrigin[3];         // +0x834  (dword 525)
+    float       camAngles[3];         // +0x840  (528)
+    float       xyOrigin[2];          // +0x84C  (531)
+    float       xyScale;              // +0x854  (533)
+    int         xyViewType;           // +0x858  (534)
+    int         regionActive;         // +0x85C  (535)
+    float       regionMins[3];        // +0x860  (536)
+    float       regionMaxs[3];        // +0x86C  (539)
+};
+static_assert(sizeof(prefabLevel_t) == 2168, "prefabLevel_t must match the binary's 2168-byte slot");
+static_assert(offsetof(prefabLevel_t, activeNext) == 257 * 4 && offsetof(prefabLevel_t, camOrigin) == 525 * 4,
+              "prefabLevel_t dword indices");
+extern prefabLevel_t g_prefabStack[16];  // engine_stubs.cpp (IDB byte_25EB240)
 
 // ── known globals (plan Appendix B). extern here; defined in their home .cpp in
 //    Phase 4 (g_qeglobals in qe3.cpp; the brush lists in map.cpp/select.cpp). ──

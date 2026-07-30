@@ -90,12 +90,13 @@ void Select_ByEntityNumber( int brushIdx, int entIdx )
     }
 
     // Find the INSTANCE whose def == bdef (walk the entity's instance brush list).
-    selbrush_t *inst = ent->brushes.ownerNext;
+    // selectedBrushInst/selectedEntityInst = the binary's locals.
+    entity_s   *selectedEntityInst = ent;
+    selbrush_t *selectedBrushInst  = ent->brushes.ownerNext;
+    selbrush_t *&inst = selectedBrushInst;
     for ( ; ; inst = inst->ownerNext )
     {
-        if ( inst == &ent->brushes )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\win_dlg.cpp",
-                    113, 0, "%s", "selectedBrushInst != &(selectedEntityInst->brushes)" );
+        iassert( selectedBrushInst != &(selectedEntityInst->brushes) );   // win_dlg.cpp:113
         if ( inst->def == bdef )
             break;
     }

@@ -273,9 +273,7 @@ static Material *Register_WorldMaterial( const char *name, RadiantMaterialInfo *
 static qtexture_s *Editor_AddRadiantMaterial( const RadiantMaterialInfo *mtlInfo,
                                               const char *name, Material *mtl )
 {
-    if ( !mtlInfo->autoTexScaleWidth || !mtlInfo->autoTexScaleHeight )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\TexWnd.cpp",
-                209, 0, "%s", "mtlInfo->autoTexScaleWidth != 0 && mtlInfo->autoTexScaleHeight != 0" );
+    iassert( mtlInfo->autoTexScaleWidth != 0 && mtlInfo->autoTexScaleHeight != 0 );   // TexWnd.cpp:209
 
     qtexture_s *newRadMat = new qtexture_s();   // value-init → all zero (operator new in IDB)
     iassert(newRadMat);
@@ -614,8 +612,6 @@ extern int   g_nUpdateBits;                                       // 0x25D5A74
 extern CFindTextureDlg *g_dlgFind;                                // findtexture.cpp (0x73C700) — the find/replace dialog singleton
 extern char  byte_73C380;                                        // findtexture.cpp (0x73C380) — 1=fill Find, 0=fill Replace on pick
 extern LRESULT LayeredMaterialWnd_RadMtl( qtexture_s *radMtl );   // layeredmaterialwnd.cpp (0x4185C0) — add radMtl as a live layer
-extern selface_t *selFace;                                        // select.cpp 0x73C710
-extern char  g_ptrSelectedFaces_GetSize[4];                       // *(int*) = selected-face count
 extern void  sub_477D70( selbrush_t *b, const float *mat );       // brush.cpp Brush_CheckBuildFaceVis
 extern float world_orient_matrix[4][3];                           // 0x6DE290
 
@@ -1040,20 +1036,20 @@ void CTexWnd::ApplyMaterialAtIndex( int idx )
             // asserts. Rebuild each selected brush's faceVis (sub_477D70, no realloc when
             // faceCount is unchanged → selFace.face stays valid), then drop the whole face
             // selection if any entry is still inconsistent. (monkey hardening.)
-            int n = *(int *)g_ptrSelectedFaces_GetSize;
-            bool selOk = ( n >= 0 ) && ( n == 0 || selFace != nullptr );
+            int n = g_SelectedFaces.GetSize();
+            bool selOk = ( n >= 0 ) && ( n == 0 || g_SelectedFaces.m_pData != nullptr );
             for ( int i = 0; selOk && i < n; ++i )
             {
-                selbrush_t *b = selFace[i].brush;
+                selbrush_t *b = g_SelectedFaces.GetAt( i ).brush;
                 if ( !b || !b->def ) { selOk = false; break; }
                 sub_477D70( b, (const float *)world_orient_matrix );
-                int fi = selFace[i].index;
+                int fi = g_SelectedFaces.GetAt( i ).index;
                 if ( (unsigned)fi >= (unsigned)b->faceCount ||
                      b->version != b->def->version ||
-                     selFace[i].face != &( (faceVis_s *)b->faces )[fi] )
+                     g_SelectedFaces.GetAt( i ).face != &( (faceVis_s *)b->faces )[fi] )
                     selOk = false;
             }
-            if ( !selOk ) { *(int *)g_ptrSelectedFaces_GetSize = 0; n = 0; }
+            if ( !selOk ) { g_SelectedFaces.m_nSize = 0; n = 0; }
 
             // IDA sub_45C0D0: a thumbnail click builds a fresh 36-byte MaterialDef from
             // the clicked qtexture, with texdef size = qtexture auto-scale * current
@@ -1226,7 +1222,7 @@ BOOL CTexWnd::OnMouseWheel( UINT nFlags, short zDelta, CPoint pt )
 //  Menu IDs 33232/33233/36100 are the binary's ID_Material/ID_Lightmap/ID_Smoothing.
 // ══════════════════════════════════════════════════════════════════════════════
 extern CMainFrame *g_pParentWnd;                        // engine_stubs.cpp (0x25D5A70)
-extern int   g_surfwin;                                 // surfacedlg.cpp (0x23F1624)
+// surfDlgGlob (surface inspector; .hwnd) comes from qe3.h
 extern void  Surf_RefreshFields();                      // surfacedlg.cpp (Select_SetTexture_2 field refresh)
 extern void  SurfaceInspector_SetTexMods();             // surfacedlg.cpp (0x458270 — multi-layer snapshot)
 extern void  CopySelectedFaceValues();                  // brush.cpp 0x47d130
@@ -1249,7 +1245,7 @@ void Material_SetMode( int iMode )
         ::CheckMenuItem( menu, 36100 /*Smoothing*/, iMode != 2 ? MF_UNCHECKED : MF_CHECKED );
     }
 
-    if ( g_surfwin )
+    if ( surfDlgGlob.hwnd )
     {
         SurfaceInspector_SetTexMods();                    // 0x458270 — re-snapshot the NEW layer
         Surf_RefreshFields();                             // Select_SetTexture_2 — refresh the fields
@@ -1313,7 +1309,7 @@ void Texture_SetMode( int iTexMenu )
 //   the P6 remap system lands).  Called by CMainFrame::OnDestroy + QE_LoadProject (neither
 //   is wired in kisak yet, so this is a ready-when-needed leaf — faithful 1:1 with the IDB).
 extern void editorVB_freeBuffers();                 // r_ed_vertbuf.cpp (0x51CC00)
-extern void *texWndGlob_materialNameRemap;          // engine_stubs.cpp (0x25E7A00)
+extern struct TexWndGlob_t { void *materialNameRemap; } texWndGlob;   // engine_stubs.cpp
 struct MaterialNameRemap { char *key; char *value; MaterialNameRemap *next; };
 // The usage/locale filter-name arrays (IDB filter_usage_array 0x739F80 / filter_locale_array
 // 0x73A780, filter_material_t {char*name; int index} x 256) are populated by the ported
@@ -1345,13 +1341,13 @@ void CTexWnd_Shutdown()
 
     editorVB_freeBuffers();
 
-    for ( MaterialNameRemap *k = (MaterialNameRemap *)texWndGlob_materialNameRemap; k; )
+    for ( MaterialNameRemap *k = (MaterialNameRemap *)texWndGlob.materialNameRemap; k; )
     {
         MaterialNameRemap *next = k->next;
         free( k->key );
         free( k->value );
         free( k );
-        texWndGlob_materialNameRemap = next;
+        texWndGlob.materialNameRemap = next;
         k = next;
     }
 }
@@ -1546,7 +1542,7 @@ void TexWnd_SurfaceTypeFilter( unsigned int index )            // 0x45B570
 
 // ══════════════════════════════════════════════════════════════════════════════
 //  LAYERED-MATERIAL SUB-VIEW (R_DrawTexWnd's g_texwnd_simple_layered_selection==1 branch).
-//  Draws the loaded layered-material library (lyrMtlGlob_Layers[], from layeredmaterials.cpp)
+//  Draws the loaded layered-material library (lyrMtlGlob.Layers[], from layeredmaterials.cpp)
 //  as a vertical list of outlined thumbnails: per entry a name label, then each layer's
 //  texture fit into a 64×64 cell, framed by a 2D outline rect.  Ported from the IDB:
 //    R_DrawOutlineRect            0x45cb10
@@ -1555,9 +1551,6 @@ void TexWnd_SurfaceTypeFilter( unsigned int index )            // 0x45B570
 //  The 2D line command R_AddCmd_Line2D (0x4fd180) is the new gfx_d3d/r_rendercmds.cpp leaf.
 // ══════════════════════════════════════════════════════════════════════════════
 extern char  Byte4PackPixelColor( float *from, GfxColor *out );  // engine_stubs.cpp (IDB 0x402ac0)
-extern uint8_t lyrMtlGlob_Layers[];                              // layeredmaterials.cpp (0x1814D00)
-extern int   lyrMtlGlob_entryCount;                              // layeredmaterials.cpp (0x1814CFC)
-extern int   lyrMtlWndGlob_active_layer_material;                // layeredmaterialwnd.cpp (0x181F510)
 
 // The texture-window MODE flag (IDB g_texwnd_simple_layered_selection 0x25E79FC).  0 = the
 // normal thumbnail grid (DrawMaterials), 1 = this layered-material sub-view.  Read by the
@@ -1679,7 +1672,7 @@ static void TexWnd_DrawLayeredMaterialEntry( LyrMtlDrawEntry *entry, int *py )
 
     // outline colour: active entry = colors[10] (highlight), else colors[8].
     const float *frameCol =
-        ( (int)(intptr_t)entry == lyrMtlWndGlob_active_layer_material )
+        ( (int)(intptr_t)entry == lyrMtlWndGlob.activeLyrMtl )
             ? g_qeglobals.d_savedinfo.colors[10]
             : g_qeglobals.d_savedinfo.colors[8];
     if ( entry->layerCount )
@@ -1697,10 +1690,10 @@ static int TexWnd_DrawLayeredMaterials()
     int layer = g_qeglobals.current_edit_layer;
     int y     = 8 - texWndGlob_textureOffset.nPos[layer].nPos_layered_current;
 
-    if ( lyrMtlGlob_entryCount > 0 )
+    if ( lyrMtlGlob.entryCount > 0 )
     {
-        LyrMtlDrawEntry *e = (LyrMtlDrawEntry *)lyrMtlGlob_Layers;
-        for ( int i = 0; i < lyrMtlGlob_entryCount; ++i, ++e )
+        LyrMtlDrawEntry *e = (LyrMtlDrawEntry *)lyrMtlGlob.Layers;
+        for ( int i = 0; i < lyrMtlGlob.entryCount; ++i, ++e )
             TexWnd_DrawLayeredMaterialEntry( e, &y );
         layer = g_qeglobals.current_edit_layer;           // (IDB re-reads after the loop)
     }
@@ -1759,15 +1752,12 @@ char Texture_SetTexture( const int *a1, MaterialDef *a2 )
     // 2) Realize its handles (radMtl->cb once / lyrMtl->cb per layer).
     MaterialDef_02( &cur->mtl, TexWnd_02 );                // 0x45be8e
 
-    // base for the patch-projection block writes (cur + 0x28 onward, byte-addressed).
-    char *curBytes = (char *)cur;
-
     // 3) Optional patch-vertex texcoord projection (a1 != 0).
     if ( a1 )
     {
-        *(int *)( curBytes + 40 ) = 1;                     // 0x45bea9  has-projection flag
-        *(int *)( curBytes + 44 ) = a1[0];                // 0x45bebe  grid width
-        *(int *)( curBytes + 48 ) = a1[1];                // 0x45bed4  grid height
+        cur->hasProjection = 1;                            // 0x45bea9
+        cur->gridWidth     = a1[0];                        // 0x45bebe
+        cur->gridHeight    = a1[1];                        // 0x45bed4
         int v3 = 0, v18 = 0;
         if ( a1[0] > 0 )                                  // 0x45beda
         {
@@ -1781,7 +1771,7 @@ char Texture_SetTexture( const int *a1, MaterialDef *a2 )
                     int v8 = v3 << 7;                     // 0x45beef  row dest byte offset (v3*128)
                     do                                    // inner: columns (v7 < a1[1])
                     {
-                        float *dst = (float *)( curBytes + 52 + v8 );          // 0x45bf02  cur+0x34+v8
+                        float *dst = (float *)( (char *)cur->st + v8 );        // 0x45bf02  cur+0x34+v8
                         const float *src = (const float *)&a1[2 * v6 + 17 + 2 * layer]; // 0x45bf09
                         ++v7;
                         v8 += 8;
@@ -1801,22 +1791,14 @@ char Texture_SetTexture( const int *a1, MaterialDef *a2 )
     }
     else
     {
-        *(int *)( curBytes + 40 ) = 0;                    // 0x45bf4e  no projection
+        cur->hasProjection = 0;                            // 0x45bf4e
     }
 
     g_nUpdateBits |= W_TEXTURE;                            // 0x45bf55  W_TEXTURE redraw (bit 0x10)
 
-    // 4) Assert a valid MtlDef (exactly one of lyrMtl/radMtl set) — verbose, cross-file.
-    if ( ( ( *(unsigned *)a2 != 0 ) + ( *( (unsigned *)a2 + 1 ) != 0 ) ) != 1 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-
-    // material name = shaderName (lyrMtl) if set, else radMtl->name.
-    const char *name;
-    if ( a2->lyrMtl )
-        name = *(const char **)a2;                        // 0x45bf9b  (lyrMtl as char* — IDB reads a2[0])
-    else
-        name = *(const char **)( *( (int *)a2 + 1 ) + 4 );// 0x45bfa8  radMtl->name (a2->radMtl + 4)
+    // 4) the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+    extern LayerMaterialDef *Materialdef_GetName( MaterialDef *m );   // materialdef.cpp 0x431640
+    const char *name = (const char *)Materialdef_GetName( a2 );
 
     // 5) Find-dialog: push `name` into the field that last had focus (0x45bfba-0x45bfe5).
     //    IDB: byte_73C380 ? sub_415CE0(name) : sub_415D40(name) — fill Find vs Replace.
@@ -1900,4 +1882,100 @@ void Texture_ResetPosition()
         }
         tex->CheckScroll( 0 );
     }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — this function's embedded Assert() calls name THIS file as
+//  their source (see the brush.cpp relocation protocol / line-uniqueness test).
+// ═════════════════════════════════════════════════════════════════════════════
+#include <universal/q_parse.h>  // Com_BeginParseSession/EndParseSession/SetCSV/ParseExt/
+                                // SkipRestOfLine + parseInfo_t (Get_MaterialNames)
+extern int   LoadFile( const char *filename, void **bufferptr );   // 0x40ABD0
+extern void  Com_PrintMessage( const char *fmt, ... );             // 0x40A960
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x45aaa0  Get_MaterialNames - load "MaterialNames.csv" into
+// texWndGlob.materialNameRemap, a list of {shaderName, materialName(lowercased), next}
+// triples.  Lines are "<shader>,<material>"; '#' and blank lines are skipped.  Consumed by
+// Material_BaseNameRemap (engine_stubs.cpp) on the legacy version-0 .map parse path and
+// freed by CTexWnd_Shutdown; malloc'd so those free() calls pair.
+// KISAK: its caller Load_Textures (0x45d140) is not ported - CMainFrame::OnCreate calls
+// this and Load_Materials directly.
+// ─────────────────────────────────────────────────────────────────────────────
+struct MaterialNameRemap_qe3 { char *key; char *value; MaterialNameRemap_qe3 *next; };
+// (TexWndGlob_t/texWndGlob declared earlier in this file — engine_stubs.cpp)
+
+void Get_MaterialNames( void )
+{
+    // 0x45aab0: texWndGlob.materialNameRemap must be empty when called.
+    iassert( texWndGlob.materialNameRemap == NULL );   // TexWnd.cpp:360
+
+    void *data = nullptr;
+    if ( LoadFile( "MaterialNames.csv", &data ) < 0 )   // 0x45aae0: absent → nothing to do
+        return;
+
+    Com_BeginParseSession( "MaterialNames.csv" );
+    Com_SetCSV( 1 );                                    // 0x45ab05: parseInfo[..].csv = 1
+
+    const char *text = (const char *)data;
+    while ( 1 )
+    {
+        // 0x45ab5d: first CSV field on the line = shader name (allowLineBreaks=1).
+        parseInfo_t *pi = Com_ParseExt( &text, 1 );
+        if ( !text )                                    // 0x45ab6c: buffer exhausted
+            break;
+
+        const char *shader = pi->token;
+        if ( shader[0] == '#' || shader[0] == 0 )       // 0x45ab74/7e: comment or blank line
+        {
+            // 0x45ac9e: skip to (and past) the next newline, counting it for line tracking.
+            const char *p = text;
+            int c = (signed char)*p;
+            if ( c )
+            {
+                while ( 1 )
+                {
+                    ++p;
+                    if ( c == '\n' )
+                    {
+                        ParseThreadInfo *pt = Com_GetParseThreadInfo();
+                        ++pt->parseInfo[pt->parseInfoNum].lines;   // ++g_parse.parseInfo[..].lines
+                        break;
+                    }
+                    c = (signed char)*p;
+                    if ( !c ) break;
+                }
+            }
+            text = p;
+            continue;
+        }
+
+        // 0x45ab84: dup the shader name.
+        size_t slen = strlen( shader ) + 1;
+        char  *shaderDup = (char *)malloc( slen );
+        memcpy( shaderDup, shader, slen );
+
+        // 0x45ac07: second CSV field on the SAME line = material name (allowLineBreaks=0).
+        parseInfo_t *pi2 = Com_ParseExt( &text, 0 );
+        const char  *matName = pi2->token;
+        if ( matName[0] == 0 )                          // 0x45ac0e: no matching material name
+            Com_PrintMessage( "shader name '%s' doesn't have a matching material name in MaterialNames.csv", shaderDup );
+
+        // 0x45ac37: dup (inlined AllocMaterialString, whose qe3.cpp:56 head-check the port
+        // had mis-transcribed onto the empty-name branch above) + lowercase.
+        char *matDup = AllocMaterialString( matName );
+        _strlwr( matDup );
+
+        // 0x45ac72: push {shaderDup, matDup, head} onto the remap list.
+        MaterialNameRemap_qe3 *node = (MaterialNameRemap_qe3 *)malloc( sizeof( MaterialNameRemap_qe3 ) );
+        node->key   = shaderDup;
+        node->value = matDup;
+        node->next  = (MaterialNameRemap_qe3 *)texWndGlob.materialNameRemap;
+        texWndGlob.materialNameRemap = node;
+
+        Com_SkipRestOfLine( &text );                    // 0x45ac91
+    }
+
+    Com_EndParseSession();                              // 0x45acea: underflow guard + pop frame
+    free( data );                                      // 0x45ad09
 }

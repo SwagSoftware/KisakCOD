@@ -41,6 +41,7 @@ int ScriptGroup_Unreachable( const char *a1 )
         if ( strstr( a1, codes[i] ) )
             return i;
     }
+    // KEEP_VERBOSE: prose condition string ("Unreachable").
     Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
             39, 0, "Unreachable" );
     return -1;
@@ -258,66 +259,9 @@ int ScriptGroup_RemoveKeyFromSelectedTriggers( const char *key, const char *valu
 // plain DeleteKey of that key — ScriptGroup_RemoveAssignedNumber below (NOT
 // ScriptGroup_RemoveColors, which is the colour-list subsystem).
 
-// 0x479FF0  ScriptGroup_AssignNextNumber — assign the next free group NUMBER (under
-// g_PrefsDlg->ScriptGroupKey) to every selected entity.  Faithful to the disasm:
-//   * guard: only run when ScriptGroupKey != ScriptColorTeamKey (the colour-team key
-//     uses the colour-token path instead; a vehicle/group key is always != the team key)
-//   * pass 1: walk active_brushes, max = -1; for each non-world entity carrying the key,
-//     atol(value) and keep the max (skip empty values)
-//   * pass 2: itoa(max+1) and SetKeyValue it onto every selected non-world entity
-// (The asserts carry the binary's literal brush.cpp file/line — AssignNextNumber was
-//  inlined from a brush.cpp context; type 0 → log+continue, type 1 → would-be-fatal but
-//  ValueForKey2 returns the "" global, never null, so the *v guard handles it.)
-void ScriptGroup_AssignNextNumber()
-{
-    const char *groupKey = (const char *)g_PrefsDlg->ScriptGroupKey;
-    if ( !strcmp( groupKey, (const char *)g_PrefsDlg->ScriptColorTeamKey ) )
-        return;   // ScriptGroupKey == ScriptColorTeamKey → the colour-token path owns it.
-
-    // PASS 1 — find the highest existing number under groupKey across active brushes.
-    int maxNum = -1;
-    for ( selbrush_t *b = active_brushes.next; b != &active_brushes; b = b->next )
-    {
-        entity_s *owner = b->owner;
-        if ( !owner || owner == world_entity )
-            continue;
-        entity_s_def *def = (entity_s_def *)owner->def;
-        // Binary 0x47a080 derefs b->def->owner UNCONDITIONALLY (no `b->def &&` guard) — matches
-        // the sibling iterators; the prior port's `b->def &&` was an invented guard, dropped.
-        if ( def != (entity_s_def *)b->def->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    4293, 0, "%s", "b->owner->def == b->def->owner" );
-
-        if ( !HasKeyValuePair( def, groupKey ) )
-            continue;
-        const char *val = ValueForKey2( (int)(intptr_t)def, groupKey );
-        if ( !val )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    4298, 1, "%s", "group" );
-        if ( val && *val )
-        {
-            int n = atol( val );
-            if ( maxNum < n )
-                maxNum = n;
-        }
-    }
-
-    // PASS 2 — assign maxNum+1 to every selected non-world entity.
-    char next[16];
-    _itoa( maxNum + 1, next, 10 );
-    for ( selbrush_t *b = selected_brushes.next; b != &selected_brushes; b = b->next )
-    {
-        entity_s *owner = b->owner;
-        if ( !owner || owner == world_entity )
-            continue;
-        entity_s_def *def = (entity_s_def *)owner->def;
-        // Binary 0x47a149 derefs b->def->owner UNCONDITIONALLY; `b->def &&` was invented, dropped.
-        if ( def != (entity_s_def *)b->def->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    4313, 0, "%s", "b->owner->def == b->def->owner" );
-        SetKeyValue( def, groupKey, next );
-    }
-}
+// ScriptGroup_AssignNextNumber (0x479FF0) now lives in brush.cpp — its asserts are
+// brush.cpp:4293/4298, i.e. that is its source file.
+extern void ScriptGroup_AssignNextNumber();   // brush.cpp 0x479FF0
 
 // 0x45FBA0  VehicleDlg_SetScriptGroupKey — the Vehicle dialog's script-group button
 // entry: store the chosen key NAME into g_PrefsDlg->ScriptGroupKey, then assign the next
@@ -345,6 +289,8 @@ void ScriptGroup_RemoveAssignedNumber( const char *key )
         if ( !owner || owner == world_entity )
             continue;
         entity_s_def *def = (entity_s_def *)owner->def;
+        // KEEP_VERBOSE: inlined brush.cpp:4313 owner-vs-def invariant (the carrier
+        // iassert lives in brush.cpp; this copy's guard shape can't stringize to it).
         if ( b->def && def != (entity_s_def *)b->def->owner )
             Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
                     4313, 0, "%s", "b->owner->def == b->def->owner" );
@@ -420,9 +366,7 @@ void ScriptGroup_Type()
             iassert( token[0] );
             if ( strstr( token, scriptColorKey ) )
             {
-                if ( triggerNumber != -1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                            98, 0, "%s\n\t(token) = %s", "(triggerNumber == -1)", token );
+                vassert( (triggerNumber == -1), "(token) = %s", token );   // ScriptGroup.cpp:98
                 triggerNumber = atol( &token[strlen( scriptColorKey )] );
             }
         }
@@ -701,6 +645,7 @@ static int ScriptGroup_Color()
     {
         if ( ++result >= MAX_COLORGROUPS )
         {
+            // KEEP_VERBOSE: prose condition string ("unreachable").
             Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
                     249, 0, "unreachable" );
             return 0;
@@ -949,13 +894,9 @@ void ScriptGroup_TriggerNumber()
             iassert( token[0] );
             if ( strstr( token, scriptColorKey ) )
             {
-                if ( triggerNumber != -1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                            842, 0, "%s", "triggerNumber == -1" );
+                iassert( triggerNumber == -1 );   // scriptgroup.cpp:842
                 triggerNumber = atol( &token[strlen( scriptColorKey )] );
-                if ( hasColor )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                            846, 0, "%s", "!hasColor" );
+                iassert( !hasColor );   // scriptgroup.cpp:846
                 hasColor = true;
             }
         }
@@ -1016,15 +957,11 @@ static void ScriptGroup_Trigger( int colorNumber )
             iassert( token[0] );
             if ( strstr( token, scriptColorKey ) )
             {
-                if ( triggerNumber != -1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                            725, 0, "%s", "triggerNumber == -1" );
+                iassert( triggerNumber == -1 );   // scriptgroup.cpp:725
                 triggerNumber = atol( &token[strlen( scriptColorKey )] );
             }
         }
-        if ( triggerNumber == -1 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                    729, 0, "%s", "triggerNumber != -1" );
+        iassert( triggerNumber != -1 );   // scriptgroup.cpp:729
         if ( triggerNumber != colorNumber )
         {
             iassert( triggerNumber < MAX_COLORGROUPS );
@@ -1064,15 +1001,11 @@ static void ScriptGroup_Trigger( int colorNumber )
                 triggerNumber = atol( &token[strlen( scriptColorKey )] );
                 if ( triggerNumber == colorNumber )
                     break;                       // target found on an active trigger — stop scanning
-                if ( hasColor )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                            774, 0, "%s\n\t(token) = %s", "(!hasColor)", token );
+                vassert( (!hasColor), "(token) = %s", token );   // ScriptGroup.cpp:774
                 hasColor = true;
             }
         }
-        if ( triggerNumber == -1 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                    778, 0, "%s", "triggerNumber != -1" );
+        iassert( triggerNumber != -1 );   // scriptgroup.cpp:778
         if ( triggerNumber != colorNumber )
         {
             iassert( triggerNumber < MAX_COLORGROUPS );
@@ -1127,9 +1060,7 @@ static void ScriptGroup_ApplyColorToSelected( int colorNumber )
                 iassert( token[0] );
                 if ( strstr( token, scriptColorKey ) )
                 {
-                    if ( hasColor )
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                                1076, 0, "%s", "!hasColor" );
+                    iassert( !hasColor );   // scriptgroup.cpp:1076
                     hasColor = true;
                 }
                 else
@@ -1297,9 +1228,7 @@ void ScriptGroup_AddColorToSelection()
         {
             ScriptGroup_Trigger( triggerNumber );
         }
-        if ( triggerNumber >= MAX_COLORGROUPS )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                    1284, 0, "%s", "triggerNumber < MAX_COLORGROUPS" );
+        iassert( triggerNumber < MAX_COLORGROUPS );   // scriptgroup.cpp:1284
         Sys_Printf( "Adding %s%i to entities:\n",
                     (const char *)g_PrefsDlg->ScriptColorKey, triggerNumber );
         ScriptGroup_ApplyColorToSelected( triggerNumber );
@@ -1652,9 +1581,8 @@ static void ScriptGroupDlg_TurretKey( const char *turretKey )   // 0x455d80
         if ( atol( (const char *)exportStr ) > 0 )
         {
             strcpy( String[exports], (const char *)exportStr );
-            if ( ++exports >= MAX_COLORENTREES )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\ScriptGroup.cpp",
-                        1818, 0, "%s", "exports < MAX_COLORENTREES" );
+            ++exports;
+            iassert( exports < MAX_COLORENTREES );   // ScriptGroup.cpp:1818
         }
     }
 
@@ -1820,163 +1748,5 @@ bool PrefsDlg_ScriptTeamColorEnabled()
     return strcmp( (const char *)g_PrefsDlg->ScriptGroupKey, "token" ) != 0
         && strcmp( (const char *)g_PrefsDlg->ScriptGroupKey,
                    (const char *)g_PrefsDlg->ScriptColorTeamKey ) == 0;
-}
-
-// flt_73B098 (0x73B098) — the 7 script-colour token colours (r/b/y/c/g/p/o),
-// indexed by ScriptGroup_Unreachable.  Same table as brush.cpp/camwnd.cpp.
-static const float kScriptColorVizTable[7][4] = {
-    { 1.0f, 0.0f, 0.0f, 1.0f },   // r — red
-    { 0.0f, 0.0f, 1.0f, 1.0f },   // b — blue
-    { 1.0f, 1.0f, 0.0f, 1.0f },   // y — yellow
-    { 0.0f, 1.0f, 1.0f, 1.0f },   // c — cyan
-    { 0.0f, 1.0f, 0.0f, 1.0f },   // g — green
-    { 1.0f, 0.0f, 1.0f, 1.0f },   // p — purple
-    { 1.0f, 0.4f, 0.0f, 1.0f },   // o — orange
-};
-
-// 0x46AA80  CamTokens_BrushMatchesToken (ecx=brush, arg0=token) — true if the brush
-// entity's ScriptColorTeamKey value strstr-contains `token`.  Disasm-faithful: walks
-// b->owner->def->epairs (selbrush+8 → entity+8 → epairs@0x74) for the team key
-// (g_PrefsDlg+0x32C), defaulting to `zero`="" when absent.
-static bool CamTokens_BrushMatchesToken( selbrush_t *b, const char *token )
-{
-    const char *teamKey = (const char *)g_PrefsDlg->ScriptColorTeamKey;
-    entity_s_def *def = (entity_s_def *)b->owner->def;        // [ecx+8]→[+8]
-    const char *value = zero;                                 // IDB `zero` = ""
-    for ( epair_t *ep = def->epairs; ep; ep = ep->next )      // [+0x74]
-    {
-        if ( !_stricmp( ep->key, teamKey ) ) { value = ep->value; break; }
-    }
-    return strstr( value, token ) != nullptr;
-}
-
-// 0x46AAE0  CamTokens_EntityGate (eax=brush) — true if the brush entity HAS the
-// ScriptColorTeamKey AND its classname contains actor / node / info_volume.
-// Disasm-faithful: v1 = b->owner->def; HasKeyValuePair(v1, teamKey) gate, then the
-// classname epair-walk (default `zero`).
-static bool CamTokens_EntityGate( selbrush_t *b )
-{
-    entity_s_def *def = (entity_s_def *)b->owner->def;        // *(int**)(*(int*)(a1+8)+8)
-    if ( !HasKeyValuePair( def, (const char *)g_PrefsDlg->ScriptColorTeamKey ) )
-        return false;
-    const char *value = zero;
-    for ( epair_t *ep = def->epairs; ep; ep = ep->next )
-    {
-        if ( !_stricmp( ep->key, "classname" ) ) { value = ep->value; break; }
-    }
-    return strstr( value, "actor" ) || strstr( value, "node" )
-        || strstr( value, "info_volume" ) != nullptr;
-}
-
-// 0x46B110  ScriptGroup_DrawTeamColorViz (sub_46B110) — the script-group single-char
-// team-colour visualization.  a1 = the team-colour token string (a selected trigger's
-// ScriptColorTeamKey value); a2/a3 = the view-rect mins/maxs on the two view axes
-// (XY_Draw's &v47 / &tdp); a4/a5 = the two world axis indices for the view plane (v58/v60).
-//
-// Copy a1 into a 1024 buffer; tokenize by " "; for each token
-// store "<tok> " into a fixed 16-byte-stride array (v42) and its colour into a parallel
-// 4-float-stride array (v34, token n → v34[4n+4] = kScriptColorVizTable[Unreachable(tok)]).
-// Then if there is more than one token, find the first (among the first tokens-1) whose
-// text contains ScriptColorKey and SWAP it (string + colour) with the LAST token — the 3
-// overlapping strcpy/qmemcpy loops in the binary are exactly a token[M] ⟷ token[tokens-1]
-// exchange via a 16-byte scratch (v43).  Finally, for every active then selected entity in
-// view that passes !FilterBrush + CamTokens_EntityGate, draw a colour billboard
-// (Ed_DrawScriptColorQuad) for each token the entity matches (CamTokens_BrushMatchesToken).
-//
-// MAX_COLORENTREES == 32 (the binary's `tokens < MAX_COLORENTREES` cap at XYWnd.cpp:3129).
-void ScriptGroup_DrawTeamColorViz( const char *a1, const float *viewMins,
-                                   const float *viewMaxs, int axis0, int axis1 )
-{
-    char buf[1024];                          // v41 — strtok working copy of a1
-    strcpy( buf, a1 );
-    if ( !buf[0] )
-        return;
-
-    // token strings (16-byte stride, each "<tok> ") + parallel colours (token n at [4n+4]).
-    char  tokStr[MAX_COLORENTREES][16];      // v42 (516 bytes; entry n = &v42[16*n])
-    float tokCol[(MAX_COLORENTREES + 1) * 4];// v34 (132 floats; token n colour at [4n+4])
-    int   tokens = 0;                        // i
-
-    for ( char *t = strtok( buf, " " ); t; t = strtok( nullptr, " " ) )
-    {
-        iassert( t[0] );                     // XYWnd.cpp:3122 "token[0]"
-        strcpy( tokStr[tokens], t );
-        strcat( tokStr[tokens], " " );       // trailing space (binary appends asc_6D56FC)
-        int ci = ScriptGroup_Unreachable( t );
-        // binary indexes flt_73B098[4*ci] unconditionally; ci is -1 only on a no-match
-        // (which would assert + read flt_73B098[-4]) — guard the never-valid case, matching
-        // the established camwnd/brush.cpp convention.
-        const float *c = ( ci >= 0 && ci <= 6 ) ? kScriptColorVizTable[ci]
-                                                : kScriptColorVizTable[0];
-        const int colSlot = 4 * tokens + 4;  // v34[4n+4]
-        tokCol[colSlot + 0] = c[0];
-        tokCol[colSlot + 1] = c[1];
-        tokCol[colSlot + 2] = c[2];
-        tokCol[colSlot + 3] = c[3];
-        ++tokens;
-        if ( tokens >= MAX_COLORENTREES )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                    3129, 0, "%s", "tokens < MAX_COLORENTREES" );
-    }
-
-    // SWAP the first ScriptColorKey-matching token (among the first tokens-1) with the
-    // LAST token (binary's 3 overlapping-copy loops, 0x46B268..0x46B382).
-    const char *colorKey = (const char *)g_PrefsDlg->ScriptColorKey;  // *(char**)(+0x330)
-    const int last = tokens - 1;
-    for ( int m = 0; m < last; ++m )
-    {
-        if ( strstr( tokStr[m], colorKey ) )
-        {
-            // save LAST token colour, copy MATCHED→LAST, restore saved→MATCHED (string too).
-            float saveCol[4];
-            saveCol[0] = tokCol[4 * last + 4 + 0];
-            saveCol[1] = tokCol[4 * last + 4 + 1];
-            saveCol[2] = tokCol[4 * last + 4 + 2];
-            saveCol[3] = tokCol[4 * last + 4 + 3];
-            char saveStr[16];
-            strcpy( saveStr, tokStr[last] );
-
-            tokCol[4 * last + 4 + 0] = tokCol[4 * m + 4 + 0];
-            tokCol[4 * last + 4 + 1] = tokCol[4 * m + 4 + 1];
-            tokCol[4 * last + 4 + 2] = tokCol[4 * m + 4 + 2];
-            tokCol[4 * last + 4 + 3] = tokCol[4 * m + 4 + 3];
-            strcpy( tokStr[last], tokStr[m] );
-
-            tokCol[4 * m + 4 + 0] = saveCol[0];
-            tokCol[4 * m + 4 + 1] = saveCol[1];
-            tokCol[4 * m + 4 + 2] = saveCol[2];
-            tokCol[4 * m + 4 + 3] = saveCol[3];
-            strcpy( tokStr[m], saveStr );
-            break;
-        }
-    }
-
-    if ( tokens <= 0 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                3150, 0, "%s", "tokens > 0" );
-
-    // Draw a colour billboard per matching token on every in-view active then selected
-    // gated entity.  Cull: viewMaxs[0]>=def->mins[axis0] && viewMaxs[1]>=def->mins[axis1]
-    //                    && viewMins[0]<=def->maxs[axis0] && viewMins[1]<=def->maxs[axis1].
-    for ( int pass = 0; pass < 2; ++pass )
-    {
-        selbrush_t *head = pass ? &selected_brushes : &active_brushes;
-        for ( selbrush_t *b = head->next; b != head; b = b->next )
-        {
-            brush_t *def = b->def;
-            if ( !( viewMaxs[0] >= def->mins[axis0] && viewMaxs[1] >= def->mins[axis1]
-                 && viewMins[0] <= def->maxs[axis0] && viewMins[1] <= def->maxs[axis1] ) )
-                continue;
-            if ( FilterBrush( b, 0 ) )
-                continue;
-            if ( !CamTokens_EntityGate( b ) )
-                continue;
-            for ( int n = 0; n < tokens; ++n )
-            {
-                if ( CamTokens_BrushMatchesToken( b, tokStr[n] ) )
-                    Ed_DrawScriptColorQuad( (int)(intptr_t)b->owner->def, &tokCol[4 * n + 4] );
-            }
-        }
-    }
 }
 

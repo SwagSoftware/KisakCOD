@@ -180,7 +180,10 @@ struct texdef_sub_t
     float size[2];      // 0x00
     float shift[2];     // 0x08
     float rotate;       // 0x10
-    int   unk3;         // 0x14
+    union {             // 0x14  Face_MoveTexture's crossterm (skew) term
+        float crossterm;
+        int   unk3;     //       (historical name; .map writes it after rotate)
+    };
     float sample_size;  // 0x18
 };
 static_assert(sizeof(texdef_sub_t) == 28, "texdef_sub_t");

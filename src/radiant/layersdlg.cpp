@@ -33,12 +33,8 @@ void Layers_AssignSelectionToLayer( const char *layerName )
 {
     for ( selbrush_t *i = selected_brushes.next; i != &selected_brushes; i = i->next )
     {
-        if ( !i )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    2365, 0, "%s", "b" );
-        if ( !i->def )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    2354, 0, "%s", "b" );
+        // (the binary inlines Brush_SetInstanceLayerString here; the helper carries the
+        // brush.cpp:2365/2354 checks itself)
         Brush_SetInstanceLayerString( i, layerName );   // free old + dup new + xx7=0
     }
     g_nUpdateBits = -1;

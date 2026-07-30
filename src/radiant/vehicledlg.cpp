@@ -55,10 +55,10 @@ static bool Veh_SelectedDef( selbrush_t *i, entity_s_def **outDef )
     if ( !def )
         return false;
 
-    // The binary's `b->owner->def == b->def->owner` invariant (type 0 → log+continue).
-    if ( i->def && def != (entity_s_def *)i->def->owner )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\VehicleDlg.cpp",
-                133, 0, "%s", "b->owner->def == b->def->owner" );
+    // The binary's invariant (type 0 → log+continue).  b = the binary's local.
+    selbrush_t *b = i;
+    if ( b->def )
+        iassert( b->owner->def == b->def->owner );   // VehicleDlg.cpp:133
 
     *outDef = def;
     return true;

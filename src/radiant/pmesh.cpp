@@ -105,6 +105,8 @@ extern int     *contents_table;
 extern int     *toolflags_table;
 extern void     MapLoad_ParseBrush_Content( int keyword, int (**writer)(int, const char *, ...),
                                             int value, void *table );
+extern void     MapLoad_ParseBrush_Layer( int (**writer)(int, const char *, ...),
+                                          int layerStr );   // engine_stubs 0x42fb40
 
 // qtexture_s is the canonical 40-byte IDB layout in qe3.h (was a wrong local
 // char[64]@0 copy; width@0x14 / height@0x18).
@@ -1114,13 +1116,8 @@ int Patch_Write( WriteWriter_t writer, patchMesh_t *p )
         WRITE( writer, " {\n  curve\n  {\n" );
 
     const char *layerName = ( (brush_t *)p->pSymbiot )->parent_layer_string;
-    if ( strcmp( layerName, "000_Global" ) )
-    {
-        if ( !layerName )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\mapparsing.cpp",
-                    190, 0, "%s", "layerName" );
-        WRITE( writer, "layer \"%s\"\n", layerName );
-    }
+    if ( strcmp( layerName, "000_Global" ) )   // MapLoad_ParseBrush_Layer inlined in the binary
+        MapLoad_ParseBrush_Layer( (int (**)(int, const char *, ...))writer, (int)(intptr_t)layerName );
 
     MapLoad_ParseBrush_Content( (int)"contents",  (int (**)(int, const char *, ...))writer,
                                 p->contents, contents_table );
@@ -2364,19 +2361,18 @@ char PMESH_34( MaterialDef *a1, patchMesh_t *a2, char a3, float a4 )
     const int layer = g_qeglobals.current_edit_layer;
 
     // 1) Stamp the material's two ptrs into the patch's per-layer texture slots.
-    //    (IDB casts a1 to curvePatchDef_t and reads width/height = the first two DWORDs,
-    //    which are the MaterialDef's lyrMtl/radMtl.)
-    *(int *)( (char *)&a2->texture + 8 * layer + 0 ) = *(int *)( (char *)a1 + 0 ); // 0x442902 lyrMtl
-    *(int *)( (char *)&a2->texture + 8 * layer + 4 ) = *(int *)( (char *)a1 + 4 ); // 0x44290e radMtl
+    patchMesh_material *texSlot = &a2->texture + layer;
+    texSlot->lyrMtl = a1->lyrMtl;                                                   // 0x442902
+    texSlot->radMtl = a1->radMtl;                                                   // 0x44290e
     ++a2->version;                                                                  // 0x442912
 
-    // base for the stored ST-projection block in the current-texture template.
-    char *curBytes = (char *)&g_qeglobals.random_texture_stuff[layer];
+    // the stored ST-projection block in the current-texture template.
+    curTexWndLayer_t *cur = &g_qeglobals.random_texture_stuff[layer];
 
-    if ( a4 != 0.0f && *(int *)( curBytes + 40 ) )                                  // 0x44291a/0x44292f has-projection?
+    if ( a4 != 0.0f && cur->hasProjection )                                         // 0x44291a/0x44292f
     {
-        if ( a2->width  == *(int *)( curBytes + 44 )                                // 0x44293e stored grid w
-          && a2->height == *(int *)( curBytes + 48 ) )                              // 0x44294d stored grid h
+        if ( a2->width  == cur->gridWidth                                           // 0x44293e
+          && a2->height == cur->gridHeight )                                        // 0x44294d
         {
             int v7 = 0, v17 = 0;
             if ( a2->width > 0 )                                                    // 0x442960
@@ -2390,8 +2386,9 @@ char PMESH_34( MaterialDef *a1, patchMesh_t *a2, char a3, float a4 )
                         int v10 = v7 << 7;                                          // 0x44297c row byte offset in block
                         do                                                          // inner: rows (v18 < height)
                         {
-                            float s = *(float *)( curBytes + 52 + v10 );           // 0x44298a cur+0x34+v10
-                            float t = *(float *)( curBytes + 56 + v10 );           // 0x442994 cur+0x38+v10
+                            const float *stp = (const float *)( (char *)cur->st + v10 );  // 0x44298a cur+0x34+v10
+                            float s = stp[0];
+                            float t = stp[1];
                             if ( ( *(unsigned int *)&s & 0x7F800000 ) == 0x7F800000 )
                                 Assert( PMESH_CPP, 4624, 0, "%s", "!IS_NAN(s)" );
                             if ( ( *(unsigned int *)&t & 0x7F800000 ) == 0x7F800000 )
@@ -4848,6 +4845,9 @@ int PMESH_20_Radius_2( int count, patchMesh_t *patch, const float *cursor,
             Byte4PackPixelColor( rgba, &packed );
 
             GfxPointVertex *out = &outVerts[count];
+            // KEEP_VERBOSE: inlined OrientationPosToWorldPos (q_shared.cpp:1599; the port
+            // carrier is draw.cpp) — the binary constant-folded its identity orientation,
+            // so there is no orient to route a call through.
             if ( (const float *)cp->xyz == (const float *)out )   // pos != out self-overlap guard
                 Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\q_shared.cpp",
                         1599, 0, "%s", "pos != out" );
@@ -4985,7 +4985,7 @@ static void sub_45E770( entity_brush_s *pBrushInst )
         Sys_Printf( "Undo_AddBrush: WARNING adding brushes after entity.\n" );
 
     entity_s *owner = pBrushInst->owner;
-    if ( *(int *)( (char *)owner->eclass + 8 ) )       // fixed-size entity -> also track the entity
+    if ( *(int *)&owner->eclass->fixedsize )           // fixed-size entity -> also track the entity
         Undo_AddEntity( (int)(intptr_t)owner );
     Undo_AddBrush( pBrushInst );
 }
@@ -5655,7 +5655,7 @@ int Patch_Paint_Start()
 //  display-only (texCoords are recomputed on parse) — no .map round-trip impact.
 // ════════════════════════════════════════════════════════════════════════════
 
-extern int sub_4A45D0( float *dir );   // engine_stubs.cpp 0x4A45D0 — dominant-axis index
+extern int Vec3_MajorAxis( const float *dir );   // linearmapping.cpp 0x4A45D0 — dominant-axis index
 
 // ── Curve_LerpVert (sub_433750) — linear-interpolate one curveVert (a→b by t) ─
 static void Curve_LerpVert( curveVert_t *dst, const curveVert_t *a, const curveVert_t *b, float t )
@@ -5912,7 +5912,7 @@ static curvePatchDef_t *Patch_TerrainTexProject( patchMesh_t *p, int layer, floa
     }
 
     float planeNormal[3] = { 0, 0, 0 };
-    planeNormal[ sub_4A45D0( summed ) ] = 1.0f;     // axis with the largest |component|
+    planeNormal[ Vec3_MajorAxis( summed ) ] = 1.0f; // axis with the largest |component|
 
     qtexture_s *lm = MaterialDef_GetLayeredMaterial( (MaterialDef *)( &p->texture + layer ) );
     int width  = lm ? lm->width  : 512;
@@ -6408,8 +6408,8 @@ static char Patch_QuadIsConvex( const PatchQuad *q )
 
 void PMESH_29_Winding( int patchInst, const orientation_t *orient, float *desc, rface_t **outList )
 {
-    unsigned char *inst = (unsigned char *)(intptr_t)patchInst;
-    MaterialDef *md = (MaterialDef *)( *(int *)inst + 24 );   // def+24 = mtldef
+    patch_t *pm = (patch_t *)(intptr_t)patchInst;             // the binary's local `pm`
+    MaterialDef *md = (MaterialDef *)&pm->def->texture;       // def+24 = mtldef
 
     dword_181F51C = 0x2000;
     MaterialDef_02( md, MaterialDef_06 );
@@ -6421,21 +6421,14 @@ void PMESH_29_Winding( int patchInst, const orientation_t *orient, float *desc, 
     else
     {
         // not drawn → must be a stencil-shadow layered material to submit at all
-        qtexture_s *lm = MaterialDef_GetLayeredMaterial( md );
-        if ( !lm )
-            return;
-        if ( !*(int *)lm )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                    246, 0, "%s", "radMtl->handle" );
-        if ( !Material_CastsStencilShadow( *(Material **)lm ) )
+        // (the binary inlines MaterialDef_10_LayeredMatHandle here; it carries MaterialDef.cpp:246)
+        extern bool MaterialDef_10_LayeredMatHandle( MaterialDef *mtlDef );
+        if ( !MaterialDef_10_LayeredMatHandle( md ) )
             return;
         exterior = 1;
     }
 
-    int defPtr = *(int *)inst;
-    if ( *(unsigned short *)( inst + 4 ) != *(unsigned short *)( (char *)(intptr_t)defPtr + 0x5040 ) )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP",
-                4236, 0, "%s", "pm->version == pm->def->version" );
+    iassert( pm->version == pm->def->version );   // PMESH.CPP:4236
 
     ++g_windingAlloc;
     winding_t *w = (winding_t *)malloc( 0x34u );
@@ -6443,16 +6436,14 @@ void PMESH_29_Winding( int patchInst, const orientation_t *orient, float *desc, 
         Com_PrintMessage( "out of memory: winding_t\n" );
     w->numpoints = 0;
 
-    int indexCount = *(int *)( inst + 12 );
-    int idx = 0;
-    if ( indexCount >= 6 )
+    int indexIter = 0;
+    if ( pm->indexCount >= 6 )
     {
         for ( ; ; )
         {
-            const unsigned short *indices = (const unsigned short *)( *(int *)( inst + 16 ) );
-            int vbase = *(int *)( (char *)(intptr_t)( *(int *)inst ) + 0x5038 );
-            const char *verts = (const char *)( *(int *)( vbase + 0xC ) );    // GfxWorldVertex base
-            #define VPTR(n) (const float *)( verts + 44 * indices[idx + (n)] )
+            const unsigned short *indices = pm->indicesFront;
+            const char *verts = (const char *)pm->def->curveDef->verts;       // GfxWorldVertex base
+            #define VPTR(n) (const float *)( verts + 44 * indices[indexIter + (n)] )
             const float *p0 = VPTR(0), *p1 = VPTR(1), *p2 = VPTR(2);
             const float *p3 = VPTR(3), *p4 = VPTR(4), *p5 = VPTR(5);
             #undef VPTR
@@ -6479,25 +6470,21 @@ void PMESH_29_Winding( int patchInst, const orientation_t *orient, float *desc, 
                 OrientationPosToWorldPos( w->p[2], q.p5, orient );
                 sub_4DAA70( w, outList, desc, exterior );
             }
-            idx += 6;
-            if ( idx + 6 > *(int *)( inst + 12 ) )
+            indexIter += 6;
+            if ( indexIter + 6 > pm->indexCount )
                 break;
         }
     }
 
     // tail triangle (indexCount not a multiple of 6)
-    int total = *(int *)( inst + 12 );
-    if ( idx != total )
+    if ( indexIter != pm->indexCount )
     {
-        if ( idx + 3 != total )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP",
-                    4274, 0, "indexIter + 3 == pm->indexCount\n\t%i, %i", idx + 3, total );
-        const unsigned short *indices = (const unsigned short *)( *(int *)( inst + 16 ) );
-        int vbase = *(int *)( (char *)(intptr_t)( *(int *)inst ) + 0x5038 );
-        const char *verts = (const char *)( *(int *)( vbase + 0xC ) );
-        const float *t0 = (const float *)( verts + 44 * indices[idx] );
-        const float *t1 = (const float *)( verts + 44 * indices[idx + 1] );
-        const float *t2 = (const float *)( verts + 44 * indices[idx + 2] );
+        vassert( indexIter + 3 == pm->indexCount, "%i, %i", indexIter + 3, pm->indexCount );   // PMESH.CPP:4274
+        const unsigned short *indices = pm->indicesFront;
+        const char *verts = (const char *)pm->def->curveDef->verts;
+        const float *t0 = (const float *)( verts + 44 * indices[indexIter] );
+        const float *t1 = (const float *)( verts + 44 * indices[indexIter + 1] );
+        const float *t2 = (const float *)( verts + 44 * indices[indexIter + 2] );
         w->numpoints = 3;
         OrientationPosToWorldPos( w->p[0], t0, orient );
         OrientationPosToWorldPos( w->p[1], t1, orient );
@@ -6761,11 +6748,10 @@ static double Splay_Vec2Normalize( float *v )
 // brushes are patches) and 2..1025 move-points picked.  Rebuilds every selected patch.
 // Faithful to the binary; NOTE the scratch `v15[]` copy of pre-splay xyz is written but
 // never read back (dead in the decompile) — preserved as a plain local pass here.
-extern char g_ptrSelectedFaces_GetSize[4];   // select.cpp (IDB 0x73C714) — selected-face count alias
 
 void DoSplay()
 {
-    if ( *(int *)g_ptrSelectedFaces_GetSize > 0 )
+    if ( g_SelectedFaces.GetSize() > 0 )
     {
         Sys_Printf( "can only connect patch vertices if only patches are selected\n" );
         return;
@@ -8567,7 +8553,7 @@ void Patch_RedistributeVerts()
         float pos[3] = { cp->xyz[0], cp->xyz[1], cp->xyz[2] };
         edTrace_t tr;
         Trace_AllDirectionsIfFailed( pos, &tr, dir, 4608 );
-        if ( tr.brush )
+        if ( tr.hit.brush )
         {
             drawVert_t *dst = g_qeglobals.d_move_points[i];
             dst->xyz[0] = dir[0] * tr.dist + pos[0];
@@ -9046,7 +9032,6 @@ static inline float *PatchVerts02Elem( int i )
 }
 
 extern char g_nScaleHow;                                 // drag.cpp 0x23F16DC (axis-lock mask, low 3 bits)
-extern char g_ptrSelectedFaces_GetSize[4];               // select.cpp (selected-face count int alias)
 
 // ── Patch_ConnectVerts (0x449BC0) — tolerant weld of the selected move-points to ─
 //   the reference vert list (patch_verts_array02).  For each selected move point,
@@ -9169,7 +9154,7 @@ static void Patch_ConnectVerts_02()
 //   write-only undo snapshot (observed once — never read back), so it is omitted.
 static void Patch_ConnectVerts_03()
 {
-    if ( *(int *)g_ptrSelectedFaces_GetSize > 0 )
+    if ( g_SelectedFaces.GetSize() > 0 )
     {
         Sys_Printf( "can only connect patch vertices if only patches are selected\n" );
         return;
@@ -9300,7 +9285,7 @@ void ConnectVertices()
 
     // TolerantWeld pref set: all-patch + no-face selection → weld among the move points
     // (Patch_ConnectVerts_03); otherwise weld to the reference list (Patch_ConnectVerts).
-    if ( *(int *)g_ptrSelectedFaces_GetSize <= 0 )
+    if ( g_SelectedFaces.GetSize() <= 0 )
     {
         selbrush_t *b = selected_brushes_next;
         if ( b != &selected_brushes )
@@ -9351,8 +9336,7 @@ extern void         Editor_AddMeshCmd( Material *handle, int techType, int sortK
 extern const MaterialTechnique *__cdecl Material_GetTechnique( const Material *material,
                         MaterialTechniqueType techType );
 
-// PM_FRONT_FACE / PM_BACK_FACE index selectors (0 / 1).
-enum { PM_FRONT_FACE = 0, PM_BACK_FACE = 1 };
+// PM_FRONT_FACE / PM_BACK_FACE index selectors come from qe3.h.
 
 static float Patch_TangentDot( const float *a, const float *b )
 {
@@ -9686,17 +9670,15 @@ static void Patch_Fill_FreeVisuals( patch_t *inst )
 //  "unify" these two; the asymmetry is the binary's (see the U1 conflated-twin lesson).
 void PMESH_22_Indices( patch_t *pm )
 {
-    if ( !pm )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3520, 0, "%s", "pm" );
+    iassert( pm );   // pmesh.cpp:3520
     if ( pm->visArray )                                     // 0x43fa44
     {
         free( pm->visArray );                               // 0x43fb00 (no R_Ed_FreeVertices loop)
         bool contiguous = ( pm->indicesBack == pm->indicesFront + pm->indexCount );  // 0x43fb11
         pm->visArray  = nullptr;                            // 0x43fb14
         pm->visCount  = 0;                                  // 0x43fb17
-        if ( !contiguous )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3536, 0, "%s",
-                    "pm->indices[PM_BACK_FACE] == pm->indices[PM_FRONT_FACE] + pm->indexCount" );
+        if ( !contiguous ) {}                               // (evaluated pre-clear above)
+        iassert( pm->indices[PM_BACK_FACE] == pm->indices[PM_FRONT_FACE] + pm->indexCount );   // PMESH.CPP:3536
         free( pm->indicesFront );                           // 0x43fb3d (one alloc: back = front + count)
         pm->indicesFront = nullptr;                         // 0x43fb44
         pm->indicesBack  = nullptr;                         // 0x43fb47
@@ -9706,16 +9688,11 @@ void PMESH_22_Indices( patch_t *pm )
     }
     else
     {
-        if ( pm->visCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3524, 0, "%s", "!pm->visCount" );
-        if ( pm->indicesFront )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3525, 0, "%s", "!pm->indices[PM_FRONT_FACE]" );
-        if ( pm->indicesBack )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3526, 0, "%s", "!pm->indices[PM_BACK_FACE]" );
-        if ( pm->indexCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3527, 0, "%s", "!pm->indexCount" );
-        if ( pm->vertCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 3528, 0, "%s", "!pm->vertCount" );
+        iassert( !pm->visCount );   // pmesh.cpp:3524
+        iassert( !pm->indices[PM_FRONT_FACE] );   // PMESH.CPP:3525
+        iassert( !pm->indices[PM_BACK_FACE] );    // PMESH.CPP:3526
+        iassert( !pm->indexCount );   // pmesh.cpp:3527
+        iassert( !pm->vertCount );   // pmesh.cpp:3528
     }
 }
 
@@ -9724,10 +9701,8 @@ void PMESH_22_Indices( patch_t *pm )
 //  vertices), free the instance, refresh the Patch Inspector.
 void PMESH_33( patch_t *p )
 {
-    if ( !p )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 4549, 0, "%s", "p" );
-    else if ( !p->def )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 4550, 0, "%s", "p->def" );
+    iassert( p );   // pmesh.cpp:4549
+    iassert( p->def );   // pmesh.cpp:4550
     Patch_Fill_FreeVisuals( p );                            // 0x4427a7  PMESH_21_Indices
     free( p );                                              // 0x4427ad
     if ( g_PatchDialog_GetHwnd() )                          // 0x4427bc  CWnd_PatchDialog.m_hWnd
@@ -9741,14 +9716,10 @@ void PMESH_33( patch_t *p )
 void PMESH_32_Symbiot( int patchDef )
 {
     patchMesh_t *p = (patchMesh_t *)(intptr_t)patchDef;
-    brush_t *symbiot = (brush_t *)p->pSymbiot;              // 0x503C
-    if ( !symbiot )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 4534, 0, "%s", "p->symbiot" );
-    if ( symbiot && symbiot->patch != p )                   // brush_t.patch @0x50
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 4535, 0, "%s", "p->symbiot->patch == p" );
-    if ( symbiot && symbiot->refCount )                     // brush_t.refCount @0x1C
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 4536, 0,
-                "%s\n\t(p->symbiot->refCount) = %i", "(p->symbiot->refCount == 0)", symbiot->refCount );
+    brush_t *symbiot = p->symbiot;                          // 0x503C
+    iassert( p->symbiot );                // PMESH.CPP:4534
+    iassert( p->symbiot->patch == p );    // PMESH.CPP:4535 (brush_t.patch @0x50)
+    vassert( (p->symbiot->refCount == 0), "(p->symbiot->refCount) = %i", p->symbiot->refCount );   // PMESH.CPP:4536
     if ( symbiot )
         symbiot->patch = nullptr;                           // 0x442723 — kill the dangling back-ref
     if ( p->curveDef )                                      // 0x44272a
@@ -9887,4 +9858,53 @@ bool Patch_DrawFilled( patch_t *inst, const orientation_t *orient, int techType,
         return true;
     Patch_Fill_Emit( inst, nullptr, PM_FRONT_FACE, techType, drawFlags );
     return true;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — this function's embedded Assert() calls name THIS file as
+//  their source (see the brush.cpp relocation protocol / line-uniqueness test).
+// ═════════════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════════════
+//  Patch_FindReplaceTexture  (0x449520) — patch (pmesh) face material swap.
+//  b = the patch brush DEF; replaceName / findName; flags.  When (flags&2)==0 the
+//  patch's current-layer material name must equal findName.  On a match → SetMaterial
+//  (replaceName) into &patch->texture[layer] + ++version.  Returns 1 if it replaced.
+// ══════════════════════════════════════════════════════════════════════════════
+char Patch_FindReplaceTexture( brush_t *b, const char *replaceName,
+                               const char *findName, char flags )
+{
+    iassert( b );          // PMESH.CPP:7120
+    iassert( b->patch );   // PMESH.CPP:7121
+
+    patchMesh_t *patch = b->patch;
+    patchMesh_material *slot = &patch->texture + g_qeglobals.current_edit_layer;
+    if ( ( flags & 2 ) == 0 )
+    {
+        const char *name = (const char *)Materialdef_GetName( (MaterialDef *)slot );
+        if ( _stricmp( name, findName ) )
+            return 0;                       // current name != find → skip
+    }
+    SetMaterial( replaceName, slot );
+    ++patch->version;
+    return 1;
+}
+
+// 0x44cf00 Patch_AllocInstance — the patch analogue of Brush_AddToList, called from
+// Brush_AddToList when a brush owns a patch.  The instance version word is seeded to
+// def->version-1 (the rebuild trigger, mirroring selbrush.version): without it a fresh
+// instance whose version happened to equal def->version would skip its first curveDef
+// rebuild.  refCount lives at def->symbiot(+0x501C) + 0x1c.
+patch_t *PMESH_55(patchMesh_t *def)
+{
+    iassert( def );   // PMESH.CPP:9031
+    iassert( def->symbiot );   // PMESH.CPP:9032
+    vassert( (def->symbiot->refCount >= 0), "(def->symbiot->refCount) = %i", def->symbiot->refCount );   // PMESH.CPP:9033",
+
+    patch_t *p = (patch_t *)calloc( 1, sizeof( patch_t ) );   // = IDB new(0x20) + zero [1..7]
+    if ( p )
+    {
+        p->def     = def;
+        p->version  = (short)( def->version - 1 );
+    }
+    return p;
 }

@@ -12,9 +12,7 @@
 // (CSpinButtonCtrl / UDN_DELTAPOS / NMUPDOWN come from <afxcmn.h> in the PCH.)
 
 // ── selection state (select.cpp) ──────────────────────────────────────────────
-extern selface_t   *selFace;                          // 0x73C710
-extern char         g_ptrSelectedFaces_GetSize[4];    // 0x73C714 (int alias)
-#define SEL_FACE_COUNT() (*(int *)g_ptrSelectedFaces_GetSize)
+#define SEL_FACE_COUNT() (g_SelectedFaces.GetSize())
 
 // ── the quick texture ops (select.cpp, already ported — the SAME path the Surface
 //    Inspector spinners use; the texture bar must NOT re-port these) ────────────
@@ -57,23 +55,19 @@ static MaterialDef *TexBar_TargetMaterialDef()
     MaterialDef *md;
     if ( SEL_FACE_COUNT() > 0 )
     {
-        selbrush_t *b = selFace[0].brush;
+        selface_t  &selFace = g_SelectedFaces.GetAt( 0 );
+        selbrush_t *b = selFace.brush;
         if ( !b || !b->def )
             return nullptr;
-        // RESTORED (TextureBar.cpp:160/161, both type-0 = log+continue): the picked face must
-        // still be live (face record points into the instance face array) + the instance/def
-        // versions in sync.  The binary asserts these INLINE in BOTH GetSurfaceAttributes
-        // (160/161) and ApplyFields (188/189, identical conditions); resolving via this shared
-        // helper restores condition+level for both paths — the write path reports 160/161 instead
-        // of 188/189, the accepted file/line divergence.  Kept VERBOSE: the binary string uses
-        // '.' member syntax ("selFace.face …") that a stringized '->' expression can't byte-match,
-        // so not iassert.  (The texDef-null Assert 169 in GetSurfaceAttributes is a never-fire
-        // address-null check the port's safer upstream-null early-return subsumes.)
-        if ( selFace[0].face != &b->faces[selFace[0].index] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\TextureBar.cpp", 160, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( b->version != b->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\TextureBar.cpp", 161, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-        md = &b->def->faces[selFace[0].index].mtldef[g_qeglobals.current_edit_layer];
+        // TextureBar.cpp:160/161 (both type-0): the picked face must still be live + the
+        // instance/def versions in sync.  The binary asserts these INLINE in BOTH
+        // GetSurfaceAttributes (160/161) and ApplyFields (188/189, identical conditions);
+        // this shared helper reports 160/161 for both — accepted file/line divergence.
+        // (The texDef-null Assert 169 is a never-fire address-null check subsumed by the
+        // upstream-null early-return.)
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );    // TextureBar.cpp:160
+        iassert( selFace.brush->version == selFace.brush->def->version );   // TextureBar.cpp:161
+        md = &b->def->faces[selFace.index].mtldef[g_qeglobals.current_edit_layer];
     }
     else
     {

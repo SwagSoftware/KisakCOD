@@ -50,9 +50,7 @@ void __cdecl MapInfo_01(
     // Traverse the brush list (selbrush_t doubly-linked, iterated via ->next).
     for ( selbrush_t *b = brushList->next; b != brushList; b = b->next )
     {
-        if ( !b->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MapInfo.cpp",
-                    60, 1, "%s", "b->owner" );
+        iassert( b->owner );   // MapInfo.cpp:60
 
         iassert(b->owner->def == b->def->owner);
 
@@ -62,9 +60,11 @@ void __cdecl MapInfo_01(
         eclass_t     *ec       = ownerDef->eclass;
         if ( !ec->fixedsize )
         {
-            if ( !worldStats )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MapInfo.cpp",
-                        31, 0, "%s", "stats" );
+            {
+                // inlined counting-helper head check; its param was `stats`
+                int *stats = worldStats;
+                iassert( stats );   // MapInfo.cpp:31
+            }
 
             // The terrain bit is read through the INSTANCE indirection: instance[0] is the
             // patch DEF (Brush_AddToList asserts `b->patch->def == b->def->patch`) and

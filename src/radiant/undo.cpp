@@ -34,6 +34,8 @@ extern void        Entity_Free( char *e );
 extern void        Entity_Free_R( entity_s *e );
 extern void        Entity_LinkBrush( brush_t *b, entity_s *world_ent );
 extern void        Entity_UnlinkBrush( brush_t *def );
+extern void        IncRef( entity_s *e, entity_s *list );   // entity.cpp 0x483bf0
+extern void        DecRef( entity_s *e );                   // entity.cpp 0x483c30
 extern entity_s   *Prefab_Init( prefab_s *instList, entity_s_def *def, selbrush_t *activeList );
 
 // Entity_Clone (sub_485090 @ 0x485090) -- allocs a new entity_s_def, copies epairs.
@@ -175,10 +177,7 @@ void Undo_ClearRedo()
             iassert( brush );   // 128
             brush_t *pNext = (brush_t *)brush->onext;
             Undo_Refcount( brush );
-            if ( brush->refCount )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        131, 1, "%s\n\t(brush->refCount) = %i",
-                        "(brush->refCount == 0)", brush->refCount );
+            vassert( (brush->refCount == 0), "(brush->refCount) = %i", brush->refCount );   // Undo.cpp:131
             Brush_Free_R( brush );
             brush = pNext;
         }
@@ -189,9 +188,7 @@ void Undo_ClearRedo()
         {
             iassert( entity );   // 136
             entity_s *pNext = entity->next;
-            if ( entity->refCount != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        138, 1, "%s", "entity->refCount == 1" );
+            iassert( entity->refCount == 1 );   // Undo.cpp:138
             --entity->refCount;
             Entity_Free_R( entity );
             entity = pNext;
@@ -226,10 +223,7 @@ void Undo_Clear()
             brush_t *bNext = (brush_t *)brush->onext;
             g_undoMemorySize -= (int)Brush_MemorySize( brush );
             Undo_Refcount( brush );
-            if ( brush->refCount )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        166, 1, "%s\n\t(brush->refCount) = %i",
-                        "(brush->refCount == 0)", brush->refCount );
+            vassert( (brush->refCount == 0), "(brush->refCount) = %i", brush->refCount );   // Undo.cpp:166
             Brush_Free_R( brush );
             brush = bNext;
         }
@@ -241,9 +235,7 @@ void Undo_Clear()
             iassert( entity );   // 171
             entity_s *eNext = entity->next;
             g_undoMemorySize -= (int)EntityDef_MemorySize( entity );
-            if ( entity->refCount != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        174, 1, "%s", "entity->refCount == 1" );
+            iassert( entity->refCount == 1 );   // Undo.cpp:174
             --entity->refCount;
             Entity_Free_R( entity );
             entity = eNext;
@@ -318,14 +310,9 @@ void Undo_FreeFirstUndo()
     {
         iassert( brush );   // 235
         g_undoMemorySize -= (int)Brush_MemorySize( brush );
-        if ( brush->refCount != 1 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                    237, 1, "%s", "brush->refCount == 1" );
+        iassert( brush->refCount == 1 );   // Undo.cpp:237
         Undo_Refcount( brush );
-        if ( brush->refCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                    239, 1, "%s\n\t(brush->refCount) = %i",
-                    "(brush->refCount == 0)", brush->refCount );
+        vassert( (brush->refCount == 0), "(brush->refCount) = %i", brush->refCount );   // Undo.cpp:239
         Brush_Free_R( brush );
         // Re-read head (Undo_Refcount removes brush, Brush_Free_R frees it)
         brush = (brush_t *)undo->brushlist.onext;
@@ -338,9 +325,7 @@ void Undo_FreeFirstUndo()
         iassert( entity );   // 244
         entity_s *eNext  = entity->next;
         g_undoMemorySize -= (int)EntityDef_MemorySize( entity );
-        if ( entity->refCount != 1 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                    247, 1, "%s", "entity->refCount == 1" );
+        iassert( entity->refCount == 1 );   // Undo.cpp:247
         --entity->refCount;
         Entity_Free_R( entity );
         entity = eNext;
@@ -444,11 +429,10 @@ void Undo_GeneralStart( const char *operation )
 // ─────────────────────────────────────────────────────────────────────────────
 static bool Undo_BrushInUndo( brush_t *brush )
 {
-    if ( !g_lastundo )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                335, 0, "%s", "undo" );
-    iassert( brush );   // 336
-    return brush->ownerPrev == (entity_s *)(intptr_t)g_lastundo->id;
+    undo_s *undo = g_lastundo;              // the binary's local
+    iassert( undo );    // Undo.cpp:335
+    iassert( brush );   // Undo.cpp:336
+    return brush->ownerPrev == (entity_s *)(intptr_t)undo->id;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -510,25 +494,14 @@ void Undo_AddBrush( entity_brush_s *pBrushInst )
     // So this reads the parent_layer_string of the source brush (at offset 72 = 0x48).
     char *srcLayerStr = brush->parent_layer_string;  // offset 0x48 = 72
 
-    // IDA 0x45e6fd: this is the INLINED clone-helper assert — its embedded __FILE__/__LINE__
-    // are brush.cpp / 2354 (aCTreesCod3P_15 + push 932h), NOT Undo.cpp/385. KEEP_VERBOSE (cross-file).
-    if ( !clone )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                2354, 0, "%s", "b" );
+    // IDA 0x45e6fd: the binary inlines Brush_SetLayerString( clone, srcLayerStr ) here —
+    // its brush.cpp:2354 head-check lives in the helper.
+    extern void Brush_SetLayerString( brush_t *b, const char *str );   // brush.cpp 0x4758A0
+    Brush_SetLayerString( clone, srcLayerStr );
 
-    // IDA clone[1].ownerPrev = same stride = clone->parent_layer_string at +72.
-    // Free old clone layer string (if any) and replace with copy from source.
-    char **cloneLayerStr = &clone->parent_layer_string;  // offset 0x48
-    if ( *cloneLayerStr )
-        ::operator delete( *cloneLayerStr );
-    *cloneLayerStr = AllocMaterialString( srcLayerStr );
-
-    // IDA: v4->unk1 = (int)a1->owner[2].next.  §11 STRIDE BUG FIXED (P5.2): the IDB
-    // types a1->owner as selbrush_t* (the 64-byte node), so owner[2].next is the dword
-    // at owner + 2*64 + 4 = owner + 132 — a field INSIDE the 140-byte entity. The prior
-    // port assumed owner was entity_s (140) → owner + 284, which read ~144 bytes PAST
-    // the entity allocation and CRASHED the first time a drag exercised the undo chain.
-    clone->unk1 = *(int *)((char *)brush->owner + 132);   // = brush->owner[2].next, IDB selbrush_t stride (owner numberId@0x84)
+    // IDA: v4->unk1 = a1->owner[2].next — the IDB's 64-byte selbrush_t stride lands on
+    // owner+132 = the owning entity's numberId (NOT an entity_s-stride index).
+    clone->unk1 = brush->owner->numberId;
 
     // IDA: v4->ownerPrev = a1->ownerPrev; v4->owner = 0;  (the prior port dropped both;
     // clone->owner = 0 in particular keeps Undo_Undo's owner-walk from following a stale
@@ -613,28 +586,18 @@ void Undo_AddEntity( int a1 )
     entity_s *clone = EntityDef_Clone( entity );
     // KEEP_VERBOSE: binary passes level=1 (SANITY CHECK) here (push 1 @0x45e901); the
     // iassert/vassert macros hardcode level 0, so converting would drop the level-1 class.
-    if ( clone->refCount )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                506, 1, "%s\n\t(clone->refCount) = %i",
-                "(clone->refCount == 0)", clone->refCount );
+    vassert( (clone->refCount == 0), "(clone->refCount) = %i", clone->refCount );   // Undo.cpp:506
     ++clone->refCount;
 
     // Save old undo ID from source into clone
-    clone->epairEdits = entity->epairEdits;                            // offset 0x7C
-    *(int *)&clone->pad_0x0080[4] = *(int *)&entity->pad_0x0080[4];   // offset 0x84 (numberId)
+    clone->epairEdits = entity->epairEdits;
+    clone->numberId   = entity->numberId;
 
     // Stamp source entity with current undo ID
     entity->epairEdits = g_lastundo->id;
 
     // Link clone into the undo entitylist
-    entity_s *p_entitylist = &g_lastundo->entitylist;
-    if ( clone->next || clone->prev )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                690, 0, "%s", "!e->next && !e->prev" );
-    clone->next         = p_entitylist;
-    clone->prev         = p_entitylist->prev;
-    p_entitylist->prev->next = clone;
-    p_entitylist->prev  = clone;
+    IncRef( clone, &g_lastundo->entitylist );        // inlined in the binary
 
     g_undoMemorySize += (int)EntityDef_MemorySize( clone );
 }
@@ -730,21 +693,6 @@ void Undo_End()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Helper: Entity_LinkBrush inline (as used in Undo_Undo and Undo_Redo).
-// Links a brush DEF (brush_t) into an entity DEF chain and sets owner.
-// Equivalent to entity.cpp Entity_LinkBrush (0x484FC0) but inlined here.
-// ─────────────────────────────────────────────────────────────────────────────
-static void Undo_InlineEntityLinkBrush( brush_t *bDef, entity_s_def *ownerDef )
-{
-    // Matches Entity_LinkBrush (entity.cpp 0x484FC0) exactly.
-    // The entity's def-list HEAD is at &ownerDef->def (offset 0x08).
-    // bDef->onext = sentinel = (brush_t*)&ownerDef->def
-    // bDef->oprev = current head = (brush_t*)ownerDef->def
-    // old_head->next (offset 4) = bDef  (works for entity_s sentinel OR brush_t head)
-    Entity_LinkBrush( bDef, (entity_s *)ownerDef );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // 0x45ea90  Undo_Undo  (2125 bytes)
 // Undoes the last completed operation.
 // __thiscall (this@<ecx> unused -- plain cdecl wrapper).
@@ -812,16 +760,12 @@ void Undo_Undo()
         if ( def->def == (brush_t_def *)(intptr_t)redo->id )
             def->def = nullptr;
     }
-    // §11 OFFSET FIX: the binary clears the redoId stamp at entity+0x80 (pad_0x0080[0]),
-    // NOT epairEdits (0x7C). Disasm 0x45ebe4: `mov ecx,[eax+80h]; cmp ecx,[esi+8]` then
-    // `mov [eax+80h],ebx`. The redoId is later STAMPED into pad_0x0080[0] in Phase 3
-    // (0x45efae `mov [esi+80h],ecx`); this reset loop must clear the SAME field so stale
-    // redoId stamps from a prior redo don't collide. The prior port cleared epairEdits (0x7C),
-    // leaving 0x80 stamps live and never clearing the actual redoId field.
+    // The binary clears the redoId stamp at entity+0x80, NOT epairEdits (0x7C); the same
+    // field Phase 3 stamps (0x45efae `mov [esi+80h],ecx`) — stale stamps must not collide.
     for ( entity_s *v12 = entities.next; v12 != &entities; v12 = v12->next )
     {
-        if ( *(int *)&v12->pad_0x0080[0] == redo->id )
-            *(int *)&v12->pad_0x0080[0] = 0;
+        if ( v12->redoId == redo->id )
+            v12->redoId = 0;
     }
 
     // Deselect all
@@ -839,38 +783,23 @@ void Undo_Undo()
             if ( def->ownerPrev == (entity_s *)(intptr_t)undo->id )
             {
                 // Save entity instance ID for later redo restore
-                def->unk1 = *(int *)&def->owner->pad_0x0080[4];
+                def->unk1 = def->owner->numberId;
 
-                // Verify refCount >= 2 before unlink
-                if ( def->refCount < 2 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            702, 1, "%s\n\t(brushInst->def->refCount) = %i",
-                            "(brushInst->def->refCount >= 2)", def->refCount );
-
-                // Entity_UnlinkBrush inline
-                if ( !def->onext || !def->oprev )
-                    Com_Error( ERR_FATAL, "Entity_UnlinkBrush: Not currently linked" );
-                if ( def->refCount <= 0 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                            1208, 0, "%s\n\t(b->refCount) = %i",
-                            "(b->refCount > 0)", def->refCount );
                 {
-                    brush_t *onxt = (brush_t *)def->onext;
-                    --def->refCount;
-                    onxt->oprev     = def->oprev;
-                    ((brush_t *)def->oprev)->onext = def->onext;
-                    def->oprev  = nullptr;
-                    def->onext  = nullptr;
-                    def->owner  = nullptr;
+                    selbrush_t *brushInst = inst;   // the binary's local
+                    vassert( (brushInst->def->refCount >= 2), "(brushInst->def->refCount) = %i", brushInst->def->refCount );   // Undo.cpp:702
                 }
+
+                Entity_UnlinkBrush( def );   // inlined in the binary (entity.cpp:1208)
 
                 // Move def into redo's brushlist
                 Undo_01_NoMoreUndo( p_redoBrushlist, def );
                 Brush_Free( inst );
 
-                if ( def->refCount != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            707, 1, "%s", "brushDef->refCount == 1" );
+                {
+                    brush_t *brushDef = def;        // the binary's local
+                    iassert( brushDef->refCount == 1 );   // Undo.cpp:707
+                }
             }
             inst = (selbrush_t *)pNextInst;
         }
@@ -887,26 +816,18 @@ void Undo_Undo()
 
             if ( def->epairEdits == undo->id )
             {
-                if ( !def->next || !def->prev )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                            701, 0, "%s", "e->next && e->prev" );
-                def->next->prev = def->prev;
-                def->prev->next = def->next;
-                def->prev = nullptr;
+                // DecRef + IncRef inlined in the binary (IncRef's 690 assert is
+                // optimized out -- provably true after DecRef nulls both links).
+                DecRef( (entity_s *)def );
+                IncRef( (entity_s *)def, p_entitylist_redo );
 
-                def->next         = (entity_s *)p_entitylist_redo;
-                def->prev         = p_entitylist_redo->prev;
-                p_entitylist_redo->prev->next = (entity_s *)def;
-                p_entitylist_redo->prev       = (entity_s *)def;
-
-                if ( def->refCount != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            720, 1, "%s", "entity->refCount == 1" );
-                ++def->refCount;
-                Entity_Free( (char *)pEInst );
-                if ( def->refCount != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            723, 1, "%s", "entity->refCount == 1" );
+                {
+                    entity_s_def *entity = def;     // the binary's local
+                    iassert( entity->refCount == 1 );   // Undo.cpp:720
+                    ++entity->refCount;
+                    Entity_Free( (char *)pEInst );
+                    iassert( entity->refCount == 1 );   // Undo.cpp:723
+                }
             }
             pEInst = pNextEInst;
         }
@@ -917,16 +838,17 @@ void Undo_Undo()
           j && j != &undo->entitylist;
           j = undo->entitylist.next )
     {
-        if ( j->refCount != 1 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                    728, 1, "%s", "entity->refCount == 1" );
+        {
+            entity_s *entity = j;                   // the binary's local
+            iassert( entity->refCount == 1 );   // Undo.cpp:728
+        }
 
         g_undoMemorySize -= (int)EntityDef_MemorySize( j );
 
         entity_s_def *worldDef = (entity_s_def *)world_entity->def;
-        int jEntityId = *(int *)&j->pad_0x0080[4]; // offset 0x84
+        int jEntityId = j->numberId;
 
-        if ( jEntityId == *(int *)&worldDef->pad_0x0080[4] )
+        if ( jEntityId == worldDef->numberId )
         {
             // World entity: restore the saved worldspawn epairs onto the live world.
             // Same swap idiom as Undo_Redo (see the note there): entNode/j takes the OLD
@@ -940,31 +862,20 @@ void Undo_Undo()
         }
         else
         {
-            // Non-world entity: unlink from undo list, insert into entities
-            if ( !j->next || !j->prev )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                        701, 0, "%s", "e->next && e->prev" );
-            j->next->prev  = j->prev;
-            j->prev->next  = j->next;
-            j->prev        = nullptr;
+            // Non-world entity: unlink from undo list, insert into entities.
+            // DecRef + IncRef inlined in the binary (IncRef's 690 assert optimized out).
+            DecRef( j );
+            IncRef( j, &entities );
 
-            // Insert at head of entities (IDA: entities = j; *(entities+4) = j)
-            j->next           = &entities;
-            j->prev           = entities.prev;
-            entities.prev->next = j;
-            entities.prev     = j;
+            j->redoId = redo->id;
 
-            *(int *)j->pad_0x0080 = redo->id;  // stamp redoId in pad[0]
-
-            if ( j->refCount != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        746, 1, "%s", "entity->refCount == 1" );
-
-            Prefab_Init( (prefab_s *)&entityInsts, (entity_s_def *)j, &active_brushes );
-
-            if ( --j->refCount != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        749, 1, "%s", "entity->refCount == 1" );
+            {
+                entity_s *entity = j;               // the binary's local
+                iassert( entity->refCount == 1 );   // Undo.cpp:746
+                Prefab_Init( (prefab_s *)&entityInsts, (entity_s_def *)j, &active_brushes );
+                --entity->refCount;
+                iassert( entity->refCount == 1 );   // Undo.cpp:749
+            }
 
             // Verify the def's brush-def-list sentinel is empty. The sentinel spans
             // offsets 0x08 (firstActive / "oprev") and 0x0C (its ->next, == "onext").
@@ -972,6 +883,8 @@ void Undo_Undo()
             // sentinel's onext side), NOT brushes.ownerPrev (0x1C). The prior port read
             // 0x1C — an unrelated field that essentially never equals &def, so this FATAL
             // assert would fire on every undo of a non-world entity (a path no gate drives).
+            // KEEP_VERBOSE (pair): the binary's entity->brushes head overlays the
+            // port's def(+0x08)/brushes(+0x0C) split — member path inexpressible.
             if ( (void *)j->brushes.prev != (void *)&j->def )   // [j+0x0C] vs &[j+0x08]
                 Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
                         750, 0, "%s", "entity->brushes.onext == &entity->brushes" );
@@ -990,20 +903,14 @@ void Undo_Undo()
             g_undoMemorySize -= (int)Brush_MemorySize( bDef );
             Undo_Refcount( bDef );
 
-            // Find the entity instance whose DEF carries the saved owner numberId.
-            // §11 STRIDE FIX: disasm 0x45f0a1 reads `[ecx+84h]` where ecx = e->def___or_
-            // firstActive (the entity_s_def), i.e. the def's numberId at offset 0x84
-            // (pad_0x0080[4]) — the SAME field Phase 1 saved into bDef->unk1 (0x45ec2e
-            // `[owner+84h]`). The IDA pseudocode rendered this as `instDef[2].next` using
-            // the IDB's 64-byte selbrush_t stride (2*64+4 = 0x84); the port's selbrush_t is
-            // 56 bytes, so `instDef[2].next` lands on 0x74 (= entity_s_def.epairs, a heap
-            // pointer) and NEVER matches a small numberId — every restored brush fell through
-            // to the world-entity fallback, misattributing non-world brushes on undo.
+            // Find the entity instance whose DEF carries the saved owner numberId
+            // (disasm 0x45f0a1 `[ecx+84h]` — hex-rays' `instDef[2].next` is the IDB's
+            // 64-byte selbrush_t stride landing on the def's numberId).
             entity_s *ownerInst = nullptr;
             for ( entity_s *e = entityInsts.next; e != &entityInsts; e = e->next )
             {
                 entity_s_def *eDef = (entity_s_def *)e->def;
-                if ( *(int *)&eDef->pad_0x0080[4] == bDef->unk1 )   // def numberId @ 0x84
+                if ( eDef->numberId == bDef->unk1 )
                 {
                     ownerInst = e;
                     break;
@@ -1014,13 +921,13 @@ void Undo_Undo()
             if ( ownerInst && ownerInst != &entityInsts )
             {
                 entity_s_def *ownerDef = (entity_s_def *)ownerInst->def;
-                Undo_InlineEntityLinkBrush( bDef, ownerDef );
+                Entity_LinkBrush( bDef, (entity_s *)ownerDef );   // inlined in the binary
             }
             else
             {
                 // Fall back to world entity
                 entity_s_def *worldDef = (entity_s_def *)world_entity->def;
-                Undo_InlineEntityLinkBrush( bDef, worldDef );
+                Entity_LinkBrush( bDef, (entity_s *)worldDef );   // inlined in the binary
                 ownerInst = world_entity;
             }
 
@@ -1116,11 +1023,11 @@ void Undo_Redo()
 
             if ( def->def == (brush_t_def *)(intptr_t)redo->id )
             {
-                if ( def->refCount < 2 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            849, 1, "%s\n\t(brushDef->refCount) = %i",
-                            "(brushDef->refCount >= 2)", def->refCount );
-                def->unk1 = *(int *)&def->owner->pad_0x0080[4];
+                {
+                    brush_t *brushDef = def;        // the binary's local
+                    vassert( (brushDef->refCount >= 2), "(brushDef->refCount) = %i", brushDef->refCount );   // Undo.cpp:849
+                }
+                def->unk1 = def->owner->numberId;
                 Entity_UnlinkBrush( def );
                 Undo_01_NoMoreUndo( &g_lastundo->brushlist, def );
                 g_undoMemorySize += (int)Brush_MemorySize( def );
@@ -1130,7 +1037,7 @@ void Undo_Redo()
         }
     }
 
-    // ── Phase 2: Move entity instances with pad_0x0080[0] == redo->id
+    // ── Phase 2: Move entity instances with redoId == redo->id
     //            into the new undo's entitylist.
     {
         entity_s *v7 = entityInsts.next;
@@ -1139,30 +1046,20 @@ void Undo_Redo()
             entity_s **v9 = &v7->next->prev;
             entity_s_def *def = (entity_s_def *)v7->def;
 
-            if ( *(int *)def->pad_0x0080 == redo->id )
+            if ( def->redoId == redo->id )
             {
-                if ( !def->next || !def->prev )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                            701, 0, "%s", "e->next && e->prev" );
-                def->next->prev = def->prev;
-                def->prev->next = def->next;
-                def->prev = nullptr;
+                // Unlink from redo list, link into the new undo's entitylist.
+                // DecRef + IncRef inlined in the binary (IncRef's 690 assert optimized out).
+                DecRef( (entity_s *)def );
+                IncRef( (entity_s *)def, &g_lastundo->entitylist );
 
-                // Link into new undo's entitylist
-                entity_s *undoEntityList = &g_lastundo->entitylist;
-                def->next = undoEntityList;
-                def->prev = undoEntityList->prev;
-                undoEntityList->prev->next = (entity_s *)def;
-                undoEntityList->prev       = (entity_s *)def;
-
-                if ( def->refCount != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            867, 1, "%s", "entity->refCount == 1" );
-                ++def->refCount;
-                Entity_Free( (char *)v7 );
-                if ( def->refCount != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                            870, 1, "%s", "entity->refCount == 1" );
+                {
+                    entity_s_def *entity = def;     // the binary's local
+                    iassert( entity->refCount == 1 );   // Undo.cpp:867
+                    ++entity->refCount;
+                    Entity_Free( (char *)v7 );
+                    iassert( entity->refCount == 1 );   // Undo.cpp:870
+                }
                 g_undoMemorySize += (int)EntityDef_MemorySize( def );
             }
             v7 = (entity_s *)v9;
@@ -1178,9 +1075,9 @@ void Undo_Redo()
             break;
 
         entity_s_def *worldDef = (entity_s_def *)world_entity->def;
-        int entEntityId = *(int *)&entNode->pad_0x0080[4]; // offset 0x84
+        int entEntityId = entNode->numberId;
 
-        if ( entEntityId == *(int *)&worldDef->pad_0x0080[4] )
+        if ( entEntityId == worldDef->numberId )
         {
             // World entity: restore the saved worldspawn epairs onto the live world.
             // DELIBERATE DIVERGENCE FROM IDA (do NOT "re-faithful" this): the binary
@@ -1201,34 +1098,24 @@ void Undo_Redo()
         }
         else
         {
-            if ( !entNode->next || !entNode->prev )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\entity.cpp",
-                        701, 0, "%s", "e->next && e->prev" );
-            // Unlink from redo list
-            entNode->next->prev = entNode->prev;
-            entNode->prev->next = entNode->next;
-            entNode->prev = nullptr;
+            // Unlink from redo list, insert into entities.
+            // DecRef + IncRef inlined in the binary (IncRef's 690 assert optimized out).
+            DecRef( entNode );
+            IncRef( entNode, &entities );
 
-            // Insert at head of entities
-            entNode->next           = &entities;
-            entNode->prev           = entities.prev;
-            entities.prev->next     = entNode;
-            entities.prev           = entNode;
-
-            if ( entNode->refCount != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        891, 1, "%s", "entity->refCount == 1" );
-
-            Prefab_Init( (prefab_s *)&entityInsts, (entity_s_def *)entNode, &active_brushes );
-
-            if ( --entNode->refCount != 1 )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
-                        894, 1, "%s", "entity->refCount == 1" );
+            {
+                entity_s *entity = entNode;         // the binary's local
+                iassert( entity->refCount == 1 );   // Undo.cpp:891
+                Prefab_Init( (prefab_s *)&entityInsts, (entity_s_def *)entNode, &active_brushes );
+                --entity->refCount;
+                iassert( entity->refCount == 1 );   // Undo.cpp:894
+            }
 
             // §11 OFFSET FIX (mirrors Undo_Undo 750): disasm 0x45f7... reads `[next+12]`
             // (= entNode->brushes.prev, the def-list sentinel's onext side at 0x0C), NOT
             // brushes.ownerPrev (0x1C). Prior port read 0x1C → this FATAL would fire on
             // every redo of a non-world entity.
+            // KEEP_VERBOSE (pair): same brushes-head overlay as Undo.cpp:750/751.
             if ( (void *)entNode->brushes.prev != (void *)&entNode->def )  // [next+0x0C] vs &[next+0x08]
                 Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\Undo.cpp",
                         895, 0, "%s", "entity->brushes.onext == &entity->brushes" );
@@ -1254,7 +1141,7 @@ void Undo_Redo()
             for ( entity_s *e = entityInsts.next; e != &entityInsts; e = e->next )
             {
                 entity_s_def *eDef = (entity_s_def *)e->def;
-                if ( *(int *)&eDef->pad_0x0080[4] == onext->unk1 )   // def numberId @ 0x84
+                if ( eDef->numberId == onext->unk1 )
                 {
                     v17 = e;
                     break;
@@ -1264,7 +1151,7 @@ void Undo_Redo()
             if ( v17 && v17 != &entityInsts )
             {
                 entity_s_def *v19 = (entity_s_def *)v17->def;
-                Undo_InlineEntityLinkBrush( onext, v19 );
+                Entity_LinkBrush( onext, (entity_s *)v19 );   // inlined in the binary
             }
             else
             {
@@ -1279,7 +1166,7 @@ void Undo_Redo()
                 // share the bug. Reproduced verbatim per the match-IDA-exactly directive (a prior port
                 // had "fixed" this to world_entity, which diverged from the IDB).
                 entity_s_def *worldDef = (entity_s_def *)world_entity->def;
-                Undo_InlineEntityLinkBrush( onext, worldDef );
+                Entity_LinkBrush( onext, (entity_s *)worldDef );   // inlined in the binary
                 v17 = (entity_s *)&entityInsts;
             }
 

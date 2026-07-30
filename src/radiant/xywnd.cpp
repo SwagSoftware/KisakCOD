@@ -8,6 +8,7 @@
 
 #include "stdafx.h"
 #include "xywnd.h"
+enum { YZ = ED_VIEW_YZ, XZ = ED_VIEW_XZ, XY = ED_VIEW_XY };   // the binary's bare view names (assert strings)
 #include "prefs.h"                  // g_PrefsDlg (prefData_t* — real settings)
 #include "mainfrm.h"                // CXYWnd / CMainFrame (First-Light window class)
 #include <gfx_d3d/r_gfx.h>          // GfxMatrix, GfxColor, GfxPointVertex
@@ -522,12 +523,10 @@ static const char *Ed_EntityNameForBrush( selbrush_t *brush )
 // KISAK: the binary passes its caller's `color[4]` local, which in the not-selected loop is
 // UNINITIALISED stack (the source's "// flickering" comment); we pass savedinfo
 // COLOR_GRIDTEXT slot 8 for both loops.
-static void Ed_DrawBrushEntityName( int viewType, selbrush_t *brush, float scale,
+static void Ed_DrawBrushEntityName( int nView, selbrush_t *b, float scale,
                                     int vWidth, int vHeight, const float *textColor )
 {
-    if ( (unsigned)viewType > 2 )      // IDB 0x46c88a (L0) — restored
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                3591, 0, "%s", "nView == XY || nView == XZ || nView == YZ" );
+    iassert( nView == XY || nView == XZ || nView == YZ );   // XYWnd.cpp:3591
 
     Font_s *font = (Font_s *)g_qeglobals.d_font_list;
     if ( !font )
@@ -535,30 +534,26 @@ static void Ed_DrawBrushEntityName( int viewType, selbrush_t *brush, float scale
     if ( ( g_qeglobals.d_savedinfo.d_xyShowFlags & 8 ) != 0 )   // 0x8 = View→Show→Names hidden
         return;
 
-    // IDB 0x46c8c5: owner-consistency for ANY non-world brush (before the representative gate).
-    entity_s *nameOwner = brush ? brush->owner : nullptr;
-    if ( nameOwner && nameOwner != world_entity
-         && (void *)nameOwner->def != (void *)brush->def->owner )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                3602, 0, "%s", "b->owner->def == b->def->owner" );
+    // IDB 0x46c8c5: owner-consistency for ANY non-world b (before the representative gate).
+    entity_s *nameOwner = b ? b->owner : nullptr;
+    if ( nameOwner && nameOwner != world_entity )
+        iassert( b->owner->def == b->def->owner );   // XYWnd.cpp:3602
 
-    const char *name = Ed_EntityNameForBrush( brush );          // representative-brush gate
+    const char *name = Ed_EntityNameForBrush( b );          // representative-b gate
     if ( !name )
         return;
 
-    if ( (void *)brush->owner->def != (void *)brush->def->owner )   // IDB 0x46c8fe (L0) — restored
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                3609, 0, "%s", "b->owner->def == b->def->owner" );
+    iassert( b->owner->def == b->def->owner );   // XYWnd.cpp:3609 (0x46c8fe)
 
     // Axis layout — the binary's axis_1(horiz/xstep) / axis_2(vert/ystep) / axis_3(depth),
     // with the CoD4Radiant enum ED_VIEW_YZ=0 / XZ=1 / XY=2:
     //   axis_1 = (nView==0=YZ)            ; axis_2 = (nView!=2=notXY)+1 ; axis_3 = 3-a2-a1.
     //   XY(2): h=0(X) v=1(Y) d=2(Z) ; XZ(1): h=0(X) v=2(Z) d=1(Y) ; YZ(0): h=1(Y) v=2(Z) d=0(X).
     // Identical to XY_DrawBrushes' nDim1/nDim2/nDim3.
-    const int axisH = ( viewType == ED_VIEW_YZ );        // (nView==0)
-    const int axisV = ( viewType != ED_VIEW_XY ) + 1;    // (nView!=2)+1
+    const int axisH = ( nView == ED_VIEW_YZ );        // (nView==0)
+    const int axisV = ( nView != ED_VIEW_XY ) + 1;    // (nView!=2)+1
     const int axisD = 3 - axisV - axisH;
-    brush_t *bd = brush->def;
+    brush_t *bd = b->def;
 
     float src[3];
     src[axisH] = bd->mins[axisH] + 4.0f;
@@ -630,6 +625,7 @@ extern void Assert( const char *file, int line, int type, const char *fmt, ... )
 // trigger gate + the 2D-view marker draw (sub_46B110 cluster, wired below in XY_DrawBrushes).
 extern bool  ScriptGroup_BrushIsTrigger( selbrush_t *b );            // scriptgroup.cpp 0x453FD0
 extern bool  PrefsDlg_ScriptTeamColorEnabled();                      // prefs.cpp/scriptgroup 0x4560F0
+// (defined at the bottom of this file — relocated from scriptgroup.cpp)
 extern void  ScriptGroup_DrawTeamColorViz( const char *teamColorStr, const float *viewMins,
                                            const float *viewMaxs, int axis0, int axis1 ); // 0x46B110
 
@@ -696,22 +692,20 @@ static void Ed_DrawRadiusCircle( const GfxColor *col, const float *center,
 // Ed_DrawNodeRadiusShape (IDB 0x46c4d0) - XY view -> the round radius circle; XZ/YZ -> a
 // 4-line axis-aligned box of `radius` half-width on the in-plane horizontal axis
 // (h = viewType != XZ) with the vertical extent given by the z-offsets zLo/zHi.
-static void Ed_DrawNodeRadiusShape( int viewType, const float *center, char channel,
+static void Ed_DrawNodeRadiusShape( int m_nViewType, const float *center, char channel,
                                     float radius, float zLo, float zHi,
                                     const GfxColor *col )
 {
-    if ( (unsigned)viewType > 2 )      // IDB 0x46c4e8: assert the view is one of XY/XZ/YZ
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                3492, 0, "%s", "m_nViewType == XY || m_nViewType == XZ || m_nViewType == YZ" );
+    iassert( m_nViewType == XY || m_nViewType == XZ || m_nViewType == YZ );   // XYWnd.cpp:3492
 
-    if ( viewType == ED_VIEW_XY )
+    if ( m_nViewType == ED_VIEW_XY )
     {
-        Ed_DrawRadiusCircle( col, center, viewType, radius, channel );
+        Ed_DrawRadiusCircle( col, center, m_nViewType, radius, channel );
         return;
     }
 
     // box branch (XZ=1 -> horizontal axis 0; YZ=0 -> horizontal axis 1)
-    const int h = ( viewType != ED_VIEW_XZ );   // v9 = (*(view+288) != 1)
+    const int h = ( m_nViewType != ED_VIEW_XZ );   // v9 = (*(view+288) != 1)
 
     float p0[3] = { center[0], center[1], center[2] };   // v19
     float p1[3] = { center[0], center[1], center[2] };   // v17
@@ -769,11 +763,10 @@ static void Ed_DrawColoredRadiusXY( selbrush_t *brush, int viewType, char channe
     bool foundColor = false;
     for ( epair_t *ep = eDef->epairs; ep; ep = ep->next )
         if ( !_stricmp( ep->key, "_color" ) ) { colorString = ep->value; foundColor = true; break; }
-    // IDB 0x46c3a8 asserts the found _color value is non-NULL (binary then sscanfs it); the port's
-    // if(colorString) guard below is the safer equivalent that avoids sscanf(NULL) in release.
-    if ( foundColor && !colorString )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                3459, 0, "%s", "colorString" );
+    // IDB 0x46c3a8 asserts the found _color value is non-NULL (binary then sscanfs it); the
+    // if(colorString) guard below still avoids sscanf(NULL) in release.
+    if ( foundColor )
+        iassert( colorString );   // XYWnd.cpp:3459
     if ( colorString )
     {
         float r, g, bl;
@@ -2397,15 +2390,13 @@ void Ed_DrawClipper( CXYWnd *wnd )
         // reuse + vertLimit=3, which truncates the preview - see the header.
         static GfxPointVertex s_lineVerts[5450];
         int vertCount = 0;
-        for ( selbrush_t *b = keep->next; b && b != keep; b = b->next )
+        for ( selbrush_t *brush = keep->next; brush && brush != keep; brush = brush->next )
         {
-            brush_t *d = b->def;
-            for ( int f = 0; f < d->faceCount; ++f )
+            brush_t *d = brush->def;
+            for ( int faceIndex = 0; faceIndex < d->faceCount; ++faceIndex )
             {
-                if ( !d->faces[f].w )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                            1024, 0, "%s", "brush->def->faces[faceIndex].w" );
-                vertCount = DrawShadedWireframe( -1, &d->faces[f],
+                iassert( brush->def->faces[faceIndex].w );   // XYWnd.cpp:1024
+                vertCount = DrawShadedWireframe( -1, &d->faces[faceIndex],
                                                  (const orientation_t *)world_orient_matrix,
                                                  &previewCol, 1, vertCount, 5450, s_lineVerts );
             }
@@ -2477,95 +2468,12 @@ void Ed_DrawVertexHandles()
 //  Brush_GetEntityLineColor 0x47aa20 - all the tail of DrawConnectionLinks 0x40c9f0.
 // ════════════════════════════════════════════════════════════════════════════════
 
-// ── Brush_GetEntityLineColor (IDB 0x47aa20) ─────────────────────────────────────
-// Pick the RGBA colour for an entity's connection line.  brushDef is the linked
-// (target/source) brush DEF; outRgba receives r,g,b,a; inRgba supplies the default
-// alpha (and is usually the same buffer as outRgba — the caller pre-fills it with the
-// entity eclass colour).  Returns 1 if a colour was chosen, 0 if the line keeps the
-// caller's colour.  Faithful to the disasm:
-//   * worldspawn entity            → 0 (no override)
-//   * has "_color" epair (3 floats)→ that colour, alpha = inRgba[3]
-//   * classname starts "actor"     → eclass.color; spawnflags!=0 forces g=0.8
-//   * classtype&0x20 + "node_path" + targetname!="auto" → green (0,1,0,1)
-static char Brush_GetEntityLineColor( float *outRgba, brush_t *brushDef, const float *inRgba )
-{
-    // KISAK: the binary derefs owner->eclass->name with no null guard; a prefab-instanced
-    // brush def can have a NULL owner/eclass on this path, so return 0 (keep the caller's
-    // colour) rather than AV.
-    if ( !brushDef ) return 0;
-    entity_s *owner = brushDef->owner;
-    if ( !owner ) return 0;
-    eclass_t *ec    = owner->eclass;
-    if ( !ec || !ec->name ) return 0;
-
-    if ( !_stricmp( ec->name, "worldspawn" ) )
-        return 0;
-
-    // walk owner->epairs for "_color"
-    const char *colStr = nullptr;
-    for ( epair_t *ep = owner->epairs; ep; ep = ep->next )
-    {
-        if ( !_stricmp( ep->key, "_color" ) )
-        {
-            colStr = ep->value;
-            // This is a brush.cpp function relocated into the connections unit - keep the
-            // original brush.cpp:4560 file/line and the exact "colorString" text.
-            if ( !colStr )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                        4560, 0, "%s", "colorString" );
-            break;
-        }
-    }
-    if ( !colStr )
-        colStr = "";                         // IDB `zero` (empty string)
-
-    float r = 0.0f, g = 0.0f, b = 0.0f;
-    if ( sscanf( colStr, "%f %f %f", &r, &g, &b ) == 3 )
-    {
-        outRgba[0] = r;
-        outRgba[1] = g;
-        outRgba[2] = b;
-        outRgba[3] = inRgba[3];              // preserve the caller's alpha
-        return 1;
-    }
-
-    if ( !strncmp( ec->name, "actor", 5 ) )
-    {
-        const char *sf = ValueForKey2( (int)(intptr_t)owner, "spawnflags" );
-        bool sfZero = ( atol( sf ) == 0 );
-        outRgba[0] = ec->color[0];
-        if ( sfZero )
-        {
-            outRgba[1] = ec->color[1];
-            outRgba[2] = ec->color[2];
-            outRgba[3] = ec->unk;            // eclass+0x30 = the alpha slot
-        }
-        else
-        {
-            outRgba[1] = 0.80000001f;        // IDB flt_6F42DC
-            outRgba[2] = ec->color[2];
-            outRgba[3] = ec->unk;
-        }
-        return 1;
-    }
-
-    if ( ( ec->classtype & 0x20 ) != 0 && !strncmp( ec->name, "node_path", 9 ) )
-    {
-        if ( HasKeyValuePair( (entity_s_def *)owner, "targetname" ) )
-        {
-            const char *tn = ValueForKey2( (int)(intptr_t)owner, "targetname" );
-            if ( strncmp( tn, "auto", 4 ) )   // != "auto"
-            {
-                outRgba[0] = 0.0f;
-                outRgba[1] = 1.0f;
-                outRgba[2] = 0.0f;
-                outRgba[3] = 1.0f;
-                return 1;
-            }
-        }
-    }
-    return 0;                                // no override — keep caller's colour
-}
+// Brush_GetEntityLineColor (IDB 0x47aa20) lives in brush.cpp — its asserts are
+// brush.cpp:4560, i.e. that IS its source file.  This TU used to carry a second
+// static copy which shadowed the canonical one for the connections overlay; the two
+// had drifted, so the copy is gone and both paths now share brush.cpp's body.
+extern char Brush_GetEntityLineColor( float *outRgba, brush_t *brushDef,
+                                      const float *inRgba );   // brush.cpp 0x47aa20
 
 // Find an entity's first epair value for `key` (case-insensitive), or "" if absent.
 // (Lines_AddLinkTo's inlined epair scan; the binary uses `zero` for the not-found case.)
@@ -2686,11 +2594,10 @@ static void Lines_AddLinkTo()
             float wing2[2] = { ax + ay, ay - ax };   // (v30,v31)
 
             // binary XYWnd.cpp:2881 — the matched brush instance must belong to the matched
-            // entity (mb->owner == me). RESTORED (was dropped); same-file L0 verbose (the string
-            // uses the original tb/te names → KEEP_VERBOSE).
-            if ( !mb->owner || mb->owner != me )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                        2881, 0, "%s", "tb->owner && tb->owner == te" );
+            // entity.  tb/te are the binary's locals.
+            selbrush_t *tb = mb;
+            entity_s   *te = me;
+            iassert( tb->owner && tb->owner == te );   // XYWnd.cpp:2881
 
             // line colour = matched entity's DEF eclass colour (§11 instance-vs-def: read the
             // DEF's eclass, not the instance's — see Ed_EntDefColor), overridden by the matched
@@ -2831,10 +2738,10 @@ static void Lines_AddLinkToScript()
                                ( toDef->mins[2] + toDef->maxs[2] ) * 0.5f };
 
             // binary XYWnd.cpp:3272 — matched brush instance must belong to the matched entity.
-            // RESTORED (was dropped); same-file L0 verbose (string keeps the original tb/te names).
-            if ( !mb->owner || mb->owner != lnEnts[i] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                        3272, 0, "%s", "tb->owner && tb->owner == te" );
+            // tb/te are the binary's locals.
+            selbrush_t *tb = mb;
+            entity_s   *te = lnEnts[i];
+            iassert( tb->owner && tb->owner == te );   // XYWnd.cpp:3272
 
             const float *baseCol = Ed_EntDefColor( lnEnts[i] );   // §11: DEF eclass colour
             float rgba[4] = { baseCol[0], baseCol[1], baseCol[2], 1.0f };
@@ -3439,13 +3346,15 @@ void CreateEntityFromName( const char *str )
         EntityAssignModel( (entity_s_def *)v4->def );
 
         selbrush_t *bboxInst = v4->brushes.ownerNext;   // the entity's (bbox) brush instance
-        if ( bboxInst == (selbrush_t *)&v4->brushes )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                    1144, 1, "%s", "b != &petNew->brushes" );
-        if ( (entity_s_def *)bboxInst->owner->def
-             != (entity_s_def *)bboxInst->def->owner )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                    1145, 1, "%s", "b->owner->def == b->def->owner" );
+        {
+            entity_s   *petNew = v4;                    // the binary's locals
+            selbrush_t *b      = bboxInst;
+            iassert( b != &petNew->brushes );   // XYWnd.cpp:1144
+        }
+        {
+            selbrush_t *b = bboxInst;            // the binary's local
+            iassert( b->owner->def == b->def->owner );   // XYWnd.cpp:1145
+        }
 
         Select_Deselect( 1 );
         Select_Brush( bboxInst, 1, 1, 0 );
@@ -3535,10 +3444,9 @@ void CreateEntityFromName( const char *str )
         }
         else
         {
-            // XYWnd.cpp:1097 (level 0) — selection consistency invariant.
-            if ( (entity_s_def *)v5->owner->def != (entity_s_def *)v5->def->owner )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                        1097, 0, "%s", "b->owner->def == b->def->owner" );
+            // XYWnd.cpp:1097 (level 0) — selection consistency invariant. b = the binary's local.
+            selbrush_t *b = v5;
+            iassert( b->owner->def == b->def->owner );   // XYWnd.cpp:1097
 
             entity_s *owner = v5->owner;
             entity_s_def *eDef = (entity_s_def *)owner->def;
@@ -3602,10 +3510,10 @@ void CreateEntityFromName( const char *str )
                 Brush_Free( v5 );
                 selbrush_t *v11 = Brush_AddToList( nb, ownerInst );        // new instance for the new def
 
-                // XYWnd.cpp:1127 (level 1).
-                if ( (entity_s_def *)v11->owner->def != (entity_s_def *)v11->def->owner )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                            1127, 1, "%s", "b->owner->def == b->def->owner" );
+                {
+                    selbrush_t *b = v11;         // the binary's local
+                    iassert( b->owner->def == b->def->owner );   // XYWnd.cpp:1127
+                }
 
                 // Select_Brush_2(&active_brushes, v11): list != &selected_brushes, so the
                 // else-branch head-splice into active_brushes (IDA 0x476630 else path).
@@ -3619,11 +3527,7 @@ void CreateEntityFromName( const char *str )
                 Select_Brush( v11, 1, 1, 0 );
                 Entity_SetDefaultModelKey( nb, eclass );                   // 0x485510 (v9, v21)
 
-                // XYWnd.cpp:1131 (level 0).
-                if ( selected_brushes.next->def != nb || selected_brushes.prev->def != nb )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\XYWnd.cpp",
-                            1131, 0, "%s",
-                            "selected_brushes.next->def == nb && selected_brushes.prev->def == nb" );
+                iassert( selected_brushes.next->def == nb && selected_brushes.prev->def == nb );   // XYWnd.cpp:1131
             }
         }
     }
@@ -4045,21 +3949,19 @@ static void Ed_DrawSizeInfo( CXYWnd *wnd, int nDim1, int nDim2 )
 // CopySelectedFaceValues (IDB 0x47d130) - XY_Draw's tail call: for each selected FACE re-run
 // Brush_CheckBuildFaceVis on its owning brush so the windings used by the surface inspector /
 // face-drag are current.
-extern selface_t *selFace;                              // select.cpp 0x73C710
-extern char       g_ptrSelectedFaces_GetSize[4];        // *(int*) = g_selFaceCount
 extern void       sub_477D70( selbrush_t *b, const float *orient );  // brush.cpp Brush_CheckBuildFaceVis
 // (world_orient_matrix is declared at the top of this file.)
 void CopySelectedFaceValues()
 {
-    const int count = *(int *)g_ptrSelectedFaces_GetSize;
+    const int count = g_SelectedFaces.GetSize();
     for ( int i = 0; i < count; ++i )
     {
-        if ( i < 0 || i >= *(int *)g_ptrSelectedFaces_GetSize )
+        if ( i < 0 || i >= g_SelectedFaces.GetSize() )
         {
             Com_Error( ERR_FATAL,
                        "RADIANT: selFace array bounds check failed (CopySelectedFaceValues)" );
         }
-        sub_477D70( selFace[i].brush, (const float *)world_orient_matrix );
+        sub_477D70( g_SelectedFaces.GetAt( i ).brush, (const float *)world_orient_matrix );
     }
 }
 
@@ -4164,3 +4066,170 @@ void CXYWnd::OnPaint()
     R_CheckTargetWindow( hwnd );
 }
 
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — this function's embedded Assert() calls name THIS file as
+//  their source (see the brush.cpp relocation protocol / line-uniqueness test).
+// ═════════════════════════════════════════════════════════════════════════════
+// deps of the moved viz cluster (previously file-local to scriptgroup.cpp):
+extern int  ScriptGroup_Unreachable( const char *a1 );                 // scriptgroup.cpp 0x451170
+extern void Ed_DrawScriptColorQuad( int entDef, const float *color );  // brush.cpp 0x46AE10
+static const char zero[] = "";       // scriptgroup's `zero` (default team-key value)
+// flt_73B098 (0x73B098) — the 7 script-colour token colours (r/b/y/c/g/p/o),
+// indexed by ScriptGroup_Unreachable.  Same table as brush.cpp/camwnd.cpp.
+static const float kScriptColorVizTable[7][4] = {
+    { 1.0f, 0.0f, 0.0f, 1.0f },   // r — red
+    { 0.0f, 0.0f, 1.0f, 1.0f },   // b — blue
+    { 1.0f, 1.0f, 0.0f, 1.0f },   // y — yellow
+    { 0.0f, 1.0f, 1.0f, 1.0f },   // c — cyan
+    { 0.0f, 1.0f, 0.0f, 1.0f },   // g — green
+    { 1.0f, 0.0f, 1.0f, 1.0f },   // p — purple
+    { 1.0f, 0.4f, 0.0f, 1.0f },   // o — orange
+};
+
+
+
+
+
+// 0x46AA80  CamTokens_BrushMatchesToken (ecx=brush, arg0=token) — true if the brush
+// entity's ScriptColorTeamKey value strstr-contains `token`.  Disasm-faithful: walks
+// b->owner->def->epairs (selbrush+8 → entity+8 → epairs@0x74) for the team key
+// (g_PrefsDlg+0x32C), defaulting to `zero`="" when absent.
+static bool CamTokens_BrushMatchesToken( selbrush_t *b, const char *token )
+{
+    const char *teamKey = (const char *)g_PrefsDlg->ScriptColorTeamKey;
+    entity_s_def *def = (entity_s_def *)b->owner->def;        // [ecx+8]→[+8]
+    const char *value = zero;                                 // IDB `zero` = ""
+    for ( epair_t *ep = def->epairs; ep; ep = ep->next )      // [+0x74]
+    {
+        if ( !_stricmp( ep->key, teamKey ) ) { value = ep->value; break; }
+    }
+    return strstr( value, token ) != nullptr;
+}
+
+// 0x46AAE0  CamTokens_EntityGate (eax=brush) — true if the brush entity HAS the
+// ScriptColorTeamKey AND its classname contains actor / node / info_volume.
+// Disasm-faithful: v1 = b->owner->def; HasKeyValuePair(v1, teamKey) gate, then the
+// classname epair-walk (default `zero`).
+static bool CamTokens_EntityGate( selbrush_t *b )
+{
+    entity_s_def *def = (entity_s_def *)b->owner->def;        // *(int**)(*(int*)(a1+8)+8)
+    if ( !HasKeyValuePair( def, (const char *)g_PrefsDlg->ScriptColorTeamKey ) )
+        return false;
+    const char *value = zero;
+    for ( epair_t *ep = def->epairs; ep; ep = ep->next )
+    {
+        if ( !_stricmp( ep->key, "classname" ) ) { value = ep->value; break; }
+    }
+    return strstr( value, "actor" ) || strstr( value, "node" )
+        || strstr( value, "info_volume" ) != nullptr;
+}
+
+// 0x46B110  ScriptGroup_DrawTeamColorViz (sub_46B110) — the script-group single-char
+// team-colour visualization.  a1 = the team-colour token string (a selected trigger's
+// ScriptColorTeamKey value); a2/a3 = the view-rect mins/maxs on the two view axes
+// (XY_Draw's &v47 / &tdp); a4/a5 = the two world axis indices for the view plane (v58/v60).
+//
+// Copy a1 into a 1024 buffer; tokenize by " "; for each token
+// store "<tok> " into a fixed 16-byte-stride array (v42) and its colour into a parallel
+// 4-float-stride array (v34, token n → v34[4n+4] = kScriptColorVizTable[Unreachable(tok)]).
+// Then if there is more than one token, find the first (among the first tokens-1) whose
+// text contains ScriptColorKey and SWAP it (string + colour) with the LAST token — the 3
+// overlapping strcpy/qmemcpy loops in the binary are exactly a token[M] ⟷ token[tokens-1]
+// exchange via a 16-byte scratch (v43).  Finally, for every active then selected entity in
+// view that passes !FilterBrush + CamTokens_EntityGate, draw a colour billboard
+// (Ed_DrawScriptColorQuad) for each token the entity matches (CamTokens_BrushMatchesToken).
+//
+// MAX_COLORENTREES == 32 (the binary's `tokens < MAX_COLORENTREES` cap at XYWnd.cpp:3129).
+void ScriptGroup_DrawTeamColorViz( const char *a1, const float *viewMins,
+                                   const float *viewMaxs, int axis0, int axis1 )
+{
+    const int MAX_COLORENTREES = 32;   // camwnd idiom; scriptgroup's #define stayed behind
+    char buf[1024];                          // v41 — strtok working copy of a1
+    strcpy( buf, a1 );
+    if ( !buf[0] )
+        return;
+
+    // token strings (16-byte stride, each "<tok> ") + parallel colours (token n at [4n+4]).
+    char  tokStr[MAX_COLORENTREES][16];      // v42 (516 bytes; entry n = &v42[16*n])
+    float tokCol[(MAX_COLORENTREES + 1) * 4];// v34 (132 floats; token n colour at [4n+4])
+    int   tokens = 0;                        // i
+
+    for ( char *t = strtok( buf, " " ); t; t = strtok( nullptr, " " ) )
+    {
+        iassert( t[0] );                     // XYWnd.cpp:3122 "token[0]"
+        strcpy( tokStr[tokens], t );
+        strcat( tokStr[tokens], " " );       // trailing space (binary appends asc_6D56FC)
+        int ci = ScriptGroup_Unreachable( t );
+        // binary indexes flt_73B098[4*ci] unconditionally; ci is -1 only on a no-match
+        // (which would assert + read flt_73B098[-4]) — guard the never-valid case, matching
+        // the established camwnd/brush.cpp convention.
+        const float *c = ( ci >= 0 && ci <= 6 ) ? kScriptColorVizTable[ci]
+                                                : kScriptColorVizTable[0];
+        const int colSlot = 4 * tokens + 4;  // v34[4n+4]
+        tokCol[colSlot + 0] = c[0];
+        tokCol[colSlot + 1] = c[1];
+        tokCol[colSlot + 2] = c[2];
+        tokCol[colSlot + 3] = c[3];
+        ++tokens;
+        iassert( tokens < MAX_COLORENTREES );   // XYWnd.cpp:3129
+    }
+
+    // SWAP the first ScriptColorKey-matching token (among the first tokens-1) with the
+    // LAST token (binary's 3 overlapping-copy loops, 0x46B268..0x46B382).
+    const char *colorKey = (const char *)g_PrefsDlg->ScriptColorKey;  // *(char**)(+0x330)
+    const int last = tokens - 1;
+    for ( int m = 0; m < last; ++m )
+    {
+        if ( strstr( tokStr[m], colorKey ) )
+        {
+            // save LAST token colour, copy MATCHED→LAST, restore saved→MATCHED (string too).
+            float saveCol[4];
+            saveCol[0] = tokCol[4 * last + 4 + 0];
+            saveCol[1] = tokCol[4 * last + 4 + 1];
+            saveCol[2] = tokCol[4 * last + 4 + 2];
+            saveCol[3] = tokCol[4 * last + 4 + 3];
+            char saveStr[16];
+            strcpy( saveStr, tokStr[last] );
+
+            tokCol[4 * last + 4 + 0] = tokCol[4 * m + 4 + 0];
+            tokCol[4 * last + 4 + 1] = tokCol[4 * m + 4 + 1];
+            tokCol[4 * last + 4 + 2] = tokCol[4 * m + 4 + 2];
+            tokCol[4 * last + 4 + 3] = tokCol[4 * m + 4 + 3];
+            strcpy( tokStr[last], tokStr[m] );
+
+            tokCol[4 * m + 4 + 0] = saveCol[0];
+            tokCol[4 * m + 4 + 1] = saveCol[1];
+            tokCol[4 * m + 4 + 2] = saveCol[2];
+            tokCol[4 * m + 4 + 3] = saveCol[3];
+            strcpy( tokStr[m], saveStr );
+            break;
+        }
+    }
+
+    iassert( tokens > 0 );   // XYWnd.cpp:3150
+
+    // Draw a colour billboard per matching token on every in-view active then selected
+    // gated entity.  Cull: viewMaxs[0]>=def->mins[axis0] && viewMaxs[1]>=def->mins[axis1]
+    //                    && viewMins[0]<=def->maxs[axis0] && viewMins[1]<=def->maxs[axis1].
+    for ( int pass = 0; pass < 2; ++pass )
+    {
+        selbrush_t *head = pass ? &selected_brushes : &active_brushes;
+        for ( selbrush_t *b = head->next; b != head; b = b->next )
+        {
+            brush_t *def = b->def;
+            if ( !( viewMaxs[0] >= def->mins[axis0] && viewMaxs[1] >= def->mins[axis1]
+                 && viewMins[0] <= def->maxs[axis0] && viewMins[1] <= def->maxs[axis1] ) )
+                continue;
+            if ( FilterBrush( b, 0 ) )
+                continue;
+            if ( !CamTokens_EntityGate( b ) )
+                continue;
+            for ( int n = 0; n < tokens; ++n )
+            {
+                if ( CamTokens_BrushMatchesToken( b, tokStr[n] ) )
+                    Ed_DrawScriptColorQuad( (int)(intptr_t)b->owner->def, &tokCol[4 * n + 4] );
+            }
+        }
+    }
+}

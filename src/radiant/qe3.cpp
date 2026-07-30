@@ -31,7 +31,8 @@ qeglobals_t g_qeglobals;
 // ─────────────────────────────────────────────────────────────────────────────
 char *AllocMaterialString( const char *src )
 {
-    if ( !src ) return nullptr;
+    iassert( src );   // qe3.cpp:56 (the binary's "str" head-check)
+    if ( !src ) return nullptr;   // defensive continue after the warn (binary would crash)
     size_t n = strlen( src ) + 1;
     char  *p = (char *)malloc( n );
     if ( p ) memcpy( p, src, n );
@@ -41,99 +42,7 @@ char *AllocMaterialString( const char *src )
 // 0x411280 qe3.cpp_01 (the `face`-type material-name list parser) lives in filters.cpp
 // next to its only caller RadiantFilters.
 
-// ─────────────────────────────────────────────────────────────────────────────
-// 0x45aaa0  Get_MaterialNames - load "MaterialNames.csv" into
-// texWndGlob.materialNameRemap, a list of {shaderName, materialName(lowercased), next}
-// triples.  Lines are "<shader>,<material>"; '#' and blank lines are skipped.  Consumed by
-// Material_BaseNameRemap (engine_stubs.cpp) on the legacy version-0 .map parse path and
-// freed by CTexWnd_Shutdown; malloc'd so those free() calls pair.
-// KISAK: its caller Load_Textures (0x45d140) is not ported - CMainFrame::OnCreate calls
-// this and Load_Materials directly.
-// ─────────────────────────────────────────────────────────────────────────────
-struct MaterialNameRemap_qe3 { char *key; char *value; MaterialNameRemap_qe3 *next; };
-extern void *texWndGlob_materialNameRemap;          // engine_stubs.cpp (0x25E7A00)
 
-void Get_MaterialNames( void )
-{
-    // 0x45aab0: texWndGlob.materialNameRemap must be empty when called.
-    if ( texWndGlob_materialNameRemap )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\TexWnd.cpp",
-                360, 1, "%s", "texWndGlob.materialNameRemap == NULL" );
-
-    void *data = nullptr;
-    if ( LoadFile( "MaterialNames.csv", &data ) < 0 )   // 0x45aae0: absent → nothing to do
-        return;
-
-    Com_BeginParseSession( "MaterialNames.csv" );
-    Com_SetCSV( 1 );                                    // 0x45ab05: parseInfo[..].csv = 1
-
-    const char *text = (const char *)data;
-    while ( 1 )
-    {
-        // 0x45ab5d: first CSV field on the line = shader name (allowLineBreaks=1).
-        parseInfo_t *pi = Com_ParseExt( &text, 1 );
-        if ( !text )                                    // 0x45ab6c: buffer exhausted
-            break;
-
-        const char *shader = pi->token;
-        if ( shader[0] == '#' || shader[0] == 0 )       // 0x45ab74/7e: comment or blank line
-        {
-            // 0x45ac9e: skip to (and past) the next newline, counting it for line tracking.
-            const char *p = text;
-            int c = (signed char)*p;
-            if ( c )
-            {
-                while ( 1 )
-                {
-                    ++p;
-                    if ( c == '\n' )
-                    {
-                        ParseThreadInfo *pt = Com_GetParseThreadInfo();
-                        ++pt->parseInfo[pt->parseInfoNum].lines;   // ++g_parse.parseInfo[..].lines
-                        break;
-                    }
-                    c = (signed char)*p;
-                    if ( !c ) break;
-                }
-            }
-            text = p;
-            continue;
-        }
-
-        // 0x45ab84: dup the shader name.
-        size_t slen = strlen( shader ) + 1;
-        char  *shaderDup = (char *)malloc( slen );
-        memcpy( shaderDup, shader, slen );
-
-        // 0x45ac07: second CSV field on the SAME line = material name (allowLineBreaks=0).
-        parseInfo_t *pi2 = Com_ParseExt( &text, 0 );
-        const char  *matName = pi2->token;
-        if ( matName[0] == 0 )                          // 0x45ac0e: no matching material name
-        {
-            Com_PrintMessage( "shader name '%s' doesn't have a matching material name in MaterialNames.csv", shaderDup );
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp",
-                    56, 0, "%s", "str" );
-        }
-
-        // 0x45ac37: dup + lowercase the material name.
-        size_t mlen = strlen( matName ) + 1;
-        char  *matDup = (char *)malloc( mlen );
-        memcpy( matDup, matName, mlen );
-        _strlwr( matDup );
-
-        // 0x45ac72: push {shaderDup, matDup, head} onto the remap list.
-        MaterialNameRemap_qe3 *node = (MaterialNameRemap_qe3 *)malloc( sizeof( MaterialNameRemap_qe3 ) );
-        node->key   = shaderDup;
-        node->value = matDup;
-        node->next  = (MaterialNameRemap_qe3 *)texWndGlob_materialNameRemap;
-        texWndGlob_materialNameRemap = node;
-
-        Com_SkipRestOfLine( &text );                    // 0x45ac91
-    }
-
-    Com_EndParseSession();                              // 0x45acea: underflow guard + pop frame
-    free( data );                                      // 0x45ad09
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 0x45b010  TexFilter_LoadMenuFile( const char *txt@ecx, void *dest, int startId )
@@ -232,7 +141,6 @@ next_line:
 // ─────────────────────────────────────────────────────────────────────────────
 extern char       *ValueForKey2( int e, const char *key );                            // entity.cpp 0x4825C0
 extern void        SetKeyValue( entity_s_def *e, const char *key, const char *value ); // entity.cpp 0x483690
-extern void        Map_ParseLinkList( int *buf, const char *str );                     // select.cpp 0x48BE20
 extern char       *va( const char *fmt, ... );                                         // q_shared
 extern void       *zero;                                                                // empty-string sentinel (engine_stubs.cpp)
 extern entity_s    entities;                                                            // entity.cpp 0x23F17A0
@@ -252,15 +160,15 @@ static char ScriptGroup_LinkTo( entity_s_def *e )
         return 0;
     int myId = atol( linkName );
 
-    int links[1026];                          // [0..count-1]=ids, [1024]=count, byte+0x1004=overflow
-    Map_ParseLinkList( links, linkTo );        // 0x48c281
-    int count = links[1024];
+    LinkList_t links;                          // Map_ParseLinkList parse buffer (qe3.h)
+    Map_ParseLinkList( &links, linkTo );       // 0x48c281
+    int count = links.size;
     if ( count <= 0 )
         return 0;
 
     // 0x48c29c: is myId present?  Not present → return 0 (no self-link to strip).
     int idx = 0;
-    while ( links[idx] != myId )
+    while ( links.id[idx] != myId )
         if ( ++idx >= count )
             return 0;
 
@@ -268,8 +176,8 @@ static char ScriptGroup_LinkTo( entity_s_def *e )
     int filtered[1024];
     int n = 0;
     for ( int i = 0; i < count; ++i )
-        if ( links[i] != myId )
-            filtered[n++] = links[i];
+        if ( links.id[i] != myId )
+            filtered[n++] = links.id[i];
 
     char buf[1028];
     if ( n )                                   // 0x48c325: join remaining ids "%i" + " %i"...
@@ -347,26 +255,23 @@ void Script_Link( entity_s_def *a, entity_s_def *b )
     if ( aLinkTo && *aLinkTo )
     {
         // 0x48c0c9: parse a's list, add newId if not already present.
-        int links[1026];
-        Map_ParseLinkList( links, aLinkTo );
-        if ( *( (unsigned char *)links + 0x1004 ) )    // 0x48c0d8: overflow flag
+        LinkList_t links;
+        Map_ParseLinkList( &links, aLinkTo );
+        if ( links.overflowed )                        // 0x48c0d8
             Sys_Printf( "Exceeded maximum links\n" );
-        int count = links[1024];
 
         bool present = false;                          // 0x48c0f1
-        for ( int i = 0; i < count; ++i )
-            if ( links[i] == newId ) { present = true; break; }
+        for ( int i = 0; i < links.size; ++i )
+            if ( links.id[i] == newId ) { present = true; break; }
         if ( !present )
-            links[count++] = newId;                    // 0x48c116
+            links.id[links.size++] = newId;            // 0x48c116
 
-        if ( count <= 0 )                              // 0x48c134
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp",
-                    567, 0, "%s", "links.size > 0" );
+        iassert( links.size > 0 );                     // qe3.cpp:567 (0x48c134)
 
         char buf[1028];
-        sprintf( buf, "%i", links[0] );                // 0x48c167
-        for ( int i = 1; i < count; ++i )
-            strcat( buf, va( " %i", links[i] ) );
+        sprintf( buf, "%i", links.id[0] );             // 0x48c167
+        for ( int i = 1; i < links.size; ++i )
+            strcat( buf, va( " %i", links.id[i] ) );
         SetKeyValue( a, "script_linkTo", buf );        // 0x48c1e6
     }
     else
@@ -858,4 +763,59 @@ BOOL DoMru( short nID, HWND hWnd )
     HMENU subMenu = GetSubMenu( GetMenu( hWnd ), 0 );
     MRU_InsertItem( mru, subMenu );
     return ok;
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — this function's embedded Assert() calls name THIS file as
+//  their source (see the brush.cpp relocation protocol / line-uniqueness test).
+// ═════════════════════════════════════════════════════════════════════════════
+// ── sub_48BE20 — parse SPACE-delimited int list (Map_ParseLinkList) ───────────────────────────────
+// 0x48be20 Map_ParseLinkList. __usercall(buf@ebx, linkTo).  Parses linkTo (script_linkTo /
+// script_linkName) as a SPACE-delimited int list with DEDUP, capped at 30 entries.
+// Layout: buf[0..count-1]=values, buf[count]=-1 terminator, buf[1024]=count (byte 0x1000),
+// byte buf+0x1004 = overflow flag (cleared each call, set when the 30-cap is hit).  Parses
+// in place; cross-file Assert qe3.cpp:446.  Caller buf must be int[1026]+ so buf+0x1004 is
+// in bounds.
+void Map_ParseLinkList( LinkList_t *buf, const char *linkTo )
+{
+    int  count = 0;
+    bool atBoundary = true;                          // v7: at a token start
+    buf->overflowed = false;                         // (IDA 0x48be31)
+    size_t i   = 0;
+    size_t len = strlen( linkTo );
+    if ( len )
+    {
+        for ( ;; )
+        {
+            const char *p = &linkTo[i];
+            iassert( linkTo[i] );   // qe3.cpp:446
+            if ( *p == ' ' )
+            {
+                atBoundary = true;
+            }
+            else if ( atBoundary )
+            {
+                int  value = atol( p );
+                bool dup   = false;                  // dedup scan buf[0..count-1] (IDA 0x48be9a)
+                for ( int k = 0; k < count; ++k )
+                    if ( buf->id[k] == value ) { dup = true; break; }
+                if ( !dup )
+                {
+                    buf->id[count++] = value;
+                    atBoundary   = false;
+                    if ( count >= 30 )               // overflow (IDA cmp esi,1Eh)
+                    {
+                        buf->overflowed = true;
+                        break;
+                    }
+                }
+            }
+            ++i;
+            len = strlen( linkTo );                      // IDA recomputes strlen each pass
+            if ( i >= len )
+                break;
+        }
+    }
+    buf->id[count] = -1;                              // -1 terminator at id[size]
+    buf->size      = count;
 }

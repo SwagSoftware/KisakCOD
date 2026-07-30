@@ -42,6 +42,7 @@ entity_s    *world_entity = nullptr;    // 0x25D5B30
 char        currentmap[1024] = "";      // 0x23F18D8
 int         modified = 0;               // 0x23F179C
 int         prefabStackLevel = 0;       // 0x25D5B34
+static bool Map_EditingPrefab() { return prefabStackLevel > 0; }   // the binary's inlined helper (map.cpp:360 string)
 HCURSOR     hCursor = nullptr;          // 0x240A114
 int         g_region_active = 0;        // 0x23F1744
 float       region_mins[3] = { -131072.0f, -131072.0f, -131072.0f };  // 0x739C14
@@ -54,8 +55,7 @@ selbrush_t *region_sides[4] = { nullptr, nullptr, nullptr, nullptr };
 // ─── IDB texWndGlob (0x25D7990) — qtextures chain (texwnd.cpp owns the object) ─
 extern qtexture_s *TexWnd_GetMaterialListHead();
 
-// ─── prefab stack storage (byte_25EB240 @ 0x25EB240, stride 2168) ─────────────
-extern char byte_25EB240[];
+// prefab stack storage: g_prefabStack (IDB byte_25EB240) — declared in qe3.h.
 
 // ─── prefab_s (IDB 0x54; mirror of entity.cpp/mayaexport.cpp) ─────────────────
 // The 5-pointer head holds the prefab's instanced entity + brush list sentinels;
@@ -72,7 +72,7 @@ struct prefab_s
 static_assert(sizeof(prefab_s) == 0x54, "prefab_s (map.cpp mirror != entity.cpp)");
 
 // ─── surface window flag / dialog ─────────────────────────────────────────────
-extern int   g_surfwin;       // surfacedlg.cpp (inspector HWND, 0 = closed)
+// surfDlgGlob (surface inspector; .hwnd = HWND when open) comes from qe3.h
 
 // ─── forward declarations for functions defined in this file ──────────────────
 void Brush_FreeMapBrushes();
@@ -102,7 +102,7 @@ void Prefab_LevelBack();
 typedef int WriteFunc_map_t( int ctx, const char *fmt, ... );
 
 // entity.cpp
-extern int          Map_LoadEntities( const char *filename, entity_s *entList, char a3 );
+extern int          Map_LoadEntities( const char *filename, entity_s *entList, char a3 );   // defined below (0x486500)
 extern void         Map_New();
 extern entity_s    *Prefab_Init( struct prefab_s *a1, entity_s_def *entDef, selbrush_t *a3 );
 extern void         Entity_Free( char *a1 );
@@ -207,9 +207,7 @@ void Brush_FreeMapBrushes()
     while ( entityInsts.next != &entityInsts )
         Entity_Free( (char *)entityInsts.next );
 
-    if ( entities.next != &entities )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                170, 1, "%s", "entities.next == &entities" );
+    iassert( entities.next == &entities );   // map.cpp:170
 }
 
 
@@ -380,9 +378,7 @@ void Map_LoadFromFile( const char *path )
     Sys_Printf( "Map_LoadFile: %s\n", String );
 
     iassert( prefabStackLevel >= 0 );
-    if ( prefabStackLevel > 0 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                360, 0, "%s", "!Map_EditingPrefab()" );   // KEEP_VERBOSE: no Map_EditingPrefab() helper
+    iassert( !Map_EditingPrefab() );   // map.cpp:360
 
     Map_NewMap();
     Map_InitlLayers();
@@ -404,9 +400,7 @@ void Map_LoadFromFile( const char *path )
 
     // world_entity must be NULL before post-process loop (Map_NewMap clears it;
     // LoadEntities does NOT set it — the loop below does).
-    if ( world_entity )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                372, 1, "%s", "world_entity == NULL" );
+    iassert( world_entity == NULL );   // map.cpp:372
 
     // ── Post-process each entity def ─────────────────────────────────────────
     entity_s_def *eDef = (entity_s_def *)entities.next;
@@ -460,9 +454,7 @@ void Map_LoadFromFile( const char *path )
         return;
     }
 
-    if ( entityInsts.next != world_entity )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                404, 1, "%s", "entityInsts.next == world_entity" );
+    iassert( entityInsts.next == world_entity );   // map.cpp:404
 
     Sys_Printf( "--- LoadMapFile ---\n" );
     Sys_Printf( "%s\n", String );
@@ -641,12 +633,8 @@ void Map_SaveFile( const char *path, char a1, char a2 )
     if ( a1 )
         AddRegionBrushes();
 
-    if ( entities.next == &entities )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                534, 1, "%s", "entities.next != &entities" );
-    if ( strcmp( entities.next->eclass->name, "worldspawn" ) != 0 )   // IDA 0x486efe derefs eclass unconditionally
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                535, 1, "%s", "!strcmp( entities.next->eclass->name, \"worldspawn\" )" );
+    iassert( entities.next != &entities );   // map.cpp:534
+    iassert( !strcmp( entities.next->eclass->name, "worldspawn" ) );   // map.cpp:535 (0x486efe derefs eclass unconditionally)
 
     // Write gate (0x486f50): def-list NON-empty OR worldspawn.  The def-list head is
     // brushes.prev (entity+0x0C), its sentinel is &def (entity+0x08); fixed-size entities
@@ -999,12 +987,8 @@ char *Map_GetNextExportId( int slot )
 // IDA __usercall, ebx = WriteWriter_t (WriteFunc_t**); the writer ptr is also its own ctx.
 void Entity_WriteSelected_R( WriteFunc_map_t **writer )
 {
-    if ( entities.next == &entities )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                1323, 1, "%s", "entities.next != &entities" );
-    if ( strcmp( entities.next->eclass->name, "worldspawn" ) != 0 )   // IDA 0x488e22 derefs eclass unconditionally
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                1324, 1, "%s", "!strcmp( entities.next->eclass->name, \"worldspawn\" )" );
+    iassert( entities.next != &entities );   // map.cpp:1323
+    iassert( !strcmp( entities.next->eclass->name, "worldspawn" ) );   // map.cpp:1324 (0x488e22 derefs eclass unconditionally)
 
     int entIdx = 0;
     for ( entity_s_def *e = (entity_s_def *)entities.next;
@@ -1053,31 +1037,14 @@ static void sub_488FC0( entity_s *a1, entity_s *a2, entity_s *a3, int a4 )
 static void sub_4890F0( int skipEnt, int level )
 {
     entity_s *a3 = (entity_s *)(intptr_t)skipEnt;
-    // unk_25EB660 = &byte_25EB240[0] + 264 dwords = slot0's saved entityInsts.next field;
-    // stride 542 dwords = 2168 bytes (one prefab slot).
-    if ( prefabStackLevel > 0 )
-    {
-        int *p = (int *)( byte_25EB240 + 264 * 4 );
-        for ( int v2 = 0; v2 < prefabStackLevel; ++v2 )
-        {
-            FreePrefabLevel( (entity_s *)(intptr_t)*p, &entityInsts, a3, level );
-            p += 542;
-        }
-    }
-    FreePrefabLevel( (entity_s *)(intptr_t)*(int *)((char *)&entityInsts + 4),
-                     &entityInsts, a3, level );
+    // unk_25EB660 = &g_prefabStack[0].entityInstsNext (the binary's raw dword walk).
+    for ( int v2 = 0; v2 < prefabStackLevel; ++v2 )
+        FreePrefabLevel( g_prefabStack[v2].entityInstsNext, &entityInsts, a3, level );
+    FreePrefabLevel( entityInsts.next, &entityInsts, a3, level );
 
-    if ( prefabStackLevel > 0 )
-    {
-        int *p = (int *)( byte_25EB240 + 264 * 4 );
-        for ( int v5 = prefabStackLevel; v5; --v5 )
-        {
-            sub_488FC0( (entity_s *)(intptr_t)*p, &entityInsts, a3, level );
-            p += 542;
-        }
-    }
-    sub_488FC0( (entity_s *)(intptr_t)*(int *)((char *)&entityInsts + 4),
-                &entityInsts, a3, level );
+    for ( int v5 = 0; v5 < prefabStackLevel; ++v5 )
+        sub_488FC0( g_prefabStack[v5].entityInstsNext, &entityInsts, a3, level );
+    sub_488FC0( entityInsts.next, &entityInsts, a3, level );
 }
 
 
@@ -1092,9 +1059,10 @@ void FreePrefabLevel( entity_s *a1, entity_s *a2, entity_s *a3, int a4 )
             continue;
 
         entity_s_def *def = (entity_s_def *)i->def;
-        if ( (def->eclass->classtype & 0x10) == 0 )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\map.cpp",
-                    1416, 1, "%s", "e->def->eclass->nShowFlags & ECLASS_PREFAB" );
+        {
+            entity_s *e = i;                     // the binary's local
+            iassert( e->def->eclass->nShowFlags & ECLASS_PREFAB );   // map.cpp:1416
+        }
 
         if ( i == a3 )
             continue;
@@ -1109,13 +1077,13 @@ void FreePrefabLevel( entity_s *a1, entity_s *a2, entity_s *a3, int a4 )
                 RemoveModelInstFromBuf( i->modelInst );
                 i->modelInst = 0;
             }
-            ++*(unsigned short *)((char *)def + 0x78);      // 0x4890c1: ++def->version
-            // 0x4890c9: i->brushes.ownerNext->def + 0x4C (brush_t.unk01 low byte) = 0.
+            ++*(unsigned short *)&def->version_prob_wrong;  // 0x4890c1: ++def->version (word)
+            // 0x4890c9: clear the def-brush's modelFailed byte (+0x4C).
             if ( i->brushes.ownerNext && i->brushes.ownerNext != (selbrush_t *)&i->brushes )
             {
                 brush_t *bdef = i->brushes.ownerNext->def;
                 if ( bdef )
-                    *(char *)((char *)bdef + 0x4C) = 0;
+                    bdef->modelFailed = 0;
             }
         }
         else
@@ -1287,6 +1255,9 @@ char MapFile_WriteEntity( entity_s_def *a1, FILE *a2, char a3 )
         const char *layerName = ( (brush_t *)a1->brushes.prev )->parent_layer_string;
         if ( strcmp( layerName, "000_Global" ) != 0 )
         {
+            // KEEP_VERBOSE: inlined MapLoad_ParseBrush_Layer (engine_stubs 0x42fb40 is the
+            // assert carrier) — this writer is a bare FILE*/fprintf, not the writer callback
+            // the helper takes, so the call can't be routed through it.
             if ( !layerName )
                 Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\mapparsing.cpp",
                         190, 0, "%s", "layerName" );
@@ -1402,13 +1373,13 @@ void Prefab_NextLevel( void *a1 )
         return;
     }
 
-    // The prefab's DEFINITION entity-list container (models_t.x88 == +0x160), whose
-    // +8/+12 are the def `entities` sentinel prev/next.
-    entity_s_def *def = (entity_s_def *)owner->def;
-    char *modelClass  = (char *)def->modelClass;            // entitymodel_t* (models_t)
-    char *defEntsRoot = *(char **)( modelClass + 0x160 );   // models_t.x88
-    entity_s *defEntsNext = *(entity_s **)( defEntsRoot + 12 );
-    int       defEntsPrev = *(int *)( defEntsRoot + 8 );
+    // The prefab's DEFINITION entity-list container (modelClass->model, models_t.x88
+    // @+0x160), whose x2(+8)/entities.next(+12) are the def `entities` sentinel head.
+    entity_s_def *def        = (entity_s_def *)owner->def;
+    entitymodel_t *modelClass = def->modelClass;
+    models_t *defEntsRoot    = modelClass->model;             // models_t.x88 slot
+    entity_s *defEntsNext    = (entity_s *)defEntsRoot->entities.next;
+    int       defEntsPrev    = defEntsRoot->x2;
 
     // 0x489267: drop the cached light previews — they belong to the parent map's brushes,
     // which are about to be swapped out (same reset as CMainFrame::OnClearPreviewList).
@@ -1425,46 +1396,46 @@ void Prefab_NextLevel( void *a1 )
 
     // ── save current world state into the (pre-increment) stack slot ──────────
     const int oldLevel = prefabStackLevel;
-    char *slot = &byte_25EB240[2168 * prefabStackLevel];
+    prefabLevel_t *slot = &g_prefabStack[prefabStackLevel];
     ++prefabStackLevel;
 
-    *(int *)(slot + 535 * 4) = g_region_active;
-    *(float *)(slot + 536 * 4) = region_mins[0];
-    *(float *)(slot + 537 * 4) = region_mins[1];
-    *(float *)(slot + 538 * 4) = region_mins[2];
-    *(float *)(slot + 539 * 4) = region_maxs[0];
-    *(float *)(slot + 540 * 4) = region_maxs[1];
-    *(float *)(slot + 541 * 4) = region_maxs[2];
+    slot->regionActive  = g_region_active;
+    slot->regionMins[0] = region_mins[0];
+    slot->regionMins[1] = region_mins[1];
+    slot->regionMins[2] = region_mins[2];
+    slot->regionMaxs[0] = region_maxs[0];
+    slot->regionMaxs[1] = region_maxs[1];
+    slot->regionMaxs[2] = region_maxs[2];
     if ( g_region_active )
         Map_RegionOff();
 
-    strcpy( slot + 4, currentmap );
-    *(int *)(slot + 0) = modified;
+    strcpy( slot->mapName, currentmap );
+    slot->modified = modified;
 
-    // List heads (same DWORD offsets PrevLevel reads back).
-    *(int *)(slot + 257 * 4) = (int)(intptr_t)active_brushes.next;
-    *(int *)(slot + 258 * 4) = (int)(intptr_t)active_brushes.prev;
-    *(int *)(slot + 261 * 4) = (int)(intptr_t)entities.next;
-    *(int *)(slot + 262 * 4) = (int)(intptr_t)entities.prev;
-    *(int *)(slot + 263 * 4) = *(int *)((char *)&entityInsts + 0);   // entityInsts.prev
-    *(int *)(slot + 264 * 4) = *(int *)((char *)&entityInsts + 4);   // entityInsts.next
-    *(int *)(slot + 265 * 4) = (int)(intptr_t)v1;                    // the prefab brush
+    // List heads (PrevLevel reads these back).
+    slot->activeNext      = active_brushes.next;
+    slot->activePrev      = active_brushes.prev;
+    slot->entitiesNext    = entities.next;
+    slot->entitiesPrev    = entities.prev;
+    slot->entityInstsPrev = entityInsts.prev;
+    slot->entityInstsNext = entityInsts.next;
+    slot->prefabBrush     = v1;
 
     // Layer snapshot — the binary (sub_489810) deep-copies the layer RB-tree into slot+2088;
     // the port models layerMap as a std::map, so this collapses to a per-level snapshot.
     Layers_SavePrefabLayers( oldLevel );
 
-    strcpy( slot + 1064, g_activeLayer_string );
+    strcpy( slot->activeLayer, g_activeLayer_string );
 
     if ( a1 )
     {
-        *(int *)(slot + 259 * 4) = (int)(intptr_t)selected_brushes.next;
-        *(int *)(slot + 260 * 4) = (int)(intptr_t)selected_brushes.prev;
+        slot->selectedNext = selected_brushes.next;
+        slot->selectedPrev = selected_brushes.prev;
     }
     else
     {
-        *(int *)(slot + 259 * 4) = 0;
-        *(int *)(slot + 260 * 4) = 0;
+        slot->selectedNext = nullptr;
+        slot->selectedPrev = nullptr;
     }
 
     // ── GUI camera / XY reframe (guarded; NULL in the headless gate) ──────────
@@ -1474,16 +1445,16 @@ void Prefab_NextLevel( void *a1 )
         CCamWnd *cam = g_pParentWnd->m_pCamWnd;
 
         // Save the parent view (PrevLevel reads these back at +525..534).
-        *(float *)(slot + 531 * 4) = xy->m_vOrigin[0];
-        *(float *)(slot + 532 * 4) = xy->m_vOrigin[1];
-        *(float *)(slot + 533 * 4) = xy->m_fScale;
-        *(int   *)(slot + 534 * 4) = (int)xy->m_nViewType;
-        *(float *)(slot + 525 * 4) = cam->camera.origin[0];
-        *(float *)(slot + 526 * 4) = cam->camera.origin[1];
-        *(float *)(slot + 527 * 4) = cam->camera.origin[2];
-        *(float *)(slot + 528 * 4) = cam->camera.angles[0];
-        *(float *)(slot + 529 * 4) = cam->camera.angles[1];
-        *(float *)(slot + 530 * 4) = cam->camera.angles[2];
+        slot->xyOrigin[0]  = xy->m_vOrigin[0];
+        slot->xyOrigin[1]  = xy->m_vOrigin[1];
+        slot->xyScale      = xy->m_fScale;
+        slot->xyViewType   = (int)xy->m_nViewType;
+        slot->camOrigin[0] = cam->camera.origin[0];
+        slot->camOrigin[1] = cam->camera.origin[1];
+        slot->camOrigin[2] = cam->camera.origin[2];
+        slot->camAngles[0] = cam->camera.angles[0];
+        slot->camAngles[1] = cam->camera.angles[1];
+        slot->camAngles[2] = cam->camera.angles[2];
 
         // Reframe the live camera into the prefab's local space.  entAxis is the entity
         // orientation matrix, origin-first [4][3] (row0 = origin, rows 1..3 = rotation).
@@ -1539,12 +1510,12 @@ void Prefab_NextLevel( void *a1 )
     entities.prev = (entity_s *)(intptr_t)defEntsPrev;
     entities.next = defEntsNext;
     defEntsNext->prev = &entities;
-    *(int *)((char *)(intptr_t)defEntsPrev + 4) = (int)(intptr_t)&entities;   // defEntsPrev->next = &entities
+    ( (entity_s *)(intptr_t)defEntsPrev )->next = &entities;
 
-    *(int *)((char *)&entityInsts + 4) = (int)(intptr_t)prefab->next_entity;  // entityInsts.next
-    *(int *)((char *)&entityInsts + 0) = (int)(intptr_t)prefab->prev_entity;  // entityInsts.prev
-    prefab->next_entity->prev = (entity_s *)((char *)&entityInsts);
-    *(int *)((char *)prefab->prev_entity + 4) = (int)(intptr_t)&entityInsts;
+    entityInsts.next = prefab->next_entity;
+    entityInsts.prev = prefab->prev_entity;
+    prefab->next_entity->prev = &entityInsts;
+    prefab->prev_entity->next = &entityInsts;
 
     world_entity = prefab->next_entity;
 
@@ -1570,12 +1541,11 @@ void Prefab_NextLevel( void *a1 )
         if ( i->patch )
             i->patch->version = (__int16)( i->patch->def->version - 1 );
     }
-    for ( entity_s *j = (entity_s *)(intptr_t)*(int *)((char *)&entityInsts + 4);
-          j != &entityInsts; j = j->next )
+    for ( entity_s *j = entityInsts.next; j != &entityInsts; j = j->next )
     {
-        // def version is at def+0x78; the instance version is the int16 at entity_s+0x4C.
-        unsigned short dv =
-            *(unsigned short *)((char *)j->def + 0x78);
+        // def version is the word at def->version_prob_wrong (+0x78); the instance
+        // version is the low word of entity_s.version (+0x4C).
+        unsigned short dv = *(unsigned short *)&j->def->version_prob_wrong;
         *(unsigned short *)&j->version = (unsigned short)( dv - 1 );
     }
 
@@ -1619,11 +1589,11 @@ void Prefab_NextLevel( void *a1 )
         entity_s_def *odef = (entity_s_def *)owner2->def;
         if ( odef )
         {
-            *(int *)((char *)odef + 0x64) = 0;            // modelClass = NULL (re-realize on leave)
-            ++*(unsigned short *)((char *)odef + 0x78);   // ++version
+            odef->modelClass = nullptr;                    // re-realize on leave
+            ++*(unsigned short *)&odef->version_prob_wrong;// ++version (word)
         }
         if ( v1->def )
-            *(char *)((char *)v1->def + 0x4C) = 0;        // brush_t+0x4C (unk01 low byte)
+            v1->def->modelFailed = 0;                      // brush_t+0x4C low byte
     }
 
     Map_InitlLayers();
@@ -1655,35 +1625,33 @@ void Prefab_PrevLevel()
     Brush_FreeMapBrushes();
     --prefabStackLevel;
 
-    // Restore from the slot the (already decremented) level indexes.  All slot offsets
-    // below are DWORD indices from the slot base; stride is 2168 bytes (0x878).
-    const int STRIDE = 2168;
-    char *slot = &byte_25EB240[STRIDE * prefabStackLevel];
+    // Restore from the (already decremented) level's slot.
+    prefabLevel_t *slot = &g_prefabStack[prefabStackLevel];
 
-    entities.next = (entity_s *)(intptr_t)*(int *)(slot + 261 * 4);
-    entities.prev = (entity_s *)(intptr_t)*(int *)(slot + 262 * 4);
+    entities.next = slot->entitiesNext;
+    entities.prev = slot->entitiesPrev;
 
     iassert( entities.next->prev == &entities );
     iassert( entities.prev->next == &entities );
 
-    *(int *)((char *)&entityInsts + 0) = *(int *)(slot + 263 * 4);  // prev
-    *(int *)((char *)&entityInsts + 4) = *(int *)(slot + 264 * 4);  // next
+    entityInsts.prev = slot->entityInstsPrev;
+    entityInsts.next = slot->entityInstsNext;
 
     iassert( entityInsts.next->prev == &entityInsts );
     iassert( entityInsts.prev->next == &entityInsts );
 
-    active_brushes.next = (selbrush_t *)(intptr_t)*(int *)(slot + 257 * 4);
-    active_brushes.prev = (selbrush_t *)(intptr_t)*(int *)(slot + 258 * 4);
+    active_brushes.next = slot->activeNext;
+    active_brushes.prev = slot->activePrev;
 
     world_entity = entityInsts.next;
 
     iassert( active_brushes.next->prev == &active_brushes );
     iassert( active_brushes.prev->next == &active_brushes );
 
-    if ( *(int *)(slot + 259 * 4) )
+    if ( slot->selectedNext )
     {
-        selbrush_t *sn = (selbrush_t *)(intptr_t)*(int *)(slot + 259 * 4);
-        selbrush_t *sp = (selbrush_t *)(intptr_t)*(int *)(slot + 260 * 4);
+        selbrush_t *sn = slot->selectedNext;
+        selbrush_t *sp = slot->selectedPrev;
         if ( sp )
         {
             selected_brushes.next = sn;
@@ -1691,21 +1659,21 @@ void Prefab_PrevLevel()
         }
     }
 
-    strncpy( currentmap, slot + 4, 1024 );
+    strncpy( currentmap, slot->mapName, 1024 );
     currentmap[1023] = '\0';
 
-    modified        = *(int *)(slot + 0);
-    g_region_active = *(int *)(slot + 535 * 4);
+    modified        = slot->modified;
+    g_region_active = slot->regionActive;
 
-    region_mins[0] = *(float *)(slot + 536 * 4);
-    region_mins[1] = *(float *)(slot + 537 * 4);
-    region_mins[2] = *(float *)(slot + 538 * 4);
-    region_maxs[0] = *(float *)(slot + 539 * 4);
-    region_maxs[1] = *(float *)(slot + 540 * 4);
-    region_maxs[2] = *(float *)(slot + 541 * 4);
+    region_mins[0] = slot->regionMins[0];
+    region_mins[1] = slot->regionMins[1];
+    region_mins[2] = slot->regionMins[2];
+    region_maxs[0] = slot->regionMaxs[0];
+    region_maxs[1] = slot->regionMaxs[1];
+    region_maxs[2] = slot->regionMaxs[2];
 
-    // slot+265: the prefab brush the user was editing.
-    entity_brush_s *prefabBrush = (entity_brush_s *)(intptr_t)*(int *)(slot + 265 * 4);
+    // The prefab brush the user was editing.
+    entity_brush_s *prefabBrush = (entity_brush_s *)slot->prefabBrush;
     Model_SetModel( prefabBrush, (int)&world_orient_matrix );
     Map_InitlLayers();
 
@@ -1727,20 +1695,20 @@ void Prefab_PrevLevel()
         Layers_02();
     }
 
-    // Active layer name (slot+1064)
-    strncpy( g_activeLayer_string, slot + 1064, 255 );
+    // Active layer name
+    strncpy( g_activeLayer_string, slot->activeLayer, 255 );
     g_activeLayer_string[255] = '\0';
     sub_41C9C0( g_activeLayer_string );
 
     // Camera restore
     if ( g_pParentWnd && g_pParentWnd->m_pCamWnd )
     {
-        g_pParentWnd->m_pCamWnd->camera.origin[0] = *(float *)(slot + 525 * 4);
-        g_pParentWnd->m_pCamWnd->camera.origin[1] = *(float *)(slot + 526 * 4);
-        g_pParentWnd->m_pCamWnd->camera.origin[2] = *(float *)(slot + 527 * 4);
-        g_pParentWnd->m_pCamWnd->camera.angles[0] = *(float *)(slot + 528 * 4);
-        g_pParentWnd->m_pCamWnd->camera.angles[1] = *(float *)(slot + 529 * 4);
-        g_pParentWnd->m_pCamWnd->camera.angles[2] = *(float *)(slot + 530 * 4);
+        g_pParentWnd->m_pCamWnd->camera.origin[0] = slot->camOrigin[0];
+        g_pParentWnd->m_pCamWnd->camera.origin[1] = slot->camOrigin[1];
+        g_pParentWnd->m_pCamWnd->camera.origin[2] = slot->camOrigin[2];
+        g_pParentWnd->m_pCamWnd->camera.angles[0] = slot->camAngles[0];
+        g_pParentWnd->m_pCamWnd->camera.angles[1] = slot->camAngles[1];
+        g_pParentWnd->m_pCamWnd->camera.angles[2] = slot->camAngles[2];
     }
 
     if ( g_pParentWnd && g_pParentWnd->m_pXYWnd )
@@ -1748,16 +1716,16 @@ void Prefab_PrevLevel()
         // 0x489c23: PositionView() runs BEFORE the m_vOrigin/m_fScale restore — it
         // overwrites m_vOrigin[nDim1/nDim2], so the restore afterwards is what wins.
         g_pParentWnd->m_pXYWnd->PositionView();
-        g_pParentWnd->m_pXYWnd->m_vOrigin[0] = *(float *)(slot + 531 * 4);
-        g_pParentWnd->m_pXYWnd->m_vOrigin[1] = *(float *)(slot + 532 * 4);
-        // BINARY BUG (faithful): 0x489c46/0x489c4f load slot+533 TWICE — m_vOrigin[2] gets
-        // the saved m_fScale.  NextLevel only ever saved 531/532/533 = origin[0]/[1]/scale.
-        g_pParentWnd->m_pXYWnd->m_vOrigin[2] = *(float *)(slot + 533 * 4);
-        g_pParentWnd->m_pXYWnd->m_fScale      = *(float *)(slot + 533 * 4);
-        g_pParentWnd->m_pXYWnd->SetViewType( *(CXYWnd::EViewType *)(slot + 534 * 4) );
+        g_pParentWnd->m_pXYWnd->m_vOrigin[0] = slot->xyOrigin[0];
+        g_pParentWnd->m_pXYWnd->m_vOrigin[1] = slot->xyOrigin[1];
+        // BINARY BUG (faithful): 0x489c46/0x489c4f load the scale slot TWICE — m_vOrigin[2]
+        // gets the saved m_fScale.  NextLevel only ever saved origin[0]/[1]/scale.
+        g_pParentWnd->m_pXYWnd->m_vOrigin[2] = slot->xyScale;
+        g_pParentWnd->m_pXYWnd->m_fScale      = slot->xyScale;
+        g_pParentWnd->m_pXYWnd->SetViewType( (CXYWnd::EViewType)slot->xyViewType );
     }
 
-    // 0x489c67: `if (g_surfwin) { SetTexMods(); Select_SetTexture_2(&g_dlgSurface); }` —
+    // 0x489c67: `if (surfDlgGlob.hwnd) { SetTexMods(); Select_SetTexture_2(&g_dlgSurface); }` —
     // Surf_UpdateInspector is exactly that pair, and a no-op when the inspector is closed.
     Surf_UpdateInspector();
     if ( g_pParentWnd && g_pParentWnd->m_hWnd )
@@ -1821,7 +1789,7 @@ void CMainFrame::OnPrefabLeave()
 extern int   LoadFile( const char *filename, void **buf );      // cmdlib.cpp
 extern void  Com_BeginParseSession( const char *name );         // q_parse
 extern int   Map_ReadVersion( const void **text );              // layers.cpp (sub_4861F0)
-extern char *Map_ImportBuffer( const char **text, int version );// entity.cpp 0x487C90
+extern char *Map_ImportBuffer( const char **text, int version );// defined below (0x487C90)
 
 void Map_ImportFile( const char *path )
 {
@@ -1874,4 +1842,244 @@ void Map_ImportFile( const char *path )
     }
     if ( wait )
         SetCursor( wait );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — this function's embedded Assert() calls name THIS file as
+//  their source (see the brush.cpp relocation protocol / line-uniqueness test).
+// ═════════════════════════════════════════════════════════════════════════════
+// deps of the moved parse bodies (previously declared in entity.cpp):
+extern void      Entity_Free_R( entity_s *e );                        // entity.cpp
+extern void      Entity_UnlinkBrush( brush_t *b );                    // entity.cpp
+extern entity_s *ParseEntity( const char **text, int version, char a2, char a3 );  // entity.cpp 0x487A30
+extern void      Map_ParseLayers( const void **text, int skipFlags ); // 0x486280
+extern bool      g_bScreenUpdates;                                    // entity.cpp
+// deps (duplicated decls are benign; the parse/undo machinery lives across TUs):
+extern void        Select_Deselect( int bDeselectFaces );                  // select.cpp 0x48E800
+extern void        Select_Brush( selbrush_t *b, char some_overwrite, char bStatus, char center ); // select.cpp 0x48DCC0
+extern void        Undo_ClearRedo();                                       // undo.cpp 0x45DF20
+extern void        Undo_GeneralStart( const char *op );                    // undo.cpp 0x45E3F0
+extern void        Undo_End();                                             // undo.cpp 0x45EA20
+extern bool        Model_SetModel( entity_brush_s *b, int orientMatrix );  // brush.cpp 0x478780
+extern undo_s     *g_lastundo;                                             // undo.cpp 0x23F162C
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x486500  Map_LoadEntities  (map.cpp:304 asserts — now in their own file)
+// Loads entities from a file into the given doubly-linked entity list.
+// 0x486500: TAIL splice, ParseEntity(mapVer,0,1),
+// parse-session setup/teardown all match. 304/305 converted to iassert (same-file after relocation); 690 CONVERTED.
+// ─────────────────────────────────────────────────────────────────────────────
+int Map_LoadEntities( const char *filename, entity_s *entList, char a3 )
+{
+    iassert( entList->next == entList );   // map.cpp:304
+    iassert( entList->prev == entList );   // map.cpp:305
+
+    int   count = 0;
+    void *buf   = nullptr;
+    if ( LoadFile( filename, &buf ) == -1 )
+        goto done;
+
+    {
+        Com_BeginParseSession( filename );
+        ParseThreadInfo *pi = Com_GetParseThreadInfo();
+        pi->parseInfo[pi->parseInfoNum].spaceDelimited  = 0;
+        pi->parseInfo[pi->parseInfoNum].negativeNumbers = 1;
+
+        const void *textPtr  = buf;
+        int         mapVer   = Map_ReadVersion( &textPtr );
+        if ( mapVer >= 0 )
+        {
+            if ( mapVer < 4 )
+                pi->parseInfo[pi->parseInfoNum].spaceDelimited = 1;
+            if ( mapVer > 3 )
+                Map_ParseLayers( &textPtr, a3 != 0 );
+
+            extern void IncRef( entity_s *e, entity_s *list );   // entity.cpp 0x483bf0
+            for ( entity_s *e = ParseEntity( (const char **)&textPtr, mapVer, 0, 1 );
+                  e;
+                  e = ParseEntity( (const char **)&textPtr, mapVer, 0, 1 ) )
+            {
+                ++count;
+                IncRef( e, entList );                    // inlined in the binary
+            }
+        }
+
+        // End parse session
+        ParseThreadInfo *pi2 = Com_GetParseThreadInfo();
+        if ( !pi2->parseInfoNum )
+            Com_Error( ERR_FATAL, "Com_EndParseSession: session underflow" );
+        --pi2->parseInfoNum;
+    }
+
+done:
+    free( buf );
+    return count;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x487c90  Map_ImportBuffer  (map.cpp ~4051 bytes) — the PASTE parse-and-place.
+//
+// Parses a .map text buffer (produced by Entity_WriteSelected_R into the clipboard)
+// back into live brushes/entities and selects them. This is the engine behind
+// CXYWnd::Paste and (in the binary) Clone_Selection. The parse machinery is the
+// proven ParseEntity / Brush_Parse / Prefab_Init chain (same as Map_LoadEntities).
+// 0x487c90: SUBSET: Implemented core (worldspawn
+// merge, undo-stamp loops @0x10/0x7C, version bumps brush_t@0x4E 16-bit, classtype & 0x10) all
+// FAITHFUL; parked auto-target/targetname/script_link renumber + OLE clipboard documented. map.cpp asserts KEEP_VERBOSE.
+//
+// Faithful to the IDB control flow (0x487C90):
+//   1. Select_Deselect(1); Undo bracket ("import buffer"); d_parsed_brushes = 0.
+//   2. For each entity ParseEntity returns:
+//        * worldspawn: MERGE its brushes into world_entity's def-list (Entity_Unlink/
+//          LinkBrush), rebuild windings, instance (Brush_AddToList) + select
+//          (Brush_AddToList2); then Entity_Free_R the now-empty parsed worldspawn def.
+//        * other: Prefab_Init it into the entityInsts/active list, splice the DEF into
+//          the `entities` list, then SELECT every instance brush (Select_Brush). The
+//          undo records get stamped onto the new entity/brushes so the paste undoes.
+//   3. Final pass: instance the model for misc_model/prefab entities (classtype&0x10),
+//      rebuild windings on the freshly-selected brushes, MarkMapModified, Undo_End.
+//
+// KISAK, deliberate subset: the auto-target/targetname RENUMBERING (the binary's
+// CMapStringToString remap that rewrites pasted target/targetname/script_link* to fresh
+// "auto%i" ids via Map_GetNextAutoTarget so a paste-on-top doesn't collide) and the
+// script_linkName/script_linkTo link-number renumbering (Map_ParseLinkList @0x48BE20).
+// Effect: pasted entities keep their ORIGINAL target/targetname/link ids — identical to
+// the existing in-memory Clone_Selection (clones land coincident, references intact).
+// All map geometry, epairs, layers, selection, and undo are faithful and round-trippable.
+// ─────────────────────────────────────────────────────────────────────────────
+char *Map_ImportBuffer( const char **text, int version )
+{
+    Select_Deselect( 1 );
+    Undo_ClearRedo();
+    Undo_GeneralStart( "import buffer" );
+    g_qeglobals.d_parsed_brushes = 0;
+
+    // (PARKED) auto-target seed + link-number map are built here in the binary; skipped.
+    (void)Map_GetNextAutoTarget;
+
+    g_qeglobals.d_num_entities = 0;
+
+    for ( entity_s *ent = ParseEntity( text, version, 0, 0 ); ent; ent = ParseEntity( text, version, 0, 0 ) )
+    {
+        entity_s_def *eDef = (entity_s_def *)ent;
+        undo_s       *u    = g_lastundo;
+
+        // ── Undo-record stamping (IDB 0x488090-0x48810B). Associates the parsed entity
+        //    + its brush defs with the current undo record so Undo removes the paste.
+        if ( u && !u->done && ent != (entity_s *)world_entity->def )
+        {
+            eDef->epairEdits = u->id;                                   // entity+0x7C
+            brush_t *sentinel = (brush_t *)&eDef->def; // entity+0x08
+            for ( brush_t *b = (brush_t *)eDef->brushes.prev; b != sentinel; b = b->onext )
+                b->ownerPrev = (entity_s *)(intptr_t)u->id;            // brush+0x10
+        }
+        {
+            brush_t *sentinel = (brush_t *)&eDef->def;
+            for ( brush_t *b = (brush_t *)eDef->brushes.prev; b && b != sentinel; b = b->onext )
+            {
+                if ( u && !u->done )
+                {
+                    b->ownerPrev = (entity_s *)(intptr_t)u->id;        // brush+0x10
+                    entity_s_def *owner = (entity_s_def *)b->owner;    // brush+0x08
+                    if ( owner->eclass && *(int *)&owner->eclass->fixedsize )
+                    {
+                        owner->epairEdits = u->id;                     // owner+0x7C
+                        u = g_lastundo;
+                    }
+                }
+            }
+        }
+
+        if ( Entity_HasEpairMatch( ent, "classname", "worldspawn" ) )
+        {
+            // ── WORLDSPAWN MERGE (IDB 0x488127-0x488254). Move every brush DEF from the
+            //    parsed worldspawn entity onto the live worldspawn DEF, instance + select
+            //    each. The walk captures `next` BEFORE the relink (relink rewrites onext).
+            //
+            //    instance-vs-def: the brush DEF's owner must be the worldspawn DEF
+            //    (world_entity->def), NOT the world_entity INSTANCE —
+            //    Entity_LinkBrush links into a DEF's def-list and sets owner=that def, and
+            //    Brush_AddToList(def, instance) then asserts def->owner == instance->def
+            //    (brush.cpp:2386). Passing world_entity (the instance) sets owner=instance
+            //    and trips that assert. The binary's inline relinks into
+            //    world_entity->def->def with owner=the DEF.
+            entity_s *worldDef = (entity_s *)world_entity->def;
+            brush_t  *sentinel = (brush_t *)&eDef->def;
+            brush_t  *b        = (brush_t *)eDef->brushes.prev;   // def-list first element
+            while ( b != sentinel )
+            {
+                brush_t *next = b->onext;                        // capture before relink
+
+                Entity_UnlinkBrush( b );                         // off the parsed worldspawn def-list
+                Entity_LinkBrush( b, worldDef );                 // onto live worldspawn DEF (owner=DEF, refCount++, Entity_ColorSth)
+
+                g_bScreenUpdates = false;
+                Brush_BuildWindings( b, 1 );
+                if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
+                    SetupVertexSelection();
+                ++b->version;
+                selbrush_t *inst = Brush_AddToList( b, world_entity );   // instance (refCount->2; owner=world_entity)
+                if ( inst->next || inst->prev )
+                    Com_Error( ERR_FATAL, "Brush_AddToList: already linked" );
+                Brush_AddToList2( inst );                                // select it
+                g_bScreenUpdates = true;
+
+                b = next;
+            }
+            Entity_Free_R( ent );                               // drop the now-empty parsed worldspawn def
+            continue;
+        }
+
+        // ── NON-WORLDSPAWN ENTITY (IDB 0x488279-0x4888DD). Instance it, splice the DEF
+        //    into the `entities` list, then select every instance brush.
+        entity_s *inst = Prefab_Init( (prefab_s *)&entityInsts, eDef, &active_brushes );
+
+        // (PARKED) target/targetname/script_link* auto-renumber happens here in the binary.
+
+        // Splice the DEF onto the `entities` list (TAIL insert — IDB 0x488894).
+        eDef->next            = &entities;
+        eDef->prev            = entities.prev;
+        entities.prev->next   = ent;
+        entities.prev         = ent;
+        ++g_qeglobals.d_num_entities;
+
+        // Select every instance brush of this pasted entity (IDB LABEL: 0x4888BE).
+        for ( selbrush_t *ib = inst->brushes.ownerNext; ib != &inst->brushes; ib = ib->ownerNext )
+            Select_Brush( ib, 1, 0, 0 );
+    }
+
+    // ── Final pass A (0x48890F): instance the 3D model for prefab insts (classtype & 0x10).
+    for ( entity_s *entInst = entityInsts.next; entInst != &entityInsts; entInst = entInst->next )
+    {
+        iassert( entInst );   // map.cpp:1242
+        entity_s_def *iDef = (entity_s_def *)entInst->def;
+        iassert( entInst->def );   // map.cpp:1243
+        iassert( entInst->def->eclass );   // map.cpp:1244
+        if ( ( iDef->eclass->classtype & 0x10 ) != 0 )
+        {
+            entity_brush_s *fb = entInst->brushes.ownerNext;
+            if ( fb != &entInst->brushes )
+                Model_SetModel( fb, (int)(intptr_t)&world_orient_matrix );
+        }
+    }
+
+    // ── Final pass B: rebuild windings on the freshly-selected brushes (IDB 0x4889B8-end).
+    //    The binary also dedups a target/targetname pair between two newly-selected ents
+    //    when they accidentally collide; that belongs to the PARKED auto-rename path
+    //    (no collisions are introduced without renumbering), so only the windings rebuild
+    //    + MarkMapModified survive here.
+    for ( selbrush_t *sb = selected_brushes.next; sb != &selected_brushes; sb = sb->next )
+    {
+        brush_t *def = sb->def;
+        Brush_BuildWindings( def, 1 );
+        if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
+            SetupVertexSelection();
+        MarkMapModified();
+        ++def->version;
+    }
+
+    g_nUpdateBits = -1;
+    modified      = 1;
+    Undo_End();
+    return nullptr;
 }

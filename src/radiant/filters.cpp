@@ -383,9 +383,7 @@ static bool FilterCond_Material(brush_t *a1, filter_info_s *a2)
         for ( int i = 0; i < a1->faceCount; ++i )
         {
             MaterialDef *md = &a1->faces[i].mtldef[0];
-            if ( ( md->lyrMtl != nullptr ) + ( md->radMtl != nullptr ) != 1 )  // MtlDef_IsValid
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                        85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
+            // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
             const char *name = (const char *)Materialdef_GetName( md );
             bool hit = ( flags & 1 ) ? ( strstr( name, target ) != nullptr )
                                      : ( strcmp( name, target ) == 0 );
@@ -421,10 +419,10 @@ static bool FilterCond_Contents(brush_t *a1, filter_info_s *a2)
     if ( !faceCount )
         return !negate;                            // no faces → "matches" (IDA returns !negate)
     int   brushContents = a1->contents;
-    char *face = (char *)a1->faces;
-    for ( unsigned int i = 0; ; ++i, face += sizeof(face_t) )
+    face_t *face = a1->faces;
+    for ( unsigned int i = 0; ; ++i, ++face )
     {
-        int faceContents = *(int *)( face + offsetof(face_t, contents) );  // +180
+        int faceContents = face->contents;
         if ( ( ( brushContents | faceContents ) & bits ) == 0 )
             return negate;                         // a face NOT excluded by these bits
         if ( i + 1 >= faceCount )
@@ -585,15 +583,15 @@ static bool FilterBrush_CheckFilterListHide(filter_entry_s *list, brush_t *def)
     // IDA 0x412050 — sub_412050
     // While condition in IDA: keep looping if (isShown) || (face type) || !condition_match
     // i.e., stop and return 1 (hidden) only when: !isShown && !face_type && condition matches
-    int v2 = (int)list;
-    if ( !v2 )
+    filter_entry_s *f = (filter_entry_s *)list;
+    if ( !f )
         return false;
-    while ( *(bool *)(v2 + 4)                          // isShown → skip
-         || (*(unsigned char *)v2 & 4) != 0             // face-type filter → skip
-         || !FilterCondition_Eval(def, *(filter_info_s **)(v2 + 16)) ) // condition not met → skip
+    while ( f->isShown                                  // isShown → skip
+         || ( f->filter_type_enum & 4 ) != 0            // face-type filter → skip
+         || !FilterCondition_Eval( def, f->info ) )     // condition not met → skip
     {
-        v2 = *(int *)(v2 + 20);                         // ->next_filter
-        if ( !v2 )
+        f = f->next_filter;
+        if ( !f )
             return false;
     }
     return true;
@@ -794,6 +792,8 @@ MaterialInfo *RadiantFilters06_large(filter_entry_s *a1)
         std::map<std::string, int>::iterator it = s_faceTexMap.find( node->name );
         if ( it == s_faceTexMap.end() )                      // IDA: Assert mapIter != end()
         {
+            // KEEP_VERBOSE: the string names g_qeglobals.d_filterGlobals.faceTexMap —
+            // the port's map is the file-static s_faceTexMap (qeglobals layout is locked).
             Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\filters.cpp",
                     622, 0, "%s", "mapIter != g_qeglobals.d_filterGlobals.faceTexMap.end()" );
             continue;

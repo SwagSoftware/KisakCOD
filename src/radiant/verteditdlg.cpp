@@ -62,10 +62,11 @@ void VertEditDlg_Apply( unsigned char r, unsigned char g, unsigned char b, unsig
         if ( !pInst )
             continue;
 
-        // 0x46123C: the `b->patch->def == b->def->patch` invariant (type 0 → log+continue).
-        if ( pInst->def != sb->def->patch )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\VertEditDlg.cpp",
-                    199, 0, "%s", "b->patch->def == b->def->patch" );
+        // 0x46123C (type 0 → log+continue).  b = the binary's local.
+        {
+            selbrush_t *b = sb;
+            iassert( b->patch->def == b->def->patch );   // VertEditDlg.cpp:199
+        }
 
         patchMesh_t *patch = sb->def->patch;             // the DEF grid (== pInst->def)
         bool changed = false;

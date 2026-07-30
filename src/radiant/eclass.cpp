@@ -138,8 +138,8 @@ char        g_scanFilePath[1024];     // not an original global; bridges ecx-arg
 
 
 // ── forward declarations ───────────────────────────────────────────────────────
-static void Eclass_FreeEntityList(int modelNode);
-static void Eclass_FreeEpairs(int modelNode);
+static void Eclass_FreeEntityList(models_t *model);
+static void Eclass_FreeEpairs(models_t *model);
 static void Eclass_FreeAll();
 
 
@@ -167,54 +167,37 @@ static void Eclass_FreeAll();
 //               loop while eax != esi+8
 //   After brushes: add [esi+88h], -1 = --entity->refCount  (entity_s.refCount at 0x88)
 //   Entity_Free_R(entity)
-static void Eclass_FreeEntityList(int a1)
+static void Eclass_FreeEntityList(models_t *model)
 {
-    if ( !*(int *)(a1 + 12) )
+    iassert( model->entities.next );   // eclass.cpp:39
+
+    // Circular entity list: first at entities.next (+0xC), sentinel &x2 (+0x8) —
+    // the same head/sentinel overlay as entity_s def(+0x08)/brushes(+0x0C).
+    while ( model->entities.next != (int)&model->x2 )
     {
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-               39, 0, "%s", "model->entities.next");
+        entity_s *e = (entity_s *)model->entities.next;
+        iassert( e->refCount == 1 );   // eclass.cpp:43
+
+        // Walk the entity's brush circular list (sentinel = &e->def, same overlay).
+        for ( brush_t *b = (brush_t *)e->brushes.prev; b != (brush_t *)&e->def; b = b->onext )
+            --b->refCount;
+
+        --e->refCount;
+        Entity_Free_R( e );
     }
 
-    // Loop sentinel: (edi+8); entity ptr at *(edi+C)
-    while ( *(int *)(a1 + 12) != a1 + 8 )
-    {
-        int esi = *(int *)(a1 + 12);  // entity ptr (raw int for offset arithmetic)
-
-        // Check entity refCount == 1 (at esi+0x88)
-        if ( *(int *)(esi + 0x88) != 1 )
-        {
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-                   43, 1, "%s", "e->refCount == 1");
-        }
-
-        // Walk brush circular list: start at entity.brushes.onext (esi+0C),
-        // sentinel is esi+8, advance via brush.onext at brush+4.
-        // Decrement brush.refCount at brush+0x1C on each brush.
-        int eax = *(int *)(esi + 0x0C);  // entity->brushes.onext
-        int ecx = esi + 8;               // sub-sentinel
-        while ( eax != ecx )
-        {
-            --*(int *)(eax + 0x1C);       // --brush->refCount
-            eax = *(int *)(eax + 4);      // brush = brush->onext
-        }
-
-        // Decrement entity refCount (esi+0x88) and free.
-        --*(int *)(esi + 0x88);
-        Entity_Free_R((entity_s *)esi);
-    }
-
-    *(int *)(a1 + 12) = 0;
+    model->entities.next = 0;
 }
 
 
 // ─────────────────────────────────────────────────────────────────────────────
 // sub_480760  →  Eclass_FreeEpairs
-// Free the key/value epair linked list stored at *(modelNode + 380).
+// Free the key/value epair linked list at model->x95 (+380).
 // Node layout: [+0] void *next, [+4] char *key, [+8] char *value.
 // ─────────────────────────────────────────────────────────────────────────────
-static void Eclass_FreeEpairs(int a1)
+static void Eclass_FreeEpairs(models_t *model)
 {
-    void **v1 = *(void ***)(a1 + 380);
+    void **v1 = (void **)model->x95;
     if ( v1 )
     {
         void **v2;
@@ -228,7 +211,7 @@ static void Eclass_FreeEpairs(int a1)
         }
         while ( v2 );
     }
-    *(int *)(a1 + 380) = 0;
+    model->x95 = 0;
 }
 
 
@@ -248,27 +231,20 @@ static void Eclass_FreeEpairs(int a1)
 // ─────────────────────────────────────────────────────────────────────────────
 void Eclass_CheckEntities(models_t *model)
 {
-    void *x88 = (void *)model->x88;
-    if ( x88 )
+    models_t *sub = (models_t *)model->x88;
+    while ( sub )
     {
-        void *v3;
-        do
+        models_t *next = (models_t *)sub->x0;
+        if ( sub->entities.next )   // non-zero means the entity list is populated
         {
-            v3 = *(void **)x88;
-            // *(x88+12): entities.next — non-zero means the entity list is populated.
-            if ( *(int *)((char *)x88 + 12) )
+            Eclass_FreeEntityList( sub );
             {
-                Eclass_FreeEntityList((int)x88);
-                if ( *(int *)((char *)x88 + 12) )
-                {
-                    Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-                           88, 1, "%s", "model->entities.next == NULL");
-                }
+                models_t *model = sub;
+                iassert( model->entities.next == NULL );   // eclass.cpp:88
             }
-            j__free(x88);
-            x88 = v3;
         }
-        while ( v3 );
+        j__free( sub );
+        sub = next;
     }
 
     j__free_0((void *)model->x94);
@@ -283,7 +259,7 @@ void Eclass_CheckEntities(models_t *model)
     }
     while ( cnt );
 
-    Eclass_FreeEpairs((int)model);
+    Eclass_FreeEpairs( model );
     j__free_0((void *)model->handle);
     j__free_0((void *)model->x15);
     j__free(model);
@@ -339,10 +315,10 @@ static char Eclass_RealizeModel(int *a1, const char *a2)
             do
             {
                 // v5[34] == entity refCount (offset 34*4 = 136 = 0x88)
-                if ( ++v5[34] != 1 )
+                ++v5[34];
                 {
-                    Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-                           159, 1, "%s", "e->refCount == 1");
+                    entity_s *e = (entity_s *)v5;
+                    iassert( e->refCount == 1 );   // eclass.cpp:159
                 }
 
                 // Walk brush list: sentinel at v5+2 (offset +8 within entity sub-node,
@@ -447,40 +423,33 @@ char Prefab_Load(const char *a1, int *a2)
 // ─────────────────────────────────────────────────────────────────────────────
 LRESULT Model_load(char *modelPath, int a2)
 {
-    int v2 = (int)modelPath;
+    const char *path = modelPath;
 
     if ( !I_strnicmp(modelPath, "xmodel", 6) )
     {
-        char v3 = *(char *)(v2 + 6);
+        char v3 = modelPath[6];
         if ( v3 == '/' || v3 == '\\' )
         {
-            v2 += 7;
+            path += 7;
         }
     }
 
-    Sys_Printf("Loading model %s...", (const char *)v2);
+    Sys_Printf("Loading model %s...", path);
 
-    // node = *(int*)a2 (the models_t sub-node); node->handle (+4) = R_RegisterModel(path).
-    // HEX-RAYS DOUBLE-DEREF ARTIFACT: hex-rays rendered this as
-    //   **(int**)(*(int*)a2 + 4) = ...   (write through node->handle, i.e. *(node->handle))
-    // but the disasm is a SINGLE store `mov [ecx+4], eax` (ecx = *a2 = node):
-    //   *(int*)(node + 4) = XModel*.  The extra `*` crashed (node->handle is 0 for a fresh
-    //   node → write to NULL).  Read-back is `mov esi,[eax+4]` = node->handle, also single.
-    int node = *(int *)a2;
-    *(int *)( node + 4 ) = (int)R_RegisterModel((char *)v2);
+    // node->handle = R_RegisterModel(path).  HEX-RAYS DOUBLE-DEREF ARTIFACT: hex-rays
+    // rendered this as **(int**)(*(int*)a2 + 4) = ... but the disasm is a SINGLE store
+    // `mov [ecx+4], eax` (the extra `*` crashed — handle is 0 for a fresh node).
+    models_t *node = *(models_t **)a2;
+    node->handle = (int)R_RegisterModel((char *)path);
 
-    if ( !*(int *)( node + 4 ) )
     {
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-               179, 0, "%s", "(*model)->handle");
+        models_t **model = (models_t **)a2;
+        iassert( (*model)->handle );   // eclass.cpp:179
     }
 
-    int v4 = *(int *)( node + 4 );
-    if ( !v4 )
-    {
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\xanim\\xmodel.cpp",
-               48, 0, "%s", "model");
-    }
+    int v4 = node->handle;
+    // (the null-model check is XModelBad's own head iassert — xmodel.cpp:48 — which the
+    // binary inlined into this caller)
 
     // CoD3 != CoD4: the IDB reads the bad flag at +193 (CoD4); kisak XModel.bad is +205 ->
     // use XModelBad() (the prefab path doesn't hit this — only xmodel models do).
@@ -501,20 +470,11 @@ LRESULT Model_load(char *modelPath, int a2)
 // Unlink a models_t from g_models and free it entirely.
 //
 // IDA signature: void __cdecl sub_480CB0(void **a1)
-//   a1 = pointer to the models_t to free (same as the node itself cast to void**).
-//
-// Field word-indices used (each is a 4-byte int field):
-//   [0]  = next node in g_models list
-//   [88] = x88  head of entity-group sub-node list  (offset 0x160)
-//   [89] = x89  (offset 0x164)
-//   [90..93] = x90..x93  four material strings (0x168-0x174)
-//   [94] = x94  (offset 0x178)
-//   [1]  = handle (offset 0x04)
-//   [15] = x15   (offset 0x3C)
+//   a1 = the models_t to free (IDA types it void**).
 // ─────────────────────────────────────────────────────────────────────────────
 void Eclass_FreeModel(void **a1)
 {
-    void **v1 = a1;
+    models_t *model = (models_t *)a1;
 
     // Unlink from the g_models singly-linked list.
     int *ec = (int *)g_models;
@@ -526,73 +486,40 @@ void Eclass_FreeModel(void **a1)
     }
     *i = *ec;  // splice out
 
-    // Free entity sub-nodes in a1[88] linked list.
-    int *v4  = (int *)a1[88];
-    int *v11 = v4;
-    if ( v4 )
+    // Free entity-group sub-nodes in model->x88; each sub-node's circular entity
+    // list uses the def(+0x08)/entities.next(+0x0C) head overlay (sentinel &x2).
+    models_t *sub = (models_t *)model->x88;
+    while ( sub )
     {
-        while ( 1 )
+        models_t *next = (models_t *)sub->x0;
+        entity_s *e    = (entity_s *)sub->entities.next;
+        if ( e )
         {
-            // v4[3] = entity list sentinel (brushes head), v4[0] = next sub-node
-            int *v5  = (int *)v4[3];
-            int *v6  = (int *)*v4;
-            int *v10 = v6;
-
-            if ( v5 )
+            for ( ; e != (entity_s *)&sub->x2; e = e->next )
             {
-                if ( v5 != v4 + 2 )
+                iassert( e->refCount >= 2 );   // eclass.cpp:258
+                --e->refCount;
+                for ( brush_t *b = (brush_t *)e->brushes.prev; b != (brush_t *)&e->def; b = b->onext )
                 {
-                    do
-                    {
-                        // v5[34] = entity refCount (offset 136 = 0x88)
-                        if ( (int)v5[34] < 2 )
-                        {
-                            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-                                   258, 1, "%s", "e->refCount >= 2");
-                        }
-                        int *v7 = (int *)v5[3];
-                        --v5[34];
-                        // v7[1] = brush onext, v7[7] = brush refCount (offset 28 = 0x1C)
-                        for ( ; v7 != v5 + 2; v7 = (int *)v7[1] )
-                        {
-                            if ( (int)v7[7] < 2 )
-                            {
-                                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-                                       262, 1, "%s", "b->refCount >= 2");
-                            }
-                            --v7[7];
-                        }
-                        v5 = (int *)v5[1];
-                    }
-                    while ( v5 != v11 + 2 );
-                    v6  = v10;
-                    v4  = v11;
-                    v1  = a1;
+                    iassert( b->refCount >= 2 );   // eclass.cpp:262
+                    --b->refCount;
                 }
-                v4[3] = 0;
             }
-            j__free(v4);
-            v11 = v6;
-            if ( !v6 )
-                break;
-            v4 = v6;
+            sub->entities.next = 0;
         }
+        j__free( sub );
+        sub = next;
     }
 
-    j__free_0(v1[94]);    // x94
-    j__free_0(v1[89]);    // x89
-    void **v8 = v1 + 90;  // &x90
-    int    v9 = 4;
-    do
-    {
-        j__free_0(*v8++);
-        --v9;
-    }
-    while ( v9 );
+    j__free_0( (void *)model->x94 );
+    j__free_0( (void *)model->x89 );
+    int *p_x90 = &model->x90;      // x90..x93: four material strings
+    for ( int cnt = 4; cnt; --cnt )
+        j__free_0( (void *)*p_x90++ );
 
-    j__free_0(v1[1]);     // handle
-    j__free_0(v1[15]);    // x15
-    j__free(v1);
+    j__free_0( (void *)model->handle );
+    j__free_0( (void *)model->x15 );
+    j__free( model );
 }
 
 
@@ -738,12 +665,7 @@ void sub_483500(int listPtr, const char *key, const char *value)
         if ( !strcmp( (const char *)node[1], key ) )
         {
             j__free_0( (void *)node[2] );
-            if ( !value )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp", 56, 0, "%s", "str" );
-            unsigned int n = (unsigned int)strlen( value );
-            void *v = operator new( n + 1 );
-            memcpy_0( v, value, n + 1 );
-            node[2] = (int)v;
+            node[2] = (int)(intptr_t)AllocMaterialString( value );   // inlined in the binary (qe3.cpp:56)
             return;
         }
         if ( !node[0] )
@@ -755,18 +677,8 @@ void sub_483500(int listPtr, const char *key, const char *value)
     int *nn = (int *)operator new( 0xCu );
     nn[0] = (int)*a1;
     *a1   = nn;
-    if ( !key )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp", 56, 0, "%s", "str" );
-    unsigned int kn = (unsigned int)strlen( key );
-    void *kv = operator new( kn + 1 );
-    memcpy_0( kv, key, kn + 1 );
-    nn[1] = (int)kv;
-    if ( !value )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp", 56, 0, "%s", "str" );
-    unsigned int vn = (unsigned int)strlen( value );
-    void *vv = operator new( vn + 1 );
-    memcpy_0( vv, value, vn + 1 );
-    nn[2] = (int)vv;
+    nn[1] = (int)(intptr_t)AllocMaterialString( key );     // inlined in the binary (qe3.cpp:56)
+    nn[2] = (int)(intptr_t)AllocMaterialString( value );
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -798,7 +710,7 @@ static void Eclass_ParseDefaults(eclass_t *ec)
 
         // ec+0x17C (= &ec->xx8) is the eclass default/epair list head (freed by
         // Eclass_FreeEpairs at +380). IDA: sub_483500(this+95, key, value).
-        sub_483500( (int)( (char *)ec + 380 ), key, value );
+        sub_483500( (int)(intptr_t)&ec->xx8, key, value );
 
         p = strstr( text, "default:" );
     }
@@ -1119,26 +1031,19 @@ bool Eclass_hasModel(eclass_t *e)
     if ( e->modelpath )
     {
         Eclass_LoadModel((int)e);
-        if ( e->modelpath )
-        {
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-                   522, 1, "%s", "e->modelpath == NULL");
-        }
+        iassert( e->modelpath == NULL );   // eclass.cpp:522
     }
 
-    int xx1 = e->xx1;
+    models_t *xx1 = (models_t *)e->xx1;
     if ( !xx1 )
         return false;
 
-    // xx1 is a models_t* for this eclass.
-    // Field +4 = primary handle (XModel*), +12 = sub-model list head.
-    // CoD3 != CoD4: the IDB reads the XModel "bad" flag at +193 (CoD4
-    // XModel layout), but kisak's CoD3 XModel has `bad` at +205 — reading +193 hits a
-    // lodInfo byte (garbage, e.g. 208), so a freshly-loaded misc_model xmodel was wrongly
-    // judged "bad" and never instanced.  Use kisak's XModelBad() (reads the right field).
+    // handle = XModel*, entities.next = sub-model list head.
+    // KISAK: CoD3 != CoD4 — the IDB reads the XModel "bad" flag at +193 (CoD4 layout);
+    // kisak's CoD3 XModel has `bad` at +205, so use XModelBad() (reads the right field).
     extern bool XModelBad( const XModel *model );
-    int v3 = *(int *)(xx1 + 4);
-    return (v3 && !XModelBad( (const XModel *)v3 )) || (*(int *)(xx1 + 12) != 0);
+    XModel *v3 = (XModel *)xx1->handle;
+    return (v3 && !XModelBad( v3 )) || xx1->entities.next != 0;
 }
 
 
@@ -1225,33 +1130,32 @@ LABEL_6:
 //
 // The model-type flag (bit 4 = 0x10) is at eclass_t byte offset 384 (classtype).
 // ─────────────────────────────────────────────────────────────────────────────
+// shim so Eclass_01's iassert( Eclass_hasModel( e ) ) stringizes 1:1 over its models_t* local.
+static inline bool Eclass_hasModel( models_t *e ) { return Eclass_hasModel( (eclass_t *)e ) != 0; }
 models_t *Eclass_01(const char *a1, int a2)
 {
+    entity_s *ent = (entity_s *)(intptr_t)a2;
+
     if ( !a1 || !strlen(a1) )
         return nullptr;
 
-    int e = g_models;
+    models_t *e = (models_t *)g_models;
     if ( !g_models )
         goto LABEL_7;
 
     // Search g_models for a node whose name matches a1 AND whose model-type
-    // flag (bit 4) matches the entity's eclass flag.
-    while ( _stricmp(a1, *(const char **)(e + 4)) ||
-            ((*(unsigned char *)(e + 384) ^ *(unsigned char *)(*(int *)(a2 + 96) + 384)) & 0x10) != 0 )
+    // flag (bit 4 of x96/classtype, byte 384) matches the entity's eclass flag.
+    while ( _stricmp(a1, (const char *)e->handle) ||
+            (((unsigned char)e->x96 ^ (unsigned char)ent->eclass->classtype) & 0x10) != 0 )
     {
-        e = *(int *)e;
+        e = (models_t *)e->x0;
         if ( !e )
             goto LABEL_7;
     }
 
-    // Found existing node.
-    if ( !Eclass_hasModel((eclass_t *)e) )
-    {
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\eclass.cpp",
-               860, 0, "%s", "Eclass_hasModel( e )");
-    }
-    *(int *)(a2 + 100) = e;
-    return (models_t *)e;
+    iassert( Eclass_hasModel( e ) );   // eclass.cpp:860
+    ent->modelClass = (entitymodel_t *)e;
+    return e;
 
 LABEL_7:
     {
@@ -1271,21 +1175,17 @@ LABEL_7:
         models->x94 = (int)v12;
 
         // Copy the model-type flag bit from the entity's eclass.
-        int v7 = *(int *)(*(int *)(a2 + 96) + 384);
+        int v7 = ent->eclass->classtype;
         *(float *)&models->x11 = 0.85000002f;
         *(float *)&models->x9  = 0.85000002f;
         models->x96 |= v7 & 0x10;
 
-        // Seed fields from the eclass found (or created) by Eclass_ForName.
-        int *v8 = (int *)Eclass_ForName(0, a1);
-        models->entities_next__substruct = v8[3];
-        models->x4 = v8[4];
-        models->x5 = v8[5];
-        models->x6 = v8[6];
-        models->x7 = v8[7];
-        models->x8 = v8[8];
+        // Seed the node's bounds from the eclass: mins/maxs (6 floats @+0xC..+0x20)
+        // bit-copied into the int fields entities.next..x8 at the same offsets.
+        eclass_t *srcEc = Eclass_ForName(0, a1);
+        memcpy( &models->entities.next, &srcEc->mins, 2 * sizeof(vec3_t) );
 
-        const char *v9 = (const char *)v8[89];
+        const char *v9 = srcEc->default_model_name;   // +0x164
         if ( v9 )
         {
             models->x89 = (int)AllocMaterialString(v9);
@@ -1294,7 +1194,7 @@ LABEL_7:
         if ( Eclass_hasModel((eclass_t *)models) )
         {
             Eclass_InsertAlphabetized((const char ***)&g_models, (const char **)models);
-            *(int *)(a2 + 100) = (int)models;
+            ent->modelClass = (entitymodel_t *)models;
             DisableRendering_mm();
             return models;
         }
@@ -1425,18 +1325,9 @@ void Init_ScanFiles(int a1)
 
     if ( a1 )
     {
-        if ( !fs_searchpaths )
-        {
-            FatalError(0, "Filesystem call made without initialization\n");
-        }
-        void *v14 = buffer;
-        if ( !buffer )
-        {
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_files.cpp",
-                   2840, 0, "%s", "buffer");
-        }
-        --fs_loadStack;
-        Hunk_FreeTempMemory((char *)v14);
+        // FS_FreeFile inlined in the binary (com_files.cpp:2840; kisak's
+        // FS_CheckFileSystemStarted asserts fs_searchpaths where CoD3 FatalError'd).
+        FS_FreeFile( (char *)buffer );
     }
     else
     {
@@ -1775,13 +1666,8 @@ void Init_ScanWeapons( const char *folder )
                 }
             }
         }
-        if ( !fs_searchpaths )
-            FatalError( 0, "Filesystem call made without initialization\n" );
-        if ( !buffer )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_files.cpp",
-                    2840, 0, "%s", "buffer" );
-        --fs_loadStack;
-        Hunk_FreeTempMemory( buffer );
+        // FS_FreeFile inlined in the binary (com_files.cpp:2840).
+        FS_FreeFile( buffer );
     }
     if ( list )
         FS_FreeFileList( list );

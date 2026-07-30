@@ -42,7 +42,7 @@ struct editorMesh_s {              // 24 bytes
     int       techType;           // +4
     int       sortKey;            // +8  (IDB "unk" — primary sort key)
     int       handle;             // +C  (LOWORD=firstIndex, HIWORD=vb buffer)
-    uint16_t  vertexCount;        // +10
+    uint16_t  vertCount;          // +10
     uint16_t  indexCount;         // +12
     int       indexTable;         // +14 (IDB "unk3" — edFaceIndices/edBackFaceIndices)
 };
@@ -53,7 +53,10 @@ struct editorSurf_sub {            // 20 bytes
     Material               *material;   // +0
     int                     techType;   // +4
     int                     sortKey;    // +8  (IDB "unk3")
-    GfxModelSkinnedSurface *skinnedSurf;// +C  the built skinned surface (verts+indices)
+    union {                             // +C  the built skinned surface (verts+indices)
+        GfxModelSkinnedSurface *skinnedSurf;
+        GfxModelSkinnedSurface *surf;   //     (the binary's name — assert strings)
+    };
     GfxScaledPlacement     *placement;  // +10 the model instance's world transform
 };
 
@@ -66,13 +69,15 @@ struct editorSurf_s {              // 8 bytes
 #define ED_SCENE_MAX_SURFS   0x44000
 #define ED_SCENE_MAX_MODELSURFS 0x4000      // IDB radiant_surfs[0x4000]
 
-static editorMesh_s   edSceneGlobals_sceneMeshes[ED_SCENE_MAX_MESHES];
-static editorSurf_s   edSceneGlobals_sceneSurfaces[ED_SCENE_MAX_SURFS];
+static struct {                        // the binary's edSceneGlobals block (assert strings)
+    editorMesh_s sceneMeshes[ED_SCENE_MAX_MESHES];
+    editorSurf_s sceneSurfs[ED_SCENE_MAX_SURFS];
+    int          sceneMeshCount;
+    int          sceneSurfCount;
+    int          sceneSurfCount_saved;
+} edSceneGlobals;
 static editorSurf_sub radiant_surfs[ED_SCENE_MAX_MODELSURFS];     // IDB 0x10F5658
 static GfxModelSkinnedSurface radiant_modelSkinnedSurfs[ED_SCENE_MAX_MODELSURFS]; // built surfs
-static int edSceneGlobals_sceneMeshCount;
-static int edSceneGlobals_sceneSurfCount;
-static int edSceneGlobals_sceneSurfCount_saved;
 static int radiant_surfCount;          // IDB 0x10F5654 — model-surf counter
 static int radiant_modelSurfPos;       // stands in for the binary's frontEndDataOut->surfPos
 static int edScene_lastFrameCount;     // IDB dword_1365660 (per-frame reset guard)
@@ -106,8 +111,7 @@ void __cdecl Editor_AddMeshCmd(Material *handle, int techType, int sortKey,
 {
     iassert(techType >= 0);                               // 0x4fda66 (level 0)
     const Material *material = Material_FromHandle(handle);
-    if (!material)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 219, 1, "%s", "material");
+    iassert( material );   // r_ed_scene.cpp:219
 
     // Skip if the material lacks the requested technique. The IDB uses
     // techniques[techType+1] (its MaterialTechniqueSet reserves slot 0); kisak's
@@ -115,26 +119,24 @@ void __cdecl Editor_AddMeshCmd(Material *handle, int techType, int sortKey,
     if (techType < 34 && !material->techniqueSet->techniques[techType])
         return;
 
-    if (edSceneGlobals_sceneMeshCount == ED_SCENE_MAX_MESHES) {
+    if (edSceneGlobals.sceneMeshCount == ED_SCENE_MAX_MESHES) {
         R_WarnOncePerFrame((GfxWarningType)34, ED_SCENE_MAX_MESHES);
         return;
     }
 
-    editorMesh_s *mesh = &edSceneGlobals_sceneMeshes[edSceneGlobals_sceneMeshCount++];
+    editorMesh_s *mesh = &edSceneGlobals.sceneMeshes[edSceneGlobals.sceneMeshCount++];
     mesh->handle      = vbIndexAndOffs;
     mesh->material    = material;
     mesh->techType    = techType;
     mesh->sortKey     = sortKey;
-    mesh->vertexCount = (uint16_t)vertCount;
-    if ((uint16_t)vertCount != vertCount)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 236, 0, "%s", "mesh->vertCount == vertCount");
+    mesh->vertCount = (uint16_t)vertCount;
+    iassert(mesh->vertCount == vertCount);                // r_ed_scene.cpp:236, after the store
     mesh->indexCount  = (uint16_t)indexCount;
     iassert(mesh->indexCount == indexCount);              // 0x4fdb40 (level 0), after the store
     mesh->indexTable  = indexTable;
 
-    if ((unsigned)edSceneGlobals_sceneSurfCount >= ED_SCENE_MAX_SURFS)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 241, 1, "%s", "edSceneGlobals.sceneSurfCount < ARRAY_COUNT( edSceneGlobals.sceneSurfs )");
-    editorSurf_s *surf = &edSceneGlobals_sceneSurfaces[edSceneGlobals_sceneSurfCount++];
+        iassert(edSceneGlobals.sceneSurfCount < ARRAY_COUNT( edSceneGlobals.sceneSurfs ));   // r_ed_scene.cpp:241
+    editorSurf_s *surf = &edSceneGlobals.sceneSurfs[edSceneGlobals.sceneSurfCount++];
     surf->mesh_or_surfSub = mesh;
     surf->type = ED_SURF_MESH;
 }
@@ -145,6 +147,8 @@ void __cdecl Editor_AddGeoFace(Material *handle, int techType, int sortKey, int 
     if (!s_edFaceIndicesInit)
         Editor_InitFaceIndices();
     if (vertCount < 3 || (unsigned)(3 * vertCount - 6) > ED_FACE_MAX_INDICES)
+        // KEEP_VERBOSE: the binary's condition string is PROSE ("fan fits"), not an
+        // expression — no iassert/vassert can stringize it 1:1.
         Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 197, 0, "%s\n\t(vertCount) = %i", "vertCount fan fits edFaceIndices", vertCount);
     Editor_AddMeshCmd(handle, techType, sortKey, vertCount, vbIndexAndOffs, 3 * vertCount - 6, (int)edFaceIndices);
 }
@@ -155,6 +159,8 @@ void __cdecl Editor_AddGeoBackFace(Material *handle, int techType, int sortKey, 
     if (!s_edFaceIndicesInit)
         Editor_InitFaceIndices();
     if (vertCount < 3 || (unsigned)(3 * vertCount - 6) > ED_FACE_MAX_INDICES)
+        // KEEP_VERBOSE: the binary's condition string is PROSE ("fan fits"), not an
+        // expression — no iassert/vassert can stringize it 1:1.
         Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 204, 0, "%s\n\t(vertCount) = %i", "vertCount fan fits edBackFaceIndices", vertCount);
     Editor_AddMeshCmd(handle, techType, sortKey, vertCount, vbIndexAndOffs, 3 * vertCount - 6, (int)edBackFaceIndices);
 }
@@ -208,10 +214,10 @@ void *__cdecl Editor_AddCmd_DrawSkinnedCached(int index, int amount)
 // one RC_DRAW_EDITOR_SKINNEDCACHED for them.
 void *__cdecl R_AddEditorSurfsCmd()
 {
-    int first = edSceneGlobals_sceneSurfCount_saved;
-    int count = edSceneGlobals_sceneSurfCount - first;
+    int first = edSceneGlobals.sceneSurfCount_saved;
+    int count = edSceneGlobals.sceneSurfCount - first;
     if (count) {
-        qsort(&edSceneGlobals_sceneSurfaces[first], count, sizeof(editorSurf_s), Editor_SurfCompare);
+        qsort(&edSceneGlobals.sceneSurfs[first], count, sizeof(editorSurf_s), Editor_SurfCompare);
         return Editor_AddCmd_DrawSkinnedCached(first, count);
     }
     return (void *)first;
@@ -222,7 +228,7 @@ void *__cdecl R_AddEditorSurfsCmd()
 // R_AddEditorSurfsCmd flush then draws them in RB_DrawEditorSkinnedCached_Sub.  This
 // branch does NOT use the per-material VB pool: it uploads the xmodel's verts to the
 // engine dynamic vertex buffer per frame (R_SetVertexData), VERTDECL_PACKED.
-// edMapGlobals.inst[] is the registry of placed models (AddModelToModelInstBuff /
+// edMapGlobals.modelInst[] is the registry of placed models (AddModelToModelInstBuff /
 // ModelInstUpdate / RemoveModelInstFromBuf); model_inst's first 32 bytes alias a
 // GfxScaledPlacement {quat,origin,scale} so an inst pointer casts straight to a
 // placement for R_ChangeObjectPlacement.
@@ -241,7 +247,7 @@ static_assert(sizeof(model_inst) == 44, "model_inst must alias GfxScaledPlacemen
 #define ED_MAP_MAX_MODELINST 65536
 struct EdMapGlobals {              // IDB edMapGlobals @ 0x835648
     int        modelInstMax;       // highest-used slot + 1 (NOT a fixed capacity)
-    model_inst inst[ED_MAP_MAX_MODELINST + 16];
+    model_inst modelInst[ED_MAP_MAX_MODELINST + 16];
 };
 static EdMapGlobals edMapGlobals;
 
@@ -254,7 +260,7 @@ int __cdecl AddModelToModelInstBuff(XModel *model, float *axis, float scale)
         return 0;
 
     int idx = 0;
-    while (idx < edMapGlobals.modelInstMax && edMapGlobals.inst[idx].inuse)
+    while (idx < edMapGlobals.modelInstMax && edMapGlobals.modelInst[idx].inuse)
         ++idx;
 
     if (idx == edMapGlobals.modelInstMax) {
@@ -267,7 +273,7 @@ int __cdecl AddModelToModelInstBuff(XModel *model, float *axis, float scale)
         ++edMapGlobals.modelInstMax;
     }
 
-    model_inst *v8 = &edMapGlobals.inst[idx];
+    model_inst *v8 = &edMapGlobals.modelInst[idx];
     memset(v8, 0, sizeof(model_inst));
     v8->inuse      = 1;            // LOBYTE(random_one) = 1 (faithful: only the low byte)
     v8->model      = model;
@@ -283,9 +289,8 @@ int __cdecl AddModelToModelInstBuff(XModel *model, float *axis, float scale)
 void __cdecl ModelInstUpdate(int instanceHandle, float (*axis)[3], float scale)
 {
     iassert(instanceHandle > 0 && instanceHandle <= edMapGlobals.modelInstMax);
-    model_inst *v3 = &edMapGlobals.inst[instanceHandle - 1];
-    if (!v3->inuse)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 325, 0, "%s", "edMapGlobals.modelInst[instanceHandle - 1].inuse");
+    model_inst *v3 = &edMapGlobals.modelInst[instanceHandle - 1];
+    iassert(edMapGlobals.modelInst[instanceHandle - 1].inuse);   // r_ed_scene.cpp:325
     v3->origin[0] = axis[0][0];
     v3->origin[1] = axis[0][1];
     v3->origin[2] = axis[0][2];
@@ -297,12 +302,11 @@ void __cdecl ModelInstUpdate(int instanceHandle, float (*axis)[3], float scale)
 void __cdecl RemoveModelInstFromBuf(int instanceHandle)
 {
     iassert(instanceHandle > 0 && instanceHandle <= edMapGlobals.modelInstMax);
-    if (!edMapGlobals.inst[instanceHandle - 1].inuse)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 309, 0, "%s", "edMapGlobals.modelInst[instanceHandle - 1].inuse");
-    edMapGlobals.inst[instanceHandle - 1].inuse = 0;
-    edMapGlobals.inst[instanceHandle - 1].model = 0;
+    iassert(edMapGlobals.modelInst[instanceHandle - 1].inuse);   // r_ed_scene.cpp:309
+    edMapGlobals.modelInst[instanceHandle - 1].inuse = 0;
+    edMapGlobals.modelInst[instanceHandle - 1].model = 0;
     int n = edMapGlobals.modelInstMax;
-    while (n > 0 && !edMapGlobals.inst[n - 1].inuse)
+    while (n > 0 && !edMapGlobals.modelInst[n - 1].inuse)
         --n;
     edMapGlobals.modelInstMax = n;
 }
@@ -313,9 +317,8 @@ extern void OrientationPosToWorldPos(float *out, const float *pos, const orienta
 void __cdecl Entity_GetModelInstBounds(int instanceHandle, float *out_mins, float *out_maxs)
 {
     iassert(instanceHandle > 0 && instanceHandle <= edMapGlobals.modelInstMax);
-    model_inst *mi = &edMapGlobals.inst[instanceHandle - 1];
-    if (!mi->inuse)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 346, 0, "%s", "edMapGlobals.modelInst[instanceHandle - 1].inuse");
+    model_inst *mi = &edMapGlobals.modelInst[instanceHandle - 1];
+    iassert(edMapGlobals.modelInst[instanceHandle - 1].inuse);   // r_ed_scene.cpp:346
 
     float mins[3], maxs[3];
     XModelGetBounds(mi->model, mins, maxs);          // sub_4C6ED0
@@ -418,9 +421,7 @@ static bool Editor_SurfFilter(int drawFlags, const Material *material)
 {
     if ((drawFlags & 0xC) == 0)
         return true;
-    if ((drawFlags & 4) && (drawFlags & 8))
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 369, 0, "%s",
-               "!(drawFlags & DRAWFLAG_ONLY_MULTIPLY) || !(drawFlags & DRAWFLAG_SKIP_MULTIPLY)");
+    iassert(!(drawFlags & DRAWFLAG_ONLY_MULTIPLY) || !(drawFlags & DRAWFLAG_SKIP_MULTIPLY));   // r_ed_scene.cpp:369
     const unsigned flags  = material ? material->editorToolFlags : 0;   // no material -> opaque
     const bool     opaque = (flags & 0x70) != 0x70;
     return (drawFlags & (opaque ? 8 : 4)) != 0;          // binary: (drawFlags & (4*(!effect)+4)) != 0
@@ -452,9 +453,8 @@ void __cdecl Editor_AddSurfCmd(int drawFlags, Material *material, model_inst *in
             v5->sortKey   = 0x64 * Material_FromHandle(material)->info.drawSurf.fields.primarySortKey;
             v5->skinnedSurf = surf;
             v5->placement = (GfxScaledPlacement *)inst;   // model_inst aliases GfxScaledPlacement
-            if ((unsigned)edSceneGlobals_sceneSurfCount >= ED_SCENE_MAX_SURFS)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 402, 1, "%s", "edSceneGlobals.sceneSurfCount < ARRAY_COUNT( edSceneGlobals.sceneSurfs )");
-            editorSurf_s *v6 = &edSceneGlobals_sceneSurfaces[edSceneGlobals_sceneSurfCount++];
+                iassert(edSceneGlobals.sceneSurfCount < ARRAY_COUNT( edSceneGlobals.sceneSurfs ));   // r_ed_scene.cpp:402
+            editorSurf_s *v6 = &edSceneGlobals.sceneSurfs[edSceneGlobals.sceneSurfCount++];
             v6->mesh_or_surfSub = v5;
             v6->type = ED_SURF_MODEL;
         }
@@ -462,16 +462,15 @@ void __cdecl Editor_AddSurfCmd(int drawFlags, Material *material, model_inst *in
 }
 
 // 0x4FE2E0  SkinModelInst — build + queue every surface of a placed model instance.
-//   instanceHandle = 1-based handle into edMapGlobals.inst[]
+//   instanceHandle = 1-based handle into edMapGlobals.modelInst[]
 //   checkhandle    = optional material override (Material handle), else use model's own
 //   techType (a3) / colorPtr (a4) / drawFlags
 void __cdecl SkinModelInst(int instanceHandle, Material *checkhandle, int techType,
                            const int *colorPtr, int drawFlags)
 {
     iassert(instanceHandle > 0 && instanceHandle <= edMapGlobals.modelInstMax);
-    model_inst *mi = &edMapGlobals.inst[instanceHandle - 1];
-    if (!mi->inuse)
-        Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 485, 0, "%s", "edMapGlobals.modelInst[instanceHandle - 1].inuse");
+    model_inst *mi = &edMapGlobals.modelInst[instanceHandle - 1];
+    iassert(edMapGlobals.modelInst[instanceHandle - 1].inuse);   // r_ed_scene.cpp:485
 
     GfxModelSkinnedSurface *skinned = AddModelSurfBuf(mi->model);
     if (!skinned)
@@ -482,6 +481,7 @@ void __cdecl SkinModelInst(int instanceHandle, Material *checkhandle, int techTy
     iassert(modelMaterial);
 
     for (unsigned i = 0; i < numsurfs; ++i) {
+        GfxModelSkinnedSurface *skinnedSurf = &skinned[i];   // the binary's local (assert strings)
         Material *material = modelMaterial[i];
         iassert(material);
         if (colorPtr) {
@@ -490,10 +490,8 @@ void __cdecl SkinModelInst(int instanceHandle, Material *checkhandle, int techTy
             // stride 0x20) — the white per-vertex colour of the tech-29 selected-model
             // wireframe.  Only ever stamp the tempSkinBuf COPY, never the shared verts0.
             mi->colorOverride = *colorPtr;
-            if (skinned[i].skinnedCachedOffset == -2)   // RIGID_SKINNED_CACHE_OFFSET
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 505, 0, "%s", "skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET");
-            if (skinned[i].skinnedCachedOffset == -3)   // HIDDEN_SURFACE_OFFSET
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 506, 0, "%s", "skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET");
+            iassert(skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET);   // r_ed_scene.cpp:505
+            iassert(skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET);        // r_ed_scene.cpp:506
             const int nv  = XSurfaceGetNumVerts(skinned[i].xsurf);         // 0x4fe43d
             uint8_t  *base = (uint8_t *)skinned[i].skinnedVert;
             for (int vi = 0; vi < nv; ++vi)                                // 0x4fe449-0x4fe45f
@@ -503,10 +501,8 @@ void __cdecl SkinModelInst(int instanceHandle, Material *checkhandle, int techTy
         }
         Material *useMat = checkhandle ? (Material *)Material_FromHandle(checkhandle) : material;
         Editor_AddSurfCmd(drawFlags, useMat, mi, &skinned[i], techType);
-        if (skinned[i].skinnedCachedOffset == -2)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 522, 0, "%s", "skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET");
-        if (skinned[i].skinnedCachedOffset == -3)
-            Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 523, 0, "%s", "skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET");
+        iassert(skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET);   // r_ed_scene.cpp:522
+        iassert(skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET);        // r_ed_scene.cpp:523
     }
 }
 
@@ -664,6 +660,7 @@ static void Editor_DrawXModelSkinnedUncached(XSurface *xsurf, GfxPackedVertex *s
     args.vertexCount = XSurfaceGetNumVerts(xsurf);
     args.triCount    = XSurfaceGetNumTris(xsurf);
 
+    // KEEP_VERBOSE (405/409/412): rb_shade.cpp editor-variant strings (foreign gfx TU).
     if (gfxCmdBufState.prim.vertDeclType != VERTDECL_PACKED)
         Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\rb_shade.cpp", 405, 1,
                "%s\n\t(gfxCmdBufState.prim.vertDeclType) = %i", "(gfxCmdBufState.prim.vertDeclType == VERTDECL_PACKED)", gfxCmdBufState.prim.vertDeclType);
@@ -716,7 +713,7 @@ static void RB_DrawEditorSkinnedCached_Sub(int index, int amount)
     bool     haveBatch = false;
 
     for (int i = 0; i < amount; ++i) {
-        editorSurf_s *surf = &edSceneGlobals_sceneSurfaces[index + i];
+        editorSurf_s *edSurf = &edSceneGlobals.sceneSurfs[index + i];
 
         editorMesh_s           *mesh = nullptr;   // set for ED_SURF_MESH
         editorSurf_sub         *modelSurf = nullptr; // set for ED_SURF_MODEL
@@ -726,39 +723,35 @@ static void RB_DrawEditorSkinnedCached_Sub(int index, int amount)
         const Material *material;
         int techType, indexCount;
 
-        if (surf->type == ED_SURF_MESH) {
-            mesh = (editorMesh_s *)surf->mesh_or_surfSub;
+        if (edSurf->type == ED_SURF_MESH) {
+            mesh = (editorMesh_s *)edSurf->mesh_or_surfSub;
             Editor_GetVertexBufferAndIndex(mesh->handle, &vb, &firstIndex);
             material   = mesh->material;
             techType   = mesh->techType;
             indexCount = (uint16_t)mesh->indexCount;
         } else {
-            if (surf->type != ED_SURF_MODEL)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 652, 0,
-                       "%s\n\t(edSurf->type) = %i", "(edSurf->type == ED_SURF_MODEL)", surf->type);
-            modelSurf   = (editorSurf_sub *)surf->mesh_or_surfSub;
+            vassert((edSurf->type == ED_SURF_MODEL), "(edSurf->type) = %i", edSurf->type);   // r_ed_scene.cpp:652
+            modelSurf   = (editorSurf_sub *)edSurf->mesh_or_surfSub;
             vb          = 0;             // model surfs do NOT use the VB pool
             firstIndex  = 0;
             skinnedSurf = modelSurf->skinnedSurf;
             material    = modelSurf->material;
             techType    = modelSurf->techType;
-            if (skinnedSurf->skinnedCachedOffset == -2)   // RIGID_SKINNED_CACHE_OFFSET
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 664, 0, "%s", "skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET");
-            if (skinnedSurf->skinnedCachedOffset == -3)   // HIDDEN_SURFACE_OFFSET
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 665, 0, "%s", "skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET");
+            iassert(skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET);   // r_ed_scene.cpp:664
+            iassert(skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET);        // r_ed_scene.cpp:665
             indexCount  = 3 * XSurfaceGetNumTris(skinnedSurf->xsurf);
         }
 
         // Flush the current (mesh) batch when the source/material/technique changes or tess
-        // would overflow.  A model surf (vb==0, but a fresh skinnedSurf each time) always
+        // would overflow.  A model edSurf (vb==0, but a fresh skinnedSurf each time) always
         // breaks the batch (its indexCount also pushes the overflow check).
         if (vb != boundVb || material != gfxCmdBufState.material ||
             techType != gfxCmdBufState.techType || indexCount + tess.indexCount > 0x7FC0)
         {
-            // Binary's `if (vb_x)` gate (0x4fe8a7): vb_x is the PREVIOUS surf's VB — 0 after a
+            // Binary's `if (vb_x)` gate (0x4fe8a7): vb_x is the PREVIOUS edSurf's VB — 0 after a
             // MODEL (R_ChangeObjectPlacement left matrix[0] holding that model's placement),
             // non-zero after a MESH.  Previous MESH -> flush its tess batch (matrix[0] is still
-            // the eye-relative world matrix); previous MODEL or first surf -> reset matrix[0]
+            // the eye-relative world matrix); previous MODEL or first edSurf -> reset matrix[0]
             // to the eye-relative world matrix before starting this mesh batch.
             if (boundVb) {
                 RB_DrawEditorTessSurface(minVert, (uint16_t)maxVert);
@@ -784,31 +777,24 @@ static void RB_DrawEditorSkinnedCached_Sub(int index, int amount)
         }
 
         if (mesh) {
-            if (modelSurf)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 699, 1, "%s", "!modelSurf");
+            iassert( !modelSurf );   // r_ed_scene.cpp:699
             // brush face: copy its indices into tess with the firstIndex base offset.
             if ((uint16_t)firstIndex < minVert)
                 minVert = firstIndex;
-            if (maxVert < mesh->vertexCount + firstIndex - 1)
-                maxVert = mesh->vertexCount + firstIndex - 1;
+            if (maxVert < mesh->vertCount + firstIndex - 1)
+                maxVert = mesh->vertCount + firstIndex - 1;
             const uint16_t *itab = (const uint16_t *)mesh->indexTable;
             for (int k = 0; k < (int)(uint16_t)mesh->indexCount; ++k)
                 tess.indices[tess.indexCount + k] = (uint16_t)(firstIndex + itab[k]);
             tess.indexCount += (uint16_t)mesh->indexCount;
         } else {
-            // xmodel surf: object placement + uncached skinned draw (no tess batching).
-            if (!modelSurf)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 711, 1, "%s", "modelSurf");
-            if (!modelSurf->skinnedSurf)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 712, 1, "%s", "modelSurf->surf");
-            if (tess.indexCount)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 713, 1, "%s", "tess.indexCount == 0");
-            if (tess.vertexCount)
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 714, 1, "%s", "tess.vertexCount == 0");
-            if (skinnedSurf->skinnedCachedOffset == -2)   // RIGID_SKINNED_CACHE_OFFSET
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 718, 0, "%s", "skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET");
-            if (skinnedSurf->skinnedCachedOffset == -3)   // HIDDEN_SURFACE_OFFSET
-                Assert("C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\gfx_d3d\\r_ed_scene.cpp", 719, 0, "%s", "skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET");
+            // xmodel edSurf: object placement + uncached skinned draw (no tess batching).
+            iassert( modelSurf );   // r_ed_scene.cpp:711
+            iassert( modelSurf->surf );   // r_ed_scene.cpp:712
+            iassert( tess.indexCount == 0 );   // r_ed_scene.cpp:713
+            iassert( tess.vertexCount == 0 );   // r_ed_scene.cpp:714
+            iassert(skinnedSurf->skinnedCachedOffset != RIGID_SKINNED_CACHE_OFFSET);   // r_ed_scene.cpp:718
+            iassert(skinnedSurf->skinnedCachedOffset != HIDDEN_SURFACE_OFFSET);        // r_ed_scene.cpp:719
             if (gfxCmdBufSourceState.objectPlacement != modelSurf->placement)
                 R_ChangeObjectPlacement(&gfxCmdBufSourceState, modelSurf->placement);
             Editor_DrawXModelSkinnedUncached(skinnedSurf->xsurf, skinnedSurf->skinnedVert);
@@ -854,13 +840,13 @@ void __cdecl R_SortMaterials()
         frontEndDataOut->viewInfo[frontEndDataOut->viewInfoCount].cmds = 0;  // sub_4FB170
         R_ClearScene(0);
         edScene_lastFrameCount        = rg.frontEndFrameCount;
-        edSceneGlobals_sceneMeshCount = 0;
+        edSceneGlobals.sceneMeshCount = 0;
         radiant_surfCount             = 0;
         radiant_modelSurfPos          = 0;   // binary: surfPos resets with tempSkinPos
-        edSceneGlobals_sceneSurfCount = 0;
+        edSceneGlobals.sceneSurfCount = 0;
     }
 
-    edSceneGlobals_sceneSurfCount_saved = edSceneGlobals_sceneSurfCount;
+    edSceneGlobals.sceneSurfCount_saved = edSceneGlobals.sceneSurfCount;
     iassert(rg.inFrame);
     rg.inFrame = inFrame;
 }

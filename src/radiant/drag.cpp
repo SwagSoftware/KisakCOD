@@ -43,7 +43,6 @@ extern void    Select_Deselect( int bDeselectFaces );
 
 // engine_stubs.cpp (stubs for Phase-5 functions)
 extern void    sub_43ECB0();           // addpoint mode cleanup (FATAL stub)
-extern char    g_ptrSelectedFaces_GetSize[4];  // *(int*) = g_selFaceCount
 extern void    SelectVertexByRay( int origin, int dir );
 extern void    SelectCurvePointByRay( int origin, int dir, unsigned int buttons );
 extern void    Select_Edge( int dir, int origin );
@@ -203,7 +202,7 @@ static void AxializeVector( float *v )
 
 // ─── 0x47e3a0  Drag_Setup (1134 bytes) ───────────────────────────────────────
 // KISAK (safer, kept per directive): the port adds `if(hitBrush)` null-guards in the
-// buttons 9/0xD face paths, where the binary derefs v19.brush unconditionally - a latent
+// buttons 9/0xD face paths, where the binary derefs v19.hit.brush unconditionally - a latent
 // null-deref reachable via alt-edge-drag with no ray hit.
 // Initialises a drag operation given the current mouse position and selection state.
 // Called by Drag_Begin when MK_LBUTTON is pressed (non-area-select path).
@@ -234,7 +233,7 @@ static void AxializeVector( float *v )
 void Drag_Setup( float *trace_dir, float *trace_start, float *press_origin,
                  int x, int y, unsigned int buttons, float *xyvec )
 {
-    edTrace_t v19;
+    edTrace_t t;
 
     // pressdelta = { 0, 0, 0 }
     g_pressdelta[0] = 0.0f;
@@ -367,39 +366,26 @@ LABEL_15:
     }
 
     // ── ray test: direct hit on selection or Alt+drag face-extrude ───────────
-    memset( &v19, 0, sizeof(v19) );
-    Test_Ray( trace_start, trace_dir, 257, &v19, 1 );
+    memset( &t, 0, sizeof(t) );
+    Test_Ray( trace_start, trace_dir, 257, &t, 1 );
     // m_bALTEdge (ALTEdgeDrag, default 1): Alt+drag face-extrude. Inert at rest (the
     // AND is false unless Alt is physically held), so default behaviour is unchanged.
-    if ( v19.selected || ( g_PrefsDlg->m_bALTEdge && GetAsyncKeyState( VK_MENU ) < 0 ) )
+    if ( t.selected || ( g_PrefsDlg->m_bALTEdge && GetAsyncKeyState( VK_MENU ) < 0 ) )
     {
         drag_ok = 1;
         Undo_Start( "drag selection" );
         Undo_AddBrushList( &selected_brushes );
 
-        selbrush_t *hitBrush = (selbrush_t *)v19.brush;
-        faceVis_s  *hitFace  = (faceVis_s  *)v19.face;
+        selbrush_t *hitBrush = (selbrush_t *)t.hit.brush;
+        faceVis_s  *hitFace  = (faceVis_s  *)t.hit.face;
 
         if ( buttons == 9 )  // MK_LBUTTON|MK_CONTROL = 9
         {
             // Shear dragging: select single face
             if ( hitBrush )
             {
-                // IDA assert: brush->version == brush->def->version
-                if ( LOWORD(hitBrush->version) != hitBrush->def->version )
-                {
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp",
-                            203, 0, "%s",
-                            "t.hit.brush->version == t.hit.brush->def->version" );
-                }
-                // IDA assert: face in [&brush->faces[0], &brush->faces[faceCount])
-                if ( hitFace < hitBrush->faces ||
-                     hitFace >= hitBrush->faces + hitBrush->faceCount )
-                {
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp",
-                            204, 0, "%s",
-                            "t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount]" );
-                }
+                iassert( t.hit.brush->version == t.hit.brush->def->version );   // drag.cpp:203
+                iassert( t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount] );   // drag.cpp:204
                 int fIdx = drag_face_index( hitBrush, hitFace );
                 // IDA: arg2 = (int)&brush->def->faces[fIdx]
                 Brush_SelectFaceForDragging( hitBrush->def,
@@ -472,13 +458,12 @@ LABEL_15:
 // with Alt is released (IDA line 270 assert).
 //
 // IDA: Assert(count == 2), then:
-//   sub_476A30(&selFace[0].brush->def->faces[selFace[0].index],
-//              selFace[1].brush->def,
-//              &selFace[1].brush->def->faces[selFace[1].index])
+//   sub_476A30(&g_SelectedFaces.GetAt( 0 ).brush->def->faces[g_SelectedFaces.GetAt( 0 ).index],
+//              g_SelectedFaces.GetAt( 1 ).brush->def,
+//              &g_SelectedFaces.GetAt( 1 ).brush->def->faces[g_SelectedFaces.GetAt( 1 ).index])
 // sub_476A30 = Brush_ApplyTextureProjection (brush.cpp, 0x476a30).
 //
-// NOTE: selFace lives in select.cpp (extern declared from engine_stubs region).
-extern struct selface_t *selFace;    // 0x73c710 — select.cpp
+// NOTE: g_SelectedFaces lives in select.cpp (model in qe3.h).
 
 // Forward: Brush_ApplyTextureProjection (brush.cpp 0x476a30)
 // IDA a1=srcFace, a2=dstBrushDef (brush_t*), a3=dstFace — brush is the middle arg.
@@ -489,13 +474,8 @@ extern brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFa
 // through into dead code.
 void Drag_FaceAlign()
 {
-    int count = *(int *)g_ptrSelectedFaces_GetSize;
-    if ( count != 2 )
-    {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp",
-                270, 0, "%s", "g_SelectedFaces.GetCount() == 2" );
-        count = *(int *)g_ptrSelectedFaces_GetSize;
-    }
+    int count = g_SelectedFaces.GetSize();
+    iassert( g_SelectedFaces.GetCount() == 2 );   // drag.cpp:270
 
     if ( count < 2 )
     {
@@ -505,14 +485,14 @@ void Drag_FaceAlign()
         return;
     }
 
-    // Apply the texture projection from selFace[0] to selFace[1]
-    // IDA: sub_476A30(&selFace[0].brush->def->faces[selFace[0].index],
-    //                  selFace[1].brush->def,            ← a2 = brush_t*
-    //                  &selFace[1].brush->def->faces[selFace[1].index])
+    // Apply the texture projection from g_SelectedFaces.GetAt( 0 ) to g_SelectedFaces.GetAt( 1 )
+    // IDA: sub_476A30(&g_SelectedFaces.GetAt( 0 ).brush->def->faces[g_SelectedFaces.GetAt( 0 ).index],
+    //                  g_SelectedFaces.GetAt( 1 ).brush->def,            ← a2 = brush_t*
+    //                  &g_SelectedFaces.GetAt( 1 ).brush->def->faces[g_SelectedFaces.GetAt( 1 ).index])
     Brush_ApplyTextureProjection(
-        (int)&selFace[0].brush->def->faces[ selFace[0].index ],
-             selFace[1].brush->def,
-        (int)&selFace[1].brush->def->faces[ selFace[1].index ]
+        (int)&g_SelectedFaces.GetAt( 0 ).brush->def->faces[ g_SelectedFaces.GetAt( 0 ).index ],
+             g_SelectedFaces.GetAt( 1 ).brush->def,
+        (int)&g_SelectedFaces.GetAt( 1 ).brush->def->faces[ g_SelectedFaces.GetAt( 1 ).index ]
     );
 }
 
@@ -558,8 +538,7 @@ extern int  CurvEditDlg_OnSomeSetting();        // CurvEditDlg (P5 dialog) — F
 extern int  g_nPatchClickedView;                // 0x73b108
 
 // --- middle/right-button texture pick/apply tail deps ---
-// (Test_Ray + selFace + Drag_FaceAlign already declared above.)
-extern void sub_480670( int a1, int a2 );                             // select.cpp RemoveAt 0x480670
+// (Test_Ray + g_SelectedFaces + Drag_FaceAlign already declared above.)
 extern void UpdatePatchInspector();                                   // patchdialog.cpp 0x436db0
 namespace SurfaceInspector { void UpdateSurfaceDialog(); }            // 0x458590 (engine_stubs no-op)
 // brush.cpp ports used by the apply branches:
@@ -606,9 +585,7 @@ void Drag_Begin( void *pressFunc, unsigned int buttons, int viewz,
     if ( viewz == 2 )       contents |= 0x1000;
     else if ( viewz == 0 )  contents |= 4;
 
-    if ( ( buttons & 0x20 ) != 0 )   // MK_ALT must not be folded into `buttons`
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp",
-                323, 0, "%s", "(buttons & MK_ALT) == 0" );
+    iassert( (buttons & MK_ALT) == 0 );   // drag.cpp:323 (MK_ALT=0x20, oleidl.h)
 
     const select_t mode = g_qeglobals.d_select_mode;
 
@@ -707,12 +684,12 @@ LABEL_34:
     if ( buttons == (unsigned)nMouseButton && !altDown )
     {
         Test_Ray( trace_start, trace_dir, 512, &t, 1 );
-        if ( !t.face )
+        if ( !t.hit.face )
         {
             Sys_Printf( "Did not select a texture\n" );
             return;
         }
-        selbrush_t *brush = t.brush;
+        selbrush_t *brush = t.hit.brush;
         brush_t    *def   = brush->def;
         // Remember the hit brush's vertical extent (bottom/top) as the new-brush template.
         g_qeglobals.d_new_brush_bottom_x = def->mins[0];   // def+0x20
@@ -722,14 +699,10 @@ LABEL_34:
         g_qeglobals.d_new_brush_top_y = def->maxs[1];
         g_qeglobals.d_new_brush_top_z = def->maxs[2];
 
-        if ( t.face < brush->faces || t.face >= &brush->faces[ brush->faceCount ] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 413, 0, "%s",
-                    "t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount]" );
-        if ( brush->version != def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 414, 0, "%s",
-                    "t.hit.brush->version == t.hit.brush->def->version" );
+        iassert( t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount] );   // drag.cpp:413
+        iassert( t.hit.brush->version == t.hit.brush->def->version );   // drag.cpp:414
 
-        int faceIdx = (int)( t.face - brush->faces );   // faceVis_s stride 12
+        int faceIdx = (int)( t.hit.face - brush->faces );   // faceVis_s stride 12
         face_t *face = &def->faces[ faceIdx ];
         if ( brush->patch )
         {
@@ -738,10 +711,11 @@ LABEL_34:
         }
         // patch-consistency assert
         patch_t *pinst = brush->patch;
-        if ( ( pinst || def->patch ) && ( pinst ? pinst->def : nullptr ) != def->patch )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 422, 0, "%s",
-                    "(t.hit.brush->patch == NULL && t.hit.brush->def->patch == NULL) || "
-                    "(t.hit.brush->patch->def == t.hit.brush->def->patch)" );
+        // Verbatim condition (drag.cpp:422). Short-circuit keeps it deref-safe for both
+        // consistent states (plain brush: first clause true; patch brush: patch != NULL);
+        // the inconsistent patch==NULL && def->patch!=NULL state derefs NULL exactly as
+        // the original source would have.
+        iassert( (t.hit.brush->patch == NULL && t.hit.brush->def->patch == NULL) || (t.hit.brush->patch->def == t.hit.brush->def->patch) );
         // a1 = the patch-vertex projection block (patch_t def) for a patch pick, else 0.
         // The brush-FACE pick (non-patch, the common case) passes 0 → no projection copy,
         // and is now fully functional.  The PATCH pick reaches sub_44B620 (FATAL) above first.
@@ -756,21 +730,21 @@ LABEL_34:
     if ( buttons == (unsigned)( nMouseButton | 8 ) && !altDown )
     {
         Test_Ray( trace_start, trace_dir, 0, &t, 1 );
-        if ( !t.brush )
+        if ( !t.hit.brush )
         {
             Sys_Printf( "Didn't hit a brush\n" );
             return;
         }
         // IDA reads eclass via owner->def (entity_s_def), NOT owner->eclass directly
         // (the instance-vs-def pattern): [owner+8]=def, [def+0x60]=eclass, [eclass+8]=fixedsize.
-        if ( ( (entity_s_def *)t.brush->owner->def )->eclass->fixedsize )
+        if ( ( (entity_s_def *)t.hit.brush->owner->def )->eclass->fixedsize )
         {
             Sys_Printf( "Can't change an entity texture\n" );
             return;
         }
         // sub_476ED0 = per-brush apply (benign no-op stub until the per-brush
         // texture-projection helpers are ported).
-        sub_476ED0( t.brush->def, (MaterialDef *)&g_qeglobals.random_texture_stuff[ layer ], 1, 1.0f, 0 );
+        sub_476ED0( t.hit.brush->def, (MaterialDef *)&g_qeglobals.random_texture_stuff[ layer ], 1, 1.0f, 0 );
         g_nUpdateBits = -1;
         return;
     }
@@ -779,7 +753,7 @@ LABEL_34:
     if ( buttons == (unsigned)( nMouseButton | 0xC ) && !altDown )
     {
         Test_Ray( trace_start, trace_dir, 0, &t, 1 );
-        selbrush_t *brush = t.brush;
+        selbrush_t *brush = t.hit.brush;
         if ( !brush )
         {
             Sys_Printf( "Didn't hit a brush\n" );
@@ -797,13 +771,9 @@ LABEL_34:
             g_nUpdateBits = -1;
             return;
         }
-        if ( t.face < brush->faces || t.face >= &brush->faces[ brush->faceCount ] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 473, 0, "%s",
-                    "t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount]" );
-        if ( brush->version != def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 474, 0, "%s",
-                    "t.hit.brush->version == t.hit.brush->def->version" );
-        int faceIdx = (int)( t.face - brush->faces );
+        iassert( t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount] );   // drag.cpp:473
+        iassert( t.hit.brush->version == t.hit.brush->def->version );   // drag.cpp:474
+        int faceIdx = (int)( t.hit.face - brush->faces );
         face_t *face = &def->faces[ faceIdx ];
         // copy the whole current-layer MaterialDef (36 bytes) onto the picked face.
         memcpy( &face->mtldef[ layer ], &g_qeglobals.random_texture_stuff[ layer ].mtl, sizeof(MaterialDef) );
@@ -825,7 +795,7 @@ LABEL_34:
     {
         Sys_Printf( "Set brush face texture but leave info\n" );
         Test_Ray( trace_start, trace_dir, 0, &t, 1 );
-        selbrush_t *brush = t.brush;
+        selbrush_t *brush = t.hit.brush;
         if ( !brush )
         {
             Sys_Printf( "Didn't hit a brush\n" );
@@ -848,13 +818,9 @@ LABEL_34:
             g_nUpdateBits = -1;
             return;
         }
-        if ( t.face < brush->faces || t.face >= &brush->faces[ brush->faceCount ] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 504, 0, "%s",
-                    "t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount]" );
-        if ( brush->version != def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 505, 0, "%s",
-                    "t.hit.brush->version == t.hit.brush->def->version" );
-        int faceIdx = (int)( t.face - brush->faces );
+        iassert( t.hit.face >= &t.hit.brush->faces[0] && t.hit.face < &t.hit.brush->faces[t.hit.brush->faceCount] );   // drag.cpp:504
+        iassert( t.hit.brush->version == t.hit.brush->def->version );   // drag.cpp:505
+        int faceIdx = (int)( t.hit.face - brush->faces );
         face_t *face = &def->faces[ faceIdx ];
         // Face_SetMaterial(&random_texture_stuff[layer], face, def): write the {lyrMtl,radMtl}
         // pair into face->mtldef[layer]; ++def->version.
@@ -867,11 +833,11 @@ LABEL_34:
     if ( buttons == (unsigned)nMouseButton && altDown )
     {
         Select_Deselect( 0 );
-        int n = *(int *)g_ptrSelectedFaces_GetSize;
+        int n = g_SelectedFaces.GetSize();
         if ( n > 1 )
-            sub_480670( 0, n - 1 );             // keep only the last selected face
+            g_SelectedFaces.RemoveAt( 0, n - 1 );   // keep only the last selected face
         SelectFaceSth( (int)trace_dir, (int)trace_start, 520 );
-        if ( *(int *)g_ptrSelectedFaces_GetSize == 2 )
+        if ( g_SelectedFaces.GetSize() == 2 )
             Drag_FaceAlign();                   // ported; internally parks on texturevecs_02
         return;
     }
@@ -887,6 +853,8 @@ LABEL_34:
 static void Drag_ProjectPointOntoRay( float *out, const float *origin,
                                       const float *dir, const float *point )
 {
+    // KEEP_VERBOSE (also Drag_RayPointDistSq below): local copy of a CoD3 com_math fn
+    // kisak's engine doesn't carry — the com_math.cpp:1357/1344 strings stay verbatim.
     if ( !Vec3IsNormalized( dir ) )
         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
                 1357, 0, "%s", "Vec3IsNormalized( dir )" );
@@ -1104,10 +1072,8 @@ void MoveSelection( float *origin, float *dir, float *move )
                 centroid[1] = centroid[1] * inv;
                 centroid[2] = inv * centroid[2];
 
-                if ( !origin )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 747, 0, "%s", "origin" );
-                if ( !dir )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\drag.cpp", 748, 0, "%s", "dir" );
+                iassert( origin );   // drag.cpp:747
+                iassert( dir );   // drag.cpp:748
 
                 // project the centroid onto the click ray (foot of perpendicular).
                 float end[3];

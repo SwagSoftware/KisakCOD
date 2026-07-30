@@ -23,6 +23,7 @@ set(RADIANT_SRCS
     "${SRC_DIR}/radiant/primarylights_region.cpp"  # light-region CSG (common/primarylights_region.cpp)
     "${SRC_DIR}/radiant/eclass.cpp"
     "${SRC_DIR}/radiant/brush.cpp"
+    "${SRC_DIR}/radiant/texturevecs.cpp"
     "${SRC_DIR}/radiant/csg.cpp"
     "${SRC_DIR}/radiant/entity.cpp"
 

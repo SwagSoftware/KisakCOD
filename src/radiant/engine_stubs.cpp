@@ -725,19 +725,15 @@ int dword_181F51C = 0;
 
 CMainFrame *g_pParentWnd = nullptr;         // 0x25d5a70
 
-// g_selFaceCount / g_ptrSelectedFaces_GetSize: the binary stores a CPtrArray whose
-// m_nSize the code reads through g_ptrSelectedFaces_GetSize; select.cpp reads/writes it
-// as *(int *)g_ptrSelectedFaces_GetSize, so that symbol must be int-aliasable storage.
-int  g_selFaceCount = 0;
-char g_ptrSelectedFaces_GetSize[4] = {};
-
-// prefab stack storage (byte_25EB240 @ 0x25eb240, stride 2168 per level, max 8 levels).
-char byte_25EB240[8 * 2168] = {};
+// prefab-edit stack (IDB byte_25EB240 @ 0x25eb240). KISAK BUG FIX: the binary's
+// storage is 16 levels (runs to exactly g_qeglobals @0x25F39C0) and the full-check
+// is == 16; the port's previous 8*2168 char array overflowed on deep nesting.
+prefabLevel_t g_prefabStack[16] = {};
 
 // texWndGlob.materialNameRemap (0x25e7a00) — head of the material-name remap list
 // ({char* key; char* value; node* next}).  Populated by the unported material remap
 // system; null here, so sub_45AD50 just strips to basename.
-void *texWndGlob_materialNameRemap = nullptr;
+struct TexWndGlob_t { void *materialNameRemap; } texWndGlob;   // IDB texWndGlob (assert strings name .materialNameRemap)
 
 // filter_usage_array 0x739f80 / filter_locale_array 0x73a780 — the usage/locale filter
 // name tables (filter_material_t {char *name; int index} x 256), filled from index 1 by
@@ -806,19 +802,10 @@ void MatrixInverse44(const void *src, void *dst)
 
 extern void Vec3Cross( const float *a, const float *b, float *out );   // com_math 0x40a4d0
 
-// 0x4a45d0 (com_math.cpp:690) — index of the vec3 component with the largest magnitude.
-int sub_4A45D0( float *dir )
-{
-    if ( !dir )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
-                690, 0, "%s", "dir" );
-    float x2 = dir[0] * dir[0];
-    float y2 = dir[1] * dir[1];
-    float z2 = dir[2] * dir[2];
-    if ( ( ( x2 < y2 ) ? y2 : x2 ) >= z2 )    // IDA: *(&v2 + (v2<v3)) >= v4
-        return ( x2 < y2 ) ? 1 : 0;
-    return 2;
-}
+// 0x4a45d0 (com_math.cpp:690) — index of the vec3 component with the largest
+// magnitude.  Canonical port is linearmapping.cpp Vec3_MajorAxis (this file
+// carried a duplicate copy).
+extern int Vec3_MajorAxis( const float *dir );
 
 // 0x4769a0 — solve the 2D texture-coordinate gradient for a face from two texture planes.
 // a1 = out face normal, a2 = {Sx,Sy,Sz,Sd, Tx,Ty,Tz,Td}, a3 = out gradient.  Reached from
@@ -831,7 +818,7 @@ void sub_4769A0( int a1, int a2, int a3 )
 
     Vec3Cross( p, p + 4, normalOut );
     Vec3Normalize_R( normalOut );
-    int v4 = sub_4A45D0( normalOut );
+    int v4 = Vec3_MajorAxis( normalOut );
     int v5 = ( v4 + 1 ) % 3;
     int v6 = ( v4 + 2 ) % 3;
     float v8 = p[v6 + 4] * p[v5] - p[v5 + 4] * p[v6];
@@ -905,7 +892,7 @@ char *sub_45AD50(char *name)
     for ( char *p = name; *p; ++p )
         if ( *p == '/' || *p == '\\' )
             base = p + 1;                       // basename = after the last slash
-    const char **node = (const char **)texWndGlob_materialNameRemap;
+    const char **node = (const char **)texWndGlob.materialNameRemap;
     while ( node )
     {
         if ( !_stricmp( base, node[0] ) )
@@ -1031,44 +1018,9 @@ void AxisToAngles( float *angles, float (*axis)[3] )   // 0x4a8a00
         angles[2] = roll + 180.0f;
 }
 
-// 0x4a59c0 (com_math.cpp:1399) — project a point onto a 2-vector basis, solving for two
-// scalars.  Degenerate branch (bases near-parallel) solves along basis1 only; thresholds
-// are the binary's dbl_6F4490 = 1e-4 (det test) and flt_6F4580 = 1e-5 (assert).  Used by
-// Brush_WritePhysCylinder to find a cylinder side-edge midpoint.
-void sub_4A59C0( const float *origin, const float *basis0, float *outS, float *outT,
-                 const float *point, const float *basis1 )
-{
-    float rel[3];
-    rel[0] = point[0] - origin[0];
-    rel[1] = point[1] - origin[1];
-    rel[2] = point[2] - origin[2];
-
-    float lenA6sq  = basis1[1]*basis1[1] + basis1[0]*basis1[0] + basis1[2]*basis1[2];
-    float lenA2sq  = basis0[1]*basis0[1] + basis0[0]*basis0[0] + basis0[2]*basis0[2];
-    float d        = basis1[0]*basis0[0] + basis0[1]*basis1[1] + basis0[2]*basis1[2];
-    float nd       = -d;
-    float relDotA6 = basis1[2]*rel[2] + basis1[0]*rel[0] + rel[1]*basis1[1];
-
-    float det = lenA2sq * lenA6sq - nd * nd;
-    float test = (float)fabs( (double)( nd * lenA6sq ) ) * 0.00009999999747378752f;
-
-    if ( test >= det * det )
-    {
-        if ( lenA6sq <= 9.999999747378752e-06f )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp",
-                    1399, 0, "%s", "dir1LenSq > 0.00001f" );
-        *outS = -relDotA6 / lenA6sq;
-        *outT = 0.0f;
-    }
-    else
-    {
-        float relDotA2 = rel[2]*basis0[2] + rel[1]*basis0[1] + rel[0]*basis0[0];
-        float nRelA2   = -relDotA2;
-        float inv      = 1.0f / det;
-        *outS = ( nRelA2 * nd - relDotA6 * lenA2sq ) * inv;
-        *outT = inv * ( nd * relDotA6 - lenA6sq * nRelA2 );
-    }
-}
+// 0x4a59c0 (com_math.cpp:1399) — the radiant binary's copy of the engine's
+// ClosestApproachOfTwoLines (universal/com_math.cpp, which carries the 1399
+// assert).  Callers use the engine fn directly; the duplicate copy is gone.
 
 // 0x4abeb0 AnglesToAxis / 0x4a49a0 Vec3RotateTranspose / 0x4ba7d0 OrientationConcatenate.
 // The editor declares these with its own signatures (distinct overloads from the kisak
@@ -1117,6 +1069,7 @@ void Vec3RotateTranspose( float * const in, float ( *matrix )[3], float * const 
 // 0x42fb40 — write `layer "<name>"` for a non-default layer.
 void MapLoad_ParseBrush_Layer(int (**writer)(int, const char *, ...), int layerStr)
 {
+    // KEEP_VERBOSE: this IS the mapparsing.cpp:190 assert carrier (foreign common/ TU).
     if ( !layerStr )
         Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\common\\mapparsing.cpp",
                 190, 0, "%s", "layerName" );
@@ -1170,30 +1123,6 @@ void sub_4767E0( const texdef_sub_t *texDef, int facePtr, int brushDef )
     Brush_SetFaceTexdef( texDef, (face_t *)(intptr_t)facePtr, (brush_t *)(intptr_t)brushDef );
 }
 
-// 0x44cf00 Patch_AllocInstance — the patch analogue of Brush_AddToList, called from
-// Brush_AddToList when a brush owns a patch.  The instance version word is seeded to
-// def->version-1 (the rebuild trigger, mirroring selbrush.version): without it a fresh
-// instance whose version happened to equal def->version would skip its first curveDef
-// rebuild.  refCount lives at def->symbiot(+0x501C) + 0x1c.
-patch_t *PMESH_55(patchMesh_t *def)
-{
-    if ( !def )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 9031, 0, "%s", "def" );
-    if ( !def->pSymbiot )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 9032, 0, "%s", "def->symbiot" );
-    if ( *(const int *)((const char *)def->pSymbiot + 28) < 0 )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\PMESH.CPP", 9033, 0,
-                "%s\n\t(def->symbiot->refCount) = %i", "(def->symbiot->refCount >= 0)",
-                *(const int *)((const char *)def->pSymbiot + 28) );
-
-    patch_t *p = (patch_t *)calloc( 1, sizeof( patch_t ) );   // = IDB new(0x20) + zero [1..7]
-    if ( p )
-    {
-        p->def     = def;
-        p->version  = (short)( def->version - 1 );
-    }
-    return p;
-}
 
 extern void Com_BeginParseSession(const char *);  // q_parse.cpp
 
@@ -1242,17 +1171,17 @@ int  FileExists( const char *path )
 }
 
 // unknown_libname_291 — the CRT bounds-check abort (IDA _VEC_validate equivalent),
-// reached from the selFace array indexing.
+// reached from g_SelectedFaces.GetAt indexing.
 void unknown_libname_291()
 {
-    Com_Error(ERR_FATAL, "RADIANT: selFace array bounds check failed (unknown_libname_291)");
+    Com_Error(ERR_FATAL, "RADIANT: g_SelectedFaces bounds check failed (unknown_libname_291)");
 }
 
 // 0x447860 — 1 iff no faces are selected and EVERY selected brush is a patch (selection
 // non-empty).  Loop shape is the binary's.
 int OnlyPatchesSelected()
 {
-    if ( *(int *)g_ptrSelectedFaces_GetSize > 0 )
+    if ( g_SelectedFaces.GetSize() > 0 )
         return 0;
     selbrush_t *b = selected_brushes.next;
     if ( b == &selected_brushes )

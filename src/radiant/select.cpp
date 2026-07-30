@@ -6,6 +6,7 @@
 // Ground truth: CoD4Radiant IDA (IW3xRadiant.i64); GtkRadiant 1.6 for naming only.
 
 #include "stdafx.h"
+#include <universal/assertive.h>    // iassert (USE_ASSERTS always on; same handler as Assert)
 #include "qe3.h"
 #include "mainfrm.h"   // CMainFrame / CXYWnd::m_nViewType (region-select view axis)
 #include "prefs.h"     // CPrefsDlg / g_PrefsDlg (Test_Ray pick-chain m_nEntityShowState/...)
@@ -102,7 +103,6 @@ void Select_GetMid( float *mid );
 extern float       world_orient_matrix[4][3];  // 0x6DE290
 extern void        unknown_libname_291();       // CRT bounds-check abort
 extern undo_s     *g_lastundo;                  // 0x23F162C — defined in undo.cpp
-extern char        g_ptrSelectedFaces_GetSize[4]; // 4-byte int alias (IDB 0x73C714)
 extern int         g_nUpdateBits;              // 0x25D5A74
 extern void       *zero;                       // empty-string sentinel (engine_stubs.cpp)
 
@@ -173,14 +173,10 @@ static inline const char *zero_str() {
 }
 
 // ── select.cpp globals ───────────────────────────────────────────────────────
-// selFace (0x73C710) — heap array of selface_t
-selface_t *selFace = nullptr;
-// g_selFaceSize (0x73C718) — allocated capacity of selFace[]
-int        g_selFaceSize = 0;
-
-// Helper: access the count of valid selFace entries.
-// All IDA read/write sites use *(_DWORD*)g_ptrSelectedFaces_GetSize.
-#define SEL_FACE_COUNT() (*(int *)g_ptrSelectedFaces_GetSize)
+// g_SelectedFaces (IDB CArray<selface_t,selface_t&> at 0x73C70C) — the face-
+// selection storage; model in qe3.h.  m_pData=0x73C710, m_nSize=0x73C714,
+// m_nMaxSize=0x73C718 (the port's old selFace / g_ptrSelectedFaces_GetSize /
+// g_selFaceSize raw globals).
 
 // ── undo helpers ─────────────────────────────────────────────────────────────
 // The "adding brushes after entity" guard tests entitylist.next (undo+0x70, IDA 0x48f210),
@@ -280,57 +276,6 @@ static void Select_Brush_2( selbrush_t *list, selbrush_t *b )
     }
 }
 
-// ── sub_48BE20 — parse SPACE-delimited int list (Map_ParseLinkList) ───────────────────────────────
-// 0x48be20 Map_ParseLinkList. __usercall(buf@ebx, str).  Parses str (script_linkTo /
-// script_linkName) as a SPACE-delimited int list with DEDUP, capped at 30 entries.
-// Layout: buf[0..count-1]=values, buf[count]=-1 terminator, buf[1024]=count (byte 0x1000),
-// byte buf+0x1004 = overflow flag (cleared each call, set when the 30-cap is hit).  Parses
-// in place; cross-file Assert qe3.cpp:446.  Caller buf must be int[1026]+ so buf+0x1004 is
-// in bounds.
-void Map_ParseLinkList( int *buf, const char *str )
-{
-    int  count = 0;
-    bool atBoundary = true;                          // v7: at a token start
-    *( (unsigned __int8 *)buf + 0x1004 ) = 0;        // overflow flag cleared (IDA 0x48be31)
-    size_t i   = 0;
-    size_t len = strlen( str );
-    if ( len )
-    {
-        for ( ;; )
-        {
-            const char *p = &str[i];
-            if ( !str[i] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\qe3.cpp", 446, 0, "%s", "linkTo[i]" );
-            if ( *p == ' ' )
-            {
-                atBoundary = true;
-            }
-            else if ( atBoundary )
-            {
-                int  value = atol( p );
-                bool dup   = false;                  // dedup scan buf[0..count-1] (IDA 0x48be9a)
-                for ( int k = 0; k < count; ++k )
-                    if ( buf[k] == value ) { dup = true; break; }
-                if ( !dup )
-                {
-                    buf[count++] = value;
-                    atBoundary   = false;
-                    if ( count >= 30 )               // overflow (IDA cmp esi,1Eh)
-                    {
-                        *( (unsigned __int8 *)buf + 0x1004 ) = 1;
-                        break;
-                    }
-                }
-            }
-            ++i;
-            len = strlen( str );                      // IDA recomputes strlen each pass
-            if ( i >= len )
-                break;
-        }
-    }
-    buf[count] = -1;                                  // -1 terminator at buf[count]
-    buf[1024]  = count;                               // count at buf[0x1000]
-}
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  THE Test_Ray PICK CHAIN (brush + patch + prefab + model ray-pick):
@@ -339,9 +284,9 @@ void Map_ParseLinkList( int *buf, const char *str )
 //    sub_48D240  (0x48d240)  per-brush inner trace: brush -> patch -> prefab -> model
 //    sub_48D460  (0x48d460)  brush-list walker (keeps nearest, dedup by ~0.5 dist)
 //    Test_Ray    (0x48d7c0)  top entry (incl. the contents&0x40 cycle-pick branch)
-//  edTrace_t (qe3.h) IS the byte-exact IDB trace_t (88 bytes: brush@0, face@4, xx1@8,
+//  edTrace_t (qe3.h) IS the byte-exact IDB trace_t (88 bytes: hit{brush@0, face@4, index@8},
 //  xx2@0xC, xx3@0x10, xx4@0x14 = a 0x30-byte orientation copy, dist@0x44, selected@0x48,
-//  _pad[0]@0x49, normal@0x4C).  The faceVis identity t->face == &brush->faces[idx] holds
+//  _pad[0]@0x49, normal@0x4C).  The faceVis identity t->hit.face == &brush->faces[idx] holds
 //  because Brush_Ray returns into the real instance faceVis array (built by sub_477D70).
 //  KISAK: sub_48D460's camera/XY frustum cull (sub_405620 + CXYWnd_SetupClipPlanes +
 //  CullCubic + sub_46CD80) is skipped - it needs m_pCamWnd/m_pActiveXY, and it is a pure
@@ -611,7 +556,7 @@ static char sub_48CE60( float *outDist, float *outNormal, const float *org,
 // ── sub_48D240 (0x48d240) — per-brush inner trace ─────────────────────────────────
 //  Ray-test ONE brush instance: convex brush (Brush_Ray) -> patch (PMESH_51) -> prefab
 //  (recurse via sub_48D460 through the prefab's local orientation) -> model (sub_48CE60).
-//  Fills a6 (a trace_t) with the hit; clears a6->brush/face on miss.
+//  Fills a6 (a trace_t) with the hit; clears a6->hit.brush/face on miss.
 static char sub_48D240( const float *start, const float *dir, int contents,
                         selbrush_t *a4, const orientation_t *a5, edTrace_t *a6 )
 {
@@ -619,14 +564,14 @@ static char sub_48D240( const float *start, const float *dir, int contents,
     float *p_dist = &a6->dist;                          // &a6->dist
 
     faceVis_s *face = Brush_Ray( a4, dir, start, a5, &a6->dist, a6->normal );   // 0x48d26b
-    a6->face = face;                                    // a6->face = patch
+    a6->hit.face = face;                                    // a6->hit.face = patch
     if ( !face )
     {
-        a6->brush = nullptr;
+        a6->hit.brush = nullptr;
         return 0;
     }
-    a6->brush = a4;                                     // a6->brush = a4
-    a6->xx1   = (int)(intptr_t)a4;                      // a6->xx1 = a4
+    a6->hit.brush = a4;                                     // a6->hit.brush = a4
+    a6->hit.index   = (int)(intptr_t)a4;                      // a6->hit.index = a4
     a6->xx2   = (int)(intptr_t)face;                    // a6->xx2 = patch
     memcpy( &a6->xx4, a5, 0x30u );                      // qmemcpy(&a6->xx4, a5, 0x30)
     a6->xx3   = 0;
@@ -641,8 +586,8 @@ static char sub_48D240( const float *start, const float *dir, int contents,
         char hit = PMESH_51( start, dir, patch, p_dist, nullptr, nullptr, nullptr, normal );   // 0x48d2d5
         if ( !hit )                                     // LABEL_16
         {
-            a6->brush = nullptr;
-            a6->face  = nullptr;
+            a6->hit.brush = nullptr;
+            a6->hit.face  = nullptr;
         }
         return hit;
     }
@@ -667,13 +612,13 @@ static char sub_48D240( const float *start, const float *dir, int contents,
         char result;
         if ( a6a.dist == 262144.0f )                    // nothing hit in the prefab
         {
-            a6->face  = nullptr;
-            a6->brush = nullptr;
+            a6->hit.face  = nullptr;
+            a6->hit.brush = nullptr;
             result = (char)(intptr_t)a6;                // LOBYTE(patch) = (_BYTE)a6
         }
         else
         {
-            a6->xx1 = a6a.xx1;
+            a6->hit.index = a6a.hit.index;
             a6->xx2 = a6a.xx2;
             a6->selected = a6a.selected;
             memcpy( &a6->xx4, &a6a.xx4, 0x30u );        // qmemcpy(p_xx4, &a6a.xx4, 0x30)
@@ -701,8 +646,8 @@ static char sub_48D240( const float *start, const float *dir, int contents,
             char hit = sub_48CE60( p_dist, normal, start, dir, a4 );     // 0x48d43e
             if ( !hit )                                  // LABEL_16
             {
-                a6->brush = nullptr;
-                a6->face  = nullptr;
+                a6->hit.brush = nullptr;
+                a6->hit.face  = nullptr;
             }
             return hit;
         }
@@ -773,13 +718,13 @@ static void sub_48D460( const float *start, const float *dir, int contents,
 
         edTrace_t v27;                                                  // [ebp-58h]
         sub_48D240( start, dir, contents, sbn, a5, &v27 );             // 0x48d628
-        if ( !v27.face )
+        if ( !v27.hit.face )
             continue;
         // face-texture-filter test: skip if the hit face's material is filtered out.
         // (CPU mode: visArray is NULL — derive the Material* from the def face's layer.)
-        Material *faceMtl = nullptr;                                    // v27.face->visArray->handle
-        if ( v27.face->visArray )
-            faceMtl = v27.face->visArray->mtlHandle;
+        Material *faceMtl = nullptr;                                    // v27.hit.face->visArray->handle
+        if ( v27.hit.face->visArray )
+            faceMtl = v27.hit.face->visArray->mtlHandle;
         if ( sub_46FCF0( faceMtl ) )                                   // 0x46FCF0
             continue;
 
@@ -845,12 +790,12 @@ void Test_Ray( float *start, float *dir, int contents, edTrace_t *t, int num_tra
             edTrace_t a4a;                                   // [ebp-68h]
             sub_48D240( start, dir, passFlags, brush,
                         (const orientation_t *)world_orient_matrix, &a4a );   // 0x48d8c5
-            if ( !a4a.face )                                 // a4a.onext (== trace.face @+4)
+            if ( !a4a.hit.face )                                 // a4a.onext (== trace.face @+4)
                 continue;
-            // a4a.face->...+8 dereferenced as a brush owner→prev, fed to sub_46FCF0 — but
+            // a4a.hit.face->...+8 dereferenced as a brush owner→prev, fed to sub_46FCF0 — but
             // sub_46FCF0 takes a Material*; the binary's [eax+8]/[eax] chain reads the
             // faceVis owner. In CPU mode (visArray NULL) this filter is inert; gather all.
-            if ( sub_46FCF0( a4a.face->visArray ? a4a.face->visArray->mtlHandle : nullptr ) )
+            if ( sub_46FCF0( a4a.hit.face->visArray ? a4a.hit.face->visArray->mtlHandle : nullptr ) )
                 continue;
             hits.push_back( brush );                         // array_addsize(array, nSize, brush)
         }
@@ -885,8 +830,8 @@ void Test_Ray( float *start, float *dir, int contents, edTrace_t *t, int num_tra
                                          (const orientation_t *)world_orient_matrix,
                                          &dist, t->normal );
             t->dist     = dist;
-            t->brush    = winner;
-            t->face     = face;
+            t->hit.brush    = winner;
+            t->hit.face     = face;
             t->selected = 0;
             return;                                          // 0x48d9d9
         }
@@ -904,7 +849,7 @@ void Test_Ray( float *start, float *dir, int contents, edTrace_t *t, int num_tra
     if ( ( x_contents & 2 ) == 0 )
         sub_48D460( start, dir, x_contents, &selected_brushes,
                     (const orientation_t *)world_orient_matrix, t, num_traces );
-    if ( ( x_contents & 4 ) != 0 && !t->brush )
+    if ( ( x_contents & 4 ) != 0 && !t->hit.brush )
     {
         edTrace_t a4a;
         Test_Ray( start, dir, x_contents - 4, &a4a, 1 );
@@ -922,11 +867,11 @@ edTrace_t *Trace_AllDirectionsIfFailed( float *cam_origin, edTrace_t *trace_resu
                                         float *dir, int contents )
 {
     Test_Ray( cam_origin, dir, contents, trace_result, 1 );
-    if ( !trace_result->brush )
+    if ( !trace_result->hit.brush )
     {
         static const float jit[4][2] = { { 1.0f, 1.0f }, { 1.0f, -1.0f },
                                          { -1.0f, 1.0f }, { -1.0f, -1.0f } };
-        for ( int k = 0; k < 4 && !trace_result->brush; ++k )
+        for ( int k = 0; k < 4 && !trace_result->hit.brush; ++k )
         {
             float o[3] = { cam_origin[0] + jit[k][0],
                            cam_origin[1] + jit[k][1],
@@ -942,21 +887,16 @@ edTrace_t *Trace_AllDirectionsIfFailed( float *cam_origin, edTrace_t *trace_resu
 //  KISAK SUBSET: the MFC bStatus status-text + the center_grid PositionView are dropped.
 //  __usercall: b in ECX -> first param.
 // ═════════════════════════════════════════════════════════════════════════════
-void Select_Brush( selbrush_t *b, char some_overwrite, char bStatus, char center_grid_on_selection )
+void Select_Brush( selbrush_t *brush, char some_overwrite, char bStatus, char center_grid_on_selection )
 {
-    if ( SEL_FACE_COUNT() )
-    {
-        if ( !b->patch )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    426, 0, "%s", "(g_SelectedFaces.GetSize() == 0) || brush->patch" );
-    }
-    entity_s *e = b->owner;
+    iassert( (g_SelectedFaces.GetSize() == 0) || brush->patch );   // select.cpp:426
+    entity_s *e = brush->owner;
     iassert( e );
 
     if ( e == world_entity || some_overwrite != 1 )
     {
-        Brush_RemoveFromList( b );
-        Brush_AddToList2( b );
+        Brush_RemoveFromList( brush );
+        Brush_AddToList2( brush );
     }
     else
     {
@@ -984,75 +924,73 @@ void Select_Brush( selbrush_t *b, char some_overwrite, char bStatus, char center
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  g_SelectedFaces CArray backbone (IDB CArray at off_73C70C / sub_494610).
-//  selFace = the selface_t[] data; SEL_FACE_COUNT() = the live count; g_selFaceSize = the
-//  allocated capacity.  SelFace_SetSize models MFC CArray::SetSize (grow-by =
+//  m_pData = the selface_t[] data; m_nSize = the live count; m_nMaxSize = the
+//  allocated capacity.  SetSize models MFC CArray::SetSize (grow-by =
 //  clamp(count/8, 4, 1024)).
 // ═════════════════════════════════════════════════════════════════════════════
-static void SelFace_SetSize( int n )            // sub_494610
+SelectedFaceArray g_SelectedFaces;
+
+void SelectedFaceArray::SetSize( int n )        // sub_494610
 {
-    int *pCount = (int *)g_ptrSelectedFaces_GetSize;
     if ( n < 0 ) { unknown_libname_291(); return; }
     if ( n == 0 )
     {
-        if ( selFace ) { j__free_0( selFace ); selFace = nullptr; }
-        g_selFaceSize = 0;
-        *pCount       = 0;
+        if ( m_pData ) { j__free_0( m_pData ); m_pData = nullptr; }
+        m_nMaxSize = 0;
+        m_nSize    = 0;
         return;
     }
-    if ( !selFace )                              // first allocation
+    if ( !m_pData )                              // first allocation
     {
-        int cap = ( n <= g_selFaceSize ) ? g_selFaceSize : n;
-        selFace = (selface_t *)malloc( sizeof( selface_t ) * cap );
-        memset( selFace, 0, sizeof( selface_t ) * cap );
-        g_selFaceSize = cap;
-        *pCount       = n;
+        int cap = ( n <= m_nMaxSize ) ? m_nMaxSize : n;
+        m_pData = (selface_t *)malloc( sizeof( selface_t ) * cap );
+        memset( m_pData, 0, sizeof( selface_t ) * cap );
+        m_nMaxSize = cap;
+        m_nSize    = n;
         return;
     }
-    if ( n > g_selFaceSize )                      // grow capacity
+    if ( n > m_nMaxSize )                         // grow capacity
     {
-        // IDA 0x4946cc: grow-by = *(a2+8)/8 = the current COUNT/8 (MFC CArray m_nSize/8),
-        // not capacity/8.
-        int growby = *pCount / 8;
+        // IDA 0x4946cc: grow-by = m_nSize/8 (MFC CArray), not capacity/8.
+        int growby = m_nSize / 8;
         if ( growby < 4 )       growby = 4;
         else if ( growby > 1024 ) growby = 1024;
-        int newcap = g_selFaceSize + growby;
+        int newcap = m_nMaxSize + growby;
         if ( n >= newcap ) newcap = n;
         selface_t *nf = (selface_t *)malloc( sizeof( selface_t ) * newcap );
-        memcpy( nf, selFace, sizeof( selface_t ) * (*pCount) );
-        memset( nf + *pCount, 0, sizeof( selface_t ) * ( newcap - *pCount ) );
-        j__free_0( selFace );
-        selFace       = nf;
-        g_selFaceSize = newcap;
+        memcpy( nf, m_pData, sizeof( selface_t ) * m_nSize );
+        memset( nf + m_nSize, 0, sizeof( selface_t ) * ( newcap - m_nSize ) );
+        j__free_0( m_pData );
+        m_pData    = nf;
+        m_nMaxSize = newcap;
     }
-    else if ( n > *pCount )                       // grow size within capacity
+    else if ( n > m_nSize )                       // grow size within capacity
     {
-        memset( selFace + *pCount, 0, sizeof( selface_t ) * ( n - *pCount ) );
+        memset( m_pData + m_nSize, 0, sizeof( selface_t ) * ( n - m_nSize ) );
     }
-    *pCount = n;
+    m_nSize = n;
 }
 
-// sub_4947A0 — append one face record {brush, faceVis*, index}; return its index.
-int sub_4947A0( selbrush_t **rec )
+// CArray::Add (the binary inlines this as SetSize(GetSize()+1) + element write —
+// sub_4947A0 is the outlined copy).
+int SelectedFaceArray::Add( const selface_t &f )
 {
-    int idx = SEL_FACE_COUNT();
+    int idx = m_nSize;
     if ( idx < 0 ) unknown_libname_291();
-    SelFace_SetSize( idx + 1 );
-    selFace[idx].brush = rec[0];
-    selFace[idx].face  = (faceVis_s *)rec[1];
-    selFace[idx].index = (int)(intptr_t)rec[2];
+    SetSize( idx + 1 );
+    m_pData[idx] = f;
     return idx;
 }
 
-// sub_480670 — RemoveAt(a1, a2): drop a2 entries starting at index a1.
-void sub_480670( int a1, int a2 )
+// CArray::RemoveAt (sub_480670): drop `count` entries starting at index i.
+void SelectedFaceArray::RemoveAt( int i, int count )
 {
-    int *pCount = (int *)g_ptrSelectedFaces_GetSize;
-    int  result = a1 + a2;
-    if ( a1 < 0 || a2 < 0 || result > *pCount || result < a1 || result < a2 )
+    int end = i + count;
+    if ( i < 0 || count < 0 || end > m_nSize || end < i || end < count )
         unknown_libname_291();
-    if ( *pCount != result )
-        memmove( &selFace[a1], &selFace[result], sizeof( selface_t ) * ( *pCount - result ) );
-    *pCount -= a2;
+    if ( m_nSize != end )
+        memmove( &m_pData[i], &m_pData[end], sizeof( selface_t ) * ( m_nSize - end ) );
+    m_nSize -= count;
 }
 
 // Insert a non-patch brush at the head of active_brushes (the cluster's
@@ -1079,22 +1017,15 @@ void sub_48E050( selbrush_t *a1 )
         Brush_ToActiveHead( a1 );
         return;
     }
-    int *pCount = (int *)g_ptrSelectedFaces_GetSize;
     for ( unsigned v7 = 0; v7 < (unsigned)a1->faceCount; ++v7 )
     {
         faceVis_s *target = &SEL_FACES( a1 )[v7];
-        int sz = *pCount;
+        int sz = g_SelectedFaces.GetSize();
         int v3 = 0;
-        while ( v3 < sz && selFace[v3].face != target )
+        while ( v3 < sz && g_SelectedFaces.GetAt( v3 ).face != target )
             ++v3;
-        if ( v3 < sz )                       // found → RemoveAt(v3, 1)
-        {
-            int v5 = v3 + 1;
-            if ( v5 > sz || v5 < v3 || v5 < 1 ) unknown_libname_291();
-            if ( sz != v5 )
-                memmove( &selFace[v3], &selFace[v5], sizeof( selface_t ) * ( sz - v5 ) );
-            *pCount = sz - 1;
-        }
+        if ( v3 < sz )
+            g_SelectedFaces.RemoveAt( v3, 1 );
     }
 }
 
@@ -1104,43 +1035,38 @@ void sub_48E050( selbrush_t *a1 )
 //  Brush_CheckBuildFaceVis runs once at the top; the version compare is 16-bit (0x48df89).
 //  The tautological assert 505 is folded away by hex-rays (omitted, inert).
 // ═════════════════════════════════════════════════════════════════════════════
-void sub_48DEC0( selbrush_t *a1 )
+void sub_48DEC0( selbrush_t *brush )
 {
-    sub_477D70( a1, (const float *)world_orient_matrix );   // Brush_CheckBuildFaceVis
-    if ( a1->patch )
+    sub_477D70( brush, (const float *)world_orient_matrix );   // Brush_CheckBuildFaceVis
+    if ( brush->patch )
     {
-        Brush_RemoveFromList( a1 );
-        if ( a1->next || a1->prev )
+        Brush_RemoveFromList( brush );
+        if ( brush->next || brush->prev )
             Com_Error( ERR_FATAL, "Brush_AddToList: already linked" );
-        Brush_AddToList2( a1 );
+        Brush_AddToList2( brush );
         return;
     }
-    if ( !a1->faceCount )
+    if ( !brush->faceCount )
         return;
-    int *pCount = (int *)g_ptrSelectedFaces_GetSize;
-    for ( unsigned v10 = 0; v10 < (unsigned)a1->faceCount; ++v10 )
+    for ( unsigned v10 = 0; v10 < (unsigned)brush->faceCount; ++v10 )
     {
-        faceVis_s *target = &SEL_FACES( a1 )[v10];
-        int sz = *pCount;
-        int v4 = 0;
-        while ( v4 < sz && selFace[v4].face != target )
-            ++v4;
-        if ( v4 < sz )                        // already selected
+        faceVis_s *target = &SEL_FACES( brush )[v10];
+        int sz = g_SelectedFaces.GetSize();
+        int i = 0;
+        while ( i < sz && g_SelectedFaces.GetAt( i ).face != target )
+            ++i;
+        if ( i < sz )                         // already selected
         {
-            if ( a1 != selFace[v4].brush )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        494, 0, "%s", "brush == g_SelectedFaces.GetAt( i ).brush" );
+            iassert( brush == g_SelectedFaces.GetAt( i ).brush );   // select.cpp:494
         }
         else                                  // add it
         {
-            if ( a1->version != a1->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        506, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-            if ( sz < 0 ) unknown_libname_291();
-            SelFace_SetSize( sz + 1 );
-            selFace[sz].brush = a1;
-            selFace[sz].face  = target;
-            selFace[sz].index = (int)v10;
+            selface_t selFace;
+            selFace.brush = brush;
+            selFace.face  = target;
+            selFace.index = (int)v10;
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:506
+            g_SelectedFaces.Add( selFace );
         }
     }
 }
@@ -1157,7 +1083,6 @@ void sub_48E170()
     if ( selected_brushes.next == &selected_brushes )
         return;
 
-    int *pCount = (int *)g_ptrSelectedFaces_GetSize;
     for ( selbrush_t *b = selected_brushes.next; b != &selected_brushes; b = b->next )
     {
         if ( b->patch )
@@ -1165,25 +1090,19 @@ void sub_48E170()
         sub_48E050( b );
         for ( unsigned i = 0; i < (unsigned)b->faceCount; ++i )
         {
-            // IDA 0x48e1c2: capture the faceVis ptr, rebuild faceVis PER-FACE (idempotent,
+            // IDA 0x48e1c2: capture the record, rebuild faceVis PER-FACE (idempotent,
             // version-gated), then assert it didn't move (570) and the instance/def
             // versions are synced (571).
-            faceVis_s *fv = &SEL_FACES( b )[i];
+            selface_t selFace;
+            selFace.brush = b;
+            selFace.face  = &SEL_FACES( b )[i];
+            selFace.index = (int)i;
             sub_477D70( b, (const float *)world_orient_matrix );
-            if ( &SEL_FACES( b )[i] != fv )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        570, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( b->version != b->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        571, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );        // select.cpp:570
+            iassert( selFace.brush->version == selFace.brush->def->version );       // select.cpp:571
             if ( !b->def->faces[i].w )                   // skip faces with no winding
                 continue;
-            int sz = *pCount;
-            if ( sz < 0 ) unknown_libname_291();
-            SelFace_SetSize( sz + 1 );
-            selFace[sz].brush = b;
-            selFace[sz].face  = fv;
-            selFace[sz].index = (int)i;
+            g_SelectedFaces.Add( selFace );
         }
     }
     // Demote every non-patch selected brush back to the active list.
@@ -1208,7 +1127,7 @@ extern char        g_bNewFace;                           // surfacedlg.cpp
 
 int Ed_SelectFirstEditableFace()
 {
-    *(int *)g_ptrSelectedFaces_GetSize = 0;              // start from an empty face selection
+    g_SelectedFaces.m_nSize = 0;                         // start from an empty face selection
 
     for ( selbrush_t *b = active_brushes.next; b && b != &active_brushes; b = b->next )
     {
@@ -1218,20 +1137,20 @@ int Ed_SelectFirstEditableFace()
         if ( *(int *)&od->eclass->fixedsize )            // bbox brushes have no editable faces
             continue;
 
-        int before = SEL_FACE_COUNT();
+        int before = g_SelectedFaces.GetSize();
         sub_48DEC0( b );                                  // build faceVis + add all winding faces
-        int added = SEL_FACE_COUNT() - before;
+        int added = g_SelectedFaces.GetSize() - before;
         if ( added <= 0 )
             continue;
         if ( added > 1 )                                  // keep only the first face
-            sub_480670( before + 1, added - 1 );
+            g_SelectedFaces.RemoveAt( before + 1, added - 1 );
 
-        MaterialDef *md = &b->def->faces[ selFace[before].index ]
+        MaterialDef *md = &b->def->faces[ g_SelectedFaces.GetAt( before ).index ]
                                 .mtldef[ g_qeglobals.current_edit_layer ];
         const char *nm = (const char *)Materialdef_GetName( md );
         if ( nm && !strcmp( nm, "lightmap_gray" ) )       // unsuitable → drop and keep looking
         {
-            sub_480670( before, 1 );
+            g_SelectedFaces.RemoveAt( before, 1 );
             continue;
         }
         g_bNewFace = 1;
@@ -1338,22 +1257,22 @@ void SelectFaceSth( int a1_dir, int a2_start, int a3_contents )
     float *trace_start = (float *)(intptr_t)a2_start;
     int    contents    = a3_contents;
 
-    edTrace_t trace;
-    Test_Ray( trace_start, trace_dir, contents, &trace, 1 );
-    selbrush_t *brush = trace.brush;
+    edTrace_t t;
+    Test_Ray( trace_start, trace_dir, contents, &t, 1 );
+    selbrush_t *brush = t.hit.brush;
     if ( !brush )
         return;
     // 0x48e381: on the Z-view (contents & 0x1000, set by Drag_Begin when viewz==2,
     // drag.cpp:588) reject the pick when brush->brushFlags & 0x20 OR the trace's +0x49 byte
     // is set (sub_48D460 sets it when a 0x20 brush was admitted by the 0x1000 pass - which
     // for a prefab hit is an INNER brush, not this one).
-    if ( ( contents & 0x1000 ) && ( ( brush->brushFlags & 0x20 ) || trace._pad[0] ) )
+    if ( ( contents & 0x1000 ) && ( ( brush->brushFlags & 0x20 ) || t._pad[0] ) )
         return;
 
     // KISAK: 0x4000 = light-preview face pick.  The binary diverts to the per-light preview
     // (sub_406330) only when the ray hit a LIGHT entity (eclass flag @+0x180) and otherwise
     // falls through to the normal select.  sub_406330 is parked and the port does not
-    // populate the light-pick target (trace.xx1), so we fall through unconditionally:
+    // populate the light-pick target (t.hit.index), so we fall through unconditionally:
     // clicking a light bbox simply selects it.
     (void)contents;
 
@@ -1368,10 +1287,8 @@ void SelectFaceSth( int a1_dir, int a2_start, int a3_contents )
     // ── single-FACE selection (Ctrl+Shift+LMB) ────────────────────────────────
     if ( ( contents & 8 ) != 0 && !brush->patch )
     {
-        faceVis_s *face = trace.face;
-        if ( !face )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    631, 0, "%s", "t.hit.face" );
+        faceVis_s *face = t.hit.face;
+        iassert( t.hit.face );   // select.cpp:631
 
         // Fixed-size entities (bbox brushes) have no editable faces — ignore.
         entity_s_def *od = (entity_s_def *)brush->owner->def;
@@ -1380,17 +1297,17 @@ void SelectFaceSth( int a1_dir, int a2_start, int a3_contents )
 
         sub_48E170();   // fold any whole-brush selection into face selection first
 
-        int sz = SEL_FACE_COUNT();
+        int sz = g_SelectedFaces.GetSize();
         int hit = -1;
         for ( int i = 0; i < sz; ++i )
-            if ( selFace[i].face == face ) { hit = i; break; }
+            if ( g_SelectedFaces.GetAt( i ).face == face ) { hit = i; break; }
 
         if ( hit >= 0 )
         {
             // already selected → toggle off
             if ( !g_qeglobals.toggle_unk03_mousedrag_state1 )
             {
-                sub_480670( hit, 1 );
+                g_SelectedFaces.RemoveAt( hit, 1 );
                 g_qeglobals.toggle_unk04_mousedrag_state2 = 1;
                 g_nUpdateBits = -1;
             }
@@ -1400,24 +1317,22 @@ void SelectFaceSth( int a1_dir, int a2_start, int a3_contents )
         // not selected → add it
         if ( g_qeglobals.toggle_unk04_mousedrag_state2 )
             return;
-        int idx = (int)( (char *)face - (char *)brush->faces ) / 12;
-        if ( (unsigned)idx >= (unsigned)brush->faceCount )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    664, 0, "%s", "selFace.index >= 0 && selFace.index < t.hit.brush->faceCount" );
-        if ( brush->version != brush->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    665, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-        selbrush_t *rec[3] = { brush, (selbrush_t *)face, (selbrush_t *)(intptr_t)idx };
-        sub_4947A0( rec );
+        selface_t selFace;
+        selFace.brush = t.hit.brush;
+        selFace.face  = face;
+        selFace.index = (int)( (char *)face - (char *)brush->faces ) / 12;
+        iassert( selFace.index >= 0 && selFace.index < t.hit.brush->faceCount );    // select.cpp:664
+        iassert( selFace.brush->version == selFace.brush->def->version );           // select.cpp:665
+        g_SelectedFaces.Add( selFace );
         g_qeglobals.toggle_unk03_mousedrag_state1 = 1;
         g_nUpdateBits = -1;
         return;
     }
 
     // ── no face selection active (or a patch hit) → whole-brush select/deselect ──
-    if ( !SEL_FACE_COUNT() || brush->patch )
+    if ( !g_SelectedFaces.GetSize() || brush->patch )
     {
-        if ( trace.selected )
+        if ( t.selected )
         {
             if ( !g_qeglobals.toggle_unk03_mousedrag_state1 )
             {
@@ -1459,10 +1374,10 @@ void SelectFaceSth( int a1_dir, int a2_start, int a3_contents )
     entity_s *grpOwner = brush->owner;
     bool alt = ( grpOwner && grpOwner != world_entity && GetAsyncKeyState( VK_MENU ) < 0 );
 
-    int sz  = SEL_FACE_COUNT();
+    int sz  = g_SelectedFaces.GetSize();
     int hit = -1;
     for ( int i = 0; i < sz; ++i )
-        if ( (face_t *)trace.face == (face_t *)selFace[i].face ) { hit = i; break; }
+        if ( (face_t *)t.hit.face == (face_t *)g_SelectedFaces.GetAt( i ).face ) { hit = i; break; }
 
     if ( hit >= 0 )
     {
@@ -1534,13 +1449,7 @@ void Select_Deselect( int a1 )
 
     if ( a1 )
     {
-        if ( selFace )
-        {
-            j__free_0( selFace );
-            selFace = nullptr;
-        }
-        g_selFaceSize        = 0;
-        SEL_FACE_COUNT()     = 0;
+        g_SelectedFaces.SetSize( 0 );    // inline CArray RemoveAll (free + cap=0 + size=0)
     }
 
     if ( v2 != &selected_brushes )
@@ -1587,14 +1496,8 @@ extern void Entity_Free( char *a1 );    // entity.cpp (0x485750)
 
 void Select_Delete()
 {
-    if ( selFace )
-    {
-        j__free_0( selFace );
-        selFace = nullptr;
-    }
+    g_SelectedFaces.SetSize( 0 );        // inline CArray RemoveAll (free + cap=0 + size=0)
     select_t prevMode      = g_qeglobals.d_select_mode;
-    g_selFaceSize          = 0;
-    SEL_FACE_COUNT()       = 0;
     g_qeglobals.d_select_mode = sel_brush;
     if ( prevMode == sel_cycle_edge_direction_quad )
         CMainFrame_UpdatePatchToolbarButtons();
@@ -1873,7 +1776,7 @@ void Select_FlipFilteredBrushes( const float *boxMins, const float *boxMaxs, cha
 // ═════════════════════════════════════════════════════════════════════════════
 void Brush_SetTexture( MaterialDef *a1, char a3 )
 {
-    int  v24 = SEL_FACE_COUNT();
+    int  v24 = g_SelectedFaces.GetSize();
     const char *opName;
 
     if ( v24 )
@@ -1891,31 +1794,21 @@ void Brush_SetTexture( MaterialDef *a1, char a3 )
     int v28 = 0;
     if ( v24 > 0 )
     {
-        for ( int v4 = 0; v28 < v24; v4 += 12, ++v28 )
+        for ( ; v28 < v24; ++v28 )
         {
-            if ( v28 < 0 || v28 >= SEL_FACE_COUNT() )
-                unknown_libname_291();
-
-            selbrush_t *b     = *(selbrush_t **)((char *)selFace + v4);
-            int         index = *(int *)         ((char *)selFace + v4 + 8);
+            selface_t  &selFace = g_SelectedFaces.GetAt( v28 );   // CArray::GetAt (bounds ENSURE)
+            selbrush_t *b     = selFace.brush;
+            int         index = selFace.index;
             brush_t    *b_def = b->def;
-            // IDA: face = *(face_t **)(&selFace->face + v4) - DEREFERENCE the stored
-            // faceVis_s*, not the address of the field (as all 7 sibling selFace loops do).
-            faceVis_s  *face  = *(faceVis_s **)  ((char *)selFace + v4 + 4);
+            faceVis_s  *face  = selFace.face;
 
             Undo_TryAddBrush( b_def );
 
             int v25 = index;
             faceVis_s *fv = &SEL_FACES(b)[index];
-            if ( (void *)face != (void *)fv )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1114, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( b->version != b->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1115, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-            if ( b->faceCount != b->def->faceCount )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1116, 0, "%s", "selFace.brush->faceCount == selFace.brush->def->faceCount" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:1114
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:1115
+            iassert( selFace.brush->faceCount == selFace.brush->def->faceCount );   // select.cpp:1116
 
             // Copy MaterialDef into the face's current layer slot: the IDB writes to
             // &def->faces[index].mtldef[layer] (= v26 + 4*(9*layer+9) = +36*(layer+1)).
@@ -1941,12 +1834,8 @@ void Brush_SetTexture( MaterialDef *a1, char a3 )
             sub_47B940( b->def );
             Undo_LinkBrush( b->def );
             sub_477D70( b, (const float *)world_orient_matrix );
-            if ( (void *)face != (void *)&SEL_FACES( b )[index] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1125, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( b->version != b->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1126, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:1125
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:1126
         }
     }
 
@@ -1973,7 +1862,7 @@ void Brush_SetTexture( MaterialDef *a1, char a3 )
 // ═════════════════════════════════════════════════════════════════════════════
 void Brush_SetTextureMapping( texdef_sub_t *a2 )
 {
-    int v1 = SEL_FACE_COUNT();
+    int v1 = g_SelectedFaces.GetSize();
     const char *opName;
 
     if ( v1 )
@@ -1991,27 +1880,19 @@ void Brush_SetTextureMapping( texdef_sub_t *a2 )
     int v22 = 0;
     if ( v1 > 0 )
     {
-        for ( int v3 = 0; v22 < v1; v3 += 12, ++v22 )
+        for ( ; v22 < v1; ++v22 )
         {
-            if ( v22 < 0 || v22 >= SEL_FACE_COUNT() )
-                unknown_libname_291();
-
-            selbrush_t *v4  = *(selbrush_t **)((char *)selFace + v3);
-            int         v5  = *(int *)         ((char *)selFace + v3 + 8);
+            selface_t  &selFace = g_SelectedFaces.GetAt( v22 );   // CArray::GetAt (bounds ENSURE)
+            selbrush_t *v4  = selFace.brush;
+            int         v5  = selFace.index;
             brush_t    *v6  = v4->def;
-            faceVis_s  *v19 = *(faceVis_s **)  ((char *)selFace + v3 + 4);
+            faceVis_s  *v19 = selFace.face;
 
             Undo_TryAddBrush( v6 );
 
-            if ( v19 != &SEL_FACES(v4)[v5] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1161, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( v4->version != v4->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1162, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-            if ( v4->faceCount != v4->def->faceCount )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1163, 0, "%s", "selFace.brush->faceCount == selFace.brush->def->faceCount" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:1161
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:1162
+            iassert( selFace.brush->faceCount == selFace.brush->def->faceCount );   // select.cpp:1163
 
             sub_4767E0( a2, (int)(intptr_t)&v6->faces[v5], (int)(intptr_t)v6 );
 
@@ -2023,12 +1904,8 @@ void Brush_SetTextureMapping( texdef_sub_t *a2 )
             sub_47B940( v6 );
             Undo_LinkBrush( v6 );
             sub_477D70( v4, (const float *)world_orient_matrix );
-            if ( v19 != &SEL_FACES( v4 )[v5] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1172, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( v4->version != v4->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1173, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:1172
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:1173
         }
     }
 
@@ -2054,7 +1931,7 @@ void Brush_SetTextureMapping( texdef_sub_t *a2 )
 // ═════════════════════════════════════════════════════════════════════════════
 void Brush_SetSampleSize( int size )
 {
-    int v1 = SEL_FACE_COUNT();
+    int v1 = g_SelectedFaces.GetSize();
     const char *opName;
 
     if ( v1 )
@@ -2072,27 +1949,19 @@ void Brush_SetSampleSize( int size )
     int v22 = 0;
     if ( v1 > 0 )
     {
-        for ( int v3 = 0; v22 < v1; v3 += 12, ++v22 )
+        for ( ; v22 < v1; ++v22 )
         {
-            if ( v22 < 0 || v22 >= SEL_FACE_COUNT() )
-                unknown_libname_291();
-
-            selbrush_t *v4  = *(selbrush_t **)((char *)selFace + v3);
-            int         v5  = *(int *)         ((char *)selFace + v3 + 8);
+            selface_t  &selFace = g_SelectedFaces.GetAt( v22 );   // CArray::GetAt (bounds ENSURE)
+            selbrush_t *v4  = selFace.brush;
+            int         v5  = selFace.index;
             brush_t    *def = v4->def;
-            faceVis_s  *v19 = *(faceVis_s **)  ((char *)selFace + v3 + 4);
+            faceVis_s  *v19 = selFace.face;
 
             Undo_TryAddBrush( def );
 
-            if ( v19 != &SEL_FACES(v4)[v5] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1208, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( v4->version != v4->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1209, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
-            if ( v4->faceCount != v4->def->faceCount )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1210, 0, "%s", "selFace.brush->faceCount == selFace.brush->def->faceCount" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:1208
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:1209
+            iassert( selFace.brush->faceCount == selFace.brush->def->faceCount );   // select.cpp:1210
 
             sub_4768B0( &v4->def->faces[v5], v4->def, size );
             Brush_BuildWindings( v4->def, 1 );
@@ -2103,12 +1972,8 @@ void Brush_SetSampleSize( int size )
             sub_47B940( v4->def );
             Undo_LinkBrush( v4->def );
             sub_477D70( v4, (const float *)world_orient_matrix );
-            if ( v19 != &SEL_FACES( v4 )[v5] )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1219, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-            if ( v4->version != v4->def->version )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1220, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+            iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:1219
+            iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:1220
         }
     }
 
@@ -2137,28 +2002,26 @@ void Select_Scale( float a1, float a2, float a3 )
     float mid[3];
     Select_GetMid( mid );
 
-    selbrush_t *v3 = selected_brushes.next;
-    if ( v3 == &selected_brushes )
+    selbrush_t *b = selected_brushes.next;
+    if ( b == &selected_brushes )
         return;
 
     do
     {
-        patch_t *patch = (patch_t *)v3->patch;
+        patch_t *patch = (patch_t *)b->patch;
         if ( patch )
         {
             float scale[3] = { a1, a2, a3 };
-            if ( patch->def != v3->def->patch )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        1351, 0, "%s", "b->patch->def == b->def->patch" );   // IDA 0x48fdc0
-            Patch_Scale( v3->def->patch, mid, scale, 1 );
+            iassert( b->patch->def == b->def->patch );   // select.cpp:1351   // IDA 0x48fdc0
+            Patch_Scale( b->def->patch, mid, scale, 1 );
         }
         else
         {
-            if ( v3->faceCount )
+            if ( b->faceCount )
             {
-                for ( int fi = 0; fi < v3->faceCount; ++fi )
+                for ( int fi = 0; fi < b->faceCount; ++fi )
                 {
-                    float *planepts = &v3->def->faces[fi].planepts[0][0];
+                    float *planepts = &b->def->faces[fi].planepts[0][0];
                     for ( int vi = 0; vi < 3; ++vi )
                     {
                         float *pt = planepts + vi * 3;
@@ -2168,15 +2031,15 @@ void Select_Scale( float a1, float a2, float a3 )
                     }
                 }
             }
-            Brush_BuildWindings( v3->def, 0 );
+            Brush_BuildWindings( b->def, 0 );
             if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
                 SetupVertexSelection();
             MarkMapModified();
-            ++v3->def->version;
+            ++b->def->version;
         }
-        v3 = v3->next;
+        b = b->next;
     }
-    while ( v3 != &selected_brushes );
+    while ( b != &selected_brushes );
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
@@ -2224,7 +2087,7 @@ void sub_48FB70( int minsOut, int maxsOut )
     float *mins = (float *)(intptr_t)minsOut;
     float *maxs = (float *)(intptr_t)maxsOut;
 
-    const int count = SEL_FACE_COUNT();
+    const int count = g_SelectedFaces.GetSize();
     if ( !count )
     {
         Select_GetBounds( mins, maxs );
@@ -2233,13 +2096,13 @@ void sub_48FB70( int minsOut, int maxsOut )
 
     for ( int i = 0; i < count; ++i )
     {
-        face_t *faces = selFace[i].brush->def->faces;
+        face_t *faces = g_SelectedFaces.GetAt( i ).brush->def->faces;
         if ( !faces[0].w )
             continue;
         const int numpoints = faces[0].w->numpoints;             // face 0's count (IDB quirk)
         if ( !numpoints )
             continue;
-        winding_t *w = faces[selFace[i].index].w;                // selected face's winding
+        winding_t *w = faces[g_SelectedFaces.GetAt( i ).index].w;   // selected face's winding
         if ( !w )
             continue;
         for ( int n = 0; n < numpoints; ++n )
@@ -2342,111 +2205,15 @@ void Select_GetMid( float *mid )
     }
 }
 
-// 0x4AABC0  SinCosDeg — sin/cos of an angle in DEGREES, with exact 0/90/180/270 cases.
-// Negative angles are wrapped +360 first. (IDB sub_4AABC0; com_math.cpp:3864.)
-static void SinCosDeg( float deg, float *s, float *c )
-{
-    // The 2 NULL-ptr asserts are cross-file (com_math.cpp:3864/3865).
-    if ( !s )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp", 3864, 0, "%s", "s" );
-    if ( !c )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\src\\universal\\com_math.cpp", 3865, 0, "%s", "c" );
-    if ( deg < 0.0f )
-        deg += 360.0f;
-    if ( deg == 0.0f )        { *c = 1.0f;  *s = 0.0f; }
-    else if ( deg == 90.0f )  { *c = 0.0f;  *s = 1.0f; }
-    else if ( deg == 180.0f ) { *c = -1.0f; *s = 0.0f; }
-    else if ( deg == 270.0f ) { *c = 0.0f;  *s = -1.0f; }
-    else
-    {
-        float rad = deg * 0.01745329238474369f;
-        *c = (float)cos( rad );
-        *s = (float)sin( rad );
-    }
-}
+// SinCosDeg (0x4AABC0) — consolidated into texturevecs.cpp as Ed_SinCos (it was a
+// duplicate port of the same com_math SinCos; see the drift-hazard rule).
+extern void Ed_SinCos( float deg, float *s, float *c );
 
-// ═════════════════════════════════════════════════════════════════════════════
-//  0x47CDE0  Select_ApplyMatrix — transform one brush by the orientation block.
-//  `mat` is the orientation_t (origin + 3x3). bSnap = grid-snap on rebuild.
-//  deg != 0 routes fixed-size (prefab/model) entities to Select_RotateFixedSize.
-//  bSwap flips each face's planept winding order (planept[0]<->planept[2]) — used
-//  by the mirror (Select_FlipAxis) so reflected faces keep outward-facing normals.
-// ═════════════════════════════════════════════════════════════════════════════
-extern void Select_RotateFixedSize( selbrush_t *sb, float (*mid_point)[3], const float *rot );
-
-// KISAK SUBSET of 0x47cde0: geometry faithful; the loop bound uses def->faceCount (the
-// instance-vs-def adaptation below) and the texture-lock reproject (sub_470570/sub_4706F0)
-// is omitted (layer-gated no-op).  ++def->version is the brush_t int16 @0x4E.  Both asserts
-// are cross-file (brush.cpp 5598/5608).
-void Select_ApplyMatrix( float *mat, selbrush_t *b, int bSnap, float deg, char bSwap )
-{
-    if ( b->patch )
-    {
-        // Patch arm: transform the control points by the orientation block (rotate/flip).
-        if ( b->def->patch != b->patch->def )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                    5598, 0, "%s", "b->def->patch == b->patch->def" );
-        Patch_ApplyMatrix( (const orientation_t *)mat, b->def->patch, (char)bSnap );
-        return;
-    }
-
-    entity_s_def *ownerDef = (entity_s_def *)b->owner->def;
-    if ( ownerDef != (entity_s_def *)b->def->owner )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\brush.cpp",
-                5608, 0, "%s", "b->owner->def == b->def->owner" );
-
-    eclass_t *eclass = ownerDef->eclass;
-    if ( *(int *)&eclass->fixedsize )
-    {
-        // Fixed-size entity (prefab / model bbox): rotate its origin + angles, no
-        // planept transform. Only meaningful for a real rotation (deg != 0); a pure
-        // mirror leaves the bbox where it is (matches the binary).
-        if ( deg != 0.0f )
-            Select_RotateFixedSize( b, (float (*)[3])mat, (const float *)eclass );
-        return;
-    }
-
-    // instance-vs-def: the IDB loops b->faceCount (the INSTANCE's cached count, set by
-    // Brush_BuildFaceVis on the camera draw, so 0 headless / before the first 3D draw).
-    // Loop the DEF count (authoritative, identical when valid) so the transform also
-    // applies headless.  Same adaptation as SetupVertexSelection.
-    if ( b->def->faceCount )
-    {
-        for ( int fi = 0; fi < b->def->faceCount; ++fi )
-        {
-            face_t *f = &b->def->faces[fi];
-            if ( bSwap )
-            {
-                // swap planepts[0] <-> planepts[2] (reverse winding for the mirror)
-                float t0 = f->planepts[0][0], t1 = f->planepts[0][1], t2 = f->planepts[0][2];
-                f->planepts[0][0] = f->planepts[2][0];
-                f->planepts[0][1] = f->planepts[2][1];
-                f->planepts[0][2] = f->planepts[2][2];
-                f->planepts[2][0] = t0;
-                f->planepts[2][1] = t1;
-                f->planepts[2][2] = t2;
-            }
-            // sub_470570 (texture-basis stash) is layer-gated → no-op in this build.
-            for ( int pi = 0; pi < 3; ++pi )
-            {
-                float rel[3];
-                rel[0] = f->planepts[pi][0] - mat[0];   // VectorSubtract(pt - origin)
-                rel[1] = f->planepts[pi][1] - mat[1];
-                rel[2] = f->planepts[pi][2] - mat[2];
-                OrientationPosToWorldPos( f->planepts[pi], rel,
-                                          reinterpret_cast<const orientation_t *>( mat ) );
-            }
-            // sub_4706F0 (Face_MakePlane + texture reproject) — Face_MakePlane is
-            // redundant with Brush_BuildWindings below; reproject is layer-gated → no-op.
-        }
-    }
-
-    Brush_BuildWindings( b->def, bSnap );
-    if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
-        SetupVertexSelection();
-    MarkMapModified();
-    ++b->def->version;
-}
+// Select_ApplyMatrix (0x47CDE0) now lives in brush.cpp — its only asserts are
+// brush.cpp:5598/5608, so brush.cpp is its source file (drag.cpp already externs it).
+// Its doc banner moved with it.
+extern void Select_ApplyMatrix( float *mat, selbrush_t *b, int bSnap, float deg,
+                                char bSwap );   // brush.cpp 0x47CDE0
 
 // 0x48FD10  Select_ApplyMatrix_SelectedBrushes — apply `mat` to every selected brush.
 void Select_ApplyMatrix_SelectedBrushes( int bSnap, float *mat, float deg, char bSwap )
@@ -2496,7 +2263,7 @@ void sub_47CBA0( selbrush_t *b, int axis, float deg )
 
     float rot = -deg;
     float s, c;
-    SinCosDeg( rot, &s, &c );
+    Ed_SinCos( rot, &s, &c );
 
     m[3] = 1.0f; m[4]  = 0.0f; m[5]  = 0.0f;   // identity 3x3
     m[6] = 0.0f; m[7]  = 1.0f; m[8]  = 0.0f;
@@ -2600,7 +2367,7 @@ void Select_RotateAxis( int axis, float deg, float (*rot_around)[4][3] )
     }
 
     float s, c;
-    SinCosDeg( -deg, &s, &c );
+    Ed_SinCos( -deg, &s, &c );
 
     // Identity-init the 3x3 (rows 1..3 of rot_around).
     float (*m)[3] = &(*rot_around)[1];   // m[0..2] = the 3x3
@@ -2885,20 +2652,18 @@ void Select_ByKeyValue_Core( const char *key, const char *value, bool keySubstr,
 
     Select_Deselect( 1 );
 
-    selbrush_t *b = active_brushes.next;
-    while ( b != &active_brushes )
+    selbrush_t *brush = active_brushes.next;
+    while ( brush != &active_brushes )
     {
-        selbrush_t *saved = b->next;                  // IDB &b->next->prev (prev@0) captured pre-relink
-        if ( !FilterBrush( b, 0 )
-          && ( b->brushFlags & 2 ) == 0
-          && ( b->brushFlags & 0x20 ) == 0 )
+        selbrush_t *saved = brush->next;                  // IDB &brush->next->prev (prev@0) captured pre-relink
+        if ( !FilterBrush( brush, 0 )
+          && ( brush->brushFlags & 2 ) == 0
+          && ( brush->brushFlags & 0x20 ) == 0 )
         {
-            entity_s *owner = b->owner;
+            entity_s *owner = brush->owner;
             if ( owner != world_entity )
             {
-                if ( (void *)owner->def != (void *)b->def->owner )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp", 1882, 0,
-                            "%s", "brush->owner->def == brush->def->owner" );
+                iassert( brush->owner->def == brush->def->owner );   // select.cpp:1882
 
                 entity_s_def *def = (entity_s_def *)owner->def;
                 bool match;
@@ -2930,12 +2695,12 @@ void Select_ByKeyValue_Core( const char *key, const char *value, bool keySubstr,
 
                 if ( match )
                 {
-                    Brush_RemoveFromList( b );
-                    Select_Brush_2( &selected_brushes, b );   // Brush_AddToList2 into selected list
+                    Brush_RemoveFromList( brush );
+                    Select_Brush_2( &selected_brushes, brush );   // Brush_AddToList2 into selected list
                 }
             }
         }
-        b = saved;
+        brush = saved;
     }
 
     g_nUpdateBits = -1;
@@ -3090,7 +2855,7 @@ void Select_Connected()
 
     ResetSelectMode();
 
-    int v37[1026];  // [0..count-1]=values, [count]=-1, [1024]=count; byte +0x1004=overflow flag (Map_ParseLinkList)
+    LinkList_t v37;   // Map_ParseLinkList parse buffer (qe3.h)
 
     char v30;
     do
@@ -3145,8 +2910,8 @@ void Select_Connected()
                         if ( !_stricmp( ep->key, "script_linkTo" ) )
                         { v9 = ep->value; break; }
                     }
-                    Map_ParseLinkList( v37, v9 );
-                    int count = v37[1024];
+                    Map_ParseLinkList( &v37, v9 );
+                    int count = v37.size;
 
                     selbrush_t *v10 = active_brushes.next;
                     while ( v10 != &active_brushes )
@@ -3166,7 +2931,7 @@ void Select_Connected()
                                 int v14 = (int)atol( v13 );
                                 for ( int si = 0; si < count; ++si )
                                 {
-                                    if ( v14 == v37[si] )
+                                    if ( v14 == v37.id[si] )
                                     {
                                         Brush_RemoveFromList( v10 );
                                         Brush_AddToList2( v10 );
@@ -3206,11 +2971,11 @@ void Select_Connected()
                             }
                             if ( v24 && *v24 )
                             {
-                                Map_ParseLinkList( v37, v24 );
-                                int count2 = v37[1024];
+                                Map_ParseLinkList( &v37, v24 );
+                                int count2 = v37.size;
                                 for ( int si = 0; si < count2; ++si )
                                 {
-                                    if ( v19 == v37[si] )
+                                    if ( v19 == v37.id[si] )
                                     {
                                         Brush_RemoveFromList( v20 );
                                         Brush_AddToList2( v20 );
@@ -3349,28 +3114,26 @@ void SelectTargettedEntity()
 void Select_ChangeBrushType( int a1, int a2 )
 {
     int mask = ~a2;
-    for ( selbrush_t *i = selected_brushes.next;
-          i != &selected_brushes;
-          i = i->next )
+    for ( selbrush_t *b = selected_brushes.next;
+          b != &selected_brushes;
+          b = b->next )
     {
-        for ( int fi = 0; fi < i->faceCount; ++fi )
+        for ( int fi = 0; fi < b->faceCount; ++fi )
         {
-            i->def->faces[fi].contents &= mask;
-            i->def->faces[fi].contents |= a1;
+            b->def->faces[fi].contents &= mask;
+            b->def->faces[fi].contents |= a1;
             // def->contents RMW is INSIDE the face loop (IDA 0x4917eb/0x4917f1) — redundant per
             // face (idempotent) but SKIPPED entirely for faceCount==0 (patch) brushes, whose
             // authoritative contents live in patchMesh_t and which the binary leaves untouched here.
-            i->def->contents &= mask;
-            i->def->contents |= a1;
+            b->def->contents &= mask;
+            b->def->contents |= a1;
         }
 
-        patch_t *patch = (patch_t *)i->patch;
+        patch_t *patch = (patch_t *)b->patch;
         if ( patch )
         {
-            if ( patch->def != i->def->patch )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        2237, 0, "%s", "b->patch->def == b->def->patch" );
-            patch->def->contents &= mask;   // IDA 0x491830: i->patch->def->contents (instance patch)
+            iassert( b->patch->def == b->def->patch );   // select.cpp:2237
+            patch->def->contents &= mask;   // IDA 0x491830: b->patch->def->contents (instance patch)
             patch->def->contents |= a1;
         }
     }
@@ -3390,22 +3153,20 @@ void Select_ChangeBrushType( int a1, int a2 )
 void Select_ChangeBrushToolflags( int a1, int a2 )
 {
     int mask = ~a2;
-    for ( selbrush_t *v2 = selected_brushes.next;
-          v2 != &selected_brushes;
-          v2 = v2->next )
+    for ( selbrush_t *b = selected_brushes.next;
+          b != &selected_brushes;
+          b = b->next )
     {
-        for ( int fi = 0; fi < v2->faceCount; ++fi )
+        for ( int fi = 0; fi < b->faceCount; ++fi )
         {
-            v2->def->faces[fi].toolflags &= mask;
-            v2->def->faces[fi].toolflags |= a1;
+            b->def->faces[fi].toolflags &= mask;
+            b->def->faces[fi].toolflags |= a1;
         }
-        patch_t *patch = (patch_t *)v2->patch;
+        patch_t *patch = (patch_t *)b->patch;
         if ( patch )
         {
-            if ( patch->def != v2->def->patch )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        2265, 0, "%s", "b->patch->def == b->def->patch" );
-            patch->def->flags &= mask;   // IDA 0x491927: v2->patch->def->flags (instance patch)
+            iassert( b->patch->def == b->def->patch );   // select.cpp:2265
+            patch->def->flags &= mask;   // IDA 0x491927: b->patch->def->flags (instance patch)
             patch->def->flags |= a1;
         }
     }
@@ -3420,18 +3181,18 @@ void Select_ChangeBrushToolflags( int a1, int a2 )
 // ═════════════════════════════════════════════════════════════════════════════
 void Brush_ShiftTexture( float a1, float a2 )
 {
-    unsigned v28 = (unsigned)SEL_FACE_COUNT();
+    unsigned v28 = (unsigned)g_SelectedFaces.GetSize();
 
     if ( selected_brushes.next == &selected_brushes && !v28 )
         return;
 
-    selbrush_t *v3 = selected_brushes.next;
-    if ( v3 != &selected_brushes )
+    selbrush_t *b = selected_brushes.next;
+    if ( b != &selected_brushes )
     {
         do
         {
             float v24, v23;
-            if ( v3->patch )
+            if ( b->patch )
             {
                 v24 = a1 * 0.001f;
                 v23 = a2 * 0.001f;
@@ -3442,9 +3203,9 @@ void Brush_ShiftTexture( float a1, float a2 )
                 v23 = (float)(int)a2;
             }
 
-            for ( int fi = 0; fi < v3->faceCount; ++fi )
+            for ( int fi = 0; fi < b->faceCount; ++fi )
             {
-                MaterialDef *v8 = &v3->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
+                MaterialDef *v8 = &b->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
                 int curLayer    = LayerMat::GetCurrentLayer( v8 );
                 texdef_sub_t *v10 = &v8->mat_texDef + curLayer;
                 // IDA 0x491ff8/0x492002: the base shift is read from the SAME (current-layer)
@@ -3455,43 +3216,34 @@ void Brush_ShiftTexture( float a1, float a2 )
                 TexMatToFakeTexCoords( v8, v10 );
             }
 
-            Brush_BuildWindings( v3->def, 1 );
+            Brush_BuildWindings( b->def, 1 );
             if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
                 SetupVertexSelection();
             MarkMapModified();
-            ++v3->def->version;
+            ++b->def->version;
 
-            patch_t *patch = v3->patch;
+            patch_t *patch = b->patch;
             if ( patch )
             {
-                if ( patch->def != v3->def->patch )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                            2460, 0, "%s", "b->patch->def == b->def->patch" );
+                iassert( b->patch->def == b->def->patch );   // select.cpp:2460
                 Patch_ShiftTexture( patch->def, v24, v23 );   // the patch DEF, not the instance
             }
 
-            v3 = v3->next;
+            b = b->next;
         }
-        while ( v3 != &selected_brushes );
+        while ( b != &selected_brushes );
     }
 
     for ( unsigned v21 = 0; v21 < v28; ++v21 )
     {
-        int v13 = (int)(v21 * 12);
-        if ( (int)v21 < 0 || (int)v21 >= SEL_FACE_COUNT() )
-            unknown_libname_291();
-
-        int         v14 = *(int *)         ((char *)selFace + v13 + 8);
-        selbrush_t *v15 = *(selbrush_t **)  ((char *)selFace + v13);
-        faceVis_s  *v29 = *(faceVis_s **)   ((char *)selFace + v13 + 4);
+        selface_t  &selFace = g_SelectedFaces.GetAt( v21 );   // CArray::GetAt (bounds ENSURE)
+        int         v14 = selFace.index;
+        selbrush_t *v15 = selFace.brush;
+        faceVis_s  *v29 = selFace.face;
         int         v25 = v14;
 
-        if ( v29 != &SEL_FACES(v15)[v14] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2470, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v15->version != v15->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2471, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2470
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2471
 
         MaterialDef  *v16 = &v15->def->faces[v14].mtldef[g_qeglobals.current_edit_layer];
         int           v17 = LayerMat::GetCurrentLayer( v16 );
@@ -3507,12 +3259,8 @@ void Brush_ShiftTexture( float a1, float a2 )
         ++v15->def->version;
         sub_477D70( v15, (const float *)world_orient_matrix );
 
-        if ( v29 != &SEL_FACES(v15)[v25] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2482, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v15->version != v15->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2483, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2482
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2483
     }
     g_nUpdateBits |= 1u;
 }
@@ -3524,7 +3272,7 @@ void Brush_ShiftTexture( float a1, float a2 )
 void Brush_FlipTexture( int axis )
 {
     if ( selected_brushes.next == &selected_brushes
-         && !SEL_FACE_COUNT() )
+         && !g_SelectedFaces.GetSize() )
         return;
 
     iassert( axis == 0 || axis == 1 );
@@ -3533,56 +3281,47 @@ void Brush_FlipTexture( int axis )
     Undo_GeneralStart( axis ? "flip texture y" : "flip texture x" );
     Undo_AddBrushList( &selected_brushes );
 
-    selbrush_t *v3 = selected_brushes.next;
-    while ( v3 != &selected_brushes )
+    selbrush_t *b = selected_brushes.next;
+    while ( b != &selected_brushes )
     {
-        for ( int fi = 0; fi < v3->faceCount; ++fi )
+        for ( int fi = 0; fi < b->faceCount; ++fi )
         {
-            MaterialDef  *v4 = &v3->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
+            MaterialDef  *v4 = &b->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
             texdef_sub_t *v5 = &v4->mat_texDef + LayerMat::GetCurrentLayer( v4 );
             v5->size[axis]  = -v5->size[axis];
             v5->shift[axis] = 1.0f - v5->shift[axis];
             TexMatToFakeTexCoords( v4, v5 );
         }
-        Brush_BuildWindings( v3->def, 1 );
+        Brush_BuildWindings( b->def, 1 );
         if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
             SetupVertexSelection();
         MarkMapModified();
-        ++v3->def->version;
+        ++b->def->version;
 
-        patch_t *patch = (patch_t *)v3->patch;
+        patch_t *patch = (patch_t *)b->patch;
         if ( patch )
         {
-            // IDA passes the patch DEF (v3->patch->def), NOT the instance; the binary
+            // IDA passes the patch DEF (b->patch->def), NOT the instance; the binary
             // also asserts the instance/def link first (select.cpp:2524).
-            if ( patch->def != v3->def->patch )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        2524, 0, "%s", "b->patch->def == b->def->patch" );
-            PMESH_37( v3->patch->def, axis );
+            iassert( b->patch->def == b->def->patch );   // select.cpp:2524
+            PMESH_37( b->patch->def, axis );
         }
 
-        v3 = v3->next;
+        b = b->next;
     }
 
     Undo_EndBrushList( &selected_brushes );
 
-    unsigned v23 = (unsigned)SEL_FACE_COUNT();
+    unsigned v23 = (unsigned)g_SelectedFaces.GetSize();
     for ( unsigned v21 = 0; v21 < v23; ++v21 )
     {
-        int v8 = (int)(v21 * 12);
-        if ( (int)v21 < 0 || (int)v21 >= SEL_FACE_COUNT() )
-            unknown_libname_291();
+        selface_t  &selFace = g_SelectedFaces.GetAt( v21 );   // CArray::GetAt (bounds ENSURE)
+        selbrush_t *v9  = selFace.brush;
+        int         v25 = selFace.index;
+        faceVis_s  *v24 = selFace.face;
 
-        selbrush_t *v9  = *(selbrush_t **)((char *)selFace + v8);
-        int         v25 = *(int *)         ((char *)selFace + v8 + 8);
-        faceVis_s  *v24 = *(faceVis_s **)  ((char *)selFace + v8 + 4);
-
-        if ( v24 != &SEL_FACES(v9)[v25] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2534, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v9->version != v9->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2535, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2534
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2535
 
         Undo_TryAddBrush( v9->def );
 
@@ -3600,12 +3339,8 @@ void Brush_FlipTexture( int axis )
         Undo_LinkBrush( v9->def );
         sub_477D70( v9, (const float *)world_orient_matrix );
 
-        if ( v24 != &SEL_FACES(v9)[v25] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2549, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v9->version != v9->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2550, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2549
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2550
     }
 
     Undo_End();
@@ -3620,63 +3355,54 @@ void Brush_FlipTexture( int axis )
 void Brush_ScaleTexture( int a1, int a2 )
 {
     if ( selected_brushes.next == &selected_brushes
-         && !SEL_FACE_COUNT() )
+         && !g_SelectedFaces.GetSize() )
         return;
 
     Undo_ClearRedo();
     Undo_GeneralStart( "scale texture" );
     Undo_AddBrushList( &selected_brushes );
 
-    selbrush_t *v2 = selected_brushes.next;
-    while ( v2 != &selected_brushes )
+    selbrush_t *b = selected_brushes.next;
+    while ( b != &selected_brushes )
     {
-        for ( int fi = 0; fi < v2->faceCount; ++fi )
+        for ( int fi = 0; fi < b->faceCount; ++fi )
         {
-            MaterialDef  *v3    = &v2->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
+            MaterialDef  *v3    = &b->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
             int           curL  = LayerMat::GetCurrentLayer( v3 );
             texdef_sub_t *v5    = &v3->mat_texDef + curL;
             v5->size[0]         = (float)a1 + v5->size[0];
             v5->size[1]         = (float)a2 + v5->size[1];
             TexMatToFakeTexCoords( v3, v5 );
         }
-        Brush_BuildWindings( v2->def, 1 );
+        Brush_BuildWindings( b->def, 1 );
         if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
             SetupVertexSelection();
         MarkMapModified();
-        ++v2->def->version;
+        ++b->def->version;
 
-        patch_t *patch = v2->patch;
+        patch_t *patch = b->patch;
         if ( patch )
         {
-            if ( patch->def != v2->def->patch )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        2589, 0, "%s", "b->patch->def == b->def->patch" );
+            iassert( b->patch->def == b->def->patch );   // select.cpp:2589
             Patch_ScaleTexture( patch->def, (float)a1, (float)a2 );   // the patch DEF
         }
 
-        v2 = v2->next;
+        b = b->next;
     }
 
     Undo_EndBrushList( &selected_brushes );
 
-    unsigned v28 = (unsigned)SEL_FACE_COUNT();
+    unsigned v28 = (unsigned)g_SelectedFaces.GetSize();
     for ( unsigned v25 = 0; v25 < v28; ++v25 )
     {
-        int v8 = (int)(v25 * 12);
-        if ( (int)v25 < 0 || (int)v25 >= SEL_FACE_COUNT() )
-            unknown_libname_291();
-
-        int         v9  = *(int *)         ((char *)selFace + v8 + 8);
-        selbrush_t *v10 = *(selbrush_t **)  ((char *)selFace + v8);
-        faceVis_s  *v31 = *(faceVis_s **)   ((char *)selFace + v8 + 4);
+        selface_t  &selFace = g_SelectedFaces.GetAt( v25 );   // CArray::GetAt (bounds ENSURE)
+        int         v9  = selFace.index;
+        selbrush_t *v10 = selFace.brush;
+        faceVis_s  *v31 = selFace.face;
         int         v30 = v9;
 
-        if ( v31 != &SEL_FACES(v10)[v9] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2599, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v10->version != v10->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2600, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2599
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2600
 
         Undo_TryAddBrush( v10->def );
 
@@ -3695,12 +3421,8 @@ void Brush_ScaleTexture( int a1, int a2 )
         Undo_LinkBrush( v10->def );
         sub_477D70( v10, (const float *)world_orient_matrix );
 
-        if ( v31 != &SEL_FACES(v10)[v30] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2613, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v10->version != v10->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2614, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2613
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2614
     }
 
     Undo_End();
@@ -3714,7 +3436,7 @@ void Brush_ScaleTexture( int a1, int a2 )
 //  reciprocal divide); Patch_RotateTexture takes the patch DEF.
 void Brush_RotateTexture( int a1 )
 {
-    unsigned v25 = (unsigned)SEL_FACE_COUNT();
+    unsigned v25 = (unsigned)g_SelectedFaces.GetSize();
 
     if ( selected_brushes.next == &selected_brushes && !v25 )
         return;
@@ -3723,12 +3445,12 @@ void Brush_RotateTexture( int a1 )
     Undo_GeneralStart( "rotate texture" );
     Undo_AddBrushList( &selected_brushes );
 
-    selbrush_t *v2 = selected_brushes.next;
-    while ( v2 != &selected_brushes )
+    selbrush_t *b = selected_brushes.next;
+    while ( b != &selected_brushes )
     {
-        for ( int fi = 0; fi < v2->faceCount; ++fi )
+        for ( int fi = 0; fi < b->faceCount; ++fi )
         {
-            MaterialDef  *v3    = &v2->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
+            MaterialDef  *v3    = &b->def->faces[fi].mtldef[g_qeglobals.current_edit_layer];
             int           curL  = LayerMat::GetCurrentLayer( v3 );
             texdef_sub_t *v5    = &v3->mat_texDef + curL;
             float         v28   = (float)a1 + v5->rotate;
@@ -3736,43 +3458,34 @@ void Brush_RotateTexture( int a1 )
             v5->rotate = (float)( (int)(v28 + 9.313225746154785e-10) % 360 );
             TexMatToFakeTexCoords( v3, v5 );
         }
-        Brush_BuildWindings( v2->def, 1 );
+        Brush_BuildWindings( b->def, 1 );
         if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
             SetupVertexSelection();
         MarkMapModified();
-        ++v2->def->version;
+        ++b->def->version;
 
-        patch_t *patch = v2->patch;
+        patch_t *patch = b->patch;
         if ( patch )
         {
-            if ( patch->def != v2->def->patch )
-                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                        2652, 0, "%s", "b->patch->def == b->def->patch" );
+            iassert( b->patch->def == b->def->patch );   // select.cpp:2652
             Patch_RotateTexture( patch->def, (float)a1 );   // the patch DEF
         }
 
-        v2 = v2->next;
+        b = b->next;
     }
 
     Undo_EndBrushList( &selected_brushes );
 
     for ( unsigned rot = 0; rot < v25; ++rot )
     {
-        int v8 = (int)(rot * 12);
-        if ( (int)rot < 0 || (int)rot >= SEL_FACE_COUNT() )
-            unknown_libname_291();
-
-        int         v9  = *(int *)         ((char *)selFace + v8 + 8);
-        selbrush_t *v10 = *(selbrush_t **)  ((char *)selFace + v8);
-        faceVis_s  *v30 = *(faceVis_s **)   ((char *)selFace + v8 + 4);
+        selface_t  &selFace = g_SelectedFaces.GetAt( rot );   // CArray::GetAt (bounds ENSURE)
+        int         v9  = selFace.index;
+        selbrush_t *v10 = selFace.brush;
+        faceVis_s  *v30 = selFace.face;
         int         v27 = v9;
 
-        if ( v30 != &SEL_FACES(v10)[v9] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2661, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v10->version != v10->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2662, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2661
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2662
 
         Undo_TryAddBrush( v10->def );
 
@@ -3792,12 +3505,8 @@ void Brush_RotateTexture( int a1 )
         Undo_LinkBrush( v10->def );
         sub_477D70( v10, (const float *)world_orient_matrix );
 
-        if ( v30 != &SEL_FACES(v10)[v27] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2675, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( v10->version != v10->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2676, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2675
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2676
     }
 
     Undo_End();
@@ -3838,62 +3547,55 @@ int sub_493210( int a1, char *a2 )
     prefab_s_select *prefab = (prefab_s_select *)pfbBrush->owner->prefab;
 
     selbrush_t *sentinel = (selbrush_t *)&prefab->active_brushlist; // prefab + 0x0C
-    selbrush_t *b = prefab->active_brushlist_next;
-    if ( b == sentinel )
+    selbrush_t *pfb = prefab->active_brushlist_next;
+    if ( pfb == sentinel )
         return 0;
 
     while ( 1 )
     {
-        if ( !FilterBrush( b, 0 ) )
+        if ( !FilterBrush( pfb, 0 ) )
         {
-            patch_t *patch = b->patch;
+            patch_t *patch = pfb->patch;
             if ( patch )
             {
                 // patch path
-                if ( patch->def != b->def->patch )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                            2799, 0, "%s", "pfb->patch->def == pfb->def->patch" );
+                iassert( pfb->patch->def == pfb->def->patch );   // select.cpp:2799
                 MaterialDef *md =
-                    (MaterialDef *)( &b->patch->def->texture + g_qeglobals.current_edit_layer );
-                // MtlDef_IsValid + name resolution inlined (matches the binary's inline idiom).
-                if ( !md || (md->lyrMtl != 0) + (md->radMtl != 0) != 1 )
-                    Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                            85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-                const char *name = md->lyrMtl ? (const char *)md->lyrMtl : md->radMtl->name;
+                    (MaterialDef *)( &pfb->patch->def->texture + g_qeglobals.current_edit_layer );
+                // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+                const char *name = (const char *)Materialdef_GetName( md );
                 if ( !_stricmp( a2, name ) )
                     return 1;
             }
-            else if ( b->owner->prefab )
+            else if ( pfb->owner->prefab )
             {
                 // nested prefab → recurse
-                if ( sub_493210( (int)(intptr_t)b, a2 ) )
+                if ( sub_493210( (int)(intptr_t)pfb, a2 ) )
                     return 1;
             }
             else
             {
                 // face loop
-                brush_t *def = b->def;
+                brush_t *def = pfb->def;
                 if ( def->faceCount )
                 {
                     unsigned int i = 0;
                     while ( 1 )
                     {
                         MaterialDef *md = &def->faces[i].mtldef[g_qeglobals.current_edit_layer];
-                        if ( !md || (md->lyrMtl != 0) + (md->radMtl != 0) != 1 )
-                            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                                    85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-                        const char *name = md->lyrMtl ? (const char *)md->lyrMtl : md->radMtl->name;
+                        // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+                        const char *name = (const char *)Materialdef_GetName( md );
                         if ( !_stricmp( a2, name ) )
                             return 1;            // LABEL_16
-                        def = b->def;            // reload (IDA: def = v5->def)
+                        def = pfb->def;            // reload (IDA: def = v5->def)
                         if ( ++i >= (unsigned int)def->faceCount )
                             break;               // → next brush (LABEL_33)
                     }
                 }
             }
         }
-        b = b->next;
-        if ( b == sentinel )
+        pfb = pfb->next;
+        if ( pfb == sentinel )
             return 0;
     }
 }
@@ -3919,18 +3621,13 @@ void Select_ByTexture( int a1 )
 {
     MaterialDef *src;
 
-    if ( SEL_FACE_COUNT() )
+    if ( g_SelectedFaces.GetSize() )
     {
-        if ( SEL_FACE_COUNT() <= 0 )
-            unknown_libname_291();          // CRT subscript bounds check on selFace[0]
-        int         index = selFace->index;
-        selbrush_t *brush = selFace->brush;
-        if ( selFace->face != (faceVis_s *)&SEL_FACES( brush )[index] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2842, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( brush->version != brush->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2843, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        selface_t  &selFace = g_SelectedFaces.GetAt( 0 );
+        int         index = selFace.index;
+        selbrush_t *brush = selFace.brush;
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );    // select.cpp:2842
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2843
         src = &brush->def->faces[index].mtldef[g_qeglobals.current_edit_layer];
     }
     else
@@ -3954,9 +3651,7 @@ void Select_ByTexture( int a1 )
                 if ( patch )
                 {
                     // patch path
-                    if ( patch->def != b->def->patch )
-                        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                                2861, 0, "%s", "b->patch->def == b->def->patch" );
+                    iassert( b->patch->def == b->def->patch );   // select.cpp:2861
                     MaterialDef *md =
                         (MaterialDef *)( &b->patch->def->texture + g_qeglobals.current_edit_layer );
                     const char *nm = (const char *)Materialdef_GetName( md );
@@ -3985,10 +3680,8 @@ void Select_ByTexture( int a1 )
                         while ( 1 )
                         {
                             MaterialDef *md = &def->faces[i].mtldef[g_qeglobals.current_edit_layer];
-                            if ( !md || (md->lyrMtl != 0) + (md->radMtl != 0) != 1 )
-                                Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\MaterialDef.cpp",
-                                        85, 0, "%s", "MtlDef_IsValid( mtlDef )" );
-                            const char *nm = md->lyrMtl ? (const char *)md->lyrMtl : md->radMtl->name;
+                            // the binary inlines Materialdef_GetName here (MaterialDef.cpp:85 lives in it)
+                            const char *nm = (const char *)Materialdef_GetName( md );
                             if ( !_stricmp( Name, nm ) )
                             {
                                 Brush_RemoveFromList( b );
@@ -4070,7 +3763,7 @@ void Select_ByClassSimilar()
 // ═════════════════════════════════════════════════════════════════════════════
 void Brush_FitTexture( float x, float y, int a4 )
 {
-    int  v3  = SEL_FACE_COUNT();
+    int  v3  = g_SelectedFaces.GetSize();
     int  v20 = v3;
 
     if ( selected_brushes.next == &selected_brushes && !v3 )
@@ -4094,21 +3787,14 @@ void Brush_FitTexture( float x, float y, int a4 )
 
     for ( int v23 = 0; v23 < v20; ++v23 )
     {
-        int v6 = v23 * 12;
-        if ( v23 < 0 || v23 >= SEL_FACE_COUNT() )
-            unknown_libname_291();
-
-        int         v7  = *(int *)         ((char *)selFace + v6 + 8);
-        selbrush_t *b   = *(selbrush_t **)  ((char *)selFace + v6);
-        faceVis_s  *v19 = *(faceVis_s **)   ((char *)selFace + v6 + 4);
+        selface_t  &selFace = g_SelectedFaces.GetAt( v23 );   // CArray::GetAt (bounds ENSURE)
+        int         v7  = selFace.index;
+        selbrush_t *b   = selFace.brush;
+        faceVis_s  *v19 = selFace.face;
         int         v21 = v7;
 
-        if ( v19 != &SEL_FACES(b)[v7] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2973, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( b->version != b->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2974, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2973
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2974
 
         Undo_TryAddBrush( b->def );
         Texture_Fit( (int)(intptr_t)&b->def->faces[v7], y, x, a4 );
@@ -4120,12 +3806,8 @@ void Brush_FitTexture( float x, float y, int a4 )
         Undo_LinkBrush( b->def );
         sub_477D70( b, (const float *)world_orient_matrix );
 
-        if ( v19 != &SEL_FACES(b)[v21] )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2982, 0, "%s", "selFace.face == &selFace.brush->faces[selFace.index]" );
-        if ( b->version != b->def->version )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\select.cpp",
-                    2983, 0, "%s", "selFace.brush->version == selFace.brush->def->version" );
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );   // select.cpp:2982
+        iassert( selFace.brush->version == selFace.brush->def->version );   // select.cpp:2983
     }
 
     // Undo linkage for the selected list (IDA trailing loop).
@@ -5459,3 +5141,103 @@ void Select_Edge( int dir, int origin )
 }
 
 
+
+// ═════════════════════════════════════════════════════════════════════════════
+//  RELOCATED HOME — this function's embedded Assert() calls name THIS file as
+//  their source (see the brush.cpp relocation protocol / line-uniqueness test).
+// ═════════════════════════════════════════════════════════════════════════════
+// deps of the moved Select_Ungroup (previously declared in entity.cpp):
+extern void        Entity_UnlinkBrush( brush_t *b );                              // entity.cpp
+extern selbrush_t *Entity_LinkBrush_0_extern( entity_s *e, entity_brush_s *b );   // entity.cpp
+extern void        sub_476330( selbrush_t *b );   // Brush_Deselect_Helper 0x476330
+extern void        sub_476470( selbrush_t *b );   // Brush_Select_Helper  0x476470
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x490780  Select_Ungroup  (select.cpp:1719 asserts)
+// Ungroups selected non-worldspawn brush entities by relinking brushes to worldspawn.
+// 0x490780: after BUG fix: added the gated
+// SetupVertexSelection() (sel_vertex/sel_edge) between Brush_BuildWindings and MarkMapModified
+// (IDA 0x490972), missing before -> dangling vtx/edge handles after ungroup. ++version brush_t@0x4E
+// 16-bit (correct). 6 select.cpp asserts KEEP_VERBOSE (cross-file).
+// ─────────────────────────────────────────────────────────────────────────────
+LRESULT Select_Ungroup()
+{
+    selbrush_t *v0 = selected_brushes.next;
+    if ( v0 == &selected_brushes )
+        return (LRESULT)Sys_Printf( "No grouped entities selected.\n" );
+
+    int numselectedgroups = 0;
+
+    // We need to iterate selected_brushes but it changes as we relink; snapshot owner list.
+    // IDA iterates by walking the sentinel forward and tracking the entity being processed.
+    selbrush_t *sb  = selected_brushes.next;
+    entity_s   *last = nullptr;
+
+    while ( sb != &selected_brushes )
+    {
+        iassert( sb->owner );   // select.cpp:1719
+        iassert( sb->def );   // select.cpp:1720
+        // IDA (0x4907FC) asserts the instance's owner and its def's owner agree (the def's
+        // owner is the entity DEF, reached via the instance's def). Was dropped.
+        iassert( sb->owner->def == sb->def->owner );   // select.cpp:1721
+
+        entity_s *e      = sb->owner;
+        selbrush_t *next = sb->next;
+
+        if ( e != world_entity && !*(int *)&((entity_s_def *)e->def)->eclass->fixedsize )
+        {
+            // Walk this entity's brush instances, relinking each to worldspawn.
+            selbrush_t *b = e->brushes.ownerNext;
+            while ( b != &e->brushes )
+            {
+                selbrush_t *biNext = b->ownerNext;
+                // IDA (0x490860) asserts the instance's def->owner == instance->owner->def. Dropped.
+                iassert( b->def->owner == b->owner->def );   // select.cpp:1730
+                bool wasSelected = ( ( b->brushFlags & 0x80 ) != 0 );
+
+                if ( wasSelected )
+                    sub_476330( b );
+
+                // Unlink brush def from old entity
+                brush_t *bDef = b->def;
+                Entity_UnlinkBrush( bDef );
+
+                // Relink into worldspawn def
+                entity_s_def *worldDef = (entity_s_def *)world_entity->def;
+                Entity_LinkBrush( bDef, (entity_s *)worldDef );
+
+                // Relink brush instance into worldspawn's instance list
+                Entity_LinkBrush_0_extern( world_entity, b );
+
+                Brush_BuildWindings( bDef, 1 );
+                if ( g_qeglobals.d_select_mode == sel_vertex || g_qeglobals.d_select_mode == sel_edge )
+                    SetupVertexSelection();   // IDA 0x490972 -- rebuild d_points/d_edges; missing -> dangling vtx handles after ungroup
+                MarkMapModified();
+                ++bDef->version;
+
+                if ( wasSelected )
+                    sub_476470( b );
+
+                // IDA (0x49099A) re-asserts def->owner == owner->def after the relink (now both
+                // point at the worldspawn DEF). Dropped by the prior port.
+                iassert( b->def->owner == b->owner->def );   // select.cpp:1746
+
+                b = biNext;
+            }
+
+            iassert( e->brushes.ownerNext == &e->brushes );   // select.cpp:1748
+
+            Entity_Free( (char *)e );
+            ++numselectedgroups;
+        }
+
+        sb = next;
+    }
+
+    if ( numselectedgroups <= 0 )
+        return (LRESULT)Sys_Printf( "No grouped entities selected.\n" );
+
+    const char *suffix = ( numselectedgroups == 1 ) ? "y" : "ies";
+    LRESULT result     = (LRESULT)Sys_Printf( "Ungrouped %d entit%s.\n", numselectedgroups, suffix );
+    g_nUpdateBits      = -1;
+    return result;
+}

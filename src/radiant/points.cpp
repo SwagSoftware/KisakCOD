@@ -45,7 +45,7 @@ static int s_num_points = 0;
 static int s_startpoint = 0;
 
 // Error-log entry count; errorfile.cpp shares it via extern.
-int g_qeglobals_d_pointfile_display_list = 0; // IDB 0x1814CE8
+int s_errLogCount = 0; // IDB 0x1814CE8
 
 // 0x48ACB0  Pointfile_Check — read <currentmap>.lin into s_pointFile[].
 // KISAK: the binary's last statement is `return (FILE*)fclose(f)`, i.e. it returns
@@ -109,9 +109,9 @@ extern s_errLogEntry_t s_errLog[];   // defined in errorfile.cpp
 
 void Pointfile_Clear()
 {
-    size_t count = (size_t)(int)g_qeglobals_d_pointfile_display_list;
+    size_t count = (size_t)(int)s_errLogCount;
 
-    if ( (int)g_qeglobals_d_pointfile_display_list > 0 )
+    if ( (int)s_errLogCount > 0 )
     {
         for ( size_t i = 0; i < count; ++i )
         {
@@ -120,7 +120,7 @@ void Pointfile_Clear()
         }
     }
 
-    g_qeglobals_d_pointfile_display_list = 0;
+    s_errLogCount = 0;
 }
 
 // 0x423B40 CMainFrame::OnErrorFile and Map_NewMap/Map_SaveFile zero s_num_points.

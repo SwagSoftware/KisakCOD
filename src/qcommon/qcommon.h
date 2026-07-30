@@ -1222,8 +1222,17 @@ struct ShowCollisionBrushPt // sizeof=0x14
 };
 struct winding_t // sizeof=0x34
 {
+#ifdef KISAK_RADIANT
+    // CoD4Radiant's source named these ptCount/pts (its assert strings embed them);
+    // the anonymous unions add the editor names as zero-cost aliases with an
+    // identical layout, so engine code keeps numpoints/p and radiant code can
+    // stringize its asserts 1:1.
+    union { int   numpoints; int   ptCount;   };
+    union { float p[4][3];   float pts[4][3]; };
+#else
     int numpoints;
     float p[4][3];
+#endif
 };
 struct cLeaf_t // sizeof=0x2C
 {                                       // ...

@@ -71,9 +71,12 @@ static float  s_st    [SHADVOL_MAX_VERTS * 2];  // IDB 0x232C5A8  vec2 texcoord
 // Counters / state.  The four 4-byte-slot counters are int (0x23715A8, 0x23F15AC,
 // 0x23F15B4, 0x23F15B8 each own a full dword); only indexCount/vertexCount are 16-bit
 // (0x23F15C8 / 0x23F15CA are two bytes apart).
-static int    s_vertHashCount = 0;      // IDB 0x23715A8  shadVol.vertHashCount
-static int    s_edgeHashCount = 0;      // IDB 0x23F15AC  shadVol.edgeHashCount
-static int    s_edgeIndexCount = 0;     // IDB 0x23F15B0
+// the binary's shadVol global block (assert strings name it):
+static struct {
+    int vertHashCount;                  // IDB 0x23715A8
+    int edgeHashCount;                  // IDB 0x23F15AC
+    int edgeIndexCount;                 // IDB 0x23F15B0
+} shadVol;
 static int    s_quadsPerEdge   = 6;     // IDB 0x23F15B4  shadVol_quadsPerEdge
 static int    s_frontCapIndices = 6;    // IDB 0x23F15B8  shadVol_frontCapIndices
 static int    s_silhouetteSign  = 0;    // IDB 0x23F15BC  silhouette facing reference
@@ -105,11 +108,7 @@ static short shadowvolume_01( const float *sunlight, const float *vtx )
     if ( s_vertHashIdx[v2] == -1 )
     {
 LABEL_6:
-        if ( (unsigned)s_vertHashCount >= (unsigned)SHADVOL_VERT_HASH_SIZE )
-        {
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\shadowvolume.cpp",
-                    164, 0, "%s", "shadVol.vertHashCount < SHADVOL_VERT_HASH_SIZE" );
-        }
+        iassert( shadVol.vertHashCount < SHADVOL_VERT_HASH_SIZE );   // shadowvolume.cpp:164
         float *v4 = &s_xyzw[4 * (int)s_vertexCount];
         s_vertexCount += 2;
 
@@ -120,7 +119,7 @@ LABEL_6:
         v4[7] = 0.0f;
 
         s_vertHashPtr[v2] = (DWORD)(uintptr_t)v4;
-        s_vertHashIdx[v2] = (short)s_vertHashCount++;
+        s_vertHashIdx[v2] = (short)shadVol.vertHashCount++;
         return s_vertHashIdx[v2];
     }
     else
@@ -161,19 +160,13 @@ static int shadowvolume_02_edge( uint16_t a1, uint16_t a2, int a3 )
     if ( s_edgeHash[v5].lo == -1 )
     {
 LABEL_7:
-        if ( (unsigned)s_edgeHashCount >= SHADVOL_EDGE_HASH_SIZE - 1u )
-        {
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\shadowvolume.cpp",
-                    205, 0, "%s", "shadVol.edgeHashCount < SHADVOL_EDGE_HASH_SIZE - 1" );
-        }
-        ++s_edgeHashCount;
-        s_edgeIndexCount += s_quadsPerEdge;
+        iassert( shadVol.edgeHashCount < SHADVOL_EDGE_HASH_SIZE - 1 );   // shadowvolume.cpp:205
+        ++shadVol.edgeHashCount;
+        shadVol.edgeIndexCount += s_quadsPerEdge;
 
-        if ( s_edgeHash[v5].parity != 0 )
         {
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\shadowvolume.cpp",
-                    209, 1, "%s\n\t(edge->parity) = %i",
-                    "(edge->parity == 0)", s_edgeHash[v5].parity );
+            ShadVolEdgeSlot *edge = &s_edgeHash[v5];   // the binary's local
+            vassert( (edge->parity == 0), "(edge->parity) = %i", edge->parity );   // shadowvolume.cpp:209
         }
         s_edgeHash[v5].lo     = (short)v4;
         s_edgeHash[v5].hi     = (short)v3;
@@ -191,7 +184,7 @@ LABEL_7:
         int result = s_quadsPerEdge;
         if ( a3 * s_edgeHash[v5].parity < 0 )
             result = -s_quadsPerEdge;
-        s_edgeIndexCount       += result;
+        shadVol.edgeIndexCount       += result;
         s_edgeHash[v5].parity  += a3;
         return result;
     }
@@ -246,7 +239,7 @@ void SunLightPreview_PolyOffsetShadows()
                 out[4] = (short)(v4 + 1);
                 out[5] = v4;
 
-                s_edgeIndexCount -= s_quadsPerEdge;
+                shadVol.edgeIndexCount -= s_quadsPerEdge;
                 --v5;
                 s_indexCount = (short)(s_indexCount + s_quadsPerEdge);
             } while ( v5 );
@@ -260,14 +253,10 @@ void SunLightPreview_PolyOffsetShadows()
     }
     while ( v0 < end );
 
-    if ( s_edgeIndexCount )
-    {
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\shadowvolume.cpp",
-                133, 0, "%s", "shadVol.edgeIndexCount == 0" );
-    }
+    iassert( shadVol.edgeIndexCount == 0 );   // shadowvolume.cpp:133
 
-    s_vertHashCount = 0;
-    s_edgeHashCount = 0;
+    shadVol.vertHashCount = 0;
+    shadVol.edgeHashCount = 0;
     // Mark every vertex-hash slot empty.  The binary memsets the whole 0x40000-byte
     // table (ptr column included); only the index column is ever tested for -1.
     memset( s_vertHashIdx, 0xFF, sizeof(s_vertHashIdx) );
@@ -397,7 +386,7 @@ static void ShadVol_AddSilhouetteTri( const float *v1, const float *v2, const fl
     if ( sign == s_silhouetteSign )                        // != front-cap facing -> skip
         return;
 
-    if ( s_vertexCount > 1021 || s_indexCount + s_edgeIndexCount > 6120 )
+    if ( s_vertexCount > 1021 || s_indexCount + shadVol.edgeIndexCount > 6120 )
         SunLightPreview_PolyOffsetShadows();
 
     uint16_t i1 = (uint16_t)shadowvolume_01( light, v1 );

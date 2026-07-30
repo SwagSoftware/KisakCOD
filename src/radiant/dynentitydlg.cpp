@@ -48,18 +48,22 @@ static bool DynEnt_SelectedDef( selbrush_t *i, entity_s_def **outDef )
     // has both) so a malformed selection never AVs on the never-run path.
     if ( !def || !def->eclass || !def->eclass->name )
     {
-        if ( def && ( !def->eclass || !def->eclass->name ) )
-            Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\DynEntityDlg.cpp",
-                    72, 0, "%s", "b->owner->def->eclass->name" );
+        if ( def && def->eclass )
+        {
+            selbrush_t *b = i;                   // the binary's local
+            iassert( b->owner->def->eclass->name );   // DynEntityDlg.cpp:72
+        }
         return false;
     }
     if ( strncmp( def->eclass->name, "dyn_", 4 ) != 0 )
         return false;
 
-    // The binary's `b->owner->def == b->def->owner` invariant (type 0 → log+continue).
-    if ( i->def && (entity_s_def *)def != (entity_s_def *)i->def->owner )
-        Assert( "C:\\trees\\cod3-pc\\cod3-modtools\\cod3src\\Radiant\\DynEntityDlg.cpp",
-                76, 0, "%s", "b->owner->def == b->def->owner" );
+    // The binary's invariant (type 0 → log+continue).  b = the binary's local.
+    if ( i->def )
+    {
+        selbrush_t *b = i;
+        iassert( b->owner->def == b->def->owner );   // DynEntityDlg.cpp:76
+    }
 
     *outDef = def;
     return true;
