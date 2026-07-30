@@ -318,17 +318,3 @@ void CVertEditDlg::Toggle()
     g_nUpdateBits |= 1;
 }
 
-#ifdef RADIANT_SELFTEST
-// ══════════════════════════════════════════════════════════════════════════════
-//  Deterministic test entry (the `vertedit` gate).  Drives the apply CORE with explicit
-//  RGBA + enable flags — NO slider/checkbox HWNDs.  RunVertEditTest (radiantapp.cpp)
-//  creates a patch, selects all its control points as move-points, applies a colour, and
-//  asserts a control point's vert_color changed.
-// ══════════════════════════════════════════════════════════════════════════════
-extern "C" int Radiant_TestVertEditApply( int r, int g, int b, int a, int doColour, int doAlpha )
-{
-    VertEditDlg_Apply( (unsigned char)r, (unsigned char)g, (unsigned char)b, (unsigned char)a,
-                       doColour != 0, doAlpha != 0 );
-    return 0;
-}
-#endif // RADIANT_SELFTEST

@@ -376,23 +376,3 @@ void CMapInfo::Show()
     }
 }
 
-#ifdef RADIANT_SELFTEST
-// `mapinfo` gate: run the counting with no HWNDs and hand back the counters so
-// RunMapInfoTest can cross-check them against an independent list walk.
-//  out[0..6] world, out[7..13] prefab (brushes/curves/terrain/brush/box/model/prefabs),
-//  out[14]   distinct entity-class count (MapInfo_02).
-extern "C" int Radiant_TestMapInfoCounts( int *out /* int[15] */ )
-{
-    int worldStats[7]  = { 0, 0, 0, 0, 0, 0, 0 };
-    int prefabStats[7] = { 0, 0, 0, 0, 0, 0, 0 };
-    MapInfo_01( worldStats, (int)prefabStats, &active_brushes, &entityInsts );
-    for ( int i = 0; i < 7; ++i ) out[i]     = worldStats[i];
-    for ( int i = 0; i < 7; ++i ) out[7 + i] = prefabStats[i];
-
-    CMap<CString, LPCSTR, int, int> classCounts;
-    classCounts.InitHashTable( 11 );
-    MapInfo_02( &classCounts, &entityInsts );
-    out[14] = (int)classCounts.GetCount();
-    return 0;
-}
-#endif // RADIANT_SELFTEST

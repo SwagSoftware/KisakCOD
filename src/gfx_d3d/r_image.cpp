@@ -1461,34 +1461,4 @@ void __cdecl R_ReloadImages()
     }
 }
 
-#ifdef RADIANT_SELFTEST
-// Headless gate hook (map-free, device-free): drive the r_picmip dvars → R_UpdateMipMap →
-// imageGlobals.picmip* propagation (the actual adaptation that resolved the "imageGlobals
-// divergence" for the resolution path).  Sets the three dvars, runs R_UpdateMipMap, reads the
-// resulting imageGlobals fields back into the out params.  No D3D / no image reload involved.
-void __cdecl Radiant_TestPicmipUpdate(int picmip, int bump, int spec,
-                                      int *outPic, int *outBump, int *outSpec)
-{
-    // The headless selftest doesn't init the renderer, so the r_picmip* dvar globals may be
-    // null.  Register them idempotently (Dvar_RegisterInt returns the existing dvar if present)
-    // so R_UpdateMipMap can dereference r_picmip->current.integer.  Matches r_dvars.cpp's
-    // [0,3] int registration.
-    if (!r_picmip)
-        r_picmip = Dvar_RegisterInt("r_picmip", 0, (DvarLimits)0x300000000LL, DVAR_ARCHIVE,
-                                    "Picmip level of color maps.");
-    if (!r_picmip_bump)
-        r_picmip_bump = Dvar_RegisterInt("r_picmip_bump", 0, (DvarLimits)0x300000000LL, DVAR_ARCHIVE,
-                                         "Picmip level of normal maps.");
-    if (!r_picmip_spec)
-        r_picmip_spec = Dvar_RegisterInt("r_picmip_spec", 0, (DvarLimits)0x300000000LL, DVAR_ARCHIVE,
-                                         "Picmip level of specular maps.");
-    Dvar_SetIntByName("r_picmip",      picmip);
-    Dvar_SetIntByName("r_picmip_bump", bump);
-    Dvar_SetIntByName("r_picmip_spec", spec);
-    R_UpdateMipMap();
-    if (outPic)  *outPic  = imageGlobals.picmip;
-    if (outBump) *outBump = imageGlobals.picmipBump;
-    if (outSpec) *outSpec = imageGlobals.picmipSpec;
-}
-#endif
 #endif

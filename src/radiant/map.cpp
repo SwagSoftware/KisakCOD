@@ -586,7 +586,6 @@ void Map_SaveFile( const char *path, char a1, char a2 )
     char *savedPathHeap = nullptr;        // _strdup'd copy (binary's v25/var_9F4)
     if ( !path || !path[0] )
     {
-#ifndef RADIANT_SELFTEST
         // The binary takes the parent from AfxGetThread(); the port uses g_pParentWnd,
         // as every other CFileDialog site does.
         CFileDialog dlg( FALSE, "map", nullptr,
@@ -601,10 +600,6 @@ void Map_SaveFile( const char *path, char a1, char a2 )
             if ( savedPathHeap ) free( savedPathHeap );
             return;
         }
-#else
-        // Headless harness never browses; an empty path is a no-op (binary's dead branch).
-        return;
-#endif
     }
 
     Pointfile_ResetPoints();          // 0x486cef: s_num_points = 0

@@ -33,8 +33,8 @@ enum
 };
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  DATA CORE — headless-safe walks of the live entity list (no HWNDs).  Used both
-//  by the dialog (to fill the controls) and by the RADIANT_SELFTEST gate harness.
+//  DATA CORE — headless-safe walks of the live entity list (no HWNDs).  Used by
+//  the dialog to fill the controls.
 // ══════════════════════════════════════════════════════════════════════════════
 
 // Resolve the definition that owns an instance's classname and epairs.
@@ -386,46 +386,3 @@ void EntList_Open()
     }
 }
 
-#ifdef RADIANT_SELFTEST
-// ══════════════════════════════════════════════════════════════════════════════
-//  Deterministic test entry (the `entitylist` gate).  Runs the dialog's data cores
-//  (InsertItems tree-grouping + UpdateKeyValuePairs epair-walk + SelectItem brush-walk)
-//  WITHOUT any HWNDs and returns counts so RunEntityListTest (radiantapp.cpp) can
-//  cross-check them against an independent walk of entityInsts (= the .map content).
-//  out[0] = total entities (= tree leaf count = entityInsts node count)
-//  out[1] = distinct classnames (= tree parent-node count)
-//  out[2] = total epairs across all entities (= sum of every list-population)
-//  out[3] = total owner-brushes across all entities (= sum of every SelectItem select)
-//  out[4] = epairs of the FIRST entity (what the list would show on the first selection)
-//  out[5] = owner-brushes of the FIRST entity (what SelectItem would select for it)
-// ══════════════════════════════════════════════════════════════════════════════
-extern "C" int Radiant_TestEntityList( int *out /* int[6] */ )
-{
-    std::map<std::string, int> classes;
-    int totalEnts = 0, totalEpairs = 0, totalBrushes = 0;
-    int firstEpairs = 0, firstBrushes = 0;
-    entity_s *first = nullptr;
-
-    for ( entity_s *ent = entityInsts.next; ent && ent != &entityInsts; ent = ent->next )
-    {
-        if ( !first ) first = ent;
-        ++totalEnts;
-        classes[ std::string( EL_ClassName( ent ) ) ] += 1;
-        totalEpairs  += EL_EntityEpairCount( ent );
-        totalBrushes += EL_EntityBrushCount( ent );
-    }
-    if ( first )
-    {
-        firstEpairs  = EL_EntityEpairCount( first );
-        firstBrushes = EL_EntityBrushCount( first );
-    }
-
-    out[0] = totalEnts;
-    out[1] = (int)classes.size();
-    out[2] = totalEpairs;
-    out[3] = totalBrushes;
-    out[4] = firstEpairs;
-    out[5] = firstBrushes;
-    return 0;
-}
-#endif // RADIANT_SELFTEST

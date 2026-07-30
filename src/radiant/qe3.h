@@ -929,15 +929,6 @@ struct filter_info_s;
 filter_info_s  *DynamicFilter_ParseCondition( const char **text );     // 0x411760
 struct FaceTexNode;
 FaceTexNode    *qe3_cpp_01( const char **text );                       // 0x411280 (face mtl list)
-// headless filter_gate driver — parse a condition, toggle its visibility, return the
-// number of active brushes it matches (or -1 if the toggle was not reversible).
-int             Radiant_TestFilter( const char *conditionStr,
-                                     int *out_baseline, int *out_off, int *out_restored );
-// headless reverse-filter gate driver — install an active condition filter, then assert
-// the d_xyShowFlags 0x40 bit (OnSelectReverseFilter) inverts FilterBrush's hide decision.
-// Returns # matched brushes (clean inversion), 0 if none matched, <0 on failure.
-int             Radiant_TestReverseFilter( const char *conditionStr,
-                                     int *out_total, int *out_normal, int *out_reverse );
 
 // ── CFilterWnd — the Filters inspector pane (filters.cpp loader + UI API) ─────
 // RadiantFilters.txt → the four category filter lists.  FACE entries (filter_type_enum&4)

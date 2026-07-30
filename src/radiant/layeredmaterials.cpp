@@ -571,10 +571,8 @@ void LayeredMaterials_AddEntries( char *name, HWND hWnd )
 // the 0 token → no write); 0 on a write failure (which aborts the whole map save).
 //
 // SAFETY: the CRC gate means this only writes when the operator has actually changed
-// the library through the authoring window (which is operator-attended).  Belt-and-
-// suspenders: the actual file write is additionally FATAL-guarded under RADIANT_SELFTEST
-// so the headless gate can NEVER write a stock asset even if a future test mutates the
-// library.  In a NORMAL (operator) build it writes faithfully.
+// the library through the authoring window (which is operator-attended), so in a
+// NORMAL (operator) build it writes faithfully.
 // ─────────────────────────────────────────────────────────────────────────────
 char LayeredMaterials_Save()
 {
@@ -593,14 +591,6 @@ char LayeredMaterials_Save()
             if ( !_stricmp( ep->key, "layeredmaterials" ) ) { value = ep->value; break; }
         }
 
-#ifdef RADIANT_SELFTEST
-        // Unreachable on the gate (empty library → CRC matches → this branch is skipped),
-        // but FATAL-guard the disk write so a future headless test that mutates the
-        // library can never clobber a stock asset library file (Directive #4).
-        Com_Error( ERR_FATAL,
-                   "LayeredMaterials_Save: refusing to write the layered-material library headless (%s)", value );
-        return 0;
-#else
         // IDA: f = Map_SaveFileToPerforce(value, 0);
         //      if ( !f || (v5 = WriteFile(f), fclose(f), !v5) ) { error; return 0; }
         FILE *f = Map_SaveFileToPerforce( value, 0 );
@@ -618,7 +608,6 @@ char LayeredMaterials_Save()
         // Re-baseline the clean-library token to the just-written contents.
         dword_1814CF8 = (int)CheckLayeredMaterial_Modifications( lyrMtlGlob_Layers,
                                                                  84 * lyrMtlGlob_entryCount, 0 );
-#endif
     }
     return 1;
 }

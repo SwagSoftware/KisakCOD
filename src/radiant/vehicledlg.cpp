@@ -449,22 +449,3 @@ void CVehicleDlg::Toggle()
     g_nUpdateBits |= 1;
 }
 
-#ifdef RADIANT_SELFTEST
-// ══════════════════════════════════════════════════════════════════════════════
-//  Deterministic test entry (the `vehicle` gate).  Drives the dialog's CORE writers
-//  WITHOUT any HWNDs — exactly as the dynent/scriptgrp gates drive the key writers on
-//  a selected entity directly:  SetPair(value, key) / RemovePair(key).
-//  RunVehicleTest (radiantapp.cpp) creates a vehicle entity, selects it, sets the keys,
-//  saves + reloads, and asserts they round-trip.
-// ══════════════════════════════════════════════════════════════════════════════
-extern "C" int Radiant_TestVehicleSetPair( const char *value, const char *key )
-{
-    VehicleDlg_SetPair( value, key );
-    return 0;
-}
-extern "C" int Radiant_TestVehicleRemovePair( const char *key )
-{
-    VehicleDlg_RemovePair( key );
-    return 0;
-}
-#endif // RADIANT_SELFTEST

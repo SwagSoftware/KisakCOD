@@ -895,15 +895,10 @@ static int Create_LayerList()
 //  to the renderer via a hidden placeholder pane, and replacing that with this real
 //  frame's list child changes the gate-critical renderer multi-window attach.  An
 //  attended session can call this (e.g. lazily on the first F4 toggle) once the attach
-//  hand-off is verified on a live desktop.  Guarded against RADIANT_SELFTEST (the
-//  headless gate never creates windows; this is belt-and-suspenders).
+//  hand-off is verified on a live desktop.
 // ═══════════════════════════════════════════════════════════════════════════════
 int Create_LayerdMaterialWnd()
 {
-#ifdef RADIANT_SELFTEST
-    Com_Error( ERR_FATAL, "%s", "Create_LayerdMaterialWnd must not run in RADIANT_SELFTEST (no GUI)" );
-    return 0;
-#else
     laymatwnd_frame_HWND            = nullptr;
     LayeredMaterialWnd_HWND_Toolbar = nullptr;
     laymatwnd_content_HWND          = nullptr;
@@ -934,7 +929,6 @@ int Create_LayerdMaterialWnd()
 
     Create_ToolBar();
     return Create_LayerList();
-#endif
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

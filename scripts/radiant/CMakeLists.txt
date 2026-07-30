@@ -68,15 +68,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
     KISAK_NO_FASTFILES
 )
 
-# Gate P4 (plan §6): headless map round-trip self-test. When ON, InitInstance runs
-# the load->save->diff harness (no UI) and exits 0/1/2. Build a dedicated selftest
-# variant with `cmake -DRADIANT_SELFTEST=ON ...`.
-option(RADIANT_SELFTEST "Build the headless map round-trip self-test harness" OFF)
-if(RADIANT_SELFTEST)
-    message("  RADIANT_SELFTEST: ON (headless map round-trip harness)")
-    target_compile_definitions(${PROJECT_NAME} PUBLIC RADIANT_SELFTEST)
-endif()
-
 # Compile flags — match the SP/MP builds (/MT static CRT to match static MFC)
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ot /MP4 /W3 /Z7 /permissive-")
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /MTd /Od /MP4 /W3 /Z7 /permissive-")

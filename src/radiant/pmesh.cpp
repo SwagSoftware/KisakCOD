@@ -5146,8 +5146,8 @@ void sub_43DD00( float amount )
     PMESH_15( &selected_brushes, amount );
 }
 
-// Test helper (RADIANT_SELFTEST): seed a CurvEditDlg control-table slot so the getters
-// (sub_401BB0/401C00/401C50) return real radii/strength without the dialog.
+// Seed a CurvEditDlg control-table slot so the getters (sub_401BB0/401C00/401C50)
+// return real radii/strength; CAdvPatchEditDlg pushes edit-box changes through here.
 void CurveEdit_SetCtrl( int slot, int id, float value )
 {
     if ( slot >= 0 && slot < 3 ) { g_curveEditCtrls[slot].id = id; g_curveEditCtrls[slot].value = value; }
@@ -7226,8 +7226,7 @@ void Patch_CapCurrent()
     {
         // No closed edge → pop CCapDialog (sub_40A8A0, IDD 0xA1) to pick the special-cap
         // shape, then build two Patch_CapSpecial brushes (bFirst 0 and 1) — verbatim from
-        // Patch_CapCurrent 0x43abaf-0x43abf3.  Headless (RADIANT_SELFTEST): no dialog, no cap.
-#ifndef RADIANT_SELFTEST
+        // Patch_CapCurrent 0x43abaf-0x43abf3.
         CCapDialog dlg;
         dlg.m_nType = 0;
         if ( dlg.DoModal() == IDOK )
@@ -7238,7 +7237,6 @@ void Patch_CapCurrent()
             caps[1] = c1;
             n = 2;
         }
-#endif
     }
 
     if ( n > 0 )

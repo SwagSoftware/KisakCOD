@@ -318,7 +318,6 @@ void CDynEntityDlg::OnClearPhys()   { DynEntityDlg_02_RemovePair( "physPreset" )
 void CDynEntityDlg::OnClearEfx()    { DynEntityDlg_02_RemovePair( "destroyEfx" );    g_nUpdateBits |= 1; }
 void CDynEntityDlg::OnClearPieces() { DynEntityDlg_02_RemovePair( "destroyPieces" ); g_nUpdateBits |= 1; }
 
-#ifndef RADIANT_SELFTEST
 // ── the file-picker helper (GUI-only) ────────────────────────────────────────
 // 0x40E150  DynEntityDlg_OpenDialog(parentWnd, editControl, subdir, ofnFlags) — pick a
 // file under <project basepath>\<subdir>; if the pick is NOT under that directory pop
@@ -386,13 +385,6 @@ void CDynEntityDlg::OnBrowsePieces()
                                   "main_shared\\xmodelpieces\\", "All files (*.*)|*.*||" ) )
         OnSetPieces();
 }
-#else
-// Headless: the file-dialog browse is GUI-only (gui_smoke / monkey cover the window
-// plumbing).  The Browse handlers are no-ops in the selftest variant.
-void CDynEntityDlg::OnBrowsePhys()   {}
-void CDynEntityDlg::OnBrowseEfx()    {}
-void CDynEntityDlg::OnBrowsePieces() {}
-#endif // RADIANT_SELFTEST
 
 // Help (0x40E5C0): show the first selected dyn_ entity's eclass comments (the QUAKED
 // doc block) in a message box, like the binary's "Radiant - Help".
@@ -459,23 +451,3 @@ void CDynEntityDlg::Toggle()
     g_nUpdateBits |= 1;
 }
 
-#ifdef RADIANT_SELFTEST
-// ══════════════════════════════════════════════════════════════════════════════
-//  Deterministic test entry (the `dynent` gate).  Drives the dialog's CORE writers
-//  WITHOUT any HWNDs — exactly as the entwnd/scriptgrp gates drive AddProp /
-//  ScriptGroup_AddKeyToSelected on a selected entity directly:
-//    SetPair(value, key) / RemovePair(key) on whatever dyn_ entity is selected.
-//  RunDynEntTest (radiantapp.cpp) creates a dyn_model, selects it, sets the keys,
-//  saves + reloads, and asserts they round-trip.
-// ══════════════════════════════════════════════════════════════════════════════
-extern "C" int Radiant_TestDynEntSetPair( const char *value, const char *key )
-{
-    DynEntityDlg_01_SetPair( value, key );
-    return 0;
-}
-extern "C" int Radiant_TestDynEntRemovePair( const char *key )
-{
-    DynEntityDlg_02_RemovePair( key );
-    return 0;
-}
-#endif // RADIANT_SELFTEST

@@ -1456,7 +1456,6 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
     Load_RadiantFilters();
     Radiant_RefreshFilterPane();    // populate the Filters inspector checklists now they're loaded
 
-#ifndef RADIANT_SELFTEST
     // Optional cmdline map (File→Open replaces this for interactive use).
     const char *mapPath = ( __argc > 1 ) ? __argv[1] : nullptr;
     if ( Radiant_PathLooksLikeMap( mapPath ) )
@@ -1489,7 +1488,6 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
         case 200: CheckTextureScale( 32894 ); break;
         default:  CheckTextureScale( 32895 ); break;
     }
-#endif
 
     QE_CountBrushesAndUpdateStatusBar();
     SetGridStatus();                // initial grid status (pane 4)

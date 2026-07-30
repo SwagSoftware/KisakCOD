@@ -392,54 +392,6 @@ void SurfaceInspector_Wnd02()
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-//  Deterministic test entry points (RADIANT_SELFTEST) — the texmod gate.  The
-//  face-select bridge lives in select.cpp (where the selFace machinery is); these
-//  apply / read the picked face's texdef so the gate can verify the round-trip.
-// ══════════════════════════════════════════════════════════════════════════════
-#ifdef RADIANT_SELFTEST
-// Apply a texmod to the currently-selected face: scale → size0/size1 (texels), shiftX →
-// shift0, rotate → rotate (shift1 preserved).  Mirrors what the inspector's Apply does.
-extern "C" int Radiant_TestApplyTexMod( float shiftX, float scale, float rotate )
-{
-    if ( SEL_FACE_COUNT() <= 0 )
-        return 0;
-    float cur[5];
-    if ( !Surf_ReadTexdef( cur, nullptr, nullptr ) )
-        return 0;
-    Surf_ApplyTexdefRaw( scale, scale, shiftX, cur[3] /*preserve shiftY*/, rotate );
-    return 1;
-}
-
-// Read the selected face's stored texdef into out[5] (size0 size1 shift0 shift1 rotate).
-extern "C" int Radiant_TestReadFaceTexdef( float out[5] )
-{
-    return Surf_ReadTexdef( out, nullptr, nullptr ) ? 1 : 0;
-}
-
-// Fit the texture to the currently-selected face(s) (the inspector's "Fit" button →
-// Brush_FitTexture 0x4939E0).  Forces rotate=0 on the target texdef first so the fit is
-// fully deterministic (the fit READS the stored rotate to orient the box), then fits.
-// Returns 1 if a face was selected (fit ran), 0 otherwise.
-extern "C" int Radiant_TestFitFace()
-{
-    if ( SEL_FACE_COUNT() <= 0 )
-        return 0;
-    // Zero the rotate so the computed size/shift are a pure function of the geometry.
-    MaterialDef *md = Surf_TargetMaterialDef();
-    if ( md )
-    {
-        int layer = LayerMat::GetCurrentLayer( md );
-        texdef_sub_t *td = &md->mat_texDef + layer;
-        td->rotate = 0.0f;
-        Brush_SetTexture( md, 0 );
-    }
-    Brush_FitTexture( 1.0f, 1.0f, 0 );
-    g_nUpdateBits = -1;
-    return 1;
-}
-#endif // RADIANT_SELFTEST
-
-// ══════════════════════════════════════════════════════════════════════════════
 //  CSurfaceDlg — the Surface Inspector, a modeless CDialog on IDD_SURFACE_INSPECTOR (116).
 //  1:1 with the binary (CDialog::Create(IDD_SURFACE_INSP) in DoSurface 0x4585d0); the RC
 //  template + control ids are the binary's (res/radiant.rc).  The data flow mirrors the

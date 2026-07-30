@@ -1980,33 +1980,3 @@ void ScriptGroup_DrawTeamColorViz( const char *a1, const float *viewMins,
     }
 }
 
-#ifdef RADIANT_SELFTEST
-// ── scriptgrp gate entry (radiantapp.cpp RunScriptGrpTest) ────────────────────
-// The gate cannot pop the Script-Group MFC dialog, so it drives the iterators directly
-// (exactly as the entwnd gate drives SetKeyValue and the model gate drives the picker's
-// commit core).  Add then verify, remove then verify.
-extern "C" int Radiant_TestScriptAddKey( const char *value, const char *key )
-{
-    return ScriptGroup_AddKeyToSelected( value, key );
-}
-extern "C" int Radiant_TestScriptRemoveKey( const char *key, const char *value )
-{
-    return ScriptGroup_RemoveKeyFromSelected( key, value );
-}
-
-// ── scriptgrpcolor gate entry (radiantapp.cpp RunScriptGrpColorTest) ──────────
-// Drives the Vehicle/Script-Group colour-button assignment core WITHOUT any HWNDs,
-// exactly as the vehicle gate drives VehicleDlg_SetPair: set the script-group key +
-// assign the next number to the selection, then remove it.  (The binary path is the
-// 10 vehicledlg.cpp script-group buttons → VehicleDlg_SetScriptGroupKey → here.)
-extern "C" int Radiant_TestAssignScriptGroupNumber( const char *key )
-{
-    VehicleDlg_SetScriptGroupKey( key );
-    return 0;
-}
-extern "C" int Radiant_TestRemoveScriptGroupNumber( const char *key )
-{
-    ScriptGroup_RemoveAssignedNumber( key );
-    return 0;
-}
-#endif

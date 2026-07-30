@@ -386,19 +386,3 @@ void CModelDlg::Toggle()
     g_nUpdateBits |= 1;
 }
 
-#ifdef RADIANT_SELFTEST
-// ══════════════════════════════════════════════════════════════════════════════
-//  Deterministic test entry (the `replacemodels` gate).  Drives the replace CORE with
-//  explicit FROM/TO arrays and a class mask — NO list-box HWNDs — exactly as the vehicle/
-//  dynent gates drive their key writers directly.  RunReplaceModelsTest (radiantapp.cpp)
-//  creates two misc_model entities, sets FROM={the first model}, TO={the second model},
-//  runs the replace, and asserts the first entity's "model" key changed to the TO model.
-// ══════════════════════════════════════════════════════════════════════════════
-extern "C" int Radiant_TestReplaceModels( const char *const *fromSet, int fromCount,
-                                          const char *const *toSet,   int toCount,
-                                          int classFlags )
-{
-    ModelDlg_DoReplace( fromSet, fromCount, toSet, toCount, classFlags );
-    return 0;
-}
-#endif // RADIANT_SELFTEST

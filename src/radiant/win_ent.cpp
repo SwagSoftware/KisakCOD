@@ -468,29 +468,6 @@ void SetSpawnFlags_R( int bit )
     Undo_End();
 }
 
-#ifdef RADIANT_SELFTEST
-// Headless gate hook: set spawnflag `bit` on entity `e` exactly as SetSpawnFlags_R's
-// "checkbox-just-checked" branch does (the GUI feeds it BM_GETCHECK==1).  Runs the same
-// SpawnFlags_Get → (1<<bit)|flags → Undo_AddEntity_W → SetKeyValue("spawnflags") chain;
-// the only difference from the live path is the checkbox state is forced (there are no
-// checkbox HWNDs headless — that input plumbing is covered by gui_smoke / monkey).
-extern "C" int Radiant_TestSetSpawnflagBit( void *entDef, int bit )
-{
-    entity_s_def *e = (entity_s_def *)entDef;
-    if ( !e )
-        return -1;
-    __int32 flags = SpawnFlags_Get( e );
-    int v8 = ( 1 << bit ) | flags;
-    char sz[32];
-    sprintf( sz, "%i", v8 );
-    Undo_ClearRedo();
-    Undo_GeneralStart( "set spawnflags" );
-    Undo_AddEntity_W( (entity_s *)e );
-    SetKeyValue( e, "spawnflags", sz );
-    Undo_End();
-    return v8;
-}
-#endif // RADIANT_SELFTEST
 
 // CreateEntity (0x497300) — create a new entity of the eclass selected in the list,
 // using the currently-selected brush(es) as the proxy (Entity_Create), then re-select
@@ -758,7 +735,6 @@ void Ed_PostAddModelCommand()
                                 | ( (unsigned long)( BN_CLICKED ) << 16 ) ), 0 );
 }
 
-#ifndef RADIANT_SELFTEST
 // CEntityWnd_OpenModelDialog (0x497d20) — the GUI picker.  Only compiled into the
 // normal (MFC) build; the selftest exercises Ed_CommitPickedModel directly.  `key`
 // selects the project base ("basepath"/"mapspath"), `subdir` the start directory
@@ -817,21 +793,7 @@ static void CEntityWnd_OpenModelDialog( const char *key, const char *subdir,
     if ( g_qeglobals.d_hwndXY )
         ::SetFocus( g_qeglobals.d_hwndXY );
 }
-#endif // !RADIANT_SELFTEST
 
-#ifdef RADIANT_SELFTEST
-// Headless model_gate hook: set model `name` on entity `def` exactly as the picker's
-// NET EFFECT (Ed_CommitPickedModel) — the file-dialog browse is GUI-only (gui_smoke /
-// monkey cover the window plumbing).  Returns 0 on success.
-extern "C" int Radiant_TestPickModel( void *entDef, const char *name )
-{
-    entity_s_def *e = (entity_s_def *)entDef;
-    if ( !e || !name )
-        return -1;
-    Ed_CommitPickedModel( e, name );
-    return 0;
-}
-#endif // RADIANT_SELFTEST
 
 // FieldWndProc (0x496370) — subclass for the key/value edit fields: Tab/Enter in the
 // key field jumps to the value field; Enter in the value field commits via AddProp.
@@ -1437,7 +1399,6 @@ void CEntityWnd::OnDeleteKey()
 // selected entity (the binary's edit_entity deref would AV — we guard).
 void CEntityWnd::OnAddModel()
 {
-#ifndef RADIANT_SELFTEST
     if ( !edit_entity || !edit_entity->eclass )
         return;
     if ( edit_entity->eclass->classtype & 0x10 )            // CLASS_PREFAB
@@ -1446,7 +1407,6 @@ void CEntityWnd::OnAddModel()
     else
         CEntityWnd_OpenModelDialog( "basepath", "main_shared\\xmodel\\",
                                     "Model files (*)|*||", true );
-#endif
 }
 
 // A spawnflag checkbox was clicked (BS_AUTOCHECKBOX has already toggled its state).
