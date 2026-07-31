@@ -385,8 +385,6 @@ void __cdecl SV_SetExpectedHunkUsage(char *mapname)
 
 void __cdecl SV_SpawnServer(char *mapname)
 {
-    char* v1; // eax
-    int v5; // eax
     const char *denied; // [esp+18h] [ebp-B0h]
     client_t *client; // [esp+1Ch] [ebp-ACh]
     client_t *clienta; // [esp+1Ch] [ebp-ACh]

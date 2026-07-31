@@ -177,9 +177,6 @@ void __cdecl Scr_PrecacheAnimationTree(uint32_t parentNode)
 
 void __cdecl Scr_LoadAnimTreeAtIndex(uint32_t index, void *(__cdecl *Alloc)(int), int user)
 {
-    char *v4; // eax
-    const char *v5; // eax
-    char *v6; // eax
     uint32_t Variable; // eax
     uint32_t animtree_node; // [esp-8h] [ebp-30h]
     XAnim_s *animtree; // [esp+0h] [ebp-28h]
@@ -496,7 +493,6 @@ bool __cdecl AnimTreeParseInternal(
 {
     bool eof; // al
     uint32_t ArrayVariable; // eax
-    uint32_t prev; // eax
     uint32_t currentAnim; // [esp+Ch] [ebp-24h]
     bool bResult; // [esp+13h] [ebp-1Dh]
     uint32_t animName; // [esp+14h] [ebp-1Ch]

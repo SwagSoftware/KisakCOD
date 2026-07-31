@@ -635,12 +635,9 @@ void __cdecl SVC_Info(netadr_t from)
 
 void __cdecl SV_ConnectionlessPacket(netadr_t from, msg_t *msg)
 {
-    char *fromAddr; // [esp+0h] [ebp-1Ch]
-    client_t *clients; // [esp+4h] [ebp-18h]
     const char *c; // [esp+8h] [ebp-14h]
     int clientIndex; // [esp+Ch] [ebp-10h]
     char *s; // [esp+10h] [ebp-Ch]
-    int i; // [esp+14h] [ebp-8h]
 
     clientIndex = -1;
     MSG_BeginReading(msg);

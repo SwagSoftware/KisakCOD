@@ -3457,7 +3457,6 @@ int XAnimSetCompleteGoalWeightKnob(
 {
     XAnimTree_s *tree; // r28
     uint32_t infoIndex; // r3
-    XAnimState *p_state; // r10
 
     iassert(obj);
 
@@ -4160,7 +4159,6 @@ static uint32_t XAnimTransfer_r(
     XAnimInfo *fromInfo; // r30
     uint32_t animToModel; // r31
     XAnimInfo *toInfo2; // r10
-    XAnimState *p_state; // r9
     uint32_t toChildInfoIndex; // r31
     uint32_t i; // r11
     uint32_t children; // r28

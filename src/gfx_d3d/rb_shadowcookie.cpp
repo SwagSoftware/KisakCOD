@@ -144,9 +144,6 @@ void RB_ShadowCookieOverlay()
     float w; // [esp+40h] [ebp-54h]
     float x; // [esp+44h] [ebp-50h]
     GfxMatrix v7; // [esp+48h] [ebp-4Ch] BYREF
-    int identityMatrix_52; // [esp+88h] [ebp-Ch]
-    void *identityMatrix_56; // [esp+8Ch] [ebp-8h]
-    void *retaddr; // [esp+94h] [ebp+0h]
 
     MatrixIdentity44(v7.m);
     x = 4.0;

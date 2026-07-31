@@ -53,7 +53,6 @@ void __cdecl CG_DrawOffHandIcon(
     Material *material,
     OffhandClass weaponType)
 {
-    float v6; // [esp+24h] [ebp-30h]
     float drawColor[4]; // [esp+38h] [ebp-1Ch] BYREF
     int32_t weapIndex; // [esp+48h] [ebp-Ch]
     const WeaponDef *weapDef; // [esp+4Ch] [ebp-8h]
@@ -144,7 +143,6 @@ void __cdecl CG_DrawOffHandHighlight(
     Material *material,
     OffhandClass weaponType)
 {
-    float v6; // [esp+24h] [ebp-38h]
     float drawColor[4]; // [esp+38h] [ebp-24h] BYREF
     float flashColor[4]; // [esp+48h] [ebp-14h] BYREF
     WeaponDef *weapDef; // [esp+58h] [ebp-4h]
@@ -269,7 +267,6 @@ void __cdecl CG_DrawOffHandAmmo(
     int32_t textStyle,
     OffhandClass weaponType)
 {
-    float v7; // [esp+20h] [ebp-2Ch]
     int32_t ammoCount; // [esp+30h] [ebp-1Ch]
     float drawColor[4]; // [esp+38h] [ebp-14h] BYREF
     const char *ammoCountString; // [esp+48h] [ebp-4h]
@@ -334,7 +331,6 @@ void __cdecl CG_DrawOffHandName(
     int32_t textStyle,
     OffhandClass weaponType)
 {
-    float v7; // [esp+20h] [ebp-28h]
     float drawColor[4]; // [esp+34h] [ebp-14h] BYREF
     const char *ammoNameString; // [esp+44h] [ebp-4h]
     cg_s *cgameGlob;

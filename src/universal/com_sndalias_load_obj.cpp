@@ -1678,9 +1678,6 @@ int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo)
 
 void __cdecl Com_ParseEntChannelFile(const char *buffer)
 {
-    char v1; // [esp+3h] [ebp-25h]
-    char *v2; // [esp+8h] [ebp-20h]
-    parseInfo_t *v3; // [esp+Ch] [ebp-1Ch]
     int i; // [esp+20h] [ebp-8h]
     parseInfo_t *value; // [esp+24h] [ebp-4h]
 

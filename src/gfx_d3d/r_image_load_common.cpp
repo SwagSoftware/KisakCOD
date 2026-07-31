@@ -23,7 +23,6 @@ void __cdecl Image_GetPicmip(const GfxImage *image, Picmip *picmip)
 
 void __cdecl Image_PicmipForSemantic(uint8_t semantic, Picmip *picmip)
 {
-    const char *v2; // eax
     int picmipUsed; // [esp+4h] [ebp-4h]
 
     switch (semantic)
@@ -108,8 +107,6 @@ void __cdecl Image_Upload2D_CopyDataBlock_PC(
     int dstPitch,
     uint8_t *dst)
 {
-    const char *v6; // eax
-    const char *v7; // eax
     signed int srcStride; // [esp+48h] [ebp-Ch]
     int y; // [esp+4Ch] [ebp-8h]
     int dy; // [esp+50h] [ebp-4h]
@@ -186,8 +183,6 @@ void __cdecl Image_Upload3D_CopyData_PC(
     uint32_t mipLevel,
     uint8_t *src)
 {
-    const char *v4; // eax
-    const char *v5; // eax
     int v6; // [esp+0h] [ebp-44h]
     int v7; // [esp+4h] [ebp-40h]
     int v8; // [esp+8h] [ebp-3Ch]
@@ -274,10 +269,6 @@ void __cdecl Image_Upload2D_CopyData_PC(
     uint32_t mipLevel,
     uint8_t *src)
 {
-    const char *v5; // eax
-    const char *v6; // eax
-    const char *v7; // eax
-    const char *v8; // eax
     uint32_t v9; // [esp+0h] [ebp-30h]
     uint32_t v10; // [esp+4h] [ebp-2Ch]
     int v11; // [esp+10h] [ebp-20h]

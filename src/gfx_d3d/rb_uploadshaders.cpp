@@ -92,9 +92,6 @@ uint32_t RB_UploadMaterialPass(
     uint32_t v9[37]; // [esp-4h] [ebp-ACh] BYREF
     uint32_t vertMem_136; // [esp+90h] [ebp-18h]
     uint32_t vertMem_140; // [esp+94h] [ebp-14h]
-    uint32_t argIter; // [esp+9Ch] [ebp-Ch]
-    uint32_t argCount; // [esp+A0h] [ebp-8h]
-    uint32_t retaddr; // [esp+A8h] [ebp+0h]
 
     //argIter = a1;
     //argCount = retaddr;

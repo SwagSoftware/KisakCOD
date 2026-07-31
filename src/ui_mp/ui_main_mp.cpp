@@ -2762,7 +2762,6 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
     char s[1028]; // [esp+CE4h] [ebp-1D48h] BYREF
     int i; // [esp+10E8h] [ebp-1944h] BYREF
     char v44[1028]; // [esp+10ECh] [ebp-1940h] BYREF
-    int ServerPunkBuster; // [esp+14F0h] [ebp-153Ch]
     char value[264]; // [esp+14F4h] [ebp-1538h] BYREF
     char key[1024]; // [esp+15FCh] [ebp-1430h] BYREF
     char checksum[1028]; // [esp+19FCh] [ebp-1030h] BYREF

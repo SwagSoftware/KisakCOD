@@ -1618,7 +1618,6 @@ void __cdecl MissileLandAnglesFlatMaintainingDirection(gentity_s *ent, trace_t *
 
 void __cdecl CheckGrenadeDanger(gentity_s *grenadeEnt)
 {
-    gentity_s *v1; // eax
     float iExplosionRadius; // [esp+8h] [ebp-14h]
     float damageRadiusSquared; // [esp+Ch] [ebp-10h]
     gentity_s *ent; // [esp+10h] [ebp-Ch]

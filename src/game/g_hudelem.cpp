@@ -951,7 +951,6 @@ void __cdecl HECmd_ScaleOverTime(scr_entref_t entref)
 {
     const char *v1; // eax
     const char *v2; // eax
-    float v3; // [esp+Ch] [ebp-20h]
     int32_t width; // [esp+1Ch] [ebp-10h]
     int32_t height; // [esp+20h] [ebp-Ch]
     game_hudelem_s *hud; // [esp+24h] [ebp-8h]
@@ -988,7 +987,6 @@ void __cdecl HECmd_MoveOverTime(scr_entref_t entref)
 {
     const char *v1; // eax
     const char *v2; // eax
-    float v3; // [esp+Ch] [ebp-18h]
     game_hudelem_s *hud; // [esp+1Ch] [ebp-8h]
     float moveTime; // [esp+20h] [ebp-4h]
 

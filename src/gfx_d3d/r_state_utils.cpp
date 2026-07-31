@@ -185,15 +185,11 @@ void __cdecl R_Set2D(GfxCmdBufSourceState *source)
 
 void __cdecl R_CmdBufSet2D(GfxCmdBufSourceState* source, GfxViewport* viewport)
 {
-    GfxViewParms* v2; // ebp
     float v3[16]; // [esp-8h] [ebp-9Ch] BYREF
     GfxMatrix identity_52; // [esp+38h] [ebp-5Ch] BYREF
     GfxViewParms* transform_56; // [esp+7Ch] [ebp-18h]
     float transform_60; // [esp+80h] [ebp-14h]
     float v7; // [esp+84h] [ebp-10h]
-    GfxViewParms* viewParms; // [esp+88h] [ebp-Ch]
-    float invHeight; // [esp+8Ch] [ebp-8h]
-    float retaddr; // [esp+94h] [ebp+0h]
 
     //viewParms = v2;
     //invHeight = retaddr;

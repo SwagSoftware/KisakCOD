@@ -134,8 +134,6 @@ void __cdecl CM_Trace(
     uint32_t model,
     int brushmask)
 {
-    const char *v7; // eax
-    const char *v8; // eax
     cmodel_t *cmod; // [esp+78h] [ebp-ECh]
     traceWork_t tw; // [esp+7Ch] [ebp-E8h] BYREF
     float offset[3]; // [esp+12Ch] [ebp-38h]
@@ -603,7 +601,6 @@ void __cdecl CM_TraceThroughLeaf(const traceWork_t *tw, cLeaf_t *leaf, trace_t *
 
 bool __cdecl CM_TraceThroughLeafBrushNode(const traceWork_t *tw, cLeaf_t *leaf, trace_t *trace)
 {
-    __int64 _FFFFFFFC; // [esp-4h] [ebp-48h]
     float absmin[3]; // [esp+Ch] [ebp-38h] BYREF
     float start[4]; // [esp+18h] [ebp-2Ch] BYREF
     float end[4]; // [esp+28h] [ebp-1Ch] BYREF
@@ -1601,13 +1598,9 @@ int __cdecl CM_BoxSightTrace(
     uint32_t model,
     int brushmask)
 {
-    const char *v7; // eax
-    const char *v8; // eax
     double v9; // st7
     double v10; // st7
     float v12; // [esp+14h] [ebp-13Ch]
-    float v13; // [esp+18h] [ebp-138h]
-    float v14; // [esp+1Ch] [ebp-134h]
     cmodel_t *cmod; // [esp+5Ch] [ebp-F4h]
     traceWork_t tw; // [esp+60h] [ebp-F0h] BYREF
     float offset[3]; // [esp+110h] [ebp-40h]

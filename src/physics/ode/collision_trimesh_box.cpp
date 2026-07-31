@@ -973,13 +973,10 @@ char __cdecl cldClosestPointOnTwoLines(
 
 void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 *v1, const dVector3 *v2)
 {
-    const char *v4; // eax
     double v5; // st7
-    const char *v6; // eax
     const char *v7; // eax
     double v8; // st7
     const char *v9; // eax
-    const char *v10; // eax
     float v11; // [esp+18h] [ebp-574h]
     float v12; // [esp+1Ch] [ebp-570h]
     float v13; // [esp+20h] [ebp-56Ch]
@@ -992,7 +989,6 @@ void __cdecl cldClipping(collData_t *tbData, const dVector3 *v0, const dVector3 
     unsigned int ctContacts; // [esp+A0h] [ebp-4ECh]
     dContactGeom *ContactGeoms; // [esp+A4h] [ebp-4E8h]
     int iFlags; // [esp+A8h] [ebp-4E4h]
-    float *normal; // [esp+D0h] [ebp-4BCh]
     int v25; // [esp+D8h] [ebp-4B4h]
     unsigned int v26; // [esp+DCh] [ebp-4B0h]
     dContactGeom *v27; // [esp+E0h] [ebp-4ACh]

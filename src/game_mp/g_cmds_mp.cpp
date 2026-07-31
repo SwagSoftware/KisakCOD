@@ -781,15 +781,11 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
     const char *v3; // eax
     const char *v4; // eax
     const char *v5; // eax
-    int32_t v6; // eax
-    int32_t v7; // eax
-    int32_t v8; // eax
     const char *v9; // eax
     const char *v10; // eax
     const char *v11; // eax
     const char *v12; // eax
     const char *v13; // eax
-    const char *v14; // eax
     const char *v15; // eax
     char *GameTypeNameForScript; // eax
     char *v17; // eax
@@ -1366,7 +1362,6 @@ void Cmd_VisionSetNaked_f()
     char *v2; // eax
     float v3; // [esp+0h] [ebp-1Ch]
     int32_t v4; // [esp+4h] [ebp-18h]
-    float v5; // [esp+8h] [ebp-14h]
     int32_t duration; // [esp+18h] [ebp-4h]
 
     duration = 1000;
@@ -1393,7 +1388,6 @@ void Cmd_VisionSetNight_f()
     char *v2; // eax
     float v3; // [esp+0h] [ebp-1Ch]
     int32_t v4; // [esp+4h] [ebp-18h]
-    float v5; // [esp+8h] [ebp-14h]
     int32_t duration; // [esp+18h] [ebp-4h]
 
     duration = 1000;

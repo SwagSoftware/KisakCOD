@@ -29,17 +29,11 @@ void __cdecl XModelReadSurface_BuildCollisionTree(
     void *(__cdecl *Alloc)(int))
 {
     unsigned __int8 *v3; // eax
-    int v4; // [esp+60h] [ebp-138h]
     int v5; // [esp+64h] [ebp-134h]
-    int v6; // [esp+68h] [ebp-130h]
     int v7; // [esp+6Ch] [ebp-12Ch]
-    int v8; // [esp+70h] [ebp-128h]
     int v9; // [esp+74h] [ebp-124h]
-    int v10; // [esp+78h] [ebp-120h]
     int v11; // [esp+7Ch] [ebp-11Ch]
-    short v12; // [esp+80h] [ebp-118h]
     int v13; // [esp+84h] [ebp-114h]
-    short v14; // [esp+88h] [ebp-110h]
     int v15; // [esp+8Ch] [ebp-10Ch]
     float *v16; // [esp+90h] [ebp-108h]
     float *v17; // [esp+94h] [ebp-104h]
@@ -1204,19 +1198,10 @@ void __cdecl XModelCopyXModelParts(const XModelPartsLoad *modelParts, XModel *mo
 
 XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(__cdecl *AllocColl)(int))
 {
-    double v4; // st7
     int *partBits; // edx
     Material *v6; // eax
     PhysPreset *v7; // eax
     PhysGeomList *PhysicsCollMap; // eax
-    float v9; // [esp+2Ch] [ebp-1648h]
-    float v10; // [esp+4Ch] [ebp-1628h]
-    float v11; // [esp+50h] [ebp-1624h]
-    float v12; // [esp+54h] [ebp-1620h]
-    float v13; // [esp+58h] [ebp-161Ch]
-    float v14; // [esp+5Ch] [ebp-1618h]
-    float v15; // [esp+60h] [ebp-1614h]
-    uint16_t v16; // [esp+64h] [ebp-1610h]
     unsigned __int8 *pos; // [esp+68h] [ebp-160Ch] BYREF
     int j; // [esp+6Ch] [ebp-1608h]
     int numBones; // [esp+70h] [ebp-1604h]
@@ -1412,7 +1397,6 @@ XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(_
 
 void __cdecl XModelCalcBasePose(XModelPartsLoad *modelParts)
 {
-    float result[3]; // [esp+44h] [ebp-74h] BYREF
     float len; // [esp+88h] [ebp-30h]
     int numBones; // [esp+90h] [ebp-28h]
     float *trans; // [esp+94h] [ebp-24h]

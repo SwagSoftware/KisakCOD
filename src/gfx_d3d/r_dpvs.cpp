@@ -190,7 +190,6 @@ uint32_t __cdecl R_CalcReflectionProbeIndex(const float *origin)
 
 void __cdecl R_AddAllSceneEntSurfacesCamera(const GfxViewInfo *viewInfo)
 {
-    bool v1; // [esp+Ch] [ebp-D4h]
     GfxSceneDynBrush *sceneDynBrush; // [esp+70h] [ebp-70h]
     DynEntityPose *dynEntPose; // [esp+74h] [ebp-6Ch]
     DynEntityPose *dynEntPosea; // [esp+74h] [ebp-6Ch]
@@ -598,7 +597,6 @@ void __cdecl R_DrawAllSceneEnt(const GfxViewInfo *viewInfo)
     uint8_t *sceneEntVisData[7]; // [esp+40h] [ebp-24h]
     uint32_t viewIndex; // [esp+5Ch] [ebp-8h]
     uint32_t visData; // [esp+60h] [ebp-4h]
-    int savedregs; // [esp+64h] [ebp+0h] BYREF
 
     entVisBits = dpvsGlob.entVisBits[scene.dpvs.localClientNum];
     for (viewIndex = 0; viewIndex < 7; ++viewIndex)
@@ -964,7 +962,6 @@ void __cdecl R_DrawAllDynEnt(const GfxViewInfo *viewInfo)
     uint32_t viewIndex; // [esp+64h] [ebp-Ch]
     uint32_t visData; // [esp+68h] [ebp-8h]
     GfxBrushModel *bmodel; // [esp+6Ch] [ebp-4h]
-    int savedregs; // [esp+70h] [ebp+0h] BYREF
 
     PROF_SCOPED("DrawDynEnt");
 
@@ -1461,7 +1458,6 @@ void __cdecl R_AddDynEntToCell(uint32_t cellIndex, uint32_t dynEntIndex, DynEnti
 void __cdecl R_FilterEntitiesIntoCells(int cameraCellIndex)
 {
     float s; // [esp+0h] [ebp-84h]
-    uint32_t v2; // [esp+14h] [ebp-70h]
     int v3; // [esp+18h] [ebp-6Ch]
     const DpvsPlane *v4; // [esp+1Ch] [ebp-68h]
     int v5; // [esp+20h] [ebp-64h]
@@ -3104,7 +3100,6 @@ void __cdecl R_ProjectPortal(
     DpvsClipChildren *clipChildren)
 {
     int windingVertIndex; // [esp+40h] [ebp-440h]
-    int windingVertIndexa; // [esp+40h] [ebp-440h]
     float area; // [esp+44h] [ebp-43Ch]
     const float *xyz; // [esp+48h] [ebp-438h]
     float x; // [esp+50h] [ebp-430h]
@@ -3562,8 +3557,6 @@ uint32_t __cdecl R_CalcReflectionProbeIndex(const GfxWorld *world, const float *
 int __cdecl R_CellForPoint(const GfxWorld *world, const float *origin)
 {
     mnode_t *node; // [esp+4h] [ebp-1Ch]
-    cplane_s *plane; // [esp+Ch] [ebp-14h]
-    float d; // [esp+10h] [ebp-10h]
     int cellIndex; // [esp+14h] [ebp-Ch]
     int cellCount; // [esp+18h] [ebp-8h]
 

@@ -2930,7 +2930,6 @@ void __cdecl PlayerCmd_GetXuid(scr_entref_t entref)
 void __cdecl PlayerCmd_BeginLocationSelection(scr_entref_t entref)
 {
     const char *v1; // eax
-    float v2; // [esp+0h] [ebp-24h]
     gentity_s *pSelf; // [esp+10h] [ebp-14h]
     float radius; // [esp+14h] [ebp-10h]
     float radiusa; // [esp+14h] [ebp-10h]

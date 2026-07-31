@@ -2244,13 +2244,9 @@ const dvar_s *__cdecl Dvar_RegisterColor(
     float v17; // [esp+24h] [ebp-88h]
     float v18; // [esp+28h] [ebp-84h]
     float v19; // [esp+2Ch] [ebp-80h]
-    float v20; // [esp+34h] [ebp-78h]
     float v21; // [esp+44h] [ebp-68h]
-    float v22; // [esp+4Ch] [ebp-60h]
     float v23; // [esp+5Ch] [ebp-50h]
-    float v24; // [esp+64h] [ebp-48h]
     float v25; // [esp+74h] [ebp-38h]
-    float v26; // [esp+7Ch] [ebp-30h]
     float v27; // [esp+8Ch] [ebp-20h]
     DvarValue dvarValue = {};
 
@@ -2486,26 +2482,6 @@ void __cdecl Dvar_SetVec4FromSource(dvar_s *dvar, float x, float y, float z, flo
 
 void __cdecl Dvar_SetColorFromSource(dvar_s *dvar, float r, float g, float b, float a, DvarSetSource source)
 {
-    float v6; // [esp+20h] [ebp-128h]
-    float v7; // [esp+24h] [ebp-124h]
-    float v8; // [esp+28h] [ebp-120h]
-    float v9; // [esp+2Ch] [ebp-11Ch]
-    float v10; // [esp+30h] [ebp-118h]
-    float v11; // [esp+34h] [ebp-114h]
-    float v12; // [esp+38h] [ebp-110h]
-    float v13; // [esp+3Ch] [ebp-10Ch]
-    float v14; // [esp+40h] [ebp-108h]
-    float v15; // [esp+44h] [ebp-104h]
-    float v16; // [esp+48h] [ebp-100h]
-    float v17; // [esp+4Ch] [ebp-FCh]
-    float v18; // [esp+54h] [ebp-F4h]
-    float v19; // [esp+64h] [ebp-E4h]
-    float v20; // [esp+6Ch] [ebp-DCh]
-    float v21; // [esp+7Ch] [ebp-CCh]
-    float v22; // [esp+84h] [ebp-C4h]
-    float v23; // [esp+94h] [ebp-B4h]
-    float v24; // [esp+9Ch] [ebp-ACh]
-    float v25; // [esp+ACh] [ebp-9Ch]
     char string[132]; // [esp+B0h] [ebp-98h] BYREF
     DvarValue newValue; // [esp+134h] [ebp-14h]
 

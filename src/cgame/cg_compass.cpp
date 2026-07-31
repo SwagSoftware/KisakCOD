@@ -711,7 +711,6 @@ void __cdecl CG_CompassCalcDimensions(
 
 double __cdecl CG_FadeCompass(int32_t localClientNum, int32_t displayStartTime, CompassType compassType)
 {
-    float v4; // [esp+4h] [ebp-10h]
 
     if (compassType)
         return 1.0;

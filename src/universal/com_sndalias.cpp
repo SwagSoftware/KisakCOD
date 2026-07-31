@@ -972,14 +972,6 @@ void __cdecl Com_SetStringEdReference(const char *pszReference, char *subtitle)
 
 void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loadspecCurGame)
 {
-    char *v2; // eax
-    int v3; // eax
-    int v4; // eax
-    int v5; // eax
-    int v6; // eax
-    int v7; // eax
-    int v8; // eax
-    int v9; // eax
     char v10; // [esp+33h] [ebp-8239h]
     char *v11; // [esp+38h] [ebp-8234h]
     char *v12; // [esp+3Ch] [ebp-8230h]

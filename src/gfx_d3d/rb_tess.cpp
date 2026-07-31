@@ -24,7 +24,6 @@ GfxScaledPlacement s_manualObjectPlacement;
 
 void __cdecl RB_ShowTess(GfxCmdBufContext context, const float *center, const char *tessName, const float *color)
 {
-    const char *v5; // eax
     const GfxBackEndData *data; // [esp+14h] [ebp-2Ch]
     float TEXT_TECH_MEAN; // [esp+18h] [ebp-28h]
     const char *infoIdString; // [esp+1Ch] [ebp-24h]
@@ -268,7 +267,6 @@ void __cdecl R_TessCodeMeshList_AddCodeMeshArgs(
 uint32_t __cdecl R_TessMarkMeshList(const GfxDrawSurfListArgs *listArgs, GfxCmdBufContext prepassContext)
 {
     int objId; // eax
-    int v3; // eax
     bool v5; // [esp+10h] [ebp-B4h]
     bool v6; // [esp+18h] [ebp-ACh]
     bool v7; // [esp+1Ch] [ebp-A8h]
@@ -1240,7 +1238,6 @@ uint32_t __cdecl R_TessXModelRigidSkinnedDrawSurfList(
     const GfxDrawSurfListArgs *listArgs,
     GfxCmdBufContext prepassContext)
 {
-    const char *v2; // eax
     GfxCmdBufContext context; // [esp+54h] [ebp-74h]
     const GfxDrawSurfListInfo *info; // [esp+5Ch] [ebp-6Ch]
     GfxDrawSurf drawSurf; // [esp+60h] [ebp-68h]

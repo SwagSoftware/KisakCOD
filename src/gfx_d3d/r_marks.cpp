@@ -972,7 +972,6 @@ void __cdecl R_MarkFragments_Begin(
     const float *viewOffset,
     Material *material)
 {
-    int savedregs; // [esp+10h] [ebp+0h] BYREF
 
     markInfo->origin[0] = *origin;
     markInfo->origin[1] = origin[1];
@@ -1147,7 +1146,6 @@ char __cdecl R_MarkFragments_WorldBrushes(MarkInfo *markInfo)
     GfxSurface *surfaces[256]; // [esp+2A4h] [ebp-410h] BYREF
     GfxMarkContext markContext; // [esp+6A8h] [ebp-Ch] BYREF
     bool anyMarks; // [esp+6B3h] [ebp-1h] BYREF
-    int savedregs; // [esp+6B4h] [ebp+0h] BYREF
 
     iassert(!markInfo->usedTriCount && !markInfo->usedPointCount);
 
@@ -1214,26 +1212,6 @@ bool __cdecl R_MarkFragments_BrushSurface(
     const GfxSurface *surface,
     bool *anyMarks)
 {
-    PackedUnitVec v7; // [esp+8h] [ebp-2D0h] BYREF
-    float v8; // [esp+Ch] [ebp-2CCh]
-    float v9; // [esp+10h] [ebp-2C8h]
-    PackedUnitVec v10; // [esp+14h] [ebp-2C4h]
-    float *v11; // [esp+1Ch] [ebp-2BCh]
-    PackedUnitVec v12; // [esp+20h] [ebp-2B8h]
-    PackedUnitVec v13; // [esp+24h] [ebp-2B4h] BYREF
-    float v14; // [esp+28h] [ebp-2B0h]
-    float v15; // [esp+2Ch] [ebp-2ACh]
-    PackedUnitVec v16; // [esp+30h] [ebp-2A8h]
-    PackedUnitVec v17; // [esp+38h] [ebp-2A0h]
-    PackedUnitVec out; // [esp+3Ch] [ebp-29Ch] BYREF
-    float v19; // [esp+40h] [ebp-298h]
-    float v20; // [esp+44h] [ebp-294h]
-    PackedUnitVec in; // [esp+48h] [ebp-290h]
-    float *v22; // [esp+50h] [ebp-288h]
-    float *v23; // [esp+54h] [ebp-284h]
-    float *v24; // [esp+58h] [ebp-280h]
-    float *v25; // [esp+5Ch] [ebp-27Ch]
-    float *v26; // [esp+60h] [ebp-278h]
     const uint8_t *triVerts1; // [esp+A0h] [ebp-238h]
     FxMarkPoint *points; // [esp+A4h] [ebp-234h]
     FxWorldMarkPoint clipPoints[2][9]; // [esp+A8h] [ebp-230h] BYREF
@@ -1703,7 +1681,6 @@ char __cdecl R_MarkFragments_AnimatedXModel(
     Material** materials; // [esp+54Ch] [ebp-Ch]
     XSurface* surfaces; // [esp+550h] [ebp-8h] BYREF
     XSurface* surface; // [esp+554h] [ebp-4h]
-    int savedregs; // [esp+558h] [ebp+0h] BYREF
 
     surfCount = XModelGetSurfaces(model, &surfaces, 0);
     baseMatList = XModelGetBasePose(model);
@@ -1785,13 +1762,8 @@ int __cdecl R_AddMarkFragment_1_(
     FxMarkPoint *points)
 {
     float out3[3]; // [esp+54h] [ebp-8Ch] BYREF
-    PackedUnitVec v12; // [esp+60h] [ebp-80h]
-    PackedUnitVec v13; // [esp+68h] [ebp-78h]
     float out2[3]; // [esp+6Ch] [ebp-74h] BYREF
-    PackedUnitVec v15; // [esp+78h] [ebp-68h]
-    PackedUnitVec v16; // [esp+80h] [ebp-60h]
     float out[3]; // [esp+84h] [ebp-5Ch] BYREF
-    PackedUnitVec in; // [esp+90h] [ebp-50h]
     float tempNormal[3]; // [esp+98h] [ebp-48h] BYREF
     float normal[3][3]; // [esp+A4h] [ebp-3Ch] BYREF
     FxModelMarkPoint *clipPoint; // [esp+C8h] [ebp-18h]
@@ -1965,14 +1937,8 @@ int __cdecl R_AddMarkFragment_0_(
     FxMarkPoint *points)
 {
     float out3[3]; // [esp+8h] [ebp-D8h] BYREF
-    PackedUnitVec v12; // [esp+14h] [ebp-CCh]
-    float *v13; // [esp+1Ch] [ebp-C4h]
-    PackedUnitVec v14; // [esp+20h] [ebp-C0h]
     float out2[3]; // [esp+24h] [ebp-BCh] BYREF
-    PackedUnitVec v16; // [esp+30h] [ebp-B0h]
-    PackedUnitVec v17; // [esp+38h] [ebp-A8h]
     float out[3]; // [esp+3Ch] [ebp-A4h] BYREF
-    PackedUnitVec v19; // [esp+48h] [ebp-98h]
     float normal[3][3]; // [esp+A4h] [ebp-3Ch] BYREF
     FxModelMarkPoint *clipPoint; // [esp+C8h] [ebp-18h]
     int pointIndex; // [esp+CCh] [ebp-14h]

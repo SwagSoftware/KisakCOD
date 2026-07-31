@@ -10,8 +10,6 @@ void __cdecl TRACK_fx_random()
 
 void __cdecl FX_RandomDir(int32_t seed, float* dir)
 {
-    const char *v2; // eax
-    double v3; // [esp+18h] [ebp-3Ch]
     float v4; // [esp+20h] [ebp-34h]
     float v5; // [esp+24h] [ebp-30h]
     float height; // [esp+40h] [ebp-14h]

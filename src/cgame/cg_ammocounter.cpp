@@ -246,7 +246,6 @@ uint32_t __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *weapD
 
 double __cdecl AmmoCounterFadeAlpha(int32_t localClientNum, cg_s *cgameGlob)
 {
-    float v3; // [esp+4h] [ebp-10h]
 
     iassert(cgameGlob);
 

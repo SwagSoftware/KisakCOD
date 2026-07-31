@@ -72,9 +72,6 @@ void __cdecl FX_BuildSpriteCodeMeshVerts(
     const uint8_t* rgbaColor,
     char spriteFlags)
 {
-    uint32_t v5; // [esp+10h] [ebp-30h]
-    uint32_t v6; // [esp+14h] [ebp-2Ch]
-    uint32_t LocalClientNum; // [esp+18h] [ebp-28h]
     float left[3]; // [esp+1Ch] [ebp-24h] BYREF
     float worldOrigin[3]; // [esp+28h] [ebp-18h] BYREF
     float up[3]; // [esp+34h] [ebp-Ch] BYREF
@@ -285,7 +282,6 @@ char __cdecl FX_HeightScreenToWorld(
     float *worldHeight,
     FxGenerateVertsCmd *cmd)
 {
-    uint32_t LocalClientNum; // [esp+8h] [ebp-Ch]
     float clipSpaceW; // [esp+Ch] [ebp-8h]
     float clipSpaceHeight; // [esp+10h] [ebp-4h]
     cg_s *cgameGlob;
@@ -354,7 +350,6 @@ char __cdecl FX_HeightWorldToScreen(
     float *screenHeight,
     FxGenerateVertsCmd *cmd)
 {
-    uint32_t LocalClientNum; // [esp+8h] [ebp-Ch]
     float clipSpaceW; // [esp+Ch] [ebp-8h]
     float clipSpaceHeight; // [esp+10h] [ebp-4h]
     cg_s *cgameGlob;

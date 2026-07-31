@@ -1486,12 +1486,6 @@ void __cdecl ShowEntityInfo_Items(gentity_s *ent)
 
 void __cdecl G_RunFrameForEntity(gentity_s *ent)
 {
-    char *v1; // eax
-    const char *v2; // eax
-    char *v3; // eax
-    const char *v4; // eax
-    char *v5; // eax
-    const char *v6; // eax
 
     iassert(ent->r.inuse);
 

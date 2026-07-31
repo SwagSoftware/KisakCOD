@@ -166,7 +166,6 @@ Inserts the current value of a variable as command text
 ===============
 */
 void Cmd_Vstr_f(void) {
-	char* v;
 
 	if (Cmd_Argc() != 2) {
 		Com_Printf(0, "vstr <variablename> : execute a variable command\n");

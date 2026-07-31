@@ -775,7 +775,6 @@ void CompleteCommand()
     bool v1; // [esp+2Ch] [ebp-264h]
     bool v2; // [esp+40h] [ebp-250h]
     int32_t matchLenAfterCmds; // [esp+44h] [ebp-24Ch] BYREF
-    char pbbuf[272]; // [esp+48h] [ebp-248h] BYREF
     field_t savedField; // [esp+158h] [ebp-138h] BYREF
     bool isDvarCommand; // [esp+27Bh] [ebp-15h]
     int32_t offset; // [esp+27Ch] [ebp-14h]
@@ -1320,7 +1319,6 @@ void __cdecl Key_Bind_f()
     const char *v2; // eax
     const char *v3; // eax
     uint8_t *v4; // eax
-    int32_t v5; // eax
     char *v6; // eax
     bool v7; // [esp+0h] [ebp-424h]
     int32_t keynum; // [esp+4h] [ebp-420h]

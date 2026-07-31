@@ -261,7 +261,6 @@ void __cdecl G_MoverTeam(gentity_s *ent)
     float *v5; // [esp+18h] [ebp-54h]
     float *currentOrigin; // [esp+1Ch] [ebp-50h]
     float *v7; // [esp+20h] [ebp-4Ch]
-    trajectory_t *p_pos; // [esp+24h] [ebp-48h]
     float move[3]; // [esp+28h] [ebp-44h] BYREF
     float origin[3]; // [esp+34h] [ebp-38h] BYREF
     float amove[3]; // [esp+40h] [ebp-2Ch] BYREF

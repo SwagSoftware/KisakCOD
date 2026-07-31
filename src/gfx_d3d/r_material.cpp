@@ -381,7 +381,6 @@ IDirect3DVertexDeclaration9 *__cdecl Material_BuildVertexDecl(
     const stream_source_info_t *sourceInfo; // [esp+8h] [ebp-81Ch]
     _D3DVERTEXELEMENT9 elemTable[256]; // [esp+14h] [ebp-810h] BYREF
     IDirect3DVertexDeclaration9 *decl; // [esp+818h] [ebp-Ch] BYREF
-    const stream_dest_info_t *destInfo; // [esp+81Ch] [ebp-8h]
     int elemIndex; // [esp+820h] [ebp-4h]
 
     decl = NULL;
@@ -533,8 +532,6 @@ Material *__cdecl Material_MakeDefault(char *name)
 
 void __cdecl Material_Add(Material *material, uint16_t hashIndex)
 {
-    unsigned __int64 v2; // rax
-    uint32_t v3; // ecx
 
     iassert(material);
     rgp.needSortMaterials = 1;

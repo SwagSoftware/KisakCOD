@@ -637,7 +637,6 @@ void __cdecl RB_DrawSunFlareCore(float alpha, float sizeIn640x480)
 {
     float widthInClipSpace; // [esp+Ch] [ebp-28h]
     float heightInClipSpace; // [esp+10h] [ebp-24h]
-    float v4; // [esp+1Ch] [ebp-18h]
 
     RB_SetTessTechnique(rgp.world->sun.flareMaterial, TECHNIQUE_UNLIT);
     R_TrackPrims(&gfxCmdBufState, GFX_PRIM_STATS_FX);

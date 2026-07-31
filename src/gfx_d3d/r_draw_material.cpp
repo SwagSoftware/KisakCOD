@@ -12,7 +12,6 @@ int __cdecl R_SetupMaterial(
     const GfxDrawSurfListInfo *info,
     GfxDrawSurf drawSurf)
 {
-    unsigned __int64 v5; // rax
     GfxDrawSurf overrideDrawSurf; // [esp+8h] [ebp-18h]
     MaterialTechniqueType baseTechType; // [esp+14h] [ebp-Ch]
     uint32_t surfType; // [esp+18h] [ebp-8h]

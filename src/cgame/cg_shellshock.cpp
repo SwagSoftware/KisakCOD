@@ -178,7 +178,6 @@ int32_t __cdecl CG_DrawShellShockSavedScreenBlendBlurred(
     int32_t start,
     int32_t duration)
 {
-    float v5; // [esp+14h] [ebp-20h]
     int32_t dt; // [esp+24h] [ebp-10h]
     const ClientViewParams* view; // [esp+2Ch] [ebp-8h]
     int32_t screenBlendTime; // [esp+30h] [ebp-4h]

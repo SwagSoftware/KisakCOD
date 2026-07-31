@@ -343,9 +343,6 @@ void __cdecl CM_LoadStaticModels()
 
 void __cdecl CM_LoadMapFromBsp(const char *name, bool usePvs)
 {
-    char v2; // [esp+3h] [ebp-21h]
-    char *v3; // [esp+8h] [ebp-1Ch]
-    const char *v4; // [esp+Ch] [ebp-18h]
     uint32_t version; // [esp+20h] [ebp-4h]
 
     Com_Memset(&cm, 0, sizeof(clipMap_t));
@@ -569,7 +566,6 @@ void CMod_LoadCollisionEdgeWalkable()
 
 void CMod_LoadCollisionBorders()
 {
-    const DiskCollBorder *result; // eax
     CollisionBorder *out; // [esp+0h] [ebp-14h]
     const DiskCollBorder *in; // [esp+8h] [ebp-Ch]
     uint32_t index; // [esp+Ch] [ebp-8h]

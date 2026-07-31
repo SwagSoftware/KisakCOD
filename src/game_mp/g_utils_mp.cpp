@@ -191,7 +191,6 @@ int __cdecl G_MaterialIndex(const char *name)
 
 int __cdecl G_ModelIndex(const char *name)
 {
-    const char *v2; // eax
     uint32_t nameString; // [esp+68h] [ebp-10h]
     uint32_t s; // [esp+6Ch] [ebp-Ch]
     int i; // [esp+70h] [ebp-8h]

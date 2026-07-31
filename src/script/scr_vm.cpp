@@ -3990,7 +3990,6 @@ float __cdecl Scr_GetFloat(uint32_t index)
 
 uint32_t __cdecl Scr_GetConstString(uint32_t index)
 {
-    const char* v2; // eax
     VariableValue* value; // [esp+0h] [ebp-4h]
 
     if (index >= scrVmPub.outparamcount)
@@ -4621,7 +4620,6 @@ void __cdecl VM_Resume(uint32_t timeId)
     VariableStackBuffer* stackValue; // [esp+20h] [ebp-Ch]
     uint32_t stackId; // [esp+24h] [ebp-8h]
     uint32_t startLocalId; // [esp+28h] [ebp-4h]
-    function_stack_t stack;
 
     PROF_SCOPED("VM_Resume");
 
@@ -5145,8 +5143,6 @@ XAnim_s * Scr_GetAnimTree(uint32_t index)
     VariableValue *v3; // r29
     int type; // r11
     VariableUnion *v5; // r11
-    int v7; // r4
-    int v8; // r3
     const char *v9; // r3
     const char *v10; // r4
 

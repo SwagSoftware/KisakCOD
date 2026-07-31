@@ -1971,7 +1971,6 @@ void __cdecl Material_CacheShaderDX(
     const char *target,
     ID3DXBuffer *shader)
 {
-    const void *v5; // eax
     char filename[268]; // [esp+0h] [ebp-220h] BYREF
     int checksum; // [esp+10Ch] [ebp-114h]
     char dirname[268]; // [esp+110h] [ebp-110h] BYREF
@@ -1989,15 +1988,7 @@ ID3DXBuffer *__cdecl Material_CompileShader(
     char *entryPoint,
     char *target)
 {
-    char *v5; // eax
-    const char *v6; // eax
     const char *v7; // eax
-    const char *v8; // [esp-10h] [ebp-8498h]
-    char **v9; // [esp-Ch] [ebp-8494h]
-    int v10; // [esp-Ch] [ebp-8494h]
-    int v11; // [esp-8h] [ebp-8490h]
-    uint32_t lineNumber; // [esp+0h] [ebp-8488h] BYREF
-    int v13; // [esp+4h] [ebp-8484h] BYREF
     char dest[68]; // [esp+8h] [ebp-8480h] BYREF
     uint32_t shaderTextLen; // [esp+4Ch] [ebp-843Ch]
     ID3DXConstantTable *v16; // [esp+50h] [ebp-8438h] BYREF
@@ -6591,14 +6582,6 @@ uint32_t __cdecl R_DrawSurfPrimarySortKey(const Material *material)
 
 void __cdecl Material_SortInternal(Material **sortedMaterials, uint32_t materialCount)
 {
-    unsigned __int64 v2; // rax
-    uint32_t v3; // ecx
-    unsigned __int64 v4; // rax
-    uint32_t v5; // ecx
-    unsigned __int64 v6; // rax
-    int v7; // ecx
-    unsigned __int64 v8; // rax
-    uint32_t v9; // ecx
     uint32_t sortedIndex; // [esp+98h] [ebp-Ch]
     Material *material; // [esp+A0h] [ebp-4h]
 

@@ -1144,8 +1144,6 @@ const FxEffectDef *__cdecl FX_LoadFailed(const char *name)
 
 const FxEffectDef *__cdecl FX_Load(const char *name)
 {
-    char v2; // [esp+3h] [ebp-10B61h]
-    const char *v4; // [esp+Ch] [ebp-10B58h]
     const FxEffectDef *v5; // [esp+10h] [ebp-10B54h]
     FxEditorEffectDef edEffectDef; // [esp+14h] [ebp-10B50h] BYREF
 

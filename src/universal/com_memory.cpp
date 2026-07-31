@@ -873,7 +873,6 @@ HunkUser* __cdecl Hunk_UserCreate(int32_t maxSize, const char* name, bool fixed,
 
 void* Hunk_UserAlloc(HunkUser* user, uint32_t size, int32_t alignment)
 {
-    const char* v3; // eax
     int32_t pos; // [esp+4h] [ebp-10h]
     int32_t result; // [esp+8h] [ebp-Ch]
     HunkUser* current; // [esp+Ch] [ebp-8h]

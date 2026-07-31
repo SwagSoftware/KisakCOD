@@ -48,7 +48,6 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4 *v10; // [esp+4Ch] [ebp-26Ch]
     float4 *v11; // [esp+50h] [ebp-268h]
     float4 *v12; // [esp+54h] [ebp-264h]
-    float4 v20; // [esp+ACh] [ebp-20Ch]
     float4 wiggleVec; // [esp+CCh] [ebp-1ECh]
     float4 scaledWiggle; // [esp+DCh] [ebp-1DCh]
     int dim; // [esp+ECh] [ebp-1CCh]
@@ -93,7 +92,6 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
     float4x4 clipMtx; // [esp+228h] [ebp-90h] BYREF
     int beamIter; // [esp+26Ch] [ebp-4Ch]
     float4x4 invClipMtx; // [esp+270h] [ebp-48h] BYREF
-    int savedregs; // [esp+2B8h] [ebp+0h] BYREF
 
     iassert(cmd);
     iassert(cmd->beamInfo);
@@ -333,7 +331,6 @@ void __cdecl FX_Beam_GenerateVerts(FxGenerateVertsCmd *cmd)
 
 void __cdecl CreateClipMatrix(float4x4* clipMtx, const float* vieworg, const mat3x3& viewaxis)
 {
-    uint32_t v3; // [esp+Ch] [ebp-90h]
     float4x4 viewMtx; // [esp+14h] [ebp-88h] BYREF
     float4x4 projMtx; // [esp+54h] [ebp-48h] BYREF
     cg_s *cgameGlob;
@@ -587,9 +584,6 @@ char  FX_GenerateBeam_GetFlatDelta(
     float v49; // [esp-20h] [ebp-2Ch]
     float v50; // [esp-1Ch] [ebp-28h]
     float v51; // [esp-18h] [ebp-24h]
-    float4 v52; // [esp-14h] [ebp-20h]
-    void* v54; // [esp+4h] [ebp-8h]
-    void* retaddr; // [esp+Ch] [ebp+0h]
 
     v48 = beamWorldBegin.v[0] + 0.0;
     v49 = beamWorldBegin.v[1] + 0.0;

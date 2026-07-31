@@ -26,7 +26,6 @@ dContactGeomExt *__cdecl AddContact(Results *results)
 
 bool __cdecl Phys_AddContactData(Results *results, float depth, float *normal, float *pos, int surfaceFlags)
 {
-    const char *v5; // eax
     dContactGeomExt *contact; // eax
 
     iassert(!IS_NAN(normal[0]) && !IS_NAN(normal[1]) && !IS_NAN(normal[2]));
@@ -271,9 +270,6 @@ void __cdecl Phys_GetWindingForBrushFace2(
     float *a; // [esp+50h] [ebp-C0h]
     float *b; // [esp+54h] [ebp-BCh]
     float diff[3]; // [esp+58h] [ebp-B8h] BYREF
-    float v10; // [esp+64h] [ebp-ACh]
-    float v11; // [esp+68h] [ebp-A8h]
-    float v12; // [esp+6Ch] [ebp-A4h]
     int v13; // [esp+70h] [ebp-A0h]
     float *v14; // [esp+74h] [ebp-9Ch]
     float v15; // [esp+78h] [ebp-98h]

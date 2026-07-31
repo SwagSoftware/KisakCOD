@@ -289,7 +289,6 @@ int __cdecl R_SkinXModel(
     int lodForDist; // [esp+E64h] [ebp-20h]
     float dist; // [esp+E68h] [ebp-1Ch]
     float AdjustedLodDist; // [esp+E6Ch] [ebp-18h]
-    XModelDrawInfo* modelInfoa; // [esp+E78h] [ebp-Ch]
     //const XModel* modela; // [esp+E7Ch] [ebp-8h]
     //const GfxPlacement* obja; // [esp+E84h] [ebp+0h]
 
@@ -382,7 +381,6 @@ int __cdecl R_SkinAndBoundSceneEnt(GfxSceneEntity *sceneEnt)
     DObjAnimMat *boneMatrix; // [esp+0h] [ebp-Ch]
     const DObj_s *obj; // [esp+4h] [ebp-8h] BYREF
     GfxSceneEntity *localSceneEnt; // [esp+8h] [ebp-4h] BYREF
-    int savedregs; // [esp+Ch] [ebp+0h] BYREF
 
     boneMatrix = R_UpdateSceneEntBounds(sceneEnt, &localSceneEnt, &obj, 1);
     if (boneMatrix)

@@ -1266,8 +1266,6 @@ static const char* comInitAllocName = "$init";
 void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 {
     int v1; // eax
-    int localClientNum; // [esp+10h] [ebp-Ch]
-    int localClientNuma; // [esp+10h] [ebp-Ch]
     char* s; // [esp+14h] [ebp-8h]
     uint32_t initStartTime; // [esp+18h] [ebp-4h]
 
@@ -1297,7 +1295,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
 #ifdef KISAK_MP
     LiveStorage_Init();
 #endif
-    for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+    for (int localClientNum = 0; localClientNum < 1; ++localClientNum)
         Com_StartupConfigs(localClientNum);
     v1 = CL_ControllerIndexFromClientNum(0);
     Cbuf_Execute(0, v1);
@@ -1368,8 +1366,8 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     {
         KISAK_NULLSUB();
         CL_InitOnceForAllClients();
-        for (localClientNuma = 0; localClientNuma < 1; ++localClientNuma)
-            CL_Init(localClientNuma);
+        for (int localClientNum = 0; localClientNum < 1; ++localClientNum)
+            CL_Init(localClientNum);
     }
 #elif KISAK_SP
     CL_InitOnceForAllClients();
@@ -1827,8 +1825,6 @@ void __cdecl Com_Frame_Try_Block_Function()
     float deltaTime; // [esp+4h] [ebp-78h]
     int lastFrameIndex; // [esp+68h] [ebp-14h]
     int msec; // [esp+6Ch] [ebp-10h]
-    int localClientNum; // [esp+70h] [ebp-Ch]
-    netsrc_t localClientNuma; // [esp+70h] [ebp-Ch]
     int minMsec; // [esp+74h] [ebp-8h]
     int maxFPS; // [esp+78h] [ebp-4h] BYREF
 
@@ -1926,7 +1922,7 @@ void __cdecl Com_Frame_Try_Block_Function()
             CL_RunOncePerClientFrame(0, msec);
             Com_EventLoop();
 #ifdef KISAK_MP
-            for (localClientNum = 0; localClientNum < 1; ++localClientNum)
+            for (int localClientNum = 0; localClientNum < 1; ++localClientNum)
             {
                 Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
             }
@@ -1950,8 +1946,8 @@ void __cdecl Com_Frame_Try_Block_Function()
         {
             PROF_SCOPED("CL_Frame");
 #ifdef KISAK_MP
-            for (localClientNuma = NS_CLIENT1; localClientNuma < NS_SERVER; ++localClientNuma)
-                CL_Frame(localClientNuma);
+            for (int localClientNum = 0; localClientNum < 1; ++localClientNum)
+                CL_Frame(localClientNum);
 #elif KISAK_SP
             CL_Frame(0, msec);
 #endif

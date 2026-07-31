@@ -12,7 +12,6 @@ void __cdecl PM_StepSlideMove(pmove_t *pm, pml_t *pml, int32_t gravity)
     float v4; // [esp+Ch] [ebp-13Ch]
     float v5; // [esp+14h] [ebp-134h]
     float v6; // [esp+1Ch] [ebp-12Ch]
-    float v7; // [esp+20h] [ebp-128h]
     float v8; // [esp+30h] [ebp-118h]
     float v12; // [esp+44h] [ebp-104h]
     float *velocity; // [esp+60h] [ebp-E8h]

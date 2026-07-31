@@ -1064,9 +1064,6 @@ void __cdecl R_DownsamplePixelData(
     uint8_t *src,
     uint8_t *dst)
 {
-    float v6; // [esp+4h] [ebp-54h]
-    float v7; // [esp+18h] [ebp-40h]
-    float v8; // [esp+2Ch] [ebp-2Ch]
     int nextSample; // [esp+3Ch] [ebp-1Ch]
     float colorScale; // [esp+40h] [ebp-18h]
     int residual; // [esp+44h] [ebp-14h]
@@ -1764,7 +1761,6 @@ uint8_t __cdecl R_CubemapShotCalcReflectionFactor(
     float v6; // [esp+Ch] [ebp-48h]
     float v7; // [esp+14h] [ebp-40h]
     float scale; // [esp+1Ch] [ebp-38h]
-    float v9; // [esp+28h] [ebp-2Ch]
     float dir[3]; // [esp+44h] [ebp-10h] BYREF
     float refraction; // [esp+50h] [ebp-4h]
 
@@ -1822,21 +1818,12 @@ void __cdecl R_CubemapLightingForDir(
     const float *baseColor,
     uint8_t *pixel)
 {
-    float v6; // [esp+Ch] [ebp-A4h]
-    float v7; // [esp+10h] [ebp-A0h]
-    float v8; // [esp+14h] [ebp-9Ch]
-    float v9; // [esp+18h] [ebp-98h]
-    float v10; // [esp+1Ch] [ebp-94h]
-    float v11; // [esp+20h] [ebp-90h]
     float v12; // [esp+24h] [ebp-8Ch]
     float v13; // [esp+28h] [ebp-88h]
     float v14; // [esp+2Ch] [ebp-84h]
     float v15; // [esp+30h] [ebp-80h]
     float v16; // [esp+34h] [ebp-7Ch]
     float v17; // [esp+38h] [ebp-78h]
-    float v18; // [esp+40h] [ebp-70h]
-    float v19; // [esp+54h] [ebp-5Ch]
-    float v20; // [esp+68h] [ebp-48h]
     int faceIndex; // [esp+84h] [ebp-2Ch]
     int sampleCount; // [esp+88h] [ebp-28h]
     int x; // [esp+8Ch] [ebp-24h]

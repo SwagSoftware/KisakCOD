@@ -195,73 +195,33 @@ void __cdecl XAnimCalcParts(
     DObjAnimMat *rotTransArray,
     const bitarray<128> *ignorePartBits)
 {
-    unsigned __int64 v6; // kr00_8
-    unsigned __int64 v7; // rax
 
-    float scale; // [esp+4Ch] [ebp-254h]
-    float v13; // [esp+50h] [ebp-250h]
-    int *v14; // [esp+A4h] [ebp-1FCh]
-    __int16 *v15; // [esp+A8h] [ebp-1F8h]
-    unsigned __int8 *v16; // [esp+ACh] [ebp-1F4h]
     char v17; // [esp+B7h] [ebp-1E9h]
-    const unsigned __int8 *v18; // [esp+B8h] [ebp-1E8h]
     char v19; // [esp+C3h] [ebp-1DDh]
-    const unsigned __int8 *v20; // [esp+C4h] [ebp-1DCh]
-    float v21[7]; // [esp+CCh] [ebp-1D4h] BYREF
-    int v22; // [esp+E8h] [ebp-1B8h]
-    float v23; // [esp+ECh] [ebp-1B4h]
-    int v24; // [esp+F0h] [ebp-1B0h]
-    float v25; // [esp+F4h] [ebp-1ACh]
-    int v26; // [esp+F8h] [ebp-1A8h]
-    float v27; // [esp+FCh] [ebp-1A4h]
-    float v28; // [esp+100h] [ebp-1A0h]
-    int v29; // [esp+104h] [ebp-19Ch]
-    unsigned __int64 v30; // [esp+108h] [ebp-198h]
-    float v[4]; // [esp+110h] [ebp-190h] BYREF
-    float v32; // [esp+120h] [ebp-180h]
     float *v33; // [esp+124h] [ebp-17Ch]
     float v34[5]; // [esp+128h] [ebp-178h] BYREF
     float *quat; // [esp+13Ch] [ebp-164h]
     float dir[4] = { 0.0f, 0.0f, 0.0f, 0.0f }; // [esp+140h] [ebp-160h] BYREF
-    __int64 v37; // [esp+148h] [ebp-158h]
     float v38; // [esp+154h] [ebp-14Ch]
     float *result; // [esp+158h] [ebp-148h]
     float v40; // [esp+15Ch] [ebp-144h]
     float v41; // [esp+160h] [ebp-140h]
     char v42; // [esp+167h] [ebp-139h]
-    unsigned __int8 *v43; // [esp+168h] [ebp-138h]
     float v44; // [esp+16Ch] [ebp-134h]
     float *start; // [esp+170h] [ebp-130h]
     float scale1; // [esp+174h] [ebp-12Ch]
     float scale0; // [esp+178h] [ebp-128h]
     char v48; // [esp+17Fh] [ebp-121h]
-    unsigned __int8 *v49; // [esp+180h] [ebp-120h]
     int v50; // [esp+184h] [ebp-11Ch] BYREF
     uint16_t *v51; // [esp+188h] [ebp-118h]
     //__int64 v52; // [esp+18Ch] [ebp-114h]
-    __int16 v52[4];
-    float v53; // [esp+194h] [ebp-10Ch]
-    float v54; // [esp+198h] [ebp-108h]
     float lerpFrac2; // [esp+19Ch] [ebp-104h] BYREF
     //__int64 v56; // [esp+1A0h] [ebp-100h]
-    __int16 v56[4];
-    float v57; // [esp+1A8h] [ebp-F8h]
-    float v58; // [esp+1ACh] [ebp-F4h]
     int v59; // [esp+1B0h] [ebp-F0h] BYREF
     unsigned __int8 *v60; // [esp+1B4h] [ebp-ECh]
     //__int64 v61; // [esp+1B8h] [ebp-E8h]
-    __int16 v61[4];
-    float v62; // [esp+1C0h] [ebp-E0h]
-    float v63; // [esp+1C4h] [ebp-DCh]
     float lerpFrac; // [esp+1C8h] [ebp-D8h] BYREF
     //__int64 v65; // [esp+1CCh] [ebp-D4h]
-    __int16 v65[4];
-    float v66; // [esp+1D4h] [ebp-CCh]
-    float v67; // [esp+1D8h] [ebp-C8h]
-    float v68; // [esp+1DCh] [ebp-C4h]
-    float v69; // [esp+1E0h] [ebp-C0h]
-    float v70; // [esp+1E4h] [ebp-BCh]
-    float v71; // [esp+1E8h] [ebp-B8h]
     float v72; // [esp+1ECh] [ebp-B4h]
     float v73; // [esp+1F0h] [ebp-B0h]
     float v74; // [esp+1F4h] [ebp-ACh]
@@ -755,7 +715,6 @@ LABEL_141:
 
 void __cdecl XAnimCalcLeaf(XAnimInfo *info, float weightScale, DObjAnimMat *rotTransArray, XAnimCalcAnimInfo *animInfo)
 {
-    bool v5; // [esp+14h] [ebp-20h]
     float time; // [esp+24h] [ebp-10h]
     XAnimToXModel *animToModel; // [esp+28h] [ebp-Ch]
     int i; // [esp+2Ch] [ebp-8h]
@@ -821,9 +780,6 @@ void __cdecl XAnimCalcNonLoopEnd(
 {
     float *trans; // edx
     float *v6; // ecx
-    int *v7; // [esp+54h] [ebp-1C8h]
-    __int16 *v8; // [esp+58h] [ebp-1C4h]
-    unsigned __int8 *v9; // [esp+5Ch] [ebp-1C0h]
     float v10[5]; // [esp+74h] [ebp-1A8h] BYREF
     float *quat; // [esp+88h] [ebp-194h]
     float v12[5]; // [esp+8Ch] [ebp-190h] BYREF
@@ -831,8 +787,6 @@ void __cdecl XAnimCalcNonLoopEnd(
     float v14[5]; // [esp+A4h] [ebp-178h] BYREF
     uint32_t v15; // [esp+B8h] [ebp-164h]
     float *start; // [esp+BCh] [ebp-160h]
-    float dir[4]; // [esp+C0h] [ebp-15Ch] BYREF
-    __int64 v18; // [esp+C8h] [ebp-154h]
     uint32_t v19; // [esp+D4h] [ebp-148h]
     float v20; // [esp+D8h] [ebp-144h]
     float v21; // [esp+DCh] [ebp-140h]
@@ -863,27 +817,10 @@ void __cdecl XAnimCalcNonLoopEnd(
     float v46; // [esp+140h] [ebp-DCh]
     float v47; // [esp+144h] [ebp-D8h]
     float v48; // [esp+148h] [ebp-D4h]
-    XAnimDynamicFrames frame; // [esp+14Ch] [ebp-D0h]
     float4 sizeVec; // [esp+150h] [ebp-CCh]
-    float v51; // [esp+160h] [ebp-BCh]
-    float v52; // [esp+164h] [ebp-B8h]
-    float v53; // [esp+168h] [ebp-B4h]
-    float v54; // [esp+16Ch] [ebp-B0h]
     float4 posVec; // [esp+170h] [ebp-ACh]
     float4 lerp; // [esp+180h] [ebp-9Ch]
     float4 minsVec; // [esp+190h] [ebp-8Ch]
-    float v58; // [esp+1A0h] [ebp-7Ch]
-    float v59; // [esp+1A4h] [ebp-78h]
-    float v60; // [esp+1A8h] [ebp-74h]
-    float v61; // [esp+1ACh] [ebp-70h]
-    float v62; // [esp+1B0h] [ebp-6Ch]
-    float v63; // [esp+1B4h] [ebp-68h]
-    float v64; // [esp+1B8h] [ebp-64h]
-    float v65; // [esp+1BCh] [ebp-60h]
-    float v66; // [esp+1C0h] [ebp-5Ch]
-    float v67; // [esp+1C4h] [ebp-58h]
-    float v68; // [esp+1C8h] [ebp-54h]
-    float v69; // [esp+1CCh] [ebp-50h]
     __int16 *v70; // [esp+1D0h] [ebp-4Ch]
     float4 frameVec; // [esp+1D4h] [ebp-48h]
     const __int16 *rotLastFrame; // [esp+1E8h] [ebp-34h]
@@ -1709,17 +1646,6 @@ void __cdecl XAnim_SetTime(float time, int frameCount, XAnimTime *animTime)
 
 void DObjCalcAnim(const DObj_s *obj, int *partBits)
 {
-    void *v3; // esp
-    const char *v4; // eax
-    const char *v5; // eax
-    float v6; // [esp+38h] [ebp-60FCh]
-    float v7; // [esp+38h] [ebp-60FCh]
-    float v8; // [esp+3Ch] [ebp-60F8h]
-    float v9; // [esp+3Ch] [ebp-60F8h]
-    float v10; // [esp+40h] [ebp-60F4h]
-    float v11; // [esp+40h] [ebp-60F4h]
-    float v12; // [esp+44h] [ebp-60F0h]
-    float v13; // [esp+44h] [ebp-60F0h]
     __int16 *quats; // [esp+68h] [ebp-60CCh]
     int mm; // [esp+90h] [ebp-60A4h]
     int numNonRootBones; // [esp+90h] [ebp-60A4h]
@@ -1741,9 +1667,6 @@ void DObjCalcAnim(const DObj_s *obj, int *partBits)
     XAnimCalcAnimInfo info; // [esp+E8h] [ebp-604Ch] BYREF
     int i; // [esp+6114h] [ebp-20h]
     DSkel *p_skel; // [esp+6120h] [ebp-14h]
-    int v37; // [esp+6128h] [ebp-Ch]
-    void *v38; // [esp+612Ch] [ebp-8h]
-    void *retaddr; // [esp+6134h] [ebp+0h]
 
     //v38 = retaddr;
     //v3 = alloca(24844); // LWSS: this was for `XAnimCalcAnimInfo`, which is a bigass struct

@@ -37,9 +37,6 @@ void __cdecl R_SetLightGridSampleDeltas(int rowStride, int sliceStride)
 void __cdecl R_ShowLightVisCachePoints(const float *viewOrigin, const DpvsPlane *clipPlanes, int clipPlaneCount)
 {
     float *color; // [esp+Ch] [ebp-A4h]
-    float v4; // [esp+44h] [ebp-6Ch]
-    float v5; // [esp+58h] [ebp-58h]
-    float v6; // [esp+6Ch] [ebp-44h]
     int i; // [esp+7Ch] [ebp-34h]
     int spread; // [esp+80h] [ebp-30h]
     float origin[3]; // [esp+84h] [ebp-2Ch] BYREF
@@ -390,9 +387,6 @@ uint8_t __cdecl R_LightGridLookup(
     uint32_t *defaultGridEntry)
 {
     bool v6; // [esp+8h] [ebp-7Ch]
-    float v7; // [esp+24h] [ebp-60h]
-    float v8; // [esp+28h] [ebp-5Ch]
-    float v9; // [esp+2Ch] [ebp-58h]
     bool v10; // [esp+32h] [ebp-52h]
     uint8_t v11; // [esp+33h] [ebp-51h]
     uint32_t pos[3]; // [esp+40h] [ebp-44h] BYREF

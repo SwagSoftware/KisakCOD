@@ -610,7 +610,7 @@ void __cdecl CL_ClearState(int32_t localClientNum);
 void __cdecl CL_Disconnect(int32_t localClientNum);
 void __cdecl CL_ClearStaticDownload();
 void __cdecl CL_ForwardCommandToServer(int32_t localClientNum, const char *string);
-void __cdecl CL_RequestAuthorization(netsrc_t localClientNum);
+void __cdecl CL_RequestAuthorization(int localClientNum);
 void __cdecl CL_ForwardToServer_f();
 void __cdecl CL_Setenv_f();
 void __cdecl CL_DisconnectLocalClient(int32_t localClientNum);
@@ -621,17 +621,17 @@ void __cdecl CL_Configstrings_f();
 void __cdecl CL_Clientinfo_f();
 bool __cdecl CL_WasMapAlreadyLoaded();
 void __cdecl CL_DownloadsComplete(int32_t localClientNum);
-void __cdecl CL_CheckForResend(netsrc_t localClientNum);
+void __cdecl CL_CheckForResend(int localClientNum);
 int32_t __cdecl CL_HighestPriorityStatPacket(clientConnection_t *clc);
 void __cdecl CL_DisconnectError(char *message);
-char __cdecl CL_ConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int32_t time);
-char __cdecl CL_DispatchConnectionlessPacket(netsrc_t localClientNum, netadr_t from, msg_t *msg, int32_t time);
+char __cdecl CL_ConnectionlessPacket(int localClientNum, netadr_t from, msg_t *msg, int32_t time);
+char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, msg_t *msg, int32_t time);
 void __cdecl CL_DisconnectPacket(int32_t localClientNum, netadr_t from, char *reason);
 void __cdecl CL_InitLoad(const char *mapname, const char *gametype);
-char __cdecl CL_PacketEvent(netsrc_t localClientNum, netadr_t from, msg_t *msg, int32_t time);
+char __cdecl CL_PacketEvent(int localClientNum, netadr_t from, msg_t *msg, int32_t time);
 void __cdecl CL_VoiceTransmit(int32_t localClientNum);
 void __cdecl CL_RunOncePerClientFrame(int32_t localClientNum, int32_t msec);
-void __cdecl CL_Frame(netsrc_t localClientNum);
+void __cdecl CL_Frame(int localClientNum);
 void __cdecl CL_CheckTimeout(int32_t localClientNum);
 void __cdecl CL_ServerTimedOut();
 void __cdecl CL_CheckUserinfo(int32_t localClientNum);
@@ -665,7 +665,7 @@ void __cdecl CL_LocalServers_f();
 void __cdecl CL_GetPing(int32_t n, char *buf, int32_t buflen, int32_t *pingtime);
 void __cdecl CL_ClearPing(uint32_t n);
 int32_t __cdecl CL_GetPingQueueCount();
-int32_t __cdecl CL_UpdateDirtyPings(netsrc_t localClientNum, uint32_t source);
+int32_t __cdecl CL_UpdateDirtyPings(int localClientNum, uint32_t source);
 void __cdecl CL_ShowIP_f();
 void __cdecl CL_SetupForNewServerMap(char *pszMapName, char *pszGametype);
 bool __cdecl CL_IsServerLoadingMap();
@@ -975,7 +975,7 @@ int32_t __cdecl LoadWorld(char *mapname);
 void __cdecl CL_StartLoading();
 void __cdecl CL_InitCGame(int32_t localClientNum);
 void __cdecl CL_FirstSnapshot(int32_t localClientNum);
-void __cdecl CL_SetCGameTime(netsrc_t localClientNum);
+void __cdecl CL_SetCGameTime(int localClientNum);
 void __cdecl CL_AdjustTimeDelta(int32_t localClientNum);
 void __cdecl CL_SetADS(int32_t localClientNum, bool ads);
 void __cdecl CL_DrawString(int32_t x, int32_t y, char *pszString, int32_t bShadow, int32_t iCharHeight);
@@ -1030,7 +1030,7 @@ void __cdecl CL_DeltaClient(
     int32_t unchanged);
 void __cdecl CL_SystemInfoChanged(int32_t localClientNum);
 void __cdecl CL_ParseMapCenter(int32_t localClientNum);
-void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg);
+void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg);
 void __cdecl CL_ParseSnapshot(int32_t localClientNum, msg_t *msg);
 void __cdecl CL_ParsePacketEntities(
     clientActive_t *cl,
@@ -1052,7 +1052,7 @@ void __cdecl CL_ParsePacketClients(
     int32_t time,
     clSnapshot_t *oldframe,
     clSnapshot_t *newframe);
-void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg);
+void __cdecl CL_ParseGamestate(int localClientNum, msg_t *msg);
 void __cdecl CL_ParseCommandString(int32_t localClientNum, msg_t *msg);
 
 
@@ -1231,7 +1231,7 @@ int32_t __cdecl LAN_CompareHostname(const char* hostName1, const char* hostName2
 int32_t __cdecl LAN_CompareServers(int32_t source, int32_t sortKey, int32_t sortDir, uint32_t s1, uint32_t s2);
 void __cdecl LAN_MarkServerDirty(int32_t source, uint32_t n, uint8_t dirty);
 int32_t __cdecl LAN_ServerIsDirty(int32_t source, uint32_t n);
-int32_t __cdecl LAN_UpdateDirtyPings(netsrc_t localClientNum, uint32_t source);
+int32_t __cdecl LAN_UpdateDirtyPings(int localClientNum, uint32_t source);
 void __cdecl Key_KeynumToStringBuf(int32_t keynum, char* buf, int32_t buflen);
 int32_t __cdecl CL_GetClientName(int32_t localClientNum, int32_t index, char* buf, int32_t size);
 int32_t __cdecl CL_ShutdownUI();

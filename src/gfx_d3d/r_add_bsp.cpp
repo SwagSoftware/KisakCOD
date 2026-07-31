@@ -19,7 +19,6 @@ char __cdecl R_PreTessBspDrawSurfs(
     uint32_t count,
     GfxBspDrawSurfData *surfData)
 {
-    int v5; // [esp+1Ch] [ebp-248h]
     uint32_t simplifiedCount; // [esp+34h] [ebp-230h]
     uint16_t surfIndex; // [esp+38h] [ebp-22Ch]
     const GfxSurface *tris; // [esp+3Ch] [ebp-228h]
@@ -125,7 +124,6 @@ void __cdecl R_AddAllBspDrawSurfacesRangeCamera(
     uint32_t stage,
     uint32_t maxDrawSurfCount)
 {
-    int packed_high; // edx
     uint16_t triSurfList[128]; // [esp+30h] [ebp-148h] BYREF
     int debugFastSunShadow; // [esp+138h] [ebp-40h]
     uint32_t* surfaceCastsSunShadow; // [esp+13Ch] [ebp-3Ch]
@@ -192,7 +190,6 @@ void __cdecl R_AddAllBspDrawSurfacesCameraNonlit(
     uint32_t endSurface,
     uint32_t stage)
 {
-    int packed_high; // edx
     uint16_t triSurfList[128]; // [esp+0h] [ebp-148h] BYREF
     GfxDrawSurf drawSurf; // [esp+108h] [ebp-40h]
     GfxDrawSurf prevDrawSurf; // [esp+110h] [ebp-38h]
@@ -257,8 +254,6 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
     uint32_t endSurface,
     uint32_t maxDrawSurfCount)
 {
-    int v4; // eax
-    int packed_high; // edx
     uint16_t triSurfList[128]; // [esp+3Ch] [ebp-158h] BYREF
     uint32_t *surfaceCastsSunShadow; // [esp+140h] [ebp-54h]
     GfxDrawSurf drawSurf; // [esp+144h] [ebp-50h]
@@ -367,7 +362,6 @@ void __cdecl R_AddAllBspDrawSurfacesRangeSunShadow(
 
 void __cdecl R_AddAllBspDrawSurfacesSpotShadow(uint32_t spotShadowIndex, uint32_t primaryLightIndex)
 {
-    int packed_high; // eax
     uint16_t triSurfList[128]; // [esp+0h] [ebp-158h] BYREF
     GfxDrawSurf drawSurf; // [esp+108h] [ebp-50h]
     GfxShadowGeometry* shadowGeom; // [esp+114h] [ebp-44h]

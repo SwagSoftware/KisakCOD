@@ -86,8 +86,6 @@ void __cdecl R_AddCodeMeshDrawSurf(
     uint32_t argCount,
     const char* fxName)
 {
-    int packed_high; // ecx
-    uint32_t v7; // edx
     int MaterialSortKey; // [esp+20h] [ebp-28h]
     FxCodeMeshData* localCodeMesh; // [esp+30h] [ebp-18h]
     GfxDrawSurf* drawSurf; // [esp+34h] [ebp-14h]
@@ -221,12 +219,6 @@ void __cdecl R_AddMarkMeshDrawSurf(
     uint16_t *indices,
     uint32_t indexCount)
 {
-    int packed_high; // edx
-    unsigned __int64 v5; // rax
-    int v6; // ecx
-    unsigned __int64 v7; // rax
-    int v8; // ecx
-    uint32_t v9; // ecx
     GfxDrawSurf *drawSurf; // [esp+40h] [ebp-14h]
     int region; // [esp+48h] [ebp-Ch]
     uint32_t markMeshIndex; // [esp+4Ch] [ebp-8h]
@@ -304,7 +296,6 @@ struct GfxSortDrawSurfsInterface // sizeof=0x0
 
 void __cdecl ShortSort /*ShortSortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSurf>*/(GfxDrawSurf *lo, GfxDrawSurf *hi)
 {
-    int packed_high; // eax
     unsigned __int64 packed; // [esp+0h] [ebp-24h]
     GfxDrawSurf *maxx; // [esp+8h] [ebp-1Ch] // (max is a fkin macro!)
     unsigned __int64 maxKey; // [esp+Ch] [ebp-18h]
@@ -346,8 +337,6 @@ void __cdecl SortMyShit /*qsortArray<GfxReverseSortDrawSurfsInterface, GfxDrawSu
     uint32_t fields; // [esp+Ch] [ebp-178h]
     uint32_t v9; // [esp+10h] [ebp-174h]
     GfxDrawSurf v10; // [esp+14h] [ebp-170h]
-    GfxDrawSurf v11; // [esp+1Ch] [ebp-168h]
-    GfxDrawSurf v12; // [esp+2Ch] [ebp-158h]
     unsigned __int64 pivotKey; // [esp+64h] [ebp-120h]
     GfxDrawSurf *loWalk; // [esp+74h] [ebp-110h]
     int sortCount; // [esp+78h] [ebp-10Ch]
@@ -527,8 +516,6 @@ void __cdecl R_SortWorldSurfaces()
 
 char __cdecl R_AddParticleCloudDrawSurf(volatile uint32_t cloudIndex, Material *material)
 {
-    int packed_high; // ecx
-    uint32_t v4; // edx
     int MaterialSortKey; // [esp+20h] [ebp-18h]
     GfxDrawSurf *drawSurf; // [esp+2Ch] [ebp-Ch]
     int region; // [esp+30h] [ebp-8h]

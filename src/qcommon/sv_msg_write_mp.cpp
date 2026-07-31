@@ -1565,8 +1565,6 @@ void __cdecl MSG_WriteDeltaField(
     int v10; // eax
     int v11; // eax
     const char *v12; // eax
-    __int64 v13; // [esp-Ch] [ebp-88h]
-    __int64 v14; // [esp-8h] [ebp-84h]
     double f; // [esp+4h] [ebp-78h]
     float v16; // [esp+20h] [ebp-5Ch]
     const hudelem_color_t *fromColor; // [esp+44h] [ebp-38h]

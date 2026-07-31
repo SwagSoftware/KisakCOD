@@ -484,7 +484,6 @@ void __cdecl CG_CalcCrosshairColor(int32_t localClientNum, float alpha, float *c
 {
     WeaponDef *weapDef; // [esp+14h] [ebp-4h]
     cg_s *cgameGlob;
-    cgs_t *cgsGlob;
 
     iassert(cg_crosshairAlpha);
     iassert(cg_crosshairEnemyColor);

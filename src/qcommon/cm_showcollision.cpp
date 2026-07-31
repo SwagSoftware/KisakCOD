@@ -577,7 +577,6 @@ void __cdecl CM_GetShowCollisionColor(float *colorFloat, char colorCounter)
 char __cdecl CM_BrushInView(const cbrush_t *brush, cplane_s *frustumPlanes, int frustumPlaneCount)
 {
     int frustumPlaneIndex; // [esp+0h] [ebp-4h]
-    int frustumPlaneIndexa; // [esp+0h] [ebp-4h]
 
     iassert( frustumPlanes );
     for (frustumPlaneIndex = 0; frustumPlaneIndex < frustumPlaneCount; frustumPlaneIndex++)// = frustumPlaneIndexa + 1)

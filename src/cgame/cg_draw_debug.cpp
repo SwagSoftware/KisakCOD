@@ -106,8 +106,6 @@ double __cdecl CG_DrawFPS(const ScreenPlacement *scrPlace, float y, meminfo_t *m
     float v8; // [esp+48h] [ebp-90h]
     float v9; // [esp+4Ch] [ebp-8Ch]
     float v10; // [esp+50h] [ebp-88h]
-    float v11; // [esp+54h] [ebp-84h]
-    float v13; // [esp+74h] [ebp-64h]
     float v14; // [esp+84h] [ebp-54h]
     float freeMem; // [esp+8Ch] [ebp-4Ch]
     int32_t fps; // [esp+90h] [ebp-48h]

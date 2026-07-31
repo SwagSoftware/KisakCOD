@@ -1455,7 +1455,6 @@ static char __cdecl FX_GenerateMarkVertsForList_EntDObj(
     uint16_t markHandle; // [esp+22Ch] [ebp-38h]
     uint16_t baseVertex; // [esp+230h] [ebp-34h] BYREF
     float transformMatrix[4][3]; // [esp+234h] [ebp-30h] BYREF
-    int32_t savedregs; // [esp+264h] [ebp+0h] BYREF
 
     for (markHandle = head; markHandle != FX_HANDLE_NONE; markHandle = mark->nextMark)
     {
@@ -1638,7 +1637,6 @@ static void __cdecl FX_ExpandMarkVerts_NoTransform_GfxPackedVertex_(
     const FxMark *mark,
     uint16_t baseVertex)
 {
-    int32_t v5; // [esp+50h] [ebp-D4h]
     PackedUnitVec v6; // [esp+58h] [ebp-CCh]
     PackedUnitVec v7; // [esp+7Ch] [ebp-A8h]
     GfxPackedVertex *castOutVert; // [esp+E0h] [ebp-44h]

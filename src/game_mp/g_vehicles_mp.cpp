@@ -2325,7 +2325,6 @@ void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime)
     float wheelPos[4][3]; // [esp+158h] [ebp-80h] BYREF
     int32_t i; // [esp+188h] [ebp-50h]
     float axis[4][3]; // [esp+18Ch] [ebp-4Ch] BYREF
-    float dot; // [esp+1BCh] [ebp-1Ch]
     float traceStart[3]; // [esp+1C0h] [ebp-18h] BYREF
     float traceEnd[3]; // [esp+1CCh] [ebp-Ch] BYREF
 

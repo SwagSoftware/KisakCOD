@@ -133,11 +133,7 @@ void __cdecl Phys_ComputeMassProperties(
 char __cdecl SkipEpair(char *token, const char **file)
 {
     char *v3; // eax
-    char *v4; // eax
     char *v5; // eax
-    int v6; // eax
-    int v7; // eax
-    int v8; // eax
     parseInfo_t *tokena; // [esp+28h] [ebp+8h]
 
     if (token[strlen(token) - 2] == 92)

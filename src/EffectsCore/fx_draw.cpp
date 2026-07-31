@@ -1621,8 +1621,6 @@ void __cdecl FX_GenerateVerts(FxGenerateVertsCmd *cmd)
 
 void __cdecl FX_FillGenerateVertsCmd(int32_t localClientNum, FxGenerateVertsCmd* cmd)
 {
-    uint32_t v2; // [esp+0h] [ebp-10h]
-    uint32_t v3; // [esp+Ch] [ebp-4h]
     cg_s *cgameGlob;
 
     iassert(cmd);

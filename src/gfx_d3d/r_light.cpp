@@ -50,7 +50,6 @@ void __cdecl R_EnumLightDefs(void(__cdecl *func)(GfxLightDef *, void *), void *d
 
 GfxLightDef *__cdecl R_RegisterLightDef_LoadObj(const char *name)
 {
-    GfxLightDef *def; // [esp+0h] [ebp-8h]
     GfxLightDef *defa; // [esp+0h] [ebp-8h]
     int defIndex; // [esp+4h] [ebp-4h]
     int defIndexa; // [esp+4h] [ebp-4h]

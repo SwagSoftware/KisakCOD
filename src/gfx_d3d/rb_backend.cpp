@@ -391,10 +391,7 @@ void __cdecl RB_SplitScreenTexCoords(float x, float y, float w, float h, float *
 
 void __cdecl R_Resolve(GfxCmdBufContext context, GfxImage *image)
 {
-    const char *v2; // eax
-    const char *v3; // eax
     const char *v4; // eax
-    const char *v5; // eax
     int v6; // [esp+0h] [ebp-Ch]
     int hr; // [esp+4h] [ebp-8h]
     IDirect3DSurface9 *imageSurface; // [esp+8h] [ebp-4h]
@@ -922,7 +919,6 @@ void __cdecl RB_BlendSavedScreenBlurredCmd(GfxRenderCommandExecState *execState)
     float s1; // [esp+28h] [ebp-48h]
     float t1; // [esp+2Ch] [ebp-44h]
     float v3; // [esp+30h] [ebp-40h]
-    float v4; // [esp+44h] [ebp-2Ch]
     float v5; // [esp+54h] [ebp-1Ch]
     float screenWidth; // [esp+58h] [ebp-18h]
     int frameTime; // [esp+5Ch] [ebp-14h]
@@ -984,8 +980,6 @@ void __cdecl RB_BlendSavedScreenFlashedCmd(GfxRenderCommandExecState *execState)
 {
     float s1; // [esp+28h] [ebp-50h]
     float t1; // [esp+2Ch] [ebp-4Ch]
-    float v3; // [esp+40h] [ebp-38h]
-    float v4; // [esp+54h] [ebp-24h]
     float screenWidth; // [esp+64h] [ebp-14h]
     float screenHeight; // [esp+70h] [ebp-8h]
     const GfxCmdBlendSavedScreenFlashed *cmd; // [esp+74h] [ebp-4h]
@@ -2348,9 +2342,6 @@ void __cdecl GetDecayingLetterInfo(
     uint32_t *resultLetter,
     bool *resultDrawExtraFxChar)
 {
-    uint8_t v11; // [esp+0h] [ebp-48h]
-    int v12; // [esp+10h] [ebp-38h]
-    float v13; // [esp+18h] [ebp-30h]
     int scrambleSeed; // [esp+28h] [ebp-20h] BYREF
     float tickRatio; // [esp+2Ch] [ebp-1Ch]
     int tickPeriod; // [esp+30h] [ebp-18h]

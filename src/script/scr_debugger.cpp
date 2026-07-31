@@ -3279,12 +3279,8 @@ void __cdecl UI_Component__DrawPic(float x, float y, float width, float height, 
 
 void Scr_DrawCurrentFilename()
 {
-    char *v0; // eax
-    char *v1; // eax
-    __int64 v2; // [esp+10h] [ebp-C8h]
     int v3; // [esp+14h] [ebp-C4h]
     float v4; // [esp+18h] [ebp-C0h]
-    float v5; // [esp+1Ch] [ebp-BCh]
     float colorYellow[4]; // [esp+38h] [ebp-A0h] BYREF
     char filename[128]; // [esp+48h] [ebp-90h] BYREF
     float width; // [esp+CCh] [ebp-Ch]

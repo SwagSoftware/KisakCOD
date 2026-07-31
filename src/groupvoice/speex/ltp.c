@@ -158,7 +158,6 @@ void open_loop_nbest_pitch(spx_sig_t *sw, int start, int end, int len, int *pitc
    VARDECL(spx_word32_t *corr);
    VARDECL(spx_word32_t *energy);
    VARDECL(spx_word32_t *score);
-   VARDECL(spx_word16_t *swn2);
    spx_word16_t *swn;
 
    ALLOC(best_score, N, spx_word32_t);

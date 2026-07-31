@@ -77,8 +77,6 @@ void* MT_Alloc(int numBytes, mtType_t type)
 
 unsigned short MT_AllocIndex(int numBytes, mtType_t type)
 {
-    const char* v2; // eax
-    const char* v3; // eax
     uint32_t nodeNum; // [esp+4Ch] [ebp-Ch]
     uint32_t size; // [esp+50h] [ebp-8h]
     int newSize; // [esp+54h] [ebp-4h]
@@ -190,7 +188,6 @@ void MT_RemoveHeadMemoryNode(int size)
 
 void MT_FreeIndex(uint32_t nodeNum, int numBytes)
 {
-    const char* v2; // eax
     int size; // [esp+30h] [ebp-8h]
     int lowBit; // [esp+34h] [ebp-4h]
 

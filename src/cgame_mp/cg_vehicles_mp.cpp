@@ -557,7 +557,6 @@ void __cdecl SetupPoseControllers(int32_t localClientNum, DObj_s *obj, centity_s
 void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s *cent, vehfx_t *fxInfo)
 {
     char *v4; // eax
-    const char *v5; // eax
     entityState_s_un1 v6; // [esp+18h] [ebp-10Ch]
     float v7; // [esp+1Ch] [ebp-108h]
     float lerp; // [esp+20h] [ebp-104h]

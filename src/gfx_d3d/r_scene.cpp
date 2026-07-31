@@ -1449,14 +1449,8 @@ void __cdecl R_GenerateSortedDrawSurfs(
 {
     MaterialTechniqueType EmissiveTechnique; // eax
     char DoesDrawSurfListInfoNeedFloatz; // al
-    float v7; // [esp+30h] [ebp-148h]
-    float v8; // [esp+4Ch] [ebp-12Ch]
-    float v9; // [esp+70h] [ebp-108h]
     float *viewOrigin; // [esp+BCh] [ebp-BCh]
     uint32_t data[20]; // [esp+C4h] [ebp-B4h] BYREF
-    float v15; // [esp+114h] [ebp-64h]
-    float v16; // [esp+118h] [ebp-60h]
-    float v17; // [esp+11Ch] [ebp-5Ch]
     float bestError; // [esp+120h] [ebp-58h]
     uint32_t bestNum; // [esp+124h] [ebp-54h]
     float error; // [esp+128h] [ebp-50h]

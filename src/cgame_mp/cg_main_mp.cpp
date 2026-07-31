@@ -1492,7 +1492,6 @@ void __cdecl CG_SubtitlePrint(int32_t msec, const snd_alias_t *alias)
 {
     int32_t integer; // [esp+4h] [ebp-20h]
     int32_t v3; // [esp+8h] [ebp-1Ch]
-    float v4; // [esp+Ch] [ebp-18h]
 
     iassert(alias);
     iassert(cg_subtitleWidthStandard);
@@ -1864,7 +1863,6 @@ void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
     const char *effectname; // [esp+4h] [ebp-10h]
     const char *modelName; // [esp+8h] [ebp-Ch]
     int32_t i; // [esp+10h] [ebp-4h]
-    int32_t ia; // [esp+10h] [ebp-4h]
     int32_t ib; // [esp+10h] [ebp-4h]
     cgs_t *cgs;
 

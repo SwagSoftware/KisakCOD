@@ -691,10 +691,6 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
 {
     float baseSlavePercentage; // [esp+4h] [ebp-ACh]
     double timescale; // [esp+10h] [ebp-A0h]
-    float v6; // [esp+1Ch] [ebp-94h]
-    float v7; // [esp+2Ch] [ebp-84h]
-    float v8; // [esp+3Ch] [ebp-74h]
-    float v9; // [esp+4Ch] [ebp-64h]
     _SAMPLE *handle; // [esp+90h] [ebp-20h]
     int total_msec; // [esp+94h] [ebp-1Ch] BYREF
     int start_msec; // [esp+98h] [ebp-18h]
@@ -1019,12 +1015,6 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
     float mindist; // [esp+4h] [ebp-108h]
     float maxdist; // [esp+8h] [ebp-104h]
     double timescale; // [esp+24h] [ebp-E8h]
-    float v7; // [esp+30h] [ebp-DCh]
-    float v8; // [esp+44h] [ebp-C8h]
-    float v9; // [esp+54h] [ebp-B8h]
-    float v10; // [esp+64h] [ebp-A8h]
-    float v11; // [esp+74h] [ebp-98h]
-    float v12; // [esp+84h] [ebp-88h]
     float diff[15]; // [esp+98h] [ebp-74h] BYREF
     _SAMPLE *handle; // [esp+D4h] [ebp-38h]
     int rate; // [esp+D8h] [ebp-34h]
@@ -1389,10 +1379,6 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     double Stream3DVolumeFallOff; // st7
     float baseSlavePercentage; // [esp+8h] [ebp-240h]
     float *org; // [esp+Ch] [ebp-23Ch]
-    float v9; // [esp+18h] [ebp-230h]
-    float v10; // [esp+28h] [ebp-220h]
-    float v11; // [esp+3Ch] [ebp-20Ch]
-    float v12; // [esp+50h] [ebp-1F8h]
     _SAMPLE *handle; // [esp+90h] [ebp-1B8h]
     int total_msec[2]; // [esp+94h] [ebp-1B4h] BYREF
     int start_msec; // [esp+9Ch] [ebp-1ACh]
@@ -2624,7 +2610,6 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     int v2; // [esp+0h] [ebp-3Ch]
     double timescale; // [esp+8h] [ebp-34h]
     float *org; // [esp+14h] [ebp-28h]
-    float v5; // [esp+1Ch] [ebp-20h]
     _STREAM *handle; // [esp+2Ch] [ebp-10h]
     _SAMPLE *handle_sample; // [esp+30h] [ebp-Ch]
     int offset; // [esp+34h] [ebp-8h] BYREF

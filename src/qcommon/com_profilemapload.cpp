@@ -388,7 +388,6 @@ void __cdecl ProfLoad_End()
 
 void __cdecl ProfLoad_DrawOverlay(rectDef_s *rect)
 {
-    MapProfileEntry *v1; // eax
     int fileReadCount; // [esp+7Ch] [ebp-128h]
     Font_s *profileFont; // [esp+88h] [ebp-11Ch]
     int fileOpenCount; // [esp+8Ch] [ebp-118h]

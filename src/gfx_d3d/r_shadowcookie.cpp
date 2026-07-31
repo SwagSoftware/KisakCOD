@@ -358,7 +358,6 @@ void __cdecl R_AddShadowCookie(
     int casterDrawSurfCount; // [esp+A4h] [ebp-Ch]
     GfxDrawSurf *casterDrawSurfs; // [esp+A8h] [ebp-8h]
     GfxDrawSurf *lastDrawSurf; // [esp+ACh] [ebp-4h]
-    int savedregs; // [esp+B0h] [ebp+0h] BYREF
 
     PROF_SCOPED("SC_DrawCaster");
 
@@ -586,7 +585,6 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
     uint32_t listSurfIndex; // [esp+E4h] [ebp-20h]
     uint32_t cookieDrawSurfCount; // [esp+E8h] [ebp-1Ch]
     GfxBspDrawSurfData surfData; // [esp+ECh] [ebp-18h] BYREF
-    int savedregs; // [esp+104h] [ebp+0h] BYREF
 
     iassert( rgp.world );
     cookieCount = shadowCookieList->cookieCount;

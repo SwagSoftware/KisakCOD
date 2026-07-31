@@ -80,7 +80,6 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
     int v1; // eax
     int passEntityNum; // [esp+14h] [ebp-E0h]
     bool v5; // [esp+18h] [ebp-DCh]
-    bool v6; // [esp+1Ch] [ebp-D8h]
     float deltaChange[3]; // [esp+60h] [ebp-94h] BYREF
     bool isRagdoll; // [esp+6Fh] [ebp-85h]
     float origin[3]; // [esp+70h] [ebp-84h] BYREF
@@ -238,7 +237,6 @@ void __cdecl G_RunCorpseMove(gentity_s *ent)
 
 void __cdecl G_BounceCorpse(gentity_s *ent, corpseInfo_t *corpseInfo, trace_t *trace, float *endpos)
 {
-    bool v4; // [esp+0h] [ebp-58h]
     float vAngles[3]; // [esp+24h] [ebp-34h] BYREF
     float vAxis[3][3]; // [esp+30h] [ebp-28h] BYREF
     bool isRagdoll; // [esp+57h] [ebp-1h]

@@ -457,7 +457,7 @@ int __cdecl LAN_ServerIsDirty(int source, uint32_t n)
     return 0;
 }
 
-int __cdecl LAN_UpdateDirtyPings(netsrc_t localClientNum, uint32_t source)
+int __cdecl LAN_UpdateDirtyPings(int localClientNum, uint32_t source)
 {
     return CL_UpdateDirtyPings(localClientNum, source);
 }

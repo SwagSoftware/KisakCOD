@@ -190,7 +190,6 @@ void R_DrawFullbrightOrDebugShader(
 
 void __cdecl R_DrawFullbright(const GfxViewInfo *viewInfo, GfxCmdBufInput *input, GfxCmdBuf *cmdBuf)
 {
-    int savedregs; // [esp+0h] [ebp+0h] BYREF
 
     R_DrawFullbrightOrDebugShader(
         R_DrawDebugShaderLitCallback,
@@ -353,7 +352,6 @@ void __cdecl RB_StandardDrawCommands(const GfxViewInfo *viewInfo)
     float clearColor[4]; // [esp+5Ch] [ebp-14h] BYREF
     uint8_t whichToClearForScene; // [esp+6Eh] [ebp-2h]
     uint8_t whichToClearForSetup; // [esp+6Fh] [ebp-1h]
-    int savedregs; // [esp+70h] [ebp+0h] BYREF
 
     data = backEndData;
     dynamicShadowType = viewInfo->dynamicShadowType;
@@ -501,7 +499,6 @@ void __cdecl R_DrawPointLitSurfs(GfxCmdBufSourceState *source, const GfxViewInfo
     float perpDir[3]; // [esp+148h] [ebp-14h] BYREF
     float perpDist; // [esp+154h] [ebp-8h]
     float w; // [esp+158h] [ebp-4h]
-    int savedregs; // [esp+15Ch] [ebp+0h] BYREF
 
     iassert(viewInfo);
 
@@ -752,7 +749,6 @@ void RB_StandardDrawCommandsCommon()
     GfxViewInfo *viewInfo; // [esp+20h] [ebp-8h]
     GfxViewInfo *viewInfoa; // [esp+20h] [ebp-8h]
     uint32_t viewInfoIndex; // [esp+24h] [ebp-4h]
-    int savedregs; // [esp+28h] [ebp+0h] BYREF
 
     data = backEndData;
     if (backEndData->viewInfoCount)

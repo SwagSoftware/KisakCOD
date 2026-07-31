@@ -288,8 +288,6 @@ void __cdecl Com_InitDObj()
 
 void __cdecl Com_ShutdownDObj()
 {
-    const char *v0; // eax
-    const char *v1; // eax
 
     if (g_bDObjInited)
     {

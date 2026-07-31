@@ -1809,7 +1809,6 @@ void AddDrawSurfForHudElemWaypoint(int32_t localClientNum, const hudelem_s *elem
     char v10[68]; // [esp-54h] [ebp-60h] BYREF
     hudelem_color_t v11; // [esp-10h] [ebp-1Ch] BYREF
     int32_t time; // [esp-Ch] [ebp-18h]
-    void *v13; // [esp+0h] [ebp-Ch]
     const cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);

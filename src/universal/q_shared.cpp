@@ -548,7 +548,6 @@ int Com_sprintfPos(char *dest, int destSize, int *destPos, const char *fmt, ...)
 bool __cdecl CanKeepStringPointer(const char *string)
 {
     va_info_t *info; // [esp+0h] [ebp-8h]
-    char stackArray[4]; // [esp+4h] [ebp-4h] BYREF
 
     // KISAKTODO: re-eval
     //if (string >= stackArray && string < (char *)&STACK[0x2004])

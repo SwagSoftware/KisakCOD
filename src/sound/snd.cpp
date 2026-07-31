@@ -1986,14 +1986,11 @@ void __cdecl SND_ContinueLoopingSound_Internal(
     int *pChannel,
     void(__cdecl *setPlaybackRateFunc)(int, int))
 {
-    double v5; // st7
     float v6; // [esp+8h] [ebp-40h]
     float v7; // [esp+Ch] [ebp-3Ch]
     float v8; // [esp+10h] [ebp-38h]
     float v9; // [esp+14h] [ebp-34h]
     float v10; // [esp+18h] [ebp-30h]
-    float v11; // [esp+1Ch] [ebp-2Ch]
-    float v12; // [esp+2Ch] [ebp-1Ch]
     float basevolume; // [esp+3Ch] [ebp-Ch]
     float v14; // [esp+40h] [ebp-8h]
 
@@ -2877,7 +2874,6 @@ void __cdecl SND_DeactivateEq(const char *channelName, int eqIndex, uint32_t ban
 
 void __cdecl SND_Update()
 {
-    unsigned intv0; // eax
     int frametime; // [esp+30h] [ebp-20h]
     MemoryFile memFile; // [esp+34h] [ebp-1Ch] BYREF
 
@@ -3103,9 +3099,6 @@ void __cdecl SND_UpdateRoomEffects(int frametime)
 
 void SND_UpdateTimeScale()
 {
-    float v0; // [esp+24h] [ebp-40h]
-    float v1; // [esp+34h] [ebp-30h]
-    float v2; // [esp+44h] [ebp-20h]
     float timescale; // [esp+58h] [ebp-Ch]
     float factor; // [esp+5Ch] [ebp-8h]
 
@@ -4249,8 +4242,6 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
     const char *v3; // eax
     const char *v4; // eax
     float *offset; // [esp+14h] [ebp-120h]
-    float v6; // [esp+1Ch] [ebp-118h]
-    float v7; // [esp+30h] [ebp-104h]
     int playbackId; // [esp+40h] [ebp-F4h]
     snd_save_stream_t info; // [esp+44h] [ebp-F0h] BYREF
     SndStartAliasInfo startAliasInfo; // [esp+64h] [ebp-D0h] BYREF

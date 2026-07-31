@@ -353,9 +353,6 @@ void __cdecl Image_DecodeDxtc(
 
 void __cdecl Image_GetRawPixels(char *imageName, GfxRawImage *image)
 {
-    char v2; // [esp+7h] [ebp-5Dh]
-    GfxRawImage *v3; // [esp+Ch] [ebp-58h]
-    char *v4; // [esp+10h] [ebp-54h]
     GfxImageFileHeader *imageData; // [esp+14h] [ebp-50h]
     char filepath[64]; // [esp+1Ch] [ebp-48h] BYREF
     GfxImageFileHeader *imageFile; // [esp+60h] [ebp-4h] BYREF

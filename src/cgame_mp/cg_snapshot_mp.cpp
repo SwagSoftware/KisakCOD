@@ -94,8 +94,6 @@ void __cdecl CG_ExtractTransPlayerState(const playerState_s *ps, transPlayerStat
 
 void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
 {
-    char *v2; // eax
-    const char *v3; // eax
     const char *v4; // eax
     XModel *v5; // eax
     int v6; // eax
@@ -384,7 +382,6 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent, int newEntity)
     clientInfo_t *ci; // [esp+30h] [ebp-Ch]
     int i; // [esp+34h] [ebp-8h]
     clientInfo_t *corpseInfo; // [esp+38h] [ebp-4h]
-    int savedregs; // [esp+3Ch] [ebp+0h] BYREF
     cg_s *cgameGlob;
     cgs_t *cgs;
 

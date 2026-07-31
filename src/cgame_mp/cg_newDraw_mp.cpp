@@ -545,7 +545,6 @@ void __cdecl CG_DrawPlayerAmmoBackdrop(
     const float *color,
     Material *material)
 {
-    float v4; // [esp+24h] [ebp-24h]
     float drawColor[4]; // [esp+38h] [ebp-10h] BYREF
     const cg_s *cgameGlob;
 
@@ -596,7 +595,6 @@ void __cdecl CG_DrawPlayerAmmoValue(
     int32_t textStyle)
 {
     double v7; // [esp+2Ch] [ebp-274h]
-    float v8; // [esp+3Ch] [ebp-264h]
     float ammoColor[5]; // [esp+4Ch] [ebp-254h] BYREF
     const ScreenPlacement *scrPlace; // [esp+60h] [ebp-240h]
     int32_t ammoVal; // [esp+64h] [ebp-23Ch]
@@ -922,7 +920,6 @@ void __cdecl CG_DrawPlayerStance(
     int32_t textStyle)
 {
     float v9; // [esp+24h] [ebp-54h]
-    float v10; // [esp+38h] [ebp-40h]
     float halfWidth; // [esp+4Ch] [ebp-2Ch]
     float drawColor[5]; // [esp+50h] [ebp-28h] BYREF
     float x; // [esp+64h] [ebp-14h]
@@ -1226,7 +1223,6 @@ void __cdecl CG_DrawStanceHintPrints(
 
 void __cdecl CG_DrawPlayerSprintBack(int32_t localClientNum, const rectDef_s *rect, Material *material, float *color)
 {
-    float v4; // [esp+34h] [ebp-28h]
     float drawColor[4]; // [esp+48h] [ebp-14h] BYREF
     float fadeAlpha; // [esp+58h] [ebp-4h]
     cg_s *cgameGlob;
@@ -1258,7 +1254,6 @@ void __cdecl CG_DrawPlayerSprintBack(int32_t localClientNum, const rectDef_s *re
 
 void __cdecl CG_DrawPlayerSprintMeter(int32_t localClientNum, const rectDef_s *rect, Material *material, float *color)
 {
-    float v4; // [esp+34h] [ebp-48h]
     float sprint; // [esp+44h] [ebp-38h]
     float drawColor[4]; // [esp+4Ch] [ebp-30h] BYREF
     int32_t sprintLeft; // [esp+5Ch] [ebp-20h]
@@ -1352,7 +1347,6 @@ void __cdecl CG_DrawPlayerBarHealth(int32_t localClientNum, const rectDef_s *rec
     float v5; // [esp+34h] [ebp-48h]
     float v6; // [esp+38h] [ebp-44h]
     float v7; // [esp+3Ch] [ebp-40h]
-    float v8; // [esp+44h] [ebp-38h]
     float health; // [esp+58h] [ebp-24h]
     playerState_s *ps; // [esp+64h] [ebp-18h]
     float x; // [esp+68h] [ebp-14h]
@@ -1760,9 +1754,6 @@ void __cdecl CG_DrawCursorhint(
 {
     double v6; // st7
     char *v7; // eax
-    char *v8; // eax
-    int32_t h; // [esp+Ch] [ebp-1C4h]
-    int32_t vertAlign; // [esp+10h] [ebp-1C0h]
     float v11; // [esp+20h] [ebp-1B0h]
     float v12; // [esp+24h] [ebp-1ACh]
     float v13; // [esp+28h] [ebp-1A8h]
@@ -1772,9 +1763,6 @@ void __cdecl CG_DrawCursorhint(
     float v17; // [esp+38h] [ebp-198h]
     float w; // [esp+3Ch] [ebp-194h]
     float v19; // [esp+40h] [ebp-190h]
-    float v20; // [esp+44h] [ebp-18Ch]
-    float v21; // [esp+48h] [ebp-188h]
-    float v22; // [esp+4Ch] [ebp-184h]
     weaponIconRatioType_t hudIconRatio; // [esp+5Ch] [ebp-174h]
     float v24; // [esp+60h] [ebp-170h]
     float v25; // [esp+6Ch] [ebp-164h]
@@ -2118,7 +2106,6 @@ void __cdecl CG_DrawHoldBreathHint(
 {
     uint32_t ViewmodelWeaponIndex; // eax
     char *v6; // eax
-    float v7; // [esp+24h] [ebp-124h]
     char *string; // [esp+34h] [ebp-114h]
     char binding[256]; // [esp+38h] [ebp-110h] BYREF
     const playerState_s *ps; // [esp+13Ch] [ebp-Ch]

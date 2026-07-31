@@ -584,7 +584,6 @@ const MaterialTextureDef *__cdecl R_SetPixelSamplerFromMaterial(
     const MaterialShaderArgument *arg,
     const MaterialTextureDef *texDef)
 {
-    const char *v3; // eax
     float floatTime; // [esp+4h] [ebp-10h]
     GfxImage *image; // [esp+8h] [ebp-Ch] BYREF
     const Material *material; // [esp+Ch] [ebp-8h]

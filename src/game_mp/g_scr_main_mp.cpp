@@ -1844,7 +1844,6 @@ void __cdecl ScrCmd_SetModel(scr_entref_t entref)
 
 void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
 {
-    float value; // [esp+0h] [ebp-Ch]
     gentity_s *pEnt; // [esp+8h] [ebp-4h]
 
     pEnt = GetEntity(entref);
@@ -2677,7 +2676,6 @@ void GScr_PrecacheHeadIcon()
 
 int32_t __cdecl GScr_GetHeadIconIndex(const char *pszIcon)
 {
-    const char *v2; // eax
     int32_t iConfigNum; // [esp+0h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+4h] [ebp-408h] BYREF
 
@@ -4265,7 +4263,6 @@ void Scr_PlayFXOnTag()
 void Scr_PlayLoopedFX()
 {
     uint32_t  NumParam; // [esp+0h] [ebp-70h]
-    float v1; // [esp+4h] [ebp-6Ch]
     float pos[3]; // [esp+2Ch] [ebp-44h] BYREF
     int32_t fxId; // [esp+38h] [ebp-38h]
     int32_t repeat; // [esp+3Ch] [ebp-34h]
@@ -4374,7 +4371,6 @@ LABEL_12:
 void Scr_TriggerFX()
 {
     int32_t result; // eax
-    float v1; // [esp+4h] [ebp-14h]
     gentity_s *ent; // [esp+14h] [ebp-4h]
 
     if (!Scr_GetNumParam() || Scr_GetNumParam() > 2)
@@ -4898,7 +4894,6 @@ void __cdecl GScr_GetPartName()
 gentity_s *GScr_Earthquake()
 {
     gentity_s *result; // eax
-    float v1; // [esp+0h] [ebp-2Ch]
     float source[3]; // [esp+10h] [ebp-1Ch] BYREF
     gentity_s *tent; // [esp+1Ch] [ebp-10h]
     int32_t duration; // [esp+20h] [ebp-Ch]
@@ -4925,7 +4920,6 @@ gentity_s *GScr_Earthquake()
 
 void __cdecl GScr_ShellShock(scr_entref_t entref)
 {
-    float v3; // [esp+8h] [ebp-424h]
     int32_t duration; // [esp+18h] [ebp-414h]
     const char *shock; // [esp+1Ch] [ebp-410h]
     gentity_s *ent; // [esp+20h] [ebp-40Ch]

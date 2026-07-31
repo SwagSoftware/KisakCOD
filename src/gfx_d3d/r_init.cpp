@@ -2767,7 +2767,6 @@ void __cdecl R_CalcGammaRamp(GfxGammaRamp *gammaRamp)
 {
     float unitScaleValue; // [esp+8h] [ebp-30h]
     float v2; // [esp+Ch] [ebp-2Ch]
-    float v3; // [esp+18h] [ebp-20h]
     uint16_t adjustedColorValue; // [esp+28h] [ebp-10h]
     uint16_t colorTableIndex; // [esp+2Ch] [ebp-Ch]
     float exponent; // [esp+30h] [ebp-8h]
@@ -3768,7 +3767,6 @@ char __cdecl R_InitHardware(const GfxWindowParms *wndParms)
 void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
 {
     const char *v1; // eax
-    float v2; // [esp+18h] [ebp-20h]
     int monitorHeight; // [esp+28h] [ebp-10h]
     int monitorWidth; // [esp+2Ch] [ebp-Ch]
 

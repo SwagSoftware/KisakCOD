@@ -130,7 +130,6 @@ struct CStringEdPackage // sizeof=0x78
     {
         char *v2; // eax
         char *v3; // eax
-        char *v6; // [esp+F0h] [ebp-B8h]
         
         v2 = va("%s_%s", this->m_strCurrentFileRef_ParseOnly.data(), psLocalReference); // _Ptr
 
@@ -189,7 +188,6 @@ struct CStringEdPackage // sizeof=0x78
     {
         int v4[2]; // [esp-8h] [ebp-A8h]
         std::string str;
-        int loc; // [esp+98h] [ebp-8h]
 
         str.assign(string);
 
@@ -212,7 +210,6 @@ struct CStringEdPackage // sizeof=0x78
 
     char IsStringFormatCorrect(char *string)
     {
-        const char *v2; // eax
         const char *v4; // eax
         CStringEdPackage *thisa; // [esp+0h] [ebp-1Ch]
         int argIndex; // [esp+4h] [ebp-18h]
@@ -238,7 +235,6 @@ struct CStringEdPackage // sizeof=0x78
 
     const char *ParseLine(char *psLine, bool forceEnglish)
     {
-        std::string *Ptr; // eax
         int v5; // eax
         std::string *p_sentence; // eax
         const char *v7; // edi
@@ -416,8 +412,6 @@ struct CStringEdPackage // sizeof=0x78
     }
     char * Filename_WithoutExt(const char *psFilename)
     {
-        char *v2; // eax
-        char *v3; // eax
         char* v4; // eax
         char v6; // [esp+3h] [ebp-1Dh]
         char *v7; // [esp+8h] [ebp-18h]

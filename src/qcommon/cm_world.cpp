@@ -547,7 +547,6 @@ void __cdecl CM_AreaEntities_r(uint32_t nodeIndex, areaParms_t *ap)
     uint32_t entnum; // [esp+Ch] [ebp-8h]
     svEntity_s *svEnt;
 
-    int n;
     for (node = &cm_world.sectors[nodeIndex]; (node->contents.contentsEntities & ap->contentmask) != 0; node = &cm_world.sectors[nodeIndex])
     {
         for (entnum = node->contents.entities; entnum; entnum = svEnt->nextEntityInWorldSector)

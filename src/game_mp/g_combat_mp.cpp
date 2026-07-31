@@ -362,7 +362,6 @@ void __cdecl G_Damage(
     uint32_t partName,
     int32_t timeOffset)
 {
-    uint32_t NumWeapons; // eax
     float localdir[3]; // [esp+0h] [ebp-14h] BYREF
     void(__cdecl * die)(gentity_s *, gentity_s *, gentity_s *, int, int, const int, const float *, const hitLocation_t, int); // [esp+Ch] [ebp-8h]
     void(__cdecl * pain)(gentity_s *, gentity_s *, int, const float *, const int, const float *, const hitLocation_t, const int); // [esp+10h] [ebp-4h]

@@ -2362,7 +2362,6 @@ bool __cdecl Phys_ObjIsAsleep(dxBody *id)
 
 void __cdecl Phys_Shutdown()
 {
-    uint32_t v0; // eax
     int worldIndex; // [esp+0h] [ebp-4h]
 
     if (physInited)

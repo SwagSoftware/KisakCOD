@@ -401,11 +401,7 @@ void __cdecl SaveMemory_CreateHeader(
     unsigned int bytesUsed; // r4
     unsigned __int8 *buffer; // r3
     const dvar_s *v40; // r3
-    __int64 v41; // r11 OVERLAPPED
-    _DWORD *v42; // r9
     int v43; // r11
-    _DWORD v44[2]; // [sp+50h] [-70h] BYREF
-    __int64 v45; // [sp+58h] [-68h]
 
     iassert(cleanUserName);
     iassert(save);

@@ -593,7 +593,6 @@ char *__cdecl R_AllocModelLightingGlobal(uint32_t bytes)
 
 void __cdecl R_ResetModelLighting()
 {
-    uint32_t v0; // eax
     float *v1; // [esp+0h] [ebp-14h]
     uint32_t entryIndex; // [esp+4h] [ebp-10h]
     uint32_t usedIndex; // [esp+8h] [ebp-Ch]

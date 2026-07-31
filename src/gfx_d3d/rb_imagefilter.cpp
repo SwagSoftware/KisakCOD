@@ -196,14 +196,12 @@ int __cdecl RB_GaussianFilterPoints1D(
     float *tapOffsets,
     float *tapWeights)
 {
-    const char *v6; // eax
     double v7; // st7
     float v9; // [esp+8h] [ebp-58h]
     float v10; // [esp+Ch] [ebp-54h]
     float v11; // [esp+10h] [ebp-50h]
     float v12; // [esp+14h] [ebp-4Ch]
     float v13; // [esp+20h] [ebp-40h]
-    float v14; // [esp+24h] [ebp-3Ch]
     int tapHalfCount; // [esp+34h] [ebp-2Ch]
     int tapIndex; // [esp+38h] [ebp-28h]
     int tapIndexa; // [esp+38h] [ebp-28h]

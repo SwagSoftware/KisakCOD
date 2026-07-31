@@ -66,7 +66,6 @@ void CG_VehPoseControllers(const cpose_t *pose, const DObj_s *obj, int32_t *part
     float steerAngles[3]; // [esp+19Ch] [ebp-34h] BYREF
     float bodyAngles[3]; // [esp+1A8h] [ebp-28h] BYREF
     float barrelAngles[7]; // [esp+1B4h] [ebp-1Ch] BYREF
-    float retaddr; // [esp+1D0h] [ebp+0h]
 
     //barrelAngles[4] = a1;
     //barrelAngles[5] = retaddr;
@@ -269,8 +268,6 @@ void __cdecl CG_mg42_DoControllers(const cpose_t *pose, const DObj_s *obj, int32
 
 void __cdecl CG_DoBaseOriginController(const cpose_t *pose, const DObj_s *obj, int32_t *setPartBits)
 {
-    float *trans; // [esp+8h] [ebp-104h]
-    float result[3]; // [esp+30h] [ebp-DCh] BYREF
     uint32_t rootBoneMask; // [esp+90h] [ebp-7Ch]
     float baseQuat[4]; // [esp+94h] [ebp-78h] BYREF
     float viewOffset[3]; // [esp+A4h] [ebp-68h] BYREF

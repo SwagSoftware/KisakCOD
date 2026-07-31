@@ -70,7 +70,6 @@ void __cdecl CG_DrawCenterString(
     float* color,
     int32_t textStyle)
 {
-    float v6; // [esp+24h] [ebp-20h]
     CenterPrint* centerPrint; // [esp+34h] [ebp-10h]
     float* fadeColor; // [esp+38h] [ebp-Ch]
     int32_t time; // [esp+3Ch] [ebp-8h]

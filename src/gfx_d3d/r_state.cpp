@@ -74,7 +74,6 @@ void __cdecl R_ChangeStreamSource(
     uint32_t vertexOffset,
     uint32_t vertexStride)
 {
-    const char *v5; // eax
     int hr; // [esp+0h] [ebp-8h]
     IDirect3DDevice9 *device; // [esp+4h] [ebp-4h]
 
@@ -444,8 +443,6 @@ void  R_DeriveWorldViewMatrix(GfxCmdBufSourceState *source)
 {
     GfxMatrix world;
     GfxViewParms *p_viewParms; // [esp+44h] [ebp-10h]
-    GfxCodeMatrices *activeMatrices; // [esp+4Ch] [ebp-8h]
-    GfxCodeMatrices *retaddr; // [esp+54h] [ebp+0h]
 
     //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
@@ -488,9 +485,6 @@ void  R_DeriveWorldViewProjectionMatrix(GfxCmdBufSourceState *source)
     float *mat20; // [esp-8h] [ebp-60h]
     GfxMatrix mat;
     GfxViewParms *p_viewParms; // [esp+48h] [ebp-10h]
-    int v6; // [esp+4Ch] [ebp-Ch]
-    GfxCodeMatrices *activeMatrices; // [esp+50h] [ebp-8h]
-    GfxCodeMatrices *retaddr; // [esp+58h] [ebp+0h]
 
     //activeMatrices = retaddr;
     p_viewParms = &source->viewParms;
@@ -529,7 +523,6 @@ void  R_GenerateWorldOutdoorLookupMatrix(
     float worldOffset[4]; // [esp+34h] [ebp-4Ch] BYREF
     float zInTimesInvViewTimesOutdoorLookup[4]; // [esp+44h] [ebp-3Ch] BYREF
     float zInTimesInvView[4]; // [esp+54h] [ebp-2Ch] BYREF
-    GfxCodeMatrices *activeMatrices; // [esp+74h] [ebp-Ch]
 
     const float awayBias = r_outdoorAwayBias->current.value;
     const float downBias = r_outdoorDownBias->current.value;

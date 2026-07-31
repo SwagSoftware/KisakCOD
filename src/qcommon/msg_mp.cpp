@@ -1592,7 +1592,6 @@ void __cdecl MSG_ReadDeltaPlayerstate(
 {
     int Short; // eax
     int v7; // eax
-    objectiveState_t v8; // eax
     uint8_t Byte; // al
     clientActive_t *LocalClientGlobals; // [esp+1Ch] [ebp-2F9Ch]
     int i; // [esp+20h] [ebp-2F98h]
@@ -1600,7 +1599,6 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     int print; // [esp+24h] [ebp-2F94h]
     int LastChangedField; // [esp+30h] [ebp-2F88h]
     int Bits; // [esp+2FA8h] [ebp-10h]
-    int *v19; // [esp+2FACh] [ebp-Ch]
     bool lc; // [esp+2FB3h] [ebp-5h]
 
     uint8_t dst[sizeof(playerState_s) + 8]; // [esp+38h] [ebp-2F80h] BYREF

@@ -1504,7 +1504,6 @@ int32_t __cdecl CL_DeathMessageIconDimension(float size)
 {
     int32_t v2; // [esp+0h] [ebp-1Ch]
     int32_t v3; // [esp+4h] [ebp-18h]
-    float v4; // [esp+Ch] [ebp-10h]
 
     if (SnapFloatToInt(size * 32.0f) < 127)
         v3 = SnapFloatToInt(size * 32.0f);
@@ -1721,7 +1720,6 @@ void __cdecl Con_DrawGameMessageWindow(
     char textAlignMode,
     msgwnd_mode_t mode)
 {
-    float v12; // [esp+Ch] [ebp-18h]
 
     if (!cg_paused->current.integer)
     {
@@ -1823,8 +1821,6 @@ void __cdecl Con_DrawMessageWindowNewToOld(
     float v13; // [esp+8h] [ebp-68h]
     float v14; // [esp+Ch] [ebp-64h]
     float v15; // [esp+10h] [ebp-60h]
-    float v16; // [esp+18h] [ebp-58h]
-    float v17; // [esp+2Ch] [ebp-44h]
     float v18; // [esp+3Ch] [ebp-34h]
     float finalColor[4]; // [esp+40h] [ebp-30h] BYREF
     Message *message; // [esp+50h] [ebp-20h]
@@ -2155,8 +2151,6 @@ void __cdecl Con_DrawMessageWindowOldToNew(
     float msgwndScale,
     char textAlignMode)
 {
-    float v13; // [esp+Ch] [ebp-58h]
-    float v14; // [esp+20h] [ebp-44h]
     clientActive_t *LocalClientGlobals; // [esp+30h] [ebp-34h]
     float finalColor[4]; // [esp+34h] [ebp-30h] BYREF
     Message *message; // [esp+44h] [ebp-20h]
@@ -2614,7 +2608,6 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
     char *v1; // eax
     char *v2; // eax
     char *v3; // eax
-    __int64 v4; // [esp-Ch] [ebp-428h]
     bool hasLatchedValue; // [esp+7h] [ebp-415h]
     int32_t infoLineCount; // [esp+8h] [ebp-414h] BYREF
     char dvarInfo[1024]; // [esp+Ch] [ebp-410h] BYREF

@@ -1066,7 +1066,7 @@ void __cdecl CL_ReadDemoMessage(int32_t localClientNum)
     }
 }
 
-void __cdecl CL_SetCGameTime(netsrc_t localClientNum)
+void __cdecl CL_SetCGameTime(int localClientNum)
 {
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-Ch]
     clientConnection_t *clc; // [esp+8h] [ebp-4h]

@@ -174,7 +174,6 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
 {
     char* Name; // eax
     float dist; // [esp+8h] [ebp-1104h]
-    float val; // [esp+2Ch] [ebp-10E0h]
     GfxStaticModelId StaticModelId; // [esp+54h] [ebp-10B8h]
     GfxStaticModelDrawInst* inst; // [esp+58h] [ebp-10B4h]
     float scale; // [esp+5Ch] [ebp-10B0h]
@@ -193,7 +192,6 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
     uint32_t smodelCount; // [esp+1094h] [ebp-78h]
     _WORD* count; // [esp+1098h] [ebp-74h]
     uint8_t* visData; // [esp+109Ch] [ebp-70h]
-    _BYTE v25[3]; // [esp+10A0h] [ebp-6Ch] BYREF
     uint8_t currentLightIndex; // [esp+10A3h] [ebp-69h]
     float origin[3]; // [esp+10A4h] [ebp-68h] BYREF
     uint16_t staticModelLodCount[4][4]{ 0 }; // [esp+10B0h] [ebp-5Ch] BYREF
@@ -600,8 +598,6 @@ void __cdecl R_AddAllStaticModelSurfacesSunShadow()
 void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(uint32_t partitionIndex, uint32_t maxDrawSurfCount)
 {
     float dist; // [esp+4h] [ebp-10E4h]
-    float val; // [esp+28h] [ebp-10C0h]
-    float diff[2][3]; // [esp+30h] [ebp-10B8h] BYREF
     GfxStaticModelId StaticModelId; // [esp+50h] [ebp-1098h]
     GfxStaticModelDrawInst* inst; // [esp+54h] [ebp-1094h]
     float scale; // [esp+58h] [ebp-1090h]

@@ -936,8 +936,6 @@ void __cdecl Vec2NormalizeFast(float *v)
 
 void __cdecl PerpendicularVector(const float* src, float* dst)
 {
-    const char* v2; // eax
-    float scale; // [esp+18h] [ebp-34h]
     int pos; // [esp+38h] [ebp-14h]
     float d; // [esp+3Ch] [ebp-10h]
     float srcSq[3]; // [esp+40h] [ebp-Ch]
@@ -2248,8 +2246,6 @@ LABEL_7:
 
 void __cdecl ProjectPointOnPlane(const float *const f1, const float *const normal, float *const result)
 {
-    const char *v3; // eax
-    double v4; // [esp+18h] [ebp-14h]
     float d; // [esp+28h] [ebp-4h]
 
     iassert(Vec3IsNormalized(normal));

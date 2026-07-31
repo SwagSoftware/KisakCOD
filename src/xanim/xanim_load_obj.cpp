@@ -427,9 +427,6 @@ void __cdecl ConsumeQuatNoSwap(unsigned __int8 **pos, __int16 *out)
     float v3; // [esp+Ch] [ebp-30h]
     float v4; // [esp+10h] [ebp-2Ch]
     float v5; // [esp+14h] [ebp-28h]
-    __int16 v6; // [esp+1Ch] [ebp-20h]
-    __int16 v7; // [esp+20h] [ebp-1Ch]
-    __int16 v8; // [esp+24h] [ebp-18h]
     int temp; // [esp+38h] [ebp-4h]
 
     out[0] = Buf_Read<unsigned short>(pos);
@@ -625,7 +622,6 @@ unsigned __int8 *__cdecl GetQuaternions(
     uint16_t numloopframes,
     bool useSmallIndices)
 {
-    uint16_t v7; // [esp+0h] [ebp-48h]
     __int16 *v8; // [esp+4h] [ebp-44h]
     __int16 *v9; // [esp+8h] [ebp-40h]
     int ii; // [esp+10h] [ebp-38h]
@@ -856,7 +852,6 @@ unsigned __int8 *__cdecl GetTranslations(
 
 void __cdecl ReadNoteTracks(const char *name, unsigned char **pos, XAnimParts *parts, void *(__cdecl *Alloc)(int))
 {
-    const char *v4; // eax
     double v5; // [esp+8h] [ebp-30h]
     uint16_t v6; // [esp+24h] [ebp-14h]
     int numNoteTracks; // [esp+28h] [ebp-10h]
@@ -894,7 +889,6 @@ int g_checkBoneOrder;
 
 XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
 {
-    const char *v2; // eax
     __int16 prev; // ax
     unsigned __int8 *Quaternions; // eax
     int v6; // eax
@@ -919,16 +913,13 @@ XAnimParts *__cdecl XAnimLoadFile(char *name, void *(__cdecl *Alloc)(int))
     int v25; // [esp+3Ch] [ebp-14A8h]
     int v26; // [esp+40h] [ebp-14A4h]
     BOOL v27; // [esp+44h] [ebp-14A0h]
-    double v28; // [esp+58h] [ebp-148Ch]
     uint16_t totalframes; // [esp+66h] [ebp-147Eh]
     int v30; // [esp+B0h] [ebp-1434h]
     int v31; // [esp+B4h] [ebp-1430h]
     int v32; // [esp+B8h] [ebp-142Ch]
     int v33; // [esp+BCh] [ebp-1428h]
     unsigned __int8 v34; // [esp+C0h] [ebp-1424h]
-    uint16_t v35; // [esp+C4h] [ebp-1420h]
     __int16 numBones; // [esp+C8h] [ebp-141Ch]
-    uint16_t v37; // [esp+CCh] [ebp-1418h]
     __int16 version; // [esp+D0h] [ebp-1414h]
     unsigned __int8 *pos; // [esp+DCh] [ebp-1408h] BYREF
     bool useSmallIndices; // [esp+E3h] [ebp-1401h]

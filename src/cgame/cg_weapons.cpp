@@ -103,10 +103,6 @@ int32_t __cdecl CG_WeaponDObjHandle(int32_t weaponNum)
 
 void __cdecl CG_RegisterWeapon(int32_t localClientNum, uint32_t weaponNum)
 {
-    uint32_t NumWeapons; // eax
-    char *v3; // eax
-    int64_t _C; // [esp+Ch] [ebp-34h]
-    const char *blendTime; // [esp+14h] [ebp-2Ch]
     weaponInfo_s *weapInfo; // [esp+18h] [ebp-28h]
     uint32_t dobjHandle; // [esp+1Ch] [ebp-24h]
     uint8_t boneIndex; // [esp+23h] [ebp-1Dh] BYREF
@@ -303,7 +299,6 @@ void __cdecl ChangeViewmodelDobj(
     XModel *newKnife,
     bool updateClientInfo)
 {
-    uint32_t NumWeapons; // eax
     weaponInfo_s *weapInfo; // [esp+8h] [ebp-34h]
     uint32_t dobjHandle; // [esp+Ch] [ebp-30h]
     int32_t mdlIdx; // [esp+10h] [ebp-2Ch]
@@ -1147,7 +1142,6 @@ bool __cdecl ViewmodelKnifeShouldBeAttached(int32_t localClientNum, WeaponDef* w
 
 void __cdecl ProcessWeaponNoteTracks(int32_t localClientNum, const playerState_s *predictedPlayerState)
 {
-    uint32_t NumWeapons; // eax
     int32_t noteListSize; // [esp+0h] [ebp-14h]
     XAnimNotify_s *noteList; // [esp+4h] [ebp-10h] BYREF
     int32_t weapIndex; // [esp+8h] [ebp-Ch]
@@ -1551,8 +1545,6 @@ static void CalculateWeaponAxis(cg_s *cgameGlob, float (*axis)[3])
 // KISAKTODO: would like to have this function more like blops, it's cleaner
 void __cdecl CG_AddViewWeapon(int32_t localClientNum)
 {
-    double v1; // st7
-    double v2; // st7
     int32_t v3; // [esp+Ch] [ebp-12Ch]
     float* vGunSpeed; // [esp+10h] [ebp-128h]
     float* vGunOffset; // [esp+14h] [ebp-124h]
@@ -2805,7 +2797,6 @@ void __cdecl FireBulletPenetrate(
     float v11; // [esp+20h] [ebp-1DCh]
     double value; // [esp+24h] [ebp-1D8h]
     float v13; // [esp+2Ch] [ebp-1D0h]
-    bool v14; // [esp+30h] [ebp-1CCh]
     __int16 v15; // [esp+34h] [ebp-1C8h]
     int32_t v16; // [esp+38h] [ebp-1C4h]
     uint32_t v17; // [esp+3Ch] [ebp-1C0h]

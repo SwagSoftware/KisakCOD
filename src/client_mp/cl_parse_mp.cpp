@@ -463,7 +463,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
 }
 
 uint8_t msgCompressed_buf[0x20000];
-void __cdecl CL_ParseServerMessage(netsrc_t localClientNum, msg_t *msg)
+void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
 {
     msg_t msgCompressed; // [esp+4h] [ebp-30h] BYREF
     int file; // [esp+2Ch] [ebp-8h]
@@ -1005,9 +1005,8 @@ void __cdecl CL_InitDownloads(int localClientNum)
     CL_DownloadsComplete(localClientNum);
 }
 
-void __cdecl CL_ParseGamestate(netsrc_t localClientNum, msg_t *msg)
+void __cdecl CL_ParseGamestate(int localClientNum, msg_t *msg)
 {
-    int v4; // eax
     uint32_t v5; // [esp+0h] [ebp-164h]
     uint32_t v6; // [esp+10h] [ebp-154h]
     uint32_t v7; // [esp+20h] [ebp-144h]

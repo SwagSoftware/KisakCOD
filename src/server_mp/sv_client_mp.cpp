@@ -131,9 +131,6 @@ int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
 void __cdecl SV_GetChallenge(netadr_t from)
 {
     int v1; // esi
-    __int16 v3; // ax
-    const char *v4; // eax
-    netadr_t v5; // [esp-14h] [ebp-30h]
     //char *cdkeyHash; // [esp+4h] [ebp-18h]
     char *clientSteamTicketBase64;
     challenge_t *challenge; // [esp+8h] [ebp-14h]
@@ -579,8 +576,6 @@ void __cdecl SV_FreeClients()
 void __cdecl SV_DirectConnect(netadr_t from)
 {
     const char *v6; // eax
-    const char *v8; // eax
-    const char *v9; // eax
     const char *v10; // eax
     char *v11; // edi
     const char *v12; // eax
@@ -588,11 +583,9 @@ void __cdecl SV_DirectConnect(netadr_t from)
     const char *v14; // eax
     bool v15; // [esp-8h] [ebp-490h]
     bool v16; // [esp-4h] [ebp-48Ch]
-    char *fromAddr; // [esp+1Ch] [ebp-46Ch]
     int ping; // [esp+20h] [ebp-468h]
     char cdkeyHash[36]; // [esp+24h] [ebp-464h] BYREF
     client_t *clients; // [esp+48h] [ebp-440h]
-    int cl_pb; // [esp+4Ch] [ebp-43Ch]
     char *denied; // [esp+50h] [ebp-438h]
     int version; // [esp+54h] [ebp-434h]
     client_t *newcl; // [esp+58h] [ebp-430h]
@@ -602,7 +595,6 @@ void __cdecl SV_DirectConnect(netadr_t from)
     char userinfo[1024]; // [esp+68h] [ebp-420h] BYREF
     gentity_s *ent; // [esp+468h] [ebp-20h]
     uint32_t scriptId; // [esp+46Ch] [ebp-1Ch]
-    char *pb_authmsg; // [esp+470h] [ebp-18h]
     int i; // [esp+474h] [ebp-14h]
     int clientNum; // [esp+478h] [ebp-10h]
     int count; // [esp+47Ch] [ebp-Ch]

@@ -40,7 +40,6 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int32_t localClientNum, const centity_s
     team_t iTeam; // [esp+1Ch] [ebp-Ch]
     playerState_s *ps; // [esp+20h] [ebp-8h]
     const char *pszIcon; // [esp+24h] [ebp-4h]
-    int32_t savedregs; // [esp+28h] [ebp+0h] BYREF
     cg_s *cgameGlob;
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -243,8 +242,6 @@ void __cdecl CG_Player(int32_t localClientNum, centity_s *cent)
 }
 void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *cent)
 {
-    char *AnimDebugName; // eax
-    char *v3; // eax
     int32_t v4; // eax
     double v5; // st7
     float v6; // [esp+18h] [ebp-1ACh]

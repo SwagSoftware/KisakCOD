@@ -450,7 +450,6 @@ void __cdecl FS_BuildOSPathForThread(const char *base, const char *game, const c
 int __cdecl FS_CreatePath(char *OSPath)
 {
     const char *v1; // eax
-    int v2; // eax
     char *ofs; // [esp+0h] [ebp-4h]
 
     v1 = strstr(OSPath, "..");
@@ -1263,7 +1262,6 @@ void FS_RegisterDvars()
 {
     char *v1; // eax
     char *v2; // eax
-    const dvar_s *result; // eax
     char *homePath; // [esp+0h] [ebp-4h]
 
     fs_debug = Dvar_RegisterInt("fs_debug", 0, (DvarLimits)0x200000000LL, DVAR_NOFLAG, "Enable file system debugging information");
@@ -2774,7 +2772,6 @@ int __cdecl FS_SV_FileExists(char *file)
 
 void __cdecl FS_Restart(int localClientNum, int checksumFeed)
 {
-    const char *v2; // eax
 
     FS_Shutdown();
     fs_checksumFeed = checksumFeed;

@@ -4229,7 +4229,6 @@ bool __cdecl Eval_AnyMissingOperands(const Eval *eval)
 
 EvalValue *__cdecl Eval_Solve(EvalValue *result, Eval *eval)
 {
-    int v3; // [esp+0h] [ebp-2Ch] BYREF
     const char *v5; // [esp+14h] [ebp-18h] BYREF
    // _DWORD pExceptionObject[5]; // [esp+18h] [ebp-14h] BYREF
 
