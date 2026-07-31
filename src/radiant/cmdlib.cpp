@@ -66,6 +66,27 @@ void Com_PrintMessage( const char *fmt, ... )
     }
 }
 
+// ---------------------------------------------------------------------------
+// R_Warn (0x40b630) — the editor's renderer-warning print.  Its IDB home is the
+// engine print-shim cluster (Com_Printf 0x40b5d0 / Com_PrintError 0x40b610 /
+// R_Warn 0x40b630), but it is defined HERE for the same reason Com_PrintMessage is:
+// console_stuff is a file-static of this TU.  The binary IGNORES the warning-type
+// argument entirely — it is a bare `if (console_stuff) console_stuff(fmt, va)` — so
+// this is byte-faithful and NOT the game's R_WarnOncePerFrame throttling.
+// Caller: VehiclePath_DrawPath (vehiclepath.cpp) on an infinite vehicle path.
+// ---------------------------------------------------------------------------
+void R_Warn( int warnType, const char *fmt, ... )
+{
+    (void)warnType;                  // faithful: the original never reads it
+    if ( console_stuff )
+    {
+        va_list args;
+        va_start( args, fmt );
+        console_stuff( fmt, args );
+        va_end( args );
+    }
+}
+
 // 0x40a980  QPrintf trampoline.
 void QPrintf( int level, const char *fmt, ... )
 {

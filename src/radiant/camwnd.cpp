@@ -2992,8 +2992,7 @@ void CCamWnd::Cam_ChangeFloor( CCamWnd *cam, int a2 )
 // cosHalfFov - i.e. a3 == (float*)&desc with cls reinterpreted at a3[0].
 #include "primarylights_region.h"
 extern char  *ValueForKey2( int e, const char *key );                      // entity.cpp 0x4825C0
-// Entity_GetIntValueForKey (0x483820) = atoi( ValueForKey2( e, key ) ).
-static int    Entity_GetIntValueForKey( int e, const char *key ) { return atoi( ValueForKey2( e, key ) ); }
+extern int    Entity_GetIntValueForKey( int e, const char *key );          // entity.cpp 0x483820
 extern bool   Entity_HasEpairMatch( entity_s *e, const char *key, const char *val ); // entity.cpp
 extern void   Entity_GetOrientation( entity_s_def *ent, orientation_t *orParent, orientation_t *orOut ); // entity.cpp
 extern char   FilterBrush( selbrush_t *b, int a2 );                        // filters.cpp 0x46A1F0

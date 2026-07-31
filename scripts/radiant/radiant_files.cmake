@@ -20,6 +20,7 @@ set(RADIANT_SRCS
     "${SRC_DIR}/radiant/winding.cpp"
     "${SRC_DIR}/radiant/linearmapping.cpp"  # universal/linearmapping.cpp — double 3x3 LU solver (texture-lock reproject)
     "${SRC_DIR}/radiant/linearmapping.h"
+    "${SRC_DIR}/radiant/vehiclepath.cpp"    # universal/g_vehicle_path.cpp — vehicle node graph + path-preview overlay
     "${SRC_DIR}/radiant/primarylights_region.cpp"  # light-region CSG (common/primarylights_region.cpp)
     "${SRC_DIR}/radiant/eclass.cpp"
     "${SRC_DIR}/radiant/brush.cpp"

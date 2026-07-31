@@ -2757,13 +2757,15 @@ static void Lines_AddLinkToScript()
 }
 
 // Ed_DrawConnectionLines - the DrawConnectionLinks (0x40c9f0) link-line tail, called from
-// OnPaint after the vertex/edge handles (that function's prefix).  VehiclePath_AddNode
-// (0x4b6710) remains a parked overlay.
-extern void Pointfile_Draw();   // points.cpp (0x48AE20)
+// OnPaint after the vertex/edge handles (that function's prefix).  The binary's tail is
+// exactly: Lines_AddLinkTo -> Lines_AddLinkToScript -> VehiclePath_AddNode -> Pointfile_Draw.
+extern void VehiclePath_AddNode();   // vehiclepath.cpp (0x4B6710)
+extern void Pointfile_Draw();        // points.cpp      (0x48AE20)
 void Ed_DrawConnectionLines()
 {
     Lines_AddLinkTo();
     Lines_AddLinkToScript();
+    VehiclePath_AddNode();      // vehicle-path preview for the selected info_vehicle_node
     Pointfile_Draw();           // IDB DrawConnectionLinks tail — draw the .lin leak path
 }
 

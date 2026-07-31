@@ -109,6 +109,18 @@ float Entity_GetFloatValueForKey( int e, const char *key )
     return (float)atof( s_emptyKeyValue );
 }
 
+// Entity_GetIntValueForKey (0x483820)
+// 0x483820: the same _stricmp epair walk as ValueForKey2 with an atol on the value;
+// not-found = atol("") = 0.  Lives here (its IDB home, between GetFloat 0x4837C0 and
+// GetVec3 0x483860); camwnd.cpp / vehiclepath.cpp declare it extern.
+int Entity_GetIntValueForKey( int e, const char *key )
+{
+    for ( epair_t *ep = *(epair_t **)( (char *)(intptr_t)e + 0x74 ); ep; ep = ep->next )
+        if ( !_stricmp( ep->key, key ) )
+            return atol( ep->value );
+    return atol( s_emptyKeyValue );
+}
+
 // HasKeyValuePair (0x4838B0)
 // 0x4838b0: strcmp (case-sensitive) epair-walk; returns bool.
 bool HasKeyValuePair( entity_s_def *e, const char *key )
