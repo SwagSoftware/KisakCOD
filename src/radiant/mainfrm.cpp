@@ -1451,7 +1451,9 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
     // 6b) Load the visibility filters (RadiantFilters.txt -> the 4 category lists); the binary
     //     does this in OnCreate (0x420a5e).  CLEAN cases only (4/5/8) - face + materialdef-
     //     coupled cases (3/6/7) are dropped at load (see filters.cpp), so FilterBrush never
-    //     evaluates a parked case.
+    //     evaluates a parked case. [STALE as of the filters unit: cases 3/6/7
+    //     (FilterCond_Material / _Misc / _SurfaceFlag) are all implemented in
+    //     filters.cpp and RadiantFilters parses every category — nothing is dropped.]
     Load_RadiantFilters();
     Radiant_RefreshFilterPane();    // populate the Filters inspector checklists now they're loaded
 
@@ -2387,13 +2389,35 @@ static void Radiant_CheckMenu( CMainFrame *frame, UINT id, bool checked )
 }
 
 // OnPrefs (IDB 0x426950) — Edit→Preferences. Opens the dialog (refreshes from the
-// registry, edits, saves on OK), then re-checks the Snap-to-grid menu item to match
-// the (possibly changed) m_bNoClamp and broadcasts a repaint. The binary's texture-
-// bar / view-restart / CTexWnd::UpdatePrefs tail is parked (those subsystems are P6+).
+// registry, edits, saves on OK), applies the settings that can change live, re-checks
+// the Snap-to-grid menu item to match the (possibly changed) m_bNoClamp, and broadcasts
+// a repaint.  The view-restart prompt + texture-bar re-apply were parked while the
+// texture bar was unported; CTextureBar shipped, so both are RESTORED (2026-07-31).
+// Still unported (each its own unit, NOT silent no-ops): CTexWnd::UpdatePrefs (0x45D9F0)
+// and the PMESH_49 (0x4495C0) tail.
 void CMainFrame::OnPrefs()
 {
+    // 0x426956: both captured BEFORE the dialog re-loads and edits the prefs.
+    const int oldTextureBar = g_PrefsDlg->m_bTextureBar;
+    const int oldView       = g_PrefsDlg->m_nView;
+
     if ( Prefs_ShowDialog( this ) == IDOK )
     {
+        // 0x42698f: the QE4-window-style change only takes effect on a restart.
+        if ( g_PrefsDlg->m_nView != oldView )
+            MessageBoxA( "You will need to restart CoD4Radiant for the view changes to take place.",
+                         "Radiant", MB_ICONINFORMATION );
+
+        // 0x4269bf: re-apply the texture-bar toggle. FAITHFUL BUG — the binary branches
+        // on the OLD value (`test ebx,ebx` at 0x4269c1, ebx = the pre-dialog setting),
+        // so inside the "it changed" arm it restores the PREVIOUS visibility instead of
+        // applying the new one. Transcribed as-is; do not "fix" without a ruling.
+        if ( oldTextureBar != g_PrefsDlg->m_bTextureBar )
+        {
+            ShowControlBar( &m_wndTextureBar, oldTextureBar ? TRUE : FALSE, TRUE );
+            ::InvalidateRect( m_wndTextureBar.GetSafeHwnd(), nullptr, TRUE );
+        }
+
         Radiant_CheckMenu( this, 32793, g_PrefsDlg->m_bNoClamp == 0 ); // snap = !NoClamp
         SetGridStatus();
         g_nUpdateBits = -1;

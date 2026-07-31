@@ -120,7 +120,9 @@ static int   Patch_CalcVertColors( patchMesh_t *p );
 static curvePatchDef_t *Patch_TerrainTexProject( patchMesh_t *p, int layer, float sampleSize ); // sub_439350
 static void  PMESH_02( patchMesh_t *p, int layer, float sampleSize );                            // 0x439580
 
-// Patch-inspector dialog refresh hooks (patchdialog.cpp is PARKED — GetHwnd() returns
+// Patch-inspector dialog refresh hooks (patchdialog.cpp SHIPPED — GetHwnd() returns the
+// live modeless CPatchInspectorDlg when open, null when it is not / headless; comment
+// below predates that port and is kept for the headless-behaviour note. GetHwnd() returns
 // null headless; GetPatchInfo() is a no-op).  Used by Patch_Move's GUI-guard tail.
 extern CWnd *g_PatchDialog_GetHwnd();
 extern void  g_PatchDialog_GetPatchInfo();
@@ -1388,9 +1390,9 @@ void Patch_BrushToMesh( char bCone, unsigned char bBevel, unsigned char bEndcap,
     p->texture  = *(patchMesh_material *)&def->faces->mtldef[0].lyrMtl;
     p->lightmap = *(patchMesh_material *)&def->faces->mtldef[1].lyrMtl;
 
-    // IDA order: Naturalize2 (+ PARKED PMESH_02 refinement) → curveDef → cone reshape
-    // → link.  Cone reshape AFTER Naturalize2 (matches the binary; the cone collapses
-    // each column's apex point to the bbox centre).
+    // IDA order: Naturalize2 → the two texCoord refinement passes → curveDef → cone
+    // reshape → link.  Cone reshape AFTER Naturalize2 (matches the binary; the cone
+    // collapses each column's apex point to the bbox centre).
     // IDA passes random_texture_stuff[0].sampleSize (the layer-0 default tex scale) as
     // BOTH scale args — NOT a hardcoded 0.25.  The GUI seeds sampleSize on init; headless
     // the test harness only memcpy's the MaterialDef (sizeof 0x24) into layer 0 and leaves
@@ -1402,12 +1404,20 @@ void Patch_BrushToMesh( char bCone, unsigned char bBevel, unsigned char bEndcap,
     if ( natScale == 0.0f )
         natScale = 0.25f;
     Patch_Naturalize2( p, 0, natScale, natScale );
-    // IDA sets size_0x504C = 16.0 AND bDirty = 1 here (0x43b1d3 / 0x43b1e0); the parked
-    // PMESH_02 texCoord refinement runs in between (skipped — see Patch_Rebuild).  bDirty
-    // gates the `size` field in Patch_Write, so without it a created patch would save
-    // `size 0` instead of `size 16` — set it to match the binary's serialized output.
+    // texCoord refinement passes (0x43b1a4-0x43b204) — identical shape to the sibling
+    // Patch_GenericMesh: layer 1 @ flt_6F427C (16.0), then size_0x504C = 16.0 / bDirty = 1
+    // (0x43b1d3 / 0x43b1e0), then layer 2 @ flt_6F42F0 (0.25). Restored 2026-07-31: these
+    // were parked while PMESH_02 / Patch_TerrainTexProject were unported, which left a
+    // newly-created cylinder/bevel/endcap/cone with only the linear Naturalize2 S/T.
+    // bDirty also gates the `size` field in Patch_Write (a created patch would otherwise
+    // save `size 0` instead of `size 16`).
+    const bool terrain = ( p->type & PATCH_TERRAIN ) != 0;
+    if ( terrain ) Patch_TerrainTexProject( p, 1, 16.0f );
+    else           PMESH_02( p, 1, 16.0f );
     *(float *)&p->size_of_struct_0x504C = 16.0f;
     p->bDirty = 1;
+    if ( terrain ) Patch_TerrainTexProject( p, 2, 0.25f );
+    else           PMESH_02( p, 2, 0.25f );
     if ( p->curveDef )
         free( p->curveDef );
     // STAGE 1: builds the tessellated curveDef render mesh (Bezier subdivision for the
@@ -1665,8 +1675,9 @@ selbrush_t *Patch_GenericTerrainMesh( int nWidth, int nHeight, int nOrientation,
 //   * the insert/remove POSITION is chosen by the `flag` arg (front vs back), NOT
 //     GtkRadiant's PointInMoveList vertex-selection scan;
 //   * REMOVE is a plain 2-column/row drop (no GtkRadiant extrapolation);
-//   * the tail refreshes CWnd_PatchDialog (parked) instead of Patch_EditPatch.
-//  The patch-dialog refresh tail (g_PatchDialog_GetPatchInfo) is GUI-only and PARKED.
+//   * the tail refreshes CWnd_PatchDialog instead of Patch_EditPatch (the patch
+//     inspector shipped with patchdialog.cpp; Patch_AdjustSelected 0x444550 has no
+//     refresh tail in the binary, verified — the refresh belongs to the callers).
 // ════════════════════════════════════════════════════════════════════════════
 
 // ─── terrain single-row/col helpers ──────────────────────────────────────────
@@ -1903,16 +1914,32 @@ void Patch_RemoveRow( patchMesh_t *p, char flag )
     // flag clear: drop the LAST 2 rows.
 }
 
-// ─── Patch_Rebuild (0x438D80) — bbox + curveDef rebuild ───────────────────────
+// ─── Patch_Rebuild (0x438D80) — texCoord refine + bbox + curveDef rebuild ─────
 //    The binary refines texCoords (PMESH_02/sub_439350) when bDirty, then rebuilds
 //    the symbiont bbox (Brush_RebuildBrush) and the curveDef (Patch_GenericMesh2).
-//    STAGE 1: the texCoord REFINEMENT stays PARKED (it only affects texturing, which
-//    the wireframe ignores; bDirty is left 0 by Patch_Naturalize2 so no refine is due),
-//    but the curveDef render mesh IS now rebuilt so an edited patch re-renders.
+//    The refinement block was parked while PMESH_02/Patch_TerrainTexProject were
+//    unported; both shipped with the terrain-texture unit, so it is RESTORED here
+//    (2026-07-31). Without it, every grid edit that routes through Patch_Rebuild
+//    (insert/remove row+column via Patch_AdjustSelected, OnDropSelectedRelativeZ)
+//    left the patch's S/T untouched, so edited patches kept pre-edit texturing.
 void Patch_Rebuild( patchMesh_t *p, char doBounds )   // non-static: OnDropSelectedRelativeZ calls it
 {
     if ( doBounds )
     {
+        if ( p->bDirty )
+        {
+            // 0x438d9b: sampleSize is SAVED to a stack slot, passed to the refine, then
+            // written BACK afterwards along with bDirty=1 — the refine may clobber both,
+            // and the binary deliberately preserves size / re-dirties. Layer is 1 for both
+            // branches (the bezier one passes it in ecx, which is why hex-rays drops it).
+            float sampleSize = *(float *)&p->size_of_struct_0x504C;
+            if ( ( p->type & PATCH_TERRAIN ) != 0 )
+                Patch_TerrainTexProject( p, 1, sampleSize );
+            else
+                PMESH_02( p, 1, sampleSize );
+            p->bDirty = 1;
+            *(float *)&p->size_of_struct_0x504C = sampleSize;
+        }
         float mins[3], maxs[3];
         Patch_CalcBounds( mins, maxs, p, true );
         Brush_RebuildBrush( (brush_t *)p->pSymbiot, mins, maxs );

@@ -37,11 +37,19 @@ typedef struct DXGI_JPEG_QUANTIZATION_TABLE
 } DXGI_JPEG_QUANTIZATION_TABLE;
 // --------------------------------------------------------------------------------
 
+// C4005 (macro redefinition): MFC's afxrendertarget.h includes <d2d1.h>, which the
+// DXSDK include dir shadows (same mechanism as the DXGI shim above). The June 2010
+// D2DErr.h then redefines every D2DERR_* the modern winerror.h already defined —
+// same values, different token spelling (MAKE_D2DHR vs _HRESULT_TYPEDEF_), hence
+// hundreds of warnings per TU. Scoped to the MFC includes only.
+#pragma warning(push)
+#pragma warning(disable: 4005)
 #include <afxwin.h>     // MFC core and standard components
 #include <afxext.h>     // MFC extensions (CFrameWnd helpers, control bars)
 #include <afxcmn.h>     // MFC support for Windows Common Controls
 #include <afxmt.h>      // MFC synchronization
 #include <afxtempl.h>   // MFC container templates
+#pragma warning(pop)
 
 // Standard C/C++
 #include <cstdio>

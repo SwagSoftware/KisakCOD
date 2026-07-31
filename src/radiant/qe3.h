@@ -310,6 +310,7 @@ struct LinkList_t
     bool overflowed;   // 0x1004  set when the 30-entry parse cap is hit
 };
 void Map_ParseLinkList( LinkList_t *buf, const char *linkTo );   // qe3.cpp 0x48BE20        // the winding cap the brush.cpp assert strings cite
+#define MAX_LINKS 4096   // script_link number census cap (map.cpp assert strings cite it)
 #define HIDDEN_SURFACE_OFFSET      (-3)
 #define ECLASS_PREFAB 0x10                // eclass_t.nShowFlags prefab-class bit (assert strings)
 

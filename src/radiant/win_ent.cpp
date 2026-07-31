@@ -23,8 +23,9 @@
 //     labels come from the eclass flagname0..7.
 //   * the ANGLE-button grid (Entity_SetAngles 0x494030, already in select.cpp) — the
 //     8 compass buttons set the "angles" YAW, up/down toggle the PITCH to ∓90.
-// PARKED (FATAL-free, no silent no-op): the model/prefab picker (OpenDialog /
-// IDC_E_ADD_MODEL), and the faithful SizeEntityDlg pixel layout.
+// The model/prefab picker (OpenDialog / IDC_E_ADD_MODEL) and the faithful SizeEntityDlg
+// pixel layout both SHIPPED; only the binary's CModelFileDialog preview PANE is still out
+// (a plain CFileDialog gives the identical pick — see CEntityWnd_OpenModelDialog).
 //
 // NO TAB STRIP.  The binary's inspector DOES carry a mode-switch tab (a CTabCtrl
 // g_wndTabsEntWnd, subclassed from IDC_E_TAB_CONTROL in the IDD_ENTITY dialog resource —
@@ -71,6 +72,8 @@ extern void        Undo_AddEntity_W( entity_s *e );                             
 extern void        Undo_End();                                                         // undo.cpp 0x45EA20
 
 extern void        Entity_SetAngles( float a1, int axis );                             // select.cpp 0x494030
+
+extern void        ScriptGroup_HasFlag( const char *key, int dlgItemID, HWND hDlg );   // scriptgroup.cpp 0x454E40
 
 extern CMainFrame *g_pParentWnd;                                                       // engine_stubs.cpp (CFileDialog parent)
 
@@ -594,13 +597,17 @@ int UpdateSelection( int wParam, eclass_t *cls )
         SetSpawnFlags();                 // reflect this entity's spawnflags into the boxes
         SetKeyValuePairs();
 
-        // IDA tail (PARKED): if ( IsWindowVisible(d_hwndMedia) ) {
-        //     ScriptGroup_HasFlag(1671, "script_flag_true",  d_hwndMedia);
-        //     ScriptGroup_HasFlag(1298, "script_flag_false", d_hwndMedia); }
-        // Reflects the selection's script_flag_true/false keys into the media window's two
-        // script-flag checkboxes. Depends on TWO un-ported pieces — ScriptGroup_HasFlag (0x454e40,
-        // catalogued in scriptgroup.cpp but not yet implemented) and the media window itself
-        // (d_hwndMedia is declared in qe3.h but never created). Restore when both land.
+        // IDA tail (0x4972a9) — RESTORED 2026-07-31. Reflects the selection's
+        // script_flag_true/false keys into the script-group (media) window's two flag
+        // listboxes. Was parked on two then-missing pieces; both landed with the
+        // script-group unit: ScriptGroup_HasFlag (0x454e40, scriptgroup.cpp) and
+        // d_hwndMedia (created by the script-group dialog's WM_INITDIALOG).
+        // IsWindowVisible(NULL) is FALSE, so this stays inert headless, as in the binary.
+        if ( ::IsWindowVisible( g_qeglobals.d_hwndMedia ) )
+        {
+            ScriptGroup_HasFlag( "script_flag_true",  1671, g_qeglobals.d_hwndMedia );
+            ScriptGroup_HasFlag( "script_flag_false", 1298, g_qeglobals.d_hwndMedia );
+        }
     }
     return 1;
 }

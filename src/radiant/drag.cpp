@@ -153,7 +153,7 @@ float  g_vRotation[3];           // 0x23f164c
 // IDB 0x23f1658: g_vRotateOrigin[3] (center of rotation)
 float  g_vRotateOrigin[3];       // 0x23f1658
 // IDB 0x231f548: g_vBendOrigin[3] (patch-bend origin; written by XY_MouseDown's
-// rotate/bend branch, read by the parked patch-bend MoveSelection path).
+// rotate/bend branch, read by the patch-bend MoveSelection path below).
 float  g_vBendOrigin[3];         // 0x231f548
 
 // IDB 0x23f16f8: selected_brushes_next is a pointer to the second element of

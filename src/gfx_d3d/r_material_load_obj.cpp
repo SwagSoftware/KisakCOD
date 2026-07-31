@@ -1807,8 +1807,6 @@ static bool Material_FindCachedShader2(uint32_t *shaderLen, void **cachedShader,
 
 static bool Material_CopyTextToDXBuffer2(uint32_t shaderHash, ID3DXBuffer **shader, const char *targetprefix)
 {
-    const char *v3; // eax
-    uint8_t *v5; // eax
     int hr; // [esp+0h] [ebp-4h]
 
     char buffer[260];

@@ -253,8 +253,8 @@ int ScriptGroup_RemoveKeyFromSelectedTriggers( const char *key, const char *valu
 // SCOPE NOTE — this is NOT the colour-token machinery (ScriptGroup_RemoveColors[_02]
 // / ScriptGroup_Color / the single-char ScriptColorKey "r/b/y/c/g/p/o" codes).  Those
 // edit a DIFFERENT key (g_PrefsDlg->ScriptColorTeamKey, a space-separated list of
-// <colourCode><number> tokens) and remain PARKED with the Script-Group MFC dialog
-// (see the worklist below).  AssignNextNumber writes a single SCALAR number under
+// <colourCode><number> tokens) and are implemented separately, with the Script-Group
+// MFC dialog, further down this file.  AssignNextNumber writes a single SCALAR number under
 // ScriptGroupKey via SetKeyValue (wholesale replace), so its faithful inverse is a
 // plain DeleteKey of that key — ScriptGroup_RemoveAssignedNumber below (NOT
 // ScriptGroup_RemoveColors, which is the colour-list subsystem).
@@ -279,7 +279,7 @@ void VehicleDlg_SetScriptGroupKey( const char *key )
 // AssignNextNumber does SetKeyValue(def, ScriptGroupKey, "<N>") — a wholesale scalar
 // write — so removing it is a plain DeleteKey of that key on every selected non-world
 // entity.  (This is the number subsystem's inverse; the colour-LIST inverse is the
-// PARKED ScriptGroup_RemoveColors[_02], a different key + token-strip.)  Used by the
+// ScriptGroup_RemoveColors[_02] below, a different key + token-strip.)  Used by the
 // scriptgrpcolor gate to verify assign → remove → gone.
 void ScriptGroup_RemoveAssignedNumber( const char *key )
 {

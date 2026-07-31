@@ -111,6 +111,12 @@ extern int          Entity_GetVec3ForKey( entity_s_def *e, float *out, const cha
 extern void         SetKeyValue( entity_s_def *e, const char *key, const char *value );
 extern void         Entity_WriteSelected( entity_s_def *ent, WriteFunc_map_t **writer );
 extern void         Entity_FreePrefab( entity_s *e );
+extern char        *ValueForKey2( int e, const char *key );                     // entity.cpp 0x4825C0
+extern bool         Entity_NeedsAutoExportId( entity_s_def *def );              // entity.cpp 0x487B10
+extern void         DeleteKey( epair_t **head, const char *key );               // entity.cpp 0x483720
+extern void         Checkkey_Model( entity_s_def *e, const char *key );         // entity.cpp 0x482F70 (Checkkey_Model_0)
+extern void         Checkkey_Color( entity_s_def *e, const char *key );         // entity.cpp 0x483210
+extern char        *va( const char *fmt, ... );                                 // q_shared
 
 // brush.cpp
 extern void         Brush_Free( selbrush_t *b );
@@ -1923,9 +1929,10 @@ done:
 // back into live brushes/entities and selects them. This is the engine behind
 // CXYWnd::Paste and (in the binary) Clone_Selection. The parse machinery is the
 // proven ParseEntity / Brush_Parse / Prefab_Init chain (same as Map_LoadEntities).
-// 0x487c90: SUBSET: Implemented core (worldspawn
-// merge, undo-stamp loops @0x10/0x7C, version bumps brush_t@0x4E 16-bit, classtype & 0x10) all
-// FAITHFUL; parked auto-target/targetname/script_link renumber + OLE clipboard documented. map.cpp asserts KEEP_VERBOSE.
+// 0x487c90: FULL: core (worldspawn merge, undo-stamp loops @0x10/0x7C, version bumps
+// brush_t@0x4E 16-bit, classtype & 0x10) + the auto-target/targetname/script_link
+// renumber (census, CMapStringToString remap, link-number remap, self-loop dedup).
+// map.cpp asserts KEEP_VERBOSE.
 //
 // Faithful to the IDB control flow (0x487C90):
 //   1. Select_Deselect(1); Undo bracket ("import buffer"); d_parsed_brushes = 0.
@@ -1939,13 +1946,18 @@ done:
 //   3. Final pass: instance the model for misc_model/prefab entities (classtype&0x10),
 //      rebuild windings on the freshly-selected brushes, MarkMapModified, Undo_End.
 //
-// KISAK, deliberate subset: the auto-target/targetname RENUMBERING (the binary's
-// CMapStringToString remap that rewrites pasted target/targetname/script_link* to fresh
-// "auto%i" ids via Map_GetNextAutoTarget so a paste-on-top doesn't collide) and the
-// script_linkName/script_linkTo link-number renumbering (Map_ParseLinkList @0x48BE20).
-// Effect: pasted entities keep their ORIGINAL target/targetname/link ids — identical to
-// the existing in-memory Clone_Selection (clones land coincident, references intact).
-// All map geometry, epairs, layers, selection, and undo are faithful and round-trippable.
+// Auto-renumber (formerly parked, implemented 2026-07-31 from the IDB):
+//   4. Before the parse loop: seed autoTarget = Map_GetNextAutoTarget(); census every
+//      active brush's owner script_linkName/script_linkTo numbers (deduped) and
+//      generate a fresh replacement number per existing number.
+//   5. Per pasted entity (skipped when g_bRestoreBetween): target/targetname colliding
+//      with an existing entity remap through a shared CMapStringToString to "auto%i"
+//      (only values starting "auto" are rewritten); script_linkName/script_linkTo
+//      numbers colliding with the census remap to their fresh replacements;
+//      Entity_NeedsAutoExportId entities get a fresh "export" id.
+//   6. Final pass strips a pasted entity whose target == its own targetname (both keys).
+// The binary's CString locals v108/v111 (copies of the remapped names) are write-only —
+// dead stores kept alive by CString refcounting — and are not reproduced.
 // ─────────────────────────────────────────────────────────────────────────────
 char *Map_ImportBuffer( const char **text, int version )
 {
@@ -1954,8 +1966,83 @@ char *Map_ImportBuffer( const char **text, int version )
     Undo_GeneralStart( "import buffer" );
     g_qeglobals.d_parsed_brushes = 0;
 
-    // (PARKED) auto-target seed + link-number map are built here in the binary; skipped.
-    (void)Map_GetNextAutoTarget;
+    // ── Auto-target seed + script_link number census (IDB 0x487db0-0x488035).
+    //    Walk every ACTIVE brush's owner-entity and collect the script_linkName /
+    //    script_linkTo numbers already used in the scene (deduped), then generate a
+    //    fresh replacement number for each (smallest positive int not used in the
+    //    scene and not already handed out).
+    int autoTarget = Map_GetNextAutoTarget();
+
+    int linkNums[MAX_LINKS];     // IDB v102[4096..8191] — numbers already in the scene
+    int newLinkNums[MAX_LINKS];  // IDB v102[0..4095]    — fresh replacement per existing number
+    int linkTotal = 0;
+    LinkList_t links;            // IDB v103/v104 — Map_ParseLinkList parse buffer
+
+    for ( selbrush_t *ab = active_brushes.next; ab != &active_brushes; ab = ab->next )
+    {
+        entity_s_def *ownerDef = (entity_s_def *)ab->owner->def;
+
+        const char *ln = ValueForKey2( (int)(intptr_t)ownerDef, "script_linkName" );
+        if ( *ln )
+        {
+            int num = (int)atol( ln );
+            int k = 0;
+            while ( k < linkTotal && linkNums[k] != num )
+                ++k;
+            if ( k >= linkTotal )
+            {
+                linkNums[linkTotal++] = num;
+                iassert(linkTotal < MAX_LINKS);   // map.cpp:1006
+            }
+        }
+
+        const char *lt = ValueForKey2( (int)(intptr_t)ownerDef, "script_linkTo" );
+        if ( *lt )
+        {
+            Map_ParseLinkList( &links, lt );
+            iassert(links.size <= MAX_LINKS);   // map.cpp:1015
+            for ( int i = 0; i < links.size; ++i )
+            {
+                int num = links.id[i];
+                int k = 0;
+                while ( k < linkTotal && linkNums[k] != num )
+                    ++k;
+                if ( k >= linkTotal )
+                {
+                    linkNums[linkTotal++] = num;
+                    iassert(linkTotal < MAX_LINKS);   // map.cpp:1036
+                }
+            }
+        }
+    }
+
+    for ( int j = 0; j < linkTotal; ++j )
+    {
+        int  newNum = 0;
+        bool inExisting;
+        do
+        {
+            for ( ;; )
+            {
+                ++newNum;
+                inExisting = false;
+                for ( int k = 0; k < linkTotal; ++k )
+                    if ( linkNums[k] == newNum ) { inExisting = true; break; }
+                bool handedOut = false;
+                for ( int k = 0; k < j; ++k )
+                    if ( newLinkNums[k] == newNum ) { handedOut = true; break; }
+                if ( !handedOut )
+                    break;
+            }
+        }
+        while ( inExisting );
+        iassert(newNum != 0);   // map.cpp:1067
+        newLinkNums[j] = newNum;
+    }
+
+    // old target/targetname → fresh "auto%i" name, shared across all pasted entities
+    // (IDB 0x48804f — CMapStringToString, default block size 10).
+    CMapStringToString targetRemap;
 
     g_qeglobals.d_num_entities = 0;
 
@@ -2034,7 +2121,94 @@ char *Map_ImportBuffer( const char **text, int version )
         //    into the `entities` list, then select every instance brush.
         entity_s *inst = Prefab_Init( (prefab_s *)&entityInsts, eDef, &active_brushes );
 
-        // (PARKED) target/targetname/script_link* auto-renumber happens here in the binary.
+        // ── Auto-renumber (IDB 0x48828b-0x488886): rewrite pasted target/targetname/
+        //    script_link* ids that collide with entities already in the map, so a
+        //    paste-on-top doesn't cross-wire the existing entities. Skipped for the
+        //    between-maps clipboard restore (g_bRestoreBetween), exactly as the binary.
+        if ( !g_bRestoreBetween )
+        {
+            // target: colliding with an existing entity's "target" → remapped "auto%i".
+            // Only values that themselves start with "auto" are rewritten (0x488405).
+            CString oldVal = ValueForKey2( (int)(intptr_t)eDef, "target" );
+            if ( !oldVal.IsEmpty() )
+            {
+                entity_s *match = entities.next;
+                while ( match != &entities && !Entity_HasEpairMatch( match, "target", oldVal ) )
+                    match = match->next;
+                if ( match != &entities )
+                {
+                    CString newName;
+                    if ( !targetRemap.Lookup( oldVal, newName ) )
+                    {
+                        newName = VA( 0, "auto%i", autoTarget );
+                        ++autoTarget;
+                        targetRemap.SetAt( oldVal, newName );
+                    }
+                    if ( !strncmp( oldVal, "auto", 4 ) )
+                        SetKeyValue( eDef, "target", newName );
+                }
+            }
+
+            // auto export id (IDB 0x48842c): script_struct-class entities get a fresh one.
+            if ( Entity_NeedsAutoExportId( eDef ) )
+                SetKeyValue( eDef, "export", Map_GetNextExportId( 0 ) );
+
+            // targetname: same remap table as target (a target/targetname PAIR maps to
+            // the same fresh name, keeping intra-paste references wired together).
+            oldVal = ValueForKey2( (int)(intptr_t)eDef, "targetname" );
+            if ( !oldVal.IsEmpty() )
+            {
+                entity_s *match = entities.next;
+                while ( match != &entities && !Entity_HasEpairMatch( match, "targetname", oldVal ) )
+                    match = match->next;
+                if ( match != &entities )
+                {
+                    CString newName;
+                    if ( !targetRemap.Lookup( oldVal, newName ) )
+                    {
+                        newName = VA( 0, "auto%i", autoTarget );
+                        ++autoTarget;
+                        targetRemap.SetAt( oldVal, newName );
+                    }
+                    if ( !strncmp( oldVal, "auto", 4 ) )
+                        SetKeyValue( eDef, "targetname", newName );
+                    else
+                        SetKeyValue( eDef, "targetname", oldVal );   // binary re-sets the original (0x488622)
+                }
+            }
+
+            // script_linkName: a number already used in the scene → its fresh replacement.
+            const char *ln = ValueForKey2( (int)(intptr_t)eDef, "script_linkName" );
+            if ( *ln )
+            {
+                int num = (int)atol( ln );
+                int k = 0;
+                while ( k < linkTotal && linkNums[k] != num )
+                    ++k;
+                if ( k < linkTotal )
+                    SetKeyValue( eDef, "script_linkName", VA( 0, "%i", newLinkNums[k] ) );
+            }
+
+            // script_linkTo: renumber each colliding id in the list; non-colliding ids
+            // pass through unchanged. Rebuilt as "%i %i ... " like the binary (0x488827).
+            const char *lt = ValueForKey2( (int)(intptr_t)eDef, "script_linkTo" );
+            if ( *lt )
+            {
+                Map_ParseLinkList( &links, lt );
+                iassert(links.size <= MAX_LINKS);   // map.cpp:1192
+                char linkBuf[1024];                  // IDB v116
+                linkBuf[0] = 0;
+                for ( int i = 0; i < links.size; ++i )
+                {
+                    int num = links.id[i];
+                    int k = 0;
+                    while ( k < linkTotal && linkNums[k] != num )
+                        ++k;
+                    strcat( linkBuf, va( "%i ", k < linkTotal ? newLinkNums[k] : num ) );
+                }
+                SetKeyValue( eDef, "script_linkTo", linkBuf );
+            }
+        }
 
         // Splice the DEF onto the `entities` list (TAIL insert — IDB 0x488894).
         eDef->next            = &entities;
@@ -2063,11 +2237,11 @@ char *Map_ImportBuffer( const char **text, int version )
         }
     }
 
-    // ── Final pass B: rebuild windings on the freshly-selected brushes (IDB 0x4889B8-end).
-    //    The binary also dedups a target/targetname pair between two newly-selected ents
-    //    when they accidentally collide; that belongs to the PARKED auto-rename path
-    //    (no collisions are introduced without renumbering), so only the windings rebuild
-    //    + MarkMapModified survive here.
+    // ── Final pass B: rebuild windings on the freshly-selected brushes, then strip
+    //    self-loops (IDB 0x4889B8-end): a pasted entity whose "target" now equals its
+    //    own "targetname" (the renumber mapped both through the same table) gets BOTH
+    //    keys removed — DeleteKey doesn't fire the Checkkey_* revalidation, so the
+    //    binary calls them explicitly after each delete.
     for ( selbrush_t *sb = selected_brushes.next; sb != &selected_brushes; sb = sb->next )
     {
         brush_t *def = sb->def;
@@ -2076,6 +2250,25 @@ char *Map_ImportBuffer( const char **text, int version )
             SetupVertexSelection();
         MarkMapModified();
         ++def->version;
+
+        entity_s_def *ownerDef = (entity_s_def *)sb->owner->def;
+        if ( !Entity_HasEpairMatch( (entity_s *)ownerDef, "classname", "worldspawn" ) )
+        {
+            // key lookup case-insensitive, VALUE compare case-sensitive (0x488ae6);
+            // both default to "" — an entity with neither key also compares equal,
+            // making the deletes no-ops (faithful to the binary).
+            const char *tgt = ValueForKey2( (int)(intptr_t)ownerDef, "target" );
+            const char *tnm = ValueForKey2( (int)(intptr_t)ownerDef, "targetname" );
+            if ( !strcmp( tgt, tnm ) )
+            {
+                DeleteKey( &ownerDef->epairs, "targetname" );
+                Checkkey_Model( ownerDef, "targetname" );
+                Checkkey_Color( ownerDef, "targetname" );
+                DeleteKey( &ownerDef->epairs, "target" );
+                Checkkey_Model( ownerDef, "target" );
+                Checkkey_Color( ownerDef, "target" );
+            }
+        }
     }
 
     g_nUpdateBits = -1;

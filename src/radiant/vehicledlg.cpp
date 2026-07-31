@@ -14,7 +14,7 @@
 //     "script_turretmg"    1/0   "script_turret" 1/0
 //     "script_badplace"    1/0   "script_avoidvehicles" 1/0
 //     "script_attackai"    1/0   "script_crashtype" default/plane/forced (combo 0x460700)
-//   SCRIPT-GROUP buttons (the PARKED colour/number machinery — see below):
+//   SCRIPT-GROUP buttons (scriptgroup.cpp colour/number machinery — see below):
 //     "script_vehiclespawngroup" "script_vehiclestartmove" "script_vehiclegroupdelete"
 //     "script_vehicleride" "script_vehiclewalk" "script_vehicleattackgroup"
 //     "script_vehiclefocusfiregroup" "script_vehicledetour" "script_gatetrigger"
@@ -115,8 +115,8 @@ void VehicleDlg_RemovePair( const char *key )
 // EDIT rows (label + edit + [Set] [Clear]) for the four free-value keys, plus a row of
 // on/off toggle pushbuttons for the boolean keys, plus a crash-type combo.  Set pushes
 // the field/state onto the selected vehicle entities (SetPair); Clear removes the key
-// (RemovePair).  Faithful to the binary's controls; the SCRIPT-GROUP buttons (the parked
-// colour/number machinery) are deliberately omitted.
+// (RemovePair).  Faithful to the binary's controls, including the 10 SCRIPT-GROUP
+// buttons (IDC_VEH_SG_*, handled by OnScriptGroup → VehicleDlg_SetScriptGroupKey).
 
 enum
 {

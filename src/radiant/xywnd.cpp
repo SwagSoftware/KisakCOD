@@ -1160,9 +1160,9 @@ static void       CreateEntityFromClassname( CXYWnd *xywnd, const char *classnam
 extern const char *Ed_SelectedEclassName();                                          // win_ent.cpp — the eclass picked in the entity window
 extern void        Ed_PostAddModelCommand();                                         // win_ent.cpp — post IDC_E_ADD_MODEL to the entity window (model picker)
 
-// Minimal RMB context-menu hook state (the full eclass-tree menu 0x467100 is parked):
-// set true when an RMB drag actually scrolls the view, so OnRButtonUp can tell a
-// context-click (no scroll) from a scroll-release.
+// RMB context-menu hook state (consumed by CXYWnd::ContextMenu, the full 0x467100
+// eclass-tree menu, ported below): set true when an RMB drag actually scrolls the view,
+// so OnRButtonUp can tell a context-click (no scroll) from a scroll-release.
 static bool       s_rmbScrolled = false;
 
 // ─── XY_MouseDown dispatch helpers (clone / nudge / camera-set branches) ──────────
@@ -3414,14 +3414,18 @@ void CreateEntityFromName( const char *str )
         else
         {
             // misc_model / misc_prefab / script_model / script_vehicle / dyn_model: the
-            // binary sets the inspector to W_ENTITY (CEntityWnd_SetInspectorMode(128),
-            // parked) then POSTS WM_COMMAND IDC_E_ADD_MODEL to the entity window, whose
+            // binary sets the inspector to W_ENTITY (CEntityWnd_SetInspectorMode(128))
+            // then POSTS WM_COMMAND IDC_E_ADD_MODEL to the entity window, whose
             // proc pops the model/prefab file picker (→ SetKeyValue("model", name)).
             // The entity (with its bbox) is ALREADY created by Entity_Create above; the
             // picker only adds the "model" epair.  We post the same command so the
             // picker runs in the GUI; headless (no entity window) it is a clean no-op —
             // the model-less misc_model bbox stands, and the model_gate exercises the
             // picker's commit core (Ed_CommitPickedModel) directly.  (was: FATAL stub)
+            // The mode switch was parked on CEntityWnd_SetInspectorMode; that shipped with
+            // the inspector-mode unit, so the W_ENTITY switch is RESTORED (2026-07-31) —
+            // without it the picker can pop behind a Textures/Console/Filters inspector.
+            CEntityWnd_SetInspectorMode( INSPECTOR_ENTITY );   // 128
             Ed_PostAddModelCommand();
         }
 
