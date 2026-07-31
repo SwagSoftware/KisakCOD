@@ -6,9 +6,11 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
-# Add a custom target to increment the build number
+# Add a custom target to update the build number. The -P script only rewrites
+# buildnumber.h when the number actually changes, so an unchanged build number
+# no longer recompiles buildnumber.cpp / forces a relink every build.
 add_custom_target(
   update_build_number
-  COMMAND ${SCRIPTS_DIR}/increment_build${SCRIPT_EXT} ${SRC_DIR} ${GIT_COMMIT_COUNT}
-  COMMENT "Running build number script..."
+  COMMAND ${CMAKE_COMMAND} -DSRC_DIR=${SRC_DIR} -DBUILD_NUMBER=${GIT_COMMIT_COUNT} -P ${SCRIPTS_DIR}/extern/write_build_number.cmake
+  COMMENT "Checking build number..."
 )
