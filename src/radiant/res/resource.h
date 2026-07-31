@@ -98,7 +98,8 @@
 // Help→Command list... (CCommandsDlg, IDB CommandlistDlg_Prolog 0x40B750 pushes 0x84).
 #define IDD_DLG_COMMANDLIST                                132
 #define IDD_FIND_REPLACE_TEXTURE_S                         147     
-#define IDD_INFORMATION                                    150     
+#define IDD_INFORMATION                                    150
+#define IDC_INFO_TEXT                                      1136    // the IDD_INFORMATION message edit (PE template)
 #define IDD_PROJECT_SETTINGS                               153     
 #define IDD_DLG_154                                        154     
 #define IDD_ADD_COMMAND                                    155     

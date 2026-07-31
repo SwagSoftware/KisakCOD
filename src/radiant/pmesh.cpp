@@ -1951,6 +1951,28 @@ void Patch_Rebuild( patchMesh_t *p, char doBounds )   // non-static: OnDropSelec
     ++p->version;
 }
 
+// ─── PMESH_49 (0x4495C0) — regenerate EVERY active patch's curveDef ───────────
+//   Same curveDef free/rebuild/version-bump as Patch_Rebuild's tail, applied to every
+//   patch in active_brushes. Called by CMainFrame::OnPrefs (0x426a2d) because the
+//   render mesh is built for g_qeglobals.current_edit_layer, and the prefs dialog can
+//   change which layer that is — without this, patches keep meshes tessellated for the
+//   old layer until each is edited.
+void PMESH_49()
+{
+    for ( selbrush_t *b = active_brushes.next; b && b != &active_brushes; b = b->next )
+    {
+        if ( !b->patch )
+            continue;
+        iassert( b->patch->def == b->def->patch );   // PMESH.CPP:7147
+        patchMesh_t *def = b->patch->def;
+        if ( def->curveDef )
+            free( def->curveDef );
+        curvePatchDef_t *mesh = Patch_GenericMesh2( def, g_qeglobals.current_edit_layer, 0, 0 );
+        ++def->version;
+        def->curveDef = mesh;
+    }
+}
+
 // ─── Patch_AdjustSelected (0x444550) — apply insert/remove to every selected patch ─
 void Patch_AdjustSelected( char bInsert, char bColumn, char bFlag )
 {
@@ -5281,15 +5303,21 @@ void Patch_TurnEdge( int org, int dir )
 //  PATCH BEND MODE - the Curve->Bend interactive editing mode: pick a rotation axis (a
 //  whole row/column), pick the "normal" portion of the patch that bends, set the rotate
 //  origin, then drag to bend.
-//  KISAK: the bend-state INFO DIALOG (ShowInfoDialog / off_25D5BF0, the "select rotation
-//  axis..." prompt) is unported MFC-dialog territory, so its calls are deferred - as with
-//  the other patch dialog-refresh hooks here.  Mode state, axis selection and the rotate
-//  origin are set identically to the binary.
+//  The bend-state INFO DIALOG (ShowInfoDialog / off_25D5BF0, the "select rotation
+//  axis..." prompt) shipped with patchdialog.cpp (IDD_INFORMATION, PE resource 150), so
+//  its calls are live.  Mode state, axis selection and the rotate origin are set
+//  identically to the binary.
 // ════════════════════════════════════════════════════════════════════════════
 
 extern signed int QE_SingleBrush();                         // qe3.cpp 0x48C8B0
 extern float      g_vBendOrigin[3];                         // drag.cpp 0x231F548
 extern float      g_vRotateOrigin[3];                       // drag.cpp 0x23F1658
+
+// patchdialog.cpp — the modeless "Information" state prompt (0x40BE90) + its messages.
+extern void        ShowInfoDialog( const char *msg );
+extern void        HideInfoDialog();
+extern const char *g_pBendStateMsg[4];                      // 0x73B114
+extern const char *g_pInsDelStateMsg;                       // 0x73B128
 
 // Bend-mode state (IDB globals; defined here — pmesh is the patch home).
 int  g_nPatchBendState = 0;     // 0x73B10C  bend state machine (0 = BEND_SELECT_ROTATION)
@@ -5322,7 +5350,7 @@ void Patch_InsDelToggle()
     if ( g_qeglobals_redispersePatchVerts )
     {
         g_qeglobals_redispersePatchVerts = 0;
-        // [DEFERRED] if the redisperse info dialog is shown, hide it (off_25D5BF0).
+        HideInfoDialog();                                 // 0x447e71
         CMainFrame_UpdatePatchToolbarButtons();
     }
     else
@@ -5341,7 +5369,7 @@ void Patch_InsDelToggle()
             g_nPatchInsertState = 0;
             g_bPatchAxisOnRow   = 1;
             g_nPatchAxisIndex   = 0;
-            // [DEFERRED] ShowInfoDialog(g_pInsDelStateMsg) — parked redisperse prompt window.
+            ShowInfoDialog( g_pInsDelStateMsg );          // 0x447f01
         }
         else
         {
@@ -5505,7 +5533,7 @@ void Patch_BendToggle()
     if ( g_bPatchBendMode )
     {
         g_bPatchBendMode = 0;
-        // [DEFERRED] hide the bend-state info dialog (off_25D5BF0) — parked MFC dialog.
+        HideInfoDialog();                                 // 0x447909
         CMainFrame_UpdatePatchToolbarButtons();
         return;
     }
@@ -5527,13 +5555,45 @@ void Patch_BendToggle()
             g_nPatchBendState = 0;      // BEND_SELECT_ROTATION
             g_bPatchAxisOnRow = 1;
             g_nPatchAxisIndex = 1;
-            // [DEFERRED] ShowInfoDialog(g_pBendStateMsg[BEND_SELECT_ROTATION]) — parked dialog.
+            ShowInfoDialog( g_pBendStateMsg[0] );   // 0x447979 (BEND_SELECT_ROTATION)
         }
     }
     else
     {
         Sys_Printf( "Must bend a single patch\n" );
     }
+}
+
+// ── Patch_BendHandleEnter (0x447b70) — ENTER advances the bend state machine ──
+//  0 (pick bend axis) → 1 (pick rotation axis/origin) → 2 (pick which side) → 3 (drag),
+//  showing the prompt for the NEW state each step; ENTER at state 3 accepts and leaves
+//  bend mode.  Entering state 1 zeroes the origin and calls TAB once to seed the first
+//  candidate; entering state 2 arms g_bPatchLowerEdge.
+//  Was unwired (CMainFrame::OnClipSelected's bend arm was inert), so bend mode could
+//  never progress past its first state — restored 2026-07-31 with ShowInfoDialog.
+void Patch_BendHandleEnter()
+{
+    if ( !g_bPatchBendMode )
+        return;
+    if ( g_nPatchBendState >= 3 )      // 0x447b7e: last state — ENTER accepts the bend
+    {
+        Patch_BendToggle();
+        g_nUpdateBits = -1;
+        return;
+    }
+    g_nPatchBendState = g_nPatchBendState + 1;
+    ShowInfoDialog( g_pBendStateMsg[g_nPatchBendState] );
+    if ( g_nPatchBendState == 1 )
+    {
+        g_nBendOriginIndex = 0;
+        g_vBendOrigin[0] = g_vBendOrigin[1] = g_vBendOrigin[2] = 0.0f;
+        Patch_BendHandleTAB();         // seed the first rotation-axis candidate
+    }
+    else if ( g_nPatchBendState == 2 )
+    {
+        g_bPatchLowerEdge = 1;
+    }
+    g_nUpdateBits = -1;
 }
 
 // ── Patch_Deselect (0x442610) — leave every patch-edit mode ───────────────────

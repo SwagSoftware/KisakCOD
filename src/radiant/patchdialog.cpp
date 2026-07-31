@@ -248,6 +248,61 @@ void AdvPatchEdit_Toggle( CWnd *parent )
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
+//  ShowInfoDialog (0x40BE90) — the modeless "Information" state prompt.
+//
+//  A caption-only popup holding one disabled multiline edit (IDD_INFORMATION, PE
+//  resource 150).  Patch BEND and INSERT/DELETE mode use it to tell the user which
+//  key does what for the current sub-state; the message pointer is one of the
+//  g_pBendStateMsg / g_pInsDelStateMsg literals below.
+//
+//  The binary keeps the dialog in a static object (off_25D5BF0) and tests its m_hWnd
+//  (dword_25D5C10 == object+0x20) to decide whether to Create it; this port uses a
+//  lazily-new'd pointer, the same idiom as g_pAdvPatchDlg above.  SetFocus back to the
+//  main frame is faithful (0x40bec7) — the prompt must never steal keyboard focus, or
+//  the TAB/ENTER/ESC keys the message describes would go to the prompt instead of the
+//  view that implements the mode.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Bend-state prompts, indexed by g_nPatchBendState + 1 (IDB g_pBendStateMsg 0x73B114).
+const char *g_pBendStateMsg[4] =
+{
+    "Use TAB to cycle through available bend axis. Press ENTER when the desired one is highlighted.",
+    "Use TAB to cycle through available rotation axis. This will LOCK around that point. You may also use Shift + Middle Click to select an arbitrary point. Press ENTER when the desired one is highlighted",
+    "Use TAB to choose which side to bend. Press ENTER when the desired one is highlighted.",
+    "Use the MOUSE to bend the patch. It uses the same ui rules as Free Rotation. Press ENTER to accept the bend, press ESC to abandon it and exit Bend mode",
+};
+
+// Insert/delete (redisperse) prompt (IDB off_73B128[0] 0x73B128).
+const char *g_pInsDelStateMsg = "Use TAB to cycle through available rows/columns for insertion/deletion. Press INS to insert at the highlight, DEL to remove the pair";
+
+static CDialog *g_pInfoDlg = nullptr;   // IDB off_25D5BF0
+
+void ShowInfoDialog( const char *msg )
+{
+    if ( !g_pInfoDlg || !g_pInfoDlg->GetSafeHwnd() )       // IDB: if ( !dword_25D5C10 )
+    {
+        if ( !g_pInfoDlg )
+            g_pInfoDlg = new CDialog();
+        g_pInfoDlg->Create( IDD_INFORMATION, AfxGetMainWnd() );
+    }
+    if ( !g_pInfoDlg->GetSafeHwnd() )
+        return;                                            // PORT guard: headless / no resources
+    g_pInfoDlg->SetDlgItemTextA( IDC_INFO_TEXT, msg );     // IDB off_25D5C64 = the edit member
+    g_pInfoDlg->ShowWindow( SW_SHOW );
+    // 0x40bec7: SetFocus(g_pParentWnd). g_pParentWnd IS the main frame, and mainfrm.h is
+    // only included further down this TU, so go through AfxGetMainWnd() (same window).
+    if ( CWnd *mainWnd = AfxGetMainWnd() )
+        mainWnd->SetFocus();
+}
+
+// The hide half (CWnd::ShowWindow(&off_25D5BF0, SW_HIDE), guarded by dword_25D5C10).
+void HideInfoDialog()
+{
+    if ( g_pInfoDlg && g_pInfoDlg->GetSafeHwnd() )
+        g_pInfoDlg->ShowWindow( SW_HIDE );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 //  sub_401DB0 (mode selector) + sub_43E6F0 (the addpoint PAINT DRAG) — paint epic 7.
 //  This is the bridge from a mouse drag (Drag_MouseMoved sel_addpoint+Alt) to the apply
 //  chain: pick the terrain cell (sub_43DD50), read the dialog's channel checkboxes + mode,

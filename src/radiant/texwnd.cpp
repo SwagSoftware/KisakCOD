@@ -1182,6 +1182,27 @@ void CTexWnd::UpdateScrollRange()
     }
 }
 
+// ─── CTexWnd::UpdatePrefs (0x45D9F0) — re-apply the texture-browser prefs ─────
+//   Called by CMainFrame::OnPrefs after the dialog closes. Shows/hides the search box
+//   and the vertical scrollbar per prefs, invalidates the scroll range, repaints.
+//
+//   PORT DIVERGENCE: the binary's search box is a CWnd embedded immediately after the
+//   CTexWnd base (hex-rays renders it as `wnd + 1`); this port has no search control,
+//   so only its 25px top inset (textureOffset) is reproduced — the field is otherwise
+//   inert here. m_bTextureWindowSearch defaults OFF, so the common path is offset 0.
+BOOL CTexWnd::UpdatePrefs()
+{
+    if ( g_PrefsDlg->m_bTextureWindowSearch )
+        texWndGlob_textureOffset.textureOffset = 25;   // room for the (unported) search box
+    else
+        texWndGlob_textureOffset.textureOffset = 0;
+
+    ::ShowScrollBar( GetSafeHwnd(), SB_VERT, g_PrefsDlg->m_bTextureScrollbar );
+    texWndGlob_textureOffset.m_bNeedRange = 0;         // force a range recompute on the next paint
+    ::InvalidateRect( GetSafeHwnd(), nullptr, TRUE );
+    return ::UpdateWindow( GetSafeHwnd() );
+}
+
 // IDB CTexWnd::OnVScroll 0x45dc80 — the WM_VSCROLL handler.
 void CTexWnd::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar )
 {

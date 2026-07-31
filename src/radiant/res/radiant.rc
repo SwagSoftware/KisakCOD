@@ -743,6 +743,19 @@ BEGIN
     CONTROL         "", 1483, "Edit", 0x50810082, 201, 14, 22, 12
 END
 
+// Information prompt (PE resource 0x96 = 150 = IDD_INFORMATION) — the modeless state-prompt
+// window driven by ShowInfoDialog (0x40BE90) for the patch BEND and INSERT/DELETE modes.
+// A single DISABLED multiline edit (id 1136) fills the client area and holds the message.
+// Extracted verbatim from CoD4Radiant.exe RT_DIALOG 150: 186x95, style 0x80C00040
+// (DS_SETFONT|WS_POPUP|WS_CAPTION — note NO WS_SYSMENU), control style 0x58A10004.
+IDD_INFORMATION DIALOG 0, 0, 186, 95
+STYLE DS_SETFONT | WS_POPUP | WS_CAPTION
+CAPTION "Information"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_INFO_TEXT, 7, 7, 172, 81, ES_MULTILINE | WS_DISABLED | WS_VSCROLL
+END
+
 // Patch Inspector "Patch Properties" (PE resource 0xAC = 172 = IDD_PATCH_PROPERTIES), the
 // CPatchDialog (g_PatchDialog / CWnd_PatchDialog).  Control IDs are the binary's.  Left half
 // = DETAILS (pick a control point by Row/Column -> show X/Y/Z/S/T + Type); right half =

@@ -2388,13 +2388,14 @@ static void Radiant_CheckMenu( CMainFrame *frame, UINT id, bool checked )
         ::CheckMenuItem( m, id, checked ? MF_CHECKED : MF_UNCHECKED );
 }
 
+extern void PMESH_49();              // pmesh.cpp (0x4495C0) — rebuild all active curveDefs
+
 // OnPrefs (IDB 0x426950) — Edit→Preferences. Opens the dialog (refreshes from the
 // registry, edits, saves on OK), applies the settings that can change live, re-checks
 // the Snap-to-grid menu item to match the (possibly changed) m_bNoClamp, and broadcasts
 // a repaint.  The view-restart prompt + texture-bar re-apply were parked while the
 // texture bar was unported; CTextureBar shipped, so both are RESTORED (2026-07-31).
-// Still unported (each its own unit, NOT silent no-ops): CTexWnd::UpdatePrefs (0x45D9F0)
-// and the PMESH_49 (0x4495C0) tail.
+// CTexWnd::UpdatePrefs (0x45D9F0) and the PMESH_49 (0x4495C0) tail are now ported too.
 void CMainFrame::OnPrefs()
 {
     // 0x426956: both captured BEFORE the dialog re-loads and edits the prefs.
@@ -2408,6 +2409,10 @@ void CMainFrame::OnPrefs()
             MessageBoxA( "You will need to restart CoD4Radiant for the view changes to take place.",
                          "Radiant", MB_ICONINFORMATION );
 
+        // 0x4269a4: re-apply the texture-browser prefs (search box + scrollbar).
+        if ( m_pTexWnd )
+            m_pTexWnd->UpdatePrefs();
+
         // 0x4269bf: re-apply the texture-bar toggle. FAITHFUL BUG — the binary branches
         // on the OLD value (`test ebx,ebx` at 0x4269c1, ebx = the pre-dialog setting),
         // so inside the "it changed" arm it restores the PREVIOUS visibility instead of
@@ -2420,6 +2425,9 @@ void CMainFrame::OnPrefs()
 
         Radiant_CheckMenu( this, 32793, g_PrefsDlg->m_bNoClamp == 0 ); // snap = !NoClamp
         SetGridStatus();
+        // 0x426a2d: the curveDef render meshes are tessellated for current_edit_layer,
+        // which the prefs dialog can change — regenerate them all.
+        PMESH_49();
         g_nUpdateBits = -1;
     }
 }
@@ -2997,6 +3005,8 @@ void CMainFrame::OnViewClipper()              // 0x426510
     Ed_InvalidateAllViews();                  // KISAK: the binary repaints from SetClipMode's bits
 }
 
+extern void Patch_BendHandleEnter();          // pmesh.cpp (0x447B70)
+
 void CMainFrame::OnClipSelected()             // 0x427170
 {
     if ( m_pActiveXY && g_bClipMode )
@@ -3011,8 +3021,7 @@ void CMainFrame::OnClipSelected()             // 0x427170
     }
     else if ( g_bPatchBendMode )
     {
-        // KISAK: the binary calls Patch_BendHandleEnter (0x447b70) here; that function is not
-        // ported yet (see RADIANT_MISSING_FUNCTIONS.md), so bend-mode Enter is inert.
+        Patch_BendHandleEnter();   // 0x447b70 — advance the bend state machine
     }
 }
 

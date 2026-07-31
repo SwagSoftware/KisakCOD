@@ -274,6 +274,7 @@ public:
     int   CheckScroll( int n );      // IDB CTexWnd::CheckScroll 0x45c7c0 (clamp+SetScrollPos+invalidate)
     void  UpdateScrollRange();       // IDB sub_45C830 (SetScrollInfo range from m_contentH)
     void  ApplyMaterialAtIndex( int idx );        // select+apply material idx (click body)
+    BOOL  UpdatePrefs();             // IDB CTexWnd::UpdatePrefs 0x45D9F0 (re-apply prefs)
 protected:
     virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
     afx_msg int  OnCreate( LPCREATESTRUCT lpCreateStruct );
