@@ -1226,10 +1226,15 @@ void CTexWnd::OnVScroll( UINT nSBCode, UINT nPos, CScrollBar* pScrollBar )
 }
 
 // IDB CTexWnd::Scroll 0x45dd80 — mouse-wheel = half-page step, sign from the wheel direction.
+void CTexWnd::Scroll( short zDelta )
+{
+    int step = ( zDelta < 0 ) ? ( m_nHeight / -2 ) : ( m_nHeight / 2 );   // 0x45dd8d/0x45dd96
+    CheckScroll( m_scrollY - step );                                      // 0x45ddb9
+}
+
 BOOL CTexWnd::OnMouseWheel( UINT nFlags, short zDelta, CPoint pt )
 {
-    int step = ( zDelta < 0 ) ? ( m_nHeight / -2 ) : ( m_nHeight / 2 );
-    CheckScroll( m_scrollY - step );
+    Scroll( zDelta );
     return CWnd::OnMouseWheel( nFlags, zDelta, pt );
 }
 

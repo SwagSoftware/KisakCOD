@@ -870,7 +870,35 @@ BEGIN_MESSAGE_MAP( CEntityWnd, CWnd )
     ON_CONTROL_RANGE( BN_CLICKED, IDC_FILT_FLAG_FIRST, IDC_FILT_FLAG_LAST, &CEntityWnd::OnFilterFlagCheck  )
     ON_WM_MEASUREITEM()                 // owner-draw the category filter lists (checkbox glyph rows)
     ON_WM_DRAWITEM()
+    ON_WM_MOUSEWHEEL()                  // 0x498590 — forwarded to CMainFrame::OnScroll
 END_MESSAGE_MAP()
+
+// CEntityWnd_EntityWndProc's WM_MOUSEWHEEL arm (0x498572..0x498590): the inspector does
+// NOT scroll itself — it hands the wheel straight to CMainFrame::OnScroll (0x42b850) with
+// nFlags=LOWORD(wParam), zDelta=HIWORD(wParam), point=(LOWORD(lParam), HIWORD(lParam)),
+// which then decides texture-scroll / camera-dolly / XY-zoom from the cursor position.
+BOOL CEntityWnd::OnMouseWheel( UINT nFlags, short zDelta, CPoint pt )
+{
+    if ( g_pParentWnd )
+        return g_pParentWnd->OnScroll( nFlags, zDelta, pt );
+    return CWnd::OnMouseWheel( nFlags, zDelta, pt );
+}
+
+// The TWIN arm at 0x4985ae..0x4985d0: the same forward, but reached through WM_COMMAND
+// with the command id set to WM_MOUSEWHEEL (0x20A) — a child control re-posting the wheel
+// as a command.  FAITHFUL QUIRK: that path passes the COMMAND ID (0x20A) as OnScroll's
+// nFlags; OnScroll ignores nFlags, so it is behaviourally identical.  No control in this
+// port uses id 522 (the inspector's own control ids start at 1801), so the test is safe.
+BOOL CEntityWnd::OnCommand( WPARAM wParam, LPARAM lParam )
+{
+    if ( LOWORD( wParam ) == WM_MOUSEWHEEL && g_pParentWnd )      // 0x4985ae
+    {
+        g_pParentWnd->OnScroll( LOWORD( wParam ), (short)HIWORD( wParam ),
+                                CPoint( (short)LOWORD( lParam ), (short)HIWORD( lParam ) ) );
+        return TRUE;
+    }
+    return CWnd::OnCommand( wParam, lParam );
+}
 
 CEntityWnd::CEntityWnd()
 {

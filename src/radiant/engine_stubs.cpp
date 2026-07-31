@@ -708,8 +708,8 @@ CClipPoint g_Clip3{};
 int        g_bClipMode      = 0;
 char       g_bRogueClipMode = 0;
 char       g_bSwitch        = 0;
-// 0x25d5b06 — XY crosshair-cursor toggle (Shift+X).  State is maintained; the
-// crosshair-CURSOR consumer in XY_MouseMoved is still unmodelled.
+// 0x25d5b06 — XY crosshair toggle (Shift+X).  Consumers ported: CXYWnd::OnPaint ->
+// Ed_DrawCrosshair (0x4655d0) and the XY_MouseMoved idle branch (0x46824b).
 int        g_bCrossHairs    = 0;
 float     *g_pMovingClip    = nullptr;
 selbrush_t g_brFrontSplits{};
@@ -1147,27 +1147,64 @@ char *VA( int slot, const char *fmt, ... )
 // would fire asserts on healthy maps.  See CLEANUP_TRACKER (unit 11) before wiring it.
 void MainFrm_EntList( entity_s *, const char * ) {}
 
-// Perforce: sub_437850 = `p4 add`, sub_4377e0 = `p4 edit`.  Reached from
-// Map_SaveFile -> Map_SaveFileToPerforce, but only when g_qeglobals.toggle_unk05 is set
-// (0x48cc92 / 0x48cd39), and that flag is zero-initialised, so the normal offline save
-// never touches them.  The real bodies drive the p4api ClientApi, which is not in this
-// port; we reproduce sub_437640's own Init-failure path (0x4376b9): clear toggle_unk05
-// for the session and report failure.
-void sub_437850( const char * )
+// ═════════════════════════════════════════════════════════════════════════════
+//  PERFORCE COMMAND LAYER  (0x437640 / 0x4377e0 / 0x437850 / 0x4379c0)
+//
+//  CANNOT BE PORTED — the binary does NOT shell out to p4.exe.  P4_RunCommand
+//  (0x437640) drives the statically-linked PERFORCE C++ API directly:
+//      ClientApi client;              // sub_4DED90 ctor / sub_4DE910 dtor
+//      Error e;
+//      client.Init(&e);               // sub_4DE950   -> CheckError("Init")  0x437560
+//      char buf[1024]; strcpy(buf, path);
+//      char *argv[1] = { buf };
+//      client.SetArgv(1, argv);       // sub_4E8230
+//      client.Run(cmd, ui);           // sub_4DE980   (ui = the ClientUser subclass)
+//      bool failed = g_p4Failed;      // byte_25D5A69 — set by the ClientUser callbacks
+//      g_p4Failed = 0;
+//      client.Final(&e);              // sub_4DE990   -> CheckError("Final") 0x437560
+//      return !failed;
+//  and the three wrappers are each one line of it with a different ClientUser + verb:
+//      P4_OpenForEdit (0x4377e0)  StdClientUser    verb "edit"
+//      P4_AddFile     (0x437850)  StdClientUser    verb "add"
+//      FileExists     (0x4379c0)  SilentClientUser verb "fstat"   <- a PERFORCE query,
+//                                 NOT a filesystem probe (it answers "is this path known
+//                                 to the depot?").
+//  p4api (clientapi.h / p4api.lib) is a third-party dependency that is not in the
+//  KisakCOD tree, so the ClientApi half is unportable here.  What IS reproduced is the
+//  binary's own Init-FAILURE path (0x4376b9): CheckError("Init") true -> clear
+//  g_qeglobals.toggle_unk05 for the session and return false.  That is exactly what the
+//  real function does on a machine with no p4 connection, and it keeps every caller
+//  (Map_SaveFileToPerforce 0x48cc70, Eclass_RealizeModel) on a faithful branch.
+//  toggle_unk05 is zero-initialised and nothing in this port sets it, so these are
+//  unreachable in practice; wiring real p4 support means adding p4api and filling in
+//  P4_RunCommand below — nothing else changes.
+// ═════════════════════════════════════════════════════════════════════════════
+// 0x437640 — the shared entry point.  `ui` is the ClientUser subclass vtable the real
+// implementation would pass to ClientApi::Run; kept in the signature so the three
+// wrappers stay 1:1 with the binary.
+static bool P4_RunCommand( const char * /*uiKind*/, const char * /*path*/, const char * /*verb*/ )
 {
-    g_qeglobals.toggle_unk05 = false;
+    g_qeglobals.toggle_unk05 = false;   // 0x437772 — the Init/Final failure path
+    return false;                       // 0x4376df
 }
-int  sub_4377E0( const char * )
+
+bool P4_OpenForEdit( const char *path )      // 0x4377e0
 {
-    g_qeglobals.toggle_unk05 = false;
-    return 0;
+    return P4_RunCommand( "StdClientUser", path, "edit" );
 }
-int  FileExists( const char *path )
+bool P4_AddFile( const char *path )          // 0x437850
 {
-    FILE *f = fopen( path, "rb" );
-    if ( f ) { fclose( f ); return 1; }
-    return 0;
+    return P4_RunCommand( "StdClientUser", path, "add" );
 }
+int  FileExists( const char *path )          // 0x4379c0 — `p4 fstat`, see the banner
+{
+    return P4_RunCommand( "SilentClientUser", path, "fstat" ) ? 1 : 0;
+}
+
+// Historical port names kept as forwarders so the existing call sites (map.cpp) and the
+// IDB addresses stay greppable.
+void sub_437850( const char *path ) { P4_AddFile( path ); }
+int  sub_4377E0( const char *path ) { return P4_OpenForEdit( path ) ? 1 : 0; }
 
 // unknown_libname_291 — the CRT bounds-check abort (IDA _VEC_validate equivalent),
 // reached from g_SelectedFaces.GetAt indexing.

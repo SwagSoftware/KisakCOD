@@ -161,6 +161,7 @@ BEGIN_MESSAGE_MAP(CMainFrame, CFrameWnd)
     ON_WM_LBUTTONDOWN()                 // splitter-bar drag start
     ON_WM_LBUTTONUP()                   // splitter-bar drag end
     ON_WM_MOUSEMOVE()                   // splitter-bar drag
+    ON_WM_MOUSEWHEEL()                  // -> CMainFrame::OnScroll (0x42b850)
     ON_WM_KEYDOWN()                     // dispatch editor hotkeys when the FRAME itself has focus
                                         // (e.g. right after a toggled inspector popup hides and
                                         //  returns focus to its owner frame) — else F/N/O/T would
@@ -1536,12 +1537,78 @@ void CMainFrame::RelayoutPanes()
     if ( m_wndConsole.GetSafeHwnd() )            m_wndConsole.MoveWindow( &L.con );
 }
 
+// ═════════════════════════════════════════════════════════════════════════════
+// 0x423830  Transparent_Background — the "floating windows + transparent background"
+// carve.  Builds  (whole window rect)  MINUS  (client rect)  PLUS  (status bar rect)
+// PLUS (toolbar rect)  and installs it with SetWindowRgn, so with the editor panes
+// detached the frame paints only its non-client border, status bar and toolbar and the
+// desktop shows through the middle.  All rects are in WINDOW coordinates (screen rects
+// offset by the frame's screen origin).
+// The binary's guards `this != (CWnd *)-212` / `-364` are the MFC "&member != NULL"
+// idiom; 212 = CMainFrame::m_wndStatusBar, 364 = CMainFrame::m_wndToolBar (IDB struct).
+// FAITHFUL QUIRK: the region handed to SetWindowRgn becomes system-owned, yet the binary
+// lets the CRgn destructor (sub_41B610 = CGdiObject::~CGdiObject → DeleteObject) delete
+// it again on the way out.  The port's CRgn locals reproduce that exactly — deliberate,
+// not an oversight.  sub_41B610 itself is NOT ported: it IS the CRgn destructor.
+// ═════════════════════════════════════════════════════════════════════════════
+static void Transparent_Background( CMainFrame *wnd )
+{
+    CRgn  rgnWindow;   // v10 — the whole window rect
+    CRgn  rgnPart;     // v12 — scratch (client rect, then each child rect)
+    CRgn  rgnOut;      // v11 — the region actually installed
+    CRect Rect, rc;
+
+    wnd->GetWindowRect( &Rect );                                        // 0x423888
+    ::OffsetRect( &Rect, -Rect.left, -Rect.top );                       // 0x4238a0
+    rgnWindow.Attach( ::CreateRectRgnIndirect( &Rect ) );               // 0x4238a6
+
+    wnd->GetWindowRect( &Rect );                                        // 0x4238bd (screen)
+    wnd->GetClientRect( &rc );                                          // 0x4238c7
+    wnd->ClientToScreen( &rc );                                         // 0x4238d3
+    ::OffsetRect( &rc, -Rect.left, -Rect.top );                         // 0x4238e8
+    rgnPart.Attach( ::CreateRectRgnIndirect( &rc ) );                   // 0x4238ee
+
+    // 0x42390d — scratch region (its rect is immediately overwritten by CombineRgn).
+    rgnOut.Attach( ::CreateRectRgn( Rect.left, Rect.top, Rect.right, Rect.bottom ) );
+    ::CombineRgn( (HRGN)rgnOut.GetSafeHandle(), (HRGN)rgnWindow.GetSafeHandle(),
+                  (HRGN)rgnPart.GetSafeHandle(), RGN_DIFF );            // 0x42392a (4)
+    rgnPart.DeleteObject();                                             // 0x423933
+
+    if ( wnd->m_wndStatusBar.GetSafeHwnd() )                            // 0x423942 (+212)
+    {
+        ::GetWindowRect( wnd->m_wndStatusBar.GetSafeHwnd(), &rc );      // 0x423953
+        ::OffsetRect( &rc, -Rect.left, -Rect.top );                     // 0x423965
+        rgnPart.Attach( ::CreateRectRgnIndirect( &rc ) );               // 0x42396b
+        ::CombineRgn( (HRGN)rgnOut.GetSafeHandle(), (HRGN)rgnOut.GetSafeHandle(),
+                      (HRGN)rgnPart.GetSafeHandle(), RGN_OR );          // 0x423985 (2)
+        rgnPart.DeleteObject();                                         // 0x42398e
+    }
+    if ( wnd->m_wndToolBar.GetSafeHwnd() )                              // 0x42399d (+364)
+    {
+        ::GetWindowRect( wnd->m_wndToolBar.GetSafeHwnd(), &rc );        // 0x4239ae
+        ::OffsetRect( &rc, -Rect.left, -Rect.top );                     // 0x4239c0
+        rgnPart.Attach( ::CreateRectRgnIndirect( &rc ) );               // 0x4239c6
+        ::CombineRgn( (HRGN)rgnOut.GetSafeHandle(), (HRGN)rgnOut.GetSafeHandle(),
+                      (HRGN)rgnPart.GetSafeHandle(), RGN_OR );          // 0x4239e0 (2)
+        rgnPart.DeleteObject();                                         // 0x4239e9
+    }
+
+    ::SetWindowRgn( wnd->GetSafeHwnd(), (HRGN)rgnOut.GetSafeHandle(), TRUE );  // 0x4239f8
+}
+
 void CMainFrame::OnSize( UINT nType, int cx, int cy )
 {
     CFrameWnd::OnSize( nType, cx, cy );
     if ( cx < 64 || cy < 64 )
         return;   // ignore minimize — keep the swap chains at their last real size
     RelayoutPanes();
+
+    // 0x4237fb — the binary's OnSize tail: only in the FLOATING-window style, and only
+    // when both prefs are set, carve the frame region (defaults are off, so this is a
+    // no-op unless the operator enables Prefs → Floating Windows + Transparent Background).
+    if ( m_nCurrentStyle == 1 && g_PrefsDlg->transparent_background
+                              && g_PrefsDlg->detatch_windows )
+        Transparent_Background( this );                                 // 0x423816
 }
 
 // Splitter-bar hit-test on the GAP gutters (client coords): 0 = none; 1/2 = vertical
@@ -2417,9 +2484,13 @@ void CMainFrame::OnPrefs()
         // on the OLD value (`test ebx,ebx` at 0x4269c1, ebx = the pre-dialog setting),
         // so inside the "it changed" arm it restores the PREVIOUS visibility instead of
         // applying the new one. Transcribed as-is; do not "fix" without a ruling.
+        // PORT NOTE: the binary's bar is a real CControlBar (ShowControlBar); the port's
+        // CTextureBar is a plain CWnd laid out by CreateBar/LayoutBar, so the equivalent
+        // is ShowWindow — same idiom OnCreate uses to apply m_bTextureBar at startup.
         if ( oldTextureBar != g_PrefsDlg->m_bTextureBar )
         {
-            ShowControlBar( &m_wndTextureBar, oldTextureBar ? TRUE : FALSE, TRUE );
+            if ( m_wndTextureBar.GetSafeHwnd() )
+                m_wndTextureBar.ShowWindow( oldTextureBar ? SW_SHOW : SW_HIDE );
             ::InvalidateRect( m_wndTextureBar.GetSafeHwnd(), nullptr, TRUE );
         }
 
@@ -2736,6 +2807,80 @@ void CMainFrame::OnViewZoomout()
     if ( z_scale < 0.003125000046566129f )
         z_scale = 0.003125f;
     Sys_UpdateWindows( W_XY | W_XY_OVERLAY | W_Z | W_Z_OVERLAY );
+}
+
+// ═════════════════════════════════════════════════════════════════════════════
+// 0x42b850  CMainFrame::OnScroll — the CENTRAL mouse-wheel dispatcher every editor
+// child wndproc funnels WM_MOUSEWHEEL into (`point` is in SCREEN coords).  Order:
+//   1. Texture pane hover  -> CTexWnd::Scroll (half-page step).
+//   2. Camera pane hover, and only with the CameraUseWheel pref  -> CCamWnd::Scroll
+//      (dolly; wheel-forward passes -1.0, wheel-back +1.0).
+//   3. Anything else       -> XY zoom in/out.
+// The hover test is two-stage, exactly as the binary: with QE4StyleWindows (m_nView) == 1
+// the pane must additionally be the window UNDER the cursor (and, for the texture pane,
+// the inspector must currently be in Textures mode); otherwise only the screen-rect test
+// runs.  Returns TRUE on every path (the wheel is always consumed).
+// ═════════════════════════════════════════════════════════════════════════════
+BOOL CMainFrame::OnScroll( UINT /*nFlags*/, short zDelta, CPoint point )
+{
+    extern void CCamWnd_Scroll( CMainFrame *frame, float amount );   // camwnd.cpp 0x4248a0
+
+    if ( !zDelta )                                                   // 0x42b863
+        return TRUE;
+
+    bool overTex = false;                                            // 0x42b879 (v13)
+    bool overCam = false;                                            // 0x42b87e (v14)
+
+    if ( m_pTexWnd )                                                 // 0x42b883
+    {
+        // 0x42b8b2 — style gate + "the texture pane is the window under the cursor".
+        if ( g_PrefsDlg->m_nView != 1
+          || ( inspector_mode == INSPECTOR_TEXTURE
+            && CWnd::FromHandle( ::WindowFromPoint( point ) ) == (CWnd *)m_pTexWnd ) )
+        {
+            CRect r;
+            m_pTexWnd->GetClientRect( &r );                          // 0x42b8bd
+            m_pTexWnd->ClientToScreen( &r );                         // 0x42b8ce
+            if ( r.PtInRect( point ) )                               // 0x42b8da
+                overTex = true;                                      // 0x42b8e4
+        }
+    }
+    if ( m_pCamWnd && g_PrefsDlg->camera_use_wheel )                 // 0x42b8f1/0x42b8f8
+    {
+        if ( g_PrefsDlg->m_nView != 1
+          || CWnd::FromHandle( ::WindowFromPoint( point ) ) == (CWnd *)m_pCamWnd )  // 0x42b920
+        {
+            CRect r;
+            m_pCamWnd->GetClientRect( &r );                          // 0x42b92b
+            m_pCamWnd->ClientToScreen( &r );                         // 0x42b93c
+            if ( r.PtInRect( point ) )                               // 0x42b948
+                overCam = true;                                      // 0x42b952
+        }
+    }
+
+    if ( overTex )                                                   // 0x42b95c
+    {
+        m_pTexWnd->Scroll( zDelta );                                 // 0x42b962
+        return TRUE;
+    }
+    if ( !overCam )                                                  // 0x42b97d
+    {
+        if ( zDelta > 0 )                                            // 0x42b9e9
+            OnViewZoomin();                                          // 0x42b9eb
+        else
+            OnViewZoomout();                                         // 0x42b9fe
+        return TRUE;
+    }
+    iassert( m_pCamWnd );                                            // MainFrm.cpp:6124
+    CCamWnd_Scroll( this, ( zDelta > 0 ) ? -1.0f : 1.0f );           // 0x42b9b7 / 0x42b9cf
+    return TRUE;
+}
+
+// WM_MOUSEWHEEL on the FRAME itself — same handler (MFC's OnMouseWheel signature is
+// byte-for-byte the binary's OnScroll signature).
+BOOL CMainFrame::OnMouseWheel( UINT nFlags, short zDelta, CPoint pt )
+{
+    return OnScroll( nFlags, zDelta, pt );
 }
 
 // CMainFrame::OnView100 (0x423c30): reset the XY view to 1:1. (View→Zoom→XY 100%,

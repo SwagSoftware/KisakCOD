@@ -53,15 +53,107 @@ static void LayerFlagsToString( char *out, int flags )   // sub_418C80 (0x418C80
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 0x419630  Layers_AddLayerPath  (sub_419630) — add or OR-in a layer's flags.
-// The original splits hierarchical "a/b/c" names on '/' and inserts each prefix
-// (clearing 0x10 on parents). Gate-P4 stock maps use flat layer names (no '/'),
-// so the flat OR-insert below is faithful for them; '/'-paths fall back to a
-// single insert of the full name (documented limitation — extend if a map needs it).
+// 0x419630  Layers_AddLayerPath  (sub_419630) — register a hierarchical layer PATH.
+// The path is split on '/' (strtok) and EVERY cumulative prefix is looked up: a
+// missing prefix is inserted with `flags & 2` (0x419871 sub_41A280's mapped value),
+// and every visited node has the internal 0x10 "dirty / unreferenced" bit CLEARED
+// (0x4198be).  The LEAF finally ORs in `flags & ~0x10` (0x419914).
+// The receiver of the path string is ECX (`lea ecx, [ebp+var_814]` at the caller) —
+// the IDB renders it as a phantom first arg; normalised to a plain `name` here.
+// ─────────────────────────────────────────────────────────────────────────────
 void Layers_AddLayerPath( const char *name, int flags )
 {
     if ( !name ) return;
-    layerMap[ std::string( name ) ] |= ( flags & ~0x10 );   // 0x10 never persisted here
+
+    char work[1028];                                  // v36[1028]
+    strncpy( work, name, sizeof( work ) - 1 );        // 0x419696
+    work[sizeof( work ) - 1] = '\0';
+
+    char acc[1024];                                   // Src[1024], memset 0 @0x41967e
+    acc[0] = '\0';
+
+    std::map<std::string, int>::iterator node = layerMap.end();
+
+    for ( char *tok = strtok( work, "/" ); tok; tok = strtok( nullptr, "/" ) )  // 0x4196b9/0x4198eb
+    {
+        strcat( acc, tok );                           // 0x4196f6
+        // 0x41974a — lower_bound + the exact-key compare; a miss lands on end().
+        auto it = layerMap.find( std::string( acc ) );
+        if ( it == layerMap.end() )                   // 0x419807
+            it = layerMap.insert( std::make_pair( std::string( acc ), flags & 2 ) ).first; // 0x419871
+        it->second &= ~0x10;                          // 0x4198be
+        node = it;
+        strcat( acc, "/" );                           // 0x4198e8
+    }
+    // 0x419914 — the LEAF carries the caller's flags (0x10 is never persisted).
+    // (The binary reaches _invalid_parameter_noinfo on an empty path; the port
+    // simply does nothing, which is the same observable result in release.)
+    if ( node != layerMap.end() )
+        node->second |= ( flags & ~0x10 );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x419310  Layers_TagListLayers (sub_419310) — walk ONE brush list, register each
+// brush's layer path, and RECURSE into every placed prefab's content list.
+//   path      = prefix ++ brush->def->parent_layer_string   -> Layers_AddLayerPath
+//               with flags 2 at a prefab level, 0 at the top level (0x4193cc).
+//   childPath = prefix ++ strlwr(<"model" epair of the owner's def>)  (0x4193f1..0x419496)
+// The recursion runs when the prefab's own layer key is ABSENT from the map or still
+// carries the 0x10 dirty bit (0x419597 / 0x4195b0); the child prefix then gets a
+// trailing '/' and the prefab's content list (prefab_s + 0x0C) is walked at level 1.
+// HEX-RAYS NOTE: the three 1 KB stack buffers are ADJACENT, so the decompiler renders
+// `strcat(dst, s)` as `p = &prev[1023]; while (*++p);` walking off the END of the
+// PREVIOUS buffer into `dst` (the §11 stack-adjacency artifact) — they are plain
+// strcpy/strcat pairs, transcribed as such.
+// ─────────────────────────────────────────────────────────────────────────────
+static void Layers_TagListLayers( selbrush_t *listHead, const char *prefix, char isPrefabLevel )
+{
+    for ( selbrush_t *b = listHead->next; b && b != listHead; b = b->next )   // 0x419341/0x419604
+    {
+        brush_t *def = b->def;
+        if ( !def )
+            continue;
+
+        char path[1024];                                          // v38
+        strncpy( path, prefix, sizeof( path ) - 1 );              // 0x419380
+        path[sizeof( path ) - 1] = '\0';
+        if ( def->parent_layer_string )                           // 0x419392 (def + 0x48)
+            strncat( path, def->parent_layer_string, sizeof( path ) - strlen( path ) - 1 );
+        Layers_AddLayerPath( path, isPrefabLevel ? 2 : 0 );        // 0x4193d0 / 0x4193d4
+
+        entity_s *owner = b->owner;                                // 0x4193d9
+        if ( !owner || !owner->prefab )                            // 0x4193e7 (owner + 0x48)
+            continue;
+
+        char childPath[1024];                                      // Src
+        strncpy( childPath, prefix, sizeof( childPath ) - 1 );     // 0x4193f1
+        childPath[sizeof( childPath ) - 1] = '\0';
+
+        // 0x419412 — the "model" epair off the owner's DEF (entity_s + 0x74 epairs);
+        // a miss uses the binary's shared empty string.
+        const char *model = "";
+        entity_s *eDef = owner->def;
+        if ( eDef )
+        {
+            for ( epair_t *ep = eDef->epairs; ep; ep = ep->next )
+                if ( !_stricmp( ep->key, "model" ) ) { model = ep->value ? ep->value : ""; break; }
+        }
+        char modelLc[1024];                                        // v37
+        strncpy( modelLc, model, sizeof( modelLc ) - 1 );          // 0x419450
+        modelLc[sizeof( modelLc ) - 1] = '\0';
+        _strlwr( modelLc );                                        // 0x419463
+        strncat( childPath, modelLc, sizeof( childPath ) - strlen( childPath ) - 1 );  // 0x419496
+
+        // 0x4194f0 — recurse when the prefab's layer key is missing or still dirty.
+        auto it = layerMap.find( std::string( childPath ) );
+        const bool needsWalk = ( it == layerMap.end() ) || ( it->second & 0x10 ) != 0;
+        if ( !needsWalk )
+            continue;
+
+        strncat( childPath, "/", sizeof( childPath ) - strlen( childPath ) - 1 );      // 0x4195d7
+        // prefab_s + 0x0C is the content brush-list sentinel ({prev, next}).
+        Layers_TagListLayers( (selbrush_t *)( (char *)owner->prefab + 0x0C ), childPath, 1 );  // 0x4195ed
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -84,17 +176,39 @@ void Map_InitlLayers()
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// 0x418DD0  Layers_SetMapLayers — ensure the two built-in layers exist.
-// The original additionally re-tags every brush with its layer and realizes any
-// prefab layers (sub_41A5A0/sub_41A7F0) — that touches instance/window state and
-// is NOT needed to round-trip the .map text, so it is omitted here.
-// std::map::operator[] inserts a flags=0 entry only if the key is absent (so a
-// layer already parsed from the file keeps its flags).
+// 0x418DD0  Layers_SetMapLayers — the full layer RESYNC.  Three phases:
+//   1. ensure the two built-in layers exist, flags 0 (0x418e57 / 0x418ed1;
+//      std::map::operator[] inserts 0 only if the key is absent, so a layer already
+//      parsed from the file keeps its flags);
+//   2. walk the three brush display lists through Layers_TagListLayers (0x418efd /
+//      0x418f11 / 0x418f25), which registers every referenced layer path — including
+//      the recursion into placed prefabs' content lists — and CLEARS the internal
+//      0x10 "dirty" bit on everything it touches;
+//   3. ERASE every layer still carrying 0x10 (0x418f7c..0x419086) — i.e. the layers
+//      the load-time sub_418A50 model-prefix tagging marked that no live brush or
+//      prefab actually references any more.
+// Phases 2+3 are a pair: 3 without 2 would delete live layers.  The 0x10 bit is set
+// by Map_ParseLayers (a `flags prefab` layer) and by sub_418A50 (per loaded model
+// path) — e.g. blackout.map's "blackout_geo.map" / "prefabs" layers, whose bit is
+// cleared again by the phase-2 prefab recursion walking "blackout_geo.map/<layer>".
 // ─────────────────────────────────────────────────────────────────────────────
 void Layers_SetMapLayers()
 {
-    layerMap[ "The Map"    ];   // insert with 0 if absent
-    layerMap[ "000_Global" ];
+    layerMap[ "The Map"    ];   // 0x418e57 — insert with 0 if absent
+    layerMap[ "000_Global" ];   // 0x418ed1
+
+    Layers_TagListLayers( &active_brushes,   "", 0 );   // 0x418efd
+    Layers_TagListLayers( &selected_brushes, "", 0 );   // 0x418f11
+    Layers_TagListLayers( &filtered_brushes, "", 0 );   // 0x418f25
+
+    // 0x418f30 — drop every still-dirty layer (LayerMap_Erase over the single key).
+    for ( auto it = layerMap.begin(); it != layerMap.end(); )
+    {
+        if ( ( it->second & 0x10 ) != 0 )               // 0x418f7c
+            it = layerMap.erase( it );                  // 0x419086
+        else
+            ++it;                                       // 0x4190b0
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

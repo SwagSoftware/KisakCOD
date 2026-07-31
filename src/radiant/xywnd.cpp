@@ -27,6 +27,13 @@ extern char  Byte4PackPixelColor(float *from, GfxColor *out);  // engine_stubs.c
 
 extern void Radiant_FL_Log( const char *fmt, ... );    // mainfrm.cpp (First-Light trace log)
 
+extern int   g_bCrossHairs;                // engine_stubs.cpp  (IDB 0x25d5b06) — Shift+X toggle
+
+// g_tdp (IDB 0x23f1634) — the snapped world point under the cursor. Maintained by
+// CXYWnd::OnMouseMove (0x464b10, every non-RMB move) and consumed by DrawCrosshair
+// (0x4655d0) and the binary's clip-point / point-file hover proximity tests.
+float g_tdp[3] = { 0.0f, 0.0f, 0.0f };
+
 extern void Draw_PatchSelectPoints();           // brush.cpp 0x40c250 (unselected candidates, green)
 extern void Draw_PatchSelectPointsSelected();   // brush.cpp 0x40c360 (selected points, light blue)
 
@@ -1708,8 +1715,8 @@ static void Ed_XY_MouseDown( CXYWnd *wnd, int x, int y, unsigned int buttons )
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  Ed_XY_MouseMoved - CXYWnd::XY_MouseMoved 0x468230, the full mouse-move dispatcher.
-//   (A) idle (no button): the binary toggles the crosshair cursor iff g_bCrossHairs, which is
-//       not ported (constant 0) - branch omitted, bare return kept.
+//   (A) idle (no button): iff g_bCrossHairs, hide+reshow the cursor and request an XY+camera
+//       repaint so DrawCrosshair tracks the cursor (0x46824b).
 //   (B) LMB-held OR alt+(RMB+shift): if a marquee toggle-state (toggle_unk03/04) is active and
 //       we are NOT in a transient RECTANGLE point-edit mode (d_select_mode 12..15), re-dispatch
 //       XY_MouseDown for buttons 5 / (9 & alt) / 13 (shift/ctrl box-extend), else clear the
@@ -1724,9 +1731,21 @@ static void Ed_XY_MouseDown( CXYWnd *wnd, int x, int y, unsigned int buttons )
 // ═════════════════════════════════════════════════════════════════════════════
 static void Ed_XY_MouseMoved( CXYWnd *wnd, int x, int y, unsigned int buttons )
 {
-    // ── (A) no button held: idle move (crosshair-cursor toggle omitted, see header) ──
+    // ── (A) no button held: idle move ──
+    // 0x46824b: with the crosshair on, the binary hides+reshows the cursor and requests a
+    // repaint of the XY + camera views so the full-extent crosshair tracks the cursor.
+    // The ShowCursor(FALSE)/ShowCursor(TRUE) pair is a net no-op on the display counter —
+    // transcribed FAITHFULLY (it is what the binary does; only the repaint request matters).
     if ( !wnd->m_nButtonstate )
+    {
+        if ( g_bCrossHairs )
+        {
+            ShowCursor( FALSE );        // 0x46825e
+            g_nUpdateBits |= 6;         // 0x468260
+            ShowCursor( TRUE );         // 0x468269
+        }
         return;
+    }
 
     const select_t sel_mode = (select_t)g_qeglobals.d_select_mode;
 
@@ -2314,6 +2333,42 @@ void Ed_FlipClip()
     g_bSwitch = ( g_bSwitch == 0 );
 }
 
+// ─── CXYWnd::DrawCrosshair (IDB 0x4655d0) ────────────────────────────────────
+// The Shift+X full-extent crosshair: two ±131072-unit lines crossing at g_tdp (the
+// snapped world point under the cursor, maintained by CXYWnd::OnMouseMove 0x464b10),
+// in the view's two in-plane axes.  The axis pair is the same one PaintSizeInfo uses:
+// dim1 = (m_nViewType == YZ) @0x46561b, dim2 = (m_nViewType != XY) + 1 @0x465625.
+// Colour {0.2, 0.9, 0.2, 0.8}; ONE 2-line batch at width 1.
+static void Ed_DrawCrosshair( CXYWnd *wnd )
+{
+    float          from[4];
+    GfxColor       gfx_col;
+    GfxPointVertex verts[4];
+
+    const int dim1 = ( wnd->m_nViewType == ED_VIEW_YZ );        // 0x46561b
+    const int dim2 = ( wnd->m_nViewType != ED_VIEW_XY ) + 1;    // 0x465625
+
+    from[0] = 0.2f;          // 0x4655ef
+    from[1] = 0.89999998f;   // 0x4655fc
+    from[2] = 0.2f;          // 0x465604
+    from[3] = 0.80000001f;   // 0x465613
+    Byte4PackPixelColor( from, &gfx_col );                      // 0x465627
+
+    for ( int i = 0; i < 4; ++i )                               // 0x465632..0x46566c
+    {
+        verts[i].xyz[0] = g_tdp[0];
+        verts[i].xyz[1] = g_tdp[1];
+        verts[i].xyz[2] = g_tdp[2];
+        *(GfxColor *)verts[i].color = gfx_col;                  // 0x46568b..0x465694
+    }
+    verts[0].xyz[dim1] = -131072.0f;                            // 0x465675
+    verts[1].xyz[dim1] =  131072.0f;                            // 0x46567f
+    verts[3].xyz[dim2] =  131072.0f;                            // 0x465683
+    verts[2].xyz[dim2] = -131072.0f;                            // 0x465687
+
+    R_AddCmd_Line3D( 2, 1, verts );                             // 0x465697
+}
+
 // CXYWnd::DrawClipper (IDB 0x4656c0) -- render the placed clip points (numbered square
 // markers + "1"/"2"/"3" labels) and, once two points are placed, a wireframe preview of
 // the kept split side. Drawn through the identity orientation (world_orient_matrix);
@@ -2831,14 +2886,23 @@ void CXYWnd::OnLButtonUp( UINT nFlags, CPoint point )
     Ed_InvalidateAllViews();   // repaint XY + Z
 }
 
-// CXYWnd::OnMouseMove - REDUCED vs IDA 0x464b10.  Kept: the clip-point hover/drag
-// (Ed_ClipMouseMoved) and Ed_XY_MouseMoved.  KISAK omissions on a no-RButton move: the
-// CHASE-MOUSE edge auto-scroll (m_bChaseMouse + SetTimer + m_ptDragAdj + the OnTimer half,
-// which needs the unmodelled m_ptDown), the crosshair-cursor toggle (g_bCrossHairs,
-// unmodelled), the STATUS-BAR coord readout, and the point-edit HOVER latch (byte_23245A5 +
-// dword_23F1648).
+// CXYWnd::OnMouseMove - REDUCED vs IDA 0x464b10.  Kept: the g_tdp cursor-point update, the
+// clip-point hover/drag (Ed_ClipMouseMoved) and Ed_XY_MouseMoved.  KISAK omissions on a
+// no-RButton move: the CHASE-MOUSE edge auto-scroll (m_bChaseMouse + SetTimer + m_ptDragAdj +
+// the OnTimer half, which needs the unmodelled m_ptDown), the STATUS-BAR coord readout, and
+// the point-edit HOVER latch (byte_23245A5 + dword_23F1648).
 void CXYWnd::OnMouseMove( UINT nFlags, CPoint point )
 {
+    // 0x464c1a: while the RMB is NOT down (the binary's m_bRButtonDown; the port carries the
+    // same state in m_nButtonstate) the cursor's snapped world point is republished into
+    // g_tdp — the anchor DrawCrosshair (0x4655d0) draws through.  Zeroed first because
+    // SnapToPoint/SnapToGrid only write the two in-plane axes.
+    if ( !( m_nButtonstate & MK_RBUTTON ) )
+    {
+        g_tdp[0] = g_tdp[1] = g_tdp[2] = 0.0f;
+        Ed_SnapToPoint_Chooser( this, g_tdp, point.x, point.y );
+    }
+
     // Clip mode: hover-pick / drag a placed clip point (sets cursor + g_pMovingClip). It
     // consumes the move only while a clip point is actively being dragged.
     if ( g_bClipMode && Ed_ClipMouseMoved( this, point.x, point.y ) )
@@ -4054,6 +4118,9 @@ void CXYWnd::OnPaint()
                || m == sel_areabrush_sub || m == sel_areapoint_curve || m == sel_areapoint ) )
             Ed_DrawSelectionBox( this );
     }
+    // Shift+X crosshair (IDB OnPaint 0x465bf7): drawn between XY_Draw and DrawClipper.
+    if ( g_bCrossHairs )
+        Ed_DrawCrosshair( this );
     if ( g_bClipMode )
         Ed_DrawClipper( this ); // clip points + numbered labels + split-preview wireframe
     Draw_PatchSelectPointsSelected();  // SELECTED curve points, light blue (binary DrawConnectionLinks prefix 0x40ca0f — before the handles)

@@ -701,6 +701,66 @@ static void Cam_DrawSelectedFaces()
     }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x408106  Cam_DrawSelectedFaceFill — Cam_Draw's SELECTED-FACE FILL pass, gated on
+// !dontDrawSelectedTint && g_SelectedFaces.GetSize() > 0.  Every picked face's winding is
+// batched (Face_AddWindingToTriBatch, 0x47b780) into ONE white-UNLIT triangle draw carrying
+// the flat d_savedinfo.colors[16] fill colour; the batcher auto-flushes at the caps.
+// MATERIAL_COLOR is neutral across the pass (0x4080f7 / 0x408115 R_SetMaterialColor(NULL))
+// so the per-vertex colour drives the fill.
+// KISAK: the batch buffers are function-static (the binary keeps ~100 KB of them in
+// Cam_Draw's stack frame); sizes are the binary's exactly.
+// ─────────────────────────────────────────────────────────────────────────────
+extern void Face_AddWindingToTriBatch( face_t *face, const float *packedColor,
+                                       int *indexCount, unsigned short *indices,
+                                       int *vertCount, float ( *xyzw )[4],
+                                       float ( *normal )[3], float *colorArr,
+                                       float ( *st )[2] );                 // brush.cpp 0x47b780
+
+static void Cam_DrawSelectedFaceFill()
+{
+    const int count = g_SelectedFaces.GetSize();              // 0x408106
+    if ( count <= 0 )                                         // 0x40810c
+        return;
+
+    static const float s_neutral[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    R_AddCmdSetMaterialColor( s_neutral );                    // 0x408115 R_SetMaterialColor(NULL)
+
+    GfxColor gfx_col;
+    Byte4PackPixelColor( g_qeglobals.d_savedinfo.colors[16], &gfx_col );   // 0x408129
+
+    static float          s_st[1362][2];
+    static float          s_normal[1362][3];
+    static float          s_xyzw[1362][4];
+    static float          s_color[1362];
+    static unsigned short s_indices[2046];
+
+    int indexCount = 0;                                       // 0x408137
+    int vertCount  = 0;                                       // 0x40813d
+
+    for ( int i = 0; i < count; ++i )
+    {
+        selface_t   selFace = g_SelectedFaces.GetAt( i );     // 0x408170/0x408177
+        selbrush_t *b       = selFace.brush;
+        if ( !b || !b->def )
+            continue;                                         // KISAK guard (headless/stale pick)
+        const int   idx     = selFace.index;
+        // 0x408186 — CamWnd.cpp:2627.
+        iassert( selFace.face == &selFace.brush->faces[selFace.index] );
+        brush_t *def = b->def;
+        if ( (unsigned)idx >= (unsigned)def->faceCount )
+            continue;                                         // KISAK guard
+        Face_AddWindingToTriBatch( &def->faces[idx], (const float *)&gfx_col,
+                                   &indexCount, s_indices, &vertCount,
+                                   s_xyzw, s_normal, s_color, s_st );   // 0x4081eb
+    }
+
+    if ( indexCount != 0 && vertCount != 0 )                  // 0x408223
+        R_AddRenderCmdDrawTris( g_qeglobals.d_white, TECHNIQUE_UNLIT,
+                                (short)indexCount, s_indices, (short)vertCount,
+                                s_xyzw, s_normal, s_color, s_st );       // 0x408253
+}
+
 // ── xmodel MESH draw ──────────────────────────────────────────────────────────
 // Cam_Draw reaches misc_model meshes through DrawBrush -> DrawModels -> SetupModelInst
 // (Entity_UpdateModelInst registers the xmodel in the editor model-inst buffer) + SkinModelInst
@@ -1880,11 +1940,27 @@ void CCamWnd::Cam_Draw()
         R_AddCmdSetMaterialColor( s_neutral );             // 0x4080f7: R_SetMaterialColor(NULL)
     }
 
+    // 0x4080ef — SELECTED-FACE FILL, immediately after the tinted flush and inside the same
+    // !dontDrawSelectedTint gate the binary uses (the whole 0x4080f7..0x408253 block).
+    if ( !g_qeglobals.dontDrawSelectedTint )
+        Cam_DrawSelectedFaceFill();
+
     // 0x408261 - ActiveSunLightPreviewInit, i.e. AFTER the world (0x407f46), patch and
     // selected-entity (0x4080e3) flushes and BEFORE the decoration/white-outline tail.  The
     // position is load-bearing: the multiply quad can only darken ALREADY-RASTERISED pixels and
     // the depth-EQUAL re-add can only land on depths the base pass wrote.
     Cam_SunPrev_Main( this, faithfulSun, sunMultiplyMat, s_litSunDir, s_litAmbientMul, s_litHaveSun );
+
+    // 0x4082f8 — LIGHT-REGION HULL overlay, drawn right after the DrawLightsMain loop (and,
+    // in the binary, after the additive world pass at 0x4082f3 the port defers).  Draws the
+    // hulls View→"Show Regions For Selected" published into d_lightRegionHulls; empty (and
+    // therefore a no-op) until that command runs.
+    {
+        extern void RegionLightRelated();              // 0x406ac0 (defined below)
+        extern void R_SortMaterials();                 // r_ed_scene.cpp
+        RegionLightRelated();
+        R_SortMaterials();                             // 0x4082fd (pass demarcation)
+    }
 
     // TRIGGER-RADIUS volumes + SCRIPT-COLOUR TOKENS.  Cam_Draw draws these in its
     // selected/active brush overlay loops after the surf flush: DrawTriggerRadius (0x40834E
@@ -2127,6 +2203,47 @@ void Camera_GetRectSelection3D( int x1, int y1, int x2, int y2, float *outPlanes
 // Reached one-shot from CamWnd_DropModelsToPlane (plain RMB, no Alt) and re-driven every idle
 // by CMainFrame::RoutineProcessing (its PostMessage(WM_TIMER) re-pokes OnIdle), hence
 // non-static.
+// ═════════════════════════════════════════════════════════════════════════════
+// 0x4248a0  CCamWnd::Scroll — the mouse-wheel camera DOLLY, driven by
+// CMainFrame::OnScroll (0x42b850) when the wheel is over the camera pane and the
+// CameraUseWheel pref is on.  Step = m_nMoveSpeed * 0.7 * amount * modifier, where the
+// modifier is Shift 0.1 / Alt 1.6 / neither 0.4, and holding Ctrl zeroes the PITCH so
+// the dolly stays horizontal.  Moves along -step * dir(pitch, yaw); OnScroll passes
+// amount = -1 for wheel-forward, +1 for wheel-back.
+// The IDB signature is __userpurge (edi = CMainFrame*, the camera reached through
+// frame->m_pCamWnd) — normalised to a plain cdecl free function here.
+// ═════════════════════════════════════════════════════════════════════════════
+void CCamWnd_Scroll( CMainFrame *frame, float amount )
+{
+    float factor;
+    if ( GetKeyState( VK_SHIFT ) < 0 )                                   // 0x4248b4
+        factor = amount * 0.1f;                                          // 0x4248ca
+    else if ( GetKeyState( VK_MENU ) < 0 )                               // 0x4248d9
+        factor = amount * 1.6f;                                          // 0x4248f0
+    else
+        factor = amount * 0.4f;                                          // 0x42490d
+
+    const float dist = (float)( (double)g_PrefsDlg->m_nMoveSpeed * 0.699999988079071
+                                * (double)factor );                      // 0x424920
+
+    CCamWnd *cam = frame->m_pCamWnd;
+    const float yaw   = cam->camera.angles[1];                           // 0x42492b
+    // 0x424933 — Ctrl held pins the pitch to 0 (horizontal dolly); otherwise the
+    // NEGATED pitch is used.
+    const float pitch = ( GetKeyState( VK_CONTROL ) < 0 ) ? 0.0f : -cam->camera.angles[0];
+
+    const double yawR   = (double)yaw   * 0.01745329238474369;           // 0x424956
+    const double pitchR = (double)pitch * 0.01745329238474369;           // 0x424981
+    const float cy = (float)cos( yawR ),   sy = (float)sin( yawR );
+    const float cp = (float)cos( pitchR ), sp = (float)sin( pitchR );
+
+    g_nUpdateBits |= 1u;                                                 // 0x4249a2
+    const float step = -dist;                                            // 0x4249c3
+    cam->camera.origin[0] += cp * cy * step;                             // 0x4249d7
+    cam->camera.origin[1] += cp * sy * step;                             // 0x4249e2
+    cam->camera.origin[2] += -sp * step;                                 // 0x4249eb
+}
+
 void Cam_MouseControl( CCamWnd *cam, float dtime )
 {
     if ( g_PrefsDlg->m_nMouseButtons == 2 )
@@ -3007,6 +3124,100 @@ extern void   Brush_DrawSubmitFaceWindings( selbrush_t *inst, const orientation_
 void *d_lightRegionHulls[1024];
 int   d_lightRegionHullCount = 0;
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x40c640  Region_DrawHull (sub_40C640) — draw ONE region hull winding as a flat
+// DOUBLE-SIDED triangle fan in the white-UNLIT immediate path, flat-coloured with the
+// caller's packed colour.  The winding's best-fit plane normal is stamped on every vertex
+// and the UVs are zero.
+// HEX-RAYS NOTE (stack adjacency): the binary writes the UVs as `xyzw[2*v + 7166]` /
+// `[2*v + 7167]` — xyzw[] is float[7168] and the st[] buffer is the NEXT stack slot, so
+// those are st[v-1][0..1] = 0.0f (the §11 stack-adjacency artifact), not out-of-bounds
+// writes into xyzw.
+// The 0x400-point cap is the binary's (its buffers hold exactly 1024 verts).
+// ─────────────────────────────────────────────────────────────────────────────
+static void Region_DrawHull( const winding_t *w, const GfxColor *col )
+{
+    if ( (unsigned)w->numpoints > 0x400 )                     // 0x40c65b
+        return;
+
+    float plane[4];
+    Region_WindingPlane( plane, w );                          // 0x40c674
+
+    static float          s_xyzw[1024][4];
+    static float          s_normal[1024][3];
+    static float          s_st[1024][2];
+    static float          s_color[1025];
+    static unsigned short s_indices[6132];
+
+    const int n = w->numpoints;
+    for ( int i = 0; i < n; ++i )                             // 0x40c6d6
+    {
+        s_color[i]     = *(const float *)&col->packed;        // 0x40c6c5 memset32
+        s_xyzw[i][0]   = w->p[i][0];
+        s_xyzw[i][1]   = w->p[i][1];
+        s_xyzw[i][2]   = w->p[i][2];
+        s_xyzw[i][3]   = 1.0f;
+        s_normal[i][0] = plane[0];
+        s_normal[i][1] = plane[1];
+        s_normal[i][2] = plane[2];
+        s_st[i][0]     = 0.0f;                                // 0x40c719 (see the note above)
+        s_st[i][1]     = 0.0f;                                // 0x40c720
+    }
+
+    // 0x40c73b — DOUBLE-sided fan: (0, k-1, k) then the reversed (k, k-1, 0).
+    int idx = 0;
+    for ( int k = 2; k < n; ++k )
+    {
+        s_indices[idx]     = 0;
+        s_indices[idx + 1] = (unsigned short)( k - 1 );
+        s_indices[idx + 2] = (unsigned short)k;
+        s_indices[idx + 3] = (unsigned short)k;
+        s_indices[idx + 4] = (unsigned short)( k - 1 );
+        s_indices[idx + 5] = 0;
+        idx += 6;
+    }
+    // 0x40c7ca — emitted even with idx == 0 (faithful; the backend no-ops on 0 indices).
+    R_AddRenderCmdDrawTris( g_qeglobals.d_white, TECHNIQUE_UNLIT, (short)idx, s_indices,
+                            (short)w->numpoints, s_xyzw, s_normal, s_color, s_st );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x406ac0  RegionLightRelated — Cam_Draw's light-REGION hull overlay (0x4082f8): every
+// hull produced by Regions_ForSelected drawn translucent orange {1, 0.75, 0, 0.25}.
+// This is the hull-draw CONSUMER the port's d_lightRegionHulls array previously lacked;
+// it is independent of the parked per-pixel light preview (LightPreview_DrawLight 0x406fb0).
+// ─────────────────────────────────────────────────────────────────────────────
+void RegionLightRelated()
+{
+    float    rgba[4];
+    GfxColor col;
+
+    rgba[0] = 1.0f;    // 0x406ac9
+    rgba[1] = 0.75f;   // 0x406ad6 (flt_6F42EC)
+    rgba[2] = 0.0f;    // 0x406adf
+    rgba[3] = 0.25f;   // 0x406ae8 (flt_6F42F0)
+    Byte4PackPixelColor( rgba, &col );                        // 0x406aeb
+
+    for ( unsigned int i = 0; i < (unsigned int)d_lightRegionHullCount; ++i )   // 0x406af5
+        Region_DrawHull( (const winding_t *)d_lightRegionHulls[i], &col );      // 0x406b0b
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 0x406c00  Region_ClearHulls — free every published hull winding and reset the count.
+// Each hull IS a winding_t, so the shared winding-allocation counter drops by the hull
+// count (0x406c0b) — the port previously inlined the free loop in Regions_ForSelected and
+// leaked that accounting.
+// ─────────────────────────────────────────────────────────────────────────────
+void Region_ClearHulls()
+{
+    if ( !d_lightRegionHullCount )                            // 0x406c09
+        return;
+    g_windingAlloc -= d_lightRegionHullCount;                 // 0x406c0b
+    for ( int i = d_lightRegionHullCount; i > 0; )            // 0x406c11
+        free( d_lightRegionHulls[--i] );                      // 0x406c1c
+    d_lightRegionHullCount = 0;                               // 0x406c28
+}
+
 // sub_4A56B0 (0x4A56B0) — squared distance from a point to an AABB (0 when inside).
 static float Region_DistSqFromBox( const float *p, const float *mins, const float *maxs )
 {
@@ -3283,10 +3494,7 @@ int CCamWnd_RemoveLightPreview( selbrush_t *removed, CCamWnd *cam )
 // light brush and every camera light-preview record.
 void Regions_ForSelected( CCamWnd *cam )
 {
-    // clear the global region-hull array (sub_406C00)
-    for ( int i = d_lightRegionHullCount; i > 0; )
-        free( d_lightRegionHulls[--i] );
-    d_lightRegionHullCount = 0;
+    Region_ClearHulls();          // 0x406f1f — sub_406C00
 
     for ( selbrush_t *b = selected_brushes.next; b != &selected_brushes; b = b->next )
     {

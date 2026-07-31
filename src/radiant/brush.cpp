@@ -5847,6 +5847,78 @@ int DrawShadedWireframe( int cullMode, face_t *face, const orientation_t *orient
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 0x47b780  Face_AddWindingToTriBatch (sub_47B780) — append ONE face's winding to a
+// caller-owned white-UNLIT triangle batch as a fan, auto-flushing the batch through
+// R_AddRenderCmdDrawTris(d_white, TECHNIQUE_UNLIT, ...) when the next winding would
+// overrun the caller's 0x552-vertex / 0x7FB-index caps.
+//   • per vertex: xyzw = winding point + w=1, normal = the FACE PLANE normal (face+192),
+//     colour = the caller's packed colour word (bit-cast into the float colour array),
+//     st = {0,0}.
+//   • indices: a one-sided fan (base, base+i-1, base+i) for i = 2 .. numpoints-1.
+// The ONLY caller is CCamWnd::Cam_Draw's selected-FACE fill pass (0x4081eb).
+// `packedColor` is a pointer to a GfxColor read as a float — the binary stores the raw
+// dword into the float colour array (a bit-cast, not a value cast).
+// ─────────────────────────────────────────────────────────────────────────────
+void Face_AddWindingToTriBatch( face_t *face, const float *packedColor,
+                                int *indexCount, unsigned short *indices,
+                                int *vertCount, float ( *xyzw )[4],
+                                float ( *normal )[3], float *colorArr,
+                                float ( *st )[2] )
+{
+    extern void __cdecl R_AddRenderCmdDrawTris(
+        Material *material, MaterialTechniqueType techType, short indexCount,
+        const uint16_t *indices, short vertexCount,
+        const float (*xyzw)[4], const float (*normal)[3], float *color,
+        const float (*st)[2] );
+
+    winding_t *w = face->w;                                     // 0x47b78f (face+224)
+    if ( !w )                                                   // 0x47b79a
+        return;
+
+    // 0x47b7bd — flush when the append would overflow either cap.
+    if ( w->numpoints + *vertCount > 0x552
+      || *indexCount + 3 * w->numpoints - 6 > 0x7FB )
+    {
+        R_AddRenderCmdDrawTris( g_qeglobals.d_white, TECHNIQUE_UNLIT,
+                                (short)*indexCount, indices, (short)*vertCount,
+                                xyzw, normal, colorArr, st );   // 0x47b7e6
+        *indexCount = 0;                                        // 0x47b7f1
+        *vertCount  = 0;                                        // 0x47b7f7
+    }
+
+    // 0x47b800 — vertex append (positions + face-plane normal + flat colour + zero UVs).
+    for ( int i = 0; i < w->numpoints; ++i )
+    {
+        const int v = *vertCount + i;
+        xyzw[v][0] = w->p[i][0];                                // 0x47b844
+        xyzw[v][1] = w->p[i][1];                                // 0x47b850
+        xyzw[v][2] = w->p[i][2];                                // 0x47b85c
+        xyzw[v][3] = 1.0f;                                      // 0x47b861
+        normal[v][0] = face->plane.normal[0];                   // 0x47b86a
+        normal[v][1] = face->plane.normal[1];                   // 0x47b873
+        normal[v][2] = face->plane.normal[2];                   // 0x47b87c
+        colorArr[v]  = *packedColor;                            // 0x47b886
+        st[v][0] = 0.0f;                                        // 0x47b888
+        st[v][1] = 0.0f;                                        // 0x47b88e
+    }
+
+    // 0x47b8ab — one-sided triangle fan off the winding's first point.
+    if ( w->numpoints > 2 )
+    {
+        int ic = *indexCount;
+        for ( int i = 2; i < w->numpoints; ++i )
+        {
+            indices[ic]     = (unsigned short)( *vertCount );        // 0x47b8ca
+            indices[ic + 1] = (unsigned short)( *vertCount + i - 1 );// 0x47b8d6
+            indices[ic + 2] = (unsigned short)( *vertCount + i );    // 0x47b8da
+            ic += 3;                                                 // 0x47b8c6
+        }
+        *indexCount = ic;                                            // 0x47b8ed
+    }
+    *vertCount += w->numpoints;                                      // 0x47b8f1
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 0x47acf0  DrawGeo  (brush.cpp:4652) — FULL port (wireframe + FILLED branches).
 // Per winding-bearing face (with per-face visuals built by Brush_CheckBuildFaceVis):
 //   • technique 29 (WIREFRAME_SHADED): batch the face outline (DrawShadedWireframe).

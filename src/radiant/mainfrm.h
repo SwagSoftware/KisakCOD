@@ -275,6 +275,7 @@ public:
     void  UpdateScrollRange();       // IDB sub_45C830 (SetScrollInfo range from m_contentH)
     void  ApplyMaterialAtIndex( int idx );        // select+apply material idx (click body)
     BOOL  UpdatePrefs();             // IDB CTexWnd::UpdatePrefs 0x45D9F0 (re-apply prefs)
+    void  Scroll( short zDelta );    // IDB CTexWnd::Scroll 0x45DD80 (wheel = half-page step)
 protected:
     virtual BOOL PreCreateWindow( CREATESTRUCT& cs );
     afx_msg int  OnCreate( LPCREATESTRUCT lpCreateStruct );
@@ -325,6 +326,9 @@ protected:
     afx_msg void OnMeasureItem( int nIDCtl, LPMEASUREITEMSTRUCT lpMeasureItemStruct ); // filter list row height
     afx_msg void OnDrawItem( int nIDCtl, LPDRAWITEMSTRUCT lpDrawItemStruct );           // filter list checkbox rows
     afx_msg void OnFilterFlagCheck( UINT nID );  // a simple show-flag checkbox toggled
+    // 0x498572/0x4985ae — the inspector forwards the wheel to CMainFrame::OnScroll.
+    afx_msg BOOL OnMouseWheel( UINT nFlags, short zDelta, CPoint pt );
+    virtual BOOL OnCommand( WPARAM wParam, LPARAM lParam );
     DECLARE_MESSAGE_MAP()
 };
 
@@ -863,6 +867,12 @@ public:
 
     afx_msg void OnViewZoomin();          // 0x424750 — View→Zoom→XY Zoom In
     afx_msg void OnViewZoomout();         // 0x4247e0 — View→Zoom→XY Zoom Out
+    // 0x42b850 — the CENTRAL mouse-wheel dispatcher.  In the binary every editor child
+    // wndproc funnels its WM_MOUSEWHEEL here (CCamWnd/CXYWnd/CZWnd/CTexWnd::OnScroll,
+    // TexWndProc, CEntityWnd_EntityWndProc); it decides texture-scroll vs camera-dolly vs
+    // XY zoom from where the cursor is.  Public: called directly, not only via the map.
+    BOOL OnScroll( UINT nFlags, short zDelta, CPoint point );
+    afx_msg BOOL OnMouseWheel( UINT nFlags, short zDelta, CPoint pt );  // -> OnScroll
     afx_msg void OnView100();             // 0x423c30 — View→Zoom→XY 100%
     afx_msg void OnSelectionDeselect();   // 0x425740 — Selection→Deselect
     afx_msg void OnSelectionDragVertices(); // 0x425840 — Selection→Drag Vertices (vertex mode, 33005)

@@ -109,7 +109,7 @@ static const float *s_kdopNormalsFlat = &s_kdopDirs[0][0];
 //  dist in out[3]; returns 0.5 * sum-of-cross-magnitudes (the winding area).
 //  (common\polylib.cpp inline; not the editor winding.cpp Winding_Plane.)
 // =============================================================================
-static float Region_WindingPlane( float *out, const winding_t *w )
+float Region_WindingPlane( float *out, const winding_t *w )
 {
     out[0] = 0.0f;
     out[1] = 0.0f;

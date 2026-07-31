@@ -31,6 +31,11 @@ void sub_4DAD20( rface_t **outList, const float *desc );
 // for each, append to outHulls[], return the hull count.  desc = light descriptor.
 int  sub_4DD260( rface_t **faceList, const lightDesc_t *desc, void **outHulls );
 
+// Winding_Plane (sub_4D6EF0) — winding best-fit plane: normal in out[0..2], dist in
+// out[3]; returns 0.5 * sum-of-cross-magnitudes (the winding area).  Also used by the
+// camwnd region-hull draw (sub_40C640).
+float Region_WindingPlane( float *out, const winding_t *w );
+
 // Winding_Clip_real_ (polylib 0x4D83B0) — destructive in-place clip keeping the FRONT
 // side (dist > epsilon).  *inout freed+replaced (NULL if all-front clipped away).
 void Winding_Clip_real_( winding_t **inout, const float *normal, float dist, float epsilon );
