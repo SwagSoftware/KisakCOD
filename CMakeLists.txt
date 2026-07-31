@@ -5,6 +5,8 @@ project(KisakCOD)
 # Set the default C++ standard
 set(CMAKE_CXX_STANDARD 20)
 
+add_compile_definitions(_CRT_SECURE_NO_WARNINGS _CRT_NONSTDC_NO_DEPRECATE)
+
 # Set this to match the folder name in scripts/platform
 # This will handle the path overrides if needed
 set(KISAK_PLATFORM win32)

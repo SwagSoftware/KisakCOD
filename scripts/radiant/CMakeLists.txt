@@ -72,6 +72,9 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /MT /O2 /Ot /MP4 /W3 /Z7 /permissive-")
 set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS_DEBUG}   /MTd /Od /MP4 /W3 /Z7 /permissive-")
 
+# Warnings as Errors
+target_compile_options(${PROJECT_NAME} PRIVATE /we4700) # Uninit'd variable used in logic
+
 # Static MSVC runtime (required for static MFC)
 set_property(TARGET ${PROJECT_NAME} PROPERTY
     MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")

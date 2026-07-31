@@ -2928,13 +2928,17 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
     int dst_base = (int)(intptr_t)dstTd;
 
     {
-        float tv39, tv40, tv41, tv42, tv43, tv44, tv45, tv46;
-        float tv47, tv48, tv49, tv50, tv51, tv52, tv53, tv54;
-        float tv55, tv56, tv57;
-        float tv32, tv33, tv34, tv35, tv36, tv37;
+        // IDA v39..v57 are adjacent stack slots filled through BYREF pointers
+        // (&v39, &v32, &v35, &v55, &v47) — they must be real arrays here, not
+        // separate scalars (separate locals are not guaranteed contiguous).
+        float texVec[8];    // v39..v46 — Face_MoveTexture output, later matrix-transform output
+        float inVec[8];     // v47..v54 — master/slave plane pair, then the two stride-2 input vectors
+        float tvGrad[3];    // v32..v34 — Face_SolveTexGradient out, later Vec3Cross(dst) out
+        float tvAxis[3];    // v35..v37 — shared rotation axis
+        float crossSrc[3];  // v55..v57 — Vec3Cross(src) out
 
         Face_MoveTexture( (int)(intptr_t)srcTd, src_normal,
-                          (int)&tv39, (int)(intptr_t)srcTd->shift,
+                          (int)texVec, (int)(intptr_t)srcTd->shift,
                           src_v17, src_v19 );
 
         float *dst_normal = dst->plane.normal;
@@ -2950,32 +2954,33 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
             float dist_val = dst->plane.dist;
             int dst20 = dst_base + 20;
             int dst16 = dst_base + 16;
-            texturevecs_02( dst_base, (int)&tv39, (float)dst_normal[2],
+            texturevecs_02( dst_base, (int)texVec, (float)dst_normal[2],
                             (int)dst_normal, dist_val,
                             dst_base + 8, dst16, dst20 );
         }
         else
         {
-            // Non-parallel: build rotation matrix
-            tv47 = *src_normal;
-            tv48 = src->plane.normal[1];
-            tv49 = src->plane.normal[2];
-            tv51 = *dst_normal;
-            tv52 = dst->plane.normal[1];
-            tv53 = dst->plane.normal[2];
-            tv50 = -src->plane.dist;
-            tv54 = -dst->plane.dist;
+            // Non-parallel: build rotation matrix. inVec = v47..v54:
+            // [0..3] master plane (normal, -dist), [4..7] slave plane.
+            inVec[0] = *src_normal;
+            inVec[1] = src->plane.normal[1];
+            inVec[2] = src->plane.normal[2];
+            inVec[4] = *dst_normal;
+            inVec[5] = dst->plane.normal[1];
+            inVec[6] = dst->plane.normal[2];
+            inVec[3] = -src->plane.dist;
+            inVec[7] = -dst->plane.dist;
 
-            sub_4769A0( (int)&tv35, (int)&tv47, (int)&tv32 );
+            sub_4769A0( (int)tvAxis, (int)inVec, (int)tvGrad );
 
-            float v29 = src->plane.normal[2] * tv34
-                      + src->plane.normal[1] * tv33
-                      + tv32 * src->plane.normal[0];
+            float v29 = src->plane.normal[2] * tvGrad[2]
+                      + src->plane.normal[1] * tvGrad[1]
+                      + tvGrad[0] * src->plane.normal[0];
             float distFromMasterPlane = (float)(v29 - (double)src->plane.dist);
 
-            float v30 = tv34 * dst->plane.normal[2]
-                      + tv33 * dst->plane.normal[1]
-                      + tv32 * dst->plane.normal[0];
+            float v30 = tvGrad[2] * dst->plane.normal[2]
+                      + tvGrad[1] * dst->plane.normal[1]
+                      + tvGrad[0] * dst->plane.normal[0];
             float distFromSlavePlane = (float)(v30 - (double)dst->plane.dist);
 
             vassert( (fabsf( distFromMasterPlane ) < 0.01f), "(distFromMasterPlane) = %g", (double)distFromMasterPlane );   // brush.cpp:2992
@@ -2984,78 +2989,70 @@ brush_t *Brush_ApplyTextureProjection( int srcFace, brush_t *b, int dstFace )
             // Build 4x4 matrix v58 (64-byte GfxMatrix)
             float v58[16], v59[16];
             memset( v58, 0, sizeof(v58) );
-            v58[0]  = tv32;
-            v58[1]  = tv33;
-            v58[2]  = tv34;
+            v58[0]  = tvGrad[0];
+            v58[1]  = tvGrad[1];
+            v58[2]  = tvGrad[2];
             v58[3]  = 1.0f;
 
-            // tv39..tv41 are the Face_MoveTexture output S-vector
-            // tv42..tv44 are also from that output (U channel)
-            // tv45 is something from the output
-            // re-read from the byref locations set by Face_MoveTexture
-            // Since Face_MoveTexture set tv39..tv46 via BYREF arg3=(int)&tv39:
-            //   tv39,tv40,tv41 = S-vector (3 floats at &tv39)
-            //   tv42,tv43,tv44 = T-vector (3 floats at &tv39 + 12)
-            //   tv45,tv46 = shift/dist (2 floats at &tv39 + 24)
-            // IDA verbatim:
-            float tv24 = tv34 * tv41 + tv40 * tv33 + tv39 * tv32;
-            tv47 = tv24 + tv42;
-            float tv25 = tv32 * tv43 + tv33 * tv44 + tv45 * tv34;
-            tv48 = tv25 + tv46;
+            // texVec = Face_MoveTexture output (8 floats at IDA &v39):
+            //   [0..2] S-vector, [3] S-shift, [4..6] T-vector, [7] T-shift
+            // IDA verbatim (v24/v25 temporaries):
+            float tv24 = tvGrad[2] * texVec[2] + texVec[1] * tvGrad[1] + texVec[0] * tvGrad[0];
+            inVec[0] = tv24 + texVec[3];
+            float tv25 = tvGrad[0] * texVec[4] + tvGrad[1] * texVec[5] + texVec[6] * tvGrad[2];
+            inVec[1] = tv25 + texVec[7];
 
-            v58[4]  = tv35;
-            v58[5]  = tv36;
-            v58[6]  = tv37;
+            v58[4]  = tvAxis[0];
+            v58[5]  = tvAxis[1];
+            v58[6]  = tvAxis[2];
 
-            tv49 = tv35 * tv39 + tv36 * tv40 + tv37 * tv41;
-            tv50 = tv44 * tv36 + tv43 * tv35 + tv45 * tv37;
+            inVec[2] = tvAxis[0] * texVec[0] + tvAxis[1] * texVec[1] + tvAxis[2] * texVec[2];
+            inVec[3] = texVec[5] * tvAxis[1] + texVec[4] * tvAxis[0] + texVec[6] * tvAxis[2];
 
             v58[8]  = *dst_normal;
             v58[9]  = dst->plane.normal[1];
             v58[10] = dst->plane.normal[2];
 
-            tv51 = tv39 * src->plane.normal[0] + tv40 * src->plane.normal[1] + tv41 * src->plane.normal[2];
-            tv52 = tv44 * src->plane.normal[1] + tv43 * src->plane.normal[0] + src->plane.normal[2] * tv45;
+            inVec[4] = texVec[0] * src->plane.normal[0] + texVec[1] * src->plane.normal[1] + texVec[2] * src->plane.normal[2];
+            inVec[5] = texVec[5] * src->plane.normal[1] + texVec[4] * src->plane.normal[0] + src->plane.normal[2] * texVec[6];
 
-            Vec3Cross( dst_normal, &tv35, &tv32 );
-            Vec3Normalize_R( &tv32 );
-            Vec3Cross( src_normal, &tv35, &tv55 );
-            Vec3Normalize_R( &tv55 );
+            Vec3Cross( dst_normal, tvAxis, tvGrad );
+            Vec3Normalize_R( tvGrad );
+            Vec3Cross( src_normal, tvAxis, crossSrc );
+            Vec3Normalize_R( crossSrc );
 
-            v58[12] = tv32;
-            v58[13] = tv33;
-            v58[14] = tv34;
+            v58[12] = tvGrad[0];
+            v58[13] = tvGrad[1];
+            v58[14] = tvGrad[2];
 
-            tv53 = tv56 * tv40 + tv55 * tv39 + tv57 * tv41;
-            tv54 = tv56 * tv44 + tv55 * tv43 + tv57 * tv45;
+            inVec[6] = crossSrc[1] * texVec[1] + crossSrc[0] * texVec[0] + crossSrc[2] * texVec[2];
+            inVec[7] = crossSrc[1] * texVec[5] + crossSrc[0] * texVec[4] + crossSrc[2] * texVec[6];
 
             MatrixInverse44( v58, v59 );
 
             // Apply the inverse matrix v59 (row-major 4x4) to two input 4-vectors,
-            // writing the 8 transformed tex-vec floats tv39..tv46. IDA 0x476a30 nests
-            // 2 (outer, inVec = &v47 then &v48) x 4 (row): each
+            // writing the 8 transformed tex-vec floats texVec[0..7]. IDA 0x476a30 nests
+            // 2 (outer, in = &v47 then &v48) x 4 (row): each
             //   out[row] = v59[row][0]*in[0] + v59[row][1]*in[2]
             //            + v59[row][2]*in[4] + v59[row][3]*in[6]
             // (in indexed stride-2: in[0]/in[2]/in[4]/in[6] = v47/v49/v51/v53 then
-            //  v48/v50/v52/v54; out[0..3]=tv39..42 then out[4..7]=tv43..46).
+            //  v48/v50/v52/v54; out[0..3]=texVec[0..3] then out[4..7]=texVec[4..7]).
             // FIX (rule-0 trace, 2026-06-20): the prior port collapsed this to a single
             // 2-iter loop with FIXED rows 0/3, writing only 2 outputs — a botched
             // transcription that yields wrong tex vectors on Drag_FaceAlign (no headless
             // gate exercises this path, so it was latent).
-            float *outVec = &tv39;
-            float *inVec  = &tv47;
             for ( int o = 0; o < 2; ++o )
             {
+                const float *in = &inVec[o];
                 for ( int r = 0; r < 4; ++r )
-                    outVec[4 * o + r] = v59[4 * r + 0] * inVec[0]
-                                      + v59[4 * r + 1] * inVec[2]
-                                      + v59[4 * r + 2] * inVec[4]
-                                      + v59[4 * r + 3] * inVec[6];
-                ++inVec;
+                    texVec[4 * o + r] = v59[4 * r + 0] * in[0]
+                                      + v59[4 * r + 1] * in[2]
+                                      + v59[4 * r + 2] * in[4]
+                                      + v59[4 * r + 3] * in[6];
             }
 
             float dist_dst = dst->plane.dist;
-            texturevecs_02( dst_base, (int)&tv39, (float)dst_normal[2],
+            texturevecs_02( dst_base, (int)texVec, (float)dst_normal[2],
                             (int)dst_normal, dist_dst,
                             dst_base + 8, dst_base + 16, dst_base + 20 );
         }
