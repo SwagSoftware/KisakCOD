@@ -69,7 +69,7 @@ enum ai_substate_t : __int32
     STATE_GRENADE_THROWBACK = 0x132,
 };
 
-enum ai_state_transition_t : __int32
+enum ai_state_transition_t
 {
     AIS_TRANSITION_CANONICAL = 0xFFFFFFFF,
     AIS_TRANSITION_NONE = 0x0,

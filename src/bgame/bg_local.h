@@ -32,24 +32,28 @@ constexpr auto MAX_FRIENDLY_DIST = 15000.0;
 #define WEAPONSTATE_DROPPING(x) (x == WEAPON_DROPPING || x == WEAPON_DROPPING_QUICK)
 
 // Kisak: Custom enum
-typedef enum {
+enum sndEnumStuff
+{
     SND_MAX_ENTCHANNEL_NAMELENGTH = 0x40
-} sndEnumStuff;
+};
 
 // Kisak: Custom Enum
-typedef enum {
+enum 
+{
     EVENT_PARM_MAX = 0xFF
 };
 
 // Kisak: Custom Enum
-typedef enum {
+enum playerStateEFlags
+{
     EF_TURRET_ACTIVE = 0x300
-} playerStateEFlags;
+};
 
-typedef enum {
+// Kisak: Custom Enum
+enum playerOtherFlags 
+{
     POF_PLAYER = 4
-    
-} playerOtherFlags;
+};
 
 enum animBodyPart_t : __int32
 {                                       // ...
