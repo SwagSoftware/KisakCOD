@@ -2050,7 +2050,7 @@ bool __cdecl VEH_SlideMove(gentity_s *ent, int gravity)
 
     veh = ent->scr_vehicle;
     phys = &veh->phys;
-    timeLeft = 0.050000001;
+    timeLeft = 0.05f;
     endVel[0] = veh->phys.vel[0];
     endVel[1] = veh->phys.vel[1];
     endVel[2] = veh->phys.vel[2];

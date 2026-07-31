@@ -185,7 +185,7 @@ void __cdecl AimTarget_Init(int32_t localClientNum);
 const dvar_s *AimTarget_RegisterDvars();
 void __cdecl AimTarget_ClearTargetList(int32_t localClientNum);
 void __cdecl AimTarget_ProcessEntity(int32_t localClientNum, const centity_s *ent);
-char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *targetEnt);
+bool AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *targetEnt);
 double __cdecl AimTarget_GetTargetRadius(const centity_s *targetEnt);
 void __cdecl AimTarget_GetTargetBounds(const centity_s *targetEnt, float *mins, float *maxs);
 char __cdecl AimTarget_IsTargetVisible(int32_t localClientNum, const centity_s *targetEnt, uint32_t visBone);

@@ -170,6 +170,8 @@ union LerpEntityStateTypeUnion // sizeof=0x1C
 #endif
 };
 
+#define EF_DEAD 0x20000
+
 struct LerpEntityState // sizeof=0x68
 {                                       // XREF: entityState_s/r
     int eFlags;                         // XREF: ClientEndFrame(gentity_s *)+5D9/r

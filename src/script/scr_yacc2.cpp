@@ -18,8 +18,8 @@
 #include <client_mp/client_mp.h>
 #endif
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
+//#pragma GCC push_options
+//#pragma GCC optimize ("O0")
 
 struct stype_t // sizeof=0x8
 {                                       // ...
@@ -2118,4 +2118,4 @@ void ScriptParse(sval_u *parseData, unsigned char user)
 	*parseData = yaccResult;
 }
 
-#pragma GCC pop_options
+//#pragma GCC pop_options

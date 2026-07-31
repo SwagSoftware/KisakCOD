@@ -39,8 +39,8 @@ enum
 	MAX_VM_OPERAND_STACK = 0x800,
 };
 
-#pragma GCC push_options
-#pragma GCC optimize ("O0")
+//#pragma GCC push_options
+//#pragma GCC optimize ("O0")
 
 #undef GetObject
 
@@ -5722,4 +5722,4 @@ void __cdecl ScriptCompile(
 	SetVariableValue(scriptId, &value);
 }
 
-#pragma GCC pop_options
+//#pragma GCC pop_options

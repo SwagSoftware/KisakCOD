@@ -91,13 +91,11 @@ void __cdecl AimTarget_ProcessEntity(int32_t localClientNum, const centity_s *en
     }
 }
 
-char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *targetEnt)
+bool AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *targetEnt)
 {
-    double v3; // st7
-    float targetDir[3] = { 0 }; // [esp+50h] [ebp-28h] BYREF
-
+    float targetDir[3]; // [esp+50h] [ebp-28h] BYREF
     float radius; // [esp+64h] [ebp-14h]
-    float playerDir[3] = { 0 }; // [esp+68h] [ebp-10h] BYREF
+    float playerDir[3]; // [esp+68h] [ebp-10h] BYREF
     float dot; // [esp+74h] [ebp-4h]
 
     PROF_SCOPED("AimTarget_IsTargetValid");
@@ -108,44 +106,36 @@ char __cdecl AimTarget_IsTargetValid(const cg_s *cgameGlob, const centity_s *tar
 
     if (targetEnt->nextState.eType == ET_PLAYER)
     {
-        iassert((targetEnt->nextState.lerp.eFlags & 0x20000) == 0);
-        iassert(targetEnt->nextState.clientNum < 0x40u);
+        iassert(!(targetEnt->nextState.lerp.eFlags & EF_DEAD));
+        bcassert(targetEnt->nextState.clientNum, MAX_CLIENTS);
 
         const clientInfo_t* targetInfo = &cgameGlob->bgs.clientinfo[targetEnt->nextState.clientNum]; // [esp+60h] [ebp-18h]
-        iassert(cgameGlob->predictedPlayerState.clientNum < 0x40u);
+        bcassert(cgameGlob->predictedPlayerState.clientNum, MAX_CLIENTS);
 
         const clientInfo_t* playerInfo = &cgameGlob->bgs.clientinfo[cgameGlob->predictedPlayerState.clientNum]; // [esp+5Ch] [ebp-1Ch]
         if (targetInfo->infoValid && targetInfo->model[0])
         {
-            DObj_s* ret = Com_GetClientDObj(targetEnt->nextState.number, targetEnt->pose.localClientNum);
-            iassert(ret);
+            iassert(Com_GetClientDObj(targetEnt->nextState.number, targetEnt->pose.localClientNum));
 
             if (targetInfo->team != playerInfo->team || playerInfo->team == TEAM_FREE)
                 goto LABEL_26;
         }
-    LABEL_25:
+
         return 0;
     }
+
     if ((targetEnt->nextState.lerp.eFlags & 0x800) == 0 || targetEnt->nextState.solid != 0xFFFFFF)
     {
         return 0;
     }
+
 LABEL_26:
     Vec3Sub(targetEnt->pose.origin, cgameGlob->predictedPlayerState.origin, targetDir);
-    playerDir[0] = cgameGlob->refdef.viewaxis[0][0];
-    playerDir[1] = cgameGlob->refdef.viewaxis[0][1];
-    playerDir[2] = cgameGlob->refdef.viewaxis[0][2];
+    Vec3Copy(cgameGlob->refdef.viewaxis[0], playerDir);
     radius = AimTarget_GetTargetRadius(targetEnt);
-    v3 = Vec3Dot(playerDir, targetDir);
-    dot = v3 + radius;
-    if (dot >= 0.0)
-    {
-        return 1;
-    }
-    else
-    {
-        return 0;
-    }
+    dot = Vec3Dot(playerDir, targetDir) + radius;
+
+    return (dot >= 0.0f);
 }
 
 double __cdecl AimTarget_GetTargetRadius(const centity_s *targetEnt)
