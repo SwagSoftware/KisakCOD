@@ -7171,76 +7171,42 @@ void DrawBrush( selbrush_t *b, const orientation_t *orient, int viewType,
 
     // PATCH brushes — the binary's DrawBrush patch dispatch (0x47b01d):
     //   draw_meth2 == 29 && viewType <= 2  → DrawPatchesWireframeGrid  (2D views, wireframe)
-    //   draw_meth2 == 29 && viewType  > 2  → DrawPatchCameraFilled     (0x4415d0, "// not called")
+    //   draw_meth2 == 29 && viewType  > 2  → DrawPatchCameraFilled     (0x4415d0)
     //   else (draw_meth2 != 29, e.g. the world draw at tech 24) → DrawPatches (0x4414e0):
     //        the FILLED per-layer surf-cache draw (PMESH_27_CheckVersion → PMESH_26_CheckFace →
     //        Editor_AddMeshCmd) UNLESS g_PrefsDlg->patch_wireframe is set, in which case it SKIPS
     //        the filled top-face and draws DrawPatchesWireframeGrid with colors[23].
     //
-    // In the 3D CAMERA the world draw arrives with viewType=-1 and technique=24
-    // (FAKELIGHT), so it takes the DrawPatches default arm — ported as Patch_DrawFilled
-    // (pmesh.cpp): builds the patch instance per-layer visuals (Patch_BuildInstanceVisuals
-    // -> PMESH_23/24, version-gated by PMESH_25) and emits the filled top face through
-    // Editor_AddMeshCmd — the SAME surf-cache the models use, flushed by the caller's
-    // R_AddEditorSurfsCmd.  Retail patch terrain (mp_backlot/blackout) is 4000+ patches
-    // carried as prefab CONTENTS, so this arm is what makes the 3D world non-white.
+    // The 3D world pass arrives with viewType=-1 and a non-wireframe technique, so it
+    // takes DrawPatches and emits through the editor surf cache.
     if ( b->patch )
     {
-        if ( technique == 29 && (unsigned)viewType <= 2 )
+        if ( technique == 29 )
         {
-            // 2D views (wireframe technique): the tessellated grid, entity colour.
-            DrawPatchesWireframeGrid( b->patch, col, orient, width, drawFlags );
-        }
-        else
-        {
-            // 3D camera / world draw (tech 24 fakelight): the binary's DrawPatches (0x4414e0).
-            //   g_PrefsDlg->patch_wireframe == 0 (default) → FILLED top face (Patch_DrawFilled).
-            //   patch_wireframe != 0                        → wireframe grid (colours[23]).
-            // Thread the DrawBrush placement `orient` (binary DrawPatches a3 = ident_mtx) so the
-            // filled patch builds its vertices at the WORLD placement — prefab-content patches ride
-            // the composed prefabOrient.  [PLACEMENT FIX 2026-07-04.]
-            extern bool Patch_DrawFilled( patch_t *inst, const orientation_t *orient, int techType,
-                                          int drawFlags ); // pmesh.cpp
-            bool drewFilled = false;
-            if ( g_PrefsDlg->patch_wireframe == 0 )
-                drewFilled = Patch_DrawFilled( b->patch, orient, technique, drawFlags );
-            if ( !drewFilled )
+            // 0x47B025: view types 0..2 use the 2D grid; the camera uses 0x4415D0.
+            if ( (unsigned)viewType <= 2 )
             {
-                // patch_wireframe on, OR the patch has no realized layer (asset gap) → wireframe
-                // fallback (COLOR_PATCH grid), so the terrain is never an invisible white void.
-                GfxColor pcol;
-                Byte4PackPixelColor( g_qeglobals.d_savedinfo.colors[23], &pcol );   // COLOR_PATCH
-                DrawPatchesWireframeGrid( b->patch, &pcol, orient, width, drawFlags );
+                // 2D views (wireframe technique): the tessellated grid, entity colour.
+                DrawPatchesWireframeGrid( b->patch, col, orient, width, drawFlags );
             }
             else
             {
-                extern int g_bPatchBendMode;
-                extern int g_qeglobals_redispersePatchVerts;
-
-                const bool editOverlay = b->patch->selected != 0 &&
-                    ( g_qeglobals.d_select_mode == sel_curvepoint ||
-                      g_qeglobals.d_select_mode == sel_area ||
-                      g_bPatchBendMode ||
-                      g_qeglobals_redispersePatchVerts );
-
-                const bool selectedTerrainOverlay = b->patch->selected != 0 &&
-                    b->patch->def &&
-                    ( (int)b->patch->def->type & PATCH_TERRAIN ) != 0;
-
-                if ( editOverlay || selectedTerrainOverlay )
-                {
-                    GfxColor pcol;
-                    if ( selectedTerrainOverlay )
-                        Byte4PackPixelColor( const_cast<float *>( colorWhite ), &pcol );
-                    else
-                        Byte4PackPixelColor( g_qeglobals.d_savedinfo.colors[23], &pcol );   // COLOR_PATCH
-                    DrawPatchesWireframeGrid( b->patch, &pcol, orient, width, drawFlags );
-                }
-                else
-                {
-                    // IDA DrawPatches tails with Patch_DrawControlPoints after the filled pass.
-                    Patch_DrawControlPoints( b->patch, orient );
-                }
+                // 3D camera: 0x4415D0 — d_white at TECHNIQUE_WIREFRAME_SOLID, both windings.
+                extern bool DrawPatchCameraFilled( patch_t *inst, const orientation_t *orient,
+                                                   int drawFlags );   // pmesh.cpp 0x4415d0
+                DrawPatchCameraFilled( b->patch, orient, drawFlags );
+            }
+        }
+        else
+        {
+            extern bool DrawPatches( patch_t *inst, const orientation_t *orient,
+                                     int techType, int drawFlags ); // pmesh.cpp 0x4414E0
+            if ( !DrawPatches( b->patch, orient, technique, drawFlags ) )
+            {
+                // Defensive asset-gap fallback; stock assumes the instance visuals exist.
+                GfxColor pcol;
+                Byte4PackPixelColor( g_qeglobals.d_savedinfo.colors[23], &pcol );   // COLOR_PATCH
+                DrawPatchesWireframeGrid( b->patch, &pcol, orient, width, drawFlags );
             }
         }
         return;

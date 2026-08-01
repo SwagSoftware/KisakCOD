@@ -16,8 +16,6 @@
 static_assert(sizeof(orientation_t) == 48, "orientation_t (fxprimitives.h != IDB)");
 static_assert(sizeof(GfxPointVertex) == 16, "GfxPointVertex (r_gfx.h != IDB)");
 
-bool g_radiantTerrainOverlayNoDepth = false;
-
 // ─── Orientation helpers (IDB 0x4ba430 / 0x4ba4b0, q_shared.cpp:1599/1608) ──────
 // kisak only carries the FX_-prefixed variants (different arg order); the editor's
 // brush/draw code references these unprefixed forms.  Defined here - the single home in
@@ -105,8 +103,6 @@ void VectorRotateByAxis( float *out, const float *axisMatrix, const float *dir )
 //   vertCount = R_Add3DLine(verts, &world_orient_matrix, p1, p2, &color, 2, vertCount, 1362);
 // `color` is a pointer to a packed Byte4 pixel color; `width` (the 6th IDB arg) is the
 // line pixel width forwarded to the flush — NOT a depth-test flag.
-// KISAK: differs from 0x40c110 — the flush routes through R_AddCmd_Line3DNoDepth when
-// g_radiantTerrainOverlayNoDepth is set (the binary always uses R_AddCmd_Line3D).
 int R_Add3DLine( GfxPointVertex *verts, const orientation_t *orient,
                  const float *p1, const float *p2, const unsigned int *color,
                  char width, int vertCount, int maxVertCount )
@@ -117,10 +113,7 @@ int R_Add3DLine( GfxPointVertex *verts, const orientation_t *orient,
 
     if ( vertCount + 2 > maxVertCount )
     {
-        if ( g_radiantTerrainOverlayNoDepth )
-            R_AddCmd_Line3DNoDepth( (short)(vertCount / 2), width, verts );
-        else
-            R_AddCmd_Line3D( (short)(vertCount / 2), width, verts );
+        R_AddCmd_Line3D( (short)(vertCount / 2), width, verts );
         vertCount = 0;
     }
 

@@ -1481,77 +1481,22 @@ void Patch_BrushToMesh( char bCone, unsigned char bBevel, unsigned char bEndcap,
 //     Patch_BrushPrimit port's identical guard — identical when the GUI is up).
 //   * The bDirty texCoord refinement (sub_439350 terrain / PMESH_02 curve, both at
 //     16.0 then 0.25, layers 1/2) is the REAL ported refinement, not parked.
+//   * type is 0 (0x43b36f) — the `type & PATCH_TERRAIN` forks below are therefore DEAD
+//     in the binary too; they are kept because the binary emits them.
+//
+//  Terrain creation is the separate Create_Terrain function at 0x43B660. It uses
+//  random_texture_stuff; it is not a PATCH_TERRAIN variant of this function and does
+//  not project materials from the selected brush face.
 // ════════════════════════════════════════════════════════════════════════════
-static const face_t *Patch_FindTerrainSourceFace( const brush_t *def, int nOrientation )
+selbrush_t *Patch_GenericMesh( int nWidth, int nHeight, int nOrientation,
+                               char bDeleteSource, char bOverwrite )
 {
-    if ( !def || !def->faces || def->faceCount <= 0 || nOrientation < 0 || nOrientation > 2 )
-        return nullptr;
-
-    const face_t *best = &def->faces[0];
-    float bestDot = best->plane.normal[nOrientation];
-    for ( int i = 1; i < def->faceCount; ++i )
-    {
-        const face_t *face = &def->faces[i];
-        float dot = face->plane.normal[nOrientation];
-        if ( dot > bestDot )
-        {
-            best = face;
-            bestDot = dot;
-        }
-    }
-    return best;
-}
-
-static void Patch_CopyFaceMaterials( patchMesh_t *p, const face_t *face )
-{
-    p->texture.lyrMtl   = face->mtldef[0].lyrMtl;
-    p->texture.radMtl   = face->mtldef[0].radMtl;
-    p->lightmap.lyrMtl  = face->mtldef[1].lyrMtl;
-    p->lightmap.radMtl  = face->mtldef[1].radMtl;
-    p->smoothing.lyrMtl = face->mtldef[2].lyrMtl;
-    p->smoothing.radMtl = face->mtldef[2].radMtl;
-}
-
-static void Patch_ProjectFaceTexcoords( patchMesh_t *p, const face_t *face )
-{
-    float mats[24];
-    for ( int L = 0; L < 3; ++L )
-    {
-        float *td = (float *)TexWnd_06_LayerCount( (int)(intptr_t)&face->mtldef[L], 0 );
-        Face_MoveTexture( (int)(intptr_t)td, face->plane.normal,
-                          (int)(intptr_t)&mats[8 * L], (int)(intptr_t)( td + 2 ), td[4], td[5] );
-    }
-
-    for ( int col = 0; col < p->width; ++col )
-    {
-        for ( int row = 0; row < p->height; ++row )
-        {
-            drawVert_t *cp = &p->ctrl[col][row];
-            for ( int L = 0; L < 3; ++L )
-            {
-                const float *m = &mats[8 * L];
-                float s = cp->xyz[1] * m[1] + cp->xyz[0] * m[0] + cp->xyz[2] * m[2] + m[3];
-                float t = cp->xyz[1] * m[5] + cp->xyz[0] * m[4] + cp->xyz[2] * m[6] + m[7];
-                if ( ( *(unsigned int *)&s & 0x7F800000 ) == 0x7F800000 )
-                    Assert( PMESH_CPP, 9122, 0, "%s", "!IS_NAN(texCoord[0])" );
-                if ( ( *(unsigned int *)&t & 0x7F800000 ) == 0x7F800000 )
-                    Assert( PMESH_CPP, 9123, 0, "%s", "!IS_NAN(texCoord[1])" );
-                cp->texCoord.st[2 * L]     = s;
-                cp->texCoord.st[2 * L + 1] = t;
-            }
-        }
-    }
-}
-
-static selbrush_t *Patch_GenericMeshTyped( int nWidth, int nHeight, int nOrientation,
-                                           char bDeleteSource, char bOverwrite, PATCH_TYPES type )
-{
-    if ( nHeight > 15 || (unsigned int)( nWidth - 3 ) > 12 )
+    if ( nHeight > 15 || (unsigned int)( nWidth - 3 ) > 12 )     // 0x43b331
     {
         Sys_Printf( "Invalid patch width or height.\n" );
         return nullptr;
     }
-    if ( !bOverwrite && !QE_SingleBrush() )
+    if ( !bOverwrite && !QE_SingleBrush() )                      // 0x43b33d
     {
         Sys_Printf( "Cannot generate a patch from multiple selections.\n" );
         return nullptr;
@@ -1560,7 +1505,7 @@ static selbrush_t *Patch_GenericMeshTyped( int nWidth, int nHeight, int nOrienta
     patchMesh_t *p = MakeNewPatch();
     p->height = nHeight;
     p->width  = nWidth;
-    p->type   = type;
+    p->type   = (PATCH_TYPES)0;                                  // 0x43b36f
 
     // Orientation → (u-axis, v-axis) of the view plane (IDA LABEL_9/LABEL_10).
     int uAxis, vAxis;
@@ -1591,40 +1536,27 @@ static selbrush_t *Patch_GenericMeshTyped( int nWidth, int nHeight, int nOrienta
         u = (int)( (double)u + uStep );
     }
 
-    const bool terrain = ( p->type & PATCH_TERRAIN ) != 0;
-    const face_t *terrainSourceFace = terrain ? Patch_FindTerrainSourceFace( def, nOrientation ) : nullptr;
-    if ( terrainSourceFace )
-    {
-        // Simple Terrain Patch (cmd 32939) is a terrain-specific extension of the IDA
-        // Patch_GenericMesh body above. Preserve the source face the same way PMESH_58
-        // Face->Terrain does: copy all three material channels and project control STs
-        // through Face_MoveTexture/TexWnd_06_LayerCount.
-        Patch_CopyFaceMaterials( p, terrainSourceFace );
-        Patch_ProjectFaceTexcoords( p, terrainSourceFace );
-    }
-    else
-    {
-        // Stamp the current-edit-layer templates (layer 0 = texture, layer 1 = lightmap).
-        p->texture.lyrMtl  = g_qeglobals.random_texture_stuff[0].mtl.lyrMtl;
-        p->texture.radMtl  = g_qeglobals.random_texture_stuff[0].mtl.radMtl;
-        p->lightmap.lyrMtl = g_qeglobals.random_texture_stuff[1].mtl.lyrMtl;
-        p->lightmap.radMtl = g_qeglobals.random_texture_stuff[1].mtl.radMtl;
+    // Stamp the current-edit-layer templates (0x43b4f2..0x43b50c): layer 0 = texture,
+    // layer 1 = lightmap.  smoothing keeps MakeNewPatch's "smoothing_smooth".
+    p->texture.lyrMtl  = g_qeglobals.random_texture_stuff[0].mtl.lyrMtl;
+    p->texture.radMtl  = g_qeglobals.random_texture_stuff[0].mtl.radMtl;
+    p->lightmap.lyrMtl = g_qeglobals.random_texture_stuff[1].mtl.lyrMtl;
+    p->lightmap.radMtl = g_qeglobals.random_texture_stuff[1].mtl.radMtl;
 
-        float natScale = g_qeglobals.random_texture_stuff[0].sampleSize;
-        if ( natScale == 0.0f )
-            natScale = 0.25f;
-        Patch_Naturalize2( p, 0, natScale, natScale );
+    float natScale = g_qeglobals.random_texture_stuff[0].sampleSize;
+    if ( natScale == 0.0f )
+        natScale = 0.25f;
+    Patch_Naturalize2( p, 0, natScale, natScale );                // 0x43b521
 
-        // texCoord refinement passes (IDA: 16.0 then 0.25; terrain vs curve; layers 1/2).
-        if ( terrain ) Patch_TerrainTexProject( p, 1, 16.0f );
-        else           PMESH_02( p, 1, 16.0f );
-        *(float *)&p->size_of_struct_0x504C = 16.0f;
-        p->bDirty = 1;
-        if ( terrain ) Patch_TerrainTexProject( p, 2, 0.25f );
-        else           PMESH_02( p, 2, 0.25f );
-    }
+    const bool terrain = ( p->type & PATCH_TERRAIN ) != 0;       // 0x43b538 (always false)
+    if ( terrain ) Patch_TerrainTexProject( p, 1, 16.0f );
+    else           PMESH_02( p, 1, 16.0f );
+    *(float *)&p->size_of_struct_0x504C = 16.0f;                 // 0x43b55e
+    p->bDirty = 1;                                               // 0x43b56b
+    if ( terrain ) Patch_TerrainTexProject( p, 2, 0.25f );
+    else           PMESH_02( p, 2, 0.25f );
 
-    if ( p->curveDef )
+    if ( p->curveDef )                                           // 0x43b592
         free( p->curveDef );
     p->curveDef = Patch_GenericMesh2( p, g_qeglobals.current_edit_layer, 0, 0 );
     ++p->version;
@@ -1648,19 +1580,105 @@ static selbrush_t *Patch_GenericMeshTyped( int nWidth, int nHeight, int nOrienta
         Select_Delete();
         Select_Brush( inst, 1, 1, 0 );
     }
+
     return inst;
 }
 
-selbrush_t *Patch_GenericMesh( int nWidth, int nHeight, int nOrientation,
-                               char bDeleteSource, char bOverwrite )
+// ── Patch_BuildCurveDef (0x438D50) — free + rebuild the tessellated render mesh ──
+//    The named helper the binary calls where Patch_BrushToMesh / Patch_GenericMesh
+//    inline the same three statements.
+static curvePatchDef_t *Patch_BuildCurveDef( patchMesh_t *p )
 {
-    return Patch_GenericMeshTyped( nWidth, nHeight, nOrientation, bDeleteSource, bOverwrite, (PATCH_TYPES)0 );
+    if ( p->curveDef )                                           // 0x438d51
+        free( p->curveDef );
+    curvePatchDef_t *result = Patch_GenericMesh2( p, g_qeglobals.current_edit_layer, 0, 0 );
+    p->curveDef = result;                                        // 0x438d78
+    return result;
 }
 
-selbrush_t *Patch_GenericTerrainMesh( int nWidth, int nHeight, int nOrientation,
-                                      char bDeleteSource, char bOverwrite )
+// Create_Terrain (0x43B660), called by TerrainDlg_NewPatch (0x458FB0).
+selbrush_t *Create_Terrain( int width, int height, int orientation )
 {
-    return Patch_GenericMeshTyped( nWidth, nHeight, nOrientation, bDeleteSource, bOverwrite, PATCH_TERRAIN );
+    if ( (unsigned int)( height - 2 ) > 14 || (unsigned int)( width - 2 ) > 14 )   // 0x43b684
+    {
+        Sys_Printf( "Invalid terrain width or height.\n" );
+        return nullptr;
+    }
+    if ( !QE_SingleBrush() )                                                       // 0x43b68a
+    {
+        Sys_Printf( "Cannot generate a terrain from multiple selections.\n" );
+        return nullptr;
+    }
+
+    patchMesh_t *p = MakeNewPatch();
+    p->height = height;
+    p->width  = width;
+    p->type   = PATCH_TERRAIN;                                                     // 0x43b6bc
+
+    int uAxis, vAxis;                                                              // LABEL_8/LABEL_9
+    if ( orientation == 0 )       { uAxis = 1; vAxis = 2; }
+    else if ( orientation == 1 )  { uAxis = 0; vAxis = 2; }
+    else                          { uAxis = 0; vAxis = 1; }
+
+    brush_t  *def   = selected_brushes.next->def;
+    entity_s *owner = selected_brushes.next->owner;
+
+    float uStep = (float)fabs( (double)( def->maxs[uAxis] - def->mins[uAxis] ) / (double)( width  - 1 ) );
+    float vStep = (float)fabs( (double)( def->maxs[vAxis] - def->mins[vAxis] ) / (double)( height - 1 ) );
+
+    int u = (int)def->mins[uAxis];
+    for ( int i = 0; i < width; ++i )
+    {
+        int   v  = (int)def->mins[vAxis];
+        float uf = (float)u;
+        for ( int j = 0; j < height; ++j )
+        {
+            float vf = (float)v;
+            p->ctrl[i][j].xyz[uAxis]      = uf;
+            p->ctrl[i][j].xyz[vAxis]      = vf;
+            p->ctrl[i][j].xyz[orientation] = def->maxs[orientation];
+            v = (int)( vf + vStep );
+        }
+        u = (int)( (double)u + uStep );
+    }
+
+    p->texture.lyrMtl  = g_qeglobals.random_texture_stuff[0].mtl.lyrMtl;           // 0x43b841
+    p->texture.radMtl  = g_qeglobals.random_texture_stuff[0].mtl.radMtl;           // 0x43b849
+    p->lightmap.lyrMtl = g_qeglobals.random_texture_stuff[1].mtl.lyrMtl;           // 0x43b852
+    p->lightmap.radMtl = g_qeglobals.random_texture_stuff[1].mtl.radMtl;           // 0x43b85b
+
+    const float natScale = g_qeglobals.random_texture_stuff[0].sampleSize;         // 0x43b870
+    Patch_Naturalize2( p, 0, natScale, natScale );
+
+    const bool terrain = ( p->type & PATCH_TERRAIN ) != 0;                         // 0x43b886 (always true here)
+    if ( terrain ) Patch_TerrainTexProject( p, 1, 16.0f );
+    else           PMESH_02( p, 1, 16.0f );
+    *(float *)&p->size_of_struct_0x504C = 16.0f;                                   // 0x43b8ad
+    p->bDirty = 1;                                                                 // 0x43b8ba
+    if ( terrain ) Patch_TerrainTexProject( p, 2, 0.25f );
+    else           PMESH_02( p, 2, 0.25f );
+
+    Patch_BuildCurveDef( p );                                                      // 0x43b8e1
+    ++p->version;                                                                  // 0x43b8e6
+
+    brush_t    *pdef = AddBrushForPatch( p, (entity_s *)owner->def );              // 0x43b8f7
+    selbrush_t *inst = Brush_AddToList( pdef, owner );                             // 0x43b907
+    // Select_Brush_2(&active_brushes, inst)  (0x476630, inlined — list != selected_brushes)
+    if ( inst->next || inst->prev )
+        Error( "Brush_AddToList: already linked" );
+    if ( &active_brushes == &selected_brushes )
+        Brush_AddToList2( inst );
+    else
+    {
+        inst->next = active_brushes.next;
+        active_brushes.next->prev = inst;
+        active_brushes.next = inst;
+        inst->prev = &active_brushes;
+    }
+
+    Select_Delete();                                                               // 0x43b90e
+    Select_Brush( inst, 1, 1, 0 );                                                 // 0x43b91b
+    return inst;
 }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -4620,9 +4638,10 @@ static int sub_43ED50( const float *a1, const float *a2, const float *a3,
         const float vz = cur[2];               // ring[seg].z
 
         // current ring vertex's distances to the 3 edges (var_80/7C/78, ping-pong slots).
-        const float dc0 = e0y * vy + e0x * vx - c0;
-        const float dc1 = e1y * vy + e1x * vx - c1;
-        const float dc2 = e2y * vy + e2x * vx - c2;
+        // 0x43EE64: same crossed-coefficient half-plane form as pd0..pd2.
+        const float dc0 = e0x * vy + e0y * vx - c0;
+        const float dc1 = e1x * vy + e1y * vx - c1;
+        const float dc2 = e2x * vy + e2y * vx - c2;
 
         // Cull: if BOTH this vertex and the previous one are outside the SAME edge (distance
         // > thresh), the ring segment can't cross the triangle interior -> nothing to emit.
@@ -9858,14 +9877,6 @@ void Patch_Fill_SyncVersion( patch_t *inst, const orientation_t *orient )
 
 extern bool MaterialDef_15_Drawflag_Multiply( int drawFlags, MaterialDef *m );
 
-static int Patch_TechAvailable( Material *m, int requestedTech )
-{
-    if ( requestedTech != TECHNIQUE_UNLIT
-         && ( !m || !Material_GetTechnique( m, (MaterialTechniqueType)requestedTech ) ) )
-        return TECHNIQUE_UNLIT;
-    return requestedTech;
-}
-
 // ── PMESH_27_CheckVersion / PMESH_26_CheckFace (0x440670 / 0x4405f0) — the draw emit ──
 // Emit the patch's tessellated mesh into the surf cache at `techType`.  `face` = PM_FRONT_FACE
 // or PM_BACK_FACE.  When `mtlOverride` is set, use it for ALL layers (the d_white patch_wireframe
@@ -9875,22 +9886,19 @@ static int Patch_TechAvailable( Material *m, int requestedTech )
 // Keep that shape: day_water_mud is translucent in D3D state but has toolFlags&0x70 == 0x20, so
 // the binary draws it in the first/skip-multiply world pass. A depth-write substitute would skip
 // it and the water strip would vanish.
-// KISAK: the binary passes `techType` to Editor_AddMeshCmd verbatim; the port routes it through
-// Patch_TechAvailable, which falls back to TECHNIQUE_UNLIT when the material has no technique for
-// the requested type.  The null-material skip and the sortKey==0 fallback are the same class of
-// defensive addition (the binary derefs visArray[0].material unguarded).
-static void Patch_Fill_Emit( patch_t *inst, Material *mtlOverride, int face, int techType,
-                             int drawFlags )
+// Returns true when at least one mesh was handed to the surf cache.
+static bool Patch_Fill_Emit( patch_t *inst, Material *mtlOverride, int face, int techType )
 {
     if ( !inst->visArray || inst->vertCount <= 0 || !inst->indicesFront )
-        return;
+        return false;
     uint16_t *indexTable = ( face == PM_BACK_FACE ) ? inst->indicesBack : inst->indicesFront;
+    bool emitted = false;
     if ( mtlOverride )
     {
-        const int useTech = Patch_TechAvailable( mtlOverride, techType );
-        Editor_AddMeshCmd( mtlOverride, useTech, Editor_MaterialSortKey( mtlOverride ),
+        Editor_AddMeshCmd( mtlOverride, techType, Editor_MaterialSortKey( mtlOverride ),
                            inst->vertCount, inst->visArray[0].vertHandle,
                            inst->indexCount, (int)indexTable );
+        emitted = true;
     }
     else
     {
@@ -9899,24 +9907,18 @@ static void Patch_Fill_Emit( patch_t *inst, Material *mtlOverride, int face, int
         {
             Material *m = inst->visArray[L].material;
             if ( !m ) continue;
-            const int useTech = Patch_TechAvailable( m, techType );
-            Editor_AddMeshCmd( m, useTech, sortKey + L,
+            Editor_AddMeshCmd( m, techType, sortKey + L,
                                inst->vertCount, inst->visArray[L].vertHandle,
                                inst->indexCount, (int)indexTable );
+            emitted = true;
         }
     }
+    return emitted;
 }
 
-// ── Patch_DrawFilled (the DrawPatches 0x4414e0 FILLED arm) ────────────────────
-// Public entry for DrawBrush's patch else-branch.  Syncs the instance visuals to the def
-// version, then emits the FILLED front face at `techType` into the surf cache (flushed by the
-// caller's R_AddEditorSurfsCmd).  Returns false if the patch has no drawable visuals (caller
-// falls back to wireframe); returns true for an IDA drawflag-gated skip because stock
-// DrawPatches does not synthesize a wireframe fallback there.  `drawFlags` == the DrawBrush drawFlags (binary DrawPatches a5) —
-// drives the binary's MaterialDef_15_Drawflag_Multiply opaque/additive gate (see below).
-// `orient` = the DrawBrush placement orientation (binary: DrawPatches a3 = DrawBrush ident_mtx),
-// threaded into the instance-visual build so patches land at their WORLD placement.
-bool Patch_DrawFilled( patch_t *inst, const orientation_t *orient, int techType, int drawFlags )
+// DrawPatches (0x4414E0): filled front, selected white under-fill, back-face
+// wireframe, optional patch grid, and control-point tail.
+bool DrawPatches( patch_t *inst, const orientation_t *orient, int techType, int drawFlags )
 {
     if ( !inst || !inst->def )
         return false;
@@ -9935,16 +9937,74 @@ bool Patch_DrawFilled( patch_t *inst, const orientation_t *orient, int techType,
 
     // FAITHFUL DRAW GATE: IDA DrawPatches 0x4414e0 calls
     //   PMESH_25_PatchVersion(pm, orient);
-    //   if (override || MaterialDef_15_Drawflag_Multiply(drawFlags, &patch->texture[layer]))
+    //   if (override || MaterialDef_15_Drawflag_Multiply(drawFlags, &patch->texture))
     //       PMESH_27_CheckVersion(...)
     // and PMESH_27 emits every layer. Do not substitute material depth-write here: CoD4 water
     // materials intentionally have depth-write off but toolFlags&0x70 != 0x70, so stock Radiant
     // draws them in the first world pass.
-    MaterialDef *mtldef = (MaterialDef *)( &inst->def->texture + g_qeglobals.current_edit_layer );
+    // 0x4414FA/0x4414FF — `mov eax,[edi] ; add eax,18h`: DrawPatches reads &def->texture
+    // FLAT (layer 0 ALWAYS), it does NOT index by current_edit_layer.  (Only the INSTANCE
+    // VISUAL build, Patch_BuildInstanceVisuals 0x440255, uses +8*current_edit_layer.)
+    // DrawPatchCameraFilled 0x4415D8 does the same flat read — they must agree, or the
+    // white selected-outline pass and the filled pass can disagree on the same patch when
+    // the edit layer is not 0.
+    MaterialDef *mtldef = (MaterialDef *)&inst->def->texture;
     if ( !MaterialDef_15_Drawflag_Multiply( drawFlags, mtldef ) )
         return true;
-    Patch_Fill_Emit( inst, nullptr, PM_FRONT_FACE, techType, drawFlags );
+
+    const int patchWireframe = g_PrefsDlg->patch_wireframe;
+    const bool drawFront = patchWireframe == 0 || ( patchWireframe == 2 && techType != 29 );
+    if ( drawFront )
+        Patch_Fill_Emit( inst, nullptr, PM_FRONT_FACE, techType );          // 0x44153E
+
+    if ( ( drawFlags & 1 ) != 0 )
+    {
+        if ( !drawFront )
+            Patch_Fill_Emit( inst, g_qeglobals.d_white, PM_FRONT_FACE, techType ); // 0x44155D
+    }
+    else
+    {
+        Patch_Fill_Emit( inst, nullptr, PM_BACK_FACE,
+                         TECHNIQUE_WIREFRAME_SHADED );                     // 0x441572
+        if ( patchWireframe )
+        {
+            extern void DrawPatchesWireframeGrid( patch_t *, GfxColor *,
+                                                   const orientation_t *, char, int );
+            GfxColor color;
+            Byte4PackPixelColor( g_qeglobals.d_savedinfo.colors[23], &color );
+            DrawPatchesWireframeGrid( inst, &color, orient, 2, drawFlags ); // 0x4415A6
+        }
+    }
+
+    extern void Patch_DrawControlPoints( patch_t *, const orientation_t * );
+    Patch_DrawControlPoints( inst, orient );                                // 0x4415B7
     return true;
+}
+
+// ── DrawPatchCameraFilled (0x4415D0) — the 3D-CAMERA tech-29 patch draw ───────
+// The selected-camera pass emits d_white at TECHNIQUE_WIREFRAME_SOLID through
+// both winding lists after the layer-0 draw gate.
+bool DrawPatchCameraFilled( patch_t *inst, const orientation_t *orient, int drawFlags )
+{
+    bool front = false, back = false;
+
+    if ( inst && inst->def && inst->def->curveDef )
+    {
+        Patch_Fill_SyncVersion( inst, orient );              // 0x4415D3
+        if ( inst->visArray && inst->visCount > 0 )
+        {
+            // 0x4415D8/0x4415DD — def + 0x18 == &def->texture, no layer index.
+            if ( MaterialDef_15_Drawflag_Multiply( drawFlags, (MaterialDef *)&inst->def->texture ) )
+            {                                                // 0x4415E8 jz -> nothing drawn
+                front = Patch_Fill_Emit( inst, g_qeglobals.d_white, PM_FRONT_FACE,
+                                         TECHNIQUE_WIREFRAME_SOLID );
+                back  = Patch_Fill_Emit( inst, g_qeglobals.d_white, PM_BACK_FACE,
+                                         TECHNIQUE_WIREFRAME_SOLID );
+            }
+        }
+    }
+
+    return front || back;
 }
 
 // ═════════════════════════════════════════════════════════════════════════════

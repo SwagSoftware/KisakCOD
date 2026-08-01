@@ -1344,7 +1344,6 @@ extern int   PMESH_20_Radius_2( int count, patchMesh_t *patch, const float *curs
 
 static GfxCmdDrawPoints *DrawAdvancedTerrainEditCircle( const float *a1 )
 {
-    extern bool g_radiantTerrainOverlayNoDepth;
     const float innerR = sub_401BB0();        // v19
     const float outerR = sub_401C00();        // v20
     const float ringZ  = a1[2] + 1.0;         // v23 (dbl_6F4098 = 1.0)
@@ -1372,9 +1371,6 @@ static GfxCmdDrawPoints *DrawAdvancedTerrainEditCircle( const float *a1 )
     GfxPointVertex verts[1362];                // v26 — on-stack batch
     int lineCount = 0;                         // v1
 
-    const bool oldNoDepth = g_radiantTerrainOverlayNoDepth;
-    g_radiantTerrainOverlayNoDepth = true;
-
     // ACTIVE patches: clipped only when the "apply to active" checkbox is set.
     if ( CurvEditDlg_OnSomeSetting() )
     {
@@ -1398,9 +1394,11 @@ static GfxCmdDrawPoints *DrawAdvancedTerrainEditCircle( const float *a1 )
                                          innerRing, outerRing,
                                          (const unsigned int *)&color, lineCount, verts );
     }
+    // 0x441436: DEPTH-TESTED R_AddCmd_Line3D. The ring is kept off the surface by
+    // sub_43ED50's own -0.125*camera.vpn nudge toward the viewer, which is the
+    // binary's anti-z-fight mechanism — a no-depth emit is NOT how it stays visible.
     if ( lineCount )
-        R_AddCmd_Line3DNoDepth( (short)( lineCount / 2 ), 1, verts );
-    g_radiantTerrainOverlayNoDepth = oldNoDepth;
+        R_AddCmd_Line3D( (short)( lineCount / 2 ), 1, verts );
 
     // SELECTED patches: falloff-coloured control-point dots.
     int ptCount = 0;
@@ -1661,7 +1659,8 @@ void CCamWnd::Cam_Draw()
     for ( selbrush_t *b = bhead->next; b != bhead; b = b->next )
     {
         brush_t *def = b->def;
-        if ( !def || def->patch )                       // convex brushes only
+        // DrawBrush 0x47B018 dispatches on the instance-side patch field.
+        if ( !def || b->patch )                         // convex brushes only
             continue;
         // 0x407af0 - DrawGeneralWorld_ gates every world brush on !CullCubic && !FilterBrush.
         // KISAK: CullCubic stays elided here (the port draws the full map); FilterBrush is
@@ -1762,7 +1761,7 @@ void CCamWnd::Cam_Draw()
         for ( selbrush_t *b = selected_brushes.next; b != &selected_brushes; b = b->next )
         {
             brush_t *def = b->def;
-            if ( !def || def->patch )                       // patches → patch-wireframe loop
+            if ( !def || b->patch )                         // patches → patch-wireframe loop
                 continue;
             entity_s_def *eDef = b->owner ? (entity_s_def *)b->owner->def : nullptr;
             if ( eDef && eDef->eclass && ( eDef->eclass->classtype & 1 ) )   // CLASS_LIGHT → skip
@@ -1797,7 +1796,7 @@ void CCamWnd::Cam_Draw()
             for ( selbrush_t *b = head->next; b && b != head; b = b->next )
             {
                 brush_t *def = b->def;
-                if ( !def || def->patch )                       // patches: own pass below
+                if ( !def || b->patch )                         // patches: own pass below
                     continue;
                 entity_s     *owner = b->owner;
                 entity_s_def *eDef  = owner ? (entity_s_def *)owner->def : nullptr;
@@ -1881,7 +1880,7 @@ void CCamWnd::Cam_Draw()
                 R_AddCmdSetMaterialColor( g_qeglobals.d_savedinfo.colors[11] );
             for ( selbrush_t *b = head->next; b && b != head; b = b->next )
             {
-                if ( !b->def || !b->def->patch )
+                if ( !b->def || !b->patch )                     // instance field — see 0x47B018
                     continue;
                 GfxColor pcol;
                 Cam_BrushColor2d( b, &pcol );
@@ -1918,7 +1917,11 @@ void CCamWnd::Cam_Draw()
         for ( selbrush_t *b = selected_brushes.next; b && b != &selected_brushes; b = b->next )
         {
             brush_t *def = b->def;
-            if ( !def || def->patch )                       // 0x408011: skip CONTENTS_PATCH
+            // 0x408011 tests brushFlags & 0x100 (the misc_model CYCLE-PREVIEW flag; see the
+            // white-outline pass below for the provenance).  The port instead splits patches into
+            // their own self-bracketed pass above, so they are skipped here by `b->patch`
+            // (the instance field — the binary's sole patch predicate, DrawBrush 0x47B018).
+            if ( !def || b->patch )
                 continue;
             entity_s     *owner = b->owner;
             entity_s_def *eDef  = owner ? (entity_s_def *)owner->def : nullptr;
@@ -2037,7 +2040,10 @@ void CCamWnd::Cam_Draw()
         for ( selbrush_t *b = selected_brushes.next; b != &selected_brushes; b = b->next )
         {
             brush_t *def = b->def;
-            if ( !def || def->patch )                       // binary skips CONTENTS_PATCH (brushflags&0x100)
+            if ( !def )
+                continue;
+            // 0x4084FC: bit 0x100 is the misc_model cycle-preview flag, not a patch test.
+            if ( ( b->brushFlags & 0x100 ) != 0 )
                 continue;
             // drawFlags=1 (force-draw) matches the binary's a10=1; viewType -1 = no 2D cull.
             DrawBrush( b, (const orientation_t *)world_orient_matrix, /*viewType*/ -1,

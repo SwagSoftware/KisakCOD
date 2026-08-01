@@ -1499,6 +1499,13 @@ int CMainFrame::OnCreate( LPCREATESTRUCT lpCreateStruct )
     Radiant_CheckMenu( this, 33950, g_PrefsDlg->enable_light_preview != 0 );
     Radiant_CheckMenu( this, 36108, g_PrefsDlg->preview_sun_aswell   != 0 );
 
+    // CMainFrame::OnCreateClient tail, 0x4232E3: apply the persisted render mode
+    // after the camera window exists.
+    {
+        extern void Texture_SetMode( int iTexMenu );   // texwnd.cpp (0x45A520)
+        Texture_SetMode( g_qeglobals.d_savedinfo.iTextMenu );
+    }
+
     m_bDoLoop = true;
     SetTimer( 1, 250, NULL );       // periodic status refresh (the binary's 1s loop timer)
     Radiant_FL_Log( "CMainFrame::OnCreate done" );

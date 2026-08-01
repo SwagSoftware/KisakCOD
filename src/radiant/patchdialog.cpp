@@ -741,8 +741,11 @@ extern void        Undo_EndBrushList( selbrush_t *sb );         // undo.cpp
 extern void        Undo_End();                                  // undo.cpp
 extern selbrush_t *Patch_GenericMesh( int nWidth, int nHeight, int nOrientation,
                                       char bDeleteSource, char bOverwrite );   // pmesh.cpp (0x43b310)
-extern selbrush_t *Patch_GenericTerrainMesh( int nWidth, int nHeight, int nOrientation,
-                                             char bDeleteSource, char bOverwrite );
+// The TERRAIN arm is the binary's own Create_Terrain (0x43B660), reached in stock from
+// TerrainDlg_NewPatch (0x458FB0) — NOT a PATCH_TERRAIN variant of Patch_GenericMesh (no
+// such function exists).  It takes (width, height, viewType) and always replaces the
+// selected brush, so it needs no bDeleteSource/bOverwrite.
+extern selbrush_t *Create_Terrain( int width, int height, int orientation );   // pmesh.cpp (0x43B660)
 
 // The binary's dimension table (g_patchDensityDims @0x73B170): combo index → patch size.
 static const int s_patchDensityDims[7] = { 3, 5, 7, 9, 11, 13, 15 };
@@ -751,6 +754,8 @@ static const int s_patchDensityDims[7] = { 3, 5, 7, 9, 11, 13, 15 };
 // g_patchDensityLastHeightSel 0x25D5B00; both 0 = "3" on first open).
 static int g_patchDensityLastWidthSel  = 0;
 static int g_patchDensityLastHeightSel = 0;
+static int g_terrainLastWidthSel       = 0;
+static int g_terrainLastHeightSel      = 0;
 
 class CPatchDensityDlg : public CDialog
 {
@@ -773,17 +778,18 @@ protected:
     virtual BOOL OnInitDialog()                            // 0x436440
     {
         CDialog::OnInitDialog();
-        // (see FIDELITY NOTE) populate both combos from the dims table, then restore
-        // the last selection (the binary's two CB_SETCURSELs).
-        for ( int i = 0; i < 7; ++i )
+        // The curve dialog indexes g_patchDensityDims. TerrainDlg uses selection+2,
+        // exposing every valid terrain dimension from 2 through 16.
+        const int itemCount = m_terrain ? 15 : 7;
+        for ( int i = 0; i < itemCount; ++i )
         {
             char s[16];
-            sprintf( s, "%d", s_patchDensityDims[i] );
+            sprintf( s, "%d", m_terrain ? i + 2 : s_patchDensityDims[i] );
             m_wndWidth.AddString( s );
             m_wndHeight.AddString( s );
         }
-        m_wndWidth.SetCurSel( g_patchDensityLastWidthSel );
-        m_wndHeight.SetCurSel( g_patchDensityLastHeightSel );
+        m_wndWidth.SetCurSel( m_terrain ? g_terrainLastWidthSel : g_patchDensityLastWidthSel );
+        m_wndHeight.SetCurSel( m_terrain ? g_terrainLastHeightSel : g_patchDensityLastHeightSel );
         return TRUE;
     }
 
@@ -791,23 +797,27 @@ protected:
     {
         int wSel = m_wndWidth.GetCurSel();
         int hSel = m_wndHeight.GetCurSel();
-        if ( (unsigned int)wSel <= 6 && (unsigned int)hSel <= 6 )
+        const unsigned int maxSel = m_terrain ? 14u : 6u;
+        if ( (unsigned int)wSel <= maxSel && (unsigned int)hSel <= maxSel )
         {
-            int nHeight = s_patchDensityDims[hSel];
-            if ( nHeight < 3 )
-                Sys_Printf( "Invalid patch width or height.\n" );
+            if ( m_terrain )
+                Create_Terrain( wSel + 2, hSel + 2,                         // 0x458FB0
+                                g_pParentWnd->m_pActiveXY->m_nViewType );
             else
-            {
-                selbrush_t *( *createPatch )( int, int, int, char, char ) =
-                    m_terrain ? Patch_GenericTerrainMesh : Patch_GenericMesh;
-                createPatch( s_patchDensityDims[wSel], nHeight,
-                             g_pParentWnd->m_pActiveXY->m_nViewType, 1, 0 );
-            }
+                Patch_GenericMesh( s_patchDensityDims[wSel], s_patchDensityDims[hSel],
+                                   g_pParentWnd->m_pActiveXY->m_nViewType, 1, 0 ); // 0x436400
             g_nUpdateBits = -1;
         }
-        // remember the selection (IDB stores edi/ebx into the two globals).
-        g_patchDensityLastWidthSel  = wSel;
-        g_patchDensityLastHeightSel = hSel;
+        if ( m_terrain )
+        {
+            g_terrainLastWidthSel  = wSel;
+            g_terrainLastHeightSel = hSel;
+        }
+        else
+        {
+            g_patchDensityLastWidthSel  = wSel;
+            g_patchDensityLastHeightSel = hSel;
+        }
         CDialog::OnOK();
     }
 };
