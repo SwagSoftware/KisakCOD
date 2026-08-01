@@ -584,7 +584,7 @@ void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *v
 void __cdecl VEH_InitPhysics(gentity_s *ent);
 int32_t __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace);
 void __cdecl VEH_ClearGround();
-bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity);
+bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out);
 void Scr_Vehicle_Init(gentity_s *pSelf);
 void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched);
@@ -619,7 +619,7 @@ void __cdecl PushAttachedStickyMissile(gentity_s *vehicle, gentity_s *missile);
 void __cdecl VEH_UpdateAim(gentity_s *ent);
 void __cdecl VEH_UpdateAIMove(gentity_s *ent);
 void __cdecl VEH_UpdatePath(gentity_s *ent);
-void __cdecl VEH_GroundPlant(gentity_s *ent, vehicle_physic_t *phys, int gravity);
+void __cdecl VEH_GroundPlant(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_DebugBox(float *pos, float width, float r, float g, float b);
 void __cdecl VEH_UpdateMoveToGoal(gentity_s *ent, const float *goalPos);
 bool __cdecl VEH_IsHovering(scr_vehicle_s *veh);
@@ -647,7 +647,11 @@ void __cdecl VEH_CheckHorizontalVelocityToGoal(
     float *accelVec);
 void __cdecl VEH_CheckVerticalVelocityToGoal(scr_vehicle_s *veh, float verticalDist, float *accelVec);
 int32_t __cdecl VEH_UpdateMove_CheckGoalReached(gentity_s *ent, float distToGoal);
+#ifdef KISAK_SP
 float __cdecl VEH_UpdateMove_CheckStop(scr_vehicle_s *veh, float distToGoal);
+#elif KISAK_MP
+double __cdecl VEH_UpdateMove_CheckStop(scr_vehicle_s *veh, float distToGoal);
+#endif
 void __cdecl VEH_UpdateMove_CheckNearGoal(gentity_s *ent, float distToGoal);
 void __cdecl VEH_GetNewSpeedAndAccel(scr_vehicle_s *veh, float dt, int32_t hovering, float *newSpeed, float *accelMax);
 void __cdecl VEH_UpdateHover(gentity_s *ent);
@@ -679,12 +683,13 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref);
 int32_t __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int32_t barrel);
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *angles);
 void __cdecl VEH_JoltBody(gentity_s *ent, const float *dir, float intensity, float speedFrac, float decel);
+
+void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime);
+
 #ifdef KISAK_SP
-void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity);
 #endif
 #ifdef KISAK_MP
-void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
 #endif
@@ -694,17 +699,15 @@ void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_UpdateClient(gentity_s *ent);
 void __cdecl VEH_VerifyPosition(gentity_s *ent);
 void __cdecl VEH_UpdateWeapon(gentity_s *ent);
-void __cdecl VEH_UpdateBody(gentity_s *ent);
+void __cdecl VEH_UpdateBody(gentity_s *ent, float frameTime);
 void __cdecl VEH_UpdateSteering(gentity_s *ent);
 void __cdecl VEH_UpdateMaterialTime(gentity_s *ent);
 void VEH_UpdateSounds(gentity_s *ent);
-// SP-only vehicle physics helpers (called by VEH_UpdateClient).  GroundTrace
-// and GroundMove also exist in MP but with frameTime args and using s_phys_0;
-// SP versions match CoD3SP IDA (s_phys, no frameTime).  DebugCapsule/CalcAccel
-// are SP-only (MP has neither).
+// SP-only vehicle physics helpers called by VEH_UpdateClient.
+// DebugCapsule/CalcAccel are SP-only (MP has neither).
 void __cdecl VEH_DebugCapsule(float *pos, float rad, float height, float r, float g, float b);
 void __cdecl VEH_GroundTrace(gentity_s *ent);
-void __cdecl VEH_GroundMove(gentity_s *ent);
+void __cdecl VEH_GroundMove(gentity_s *ent, float frameTime);
 void __cdecl VEH_CalcAccel(gentity_s *ent, char *move, float *bodyAccel, float *rotAccel);
 #endif
 

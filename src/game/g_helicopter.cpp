@@ -115,7 +115,7 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
         startPos[1] = veh->phys.origin[1];
         startPos[2] = veh->phys.origin[2];
         VEH_ClearGround();
-        v1 = VEH_SlideMove(ent, 0);
+        v1 = VEH_SlideMove(ent, 0, 0.05f);
         bumped = v1;
         if (v1)
         {
@@ -295,7 +295,7 @@ LABEL_27:
         startPos[1] = veh->phys.origin[1];
         startPos[2] = veh->phys.origin[2];
         VEH_ClearGround();
-        v1 = VEH_SlideMove(ent, 0);
+        v1 = VEH_SlideMove(ent, 0, 0.05f);
         bumped = v1;
         if (v1)
         {
@@ -953,7 +953,7 @@ bool __cdecl VEH_TestSlideMove(gentity_s *ent, float *outPos)
     startVel = veh->phys.vel[0];
     startVel_4 = veh->phys.vel[1];
     startVel_8 = veh->phys.vel[2];
-    result = VEH_SlideMove(ent, 0);
+    result = VEH_SlideMove(ent, 0, 0.05f);
     *outPos = veh->phys.origin[0];
     outPos[1] = veh->phys.origin[1];
     outPos[2] = veh->phys.origin[2];

@@ -948,7 +948,7 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
 double __cdecl GetSpeed(int32_t localClientNum, centity_s *cent);
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *vel, const float *angles);
 void __cdecl VEH_InitPhysics(gentity_s *ent);
-bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity);
+bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_ClipVelocity(float *in, float *normal, float *out);
 void __cdecl VEH_BackupPosition(gentity_s *ent);
 void __cdecl VEH_TouchEntities(gentity_s *ent);
