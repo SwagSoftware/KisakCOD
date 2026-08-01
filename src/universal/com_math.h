@@ -14,6 +14,8 @@
 #define CLAMP(x, low, high) ((x) < (low) ? (low) : ((x) > (high) ? (high) : (x)))
 #define IS_NAN(x) _isnan(x)
 
+static const float MPH_TO_INCHES_PER_SEC = 17.6f;
+
 struct cplane_s // sizeof=0x14
 {                                       // ...
     float normal[3];                    // ...

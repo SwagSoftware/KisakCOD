@@ -441,7 +441,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 return;
             case EV_FIRE_WEAPON_MG42:
                 eType = ET_PLAYER;
-                CG_StartShakeCamera(localClientNum, 0.050000001f, 100, cent->pose.origin, 100.0f);
+                CG_StartShakeCamera(localClientNum, 0.05f, 100, cent->pose.origin, 100.0f);
                 CG_FireWeapon(localClientNum, cent, event, scr_const.tag_flash, 0, &cgameGlob->nextSnap->ps);
                 attackerCent = CG_GetEntity(localClientNum, eventParm);
                 if (attackerCent->nextValid

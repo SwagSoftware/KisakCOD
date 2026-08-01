@@ -320,7 +320,7 @@ void AimAssist_RegisterDvars()
     minr.value.min = 0.0f;
     aim_lockon_deflection = Dvar_RegisterFloat(
         "aim_lockon_deflection",
-        0.050000001f,
+        0.05f,
         minr,
         DVAR_CHEAT,
         "The amount of stick deflection for the lockon to activate");

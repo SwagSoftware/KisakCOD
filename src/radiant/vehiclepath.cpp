@@ -86,7 +86,7 @@ struct VehiclePathNode
     __int16     index;         // 0x0C  this node's own index
     __int16     pad_0e;        // 0x0E  (never written)
     int         isRotateNode;  // 0x10  eclass == info_vehicle_node_rotate
-    float       speed;         // 0x14  units/sec (mph * 17.6); -1 = "inherit"
+    float       speed;         // 0x14  units/sec (mph * MPH_TO_INCHES_PER_SEC); -1 = "inherit"
     float       lookahead;     // 0x18  -1 = "inherit"
     float       origin[3];     // 0x1C  world position (the entity's origin)
     float       dir[3];        // 0x28  UNIT direction to the next node (LinkNodes)
@@ -1279,7 +1279,7 @@ void VehiclePath_AddNode()
         {
             const char *speed = ValueForKey2( (int)(intptr_t)ent->def, "speed" );
             if ( speed && *speed )
-                node->speed = (float)( atof( speed ) * 17.6f );   // mph -> units/sec
+                node->speed = (float)( atof( speed ) * MPH_TO_INCHES_PER_SEC );   // mph -> units/sec
 
             const char *lookahead = ValueForKey2( (int)(intptr_t)ent->def, "lookahead" );
             if ( lookahead && *lookahead )

@@ -1039,7 +1039,7 @@ void __cdecl BG_RegisterDvars()
     mincj.value.min = 0.0f;
     bg_shock_viewKickRadius = Dvar_RegisterFloat(
         "bg_shock_viewKickRadius",
-        0.050000001f,
+        0.05f,
         mincj,
         DVAR_CHEAT,
         "Shell shock kick radius");

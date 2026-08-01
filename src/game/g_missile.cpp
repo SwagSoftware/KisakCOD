@@ -195,7 +195,7 @@ void __cdecl G_RegisterMissileDvars()
         "Rocket's speed limit when descending towards target.");
     minn.value.max = 1.0f;
     minn.value.min = 0.0f;
-    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.050000001f, minn, DVAR_CHEAT, "");
+    missileJavTurnDecel = Dvar_RegisterFloat("missileJavTurnDecel", 0.05f, minn, DVAR_CHEAT, "");
     mino.value.max = FLT_MAX;
     mino.value.min = 0.0f;
     missileJavClimbToOwner = Dvar_RegisterFloat("missileJavClimbToOwner", 700.0f, mino, DVAR_CHEAT, "");
@@ -1826,7 +1826,7 @@ void __cdecl RunMissile_Destabilize(gentity_s *missile)
         missile->missile.time = weaponDef->destabilizationRateTime * 1000.0f;
         missile->flags |= FL_MISSILE_DESTABILIZED;
     }
-    Vec3Mad(missile->s.lerp.apos.trBase, 0.050000001f, missile->missile.curvature, newAPos);
+    Vec3Mad(missile->s.lerp.apos.trBase, 0.05f, missile->missile.curvature, newAPos);
     G_SetAngle(missile, newAPos);
     AngleVectors(newAPos, direction, 0, 0);
     min = (float)weaponDef->iProjectileSpeed;
@@ -1977,7 +1977,7 @@ void __cdecl Missile_ApplyAttractorsRepulsors(gentity_s *missile)
     }
     if (0.0f != forceVector[0] || 0.0f != forceVector[1] || 0.0f != forceVector[2])
     {
-        Vec3Mad(missile->s.lerp.pos.trDelta, 0.050000001f, forceVector, missile->s.lerp.pos.trDelta);
+        Vec3Mad(missile->s.lerp.pos.trDelta, 0.05f, forceVector, missile->s.lerp.pos.trDelta);
         Vec3NormalizeTo(missile->s.lerp.pos.trDelta, forwardDir);
         iProjectileSpeed = (float)weaponDef->iProjectileSpeed;
         Vec3Scale(forwardDir, iProjectileSpeed, missile->s.lerp.pos.trDelta);
@@ -2031,7 +2031,7 @@ void __cdecl MissileTrajectory(gentity_s *ent, float *result)
             if (forwardSpeed < (float)weapDef->iProjectileSpeed)
             {
                 accel = (float)weapDef->iProjectileSpeed / weapDef->timeToAccelerate;
-                v2 = accel * 0.05000000074505806f;
+                v2 = accel * 0.05f;
                 Vec3Mad(ent->s.lerp.pos.trDelta, v2, dir, ent->s.lerp.pos.trDelta);
             }
             else
@@ -2041,7 +2041,7 @@ void __cdecl MissileTrajectory(gentity_s *ent, float *result)
             }
         }
         if (weapDef->projectileCurvature > 0.0f)
-            Vec3Mad(ent->s.lerp.pos.trDelta, 0.050000001f, ent->missile.curvature, ent->s.lerp.pos.trDelta);
+            Vec3Mad(ent->s.lerp.pos.trDelta, 0.05f, ent->missile.curvature, ent->s.lerp.pos.trDelta);
         if (missileDebugDraw->current.enabled)
         {
             dbgStart[0] = ent->r.currentOrigin[0];
@@ -2051,7 +2051,7 @@ void __cdecl MissileTrajectory(gentity_s *ent, float *result)
         GuidedMissileSteering(ent);
         if (weapDef->guidedMissileType != MISSILE_GUIDANCE_JAVELIN || ent->missile.stage)
         {
-            Vec3Mad(ent->s.lerp.pos.trBase, 0.050000001f, ent->s.lerp.pos.trDelta, ent->s.lerp.pos.trBase);
+            Vec3Mad(ent->s.lerp.pos.trBase, 0.05f, ent->s.lerp.pos.trDelta, ent->s.lerp.pos.trBase);
             *result = ent->s.lerp.pos.trBase[0];
             result[1] = ent->s.lerp.pos.trBase[1];
             result[2] = ent->s.lerp.pos.trBase[2];
@@ -2129,7 +2129,7 @@ void __cdecl GuidedMissileSteering(gentity_s *ent)
             steer[2] = 0.0f;
             MissileHorzSteerToTarget(ent, currentRight, toTargetRelative, currentHorzSpeed, steer);
             MissileVerticalSteering(ent, toTargetRelative, currentHorzSpeed, steer);
-            Vec3Mad(ent->s.lerp.pos.trDelta, 0.050000001f, steer, ent->s.lerp.pos.trDelta);
+            Vec3Mad(ent->s.lerp.pos.trDelta, 0.05f, steer, ent->s.lerp.pos.trDelta);
         }
     }
 }
@@ -2480,7 +2480,7 @@ void __cdecl JavelinRotateVelocity(gentity_s *ent, const float *currentVel, cons
     {
         if (ent->missile.stage == MISSILESTAGE_ASCENT || currentVel[2] > 0.0f)
         {
-            len = missileJavAccelClimb->current.value * 0.05000000074505806f + len;
+            len = missileJavAccelClimb->current.value * 0.05f + len;
             if (missileJavSpeedLimitClimb->current.value < len)
                 len = missileJavSpeedLimitClimb->current.value;
         }
@@ -2488,7 +2488,7 @@ void __cdecl JavelinRotateVelocity(gentity_s *ent, const float *currentVel, cons
         {
             if (ent->missile.stage != MISSILESTAGE_DESCENT)
                 MyAssertHandler(".\\game\\g_missile.cpp", 1804, 0, "%s", "ent->missile.stage == MISSILESTAGE_DESCENT");
-            len = missileJavAccelDescend->current.value * 0.05000000074505806f + len;
+            len = missileJavAccelDescend->current.value * 0.05f + len;
             if (missileJavSpeedLimitDescend->current.value < len)
                 len = missileJavSpeedLimitDescend->current.value;
         }
@@ -2515,7 +2515,7 @@ double __cdecl JavelinRotateDir(gentity_s *ent, const float *currentDir, const f
     dot = (1.0 - (dot + 1.0) * 0.5) * 180.0;
     if (dot > 0.1)
     {
-        targetDPS = dot / 0.05000000074505806f;
+        targetDPS = dot / 0.05f;
         if (maxDPS <= targetDPS)
         {
             frac = maxDPS / targetDPS;

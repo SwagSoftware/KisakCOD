@@ -1078,7 +1078,7 @@ int __cdecl PausedClientFreeMove(int localClientNum)
 
         int deltaMsec = v6 - oldMsec;
         oldMsec = v6;
-        v9 = (float)deltaMsec * (float)value * 0.050000001f;
+        v9 = (float)deltaMsec * (float)value * 0.05f;
         AnglesToAxis(LocalClientGlobals->refdefViewAngles, LocalClientGlobals->refdef.viewaxis);
         v18[0] = LocalClientGlobals->refdef.viewaxis[0][0];
         v18[1] = LocalClientGlobals->refdef.viewaxis[0][1];

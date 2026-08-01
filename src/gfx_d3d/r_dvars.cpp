@@ -837,7 +837,7 @@
          DVAR_NOFLAG,
          "Max reflection intensity based on glancing angle.");
      mint.value.max = 20.0f;
-     mint.value.min = 0.050000001f;
+     mint.value.min = 0.05f;
      r_envMapExponent = Dvar_RegisterFloat("r_envMapExponent", 5.0f, mint, DVAR_NOFLAG, "Reflection exponent.");
      minu.value.max = 4.0f;
      minu.value.min = 0.0f;

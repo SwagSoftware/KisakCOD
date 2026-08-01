@@ -579,7 +579,7 @@ void(__cdecl *__cdecl ScriptEnt_GetMethod(const char **pName))(scr_entref_t);
 gentity_s *__cdecl GScr_GetVehicle(scr_entref_t entref);
 gentity_s *__cdecl VEH_GetVehicle(int32_t entNum);
 void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx);
-void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, __int16 infoIdx);
+void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, short infoIdx);
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *vel, const float *angles);
 void __cdecl VEH_InitPhysics(gentity_s *ent);
 int32_t __cdecl VEH_CorrectAllSolid(gentity_s *ent, trace_t *trace);
@@ -647,7 +647,7 @@ void __cdecl VEH_CheckHorizontalVelocityToGoal(
     float *accelVec);
 void __cdecl VEH_CheckVerticalVelocityToGoal(scr_vehicle_s *veh, float verticalDist, float *accelVec);
 int32_t __cdecl VEH_UpdateMove_CheckGoalReached(gentity_s *ent, float distToGoal);
-double __cdecl VEH_UpdateMove_CheckStop(scr_vehicle_s *veh, float distToGoal);
+float __cdecl VEH_UpdateMove_CheckStop(scr_vehicle_s *veh, float distToGoal);
 void __cdecl VEH_UpdateMove_CheckNearGoal(gentity_s *ent, float distToGoal);
 void __cdecl VEH_GetNewSpeedAndAccel(scr_vehicle_s *veh, float dt, int32_t hovering, float *newSpeed, float *accelMax);
 void __cdecl VEH_UpdateHover(gentity_s *ent);
@@ -679,9 +679,15 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref);
 int32_t __cdecl VEH_GetTagBoneIndex(gentity_s *ent, int32_t barrel);
 void __cdecl VEH_SetPosition(gentity_s *ent, const float *origin, const float *angles);
 void __cdecl VEH_JoltBody(gentity_s *ent, const float *dir, float intensity, float speedFrac, float decel);
+#ifdef KISAK_SP
+void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity);
+void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity);
+#endif
+#ifdef KISAK_MP
 void __cdecl VEH_StepSlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 bool __cdecl VEH_SlideMove(gentity_s *ent, int32_t gravity, float frameTime);
 void __cdecl VEH_AirMove(gentity_s *ent, int32_t gravity, float frameTime);
+#endif
 
 #ifdef KISAK_SP
 // CoD3SP SP-only vehicle physics entry points (kisak ports in g_scr_vehicle.cpp).
@@ -933,6 +939,4 @@ void __cdecl Helicopter_Controller(const gentity_s *pSelf, int32_t *partBits);
 extern vehicle_info_t s_vehicleInfos[32];
 
 extern VehicleLocalPhysics s_phys;
-extern VehicleLocalPhysics s_phys_0;
-extern VehiclePhysicsBackup s_backup_0;
 extern VehiclePhysicsBackup s_backup;

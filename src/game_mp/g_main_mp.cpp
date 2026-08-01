@@ -538,7 +538,7 @@ const dvar_s *G_RegisterDvars()
         "g_ScoresColor_EnemyTeam",
         0.69f,
         0.07f,
-        0.050000001f,
+        0.05f,
         1.0f,
         DVAR_TEMP,
         "Enemy team color on scoreboard");
@@ -570,7 +570,7 @@ const dvar_s *G_RegisterDvars()
         "g_ScoresColor_Axis",
         0.69f,
         0.07f,
-        0.050000001f,
+        0.05f,
         1.0f,
         DVAR_TEMP,
         "Axis team color on scoreboard");

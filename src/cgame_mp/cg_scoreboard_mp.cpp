@@ -36,9 +36,9 @@ const dvar_t *cg_scoreboardBannerHeight;
 const listColumnInfo_t columnInfo[8] =
 {
   { LCT_RANK_ICON, 0.07f, "", 0 },
-  { LCT_STATUS_ICON, 0.050000001f, "", 2 },
+  { LCT_STATUS_ICON, 0.05f, "", 2 },
   { LCT_NAME, 0.43000001f, "", 0 },
-  { LCT_TALKING_ICON, 0.050000001f, "", 0 },
+  { LCT_TALKING_ICON, 0.05f, "", 0 },
   { LCT_SCORE, 0.1f, "CGAME_SB_SCORE", 2 },
   { LCT_KILLS, 0.1f, "CGAME_SB_KILLS", 2 },
   { LCT_ASSISTS, 0.1f, "CGAME_SB_ASSISTS", 2 },
@@ -46,10 +46,10 @@ const listColumnInfo_t columnInfo[8] =
 }; // idb
 const listColumnInfo_t columnInfoWithPing[9] =
 {
-  { LCT_RANK_ICON, 0.050000001f, "", 0 },
-  { LCT_STATUS_ICON, 0.050000001f, "", 2 },
+  { LCT_RANK_ICON, 0.05f, "", 0 },
+  { LCT_STATUS_ICON, 0.05f, "", 2 },
   { LCT_NAME, 0.34999999f, "", 0 },
-  { LCT_TALKING_ICON, 0.050000001f, "", 0 },
+  { LCT_TALKING_ICON, 0.05f, "", 0 },
   { LCT_SCORE, 0.1f, "CGAME_SB_SCORE", 2 },
   { LCT_KILLS, 0.1f, "CGAME_SB_KILLS", 2 },
   { LCT_ASSISTS, 0.1f, "CGAME_SB_ASSISTS", 2 },

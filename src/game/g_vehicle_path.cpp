@@ -1331,7 +1331,7 @@ void __cdecl SP_info_vehicle_node(int rotated)
             node->origin[2]
         );
     if (node->speed >= 0.0f)
-        node->speed = node->speed * 17.6f;
+        node->speed = node->speed * MPH_TO_INCHES_PER_SEC;
 }
 
 int __cdecl GScr_GetVehicleNodeIndex(int index)
