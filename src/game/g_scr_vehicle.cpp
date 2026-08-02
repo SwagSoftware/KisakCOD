@@ -3191,8 +3191,8 @@ static void VEH_GroundPlantInternal(gentity_s *ent, vehicle_physic_t *phys, int3
     phys->angles[0] = DiffTrackAngle(angles[0], phys->prevAngles[0], 6.0f, frameTime);
     phys->angles[2] = DiffTrackAngle(angles[2], phys->prevAngles[2], 6.0f, frameTime);
 
-    CLAMP(phys->angles[0], -60.0f, 60.0f);
-    CLAMP(phys->angles[2], -60.0f, 60.0f);
+    phys->angles[0] = CLAMP(phys->angles[0], -60.0f, 60.0f);
+    phys->angles[2] = CLAMP(phys->angles[2], -60.0f, 60.0f);
 #ifdef KISAK_MP
     if ((veh->flags & 1) == 0 && plane[2] != 0.0f)
         phys->origin[2] = -(phys->origin[0] * plane[0] + phys->origin[1] * plane[1] - plane[3]) / plane[2];

@@ -1022,145 +1022,53 @@ unsigned __int16 *g_wheelTags[6] =
 
 void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, centity_s *cent)
 {
-    long double pitch; // fp2
-    long double v7; // fp2
-    long double vehRoll; // fp2
-    long double gunPitch; // fp2
-    long double gunYaw; // fp2
-    long double v13; // fp2
-    long double steerYaw; // fp2
-    unsigned __int8 *v17; // r11
-    int v18; // ctr
-    double height; // fp30
-    const XModel *Model; // r3
-    const DObjAnimMat *BasePose; // r24
-    unsigned __int16 **v22; // r27
-    unsigned __int8 *wheelBoneIndex; // r30
-    CEntFx *v24; // r29
-    int v25; // r25
-    float transformed[3];
-    //float v29; // [sp+78h] [-D8h] BYREF
-    //float v30; // [sp+7Ch] [-D4h]
-    //float v31; // [sp+80h] [-D0h]
-    float axis[4][3]; // [sp+90h] [-C0h] BYREF
-    trace_t traceresults; // [sp+C0h] [-90h] BYREF
+    float axis[4][3];
+    float wheelOrigin[3];
+    float traceStart[3];
+    float traceEnd[3];
+    trace_t trace;
 
     iassert(obj);
-    pitch = ((LerpAngle(
-        cent->currentState.u.turret.gunAngles[0],
-        cent->nextState.lerp.u.turret.gunAngles[0],
-        cgArray[0].frameInterpolation)
-        * 182.04445f)
-        + 0.5f);
-    cent->pose.vehicle.pitch = (int)floor(pitch);
 
-    vehRoll = ((LerpAngle(
-        cent->currentState.u.vehicle.bodyRoll,
-        cent->nextState.lerp.u.vehicle.bodyRoll,
-        cgArray[0].frameInterpolation)
-        * 182.04445f)
-        + 0.5f);
-    cent->pose.vehicle.roll = (int)floor(vehRoll);
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    gunPitch = (float)((float)(LerpAngle(
-        cent->currentState.u.vehicle.gunPitch,
-        cent->nextState.lerp.u.vehicle.gunPitch,
-        cgArray[0].frameInterpolation)
-        * 182.04445f)
-        + 0.5f);
-    cent->pose.vehicle.barrelPitch = (int)floor(gunPitch);
+    cent->pose.vehicle.pitch = (int)floor(LerpAngle(cent->currentState.u.vehicle.bodyPitch, cent->nextState.lerp.u.vehicle.bodyPitch, cgameGlob->frameInterpolation) * 182.04445f + 0.5f);
+    cent->pose.vehicle.roll = (int)floor(LerpAngle(cent->currentState.u.vehicle.bodyRoll, cent->nextState.lerp.u.vehicle.bodyRoll, cgameGlob->frameInterpolation) * 182.04445f + 0.5f);
+    cent->pose.vehicle.barrelPitch = (int)floor(LerpAngle(cent->currentState.u.vehicle.gunPitch, cent->nextState.lerp.u.vehicle.gunPitch, cgameGlob->frameInterpolation) * 182.04445f + 0.5f);
+    cent->pose.vehicle.yaw = (int)floor(LerpAngle(cent->currentState.u.vehicle.gunYaw, cent->nextState.lerp.u.vehicle.gunYaw, cgameGlob->frameInterpolation) * 182.04445f + 0.5f);
+    cent->pose.vehicle.steerYaw = (int)floor( LerpAngle(cent->currentState.u.vehicle.steerYaw, cent->nextState.lerp.u.vehicle.steerYaw, cgameGlob->frameInterpolation) * 182.04445f + 0.5f);
 
-    gunYaw = ((LerpAngle(
-        cent->currentState.u.vehicle.gunYaw,
-        cent->nextState.lerp.u.vehicle.gunYaw,
-        cgArray[0].frameInterpolation)
-        * 182.04445f)
-        + 0.5f);
-    cent->pose.vehicle.yaw = (int)floor(gunYaw);
-
-    steerYaw = ((LerpAngle(
-        cent->currentState.u.turret.gunAngles[2],
-        cent->nextState.lerp.u.turret.gunAngles[2],
-        cgArray[0].frameInterpolation)
-        * 182.04445f)
-        + 0.5f);
-    cent->pose.vehicle.steerYaw = (int)floor(steerYaw);
-
-    cent->pose.actor.height = (float)cent->nextState.time2 * 0.001f;
+    cent->pose.vehicle.time = (float)cent->nextState.time2 * 0.001f;
     DObjGetBoneIndex(obj, scr_const.tag_body, &cent->pose.vehicle.tag_body);
     DObjGetBoneIndex(obj, scr_const.tag_turret, &cent->pose.vehicle.tag_turret);
     DObjGetBoneIndex(obj, scr_const.tag_barrel, &cent->pose.vehicle.tag_barrel);
 
-    if (cent->pose.cullIn == 2)
+    if (cent->pose.cullIn != 2)
     {
-        height = cent->pose.actor.height;
-        AnglesToAxis(cent->pose.angles, axis);
-        //v36 = cent->pose.origin[0];
-        //v37 = cent->pose.origin[1];
-        //v38 = cent->pose.origin[2];
-        axis[3][0] = cent->pose.origin[0];
-        axis[3][1] = cent->pose.origin[1];
-        axis[3][2] = cent->pose.origin[2];
-        Model = DObjGetModel(obj, 0);
-        BasePose = XModelGetBasePose(Model);
-        if (*g_wheelTags[0] != scr_const.tag_wheel_front_left)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-                835,
-                0,
-                "%s",
-                "*g_wheelTags[TAG_WHEEL_FRONT_LEFT] == scr_const.tag_wheel_front_left");
-        if (*g_wheelTags[1] != scr_const.tag_wheel_front_right)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_ents.cpp",
-                836,
-                0,
-                "%s",
-                "*g_wheelTags[TAG_WHEEL_FRONT_RIGHT] == scr_const.tag_wheel_front_right");
-        v22 = g_wheelTags;
-        wheelBoneIndex = cent->pose.vehicle.wheelBoneIndex;
-        v24 = &cent->pose.fx + 2;
-        v25 = 6;
-        do
-        {
-            if (DObjGetBoneIndex(obj, **v22, wheelBoneIndex))
-            {
-                float start[3];
-                float end[3];
-                MatrixTransformVector43((const float *)((char *)BasePose->trans + __ROL4__(*wheelBoneIndex, 5)), (const mat4x3&)axis, transformed);
-                //start[0] = (float)(v33 * (float)40.0) + transformed[0];
-                //start[1] = (float)(v34 * (float)40.0) + transformed[1];
-                //start[2] = (float)(v35 * (float)40.0) + transformed[2];
-                start[0] = (axis[2][0] * 40.0f) + transformed[0]; // KSIAKTODO: double check if axis[2] is correct here and below
-                start[1] = (axis[2][1] * 40.0f) + transformed[1];
-                start[2] = (axis[2][2] * 40.0f) + transformed[2];
-
-                //end[0] = (float)(v33 * (float)-height) + transformed[0];
-                //end[1] = (float)(v34 * (float)-height) + transformed[1];
-                //end[2] = (float)(v35 * (float)-height) + transformed[2];
-                end[0] = (axis[2][0] * (-height)) + transformed[0];
-                end[1] = (axis[2][1] * (-height)) + transformed[1];
-                end[2] = (axis[2][2] * (-height)) + transformed[2];
-
-                CG_TraceCapsule(&traceresults, start, vec3_origin, vec3_origin, end, cent->nextState.number, 529);
-                //HIWORD(v24->triggerTime) = CompressUnit(v39.fraction);
-                v24->triggerTime = CompressUnit(traceresults.fraction);
-            }
-            --v25;
-            v24 = (CEntFx *)((char *)v24 + 2);
-            ++v22;
-            ++wheelBoneIndex;
-        } while (v25);
+        memset(cent->pose.vehicle.wheelBoneIndex, 254, sizeof(cent->pose.vehicle.wheelBoneIndex));
+        return;
     }
-    else
+
+    AnglesToAxis(cent->pose.angles, axis);
+    Vec3Copy(cent->pose.origin, axis[3]);
+
+    const XModel *model = DObjGetModel(obj, 0);
+    const DObjAnimMat *basePose = XModelGetBasePose(model);
+
+    iassert(*g_wheelTags[0] == scr_const.tag_wheel_front_left);
+    iassert(*g_wheelTags[1] == scr_const.tag_wheel_front_right);
+
+    for (int wheelIndex = 0; wheelIndex < ARRAY_COUNT(g_wheelTags); ++wheelIndex)
     {
-        v17 = cent->pose.vehicle.wheelBoneIndex;
-        v18 = 6;
-        do
+        unsigned __int8 *boneIndex = &cent->pose.vehicle.wheelBoneIndex[wheelIndex];
+        if (DObjGetBoneIndex(obj, *g_wheelTags[wheelIndex], boneIndex))
         {
-            *v17++ = -2;
-            --v18;
-        } while (v18);
+            MatrixTransformVector43(basePose[*boneIndex].trans, (const mat4x3 &)axis, wheelOrigin);
+            Vec3Mad(wheelOrigin, 40.0f, axis[2], traceStart);
+            Vec3Mad(wheelOrigin, -cent->pose.vehicle.time, axis[2], traceEnd);
+            CG_TraceCapsule(&trace, traceStart, vec3_origin, vec3_origin, traceEnd, cent->nextState.number, 529);
+            cent->pose.vehicle.wheelFraction[wheelIndex] = CompressUnit(trace.fraction);
+        }
     }
 }
 
