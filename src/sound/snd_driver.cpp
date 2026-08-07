@@ -15,7 +15,7 @@
 #include <cgame/cg_main.h>
 #endif
 
-#ifdef KISAK_SOUND
+#ifdef KISAK_OPENAL
 // Declarations only - DR_WAV_IMPLEMENTATION/DR_MP3_IMPLEMENTATION are generated exactly
 // once, in snd_driver_load_obj.cpp (see Phase 3).
 #include <dr_libs/dr_wav.h>
@@ -24,7 +24,7 @@
 #include <fstream>
 #endif
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 MssLocal milesGlob;
 #else
 AlLocal alGlob;
@@ -35,7 +35,7 @@ const dvar_t *snd_outputConfiguration;
 
 void __cdecl TRACK_snd_driver()
 {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     track_static_alloc_internal(&milesGlob, 9936, "milesGlob", 13);
 #else
     track_static_alloc_internal(&alGlob, sizeof(alGlob), "alGlob", 13);
@@ -44,7 +44,7 @@ void __cdecl TRACK_snd_driver()
 
 bool __cdecl SND_IsMultiChannel()
 {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     return milesGlob.isMultiChannel;
 #else
     return alGlob.isMultiChannel;
@@ -58,7 +58,7 @@ char __cdecl SND_InitDriver()
 #else
 
     snd_khz = Dvar_RegisterInt("snd_khz", 44, (DvarLimits)0x2C0000000BLL, DVAR_ARCHIVE | DVAR_LATCH, "The game sound frequency.");
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_file_callbacks(MSS_FileOpenCallback, MSS_FileCloseCallback, MSS_FileSeekCallback, MSS_FileReadCallback);
     AIL_set_redist_directory("miles");
 #endif
@@ -68,7 +68,7 @@ char __cdecl SND_InitDriver()
         0,
         DVAR_ARCHIVE | DVAR_LATCH,
         "Sound output configuration");
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     if (MSS_Startup())
     {
         MSS_open_digital_driver(11025, 2, 2);
@@ -85,7 +85,7 @@ char __cdecl SND_InitDriver()
         }
         else
         {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
             AIL_shutdown();
 #endif
             MSS_ShutdownCleanup();
@@ -109,9 +109,9 @@ void __cdecl SND_ShutdownDriver()
     return;
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_shutdown();
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     MSS_ShutdownCleanup();
 
 #endif // KISAK_DEDICATED
@@ -123,10 +123,10 @@ int __cdecl SND_GetDriverCPUPercentage()
     return 0;
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     return AIL_digital_CPU_percent(milesGlob.driver);
 #else
-    // KISAK_SOUND TODO: no direct OpenAL equivalent to Miles' per-driver CPU usage stat.
+    // KISAK_OPENAL TODO: no direct OpenAL equivalent to Miles' per-driver CPU usage stat.
     return 0;
 #endif
 
@@ -141,7 +141,7 @@ void __cdecl SND_Set3DPosition(int index, const float *org)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     float v2; // [esp+0h] [ebp-28h]
     float delta[3]; // [esp+Ch] [ebp-1Ch] BYREF
     int listenerIndex; // [esp+18h] [ebp-10h]
@@ -172,12 +172,12 @@ void __cdecl SND_Set3DPosition(int index, const float *org)
     float transformed[3];
     MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
     alSource3f(alGlob.source[index], AL_POSITION, -transformed[1], transformed[2], -transformed[0]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
 
-#ifdef KISAK_SOUND
+#ifdef KISAK_OPENAL
 // Detaches and deletes the channel's currently-attached AL buffer, if any. Called before a
 // channel starts playing a new sound (defensive - normally the channel allocator only hands
 // out channels that were already stopped) and when a channel is explicitly stopped, since
@@ -382,7 +382,7 @@ void __cdecl SND_Stop2DChannel(int index)
 
     iassert((index >= 0 && index < 0 + g_snd.max_2D_channels));
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_end_sample(milesGlob.handle_sample[index]);
 #else
     SND_ReleaseChannelBuffer(index);
@@ -401,11 +401,11 @@ void __cdecl SND_Pause2DChannel(int index)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_stop_sample(milesGlob.handle_sample[index]);
 #else
     alSourcePause(alGlob.source[index]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     g_snd.chaninfo[index].paused = 1;
 
 #endif // KISAK_DEDICATED
@@ -421,11 +421,11 @@ void __cdecl SND_Unpause2DChannel(int index, int timeshift)
 
     if (!g_snd.chaninfo[index].startDelay)
     {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         AIL_resume_sample(milesGlob.handle_sample[index]);
 #else
         alSourcePlay(alGlob.source[index]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     }
 
     g_snd.chaninfo[index].soundFileInfo.endtime += timeshift;
@@ -449,11 +449,11 @@ void __cdecl SND_Stop3DChannel(int index)
 #else
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_end_sample(milesGlob.handle_sample[index]);
 #else
     SND_ReleaseChannelBuffer(index);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     SND_ResetChannelInfo(index);
     SND_RemoveVoice(g_snd.chaninfo[index].entchannel);
 
@@ -467,7 +467,7 @@ void __cdecl SND_Pause3DChannel(int index)
     return;
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_stop_sample(milesGlob.handle_sample[index]);
 #else
     alSourcePause(alGlob.source[index]);
@@ -486,7 +486,7 @@ void __cdecl SND_Unpause3DChannel(int index, int timeshift)
 
     if (!g_snd.chaninfo[index].startDelay)
     {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         AIL_resume_sample(milesGlob.handle_sample[index]);
 #else
         alSourcePlay(alGlob.source[index]);
@@ -514,7 +514,7 @@ void __cdecl SND_StopStreamChannel(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     if (!milesGlob.handle_sample[index])
         MyAssertHandler(
             ".\\win32\\snd_driver.cpp",
@@ -533,7 +533,7 @@ void __cdecl SND_StopStreamChannel(int index)
     milesGlob.handle_sample[index] = 0;
 #else
     SND_ReleaseStreamChannel(index);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     SND_ResetChannelInfo(index);
     SND_RemoveVoice(g_snd.chaninfo[index].entchannel);
 
@@ -548,11 +548,11 @@ void __cdecl SND_PauseStreamChannel(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 1);
 #else
     alSourcePause(alGlob.source[index]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     g_snd.chaninfo[index].paused = 1;
 
 #endif // KISAK_DEDICATED
@@ -568,11 +568,11 @@ void __cdecl SND_UnpauseStreamChannel(int index, int timeshift)
 
     if (!g_snd.chaninfo[index].startDelay)
     {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         AIL_pause_stream((HSTREAM)milesGlob.handle_sample[index], 0);
 #else
         alSourcePlay(alGlob.source[index]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
     }
 
     g_snd.chaninfo[index].soundFileInfo.endtime += timeshift;
@@ -589,7 +589,7 @@ bool __cdecl SND_IsStreamChannelFree(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     if (!milesGlob.handle_sample[index])
         return 1;
 
@@ -605,7 +605,7 @@ bool __cdecl SND_IsStreamChannelFree(int index)
         return 0;
 
     return g_snd.chaninfo[index].alias0 == 0;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -617,7 +617,7 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE* handle, const snd_alias_t* alias, int 
 }
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int srcChannelCount)
 {
     float v3; // [esp+0h] [ebp-60h]
@@ -668,7 +668,7 @@ void __cdecl SND_ApplyChannelMap(_SAMPLE *handle, const snd_alias_t *alias, int 
     }
 }
 #else
-// KISAK_SOUND TODO (Phase 4): per-speaker channel-level mapping. Note the existing Miles
+// KISAK_OPENAL TODO (Phase 4): per-speaker channel-level mapping. Note the existing Miles
 // implementation above already has the real per-speaker src/dst mapping short-circuited
 // (hardcoded MSS_SPEAKER_FRONT_CENTER arrays - see WORK.md Phase 4) - don't try to preserve
 // behavior that isn't really there; OpenAL's own downmix is a reasonable default to start.
@@ -686,7 +686,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo* startAliasInfo, int* pChan
 }
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChannel)
 {
     float baseSlavePercentage; // [esp+4h] [ebp-ACh]
@@ -928,7 +928,7 @@ int __cdecl SND_StartAlias2DSample(SndStartAliasInfo *startAliasInfo, int *pChan
 
     return playbackId;
 }
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 
@@ -939,7 +939,7 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE* handle, const snd_alias_t*
 }
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t *alias)
 {
     MSS_SPEAKER src_list[18] = {
@@ -992,12 +992,12 @@ void __cdecl SND_Apply3DSpatializationTweaks(_SAMPLE *handle, const snd_alias_t 
     }
 }
 #else
-// KISAK_SOUND TODO (Phase 4): see the note on SND_ApplyChannelMap's stub above - the
+// KISAK_OPENAL TODO (Phase 4): see the note on SND_ApplyChannelMap's stub above - the
 // existing Miles per-speaker mapping is already short-circuited, so this is low priority.
 void __cdecl SND_Apply3DSpatializationTweaks(ALuint handle, const snd_alias_t *alias)
 {
 }
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 
@@ -1008,7 +1008,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo* startAliasInfo, int* pChan
 }
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChannel)
 {
     double LerpedSlavePercentage; // st7
@@ -1300,7 +1300,7 @@ int __cdecl SND_StartAlias3DSample(SndStartAliasInfo *startAliasInfo, int *pChan
         SND_AddVoice(entchannel);
     return playbackId;
 }
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 
@@ -1311,7 +1311,7 @@ void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *
 #else
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     float v3; // [esp+0h] [ebp-28h]
     float delta[3]; // [esp+Ch] [ebp-1Ch] BYREF
     _SAMPLE *handle_sample; // [esp+18h] [ebp-10h]
@@ -1330,7 +1330,7 @@ void __cdecl SND_Set3DStreamPosition(int index, int listenerIndex, const float *
     float transformed[3];
     MatrixTransposeTransformVector(delta, g_snd.listeners[listenerIndex].orient.axis, transformed);
     alSource3f(alGlob.source[index], AL_POSITION, -transformed[1], transformed[2], -transformed[0]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -1371,7 +1371,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo* startAliasInfo, int
     return -1;
 }
 #else
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int index)
 {
     const char *error; // eax
@@ -1729,10 +1729,10 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
         SND_AddVoice(entchannel);
     return playbackId;
 }
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 #endif // KISAK_DEDICATED
 
-#ifdef KISAK_SOUND
+#ifdef KISAK_OPENAL
 // snd_roomStrings[27] (snd.cpp) is the exact same 26-name, same-order I3DL2/EAX preset list
 // as these - verified name-for-name, not assumed - so this is a mechanical 1:1 copy, not a
 // design decision. SND_RoomtypeFromString (snd.cpp) maps a string to an index into this
@@ -1815,14 +1815,14 @@ void __cdecl SND_SetRoomtype(int roomtype)
     return;
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_room_type(milesGlob.driver, roomtype);
     AIL_set_digital_master_reverb_levels(milesGlob.driver, MSS_GetDryLevel(), MSS_GetWetLevel(0));
 #else
     iassert(roomtype >= 0 && roomtype < ARRAY_COUNT(AL_RoomPresets));
     AL_ApplyReverbPreset(alGlob.reverbEffect, AL_RoomPresets[roomtype]);
     alAuxiliaryEffectSloti(alGlob.auxSlot, AL_EFFECTSLOT_EFFECT, alGlob.reverbEffect);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -1833,7 +1833,7 @@ void __cdecl SND_UpdateEqs()
     return;
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _SAMPLE *handle; // [esp+0h] [ebp-8h]
     int channelIndex; // [esp+4h] [ebp-4h]
 
@@ -1879,7 +1879,7 @@ void __cdecl SND_UpdateEqs()
     {
         MSS_ApplyEqFilter(alGlob.source[channelIndex], g_snd.chaninfo[channelIndex].entchannel);
     }
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -1898,7 +1898,7 @@ void __cdecl SND_SetEqParams(
     iassert(freq >= 0 && freq <= 20000);
     iassert(q > 0);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
 
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
@@ -1926,7 +1926,7 @@ void __cdecl SND_SetEqType(uint32_t entchannel, int eqIndex, uint32_t band, SND_
     iassert(entchannel >= 0 && entchannel < 64);
     iassert(band >= 0 && band < 3);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
 
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
@@ -1945,7 +1945,7 @@ void __cdecl SND_SetEqFreq(uint32_t entchannel, int eqIndex, uint32_t band, floa
     iassert(band >= 0 && band < 3);
     iassert(freq >= 0 && freq <= 20000);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
 
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
@@ -1963,7 +1963,7 @@ void __cdecl SND_SetEqGain(uint32_t entchannel, int eqIndex, uint32_t band, floa
     iassert(entchannel >= 0 && entchannel < 64);
     iassert(band >= 0 && band < 3);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
     milesGlob.eq[eqIndex].params[band][entchannel].gain = gain;
@@ -1980,7 +1980,7 @@ void __cdecl SND_SetEqQ(uint32_t entchannel, int eqIndex, uint32_t band, float q
     iassert(band >= 0 && band < 3);
     iassert(q > 0);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
 
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 1;
@@ -2002,7 +2002,7 @@ void __cdecl SND_DisableEq(uint32_t entchannel, int eqIndex, uint32_t band)
     iassert(entchannel >= 0 && entchannel < 64);
     iassert(band >= 0 && band < 3);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     iassert((unsigned)eqIndex < ARRAY_COUNT(milesGlob.eq)); // LWSS ADD
 
     milesGlob.eq[eqIndex].params[band][entchannel].enabled = 0;
@@ -2024,7 +2024,7 @@ void __cdecl SND_SaveEq(MemoryFile *memFile)
         for (band = 0; band < 3; ++band)
         {
             for (entchannel = 0; entchannel < 64; ++entchannel)
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
                 MemFile_WriteData(memFile, 20, &milesGlob.eq[eqIndex].params[band][entchannel]);
 #else
                 MemFile_WriteData(memFile, 20, &alGlob.eq[eqIndex].params[band][entchannel]);
@@ -2044,7 +2044,7 @@ void __cdecl SND_RestoreEq(MemoryFile *memFile)
         for (band = 0; band < 3; ++band)
         {
             for (entchannel = 0; entchannel < 64; ++entchannel)
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
                 MemFile_ReadData(memFile, 20, (uint8_t *)&milesGlob.eq[eqIndex].params[band][entchannel]);
 #else
                 MemFile_ReadData(memFile, 20, (uint8_t *)&alGlob.eq[eqIndex].params[band][entchannel]);
@@ -2070,7 +2070,7 @@ void __cdecl SND_PrintEqParams()
         {
             for (band = 0; band < 3; ++band)
             {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
                 v0 = (float *)&milesGlob.eq[eqIndex].params[band][entchannel];
 #else
                 v0 = (float *)&alGlob.eq[eqIndex].params[band][entchannel];
@@ -2090,7 +2090,7 @@ double __cdecl SND_Get2DChannelVolume(int index)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     float right; // [esp+4h] [ebp-8h] BYREF
     float left; // [esp+8h] [ebp-4h] BYREF
 
@@ -2106,7 +2106,7 @@ double __cdecl SND_Get2DChannelVolume(int index)
     ALfloat gain;
     alGetSourcef(alGlob.source[index], AL_GAIN, &gain);
     return gain;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2119,11 +2119,11 @@ void __cdecl SND_Set2DChannelVolume(int index, float volume)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_sample_volume_levels(milesGlob.handle_sample[index], volume, volume);
 #else
     alSourcef(alGlob.source[index], AL_GAIN, volume);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2136,7 +2136,7 @@ double __cdecl SND_Get3DChannelVolume(int index)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     float right; // [esp+4h] [ebp-8h] BYREF
     float left; // [esp+8h] [ebp-4h] BYREF
 
@@ -2149,7 +2149,7 @@ double __cdecl SND_Get3DChannelVolume(int index)
     ALfloat gain;
     alGetSourcef(alGlob.source[index], AL_GAIN, &gain);
     return gain;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2162,7 +2162,7 @@ void __cdecl SND_Set3DChannelVolume(int index, float volume)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     float v2; // [esp+Ch] [ebp-4h]
 
     if (g_snd.chaninfo[index].soundFileInfo.srcChannelCount == 2)
@@ -2178,7 +2178,7 @@ void __cdecl SND_Set3DChannelVolume(int index, float volume)
     // Miles halves mono-source volume to compensate for its stereo-pair mixing; AL_GAIN
     // applies uniformly regardless of channel count, so no such compensation is needed.
     alSourcef(alGlob.source[index], AL_GAIN, volume);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2191,7 +2191,7 @@ double __cdecl SND_GetStreamChannelVolume(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _SAMPLE *handle_sample; // [esp+4h] [ebp-Ch]
     float right; // [esp+8h] [ebp-8h] BYREF
     float left; // [esp+Ch] [ebp-4h] BYREF
@@ -2210,7 +2210,7 @@ double __cdecl SND_GetStreamChannelVolume(int index)
     ALfloat gain;
     alGetSourcef(alGlob.source[index], AL_GAIN, &gain);
     return gain;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2223,7 +2223,7 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     float v2; // [esp+Ch] [ebp-8h]
     _SAMPLE *handle_sample; // [esp+10h] [ebp-4h]
 
@@ -2240,7 +2240,7 @@ void __cdecl SND_SetStreamChannelVolume(int index, float volume)
     }
 #else
     alSourcef(alGlob.source[index], AL_GAIN, volume);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2253,7 +2253,7 @@ int __cdecl SND_Get2DChannelPlaybackRate(int index)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     return AIL_sample_playback_rate(milesGlob.handle_sample[index]);
 #else
     // AL_PITCH is a ratio, not an absolute rate like Miles' - convert against the buffer's
@@ -2263,7 +2263,7 @@ int __cdecl SND_Get2DChannelPlaybackRate(int index)
     ALfloat pitch;
     alGetSourcef(alGlob.source[index], AL_PITCH, &pitch);
     return SnapFloatToInt(pitch * g_snd.chaninfo[index].soundFileInfo.baserate);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2276,12 +2276,12 @@ void __cdecl SND_Set2DChannelPlaybackRate(int index, int rate)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_sample_playback_rate(milesGlob.handle_sample[index], rate);
 #else
     int baserate = g_snd.chaninfo[index].soundFileInfo.baserate;
     alSourcef(alGlob.source[index], AL_PITCH, baserate ? (float)rate / baserate : 1.0f);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2294,13 +2294,13 @@ int __cdecl SND_Get3DChannelPlaybackRate(int index)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     return AIL_sample_playback_rate(milesGlob.handle_sample[index]);
 #else
     ALfloat pitch;
     alGetSourcef(alGlob.source[index], AL_PITCH, &pitch);
     return SnapFloatToInt(pitch * g_snd.chaninfo[index].soundFileInfo.baserate);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KSIAK_DEDICATED
 }
@@ -2313,12 +2313,12 @@ void __cdecl SND_Set3DChannelPlaybackRate(int index, int rate)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_sample_playback_rate(milesGlob.handle_sample[index], rate);
 #else
     int baserate = g_snd.chaninfo[index].soundFileInfo.baserate;
     alSourcef(alGlob.source[index], AL_PITCH, baserate ? (float)rate / baserate : 1.0f);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2331,7 +2331,7 @@ int __cdecl SND_GetStreamChannelPlaybackRate(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _SAMPLE *handle_sample; // [esp+0h] [ebp-4h]
 
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
@@ -2341,7 +2341,7 @@ int __cdecl SND_GetStreamChannelPlaybackRate(int index)
     ALfloat pitch;
     alGetSourcef(alGlob.source[index], AL_PITCH, &pitch);
     return SnapFloatToInt(pitch * g_snd.chaninfo[index].soundFileInfo.baserate);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2355,7 +2355,7 @@ void __cdecl SND_SetStreamChannelPlaybackRate(int index, int rate)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _SAMPLE *handle_sample; // [esp+0h] [ebp-4h]
 
     handle_sample = (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]);
@@ -2363,7 +2363,7 @@ void __cdecl SND_SetStreamChannelPlaybackRate(int index, int rate)
 #else
     int baserate = g_snd.chaninfo[index].soundFileInfo.baserate;
     alSourcef(alGlob.source[index], AL_PITCH, baserate ? (float)rate / baserate : 1.0f);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATEd
 }
@@ -2376,11 +2376,11 @@ void __cdecl SND_Update2DChannelReverb(int index)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], MSS_GetDryLevel(), MSS_GetWetLevel(g_snd.chaninfo[index].alias0));
 #else
     SND_ApplyReverbSend(index, g_snd.chaninfo[index].alias0);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2393,11 +2393,11 @@ void __cdecl SND_Update3DChannelReverb(int index)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_sample_reverb_levels(milesGlob.handle_sample[index], MSS_GetDryLevel(), MSS_GetWetLevel(g_snd.chaninfo[index].alias0));
 #else
     SND_ApplyReverbSend(index, g_snd.chaninfo[index].alias0);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2410,7 +2410,7 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     AIL_set_sample_reverb_levels(
         (_SAMPLE *)AIL_stream_sample_handle((HSTREAM)milesGlob.handle_sample[index]),
         MSS_GetDryLevel(),
@@ -2418,7 +2418,7 @@ void __cdecl SND_UpdateStreamChannelReverb(int index)
     );
 #else
     SND_ApplyReverbSend(index, g_snd.chaninfo[index].alias0);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2431,7 +2431,7 @@ int __cdecl SND_Get2DChannelLength(int index)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     int length; // [esp+0h] [ebp-4h] BYREF
 
     AIL_sample_ms_position(milesGlob.handle_sample[index], &length, 0);
@@ -2442,7 +2442,7 @@ int __cdecl SND_Get2DChannelLength(int index)
     // the buffer (which would also need AL_PITCH factored back in to match Miles' behavior
     // of reporting a pitch-adjusted length, same as the total_msec comment there explains).
     return g_snd.chaninfo[index].totalMsec;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2455,7 +2455,7 @@ int __cdecl SND_Get3DChannelLength(int index)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     int length; // [esp+0h] [ebp-4h] BYREF
 
     AIL_sample_ms_position(milesGlob.handle_sample[index], &length, 0);
@@ -2463,7 +2463,7 @@ int __cdecl SND_Get3DChannelLength(int index)
 #else
     // See SND_Get2DChannelLength.
     return g_snd.chaninfo[index].totalMsec;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2476,7 +2476,7 @@ int __cdecl SND_GetStreamChannelLength(int index)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     int length; // [esp+0h] [ebp-4h] BYREF
 
     AIL_stream_ms_position((HSTREAM)milesGlob.handle_sample[index], &length, 0);
@@ -2485,7 +2485,7 @@ int __cdecl SND_GetStreamChannelLength(int index)
     // See SND_Get2DChannelLength - reuses the duration SND_StartAliasStreamOnChannel
     // already computed via drwav's totalPCMFrameCount / dr_mp3's one-time frame-count scan.
     return g_snd.chaninfo[index].totalMsec;
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 #endif // KISAK_DEDICATED
 }
 
@@ -2497,7 +2497,7 @@ void __cdecl SND_Get2DChannelSaveInfo(int index, snd_save_2D_sample_t *info)
 
     iassert(index >= 0 && index < 0 + g_snd.max_2D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _SAMPLE *handle; // [esp+0h] [ebp-Ch]
     int offset; // [esp+4h] [ebp-8h] BYREF
     int length; // [esp+8h] [ebp-4h] BYREF
@@ -2530,7 +2530,7 @@ void __cdecl SND_Get2DChannelSaveInfo(int index, snd_save_2D_sample_t *info)
         info->volume = gain / g_snd.volume;
     // info->pan intentionally left untouched, matching the Miles branch above (which also
     // never sets it - AIL_sample_volume_pan's third argument there is NULL/0).
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2553,7 +2553,7 @@ void __cdecl SND_Get3DChannelSaveInfo(int index, snd_save_3D_sample_t *info)
 
     iassert(index >= (0 + 8) && index < (0 + 8) + g_snd.max_3D_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _SAMPLE *handle; // [esp+0h] [ebp-Ch]
     int offset; // [esp+4h] [ebp-8h] BYREF
     int length; // [esp+8h] [ebp-4h] BYREF
@@ -2593,7 +2593,7 @@ void __cdecl SND_Get3DChannelSaveInfo(int index, snd_save_3D_sample_t *info)
     // store the queried AL_POSITION directly in natural (x,y,z) order - self-consistent for
     // this backend, not byte-compatible with a Miles-format save.
     alGetSource3f(source, AL_POSITION, &info->org[0], &info->org[1], &info->org[2]);
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2606,7 +2606,7 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
 
     iassert(index >= SND_FIRST_STREAM_CHANNEL && index < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels);
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     int v2; // [esp+0h] [ebp-3Ch]
     double timescale; // [esp+8h] [ebp-34h]
     float *org; // [esp+14h] [ebp-28h]
@@ -2688,7 +2688,7 @@ void __cdecl SND_GetStreamChannelSaveInfo(int index, snd_save_stream_t *info)
     info->org[0] = org[0];
     info->org[1] = org[1];
     info->org[2] = org[2];
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 }
@@ -2742,7 +2742,7 @@ void __cdecl SND_Update2DChannel(int i, int frametime)
         iassert(alias1);
 
         volume = chaninfo->basevolume;
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         bool finishedOrChaining = (!chaninfo->startDelay && AIL_sample_status(milesGlob.handle_sample[i]) == 2)
             || (alias0->chainAliasName && chaninfo->totalMsec + chaninfo->startTime - g_snd.time <= 0);
 #else
@@ -2802,7 +2802,7 @@ void __cdecl SND_Update3DChannel(int i, int frametime)
         iassert(alias1);
         lerp = chaninfo->lerp;
         volume = chaninfo->basevolume;
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         bool finishedOrChaining = (!chaninfo->startDelay && AIL_sample_status(milesGlob.handle_sample[i]) == 2)
             || ((timeleft = chaninfo->totalMsec + chaninfo->startTime - g_snd.time, alias0->chainAliasName) && timeleft <= 0);
 #else
@@ -2868,7 +2868,7 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
         iassert(alias0);
         iassert(alias1);
         volume = chaninfo->basevolume;
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         bool stillPlaying = g_snd.chaninfo[i].startDelay || AIL_stream_status((HSTREAM)milesGlob.handle_sample[i]) != 2;
 #else
         // Refill/re-queue buffers *before* checking whether the source has actually
@@ -2906,7 +2906,7 @@ void __cdecl SND_UpdateStreamChannel(int i, int frametime)
                 g_snd.chaninfo[i].startDelay = v2;
                 if (!g_snd.chaninfo[i].startDelay)
                 {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
                     AIL_pause_stream((HSTREAM)milesGlob.handle_sample[i], 0);
 #else
                     alSourcePlay(alGlob.source[i]);
@@ -2928,12 +2928,12 @@ void __cdecl SND_SetHWND(HWND hwnd)
 #ifdef KISAK_DEDICATED
     return;
 #else
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     if (g_snd.Initialized2d)
         AIL_set_DirectSound_HWND(milesGlob.driver, hwnd);
 #else
     // OpenAL has no window-handle dependency (no DirectSound backend to bind).
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 #endif // KISAK_DEDICATED
 }
 
@@ -2944,7 +2944,7 @@ void __cdecl SND_SetData(MssSoundCOD4 *mssSound, void *srcData)
 #else
     // KISAKTODO: double check MssSound struct usage here. It looks 'okay' at first glance
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
     _AILMIXINFO mixinfo; // [esp+Ch] [ebp-80h] BYREF
     int digitalFormat; // [esp+88h] [ebp-4h]
 
@@ -3048,7 +3048,7 @@ void SND_SetEqLerp(double lerp)
             LODWORD(lerp));
 #if KISAK_XBOX
     xaGlob.eqLerp = lerp;
-#elif !defined(KISAK_SOUND)
+#elif !defined(KISAK_OPENAL)
 	milesGlob.eqLerp = (float)lerp;
 	SND_UpdateEqs();
 #else

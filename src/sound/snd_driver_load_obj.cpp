@@ -4,7 +4,7 @@
 #include <universal/com_files.h>
 #include <universal/com_memory.h>
 
-#ifdef KISAK_SOUND
+#ifdef KISAK_OPENAL
 // Single-header decoders (public domain / MIT-0), vendored in deps/dr_libs. This is the
 // one translation unit that generates their implementations - DR_WAV_IMPLEMENTATION/
 // DR_MP3_IMPLEMENTATION are defined for this file only via CMake (set_source_files_properties
@@ -24,7 +24,7 @@ LoadedSound* __cdecl SND_LoadFromBuffer(void* buffer, const char* soundName)
 }
 #else
 
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, const char *soundName)
 {
     _AILSOUNDINFO info; // [esp+8h] [ebp-28h] BYREF
@@ -107,7 +107,7 @@ LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, uint32_t bufferSize, const
 
     return loadSnd;
 }
-#endif // KISAK_SOUND
+#endif // KISAK_OPENAL
 
 #endif // KISAK_DEDICATED
 
@@ -126,7 +126,7 @@ LoadedSound *__cdecl SND_LoadSoundFile(const char *name)
     int fileLen = FS_ReadFile(realname, &buffer);
     if (fileLen >= 0)
     {
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
         loadSnd = SND_LoadFromBuffer(buffer, name);
 #else
         loadSnd = SND_LoadFromBuffer(buffer, (uint32_t)fileLen, name);

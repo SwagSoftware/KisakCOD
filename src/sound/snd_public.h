@@ -1,7 +1,7 @@
 #pragma once
 
 #include <qcommon/qcommon.h>
-#ifndef KISAK_SOUND
+#ifndef KISAK_OPENAL
 #include <msslib/mss.h>
 #else
 // snd_public.h is included very widely across the codebase, and msslib/mss.h's own
@@ -11,7 +11,7 @@
 // transitively despite never including <windows.h> or <msslib/mss.h> themselves. Reproduce
 // the same type set here rather than pulling in the real <windows.h>. Guard against both the
 // real windef.h (_WINDEF_) and msslib/mss.h's own declarations (its include guard is MSS_H)
-// so files that still include mss.h directly (regardless of KISAK_SOUND) don't conflict.
+// so files that still include mss.h directly (regardless of KISAK_OPENAL) don't conflict.
 #if !defined(_WINDEF_) && !defined(MSS_H)
 typedef char CHAR;
 typedef short SHORT;
