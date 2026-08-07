@@ -1,3 +1,4 @@
+#ifdef KISAK_OPENAL
 // OpenAL implementation of the snd_driver/snd_mss interface declared in snd_local.h.
 // Mirrors snd_mss.cpp function-for-function; only one of the two files is compiled for a
 // given build (see scripts/common_files.cmake), selected by KISAK_SOUND. See snd_local.h
@@ -324,3 +325,5 @@ uint32_t *__cdecl MSS_Alloc_FastFile(int bytes)
 {
     return (uint32_t *)Z_Malloc(bytes, "MSS_Alloc", 15);
 }
+
+#endif

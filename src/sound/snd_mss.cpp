@@ -1,3 +1,5 @@
+#ifndef KISAK_OPENAL
+
 #include <universal/q_shared.h>
 #include "snd_local.h"
 #include "snd_public.h"
@@ -5,6 +7,7 @@
 #include <qcommon/qcommon.h>
 #include <universal/com_memory.h>
 #include <math.h>
+#include <mss.h>
 
 uint32_t __stdcall MSS_FileOpenCallback(const MSS_FILE *pszFilename, UINTa *phFileHandle)
 {
@@ -413,3 +416,4 @@ uint32_t *__cdecl MSS_Alloc_FastFile(int bytes)
   return (uint32_t *)Z_Malloc(bytes, "MSS_Alloc", 15);
 }
 
+#endif
