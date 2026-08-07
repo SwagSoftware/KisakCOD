@@ -50,7 +50,7 @@ _DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels)
   _DIG_DRIVER *driver; // [esp+8h] [ebp-8h]
   MSS_MC_SPEC mcSpec; // [esp+Ch] [ebp-4h] BYREF
 
-  AIL_set_preference(1, 53);
+  AIL_set_preference(DIG_MIXER_CHANNELS, SND_MAX_CHANNELS);
   driver = (_DIG_DRIVER *)AIL_open_digital_driver(hertz, bits, channels, 0);
   if ( driver )
   {
@@ -63,9 +63,9 @@ _DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels)
       if ( !MSS_Startup() )
       {
         MSS_InitFailed();
-        return 0;
+        return NULL;
       }
-      AIL_set_preference(1, 53);
+      AIL_set_preference(DIG_MIXER_CHANNELS, SND_MAX_CHANNELS);
       return (_DIG_DRIVER *)AIL_open_digital_driver(hertz, bits, 32, 0);
     }
   }
@@ -130,7 +130,7 @@ LABEL_8:
     g_snd.max_3D_channels = 32;
     g_snd.max_stream_channels = 13;
     g_snd.playback_rate = hertz + hertz / 2;
-    if ( g_snd.playback_rate >= 0xAC44 )
+    if ( g_snd.playback_rate >= 44100 )
       g_snd.playback_rate = 0x7FFFFFFF;
     g_snd.playback_channels = (mss_spec[snd_outputConfiguration->current.integer] != MSS_MC_MONO) + 1;
     g_snd.timescale = 1.0;
@@ -146,9 +146,7 @@ LABEL_8:
 
 void MSS_InitChannels()
 {
-  int i; // [esp+0h] [ebp-4h]
-
-  for ( i = 0; i < g_snd.max_3D_channels + g_snd.max_2D_channels; ++i )
+  for ( int i = 0; i < g_snd.max_3D_channels + g_snd.max_2D_channels; ++i )
   {
     milesGlob.handle_sample[i] = (_SAMPLE *)AIL_allocate_sample_handle(milesGlob.driver);
     if ( !milesGlob.handle_sample[i] )
@@ -161,23 +159,16 @@ void MSS_InitChannels()
 
 void MSS_InitEq()
 {
-  int channelIndex; // [esp+4h] [ebp-10h]
-  int band; // [esp+8h] [ebp-Ch]
-  SndEqParams *params; // [esp+Ch] [ebp-8h]
-  int eqIndex; // [esp+10h] [ebp-4h]
-
   milesGlob.eqFilter = 0;
-#ifndef KISAK_XBOX
-  milesGlob.eqLerp = 1.0f;
-#endif
+  milesGlob.eqLerp = 1.0f; // Added by someone?
 
-  for ( eqIndex = 0; eqIndex < 2; ++eqIndex )
+  for ( int eqIndex = 0; eqIndex < 2; ++eqIndex )
   {
-    for ( band = 0; band < 3; ++band )
+    for ( int band = 0; band < 3; ++band )
     {
-      for ( channelIndex = 0; channelIndex < 64; ++channelIndex )
+      for ( int channelIndex = 0; channelIndex < 64; ++channelIndex )
       {
-        params = &milesGlob.eq[eqIndex].params[band][channelIndex];
+          SndEqParams *params = &milesGlob.eq[eqIndex].params[band][channelIndex];
         params->enabled = 0;
         params->freq = 20000.0f;
         params->gain = 1.0f;
@@ -186,6 +177,7 @@ void MSS_InitEq()
       }
     }
   }
+
   // LWSS ADD
   HPROENUM itr = HPROENUM_FIRST;
   HPROVIDER provider;
@@ -247,8 +239,6 @@ const char *MSS_EQ_Q[3] = { "Q 0", "Q 1", "Q 2" }; // idb
 
 void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
 {
-#ifndef KISAK_XBOX
-
   int enabled; // [esp+0h] [ebp-14h] BYREF
   int band; // [esp+4h] [ebp-10h]
   SAMPLESTAGE stage; // [esp+8h] [ebp-Ch]
@@ -278,90 +268,25 @@ void __cdecl MSS_ApplyEqFilter(_SAMPLE *s, int entchannel)
         stage = SP_FILTER_1;
     }
   }
-
-#else
-
-	int enabled; // [esp+0h] [ebp-14h] BYREF
-	int band; // [esp+4h] [ebp-10h]
-	SAMPLESTAGE stage; // [esp+8h] [ebp-Ch]
-	SndEqParams *params; // [esp+Ch] [ebp-8h]
-	int eqIndex; // [esp+10h] [ebp-4h]
-	float eqWeight[2];
-	float gain;
-	const float eqCap = 0.99f;// Clamp the EQ blend before full interpolation. Overlapping filters become too aggressive.
-
-#ifdef KISAK_SP
-	if (milesGlob.eqLerp >= eqCap)
-	{
-		eqWeight[0] = milesGlob.eqLerp;
-		eqWeight[1] = 0.0f;
-	}
-	else
-	{
-		eqWeight[0] = 0.0f;
-		eqWeight[1] = 1.0f - milesGlob.eqLerp;
-	}
-#else
-	eqWeight[0] = 1.0f;
-	eqWeight[1] = 0.0f;
-#endif
-
-	if ( !snd_enableEq->current.enabled || !milesGlob.eqFilter )
-	{
-		AIL_set_sample_processor(s, SP_FILTER, 0);
-		AIL_set_sample_processor(s, SP_FILTER_1, 0);
-		return;
-	}
-
-	for (eqIndex = 0; eqIndex < 2; ++eqIndex)
-	{
-		stage = (eqIndex == 0) ? SP_FILTER : SP_FILTER_1;
-		if ( eqWeight[eqIndex] <= 0.0f )
-		{
-			AIL_set_sample_processor(s, stage, 0);
-			continue;
-		}
-		AIL_set_sample_processor(s, stage, milesGlob.eqFilter);
-		for (band = 0; band < 3; ++band)
-		{
-			params = &milesGlob.eq[eqIndex].params[band][entchannel];
-			enabled = params->enabled;
-			if ( !enabled )
-			{
-				AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], -1, 0, &enabled, 0);
-				continue;
-			}
-			
-			enabled = 1;
-			AIL_sample_stage_property(s, stage, MSS_EQ_ENABLED[band], -1, 0, &enabled, 0);
-			gain = params->gain;
-			if ( eqWeight[eqIndex] < 1.0f )
-				gain += 20.0f * log10f(eqWeight[eqIndex]);
-			
-			AIL_sample_stage_property(s, stage, MSS_EQ_TYPE[band], -1, 0, params, 0);
-			AIL_sample_stage_property(s, stage, MSS_EQ_FREQ[band], -1, 0, &params->freq, 0);
-			AIL_sample_stage_property(s, stage, MSS_EQ_GAIN[band], -1, 0, &gain, 0);
-			AIL_sample_stage_property(s, stage, MSS_EQ_Q[band], -1, 0, &params->q, 0);
-		}
-  }
-
-#endif
 }
 
 void __cdecl MSS_ResumeSample(int i, int frametime)
 {
-  int v2; // [esp+0h] [ebp-8h]
-
-  if ( g_snd.chaninfo[i].startDelay )
-  {
-    if ( g_snd.chaninfo[i].startDelay - frametime > 0 )
-      v2 = g_snd.chaninfo[i].startDelay - frametime;
-    else
-      v2 = 0;
-    g_snd.chaninfo[i].startDelay = v2;
-    if ( !g_snd.chaninfo[i].startDelay )
-      AIL_resume_sample(milesGlob.handle_sample[i]);
-  }
+    if ( g_snd.chaninfo[i].startDelay )
+    {
+        if (g_snd.chaninfo[i].startDelay - frametime > 0)
+        {
+            g_snd.chaninfo[i].startDelay = g_snd.chaninfo[i].startDelay - frametime;
+        }
+        else
+        {
+            g_snd.chaninfo[i].startDelay = 0;
+        }
+        if (!g_snd.chaninfo[i].startDelay)
+        {
+            AIL_resume_sample(milesGlob.handle_sample[i]);
+        }
+    }
 }
 
 _DIG_DRIVER *__cdecl MSS_GetDriver()

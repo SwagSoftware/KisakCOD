@@ -50,37 +50,6 @@ snd_physics g_sndPhysics;
 uint32_t g_FXPlaySoundCount;
 AsyncPlaySound g_FXPlaySounds[32];
 
-const char *snd_roomStrings[27] =
-{
-  "generic",
-  "paddedcell",
-  "room",
-  "bathroom",
-  "livingroom",
-  "stoneroom",
-  "auditorium",
-  "concerthall",
-  "cave",
-  "arena",
-  "hangar",
-  "carpetedhallway",
-  "hallway",
-  "stonecorridor",
-  "alley",
-  "forest",
-  "city",
-  "mountains",
-  "quarry",
-  "plain",
-  "parkinglot",
-  "sewerpipe",
-  "underwater",
-  "drugged",
-  "dizzy",
-  "psychotic",
-  NULL
-}; // idb
-
 void __cdecl TRACK_snd()
 {
     track_static_alloc_internal(&g_snd, 32504, "g_snd", 13);
@@ -114,7 +83,7 @@ bool __cdecl SND_HasFreeVoice(int entchannel)
     iassert((g_snd.entchaninfo[entchannel].maxVoices > 0));
 
     loadingStreamCount = 0;
-    for (index = 40; index < 53; ++index)
+    for (index = SND_FIRST_STREAM_CHANNEL; index < SND_MAX_CHANNELS; ++index)
     {
         if (SND_IsStreamChannelLoading(index))
         {
@@ -127,25 +96,13 @@ bool __cdecl SND_HasFreeVoice(int entchannel)
 
 void __cdecl SND_AddVoice(int entchannel)
 {
-    const char *v1; // eax
-
     iassert(entchannel >= 0 && entchannel < g_snd.entchannel_count);
+    vassert(g_snd.entchaninfo[entchannel].voiceCount < g_snd.entchaninfo[entchannel].maxVoices,
+        "Not enough voices: entchannel = %s, maxvoices = %i",
+        g_snd.entchaninfo[entchannel].name,
+        g_snd.entchaninfo[entchannel].maxVoices);
 
-    if (g_snd.entchaninfo[entchannel].voiceCount >= g_snd.entchaninfo[entchannel].maxVoices)
-    {
-        v1 = va(
-            "Not enough voices: entchannel = %s, maxvoices = %i",
-            g_snd.entchaninfo[entchannel].name,
-            g_snd.entchaninfo[entchannel].maxVoices);
-        MyAssertHandler(
-            ".\\snd.cpp",
-            176,
-            0,
-            "%s\n\t%s",
-            "g_snd.entchaninfo[entchannel].voiceCount < g_snd.entchaninfo[entchannel].maxVoices",
-            v1);
-    }
-    ++g_snd.entchaninfo[entchannel].voiceCount;
+    g_snd.entchaninfo[entchannel].voiceCount++;
 }
 
 void __cdecl SND_RemoveVoice(int entchannel)
@@ -193,17 +150,15 @@ snd_entchannel_info_t *__cdecl SND_GetEntChannelName(int entchannel)
 
 int __cdecl SND_GetEntChannelFromName(const char *channelName)
 {
-    int chanIdx; // [esp+0h] [ebp-4h]
-
     iassert(channelName);
 
-    for (chanIdx = 0; chanIdx < g_snd.entchannel_count; ++chanIdx)
+    for (int chanIdx = 0; chanIdx < g_snd.entchannel_count; ++chanIdx)
     {
         if (!I_stricmp(channelName, g_snd.entchaninfo[chanIdx].name))
             return chanIdx;
     }
 
-    return -1;
+    return SND_PLAYBACKID_NOTPLAYED;
 }
 
 char __cdecl SND_ValidateEnvEffectsPriorityValue(const char *priorityName, int *priority)
@@ -235,10 +190,6 @@ char __cdecl SND_ValidateEnvEffectsPriorityValue(const char *priorityName, int *
 
 void __cdecl SND_SetEnvironmentEffects_f()
 {
-    const char *v0; // eax
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     const char *roomstring; // [esp+Ch] [ebp-18h]
     float drylevel; // [esp+14h] [ebp-10h]
     float wetlevel; // [esp+18h] [ebp-Ch]
@@ -247,22 +198,18 @@ void __cdecl SND_SetEnvironmentEffects_f()
 
     if (Cmd_Argc() == 6)
     {
-        v0 = Cmd_Argv(1);
-        if (SND_ValidateEnvEffectsPriorityValue(v0, &priority))
+        if (SND_ValidateEnvEffectsPriorityValue(Cmd_Argv(1), &priority))
         {
             roomstring = Cmd_Argv(2);
             if (SND_RoomtypeFromString(roomstring) || !I_stricmp(roomstring, snd_roomStrings[0]))
             {
-                v1 = Cmd_Argv(3);
-                drylevel = atof(v1);
+                drylevel = atof(Cmd_Argv(3));
                 if (drylevel >= 0.0 && drylevel <= 1.0)
                 {
-                    v2 = Cmd_Argv(4);
-                    wetlevel = atof(v2);
+                    wetlevel = atof(Cmd_Argv(4));
                     if (wetlevel >= 0.0 && wetlevel <= 1.0)
                     {
-                        v3 = Cmd_Argv(5);
-                        fademsec = atoi(v3);
+                        fademsec = atoi(Cmd_Argv(5));
                         if (fademsec >= 0)
                             SND_SetEnvironmentEffects(priority, roomstring, drylevel, wetlevel, fademsec);
                         else
@@ -315,18 +262,14 @@ int __cdecl SND_RoomtypeFromString(const char *string)
 
 void __cdecl SND_DeactivateEnvironmentEffects_f()
 {
-    const char *v0; // eax
-    const char *v1; // eax
-    int priority; // [esp+0h] [ebp-8h] BYREF
-    int fademsec; // [esp+4h] [ebp-4h]
+    int priority;
+    int fademsec;
 
     if (Cmd_Argc() == 3)
     {
-        v0 = Cmd_Argv(1);
-        if (SND_ValidateEnvEffectsPriorityValue(v0, &priority))
+        if (SND_ValidateEnvEffectsPriorityValue(Cmd_Argv(1), &priority))
         {
-            v1 = Cmd_Argv(2);
-            fademsec = atoi(v1);
+            fademsec = atoi(Cmd_Argv(2));
             if (fademsec >= 0)
                 SND_DeactivateEnvironmentEffects(priority, fademsec);
             else
@@ -341,10 +284,6 @@ void __cdecl SND_DeactivateEnvironmentEffects_f()
 
 void __cdecl SND_SetEq_f()
 {
-    const char *v0; // eax
-    const char *v1; // eax
-    const char *v2; // eax
-    const char *v3; // eax
     int band; // [esp+Ch] [ebp-1Ch] BYREF
     float q; // [esp+10h] [ebp-18h]
     int entchannel; // [esp+14h] [ebp-14h] BYREF
@@ -357,18 +296,14 @@ void __cdecl SND_SetEq_f()
     {
         if (SND_ParseChannelAndBand_f(&entchannel, &eqIndex, &band))
         {
-            v0 = Cmd_Argv(4);
-            type = (SND_EQTYPE)SND_EqTypeFromString(v0);
+            type = (SND_EQTYPE)SND_EqTypeFromString(Cmd_Argv(4));
             if (type != SND_EQTYPE_COUNT)
             {
-                v1 = Cmd_Argv(5);
-                gain = atof(v1);
-                v2 = Cmd_Argv(6);
-                freq = atof(v2);
+                gain = atof(Cmd_Argv(5));
+                freq = atof(Cmd_Argv(6));
                 if (freq >= 0.0 && freq <= 20000.0)
                 {
-                    v3 = Cmd_Argv(7);
-                    q = atof(v3);
+                    q = atof(Cmd_Argv(7));
                     if (q > 0.0)
                         SND_SetEqParams(entchannel, eqIndex, band, type, gain, freq, q);
                     else
@@ -383,9 +318,7 @@ void __cdecl SND_SetEq_f()
     }
     else
     {
-        Com_Printf(
-            9,
-            "USAGE: snd_setEq <const char *channelName> <int eqIndex> <int band> <const char *type> <float gain> <float freq> <float q>\n");
+        Com_Printf(9, "USAGE: snd_setEq <const char *channelName> <int eqIndex> <int band> <const char *type> <float gain> <float freq> <float q>\n");
         SND_PrintEqParams();
     }
 }
@@ -416,26 +349,20 @@ SND_EQTYPE __cdecl SND_EqTypeFromString(const char *typeString)
 
 char __cdecl SND_ParseChannelAndBand_f(int *entchannel, int *eqIndex, int *band)
 {
-    const char *v4; // eax
-    const char *v5; // eax
-    const char *channelName; // [esp+0h] [ebp-4h]
-
     iassert(entchannel);
     iassert(band);
     iassert(eqIndex);
 
-    channelName = Cmd_Argv(1);
+    const char *channelName = Cmd_Argv(1);
 
     *entchannel = SND_GetEntChannelFromName(channelName);
 
     if (*entchannel >= 0)
     {
-        v4 = Cmd_Argv(2);
-        *eqIndex = atoi(v4);
+        *eqIndex = atoi(Cmd_Argv(2));
         if ((uint32_t)*eqIndex < 2)
         {
-            v5 = Cmd_Argv(3);
-            *band = atoi(v5);
+            *band = atoi(Cmd_Argv(3));
             if ((uint32_t)*band <= 2)
             {
                 return 1;
@@ -461,7 +388,6 @@ char __cdecl SND_ParseChannelAndBand_f(int *entchannel, int *eqIndex, int *band)
 
 void __cdecl SND_SetEqFreq_f()
 {
-    const char *v0; // eax
     int band; // [esp+Ch] [ebp-10h] BYREF
     int entchannel; // [esp+10h] [ebp-Ch] BYREF
     int eqIndex; // [esp+14h] [ebp-8h] BYREF
@@ -471,8 +397,7 @@ void __cdecl SND_SetEqFreq_f()
     {
         if (SND_ParseChannelAndBand_f(&entchannel, &eqIndex, &band))
         {
-            v0 = Cmd_Argv(4);
-            freq = atof(v0);
+            freq = atof(Cmd_Argv(4));
             if (freq >= 0.0 && freq <= 20000.0)
                 SND_SetEqFreq(entchannel, eqIndex, band, freq);
             else
@@ -487,7 +412,6 @@ void __cdecl SND_SetEqFreq_f()
 
 void __cdecl SND_SetEqType_f()
 {
-    const char *v0; // eax
     int band; // [esp+0h] [ebp-10h] BYREF
     int entchannel; // [esp+4h] [ebp-Ch] BYREF
     int eqIndex; // [esp+8h] [ebp-8h] BYREF
@@ -497,8 +421,7 @@ void __cdecl SND_SetEqType_f()
     {
         if (SND_ParseChannelAndBand_f(&entchannel, &eqIndex, &band))
         {
-            v0 = Cmd_Argv(4);
-            type = SND_EqTypeFromString(v0);
+            type = SND_EqTypeFromString(Cmd_Argv(4));
             if (type != SND_EQTYPE_COUNT)
                 SND_SetEqType(entchannel, eqIndex, band, type);
         }
@@ -511,7 +434,6 @@ void __cdecl SND_SetEqType_f()
 
 void __cdecl SND_SetEqGain_f()
 {
-    const char *v0; // eax
     int band; // [esp+4h] [ebp-10h] BYREF
     int entchannel; // [esp+8h] [ebp-Ch] BYREF
     int eqIndex; // [esp+Ch] [ebp-8h] BYREF
@@ -521,8 +443,7 @@ void __cdecl SND_SetEqGain_f()
     {
         if (SND_ParseChannelAndBand_f(&entchannel, &eqIndex, &band))
         {
-            v0 = Cmd_Argv(4);
-            gain = atof(v0);
+            gain = atof(Cmd_Argv(4));
             SND_SetEqGain(entchannel, eqIndex, band, gain);
         }
     }
@@ -534,7 +455,6 @@ void __cdecl SND_SetEqGain_f()
 
 void __cdecl SND_SetEqQ_f()
 {
-    const char *v0; // eax
     int band; // [esp+8h] [ebp-10h] BYREF
     float q; // [esp+Ch] [ebp-Ch]
     int entchannel; // [esp+10h] [ebp-8h] BYREF
@@ -544,8 +464,7 @@ void __cdecl SND_SetEqQ_f()
     {
         if (SND_ParseChannelAndBand_f(&entchannel, &eqIndex, &band))
         {
-            v0 = Cmd_Argv(4);
-            q = atof(v0);
+            q = atof(Cmd_Argv(4));
             if (q > 0.0)
                 SND_SetEqQ(entchannel, eqIndex, band, q);
             else
@@ -560,8 +479,6 @@ void __cdecl SND_SetEqQ_f()
 
 void __cdecl SND_DeactivateEq_f()
 {
-    const char *v0; // eax
-    const char *v1; // eax
     const char *channelName; // [esp+4h] [ebp-10h]
     const char *channelNamea; // [esp+4h] [ebp-10h]
     uint32_t band; // [esp+8h] [ebp-Ch]
@@ -571,8 +488,7 @@ void __cdecl SND_DeactivateEq_f()
     argc = Cmd_Argc();
     if (argc >= 2 && argc <= 4)
     {
-        v0 = Cmd_Argv(1);
-        eqIndex = atoi(v0);
+        eqIndex = atoi(Cmd_Argv(1));
         if (eqIndex < 2)
         {
             if (argc == 2)
@@ -587,8 +503,7 @@ void __cdecl SND_DeactivateEq_f()
             else
             {
                 channelName = Cmd_Argv(2);
-                v1 = Cmd_Argv(3);
-                band = atoi(v1);
+                band = atoi(Cmd_Argv(3));
                 if (band <= 2)
                     SND_DeactivateEq(channelName, eqIndex, band);
                 else
@@ -663,8 +578,6 @@ void __cdecl SND_DisconnectListener(int localClientNum)
 
 void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *origin, const float (*axis)[3])
 {
-    snd_listener *v4; // [esp+0h] [ebp-4h]
-
     if (g_snd.Initialized2d)
     {
         iassert(origin);
@@ -672,10 +585,7 @@ void __cdecl SND_SetListener(int localClientNum, int clientNum, const float *ori
         bcassert(localClientNum, 1);
 
         AxisCopy(*(const mat3x3 *)axis, g_snd.listeners[localClientNum].orient.axis);
-        v4 = &g_snd.listeners[localClientNum];
-        v4->orient.origin[0] = *origin;
-        v4->orient.origin[1] = origin[1];
-        v4->orient.origin[2] = origin[2];
+        Vec3Copy(origin, g_snd.listeners[localClientNum].orient.origin);
         g_snd.listeners[localClientNum].clientNum = clientNum;
         g_snd.listeners[localClientNum].active = 1;
         if (g_snd.amplifier.listener->active)
@@ -701,8 +611,8 @@ int __cdecl SND_SetPlaybackIdNotPlayed(uint32_t index)
 {
     iassert(index >= 0 && index < SND_MAX_CHANNELS);
 
-    g_snd.chaninfo[index].playbackId = -1;
-    return -1;
+    g_snd.chaninfo[index].playbackId = SND_PLAYBACKID_NOTPLAYED;
+    return SND_PLAYBACKID_NOTPLAYED;
 }
 
 int __cdecl SND_AcquirePlaybackId(uint32_t index, int totalMsec)
@@ -737,11 +647,11 @@ char __cdecl SND_AddLengthNotify(int playbackId, const snd_alias_t *lengthNotify
 
     bcassert(id, SndLengthNotifyCount);
 
-    if (playbackId != -1 && playbackId)
+    if (playbackId != SND_PLAYBACKID_NOTPLAYED && playbackId)
     {
-        for (chanInfoIndex = 0; chanInfoIndex < 53 && g_snd.chaninfo[chanInfoIndex].playbackId != playbackId; ++chanInfoIndex)
+        for (chanInfoIndex = 0; chanInfoIndex < SND_MAX_CHANNELS && g_snd.chaninfo[chanInfoIndex].playbackId != playbackId; ++chanInfoIndex)
             ;
-        if (chanInfoIndex == 53)
+        if (chanInfoIndex == SND_MAX_CHANNELS)
         {
             return 0;
         }
@@ -805,13 +715,13 @@ char __cdecl SND_GetKnownLength(int playbackId, int *msec)
 
     *msec = 0;
 
-    if (playbackId == -1 || !playbackId)
+    if (playbackId == SND_PLAYBACKID_NOTPLAYED || !playbackId)
         return 1;
 
-    for (chanInfoIndex = 0; chanInfoIndex < 53 && g_snd.chaninfo[chanInfoIndex].playbackId != playbackId; ++chanInfoIndex)
+    for (chanInfoIndex = 0; chanInfoIndex < SND_MAX_CHANNELS && g_snd.chaninfo[chanInfoIndex].playbackId != playbackId; ++chanInfoIndex)
         ;
 
-    if (chanInfoIndex == 53)
+    if (chanInfoIndex == SND_MAX_CHANNELS)
         return 0;
 
     if (g_snd.chaninfo[chanInfoIndex].totalMsec < 0)
@@ -821,12 +731,12 @@ char __cdecl SND_GetKnownLength(int playbackId, int *msec)
     return 1;
 }
 
-double __cdecl SND_GetLerpedSlavePercentage(float baseSlavePercentage)
+float __cdecl SND_GetLerpedSlavePercentage(float baseSlavePercentage)
 {
-    return (float)(1.0 - (1.0 - baseSlavePercentage) * g_snd.slaveLerp);
+    return (float)(1.0f - (1.0f - baseSlavePercentage) * g_snd.slaveLerp);
 }
 
-double __cdecl SND_Attenuate(SndCurve *volumeFalloffCurve, float radius, float mindist, float maxdist)
+float __cdecl SND_Attenuate(SndCurve *volumeFalloffCurve, float radius, float mindist, float maxdist)
 {
     float radiusa; // [esp+10h] [ebp+Ch]
     float radiusb; // [esp+10h] [ebp+Ch]
@@ -834,17 +744,17 @@ double __cdecl SND_Attenuate(SndCurve *volumeFalloffCurve, float radius, float m
     iassert(volumeFalloffCurve);
 
     radiusa = radius - mindist;
-    if (radiusa <= 0.0)
-        return 1.0;
+    if (radiusa <= 0.0f)
+        return 1.0f;
 
     iassert(maxdist > mindist);
 
     radiusb = radiusa / (maxdist - mindist);
 
-    if (radiusb < 1.0)
+    if (radiusb < 1.0f)
         return Com_GetVolumeFalloffCurveValue(volumeFalloffCurve, radiusb);
     else
-        return 0.0;
+        return 0.0f;
 }
 
 void __cdecl SND_GetCurrent3DPosition(SndEntHandle sndEnt, float *offset, float *pos_out)
@@ -859,9 +769,7 @@ void __cdecl SND_GetCurrent3DPosition(SndEntHandle sndEnt, float *offset, float 
     Vec3Mad(org, *offset, axis[0], org);
     Vec3Mad(org, offset[1], axis[1], org);
     Vec3Mad(org, offset[2], axis[2], org);
-    *pos_out = org[0];
-    pos_out[1] = org[1];
-    pos_out[2] = org[2];
+    Vec3Copy(org, pos_out);
 }
 
 void __cdecl SND_ResetChannelInfo(int index)
@@ -876,12 +784,7 @@ void __cdecl SND_ResetChannelInfo(int index)
 
 void __cdecl SND_SetChannelStartInfo(uint32_t index, SndStartAliasInfo *SndStartAliasInfo)
 {
-    double v2; // st7
-    double v3; // st7
-    double v4; // st7
     sndLengthNotifyInfo *p_lengthNotifyInfo; // ecx
-    bool v6; // [esp+0h] [ebp-48h]
-    float *v7; // [esp+4h] [ebp-44h]
     float offset[3]; // [esp+8h] [ebp-40h] BYREF
     float org[3]; // [esp+14h] [ebp-34h] BYREF
     float axis[3][3]; // [esp+20h] [ebp-28h] BYREF
@@ -898,19 +801,13 @@ void __cdecl SND_SetChannelStartInfo(uint32_t index, SndStartAliasInfo *SndStart
     {
         CG_GetSoundEntityOrientation(SndStartAliasInfo->sndEnt, org, axis);
         Vec3Sub(SndStartAliasInfo->org, org, offset);
-        v2 = Vec3Dot(offset, axis[0]);
-        chanInfo->offset[0] = v2;
-        v3 = Vec3Dot(offset, axis[1]);
-        chanInfo->offset[1] = v3;
-        v4 = Vec3Dot(offset, axis[2]);
-        chanInfo->offset[2] = v4;
+        chanInfo->offset[0] = Vec3Dot(offset, axis[0]);
+        chanInfo->offset[1] = Vec3Dot(offset, axis[1]);
+        chanInfo->offset[2] = Vec3Dot(offset, axis[2]);
     }
     else
     {
-        v7 = chanInfo->offset;
-        chanInfo->offset[0] = 0.0;
-        v7[1] = 0.0;
-        v7[2] = 0.0;
+        Vec3Clear(chanInfo->offset);
     }
     chanInfo->sndEnt.field.entIndex = SndStartAliasInfo->sndEnt.field.entIndex;
     chanInfo->entchannel = (SndStartAliasInfo->alias0->flags & 0x3F00) >> 8;
@@ -921,8 +818,7 @@ void __cdecl SND_SetChannelStartInfo(uint32_t index, SndStartAliasInfo *SndStart
     chanInfo->lerp = SndStartAliasInfo->lerp;
     chanInfo->startDelay = SndStartAliasInfo->startDelay;
     chanInfo->looptime = g_snd.looptime;
-    v6 = g_snd.paused && g_snd.pauseSettings[(SndStartAliasInfo->alias0->flags & 0x3F00) >> 8];
-    chanInfo->paused = v6;
+    chanInfo->paused = g_snd.paused && g_snd.pauseSettings[(SndStartAliasInfo->alias0->flags & 0x3F00) >> 8];
     chanInfo->master = SndStartAliasInfo->master;
     chanInfo->system = SndStartAliasInfo->system;
     chanInfo->startTime = g_snd.time + chanInfo->startDelay;
@@ -986,7 +882,7 @@ int __cdecl SND_FindFree2DChannel(SndStartAliasInfo *startAliasInfo, int entchan
     HasFreeVoice = SND_HasFreeVoice(entchannel);
     SND_DebugAliasPrint(!HasFreeVoice, alias0, v17);
     if (!SND_HasFreeVoice(entchannel))
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 
     for (i = 0; i < g_snd.max_2D_channels; ++i)
     {
@@ -1086,7 +982,7 @@ int __cdecl SND_FindReplaceableChannel(
         v6 = -startAliasInfo->volume;
     }
     minMetric = v6;
-    replaceable = -1;
+    replaceable = SND_PLAYBACKID_NOTPLAYED;
 
     iassert(startAliasInfo->alias0);
 
@@ -1188,7 +1084,7 @@ int __cdecl SND_FindFree3DChannel(SndStartAliasInfo *startAliasInfo, int entchan
     int i; // [esp+40h] [ebp-4h]
 
     if (!SND_HasFreeVoice(entchannel))
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 
     for (i = 0; i < g_snd.max_3D_channels; ++i)
     {
@@ -1251,9 +1147,7 @@ int __cdecl SND_FindFree3DChannel(SndStartAliasInfo *startAliasInfo, int entchan
 
 void __cdecl DB_SaveSounds()
 {
-    int i; // [esp+0h] [ebp-4h]
-
-    for (i = 0; i < 53; ++i)
+    for (int i = 0; i < SND_MAX_CHANNELS; ++i)
         SND_Archive(&g_snd.chaninfo[i]);
 }
 
@@ -1285,9 +1179,7 @@ void __cdecl SND_Archive(snd_channel_info_t *chaninfo)
 
 void __cdecl DB_LoadSounds()
 {
-    int i; // [esp+0h] [ebp-4h]
-
-    for (i = 0; i < 53; ++i)
+    for (int i = 0; i < SND_MAX_CHANNELS; ++i)
         SND_Unarchive(&g_snd.chaninfo[i]);
 }
 
@@ -1331,7 +1223,7 @@ void __cdecl StopSoundAliasesOnEnt(SndEntHandle sndEnt, const char *aliasName)
         stopChannel = 0;
         for (chanIdx = 0; ; ++chanIdx)
         {
-            if (chanIdx >= 53)
+            if (chanIdx >= SND_MAX_CHANNELS)
                 return;
             chaninfo = &g_snd.chaninfo[chanIdx];
             if (chaninfo->sndEnt.field.entIndex == sndEnt.field.entIndex)
@@ -1340,7 +1232,7 @@ void __cdecl StopSoundAliasesOnEnt(SndEntHandle sndEnt, const char *aliasName)
                 {
                     if (chanIdx < 8 || chanIdx >= g_snd.max_3D_channels + 8)
                     {
-                        if (chanIdx >= 40 && chanIdx < g_snd.max_stream_channels + 40)
+                        if (chanIdx >= SND_FIRST_STREAM_CHANNEL && chanIdx < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels)
                         {
                             if (SND_IsStreamChannelFree(chanIdx))
                                 continue;
@@ -1399,21 +1291,17 @@ void __cdecl SND_InitFXSounds()
 
 void __cdecl SND_AddPlayFXSoundAlias(snd_alias_t *alias, SndEntHandle sndEnt, const float *origin)
 {
-    AsyncPlaySound *sound; // [esp+0h] [ebp-4h]
-
     if (g_FXPlaySoundCount == 32)
     {
         Com_PrintError(20, "ERROR: too many FX sounds %d\n", 32);
     }
     else
     {
-        sound = &g_FXPlaySounds[g_FXPlaySoundCount];
+        AsyncPlaySound *sound = &g_FXPlaySounds[g_FXPlaySoundCount];
         sound->alias = alias;
         sound->sndEnt = sndEnt;
-        sound->origin[0] = *origin;
-        sound->origin[1] = origin[1];
-        sound->origin[2] = origin[2];
-        ++g_FXPlaySoundCount;
+        Vec3Copy(origin, sound->origin);
+        g_FXPlaySoundCount++;
     }
 }
 
@@ -1425,9 +1313,7 @@ void __cdecl Snd_AssertAliasValid(snd_alias_t *alias)
 
 void __cdecl SND_PlayFXSounds()
 {
-    uint32_t soundIndex; // [esp+4h] [ebp-4h]
-
-    for (soundIndex = 0; soundIndex < g_FXPlaySoundCount; ++soundIndex)
+    for (uint soundIndex = 0; soundIndex < g_FXPlaySoundCount; ++soundIndex)
         SND_PlaySoundAlias(
             g_FXPlaySounds[soundIndex].alias,
             g_FXPlaySounds[soundIndex].sndEnt,
@@ -1448,7 +1334,7 @@ int __cdecl SND_PlaySoundAlias(
     if (alias)
         return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, 0, timeshift, 0, 1, system);
     else
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 }
 
 int __cdecl SND_PlaySoundAlias_Internal(
@@ -1464,11 +1350,8 @@ int __cdecl SND_PlaySoundAlias_Internal(
     bool useTimescale,
     snd_alias_system_t system)
 {
-    const char *v12; // eax
-    const char *v13; // eax
     int v14; // [esp+24h] [ebp-7Ch]
     bool v15; // [esp+28h] [ebp-78h]
-    float v16; // [esp+2Ch] [ebp-74h]
     snd_listener *a; // [esp+38h] [ebp-68h]
     float diff[3]; // [esp+3Ch] [ebp-64h] BYREF
     snd_alias_t *tertiaryAlias; // [esp+48h] [ebp-58h]
@@ -1485,14 +1368,14 @@ int __cdecl SND_PlaySoundAlias_Internal(
     iassert(alias1);
     iassert(org);
 
-    playbackId = -1;
+    playbackId = SND_PLAYBACKID_NOTPLAYED;
     outOfRange = 0;
 
     if (!g_snd.Initialized2d)
         return playbackId;
 
     if (pChannel)
-        *pChannel = -1;
+        *pChannel = SND_PLAYBACKID_NOTPLAYED;
 
     alias0Channel = (alias0->flags & 0x3F00) >> 8;
     if (SND_IsAliasChannel3D(alias0Channel))
@@ -1504,9 +1387,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
         outOfRange = distListenerSq > distMax * distMax;
         if (*(_BYTE *)snd_debugAlias->current.integer)
         {
-            v16 = sqrt(distListenerSq);
-            v12 = va("Not playing, out of range: %.1f > %.1f", v16, distMax);
-            SND_DebugAliasPrint(outOfRange, alias0, v12);
+            SND_DebugAliasPrint(outOfRange, alias0, va("Not playing, out of range: %.1f > %.1f", sqrt(distListenerSq), distMax));
         }
     }
     if (!outOfRange)
@@ -1539,16 +1420,14 @@ int __cdecl SND_PlaySoundAlias_Internal(
             SND_StopEntityChannel(sndEnt, alias0Channel);
 
         if (SND_IsNullSoundFile(alias0->soundFile))
-            return -1;
+            return SND_PLAYBACKID_NOTPLAYED;
 
         SND_ChoosePitchAndVolume(alias0, alias1, lerp, volumeScale, &startAliasInfo.volume, &startAliasInfo.pitch);
         startAliasInfo.alias0 = alias0;
         startAliasInfo.alias1 = alias1;
         startAliasInfo.lerp = lerp;
         startAliasInfo.sndEnt = sndEnt;
-        startAliasInfo.org[0] = *org;
-        startAliasInfo.org[1] = org[1];
-        startAliasInfo.org[2] = org[2];
+        Vec3Copy(org, startAliasInfo.org);
         startAliasInfo.timeshift = timeshift;
         startAliasInfo.fraction = 0.0;
         startAliasInfo.startDelay = alias0->startDelay;
@@ -1569,10 +1448,9 @@ int __cdecl SND_PlaySoundAlias_Internal(
         {
             if (!alwaysfails)
             {
-                v13 = va("unhandled sound alias type %i", (alias0->flags & 0xC0) >> 6);
-                MyAssertHandler(".\\snd.cpp", 1609, 0, v13);
+                MyAssertHandler(".\\snd.cpp", 1609, 0, va("unhandled sound alias type %i", (alias0->flags & 0xC0) >> 6));
             }
-            playbackId = -1;
+            playbackId = SND_PLAYBACKID_NOTPLAYED;
         }
     }
     if (alias0->secondaryAliasName)
@@ -1614,7 +1492,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
                         "Error: Infinite recursion in secondary aliases sequenced together.\nAlias sequence start: '%s'->'%s'\n",
                         alias0->aliasName,
                         alias0->secondaryAliasName);
-                    return -1;
+                    return SND_PLAYBACKID_NOTPLAYED;
                 }
                 ++secondaryAliasRecursionCounter;
             }
@@ -1636,7 +1514,7 @@ int __cdecl SND_PlaySoundAlias_Internal(
             Com_PrintError(9, "Error: unable to find '%s' alias\n", alias0->secondaryAliasName);
         }
     }
-    SND_DebugAliasPrint(playbackId != -1, alias0, "Started");
+    SND_DebugAliasPrint(playbackId != SND_PLAYBACKID_NOTPLAYED, alias0, "Started");
     return playbackId;
 }
 
@@ -1653,7 +1531,7 @@ void __cdecl SND_StopEntityChannel(SndEntHandle sndEnt, int entchannel)
         }
     }
 
-    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+    for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
     {
         if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex
             && g_snd.chaninfo[i].entchannel == entchannel
@@ -1726,31 +1604,29 @@ int __cdecl SND_StartAliasSample(SndStartAliasInfo *startAliasInfo, int *pChanne
             filename,
             startAliasInfo->alias0->aliasName);
         if (pChannel)
-            *pChannel = -1;
+            *pChannel = SND_PLAYBACKID_NOTPLAYED;
         return 0;
     }
 }
 
 int __cdecl SND_StartAliasStream(SndStartAliasInfo *startAliasInfo, int *pChannel)
 {
-    int index; // [esp+4h] [ebp-4h]
-
     iassert(startAliasInfo->alias0);
     iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias0->flags) == SAT_STREAMED);
     iassert(startAliasInfo->alias1);
     iassert(SNDALIASFLAGS_GET_TYPE(startAliasInfo->alias1->flags) == SAT_STREAMED);
 
-    index = SND_FindFreeStreamChannel(startAliasInfo, (startAliasInfo->alias0->flags & 0x3F00) >> 8);
+    int index = SND_FindFreeStreamChannel(startAliasInfo, (startAliasInfo->alias0->flags & 0x3F00) >> 8);
     if (pChannel)
         *pChannel = index;
 
     if (index < 0)
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 
     iassert(index >= ((0 + 8) + 32) && index < ((0 + 8) + 32) + g_snd.max_stream_channels);
 
     if (!snd_enableStream->current.enabled)
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 
     if (SND_IsAliasChannel3D((startAliasInfo->alias0->flags & 0x3F00) >> 8) && !SND_AnyActiveListeners())
         Com_Error(
@@ -1764,12 +1640,6 @@ int __cdecl SND_StartAliasStream(SndStartAliasInfo *startAliasInfo, int *pChanne
 
 int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int entchannel)
 {
-    int v3; // eax
-    const char *v4; // eax
-    int v5; // eax
-    const char *v6; // eax
-    int v7; // eax
-    int v8; // [esp-4h] [ebp-74h]
     const char *v9; // [esp+8h] [ebp-68h]
     int v10; // [esp+Ch] [ebp-64h]
     const char *aliasName; // [esp+10h] [ebp-60h]
@@ -1791,15 +1661,15 @@ int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int ent
     int i; // [esp+6Ch] [ebp-4h]
 
     if (!SND_HasFreeVoice(entchannel))
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 
     for (i = 5; i < g_snd.max_stream_channels; ++i)
     {
-        if (SND_IsStreamChannelFree(i + 40))
-            return i + 40;
+        if (SND_IsStreamChannelFree(SND_FIRST_STREAM_CHANNEL + i))
+            return SND_FIRST_STREAM_CHANNEL + i;
     }
 
-    i = SND_FindReplaceableChannel(startAliasInfo, entchannel, 0x2Du, g_snd.max_stream_channels - 5);
+    i = SND_FindReplaceableChannel(startAliasInfo, entchannel, 45, g_snd.max_stream_channels - 5);
     if (i >= 0)
     {
         if (g_snd.chaninfo[i].alias0 == startAliasInfo->alias0)
@@ -1811,7 +1681,7 @@ int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int ent
             Vec3Sub(listenerOrg, g_snd.chaninfo[i].org, v);
             v16 = v24;
             if (Vec3LengthSq(v) <= v16)
-                i = -1;
+                i = SND_PLAYBACKID_NOTPLAYED;
             else
                 SND_StopStreamChannel(i);
         }
@@ -1823,14 +1693,10 @@ int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int ent
         {
             Priority = SND_GetPriority(g_snd.chaninfo[i].entchannel);
             aliasName = g_snd.chaninfo[i].alias0->aliasName;
-            v3 = SND_GetPriority(entchannel);
-            v4 = va("(prio %i) => Replacing '%s' (prio: %i)", v3, aliasName, Priority);
-            SND_DebugAliasPrint(1, startAliasInfo->alias0, v4);
+            SND_DebugAliasPrint(1, startAliasInfo->alias0, va("(prio %i) => Replacing '%s' (prio: %i)", SND_GetPriority(entchannel), aliasName, Priority));
             v15 = SND_GetPriority(entchannel);
             v12 = startAliasInfo->alias0->aliasName;
-            v5 = SND_GetPriority(g_snd.chaninfo[i].entchannel);
-            v6 = va("(prio %i ) => Replaced by '%s' (prio: %i)", v5, v12, v15);
-            SND_DebugAliasPrint(1, g_snd.chaninfo[i].alias0, v6);
+            SND_DebugAliasPrint(1, g_snd.chaninfo[i].alias0, va("(prio %i ) => Replaced by '%s' (prio: %i)", SND_GetPriority(g_snd.chaninfo[i].entchannel), v12, v15));
             if (snd_debugReplace->current.enabled
                 && ((g_snd.chaninfo[i].alias0->flags & 1) != 0
                     || g_snd.chaninfo[i].totalMsec + g_snd.chaninfo[i].startTime - g_snd.time > 0))
@@ -1844,15 +1710,13 @@ int __cdecl SND_FindFreeStreamChannel(SndStartAliasInfo *startAliasInfo, int ent
                 v13 = v20;
                 v10 = SND_GetPriority(entchannel);
                 v9 = startAliasInfo->alias0->aliasName;
-                v8 = g_snd.chaninfo[i].totalMsec + g_snd.chaninfo[i].startTime - g_snd.time;
-                v7 = SND_GetPriority(g_snd.chaninfo[i].entchannel);
                 Com_DPrintf(
                     9,
                     "Stopping stream sound channel that's playing '%s' (prio: %i, %ims left, dist: %f) so we can play '%s' (prio: %"
                     "i, dist: %f) instead\n",
                     g_snd.chaninfo[i].alias0->aliasName,
-                    v7,
-                    v8,
+                    SND_GetPriority(g_snd.chaninfo[i].entchannel),
+                    g_snd.chaninfo[i].totalMsec + g_snd.chaninfo[i].startTime - g_snd.time,
                     v17,
                     v9,
                     v10,
@@ -1921,8 +1785,6 @@ char __cdecl SND_ContinueLoopingSound(
     const float *org,
     int *pChannel)
 {
-    float *v8; // [esp+10h] [ebp-8Ch]
-
     for (int i = 8; i < g_snd.max_3D_channels + 8; ++i)
     {
         if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_Is3DChannelFree(i))
@@ -1956,7 +1818,7 @@ char __cdecl SND_ContinueLoopingSound(
             }
         }
     }
-    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+    for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
     {
         if (g_snd.chaninfo[i].sndEnt.field.entIndex == sndEnt.field.entIndex && !SND_IsStreamChannelFree(i))
         {
@@ -1968,10 +1830,7 @@ char __cdecl SND_ContinueLoopingSound(
                 && g_snd.chaninfo[i].alias1->aliasName == alias1->aliasName)
             {
                 SND_ContinueLoopingSound_Internal(i, lerp, volumeScale, pChannel, SND_SetStreamChannelPlaybackRate);
-                v8 = g_snd.chaninfo[i].org;
-                *v8 = *org;
-                v8[1] = org[1];
-                v8[2] = org[2];
+                Vec3Copy(org, g_snd.chaninfo[i].org);
                 return 1;
             }
         }
@@ -2056,9 +1915,9 @@ int __cdecl SND_PlaySoundAliasAsMaster(
     iassert(org);
 
     if (alias)
-        return SND_PlaySoundAlias_Internal(alias, alias, 0.0, 1.0, sndEnt, org, 0, timeshift, 1, 1, system);
+        return SND_PlaySoundAlias_Internal(alias, alias, 0.0f, 1.0f, sndEnt, org, 0, timeshift, true, true, system);
     else
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 }
 
 int __cdecl SND_PlayBlendedSoundAliases(
@@ -2074,7 +1933,7 @@ int __cdecl SND_PlayBlendedSoundAliases(
     iassert(org);
 
     if (!alias0 || !alias1)
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 
     SND_ValidateSoundAliasBlend(alias0, alias1, 1);
     return SND_PlaySoundAlias_Internal(alias0, alias1, lerp, volumeScale, sndEnt, org, 0, timeshift, 0, 1, system);
@@ -2224,30 +2083,17 @@ int __cdecl SND_PlayLocalSoundAlias(uint32_t localClientNum, const snd_alias_t *
     bcassert(system, SASYS_COUNT);
     bcassert(localClientNum, ARRAY_COUNT(g_snd.listeners));
 
-    //int __cdecl SND_PlaySoundAlias_Internal(
-    //    const snd_alias_t * alias0,
-    //    const snd_alias_t * alias1,
-    //    float lerp,
-    //    float volumeScale,
-    //    SndEntHandle * sndEnt,
-    //    SndEntHandle * org,
-    //    float *pChannel,
-    //    int timeshift,
-    //    bool treatAsMaster,
-    //    bool useTimescale,
-    //    snd_alias_system_t system)
-
     return SND_PlaySoundAlias_Internal(
         alias,
         alias,
-        0.0,
-        1.0,
-        0,
+        0.0f,
+        1.0f,
+        NULL,
         g_snd.listeners[localClientNum].orient.origin,
+        NULL,
         0,
-        0,
-        0,
-        1,
+        false,
+        true,
         system);
 }
 
@@ -2261,14 +2107,12 @@ int __cdecl SND_PlayLocalSoundAliasByName(
     if (aliasname && (alias = Com_PickSoundAlias(aliasname)) != 0)
         return SND_PlayLocalSoundAlias(localClientNum, alias, system);
     else
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
 }
 
 void __cdecl SND_ResetPauseSettingsToDefaults()
 {
-    int i; // [esp+0h] [ebp-4h]
-
-    for (i = 0; i < 64; ++i)
+    for (int i = 0; i < 64; ++i)
         g_snd.pauseSettings[i] = g_snd.defaultPauseSettings[i];
 }
 
@@ -2280,7 +2124,7 @@ void __cdecl SND_PlayMusicAlias(
 {
     if (g_snd.Initialized2d && alias)
     {
-        if (SND_IsStreamChannelFree(40))
+        if (SND_IsStreamChannelFree(SND_FIRST_STREAM_CHANNEL))
             SND_StartBackground(localClientNum, 0, alias, 0, 0.0, useTimescale, system);
         else
             Com_PrintWarning(9, "Unable to play music alias %s\n", alias->aliasName);
@@ -2324,7 +2168,7 @@ void __cdecl SND_StartBackground(
     volume = random() * v8 + alias->volMin;
     v7 = alias->pitchMax - alias->pitchMin;
     pitch = random() * v7 + alias->pitchMin;
-    channel = track + 40;
+    channel = SND_FIRST_STREAM_CHANNEL + track;
 
     iassert(channel >= ((0 + 8) + 32) && channel < ((0 + 8) + 32) + g_snd.max_stream_channels);
 
@@ -2398,11 +2242,8 @@ int SND_PauseSounds()
                 SND_Pause3DChannel(i);
         }
 
-        for (int i = 40; ; ++i)
+        for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
         {
-            result = g_snd.max_stream_channels + 40;
-            if (i >= g_snd.max_stream_channels + 40)
-                break;
             if (!SND_IsStreamChannelFree(i) && g_snd.pauseSettings[(g_snd.chaninfo[i].alias0->flags & 0x3F00) >> 8])
                 SND_PauseStreamChannel(i);
         }
@@ -2432,7 +2273,7 @@ void SND_UnpauseSounds()
                 SND_Unpause3DChannel(i, timeshift);
         }
 
-        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+        for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
         {
             if (!SND_IsStreamChannelFree(i) && g_snd.chaninfo[i].paused)
                 SND_UnpauseStreamChannel(i, timeshift);
@@ -2454,7 +2295,7 @@ void __cdecl SND_StopBackground(uint32_t track, int fadetime)
     iassert(track >= 0 && track < SND_TRACK_COUNT);
     iassert(fadetime >= 0);
 
-    if (!SND_IsStreamChannelFree(track + 40))
+    if (!SND_IsStreamChannelFree(SND_FIRST_STREAM_CHANNEL + track))
     {
         if (fadetime)
         {
@@ -2466,7 +2307,7 @@ void __cdecl SND_StopBackground(uint32_t track, int fadetime)
         }
         else
         {
-            SND_StopStreamChannel(track + 40);
+            SND_StopStreamChannel(SND_FIRST_STREAM_CHANNEL + track);
         }
     }
 }
@@ -2519,7 +2360,7 @@ void __cdecl SND_PlayAmbientAlias(
                     return;
                 }
 
-                tracknum = g_snd.ambient_track + i + 40;
+                tracknum = g_snd.ambient_track + SND_FIRST_STREAM_CHANNEL + i;
                 if (!aliases[i] || SND_IsStreamChannelFree(tracknum))
                     goto LABEL_32;
 
@@ -2690,7 +2531,7 @@ void __cdecl SND_UpdateLoopingSounds()
             }
         }
 
-        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+        for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
         {
             if (!SND_IsStreamChannelFree(i))
             {
@@ -2712,7 +2553,7 @@ char __cdecl SND_UpdateBackgroundVolume(uint32_t track, int frametime)
 
     iassert(track >= 0 && track < SND_TRACK_COUNT);
 
-    channel = track + 40;
+    channel = SND_FIRST_STREAM_CHANNEL + track;
 
     if (SND_IsAliasChannel3D(SNDALIASFLAGS_GET_CHANNEL(g_snd.chaninfo[channel].alias0->flags)))
         MyAssertHandler(
@@ -2834,7 +2675,7 @@ void __cdecl SND_UpdateReverbs()
             SND_Update2DChannelReverb(i);
     }
 
-    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+    for (int i = SND_FIRST_STREAM_CHANNEL; i < g_snd.max_stream_channels + SND_FIRST_STREAM_CHANNEL; ++i)
     {
         if (!SND_IsStreamChannelFree(i))
             SND_UpdateStreamChannelReverb(i);
@@ -2843,12 +2684,9 @@ void __cdecl SND_UpdateReverbs()
 
 void __cdecl SND_DeactivateAllEq(int eqIndex)
 {
-    signed int band; // [esp+0h] [ebp-8h]
-    signed int entchannel; // [esp+4h] [ebp-4h]
-
-    for (entchannel = 0; entchannel < 64; ++entchannel)
+    for (int entchannel = 0; entchannel < 64; ++entchannel)
     {
-        for (band = 0; band < 3; ++band)
+        for (int band = 0; band < 3; ++band)
             SND_DisableEq(entchannel, eqIndex, band);
     }
 }
@@ -2895,7 +2733,7 @@ void __cdecl SND_Update()
             {
                 MemFile_InitForReading(&memFile, g_snd.restore.size, g_snd.restore.buffer, g_snd.restore.compress);
                 SND_Restore(&memFile);
-                MemFile_MoveToSegment(&memFile, -1);
+                MemFile_MoveToSegment(&memFile, SND_PLAYBACKID_NOTPLAYED);
 
                 iassert(memFile.bytesUsed == g_snd.restore.size);
 
@@ -2913,9 +2751,7 @@ void __cdecl SND_Update()
 
 void __cdecl SND_UpdateMasterVolumes(int frametime)
 {
-    int i; // [esp+0h] [ebp-4h]
-
-    for (i = 0; i < SND_GetEntChannelCount(); ++i)
+    for (int i = 0; i < SND_GetEntChannelCount(); ++i)
     {
         if (!g_snd.paused || !SND_IsPausable(i))
             SND_UpdateVolume(&g_snd.channelvol->channelvol[i], frametime);
@@ -2963,7 +2799,7 @@ void __cdecl SND_UpdateAllChannels(int frametime)
             SND_Update3DChannel(i, frametime);
     }
 
-    for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+    for (int i = SND_FIRST_STREAM_CHANNEL; i < g_snd.max_stream_channels + SND_FIRST_STREAM_CHANNEL; ++i)
     {
         if (!SND_IsStreamChannelFree(i))
             SND_UpdateStreamChannel(i, frametime);
@@ -2993,7 +2829,7 @@ void __cdecl SND_UpdateSlaveLerp(int frametime)
             masterPlaying = g_snd.chaninfo[i].master;
     }
 
-    for (int i = 40; !masterPlaying && i < g_snd.max_stream_channels + 40; ++i)
+    for (int i = SND_FIRST_STREAM_CHANNEL; !masterPlaying && i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
     {
         if (SND_IsStreamChannelPlaying(i))
             masterPlaying = g_snd.chaninfo[i].master;
@@ -3099,10 +2935,9 @@ void __cdecl SND_UpdateRoomEffects(int frametime)
 
 void SND_UpdateTimeScale()
 {
-    float timescale; // [esp+58h] [ebp-Ch]
     float factor; // [esp+5Ch] [ebp-8h]
 
-    timescale = Com_GetTimescaleForSnd();
+    float timescale = Com_GetTimescaleForSnd();
     if (timescale <= 0.0)
         timescale = 1.0;
     if (g_snd.timescale != timescale)
@@ -3120,7 +2955,7 @@ void SND_UpdateTimeScale()
             }
         }
 
-        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+        for (int i = SND_FIRST_STREAM_CHANNEL; i < g_snd.max_stream_channels + SND_FIRST_STREAM_CHANNEL; ++i)
         {
             if (!SND_IsStreamChannelFree(i) && g_snd.chaninfo[i].timescale)
             {
@@ -3141,7 +2976,7 @@ void SND_UpdateTimeScale()
 void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
 {
     int closestId; // [esp+0h] [ebp-1214h] BYREF
-    int dst[1153]; // [esp+4h] [ebp-1210h] BYREF
+    int dst[0x1200]; // [esp+4h] [ebp-1210h] BYREF
     int index; // [esp+1208h] [ebp-Ch]
     float closestIdDotProd; // [esp+120Ch] [ebp-8h] BYREF
     int entchannel; // [esp+1210h] [ebp-4h]
@@ -3150,7 +2985,7 @@ void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
 
     if (debugDrawStyle)
     {
-        closestId = -1;
+        closestId = SND_PLAYBACKID_NOTPLAYED;
         closestIdDotProd = -2.0;
         memset((uint8_t *)dst, 0, 0x1200u);
         for (index = 8; index < g_snd.max_3D_channels + 8; ++index)
@@ -3158,7 +2993,7 @@ void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
             if (!SND_Is3DChannelFree(index))
                 DebugDrawWorldSound3D(index, debugDrawStyle, dst, &closestId, &closestIdDotProd);
         }
-        for (index = 40; index < g_snd.max_stream_channels + 40; ++index)
+        for (index = SND_FIRST_STREAM_CHANNEL; index < g_snd.max_stream_channels + SND_FIRST_STREAM_CHANNEL; ++index)
         {
             if (!SND_IsStreamChannelFree(index))
             {
@@ -3169,7 +3004,7 @@ void __cdecl DebugDrawWorldSounds(int debugDrawStyle)
                     DebugDrawWorldSound3D(index, debugDrawStyle, dst, &closestId, &closestIdDotProd);
             }
         }
-        if (closestId != -1 && closestIdDotProd >= 0.93000001)
+        if (closestId != SND_PLAYBACKID_NOTPLAYED && closestIdDotProd >= 0.93f)
             DebugDrawWorldSound3D(closestId, 3, dst, 0, 0);
     }
 }
@@ -3342,9 +3177,9 @@ void __cdecl SND_StopSounds(snd_stopsounds_arg_t which)
             }
         }
 
-        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+        for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
         {
-            if (!SND_IsStreamChannelFree(i) && ((which & 2) == 0 || i != 40))
+            if (!SND_IsStreamChannelFree(i) && ((which & 2) == 0 || i != SND_FIRST_STREAM_CHANNEL))
             {
                 if ((which & 4) == 0 || (i < 41 || i > 44 ? (v1 = 0) : (v1 = 1), !v1))
                     SND_StopStreamChannel(i);
@@ -3390,7 +3225,7 @@ void __cdecl SND_Init()
     snd_errorOnMissing = Dvar_RegisterBool("snd_errorOnMissing", 0, DVAR_ARCHIVE, "Cause a Com_Error if a sound file is missing.");
     min.value.max = 1.0f;
     min.value.min = 0.0f;
-    snd_volume = Dvar_RegisterFloat("snd_volume", 0.80000001f, min, DVAR_ARCHIVE, "Game sound master volume");
+    snd_volume = Dvar_RegisterFloat("snd_volume", 0.8f, min, DVAR_ARCHIVE, "Game sound master volume");
     snd_slaveFadeTime = Dvar_RegisterInt(
         "snd_slaveFadeTime",
         500,
@@ -3639,7 +3474,7 @@ void __cdecl SND_ParseEntChannelFile(const char *buffer)
             break;
         if (*value && *value != 35)
         {
-            if (strlen(value) > 0x40)
+            if (strlen(value) > 64)
             {
                 Com_EndParseSession();
                 Com_Error(
@@ -3677,30 +3512,30 @@ void __cdecl SND_ParseEntChannelFile(const char *buffer)
                 maxVoices = atoi(value);
                 if (maxVoices <= 0)
                 {
-                    maxVoices = 53;
+                    maxVoices = SND_MAX_CHANNELS;
                     Com_PrintError(
                         9,
                         "channel '%s' has nonnumeric or negative value (%s) in file [%s], defaulting to max (%i).\n",
                         channelName,
                         value,
                         "soundaliases/channels.def",
-                        53);
+                        SND_MAX_CHANNELS);
                 }
-                if (maxVoices > 53)
+                if (maxVoices > SND_MAX_CHANNELS)
                 {
-                    maxVoices = 53;
+                    maxVoices = SND_MAX_CHANNELS;
                     Com_PrintError(
                         9,
                         "max number (%d) of voices exceeded for channel '%s' in file [%s], defaulting to max (%i).\n",
-                        53,
+                        SND_MAX_CHANNELS,
                         channelName,
                         "soundaliases/channels.def",
-                        53);
+                        SND_MAX_CHANNELS);
                 }
             }
             else
             {
-                maxVoices = 53;
+                maxVoices = SND_MAX_CHANNELS;
             }
             v3 = channelName;
             v2 = &g_snd.entchaninfo[g_snd.entchannel_count];
@@ -3809,7 +3644,7 @@ void __cdecl SND_Save(MemoryFile *memFile)
 
     if (g_snd.Initialized2d)
     {
-        for (int i = 40; i < g_snd.max_stream_channels + 40; ++i)
+        for (int i = SND_FIRST_STREAM_CHANNEL; i < SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels; ++i)
             SND_SaveStreamChannel(i, memFile);
     }
 
@@ -4008,11 +3843,11 @@ void __cdecl SND_Restore(MemoryFile *memFile)
 
         for (int i = 0; i < 5; ++i)
         {
-            if (i + 40 < 41 || i + 40 > 44)
-                SND_RestoreStreamChannel(i + 40, memFile);
+            if (SND_FIRST_STREAM_CHANNEL + i < 41 || SND_FIRST_STREAM_CHANNEL + i > 44)
+                SND_RestoreStreamChannel(SND_FIRST_STREAM_CHANNEL + i, memFile);
         }
 
-        while (SND_RestoreStreamChannel(-1, memFile))
+        while (SND_RestoreStreamChannel(SND_PLAYBACKID_NOTPLAYED, memFile))
             ;
     }
 }
@@ -4055,9 +3890,7 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
         startAliasInfo.alias1 = alias1;
         startAliasInfo.lerp = chaninfo.lerp;
         startAliasInfo.sndEnt.field.entIndex = chaninfo.sndEnt.field.entIndex;
-        startAliasInfo.org[0] = info.org[0];
-        startAliasInfo.org[1] = info.org[1];
-        startAliasInfo.org[2] = info.org[2];
+        Vec3Copy(info.org, startAliasInfo.org);
         startAliasInfo.volume = chaninfo.basevolume;
         startAliasInfo.pitch = info.pitch;
         startAliasInfo.timeshift = 0;
@@ -4067,7 +3900,7 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
         startAliasInfo.system = SASYS_CGAME;
         startAliasInfo.timescale = chaninfo.timescale;
         playbackId = SND_StartAlias3DSample(&startAliasInfo, &channel);
-        if (playbackId != -1)
+        if (playbackId != SND_PLAYBACKID_NOTPLAYED)
         {
             iassert(channel >= (0 + 8) && channel < (0 + 8) + g_snd.max_3D_channels);
 
@@ -4178,7 +4011,6 @@ void __cdecl SND_RestoreLengthNotifyInfo(MemoryFile *memFile, sndLengthNotifyInf
 
 char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
 {
-    float *offset; // [esp+Ch] [ebp-ECh]
     snd_save_2D_sample_t info; // [esp+10h] [ebp-E8h] BYREF
     int playbackId; // [esp+20h] [ebp-D8h]
     SndStartAliasInfo startAliasInfo; // [esp+24h] [ebp-D4h] BYREF
@@ -4205,6 +4037,7 @@ char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
     {
         if (!snd_enable2D->current.enabled)
             return 1;
+
         startAliasInfo.alias0 = alias0;
         startAliasInfo.alias1 = alias1;
         startAliasInfo.lerp = chaninfo.lerp;
@@ -4218,15 +4051,12 @@ char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
         startAliasInfo.system = SASYS_CGAME;
         startAliasInfo.timescale = chaninfo.timescale;
         playbackId = SND_StartAlias2DSample(&startAliasInfo, &channel);
-        if (playbackId != -1)
+        if (playbackId != SND_PLAYBACKID_NOTPLAYED)
         {
             iassert(channel >= 0 && channel < 0 + g_snd.max_2D_channels);
 
             SND_Set2DChannelFromSaveInfo(channel, &info);
-            offset = g_snd.chaninfo[channel].offset;
-            *offset = chaninfo.offset[0];
-            offset[1] = chaninfo.offset[1];
-            offset[2] = chaninfo.offset[2];
+            Vec3Copy(chaninfo.offset, g_snd.chaninfo[channel].offset);
 
             memcpy(
                 &g_snd.chaninfo[channel].lengthNotifyInfo,
@@ -4241,7 +4071,6 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
 {
     const char *v3; // eax
     const char *v4; // eax
-    float *offset; // [esp+14h] [ebp-120h]
     int playbackId; // [esp+40h] [ebp-F4h]
     snd_save_stream_t info; // [esp+44h] [ebp-F0h] BYREF
     SndStartAliasInfo startAliasInfo; // [esp+64h] [ebp-D0h] BYREF
@@ -4284,7 +4113,7 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
                     "sound alias '%s' on aliaschannel #%d tried to play on stream channel #%d",
                     alias0->aliasName,
                     (alias0->flags & 0x3F00) >> 8,
-                    channel - 40);
+                    channel - SND_FIRST_STREAM_CHANNEL);
                 MyAssertHandler(
                     ".\\snd.cpp",
                     4173,
@@ -4305,10 +4134,10 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
             startAliasInfo.master = 0;
             playbackId = SND_StartAliasStream(&startAliasInfo, &channel);
         }
-        if (playbackId != -1 && !SND_IsStreamChannelFree(channel))
+        if (playbackId != SND_PLAYBACKID_NOTPLAYED && !SND_IsStreamChannelFree(channel))
         {
             v4 = va("restarted at %.3f", info.fraction);
-            SND_DebugAliasPrint(playbackId != -1, startAliasInfo.alias0, v4);
+            SND_DebugAliasPrint(playbackId != SND_PLAYBACKID_NOTPLAYED, startAliasInfo.alias0, v4);
             SND_SetStreamChannelFromSaveInfo(channel, &info);
             if (g_snd.chaninfo[channel].timescale)
             {
@@ -4318,10 +4147,7 @@ char __cdecl SND_RestoreStreamChannel(int channel, MemoryFile *memFile)
             {
                 SND_SetStreamChannelPlaybackRate(channel, SnapFloatToInt((float)info.rate * g_snd.chaninfo[channel].pitch));
             }
-            offset = g_snd.chaninfo[channel].offset;
-            *offset = chaninfo.offset[0];
-            offset[1] = chaninfo.offset[1];
-            offset[2] = chaninfo.offset[2];
+            Vec3Copy(chaninfo.offset, g_snd.chaninfo[channel].offset);
             memcpy(
                 &g_snd.chaninfo[channel].lengthNotifyInfo,
                 &chaninfo.lengthNotifyInfo,
@@ -4352,6 +4178,7 @@ int __cdecl SND_GetSoundOverlay(snd_overlay_type_t type, snd_overlay_info_t *inf
     case SND_OVERLAY_2D:
         return SND_GetSoundOverlay2D(info, maxcount);
     }
+
     return 0;
 }
 
@@ -4387,7 +4214,7 @@ int __cdecl SND_GetSoundOverlay2D(snd_overlay_info_t *info, int maxcount)
             if (g_snd.volume != 0.0)
                 info[channel].fCurVolume = info[channel].fCurVolume / g_snd.volume;
 
-            info[channel].dist = -1;
+            info[channel].dist = SND_PLAYBACKID_NOTPLAYED;
         }
         else
         {
@@ -4407,11 +4234,11 @@ int __cdecl SND_GetSoundOverlay3D(snd_overlay_info_t *info, int maxcount)
     float dist; // [esp+18h] [ebp-18h]
     int channel; // [esp+1Ch] [ebp-14h]
     float org[3]; // [esp+20h] [ebp-10h] BYREF
-    int i; // [esp+2Ch] [ebp-4h]
 
     if (maxcount > g_snd.max_3D_channels)
         maxcount = g_snd.max_3D_channels;
-    for (i = 0; i < maxcount; ++i)
+
+    for (int i = 0; i < maxcount; ++i)
     {
         channel = i + 8;
         if (!SND_Is3DChannelFree(i + 8) && g_snd.chaninfo[channel].soundFileInfo.loadingState == SFLS_LOADED)
@@ -4460,14 +4287,14 @@ int __cdecl SND_GetSoundOverlayStream(snd_overlay_info_t *info, int maxcount)
     float dist; // [esp+18h] [ebp-18h]
     int channel; // [esp+1Ch] [ebp-14h]
     float org[3]; // [esp+20h] [ebp-10h] BYREF
-    int i; // [esp+2Ch] [ebp-4h]
 
     if (maxcount > g_snd.max_stream_channels)
         maxcount = g_snd.max_stream_channels;
-    for (i = 0; i < maxcount; ++i)
+
+    for (int i = 0; i < maxcount; ++i)
     {
-        channel = i + 40;
-        if (!SND_IsStreamChannelFree(i + 40) && g_snd.chaninfo[channel].soundFileInfo.loadingState == SFLS_LOADED)
+        channel = SND_FIRST_STREAM_CHANNEL + i;
+        if (!SND_IsStreamChannelFree(SND_FIRST_STREAM_CHANNEL + i) && g_snd.chaninfo[channel].soundFileInfo.loadingState == SFLS_LOADED)
         {
             iassert(g_snd.chaninfo[channel].soundFileInfo.baserate > 0);
             iassert(g_snd.chaninfo[channel].alias0);
@@ -4496,7 +4323,7 @@ int __cdecl SND_GetSoundOverlayStream(snd_overlay_info_t *info, int maxcount)
             }
             else
             {
-                info[i].dist = -1;
+                info[i].dist = SND_PLAYBACKID_NOTPLAYED;
             }
         }
         else
@@ -4549,7 +4376,7 @@ void __cdecl StopChannel(int chanId)
 {
     iassert(((chanId >= 0) && (chanId < (32 + (SND_TRACK_COUNT + 8) + 8))));
 
-    if (chanId < 40)
+    if (chanId < SND_FIRST_STREAM_CHANNEL)
     {
         if (chanId < 8)
             SND_Stop2DChannel(chanId);
@@ -4564,19 +4391,14 @@ void __cdecl StopChannel(int chanId)
 
 void __cdecl SND_AddPhysicsSound(snd_alias_list_t *aliasList, float *org)
 {
-    float *v2; // [esp+0h] [ebp-4h]
-
     iassert(aliasList);
 
     Sys_EnterCriticalSection(CRITSECT_AUDIO_PHYSICS);
-    if (g_sndPhysics.count < 32)
+    if (g_sndPhysics.count < SND_MAX_PHYSICS)
     {
         g_sndPhysics.info[g_sndPhysics.count].aliasList = aliasList;
-        v2 = g_sndPhysics.info[g_sndPhysics.count].org;
-        *v2 = *org;
-        v2[1] = org[1];
-        v2[2] = org[2];
-        ++g_sndPhysics.count;
+        Vec3Copy(org, g_sndPhysics.info[g_sndPhysics.count].org);
+        g_sndPhysics.count++;
     }
     Sys_LeaveCriticalSection(CRITSECT_AUDIO_PHYSICS);
 }
@@ -4695,7 +4517,7 @@ int SND_FindPlaybackId(const snd_alias_t *sndEnt, const char *aliasName)
     const char **v7; // r11
 
     if (!g_snd.Initialized2d)
-        return -1;
+        return SND_PLAYBACKID_NOTPLAYED;
     v4 = 0;
     p_alias0 = &g_snd.chaninfo[0].alias0;
     while (1)
@@ -4712,7 +4534,7 @@ int SND_FindPlaybackId(const snd_alias_t *sndEnt, const char *aliasName)
             IsStreamChannelFree = SND_Is3DChannelFree(v4);
             goto LABEL_13;
         }
-        if (v4 < 40 || v4 >= g_snd.max_stream_channels + 40)
+        if (v4 < SND_FIRST_STREAM_CHANNEL || v4 >= SND_FIRST_STREAM_CHANNEL + g_snd.max_stream_channels)
             break;
         IsStreamChannelFree = SND_IsStreamChannelFree(v4);
     LABEL_13:
@@ -4722,7 +4544,7 @@ int SND_FindPlaybackId(const snd_alias_t *sndEnt, const char *aliasName)
         p_alias0 += 35;
         ++v4;
         if ((int)p_alias0 >= (int)&g_sndPhysics.info[4].org[2])
-            return -1;
+            return SND_PLAYBACKID_NOTPLAYED;
     }
     if (!*p_alias0 || I_stricmp((*p_alias0)->aliasName, aliasName))
     {

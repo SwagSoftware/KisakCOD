@@ -177,11 +177,11 @@ void __cdecl SND_DisableEq(uint32_t entchannel, int eqIndex, uint32_t band);
 void __cdecl SND_SaveEq(MemoryFile *memFile);
 void __cdecl SND_RestoreEq(MemoryFile *memFile);
 void __cdecl SND_PrintEqParams();
-double __cdecl SND_Get2DChannelVolume(int index);
+float __cdecl SND_Get2DChannelVolume(int index);
 void __cdecl SND_Set2DChannelVolume(int index, float volume);
-double __cdecl SND_Get3DChannelVolume(int index);
+float __cdecl SND_Get3DChannelVolume(int index);
 void __cdecl SND_Set3DChannelVolume(int index, float volume);
-double __cdecl SND_GetStreamChannelVolume(int index);
+float __cdecl SND_GetStreamChannelVolume(int index);
 void __cdecl SND_SetStreamChannelVolume(int index, float volume);
 int __cdecl SND_Get2DChannelPlaybackRate(int index);
 void __cdecl SND_Set2DChannelPlaybackRate(int index, int rate);
@@ -207,7 +207,7 @@ void __cdecl SND_Update3DChannel(int i, int frametime);
 void __cdecl SND_UpdateStreamChannel(int i, int frametime);
 
 #ifdef KISAK_SP
-void SND_SetEqLerp(double lerp);
+void SND_SetEqLerp(float lerp);
 #endif
 
 

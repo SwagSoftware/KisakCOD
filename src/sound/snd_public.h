@@ -59,36 +59,18 @@ typedef DWORD FOURCC;
 #define SNDALIASFLAGS_GET_TYPE(flags) (((flags) & 0xC0) >> 6)
 // snd
 
-static const char *snd_eqTypeStrings[6] = { "lowpass", "highpass", "lowshelf", "highshelf", "bell", NULL }; // idb
+#define SND_PLAYBACKID_NOTPLAYED     -1
 
-enum SND_CHANNELS : __int32 // KISAK
-{
-    SND_FIRST_STREAM_CHANNEL = 40,
-    SND_MAX_CHANNELS = 53
-};
+#define SND_FIRST_STREAM_CHANNEL     40
+#define SND_MAX_CHANNELS             53
+#define SND_LENGTHNOTIFY_COUNT       4
+#define SND_TRACK_AMBIENT_PRIMARY_0  1
+#define SND_TRACK_AMBIENT_PRIMARY_1  3
+#define SND_TRACK_COUNT              5
+#define SND_ENVEFFECTPRIO_NONE       0
+#define SND_ENVEFFECTPRIO_COUNT      3
+#define SND_MAX_PHYSICS              32
 
-enum SND_LENGTHNOTIFY : __int32 // KISAK
-{
-    SND_LENGTHNOTIFY_COUNT = 4
-};
-
-enum SND_TRACK : __int32 // KISAK
-{
-    SND_TRACK_AMBIENT_PRIMARY_0 = 1,
-    SND_TRACK_AMBIENT_PRIMARY_1 = 3,
-    SND_TRACK_COUNT = 5
-};
-
-enum SND_ENVEFFECTPRIO : __int32 // KISAK
-{
-    SND_ENVEFFECTPRIO_NONE = 0,
-    SND_ENVEFFECTPRIO_COUNT = 3
-};
-
-enum SND_PHYSICS : __int32 // KISAK
-{
-    SND_MAX_PHYSICS = 32
-};
 
 enum SND_CHANNELVOLPRIO : __int32
 {
@@ -520,8 +502,8 @@ int __cdecl SND_AcquirePlaybackId(uint32_t index, int totalMsec);
 char __cdecl SND_AddLengthNotify(int playbackId, const snd_alias_t *lengthNotifyData, SndLengthId id);
 void __cdecl DoLengthNotify(int msec, const snd_alias_t *lengthNotifyData, SndLengthId id);
 char __cdecl SND_GetKnownLength(int playbackId, int *msec);
-double __cdecl SND_GetLerpedSlavePercentage(float baseSlavePercentage);
-double __cdecl SND_Attenuate(SndCurve *volumeFalloffCurve, float radius, float mindist, float maxdist);
+float __cdecl SND_GetLerpedSlavePercentage(float baseSlavePercentage);
+float __cdecl SND_Attenuate(SndCurve *volumeFalloffCurve, float radius, float mindist, float maxdist);
 void __cdecl SND_GetCurrent3DPosition(SndEntHandle sndEnt, float *offset, float *pos_out);
 void __cdecl SND_ResetChannelInfo(int index);
 void __cdecl SND_SetChannelStartInfo(uint32_t index, SndStartAliasInfo *SndStartAliasInfo);
@@ -743,3 +725,6 @@ extern const dvar_t *snd_enableStream;
 extern const dvar_t *snd_drawEqChannels;
 extern const dvar_t *snd_levelFadeTime;
 extern const dvar_t *snd_touchStreamFilesOnLoad;
+
+extern const char *snd_eqTypeStrings[6];
+extern const char *snd_roomStrings[27];
