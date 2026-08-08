@@ -1,7 +1,7 @@
 # KisakCOD
 
 ## About the project
-An open source fully-buildable reimplementation of Call of Duty 4's Multi-Player .exe
+An open source fully-buildable reimplementation of Call of Duty 4
 
 Aimed towards mod developers and COD4 enthusiasts.
 
