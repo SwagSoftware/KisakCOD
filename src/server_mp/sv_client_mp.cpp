@@ -120,7 +120,7 @@ int __cdecl SV_IsTempBannedGuid(const char *cdkeyHash)
     for (banSlot = 0; banSlot < 0x10; ++banSlot)
     {
         if (!memcmp(&svs.tempBans[banSlot], cdkeyHash, 0x20u)
-            && sv_kickBanTime->current.value * 1000.0 >= (svs.time - LODWORD(svs.mapCenter[9 * banSlot - 136])))
+            && sv_kickBanTime->current.value * 1000.0 >= (svs.time - svs.tempBans[banSlot].banTime))
         {
             return 1;
         }
@@ -432,7 +432,7 @@ void __cdecl SV_BanGuidBriefly(const char *cdkeyHash)
 
     banSlot = SV_FindFreeTempBanSlot();
     memcpy(&svs.tempBans[banSlot], cdkeyHash, 0x20u);
-    LODWORD(svs.mapCenter[9 * banSlot - 136]) = svs.time;
+    svs.tempBans[banSlot].banTime = svs.time;
 }
 
 uint32_t __cdecl SV_FindFreeTempBanSlot()
@@ -445,7 +445,7 @@ uint32_t __cdecl SV_FindFreeTempBanSlot()
     {
         if (!svs.tempBans[banSlot].cdkeyHash[0])
             return banSlot;
-        if (SLODWORD(svs.mapCenter[9 * banSlot - 136]) < SLODWORD(svs.mapCenter[9 * oldestSlot - 136]))
+        if (svs.tempBans[banSlot].banTime < svs.tempBans[oldestSlot].banTime)
             oldestSlot = banSlot;
     }
     return oldestSlot;
