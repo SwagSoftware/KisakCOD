@@ -1558,6 +1558,11 @@ static void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s 
             "count == MAX_HUDELEMS_ARCHIVAL || count == MAX_HUDELEMS_CURRENT");
 
     int inuse = MSG_ReadBits(msg, 5u);
+    if (inuse < 0)
+    {
+        msg->overflowed = 1;
+        return;
+    }
 
     for (int i = 0; i < inuse; ++i)
     {

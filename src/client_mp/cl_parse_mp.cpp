@@ -713,11 +713,15 @@ void __cdecl CL_ParsePacketEntities(
 
         //vassert(newnum >= 0 && newnum < (1 << 10), "(newnum) = %i", newnum); // LWSS: changed to an actual error
 
-        if (newnum < 0 || newnum >= MAX_GENTITIES)
-            Com_Error(ERR_DROP, "CL_ParsePacketEntities: bad entity number %i", newnum);
-
         if (newnum == ENTITYNUM_NONE)
             break;
+
+        if (newnum < 0)
+            break;
+            
+        if (newnum >= MAX_GENTITIES)
+            Com_Error(ERR_DROP, "CL_ParsePacketEntities: bad entity number %i", newnum);
+
         if (msg->readcount > msg->cursize)
             Com_Error(ERR_DROP, "CL_ParsePacketEntities: end of message");
         while (oldnum < newnum && !msg->overflowed)
@@ -878,7 +882,10 @@ void __cdecl CL_ParsePacketClients(
     {
         newnum = MSG_ReadEntityIndex(msg, 6u);
 
-        if (newnum < 0 || newnum >= MAX_CLIENTS) // LWSS ADD bounds check
+        if (newnum < 0)
+            break;
+            
+        if (newnum >= MAX_CLIENTS) // LWSS ADD bounds check
             Com_Error(ERR_DROP, "CL_ParsePacketClients: bad client number %i", newnum);
             
         if (msg->readcount > msg->cursize)

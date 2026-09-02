@@ -791,7 +791,7 @@ bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan)
 
 void BADPACKET(void *buffer, uint32_t len)
 {
-    if (cl_shownet->current.value >= 1) // LWSS: move behind `cl_shownet`
+    if (cl_shownet && cl_shownet->current.integer >= 1) // LWSS: move behind `cl_shownet`
     {
         int file = FS_FOpenFileWrite((char *)"badpacket.dat");
         if (file)
