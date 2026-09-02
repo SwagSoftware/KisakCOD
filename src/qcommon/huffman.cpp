@@ -14,11 +14,17 @@ int __cdecl get_bit(const uint8_t *fin)
     return t;
 }
 
-void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const uint8_t *fin, int *offset)
+bool __cdecl Huff_offsetReceive(nodetype *node, int *ch, const uint8_t *fin, int *offset, int maxOffset)
 {
     bloc = *offset;
     while (node && node->symbol == 257)
     {
+        if (bloc >= maxOffset)
+        {
+            *ch = 0;
+            *offset = bloc;
+            return false;
+        }
         if (get_bit(fin))
             node = node->right;
         else
@@ -28,11 +34,12 @@ void __cdecl Huff_offsetReceive(nodetype *node, int *ch, const uint8_t *fin, int
     {
         *ch = node->symbol;
         *offset = bloc;
+        return true;
     }
-    else
-    {
-        *ch = 0;
-    }
+
+    *ch = 0;
+    *offset = bloc;
+    return false;
 }
 
 void __cdecl huffman_send(nodetype *node, nodetype *child, uint8_t *fout)

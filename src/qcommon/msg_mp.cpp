@@ -237,24 +237,29 @@ int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_
     return (bit + 7) >> 3;
 }
 
-int __cdecl MSG_ReadBitsCompress(const uint8_t *from, uint8_t *to, int size)
+int __cdecl MSG_ReadBitsCompress(const uint8_t *from, uint8_t *to, int size, int maxSize)
 {
     int bit; // [esp+0h] [ebp-14h] BYREF
-    uint8_t *data; // [esp+4h] [ebp-10h]
     int bits; // [esp+8h] [ebp-Ch]
-    int i; // [esp+Ch] [ebp-8h]
+    int outputSize; // [esp+Ch] [ebp-8h]
     int get; // [esp+10h] [ebp-4h] BYREF
 
+    if (size < 0 || size > 0x0FFFFFFF || maxSize < 0)
+        return -1;
+
     bits = 8 * size;
-    i = 0;
-    data = to;
+    outputSize = 0;
     bit = 0;
     while (bit < bits)
     {
-        Huff_offsetReceive(msgHuff.compressDecompress.tree, &get, from, &bit);
-        *data++ = get;
+        int previousBit = bit;
+        if (!Huff_offsetReceive(msgHuff.compressDecompress.tree, &get, from, &bit, bits))
+            break;
+        if (bit <= previousBit || outputSize >= maxSize)
+            return -1;
+        to[outputSize++] = get;
     }
-    return data - to;
+    return outputSize;
 }
 
 void __cdecl MSG_WriteByte(msg_t *msg, uint8_t c)
@@ -525,6 +530,12 @@ void __cdecl MSG_ReadData(msg_t *msg, uint8_t *data, int len)
 {
     int newcount; // [esp+0h] [ebp-8h]
     signed int cursize; // [esp+4h] [ebp-4h]
+
+    if (len < 0)
+    {
+        msg->overflowed = 1;
+        return;
+    }
 
     newcount = len + msg->readcount;
     if (newcount > msg->cursize)
