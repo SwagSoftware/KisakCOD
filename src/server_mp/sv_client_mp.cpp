@@ -299,7 +299,7 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
     if (ClientByAddress)
     {
         packetNum = MSG_ReadByte(msg);
-        if (packetNum < 8)
+        if (packetNum < 7)
         {
             Com_Printf(15, "Received packet %i of stats data\n", packetNum);
             start = 1240 * packetNum;
@@ -321,6 +321,11 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
                     v2);
             }
             MSG_ReadData(msg, &ClientByAddress->stats[start], v4);
+            if (msg->overflowed)
+            {
+                Com_PrintWarning(15, "Truncated stat packet %i from client\n", packetNum);
+                return;
+            }
             ClientByAddress->statPacketsReceived |= 1 << packetNum;
             ClientByAddress->lastPacketTime = svs.time;
             v3 = va("statResponse %i", ~ClientByAddress->statPacketsReceived & 0x7F);
@@ -1576,7 +1581,13 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
     msgCompressed.cursize = MSG_ReadBitsCompress(
         &msg->data[msg->readcount],
         msgCompressed_buf_0,
-        msg->cursize - msg->readcount);
+        msg->cursize - msg->readcount,
+        sizeof(msgCompressed_buf_0));
+    if (msgCompressed.cursize < 0)
+    {
+        SV_DropClient(cl, "SV_ExecuteClientMessage: oversize compressed message", 1);
+        return;
+    }
     if (cl->serverId == sv_serverId_value || cl->downloading || cl->downloadingWWW || cl->clientDownloadingWWW)
     {
         if (SV_ProcessClientCommands(cl, &msgCompressed, 0, &c))

@@ -403,8 +403,20 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
             }
         }
         size = MSG_ReadShort(msg);
+        if (size < 0 || size > (int)sizeof(parseDownloadData))
+        {
+            Com_Error(ERR_DROP, "CL_ParseDownload: invalid download block size %i", size);
+            return;
+        }
         if (size > 0)
+        {
             MSG_ReadData(msg, (uint8_t *)parseDownloadData, size);
+            if (msg->overflowed)
+            {
+                Com_Error(ERR_DROP, "CL_ParseDownload: truncated download block");
+                return;
+            }
+        }
         if (cls.downloadBlock == block)
         {
             if (cls.download)
@@ -486,7 +498,13 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
     msgCompressed.cursize = MSG_ReadBitsCompress(
         &msg->data[msg->readcount],
         msgCompressed_buf,
-        msg->cursize - msg->readcount);
+        msg->cursize - msg->readcount,
+        sizeof(msgCompressed_buf));
+    if (msgCompressed.cursize < 0)
+    {
+        Com_Error(ERR_DROP, "Huffman decompression overflow in CL_ParseServerMessage");
+        return;
+    }
 
     while (2)
     {

@@ -96,7 +96,7 @@ int __cdecl MSG_ReadBits(msg_t *msg, uint32_t bits);
 int __cdecl MSG_GetByte(msg_t *msg, int where);
 int __cdecl MSG_ReadBit(msg_t *msg);
 int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_t *to, int size);
-int __cdecl MSG_ReadBitsCompress(const uint8_t *from, uint8_t *to, int size);
+int __cdecl MSG_ReadBitsCompress(const uint8_t *from, uint8_t *to, int size, int maxSize);
 void __cdecl MSG_WriteByte(msg_t *msg, uint8_t c);
 void __cdecl MSG_WriteData(msg_t *buf, uint8_t *data, uint32_t length);
 void __cdecl MSG_WriteShort(msg_t *msg, __int16 c);
