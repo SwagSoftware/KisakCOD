@@ -1454,7 +1454,8 @@ int __cdecl MSG_ReadDeltaStruct(
     else if (MSG_ReadBit(msg))
     {
         lc = MSG_ReadLastChangedField(msg, totalFields);
-        if (lc <= numFields)
+        
+        if ((uint32_t)lc <= (uint32_t)numFields)
         {
             if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
             {
@@ -1557,6 +1558,12 @@ static void __cdecl MSG_ReadDeltaHudElems(msg_t *msg, int time, const hudelem_s 
     for (int i = 0; i < inuse; ++i)
     {
         lc = MSG_ReadBits(msg, 6);
+        
+        if (lc >= (uint32_t)numHudElemFields) // LWSS ADD bounds check
+        {
+            msg->overflowed = 1;
+            return;
+        }
 
         for (j = 0; j <= lc; ++j)
             MSG_ReadDeltaField(msg, time, (const char *)&from[i], (char *)&to[i], &hudElemFields[j], 0, 0);
