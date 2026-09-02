@@ -3152,8 +3152,6 @@ void __cdecl Con_Bottom()
 
 void __cdecl Con_Close(int32_t localClientNum)
 {
-    int32_t client; // [esp+0h] [ebp-4h]
-
     iassert(localClientNum == 0);
     if (clientUIActives[0].isRunning)
     {
@@ -3162,7 +3160,7 @@ void __cdecl Con_Close(int32_t localClientNum)
         Con_ClearNotify(localClientNum);
         Con_ClearMiniConsole(localClientNum);
         Con_ClearErrors(localClientNum);
-        for (client = 0; client < 1; ++client)
+        for (int client = 0; client < 1; ++client)
             clientUIActives[client].keyCatchers &= ~1u;
     }
 }

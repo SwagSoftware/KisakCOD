@@ -15,6 +15,7 @@
 #include <database/database.h>
 #include <qcommon/files.h>
 #include <client/client.h>
+#include <server_mp/server_mp.h>
 
 const char* svc_strings[256] = {
     "svc_nop",
@@ -366,10 +367,6 @@ void __cdecl CL_NextDownload(int localClientNum)
 char parseDownloadData[2048];
 void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
 {
-    const char *String; // eax
-    const char *v3; // eax
-    const char *v4; // eax
-    const char *v5; // eax
     int block; // [esp+0h] [ebp-Ch]
     int size; // [esp+4h] [ebp-8h]
 
@@ -396,9 +393,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
             legacyHacks.cl_downloadSize = cls.downloadSize;
             if (cls.downloadSize < 0)
             {
-                String = MSG_ReadString(msg);
-                v3 = va("%s", String);
-                Com_Error(ERR_DROP, v3);
+                Com_Error(ERR_DROP, va("%s", MSG_ReadString(msg)));
                 return;
             }
         }
@@ -433,8 +428,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
             LABEL_19:
                 if (size)
                     FS_Write(parseDownloadData, size, cls.download);
-                v5 = va("nextdl %d", cls.downloadBlock);
-                CL_AddReliableCommand(localClientNum, v5);
+                CL_AddReliableCommand(localClientNum, va("nextdl %d", cls.downloadBlock));
                 ++cls.downloadBlock;
                 cls.downloadCount += size;
                 legacyHacks.cl_downloadCount = cls.downloadCount;
@@ -467,8 +461,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
             if (block > cls.downloadBlock)
             {
                 Com_DPrintf(14, "CL_ParseDownload: Sending retransmit request to get the missed block\n");
-                v4 = va("retransdl %d", cls.downloadBlock);
-                CL_AddReliableCommand(localClientNum, v4);
+                CL_AddReliableCommand(localClientNum, va("retransdl %d", cls.downloadBlock));
             }
         }
     }
@@ -477,10 +470,6 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
 uint8_t msgCompressed_buf[0x20000];
 void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
 {
-    msg_t msgCompressed; // [esp+4h] [ebp-30h] BYREF
-    int file; // [esp+2Ch] [ebp-8h]
-    int cmd; // [esp+30h] [ebp-4h]
-
     if (cl_shownet->current.integer == 1)
     {
         Com_Printf(14, "%i ", msg->cursize);
@@ -490,6 +479,7 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
         Com_Printf(14, "------------------\n");
     }
 
+    msg_t msgCompressed;
     MSG_Init(&msgCompressed, msgCompressed_buf, sizeof(msgCompressed_buf));
 
     if ((uint32_t)(msg->cursize - msg->readcount) > sizeof(msgCompressed_buf))
@@ -500,6 +490,7 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
         msgCompressed_buf,
         msg->cursize - msg->readcount,
         sizeof(msgCompressed_buf));
+
     if (msgCompressed.cursize < 0)
     {
         Com_Error(ERR_DROP, "Huffman decompression overflow in CL_ParseServerMessage");
@@ -514,7 +505,7 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
             return;
         }
 
-        cmd = MSG_ReadByte(&msgCompressed);
+        int cmd = MSG_ReadByte(&msgCompressed);
 
         //if (cmd == svc_EOF)
         if (cmd == svc_EOF || msgCompressed.overflowed) // LWSS ADD from later cod
@@ -535,30 +526,27 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
 
         switch (cmd)
         {
-        case svc_nop:
-            continue;
-        case svc_gamestate:
-            CL_ParseGamestate(localClientNum, &msgCompressed);
-            continue;
-        case svc_serverCommand:
-            CL_ParseCommandString(localClientNum, &msgCompressed);
-            continue;
-        case svc_download:
-            CL_ParseDownload(localClientNum, &msgCompressed);
-            continue;
-        case svc_snapshot:
-            CL_ParseSnapshot(localClientNum, &msgCompressed);
-            continue;
-        default:
-            file = FS_FOpenFileWrite((char*)"badpacket.dat");
-            if (file)
+            case svc_nop:
+                continue;
+            case svc_gamestate:
+                CL_ParseGamestate(localClientNum, &msgCompressed);
+                continue;
+            case svc_serverCommand:
+                CL_ParseCommandString(localClientNum, &msgCompressed);
+                continue;
+            case svc_download:
+                CL_ParseDownload(localClientNum, &msgCompressed);
+                continue;
+            case svc_snapshot:
+                CL_ParseSnapshot(localClientNum, &msgCompressed);
+                continue;
+            default:
             {
-                FS_Write((char *)msg->data, msg->cursize, file);
-                FS_FCloseFile(file);
+                BADPACKET(msg->data, msg->cursize);
+                Com_PrintError(1, "CL_ParseServerMessage: Illegible server message %d\n", cmd);
+                MSG_Discard(msg);
+                break;
             }
-            Com_PrintError(1, "CL_ParseServerMessage: Illegible server message %d\n", cmd);
-            MSG_Discard(msg);
-            break;
         }
         break;
     }
@@ -1025,116 +1013,114 @@ void __cdecl CL_InitDownloads(int localClientNum)
 
 void __cdecl CL_ParseGamestate(int localClientNum, msg_t *msg)
 {
-    uint32_t v5; // [esp+0h] [ebp-164h]
-    uint32_t v6; // [esp+10h] [ebp-154h]
-    uint32_t v7; // [esp+20h] [ebp-144h]
-    int constConfigStringIndex; // [esp+34h] [ebp-130h]
-    int constConfigStringIndexa; // [esp+34h] [ebp-130h]
-    int lastStringIndex; // [esp+3Ch] [ebp-128h]pac
-    int numConfigStrings; // [esp+40h] [ebp-124h]
-    int currentConstConfigString; // [esp+44h] [ebp-120h]
-    clientActive_t *LocalClientGlobals; // [esp+48h] [ebp-11Ch]
-    uint32_t configStringIndex; // [esp+4Ch] [ebp-118h]
-    uint32_t newnum; // [esp+50h] [ebp-114h]
-    entityState_s nullstate; // [esp+54h] [ebp-110h] BYREF
-    clientConnection_t *clc; // [esp+150h] [ebp-14h]
-    entityState_s *to; // [esp+154h] [ebp-10h]
-    int file; // [esp+158h] [ebp-Ch]
-    const char *s; // [esp+15Ch] [ebp-8h]
-    int cmd; // [esp+160h] [ebp-4h]
-
     Con_Close(localClientNum);
-    clc = CL_GetLocalClientConnection(localClientNum);
+
+    clientConnection_t *clc = CL_GetLocalClientConnection(localClientNum);
     clc->connectPacketCount = 0;
     CL_ClearState(localClientNum);
     MSG_ClearLastReferencedEntity(msg);
-    cls.mapCenter[0] = 0.0;
-    cls.mapCenter[1] = 0.0;
-    cls.mapCenter[2] = 0.0;
+    Vec3Clear(cls.mapCenter);
     clc->serverCommandSequence = MSG_ReadLong(msg);
-    LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-    LocalClientGlobals->gameState.dataCount = 1;
+
+    clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+    cl->gameState.dataCount = 1;
 
     while (1)
     {
-        cmd = MSG_ReadByte(msg);
+        int cmd = MSG_ReadByte(msg);
 
         switch (cmd)
         {
-        case svc_EOF:
-            goto END_LOOP;
-        case svc_configstring:
-            currentConstConfigString = 0;
-            lastStringIndex = -1;
-            for (numConfigStrings = MSG_ReadShort(msg); numConfigStrings; --numConfigStrings)
+            case svc_EOF:
+                goto END_LOOP;
+
+            case svc_configstring:
             {
-                if (MSG_ReadBit(msg))
-                    configStringIndex = lastStringIndex + 1;
-                else
-                    configStringIndex = MSG_ReadBits(msg, 0xCu);
-                if (configStringIndex >= 2442)
-                    Com_Error(ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
-                while (constantConfigStrings[currentConstConfigString].configStringNum
-                    && constantConfigStrings[currentConstConfigString].configStringNum < (signed int)configStringIndex)
+                int currentConstConfigString = 0;
+                int lastStringIndex = -1;
+                int constConfigStringIndex;
+                uint configStringIndex;
+                for (int numConfigStrings = MSG_ReadShort(msg); numConfigStrings; --numConfigStrings)
+                {
+                    if (MSG_ReadBit(msg))
+                        configStringIndex = lastStringIndex + 1;
+                    else
+                        configStringIndex = MSG_ReadBits(msg, 12);
+
+                    if (configStringIndex >= MAX_CONFIGSTRINGS)
+                        Com_Error(ERR_DROP, "configstring > MAX_CONFIGSTRINGS");
+
+                    while (constantConfigStrings[currentConstConfigString].configStringNum
+                        && constantConfigStrings[currentConstConfigString].configStringNum < (signed int)configStringIndex
+                        )
+                    {
+                        constConfigStringIndex = constantConfigStrings[currentConstConfigString].configStringNum;
+                        const char *s = constantConfigStrings[currentConstConfigString].configString;
+                        uint len = strlen(s);
+                        if ((int)(len + cl->gameState.dataCount + 1) > MAX_GAMESTATE_CHARS)
+                            Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
+                        cl->gameState.stringOffsets[constConfigStringIndex] = cl->gameState.dataCount;
+                        memcpy(
+                            (uint8_t *)&cl->gameState.stringData[cl->gameState.dataCount],
+                            (uint8_t *)s,
+                            len + 1);
+                        cl->gameState.dataCount += len + 1;
+                        ++currentConstConfigString;
+                    }
+
+                    if (constantConfigStrings[currentConstConfigString].configStringNum && constantConfigStrings[currentConstConfigString].configStringNum == configStringIndex)
+                        ++currentConstConfigString;
+
+                    const char *s = MSG_ReadBigString(msg);
+                    uint len = strlen(s);
+                    if ((int)(len + cl->gameState.dataCount + 1) > MAX_GAMESTATE_CHARS)
+                        Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
+                    cl->gameState.stringOffsets[configStringIndex] = cl->gameState.dataCount;
+                    memcpy(&cl->gameState.stringData[cl->gameState.dataCount], s, len + 1);
+                    cl->gameState.dataCount += len + 1;
+
+                    lastStringIndex = configStringIndex;
+                }
+
+                while (constantConfigStrings[currentConstConfigString].configStringNum)
                 {
                     constConfigStringIndex = constantConfigStrings[currentConstConfigString].configStringNum;
-                    s = constantConfigStrings[currentConstConfigString].configString;
-                    v7 = strlen(s);
-                    LocalClientGlobals->gameState.stringOffsets[constConfigStringIndex] = LocalClientGlobals->gameState.dataCount;
+                    const char *s = constantConfigStrings[currentConstConfigString].configString;
+                    uint len = strlen(s);
+                    if ((int)(len + cl->gameState.dataCount + 1) > MAX_GAMESTATE_CHARS)
+                        Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
+                    cl->gameState.stringOffsets[constConfigStringIndex] = cl->gameState.dataCount;
                     memcpy(
-                        (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
+                        (uint8_t *)&cl->gameState.stringData[cl->gameState.dataCount],
                         (uint8_t *)s,
-                        v7 + 1);
-                    LocalClientGlobals->gameState.dataCount += v7 + 1;
+                        len + 1);
+                    cl->gameState.dataCount += len + 1;
                     ++currentConstConfigString;
                 }
-                if (constantConfigStrings[currentConstConfigString].configStringNum == configStringIndex)
-                    ++currentConstConfigString;
-                s = MSG_ReadBigString(msg);
-                v6 = strlen(s);
-                if ((int)(v6 + LocalClientGlobals->gameState.dataCount + 1) > 0x20000)
-                    Com_Error(ERR_DROP, "MAX_GAMESTATE_CHARS exceeded");
-                LocalClientGlobals->gameState.stringOffsets[configStringIndex] = LocalClientGlobals->gameState.dataCount;
-                memcpy(
-                    (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
-                    (uint8_t *)s,
-                    v6 + 1);
-                LocalClientGlobals->gameState.dataCount += v6 + 1;
-                lastStringIndex = configStringIndex;
+                CL_ParseMapCenter(localClientNum);
+                break;
             }
-            while (constantConfigStrings[currentConstConfigString].configStringNum)
+
+            case svc_baseline:
             {
-                constConfigStringIndexa = constantConfigStrings[currentConstConfigString].configStringNum;
-                s = constantConfigStrings[currentConstConfigString].configString;
-                v5 = strlen(s);
-                LocalClientGlobals->gameState.stringOffsets[constConfigStringIndexa] = LocalClientGlobals->gameState.dataCount;
-                memcpy(
-                    (uint8_t *)&LocalClientGlobals->gameState.stringData[LocalClientGlobals->gameState.dataCount],
-                    (uint8_t *)s,
-                    v5 + 1);
-                LocalClientGlobals->gameState.dataCount += v5 + 1;
-                ++currentConstConfigString;
+                uint newnum = MSG_ReadEntityIndex(msg, 10);
+                if (newnum >= MAX_BASELINES)
+                    Com_Error(ERR_DROP, "Baseline number out of range: %i", newnum);
+
+                entityState_s nullstate;
+                memset(&nullstate, 0, sizeof(nullstate));
+                entityState_s *to = &cl->entityBaselines[newnum];
+                MSG_ReadDeltaEntity(msg, 0, &nullstate, to, newnum);
+                break;
             }
-            CL_ParseMapCenter(localClientNum);
-            break;
-        case svc_baseline:
-            newnum = MSG_ReadEntityIndex(msg, 0xAu);
-            if (newnum >= 0x400)
-                Com_Error(ERR_DROP, "Baseline number out of range: %i", newnum);
-            memset((uint8_t *)&nullstate, 0, sizeof(nullstate));
-            to = &LocalClientGlobals->entityBaselines[newnum];
-            MSG_ReadDeltaEntity(msg, 0, &nullstate, to, newnum);
-            break;
-        default:
-            file = FS_FOpenFileWrite((char *)"badpacket.dat");
-            if (file)
+
+            default:
             {
-                FS_Write((char *)msg->data, msg->cursize, file);
-                FS_FCloseFile(file);
+                BADPACKET(msg->data, msg->cursize);
+                Com_PrintError(1, "CL_ParseGamestate: bad command byte %d\n", cmd);
+                MSG_Discard(msg);
+                return;
             }
-            Com_PrintError(1, "CL_ParseGamestate: bad command byte %d\n", cmd);
-            MSG_Discard(msg);
-            return;
         }
     }
 
@@ -1171,17 +1157,14 @@ END_LOOP:
 
 void __cdecl CL_ParseCommandString(int localClientNum, msg_t *msg)
 {
-    int seq; // [esp+0h] [ebp-10h]
-    clientConnection_t *clc; // [esp+4h] [ebp-Ch]
-    char *s; // [esp+Ch] [ebp-4h]
+    int seq = MSG_ReadLong(msg);
+    char *s = MSG_ReadString(msg);
+    clientConnection_t *clc = CL_GetLocalClientConnection(localClientNum);
 
-    seq = MSG_ReadLong(msg);
-    s = MSG_ReadString(msg);
-    clc = CL_GetLocalClientConnection(localClientNum);
     if (clc->serverCommandSequence < seq)
     {
         clc->serverCommandSequence = seq;
-        I_strncpyz(clc->serverCommands[seq & 0x7F], s, 1024);
+        I_strncpyz(clc->serverCommands[seq & (MAX_RELIABLE_COMMANDS - 1)], s, 1024);
     }
 }
 

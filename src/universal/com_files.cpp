@@ -2830,9 +2830,11 @@ void __cdecl FS_Restart(int localClientNum, int checksumFeed)
 bool __cdecl FS_NeedRestart(int checksumFeed)
 {
     if (com_sv_running->current.enabled)
-        return 0;
+        return false;
+
     if (fs_gameDirVar->modified)
-        return 1;
+        return true;
+
     return checksumFeed != fs_checksumFeed;
 }
 

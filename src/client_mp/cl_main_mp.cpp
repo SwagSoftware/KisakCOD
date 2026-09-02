@@ -398,12 +398,9 @@ void __cdecl CL_ResetSkeletonCache(int32_t localClientNum)
 
 void __cdecl CL_ClearState(int32_t localClientNum)
 {
-    clientActive_t *dst; // [esp+0h] [ebp-4h]
-
-    if (localClientNum < 1)
+    if (localClientNum < MAX_LOCAL_CLIENTS)
     {
-        dst = CL_GetLocalClientGlobals(localClientNum);
-        memset((uint8_t *)dst, 0, sizeof(clientActive_t));
+        memset(CL_GetLocalClientGlobals(localClientNum), 0, sizeof(clientActive_t));
     }
     Com_ClientDObjClearAllSkel();
 }

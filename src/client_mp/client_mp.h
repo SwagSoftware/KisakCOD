@@ -11,6 +11,7 @@
 #include <xanim/xanim.h>
 
 #include <ui_mp/ui_mp.h>
+#include <server_mp/server_mp.h>
 
 struct GfxConfiguration;
 
@@ -124,10 +125,12 @@ struct clSnapshot_t // sizeof=0x2F94
     int32_t serverCommandNum;               // XREF: CL_ParseSnapshot+41/w
 };
 
+#define MAX_GAMESTATE_CHARS 0x20000
+
 struct gameState_t // sizeof=0x2262C
 {                                       // XREF: clientActive_t/r
-    int32_t stringOffsets[2442];
-    char stringData[131072];
+    int32_t stringOffsets[MAX_CONFIGSTRINGS];
+    char stringData[MAX_GAMESTATE_CHARS];
     int32_t dataCount;
 };
 
@@ -290,6 +293,8 @@ struct gclient_s // sizeof=0x3184
     int32_t lastStandTime;
 };
 
+#define MAX_BASELINES 1024 // LWSS: not a real name
+
 struct clientActive_t // sizeof=0x1B1BDC
 {                                       // XREF: .data:clientActive_t * clients/r
     bool usingAds;
@@ -354,7 +359,7 @@ struct clientActive_t // sizeof=0x1B1BDC
     outPacket_t outPackets[32];
     clSnapshot_t snapshots[32];         // XREF: Sys_GetPhysicalCpuCount+131/o
                                         // RB_LogPrintState_0(int,int)+19D/o ...
-    entityState_s entityBaselines[1024];
+    entityState_s entityBaselines[MAX_BASELINES];
     entityState_s parseEntities[2048];  // XREF: CG_CompassUpdateActors(int)+540/o
                                         // CountBitsEnabled(uint)+1B/o ...
     clientState_s parseClients[2048];   // XREF: AimTarget_ProcessEntity(int,centity_s const *)+133/o

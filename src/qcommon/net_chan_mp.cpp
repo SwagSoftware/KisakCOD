@@ -789,9 +789,21 @@ bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan)
     return res > 0;
 }
 
+void BADPACKET(void *buffer, uint32_t len)
+{
+    if (cl_shownet->current.value >= 1) // LWSS: move behind `cl_shownet`
+    {
+        int file = FS_FOpenFileWrite((char *)"badpacket.dat");
+        if (file)
+        {
+            FS_Write((char*)buffer, len, file);
+            FS_FCloseFile(file);
+        }
+    }
+}
+
 bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
 {
-    int file; // [esp+4Ch] [ebp-5ACh]
     msg_t send; // [esp+50h] [ebp-5A8h] BYREF
     uint8_t send_buf[1400]; // [esp+78h] [ebp-580h] BYREF
     int res; // [esp+5F4h] [ebp-4h]
@@ -800,14 +812,10 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
 
     if (length > 0x20000)
     {
-        file = FS_FOpenFileWrite((char*)"badpacket.dat");
-        if (file)
-        {
-            FS_Write(data, length, file);
-            FS_FCloseFile(file);
-        }
+        BADPACKET(data, length);
         Com_Error(ERR_DROP, "Netchan_Transmit: length = %i", length);
     }
+
     chan->unsentFragmentStart = 0;
     if (length < 1300)
     {
@@ -842,14 +850,7 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
     {
         chan->unsentFragments = 1;
         chan->unsentLength = length;
-        if (chan->unsentBufferSize <= length)
-            MyAssertHandler(
-                ".\\qcommon\\net_chan_mp.cpp",
-                1228,
-                0,
-                "%s\n\t(length) = %i",
-                "(chan->unsentBufferSize > length)",
-                length);
+        iassert(chan->unsentBufferSize > length);
         Com_Memcpy((char *)chan->unsentBuffer, data, length);
         Netchan_TransmitNextFragment(chan);
         return 1;

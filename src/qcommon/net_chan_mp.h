@@ -189,6 +189,7 @@ void __cdecl Netchan_Setup(
     int incomingBufferSize);
 bool __cdecl Netchan_TransmitNextFragment(netchan_t* chan);
 bool __cdecl Netchan_Transmit(netchan_t* chan, int length, char* data);
+void BADPACKET(void *buffer, uint32_t len);
 int __cdecl Netchan_Process(netchan_t* chan, msg_t* msg);
 int __cdecl NET_CompareBaseAdrSigned(netadr_t* a, netadr_t* b);
 bool __cdecl NET_CompareBaseAdr(netadr_t a, netadr_t b);
