@@ -636,8 +636,15 @@ void __cdecl LiveStorage_SetStat(int __formal, int index, uint32_t value)
 #endif
     const char *v3; // eax
 
-    if ((uint32_t)index > 0xDAA)
-        MyAssertHandler(".\\win32\\win_storage.cpp", 403, 0, "%s\n\t(index) = %i", "(index >= 0 && index < 3499)", index);
+	iassert(index >= 0 && index < 3499);
+	
+    // KISAK: reject it for real in addition to asserting
+    if ((uint32_t)index >= 3498)
+    {
+        Com_PrintError(14, "LiveStorage_SetStat: bad stat index %i\n", index);
+        return;
+    }
+    
     if (!statData.statsFetched)
     {
         Com_Printf(14, "Tried to set stat index %i before we have obtained player stats\n", index);
@@ -658,10 +665,10 @@ void __cdecl LiveStorage_SetStat(int __formal, int index, uint32_t value)
             if (!debugStats)
                 MyAssertHandler(".\\win32\\win_storage.cpp", 434, 0, "%s", "debugStats");
             if (debugStats->current.enabled)
-                Com_Printf(14, "Setting stat %i from %i to %i\n", index, *(int*)&statData.playerStats[4 * index + 0x176C], value);
-            if (*(int*)&statData.playerStats[4 * index + 0x176C] != value)
+                Com_Printf(14, "Setting stat %i from %i to %i\n", index, *(int*)&statData.playerStats[4 * index - 5996], value);
+            if (*(int*)&statData.playerStats[4 * index - 5996] != value)
             {
-                *(int*)&statData.playerStats[4 * index + 0x176C] = value;
+                *(int*)&statData.playerStats[4 * index - 5996] = value;
                 goto LABEL_24;
             }
         }

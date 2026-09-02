@@ -1190,6 +1190,17 @@ void __cdecl SV_SendClientGameState(client_t *client)
     MSG_WriteLong(&msg, client - svs.clients);
     MSG_WriteLong(&msg, sv.checksumFeed);
     MSG_WriteByte(&msg, 7u);
+    
+    // KISAK: every other sender checks this; a truncated gamestate must not go out (and a full buffer
+    // is exactly what overflows the Huffman stage in SV_SendMessageToClient).
+    if (msg.overflowed)
+    {
+        Com_PrintError(15, "SV_SendClientGameState: gamestate overflowed for client %i\n", client - svs.clients);
+        SV_DropClient(client, "EXE_SERVERMESSAGEOVERFLOW", 1);
+        SV_GetServerStaticHeader();
+        return;
+    }
+    
     Com_DPrintf(15, "Sending %i bytes in gamestate to client: %i\n", msg.cursize, client - svs.clients);
     SV_SendMessageToClient(&msg, client);
     SV_GetServerStaticHeader();

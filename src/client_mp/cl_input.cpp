@@ -284,8 +284,11 @@ void __cdecl CL_WritePacket(int localClientNum)
             0,
             (const uint8_t *)buf.data + 9,
             &(*compressedBuf)[9],
-            buf.cursize - 9)
+            buf.cursize - 9,
+            sizeof(*compressedBuf) - 9)
             + 9;
+        if (compressedSize < 9)
+            Com_Error(ERR_DROP, "Overflow compressed msg buf in CL_WritePacket()");
         packetNum = clc->netchan.outgoingSequence & 0x1F;
         LocalClientGlobals->outPackets[packetNum].p_realtime = cls.realtime;
         LocalClientGlobals->outPackets[packetNum].p_serverTime = oldcmd->serverTime;

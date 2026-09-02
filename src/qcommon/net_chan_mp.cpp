@@ -968,7 +968,10 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
         chan->fragmentLength += fragmentLength;
         if (fragmentLength == 1300)
             return 0;
-        if (chan->fragmentLength > msg->maxsize)
+            
+        // KISAK: the reassembled message is written at data+4, so the 4-byte sequence header must fit too.
+        // The client's fragment buffer equals its msg buffer (0x20000), so equality overflowed by 4 bytes.
+        if (chan->fragmentLength + 4 > msg->maxsize)
         {
             v10 = chan->fragmentLength;
             v7 = NET_AdrToString(chan->remoteAddress);
@@ -1115,6 +1118,12 @@ void __cdecl NET_SendLoopPacket(netsrc_t sock, uint32_t length, uint8_t *data, n
     }
     loop = &loopbacks[sock];
     i = loop->send & 0xF;
+    // KISAK: OOB voice/print packets can exceed the loopback slot size
+    if (length > sizeof(loop->msgs[i].data))
+    {
+        Com_PrintWarning(16, "NET_SendLoopPacket: dropping %u byte packet (slot is %u bytes)\n", length, (uint32_t)sizeof(loop->msgs[i].data));
+        return;
+    }
     memcpy(loop->msgs[i].data, data, length);
     loop->msgs[i].datalen = length;
     loop->msgs[i].port = port;
@@ -1203,6 +1212,11 @@ bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const uint8_t *forma
     tempNetchanPacketBuf[1] = -1;
     tempNetchanPacketBuf[2] = -1;
     tempNetchanPacketBuf[3] = -1;
+    if (len < 0 || len + 4 > (int)sizeof(tempNetchanPacketBuf))
+    {
+        Com_PrintError(16, "NET_OutOfBandData: %i bytes is too large to send\n", len);
+        return 0;
+    }
     for (i = 0; i < len; ++i)
         tempNetchanPacketBuf[i + 4] = format[i];
     mbuf_20 = len + 4;
@@ -1226,13 +1240,11 @@ bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, uint8_t *format
     tempNetchanPacketBuf[1] = -1;
     tempNetchanPacketBuf[2] = -1;
     tempNetchanPacketBuf[3] = -1;
-    if ((int)(len + 4) >= 0x20000)
-        MyAssertHandler(
-            ".\\qcommon\\net_chan_mp.cpp",
-            1952,
-            0,
-            "%s",
-            "len + 4 < static_cast<int>( sizeof( tempNetchanPacketBuf ) )");
+    if (len + 4 > sizeof(tempNetchanPacketBuf))
+    {
+        Com_PrintError(16, "NET_OutOfBandVoiceData: %u bytes is too large to send\n", len);
+        return 0;
+    }
     memcpy(&tempNetchanPacketBuf[4], format, len);
     mbuf_20 = len + 4;
     res = (int)FakeLag_SendPacket(sock, len + 4, tempNetchanPacketBuf, adr) >= -1;

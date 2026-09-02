@@ -1081,6 +1081,14 @@ void __cdecl CL_CheckForResend(int localClientNum)
                 MSG_Init(&buf, msgBuffer, 2048);
                 MSG_WriteString(&buf, "stats");
                 c = CL_HighestPriorityStatPacket(clc);
+                if (c < 0)
+                {
+                    // KISAK: nothing eligible to send this frame. Should be unreachable (the statResponse
+                    // handler never leaves the mask at 0 in this state, and the 100ms resend gate guarantees
+                    // an older stamp), but index -1 read 1240 bytes before the stat buffer and wrote
+                    // statPacketSendTime[-1], so skip the frame rather than trust it.
+                    break;
+                }
                 if (c > 6)
                     MyAssertHandler(
                         ".\\client_mp\\cl_main_mp.cpp",
@@ -1593,7 +1601,9 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                     clca = CL_GetLocalClientConnection(localClientNum);
                     v7 = Cmd_Argv(1);
                     statPacketsNeeded = atoi(v7);
-                    if (statPacketsNeeded)
+                    // KISAK: test the 7-bit mask, not the raw value. A reply such as 128 used to leave
+                    // statPacketsToSend == 0 while still in CA_SENDINGSTATS, which drove the packet picker to -1.
+                    if (statPacketsNeeded & 0x7F)
                     {
                         clca->statPacketsToSend = statPacketsNeeded & 0x7F;
                     }
@@ -2836,8 +2846,11 @@ void __cdecl CL_Record_f()
                     0,
                     (const uint8_t *)buf.data + 4,
                     &(*compressedBuf)[4],
-                    buf.cursize - 4)
+                    buf.cursize - 4,
+                    sizeof(*compressedBuf) - 4)
                     + 4;
+                if (compressedSize < 4)
+                    Com_Error(ERR_DROP, "Overflow compressed msg buf writing demo gamestate");
                 type = 0;
                 FS_Write((char *)&type, 1u, clc->demofile);
                 len = clc->serverMessageSequence;

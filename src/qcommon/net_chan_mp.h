@@ -121,9 +121,11 @@ struct fakedLatencyPackets_t // sizeof=0x50
     msg_t msg;
 };
 
-struct loopmsg_t // sizeof=0x580
+struct loopmsg_t // sizeof=0x580 (originally; data was 1400)
 {                                       // ...
-    uint8_t data[1400];
+    // KISAK: OOB voice batches to the listen-server host (up to ~10 KB) and large status replies exceeded the
+    // original 1400-byte slot and silently overflowed into the next slots. Nothing serializes this struct.
+    uint8_t data[16384];
     int datalen;
     int port;
 };

@@ -430,6 +430,14 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 		socksBuf[3] = 1;
 		*(_DWORD *)&socksBuf[4] = *(_DWORD *)&addr.sa_data[2];
 		*(_WORD *)&socksBuf[8] = *(_WORD *)addr.sa_data;
+		
+		// KISAK: OOB packets can be far larger than the SOCKS staging buffer
+		if (length < 0 || length + 10 > (int)sizeof(socksBuf))
+		{
+			Com_PrintError(16, "Sys_SendPacket: %i byte packet too large for SOCKS buffer\n", length);
+			return 0;
+		}
+		
 		memcpy((unsigned __int8 *)&socksBuf[10], data, length);
 		ret = sendto(net_socket, socksBuf, length + 10, 0, &socksRelayAddr, 16);
 	}

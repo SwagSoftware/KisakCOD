@@ -11,7 +11,6 @@
 #include <xanim/xanim.h>
 
 #include <ui_mp/ui_mp.h>
-#include <server_mp/server_mp.h>
 
 struct GfxConfiguration;
 
@@ -126,6 +125,10 @@ struct clSnapshot_t // sizeof=0x2F94
 };
 
 #define MAX_GAMESTATE_CHARS 0x20000
+
+#ifndef MAX_CONFIGSTRINGS // COMPILE HACK MP
+#define MAX_CONFIGSTRINGS 2442
+#endif
 
 struct gameState_t // sizeof=0x2262C
 {                                       // XREF: clientActive_t/r

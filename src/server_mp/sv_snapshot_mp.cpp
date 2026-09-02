@@ -1328,8 +1328,17 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
         client->header.state == 4,
         (const uint8_t *)msg->data + 4,
         svCompressedBuf + 4,
-        msg->cursize - 4)
+        msg->cursize - 4,
+        sizeof(svCompressedBuf) - 4)
         + 4;
+        
+    if (compressedSize < 4)
+    {
+        Com_PrintError(15, "SV_SendMessageToClient: compressed message overflow for client %i\n", client - svs.clients);
+        SV_DropClient(client, "EXE_SERVERMESSAGEOVERFLOW", 1);
+        return;
+    }
+    
     if (client->header.netchan.remoteAddress.type != NA_LOOPBACK)
         SV_TrackPacketCompression(client - svs.clients, msg->cursize, compressedSize);
     if (client->dropReason)

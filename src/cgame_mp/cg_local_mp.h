@@ -464,7 +464,8 @@ struct cgs_t // sizeof=0x3A24
     clientInfo_t corpseinfo[8];
 };
 
-#define CS_EFFECT_NAMES 244
+// KISAK: a stray '#define CS_EFFECT_NAMES 244' (the SP value) lived here and shadowed the CS_EFFECT_NAMES = 1598
+// enumerator from client_mp.h, so CG_ConfigStringModified indexed cgs->fxs[] 1354 slots too far.
 
 extern weaponInfo_s cg_weaponsArray[1][128];
 extern cg_s cgArray[1];

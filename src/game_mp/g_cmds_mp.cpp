@@ -1058,7 +1058,7 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
         ent->client->ps.eFlags |= 0x100000u;
     }
     SV_Cmd_ArgvBuffer(1, msg, 64);
-    if (msg[0] == 121 || msg[1] == 89 || msg[1] == 49)
+    if (msg[0] == 'y' || msg[0] == 'Y' || msg[0] == '1')
     {
         if (g_oldVoting->current.enabled)
         {

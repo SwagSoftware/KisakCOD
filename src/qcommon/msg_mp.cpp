@@ -216,7 +216,7 @@ int __cdecl MSG_ReadBit(msg_t *msg)
     return (Byte >> bit) & 1;
 }
 
-int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_t *to, int size)
+int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_t *to, int size, int maxSize)
 {
     int bit; // [esp+0h] [ebp-8h] BYREF
     int i; // [esp+4h] [ebp-4h]
@@ -230,6 +230,10 @@ int __cdecl MSG_WriteBitsCompress(bool trainHuffman, const uint8_t *from, uint8_
     i = size;
     while (i)
     {
+        // KISAK: the static Huffman tree has codes up to 11 bits, so high-entropy input EXPANDS and the
+        // original had no output bound at all. Reserve 4 bytes of headroom per symbol (covers any code <= 25 bits).
+        if (((bit + 7) >> 3) + 4 > maxSize)
+            return -1;
         Huff_offsetTransmit(&msgHuff.compressDecompress, *from, to, &bit);
         --i;
         ++from;

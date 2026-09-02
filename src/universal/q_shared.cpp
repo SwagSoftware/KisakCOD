@@ -839,7 +839,7 @@ void __cdecl Info_SetValueForKey(char *s, const char *key, const char *value)
                         len = Com_sprintf(newi, 0x400u, "\\%s\\%s", key, cleanValue);
                         if (len > 0)
                         {
-                            if (strlen(s) + &newi[strlen(newi) + 1] - &newi[1] <= 0x400)
+                            if (strlen(s) + &newi[strlen(newi) + 1] - &newi[1] < 0x400)
                                 memcpy(&s[strlen(s)], newi, &newi[strlen(newi) + 1] - newi);
                             else
                                 Com_Printf(16, "Info string length exceeded. key: %s value: %s Info string: %s", key, value, s);

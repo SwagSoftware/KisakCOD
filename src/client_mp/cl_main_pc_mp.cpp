@@ -560,13 +560,11 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
 
 void __cdecl CL_ResetPlayerMuting(uint32_t muteClientIndex)
 {
-    if (muteClientIndex >= 0x40)
-        MyAssertHandler(
-            ".\\client_mp\\cl_main_pc_mp.cpp",
-            1378,
-            0,
-            "%s",
-            "muteClientIndex >= 0 && muteClientIndex < MAX_CLIENTS");
+    if (muteClientIndex >= MAX_CLIENTS)
+    {
+        Com_PrintError(14, "CL_ResetPlayerMuting: bad client index %u\n", muteClientIndex);
+        return;
+    }
     s_playerMute[muteClientIndex] = 0;
 }
 
