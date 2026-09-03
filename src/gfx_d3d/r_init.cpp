@@ -3779,7 +3779,7 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
     vidConfig.isFullscreen = wndParms->fullscreen;
     switch (r_aspectRatio->current.integer)
     {
-    case 0:
+    case GFX_ASPECT_RATIO_AUTO:
         if (vidConfig.isFullscreen && dx.adapterNativeIsValid)
         {
             monitorWidth = dx.adapterNativeWidth;
@@ -3803,13 +3803,13 @@ void __cdecl R_StoreWindowSettings(const GfxWindowParms *wndParms)
             vidConfig.aspectRatioWindow = 1.7777778f;
         }
         break;
-    case 1:
+    case GFX_ASPECT_RATIO_STANDARD:
         vidConfig.aspectRatioWindow = 1.3333334f;
         break;
-    case 2:
+    case GFX_ASPECT_RATIO_WIDE_16_10:
         vidConfig.aspectRatioWindow = 1.6f;
         break;
-    case 3:
+    case GFX_ASPECT_RATIO_WIDE_16_9:
         vidConfig.aspectRatioWindow = 1.7777778f;
         break;
     default:
