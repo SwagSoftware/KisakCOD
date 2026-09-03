@@ -1132,7 +1132,7 @@ void __cdecl G_XAnimUpdateEnt(gentity_s *ent)
 
 void __cdecl TeamplayInfoMessage(gentity_s *ent)
 {
-    ent->client->ps.stats[3] = -1;
+    ent->client->ps.stats[STAT_IDENT_CLIENT_NUM] = -1;
 }
 
 void __cdecl CheckTeamStatus()

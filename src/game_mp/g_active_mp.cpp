@@ -379,7 +379,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         if (ent->client && (ent->flags & 3) == 0)
         {
             ent->health = 0;
-            ent->client->ps.stats[0] = 0;
+            ent->client->ps.stats[STAT_HEALTH] = 0;
             if (ent->client->ps.throwBackGrenadeOwner == ENTITYNUM_NONE)
             {
                 player_die(ent, ent, ent, 100000, 12, eventParm, 0, HITLOC_NONE, 0);
@@ -401,7 +401,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
             damage = eventParm < 100 ? (double)eventParm * 0.009999999776482582 : 1.1;
             if (damage != 0.0)
             {
-                damage = (double)client->ps.stats[2] * damage;
+                damage = (double)client->ps.stats[STAT_MAX_HEALTH] * damage;
                 G_Damage(ent, 0, 0, 0, 0, (int)damage, 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
             }
         }
@@ -1220,7 +1220,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             else
                 v2 = ent->s.lerp.eFlags | 0x80;
             ent->s.lerp.eFlags = v2;
-            client->ps.stats[0] = ent->health;
+            client->ps.stats[STAT_HEALTH] = ent->health;
             G_SetClientSound(ent);
             v7 = level.teamHasRadar[client->sess.cs.team] || client->hasRadar;
             client->ps.radarEnabled = v7;

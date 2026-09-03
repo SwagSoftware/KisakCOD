@@ -674,11 +674,11 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
 #endif
     if (ps->pm_type >= PM_DEAD)
     {
-        if (ps->stats[1] == 999)
+        if (ps->stats[STAT_DEAD_YAW] == 999)
         {
             angle = (double)cmd->angles[1] * 0.0054931640625 + ps->delta_angles[1];
             temp = AngleNormalize360(angle);
-            ps->stats[1] = (int)(temp * 0.0054931640625);
+            ps->stats[STAT_DEAD_YAW] = (int)(temp * 0.0054931640625);
         }
     LABEL_21:
         PM_UpdateLean(

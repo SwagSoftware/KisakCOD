@@ -273,8 +273,8 @@ void __cdecl Cmd_Give_f(gentity_s *ent)
         }
         else
         {
-            ent->client->ps.stats[2] = g_player_maxhealth->current.integer;
-            v11 = ent->client->ps.stats[2];
+            ent->client->ps.stats[STAT_MAX_HEALTH] = g_player_maxhealth->current.integer;
+            v11 = ent->client->ps.stats[STAT_MAX_HEALTH];
         }
         ent->health = v11;
         if (!v10)
@@ -648,7 +648,7 @@ void __cdecl Cmd_Kill_f(gentity_s *ent)
         client = ent->client;
         ent->health = 0;
         ent->flags &= ~(FL_GODMODE | FL_DEMI_GODMODE);
-        client->ps.stats[0] = 0;
+        client->ps.stats[STAT_HEALTH] = 0;
         player_die(ent, ent, ent, 100000, 12, 0, 0, HITLOC_NONE);
     }
 }

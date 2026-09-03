@@ -418,7 +418,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                     if (v11 && (ent->flags & 3) == 0)
                     {
                         ent->health = 0;
-                        v11->ps.stats[0] = 0;
+                        v11->ps.stats[STAT_HEALTH] = 0;
                         player_die(ent, ent, ent, 100000, 12, v8, 0, HITLOC_NONE);
                     }
                     break;
@@ -465,7 +465,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
         }
         damage = 1.1f;
     LABEL_9:
-        G_Damage(ent, 0, 0, 0, 0, (int)((float)client->ps.stats[2] * damage), 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
+        G_Damage(ent, 0, 0, 0, 0, (int)((float)client->ps.stats[STAT_MAX_HEALTH] * damage), 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
         goto LABEL_46;
     }
 }
@@ -648,7 +648,7 @@ void __cdecl ClientThink_real(gentity_s *ent)
     {
         client->ps.pm_type = PM_MPVIEWER;
     }
-	else if (client->ps.stats[0] <= 0)
+	else if (client->ps.stats[STAT_HEALTH] <= 0)
 	{
 		client->ps.pm_type = ent->tagInfo ? PM_DEAD_LINKED : PM_DEAD;
 	}
@@ -839,7 +839,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
         if (ent->tagInfo)
         {
             v3->ps.pm_type = PM_DEAD_LINKED;
-            if (v3->ps.stats[0] > 0)
+            if (v3->ps.stats[STAT_HEALTH] > 0)
             {
                 v3->ps.pm_type = PM_NORMAL_LINKED;
             }
@@ -872,7 +872,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
     }
     P_DamageFeedback(ent);
     ent->client->ps.moveSpeedScaleMultiplier = ent->client->pers.moveSpeedScaleMultiplier;
-    ent->client->ps.stats[0] = ent->health;
+    ent->client->ps.stats[STAT_HEALTH] = ent->health;
     v8 = ent->client;
     ent->s.loopSound = 0;
     G_PlayerStateToEntityStateExtrapolate(&v8->ps, &ent->s, v8->ps.commandTime, 1);

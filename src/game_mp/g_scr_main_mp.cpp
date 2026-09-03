@@ -6200,7 +6200,7 @@ void __cdecl Scr_SetHealth(gentity_s *ent, int32_t i)
     if (ent->client)
     {
         ent->health = health;
-        ent->client->ps.stats[0] = health;
+        ent->client->ps.stats[STAT_HEALTH] = health;
     }
     else
     {

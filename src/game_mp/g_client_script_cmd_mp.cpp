@@ -1450,7 +1450,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 LABEL_93:
                     if (!pSelf->r.inuse)
                         MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1166, 0, "%s", "pSelf->r.inuse");
-                    pSelf->client->ps.stats[0] = pSelf->health;
+                    pSelf->client->ps.stats[STAT_HEALTH] = pSelf->health;
                     return;
                 }
                 if (tempBulletHitEntity)
@@ -1503,7 +1503,7 @@ void __cdecl PlayerCmd_Suicide(scr_entref_t entref)
     }
     pSelf->flags &= ~(FL_GODMODE | FL_DEMI_GODMODE);
     pSelf->health = 0;
-    pSelf->client->ps.stats[0] = 0;
+    pSelf->client->ps.stats[STAT_HEALTH] = 0;
     player_die(pSelf, pSelf, pSelf, 100000, 12, 0, 0, HITLOC_NONE, 0);
 }
 

@@ -1712,7 +1712,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     } while (v9);
     v20 = 0;
     v21 = 2;
-    v22 = &to->stats[1];
+    v22 = &to->stats[STAT_DEAD_YAW];
     do
     {
         if (*(v22 - 1))
@@ -1740,7 +1740,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
             msg->cursize = v23 + 2;
         }
         v24 = 2;
-        v25 = &to->stats[1];
+        v25 = &to->stats[STAT_DEAD_YAW];
         do
         {
             if (((1 << (v24 - 2)) & v20) != 0)
@@ -2269,7 +2269,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
             v26 = v25;
         }
         v27 = 2;
-        v28 = &to->stats[1];
+        v28 = &to->stats[STAT_DEAD_YAW];
         do
         {
             if (((1 << (v27 - 2)) & v26) != 0)

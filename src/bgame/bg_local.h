@@ -814,6 +814,16 @@ enum pmflags_t : __int32 // (MP/SP same)
 #endif
 };
 
+enum statIndex_t : __int32
+{
+    STAT_HEALTH = 0x0,
+    STAT_DEAD_YAW = 0x1,
+    STAT_MAX_HEALTH = 0x2,
+    STAT_IDENT_CLIENT_NUM = 0x3,
+    STAT_SPAWN_COUNT = 0x4,
+    MAX_STATS = 0x5,
+};
+
 #ifdef KISAK_MP
 enum pmtype_t : __int32
 {
@@ -897,7 +907,7 @@ struct playerState_s // sizeof=0x2F64
     int32_t damageYaw;
     int32_t damagePitch;
     int32_t damageCount;
-    int32_t stats[5];                       // XREF: SV_GetClientPositionAtTime(int,int,float * const)+E9/r
+    int32_t stats[MAX_STATS];               // XREF: SV_GetClientPositionAtTime(int,int,float * const)+E9/r
     int32_t ammo[128];
     int32_t ammoclip[128];
     uint32_t weapons[4];
