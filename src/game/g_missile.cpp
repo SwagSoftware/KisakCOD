@@ -670,7 +670,7 @@ void __cdecl RunMissile_BroadcastActorEvents(gentity_s *missile)
     weapDef = BG_GetWeaponDef(missile->s.weapon);
     if (!weapDef)
         MyAssertHandler(".\\game\\g_missile.cpp", 1419, 0, "%s", "weapDef");
-    if (methodOfDeath == 3)
+    if (methodOfDeath == MOD_GRENADE)
     {
         if (weapDef->offhandClass)
         {
@@ -898,7 +898,7 @@ void __cdecl G_RunMissile(gentity_s *ent)
         v9 = Vec3Length(diff);
         ent->missile.travelDist = ent->missile.travelDist + v9;
     }
-    if (entityHandlers[ent->handler].methodOfDeath == 3)
+    if (entityHandlers[ent->handler].methodOfDeath == MOD_GRENADE)
         G_GrenadeTouchTriggerDamage(
             ent,
             vOldOrigin,
@@ -1052,7 +1052,7 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
         explosionType = 4;
         explodeOnImpact = 0;
         ent->missile.travelDist = -1.0e10f;
-        methodOfDeath = 15;
+        methodOfDeath = MOD_IMPACT;
     }
     else if (explodeOnImpact)
     {
@@ -1060,15 +1060,15 @@ void __cdecl MissileImpact(gentity_s *ent, trace_t *trace, float *dir, float *en
     }
     else
     {
-        methodOfDeath = 15;
+        methodOfDeath = MOD_IMPACT;
     }
-    if (methodOfDeath == 15)
+    if (methodOfDeath == MOD_IMPACT)
         partGroup = (hitLocation_t)trace->partGroup;
     else
         partGroup = HITLOC_NONE;
     hitLocation = partGroup;
 #ifdef KISAK_SP
-    if (methodOfDeath != 7 && ent->r.ownerNum.isDefined())
+    if (methodOfDeath != MOD_MELEE && ent->r.ownerNum.isDefined())
     {
         gentity_s *owner = ent->r.ownerNum.ent();
         Actor_BroadcastLineEvent(owner, AI_EV_PROJECTILE_IMPACT, 0, owner->s.lerp.pos.trBase, endpos, 0.0);
@@ -1737,7 +1737,7 @@ void __cdecl Missile_PenetrateGlass(
                             ent->r.currentOrigin,
                             damage,
                             DAMAGE_NOFLAG,
-                            15,
+                            MOD_IMPACT,
                             ent->s.weapon,
                             hitLoc,
                             results->modelIndex,
