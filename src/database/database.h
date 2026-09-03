@@ -20,14 +20,14 @@ enum $D93A52C218787A3ED865FD745137F4B3 : int32_t
 
 enum $A9FDED199653E5E1C469F04B28023DED : int32_t
 {
-    DB_ZONE_CODE_LOC = 0x0,
-    DB_ZONE_COMMON_LOC = 0x1,
-    DB_ZONE_CODE = 0x2,
-    DB_ZONE_COMMON = 0x4,
-    DB_ZONE_GAME = 0x8,
-    DB_ZONE_MOD = 0x10,
-    DB_ZONE_LOAD = 0x20,
-    DB_ZONE_DEV = 0x40,
+    DB_ZONE_CODE_LOC   = 0,
+    DB_ZONE_COMMON_LOC = (1 << 0),
+    DB_ZONE_CODE       = (1 << 1),
+    DB_ZONE_COMMON     = (1 << 2),
+    DB_ZONE_GAME       = (1 << 3),
+    DB_ZONE_MOD        = (1 << 4),
+    DB_ZONE_LOAD       = (1 << 5),
+    DB_ZONE_DEV        = (1 << 6)
 };
 
 struct StreamDelayInfo // sizeof=0x8
