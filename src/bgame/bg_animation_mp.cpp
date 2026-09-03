@@ -1173,7 +1173,7 @@ void __cdecl BG_AnimUpdatePlayerStateConditions(pmove_t *pmove)
 
     BG_SetConditionValue(ps->clientNum, 4u, ps->viewangles[0] > 0.0);
 
-    if ((pmove->cmd.buttons & 1) != 0)
+    if ((pmove->cmd.buttons & BUTTON_ATTACK) != 0)
         BG_SetConditionValue(ps->clientNum, 6u, 1u);
     else
         BG_SetConditionValue(ps->clientNum, 6u, 0);

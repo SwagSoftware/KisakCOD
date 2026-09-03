@@ -284,7 +284,7 @@ char __cdecl Mantle_CheckLedge(pmove_t *pm, pml_t *pml, MantleResults *mresults,
                 ps->mantleState.flags |= 8u;
                 mresults->flags |= 8u;
                 Mantle_DebugPrint("Mantle available!");
-                if ((pm->cmd.buttons & 0x400) != 0)
+                if ((pm->cmd.buttons & BUTTON_JUMP) != 0)
                 {
                     Mantle_CalcEndPos(pm, mresults);
                     if ((ps->eFlags & 4) == 0)

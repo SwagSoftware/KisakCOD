@@ -466,14 +466,14 @@ bool __cdecl CG_CheckPlayerMovement(usercmd_s oldCmd, usercmd_s newCmd)
 
 int32_t __cdecl CG_CheckPlayerStanceChange(int32_t localClientNum, __int16 newButtons, __int16 changedButtons)
 {
-    if ((changedButtons & 0x1300) != 0)
+    if ((changedButtons & (BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE)) != 0)
     {
         CG_MenuShowNotify(localClientNum, 3);
         return 1;
     }
     else
     {
-        if ((newButtons & 0x1300) != 0)
+        if ((newButtons & (BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE)) != 0)
             CG_MenuShowNotify(localClientNum, 3);
         return 0;
     }
@@ -493,7 +493,7 @@ bool __cdecl CG_CheckPlayerTryReload(int32_t localClientNum, char buttons)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if ((buttons & 0x30) == 0)
+    if ((buttons & (BUTTON_RELOAD | BUTTON_USE_RELOAD)) == 0)
         return 0;
 
     return (cgameGlob->predictedPlayerState.pm_flags & PMF_MANTLE) == 0 && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0;
@@ -505,7 +505,7 @@ bool __cdecl CG_CheckPlayerFireNonTurret(int32_t localClientNum, char buttons)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if ((buttons & 1) == 0)
+    if ((buttons & BUTTON_ATTACK) == 0)
         return 0;
 
     return (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0;
@@ -513,7 +513,7 @@ bool __cdecl CG_CheckPlayerFireNonTurret(int32_t localClientNum, char buttons)
 
 int32_t __cdecl CG_CheckPlayerOffHandUsage(int32_t localClientNum, __int16 buttons)
 {
-    if ((buttons & 0xC000) == 0)
+    if ((buttons & (BUTTON_FRAG | BUTTON_SMOKE)) == 0)
         return 0;
     CG_MenuShowNotify(localClientNum, 4);
     return 1;
@@ -521,7 +521,7 @@ int32_t __cdecl CG_CheckPlayerOffHandUsage(int32_t localClientNum, __int16 butto
 
 uint32_t __cdecl CG_CheckPlayerMiscInput(int32_t buttons)
 {
-    return buttons & 0xFFFFECFF;
+    return buttons & ~(BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE);
 }
 
 void __cdecl CG_CheckHudHealthDisplay(int32_t localClientNum)

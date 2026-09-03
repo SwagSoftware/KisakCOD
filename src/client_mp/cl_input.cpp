@@ -412,10 +412,10 @@ usercmd_s *__cdecl CL_CreateCmd(usercmd_s *result, int localClientNum)
         }
         if (CG_VehLocalClientDriving(localClientNum))
         {
-            cmd.buttons &= ~1u;
-            cmd.buttons &= ~0x800u;
-            cmd.buttons &= 0xFFFF3FFF;
-            cmd.buttons &= ~0x8000u;
+            cmd.buttons &= ~BUTTON_ATTACK;
+            cmd.buttons &= ~BUTTON_ADS;
+            cmd.buttons &= ~(BUTTON_FRAG | BUTTON_SMOKE);
+            cmd.buttons &= ~BUTTON_SMOKE;
         }
     }
     CL_FinishMove(localClientNum, &cmd);
@@ -513,15 +513,15 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
     {
         if (playersKb[localClientNum][KEY_PRONE].active)
         {
-            cmd->buttons |= 0x100u;
-            cmd->buttons = cmd->buttons & 0xFFFFFDFF;
+            cmd->buttons |= BUTTON_PRONE;
+            cmd->buttons = cmd->buttons & ~BUTTON_CROUCH;
         }
         else
         {
-            cmd->buttons |= 0x200u;
-            cmd->buttons = cmd->buttons & 0xFFFFFEFF;
+            cmd->buttons |= BUTTON_CROUCH;
+            cmd->buttons = cmd->buttons & ~BUTTON_PRONE;
         }
-        cmd->buttons |= 0x1000u;
+        cmd->buttons |= BUTTON_TEMP_STANCE;
     }
     else
     {
@@ -532,9 +532,9 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
     kb = playersKb[localClientNum];
 
     if (kb[KEY_SPEED].active == !CL_GetLocalClientGlobals(localClientNum)->usingAds)
-        cmd->buttons = cmd->buttons | 0x800;
+        cmd->buttons = cmd->buttons | BUTTON_ADS;
     else
-        cmd->buttons = cmd->buttons & 0xFFFFF7FF;
+        cmd->buttons = cmd->buttons & ~BUTTON_ADS;
 
     forward = 0;
     side = 0;
@@ -549,16 +549,16 @@ void __cdecl CL_KeyMove(int localClientNum, usercmd_s *cmd)
     {
         if (kb[KEY_SPRINT].active || kb[KEY_SPRINT].wasPressed)
         {
-            cmd->buttons |= 2u;
+            cmd->buttons |= BUTTON_SPRINT;
             kb[KEY_SPRINT].wasPressed = 0;
         }
         else
         {
-            cmd->buttons &= ~2u;
+            cmd->buttons &= ~BUTTON_SPRINT;
         }
     }
 
-    if (kb[KEY_STRAFE].active && (cmd->buttons & 2) == 0)
+    if (kb[KEY_STRAFE].active && (cmd->buttons & BUTTON_SPRINT) == 0)
     {
         side += (int)(CL_KeyState(&kb[KEY_RIGHT]) * (double)127);
         side -= (int)(CL_KeyState(&kb[KEY_LEFT]) * (double)127);
@@ -600,21 +600,21 @@ void __cdecl CL_AddCurrentStanceToCmd(int localClientNum, usercmd_s *cmd)
     stance = cl->stance;
     if (stance == CL_STANCE_CROUCH)
     {
-        cmd->buttons |= 0x200u;
-        cmd->buttons &= ~0x100u;
+        cmd->buttons |= BUTTON_CROUCH;
+        cmd->buttons &= ~BUTTON_PRONE;
     }
     else if (stance == CL_STANCE_PRONE)
     {
-        cmd->buttons |= 0x100u;
-        cmd->buttons &= ~0x200u;
+        cmd->buttons |= BUTTON_PRONE;
+        cmd->buttons &= ~BUTTON_CROUCH;
     }
     else
     {
         iassert(cl->stance == CL_STANCE_STAND);
-        cmd->buttons &= ~0x100u;
-        cmd->buttons &= ~0x200u;
+        cmd->buttons &= ~BUTTON_PRONE;
+        cmd->buttons &= ~BUTTON_CROUCH;
     }
-    cmd->buttons &= ~0x1000u;
+    cmd->buttons &= ~BUTTON_TEMP_STANCE;
 }
 
 void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
@@ -758,25 +758,25 @@ void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
 {
     clientActive_t *LocalClientGlobals; // [esp+8h] [ebp-Ch]
 
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 14, 1);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 15, 0x2000);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 16, 0x4000);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 17, 0x8000);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 18, 4);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 19, 8);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 20, 16);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 21, 32);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 22, 64);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 23, 128);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 24, 256);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 25, 512);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 10, 1024);
-    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 26, 0x80000);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 14, BUTTON_ATTACK);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 15, BUTTON_BREATH);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 16, BUTTON_FRAG);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 17, BUTTON_SMOKE);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 18, BUTTON_MELEE);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 19, BUTTON_USE);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 20, BUTTON_RELOAD);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 21, BUTTON_USE_RELOAD);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 22, BUTTON_LEAN_LEFT);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 23, BUTTON_LEAN_RIGHT);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 24, BUTTON_PRONE);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 25, BUTTON_CROUCH);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 10, BUTTON_JUMP);
+    CL_UpdateCmdButton(localClientNum, &cmd->buttons, 26, BUTTON_THROW);
 
     Key_IsCatcherActive(localClientNum, -1);
 
     if (clientUIActives[0].keyCatchers && !cl_bypassMouseInput->current.enabled && UI_GetActiveMenu(localClientNum) != UIMENU_SCOREBOARD)
-        cmd->buttons |= 0x100000u;
+        cmd->buttons |= BUTTON_LOC_SELECTING;
 
     if (CG_GetLocalClientConnectionState(localClientNum) > CA_CONNECTED)
     {
@@ -785,7 +785,7 @@ void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
             || LocalClientGlobals->snap.ps.pm_type == PM_UFO
             || LocalClientGlobals->snap.ps.pm_type == PM_SPECTATOR)
         {
-            CL_UpdateCmdButton(localClientNum, &cmd->buttons, 12, 1024);
+            CL_UpdateCmdButton(localClientNum, &cmd->buttons, 12, BUTTON_JUMP);
         }
     }
     iassert(cmd->buttons < (1 << BUTTON_BIT_COUNT));
@@ -836,7 +836,7 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
     if (cgameGlob->predictedPlayerState.locationSelectionInfo)
     {
         CL_AddCurrentStanceToCmd(localClientNum, cmd);
-        cmd->buttons |= 0x100000u;
+        cmd->buttons |= BUTTON_LOC_SELECTING;
         frametime = (double)cgameGlob->frametime * EQUAL_EPSILON;
         mapAspectRatio = cgameGlob->compassMapWorldSize[0] / cgameGlob->compassMapWorldSize[1];
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
@@ -882,13 +882,13 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
         locSelInputState = playerKeys[localClientNum].locSelInputState;
         if (locSelInputState == LOC_SEL_INPUT_CONFIRM)
         {
-            cmd->buttons |= 0x10000u;
+            cmd->buttons |= BUTTON_LOC_CONFIRM;
             cmd->selectedLocation[0] = SnapFloatToInt(cgameGlob->selectedLocation[0] * 255.0f) + 0x80;
             cmd->selectedLocation[1] = SnapFloatToInt(cgameGlob->selectedLocation[1] * 255.0f) + 0x80;
         }
         else if (locSelInputState == LOC_SEL_INPUT_CANCEL)
         {
-            cmd->buttons |= 0x20000u;
+            cmd->buttons |= BUTTON_LOC_CANCEL;
         }
         return 1;
     }

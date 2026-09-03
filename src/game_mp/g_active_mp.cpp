@@ -240,13 +240,13 @@ void __cdecl SpectatorThink(gentity_s *ent, usercmd_s *ucmd)
     if (client->sess.forceSpectatorClient < 0
         && G_ClientCanSpectateTeam(client, TEAM_NUM_TEAMS)
         && client->spectatorClient >= 0
-        && (client->buttons & 4) != (client->oldbuttons & 4))
+        && (client->buttons & BUTTON_MELEE) != (client->oldbuttons & BUTTON_MELEE))
     {
         StopFollowing(ent);
     }
-    if ((client->buttons & 1) == 0 || (client->oldbuttons & 1) != 0)
+    if ((client->buttons & BUTTON_ATTACK) == 0 || (client->oldbuttons & BUTTON_ATTACK) != 0)
     {
-        if ((client->buttons & 0x800) != 0 && (client->oldbuttons & 0x800) == 0)
+        if ((client->buttons & BUTTON_ADS) != 0 && (client->oldbuttons & BUTTON_ADS) == 0)
             Cmd_FollowCycle_f(ent, -1);
     }
     else
@@ -279,7 +279,7 @@ int32_t __cdecl ClientInactivityTimer(gclient_s *client)
 
     if (g_inactivity->current.integer)
     {
-        if (client->sess.cmd.forwardmove || client->sess.cmd.rightmove || (client->sess.cmd.buttons & 0x401) != 0)
+        if (client->sess.cmd.forwardmove || client->sess.cmd.rightmove || (client->sess.cmd.buttons & (BUTTON_ATTACK | BUTTON_JUMP)) != 0)
         {
             client->inactivityTime = level.time + 1000 * g_inactivity->current.integer;
             client->inactivityWarning = 0;
@@ -562,15 +562,15 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
             {
                 client->oldbuttons = client->buttons;
                 if (!client->useButtonDone)
-                    client->oldbuttons &= 0xFFFFFFD7;
+                    client->oldbuttons &= ~(BUTTON_USE | BUTTON_USE_RELOAD);
                 client->buttons = client->sess.cmd.buttons;
-                if ((client->buttons & 0x28) == 0)
+                if ((client->buttons & (BUTTON_USE | BUTTON_USE_RELOAD)) == 0)
                     client->useButtonDone = 0;
                 client->latched_buttons = client->buttons & ~client->oldbuttons;
                 client->buttonsSinceLastFrame |= client->latched_buttons;
                 if (client->ps.locationSelectionInfo)
                 {
-                    if ((client->buttonsSinceLastFrame & 0x10000) != 0)
+                    if ((client->buttonsSinceLastFrame & BUTTON_LOC_CONFIRM) != 0)
                     {
                         loc2d = ((double)ucmd->selectedLocation[0] + 128.0) / 255.0;
                         loc2d_4 = ((double)ucmd->selectedLocation[1] + 128.0) / 255.0;
@@ -582,13 +582,13 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                         Scr_AddVector(loc);
                         Scr_Notify(ent, scr_const.confirm_location, 1u);
                     }
-                    else if ((client->buttonsSinceLastFrame & 0x20000) != 0)
+                    else if ((client->buttonsSinceLastFrame & BUTTON_LOC_CANCEL) != 0)
                     {
                         Scr_Notify(ent, scr_const.cancel_location, 0);
                     }
-                    client->buttons &= 0x1300u;
-                    client->latched_buttons &= 0x1300u;
-                    client->buttonsSinceLastFrame &= 0x1300u;
+                    client->buttons &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
+                    client->latched_buttons &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
+  client->buttonsSinceLastFrame &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
                 }
                 oldEventSequence = client->ps.eventSequence;
                 memset((uint8_t *)&pm, 0, sizeof(pm));

@@ -1049,9 +1049,9 @@ void __cdecl SV_BotUserMove(client_t *cl)
         if (!G_GetClientArchiveTime(cl - svs.clients))
         {
             if (random() < 0.5 && sv_botsPressAttackBtn->current.enabled)
-                nullcmd.buttons |= 1u;
+                nullcmd.buttons |= BUTTON_ATTACK;
             if (random() < 0.5)
-                nullcmd.buttons |= 0x28u;
+                nullcmd.buttons |= BUTTON_USE | BUTTON_USE_RELOAD;
             if (random() >= 0.3300000131130219)
             {
                 if (random() < 0.5)

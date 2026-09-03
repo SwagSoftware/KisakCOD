@@ -838,14 +838,14 @@ void __cdecl MSG_WriteDeltaUsercmd(msg_t *msg, const usercmd_s *from, const user
     float gunZOfs; // [sp+50h] [-40h]
     float meleeChargeYaw; // [sp+50h] [-40h]
 
-    if (from->buttons >= 0x100000)
+    if (from->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             759,
             0,
             "%s",
             "from->buttons < (1 << BUTTON_BIT_COUNT)");
-    if (to->buttons >= 0x100000)
+    if (to->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             760,
@@ -1160,7 +1160,7 @@ void __cdecl MSG_ReadDeltaUsercmd(msg_t *msg, const usercmd_s *from, usercmd_s *
     double meleeChargeYaw; // fp31
     unsigned __int8 meleeChargeDist; // r30
 
-    if (from->buttons >= 0x100000)
+    if (from->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             810,
@@ -1286,7 +1286,7 @@ void __cdecl MSG_ReadDeltaUsercmd(msg_t *msg, const usercmd_s *from, usercmd_s *
         to->meleeChargeYaw = from->meleeChargeYaw;
         to->meleeChargeDist = from->meleeChargeDist;
     }
-    if (to->buttons >= 0x100000)
+    if (to->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             864,

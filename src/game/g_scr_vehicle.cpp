@@ -3728,7 +3728,7 @@ void __cdecl VEH_UpdateClient(gentity_s *ent)
             buttons = client->pers.cmd.buttons;
             move[0] = client->pers.cmd.forwardmove;
             move[1] = client->pers.cmd.rightmove;
-            handbrake = (int8_t)((buttons & 0x800) ? 0x7F : 0);
+            handbrake = (int8_t)((buttons & BUTTON_ADS) ? 0x7F : 0);
             move[2] = handbrake;
             if (handbrake > 0)
                 player->client->ps.eFlags &= ~0x40000u;
@@ -6096,7 +6096,7 @@ void __cdecl VEH_UpdateWeapon(gentity_s *ent)
     {
         veh->turret.fireTime = fireTime - 50;
     }
-    else if ((player->client->pers.cmd.buttons & 1) != 0
+    else if ((player->client->pers.cmd.buttons & BUTTON_ATTACK) != 0
         && (player->client->ps.pm_flags & 0xC00) == 0)
     {
         Scr_Notify(ent, scr_const.turret_fire, 0);
@@ -6160,7 +6160,7 @@ void __cdecl VEH_UpdateWeapon(gentity_s *ent)
 
         if (veh->turret.fireTime <= 0 || (veh->turret.fireTime -= level.frametime, veh->turret.fireTime <= 0))
         {
-            if ((client->buttons & 1) != 0)
+            if ((client->buttons & BUTTON_ATTACK) != 0)
                 FireTurret(ent, &g_entities[playerEntNum]);
         }
     }

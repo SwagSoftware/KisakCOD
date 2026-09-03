@@ -202,7 +202,7 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
                 buttons = client->pers.cmd.buttons;
                 move[0] = client->pers.cmd.forwardmove;
                 move[1] = client->pers.cmd.rightmove;
-                if ((buttons & 0x800) != 0)
+                if ((buttons & BUTTON_ADS) != 0)
                 {
                     client->ps.eFlags &= ~0x40000u;
                     player->client->linkAnglesMinClamp[1] = -info->turretHorizSpanRight;
@@ -218,24 +218,24 @@ void __cdecl VEH_UpdateClientChopper(gentity_s *ent)
                     {
                         pitchmove = client->pers.cmd.pitchmove;
                         move[2] = pitchmove;
-                        if ((client->pers.cmd.buttons & 0x8000) != 0)
+                        if ((client->pers.cmd.buttons & BUTTON_SMOKE) != 0)
                         {
                             altmove = 127;
                             move[3] = 127;
                         }
-                        if ((client->pers.cmd.buttons & 0x4000) != 0)
+                        if ((client->pers.cmd.buttons & BUTTON_FRAG) != 0)
                             move[3] = altmove - 127;
                         goto LABEL_25;
                     }
                     if (yawAltControls >= 3)
                         goto LABEL_25;
                     move[3] = client->pers.cmd.yawmove;
-                    if ((client->pers.cmd.buttons & 0x4000) != 0)
+                    if ((client->pers.cmd.buttons & BUTTON_FRAG) != 0)
                     {
                         pitchmove = 127;
                         move[2] = 127;
                     }
-                    if ((client->pers.cmd.buttons & 0x8000) == 0)
+                    if ((client->pers.cmd.buttons & BUTTON_SMOKE) == 0)
                         goto LABEL_25;
                     pitchmove -= 127;
                 }

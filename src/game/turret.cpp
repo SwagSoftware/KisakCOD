@@ -363,7 +363,7 @@ void __cdecl turret_track(gentity_s *self, gentity_s *other)
     {
         turretInfo->fireTime = 0;
         client = other->client;
-        if ((client->ps.pm_flags & 0x800) != 0 || (client->buttons & 1) == 0)
+        if ((client->ps.pm_flags & 0x800) != 0 || (client->buttons & BUTTON_ATTACK) == 0)
         {
             turretInfo->triggerDown = 0;
         }

@@ -803,7 +803,7 @@ void __cdecl PlayerCmd_useButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x28) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -830,7 +830,7 @@ void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 1) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_ATTACK) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -857,7 +857,7 @@ void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x800) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_ADS) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -884,7 +884,7 @@ void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 4) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_MELEE) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -911,7 +911,7 @@ void __cdecl PlayerCmd_fragButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x4000) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_FRAG) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -938,7 +938,7 @@ void __cdecl PlayerCmd_secondaryOffhandButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x8000) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_SMOKE) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);

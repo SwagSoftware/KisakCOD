@@ -165,22 +165,22 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
     if (ent->client->useHoldEntity.isDefined())
     {
         client = ent->client;
-        if ((client->oldbuttons & 0x20) != 0 && (client->buttons & 0x20) == 0)
+        if ((client->oldbuttons & BUTTON_USE_RELOAD) != 0 && (client->buttons & BUTTON_USE_RELOAD) == 0)
         {
         LABEL_13:
             ent->client->ps.weapFlags |= 1u;
             return;
         }
     }
-    if ((ent->client->latched_buttons & 0x28) != 0)
+    if ((ent->client->latched_buttons & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0)
         v2 = Player_ActivateCmd(ent);
     if (!ent->client->useHoldEntity.isDefined() && !v2)
     {
-        if ((ent->client->latched_buttons & 0x20) == 0)
+        if ((ent->client->latched_buttons & BUTTON_USE_RELOAD) == 0)
             return;
         goto LABEL_13;
     }
-    if ((ent->client->buttons & 0x28) != 0)
+    if ((ent->client->buttons & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0)
         Player_ActivateHoldCmd(ent);
     ent->client->useButtonDone = 1;
 }
