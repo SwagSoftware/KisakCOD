@@ -1476,7 +1476,7 @@ bool __cdecl IsBulletImpactMOD(meansOfDeath_t mod)
             0,
             "mod doesn't index MOD_NUM\n\t%i not in [0, %i)",
             mod,
-            16);
+            MOD_NUM);
     return mod == MOD_PISTOL_BULLET || mod == MOD_RIFLE_BULLET || mod == MOD_HEAD_SHOT;
 }
 

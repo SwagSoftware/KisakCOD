@@ -465,7 +465,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
         }
         damage = 1.1f;
     LABEL_9:
-        G_Damage(ent, 0, 0, 0, 0, (int)((float)client->ps.stats[STAT_MAX_HEALTH] * damage), DAMAGE_NOFLAG, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
+        G_Damage(ent, 0, 0, 0, 0, (int)((float)client->ps.stats[STAT_MAX_HEALTH] * damage), DAMAGE_NOFLAG, MOD_FALLING, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
         goto LABEL_46;
     }
 }

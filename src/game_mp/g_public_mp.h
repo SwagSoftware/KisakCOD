@@ -33,7 +33,28 @@ struct BuiltinMethodDef // sizeof=0xC
 };
 static_assert(sizeof(BuiltinMethodDef) == 0xC);
 
-static uint16_t *modNames[16] =
+enum meansOfDeath_t : int32_t
+{                                       // ...
+    MOD_UNKNOWN = 0x0,
+    MOD_PISTOL_BULLET = 0x1,
+    MOD_RIFLE_BULLET = 0x2,
+    MOD_GRENADE = 0x3,
+    MOD_GRENADE_SPLASH = 0x4,
+    MOD_PROJECTILE = 0x5,
+    MOD_PROJECTILE_SPLASH = 0x6,
+    MOD_MELEE = 0x7,
+    MOD_HEAD_SHOT = 0x8,
+    MOD_CRUSH = 0x9,
+    MOD_TELEFRAG = 0xA,
+    MOD_FALLING = 0xB,
+    MOD_SUICIDE = 0xC,
+    MOD_TRIGGER_HURT = 0xD,
+    MOD_EXPLOSIVE = 0xE,
+    MOD_IMPACT = 0xF,
+    MOD_NUM = 0x10,
+};
+
+static uint16_t *modNames[MOD_NUM] =
 {
     &scr_const.mod_unknown,
     &scr_const.mod_pistol_bullet,
@@ -150,27 +171,6 @@ uint32_t __cdecl G_GetNonPVSPlayerInfo(gentity_s *pSelf, float *vPosition, int32
 
 
 // g_client_script_cmd_mp
-enum meansOfDeath_t : int32_t
-{                                       // ...
-    MOD_UNKNOWN = 0x0,
-    MOD_PISTOL_BULLET = 0x1,
-    MOD_RIFLE_BULLET = 0x2,
-    MOD_GRENADE = 0x3,
-    MOD_GRENADE_SPLASH = 0x4,
-    MOD_PROJECTILE = 0x5,
-    MOD_PROJECTILE_SPLASH = 0x6,
-    MOD_MELEE = 0x7,
-    MOD_HEAD_SHOT = 0x8,
-    MOD_CRUSH = 0x9,
-    MOD_TELEFRAG = 0xA,
-    MOD_FALLING = 0xB,
-    MOD_SUICIDE = 0xC,
-    MOD_TRIGGER_HURT = 0xD,
-    MOD_EXPLOSIVE = 0xE,
-    MOD_IMPACT = 0xF,
-    MOD_NUM = 0x10,
-};
-
 void __cdecl PlayerCmd_giveWeapon(scr_entref_t entref);
 void __cdecl G_InitializeAmmo(gentity_s *pSelf, int32_t weaponIndex, uint8_t weaponModel, int32_t hadWeapon);
 int32_t __cdecl G_GetNeededStartAmmo(gentity_s *pSelf, WeaponDef *weapDef);

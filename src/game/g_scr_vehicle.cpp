@@ -2791,14 +2791,14 @@ bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapo
 
     switch (mod)
     {
-    case 1:
-    case 2:
+    case MOD_PISTOL_BULLET:
+    case MOD_RIFLE_BULLET:
         if (v4->bulletDamage || ((damageFlags & DAMAGE_NO_ARMOR) != 0 && v4->armorPiercingDamage))
             goto LABEL_3;
         goto LABEL_6;
 
-    case 3:
-    case 4:
+    case MOD_GRENADE:
+    case MOD_GRENADE_SPLASH:
     {
 
         if (BG_GetWeaponDef(weapon)->projExplosion == WEAPPROJEXP_HEAVY)
@@ -2810,15 +2810,15 @@ bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapo
         break;
     }
 
-    case 5:
+    case MOD_PROJECTILE:
         result = (v4->projectileDamage == 0);
         break;
 
-    case 6:
+    case MOD_PROJECTILE_SPLASH:
         result = (v4->projectileSplashDamage == 0);
         break;
 
-    case 14:
+    case MOD_EXPLOSIVE:
     LABEL_3:
         result = 0;
         break;
@@ -5596,7 +5596,7 @@ void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
                 pOther->r.currentOrigin,
                 999999,
                 DAMAGE_NOFLAG,
-                9,
+                MOD_CRUSH,
                 -1,
                 HITLOC_NONE,
                 0,
@@ -5620,7 +5620,7 @@ void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
                     pOther->r.currentOrigin,
                     999999,
                     DAMAGE_NOFLAG,
-                    9,
+                    MOD_CRUSH,
                     -1,
                     HITLOC_NONE,
                     0,
@@ -5647,7 +5647,7 @@ void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
                             pOther->r.currentOrigin,
                             damage,
                             DAMAGE_NOFLAG,
-                            9,
+                            MOD_CRUSH,
                             -1,
                             HITLOC_NONE,
                             0,
