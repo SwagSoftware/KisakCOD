@@ -430,7 +430,7 @@ void __cdecl ClientEvents(gentity_s *ent, int oldEventSequence)
                     if (v7 == 81 || v7 == 82 || v7 == 83 || v7 == 85 || v7 >= 86 && v7 <= 114)
                     {
                         v12 = ent->client;
-                        if ((v12->ps.pm_flags & 2) == 0 && (v12->pers.cmd.buttons & 0x800) == 0)
+                        if ((v12->ps.pm_flags & 2) == 0 && (v12->pers.cmd.buttons & BUTTON_ADS) == 0)
                         {
                             sentient = ent->sentient;
                             if (sentient)
@@ -720,10 +720,10 @@ void __cdecl ClientThink_real(gentity_s *ent)
     useButtonDone = client->useButtonDone;
     client->oldbuttons = buttons;
     if (!useButtonDone)
-        *p_oldbuttons = buttons & 0xFFFFFFD7;
+        *p_oldbuttons = buttons & ~(BUTTON_USE | BUTTON_USE_RELOAD);
     v25 = p_cmd->buttons;
     *p_buttons = v25;
-    if ((v25 & 0x28) == 0)
+    if ((v25 & (BUTTON_USE | BUTTON_USE_RELOAD)) == 0)
         client->useButtonDone = 0;
     p_buttonsSinceLastFrame = &client->buttonsSinceLastFrame;
     HIDWORD(v29) = client->ps.locationSelectionInfo;
@@ -734,7 +734,7 @@ void __cdecl ClientThink_real(gentity_s *ent)
     client->buttonsSinceLastFrame = v29;
     if (HIDWORD(v29))
     {
-        if ((v29 & 0x10000) != 0)
+        if ((v29 & BUTTON_LOC_CONFIRM) != 0)
         {
             v29 = p_cmd->selectedLocation[1];
             v30 = p_cmd->selectedLocation[0];
@@ -765,14 +765,14 @@ void __cdecl ClientThink_real(gentity_s *ent)
         }
         else
         {
-            if ((v29 & 0x20000) == 0)
+            if ((v29 & BUTTON_LOC_CANCEL) == 0)
             {
             LABEL_34:
                 v33 = *p_buttonsSinceLastFrame;
-                v34 = *p_latched_buttons & 0x1300;
-                *p_buttons &= 0x1300u;
+                v34 = *p_latched_buttons & (BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE);
+                *p_buttons &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
                 *p_latched_buttons = v34;
-                *p_buttonsSinceLastFrame = v33 & 0x1300;
+                *p_buttonsSinceLastFrame = v33 & (BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE);
                 goto LABEL_35;
             }
             v31 = 0;

@@ -667,25 +667,25 @@ void __cdecl MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd)
     {
         if ((ps->eFlags & 8) != 0)
         {
-            cmd->buttons |= 0x100u;
+            cmd->buttons |= BUTTON_PRONE;
         }
         else if ((ps->eFlags & 4) != 0)
         {
-            cmd->buttons |= 0x200u;
+            cmd->buttons |= BUTTON_CROUCH;
         }
         if (ps->leanf <= 0.0)
         {
             if (ps->leanf < 0.0)
-                cmd->buttons |= 0x40u;
+                cmd->buttons |= BUTTON_LEAN_LEFT;
         }
         else
         {
-            cmd->buttons |= 0x80u;
+            cmd->buttons |= BUTTON_LEAN_RIGHT;
         }
         if (ps->fWeaponPosFrac != 0.0)
-            cmd->buttons |= 0x800u;
+            cmd->buttons |= BUTTON_ADS;
         if ((ps->pm_flags & PMF_SPRINTING) != 0)
-            cmd->buttons |= 2u;
+            cmd->buttons |= BUTTON_SPRINT;
     }
 }
 
@@ -775,7 +775,7 @@ void __cdecl MSG_WriteDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from
     {
         if (from->angles[0] == to->angles[0]
             && from->angles[1] == to->angles[1]
-            && (from->buttons & 1) == (to->buttons & 1)
+            && (from->buttons & BUTTON_ATTACK) == (to->buttons & BUTTON_ATTACK)
             && horFromMove == horToMove)
         {
             MSG_WriteKey(msg, key, 0, 1u);
@@ -804,12 +804,12 @@ void __cdecl MSG_WriteDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from
         MSG_WriteDeltaKey(msg, keya, from->buttons >> 1, to->buttons >> 1, 0x14u);
         MSG_WriteDeltaKey(msg, keya, from->weapon, to->weapon, 7u);
         MSG_WriteDeltaKey(msg, keya, from->offHandIndex, to->offHandIndex, 7u);
-        if ((to->buttons & 0x10000) != 0)
+        if ((to->buttons & BUTTON_LOC_CONFIRM) != 0)
         {
             MSG_WriteDeltaKeyByte(msg, keya, from->selectedLocation[0], to->selectedLocation[0]);
             MSG_WriteDeltaKeyByte(msg, keya, from->selectedLocation[1], to->selectedLocation[1]);
         }
-        if ((to->buttons & 4) != 0)
+        if ((to->buttons & BUTTON_MELEE) != 0)
         {
             MSG_WriteDeltaKeyShort(
                 msg,
@@ -840,7 +840,7 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
         to->serverTime = MSG_ReadLong(msg);
     if (MSG_ReadKey(msg, key, 1u))
     {
-        to->buttons &= ~1u;
+        to->buttons &= ~BUTTON_ATTACK;
         if (MSG_ReadKey(msg, key, 1u))
         {
             to->buttons |= MSG_ReadKey(msg, key, 1u);
@@ -851,16 +851,16 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
             MSG_HorMoveFrom(horToMovea, &to->forwardmove, &to->rightmove);
             keya = to->serverTime ^ key;
             to->angles[2] = (uint16_t)MSG_ReadDeltaKeyShort(msg, keya, from->angles[2]);
-            to->buttons &= 1u;
-            to->buttons |= 2 * MSG_ReadDeltaKey(msg, keya, from->buttons >> 1, 0x14u);
+            to->buttons &= BUTTON_ATTACK;
+            to->buttons |= BUTTON_SPRINT * MSG_ReadDeltaKey(msg, keya, from->buttons >> 1, 0x14u);
             to->weapon = MSG_ReadDeltaKey(msg, keya, from->weapon, 7u);
             to->offHandIndex = MSG_ReadDeltaKey(msg, keya, from->offHandIndex, 7u);
-            if ((to->buttons & 0x10000) != 0)
+            if ((to->buttons & BUTTON_LOC_CONFIRM) != 0)
             {
                 to->selectedLocation[0] = MSG_ReadDeltaKeyByte(msg, keya, from->selectedLocation[0]);
                 to->selectedLocation[1] = MSG_ReadDeltaKeyByte(msg, keya, from->selectedLocation[1]);
             }
-            if ((to->buttons & 4) != 0)
+            if ((to->buttons & BUTTON_MELEE) != 0)
             {
                 to->meleeChargeYaw = (double)MSG_ReadDeltaKeyShort(
                     msg,
@@ -869,7 +869,7 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
                     * 0.0054931640625;
                 to->meleeChargeDist = MSG_ReadDeltaKey(msg, keya, from->meleeChargeDist, 8u);
             }
-            if (to->buttons >= 0x200000)
+            if (to->buttons >= (1 << BUTTON_BIT_COUNT))
             {
                 Com_PrintError(15, "client sent an invalid buttons value %i\n", to->buttons);
                 to->buttons = from->buttons;

@@ -1083,7 +1083,7 @@ void __cdecl PlayerCmd_useButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 0x28) != 0);
+    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0);
 }
 
 void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
@@ -1114,7 +1114,7 @@ void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 1) != 0);
+    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & BUTTON_ATTACK) != 0);
 }
 
 void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
@@ -1145,7 +1145,7 @@ void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int16)v1->client->buttonsSinceLastFrame | (unsigned __int16)v1->client->buttons) & 0x800) != 0);
+    Scr_AddInt((((unsigned __int16)v1->client->buttonsSinceLastFrame | (unsigned __int16)v1->client->buttons) & BUTTON_ADS) != 0);
 }
 
 void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
@@ -1176,7 +1176,7 @@ void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 4) != 0);
+    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & BUTTON_MELEE) != 0);
 }
 
 int __cdecl PlayerCmd_CheckButtonPressed()

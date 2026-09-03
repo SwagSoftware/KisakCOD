@@ -29,22 +29,22 @@ void __cdecl Player_UpdateActivate(gentity_s *ent)
     ent->client->ps.weapFlags &= ~1u;
     useSucceeded = 0;
     if (ent->client->useHoldEntity.isDefined()
-        && (ent->client->oldbuttons & 0x20) != 0
-        && (ent->client->buttons & 0x20) == 0)
+        && (ent->client->oldbuttons & BUTTON_USE_RELOAD) != 0
+        && (ent->client->buttons & BUTTON_USE_RELOAD) == 0)
     {
         ent->client->ps.weapFlags |= 1u;
     }
     else
     {
-        if ((ent->client->latched_buttons & 0x28) != 0)
+        if ((ent->client->latched_buttons & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0)
             useSucceeded = Player_ActivateCmd(ent);
         if (ent->client->useHoldEntity.isDefined() || useSucceeded)
         {
-            if ((ent->client->buttons & 0x28) != 0)
+            if ((ent->client->buttons & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0)
                 Player_ActivateHoldCmd(ent);
             ent->client->useButtonDone = 1;
         }
-        else if ((ent->client->latched_buttons & 0x20) != 0)
+        else if ((ent->client->latched_buttons & BUTTON_USE_RELOAD) != 0)
         {
             ent->client->ps.weapFlags |= 1u;
         }

@@ -784,10 +784,10 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
 #endif
     ps->pm_flags &= ~PMF_SIGHT_AIMING;
     adsAllowed = PM_IsAdsAllowed(ps, pml);
-    adsRequested = (pm->cmd.buttons & 0x800) != 0;
+    adsRequested = (pm->cmd.buttons & BUTTON_ADS) != 0;
 #ifdef KISAK_MP
-    if ((pm->cmd.buttons & 2) != 0
-        && (weapDef->overlayReticle == WEAPOVERLAYRETICLE_NONE || (pm->cmd.buttons & 0x2000) == 0))
+    if ((pm->cmd.buttons & BUTTON_SPRINT) != 0
+        && (weapDef->overlayReticle == WEAPOVERLAYRETICLE_NONE || (pm->cmd.buttons & BUTTON_BREATH) == 0))
     {
         PM_ExitAimDownSight(ps);
         adsAllowed = 0;
@@ -802,7 +802,7 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
             iassert(ps->otherFlags & POF_PLAYER);
 #endif
         }
-        else if ((pm->oldcmd.buttons & 0x800) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
+        else if ((pm->oldcmd.buttons & BUTTON_ADS) == 0 || !pm->cmd.forwardmove && !pm->cmd.rightmove)
         {
             ps->pm_flags |= PMF_SIGHT_AIMING;
             ps->pm_flags |= PMF_PRONEMOVE_OVERRIDDEN;
@@ -1526,7 +1526,7 @@ void __cdecl PM_UpdateHoldBreath(pmove_t *pm, pml_t *pml)
         if (ps->fWeaponPosFrac == 1.0
             && weapDef->overlayReticle
             && weapDef->weapClass != WEAPCLASS_ITEM
-            && (pm->cmd.buttons & 0x2000) != 0)
+            && (pm->cmd.buttons & BUTTON_BREATH) != 0)
         {
             if (!ps->holdBreathTimer)
                 PM_StartHoldBreath(ps);
@@ -1845,7 +1845,7 @@ void __cdecl PM_Weapon_FinishReloadStart(pmove_t *pm, int32_t delayedAction)
         PM_Weapon_ReloadDelayedAction(ps);
     if (!ps->weaponTime)
     {
-        if (weapDef->bSegmentedReload && (pm->cmd.buttons & 1) != 0)
+        if (weapDef->bSegmentedReload && (pm->cmd.buttons & BUTTON_ATTACK) != 0)
             ps->weaponstate = WEAPON_RELOAD_START_INTERUPT;
 
         if (ps->weaponstate == WEAPON_RELOAD_START_INTERUPT && ps->ammoclip[BG_ClipForWeapon(ps->weapon)] || !PM_Weapon_AllowReload(ps))
@@ -2082,7 +2082,7 @@ void __cdecl PM_Weapon_FinishReload(pmove_t *pm, int32_t delayedAction)
     {
         if (!ps->weaponTime)
         {
-            if (weapDef->bSegmentedReload && (pm->cmd.buttons & 1) != 0)
+            if (weapDef->bSegmentedReload && (pm->cmd.buttons & BUTTON_ATTACK) != 0)
                 ps->weaponstate = WEAPON_RELOADING_INTERUPT;
             Com_BitClearAssert(ps->weaponrechamber, ps->weapon, 16);
             if (!weapDef->bSegmentedReload)
@@ -2136,7 +2136,7 @@ void __cdecl PM_Weapon_CheckForReload(pmove_t *pm)
         && ps->weaponstate != WEAPON_MELEE_FIRE
         && ps->weaponstate != WEAPON_MELEE_END)
     {
-        reloadRequested = (pm->cmd.buttons & 0x10) != 0;
+        reloadRequested = (pm->cmd.buttons & BUTTON_RELOAD) != 0;
         if ((ps->weapFlags & 1) != 0)
         {
             ps->weapFlags &= ~1u;
@@ -2144,8 +2144,8 @@ void __cdecl PM_Weapon_CheckForReload(pmove_t *pm)
         }
         if (weapDef->bSegmentedReload
             && (ps->weaponstate == WEAPON_RELOAD_START || ps->weaponstate == WEAPON_RELOADING)
-            && (pm->cmd.buttons & 1) != 0
-            && (pm->oldcmd.buttons & 1) == 0)
+            && (pm->cmd.buttons & BUTTON_ATTACK) != 0
+            && (pm->oldcmd.buttons & BUTTON_ATTACK) == 0)
         {
             if (ps->weaponstate == WEAPON_RELOAD_START && weapDef->iReloadStartTime)
             {
@@ -2255,8 +2255,8 @@ void __cdecl UpdatePendingTriggerPull(pmove_t *pm)
     iassert(ps);
 
     if (BG_GetWeaponDef(ps->weapon)->fireType >= (uint32_t)WEAPON_FIRETYPE_BURSTFIRE2
-        && (pm->cmd.buttons & 1) != 0
-        && (pm->oldcmd.buttons & 1) == 0)
+        && (pm->cmd.buttons & BUTTON_ATTACK) != 0
+        && (pm->oldcmd.buttons & BUTTON_ATTACK) == 0)
     {
         ps->weapFlags |= 0x100u;
     }
@@ -2352,7 +2352,7 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
             v3 = weapDef->weapType == WEAPTYPE_GRENADE && weapDef->holdButtonToThrow;
             if ((ps->weaponstate < WEAPON_OFFHAND_INIT || ps->weaponstate > WEAPON_OFFHAND_END)
                 && (v4 || v3)
-                && (pm->cmd.buttons & 1) != 0
+                && (pm->cmd.buttons & BUTTON_ATTACK) != 0
                 && ps->weapon == pm->cmd.weapon
                 && PM_WeaponAmmoAvailable(ps))
             {
@@ -2390,7 +2390,7 @@ int __cdecl PM_Weapon_WeaponTimeAdjust(pmove_t *pm, pml_t *pml)
                 if (G_IsServerGameSystem(ps->clientNum))
                     Com_Printf(19, "end weapon (timeout)\n");
 #endif
-                if (((pm->cmd.buttons & 1) == 0 || (ps->weapFlags & 0x100) != 0) && !BurstFirePending(ps))
+                if (((pm->cmd.buttons & BUTTON_ATTACK) == 0 || (ps->weapFlags & 0x100) != 0) && !BurstFirePending(ps))
                     ps->weaponShotCount = 0;
                 ps->weaponTime = 0;
             }
@@ -2929,8 +2929,8 @@ void __cdecl PM_Weapon_CheckForMelee(pmove_t *pm, int32_t delayedAction)
             || ps->weaponstate == WEAPON_RELOAD_END
             || ps->weaponstate == WEAPON_RELOAD_START_INTERUPT
             || ps->weaponstate == WEAPON_RELOADING_INTERUPT)
-        && (pm->cmd.buttons & 4) != 0
-        && (pm->oldcmd.buttons & 4) == 0
+        && (pm->cmd.buttons & BUTTON_MELEE) != 0
+        && (pm->oldcmd.buttons & BUTTON_MELEE) == 0
         && (ps->fWeaponPosFrac <= 0.0 || weapDef->overlayReticle == WEAPOVERLAYRETICLE_NONE))
     {
         weaponstate = ps->weaponstate;
@@ -3041,7 +3041,7 @@ void __cdecl PM_Weapon_OffHandStart(pmove_t *pm)
     iassert(ps);
     iassert(ps->offHandIndex != WP_NONE);
     weapDef = BG_GetWeaponDef(ps->offHandIndex);
-    if (!weapDef->holdButtonToThrow && (pm->oldcmd.buttons & 0xC000) != 0 && (pm->cmd.buttons & 0xC000) != 0)
+    if (!weapDef->holdButtonToThrow && (pm->oldcmd.buttons & (BUTTON_FRAG | BUTTON_SMOKE)) != 0 && (pm->cmd.buttons & (BUTTON_FRAG | BUTTON_SMOKE)) != 0)
     {
         ps->weaponDelay = 1;
     }
@@ -3158,14 +3158,14 @@ void __cdecl PM_Weapon_CheckForOffHand(pmove_t *pm)
                 }
             }
         }
-        if ((pm->cmd.buttons & 0x4000) != 0)
+        if ((pm->cmd.buttons & BUTTON_FRAG) != 0)
         {
             offhandClass = OFFHAND_CLASS_FRAG_GRENADE;
             FirstAvailableOffhand = BG_GetFirstAvailableOffhand(ps, 1);
         }
         else
         {
-            if ((pm->cmd.buttons & 0x8000) == 0)
+            if ((pm->cmd.buttons & BUTTON_SMOKE) == 0)
                 return;
             if (ps->offhandSecondary)
             {
@@ -3350,7 +3350,7 @@ void __cdecl PM_Weapon_CheckForDetonation(pmove_t *pm)
             && (ps->weaponstate < WEAPON_OFFHAND_INIT || ps->weaponstate > WEAPON_OFFHAND_END)
             && ps->weaponstate != WEAPON_NIGHTVISION_WEAR
             && ps->weaponstate != WEAPON_NIGHTVISION_REMOVE
-            && (pm->cmd.buttons & 1) != 0)
+            && (pm->cmd.buttons & BUTTON_ATTACK) != 0)
         {
             ps->weaponstate = WEAPON_DETONATING;
             ps->weaponTime = weapDef->iDetonateTime;
@@ -3372,7 +3372,7 @@ void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm)
 
         if (weapDef->holdButtonToThrow)
         {
-            if ((pm->cmd.buttons & 0xC000) == 0)
+            if ((pm->cmd.buttons & (BUTTON_FRAG | BUTTON_SMOKE)) == 0)
                 PM_Weapon_OffHandEnd(ps);
         }
     }
@@ -3384,7 +3384,7 @@ void __cdecl PM_Weapon_CheckForGrenadeThrowCancel(pmove_t *pm)
         if (weapDefa->weapType == WEAPTYPE_GRENADE
             && ps->weaponstate == WEAPON_FIRING
             && weapDefa->holdButtonToThrow
-            && (pm->cmd.buttons & 1) == 0)
+            && (pm->cmd.buttons & BUTTON_ATTACK) == 0)
         {
             PM_Weapon_Idle(ps);
             PM_StartWeaponAnim(ps, 1);
@@ -3412,7 +3412,7 @@ void __cdecl PM_Weapon_CheckForNightVision(pmove_t *pm)
     iassert(ps);
 
     BG_GetWeaponDef(ps->weapon);
-    if ((pm->oldcmd.buttons & 0x40000) == 0 && (pm->cmd.buttons & 0x40000) != 0)
+    if ((pm->oldcmd.buttons & BUTTON_NIGHTVISION) == 0 && (pm->cmd.buttons & BUTTON_NIGHTVISION) != 0)
     {
 #ifdef KISAK_SP
 		WeaponDef *weapDef = BG_GetWeaponDef(ps->weapon);
