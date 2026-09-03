@@ -77,7 +77,7 @@ char __cdecl Player_ActivateCmd(gentity_s *ent)
     {
         return 1;
     }
-    else if (ent->client->ps.weaponstate < 15 || ent->client->ps.weaponstate > 20)
+    else if (ent->client->ps.weaponstate < WEAPON_OFFHAND_INIT || ent->client->ps.weaponstate > WEAPON_OFFHAND_END)
     {
         if (ent->client->ps.cursorHint)
         {
@@ -196,7 +196,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
         }
         else if ((ent->client->ps.pm_flags & PMF_MANTLE) == 0
             && (ent->client->ps.pm_flags & PMF_SPRINTING) == 0
-            && (ps->weaponstate < 15 || ps->weaponstate > 19))
+            && (ps->weaponstate < WEAPON_OFFHAND_INIT || ps->weaponstate > WEAPON_OFFHAND))
         {
             if (ps->pm_type == PM_LASTSTAND)
             {

@@ -104,7 +104,7 @@ int __cdecl Player_ActivateCmd(gentity_s *ent)
         if ((pm_flags & 4) == 0 && (pm_flags & 0x8000) == 0)
         {
             weaponstate = client->ps.weaponstate;
-            if (weaponstate < 15 || weaponstate > 20)
+            if (weaponstate < WEAPON_OFFHAND_INIT || weaponstate > WEAPON_OFFHAND_END)
             {
                 cursorHintEntIndex = client->ps.cursorHintEntIndex;
                 if (cursorHintEntIndex == ENTITYNUM_NONE)
@@ -655,7 +655,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                 if ((pm_flags & 4) == 0 && (pm_flags & 0x8000) == 0)
                 {
                     weaponstate = client->ps.weaponstate;
-                    if ((weaponstate < 15 || weaponstate > 19) && !v6->bFrozen)
+                    if ((weaponstate < WEAPON_OFFHAND_INIT || weaponstate > WEAPON_OFFHAND) && !v6->bFrozen)
                     {
                         UseList = Player_GetUseList(ent, v20, cursorHintEntIndex);
                         v10 = UseList;

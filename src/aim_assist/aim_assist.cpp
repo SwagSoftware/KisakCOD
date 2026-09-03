@@ -933,7 +933,7 @@ void __cdecl AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output)
     iassert(output);
 
     aaGlob = &aaGlobArray[input->localClientNum];
-    meleeing = input->ps->weaponstate == 12;
+    meleeing = input->ps->weaponstate == WEAPON_MELEE_INIT;
     weapIndex = AimAssist_GetWeaponIndex(input->localClientNum, input->ps);
     if (aim_automelee_enabled->current.enabled && meleeing && weapIndex)
     {
