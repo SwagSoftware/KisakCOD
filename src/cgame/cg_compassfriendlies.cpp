@@ -37,9 +37,9 @@ void __cdecl CG_CompassAddWeaponPingInfo(int localClientNum, centity_s *cent, fl
     int team; // [sp+54h] [-3Ch] BYREF
 
     eType = cent->nextState.eType;
-    if (eType != 16)
+    if (eType != ET_ACTOR_CORPSE)
     {
-        if (eType != 14)
+        if (eType != ET_ACTOR)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp",
                 61,
@@ -140,7 +140,7 @@ void __cdecl CG_CompassUpdateActorInfo(int localClientNum, int entityIndex)
             "%s",
             "cgameGlob->nextSnap");
     Entity = CG_GetEntity(localClientNum, entityIndex);
-    if (Entity->nextState.eType != 14)
+    if (Entity->nextState.eType != ET_ACTOR)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp",
             109,
@@ -268,7 +268,7 @@ void __cdecl CG_CompassUpdateVehicleInfo(int localClientNum, int entityIndex)
             "%s",
             "cgameGlob->nextSnap");
     Entity = CG_GetEntity(localClientNum, entityIndex);
-    if (Entity->nextState.eType != 11)
+    if (Entity->nextState.eType != ET_VEHICLE)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_compassfriendlies.cpp",
             167,

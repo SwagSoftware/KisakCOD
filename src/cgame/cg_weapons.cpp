@@ -2568,7 +2568,7 @@ void __cdecl CG_FireWeapon(
             if (isPlayer)
                 TakeClipOnlyWeaponIfEmpty(localClientNum, &cgameGlob->predictedPlayerState);
 #elif KISAK_SP
-            //if (playerUsingTurret || v19 || p_nextState->eType == 1)
+            //if (playerUsingTurret || v19 || p_nextState->eType == ET_PLAYER)
             //{
             //    fireRumble = weaponDef->fireRumble;
             //    if (fireRumble)

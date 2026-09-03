@@ -1844,7 +1844,7 @@ void Scr_GetSpawnerArray()
             v3 = &level.gentities[v2];
             if (level.gentities[v2].r.inuse)
             {
-                if (v3->s.eType == 15)
+                if (v3->s.eType == ET_ACTOR_SPAWNER)
                 {
                     Scr_AddEntity(v3);
                     Scr_AddArray();
@@ -1877,7 +1877,7 @@ void Scr_GetSpawnerTeamArray()
         do
         {
             v4 = &level.gentities[v3];
-            if (level.gentities[v3].r.inuse && v4->s.eType == 15 && ((1 << v4->item[0].ammoCount) & TeamFlags) != 0)
+            if (level.gentities[v3].r.inuse && v4->s.eType == ET_ACTOR_SPAWNER && ((1 << v4->item[0].ammoCount) & TeamFlags) != 0)
             {
                 Scr_AddEntity(v4);
                 Scr_AddArray();
@@ -2768,7 +2768,7 @@ void __cdecl ScrCmd_EnableLinkTo(scr_entref_t entref)
     Entity = GetEntity(entref);
     if ((Entity->flags & FL_SUPPORTS_LINKTO) != 0)
         Scr_ObjectError("entity already has linkTo enabled");
-    if (Entity->s.eType || Entity->physicsObject)
+    if (Entity->s.eType != ET_GENERAL || Entity->physicsObject)
     {
         EntityTypeName = G_GetEntityTypeName(Entity);
         Scr_ObjectError(va("entity (classname: '%s', type: '%s') does not currently support enableLinkTo", SL_ConvertToString(Entity->classname), EntityTypeName));
@@ -2807,7 +2807,7 @@ void __cdecl ScrCmd_dospawn(scr_entref_t entref)
 
     Entity = GetEntity(entref);
     v2 = Entity;
-    if (Entity->s.eType != 15)
+    if (Entity->s.eType != ET_ACTOR_SPAWNER)
     {
         targetname = Entity->targetname;
         if (v2->targetname)
@@ -3014,7 +3014,7 @@ void __cdecl ScrCmd_ItemWeaponSetAmmo(scr_entref_t entref)
     char *v8; // r11
 
     Entity = GetEntity(entref);
-    if (Entity->s.eType != 2)
+    if (Entity->s.eType != ET_ITEM)
         Scr_Error("Entity is not an item.");
     if (*(itemType_t *)((char *)&bg_itemlist[0].giType + __ROL4__(Entity->s.index.item, 2)) != IT_WEAPON)
         Scr_Error("Item entity is not a weapon.");
@@ -4033,7 +4033,7 @@ void __cdecl Scr_SetStableMissile(scr_entref_t entref)
     Int = Scr_GetInt(0);
     eType = Entity->s.eType;
     v4 = Int;
-    if (eType != 14 && eType != 11 && eType != 1)
+    if (eType != ET_ACTOR && eType != ET_VEHICLE && eType != ET_PLAYER)
         Scr_Error("Type should be a sentient or a vehicle");
     flags = Entity->flags;
     if (v4)
@@ -6836,7 +6836,7 @@ void __cdecl GScr_Detonate(scr_entref_t entref)
 
     Entity = GetEntity(entref);
     WeaponDef = BG_GetWeaponDef(Entity->s.weapon);
-    if (Entity->s.eType != 3 || !WeaponDef || WeaponDef->weapType != WEAPTYPE_GRENADE)
+    if (Entity->s.eType != ET_MISSILE || !WeaponDef || WeaponDef->weapType != WEAPTYPE_GRENADE)
         Scr_ObjectError("entity is not a grenade");
     if (Scr_GetNumParam())
     {
@@ -7815,7 +7815,7 @@ void Scr_TriggerFX()
     Entity = Scr_GetEntity(0);
     if (!Entity)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 9098, 0, "%s", "ent");
-    if (Entity->s.eType != 7)
+    if (Entity->s.eType != ET_FX)
         Scr_ParamError(0, "entity wasn't created with 'newFx'");
     if (Scr_GetNumParam() == 2)
     {
@@ -9488,7 +9488,7 @@ void __cdecl GScr_ValidateLightVis(int eType)
 {
     const char *v1; // r3
 
-    if (eType && eType != 5 && !alwaysfails)
+    if (eType != ET_GENERAL && eType != ET_SCRIPTMOVER && !alwaysfails)
     {
         v1 = va("(un)lockLightVis: entity type '%i' is not yet handled, get a coder to fix it\n", eType);
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11828, 0, v1);
@@ -9504,7 +9504,7 @@ void __cdecl GScr_LockLightVis(scr_entref_t entref)
     Entity = GetEntity(entref);
     eType = Entity->s.eType;
     Entity->s.lerp.eFlags |= 0x400u;
-    if (eType && eType != 5 && !alwaysfails)
+    if (eType != ET_GENERAL && eType != ET_SCRIPTMOVER && !alwaysfails)
     {
         v3 = va("(un)lockLightVis: entity type '%i' is not yet handled, get a coder to fix it\n", eType);
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11828, 0, v3);
@@ -9520,7 +9520,7 @@ void __cdecl GScr_UnlockLightVis(scr_entref_t entref)
     Entity = GetEntity(entref);
     eType = Entity->s.eType;
     Entity->s.lerp.eFlags &= ~0x400u;
-    if (eType && eType != 5 && !alwaysfails)
+    if (eType != ET_GENERAL && eType != ET_SCRIPTMOVER && !alwaysfails)
     {
         v3 = va("(un)lockLightVis: entity type '%i' is not yet handled, get a coder to fix it\n", eType);
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 11828, 0, v3);
@@ -9605,7 +9605,7 @@ void __cdecl GScr_SetSoundBlend(scr_entref_t entref)
     double v7; // fp31
 
     Entity = GetEntity(entref);
-    if (Entity->s.eType != 6)
+    if (Entity->s.eType != ET_SOUND_BLEND)
         Scr_Error("Entity is not a sound_blend\n");
     String = Scr_GetString(0);
     v3 = G_SoundAliasIndexPermanent(String);
@@ -9718,7 +9718,7 @@ void __cdecl GScr_MakeFakeAI(scr_entref_t entref)
 
     Entity = GetEntity(entref);
     v2 = Entity;
-    if (Entity->s.eType != 5 || (Entity->flags & 0x2000) == 0)
+    if (Entity->s.eType != ET_SCRIPTMOVER || (Entity->flags & 0x2000) == 0)
         Scr_Error("makeFakeAI must be applied to a script_model");
     v2->r.svFlags = v2->r.svFlags & 0xF9 | 2;
     v2->r.mins[0] = -15.0;
@@ -9889,7 +9889,7 @@ void __cdecl GScr_SetSpawnerTeam(scr_entref_t entref)
     const char *v3; // r3
 
     Entity = GetEntity(entref);
-    if (Entity->s.eType != 15)
+    if (Entity->s.eType != ET_ACTOR_SPAWNER)
         Scr_Error("setspawnerteam can only be applied to AI spawners");
     String = Scr_GetString(0);
     if (I_stricmp(String, "axis"))
@@ -10706,7 +10706,7 @@ gentity_s *__cdecl GScr_SetupLightEntity(scr_entref_t entref)
     Entity = GetEntity(entref);
     if (!Entity)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 13917, 0, "%s", "ent");
-    if (Entity->s.eType != 9)
+    if (Entity->s.eType != ET_PRIMARY_LIGHT)
     {
         v2 = SL_ConvertToString(Entity->classname);
         v3 = va("Function can only be called on a 'light' entity; actual classname is '%s'\n", v2);

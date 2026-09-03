@@ -34,7 +34,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
     if (!useEnt->r.inuse)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 52, 0, "%s", "useEnt->r.inuse");
     eType = useEnt->s.eType;
-    if (eType == 2)
+    if (eType == ET_ITEM)
     {
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.touch, 1u);
@@ -50,7 +50,7 @@ void __cdecl Player_UseEntity(gentity_s *playerEnt, gentity_s *useEnt)
     }
     else
     {
-        if (eType == 14)
+        if (eType == ET_ACTOR)
             Sentient_StealClaimNode(playerEnt->sentient, useEnt->sentient);
         Scr_AddEntity(playerEnt);
         Scr_Notify(useEnt, scr_const.trigger, 1u);
@@ -300,7 +300,7 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
             if (ent == gEnt)
                 goto LABEL_41;
             eType = gEnt->s.eType;
-            if (eType != 2 && (gEnt->r.contents & 0x200000) == 0)
+            if (eType != ET_ITEM && (gEnt->r.contents & 0x200000) == 0)
             {
                 actor = gEnt->actor;
                 if (!actor || !actor->useable)
@@ -322,7 +322,7 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
             }
             else
             {
-                if (eType == 3)
+                if (eType == ET_MISSILE)
                 {
                     if (prevHintEntIndex != gEnt->s.number)
                     {
@@ -400,13 +400,13 @@ int __cdecl Player_GetUseList(gentity_s *ent, useList_t *useList, int prevHintEn
                     * (float)0.5)
                     - (float)1.0)
                     * (float)256.0;
-                if (gEnt->s.eType == 3)
+                if (gEnt->s.eType == ET_MISSILE)
                     v12->score = (float)v30 - 512.0f;
                 if (gEnt->classname == scr_const.trigger_use)
                     v12->score = v12->score - 256.0f;
                 if (gEnt->s.eType == ET_MG42)
                     v12->score = v12->score - 128.0f;
-                if (gEnt->s.eType == 2 && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
+                if (gEnt->s.eType == ET_ITEM && !BG_CanItemBeGrabbed(&gEnt->s, &ent->client->ps, 0))
                 {
                     ++v6;
                     v12->score = v12->score + (float)10000.0;
@@ -480,7 +480,7 @@ void __cdecl G_UpdateFriendlyOverlay(gentity_s *ent)
     actor = v2->actor;
     if (!actor || !actor->properName)
     {
-        if (v2->s.eType == 11)
+        if (v2->s.eType == ET_VEHICLE)
         {
             if (!v2->scr_vehicle)
                 MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp", 466, 0, "%s", "traceEnt->scr_vehicle");
@@ -1170,7 +1170,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                 }
                 return;
             }
-            if (traceEnt->s.eType != 11 || ent->client->pLookatEnt.isDefined())
+            if (traceEnt->s.eType != ET_VEHICLE || ent->client->pLookatEnt.isDefined())
             {
                 if (traceEnt->lookAtText0 && !ent->client->pLookatEnt.isDefined())
                 {
@@ -1192,7 +1192,7 @@ void __cdecl Player_UpdateLookAtEntity(gentity_s *ent)
                     }
                     if (v30 < (float)(v29->current.value * v29->current.value))
                         ent->client->pLookatEnt.setEnt(traceEnt);
-                    if (traceEnt->s.eType == 5)
+                    if (traceEnt->s.eType == ET_SCRIPTMOVER)
                     {
                         v31 = g_friendlyfireDist;
                         if (g_friendlyfireDist->current.value > MAX_FRIENDLY_DIST)
