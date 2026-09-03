@@ -4098,7 +4098,7 @@ void __cdecl GScr_StartFiring(scr_entref_t entref)
     pTurretInfo = v2->pTurretInfo;
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 4502, 0, "%s", "pTurretInfo");
-    pTurretInfo->flags |= 4u;
+    pTurretInfo->flags |= TURRET_FIRING;
 }
 
 void __cdecl GScr_StopFiring(scr_entref_t entref)
@@ -4120,7 +4120,7 @@ void __cdecl GScr_StopFiring(scr_entref_t entref)
     pTurretInfo = v2->pTurretInfo;
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_scr_main.cpp", 4528, 0, "%s", "pTurretInfo");
-    pTurretInfo->flags &= ~4u;
+    pTurretInfo->flags &= ~TURRET_FIRING;
 }
 
 void __cdecl GScr_ShootTurret(scr_entref_t entref)
@@ -4164,19 +4164,19 @@ void __cdecl GScr_SetMode(scr_entref_t entref)
     ConstString = Scr_GetConstString(0);
     if (ConstString == scr_const.auto_ai)
     {
-        pTurretInfo->flags |= 3u;
+        pTurretInfo->flags |= TURRET_REQUIRES_AI | TURRET_AUTO;
     }
     else if (ConstString == scr_const.manual)
     {
-        pTurretInfo->flags &= 0xFFFFFFFC;
+        pTurretInfo->flags &= ~(TURRET_REQUIRES_AI | TURRET_AUTO);
     }
     else if (ConstString == scr_const.manual_ai)
     {
-        pTurretInfo->flags = pTurretInfo->flags & 0xFFFFFFFC | 1;
+        pTurretInfo->flags = (pTurretInfo->flags & ~(TURRET_REQUIRES_AI | TURRET_AUTO)) | TURRET_REQUIRES_AI;
     }
     else if (ConstString == scr_const.auto_nonai)
     {
-        pTurretInfo->flags = __ROL4__(1, 1) & 3 | pTurretInfo->flags & 0xFFFFFFFC;
+        pTurretInfo->flags = (pTurretInfo->flags & ~(TURRET_REQUIRES_AI | TURRET_AUTO)) | TURRET_AUTO;
     }
     else
     {
@@ -4507,7 +4507,7 @@ void __cdecl GScr_GetTurretTarget(scr_entref_t entref)
     if (ent->pTurretInfo->target.isDefined())
     {
         pTurretInfo = ent->pTurretInfo;
-        if ((pTurretInfo->flags & 0x40) != 0)
+        if ((pTurretInfo->flags & TURRET_HAS_TARGET) != 0)
         {
             Scr_AddEntity(pTurretInfo->target.ent());
         }

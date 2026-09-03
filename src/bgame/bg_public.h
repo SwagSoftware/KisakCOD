@@ -518,6 +518,22 @@ struct mover_ent_t // sizeof=0x60 (SP/MP same)
 };
 static_assert(sizeof(mover_ent_t) == 0x60);
 
+enum $A1BE347394FC01D8E43F73A65E725CFC : __int32
+{
+    TURRET_REQUIRES_AI     = (1 << 0),
+    TURRET_AUTO            = (1 << 1),
+    TURRET_FIRING          = (1 << 2),
+    TURRET_HAS_MISS_TARGET = (1 << 3),
+    TURRET_TAKEN_PAIN      = (1 << 4),
+    TURRET_ERROR_INITED    = (1 << 5),
+    TURRET_HAS_TARGET      = (1 << 6),
+    TURRET_BAD_TARGET      = (1 << 7),
+    TURRET_FIRST_PITCH_CAP = (1 << 8),
+    TURRET_PITCH_CAP       = (1 << 9),
+    TURRET_PITCH_MIN       = (1 << 10),
+    TURRET_INIT_VIEW       = (1 << 11)
+};
+
 #ifdef KISAK_MP
 struct entityShared_t // sizeof=0x68
 {                                       // ...
