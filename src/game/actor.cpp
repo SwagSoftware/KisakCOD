@@ -4989,7 +4989,7 @@ void __cdecl Actor_Think(gentity_s *self)
             Actor_UpdateLookAt(actor);
 
             if (actor->delayedDeath && !Actor_InScriptedState(actor))
-                G_Damage(self, 0, 0, 0, self->r.currentOrigin, self->health + 1, 0, 0, 0xFFFFFFFF, HITLOC_HEAD, 0, 0);
+                G_Damage(self, 0, 0, 0, self->r.currentOrigin, self->health + 1, DAMAGE_NOFLAG, 0, 0xFFFFFFFF, HITLOC_HEAD, 0, 0);
 
             if (self->actor->Physics.bIsAlive && !self->actor->ignoreTriggers)
                 G_DoTouchTriggers(self);

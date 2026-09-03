@@ -1300,7 +1300,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 localdir[1] = 0.0f;
                 localdir[2] = 0.0f;
             }
-            if ((pSelf->flags & 8) == 0 && (dflags & 4) == 0)
+            if ((pSelf->flags & 8) == 0 && (dflags & DAMAGE_NO_KNOCKBACK) == 0)
             {
                 knockbackMod = 0.30000001f;
                 if ((pSelf->client->ps.pm_flags & PMF_PRONE) != 0)

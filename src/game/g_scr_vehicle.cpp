@@ -971,7 +971,7 @@ void __cdecl VEH_PushEntity(gentity_s *ent, gentity_s *target, float *pushDir, f
                 && (!target->actor || !Actor_InScriptedState(target->actor)))
             {
                 G_Damage(target, ent, ent, pushDir, target->r.currentOrigin,
-                         999999, 0, MOD_CRUSH, -1, HITLOC_NONE, 0, 0);
+                         999999, DAMAGE_NOFLAG, MOD_CRUSH, -1, HITLOC_NONE, 0, 0);
             }
         }
 #endif
@@ -2793,7 +2793,7 @@ bool G_IsVehicleImmune(gentity_s *ent, int mod, char damageFlags, uint32_t weapo
     {
     case 1:
     case 2:
-        if (v4->bulletDamage || ((damageFlags & 2) != 0 && v4->armorPiercingDamage))
+        if (v4->bulletDamage || ((damageFlags & DAMAGE_NO_ARMOR) != 0 && v4->armorPiercingDamage))
             goto LABEL_3;
         goto LABEL_6;
 
@@ -5595,7 +5595,7 @@ void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
                 moveDir,
                 pOther->r.currentOrigin,
                 999999,
-                0,
+                DAMAGE_NOFLAG,
                 9,
                 -1,
                 HITLOC_NONE,
@@ -5619,7 +5619,7 @@ void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
                     moveDir,
                     pOther->r.currentOrigin,
                     999999,
-                    0,
+                    DAMAGE_NOFLAG,
                     9,
                     -1,
                     HITLOC_NONE,
@@ -5646,7 +5646,7 @@ void Scr_Vehicle_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
                             moveDir,
                             pOther->r.currentOrigin,
                             damage,
-                            0,
+                            DAMAGE_NOFLAG,
                             9,
                             -1,
                             HITLOC_NONE,

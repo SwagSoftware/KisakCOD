@@ -191,7 +191,7 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int32_t extra)
     {
         G_Trigger(self, other);
         self->item[0].index = (self->spawnflags & 0x10) != 0 ? level.time + 1000 : level.time + 50;
-        G_Damage(other, self, self, 0, 0, self->damage, 0, 13, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
+        G_Damage(other, self, self, 0, 0, self->damage, DAMAGE_NOFLAG, 13, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
         if ((self->spawnflags & 0x20) != 0)
         {
             if (self->handler != 3)

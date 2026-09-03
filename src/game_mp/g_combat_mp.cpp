@@ -913,7 +913,7 @@ int32_t __cdecl G_RadiusDamage(
                     Vec3Sub(ent->r.currentOrigin, origin, diff);
                     diff[2] = diff[2] + 24.0;
                     v14 = (fInnerDamage - fOuterDamage) * (1.0 - v12 / radius) + fOuterDamage;
-                    G_Damage(ent, inflictor, attacker, diff, origin, (v14 * v23), 5, mod, weapon, HITLOC_NONE, 0, 0, 0);
+                    G_Damage(ent, inflictor, attacker, diff, origin, (v14 * v23), DAMAGE_RADIUS | DAMAGE_NO_KNOCKBACK, mod, weapon, HITLOC_NONE, 0, 0, 0);
                 }
             }
         }

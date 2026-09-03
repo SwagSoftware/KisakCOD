@@ -231,7 +231,7 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
         wp->forward,
         endpos,
         damage + v6 % 5,
-        0,
+        DAMAGE_NOFLAG,
         7,
         0xFFFFFFFF,
         partGroup,

@@ -266,7 +266,7 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
             0,
             0,
             self->damage,
-            0, // dflags
+            DAMAGE_NOFLAG, // dflags
             13, // mod
             0xFFFFFFFF,
             HITLOC_NONE,

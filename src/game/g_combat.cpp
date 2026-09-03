@@ -506,7 +506,7 @@ static void __cdecl G_DamageKnockback(
     if (dir)
         Vec3NormalizeTo(dir, scaledDir);
     else
-        flags |= 4;
+        flags |= DAMAGE_NO_KNOCKBACK;
 
     client = targ->client;
     if (client)
@@ -529,7 +529,7 @@ static void __cdecl G_DamageKnockback(
     if ((targ->flags & 0x20) != 0)
         dmg = 0;
 
-    if ((flags & 4) == 0 && dmg && client && (client->ps.eFlags & 0x300) == 0)
+    if ((flags & DAMAGE_NO_KNOCKBACK) == 0 && dmg && client && (client->ps.eFlags & 0x300) == 0)
     {
         client->ps.velocity[0] += (scaledDir[0] * ((g_knockback->current.value * dmg) * 0.004f));
         client->ps.velocity[1] += (scaledDir[1] * ((g_knockback->current.value * dmg) * 0.004f));
@@ -675,7 +675,7 @@ void __cdecl G_Damage(
             }
             if (mod != 11)
             {
-                if ((dflags & 1) != 0)
+                if ((dflags & DAMAGE_RADIUS) != 0)
                 {
                     dmgDvar = player_radiusDamageMultiplier;
                 }
@@ -1509,7 +1509,7 @@ int __cdecl G_RadiusDamage(
                             dir,
                             origin,
                             (int)damage,
-                            5, // dflags
+                            DAMAGE_RADIUS | DAMAGE_NO_KNOCKBACK, // dflags
                             mod,
                             weapon,
                             HITLOC_NONE,
