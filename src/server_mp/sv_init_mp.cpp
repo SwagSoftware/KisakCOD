@@ -405,8 +405,8 @@ void __cdecl SV_SpawnServer(char *mapname)
         DB_ResetZoneSize(0);
         Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
         zoneInfo.name = zoneName;
-        zoneInfo.allocFlags = 32;
-        zoneInfo.freeFlags = 96;
+        zoneInfo.allocFlags = DB_ZONE_LOAD;
+        zoneInfo.freeFlags = DB_ZONE_LOAD | DB_ZONE_DEV;
         DB_LoadXAssets(&zoneInfo, 1, 0);
     }
     Scr_ParseGameTypeList();
@@ -511,8 +511,8 @@ void __cdecl SV_SpawnServer(char *mapname)
         {
             PROF_SCOPED("Load fast file");
             zoneInfo.name = mapname;
-            zoneInfo.allocFlags = 8;
-            zoneInfo.freeFlags = 8;
+            zoneInfo.allocFlags = DB_ZONE_GAME;
+            zoneInfo.freeFlags = DB_ZONE_GAME;
             DB_LoadXAssets(&zoneInfo, 1, 0);
             iassert(sv_loadMyChanges);
             if (sv_loadMyChanges->current.enabled)

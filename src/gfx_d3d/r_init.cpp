@@ -3646,34 +3646,34 @@ void R_LoadGraphicsAssets()
     uint32_t zoneCount; // [esp+4Ch] [ebp-4h]
 
     zoneInfo[0].name = gfxCfg.codeFastFileName;
-    zoneInfo[0].allocFlags = 2;
+    zoneInfo[0].allocFlags = DB_ZONE_CODE;
     zoneInfo[0].freeFlags = 0;
     zoneCount = 1;
 
     if (gfxCfg.localizedCodeFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.localizedCodeFastFileName;
-        zoneInfo[zoneCount].allocFlags = 0;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_CODE_LOC;
         zoneInfo[zoneCount].freeFlags = 0;
         zoneCount++;
     }
     if (gfxCfg.uiFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.uiFastFileName;
-        zoneInfo[zoneCount].allocFlags = 8;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_GAME;
         zoneInfo[zoneCount].freeFlags = 0;
         zoneCount++;
     }
 
     zoneInfo[zoneCount].name = gfxCfg.commonFastFileName;
-    zoneInfo[zoneCount].allocFlags = 4;
+    zoneInfo[zoneCount].allocFlags = DB_ZONE_COMMON;
     zoneInfo[zoneCount].freeFlags = 0;
     zoneCount++;
 
     if (gfxCfg.localizedCommonFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.localizedCommonFastFileName;
-        zoneInfo[zoneCount].allocFlags = 1;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_COMMON_LOC;
         zoneInfo[zoneCount].freeFlags = 0;
         zoneCount++;
     }
@@ -3681,7 +3681,7 @@ void R_LoadGraphicsAssets()
     if (gfxCfg.modFastFileName)
     {
         zoneInfo[zoneCount].name = gfxCfg.modFastFileName;
-        zoneInfo[zoneCount].allocFlags = 16;
+        zoneInfo[zoneCount].allocFlags = DB_ZONE_MOD;
         zoneInfo[zoneCount].freeFlags = 0;
         zoneCount++;
     }

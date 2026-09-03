@@ -170,13 +170,13 @@ void __cdecl SV_LoadLevelAssets(const char *mapname)
     XZoneInfo zoneInfo; // [sp+50h] [-20h] BYREF
 
     zoneInfo.name = mapname;
-    //zoneInfo.allocFlags = 2;
-    //zoneInfo.freeFlags = 2;
-    // LWSS: I am changing the flags here 2 -> 8. This is accurate to SP on PC.
+    //zoneInfo.allocFlags = DB_ZONE_CODE;
+    //zoneInfo.freeFlags = DB_ZONE_CODE;
+    // LWSS: I am changing the flags here DB_ZONE_CODE -> DB_ZONE_GAME. This is accurate to SP on PC.
     // Unloading one of the other zones causes an error with mp/defaultstringtable not being found.
     // That file is the default stringtable file, but is only located in `code_post_gfx_mp` which is not loaded at all in SP
-    zoneInfo.allocFlags = 8;
-    zoneInfo.freeFlags = 8;
+    zoneInfo.allocFlags = DB_ZONE_GAME;
+    zoneInfo.freeFlags = DB_ZONE_GAME;
     DB_LoadXAssets(&zoneInfo, 1, 0);
     if (sv_loadMyChanges->current.enabled)
     {
@@ -436,8 +436,8 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
         DB_ResetZoneSize(0);
         //Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
         //zoneInfo.name = zoneName;
-        //zoneInfo.allocFlags = 32;
-        //zoneInfo.freeFlags = 96;
+        //zoneInfo.allocFlags = DB_ZONE_LOAD;
+        //zoneInfo.freeFlags = DB_ZONE_LOAD | DB_ZONE_DEV;
         //DB_LoadXAssets(&zoneInfo, 1, 0);
     }
     // MP END
