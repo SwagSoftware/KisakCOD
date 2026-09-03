@@ -15,8 +15,6 @@
 struct game_hudelem_s;
 struct weaponParms;
 
-#define PERK_COUNT 20
-
 static const char *g_dedicatedEnumNames[4] = { "listen server", "dedicated LAN server", "dedicated internet server", NULL }; // idb
 
 struct BuiltinFunctionDef // sizeof=0xC

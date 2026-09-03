@@ -3222,7 +3222,7 @@ void __cdecl PlayerCmd_SetPerk(scr_entref_t entref)
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
-    if (perkIndex == 20)
+    if (perkIndex == PERK_UNKNOWN)
     {
         Scr_Error(va("Unknown perk: %s\n", perkName));
     }
@@ -3262,19 +3262,19 @@ void __cdecl PlayerCmd_HasPerk(scr_entref_t entref)
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
-    if (perkIndex == 20)
+    if (perkIndex == PERK_UNKNOWN)
     {
         Scr_Error(va("Unknown perk: %s\n", perkName));
     }
     perks = pSelf->client->ps.perks;
-    if (perkIndex >= 0x14)
+    if (perkIndex >= PERK_COUNT)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h",
             40,
             0,
             "perkIndex doesn't index PERK_COUNT\n\t%i not in [0, %i)",
             perkIndex,
-            20);
+            PERK_COUNT);
     Scr_AddBool((perks & (1 << perkIndex)) != 0);
 }
 
@@ -3301,7 +3301,7 @@ void __cdecl PlayerCmd_UnsetPerk(scr_entref_t entref)
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
-    if (perkIndex == 20)
+    if (perkIndex == PERK_UNKNOWN)
     {
         Scr_Error(va("Unknown perk: %s\n", perkName));
     }
@@ -3313,14 +3313,14 @@ void __cdecl BG_UnsetPerk(int32_t *perks, uint32_t perkIndex)
 {
     if (!perks)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h", 55, 0, "%s", "perks");
-    if (perkIndex >= 0x14)
+    if (perkIndex >= PERK_COUNT)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h",
             56,
             0,
             "perkIndex doesn't index PERK_COUNT\n\t%i not in [0, %i)",
             perkIndex,
-            20);
+            PERK_COUNT);
     *perks &= ~(1 << perkIndex);
 }
 
