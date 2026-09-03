@@ -796,8 +796,8 @@ void __cdecl CL_Vid_Restart_f()
             DB_ResetZoneSize(0);
             Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
             zoneInfo[0].name = zoneName;
-            zoneInfo[0].allocFlags = 32;
-            zoneInfo[0].freeFlags = 96;
+            zoneInfo[0].allocFlags = DB_ZONE_LOAD;
+            zoneInfo[0].freeFlags = DB_ZONE_LOAD | DB_ZONE_DEV;
             DB_LoadXAssets(zoneInfo, 1u, 0);
             DB_SyncXAssets();
             DB_UpdateDebugZone();
@@ -901,8 +901,8 @@ void __cdecl LoadMapLoadscreen(const char *mapname)
     DB_ResetZoneSize(0);
     Com_sprintf(zoneName, 0x40u, "%s_load", mapname);
     zoneInfo[0].name = zoneName;
-    zoneInfo[0].allocFlags = 32;
-    zoneInfo[0].freeFlags = 96;
+    zoneInfo[0].allocFlags = DB_ZONE_LOAD;
+    zoneInfo[0].freeFlags = DB_ZONE_LOAD | DB_ZONE_DEV;
     DB_LoadXAssets(zoneInfo, 1u, 0);
     DB_SyncXAssets();
     DB_UpdateDebugZone();

@@ -758,8 +758,8 @@ void __cdecl CL_InitCGame(int32_t localClientNum)
         if (IsFastFileLoad())
         {
             zoneInfo.name = mapname;
-            zoneInfo.allocFlags = 8;
-            zoneInfo.freeFlags = 8;
+            zoneInfo.allocFlags = DB_ZONE_GAME;
+            zoneInfo.freeFlags = DB_ZONE_GAME;
             DB_LoadXAssets(&zoneInfo, 1u, 0);
         }
         else

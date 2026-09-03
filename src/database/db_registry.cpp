@@ -2207,9 +2207,9 @@ void __cdecl DB_UpdateDebugZone()
         zoneInfo[0].allocFlags = 0;
         zoneInfo[1].name = g_debugZoneName;
         Com_SyncThreads();
-        zoneInfo[0].freeFlags = 64;
-        zoneInfo[1].allocFlags = 64;
-        zoneInfo[1].freeFlags = 64;
+        zoneInfo[0].freeFlags = DB_ZONE_DEV;
+        zoneInfo[1].allocFlags = DB_ZONE_DEV;
+        zoneInfo[1].freeFlags = DB_ZONE_DEV;
         DB_LoadXAssets(zoneInfo, 2u, 1);
         CG_VisionSetMyChanges();
     }
@@ -2275,12 +2275,12 @@ void __cdecl DB_LoadXAssets(XZoneInfo *zoneInfo, uint32_t zoneCount, int32_t syn
         DB_FreeUnusedResources();
         for (ja = 0; ja < zoneCount; ++ja)
         {
-            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, 64);
-            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, 32);
-            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, 16);
-            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, 8);
-            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, 4);
-            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, 1);
+            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, DB_ZONE_DEV);
+            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, DB_ZONE_LOAD);
+            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, DB_ZONE_MOD);
+            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, DB_ZONE_GAME);
+            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, DB_ZONE_COMMON);
+            DB_UnloadXAssetsMemoryForZone(zoneInfo[ja].freeFlags, DB_ZONE_COMMON_LOC);
         }
         Sys_UnlockWrite(&db_hashCritSect);
         DB_UnarchiveAssets();
@@ -2767,7 +2767,7 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
         }
         PMem_BeginAlloc(zone->name, g_zoneAllocType);
         zone->allocType = g_zoneAllocType;
-        DB_ResetZoneSize((zoneFlags & 8) != 0);
+        DB_ResetZoneSize((zoneFlags & DB_ZONE_GAME) != 0);
         if (!zone)
             MyAssertHandler(".\\database\\db_registry.cpp", 3718, 0, "%s", "zone");
         DB_LoadXFile(filename, zoneFile, zone->name, &zone->mem, 0, g_fileBuf, g_zoneAllocType);
@@ -2797,11 +2797,11 @@ int32_t __cdecl DB_GetZoneAllocType(int32_t zoneFlags)
 
     switch (zoneFlags)
     {
-    case 1:
-    case 4:
-    case 16:
-    case 32:
-    case 64:
+    case DB_ZONE_COMMON_LOC:
+    case DB_ZONE_COMMON:
+    case DB_ZONE_MOD:
+    case DB_ZONE_LOAD:
+    case DB_ZONE_DEV:
         result = 1;
         break;
     default:
