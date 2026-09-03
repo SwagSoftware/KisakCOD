@@ -260,7 +260,7 @@ int __cdecl Actor_TeamMoveShouldTryDodgeSentient(
     }
     else
     {
-        if (fPosDeltaLengthSqrd >= context->fDodgePosDeltaLengthSqrd || (self->Physics.iTraceMask & 0x2000000) == 0)
+        if (fPosDeltaLengthSqrd >= context->fDodgePosDeltaLengthSqrd || (self->Physics.iTraceMask & CONTENTS_PLAYER) == 0)
             return 0;
         if (Actor_IsEnemy(self, other))
             return 1;

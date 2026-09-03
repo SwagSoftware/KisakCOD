@@ -339,9 +339,9 @@ void __cdecl SetupCollisionMap(gentity_s *ent)
         {
             ent->s.index.brushmodel = cmEnt->s.index.brushmodel;
             SV_SetBrushModel(ent);
-            ent->r.contents = 0x800000;
+            ent->r.contents = CONTENTS_VEHICLE;
             if ((ent->spawnflags & 1) != 0)
-                ent->r.contents |= 0x200000u;
+                ent->r.contents |= CONTENTS_USE;
         }
         else
         {
@@ -477,12 +477,12 @@ void __cdecl InitEntityVars(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 {
     ent->handler = ENT_HANDLER_VEHICLE;
     ent->r.svFlags = 4;
-    ent->r.contents = 8320;
+    ent->r.contents = MASK_WEAPONCLIP;
     if ((ent->spawnflags & 1) != 0)
     {
         if (!alwaysfails)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 2874, 0, "Initializing a usable vehicle!");
-        ent->r.contents |= 0x200000u;
+        ent->r.contents |= CONTENTS_USE;
     }
     ent->s.eType = ET_VEHICLE;
     ent->s.lerp.eFlags = 0;

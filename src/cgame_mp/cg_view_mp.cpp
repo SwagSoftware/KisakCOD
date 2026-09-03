@@ -1641,7 +1641,7 @@ void __cdecl GetCeilingHeight(cg_s *cgameGlob)
         (float *)playerMaxs,
         endPos,
         ENTITYNUM_NONE,
-        1);
+        MASK_SOLID);
     if (result.fraction < 1.0)
     {
         Vec3Lerp(cgameGlob->predictedPlayerState.origin, endPos, result.fraction, endPos);
@@ -1814,7 +1814,7 @@ void __cdecl CG_UpdateAdsDof(int32_t localClientNum, GfxDepthOfField *dof)
             (float *)vec3_origin,
             traceEnd,
             ps->clientNum,
-            0x806C31);
+            MASK_ADS_DOF_TRACE);
         Vec3Lerp(cgameGlob->refdef.vieworg, traceEnd, trace.fraction, traceEnd);
         Vec3Sub(traceEnd, cgameGlob->refdef.vieworg, v);
         traceDist = Vec3Length(v);

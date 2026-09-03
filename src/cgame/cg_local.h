@@ -18,7 +18,6 @@ struct ScreenPlacement;
 
 #define ACTIONSLOTS_NUM 3
 
-#define SURF_TYPECOUNT 29
 
 #define WEAPON_HINT_OFFSET 4
 

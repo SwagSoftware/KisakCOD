@@ -2337,9 +2337,9 @@ void __cdecl ActorCmd_PushPlayer(scr_entref_t entref)
     Int = Scr_GetInt(0);
     iTraceMask = v1->Physics.iTraceMask;
     if (Int)
-        v4 = iTraceMask & 0xFDFFFFFF;
+        v4 = iTraceMask & ~CONTENTS_PLAYER;
     else
-        v4 = iTraceMask | 0x2000000;
+        v4 = iTraceMask | CONTENTS_PLAYER;
     v1->Physics.iTraceMask = v4;
 }
 

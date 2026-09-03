@@ -524,7 +524,7 @@ int32_t __cdecl CG_GetEntityBModelContents(const centity_s *cent)
     if (cent->nextState.solid == 0xFFFFFF)
         return CM_ContentsOfModel(cent->nextState.index.brushmodel);
     if (cent->nextState.eType == ET_PLAYER)
-        return 0x2000000;
+        return CONTENTS_PLAYER;
     return 1;
 }
 

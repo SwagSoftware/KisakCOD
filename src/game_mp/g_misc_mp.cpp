@@ -454,7 +454,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
                 end[2] = client->ps.origin[2];
                 start[2] = start[2] + ent->client->ps.viewHeightCurrent;
                 end[2] = end[2] - 60.0;
-                G_TraceCapsule(&trace, start, vec3_origin, vec3_origin, end, ent->s.number, 0x810011);
+                G_TraceCapsule(&trace, start, vec3_origin, vec3_origin, end, ent->s.number, MASK_DEADSOLID);
                 if (trace.fraction < 1.0)
                 {
                     Vec3Lerp(start, end, trace.fraction, endpos);
@@ -1139,8 +1139,8 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     if (pTurretInfo->playerSpread < 0.0)
         pTurretInfo->playerSpread = 0.0;
     pTurretInfo->flags = TURRET_REQUIRES_AI | TURRET_AUTO;
-    self->clipmask = 1;
-    self->r.contents = 2097156;
+    self->clipmask = MASK_SOLID;
+    self->r.contents = CONTENTS_USE | CONTENTS_NONCOLLIDING;
     self->r.svFlags = 0;
     self->s.eType = ET_MG42;
     self->flags |= FL_SUPPORTS_LINKTO;

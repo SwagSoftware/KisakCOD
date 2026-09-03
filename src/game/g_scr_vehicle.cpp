@@ -134,7 +134,7 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
 #ifdef KISAK_MP
     ent->handler = ENT_HANDLER_HELICOPTER;
     ent->r.svFlags = 4;
-    ent->r.contents = 8320;
+    ent->r.contents = MASK_WEAPONCLIP;
     ent->s.lerp.eFlags = 0;
     ent->s.lerp.pos.trType = TR_INTERPOLATE;
     ent->s.lerp.apos.trType = TR_INTERPOLATE;
@@ -159,9 +159,9 @@ void __cdecl VEH_InitEntity(gentity_s *ent, scr_vehicle_s *veh, int32_t infoIdx)
     int spawnflags = ent->spawnflags;
     ent->handler = ENT_HANDLER_VEHICLE_INIT;
     ent->r.svFlags = 4;
-    ent->r.contents = 8320;
+    ent->r.contents = MASK_WEAPONCLIP;
     if ((spawnflags & 1) != 0)
-        ent->r.contents = 0x202080;
+        ent->r.contents = MASK_WEAPONCLIP | CONTENTS_USE;
     ent->s.lerp.eFlags = 0;
     ent->s.eType = ET_VEHICLE;
     ent->s.lerp.pos.trType = TR_INTERPOLATE;
@@ -3029,15 +3029,15 @@ static void VEH_GroundPlantInternal(gentity_s *ent, vehicle_physic_t *phys, int3
     else
         numWheels = 4;
 
-    contents = 529;
+    contents = CONTENTS_SOLID | CONTENTS_GLASS | CONTENTS_VEHICLECLIP;
 
-    if ((veh->flags & 1) != 0)
+    if (veh->flags & 1)
     {
-#ifdef KISAK_MP
-        contents |= 0x10000u;
-#elif KISAK_SP
-        contents = 66065;
-#endif
+        /*When veh->flags & 1 is set:
+        - MP adds 0x10000, which is CONTENTS_PLAYERCLIP.
+        - SP assigns 66065, which is 0x10211
+        -> the same final combination.*/
+        contents |= CONTENTS_PLAYERCLIP;
     }
 
     axis[3][0] = phys->origin[0];
@@ -3106,7 +3106,7 @@ static void VEH_GroundPlantInternal(gentity_s *ent, vehicle_physic_t *phys, int3
         else
         {
             Vec3Lerp(traceStart, traceEnd, trace.fraction, hitPos);
-            phys->wheelSurfType[i] = (trace.surfaceFlags & 0x1F00000) >> 20;
+            phys->wheelSurfType[i] = SURF_TYPEINDEX(trace.surfaceFlags);
         }
         if (gravity)
         {
@@ -4007,7 +4007,7 @@ void VEH_SetupCollmap(gentity_s *ent)
         {
             ent->s.index.item = CollMap->s.index.item;
             SV_SetBrushModel(ent);
-            ent->r.contents = 0x800000;
+            ent->r.contents = CONTENTS_VEHICLE;
             if (ent->spawnflags & 1)
                 ent->r.contents = 0xA00000;
         }

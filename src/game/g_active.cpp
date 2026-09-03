@@ -175,7 +175,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
 
     if (ent->scr_vehicle)
     {
-        contentMask = 8;
+        contentMask = CONTENTS_VEHICLETRIGGER;
     }
     else
     {
@@ -184,7 +184,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
         {
             if (ent->client)
             {
-                contentMask = 0x40000000;
+                contentMask = CONTENTS_PLAYERTRIGGER;
             }
             else
             {
@@ -192,13 +192,13 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
                 switch (eTeam)
                 {
                 case TEAM_AXIS:
-                    contentMask = 0x40000;
+                    contentMask = CONTENTS_AXISTRIGGER;
                     break;
                 case TEAM_ALLIES:
-                    contentMask = 0x80000;
+                    contentMask = CONTENTS_ALLIESTRIGGER;
                     break;
                 case TEAM_NEUTRAL:
-                    contentMask = 0x100000;
+                    contentMask = CONTENTS_NEUTRALTRIGGER;
                     break;
                 default:
                     return;
@@ -208,7 +208,7 @@ void __cdecl G_DoTouchTriggers(gentity_s *ent)
         }
         else
         {
-            contentMask = 0x400000;
+            contentMask = CONTENTS_NONSENTIENTTRIGGER;
         }
     }
 

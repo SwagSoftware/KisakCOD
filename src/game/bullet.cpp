@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include "bullet.h"
 
 #include "game_public.h"
@@ -39,9 +40,9 @@ char __cdecl Bullet_Trace(
     Com_Memset(br, 0, sizeof(BulletTraceResults));
 
     if (weapDef->bRifleBullet)
-        G_LocationalTraceAllowChildren(&br->trace, (float*)bp->start, (float *)bp->end, bp->ignoreEntIndex, 0x2806831, riflePriorityMap);
+        G_LocationalTraceAllowChildren(&br->trace, (float*)bp->start, (float *)bp->end, bp->ignoreEntIndex, MASK_SHOT, riflePriorityMap);
     else
-        G_LocationalTraceAllowChildren(&br->trace, (float *)bp->start, (float *)bp->end, bp->ignoreEntIndex, 0x2806831, bulletPriorityMap);
+        G_LocationalTraceAllowChildren(&br->trace, (float *)bp->start, (float *)bp->end, bp->ignoreEntIndex, MASK_SHOT, bulletPriorityMap);
 
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
@@ -63,12 +64,12 @@ char __cdecl Bullet_Trace(
         if (br->hitEnt->sentient && !br->trace.surfaceFlags)
 #endif
         {
-            br->trace.surfaceFlags = 0x700000;
+            br->trace.surfaceFlags = SURF_TYPE_FLESH;
         }
         br->ignoreHitEnt = Bullet_IgnoreHitEntity(bp, br, attacker);
     }
-    br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
-    if ((br->trace.surfaceFlags & 0x100) != 0)
+    br->depthSurfaceType = SURF_TYPEINDEX(br->trace.surfaceFlags);
+    if ((br->trace.surfaceFlags & SURF_NOPENETRATE) != 0)
     {
         br->depthSurfaceType = 0;
     }
@@ -323,7 +324,7 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
     for (extIndex = 0; extIndex < 12 && Bullet_Trace(bp, weapDef, attacker, &br, 0); ++extIndex)
     {
         Bullet_Process(bp, &br, weapDef, attacker, DAMAGE_NOFLAG, gameTime, &impactFlags, 1);
-        if ((br.trace.contents & 0x10) != 0)
+        if ((br.trace.contents & CONTENTS_GLASS) != 0)
         {
             if (!BG_AdvanceTrace(bp, &br, 0.13500001f))
                 return;
@@ -657,7 +658,7 @@ void __cdecl Bullet_ImpactEffect(
     }
     else
     {
-        createEffect = (br->trace.surfaceFlags & 4) == 0 && br->trace.fraction < 1.0;
+        createEffect = (br->trace.surfaceFlags & SURF_SKY) == 0 && br->trace.fraction < 1.0;
         if (br->hitEnt)
             createEffect &= br->hitEnt->client == 0;
         if (createEffect)
@@ -674,7 +675,7 @@ void __cdecl Bullet_ImpactEffect(
                 tempEnt->s.weapon = (uint8_t)BG_GetWeaponIndex(weapDef);
                 tempEnt->s.eventParm = DirToByte(normal);
                 tempEnt->s.un1.scale = impactEffectFlags;
-                tempEnt->s.surfType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
+                tempEnt->s.surfType = SURF_TYPEINDEX(br->trace.surfaceFlags);
                 tempEnt->s.otherEntityNum = bp->weaponEntIndex;
             }
             *outTempEnt = tempEnt;
@@ -710,7 +711,7 @@ void __cdecl Bullet_ImpactEffect(
         *outTempEnt = 0;
         return;
     }
-    if ((br->trace.surfaceFlags & 4) != 0 || (v14 = 1, br->trace.fraction >= 1.0))
+    if ((br->trace.surfaceFlags & SURF_SKY) != 0 || (v14 = 1, br->trace.fraction >= 1.0))
         v14 = 0;
     hitEnt = br->hitEnt;
     v16 = v14;
@@ -734,7 +735,7 @@ void __cdecl Bullet_ImpactEffect(
         tempEnt->s.lerp.u.bulletHit.start[1] = bp->start[1];
         tempEnt->s.lerp.u.bulletHit.start[2] = bp->start[2];
         tempEnt->s.weapon = BG_GetWeaponIndex(weapDef);
-        tempEnt->s.surfType = (br->trace.surfaceFlags >> 20) & 0x1F;
+        tempEnt->s.surfType = SURF_TYPEINDEX(br->trace.surfaceFlags);
         tempEnt->s.otherEntityNum = bp->weaponEntIndex;
         v21 = br->hitEnt;
         if (v21)
@@ -762,7 +763,7 @@ void __cdecl Bullet_ImpactEffect(
         tempEnt->s.weapon = WeaponIndex;
         G_SetAngle(tempEnt, (float*)normal);
         tempEnt->s.un1.eventParm2 = impactEffectFlags;
-        tempEnt->s.surfType = (br->trace.surfaceFlags >> 20) & 0x1F;
+        tempEnt->s.surfType = SURF_TYPEINDEX(br->trace.surfaceFlags);
         tempEnt->s.lerp.u.bulletHit.start[0] = bp->start[0];
         tempEnt->s.lerp.u.bulletHit.start[1] = bp->start[1];
         tempEnt->s.lerp.u.bulletHit.start[2] = bp->start[2];
@@ -944,7 +945,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                     v15 = bullet_penetrationMinFxDist->current.value;
                     v5 = v15 * v15;
                     processFx = v5 < (float)v16;
-                    if (v5 < (float)v16 && (!traceHit || (br.trace.surfaceFlags & 4) == 0))
+                    if (v5 < (float)v16 && (!traceHit || (br.trace.surfaceFlags & SURF_SKY) == 0))
                         Bullet_ImpactEffect(&revBp, &revBr, bp->dir, weapDef, attacker, impactFlags | 4, &bulletEffectTempEnt);
                     if (traceHit)
                         Bullet_Process(bp, &br, weapDef, attacker, DAMAGE_PENETRATION, gameTime, &impactFlags, processFx);

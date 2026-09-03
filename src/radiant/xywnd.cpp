@@ -584,7 +584,7 @@ static void Ed_DrawBrushEntityName( int nView, selbrush_t *b, float scale,
 // XY_BrushColor - REDUCED Brush_GetColor2d 0x46CA10 (the brush's 2D wireframe colour).
 // KISAK PORT DEBT: the full Brush_GetColor2d picks frozen-layer (brushflags&0x20)->slot24;
 // !worldspawn -> func_group(17)/func_cullgroup(18)/misc_model(21)/else eclass->color +
-// Brush_GetEntityLineColor; worldspawn -> weapon-clip(bf&0x2080)->19 / unknown(bf&0x8000004)
+// Brush_GetEntityLineColor; worldspawn -> weapon-clip(bf&MASK_WEAPONCLIP)->19 / unknown(bf&0x8000004)
 // ->22 / bf&0x8000000->14 / BYTE1(def[1].def)->15 / else COLOR_BRUSHES(9), and copies FOUR
 // floats including alpha.  This keeps only !worldspawn->eclass colour, worldspawn->9, alpha 1.
 // Completing it needs sub_40A130 (colour unpack) + Brush_GetEntityLineColor 0x47aa20 + the

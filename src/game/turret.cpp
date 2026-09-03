@@ -2472,10 +2472,10 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     turretInfo->prevSentTarget = -1;
     turretInfo->flags = 0x1000 | TURRET_REQUIRES_AI | TURRET_AUTO;
     turretInfo->eTeam = TEAM_NEUTRAL;
-    self->clipmask = 1;
+    self->clipmask = MASK_SOLID;
     self->r.svFlags = 0;
     self->s.eType = ET_MG42;
-    self->r.contents = 2097156;
+    self->r.contents = CONTENTS_USE | CONTENTS_NONCOLLIDING;
     self->flags |= FL_SUPPORTS_LINKTO;
     G_DObjUpdate(self);
     self->r.mins[2] = 0.0;

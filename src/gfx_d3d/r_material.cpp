@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include "r_material.h"
 #include "r_init.h"
 #include "r_state.h"
@@ -716,7 +717,7 @@ char __cdecl Material_GetConstantValue(Material *material, const char *name, flo
 bool __cdecl Material_CastsStencilShadow(Material *handle)
 {
     const Material *m = Material_FromHandle(handle);
-    if ((m->surfaceFlags & 0x40000) != 0)
+    if ((m->surfaceFlags & SURF_NOCASTSHADOW) != 0)
         return false;
     const MaterialTechniqueSet *techniqueSet = m->techniqueSet;
     int idx = techniqueSet->techniques[5] ? (uint8_t)m->stateBitsEntry[4] : 0;

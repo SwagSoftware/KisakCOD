@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include <qcommon/qcommon.h>
 
 #include "cg_local.h"
@@ -2868,7 +2869,7 @@ void __cdecl FireBulletPenetrate(
             DynEntCl_DynEntImpactEvent(localClientNum, attacker->nextState.number, bp->start, br.hitPos, weapDef->damage, 0);
             hitContents = br.trace.contents;
             damage = weapDef->damage;
-            surfType = (br.trace.surfaceFlags & 0x1F00000) >> 20;
+            surfType = SURF_TYPEINDEX(br.trace.surfaceFlags);
             entityNum = traceHitEntityId;
             sourceEntityNum = attacker->nextState.number;
 
@@ -2979,11 +2980,11 @@ void __cdecl FireBulletPenetrate(
                         v7 = v32 * v32;
                         if (v7 < (float)v33)
                         {
-                            if (!traceHit || (br.trace.surfaceFlags & 4) == 0)
+                            if (!traceHit || (br.trace.surfaceFlags & SURF_SKY) == 0)
                             {
                                 contents = revBr.trace.contents;
                                 v28 = weapDef->damage;
-                                v29 = (revBr.trace.surfaceFlags & 0x1F00000) >> 20;
+                                v29 = SURF_TYPEINDEX(revBr.trace.surfaceFlags);
                                 targetEntityNum = traceHitEntityId;
                                 number = attacker->nextState.number;
                                 if (!sv_clientSideBullets->current.enabled || !IsEntityAPlayer(localClientNum, targetEntityNum))
@@ -3005,7 +3006,7 @@ void __cdecl FireBulletPenetrate(
                             {
                                 v22 = br.trace.contents;
                                 v23 = weapDef->damage;
-                                v24 = (br.trace.surfaceFlags & 0x1F00000) >> 20;
+                                v24 = SURF_TYPEINDEX(br.trace.surfaceFlags);
                                 v25 = traceHitEntityId;
                                 v26 = attacker->nextState.number;
                                 if (!sv_clientSideBullets->current.enabled || !IsEntityAPlayer(localClientNum, v25))
@@ -3045,7 +3046,7 @@ void __cdecl FireBulletPenetrate(
                         {
                             v15 = br.trace.contents;
                             v16 = weapDef->damage;
-                            v17 = (br.trace.surfaceFlags & 0x1F00000) >> 20;
+                            v17 = SURF_TYPEINDEX(br.trace.surfaceFlags);
                             v18 = traceHitEntityId;
                             v19 = attacker->nextState.number;
                             if (!sv_clientSideBullets->current.enabled || !IsEntityAPlayer(localClientNum, traceHitEntityId))
@@ -3101,7 +3102,7 @@ char __cdecl BulletTrace(
     iassert(br);
     bcassert(lastSurfaceType, SURF_TYPECOUNT);
     Com_Memset((uint32_t *)br, 0, 68);
-    CG_LocationalTrace(&br->trace, (float*)bp->start, (float*)bp->end, bp->ignoreEntIndex, 0x2806831);
+    CG_LocationalTrace(&br->trace, (float*)bp->start, (float*)bp->end, bp->ignoreEntIndex, MASK_SHOT);
     if (br->trace.hitType == TRACE_HITTYPE_NONE)
         return 0;
     hitEntId = Trace_GetEntityHitId(&br->trace);
@@ -3113,11 +3114,11 @@ char __cdecl BulletTrace(
     if (Entity)
     {
         if ((Entity->nextState.eType == ET_PLAYER || Entity->nextState.eType == ET_PLAYER_CORPSE) && !br->trace.surfaceFlags)
-            br->trace.surfaceFlags = 0x700000;
+            br->trace.surfaceFlags = SURF_TYPE_FLESH;
         br->ignoreHitEnt = ShouldIgnoreHitEntity(attacker->nextState.number, hitEntId);
     }
-    br->depthSurfaceType = (br->trace.surfaceFlags & 0x1F00000) >> 20;
-    if ((br->trace.surfaceFlags & 0x100) != 0)
+    br->depthSurfaceType = SURF_TYPEINDEX(br->trace.surfaceFlags);
+    if ((br->trace.surfaceFlags & SURF_NOPENETRATE) != 0)
     {
         br->depthSurfaceType = 0;
     }

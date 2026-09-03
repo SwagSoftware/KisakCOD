@@ -165,11 +165,11 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
         cg_pmove[localClientNum].ps = &cgameGlob->predictedPlayerState;
         cg_pmove[localClientNum].handler = 0;
         if (cg_pmove[localClientNum].ps->pm_type < PM_DEAD)
-            cg_pmove[localClientNum].tracemask = 0x2810011;
+            cg_pmove[localClientNum].tracemask = MASK_PLAYERSOLID;
         else
-            cg_pmove[localClientNum].tracemask = 0x810011;
+            cg_pmove[localClientNum].tracemask = MASK_DEADSOLID;
         if (ps->pm_type == PM_SPECTATOR)
-            cg_pmove[localClientNum].tracemask &= 0xFDFEFFFF;
+            cg_pmove[localClientNum].tracemask &= ~(CONTENTS_PLAYER | CONTENTS_PLAYERCLIP);
         cg_pmove[localClientNum].viewChange = 0.0;
         cg_pmove[localClientNum].viewChangeTime = cgameGlob->stepViewStart;
         current = CL_GetCurrentCmdNumber(localClientNum);

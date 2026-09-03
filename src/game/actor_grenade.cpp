@@ -3,6 +3,7 @@
 #endif
 
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include "actor_grenade.h"
 #include "g_main.h"
 #include "g_local.h"
@@ -252,7 +253,7 @@ void __cdecl Actor_Grenade_GetTossPositions(
     if (v18.fraction == 1.0)
         v9 = 0;
     else
-        v9 = (v18.surfaceFlags >> 20) & 0x1F;
+        v9 = SURF_TYPEINDEX(v18.surfaceFlags);
 
     v10 = 4 * ((unsigned __int8)v9 + 368);
     v11 = 4 * ((unsigned __int8)v9 + 397);
@@ -910,7 +911,7 @@ void __cdecl Actor_PredictGrenadeLandPos(gentity_s *pGrenade)
     {
         clipmask = pGrenade->clipmask;
         nextthink = pGrenade->nextthink;
-        pGrenade->clipmask = clipmask & 0xFDFF3FFF;
+        pGrenade->clipmask = clipmask & MASK_IGNORE_CHARACTERS;
         v4 = G_PredictMissile(pGrenade, nextthink - level.time, v8, 1, &v7);
         pGrenade->item[1].ammoCount = v7;
         if (v4)
@@ -2098,7 +2099,7 @@ void __cdecl Actor_GrenadeBounced(gentity_s *pGrenade, gentity_s *pHitEnt)
 {
     actor_s *i; // r31
 
-    if ((pHitEnt->r.contents & 0x200C000) != 0)
+    if ((pHitEnt->r.contents & MASK_CHARACTER) != 0)
     {
         pGrenade->mover.decelTime = 0.0;
         pGrenade->mover.aDecelTime = 0.0;

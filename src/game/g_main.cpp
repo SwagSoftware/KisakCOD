@@ -2241,7 +2241,7 @@ void __cdecl ShowEntityInfo()
 
         filter = g_entinfo_type->current.integer;
         if (filter == 1)
-            contentmask = 0x4000;             // AI only -> CONTENTS_BODY
+            contentmask = 0x4000;             // AI only -> CONTENTS_ACTOR
         else if (filter == 2)
             contentmask = 0x800000;           // vehicle only -> CONTENTS_VEHICLE
         else

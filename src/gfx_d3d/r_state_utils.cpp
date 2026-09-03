@@ -119,7 +119,7 @@ int __cdecl R_PickMaterial(
     *contents = 0;
     contents[charLimit - 1] = 0;
     contentsLen = 0;
-    v8 = (trace.surfaceFlags & 0x1F00000) >> 20;
+    v8 = SURF_TYPEINDEX(trace.surfaceFlags);
     index = (uint8_t)v8;
     if ((_BYTE)v8 && index < 29)
         strncpy(surfaceFlags, infoParms[index - 1].name, charLimit);
@@ -128,7 +128,7 @@ int __cdecl R_PickMaterial(
     if (surfaceFlags[charLimit - 1])
         return 0;
     surfaceFlagsLen = strlen(surfaceFlags);
-    if ((trace.contents & 1) != 0)
+    if ((trace.contents & CONTENTS_SOLID) != 0)
         strncpy(contents, "solid", charLimit);
     else
         strncpy(contents, "^3nonsolid^7", charLimit);

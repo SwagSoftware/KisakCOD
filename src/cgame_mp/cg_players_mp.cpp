@@ -422,7 +422,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *
                                             end[1] = cent->pose.origin[1];
                                             end[2] = cent->pose.origin[2];
                                             start[2] = pTurretCEnt->pose.origin[2];
-                                            CG_TraceCapsule(&trace, start, vec3_origin, vec3_origin, end, cent->nextState.number, 0x2810011);
+                                            CG_TraceCapsule(&trace, start, vec3_origin, vec3_origin, end, cent->nextState.number, MASK_PLAYERSOLID);
                                             if (trace.fraction < 1.0)
                                             {
                                                 Vec3Lerp(start, end, trace.fraction, endpos);
@@ -805,7 +805,7 @@ bool __cdecl CG_IsWeaponVisible(int32_t localClientNum, centity_s *cent, XModel 
     iassert(cent);
 
     CG_CalcWeaponVisTrace(weapModel, origin, forward, stock, end, &weapLen);
-    CG_TraceCapsule(&trace, stock, vec3_origin, vec3_origin, end, cent->nextState.number, 4097);
+    CG_TraceCapsule(&trace, stock, vec3_origin, vec3_origin, end, cent->nextState.number, CONTENTS_SOLID | CONTENTS_AI_NOSIGHT);
 
     iassert(cg_drawWVisDebug);
 
@@ -825,7 +825,7 @@ bool __cdecl CG_IsWeaponVisible(int32_t localClientNum, centity_s *cent, XModel 
     eye[0] = cgameGlob->refdef.vieworg[0];
     eye[1] = cgameGlob->refdef.vieworg[1];
     eye[2] = cgameGlob->refdef.vieworg[2];
-    CG_TraceCapsule(&trace, eye, vec3_origin, vec3_origin, stock, cent->nextState.number, 4097);
+    CG_TraceCapsule(&trace, eye, vec3_origin, vec3_origin, stock, cent->nextState.number, CONTENTS_SOLID | CONTENTS_AI_NOSIGHT);
     if (cg_drawWVisDebug->current.enabled)
     {
         if (trace.fraction == 1.0)
