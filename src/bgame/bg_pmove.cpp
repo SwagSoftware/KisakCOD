@@ -1706,7 +1706,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     }
     if ((pm->cmd.buttons & BUTTON_LOC_SELECTING) != 0)
     {
-        pm->cmd.buttons &= BUTTON_LOC_SELECTING | BUTTON_TEMP_STANCE | BUTTON_ADS | BUTTON_CROUCH | BUTTON_SPRINT;
+        pm->cmd.buttons &= BUTTON_LOC_SELECTING | BUTTON_TEMP_STANCE | BUTTON_ADS | BUTTON_CROUCH | BUTTON_SPRINT | BUTTON_PRONE;
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
     }
