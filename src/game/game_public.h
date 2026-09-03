@@ -17,6 +17,15 @@
 
 static const char *hintStrings[] = { "", "HINT_NOICON", "HINT_ACTIVATE", "HINT_HEALTH" }; // idb
 
+enum DAMAGE_FLAGS : __int32 // (SP/MP same)
+{
+    DAMAGE_NOFLAG = 0,
+    DAMAGE_RADIUS = (1 << 0),
+    DAMAGE_NO_ARMOR = (1 << 1),
+    DAMAGE_NO_KNOCKBACK = (1 << 2),
+    DAMAGE_PENETRATION = (1 << 3),
+};
+
 enum VehicleTypes : __int32 // (SP/MP same)
 {
     VEH_WHEELS_4 = 0x0,

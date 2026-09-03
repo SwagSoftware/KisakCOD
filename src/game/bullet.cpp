@@ -322,7 +322,7 @@ void __cdecl Bullet_FireExtended(BulletFireParams *bp, const WeaponDef *weapDef,
         MyAssertHandler(".\\game\\bullet.cpp", 567, 0, "%s", "attacker");
     for (extIndex = 0; extIndex < 12 && Bullet_Trace(bp, weapDef, attacker, &br, 0); ++extIndex)
     {
-        Bullet_Process(bp, &br, weapDef, attacker, 0, gameTime, &impactFlags, 1);
+        Bullet_Process(bp, &br, weapDef, attacker, DAMAGE_NOFLAG, gameTime, &impactFlags, 1);
         if ((br.trace.contents & 0x10) != 0)
         {
             if (!BG_AdvanceTrace(bp, &br, 0.13500001f))
@@ -517,7 +517,7 @@ void __cdecl Bullet_Process(
     if (br->hitEnt && br->hitEnt->takedamage && !br->ignoreHitEnt)
     {
         if (weapDef->armorPiercing)
-            dFlags |= 2u;
+            dFlags |= DAMAGE_NO_ARMOR;
 
         iassert(br->hitEnt->r.inuse);
         targetWasAlive = br->hitEnt->health > 0;
@@ -837,7 +837,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
     
     if (Bullet_Trace(bp, weapDef, attacker, &br, 0))
     {
-        Bullet_Process(bp, &br, weapDef, attacker, 0, gameTime, &impactFlags, 1);
+        Bullet_Process(bp, &br, weapDef, attacker, DAMAGE_NOFLAG, gameTime, &impactFlags, 1);
 
         for (penetrateIndex = 0; penetrateIndex < 5; ++penetrateIndex)
         {
@@ -947,7 +947,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                     if (v5 < (float)v16 && (!traceHit || (br.trace.surfaceFlags & 4) == 0))
                         Bullet_ImpactEffect(&revBp, &revBr, bp->dir, weapDef, attacker, impactFlags | 4, &bulletEffectTempEnt);
                     if (traceHit)
-                        Bullet_Process(bp, &br, weapDef, attacker, 8, gameTime, &impactFlags, processFx);
+                        Bullet_Process(bp, &br, weapDef, attacker, DAMAGE_PENETRATION, gameTime, &impactFlags, processFx);
                 }
             }
             else if (traceHit)
@@ -956,7 +956,7 @@ void __cdecl Bullet_FirePenetrate(BulletFireParams *bp, const WeaponDef *weapDef
                 v13 = Vec3LengthSq(v14);
                 v4 = bullet_penetrationMinFxDist->current.value * bullet_penetrationMinFxDist->current.value;
                 processFx = v4 < (float)v13;
-                Bullet_Process(bp, &br, weapDef, attacker, 8, gameTime, &impactFlags, processFx);
+                Bullet_Process(bp, &br, weapDef, attacker, DAMAGE_PENETRATION, gameTime, &impactFlags, processFx);
             }
             if (!traceHit)
                 return;

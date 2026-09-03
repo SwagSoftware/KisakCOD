@@ -585,7 +585,7 @@ bool __cdecl G_VehImmuneToDamage(gentity_s *ent, int32_t mod, char damageFlags, 
         if (info->bulletDamage)
             result = 0;
         else
-            result = (damageFlags & 2) == 0 || !info->armorPiercingDamage;
+            result = (damageFlags & DAMAGE_NO_ARMOR) == 0 || !info->armorPiercingDamage;
         break;
     case 3:
     case 4:
@@ -931,7 +931,7 @@ void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int
         dir,
         target->r.currentOrigin,
         damage,
-        0,
+        DAMAGE_NOFLAG,
         9,
         0xFFFFFFFF,
         HITLOC_NONE,
