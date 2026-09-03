@@ -71,7 +71,7 @@ void __cdecl CG_InitEntity(centity_s *cent)
     int eType; // r11
 
     eType = cent->nextState.eType;
-    if (eType == 8 || eType == 7)
+    if (eType == ET_LOOP_FX || eType == ET_FX)
     {
         cent->pose.actor.proneType = 0;
         cent->pose.fx.effect = 0;
@@ -99,7 +99,7 @@ void __cdecl CG_ResetEntity(int localClientNum, centity_s *cent)
         cent->lightingOrigin[2] = 0.0;
         CG_ShutdownEntity(localClientNum, cent);
         eType = cent->nextState.eType;
-        if (eType == 8 || eType == 7)
+        if (eType == ET_LOOP_FX || eType == ET_FX)
         {
             cent->pose.actor.proneType = 0;
             cent->pose.fx.effect = 0;
@@ -256,7 +256,7 @@ int __cdecl CG_DObjCloneToBuffer(int localClientNum, centity_s *cent, const XAni
         goto LABEL_11;
     }
     eType = cent->nextState.eType;
-    if (eType != 14 && eType != 16 || cent->nextState.lerp.u.actor.species)
+    if (eType != ET_ACTOR && eType != ET_ACTOR_CORPSE || cent->nextState.lerp.u.actor.species)
     {
         Anims = XAnimGetAnims(serverTree);
         SmallTree = Com_XAnimCreateSmallTree(Anims);

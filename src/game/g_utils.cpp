@@ -824,9 +824,9 @@ unsigned int __cdecl G_GetEntAnimTreeId(int entnum)
             "entnum >= 0 && entnum < level.num_entities");
     v2 = &g_entities[entnum];
     eType = v2->s.eType;
-    if (eType != 14)
+    if (eType != ET_ACTOR)
     {
-        if (eType != 16)
+        if (eType != ET_ACTOR_CORPSE)
             goto LABEL_18;
         if (!v2->s.lerp.u.actor.species)
         {
@@ -873,9 +873,9 @@ XAnimTree_s *__cdecl G_GetEntAnimTreeForId(int entnum, unsigned int id)
             "entnum >= 0 && entnum < level.num_entities");
     v4 = &g_entities[entnum];
     eType = v4->s.eType;
-    if (eType != 14)
+    if (eType != ET_ACTOR)
     {
-        if (eType != 16)
+        if (eType != ET_ACTOR_CORPSE)
             goto LABEL_14;
         if (!v4->s.lerp.u.actor.species)
         {
@@ -955,9 +955,9 @@ XAnimTree_s *__cdecl G_GetEntAnimTree(gentity_s *ent)
     if (ent->s.lerp.u.actor.species)
         return ent->pAnimTree;
     eType = ent->s.eType;
-    if (eType == 14)
+    if (eType == ET_ACTOR)
         return G_GetActorAnimTree(ent->actor);
-    if (eType != 16)
+    if (eType != ET_ACTOR_CORPSE)
         return ent->pAnimTree;
     return G_GetActorCorpseAnimTree(ent);
 }
@@ -992,11 +992,11 @@ void __cdecl G_CheckDObjUpdate(gentity_s *ent)
         else
         {
             eType = ent->s.eType;
-            if (eType == 14)
+            if (eType == ET_ACTOR)
             {
                 pAnimTree = G_GetActorAnimTree(ent->actor);
             }
-            else if (eType == 16)
+            else if (eType == ET_ACTOR_CORPSE)
             {
                 pAnimTree = G_GetActorCorpseAnimTree(ent);
             }
@@ -1952,7 +1952,7 @@ void __cdecl G_AddEvent(gentity_s *ent, unsigned int event, unsigned int eventPa
     {
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2689, 0, "%s", "event");
     }
-    if (ent->s.eType >= 0x11u)
+    if (ent->s.eType >= ET_EVENTS)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp", 2692, 0, "%s", "ent->s.eType < ET_EVENTS");
     client = ent->client;
     if (client)
@@ -2117,7 +2117,7 @@ void __cdecl G_SetConstString(unsigned __int16 *to, const char *from)
 
 const char *__cdecl G_GetEntityTypeName(const gentity_s *ent)
 {
-    if (ent->s.eType >= 0x11u)
+    if (ent->s.eType >= ET_EVENTS)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_utils.cpp",
             2863,
@@ -2585,8 +2585,8 @@ gentity_s *__cdecl G_TempEntity(float *origin, int event)
     float v8[6]; // [sp+50h] [-30h] BYREF
 
     v4 = G_Spawn();
-    v4->s.eType = (entityType_t)(event + 17);
-    v6 = (unsigned __int8)(event + 17) == event + 17;
+    v4->s.eType = (entityType_t)(event + ET_EVENTS);
+    v6 = (unsigned __int8)(event + ET_EVENTS) == event + ET_EVENTS;
     v5 = v4;
     if (!v6)
         MyAssertHandler(
@@ -2862,7 +2862,7 @@ void __cdecl G_FreeEntity(gentity_s *ed)
             }
         }
     }
-    if (ed->s.eType == 16)
+    if (ed->s.eType == ET_ACTOR_CORPSE)
         ActorCorpse_Free(ed);
     pTurretInfo = ed->pTurretInfo;
     if (pTurretInfo)
@@ -2941,13 +2941,13 @@ void __cdecl G_DObjUpdate(gentity_s *ent)
     if (!ent->s.lerp.u.actor.species)
     {
         eType = ent->s.eType;
-        if (eType == 14)
+        if (eType == ET_ACTOR)
         {
             ActorAnimTree = G_GetActorAnimTree(ent->actor);
         }
         else
         {
-            if (eType != 16)
+            if (eType != ET_ACTOR_CORPSE)
             {
                 pAnimTree = ent->pAnimTree;
                 goto LABEL_17;

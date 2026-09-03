@@ -2866,7 +2866,7 @@ void __cdecl Actor_FinishSpawningAll()
                 iassert(typeScript);
                 iassert(typeScript->main);
                 iassert(typeScript->spawner);
-                if (pEnt->s.eType == 15)
+                if (pEnt->s.eType == ET_ACTOR_SPAWNER)
                 {
                     Scr_FreeThread(Scr_ExecEntThread(pEnt, typeScript->spawner, 0));
                 }

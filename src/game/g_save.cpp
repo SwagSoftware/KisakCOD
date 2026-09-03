@@ -2634,7 +2634,7 @@ void __cdecl G_LoadMainState(SaveGame *save)
                 if (G_XModelBad(v18->model))
                 {
                     eType = v18->s.eType;
-                    if (eType == 14 || eType == 16)
+                    if (eType == ET_ACTOR || eType == ET_ACTOR_CORPSE)
                     {
                         v20 = G_ModelName(v18->model);
                         v21 = SL_ConvertToString(v20);

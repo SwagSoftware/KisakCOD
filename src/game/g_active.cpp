@@ -294,7 +294,7 @@ bool __cdecl IsLiveGrenade(gentity_s *ent)
 {
     WeaponDef *WeaponDef; // r31
 
-    if (ent->s.eType != 3)
+    if (ent->s.eType != ET_MISSILE)
         return 0;
     WeaponDef = BG_GetWeaponDef(ent->s.index.item - ((int)ent->s.index.item >> 7 << 7));
     if (!WeaponDef)

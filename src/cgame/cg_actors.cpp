@@ -87,7 +87,7 @@ void __cdecl CG_Actor(int localClientNum, centity_s *cent)
                 LocalClientGlobals = CG_GetLocalClientGlobals(localClientNum);
                 CG_Laser_Add(cent, ClientDObj, &cent->pose, LocalClientGlobals->refdef.viewOffset, LASER_OWNER_NON_PLAYER);
             }
-            if (p_nextState->eType == 14)
+            if (p_nextState->eType == ET_ACTOR)
                 CG_CompassUpdateActorInfo(localClientNum, p_nextState->number);
         }
     }

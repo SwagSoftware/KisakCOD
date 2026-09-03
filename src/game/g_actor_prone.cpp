@@ -33,7 +33,7 @@ actor_prone_info_s *__cdecl G_GetActorProneInfoFromEntNum(int iEntNum)
     actor = v2->actor;
     if (actor)
         return G_GetActorProneInfo(actor);
-    if (v2->s.eType != 16)
+    if (v2->s.eType != ET_ACTOR_CORPSE)
         return 0;
     ActorCorpseIndex = G_GetActorCorpseIndex(v2);
     number = v2->s.number;

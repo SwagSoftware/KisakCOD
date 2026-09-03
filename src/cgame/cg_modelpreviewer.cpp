@@ -2727,7 +2727,7 @@ void __cdecl CG_AddModelPreviewerModel(int frametime)
         CG_ModPrvApplyDelta(v9);
         DObjUpdateClientInfo(g_mdlprv.model.currentObj, v9, center);
         memset(&g_mdlprv.model.pose, 0, sizeof(g_mdlprv.model.pose));
-        g_mdlprv.model.pose.eType = 17;
+        g_mdlprv.model.pose.eType = ET_EVENTS;
         g_mdlprv.model.currentEntity.info.pose = &g_mdlprv.model.pose;
         g_mdlprv.model.pose.ragdollHandle = g_mdlprv.model.ragdoll;
         //g_mdlprv.model.pose.isRagdoll = (_cntlzw(g_mdlprv.model.ragdoll) & 0x20) == 0;
