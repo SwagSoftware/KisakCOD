@@ -1077,7 +1077,7 @@ void __cdecl SV_SetPerk_f()
     {
         perkName = SV_Cmd_Argv(2);
         perkIndex = BG_GetPerkIndexForName(perkName);
-        if (perkIndex < 0x14)
+        if (perkIndex < PERK_COUNT)
         {
             i = 0;
             for (clIdx = svs.clients; i < sv_maxclients->current.integer && clIdx != PlayerByName; ++clIdx)
