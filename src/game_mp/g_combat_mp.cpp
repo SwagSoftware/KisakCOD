@@ -88,7 +88,7 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
     {
         Vec3Sub(attacker->r.currentOrigin, self->r.currentOrigin, dir);
     LABEL_10:
-        self->client->ps.stats[1] = (int)vectoyaw(dir);
+        self->client->ps.stats[STAT_DEAD_YAW] = (int)vectoyaw(dir);
         vectoyaw(dir);
         return;
     }
@@ -99,7 +99,7 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
     }
     if (!self->client)
         MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 178, 0, "%s", "self->client");
-    self->client->ps.stats[1] = (int)self->r.currentAngles[1];
+    self->client->ps.stats[STAT_DEAD_YAW] = (int)self->r.currentAngles[1];
 }
 
 int32_t __cdecl G_MeansOfDeathFromScriptParam(uint32_t scrParam)
@@ -152,7 +152,7 @@ void __cdecl player_die(
         self->client->ps.pm_type = (self->client->ps.pm_type == PM_NORMAL_LINKED) ? PM_DEAD_LINKED : PM_DEAD;
 
         deathAnimDuration = BG_AnimScriptEvent(&self->client->ps, ANIM_ET_DEATH, 0, 1);
-        self->client->ps.stats[0] = 0;
+        self->client->ps.stats[STAT_HEALTH] = 0;
         Scr_PlayerKilled(
             self,
             inflictor,

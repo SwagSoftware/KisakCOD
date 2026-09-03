@@ -166,7 +166,7 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
         v6[0] = v3;
         v6[1] = (float)v4 - self->r.currentOrigin[1];
         v6[2] = (float)v5 - self->r.currentOrigin[2];
-        self->client->ps.stats[1] = (int)vectoyaw(v6);
+        self->client->ps.stats[STAT_DEAD_YAW] = (int)vectoyaw(v6);
         vectoyaw(v6);
         return;
     }
@@ -177,7 +177,7 @@ void __cdecl LookAtKiller(gentity_s *self, gentity_s *inflictor, gentity_s *atta
         v5 = inflictor->r.currentOrigin[2];
         goto LABEL_7;
     }
-    self->client->ps.stats[1] = (int)self->r.currentAngles[1];
+    self->client->ps.stats[STAT_DEAD_YAW] = (int)self->r.currentAngles[1];
 }
 
 int __cdecl G_MeansOfDeathFromScriptParam(unsigned int scrParam)
@@ -362,7 +362,7 @@ void __cdecl handleDeathInvulnerability(gentity_s *targ, int prevHealth, int mod
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 422, 0, "%s", "client");
     if (!client->invulnerableEnabled)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_combat.cpp", 423, 0, "%s", "client->invulnerableEnabled");
-    if (prevHealth == client->ps.stats[2])
+    if (prevHealth == client->ps.stats[STAT_MAX_HEALTH])
         client->invulnerableActivated = 0;
     health = targ->health;
     if (prevHealth != health && health <= 0 && prevHealth > 0)
@@ -835,7 +835,7 @@ void __cdecl G_Damage(
                     {
                         if (targ->health < 0)
                             targ->health = 0;
-                        v66->ps.stats[0] = targ->health;
+                        v66->ps.stats[STAT_HEALTH] = targ->health;
                     }
                 }
             }

@@ -162,12 +162,12 @@ float CG_CalcPlayerHealth(const playerState_s *ps)
     float v5; // [esp+Ch] [ebp-8h]
     float health; // [esp+10h] [ebp-4h]
 
-    if (!ps->stats[0] || !ps->stats[2] || ps->pm_type == PM_DEAD)
+    if (!ps->stats[STAT_HEALTH] || !ps->stats[STAT_MAX_HEALTH] || ps->pm_type == PM_DEAD)
         return 0.0;
-    health = (double)ps->stats[0] / (double)ps->stats[2];
+    health = (double)ps->stats[STAT_HEALTH] / (double)ps->stats[STAT_MAX_HEALTH];
 
     if ((health - 1.0f) < 0.0)
-        v5 = (double)ps->stats[0] / (double)ps->stats[2];
+        v5 = (double)ps->stats[STAT_HEALTH] / (double)ps->stats[STAT_MAX_HEALTH];
     else
         v5 = 1.0;
 

@@ -1718,17 +1718,17 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         if (cl_shownet && cl_shownet->current.integer == 4)
             Com_Printf(16, "%s ", "PS_STATS");
-        Bits = MSG_ReadBits(msg, 5u);
-        if ((Bits & 1) != 0)
-            to->stats[0] = MSG_ReadShort(msg);
-        if ((Bits & 2) != 0)
-            to->stats[1] = MSG_ReadShort(msg);
-        if ((Bits & 4) != 0)
-            to->stats[2] = MSG_ReadShort(msg);
-        if ((Bits & 8) != 0)
-            to->stats[3] = MSG_ReadBits(msg, 6u);
-        if ((Bits & 0x10) != 0)
-            to->stats[4] = MSG_ReadByte(msg);
+        Bits = MSG_ReadBits(msg, MAX_STATS);
+        if ((Bits & (1 << STAT_HEALTH)) != 0)
+            to->stats[STAT_HEALTH] = MSG_ReadShort(msg);
+        if ((Bits & (1 << STAT_DEAD_YAW)) != 0)
+            to->stats[STAT_DEAD_YAW] = MSG_ReadShort(msg);
+        if ((Bits & (1 << STAT_MAX_HEALTH)) != 0)
+            to->stats[STAT_MAX_HEALTH] = MSG_ReadShort(msg);
+        if ((Bits & (1 << STAT_IDENT_CLIENT_NUM)) != 0)
+            to->stats[STAT_IDENT_CLIENT_NUM] = MSG_ReadBits(msg, 6u);
+        if ((Bits & (1 << STAT_SPAWN_COUNT)) != 0)
+            to->stats[STAT_SPAWN_COUNT] = MSG_ReadByte(msg);
     }
 
     if (MSG_ReadBit(msg))

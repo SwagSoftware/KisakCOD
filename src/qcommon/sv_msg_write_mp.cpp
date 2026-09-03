@@ -2319,7 +2319,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     v9 = MSG_GetUsedBitCount(msg);
     SV_TrackPSFieldDeltasBits(v9 - UsedBitCount);
     value = 0;
-    for (fieldNum = 0; fieldNum < 5; ++fieldNum)
+    for (fieldNum = 0; fieldNum < MAX_STATS; ++fieldNum)
     {
         if (to->stats[fieldNum] != from->stats[fieldNum])
             value |= 1 << fieldNum;
@@ -2328,39 +2328,39 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     if (value)
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Sending player stats changes - bit 1 to say it changed, %i bits for which changed\n", 5);
+            Com_Printf(16, "Sending player stats changes - bit 1 to say it changed, %i bits for which changed\n", MAX_STATS);
         MSG_WriteBit1(msg);
-        MSG_WriteBits(msg, value, 5u);
+        MSG_WriteBits(msg, value, MAX_STATS);
         SV_PacketDataIsData(snapInfo->clientNum, msg);
-        if ((value & 1) != 0)
+        if ((value & (1 << STAT_HEALTH)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player health stat (value is %i)\n", to->stats[0]);
-            MSG_WriteShort(msg, to->stats[0]);
+                Com_Printf(16, "Sending player health stat (value is %i)\n", to->stats[STAT_HEALTH]);
+            MSG_WriteShort(msg, to->stats[STAT_HEALTH]);
         }
-        if ((value & 2) != 0)
+        if ((value & (1 << STAT_DEAD_YAW)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player dead yaw stat (value is %i)\n", to->stats[1]);
-            MSG_WriteShort(msg, to->stats[1]);
+                Com_Printf(16, "Sending player dead yaw stat (value is %i)\n", to->stats[STAT_DEAD_YAW]);
+            MSG_WriteShort(msg, to->stats[STAT_DEAD_YAW]);
         }
-        if ((value & 4) != 0)
+        if ((value & (1 << STAT_MAX_HEALTH)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player maximum health stat (value is %i)\n", to->stats[2]);
-            MSG_WriteShort(msg, to->stats[2]);
+                Com_Printf(16, "Sending player maximum health stat (value is %i)\n", to->stats[STAT_MAX_HEALTH]);
+            MSG_WriteShort(msg, to->stats[STAT_MAX_HEALTH]);
         }
-        if ((value & 8) != 0)
+        if ((value & (1 << STAT_IDENT_CLIENT_NUM)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player crosshair client stat (value is %i)\n", to->stats[3]);
-            MSG_WriteBits(msg, to->stats[3], 6u);
+                Com_Printf(16, "Sending player crosshair client stat (value is %i)\n", to->stats[STAT_IDENT_CLIENT_NUM]);
+            MSG_WriteBits(msg, to->stats[STAT_IDENT_CLIENT_NUM], 6u);
         }
-        if ((value & 0x10) != 0)
+        if ((value & (1 << STAT_SPAWN_COUNT)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player spawn count stat (value is %i)\n", to->stats[4]);
-            MSG_WriteByte(msg, to->stats[4]);
+                Com_Printf(16, "Sending player spawn count stat (value is %i)\n", to->stats[STAT_SPAWN_COUNT]);
+            MSG_WriteByte(msg, to->stats[STAT_SPAWN_COUNT]);
         }
     }
     else

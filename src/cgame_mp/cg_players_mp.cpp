@@ -705,7 +705,7 @@ bool __cdecl CG_IsPlayerDead(int32_t localClientNum)
 
     iassert(cgameGlob->bgs.clientinfo[cgameGlob->clientNum].infoValid);
 
-    return !cgameGlob->nextSnap->ps.stats[0]
+    return !cgameGlob->nextSnap->ps.stats[STAT_HEALTH]
         || (cgameGlob->nextSnap->ps.otherFlags & 4) == 0
         || (cgameGlob->nextSnap->ps.otherFlags & 2) != 0;
 }

@@ -476,7 +476,7 @@ bool __cdecl LogAccuracyHit(gentity_s *target, gentity_s *attacker)
     if (target->client->ps.pm_type < PM_DEAD)
         return !OnSameTeam(target, attacker);
 #elif KISAK_SP
-    if (target->client->ps.stats[0] <= 0)
+    if (target->client->ps.stats[STAT_HEALTH] <= 0)
     {
         return 0;
     }

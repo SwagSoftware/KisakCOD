@@ -1371,7 +1371,7 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return cgArray[0].nextSnap->ps.stats[0] == 0;
+    return cgArray[0].nextSnap->ps.stats[STAT_HEALTH] == 0;
 }
 
 int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
