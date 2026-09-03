@@ -1735,7 +1735,8 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 v6 = I_fabs(v15),
                 v6 >= (double)v7))
         {
-            if ((ps->pm_flags & PMF_SIGHT_AIMING) == 0 && (ps->weaponstate <= 4u || ps->weaponstate == 7))
+            if ((ps->pm_flags & PMF_SIGHT_AIMING) == 0
+                && (ps->weaponstate <= WEAPON_DROPPING_QUICK || ps->weaponstate == WEAPON_RELOADING))
                 ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
         }
         else
@@ -1766,7 +1767,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         ps->pm_type != PM_INTERMISSION && 
 #endif
         (ps->pm_flags & PMF_RESPAWNED) == 0
-        && (!ps->weaponstate || ps->weaponstate == 5)
+        && (!ps->weaponstate || ps->weaponstate == WEAPON_FIRING)
         && PM_WeaponAmmoAvailable(ps)
         && (pm->cmd.buttons & 1) != 0)
     {

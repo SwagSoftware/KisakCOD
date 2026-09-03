@@ -1120,11 +1120,11 @@ void __cdecl CG_DrawPlayerWeaponLowAmmoWarning(
         && (cgArray[0].predictedPlayerState.eFlags & 0x20000) == 0
 #endif
         && (cgameGlob->predictedPlayerState.eFlags & 0x300) == 0
-        && cgameGlob->predictedPlayerState.weaponstate != 7
-        && cgameGlob->predictedPlayerState.weaponstate != 9
-        && cgameGlob->predictedPlayerState.weaponstate != 11
-        && cgameGlob->predictedPlayerState.weaponstate != 10
-        && cgameGlob->predictedPlayerState.weaponstate != 8)
+        && cgameGlob->predictedPlayerState.weaponstate != WEAPON_RELOADING
+        && cgameGlob->predictedPlayerState.weaponstate != WEAPON_RELOAD_START
+        && cgameGlob->predictedPlayerState.weaponstate != WEAPON_RELOAD_END
+        && cgameGlob->predictedPlayerState.weaponstate != WEAPON_RELOAD_START_INTERUPT
+        && cgameGlob->predictedPlayerState.weaponstate != WEAPON_RELOADING_INTERUPT)
     {
         if (cgameGlob->predictedPlayerState.weapon)
         {

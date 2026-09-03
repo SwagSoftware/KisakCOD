@@ -124,7 +124,7 @@ void __cdecl TossClientItems(gentity_s *self)
     client = self->client;
     weapon = self->s.weapon;
     weaponstate = client->ps.weaponstate;
-    if (weaponstate == 3 || weaponstate == 4)
+    if (weaponstate == WEAPON_DROPPING || weaponstate == WEAPON_DROPPING_QUICK)
         weapon = client->pers.cmd.weapon;
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
