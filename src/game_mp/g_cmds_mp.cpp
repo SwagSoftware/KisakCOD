@@ -568,7 +568,7 @@ void __cdecl StopFollowing(gentity_s *ent)
         vMaxs[0] = 8.0;
         vMaxs[1] = 8.0;
         vMaxs[2] = 8.0;
-        G_TraceCapsule(&trace, vPos, vMins, vMaxs, vEnd, ENTITYNUM_NONE, 0x810011);
+        G_TraceCapsule(&trace, vPos, vMins, vMaxs, vEnd, ENTITYNUM_NONE, MASK_DEADSOLID);
         Vec3Lerp(vPos, vEnd, trace.fraction, vPos);
         client->ps.clientNum = ent - g_entities;
         client->ps.eFlags &= 0xFFFFFCFF;

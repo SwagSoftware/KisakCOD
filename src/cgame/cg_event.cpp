@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include "cg_local.h"
 #include "cg_public.h"
 

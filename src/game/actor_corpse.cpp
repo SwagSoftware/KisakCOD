@@ -628,7 +628,7 @@ void __cdecl Actor_OrientCorpseToGround(gentity_s *self, int bLerp)
         currentYaw = self->r.currentAngles[YAW];
         entNum = self->s.number;
         origin = self->r.currentOrigin;
-        clipMask = self->clipmask & 0xFDFF3FFF;
+        clipMask = self->clipmask & MASK_IGNORE_CHARACTERS;
         if (bLerp)
         {
             Actor_GetBodyPlantAngles(entNum, clipMask, origin, currentYaw, &pitch, &roll, &height);
@@ -705,7 +705,7 @@ void __cdecl Actor_OrientPitchToGround(gentity_s *self, int bLerp)
     {
         yaw = self->r.currentAngles[YAW];
         number = self->s.number;
-        clipMask = self->clipmask & 0xFDFF3FFF;
+        clipMask = self->clipmask & MASK_IGNORE_CHARACTERS;
         currentOrigin = self->r.currentOrigin;
         if (bLerp)
         {
@@ -805,7 +805,7 @@ int __cdecl Actor_BecomeCorpse(gentity_s *self)
     self->physicsObject = 1;
     p_pos = &self->s.lerp.pos;
     self->handler = ENT_HANDLER_ACTOR_CORPSE;
-    self->r.contents = 0x4000000;
+    self->r.contents = CONTENTS_CORPSE;
     self->s.eType = ET_ACTOR_CORPSE;
     self->clipmask = 8519697;
     IsRagdollTrajectory = Com_IsRagdollTrajectory(&self->s.lerp.pos);

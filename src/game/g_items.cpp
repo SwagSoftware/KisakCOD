@@ -716,11 +716,11 @@ gentity_s *__cdecl LaunchItem(const gitem_s *item, float *origin, float *angles,
     dropped->r.maxs[2] = 1.0;
 
 #ifdef KISAK_MP
-    dropped->r.contents = 1079771400;
-    dropped->r.contents |= 0x200000u;
+    dropped->r.contents = CONTENTS_ITEM | CONTENTS_ANY_TRIGGER;
+    dropped->r.contents |= CONTENTS_USE;
     dropped->s.clientNum = ownerNum;
 #elif KISAK_SP
-    dropped->r.contents = 1081868552;
+    dropped->r.contents = CONTENTS_ITEM | CONTENTS_USE | CONTENTS_ANY_TRIGGER;
 #endif
     weapModel = itemIndex / 128;
     weapDef = BG_GetWeaponDef(itemIndex % 128);
@@ -1260,11 +1260,11 @@ void __cdecl G_SpawnItem(gentity_s *ent, const gitem_s *item)
 
     ent->s.eType = ET_ITEM;
 #ifdef KISAK_MP
-    ent->r.contents = 1079771400;
-    ent->r.contents |= 0x200000u;
+    ent->r.contents = CONTENTS_ITEM | CONTENTS_ANY_TRIGGER;
+    ent->r.contents |= CONTENTS_USE;
     ent->s.index.brushmodel = LOWORD(ent->missile.travelDist);
 #elif KISAK_SP
-    ent->r.contents = 1081868552;
+    ent->r.contents = CONTENTS_ITEM | CONTENTS_USE | CONTENTS_ANY_TRIGGER;
     ent->s.index.item = ent->item->index;
 #endif
     TransferRandomAmmoToWeaponEntity(ent, weapIndex);

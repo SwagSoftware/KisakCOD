@@ -89,7 +89,7 @@ actor_think_result_t __cdecl Actor_Death_Think(actor_s *self)
         Actor_PostThink(self);
         if (level.time >= self->iStateTime + 500)
         {
-            self->ent->r.contents = 67117056;
+            self->ent->r.contents = CONTENTS_CORPSE | CONTENTS_CLIPSHOT;
             SV_LinkEntity(self->ent);
         }
         return ACTOR_THINK_DONE;

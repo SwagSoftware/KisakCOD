@@ -1877,9 +1877,9 @@ bool __cdecl BG_CheckProneValid(
     iassert(traceFunc);
 
     if (proneCheckType)
-        iTraceMask = 0x820011;
+        iTraceMask = MASK_DEADSOLID | CONTENTS_PLAYERCLIP;
     else
-        iTraceMask = 0x810011;
+        iTraceMask = MASK_DEADSOLID;
 
     if (!isAlreadyProne)
     {

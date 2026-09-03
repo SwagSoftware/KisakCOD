@@ -445,7 +445,7 @@ void __cdecl Client_Touch(gentity_s *pSelf, gentity_s *pOther, int bTouched)
     if (actor
         && !actor->pCloseEnt.isDefined()
         && !actor->bDontAvoidPlayer
-        && (actor->Physics.iTraceMask & 0x2000000) != 0
+        && (actor->Physics.iTraceMask & CONTENTS_PLAYER) != 0
         && actor->eState[actor->stateLevel] != AIS_TURRET)
     {
         if (!pOther->sentient)
@@ -580,7 +580,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     ent->s.groundEntityNum = ENTITYNUM_NONE;
     ent->takedamage = 1;
     Scr_SetString(&ent->classname, scr_const.player);
-    ent->r.contents = 0x2000000;
+    ent->r.contents = CONTENTS_PLAYER;
     ent->clipmask = 42057745;
     ent->flags = (FL_SUPPORTS_LINKTO | FL_OBSTACLE);
     ent->r.mins[0] = -15.0;
@@ -697,7 +697,7 @@ void __cdecl G_UpdateHeadHitEnt(gentity_s *pSelf)
         pHitHitEnt->r.maxs[0] = 8.0;
         pHitHitEnt->r.maxs[1] = 8.0;
         pHitHitEnt->r.maxs[2] = 8.0;
-        pHitHitEnt->r.contents = 8320;
+        pHitHitEnt->r.contents = MASK_WEAPONCLIP;
         pHitHitEnt->r.ownerNum.setEnt(pSelf);
         pHitHitEnt->handler = ENT_HANDLER_HEAD_HIT;
         pHitHitEnt->health = 99999;

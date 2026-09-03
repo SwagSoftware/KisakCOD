@@ -273,7 +273,7 @@ void __cdecl player_die(
         self->sentient->lastAttacker = attacker;
         v22 = self->client;
         self->takedamage = 1;
-        self->r.contents = 0x4000000;
+        self->r.contents = CONTENTS_CORPSE;
         self->s.weapon = 0;
         if (v22->ps.pm_type != PM_DEAD_LINKED)
         {

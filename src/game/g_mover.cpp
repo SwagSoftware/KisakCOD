@@ -44,7 +44,7 @@ gentity_s *__cdecl G_TestEntityPosition(gentity_s *ent, float *vOrigin)
 
     if (ent->clipmask)
     {
-        if ((ent->r.contents & 0x4000000) != 0)
+        if ((ent->r.contents & CONTENTS_CORPSE) != 0)
             return 0;
         mask = ent->clipmask;
     }

@@ -3017,7 +3017,7 @@ void __cdecl Actor_UpdatePlayerPush(actor_s *self, gentity_s *player)
     iassert(player->sentient);
 
     if (!self->bDontAvoidPlayer
-        && (self->Physics.iTraceMask & 0x2000000) != 0
+        && (self->Physics.iTraceMask & CONTENTS_PLAYER) != 0
         && self->eState[self->stateLevel] != AIS_TURRET
         && ((1 << self->sentient->eTeam) & ~(1 << Sentient_EnemyTeam(player->sentient->eTeam))) != 0)
     {
@@ -3758,7 +3758,7 @@ LABEL_87:
             xyz[2] = xyz[2] - (float)((float)infoScale * (float)7.0);
             G_AddDebugString(xyz, colorWhite, infoScale * 0.6f, "dontavoidplayer");
         }
-        if ((actor->Physics.iTraceMask & 0x2000000) == 0)
+        if ((actor->Physics.iTraceMask & CONTENTS_PLAYER) == 0)
         {
             xyz[2] = xyz[2] - (float)((float)infoScale * (float)7.0);
             G_AddDebugString(xyz, colorWhite, infoScale * 0.6f, "pushPlayer");
@@ -4752,7 +4752,7 @@ int __cdecl SP_actor(gentity_s *ent)
         ent->r.maxs[1] = 15.0;
         ent->r.maxs[2] = 72.0;
         ent->clipmask = 42074129;
-        ent->r.contents = 0x4000;
+        ent->r.contents = CONTENTS_ACTOR;
         ent->s.eType = ET_ACTOR;
         G_SetOrigin(ent, ent->r.currentOrigin);
         v3->ent = ent;

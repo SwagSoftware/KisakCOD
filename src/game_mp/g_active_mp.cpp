@@ -503,7 +503,7 @@ void __cdecl G_SetClientContents(gentity_s *pEnt)
     }
     else
     {
-        pEnt->r.contents = 0x2000000;
+        pEnt->r.contents = CONTENTS_PLAYER;
     }
 }
 
@@ -596,9 +596,9 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                 memcpy(&pm.cmd, ucmd, sizeof(pm.cmd));
                 memcpy(&pm.oldcmd, &client->sess.oldcmd, sizeof(pm.oldcmd));
                 if (client->ps.pm_type < PM_DEAD)
-                    pm.tracemask = 0x2810011;
+                    pm.tracemask = MASK_PLAYERSOLID;
                 else
-                    pm.tracemask = 0x810011;
+                    pm.tracemask = MASK_DEADSOLID;
                 pm.handler = 1;
                 oldOrigin = client->oldOrigin;
                 origin = client->ps.origin;
@@ -1025,7 +1025,7 @@ int32_t __cdecl StuckInClient(gentity_s *self)
         return 0;
     if (self->client->sess.sessionState)
         return 0;
-    if (self->r.contents != 0x2000000 && self->r.contents != 0x4000000)
+    if (self->r.contents != CONTENTS_PLAYER && self->r.contents != CONTENTS_CORPSE)
         return 0;
     hit = g_entities;
     for (i = 0; ; ++i)
@@ -1038,7 +1038,7 @@ int32_t __cdecl StuckInClient(gentity_s *self)
             && hit != self
             && hit->client
             && hit->health > 0
-            && (hit->r.contents == 0x2000000 || hit->r.contents == 0x4000000)
+            && (hit->r.contents == CONTENTS_PLAYER || hit->r.contents == CONTENTS_CORPSE)
             && self->r.absmax[0] >= (double)hit->r.absmin[0]
             && self->r.absmin[0] <= (double)hit->r.absmax[0]
             && self->r.absmax[1] >= (double)hit->r.absmin[1]

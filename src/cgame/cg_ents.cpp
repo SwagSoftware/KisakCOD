@@ -1066,7 +1066,7 @@ void __cdecl CG_Vehicle_PreControllers(int localClientNum, const DObj_s *obj, ce
             MatrixTransformVector43(basePose[*boneIndex].trans, (const mat4x3 &)axis, wheelOrigin);
             Vec3Mad(wheelOrigin, 40.0f, axis[2], traceStart);
             Vec3Mad(wheelOrigin, -cent->pose.vehicle.time, axis[2], traceEnd);
-            CG_TraceCapsule(&trace, traceStart, vec3_origin, vec3_origin, traceEnd, cent->nextState.number, 529);
+            CG_TraceCapsule(&trace, traceStart, vec3_origin, vec3_origin, traceEnd, cent->nextState.number, CONTENTS_SOLID | CONTENTS_GLASS | CONTENTS_VEHICLECLIP);
             cent->pose.vehicle.wheelFraction[wheelIndex] = CompressUnit(trace.fraction);
         }
     }

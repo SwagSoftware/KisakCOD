@@ -1,5 +1,63 @@
 #pragma once
 
+#define SURF_INVALID -1
+#define SURF_NONE           0x00000000
+#define SURF_NODAMAGE       0x00000001
+#define SURF_SLICK          0x00000002
+#define SURF_SKY            0x00000004
+#define SURF_LADDER         0x00000008
+#define SURF_NOIMPACT       0x00000010
+#define SURF_NOMARKS        0x00000020
+#define SURF_HDRPORTAL      0x00000040
+#define SURF_NODRAW         0x00000080
+#define SURF_NOPENETRATE    0x00000100
+#define SURF_NOLIGHTMAP     0x00000400
+#define SURF_NOSTEPS        0x00002000
+#define SURF_NONSOLID       0x00004000
+#define SURF_NODLIGHT       0x00020000
+#define SURF_NOCASTSHADOW   0x00040000
+#define SURF_MANTLEON       0x02000000
+#define SURF_MANTLEOVER     0x04000000
+#define SURF_PORTAL         ((int)0x80000000u)
+
+#define SURF_TYPE_SHIFT 20
+#define SURF_TYPE_MASK  0x01F00000
+#define SURF_TYPECOUNT  29
+
+#define SURF_TYPE_DEFAULT       0x00000000
+#define SURF_TYPE_BARK          0x00100000
+#define SURF_TYPE_BRICK         0x00200000
+#define SURF_TYPE_CARPET        0x00300000
+#define SURF_TYPE_CLOTH         0x00400000
+#define SURF_TYPE_CONCRETE      0x00500000
+#define SURF_TYPE_DIRT          0x00600000
+#define SURF_TYPE_FLESH         0x00700000
+#define SURF_TYPE_FOLIAGE       0x00800000
+#define SURF_TYPE_GLASS         0x00900000
+#define SURF_TYPE_GRASS         0x00A00000
+#define SURF_TYPE_GRAVEL        0x00B00000
+#define SURF_TYPE_ICE           0x00C00000
+#define SURF_TYPE_METAL         0x00D00000
+#define SURF_TYPE_MUD           0x00E00000
+#define SURF_TYPE_PAPER         0x00F00000
+#define SURF_TYPE_PLASTER       0x01000000
+#define SURF_TYPE_ROCK          0x01100000
+#define SURF_TYPE_SAND          0x01200000
+#define SURF_TYPE_SNOW          0x01300000
+#define SURF_TYPE_WATER         0x01400000
+#define SURF_TYPE_WOOD          0x01500000
+#define SURF_TYPE_ASPHALT       0x01600000
+#define SURF_TYPE_CERAMIC       0x01700000
+#define SURF_TYPE_PLASTIC       0x01800000
+#define SURF_TYPE_RUBBER        0x01900000
+#define SURF_TYPE_CUSHION       0x01A00000
+#define SURF_TYPE_FRUIT         0x01B00000
+#define SURF_TYPE_PAINTEDMETAL  0x01C00000
+#define SURF_TYPE_OPAQUEGLASS   SURF_TYPE_GLASS
+
+#define SURF_TYPEINDEX(flags) \
+    (((flags) & SURF_TYPE_MASK) >> SURF_TYPE_SHIFT)
+
 struct infoParm_t // sizeof=0x14
 {
     const char *name;
@@ -9,68 +67,7 @@ struct infoParm_t // sizeof=0x14
     int toolFlags;
 };
 
-const infoParm_t infoParms[60] =
-{
-    { "bark", 0, 0x100000, 0, 0},
-    { "brick", 0, 0x200000, 0, 0},
-    { "carpet", 0, 0x300000, 0, 0},
-    { "cloth", 0, 0x400000, 0, 0},
-    { "concrete", 0, 0x500000, 0, 0},
-    { "dirt" , 0, 0x600000, 0, 0},
-    { "flesh", 0, 0x700000, 0, 0},
-    { "foilage", 1, 0x800000, 2, 0},
-    { "glass", 1, 0x900000, 0x10, 0},
-    { "grass", 0, 0x0A00000, 0, 0},
-    { "gravel", 0, 0x0B00000, 0, 0},
-    { "ice", 0, 0x0C00000, 0, 0},
-    { "metal", 0, 0x0D00000, 0, 0},
-    { "mud", 0, 0x0E00000, 0, 0},
-    { "paper", 0, 0x0F00000, 0, 0},
-    { "plaster", 0, 0x1000000, 0, 0},
-    { "rock", 0, 0x1100000, 0, 0},
-    { "sand", 0, 0x1200000, 0, 0},
-    { "snow", 0, 0x1300000, 0, 0},
-    { "water", 1, 0x1400000, 0x20, 0},
-    { "wood", 0, 0x1500000, 0, 0},
-    { "asphalt", 0, 0x1600000, 0, 0},
-    { "ceramic", 0, 0x1700000, 0, 0},
-    { "plastic", 0, 0x1800000, 0, 0},
-    { "rubber", 0, 0x1900000, 0, 0},
-    { "cushion", 0, 0x1A00000, 0, 0},
-    { "fruit", 0, 0x1B00000, 0, 0},
-    { "paintedmetal", 0, 0x1C00000, 0, 0},
-    { "opaqueglass", 0, 0x900000, 0, 0},
-    { "clipmissile", 1, 0, 0x80, 0},
-    { "ai_nosight", 1, 0, 0x1000, 0},
-    { "clipshot", 1, 0, 0x2000, 0},
-    { "playerclip", 1, 0, 0x10000, 0},
-    { "monsterclip", 1, 0, 0x20000, 0},
-    { "vehicleclip", 1, 0, 0x200, 0},
-    { "itemclip", 1, 0, 0x400, 0},
-    { "nodrop", 1, 0, 0x80000000, 0},
-    { "nonsolid", 1, 0x4000, 0, 0},
-    { "detail", 0, 0, 0x8000000, 0},
-    { "structural", 0, 0, 0x10000000, 0},
-    { "portal", 1, 0x80000000, 0, 0},
-    { "canshootclip", 0, 0, 0x40, 0},
-    { "origin", 1, 0, 0, 4},
-    { "sky", 0, 4, 0x800, 0},
-    { "nocastshadow", 0, 0x40000, 0, 0},
-    { "physicsGeom", 0, 0, 0, 0x400},
-    { "lightPortal", 0, 0, 0, 0x2000},
-    { "slick", 0, 2, 0, 0},
-    { "noimpact", 0, 0x10, 0, 0},
-    { "nomarks", 0, 0x20, 0, 0},
-    { "nopenetrate", 0, 0x100, 0, 0},
-    { "ladder", 0, 8, 0, 0},
-    { "nodamage", 0, 1, 0, 0},
-    { "mantleOn", 0, 0x2000000, 0x1000000, 0},
-    { "mantleOver", 0, 0x4000000, 0x1000000, 0},
-    { "nosteps", 0, 0x2000, 0, 0},
-    { "nodraw", 0, 0x80, 0, 0},
-    { "nolightmap", 0, 0x400, 0, 0},
-    { "nodlight", 0, 0x20000, 0, 0},
-};
+extern const infoParm_t infoParms[60];
 
 const char *__cdecl Com_SurfaceTypeToName(int iTypeIndex);
 int __cdecl Com_SurfaceTypeFromName(const char *name);

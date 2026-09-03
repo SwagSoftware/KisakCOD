@@ -23,6 +23,7 @@
 // the binary's wc/<name> then optional wc/<name>_editor registration path.
 
 #include "stdafx.h"
+#include <universal/surfaceflags.h>
 #include "qe3.h"
 #include "prefs.h"                  // g_PrefsDlg->m_nTextureWindowScale / m_bTextureScrollbar
 
@@ -296,7 +297,7 @@ static qtexture_s *Editor_AddRadiantMaterial( const RadiantMaterialInfo *mtlInfo
     newRadMat->width                       = mtlInfo->autoTexScaleWidth;  // 0x14
     newRadMat->height                      = mtlInfo->autoTexScaleHeight; // 0x18
     newRadMat->color_or_surfacetype_filter = mtlInfo->surfaceFlags;       // 0x1C  surfaceFlags (full; the
-                                                                          //       filter ANDs &0x1F00000)
+                                                                          //       filter ANDs with SURF_TYPE_MASK)
     newRadMat->in_use                      = mtlInfo->contents;           // 0x20
 
     newRadMat->prev = texWndGlob_textureOffset.qtextures;                // 0x24  list link
@@ -710,7 +711,8 @@ static int TexWnd_SetupIter( MaterialIter_t *it, Font_s *font )
 //   reject if  tex->usage_index == 0                                          (0x45bc70)
 //   reject if  usageFilter!=0       && usage_index != filter_usage_array[usageFilter].index   (0x45bc7b)
 //   reject if  localeFilter!=0      && (1<<filter_locale_array[localeFilter].index & tex->tex_num_or_localefilter)==0 (0x45bc98)
-//   reject if  surfaceTypeFilter!=0 && filter_surfacetype_array[surfaceTypeFilter].index != (tex->color_or_surfacetype_filter & 0x1F00000) (0x45bcbb)
+//   reject if surfaceTypeFilter != 0 and the selected encoded surface type does not match
+//   (tex->color_or_surfacetype_filter & SURF_TYPE_MASK) (0x45bcbb)
 //   then searchbar (prefix) if active; else accept iff tex->is_in_use         (0x45bcdd/0x45bd89)
 // The usage_index/locale/surfaceFlags metadata is now populated for BOTH registration paths
 // (Material_ConvertToEditorMaterial reads the raw header; Editor_AddRadiantMaterial reads the
@@ -752,7 +754,7 @@ static bool TexWnd_FilterAccept( const qtexture_s *tex )
 
     const unsigned char surfaceTypeFilter = texWndGlob_textureOffset.surfaceTypeFilter; // 0x45bcbb
     if ( surfaceTypeFilter &&
-         filter_surfacetype_array[surfaceTypeFilter].index != ( tex->color_or_surfacetype_filter & 0x1F00000 ) ) // 0x45bcc4 and/cmp/jnz
+         filter_surfacetype_array[surfaceTypeFilter].index != ( tex->color_or_surfacetype_filter & SURF_TYPE_MASK ) ) // 0x45bcc4 and/cmp/jnz
         return false;
 
     // Search-bar (FAITHFUL, data-independent): when active, accept iff the material name
@@ -1398,35 +1400,35 @@ extern const char *Dvar_GetString( const char *dvarName );                      
 // material surface-flag bit (e.g. asphalt = 22<<20), passed straight to the menu id math.
 // Verbatim from the IDB .data dump (the strings are string-literals, never freed).
 RadiantFilterEntry filter_surfacetype_array[29] = {
-    { (char *)"all", 0x0 },
-    { (char *)"asphalt", 0x1600000 },
-    { (char *)"bark", 0x100000 },
-    { (char *)"brick", 0x200000 },
-    { (char *)"carpet", 0x300000 },
-    { (char *)"ceramic", 0x1700000 },
-    { (char *)"cloth", 0x400000 },
-    { (char *)"concrete", 0x500000 },
-    { (char *)"cushion", 0x1A00000 },
-    { (char *)"dirt", 0x600000 },
-    { (char *)"flesh", 0x700000 },
-    { (char *)"fruit", 0x1B00000 },
-    { (char *)"foliage", 0x800000 },
-    { (char *)"glass", 0x900000 },
-    { (char *)"grass", 0xA00000 },
-    { (char *)"gravel", 0xB00000 },
-    { (char *)"ice", 0xC00000 },
-    { (char *)"metal", 0xD00000 },
-    { (char *)"mud", 0xE00000 },
-    { (char *)"painted metal", 0x1C00000 },
-    { (char *)"paper", 0xF00000 },
-    { (char *)"plaster", 0x1000000 },
-    { (char *)"plastic", 0x1800000 },
-    { (char *)"rock", 0x1100000 },
-    { (char *)"rubber", 0x1900000 },
-    { (char *)"sand", 0x1200000 },
-    { (char *)"snow", 0x1300000 },
-    { (char *)"water", 0x1400000 },
-    { (char *)"wood", 0x1500000 },
+    { (char *)"all", SURF_TYPE_DEFAULT },
+    { (char *)"asphalt", SURF_TYPE_ASPHALT },
+    { (char *)"bark", SURF_TYPE_BARK },
+    { (char *)"brick", SURF_TYPE_BRICK },
+    { (char *)"carpet", SURF_TYPE_CARPET },
+    { (char *)"ceramic", SURF_TYPE_CERAMIC },
+    { (char *)"cloth", SURF_TYPE_CLOTH },
+    { (char *)"concrete", SURF_TYPE_CONCRETE },
+    { (char *)"cushion", SURF_TYPE_CUSHION },
+    { (char *)"dirt", SURF_TYPE_DIRT },
+    { (char *)"flesh", SURF_TYPE_FLESH },
+    { (char *)"fruit", SURF_TYPE_FRUIT },
+    { (char *)"foliage", SURF_TYPE_FOLIAGE },
+    { (char *)"glass", SURF_TYPE_GLASS },
+    { (char *)"grass", SURF_TYPE_GRASS },
+    { (char *)"gravel", SURF_TYPE_GRAVEL },
+    { (char *)"ice", SURF_TYPE_ICE },
+    { (char *)"metal", SURF_TYPE_METAL },
+    { (char *)"mud", SURF_TYPE_MUD },
+    { (char *)"painted metal", SURF_TYPE_PAINTEDMETAL },
+    { (char *)"paper", SURF_TYPE_PAPER },
+    { (char *)"plaster", SURF_TYPE_PLASTER },
+    { (char *)"plastic", SURF_TYPE_PLASTIC },
+    { (char *)"rock", SURF_TYPE_ROCK },
+    { (char *)"rubber", SURF_TYPE_RUBBER },
+    { (char *)"sand", SURF_TYPE_SAND },
+    { (char *)"snow", SURF_TYPE_SNOW },
+    { (char *)"water", SURF_TYPE_WATER },
+    { (char *)"wood", SURF_TYPE_WOOD },
 };
 
 // AppendTextureFilterMenu (0x45AFB0) — build ONE submenu popup ("Usage"/"Locale"/"Surface type")

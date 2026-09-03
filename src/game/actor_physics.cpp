@@ -3,6 +3,7 @@
 #endif
 
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include "actor.h"
 #include "actor_physics.h"
 #include <qcommon/mem_track.h>
@@ -574,11 +575,11 @@ void AIPhys_GroundTrace()
     memcpy(&g_apl.groundTrace, &trace, sizeof(g_apl.groundTrace));
     if (!trace.startsolid)
         goto LABEL_10;
-    if ((trace.contents & 0x200C000) != 0)
+    if ((trace.contents & MASK_CHARACTER) != 0)
     {
         EntityHitId = Trace_GetEntityHitId(&trace);
         AIPhys_AddTouchEnt(EntityHitId);
-        g_apl.iTraceMask &= ~0x200C000;
+        g_apl.iTraceMask &= ~MASK_CHARACTER;
         G_TraceCapsule(&trace, start, g_pPhys->vMins, g_pPhys->vMaxs, end, g_pPhys->iEntNum, g_apl.iTraceMask);
         memcpy(&g_apl.groundTrace, &trace, sizeof(g_apl.groundTrace));
     }
@@ -811,7 +812,7 @@ int __cdecl Actor_Physics(actor_physics_t *pPhys)
                 v10 = g_pPhys;
                 g_pPhys->bHasGroundPlane = 1;
                 v10->groundplaneSlope = g_apl.groundTrace.normal[2];
-                v10->iSurfaceType = (g_apl.groundTrace.surfaceFlags >> 20) & 0x1F;
+                v10->iSurfaceType = SURF_TYPEINDEX(g_apl.groundTrace.surfaceFlags);
             }
             else
             {

@@ -202,7 +202,7 @@ void __cdecl SP_script_model(gentity_s *pSelf)
     G_DObjUpdate(pSelf);
     InitScriptMover(pSelf);
     pSelf->r.svFlags |= 4u;
-    pSelf->r.contents = 8320;
+    pSelf->r.contents = MASK_WEAPONCLIP;
     SV_LinkEntity(pSelf);
 #ifdef KISAK_SP
     pSelf->flags |= FL_SUPPORTS_ANIMSCRIPTED; // KISAKTODO: flags here different in blops, why?
@@ -1201,7 +1201,7 @@ void __cdecl ScriptEntCmd_Solid(scr_entref_t entref)
     {
         if (pSelf->classname == scr_const.script_model)
         {
-            pSelf->r.contents = 8320;
+            pSelf->r.contents = MASK_WEAPONCLIP;
         }
         else
         {

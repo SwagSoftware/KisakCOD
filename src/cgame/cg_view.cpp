@@ -1243,7 +1243,7 @@ void __cdecl GetCeilingHeight(cg_s *cgameGlob)
     endPos[1] = cgameGlob->predictedPlayerState.origin[1];
     endPos[2] = cgameGlob->predictedPlayerState.origin[2] + 1024.0f;
 
-    CG_TraceCapsule(&result, cgameGlob->predictedPlayerState.origin, playerMins, playerMaxs, endPos, ENTITYNUM_NONE, 1);
+    CG_TraceCapsule(&result, cgameGlob->predictedPlayerState.origin, playerMins, playerMaxs, endPos, ENTITYNUM_NONE, MASK_SOLID);
     if (result.fraction < 1.0)
     {
         Vec3Lerp(cgameGlob->predictedPlayerState.origin, endPos, result.fraction, endPos);

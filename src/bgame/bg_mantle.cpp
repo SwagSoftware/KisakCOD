@@ -1,4 +1,5 @@
 #include <universal/q_shared.h>
+#include <universal/surfaceflags.h>
 #include "bg_public.h"
 #include "bg_local.h"
 #include <aim_assist/aim_assist.h>
@@ -197,7 +198,7 @@ void __cdecl Mantle_Check(pmove_t *pm, pml_t *pml)
                 mresults.startPos[0] = ps->origin[0];
                 mresults.startPos[1] = ps->origin[1];
                 mresults.startPos[2] = ps->origin[2];
-                if ((trace.surfaceFlags & 0x4000000) != 0)
+                if ((trace.surfaceFlags & SURF_MANTLEOVER) != 0)
                     mresults.flags |= 1u;
                 if (!Mantle_CheckLedge(pm, pml, &mresults, 60.0) && !Mantle_CheckLedge(pm, pml, &mresults, 40.0))
                     Mantle_CheckLedge(pm, pml, &mresults, 20.0);
@@ -544,7 +545,7 @@ char __cdecl Mantle_FindMantleSurface(pmove_t *pm, pml_t *pml, trace_t *trace, f
         Mantle_DebugPrint("Mantle Failed: No mantle surface found");
         return 0;
     }
-    else if ((trace->surfaceFlags & 0x6000000) != 0)
+    else if ((trace->surfaceFlags & (SURF_MANTLEOVER|SURF_MANTLEON)) != 0)
     {
         mantleDir[0] = -trace->normal[0];
         mantleDir[1] = -trace->normal[1];

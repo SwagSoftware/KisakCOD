@@ -5377,7 +5377,7 @@ void Scr_BulletTrace()
     {
         Scr_AddVector(v15.normal);
         Scr_AddArrayStringIndexed(scr_const.normal);
-        v3 = Com_SurfaceTypeToName((v15.surfaceFlags >> 20) & 0x1F);
+        v3 = Com_SurfaceTypeToName(SURF_TYPEINDEX(v15.surfaceFlags));
         Scr_AddString(v3);
     }
     Scr_AddArrayStringIndexed(scr_const.surfacetype);

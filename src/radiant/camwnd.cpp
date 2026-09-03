@@ -7,6 +7,7 @@
 // NOTE: 0x403d30 is CamWnd_DropModelsToPlane, NOT Cam_Draw (0x407dc0).
 
 #include "stdafx.h"
+#include <universal/surfaceflags.h>
 #include <csetjmp>                  // model-load asset-drop recovery guard (Stage B)
 #include <universal/q_parse.h>      // Com_GetParseThreadInfo / negativeNumbers (collmap parse)
 #include "mainfrm.h"                // CCamWnd, camera_s

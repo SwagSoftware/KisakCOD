@@ -358,7 +358,7 @@ void __cdecl CG_ScanForCrosshairEntity(int32_t localClientNum)
             (float *)vec3_origin,
             end,
             cgameGlob->nextSnap->ps.clientNum,
-            0x2803001);
+            MASK_PLAYER_VISIBILITY);
         hitEntId = Trace_GetEntityHitId(&trace);
         if (hitEntId < 0x40u)
         {
@@ -1252,7 +1252,14 @@ bool __cdecl CG_CanSeeFriendlyHead(int32_t localClientNum, const centity_s *cent
     v3 = cg_overheadNamesMaxDist->current.value * cg_overheadNamesMaxDist->current.value;
     if (v4 > (double)v3)
         return 0;
-    CG_TraceCapsule(&trace, start, (float *)vec3_origin, (float *)vec3_origin, end, ps->clientNum, 0x2803001);
+    CG_TraceCapsule(
+        &trace,
+        start,
+        (float *)vec3_origin,
+        (float *)vec3_origin,
+        end,
+        ps->clientNum,
+        MASK_PLAYER_VISIBILITY);
     hitEntId = Trace_GetEntityHitId(&trace);
     if (hitEntId != ENTITYNUM_NONE && hitEntId != cent->nextState.clientNum)
         return 0;

@@ -85,15 +85,15 @@ void __cdecl InitSentientTrigger(gentity_s *self)
     spawnflags = self->spawnflags;
     self->r.contents = 0;
     if ((spawnflags & 8) == 0)
-        self->r.contents = 0x40000000;
+        self->r.contents = CONTENTS_PLAYERTRIGGER;
     if ((spawnflags & 1) != 0)
-        self->r.contents |= 0x40000u;
+        self->r.contents |= CONTENTS_AXISTRIGGER;
     if ((spawnflags & 2) != 0)
-        self->r.contents |= 0x80000u;
+        self->r.contents |= CONTENTS_ALLIESTRIGGER;
     if ((spawnflags & 4) != 0)
-        self->r.contents |= 0x100000u;
+        self->r.contents |= CONTENTS_NEUTRALTRIGGER;
     if ((spawnflags & 0x10) != 0)
-        self->r.contents |= 8u;
+        self->r.contents |= CONTENTS_VEHICLETRIGGER;
 }
 
 void __cdecl multi_trigger(gentity_s *ent, gentity_s *activator)

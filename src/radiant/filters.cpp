@@ -6,6 +6,7 @@
 // g_qeglobals.d_filterGlobals_*.
 
 #include "stdafx.h"
+#include <universal/surfaceflags.h>
 #include "qe3.h"
 #include <universal/q_parse.h>   // Com_Parse / Com_ParseOnLine — the filter file grammar
 #include <map>                    // faceTexMap (IDB std::map<std::string,int>)
@@ -114,23 +115,27 @@ static filter_info_s *Filter_ParseTexture( const char **text )
 // it at stride 2 dwords (name@8*i, bits@8*i+4).  We store proper pairs and iterate.
 struct FilterFlagName { const char *name; int bits; };
 static const FilterFlagName s_contentsTbl[] = {   // 0x73C388 — 34 pairs
-    {"solid",0x1},{"foliage",0x2},{"ai_avoid",0x4},{"vehicletrigger",0x8},{"glass",0x10},
-    {"water",0x20},{"canshootclip",0x40},{"missileclip",0x80},{"item",0x100},
-    {"vehicleclip",0x200},{"itemclip",0x400},{"sky",0x800},{"ai_nosight",0x1000},
-    {"clipshot",0x2000},{"actor",0x4000},{"fake_actor",0x8000},{"playerclip",0x10000},
-    {"monsterclip",0x20000},{"axistrigger",0x40000},{"alliestrigger",0x80000},
-    {"neutraltrigger",0x100000},{"use",0x200000},{"nonsentienttrigger",0x400000},
-    {"vehicle",0x800000},{"mantle",0x1000000},{"player",0x2000000},{"corpse",0x4000000},
-    {"detail",0x8000000},{"structural",0x10000000},{"lookat",0x20000000},
-    {"translucent",0x20000000},{"playertrigger",0x40000000},{"nodrop",(int)0x80000000},
-    {"noncolliding",0x4},
+    {"solid", CONTENTS_SOLID}, {"foliage", CONTENTS_FOLIAGE}, {"ai_avoid", CONTENTS_AI_AVOID},
+    {"vehicletrigger", CONTENTS_VEHICLETRIGGER}, {"glass", CONTENTS_GLASS}, {"water", CONTENTS_WATER},
+    {"canshootclip", CONTENTS_CANSHOOTCLIP}, {"missileclip", CONTENTS_MISSILECLIP}, {"item", CONTENTS_ITEM},
+    {"vehicleclip", CONTENTS_VEHICLECLIP}, {"itemclip", CONTENTS_ITEMCLIP}, {"sky", CONTENTS_SKY},
+    {"ai_nosight", CONTENTS_AI_NOSIGHT}, {"clipshot", CONTENTS_CLIPSHOT}, {"actor", CONTENTS_ACTOR},
+    {"fake_actor", CONTENTS_FAKE_ACTOR}, {"playerclip", CONTENTS_PLAYERCLIP}, {"monsterclip", CONTENTS_MONSTERCLIP},
+    {"axistrigger", CONTENTS_AXISTRIGGER}, {"alliestrigger", CONTENTS_ALLIESTRIGGER},
+    {"neutraltrigger", CONTENTS_NEUTRALTRIGGER}, {"use", CONTENTS_USE},
+    {"nonsentienttrigger", CONTENTS_NONSENTIENTTRIGGER}, {"vehicle", CONTENTS_VEHICLE},
+    {"mantle", CONTENTS_MANTLE}, {"player", CONTENTS_PLAYER}, {"corpse", CONTENTS_CORPSE},
+    {"detail", CONTENTS_DETAIL}, {"structural", CONTENTS_STRUCTURAL}, {"lookat", CONTENTS_LOOKAT},
+    {"translucent", CONTENTS_TRANSLUCENT}, {"playertrigger", CONTENTS_PLAYERTRIGGER},
+    {"nodrop", static_cast<int>(CONTENTS_NODROP)}, {"noncolliding", CONTENTS_NONCOLLIDING},
 };
 static const FilterFlagName s_surfaceTbl[] = {    // 0x73C498 — 17 pairs
-    {"nodamage",0x1},{"slick",0x2},{"sky",0x4},{"ladder",0x8},{"noimpact",0x10},
-    {"nomarks",0x20},{"nopenetrate",0x100},{"hdrportal",0x40},{"nodraw",0x80},
-    {"nolightmap",0x400},{"nosteps",0x2000},{"nonsolid",0x4000},{"nodlight",0x20000},
-    {"nocastshadow",0x40000},{"mantleon",0x2000000},{"mantleover",0x4000000},
-    {"portal",(int)0x80000000},
+    {"nodamage", SURF_NODAMAGE}, {"slick", SURF_SLICK}, {"sky", SURF_SKY}, {"ladder", SURF_LADDER},
+    {"noimpact", SURF_NOIMPACT}, {"nomarks", SURF_NOMARKS}, {"nopenetrate", SURF_NOPENETRATE},
+    {"hdrportal", SURF_HDRPORTAL}, {"nodraw", SURF_NODRAW}, {"nolightmap", SURF_NOLIGHTMAP},
+    {"nosteps", SURF_NOSTEPS}, {"nonsolid", SURF_NONSOLID}, {"nodlight", SURF_NODLIGHT},
+    {"nocastshadow", SURF_NOCASTSHADOW}, {"mantleon", SURF_MANTLEON}, {"mantleover", SURF_MANTLEOVER},
+    {"portal", static_cast<int>(SURF_PORTAL)},
 };
 static const FilterFlagName s_eclassTbl[] = {     // 0x73C520 — 9 pairs
     {"light",0x1},{"angle",0x2},{"path",0x4},{"miscmodel",0x8},{"prefab",0x10},

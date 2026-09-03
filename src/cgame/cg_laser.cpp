@@ -82,7 +82,7 @@ void __cdecl CG_Laser_Add_Core(
     laserBegin[1] = orient->origin[1];
     laserBegin[2] = orient->origin[2];
     Vec3Mad(orient->origin, laserRange, orient->axis[0], laserEnd);
-    CG_TraceCapsule(&traceResults, laserBegin, mins, maxs, laserEnd, cent->nextState.number, 0x2806831);
+    CG_TraceCapsule(&traceResults, laserBegin, mins, maxs, laserEnd, cent->nextState.number, MASK_SHOT);
     laserLength = traceResults.fraction * laserRange;
     scale = laserLength - cg_laserEndOffset->current.value;
     Vec3Mad(orient->origin, scale, orient->axis[0], laserEnd);
@@ -125,7 +125,7 @@ void __cdecl CG_Laser_Add_Core(
     {
         laserLightBeginDist = cg_laserLightBeginOffset->current.value;
         laserLightEndDist = laserLength - cg_laserLightEndOffset->current.value;
-        if ((traceResults.contents & 0x2004000) != 0)
+        if ((traceResults.contents & (CONTENTS_PLAYER | CONTENTS_ACTOR)) != 0)
             laserLightEndDist = laserLightEndDist + cg_laserLightBodyTweak->current.value;
         if (laserLightEndDist - laserLightBeginDist < 4.0)
         {

@@ -2177,7 +2177,7 @@ void MdlPrvDropToFloor()
     mins[1] = -5.0f;
     mins[2] = -5.0f;
 
-    CG_TraceCapsule(&trace, center, mins, maxs, end, -1, 1);
+    CG_TraceCapsule(&trace, center, mins, maxs, end, -1, MASK_SOLID);
 
     if (!trace.allsolid && trace.fraction != 1.0)
     {

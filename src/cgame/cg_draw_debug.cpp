@@ -478,9 +478,9 @@ void __cdecl CG_DrawMaterial(int32_t localClientNum, uint32_t drawMaterialType)
     cg_s *cgameGlob;
 
     traceMasks[0] = 0;
-    traceMasks[1] = 1;
-    traceMasks[2] = 0x2806831;
-    traceMasks[3] = 0x2810011;
+    traceMasks[1] = MASK_SOLID;
+    traceMasks[2] = MASK_SHOT;
+    traceMasks[3] = MASK_PLAYERSOLID;
 
     iassert(drawMaterialType != 0);
     bcassert(drawMaterialType, ARRAY_COUNT(traceMasks));

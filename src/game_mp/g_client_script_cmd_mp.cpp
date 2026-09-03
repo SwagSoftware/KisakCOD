@@ -1980,7 +1980,7 @@ void __cdecl PlayerCmd_setEnterTime(scr_entref_t entref)
 void __cdecl BodyEnd(gentity_s *ent)
 {
     ent->s.lerp.eFlags &= ~0x80000u;
-    ent->r.contents = 0x4000000;
+    ent->r.contents = CONTENTS_CORPSE;
     ent->r.svFlags = 0;
 }
 
