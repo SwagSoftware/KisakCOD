@@ -113,12 +113,13 @@ bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 52, 0, "%s", "pTurretInfo");
     initialYawmax = pTurretInfo->initialYawmax;
-    v7 = pTurretInfo->flags & 0xFFFFFFF7;
+    v7 = pTurretInfo->flags & ~TURRET_HAS_MISS_TARGET;
     pTurretInfo->arcmin[1] = pTurretInfo->initialYawmin;
     pTurretInfo->arcmax[1] = initialYawmax;
-    v8 = v7 & 0xFFFFFE1F | 0x100;
+    v8 = v7 & ~(TURRET_ERROR_INITED | TURRET_HAS_TARGET | TURRET_BAD_TARGET | TURRET_FIRST_PITCH_CAP)
+        | TURRET_FIRST_PITCH_CAP;
     pTurretInfo->flags = v8;
-    if ((v8 & 0x200) != 0)
+    if ((v8 & TURRET_PITCH_CAP) != 0)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp",
             59,
@@ -128,7 +129,7 @@ bool __cdecl Actor_Turret_Start(actor_s *self, ai_state_t ePrevState)
     Actor_CanAttackAll(self);
     if (ePrevState != AIS_PAIN)
     {
-        pTurretInfo->flags &= ~0x10u;
+        pTurretInfo->flags &= ~TURRET_TAKEN_PAIN;
         pTurretInfo->detachSentient.setSentient(NULL);
     }
     Actor_ClearKeepClaimedNode(self);
@@ -174,7 +175,7 @@ void __cdecl Actor_DetachTurret(actor_s *self)
     pTurretInfo = pTurret->pTurretInfo;
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 122, 0, "%s", "pTurretInfo");
-    pTurretInfo->flags &= ~0x200u;
+    pTurretInfo->flags &= ~TURRET_PITCH_CAP;
 }
 
 void __cdecl Actor_Turret_Finish(actor_s *self, ai_state_t eNextState)
@@ -351,17 +352,17 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         // Desired pitch lies between two animated levels: blend them.
         int flags = pTurretInfo->flags;
         bool clearPitchCap;
-        if ((flags & 0x20) == 0
+        if ((flags & TURRET_ERROR_INITED) == 0
             || pTurretInfo->originError[0] != 0.0f
             || pTurretInfo->originError[1] != 0.0f
             || pTurretInfo->originError[2] != 0.0f)
         {
             clearPitchCap = true;
         }
-        else if ((flags & 0x200) != 0)
+        else if ((flags & TURRET_PITCH_CAP) != 0)
         {
             // Ease the active pitch cap toward its arc limit; clear it once reached.
-            if ((flags & 0x400) != 0)
+            if ((flags & TURRET_PITCH_MIN) != 0)
             {
                 pTurretInfo->pitchCap -= 0.1f;
                 clearPitchCap = (pTurretInfo->pitchCap <= pTurretInfo->arcmin[0]);
@@ -377,7 +378,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
             clearPitchCap = false;
         }
         if (clearPitchCap)
-            pTurretInfo->flags = flags & ~0x200;
+            pTurretInfo->flags = flags & ~TURRET_PITCH_CAP;
 
         iassert((trans[2] - fPrevZ) != 0.0f);
         float fPitchFrac = (fDesiredZ - fPrevZ) / (trans[2] - fPrevZ);
@@ -408,7 +409,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         }
 
         int flags = pTurretInfo->flags;
-        if ((flags & 0x20) != 0
+        if ((flags & TURRET_ERROR_INITED) != 0
             && pTurretInfo->originError[0] == 0.0f
             && pTurretInfo->originError[1] == 0.0f
             && pTurretInfo->originError[2] == 0.0f)
@@ -444,22 +445,22 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
 
             if (iPitchStep)   // overshot the bottom: cap rises above the target
             {
-                pTurretInfo->flags    = flags | 0x600;
+                pTurretInfo->flags    = flags | TURRET_PITCH_CAP | TURRET_PITCH_MIN;
                 pTurretInfo->pitchCap = fAimPitch + fAnimPitchError;
             }
             else              // overshot the top: cap drops below the target
             {
-                pTurretInfo->flags    = (flags & ~0x600) | 0x200;
+                pTurretInfo->flags    = (flags & ~(TURRET_PITCH_CAP | TURRET_PITCH_MIN)) | TURRET_PITCH_CAP;
                 pTurretInfo->pitchCap = fAimPitch - fAnimPitchError;
             }
         }
         else
         {
-            pTurretInfo->flags = flags & ~0x200;
+            pTurretInfo->flags = flags & ~TURRET_PITCH_CAP;
         }
 
-        self->pszDebugInfo = (pTurretInfo->flags & 2) ? "auto_turret EXCEEDED ANIM PITCH"
-                                                      : "manual_turret EXCEEDED ANIM PITCH";
+        self->pszDebugInfo = (pTurretInfo->flags & TURRET_AUTO) ? "auto_turret EXCEEDED ANIM PITCH"
+                                                                 : "manual_turret EXCEEDED ANIM PITCH";
         XAnimSetGoalWeight(serverDObj, pitchAnim, 1.0f, 0.0f, 1.0f, 0, 0, 0);
     }
 
@@ -496,9 +497,9 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
 
     // On the first think after mounting, seed the origin/angle error so the AI eases into
     // the computed pose instead of snapping (unless the level is still loading).
-    if ((pTurretInfo->flags & 0x20) == 0)
+    if ((pTurretInfo->flags & TURRET_ERROR_INITED) == 0)
     {
-        pTurretInfo->flags |= 0x20;
+        pTurretInfo->flags |= TURRET_ERROR_INITED;
         if (level.loading == LOADING_LEVEL)
         {
             Vec3Copy(ent->r.currentOrigin, newOrigin);
@@ -676,7 +677,7 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
         }
         if (((pTurretInfo->flags & 0x2000) != 0 || Actor_PointNearGoal(pTurret->r.currentOrigin, &self->codeGoal, 92.0))
             && G_EntIsLinkedTo(self->ent, pTurret)
-            && (pTurretInfo->flags & 0x80) == 0)
+            && (pTurretInfo->flags & TURRET_BAD_TARGET) == 0)
         {
             if (self->pGrenade.isDefined() && !pTurret->tagInfo)
             {
@@ -697,7 +698,7 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
             {
                 if (state == 1)
                 {
-                    if ((pTurretInfo->flags & 2) != 0)
+                    if ((pTurretInfo->flags & TURRET_AUTO) != 0)
                         v11 = "auto_turret_firing_head";
                     else
                         v11 = "manual_turret_firing_head";
@@ -737,13 +738,13 @@ actor_think_result_t __cdecl Actor_Turret_Think(actor_s *self)
                         }
                         goto LABEL_52;
                     }
-                    if ((pTurretInfo->flags & 2) != 0)
+                    if ((pTurretInfo->flags & TURRET_AUTO) != 0)
                         v11 = "auto_turret_firing_feet";
                     else
                         v11 = "manual_turret_firing_feet";
                 }
             }
-            else if ((pTurretInfo->flags & 2) != 0)
+            else if ((pTurretInfo->flags & TURRET_AUTO) != 0)
             {
                 v11 = "auto_turret_idle";
             }
@@ -793,13 +794,13 @@ void __cdecl Actor_Turret_Pain(
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\actor_turret.cpp", 708, 0, "%s", "self->pTurret");
         pTurretInfo = self->pTurret->pTurretInfo;
         flags = pTurretInfo->flags;
-        if ((flags & 0x10) != 0)
+        if ((flags & TURRET_TAKEN_PAIN) != 0)
         {
             Actor_StopUseTurret(self);
         }
         else
         {
-            pTurretInfo->flags = flags | 0x10;
+            pTurretInfo->flags = flags | TURRET_TAKEN_PAIN;
             pTurretInfo->detachSentient.setSentient(pAttacker->sentient);
         }
     }
