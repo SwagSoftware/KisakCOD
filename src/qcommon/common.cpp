@@ -2107,8 +2107,8 @@ void __cdecl Com_AssetLoadUI()
 #elif KISAK_SP
         zoneInfo.name = "ui";
 #endif
-        zoneInfo.allocFlags = 8;
-        zoneInfo.freeFlags = 104;
+        zoneInfo.allocFlags = DB_ZONE_GAME;
+        zoneInfo.freeFlags = DB_ZONE_GAME | DB_ZONE_LOAD | DB_ZONE_DEV;
         DB_LoadXAssets(&zoneInfo, 1u, 0);
     }
 #ifdef KISAK_MP

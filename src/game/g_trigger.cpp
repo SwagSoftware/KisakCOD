@@ -266,8 +266,8 @@ void __cdecl hurt_touch(gentity_s *self, gentity_s *other, int bTouched)
             0,
             0,
             self->damage,
-            0, // dflags
-            13, // mod
+            DAMAGE_NOFLAG, // dflags
+            MOD_TRIGGER_HURT, // mod
             0xFFFFFFFF,
             HITLOC_NONE,
             0,
@@ -462,14 +462,14 @@ void __cdecl G_CheckHitTriggerDamage(
     float v25[4]; // [sp+70h] [-2290h] BYREF
     int v26[MAX_GENTITIES];
 
-    if (iMOD >= 0x10)
+    if (iMOD >= MOD_NUM)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_trigger.cpp",
             600,
             0,
             "iMOD doesn't index MOD_NUM\n\t%i not in [0, %i)",
             iMOD,
-            16);
+            MOD_NUM);
     if (!*modNames[iMOD])
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_trigger.cpp", 601, 0, "%s", "*modNames[iMOD]");
     if (!vStart)

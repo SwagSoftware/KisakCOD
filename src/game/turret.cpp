@@ -187,9 +187,9 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
                          + wp.forward[2] * (dir[2] * invLen);
 
         if (forwardDot > turretInfo->forwardAngleDot)
-            turretInfo->flags &= ~0x80;
+            turretInfo->flags &= ~TURRET_BAD_TARGET;
         else
-            turretInfo->flags |= 0x80;
+            turretInfo->flags |= TURRET_BAD_TARGET;
 
         float visibility = SV_FX_GetVisibility(wp.muzzleTrace, targetPos);
         int remainingConvergence =
@@ -311,9 +311,9 @@ void turret_clientaim(gentity_s *self, gentity_s *other)
     self->s.lerp.u.turret.gunAngles[2] = 0.0f;
 
     // Clear the user flag if needed
-    if (ti->flags & 0x800)
+    if (ti->flags & TURRET_INIT_VIEW)
     {
-        ti->flags &= ~0x800;
+        ti->flags &= ~TURRET_INIT_VIEW;
         self->s.lerp.eFlags ^= 2u;
     }
 }
@@ -334,7 +334,7 @@ void __cdecl turret_shoot_internal(gentity_s *self, gentity_s *other)
         }
         else
         {
-            Fire_Lead(self, other, self->pTurretInfo->flags & 0x40);
+            Fire_Lead(self, other, self->pTurretInfo->flags & TURRET_HAS_TARGET);
         }
     }
 }
@@ -363,7 +363,7 @@ void __cdecl turret_track(gentity_s *self, gentity_s *other)
     {
         turretInfo->fireTime = 0;
         client = other->client;
-        if ((client->ps.pm_flags & 0x800) != 0 || (client->buttons & 1) == 0)
+        if ((client->ps.pm_flags & 0x800) != 0 || (client->buttons & BUTTON_ATTACK) == 0)
         {
             turretInfo->triggerDown = 0;
         }
@@ -500,7 +500,7 @@ int turret_UpdateTargetAngles(
     }
 
     int flags = info->flags;
-    if ((flags & 0x200) && (flags & 0x100)) {
+    if ((flags & TURRET_PITCH_CAP) && (flags & TURRET_FIRST_PITCH_CAP)) {
         velX = 360.0f;
     }
 
@@ -529,17 +529,17 @@ int turret_UpdateTargetAngles(
         lerp->turret.gunAngles[channel] += delta;
     }
 
-    if (flags & 0x200) {
+    if (flags & TURRET_PITCH_CAP) {
         float currentPitch = lerp->turret.gunAngles[0];
         float cap = info->pitchCap;
 
-        bool capped = (flags & 0x400) ? (currentPitch >= cap)
+        bool capped = (flags & TURRET_PITCH_MIN) ? (currentPitch >= cap)
             : (currentPitch <= cap);
         if (capped) {
 #ifdef KISAK_SP        	
-            info->flags &= ~0x100;
+            info->flags &= ~TURRET_FIRST_PITCH_CAP;
 #elif KISAK_MP
-			info->flags &= ~0x200;
+			info->flags &= ~TURRET_PITCH_CAP;
 #endif
         }
         else {
@@ -589,7 +589,7 @@ void __cdecl turret_ClearTargetEnt(gentity_s *self)
     iassert(pTurretInfo);
 
     pTurretInfo->target.setEnt(NULL);
-    pTurretInfo->flags &= 0xFFFFFFB7;
+    pTurretInfo->flags &= ~(TURRET_HAS_MISS_TARGET | TURRET_HAS_TARGET);
     turret_SetState(self, 0);
 }
 
@@ -891,7 +891,7 @@ void __cdecl turret_aimat_vector_internal(gentity_s *self, float *origin, int bS
         turret_SetState(self, v12);
     }
 LABEL_15:
-    pTurretInfo->flags |= 0x40u;
+    pTurretInfo->flags |= TURRET_HAS_TARGET;
     pTurretInfo->targetPos[0] = *origin;
     pTurretInfo->targetPos[1] = origin[1];
     pTurretInfo->targetPos[2] = origin[2];
@@ -911,7 +911,7 @@ int __cdecl turret_aimat_vector(gentity_s *self, float *origin, int bShoot, floa
     {
         iassert(self->pTurretInfo);
         result = 0;
-        self->pTurretInfo->flags &= ~0x40u;
+        self->pTurretInfo->flags &= ~TURRET_HAS_TARGET;
     }
     return result;
 }
@@ -933,7 +933,7 @@ void __cdecl turret_SetTargetEnt(gentity_s *self, gentity_s *ent)
     {
         pTurretInfo->target.setEnt(ent);
         time = level.time;
-        pTurretInfo->flags &= ~8u;
+        pTurretInfo->flags &= ~TURRET_HAS_MISS_TARGET;
         pTurretInfo->targetTime = time;
     }
 }
@@ -949,7 +949,6 @@ int __cdecl turret_aimat_Sentient_Internal(
     int result; // r3
     TurretInfo *pTurretInfo; // r31
     int targetTime; // r11
-    __int64 v13; // r10 OVERLAPPED
     double v14; // fp0
     double v15; // fp13
     double v16; // fp12
@@ -983,8 +982,7 @@ int __cdecl turret_aimat_Sentient_Internal(
     targetTime = pTurretInfo->targetTime;
     if (pTurretInfo->convergenceTime[1] - level.time + targetTime > 0)
     {
-        HIDWORD(v13) = pTurretInfo->flags;
-        if ((v13 & 0x800000000LL) != 0)
+        if ((pTurretInfo->flags & TURRET_HAS_MISS_TARGET) != 0)
         {
             if (missTime <= 0)
             {
@@ -1008,7 +1006,7 @@ int __cdecl turret_aimat_Sentient_Internal(
         }
         else
         {
-            pTurretInfo->flags = HIDWORD(v13) | 8;
+            pTurretInfo->flags |= TURRET_HAS_MISS_TARGET;
             if (!G_DObjGetWorldTagMatrix(self, scr_const.tag_aim, (float (*)[3])v38))
                 return 0;
             dir[0] = targetPos[1] - v38[10];
@@ -1304,7 +1302,8 @@ sentient_s *__cdecl turret_findBestTarget(gentity_s *self)
     iassert(pTurretInfo);
     
     sentient = 0;
-    if ((pTurretInfo->flags & 0x40) != 0 && pTurretInfo->target.isDefined() && pTurretInfo->target.ent()->sentient)
+    if ((pTurretInfo->flags & TURRET_HAS_TARGET) != 0 && pTurretInfo->target.isDefined()
+        && pTurretInfo->target.ent()->sentient)
     {
         p_target = &pTurretInfo->target;
         if (level.time <= pTurretInfo->targetTime + 4000)
@@ -1442,7 +1441,7 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
     pTurretInfo = self->pTurretInfo;
     if (!pTurretInfo)
         MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1337, 0, "%s", "pTurretInfo");
-    if ((pTurretInfo->flags & 0x20) == 0
+    if ((pTurretInfo->flags & TURRET_ERROR_INITED) == 0
         || pTurretInfo->originError[0] != 0.0
         || pTurretInfo->originError[1] != 0.0
         || pTurretInfo->originError[2] != 0.0)
@@ -1457,7 +1456,7 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
         return 1;
     }
     TargetSentient = Actor_GetTargetSentient(actor);
-    if ((pTurretInfo->flags & 0x10) != 0 && pTurretInfo->detachSentient.isDefined())
+    if ((pTurretInfo->flags & TURRET_TAKEN_PAIN) != 0 && pTurretInfo->detachSentient.isDefined())
         TargetSentient = pTurretInfo->detachSentient.sentient();
     if (pTurretInfo->manualTarget.isDefined())
         v6 = pTurretInfo->manualTarget.ent();
@@ -1488,7 +1487,7 @@ int __cdecl turret_think_auto(gentity_s *self, actor_s *actor)
     if (v7->VisCache.bVisible && turret_aimat_Sentient(self, TargetSentient, 1, pTurretInfo->convergenceTime[1]))
     {
         result = 1;
-        pTurretInfo->flags &= ~0x10u;
+        pTurretInfo->flags &= ~TURRET_TAKEN_PAIN;
         v7->attackTime = 0;
         return result;
     }
@@ -1556,7 +1555,7 @@ LABEL_36:
             {
                 if (p_detachSentient->sentient() == TargetSentient)
                 {
-                    if ((pTurretInfo->flags & 0x10) != 0 || !v16 || turret_ReturnToDefaultPos(self, 1))
+                    if ((pTurretInfo->flags & TURRET_TAKEN_PAIN) != 0 || !v16 || turret_ReturnToDefaultPos(self, 1))
                     {
                         result = 0;
                         v7->attackTime = 0;
@@ -1588,7 +1587,7 @@ LABEL_53:
         {
             v38[0] = *((float *)v28 + 531);
             v38[1] = *((float *)v28 + 532);
-            if ((pTurretInfo->flags & 0x40) != 0)
+            if ((pTurretInfo->flags & TURRET_HAS_TARGET) != 0)
                 v29 = pTurretInfo->targetPos[2];
             else
                 v29 = (float)(*((float *)v28 + 533) + (float)32.0);
@@ -1668,7 +1667,7 @@ int __cdecl turret_think_manual(gentity_s *self, actor_s *actor)
         MyAssertHandler("c:\\trees\\cod3\\ENTITYNUM_NONE\\src\\game\\turret.cpp", 1543, 0, "%s", "pTurretInfo");
     if (!actor)
         goto LABEL_15;
-    if ((pTurretInfo->flags & 0x20) != 0
+    if ((pTurretInfo->flags & TURRET_ERROR_INITED) != 0
         && pTurretInfo->originError[0] == 0.0
         && pTurretInfo->originError[1] == 0.0
         && pTurretInfo->originError[2] == 0.0)
@@ -1693,13 +1692,13 @@ int __cdecl turret_think_manual(gentity_s *self, actor_s *actor)
                     return turret_think_auto(self, actor);
             }
         }
-        pTurretInfo->flags &= ~0x10u;
+        pTurretInfo->flags &= ~TURRET_TAKEN_PAIN;
         if (TargetSentient)
             actor->sentientInfo[TargetSentient - level.sentients].attackTime = level.time + 2000;
         else
             Actor_CanAttackAll(actor);
     LABEL_15:
-        v13 = ((unsigned int)pTurretInfo->flags >> 2) & 1;
+        v13 = (pTurretInfo->flags & TURRET_FIRING) != 0;
         if (pTurretInfo->manualTarget.isDefined())
         {
             v14 = pTurretInfo->manualTarget.ent();
@@ -1825,7 +1824,7 @@ void __cdecl turret_think(gentity_s *self)
         return;
     turret_UpdateSound(self);
     flags = pTurretInfo->flags;
-    if ((flags & 2) != 0 && (flags & 1) == 0)
+    if ((flags & TURRET_AUTO) != 0 && (flags & TURRET_REQUIRES_AI) == 0)
     {
         turret_think_auto_nonai(self);
         return;
@@ -1835,7 +1834,7 @@ void __cdecl turret_think(gentity_s *self)
     {
         if (actor->eState[0] == AIS_TURRET)
         {
-            if ((flags & 2) != 0)
+            if ((flags & TURRET_AUTO) != 0)
             {
                 if (turret_think_auto(self, actor))
                     return;
@@ -1845,12 +1844,12 @@ void __cdecl turret_think(gentity_s *self)
         }
         actor = 0;
     }
-    if ((flags & 1) != 0)
+    if ((flags & TURRET_REQUIRES_AI) != 0)
     {
         turret_ReturnToDefaultPos(self, 0);
         return;
     }
-    if ((flags & 2) != 0)
+    if ((flags & TURRET_AUTO) != 0)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\turret.cpp",
             1726,
@@ -2002,7 +2001,7 @@ bool __cdecl turret_canuse(actor_s *actor, gentity_s *pTurret)
         return 1;
     if (pTurret->active)
         return 0;
-    if ((pTurretInfo->flags & 2) != 0)
+    if ((pTurretInfo->flags & TURRET_AUTO) != 0)
         return turret_canuse_auto(pTurret, actor);
     return turret_canuse_manual(pTurret, actor);
 }
@@ -2169,7 +2168,7 @@ void turret_use(gentity_s *self, gentity_s *owner, gentity_s *activator)
     turretInfo->arcmax[1] = turretInfo->initialYawmax;
 
     // Enable turret user flag
-    turretInfo->flags |= 0x800;
+    turretInfo->flags |= TURRET_INIT_VIEW;
 
     // Save user origin
     turretInfo->userOrigin[0] = owner->r.currentOrigin[0];
@@ -2471,7 +2470,7 @@ void __cdecl G_SpawnTurret(gentity_s *self, const char *weaponinfoname)
     }
     turretInfo->state = 0;
     turretInfo->prevSentTarget = -1;
-    turretInfo->flags = 4099;
+    turretInfo->flags = 0x1000 | TURRET_REQUIRES_AI | TURRET_AUTO;
     turretInfo->eTeam = TEAM_NEUTRAL;
     self->clipmask = MASK_SOLID;
     self->r.svFlags = 0;
@@ -2547,7 +2546,7 @@ void __cdecl G_ClientStopUsingTurret(gentity_s *self)
     owner->active = 0;
     G_DeactivateTurret(self);
     self->r.ownerNum.setEnt(NULL);
-    pTurretInfo->flags &= ~0x800u;
+    pTurretInfo->flags &= ~TURRET_INIT_VIEW;
     Scr_Notify(self, scr_const.turretownerchange, 0);
 }
 

@@ -838,14 +838,14 @@ void __cdecl MSG_WriteDeltaUsercmd(msg_t *msg, const usercmd_s *from, const user
     float gunZOfs; // [sp+50h] [-40h]
     float meleeChargeYaw; // [sp+50h] [-40h]
 
-    if (from->buttons >= 0x100000)
+    if (from->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             759,
             0,
             "%s",
             "from->buttons < (1 << BUTTON_BIT_COUNT)");
-    if (to->buttons >= 0x100000)
+    if (to->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             760,
@@ -1160,7 +1160,7 @@ void __cdecl MSG_ReadDeltaUsercmd(msg_t *msg, const usercmd_s *from, usercmd_s *
     double meleeChargeYaw; // fp31
     unsigned __int8 meleeChargeDist; // r30
 
-    if (from->buttons >= 0x100000)
+    if (from->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             810,
@@ -1286,7 +1286,7 @@ void __cdecl MSG_ReadDeltaUsercmd(msg_t *msg, const usercmd_s *from, usercmd_s *
         to->meleeChargeYaw = from->meleeChargeYaw;
         to->meleeChargeDist = from->meleeChargeDist;
     }
-    if (to->buttons >= 0x100000)
+    if (to->buttons >= BUTTON_LOC_SELECTING)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\qcommon\\msg.cpp",
             864,
@@ -1712,7 +1712,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     } while (v9);
     v20 = 0;
     v21 = 2;
-    v22 = &to->stats[1];
+    v22 = &to->stats[STAT_DEAD_YAW];
     do
     {
         if (*(v22 - 1))
@@ -1740,7 +1740,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
             msg->cursize = v23 + 2;
         }
         v24 = 2;
-        v25 = &to->stats[1];
+        v25 = &to->stats[STAT_DEAD_YAW];
         do
         {
             if (((1 << (v24 - 2)) & v20) != 0)
@@ -2269,7 +2269,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
             v26 = v25;
         }
         v27 = 2;
-        v28 = &to->stats[1];
+        v28 = &to->stats[STAT_DEAD_YAW];
         do
         {
             if (((1 << (v27 - 2)) & v26) != 0)

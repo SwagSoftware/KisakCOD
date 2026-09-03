@@ -264,7 +264,7 @@
 
  const char *prof_enumNames[433]{ ":)" }; // KISAKTODO
 
- const char *s_aspectRatioNames[5] =
+ const char *s_aspectRatioNames[GFX_ASPECT_RATIO_COUNT + 1] =
  {
      "auto",
      "standard",
@@ -1470,7 +1470,7 @@
      r_aspectRatio = Dvar_RegisterEnum(
          "r_aspectRatio",
          s_aspectRatioNames,
-         0,
+         GFX_ASPECT_RATIO_AUTO,
          DVAR_ARCHIVE | DVAR_LATCH,
          "Screen aspect ratio.  Most widescreen monitors are 16:10 instead of 16:9.");
      r_customMode = Dvar_RegisterString(

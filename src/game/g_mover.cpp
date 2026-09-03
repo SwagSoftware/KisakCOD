@@ -511,9 +511,9 @@ char __cdecl G_MoverPush(gentity_s *pusher, float *move, float *amove, gentity_s
                 break;
             }
 #ifdef KISAK_MP
-            G_Damage(ent, pusher, pusher, 0, 0, 99999, 0, 9, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
+            G_Damage(ent, pusher, pusher, 0, 0, 99999, DAMAGE_NOFLAG, MOD_CRUSH, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
 #elif KISAK_SP
-            G_Damage(ent, pusher, pusher, 0, 0, 99999, 0, 9, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
+            G_Damage(ent, pusher, pusher, 0, 0, 99999, DAMAGE_NOFLAG, MOD_CRUSH, 0xFFFFFFFF, HITLOC_NONE, 0, 0);
 #endif
         }
     }

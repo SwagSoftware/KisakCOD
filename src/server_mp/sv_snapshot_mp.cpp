@@ -548,7 +548,7 @@ char __cdecl SV_GetClientPositionAtTime(int client, int gametime, float *pos)
     {
         if (SV_GetArchivedClientInfo(client, pArchiveTime, &ps, &cs))
         {
-            if (ps.stats[0] <= 0 || (ps.otherFlags & 4) == 0 || (ps.otherFlags & 2) != 0)
+            if (ps.stats[STAT_HEALTH] <= 0 || (ps.otherFlags & 4) == 0 || (ps.otherFlags & 2) != 0)
                 return 0;
             if (foundEnd)
             {

@@ -522,12 +522,12 @@ void __cdecl CG_DrawDebugPlayerHealth(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if (cgameGlob->predictedPlayerState.stats[0] && cgameGlob->predictedPlayerState.stats[2])
+    if (cgameGlob->predictedPlayerState.stats[STAT_HEALTH] && cgameGlob->predictedPlayerState.stats[STAT_MAX_HEALTH])
     {
-        health = (double)cgameGlob->predictedPlayerState.stats[0] / (double)cgameGlob->predictedPlayerState.stats[2];
+        health = (double)cgameGlob->predictedPlayerState.stats[STAT_HEALTH] / (double)cgameGlob->predictedPlayerState.stats[STAT_MAX_HEALTH];
         v4 = health - 1.0;
         if (v4 < 0.0)
-            v5 = (double)cgameGlob->predictedPlayerState.stats[0] / (double)cgameGlob->predictedPlayerState.stats[2];
+            v5 = (double)cgameGlob->predictedPlayerState.stats[STAT_HEALTH] / (double)cgameGlob->predictedPlayerState.stats[STAT_MAX_HEALTH];
         else
             v5 = 1.0;
         v3 = 0.0 - health;

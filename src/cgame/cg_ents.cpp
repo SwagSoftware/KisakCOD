@@ -915,7 +915,7 @@ void __cdecl CG_AdjustPositionForMover(
         outDeltaAngles[2] = 0.0;
     }
     if ((unsigned int)(moverNum - 1) <= 0x87C
-        && (Entity = CG_GetEntity(localClientNum, moverNum), v13 = Entity, Entity->nextState.eType == 5))
+        && (Entity = CG_GetEntity(localClientNum, moverNum), v13 = Entity, Entity->nextState.eType == ET_SCRIPTMOVER))
     {
         p_pos = &Entity->currentState.pos;
         BG_EvaluateTrajectory(&Entity->currentState.pos, fromTime, v23);
@@ -1107,7 +1107,7 @@ void __cdecl CG_Vehicle(int localClientNum, centity_s *cent)
             }
             RenderFlagForRefEntity = CG_GetRenderFlagForRefEntity(p_nextState->lerp.eFlags);
             R_AddDObjToScene(obj, &cent->pose, p_nextState->number, RenderFlagForRefEntity | 4, lightingOrigin, materialTime);
-            if (p_nextState->eType == 11)
+            if (p_nextState->eType == ET_VEHICLE)
                 CG_CompassUpdateVehicleInfo(localClientNum, p_nextState->number);
         }
     }
@@ -1927,7 +1927,7 @@ void __cdecl CG_SaveEntityFX(centity_s *cent, SaveGame *save)
     int ClientEffectIndex; // [sp+54h] [-1Ch] BYREF
 
     eType = cent->nextState.eType;
-    if (eType == 7 || (v6 = eType != 8, v5 = 0, !v6))
+    if (eType == ET_FX || (v6 = eType != ET_LOOP_FX, v5 = 0, !v6))
         v5 = 1;
     v8 = v5;
     SaveMemory_SaveWrite(&v8, 4, save);
@@ -2155,7 +2155,7 @@ void __cdecl CG_AddPacketEntity(unsigned int localClientNum, unsigned int entnum
     v10 = Entity->pose.origin[1];
     v11 = Entity->pose.origin[2];
     v12 = Entity->pose.angles[2];
-    if (Entity->nextState.eType == 5 && Entity->nextState.solid == 0xFFFFFF)
+    if (Entity->nextState.eType == ET_SCRIPTMOVER && Entity->nextState.solid == 0xFFFFFF)
     {
         CG_CalcEntityLerpPositions(localClientNum, Entity);
         if (*origin != v9
@@ -2253,7 +2253,7 @@ int __cdecl CG_AddPacketEntities(int localClientNum)
         {
             v7 = *(int *)((char *)&nextSnap->snapFlags + v6);
             Entity = CG_GetEntity(localClientNum, v7);
-            if (Entity->nextState.eType < 0x11u)
+            if (Entity->nextState.eType < ET_EVENTS)
             {
                 if (v7 == viewlocked_entNum)
                 {

@@ -670,8 +670,8 @@ void __cdecl CG_OffsetThirdPersonView(cg_s *cgameGlob)
     focusAngles[2] = cgameGlob->refdefViewAngles[2];
     if (cgameGlob->predictedPlayerState.pm_type >= PM_DEAD)
     {
-        focusAngles[1] = (float)cgameGlob->predictedPlayerState.stats[1];
-        viewAngles[1] = (float)cgameGlob->predictedPlayerState.stats[1];
+        focusAngles[1] = (float)cgameGlob->predictedPlayerState.stats[STAT_DEAD_YAW];
+        viewAngles[1] = (float)cgameGlob->predictedPlayerState.stats[STAT_DEAD_YAW];
     }
     if (focusAngles[0] > 45.0)
         focusAngles[0] = 45.0;

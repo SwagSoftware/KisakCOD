@@ -823,6 +823,6 @@ int __cdecl G_EntAttach(gentity_s *ent, const char *modelName, unsigned int tagN
 
 
 extern bool g_godModeRemoteInputValid;
-extern unsigned __int16 *modNames[16];
+extern unsigned __int16 *modNames[MOD_NUM];
 
 extern TargetGlob targGlob;

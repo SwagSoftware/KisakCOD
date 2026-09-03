@@ -1132,7 +1132,7 @@ void __cdecl G_XAnimUpdateEnt(gentity_s *ent)
 
 void __cdecl TeamplayInfoMessage(gentity_s *ent)
 {
-    ent->client->ps.stats[3] = -1;
+    ent->client->ps.stats[STAT_IDENT_CLIENT_NUM] = -1;
 }
 
 void __cdecl CheckTeamStatus()
@@ -1375,7 +1375,7 @@ void __cdecl G_ClientDoPerFrameNotifies(gentity_s *ent)
         Scr_Notify(ent, scr_const.weapon_change, 1u);
         client->lastWeapon = client->ps.weapon;
     }
-    if (client->ps.weaponstate == 5 && client->ps.pm_type < PM_DEAD)
+    if (client->ps.weaponstate == WEAPON_FIRING && client->ps.pm_type < PM_DEAD)
         v2 = DoPerFrameNotify(ent, 1, client->previouslyFiring, scr_const.begin_firing, scr_const.end_firing);
     else
         v2 = DoPerFrameNotify(ent, 0, client->previouslyFiring, scr_const.begin_firing, scr_const.end_firing);

@@ -508,7 +508,7 @@ char *__cdecl ClientConnect(int clientNum)
     integer = g_player_maxhealth->current.integer;
     v2->ps.clientNum = (unsigned __int16)clientNum;
     v2->pers.maxHealth = integer;
-    v2->ps.stats[2] = integer;
+    v2->ps.stats[STAT_MAX_HEALTH] = integer;
     if ((unsigned __int16)clientNum != clientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\game\\g_client.cpp",
@@ -576,7 +576,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     maxHealth = client->pers.maxHealth;
     client->ps.viewlocked_entNum = ENTITYNUM_NONE;
     client->groundTiltEntNum = ENTITYNUM_NONE;
-    client->ps.stats[2] = maxHealth;
+    client->ps.stats[STAT_MAX_HEALTH] = maxHealth;
     ent->s.groundEntityNum = ENTITYNUM_NONE;
     ent->takedamage = 1;
     Scr_SetString(&ent->classname, scr_const.player);
@@ -589,7 +589,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     ent->r.maxs[0] = 15.0;
     ent->r.maxs[1] = 15.0;
     ent->r.maxs[2] = 70.0;
-    v7 = client->ps.stats[2];
+    v7 = client->ps.stats[STAT_MAX_HEALTH];
     client->ps.viewHeightCurrent = 60.0;
     client->ps.viewHeightTarget = 60;
     client->ps.dofNearBlur = 6.0;
@@ -599,7 +599,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     client->ps.spreadOverrideState = 0;
     client->ps.throwBackGrenadeTimeLeft = 0;
     client->ps.throwBackGrenadeOwner = ENTITYNUM_NONE;
-    client->ps.stats[0] = v7;
+    client->ps.stats[STAT_HEALTH] = v7;
     ent->health = v7;
     G_SetOrigin(ent, v12);
     client->ps.origin[0] = v12[0];
@@ -662,7 +662,7 @@ void __cdecl HeadHitEnt_Pain(
     iassert(pSelf->r.ownerNum.isDefined());
     target = p_ownerNum->ent();
     if (target->takedamage)
-        G_Damage(target, pAttacker, pAttacker, vDir, vPoint, iDamage, 0, iMod, -1/*Weapon*/, hitLoc, 0, 0);
+        G_Damage(target, pAttacker, pAttacker, vDir, vPoint, iDamage, DAMAGE_NOFLAG, iMod, -1/*Weapon*/, hitLoc, 0, 0);
 }
 
 void __cdecl HeadHitEnt_Die(

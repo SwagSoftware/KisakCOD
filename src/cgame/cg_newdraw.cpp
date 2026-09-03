@@ -471,12 +471,12 @@ float CG_CalcPlayerHealth(const playerState_s *ps)
     float v5; // [esp+Ch] [ebp-8h]
     float health; // [esp+10h] [ebp-4h]
 
-    if (!ps->stats[0] || !ps->stats[2] || ps->pm_type == PM_DEAD)
+    if (!ps->stats[STAT_HEALTH] || !ps->stats[STAT_MAX_HEALTH] || ps->pm_type == PM_DEAD)
         return 0.0;
-    health = (double)ps->stats[0] / (double)ps->stats[2];
+    health = (double)ps->stats[STAT_HEALTH] / (double)ps->stats[STAT_MAX_HEALTH];
 
     if ((health - 1.0f) < 0.0)
-        v5 = (double)ps->stats[0] / (double)ps->stats[2];
+        v5 = (double)ps->stats[STAT_HEALTH] / (double)ps->stats[STAT_MAX_HEALTH];
     else
         v5 = 1.0;
 
@@ -1438,7 +1438,7 @@ void __cdecl CG_DrawTankBody(int localClientNum, rectDef_s *rect, Material *mate
     if ((cgameGlob->predictedPlayerState.eFlags & 0x20000) != 0 && (cgameGlob->predictedPlayerState.eFlags & 0x80000) == 0)
     {
         Entity = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
-        if (Entity->nextState.eType == 11 && (Entity->nextState.lerp.eFlags & 0x10000) != 0)
+        if (Entity->nextState.eType == ET_VEHICLE && (Entity->nextState.lerp.eFlags & 0x10000) != 0)
         {
             angle = AngleSubtract(cgameGlob->refdefViewAngles[1], Entity->pose.angles[1]);
             LocalClientStaticGlobals = CG_GetLocalClientStaticGlobals(localClientNum);
@@ -1541,7 +1541,7 @@ void __cdecl CG_DrawTankBarrel(int localClientNum, const rectDef_s *rect, Materi
     {
         Entity = CG_GetEntity(localClientNum, cgameGlob->predictedPlayerState.viewlocked_entNum);
         p_pose = &Entity->pose;
-        if (Entity->nextState.eType == 11 && (Entity->nextState.lerp.eFlags & 0x10000) != 0)
+        if (Entity->nextState.eType == ET_VEHICLE && (Entity->nextState.lerp.eFlags & 0x10000) != 0)
         {
             ClientDObj = Com_GetClientDObj(Entity->nextState.number, 0);
             if (ClientDObj)

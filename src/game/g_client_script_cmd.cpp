@@ -1083,7 +1083,7 @@ void __cdecl PlayerCmd_useButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 0x28) != 0);
+    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0);
 }
 
 void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
@@ -1114,7 +1114,7 @@ void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 1) != 0);
+    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & BUTTON_ATTACK) != 0);
 }
 
 void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
@@ -1145,7 +1145,7 @@ void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int16)v1->client->buttonsSinceLastFrame | (unsigned __int16)v1->client->buttons) & 0x800) != 0);
+    Scr_AddInt((((unsigned __int16)v1->client->buttonsSinceLastFrame | (unsigned __int16)v1->client->buttons) & BUTTON_ADS) != 0);
 }
 
 void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
@@ -1176,7 +1176,7 @@ void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v2);
         }
     }
-    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & 4) != 0);
+    Scr_AddInt((((unsigned __int8)v1->client->buttonsSinceLastFrame | (unsigned __int8)v1->client->buttons) & BUTTON_MELEE) != 0);
 }
 
 int __cdecl PlayerCmd_CheckButtonPressed()
@@ -1784,7 +1784,8 @@ void __cdecl PlayerCmd_HideViewmodel(scr_entref_t entref)
     }
     p_ps = &v2->client->ps;
     weaponstate = p_ps->weaponstate;
-    if (weaponstate == 7 || weaponstate == 9 || weaponstate == 11 || weaponstate == 10 || weaponstate == 8)
+    if (weaponstate == WEAPON_RELOADING || weaponstate == WEAPON_RELOAD_START || weaponstate == WEAPON_RELOAD_END
+        || weaponstate == WEAPON_RELOAD_START_INTERUPT || weaponstate == WEAPON_RELOADING_INTERUPT)
         BG_AddPredictableEventToPlayerstate(EV_STOP_WEAPON_SOUND, weaponstate, p_ps);
     PM_ResetWeaponState(p_ps);
     SV_GameSendServerCommand(v1, "hideViewModel");
@@ -2606,11 +2607,11 @@ void __cdecl PlayerCmd_IsFiring(scr_entref_t entref)
     if (!v1->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp", 1965, 0, "%s", "pSelf->client");
     weaponstate = v1->client->ps.weaponstate;
-    if (weaponstate == 5
-        || weaponstate == 6
-        || weaponstate == 12
-        || weaponstate == 13
-        || (v5 = weaponstate != 14, v4 = 0, !v5))
+    if (weaponstate == WEAPON_FIRING
+        || weaponstate == WEAPON_RECHAMBERING
+        || weaponstate == WEAPON_MELEE_INIT
+        || weaponstate == WEAPON_MELEE_FIRE
+        || (v5 = weaponstate != WEAPON_MELEE_END, v4 = 0, !v5))
     {
         v4 = 1;
     }
@@ -2652,7 +2653,7 @@ void __cdecl PlayerCmd_IsThrowingGrenade(scr_entref_t entref)
     if (!v1->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp", 1987, 0, "%s", "pSelf->client");
     weaponstate = v1->client->ps.weaponstate;
-    if (weaponstate < 15 || (v5 = weaponstate <= 20, v4 = 1, !v5))
+    if (weaponstate < WEAPON_OFFHAND_INIT || (v5 = weaponstate <= WEAPON_OFFHAND_END, v4 = 1, !v5))
         v4 = 0;
     Scr_AddBool(v4);
 }
@@ -2692,7 +2693,8 @@ void __cdecl PlayerCmd_IsMeleeing(scr_entref_t entref)
     if (!v1->client)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_client_script_cmd.cpp", 2009, 0, "%s", "pSelf->client");
     weaponstate = v1->client->ps.weaponstate;
-    if (weaponstate == 12 || weaponstate == 13 || (v5 = weaponstate != 14, v4 = 0, !v5))
+    if (weaponstate == WEAPON_MELEE_INIT || weaponstate == WEAPON_MELEE_FIRE
+        || (v5 = weaponstate != WEAPON_MELEE_END, v4 = 0, !v5))
         v4 = 1;
     Scr_AddBool(v4);
 }

@@ -849,7 +849,7 @@ void __cdecl AimAssist_UpdateAdsLerp(const AimInput *input)
 
     aaGlob = &aaGlobArray[input->localClientNum];
     aaGlob->adsLerp = input->ps->fWeaponPosFrac;
-    if ((input->ps->eFlags & 0x300) != 0 && (input->buttons & 0x800) != 0)
+    if ((input->ps->eFlags & 0x300) != 0 && (input->buttons & BUTTON_ADS) != 0)
         aaGlob->adsLerp = 1.0;
 }
 
@@ -933,7 +933,7 @@ void __cdecl AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output)
     iassert(output);
 
     aaGlob = &aaGlobArray[input->localClientNum];
-    meleeing = input->ps->weaponstate == 12;
+    meleeing = input->ps->weaponstate == WEAPON_MELEE_INIT;
     weapIndex = AimAssist_GetWeaponIndex(input->localClientNum, input->ps);
     if (aim_automelee_enabled->current.enabled && meleeing && weapIndex)
     {
@@ -1043,7 +1043,7 @@ void __cdecl AimAssist_ApplyMeleeCharge(const AimInput *input, AimOutput *output
     tweaks = &aaGlob->tweakables;
     output->meleeChargeYaw = 0.0;
     output->meleeChargeDist = 0;
-    if ((input->buttons & 4) != 0 && (input->ps->pm_flags & PMF_PRONE) == 0)
+    if ((input->buttons & BUTTON_MELEE) != 0 && (input->ps->pm_flags & PMF_PRONE) == 0)
     {
         const AimScreenTarget* screenTarget = AimAssist_GetBestTarget( // [esp+3Ch] [ebp-Ch]
             aaGlob,

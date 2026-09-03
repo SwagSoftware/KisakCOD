@@ -232,8 +232,8 @@ gentity_s *__cdecl Weapon_Melee_internal(gentity_s *ent, weaponParms *wp, float 
         wp->forward,
         endpos,
         damage + v6 % 5,
-        0,
-        7,
+        DAMAGE_NOFLAG,
+        MOD_MELEE,
         0xFFFFFFFF,
         partGroup,
         modelIndex,
@@ -477,7 +477,7 @@ bool __cdecl LogAccuracyHit(gentity_s *target, gentity_s *attacker)
     if (target->client->ps.pm_type < PM_DEAD)
         return !OnSameTeam(target, attacker);
 #elif KISAK_SP
-    if (target->client->ps.stats[0] <= 0)
+    if (target->client->ps.stats[STAT_HEALTH] <= 0)
     {
         return 0;
     }

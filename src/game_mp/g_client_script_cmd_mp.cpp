@@ -803,7 +803,7 @@ void __cdecl PlayerCmd_useButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x28) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & (BUTTON_USE | BUTTON_USE_RELOAD)) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -830,7 +830,7 @@ void __cdecl PlayerCmd_attackButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 1) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_ATTACK) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -857,7 +857,7 @@ void __cdecl PlayerCmd_adsButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x800) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_ADS) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -884,7 +884,7 @@ void __cdecl PlayerCmd_meleeButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 4) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_MELEE) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -911,7 +911,7 @@ void __cdecl PlayerCmd_fragButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x4000) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_FRAG) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -938,7 +938,7 @@ void __cdecl PlayerCmd_secondaryOffhandButtonPressed(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & 0x8000) != 0)
+    if (((pSelf->client->buttons | pSelf->client->buttonsSinceLastFrame) & BUTTON_SMOKE) != 0)
         Scr_AddInt(1);
     else
         Scr_AddInt(0);
@@ -1300,7 +1300,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 localdir[1] = 0.0f;
                 localdir[2] = 0.0f;
             }
-            if ((pSelf->flags & 8) == 0 && (dflags & 4) == 0)
+            if ((pSelf->flags & 8) == 0 && (dflags & DAMAGE_NO_KNOCKBACK) == 0)
             {
                 knockbackMod = 0.30000001f;
                 if ((pSelf->client->ps.pm_flags & PMF_PRONE) != 0)
@@ -1450,7 +1450,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 LABEL_93:
                     if (!pSelf->r.inuse)
                         MyAssertHandler(".\\game_mp\\g_client_script_cmd_mp.cpp", 1166, 0, "%s", "pSelf->r.inuse");
-                    pSelf->client->ps.stats[0] = pSelf->health;
+                    pSelf->client->ps.stats[STAT_HEALTH] = pSelf->health;
                     return;
                 }
                 if (tempBulletHitEntity)
@@ -1476,7 +1476,7 @@ bool __cdecl IsBulletImpactMOD(meansOfDeath_t mod)
             0,
             "mod doesn't index MOD_NUM\n\t%i not in [0, %i)",
             mod,
-            16);
+            MOD_NUM);
     return mod == MOD_PISTOL_BULLET || mod == MOD_RIFLE_BULLET || mod == MOD_HEAD_SHOT;
 }
 
@@ -1503,7 +1503,7 @@ void __cdecl PlayerCmd_Suicide(scr_entref_t entref)
     }
     pSelf->flags &= ~(FL_GODMODE | FL_DEMI_GODMODE);
     pSelf->health = 0;
-    pSelf->client->ps.stats[0] = 0;
+    pSelf->client->ps.stats[STAT_HEALTH] = 0;
     player_die(pSelf, pSelf, pSelf, 100000, 12, 0, 0, HITLOC_NONE, 0);
 }
 
@@ -3222,7 +3222,7 @@ void __cdecl PlayerCmd_SetPerk(scr_entref_t entref)
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
-    if (perkIndex == 20)
+    if (perkIndex == PERK_UNKNOWN)
     {
         Scr_Error(va("Unknown perk: %s\n", perkName));
     }
@@ -3262,19 +3262,19 @@ void __cdecl PlayerCmd_HasPerk(scr_entref_t entref)
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
-    if (perkIndex == 20)
+    if (perkIndex == PERK_UNKNOWN)
     {
         Scr_Error(va("Unknown perk: %s\n", perkName));
     }
     perks = pSelf->client->ps.perks;
-    if (perkIndex >= 0x14)
+    if (perkIndex >= PERK_COUNT)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h",
             40,
             0,
             "perkIndex doesn't index PERK_COUNT\n\t%i not in [0, %i)",
             perkIndex,
-            20);
+            PERK_COUNT);
     Scr_AddBool((perks & (1 << perkIndex)) != 0);
 }
 
@@ -3301,7 +3301,7 @@ void __cdecl PlayerCmd_UnsetPerk(scr_entref_t entref)
     }
     perkName = Scr_GetString(0);
     perkIndex = BG_GetPerkIndexForName(perkName);
-    if (perkIndex == 20)
+    if (perkIndex == PERK_UNKNOWN)
     {
         Scr_Error(va("Unknown perk: %s\n", perkName));
     }
@@ -3313,14 +3313,14 @@ void __cdecl BG_UnsetPerk(int32_t *perks, uint32_t perkIndex)
 {
     if (!perks)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h", 55, 0, "%s", "perks");
-    if (perkIndex >= 0x14)
+    if (perkIndex >= PERK_COUNT)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\bgame\\../bgame/bg_perks_mp.h",
             56,
             0,
             "perkIndex doesn't index PERK_COUNT\n\t%i not in [0, %i)",
             perkIndex,
-            20);
+            PERK_COUNT);
     *perks &= ~(1 << perkIndex);
 }
 

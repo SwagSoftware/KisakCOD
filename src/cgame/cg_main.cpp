@@ -1371,7 +1371,7 @@ bool __cdecl CG_IsPlayerDead(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return cgArray[0].nextSnap->ps.stats[0] == 0;
+    return cgArray[0].nextSnap->ps.stats[STAT_HEALTH] == 0;
 }
 
 int __cdecl CG_GetPlayerClipAmmoCount(int localClientNum)
@@ -1422,7 +1422,7 @@ void __cdecl CG_Init(int localClientNum, int savegame)
     memset(cg_weaponsArray[localClientNum], 0, sizeof(weaponInfo_s[128]));
     memset(&cgArray[0].viewModelPose, 0, sizeof(cgArray[0].viewModelPose));
 
-    cgameGlob->viewModelPose.eType = 17;
+    cgameGlob->viewModelPose.eType = ET_EVENTS;
     cgameGlob->localClientNum = localClientNum;
     cgameGlob->refdef.dof.nearStart = 0.0;
     cgameGlob->refdef.dof.nearEnd = 0.0;

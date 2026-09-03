@@ -625,12 +625,12 @@ char __cdecl CG_LookingThroughNightVision(int32_t localClientNum)
     weapIndex = BG_GetViewmodelWeaponIndex(&cgameGlob->predictedPlayerState);
     weapDef = BG_GetWeaponDef(weapIndex);
 
-    if (cgameGlob->predictedPlayerState.weaponstate == 25)
+    if (cgameGlob->predictedPlayerState.weaponstate == WEAPON_NIGHTVISION_WEAR)
     {
         if (weapDef->nightVisionWearTime - cgameGlob->predictedPlayerState.weaponTime >= weapDef->nightVisionWearTimePowerUp)
             return 1;
     }
-    else if (cgameGlob->predictedPlayerState.weaponstate == 26)
+    else if (cgameGlob->predictedPlayerState.weaponstate == WEAPON_NIGHTVISION_REMOVE)
     {
         if (weapDef->nightVisionRemoveTime - cgameGlob->predictedPlayerState.weaponTime <= weapDef->nightVisionRemoveTimePowerDown)
             return 1;
@@ -714,7 +714,7 @@ double __cdecl VisionFadeValue(int32_t localClientNum)
     weapDef = BG_GetWeaponDef(weapIndex);
     if (!weapIndex)
         return 1.0;
-    if (cgameGlob->predictedPlayerState.weaponstate == 25)
+    if (cgameGlob->predictedPlayerState.weaponstate == WEAPON_NIGHTVISION_WEAR)
     {
         timePassed = weapDef->nightVisionWearTime - cgameGlob->predictedPlayerState.weaponTime;
         if (timePassed > weapDef->nightVisionWearTimeFadeOutEnd)
@@ -755,7 +755,7 @@ double __cdecl VisionFadeValue(int32_t localClientNum)
                 return (float)0.0;
         }
     }
-    else if (cgameGlob->predictedPlayerState.weaponstate == 26)
+    else if (cgameGlob->predictedPlayerState.weaponstate == WEAPON_NIGHTVISION_REMOVE)
     {
         timePasseda = weapDef->nightVisionRemoveTime - cgameGlob->predictedPlayerState.weaponTime;
         if (timePasseda >= weapDef->nightVisionRemoveTimePowerDown)

@@ -580,27 +580,27 @@ bool __cdecl G_VehImmuneToDamage(gentity_s *ent, int32_t mod, char damageFlags, 
     info = &s_vehicleInfos[veh->infoIdx];
     switch (mod)
     {
-    case 1:
-    case 2:
+    case MOD_PISTOL_BULLET:
+    case MOD_RIFLE_BULLET:
         if (info->bulletDamage)
             result = 0;
         else
-            result = (damageFlags & 2) == 0 || !info->armorPiercingDamage;
+            result = (damageFlags & DAMAGE_NO_ARMOR) == 0 || !info->armorPiercingDamage;
         break;
-    case 3:
-    case 4:
+    case MOD_GRENADE:
+    case MOD_GRENADE_SPLASH:
         if (BG_GetWeaponDef(weapon)->projExplosion == WEAPPROJEXP_HEAVY)
             result = info->heavyExplosiveDamage == 0;
         else
             result = info->grenadeDamage == 0;
         break;
-    case 5:
+    case MOD_PROJECTILE:
         result = info->projectileDamage == 0;
         break;
-    case 6:
+    case MOD_PROJECTILE_SPLASH:
         result = info->projectileSplashDamage == 0;
         break;
-    case 14:
+    case MOD_EXPLOSIVE:
         result = 0;
         break;
     default:
@@ -931,8 +931,8 @@ void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int
         dir,
         target->r.currentOrigin,
         damage,
-        0,
-        9,
+        DAMAGE_NOFLAG,
+        MOD_CRUSH,
         0xFFFFFFFF,
         HITLOC_NONE,
         0,

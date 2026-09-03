@@ -240,13 +240,13 @@ void __cdecl SpectatorThink(gentity_s *ent, usercmd_s *ucmd)
     if (client->sess.forceSpectatorClient < 0
         && G_ClientCanSpectateTeam(client, TEAM_NUM_TEAMS)
         && client->spectatorClient >= 0
-        && (client->buttons & 4) != (client->oldbuttons & 4))
+        && (client->buttons & BUTTON_MELEE) != (client->oldbuttons & BUTTON_MELEE))
     {
         StopFollowing(ent);
     }
-    if ((client->buttons & 1) == 0 || (client->oldbuttons & 1) != 0)
+    if ((client->buttons & BUTTON_ATTACK) == 0 || (client->oldbuttons & BUTTON_ATTACK) != 0)
     {
-        if ((client->buttons & 0x800) != 0 && (client->oldbuttons & 0x800) == 0)
+        if ((client->buttons & BUTTON_ADS) != 0 && (client->oldbuttons & BUTTON_ADS) == 0)
             Cmd_FollowCycle_f(ent, -1);
     }
     else
@@ -279,7 +279,7 @@ int32_t __cdecl ClientInactivityTimer(gclient_s *client)
 
     if (g_inactivity->current.integer)
     {
-        if (client->sess.cmd.forwardmove || client->sess.cmd.rightmove || (client->sess.cmd.buttons & 0x401) != 0)
+        if (client->sess.cmd.forwardmove || client->sess.cmd.rightmove || (client->sess.cmd.buttons & (BUTTON_ATTACK | BUTTON_JUMP)) != 0)
         {
             client->inactivityTime = level.time + 1000 * g_inactivity->current.integer;
             client->inactivityWarning = 0;
@@ -379,7 +379,7 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
         if (ent->client && (ent->flags & 3) == 0)
         {
             ent->health = 0;
-            ent->client->ps.stats[0] = 0;
+            ent->client->ps.stats[STAT_HEALTH] = 0;
             if (ent->client->ps.throwBackGrenadeOwner == ENTITYNUM_NONE)
             {
                 player_die(ent, ent, ent, 100000, 12, eventParm, 0, HITLOC_NONE, 0);
@@ -401,8 +401,8 @@ void __cdecl HandleClientEvent(gclient_s *client, gentity_s *ent, int32_t event,
             damage = eventParm < 100 ? (double)eventParm * 0.009999999776482582 : 1.1;
             if (damage != 0.0)
             {
-                damage = (double)client->ps.stats[2] * damage;
-                G_Damage(ent, 0, 0, 0, 0, (int)damage, 0, 11, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
+                damage = (double)client->ps.stats[STAT_MAX_HEALTH] * damage;
+                G_Damage(ent, 0, 0, 0, 0, (int)damage, DAMAGE_NOFLAG, MOD_FALLING, 0xFFFFFFFF, HITLOC_NONE, 0, 0, 0);
             }
         }
         break;
@@ -562,15 +562,15 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
             {
                 client->oldbuttons = client->buttons;
                 if (!client->useButtonDone)
-                    client->oldbuttons &= 0xFFFFFFD7;
+                    client->oldbuttons &= ~(BUTTON_USE | BUTTON_USE_RELOAD);
                 client->buttons = client->sess.cmd.buttons;
-                if ((client->buttons & 0x28) == 0)
+                if ((client->buttons & (BUTTON_USE | BUTTON_USE_RELOAD)) == 0)
                     client->useButtonDone = 0;
                 client->latched_buttons = client->buttons & ~client->oldbuttons;
                 client->buttonsSinceLastFrame |= client->latched_buttons;
                 if (client->ps.locationSelectionInfo)
                 {
-                    if ((client->buttonsSinceLastFrame & 0x10000) != 0)
+                    if ((client->buttonsSinceLastFrame & BUTTON_LOC_CONFIRM) != 0)
                     {
                         loc2d = ((double)ucmd->selectedLocation[0] + 128.0) / 255.0;
                         loc2d_4 = ((double)ucmd->selectedLocation[1] + 128.0) / 255.0;
@@ -582,13 +582,13 @@ void __cdecl ClientThink_real(gentity_s *ent, usercmd_s *ucmd)
                         Scr_AddVector(loc);
                         Scr_Notify(ent, scr_const.confirm_location, 1u);
                     }
-                    else if ((client->buttonsSinceLastFrame & 0x20000) != 0)
+                    else if ((client->buttonsSinceLastFrame & BUTTON_LOC_CANCEL) != 0)
                     {
                         Scr_Notify(ent, scr_const.cancel_location, 0);
                     }
-                    client->buttons &= 0x1300u;
-                    client->latched_buttons &= 0x1300u;
-                    client->buttonsSinceLastFrame &= 0x1300u;
+                    client->buttons &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
+                    client->latched_buttons &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
+  client->buttonsSinceLastFrame &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
                 }
                 oldEventSequence = client->ps.eventSequence;
                 memset((uint8_t *)&pm, 0, sizeof(pm));
@@ -1220,7 +1220,7 @@ void __cdecl ClientEndFrame(gentity_s *ent)
             else
                 v2 = ent->s.lerp.eFlags | 0x80;
             ent->s.lerp.eFlags = v2;
-            client->ps.stats[0] = ent->health;
+            client->ps.stats[STAT_HEALTH] = ent->health;
             G_SetClientSound(ent);
             v7 = level.teamHasRadar[client->sess.cs.team] || client->hasRadar;
             client->ps.radarEnabled = v7;

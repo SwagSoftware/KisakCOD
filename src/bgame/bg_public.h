@@ -13,6 +13,32 @@
 
 
 #ifdef KISAK_MP
+enum perksEnum : __int32
+{
+    PERK_JAMRADAR = 0x0,
+    PERK_ACCURACY = 0x1,
+    PERK_FASTRELOAD = 0x2,
+    PERK_RATEOFFIRE = 0x3,
+    PERK_EXTRABREATH = 0x4,
+    PERK_EXTRABP = 0x5,
+    PERK_GRENADEDEATH = 0x6,
+    PERK_PISTOLDEATH = 0x7,
+    PERK_QUIETMOVE = 0x8,
+    PERK_PARABOLIC = 0x9,
+    PERK_LONGERSPRINT = 0xA,
+    PERK_DETECTEXPLOSIVE = 0xB,
+    PERK_EXPLOSIVEDMG = 0xC,
+    PERK_EXPOSEENEMY = 0xD,
+    PERK_BULLETDMG = 0xE,
+    PERK_EXTRAAMMO = 0xF,
+    PERK_TWOPRIMARIES = 0x10,
+    PERK_ARMORVEST = 0x11,
+    PERK_FRAGGRENADE = 0x12,
+    PERK_SPECIALGRENADE = 0x13,
+    PERK_COUNT = 0x14,
+    PERK_UNKNOWN = 0x14,
+};
+
 enum entity_event_t : __int32
 {
     EV_NONE = 0x0,
@@ -491,6 +517,22 @@ struct mover_ent_t // sizeof=0x60 (SP/MP same)
     float apos3[3];
 };
 static_assert(sizeof(mover_ent_t) == 0x60);
+
+enum $A1BE347394FC01D8E43F73A65E725CFC : __int32
+{
+    TURRET_REQUIRES_AI     = (1 << 0),
+    TURRET_AUTO            = (1 << 1),
+    TURRET_FIRING          = (1 << 2),
+    TURRET_HAS_MISS_TARGET = (1 << 3),
+    TURRET_TAKEN_PAIN      = (1 << 4),
+    TURRET_ERROR_INITED    = (1 << 5),
+    TURRET_HAS_TARGET      = (1 << 6),
+    TURRET_BAD_TARGET      = (1 << 7),
+    TURRET_FIRST_PITCH_CAP = (1 << 8),
+    TURRET_PITCH_CAP       = (1 << 9),
+    TURRET_PITCH_MIN       = (1 << 10),
+    TURRET_INIT_VIEW       = (1 << 11)
+};
 
 #ifdef KISAK_MP
 struct entityShared_t // sizeof=0x68

@@ -788,7 +788,7 @@ void __cdecl WeaponRunXModelAnims(int32_t localClientNum, const playerState_s* p
     weapDef = BG_GetWeaponDef(weaponIndex);
     if (weapDef->aimDownSight)
     {
-        v5 = ps->weaponstate == 7 && ps->weaponTime - weapDef->iPositionReloadTransTime > 0;
+        v5 = ps->weaponstate == WEAPON_RELOADING && ps->weaponTime - weapDef->iPositionReloadTransTime > 0;
         v4 = (ps->pm_flags & PMF_SIGHT_AIMING) != 0 && (ps->weapFlags & 2) == 0;
         v3 = !v5 && v4;
         PlayADSAnim(ps->fWeaponPosFrac, weaponIndex, obj, 32 - v3);
@@ -941,11 +941,11 @@ void __cdecl StartWeaponAnim(
 #ifdef KISAK_MP
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if ((cgameGlob->predictedPlayerState.weaponstate == 7
-        || cgameGlob->predictedPlayerState.weaponstate == 9
-        || cgameGlob->predictedPlayerState.weaponstate == 11
-        || cgameGlob->predictedPlayerState.weaponstate == 10
-        || cgameGlob->predictedPlayerState.weaponstate == 8)
+    if ((cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOADING
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOAD_START
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOAD_END
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOAD_START_INTERUPT
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOADING_INTERUPT)
         && (cgameGlob->predictedPlayerState.perks & 4) != 0)
     {
         if (perk_weapReloadMultiplier->current.value == 0.0)
@@ -953,7 +953,8 @@ void __cdecl StartWeaponAnim(
         else
             rate = rate / perk_weapReloadMultiplier->current.value;
     }
-    else if (cgameGlob->predictedPlayerState.weaponstate == 6 && (cgameGlob->predictedPlayerState.perks & 8) != 0)
+    else if (cgameGlob->predictedPlayerState.weaponstate == WEAPON_RECHAMBERING
+        && (cgameGlob->predictedPlayerState.perks & 8) != 0)
     {
         if (perk_weapRateMultiplier->current.value == 0.0)
             rate = 1000.0;
@@ -1120,11 +1121,11 @@ bool __cdecl ViewmodelRocketShouldBeAttached(int32_t localClientNum, WeaponDef* 
     if (cgameGlob->predictedPlayerState.ammoclip[BG_ClipForWeapon(cgameGlob->predictedPlayerState.weapon)])
         return 1;
 
-    return (cgameGlob->predictedPlayerState.weaponstate == 7
-        || cgameGlob->predictedPlayerState.weaponstate == 9
-        || cgameGlob->predictedPlayerState.weaponstate == 11
-        || cgameGlob->predictedPlayerState.weaponstate == 10
-        || cgameGlob->predictedPlayerState.weaponstate == 8)
+    return (cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOADING
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOAD_START
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOAD_END
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOAD_START_INTERUPT
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RELOADING_INTERUPT)
         && weapDef->iReloadTime - cgameGlob->predictedPlayerState.weaponTime > weapDef->reloadShowRocketTime;
 }
 
@@ -1244,9 +1245,9 @@ static void CalculateWeaponPosition_BasePosition_angles(cg_s *cgameGlob, float *
     minSpeed = minSpeed + cg_gun_rot_minspeed->current.value;
 
     if (cgameGlob->xyspeed <= minSpeed
-        || ps->weaponstate == 7
-        || ps->weaponstate == 25
-        || ps->weaponstate == 26)
+        || ps->weaponstate == WEAPON_RELOADING
+        || ps->weaponstate == WEAPON_NIGHTVISION_WEAR
+        || ps->weaponstate == WEAPON_NIGHTVISION_REMOVE)
     {
         targetAng[0] = 0.0f;
         targetAng[1] = 0.0f;
@@ -1827,10 +1828,10 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
         minSpeed = v2;
     }
     moving = minSpeed < (float)cgameGlob->xyspeed;
-    v6 = ps->weaponstate == 25 || ps->weaponstate == 26;
+    v6 = ps->weaponstate == WEAPON_NIGHTVISION_WEAR || ps->weaponstate == WEAPON_NIGHTVISION_REMOVE;
     prone = ps->viewHeightTarget == 11;
     crouched = ps->viewHeightTarget == 40;
-    if (minSpeed >= (float)cgameGlob->xyspeed || ps->weaponstate == 7 || v6)
+    if (minSpeed >= (float)cgameGlob->xyspeed || ps->weaponstate == WEAPON_RELOADING || v6)
     {
         targetPos[0] = 0.0f;
         targetPos[1] = 0.0f;
@@ -1866,7 +1867,7 @@ void __cdecl CalculateWeaponPosition_BasePosition_movement(cg_s *cgameGlob, floa
         lerp = 1.0;
         if (v6)
         {
-            if (ps->weaponstate == 25)
+            if (ps->weaponstate == WEAPON_NIGHTVISION_WEAR)
             {
                 lerpa = (float)ps->weaponTime / (float)weapDef->nightVisionWearTime;
             }
@@ -2316,11 +2317,11 @@ char __cdecl ToggleWeaponAltMode(int32_t localClientNum)
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    if ((cgameGlob->predictedPlayerState.weaponstate == 1
-        || cgameGlob->predictedPlayerState.weaponstate == 2
-        || cgameGlob->predictedPlayerState.weaponstate == 3
-        || cgameGlob->predictedPlayerState.weaponstate == 4)
-        && cgameGlob->predictedPlayerState.weaponstate != 1)
+    if ((cgameGlob->predictedPlayerState.weaponstate == WEAPON_RAISING
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_RAISING_ALTSWITCH
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_DROPPING
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_DROPPING_QUICK)
+        && cgameGlob->predictedPlayerState.weaponstate != WEAPON_RAISING)
     {
         return 0;
     }
@@ -2342,7 +2343,8 @@ bool __cdecl ActionSlotUsageAllowed(cg_s *cgameGlob)
     iassert(cgameGlob);
     if (!cgameGlob->nextSnap)
         return 0;
-    if (cgameGlob->predictedPlayerState.weaponstate == 3 || cgameGlob->predictedPlayerState.weaponstate == 4)
+    if (cgameGlob->predictedPlayerState.weaponstate == WEAPON_DROPPING
+        || cgameGlob->predictedPlayerState.weaponstate == WEAPON_DROPPING_QUICK)
         return 0;
     if ((cgameGlob->predictedPlayerState.pm_flags & (PMF_RESPAWNED | PMF_FROZEN)) != 0)
         return 0;
@@ -2567,7 +2569,7 @@ void __cdecl CG_FireWeapon(
             if (isPlayer)
                 TakeClipOnlyWeaponIfEmpty(localClientNum, &cgameGlob->predictedPlayerState);
 #elif KISAK_SP
-            //if (playerUsingTurret || v19 || p_nextState->eType == 1)
+            //if (playerUsingTurret || v19 || p_nextState->eType == ET_PLAYER)
             //{
             //    fireRumble = weaponDef->fireRumble;
             //    if (fireRumble)

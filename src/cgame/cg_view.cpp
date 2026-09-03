@@ -522,7 +522,7 @@ void __cdecl OffsetFirstPersonView(int localClientNum, cg_s *cgameGlob)
             if (pm_type == PM_DEAD)
             {
                 cgameGlob->refdefViewAngles[0] = -15.0;
-                cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[1];
+                cgameGlob->refdefViewAngles[1] = (float)cgameGlob->nextSnap->ps.stats[STAT_DEAD_YAW];
                 cgameGlob->refdefViewAngles[2] = 40.0;
                 return;
             }

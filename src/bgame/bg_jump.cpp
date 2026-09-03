@@ -233,12 +233,12 @@ bool __cdecl Jump_Check(pmove_t *pm, pml_t *pml)
     if (PM_GetEffectiveStance(ps))
         return false;
 
-    if ((pm->cmd.buttons & 0x400) == 0)
+    if ((pm->cmd.buttons & BUTTON_JUMP) == 0)
         return false;
 
-    if ((pm->oldcmd.buttons & 0x400) != 0)
+    if ((pm->oldcmd.buttons & BUTTON_JUMP) != 0)
     {
-        pm->cmd.buttons &= ~0x400u;
+        pm->cmd.buttons &= ~BUTTON_JUMP;
         return false;
     }
     else

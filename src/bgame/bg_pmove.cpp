@@ -571,16 +571,16 @@ void __cdecl PM_UpdateLean(
 
     // Patched from 1.7
 #ifdef KISAK_MP
-    if ((cmd->buttons & 0xC0) != 0 && (ps->pm_flags & PMF_FROZEN) == 0)
+    if ((cmd->buttons & (BUTTON_LEAN_LEFT | BUTTON_LEAN_RIGHT)) != 0 && (ps->pm_flags & PMF_FROZEN) == 0)
 #elif KISAK_SP
-	if ((cmd->buttons & 0xC0) != 0 && (ps->pm_flags & PMF_FROZEN) == 0 && (ps->pm_flags & PMF_SCRIPT_NO_LEAN) == 0)
+	if ((cmd->buttons & (BUTTON_LEAN_LEFT | BUTTON_LEAN_RIGHT)) != 0 && (ps->pm_flags & PMF_FROZEN) == 0 && (ps->pm_flags & PMF_SCRIPT_NO_LEAN) == 0)
 #endif
     {
         if (ps->pm_type < PM_DEAD && (ps->groundEntityNum != ENTITYNUM_NONE || ps->pm_type == PM_NORMAL_LINKED))
         {
-            if ((cmd->buttons & 0x40) != 0)
+            if ((cmd->buttons & BUTTON_LEAN_LEFT) != 0)
                 leaning = -1;
-            if ((cmd->buttons & 0x80) != 0)
+            if ((cmd->buttons & BUTTON_LEAN_RIGHT) != 0)
                 ++leaning;
         }
     }
@@ -674,11 +674,11 @@ void __cdecl PM_UpdateViewAngles(playerState_s *ps, float msec, usercmd_s *cmd, 
 #endif
     if (ps->pm_type >= PM_DEAD)
     {
-        if (ps->stats[1] == 999)
+        if (ps->stats[STAT_DEAD_YAW] == 999)
         {
             angle = (double)cmd->angles[1] * 0.0054931640625 + ps->delta_angles[1];
             temp = AngleNormalize360(angle);
-            ps->stats[1] = (int)(temp * 0.0054931640625);
+            ps->stats[STAT_DEAD_YAW] = (int)(temp * 0.0054931640625);
         }
     LABEL_21:
         PM_UpdateLean(
@@ -1676,7 +1676,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         pm->cmd.forwardmove = 127;
     if ((ps->pm_flags & PMF_FROZEN) != 0)
     {
-        pm->cmd.buttons &= 0x1300u;
+        pm->cmd.buttons &= BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
         velocity = ps->velocity;
@@ -1686,7 +1686,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
     }
     else if ((ps->pm_flags & PMF_RESPAWNED) != 0)
     {
-        pm->cmd.buttons &= 0x1301u;
+        pm->cmd.buttons &= BUTTON_ATTACK | BUTTON_PRONE | BUTTON_CROUCH | BUTTON_TEMP_STANCE;
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
         v20 = ps->velocity;
@@ -1698,15 +1698,15 @@ void __cdecl PmoveSingle(pmove_t *pm)
     {
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
-        pm->cmd.buttons &= 0xFFFFFB3F;
+        pm->cmd.buttons &= ~(BUTTON_JUMP | BUTTON_LEAN_LEFT | BUTTON_LEAN_RIGHT);
         v19 = ps->velocity;
         ps->velocity[0] = 0.0;
         v19[1] = 0.0;
         v19[2] = 0.0;
     }
-    if ((pm->cmd.buttons & 0x100000) != 0)
+    if ((pm->cmd.buttons & BUTTON_LOC_SELECTING) != 0)
     {
-        pm->cmd.buttons &= 0x101B02u;
+        pm->cmd.buttons &= BUTTON_LOC_SELECTING | BUTTON_TEMP_STANCE | BUTTON_ADS | BUTTON_CROUCH | BUTTON_SPRINT | BUTTON_PRONE;
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
     }
@@ -1735,7 +1735,8 @@ void __cdecl PmoveSingle(pmove_t *pm)
                 v6 = I_fabs(v15),
                 v6 >= (double)v7))
         {
-            if ((ps->pm_flags & PMF_SIGHT_AIMING) == 0 && (ps->weaponstate <= 4u || ps->weaponstate == 7))
+            if ((ps->pm_flags & PMF_SIGHT_AIMING) == 0
+                && (ps->weaponstate <= WEAPON_DROPPING_QUICK || ps->weaponstate == WEAPON_RELOADING))
                 ps->pm_flags &= ~PMF_PRONEMOVE_OVERRIDDEN;
         }
         else
@@ -1754,7 +1755,7 @@ void __cdecl PmoveSingle(pmove_t *pm)
         pm->cmd.forwardmove = 0;
         pm->cmd.rightmove = 0;
     }
-    if ((pm->cmd.buttons & 0x100000) != 0)
+    if ((pm->cmd.buttons & BUTTON_LOC_SELECTING) != 0)
         v1 = ps->eFlags | 0x200000;
     else
         v1 = ps->eFlags & 0xFFDFFFFF;
@@ -1766,14 +1767,14 @@ void __cdecl PmoveSingle(pmove_t *pm)
         ps->pm_type != PM_INTERMISSION && 
 #endif
         (ps->pm_flags & PMF_RESPAWNED) == 0
-        && (!ps->weaponstate || ps->weaponstate == 5)
+        && (!ps->weaponstate || ps->weaponstate == WEAPON_FIRING)
         && PM_WeaponAmmoAvailable(ps)
-        && (pm->cmd.buttons & 1) != 0)
+        && (pm->cmd.buttons & BUTTON_ATTACK) != 0)
     {
         ps->eFlags |= 0x40u;
     }
 
-    if (ps->pm_type < PM_DEAD && (pm->cmd.buttons & 0x101) == 0)
+    if (ps->pm_type < PM_DEAD && (pm->cmd.buttons & (BUTTON_ATTACK | BUTTON_PRONE)) == 0)
         ps->pm_flags &= ~PMF_RESPAWNED;
     memset((uint8_t *)&pml, 0, sizeof(pml));
     pml.msec = pm->cmd.serverTime - ps->commandTime;
@@ -2019,7 +2020,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
     iassert(ps);
 
     SprintState* p_sprintState = &ps->sprintState; // [esp+4h] [ebp-10h]
-    if (ps->sprintState.sprintButtonUpRequired && (pm->cmd.buttons & 2) == 0)
+    if (ps->sprintState.sprintButtonUpRequired && (pm->cmd.buttons & BUTTON_SPRINT) == 0)
         p_sprintState->sprintButtonUpRequired = 0;
 
     if (ps->pm_type >= PM_NOCLIP || BG_GetMaxSprintTime(ps) <= 0)
@@ -2041,7 +2042,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
         if (PM_SprintEndingButtons(ps, pm->cmd.forwardmove, pm->cmd.buttons))
             goto LABEL_13;
 
-        if ((pm->oldcmd.buttons & 2) == 0 && (pm->cmd.buttons & 2) != 0)
+        if ((pm->oldcmd.buttons & BUTTON_SPRINT) == 0 && (pm->cmd.buttons & BUTTON_SPRINT) != 0)
         {
             PM_EndSprint(ps, pm);
             p_sprintState->sprintButtonUpRequired = 1;
@@ -2050,7 +2051,7 @@ void __cdecl PM_UpdateSprint(pmove_t *pm, const pml_t *pml)
     else if ((!ps->sprintState.sprintDelay
         || player_sprintRechargePause->current.value * 1000.0 <= (double)(pm->cmd.serverTime
             - ps->sprintState.lastSprintEnd))
-        && (pm->cmd.buttons & 2) != 0
+        && (pm->cmd.buttons & BUTTON_SPRINT) != 0
         && (ps->pm_flags & PMF_NO_SPRINT) == 0
         && !p_sprintState->sprintButtonUpRequired
         && !PM_SprintStartInterferingButtons(ps, pm->cmd.forwardmove, pm->cmd.buttons)
@@ -2082,7 +2083,7 @@ void __cdecl PM_EndSprint(playerState_s *ps, pmove_t *pm)
         ps->sprintState.sprintDelay = 0;
         ps->sprintState.lastSprintEnd = pm->cmd.serverTime;
         ps->pm_flags &= ~PMF_SPRINTING;
-        if ((pm->cmd.buttons & 2) != 0)
+        if ((pm->cmd.buttons & BUTTON_SPRINT) != 0)
             ps->sprintState.sprintButtonUpRequired = 1;
     }
 }
@@ -2095,7 +2096,7 @@ bool __cdecl PM_SprintStartInterferingButtons(const playerState_s *ps, int32_t f
     if (forwardSpeed <= player_sprintForwardMinimum->current.integer)
         return true;
 
-    if ((buttons & 0xC435) != 0)
+    if ((buttons & (BUTTON_ATTACK | BUTTON_MELEE | BUTTON_RELOAD | BUTTON_USE_RELOAD | BUTTON_JUMP | BUTTON_FRAG | BUTTON_SMOKE)) != 0)
         return true;
 
     if (ps->leanf != 0.0)
@@ -2126,7 +2127,7 @@ bool __cdecl PM_SprintEndingButtons(const playerState_s *ps, int32_t forwardSpee
     if (forwardSpeed <= player_sprintForwardMinimum->current.integer)
         return true;
 
-    if ((buttons & 0xC735) != 0)
+    if ((buttons & (BUTTON_ATTACK | BUTTON_MELEE | BUTTON_RELOAD | BUTTON_USE_RELOAD | BUTTON_PRONE | BUTTON_CROUCH | BUTTON_JUMP | BUTTON_FRAG | BUTTON_SMOKE)) != 0)
         return true;
 
     if (ps->leanf != 0.0)
@@ -2194,9 +2195,9 @@ void __cdecl PM_FlyMove(pmove_t *pm, pml_t *pml)
     if (ps->speed)
     {
         scale = PM_MoveScale(ps, 0.0, 0.0, 127.0);
-        if ((pm->cmd.buttons & 0x40) != 0)
+        if ((pm->cmd.buttons & BUTTON_LEAN_LEFT) != 0)
             wishvel[2] = wishvel[2] - scale * 127.0;
-        if ((pm->cmd.buttons & 0x80) != 0)
+        if ((pm->cmd.buttons & BUTTON_LEAN_RIGHT) != 0)
             wishvel[2] = scale * 127.0 + wishvel[2];
     }
     wishdir[0] = wishvel[0];
@@ -2916,9 +2917,9 @@ void __cdecl PM_NoclipMove(pmove_t *pm, pml_t *pml)
     fmove = (float)pm->cmd.forwardmove;
     smove = (float)pm->cmd.rightmove;
     umove = 0.0;
-    if ((pm->cmd.buttons & 0x80) != 0)
+    if ((pm->cmd.buttons & BUTTON_LEAN_RIGHT) != 0)
         umove = umove + 127.0;
-    if ((pm->cmd.buttons & 0x40) != 0)
+    if ((pm->cmd.buttons & BUTTON_LEAN_LEFT) != 0)
         umove = umove - 127.0;
     scale = PM_MoveScale(ps, fmove, smove, umove);
     for (int32_t i = 0; i < 3; ++i) // [esp+64h] [ebp-10h]
@@ -2961,10 +2962,10 @@ void __cdecl PM_UFOMove(pmove_t *pm, pml_t *pml)
     smove = (float)pm->cmd.rightmove;
     umove = 0.0;
 
-    if ((pm->cmd.buttons & 0x80) != 0)
+    if ((pm->cmd.buttons & BUTTON_LEAN_RIGHT) != 0)
         umove = umove + 127.0;
 
-    if ((pm->cmd.buttons & 0x40) != 0)
+    if ((pm->cmd.buttons & BUTTON_LEAN_LEFT) != 0)
         umove = umove - 127.0;
 
     if (fmove == 0.0 && smove == 0.0 && umove == 0.0)
@@ -3431,9 +3432,9 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         pm->maxs[1] = 8.0;
         pm->maxs[2] = 16.0;
         ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
-        if ((pm->cmd.buttons & 0x100) != 0)
+        if ((pm->cmd.buttons & BUTTON_PRONE) != 0)
         {
-            pm->cmd.buttons &= ~0x100u;
+            pm->cmd.buttons &= ~BUTTON_PRONE;
             BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
         }
         ps->viewHeightTarget = 0;
@@ -3443,9 +3444,9 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
     if (ps->pm_type == PM_DEAD)
     {
         ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
-        if ((pm->cmd.buttons & 0x100) != 0)
+        if ((pm->cmd.buttons & BUTTON_PRONE) != 0)
         {
-            pm->cmd.buttons &= ~0x100u;
+            pm->cmd.buttons &= ~BUTTON_PRONE;
             BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
         }
         if (ps->viewHeightCurrent <= 8.0f)
@@ -3509,13 +3510,13 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
         {
 #ifdef KISAK_SP
             if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) != 0)
-                pm->cmd.buttons &= ~0x100u;
+                pm->cmd.buttons &= ~BUTTON_PRONE;
             if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) != 0)
-                pm->cmd.buttons &= ~0x200u;
+                pm->cmd.buttons &= ~BUTTON_CROUCH;
 
             if ((ps->pm_flags & PMF_SCRIPT_NO_PRONE) != 0 && (ps->pm_flags & PMF_PRONE) != 0)
             {
-                pm->cmd.buttons &= ~0x300u;
+                pm->cmd.buttons &= ~(BUTTON_PRONE | BUTTON_CROUCH);
                 if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
                 {
                     ps->pm_flags &= ~PMF_PRONE;
@@ -3534,7 +3535,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             }
             else if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) != 0 && (ps->pm_flags & PMF_DUCKED) != 0)
             {
-                pm->cmd.buttons &= ~0x300u;
+                pm->cmd.buttons &= ~(BUTTON_PRONE | BUTTON_CROUCH);
                 if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) == 0)
                 {
                     ps->pm_flags &= ~(PMF_PRONE | PMF_DUCKED);
@@ -3549,7 +3550,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
             }
             else if ((ps->pm_flags & PMF_SCRIPT_NO_STAND) != 0 && (ps->pm_flags & (PMF_PRONE | PMF_DUCKED)) == 0)
             {
-                pm->cmd.buttons &= ~0x300u;
+                pm->cmd.buttons &= ~(BUTTON_PRONE | BUTTON_CROUCH);
                 if ((ps->pm_flags & PMF_SCRIPT_NO_CROUCH) == 0)
                 {
                     ps->pm_flags |= PMF_DUCKED;
@@ -3597,14 +3598,14 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                 else
 #endif
                 {
-                    if ((ps->pm_flags & PMF_LADDER) != 0 && (pm->cmd.buttons & 0x300) != 0)
+                    if ((ps->pm_flags & PMF_LADDER) != 0 && (pm->cmd.buttons & (BUTTON_PRONE | BUTTON_CROUCH)) != 0)
                     {
-                        pm->cmd.buttons &= 0xFFFFFCFF;
+                        pm->cmd.buttons &= ~(BUTTON_PRONE | BUTTON_CROUCH);
                         BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_STAND, 0, ps);
                     }
-                    if ((pm->cmd.buttons & 0x100) == 0 || (ps->pm_flags & PMF_RESPAWNED) != 0)
+                    if ((pm->cmd.buttons & BUTTON_PRONE) == 0 || (ps->pm_flags & PMF_RESPAWNED) != 0)
                     {
-                        if ((pm->cmd.buttons & 0x200) != 0)
+                        if ((pm->cmd.buttons & BUTTON_CROUCH) != 0)
                         {
                             if ((ps->pm_flags & PMF_PRONE) != 0)
                             {
@@ -3619,7 +3620,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     pm->tracemask & MASK_IGNORE_CHARACTERS);
                                 if (trace.allsolid)
                                 {
-                                    if ((pm->cmd.buttons & 0x1000) == 0)
+                                    if ((pm->cmd.buttons & BUTTON_TEMP_STANCE) == 0)
                                         BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_PRONE, 2u, ps);
                                 }
                                 else
@@ -3673,7 +3674,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                     pm->tracemask & MASK_IGNORE_CHARACTERS);
                                 if (trace.allsolid)
                                 {
-                                    if ((pm->cmd.buttons & 0x1000) == 0)
+                                    if ((pm->cmd.buttons & BUTTON_TEMP_STANCE) == 0)
                                         BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_PRONE, 1u, ps);
                                 }
                                 else
@@ -3707,7 +3708,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                                 pm->tracemask & MASK_IGNORE_CHARACTERS);
                             if (trace.allsolid)
                             {
-                                if ((pm->cmd.buttons & 0x1000) == 0)
+                                if ((pm->cmd.buttons & BUTTON_TEMP_STANCE) == 0)
                                     BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 1u, ps);
                             }
                             else
@@ -3733,7 +3734,7 @@ void __cdecl PM_CheckDuck(pmove_t *pm, pml_t *pml)
                     else if (ps->groundEntityNum != ENTITYNUM_NONE)
                     {
                         ps->pm_flags |= PMF_NO_PRONE;
-                        if ((pm->cmd.buttons & 0x1000) == 0)
+                        if ((pm->cmd.buttons & BUTTON_TEMP_STANCE) == 0)
                         {
                             if ((ps->pm_flags & PMF_PRONE) != 0 || (ps->pm_flags & PMF_DUCKED) != 0)
                                 BG_AddPredictableEventToPlayerstate(EV_STANCE_FORCE_CROUCH, 0, ps);
@@ -4650,7 +4651,7 @@ void __cdecl PM_UpdatePlayerWalkingFlag(pmove_t *pm)
     ps->pm_flags &= ~PMF_WALKING;
 
     if (ps->pm_type < PM_DEAD
-        && (pm->cmd.buttons & 0x800) != 0
+        && (pm->cmd.buttons & BUTTON_ADS) != 0
         && (ps->pm_flags & PMF_PRONE) == 0
         && (ps->pm_flags & PMF_SIGHT_AIMING) != 0
         && ps->weaponstate != WEAPON_RELOADING
@@ -5028,7 +5029,7 @@ void __cdecl TurretNVGTrigger(pmove_t *pm)
     playerState_s* ps = pm->ps; // [esp+8h] [ebp-4h]
     iassert(ps);
 
-    if ((pm->oldcmd.buttons & 0x40000) == 0 && (pm->cmd.buttons & 0x40000) != 0)
+    if ((pm->oldcmd.buttons & BUTTON_NIGHTVISION) == 0 && (pm->cmd.buttons & BUTTON_NIGHTVISION) != 0)
     {
         if ((ps->weapFlags & 0x40) != 0)
         {

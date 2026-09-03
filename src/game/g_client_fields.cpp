@@ -299,10 +299,10 @@ void __cdecl ClientScr_SetMaxHealth(gclient_s *pSelf, const client_fields_s *pFi
     pSelf->sess.maxHealth = Scr_GetInt(0);
     if (pSelf->sess.maxHealth < 1)
         pSelf->sess.maxHealth = 1;
-    if (pSelf->ps.stats[0] > pSelf->sess.maxHealth)
-        pSelf->ps.stats[0] = pSelf->sess.maxHealth;
-    g_entities[pSelf - level.clients].health = pSelf->ps.stats[0];
-    pSelf->ps.stats[2] = pSelf->sess.maxHealth;
+    if (pSelf->ps.stats[STAT_HEALTH] > pSelf->sess.maxHealth)
+        pSelf->ps.stats[STAT_HEALTH] = pSelf->sess.maxHealth;
+    g_entities[pSelf - level.clients].health = pSelf->ps.stats[STAT_HEALTH];
+    pSelf->ps.stats[STAT_MAX_HEALTH] = pSelf->sess.maxHealth;
 }
 
 void __cdecl ClientScr_SetScore(gclient_s *pSelf, const client_fields_s *pField)
