@@ -416,29 +416,26 @@ void __cdecl CG_RegisterItemVisuals(int32_t localClientNum, uint32_t weapIdx)
 
 void __cdecl CG_RegisterItems(int32_t localClientNum)
 {
-    char v1; // al
-    char *v2; // [esp+8h] [ebp-98h]
-    const char *ConfigString; // [esp+Ch] [ebp-94h]
-    char items[132]; // [esp+10h] [ebp-90h] BYREF
-    int32_t i; // [esp+98h] [ebp-8h]
-    int32_t digit; // [esp+9Ch] [ebp-4h]
+    const char* configString = CL_GetConfigString(localClientNum, CS_ITEMS);
+    if (!configString[0])
+        return;
 
-    ConfigString = CL_GetConfigString(localClientNum, CS_ITEMS);
-    v2 = items;
-    do
+    for (size_t i = 1; i < MAX_WEAPONS; ++i)
     {
-        v1 = *ConfigString;
-        *v2++ = *ConfigString++;
-    } while (v1);
-    for (i = 1; i < 128; ++i)
-    {
-        digit = items[i / 4];
-        if (digit > 57)
-            digit -= 87;
-        else
-            digit -= 48;
-        if ((digit & (1 << (i & 3))) != 0)
+        const char hexadecimal = configString[i / 4];
+        if (!hexadecimal)
+            break;
+
+        // '0'-'9','a'-'f'; 'f' -> 0b1111
+        const int value = (hexadecimal > '9')
+            ? static_cast<int>(hexadecimal - 'a' + 10)
+            : static_cast<int>(hexadecimal - '0');
+
+        const size_t bitIndex = i & 3;
+        if (value & (1 << bitIndex))
+        {
             CG_RegisterItemVisuals(localClientNum, i);
+        }
     }
 }
 
