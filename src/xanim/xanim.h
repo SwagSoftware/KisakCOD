@@ -467,7 +467,7 @@ struct WeaponDef // sizeof=0x878
     const char* szOverlayName;
     XModel* gunXModel[16];
     XModel* handXModel;
-    const char* szXAnims[33];
+    const char* szXAnims[NUM_WEAP_ANIMS];
     const char* szModeName;
     uint16_t hideTags[8];
     uint16_t notetrackSoundMapKeys[16];
