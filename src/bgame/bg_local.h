@@ -1421,6 +1421,13 @@ enum VehicleMoveState : __int32
     VEH_MOVESTATE_HOVER = 0x2,
 };
 
+enum VehicleManualMode : __int32
+{
+    VEH_MANUAL_OFF = 0x0,
+    VEH_MANUAL_ON = 0x1,
+    VEH_MANUAL_TRANS = 0x2,
+};
+
 enum VehicleTurretState : __int32
 {                                       // ...
     VEH_TURRET_STOPPED = 0x0,
@@ -1482,7 +1489,7 @@ struct scr_vehicle_s // sizeof=0x354
     int32_t drawOnCompass;
     uint16_t lookAtText0;
     uint16_t lookAtText1;
-    int32_t manualMode;
+    VehicleManualMode manualMode;
     float manualSpeed;
     float manualAccel;
     float manualDecel;
@@ -1543,7 +1550,7 @@ struct scr_vehicle_s // sizeof=0x338
     int drawOnCompass;
     uint16_t lookAtText0;
     uint16_t lookAtText1;
-    int manualMode;
+    VehicleManualMode manualMode;
     float manualSpeed;
     float manualAccel;
     float manualDecel;

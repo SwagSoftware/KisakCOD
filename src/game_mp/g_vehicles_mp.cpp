@@ -456,7 +456,7 @@ void __cdecl InitEntityVehicleVars(gentity_s *ent, scr_vehicle_s *veh, __int16 i
     veh->drawOnCompass = 0;
     veh->lookAtText0 = 0;
     veh->lookAtText1 = 0;
-    veh->manualMode = 0;
+    veh->manualMode = VEH_MANUAL_OFF;
     veh->manualSpeed = 0.0;
     veh->manualAccel = 0.0;
     veh->manualDecel = 0.0;

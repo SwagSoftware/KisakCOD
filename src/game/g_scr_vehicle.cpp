@@ -209,7 +209,7 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, short infoIdx)
     veh->drawOnCompass = 0;
     veh->lookAtText0 = 0;
     veh->lookAtText1 = 0;
-    veh->manualMode = 0;
+    veh->manualMode = VEH_MANUAL_OFF;
     veh->manualSpeed = 0.0f;
     veh->manualAccel = 0.0f;
     veh->manualDecel = 0.0f;
@@ -2150,7 +2150,7 @@ void __cdecl CMD_VEH_Script_SetSpeed(gentity_s *ent)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 4873, 0, "%s", "veh");
     if (!info)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 4874, 0, "%s", "info");
-    veh->manualMode = 1;
+    veh->manualMode = VEH_MANUAL_ON;
     veh->manualSpeed = Scr_GetFloat(0) * MPH_TO_INCHES_PER_SEC;
     if (veh->manualSpeed < 0.0f)
     {
@@ -2194,7 +2194,7 @@ void __cdecl CMD_VEH_ResumeSpeed(scr_entref_t entref)
     scr_vehicle_s *veh; // [esp+0h] [ebp-8h]
 
     veh = GScr_GetVehicle(entref)->scr_vehicle;
-    veh->manualMode = 2;
+    veh->manualMode = VEH_MANUAL_TRANS;
     veh->manualAccel = Scr_GetFloat(0) * MPH_TO_INCHES_PER_SEC;
     if (veh->manualAccel < 0.0f)
         Scr_ParamError(0, "Cannot set negative acceleration on vehicle");
@@ -2314,7 +2314,7 @@ void __cdecl CMD_VEH_SetGoalPos(scr_entref_t entref)
     scr_vehicle_s *veh; // [esp+0h] [ebp-8h]
 
     veh = GScr_GetVehicle(entref)->scr_vehicle;
-    veh->manualMode = 1;
+    veh->manualMode = VEH_MANUAL_ON;
     Scr_GetVector(0, veh->goalPosition);
     veh->stopAtGoal = Scr_GetNumParam() > 1 && Scr_GetInt(1) != 0;
     if (veh->manualSpeed == 0.0f || veh->manualAccel == 0.0f || veh->manualDecel == 0.0f)
@@ -3822,17 +3822,17 @@ void __cdecl VEH_UpdatePath(gentity_s *ent)
     if (veh->manualSpeed < 0.0f)
         MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2531, 0, "%s", "veh->manualSpeed >= 0.0f");
 
-    if (veh->manualMode == 0)
+    if (veh->manualMode == VEH_MANUAL_OFF)
     {
         // No manual override - just track the path's prescribed speed.
         veh->speed = veh->pathPos.speed;
     }
     else
     {
-        // manualMode 1 = explicit manual speed; mode 2 = decay back to path
-        // speed and then auto-clear.
-        float manualSpeed = (veh->manualMode == 2) ? veh->pathPos.speed
-                                                   : veh->manualSpeed;
+        // VEH_MANUAL_ON = explicit manual speed; VEH_MANUAL_TRANS = decay back
+        // to path speed and then auto-clear.
+        float manualSpeed = (veh->manualMode == VEH_MANUAL_TRANS) ? veh->pathPos.speed
+                                                                   : veh->manualSpeed;
         float newSpeed;
         if (veh->speed >= manualSpeed)
         {
@@ -3847,8 +3847,8 @@ void __cdecl VEH_UpdatePath(gentity_s *ent)
                 newSpeed = manualSpeed;
         }
         veh->speed = newSpeed;
-        if (veh->manualMode == 2 && newSpeed == manualSpeed)
-            veh->manualMode = 0;
+        if (veh->manualMode == VEH_MANUAL_TRANS && newSpeed == manualSpeed)
+            veh->manualMode = VEH_MANUAL_OFF;
     }
 
     if (veh->speed < 0.0f)
