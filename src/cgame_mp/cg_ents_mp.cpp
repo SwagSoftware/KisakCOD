@@ -1297,8 +1297,8 @@ XAnim_s *__cdecl CG_GetMG42Anims(centity_s *cent)
     pAnims = XAnimCreateAnims("MG42", 3u, (void *(__cdecl *)(int))Hunk_AllocXAnimClient);
     iassert(pAnims);
     XAnimBlend(pAnims, 0, "root", 1u, 2u, 0);
-    BG_CreateXAnim(pAnims, 1u, (char *)weapDef->szXAnims[1]);
-    BG_CreateXAnim(pAnims, 2u, (char *)weapDef->szXAnims[3]);
+    BG_CreateXAnim(pAnims, 1u, (char *)weapDef->szXAnims[WEAP_ANIM_IDLE]);
+    BG_CreateXAnim(pAnims, 2u, (char *)weapDef->szXAnims[WEAP_ANIM_FIRE]);
     return pAnims;
 }
 

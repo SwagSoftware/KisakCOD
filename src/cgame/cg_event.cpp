@@ -836,7 +836,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->detonateSound);
                 return;
             case EV_NIGHTVISION_WEAR:
-                if (isPlayerView && ((ps->eFlags & 0x300) != 0 || !*weaponDef->szXAnims[26]))
+                if (isPlayerView && ((ps->eFlags & 0x300) != 0 || !*weaponDef->szXAnims[WEAP_ANIM_NIGHTVISION_WEAR]))
                     CG_PlayClientSoundAlias(localClientNum, cgMedia.nightVisionOn);
                 if (isPlayerView)
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionWearSoundPlayer);
@@ -844,7 +844,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionWearSound);
                 return;
             case EV_NIGHTVISION_REMOVE:
-                if (isPlayerView && ((ps->eFlags & 0x300) != 0 || !*weaponDef->szXAnims[27]))
+                if (isPlayerView && ((ps->eFlags & 0x300) != 0 || !*weaponDef->szXAnims[WEAP_ANIM_NIGHTVISION_REMOVE]))
                     CG_PlayClientSoundAlias(localClientNum, cgMedia.nightVisionOff);
                 if (isPlayerView)
                     CG_PlayEntitySoundAlias(localClientNum, ent->number, weaponDef->nightVisionRemoveSoundPlayer);
