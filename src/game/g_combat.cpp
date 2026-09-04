@@ -98,7 +98,7 @@ void __cdecl G_ParseHitLocDmgTable()
         v3 = g_HitLocNames[v0];
         g_fHitLocDamageMult[v0] = 1.0;
         *p_iOffset = v0 * 4;
-        p_iOffset[1] = 6;
+        p_iOffset[1] = CSPFT_FLOAT;
         *(p_iOffset - 1) = (int)v3;
         *v1++ = Scr_AllocString((char*)v3, 1);
         p_iOffset += 3;

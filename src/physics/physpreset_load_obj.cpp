@@ -8,16 +8,16 @@ void *(__cdecl *physAlloc)(int);
 
 cspField_t physPresetFields[10] =
 {
-  { "mass", 0, 6 },
-  { "bounce", 4, 6 },
-  { "friction", 8, 6 },
-  { "isFrictionInfinity", 12, 5 },
-  { "bulletForceScale", 16, 6 },
-  { "explosiveForceScale", 20, 6 },
-  { "sndAliasPrefix", 24, 0 },
-  { "piecesSpreadFraction", 28, 6 },
-  { "piecesUpwardVelocity", 32, 6 },
-  { "tempDefaultToCylinder", 36, 5 }
+  { "mass", 0, CSPFT_FLOAT },
+  { "bounce", 4, CSPFT_FLOAT },
+  { "friction", 8, CSPFT_FLOAT },
+  { "isFrictionInfinity", 12, CSPFT_QBOOLEAN },
+  { "bulletForceScale", 16, CSPFT_FLOAT },
+  { "explosiveForceScale", 20, CSPFT_FLOAT },
+  { "sndAliasPrefix", 24, CSPFT_STRING },
+  { "piecesSpreadFraction", 28, CSPFT_FLOAT },
+  { "piecesUpwardVelocity", 32, CSPFT_FLOAT },
+  { "tempDefaultToCylinder", 36, CSPFT_QBOOLEAN }
 }; // idb
 
 struct PhysPresetLite // LWSS add custom struct to adhere to the above field offfsets
