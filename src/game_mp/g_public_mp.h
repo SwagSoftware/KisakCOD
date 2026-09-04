@@ -54,6 +54,15 @@ enum meansOfDeath_t : int32_t
     MOD_NUM = 0x10,
 };
 
+enum HELICOPTER_STAGES : __int32
+{
+    HELICOPTER_ONFIRE = 0x0,
+    HELICOPTER_HEAVYSMOKE = 0x1,
+    HELICOPTER_SMOKING = 0x2,
+    HELICOPTER_FULLHEALTH = 0x3,
+    NUM_HELICOPTERSTAGES = 0x4,
+};
+
 static uint16_t *modNames[MOD_NUM] =
 {
     &scr_const.mod_unknown,
