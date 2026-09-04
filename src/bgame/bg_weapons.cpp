@@ -93,7 +93,7 @@ void __cdecl BG_ParsePenetrationDepthTable(const char *penetrateType, float *dep
         }
         pFieldList[iTypeIndex].szName = &dest[256 * iTypeIndex];
         pFieldList[iTypeIndex].iOffset = 4 * iTypeIndex;
-        pFieldList[iTypeIndex].iFieldType = 6;
+        pFieldList[iTypeIndex].iFieldType = CSPFT_FLOAT;
     }
     if (!ParseConfigStringToStruct((uint8_t *)depthTable, pFieldList, 29, buffer, 0, 0, BG_StringCopy))
         Com_Error(ERR_DROP, "Error parsing bullet penetration table [%s].", penetrateType);

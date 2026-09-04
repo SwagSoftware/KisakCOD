@@ -602,11 +602,56 @@ using dvar_t = dvar_s;
 
 //=============================================
 
+enum csParseFieldType_t : __int32
+{
+    CSPFT_STRING = 0x0,
+    CSPFT_STRING_MAX_STRING_CHARS = 0x1,
+    CSPFT_STRING_MAX_QPATH = 0x2,
+    CSPFT_STRING_MAX_OSPATH = 0x3,
+    CSPFT_INT = 0x4,
+    CSPFT_QBOOLEAN = 0x5,
+    CSPFT_FLOAT = 0x6,
+    CSPFT_MILLISECONDS = 0x7,
+    CSPFT_FX = 0x8,
+    CSPFT_XMODEL = 0x9,
+    CSPFT_MATERIAL = 0xA,
+    CSPFT_SOUND = 0xB,
+    CSPFT_NUM_BASE_FIELD_TYPES = 0xC,
+};
+
+enum weapFieldType_t : __int32
+{
+    WFT_WEAPONTYPE = 0xC,
+    WFT_WEAPONCLASS = 0xD,
+    WFT_OVERLAYRETICLE = 0xE,
+    WFT_PENETRATE_TYPE = 0xF,
+    WFT_IMPACT_TYPE = 0x10,
+    WFT_STANCE = 0x11,
+    WFT_PROJ_EXPLOSION = 0x12,
+    WFT_OFFHAND_CLASS = 0x13,
+    WFT_ANIMTYPE = 0x14,
+    WFT_ACTIVE_RETICLE_TYPE = 0x15,
+    WFT_GUIDED_MISSILE_TYPE = 0x16,
+    WFT_BOUNCE_SOUND = 0x17,
+    WFT_STICKINESS = 0x18,
+    WFT_OVERLAYINTERFACE = 0x19,
+    WFT_INVENTORYTYPE = 0x1A,
+    WFT_FIRETYPE = 0x1B,
+    WFT_AMMOCOUNTER_CLIPTYPE = 0x1C,
+    WFT_ICONRATIO_HUD = 0x1D,
+    WFT_ICONRATIO_AMMOCOUNTER = 0x1E,
+    WFT_ICONRATIO_KILL = 0x1F,
+    WFT_ICONRATIO_DPAD = 0x20,
+    WFT_HIDETAGS = 0x21,
+    WFT_NOTETRACKSOUNDMAP = 0x22,
+    WFT_NUM_FIELD_TYPES = 0x23,
+};
+
 struct cspField_t // sizeof=0xC
 {                                       // ...
 	const char *szName;                 // ...
 	int iOffset;                        // ...
-	int iFieldType;                     // ...
+	int iFieldType;                     // csParseFieldType_t or parser-specific field type
 };
 
 union FloatWriteSwap_union // sizeof=0x4

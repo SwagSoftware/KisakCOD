@@ -69,39 +69,39 @@ short s_numVehicleInfos;
 
 cspField_t s_vehicleFields[33] =
 {
-  { "type", offsetof(vehicle_info_t, type), 12 },
-  { "steerWheels", offsetof(vehicle_info_t, steerWheels), 5 },
-  { "texureScroll", offsetof(vehicle_info_t, texScroll), 5 },
-  { "quadBarrel", offsetof(vehicle_info_t, quadBarrel), 5 },
-  { "bulletDamage", offsetof(vehicle_info_t, bulletDamage), 5 },
-  { "armorPiercingDamage", offsetof(vehicle_info_t, armorPiercingDamage), 5 },
-  { "grenadeDamage", offsetof(vehicle_info_t, grenadeDamage), 5 },
-  { "projectileDamage", offsetof(vehicle_info_t, projectileDamage), 5 },
-  { "projectileSplashDamage", offsetof(vehicle_info_t, projectileSplashDamage), 5 },
-  { "heavyExplosiveDamage", offsetof(vehicle_info_t, heavyExplosiveDamage), 5 },
-  { "texureScrollScale", offsetof(vehicle_info_t, texScrollScale), 6 },
-  { "maxSpeed", offsetof(vehicle_info_t, maxSpeed), 6 },
-  { "accel", offsetof(vehicle_info_t, accel), 6 },
-  { "rotRate", offsetof(vehicle_info_t, rotRate), 6 },
-  { "rotAccel", offsetof(vehicle_info_t, rotAccel), 6 },
-  { "collisionDamage", offsetof(vehicle_info_t, collisionDamage), 6 },
-  { "collisionSpeed", offsetof(vehicle_info_t, collisionSpeed), 6 },
-  { "suspensionTravel", offsetof(vehicle_info_t, suspensionTravel), 6 },
-  { "maxBodyPitch", offsetof(vehicle_info_t, maxBodyPitch), 6 },
-  { "maxBodyRoll", offsetof(vehicle_info_t, maxBodyRoll), 6 },
-  { "turretWeapon", offsetof(vehicle_info_t, turretWeapon), 0 },
-  { "turretHorizSpanLeft", offsetof(vehicle_info_t, turretHorizSpanLeft), 6 },
-  { "turretHorizSpanRight", offsetof(vehicle_info_t, turretHorizSpanRight), 6 },
-  { "turretVertSpanUp", offsetof(vehicle_info_t, turretVertSpanUp), 6 },
-  { "turretVertSpanDown", offsetof(vehicle_info_t, turretVertSpanDown), 6 },
-  { "turretRotRate", offsetof(vehicle_info_t, turretRotRate), 6 },
-  { "lowIdleSnd", offsetof(vehicle_info_t, sndNames[VEH_LOW_IDLE_SND]), 0 },
-  { "highIdleSnd", offsetof(vehicle_info_t, sndNames[VEH_HIGH_IDLE_SND]), 0 },
-  { "lowEngineSnd", offsetof(vehicle_info_t, sndNames[VEH_LOW_ENGINE_SND]), 0 },
-  { "highEngineSnd", offsetof(vehicle_info_t, sndNames[VEH_HIGH_ENGINE_SND]), 0 },
-  { "turretSpinSnd", offsetof(vehicle_info_t, sndNames[VEH_TURRET_SPIN_SND]), 0 },
-  { "turretStopSnd", offsetof(vehicle_info_t, sndNames[VEH_TURRET_STOP_SND]), 0 },
-  { "engineSndSpeed", offsetof(vehicle_info_t, engineSndSpeed), 6 }
+  { "type", offsetof(vehicle_info_t, type), CSPFT_NUM_BASE_FIELD_TYPES },
+  { "steerWheels", offsetof(vehicle_info_t, steerWheels), CSPFT_QBOOLEAN },
+  { "texureScroll", offsetof(vehicle_info_t, texScroll), CSPFT_QBOOLEAN },
+  { "quadBarrel", offsetof(vehicle_info_t, quadBarrel), CSPFT_QBOOLEAN },
+  { "bulletDamage", offsetof(vehicle_info_t, bulletDamage), CSPFT_QBOOLEAN },
+  { "armorPiercingDamage", offsetof(vehicle_info_t, armorPiercingDamage), CSPFT_QBOOLEAN },
+  { "grenadeDamage", offsetof(vehicle_info_t, grenadeDamage), CSPFT_QBOOLEAN },
+  { "projectileDamage", offsetof(vehicle_info_t, projectileDamage), CSPFT_QBOOLEAN },
+  { "projectileSplashDamage", offsetof(vehicle_info_t, projectileSplashDamage), CSPFT_QBOOLEAN },
+  { "heavyExplosiveDamage", offsetof(vehicle_info_t, heavyExplosiveDamage), CSPFT_QBOOLEAN },
+  { "texureScrollScale", offsetof(vehicle_info_t, texScrollScale), CSPFT_FLOAT },
+  { "maxSpeed", offsetof(vehicle_info_t, maxSpeed), CSPFT_FLOAT },
+  { "accel", offsetof(vehicle_info_t, accel), CSPFT_FLOAT },
+  { "rotRate", offsetof(vehicle_info_t, rotRate), CSPFT_FLOAT },
+  { "rotAccel", offsetof(vehicle_info_t, rotAccel), CSPFT_FLOAT },
+  { "collisionDamage", offsetof(vehicle_info_t, collisionDamage), CSPFT_FLOAT },
+  { "collisionSpeed", offsetof(vehicle_info_t, collisionSpeed), CSPFT_FLOAT },
+  { "suspensionTravel", offsetof(vehicle_info_t, suspensionTravel), CSPFT_FLOAT },
+  { "maxBodyPitch", offsetof(vehicle_info_t, maxBodyPitch), CSPFT_FLOAT },
+  { "maxBodyRoll", offsetof(vehicle_info_t, maxBodyRoll), CSPFT_FLOAT },
+  { "turretWeapon", offsetof(vehicle_info_t, turretWeapon), CSPFT_STRING },
+  { "turretHorizSpanLeft", offsetof(vehicle_info_t, turretHorizSpanLeft), CSPFT_FLOAT },
+  { "turretHorizSpanRight", offsetof(vehicle_info_t, turretHorizSpanRight), CSPFT_FLOAT },
+  { "turretVertSpanUp", offsetof(vehicle_info_t, turretVertSpanUp), CSPFT_FLOAT },
+  { "turretVertSpanDown", offsetof(vehicle_info_t, turretVertSpanDown), CSPFT_FLOAT },
+  { "turretRotRate", offsetof(vehicle_info_t, turretRotRate), CSPFT_FLOAT },
+  { "lowIdleSnd", offsetof(vehicle_info_t, sndNames[VEH_LOW_IDLE_SND]), CSPFT_STRING },
+  { "highIdleSnd", offsetof(vehicle_info_t, sndNames[VEH_HIGH_IDLE_SND]), CSPFT_STRING },
+  { "lowEngineSnd", offsetof(vehicle_info_t, sndNames[VEH_LOW_ENGINE_SND]), CSPFT_STRING },
+  { "highEngineSnd", offsetof(vehicle_info_t, sndNames[VEH_HIGH_ENGINE_SND]), CSPFT_STRING },
+  { "turretSpinSnd", offsetof(vehicle_info_t, sndNames[VEH_TURRET_SPIN_SND]), CSPFT_STRING },
+  { "turretStopSnd", offsetof(vehicle_info_t, sndNames[VEH_TURRET_STOP_SND]), CSPFT_STRING },
+  { "engineSndSpeed", offsetof(vehicle_info_t, engineSndSpeed), CSPFT_FLOAT }
 }; // idb
 
 
@@ -2911,7 +2911,7 @@ static void VEH_Strcpy(unsigned char *pMember, const char *pKeyValue)
 
 int VEH_ParseSpecificField(uint8_t *pStruct, const char *pValue, int fieldType)
 {
-    if (fieldType == 12)
+    if (fieldType == CSPFT_NUM_BASE_FIELD_TYPES)
     {
         int typeIdx;
         for (typeIdx = 0; typeIdx < ARRAY_COUNT(s_vehicleTypeNames); typeIdx++)
@@ -2958,7 +2958,7 @@ int32_t __cdecl G_LoadVehicle(const char *name)
         s_vehicleFields,
         ARRAY_COUNT(s_vehicleFields),
         infoString,
-        13,
+        CSPFT_NUM_BASE_FIELD_TYPES + 1,
         VEH_ParseSpecificField,
         VEH_Strcpy))
     {
