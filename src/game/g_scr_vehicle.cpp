@@ -95,12 +95,12 @@ cspField_t s_vehicleFields[33] =
   { "turretVertSpanUp", offsetof(vehicle_info_t, turretVertSpanUp), 6 },
   { "turretVertSpanDown", offsetof(vehicle_info_t, turretVertSpanDown), 6 },
   { "turretRotRate", offsetof(vehicle_info_t, turretRotRate), 6 },
-  { "lowIdleSnd", offsetof(vehicle_info_t, sndNames[0]), 0 },
-  { "highIdleSnd", offsetof(vehicle_info_t, sndNames[1]), 0 },
-  { "lowEngineSnd", offsetof(vehicle_info_t, sndNames[2]), 0 },
-  { "highEngineSnd", offsetof(vehicle_info_t, sndNames[3]), 0 },
-  { "turretSpinSnd", offsetof(vehicle_info_t, sndNames[4]), 0 },
-  { "turretStopSnd", offsetof(vehicle_info_t, sndNames[5]), 0 },
+  { "lowIdleSnd", offsetof(vehicle_info_t, sndNames[VEH_LOW_IDLE_SND]), 0 },
+  { "highIdleSnd", offsetof(vehicle_info_t, sndNames[VEH_HIGH_IDLE_SND]), 0 },
+  { "lowEngineSnd", offsetof(vehicle_info_t, sndNames[VEH_LOW_ENGINE_SND]), 0 },
+  { "highEngineSnd", offsetof(vehicle_info_t, sndNames[VEH_HIGH_ENGINE_SND]), 0 },
+  { "turretSpinSnd", offsetof(vehicle_info_t, sndNames[VEH_TURRET_SPIN_SND]), 0 },
+  { "turretStopSnd", offsetof(vehicle_info_t, sndNames[VEH_TURRET_STOP_SND]), 0 },
   { "engineSndSpeed", offsetof(vehicle_info_t, engineSndSpeed), 6 }
 }; // idb
 
@@ -239,9 +239,9 @@ void __cdecl VEH_InitVehicle(gentity_s *ent, scr_vehicle_s *veh, short infoIdx)
     veh->engineSndLerp = 0.0f;
     veh->turretHitNum = 0;
 #ifdef KISAK_SP
-    if (s_vehicleInfos[infoIdx].sndIndices[0] && s_vehicleInfos[infoIdx].sndIndices[1])
+    if (s_vehicleInfos[infoIdx].sndIndices[VEH_LOW_IDLE_SND] && s_vehicleInfos[infoIdx].sndIndices[VEH_HIGH_IDLE_SND])
         veh->idleSndEnt.setEnt(G_SpawnSoundBlend());
-    if (s_vehicleInfos[infoIdx].sndIndices[2] && s_vehicleInfos[infoIdx].sndIndices[3])
+    if (s_vehicleInfos[infoIdx].sndIndices[VEH_LOW_ENGINE_SND] && s_vehicleInfos[infoIdx].sndIndices[VEH_HIGH_ENGINE_SND])
         veh->engineSndEnt.setEnt(G_SpawnSoundBlend());
 #endif
     veh->hover.hoverRadius = 30.0f;
@@ -3303,8 +3303,8 @@ void VEH_UpdateSounds(gentity_s *ent)
         else
         {
             idleSndLerp = scr_vehicle->idleSndLerp;
-            v7 = sndIndices[1];
-            v8 = *sndIndices;
+            v7 = sndIndices[VEH_HIGH_IDLE_SND];
+            v8 = sndIndices[VEH_LOW_IDLE_SND];
         }
         G_SetSoundBlend(v5, v8, v7, idleSndLerp);
     }
@@ -3321,17 +3321,17 @@ void VEH_UpdateSounds(gentity_s *ent)
         G_SetSoundBlend(v9, 0, 0, 0.0);
         goto LABEL_14;
     }
-    G_SetSoundBlend(v9, sndIndices[2], sndIndices[3], scr_vehicle->engineSndLerp);
+    G_SetSoundBlend(v9, sndIndices[VEH_LOW_ENGINE_SND], sndIndices[VEH_HIGH_ENGINE_SND], scr_vehicle->engineSndLerp);
 LABEL_15:
     turretState = scr_vehicle->turret.turretState;
-    if (turretState == VEH_TURRET_MOVING && sndIndices[4])
+    if (turretState == VEH_TURRET_MOVING && sndIndices[VEH_TURRET_SPIN_SND])
     {
-        ent->s.loopSound = sndIndices[4];
+        ent->s.loopSound = sndIndices[VEH_TURRET_SPIN_SND];
     }
     else if (turretState == VEH_TURRET_STOPPING)
     {
-        if (sndIndices[5])
-            G_PlaySoundAlias(ent, sndIndices[5]);
+        if (sndIndices[VEH_TURRET_STOP_SND])
+            G_PlaySoundAlias(ent, sndIndices[VEH_TURRET_STOP_SND]);
     }
 #elif KISAK_MP
     iassert(ent->r.inuse);
@@ -4285,7 +4285,7 @@ void G_RestartScrVehicleInfo()
     v0 = 0;
     if (s_numVehicleInfos > 0)
     {
-        v1 = s_vehicleInfos[0].sndNames[0];
+        v1 = s_vehicleInfos[0].sndNames[VEH_LOW_IDLE_SND];
         do
         {
             v2 = (_WORD*)(v1 + 384);
@@ -5418,7 +5418,7 @@ void G_SaveVehicleInfo(SaveGame *save)
     uint16_t *sndIndices = (uint16_t *)s_vehicleInfos[0].sndIndices;
     for (int v2 = 0; v2 < s_numVehicleInfos; ++v2)
     {
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < NUM_VEHICLE_SNDS; ++i)
         {
             if (sndIndices[i])
                 SaveMemory_SaveWrite(&sndIndices[i], 2, save);
@@ -5434,7 +5434,7 @@ void G_LoadVehicleInfo(SaveGame *save)
     uint16_t *sndIndices = (uint16_t *)s_vehicleInfos[0].sndIndices;
     for (int v2 = 0; v2 < s_numVehicleInfos; ++v2)
     {
-        for (int i = 0; i < 6; ++i)
+        for (int i = 0; i < NUM_VEHICLE_SNDS; ++i)
         {
             if (sndIndices[i])
                 SaveMemory_LoadRead(&sndIndices[i], 2, save);
