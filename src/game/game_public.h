@@ -37,6 +37,17 @@ enum VehicleTypes : __int32 // (SP/MP same)
     NUM_VEHICLE_TYPES = 0x6,
 };
 
+enum VehicleSound : __int32
+{
+    VEH_LOW_IDLE_SND = 0x0,
+    VEH_HIGH_IDLE_SND = 0x1,
+    VEH_LOW_ENGINE_SND = 0x2,
+    VEH_HIGH_ENGINE_SND = 0x3,
+    VEH_TURRET_SPIN_SND = 0x4,
+    VEH_TURRET_STOP_SND = 0x5,
+    NUM_VEHICLE_SNDS = 0x6,
+};
+
 // Corresponds to above enum
 static const char *s_vehicleTypeNames[6] = { "4 wheel", "tank", "plane", "boat", "artillery", "helicopter" };
 
@@ -109,11 +120,11 @@ struct vehicle_info_t // sizeof=0x274
     float turretVertSpanUp;
     float turretVertSpanDown;
     float turretRotRate;
-    char sndNames[6][64];
+    char sndNames[NUM_VEHICLE_SNDS][64];
 #ifdef KISAK_SP
-    uint16_t sndIndices[6];
+    uint16_t sndIndices[NUM_VEHICLE_SNDS];
 #else
-    uint8_t sndIndices[6];
+    uint8_t sndIndices[NUM_VEHICLE_SNDS];
 #endif
     float engineSndSpeed;
 };

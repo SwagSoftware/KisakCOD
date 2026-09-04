@@ -296,7 +296,7 @@ void __cdecl InitInfos(int32_t restarting)
         for (vehIndex = 0; vehIndex < s_numVehicleInfos; ++vehIndex)
         {
             vehInfo = &s_vehicleInfos[vehIndex];
-            for (sndIndex = 0; sndIndex < 6; ++sndIndex)
+            for (sndIndex = 0; sndIndex < NUM_VEHICLE_SNDS; ++sndIndex)
             {
                 if (vehInfo->sndIndices[sndIndex])
                     vehInfo->sndIndices[sndIndex] = G_SoundAliasIndex(vehInfo->sndNames[sndIndex]);
