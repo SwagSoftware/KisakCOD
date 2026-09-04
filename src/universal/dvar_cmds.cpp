@@ -73,7 +73,7 @@ bool __cdecl Dvar_ToggleInternal()
                 for (argIndex = 2; argIndex + 1 < Cmd_Argc(); ++argIndex)
                 {
                     argString = Cmd_Argv(argIndex);
-                    if (dvar->type == 6)
+                    if (dvar->type == DVAR_TYPE_ENUM)
                     {
                         enumString = Dvar_IndexStringToEnumString(dvar, argString);
                         if (strlen(enumString))
@@ -87,7 +87,7 @@ bool __cdecl Dvar_ToggleInternal()
                     }
                 }
                 argStringa = (char *)Cmd_Argv(2);
-                if (dvar->type == 6)
+                if (dvar->type == DVAR_TYPE_ENUM)
                 {
                     enumStringa = Dvar_IndexStringToEnumString(dvar, argStringa);
                     if (strlen(enumStringa))
@@ -551,11 +551,11 @@ void __cdecl Dvar_RegisterBool_f()
         v1 = Cmd_Argv(2);
         value = atoi(v1) != 0;
         dvar = Dvar_FindVar(dvarName);
-        if (!dvar || dvar->type == 7 && (dvar->flags & 0x4000) != 0)
+        if (!dvar || dvar->type == DVAR_TYPE_STRING && (dvar->flags & 0x4000) != 0)
         {
             Dvar_RegisterBool(dvarName, value, DVAR_EXTERNAL, "External Dvar");
         }
-        else if (dvar->type)
+        else if (dvar->type != DVAR_TYPE_BOOL)
         {
             Com_Printf(0, "dvar '%s' is not a boolean dvar\n", dvar->name);
         }
@@ -591,14 +591,14 @@ void __cdecl Dvar_RegisterInt_f()
         if (min <= max)
         {
             dvar = Dvar_FindVar(dvarName);
-            if (!dvar || dvar->type == 7 && (dvar->flags & 0x4000) != 0)
+            if (!dvar || dvar->type == DVAR_TYPE_STRING && (dvar->flags & 0x4000) != 0)
             {
                 DvarLimits dLimits;
                 dLimits.integer.max = max;
                 dLimits.integer.min = min;
                 Dvar_RegisterInt(dvarName, value, dLimits, DVAR_EXTERNAL, "External Dvar");
             }
-            else if (dvar->type != 5 && dvar->type != 6)
+            else if (dvar->type != DVAR_TYPE_INT && dvar->type != DVAR_TYPE_ENUM)
             {
                 Com_Printf(0, "dvar '%s' is not an integer dvar\n", dvar->name);
             }
@@ -640,13 +640,13 @@ void __cdecl Dvar_RegisterFloat_f()
         if (max >= (double)min)
         {
             dvar = Dvar_FindVar(dvarName);
-            if (!dvar || dvar->type == 7 && (dvar->flags & 0x4000) != 0)
+            if (!dvar || dvar->type == DVAR_TYPE_STRING && (dvar->flags & 0x4000) != 0)
             {
                 v4.value.max = max;
                 v4.value.min = min;
                 Dvar_RegisterFloat(dvarName, value, v4, DVAR_EXTERNAL, "External Dvar");
             }
-            else if (dvar->type != 1)
+            else if (dvar->type != DVAR_TYPE_FLOAT)
             {
                 Com_Printf(0, "dvar '%s' is not an integer dvar\n", dvar->name);
             }

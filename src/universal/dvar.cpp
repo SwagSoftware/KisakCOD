@@ -310,7 +310,7 @@ const char *__cdecl Dvar_EnumToString(const dvar_s *dvar)
         MyAssertHandler(".\\universal\\dvar.cpp", 278, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 279, 0, "%s", "dvar->name");
-    if (dvar->type != 6)
+    if (dvar->type != DVAR_TYPE_ENUM)
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             280,
@@ -353,7 +353,7 @@ const char *__cdecl Dvar_IndexStringToEnumString(const dvar_s *dvar, const char 
         MyAssertHandler(".\\universal\\dvar.cpp", 296, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 297, 0, "%s", "dvar->name");
-    if (dvar->type != 6)
+    if (dvar->type != DVAR_TYPE_ENUM)
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             298,
@@ -863,7 +863,7 @@ void __cdecl Dvar_UpdateEnumDomain(dvar_s *dvar, const char **stringTable)
         MyAssertHandler(".\\universal\\dvar.cpp", 1118, 0, "%s", "dvar->name");
     if (!stringTable)
         MyAssertHandler(".\\universal\\dvar.cpp", 1119, 0, "%s\n\t(dvar->name) = %s", "(stringTable)", dvar->name);
-    if (dvar->type != 6)
+    if (dvar->type != DVAR_TYPE_ENUM)
     {
         v2 = va("dvar %s type %i", dvar->name, dvar->type);
         MyAssertHandler(".\\universal\\dvar.cpp", 1120, 0, "%s\n\t%s", "dvar->type == DVAR_TYPE_ENUM", v2);
@@ -993,7 +993,7 @@ bool __cdecl Dvar_GetBool(const char *dvarName)
     dvar = Dvar_FindVar(dvarName);
     if (!dvar)
         return 0;
-    if (dvar->type && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_BOOL && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1143,
@@ -1001,7 +1001,7 @@ bool __cdecl Dvar_GetBool(const char *dvarName)
             "%s\n\t(dvar->type) = %i",
             "(dvar->type == DVAR_TYPE_bool || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->type);
-    if (dvar->type)
+    if (dvar->type != DVAR_TYPE_BOOL)
         return Dvar_StringToBool(dvar->current.string);
     else
         return dvar->current.enabled;
@@ -1021,7 +1021,7 @@ int __cdecl Dvar_GetInt(const char *dvarName)
     dvar = Dvar_FindVar(dvarName);
     if (!dvar)
         return 0;
-    if (dvar->type != 5 && dvar->type != 6 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_INT && dvar->type != DVAR_TYPE_ENUM && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1159,
@@ -1029,7 +1029,7 @@ int __cdecl Dvar_GetInt(const char *dvarName)
             "%s\n\t(dvar->type) = %i",
             "(dvar->type == DVAR_TYPE_INT || dvar->type == DVAR_TYPE_ENUM || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->type);
-    if (dvar->type == 5 || dvar->type == 6)
+    if (dvar->type == DVAR_TYPE_INT || dvar->type == DVAR_TYPE_ENUM)
         return dvar->current.integer;
     else
         return Dvar_StringToInt(dvar->current.string);
@@ -1049,7 +1049,7 @@ double __cdecl Dvar_GetFloat(const char *dvarName)
     dvar = Dvar_FindVar(dvarName);
     if (!dvar)
         return 0.0;
-    if (dvar->type != 1 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_FLOAT && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1175,
@@ -1057,7 +1057,7 @@ double __cdecl Dvar_GetFloat(const char *dvarName)
             "%s\n\t(dvar->type) = %i",
             "(dvar->type == DVAR_TYPE_FLOAT || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->type);
-    if (dvar->type == 1)
+    if (dvar->type == DVAR_TYPE_FLOAT)
         return dvar->current.value;
     else
         return Dvar_StringToFloat(dvar->current.string);
@@ -1077,7 +1077,7 @@ const char *__cdecl Dvar_GetString(const char *dvarName)
     dvar = Dvar_FindVar(dvarName);
     if (!dvar)
         return "";
-    if (dvar->type != 7 && dvar->type != 6)
+    if (dvar->type != DVAR_TYPE_STRING && dvar->type != DVAR_TYPE_ENUM)
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1207,
@@ -1085,7 +1085,7 @@ const char *__cdecl Dvar_GetString(const char *dvarName)
             "%s\n\t(dvar->type) = %i",
             "(dvar->type == DVAR_TYPE_STRING || dvar->type == DVAR_TYPE_ENUM)",
             dvar->type);
-    if (dvar->type == 6)
+    if (dvar->type == DVAR_TYPE_ENUM)
         return Dvar_EnumToString(dvar);
     else
         return dvar->current.string;
@@ -1108,7 +1108,7 @@ void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor)
 
     if (!dvar)
         MyAssertHandler(".\\universal\\dvar.cpp", 1230, 0, "%s", "dvar");
-    if (dvar->type != 8 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_COLOR && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1231,
@@ -1116,7 +1116,7 @@ void __cdecl Dvar_GetUnpackedColor(const dvar_s *dvar, float *expandedColor)
             "%s\n\t(dvar->type) = %i",
             "(dvar->type == DVAR_TYPE_COLOR || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->type);
-    if (dvar->type == 8)
+    if (dvar->type == DVAR_TYPE_COLOR)
         *(uint32_t *)color = dvar->current.integer;
     else
         Dvar_StringToColor(dvar->current.string, color);
@@ -1170,7 +1170,7 @@ void __cdecl Dvar_Shutdown()
     for (dvarIter = 0; dvarIter < dvarCount; ++dvarIter)
     {
         dvar = &dvarPool[dvarIter];
-        if (dvar->type == 7)
+        if (dvar->type == DVAR_TYPE_STRING)
         {
             if (Dvar_ShouldFreeCurrentString(dvar))
                 Dvar_FreeString(&dvar->current);
@@ -1344,7 +1344,7 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
         v5 = Dvar_ValueToString(dvar, value);
         Com_Printf(16, "'%s' is not a valid value for dvar '%s'\n", v5, name);
         Dvar_PrintDomain(dvar->type, dvar->domain);
-        if (dvar->type == 6)
+        if (dvar->type == DVAR_TYPE_ENUM)
         {
             if (!Dvar_ValueInDomain(dvar->type, dvar->reset, dvar->domain))
                 MyAssertHandler(
@@ -1653,7 +1653,7 @@ void __cdecl Dvar_PerformUnregistration(dvar_s *dvar)
         dvar->flags |= 0x4000u;
         dvar->name = Dvar_AllocNameString(dvar->name);
     }
-    if (dvar->type != 7)
+    if (dvar->type != DVAR_TYPE_STRING)
     {
         v1 = Dvar_DisplayableLatchedValue(dvar);
         Dvar_CopyString(v1, &dvar->current);
@@ -1667,7 +1667,7 @@ void __cdecl Dvar_PerformUnregistration(dvar_s *dvar)
         v2 = Dvar_DisplayableResetValue(dvar);
         Dvar_AssignResetStringValue(dvar, &resetString, v2);
         dvar->reset.integer = resetString.integer;
-        dvar->type = 7;
+        dvar->type = DVAR_TYPE_STRING;
     }
 }
 
@@ -1729,7 +1729,7 @@ void __cdecl Dvar_Reregister(
         Dvar_ReinterpretDvar(dvar, dvarName, type, flags, resetValue, domain);
     if ((dvar->flags & 0x4000) != 0 && dvar->type != type)
     {
-        if (dvar->type != 7)
+        if (dvar->type != DVAR_TYPE_STRING)
         {
             v8 = va("dvar %s, type %i", dvar->name, dvar->type);
             MyAssertHandler(".\\universal\\dvar.cpp", 1556, 0, "%s\n\t%s", "dvar->type == DVAR_TYPE_STRING", v8);
@@ -1804,7 +1804,7 @@ void __cdecl Dvar_MakeExplicitType(
     bool wasString; // [esp+47h] [ebp-15h]
     DvarValue castValue; // [esp+48h] [ebp-14h]
 
-    if (dvar->type != 7)
+    if (dvar->type != DVAR_TYPE_STRING)
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1445,
@@ -1825,11 +1825,11 @@ void __cdecl Dvar_MakeExplicitType(
         v8 = *Dvar_ClampValueToDomain(&v7, type, v10, resetValue, domain);
         castValue = v8;
     }
-    v6 = dvar->type == 7 && castValue.integer;
+    v6 = dvar->type == DVAR_TYPE_STRING && castValue.integer;
     wasString = v6;
     if (v6)
         castValue.integer = (int)CopyString((char *)castValue.integer);
-    if (dvar->type != 7 && Dvar_ShouldFreeCurrentString(dvar))
+    if (dvar->type != DVAR_TYPE_STRING && Dvar_ShouldFreeCurrentString(dvar))
         Dvar_FreeString(&dvar->current);
     dvar->current.integer = 0;
     if (Dvar_ShouldFreeLatchedString(dvar))
@@ -2306,7 +2306,7 @@ void __cdecl Dvar_SetBoolFromSource(dvar_s *dvar, bool value, DvarSetSource sour
         MyAssertHandler(".\\universal\\dvar.cpp", 1798, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 1799, 0, "%s", "dvar->name");
-    if (dvar->type && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_BOOL && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1800,
@@ -2314,7 +2314,7 @@ void __cdecl Dvar_SetBoolFromSource(dvar_s *dvar, bool value, DvarSetSource sour
             "%s\n\t(dvar->name) = %s",
             "(dvar->type == DVAR_TYPE_bool || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
-    if (dvar->type)
+    if (dvar->type != DVAR_TYPE_BOOL)
     {
         if (value)
             v3 = "1";
@@ -2338,7 +2338,7 @@ void __cdecl Dvar_SetIntFromSource(dvar_s *dvar, int value, DvarSetSource source
         MyAssertHandler(".\\universal\\dvar.cpp", 1816, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 1817, 0, "%s", "dvar->name");
-    if (dvar->type != 5 && dvar->type != 6 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_INT && dvar->type != DVAR_TYPE_ENUM && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1818,
@@ -2346,7 +2346,7 @@ void __cdecl Dvar_SetIntFromSource(dvar_s *dvar, int value, DvarSetSource source
             "%s\n\t(dvar->name) = %s",
             "(dvar->type == DVAR_TYPE_INT || dvar->type == DVAR_TYPE_ENUM || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
-    if (dvar->type == 5 || dvar->type == 6)
+    if (dvar->type == DVAR_TYPE_INT || dvar->type == DVAR_TYPE_ENUM)
     {
         newValue.integer = value;
     }
@@ -2367,7 +2367,7 @@ void __cdecl Dvar_SetFloatFromSource(dvar_s *dvar, float value, DvarSetSource so
         MyAssertHandler(".\\universal\\dvar.cpp", 1839, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 1840, 0, "%s", "dvar->name");
-    if (dvar->type != 1 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_FLOAT && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1841,
@@ -2375,7 +2375,7 @@ void __cdecl Dvar_SetFloatFromSource(dvar_s *dvar, float value, DvarSetSource so
             "%s\n\t(dvar->name) = %s",
             "(dvar->type == DVAR_TYPE_FLOAT || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
-    if (dvar->type == 1)
+    if (dvar->type == DVAR_TYPE_FLOAT)
     {
         newValue.value = value;
     }
@@ -2396,7 +2396,7 @@ void __cdecl Dvar_SetVec2FromSource(dvar_s *dvar, float x, float y, DvarSetSourc
         MyAssertHandler(".\\universal\\dvar.cpp", 1862, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 1863, 0, "%s", "dvar->name");
-    if (dvar->type != 4 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_FLOAT_4 && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1864,
@@ -2404,7 +2404,7 @@ void __cdecl Dvar_SetVec2FromSource(dvar_s *dvar, float x, float y, DvarSetSourc
             "%s\n\t(dvar->name) = %s",
             "(dvar->type == DVAR_TYPE_FLOAT_4 || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
-    if (dvar->type == 4)
+    if (dvar->type == DVAR_TYPE_FLOAT_4)
     {
         newValue.value = x;
         newValue.vector[1] = y;
@@ -2426,7 +2426,7 @@ void __cdecl Dvar_SetVec3FromSource(dvar_s *dvar, float x, float y, float z, Dva
         MyAssertHandler(".\\universal\\dvar.cpp", 1885, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 1886, 0, "%s", "dvar->name");
-    if (dvar->type != 3 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_FLOAT_3 && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1887,
@@ -2434,7 +2434,7 @@ void __cdecl Dvar_SetVec3FromSource(dvar_s *dvar, float x, float y, float z, Dva
             "%s\n\t(dvar->name) = %s",
             "(dvar->type == DVAR_TYPE_FLOAT_3 || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
-    if (dvar->type == 3)
+    if (dvar->type == DVAR_TYPE_FLOAT_3)
     {
         newValue.value = x;
         newValue.vector[1] = y;
@@ -2457,7 +2457,7 @@ void __cdecl Dvar_SetVec4FromSource(dvar_s *dvar, float x, float y, float z, flo
         MyAssertHandler(".\\universal\\dvar.cpp", 1908, 0, "%s", "dvar");
     if (!dvar->name)
         MyAssertHandler(".\\universal\\dvar.cpp", 1909, 0, "%s", "dvar->name");
-    if (dvar->type != 4 && (dvar->type != 7 || (dvar->flags & 0x4000) == 0))
+    if (dvar->type != DVAR_TYPE_FLOAT_4 && (dvar->type != DVAR_TYPE_STRING || (dvar->flags & 0x4000) == 0))
         MyAssertHandler(
             ".\\universal\\dvar.cpp",
             1910,
@@ -2465,7 +2465,7 @@ void __cdecl Dvar_SetVec4FromSource(dvar_s *dvar, float x, float y, float z, flo
             "%s\n\t(dvar->name) = %s",
             "(dvar->type == DVAR_TYPE_FLOAT_4 || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14))))",
             dvar->name);
-    if (dvar->type == 4)
+    if (dvar->type == DVAR_TYPE_FLOAT_4)
     {
         newValue.value = x;
         newValue.vector[1] = y;
@@ -2586,7 +2586,7 @@ void __cdecl Dvar_SetFromStringFromSource(dvar_s *dvar, char *string, DvarSetSou
     I_strncpyz(buf, string, 1024);
     v4 = *Dvar_StringToValue(&result, dvar->type, dvar->domain, buf);
     newValue = v4;
-    if (dvar->type == 6 && newValue.integer == -1337)
+    if (dvar->type == DVAR_TYPE_ENUM && newValue.integer == -1337)
     {
         Com_Printf(16, "'%s' is not a valid value for dvar '%s'\n", buf, dvar->name);
         Dvar_PrintDomain(dvar->type, dvar->domain);

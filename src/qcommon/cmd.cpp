@@ -176,7 +176,7 @@ void Cmd_Vstr_f(void) {
 	const dvar_s* dvar = Dvar_FindVar(dvarName);
 	if (dvar)
 	{
-		if (dvar->type == 7 || dvar->type == 6)
+		if (dvar->type == DVAR_TYPE_STRING || dvar->type == DVAR_TYPE_ENUM)
 		{
 			const char* v0 = va("%s\n", dvar->current.string);
 			Cbuf_InsertText(0, v0);
@@ -811,7 +811,7 @@ void __cdecl _Cmd_Vstr_f()
         dvar = Dvar_FindVar(dvarName);
         if (dvar)
         {
-            if (dvar->type == 7 || dvar->type == 6)
+            if (dvar->type == DVAR_TYPE_STRING || dvar->type == DVAR_TYPE_ENUM)
             {
                 v0 = va("%s\n", dvar->current.string);
                 Cbuf_InsertText(0, v0);
