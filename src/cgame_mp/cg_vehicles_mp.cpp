@@ -715,24 +715,24 @@ void __cdecl VehicleFXTest(int32_t localClientNum, const DObj_s *obj, centity_s 
             }
             vehFx->nextDustFx = nextDustInc + Sys_Milliseconds();
         }
-        if (cent->nextState.un1.scale != 3 && vehFx->nextSmokeFx <= (signed int)Sys_Milliseconds())
+        if (cent->nextState.un1.scale != HELICOPTER_FULLHEALTH && vehFx->nextSmokeFx <= (signed int)Sys_Milliseconds())
         {
             v6.scale = (int)cent->nextState.un1;
-            switch (v6.scale)
+            switch (static_cast<HELICOPTER_STAGES>(v6.scale))
             {
-            case 0:
+            case HELICOPTER_ONFIRE:
                 fx = cgMedia.helicopterOnFire;
                 tag = scr_const.tag_engine_left;
                 DObjGetBoneIndex(obj, scr_const.tag_engine_left, &vehFx->tag_engine_left);
                 boneIndex = vehFx->tag_engine_left;
                 goto LABEL_59;
-            case 1:
+            case HELICOPTER_HEAVYSMOKE:
                 fx = cgMedia.helicopterHeavySmoke;
                 tag = scr_const.tag_engine_left;
                 DObjGetBoneIndex(obj, scr_const.tag_engine_left, &vehFx->tag_engine_left);
                 boneIndex = vehFx->tag_engine_left;
                 goto LABEL_59;
-            case 2:
+            case HELICOPTER_SMOKING:
                 fx = cgMedia.helicopterLightSmoke;
                 tag = scr_const.tag_engine_right;
                 DObjGetBoneIndex(obj, scr_const.tag_engine_right, &vehFx->tag_engine_right);
