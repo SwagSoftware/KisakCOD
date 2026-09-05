@@ -141,7 +141,7 @@ double __cdecl MSG_ReadOriginFloat(int bits, msg_t *msg, float oldValue);
 double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue);
 int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, uint32_t number);
 int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, uint32_t number);
-int __cdecl MSG_ReadLastChangedField(msg_t *msg, int totalFields);
+uint MSG_ReadLastChangedField(msg_t *msg, int totalFields);
 int __cdecl MSG_ReadDeltaArchivedEntity(
     msg_t *msg,
     int time,

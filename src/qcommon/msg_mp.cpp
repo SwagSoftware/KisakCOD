@@ -1378,19 +1378,12 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
     }
 }
 
-int __cdecl MSG_ReadLastChangedField(msg_t *msg, int totalFields)
+uint MSG_ReadLastChangedField(msg_t *msg, int totalFields)
 {
-    const char *v2; // eax
-    int lastChanged; // [esp+0h] [ebp-8h]
-    uint32_t idealBits; // [esp+4h] [ebp-4h]
+    uint idealBits = GetMinBitCountForNum(totalFields);
+    int lastChanged = MSG_ReadBits(msg, idealBits);
 
-    idealBits = GetMinBitCountForNum(totalFields);
-    lastChanged = MSG_ReadBits(msg, idealBits);
-    if (lastChanged > totalFields)
-    {
-        v2 = va("lastChanged was %i, totalFields is %i\n", lastChanged, totalFields);
-        MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1321, 0, "%s\n\t%s", "lastChanged <= totalFields", v2);
-    }
+    vassert(lastChanged <= totalFields, "lastChanged was %i, totalFields is %i\n", lastChanged, totalFields);
     return lastChanged;
 }
 
@@ -1617,16 +1610,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     playerState_s *to,
     bool predictedFieldsIgnoreXor)
 {
-    int Short; // eax
-    int v7; // eax
-    uint8_t Byte; // al
-    clientActive_t *LocalClientGlobals; // [esp+1Ch] [ebp-2F9Ch]
-    int i; // [esp+20h] [ebp-2F98h]
-    int k; // [esp+20h] [ebp-2F98h]
-    int print; // [esp+24h] [ebp-2F94h]
-    int LastChangedField; // [esp+30h] [ebp-2F88h]
-    int Bits; // [esp+2FA8h] [ebp-10h]
-    bool lc; // [esp+2FB3h] [ebp-5h]
+    int print;
 
     uint8_t dst[sizeof(playerState_s) + 8]; // [esp+38h] [ebp-2F80h] BYREF
 
@@ -1649,11 +1633,11 @@ void __cdecl MSG_ReadDeltaPlayerstate(
         print = 0;
     }
 
-    lc = MSG_ReadBit(msg) > 0;
+    bool lc = MSG_ReadBit(msg) > 0;
 
     {
-        const uint32_t LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
-        if (LastChangedField > static_cast<uint32_t>(numPlayerStateFields))
+        const uint32_t lastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
+        if (lastChangedField > static_cast<uint32_t>(numPlayerStateFields))
         {
             msg->overflowed = 1;
             return;
@@ -1661,7 +1645,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
 
         iassert(!msg->overflowed);
 
-        for (uint32_t i = 0; i < LastChangedField; ++i)
+        for (uint32_t i = 0; i < lastChangedField; ++i)
         {
             const NetField *field = &playerStateFields[i];
 
@@ -1690,10 +1674,8 @@ void __cdecl MSG_ReadDeltaPlayerstate(
 
     if (!lc)
     {
-        LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
-
         if (!CL_GetPredictedOriginForServerTime(
-            LocalClientGlobals,
+            CL_GetLocalClientGlobals(localClientNum),
             to->commandTime,
             to->origin,
             to->velocity,
@@ -1722,7 +1704,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         if (cl_shownet && cl_shownet->current.integer == 4)
             Com_Printf(16, "%s ", "PS_STATS");
-        Bits = MSG_ReadBits(msg, MAX_STATS);
+        int Bits = MSG_ReadBits(msg, MAX_STATS);
         if ((Bits & (1 << STAT_HEALTH)) != 0)
             to->stats[STAT_HEALTH] = MSG_ReadShort(msg);
         if ((Bits & (1 << STAT_DEAD_YAW)) != 0)
@@ -1737,38 +1719,36 @@ void __cdecl MSG_ReadDeltaPlayerstate(
 
     if (MSG_ReadBit(msg))
     {
-        for (i = 0; i < 4; ++i)
+        for (int i = 0; i < 4; ++i)
         {
             if (MSG_ReadBit(msg))
             {
                 if (cl_shownet && cl_shownet->current.integer == 4)
                     Com_Printf(16, "%s ", "PS_AMMO");
-                Bits = MSG_ReadShort(msg);
+                int Bits = MSG_ReadShort(msg);
                 for (int j = 0; j < 16; ++j)
                 {
                     if ((Bits & (1 << j)) != 0)
                     {
-                        Short = MSG_ReadShort(msg);
-                        to->ammo[16 * i + j] = Short;
+                        to->ammo[16 * i + j] = MSG_ReadShort(msg);
                     }
                 }
             }
         }
     }
 
-    for (k = 0; k < 8; ++k)
+    for (int k = 0; k < 8; ++k)
     {
         if (MSG_ReadBit(msg))
         {
             if (cl_shownet && cl_shownet->current.integer == 4)
                 Com_Printf(16, "%s ", "PS_AMMOCLIP");
-            Bits = MSG_ReadShort(msg);
+            int Bits = MSG_ReadShort(msg);
             for (int j = 0; j < 16; ++j)
             {
                 if ((Bits & (1 << j)) != 0)
                 {
-                    v7 = MSG_ReadShort(msg);
-                    to->ammoclip[16 * k + j] = v7;
+                    to->ammoclip[16 * k + j] = MSG_ReadShort(msg);
                 }
             }
         }
@@ -1799,8 +1779,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     {
         for (int j = 0; j < 128; ++j)
         {
-            Byte = MSG_ReadByte(msg);
-            to->weaponmodels[j] = Byte;
+            to->weaponmodels[j] = MSG_ReadByte(msg);
         }
     }
 }
