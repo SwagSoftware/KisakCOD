@@ -1032,7 +1032,7 @@ void __cdecl GetDvarStringValue(Operand *source, Operand *result)
         dvar = Dvar_FindVar(source->internals.string);
         if (dvar)
         {
-            if (dvar->type == 7)
+            if (dvar->type == DVAR_TYPE_STRING)
                 VariantString = CopyDvarString(dvar->current.string);
             else
                 VariantString = (char *)Dvar_GetVariantString(source->internals.string);

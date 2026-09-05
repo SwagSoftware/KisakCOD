@@ -5601,7 +5601,7 @@ void __cdecl Item_TextField_Paint(UiContext *dc, itemDef_s *item)
             if (item->type == 17)
             {
                 dvar = Dvar_FindVar(item->dvar);
-                if (dvar && dvar->type == 1)
+                if (dvar && dvar->type == DVAR_TYPE_FLOAT)
                     Com_LocalizedFloatToString(dvar->current.value, buff, 0x400u, 2u);
             }
             else

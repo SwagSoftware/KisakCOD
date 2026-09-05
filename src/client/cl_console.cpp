@@ -2666,7 +2666,7 @@ void __cdecl ConDrawInput_DetailedDvarMatch(char *str)
         ConDrawInput_Text(dvarInfo, con_inputDvarInfoColor);
         conDrawInputGlob.y = conDrawInputGlob.y + conDrawInputGlob.fontHeight;
         conDrawInputGlob.x = conDrawInputGlob.leftX;
-        if (dvar->type == 6 && Cmd_Argc() == 2)
+        if (dvar->type == DVAR_TYPE_ENUM && Cmd_Argc() == 2)
             ConDrawInput_AutoCompleteArg(dvar->domain.enumeration.strings, dvar->domain.enumeration.stringCount);
     }
 }

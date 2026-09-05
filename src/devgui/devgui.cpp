@@ -838,7 +838,7 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
     rowCount = DevGui_DvarRowCount(dvar);
     width = rowWidth + 8;
     height = rowHeight * (rowCount + 2) + 2 * rowCount + 14;
-    if (dvar->type == 8)
+    if (dvar->type == DVAR_TYPE_COLOR)
         height += rowHeight + 2;
     xa = devguiGlob.left + (devguiGlob.right - devguiGlob.left - width) / 2;
     x_4a = devguiGlob.bottom - height;
@@ -852,7 +852,7 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
     x = xa + 4;
     x_4 = x_4a + 6;
     DevGui_DrawSliderPath(x, x_4);
-    if (dvar->type == 8)
+    if (dvar->type == DVAR_TYPE_COLOR)
     {
         x_4 += rowHeight + 2;
         DevGui_DrawBox(x, x_4, rowWidth, rowHeight, (const uint8_t *)&dvar->latched);
@@ -867,7 +867,7 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
             DevGui_DrawSingleSlider(x, x_4, rowWidth, rowHeight, fractiona, (const uint8_t *)p_current);
         }
     }
-    else if (dvar->type == 2 || dvar->type == 3 || dvar->type == 4)
+    else if (dvar->type == DVAR_TYPE_FLOAT_2 || dvar->type == DVAR_TYPE_FLOAT_3 || dvar->type == DVAR_TYPE_FLOAT_4)
     {
         for (rowa = 0; rowa < rowCount; ++rowa)
         {
@@ -884,7 +884,7 @@ void __cdecl DevGui_DrawSliders(const DevMenuItem *menu)
     else
     {
         x_4 += rowHeight + 2;
-        if (dvar->type)
+        if (dvar->type != DVAR_TYPE_BOOL)
         {
             switch (dvar->type)
             {
@@ -992,9 +992,9 @@ void __cdecl DevGui_DrawDvarValue(int32_t x, int32_t y, const dvar_s *dvar)
     const char *v4; // [esp+0h] [ebp-8h]
     char *text; // [esp+4h] [ebp-4h]
 
-    if (dvar->type)
+    if (dvar->type != DVAR_TYPE_BOOL)
     {
-        if (dvar->type == 6)
+        if (dvar->type == DVAR_TYPE_ENUM)
         {
             v3 = Dvar_DisplayableLatchedValue(dvar);
             text = va("%i: %s", dvar->latched.integer, v3);

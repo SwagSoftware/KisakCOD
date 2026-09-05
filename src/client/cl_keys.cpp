@@ -994,7 +994,7 @@ void CompleteDvarArgument()
     dvar = Dvar_FindVar(dvarName);
     if (!dvar)
         MyAssertHandler(".\\client\\cl_keys.cpp", 898, 0, "%s", "dvar");
-    if (dvar->type == 6)
+    if (dvar->type == DVAR_TYPE_ENUM)
     {
         dvarValuePrefix = Cmd_Argv(1);
         if (*dvarValuePrefix)
