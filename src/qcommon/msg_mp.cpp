@@ -1652,18 +1652,18 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     lc = MSG_ReadBit(msg) > 0;
 
     {
-        const int LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
-        if (static_cast<uint32_t>(LastChangedField) > static_cast<uint32_t>(numPlayerStateFields))
+        const uint32_t LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
+        if (LastChangedField > static_cast<uint32_t>(numPlayerStateFields))
         {
             msg->overflowed = 1;
             return;
         }
 
-        int itr = 0;
-        NetField *field = (NetField *)playerStateFields;
-        while (itr < LastChangedField)
+        iassert(!msg->overflowed);
+
+        for (uint32_t i = 0; i < LastChangedField; ++i)
         {
-            iassert(!msg->overflowed);
+            const NetField *field = &playerStateFields[i];
 
             if (predictedFieldsIgnoreXor && lc && field->changeHints == 3)
                 MSG_ReadDeltaField(msg, time, (const char *)from, (char *)to, field, print, 1);
@@ -1671,8 +1671,6 @@ void __cdecl MSG_ReadDeltaPlayerstate(
                 MSG_ReadDeltaField(msg, time, (const char *)from, (char *)to, field, print, 0);
 
             iassert(!msg->overflowed);
-            ++itr;
-            ++field;
         }
     }
 
