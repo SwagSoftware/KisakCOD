@@ -1650,9 +1650,15 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     }
 
     lc = MSG_ReadBit(msg) > 0;
-    LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
 
     {
+        const int LastChangedField = MSG_ReadLastChangedField(msg, numPlayerStateFields);
+        if (static_cast<uint32_t>(LastChangedField) > static_cast<uint32_t>(numPlayerStateFields))
+        {
+            msg->overflowed = 1;
+            return;
+        }
+
         int itr = 0;
         NetField *field = (NetField *)playerStateFields;
         while (itr < LastChangedField)
