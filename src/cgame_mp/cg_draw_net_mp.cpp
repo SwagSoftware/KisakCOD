@@ -942,7 +942,7 @@ void __cdecl CG_DrawDisconnect(int32_t localClientNum)
             UI_DrawText(scrPlace, s, 0x7FFFFFFF, font, x, 100.0, 0, 0, 0.5, colorWhite, 3);
             if (((cgameGlob->time >> 9) & 1) == 0)
             {
-                disconnectMaterial = Material_RegisterHandle("net_disconnect", 7);
+                disconnectMaterial = Material_RegisterHandle("net_disconnect", IMAGE_TRACK_HUD);
                 UI_DrawHandlePic(scrPlace, 296.0, 320.0, 48.0, 48.0, 0, 0, 0, disconnectMaterial);
             }
         }

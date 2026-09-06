@@ -340,10 +340,10 @@ static void ShadVol_Init()
     s_silhouetteSign = -1;                                 // shadVol_silhouetteFacing = -1
     if ( !mat_stencilshadow )
         mat_stencilshadow = rgp.stencilShadowMaterial;     // "stencilshadow" builtin
-    if ( !mat_white_multiply )                             // IDB: Material_RegisterHandle("white_multiply",0)
+    if ( !mat_white_multiply )                             // IDB: Material_RegisterHandle("white_multiply",IMAGE_TRACK_MISC)
     {
         extern Material *__cdecl Material_RegisterHandle( const char *name, int imageTrack );
-        mat_white_multiply = Material_RegisterHandle( "white_multiply", 0 );
+        mat_white_multiply = Material_RegisterHandle( "white_multiply", IMAGE_TRACK_MISC );
     }
     memset( s_vertHashIdx, 0xFF, sizeof(s_vertHashIdx) );  // all slots empty
     for ( int i = 0; i < SHADVOL_EDGE_HASH_SIZE; ++i )
@@ -358,7 +358,7 @@ Material *Radiant_GetWhiteMultiplyMaterial()
     if ( !mat_white_multiply )
     {
         extern Material *__cdecl Material_RegisterHandle( const char *name, int imageTrack );
-        mat_white_multiply = Material_RegisterHandle( "white_multiply", 0 );
+        mat_white_multiply = Material_RegisterHandle( "white_multiply", IMAGE_TRACK_MISC );
     }
     return mat_white_multiply;
 }

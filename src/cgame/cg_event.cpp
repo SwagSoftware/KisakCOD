@@ -1008,7 +1008,7 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
     {
         mod = ent->eventParm & 0xFFFFFF7F;
         weapDef = 0;
-        iconShader = Material_RegisterHandle("killicondied", 7);
+        iconShader = Material_RegisterHandle("killicondied", IMAGE_TRACK_HUD);
     }
     else
     {
@@ -1045,37 +1045,37 @@ void __cdecl CG_Obituary(int32_t localClientNum, const entityState_s *ent)
         }
         else
         {
-            iconShader = Material_RegisterHandle("killicondied", 7);
+            iconShader = Material_RegisterHandle("killicondied", IMAGE_TRACK_HUD);
         }
     }
     switch (mod)
     {
     case 7u:
-        iconShader = Material_RegisterHandle("killiconmelee", 7);
+        iconShader = Material_RegisterHandle("killiconmelee", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     case 8u:
-        iconShader = Material_RegisterHandle("killiconheadshot", 7);
+        iconShader = Material_RegisterHandle("killiconheadshot", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     case 9u:
-        iconShader = Material_RegisterHandle("killiconcrush", 7);
+        iconShader = Material_RegisterHandle("killiconcrush", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     case 0xBu:
-        iconShader = Material_RegisterHandle("killiconfalling", 7);
+        iconShader = Material_RegisterHandle("killiconfalling", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     case 0xCu:
-        iconShader = Material_RegisterHandle("killiconsuicide", 7);
+        iconShader = Material_RegisterHandle("killiconsuicide", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     case 0xDu:
-        iconShader = Material_RegisterHandle("killicondied", 7);
+        iconShader = Material_RegisterHandle("killicondied", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     case 0xFu:
-        iconShader = Material_RegisterHandle("killiconimpact", 7);
+        iconShader = Material_RegisterHandle("killiconimpact", IMAGE_TRACK_HUD);
         iconWidth = baseIconSize;
         break;
     default:

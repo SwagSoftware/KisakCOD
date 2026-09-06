@@ -209,6 +209,21 @@ union GfxTexture // sizeof=0x4
     GfxImageLoadDef* loadDef;
 };
 
+enum $F18C17676CCABCF3A7521CF0683F7501 : __int32
+{
+    IMAGE_TRACK_MISC = 0x0,
+    IMAGE_TRACK_DEBUG = 0x1,
+    IMAGE_TRACK_TEXTURENAME = 0x2,
+    IMAGE_TRACK_UI = 0x3,
+    IMAGE_TRACK_LIGHTMAP = 0x4,
+    IMAGE_TRACK_LIGHT = 0x5,
+    IMAGE_TRACK_FX = 0x6,
+    IMAGE_TRACK_HUD = 0x7,
+    IMAGE_TRACK_MODEL = 0x8,
+    IMAGE_TRACK_WORLD = 0x9,
+    IMAGE_TRACK_COUNT = 0xA,
+};
+
 struct GfxImage // sizeof=0x24
 {                                       // ...
     MapType mapType;                    // ...

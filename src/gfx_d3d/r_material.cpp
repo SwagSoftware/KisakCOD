@@ -881,7 +881,7 @@ void __cdecl Material_Init()
         Material_PreLoadAllShaderText();
     }
     Material_LoadBuiltIn(s_builtInMaterials, 50);
-    Material_Register("statmon_warning_tris", 1);
+    Material_Register("statmon_warning_tris", IMAGE_TRACK_DEBUG);
 }
 
 void __cdecl Material_Shutdown()
@@ -899,7 +899,7 @@ void __cdecl Material_LoadBuiltIn(const BuiltInMaterialTable *mtlTable, int mtlT
     for (builtInMtlIndex = 0; builtInMtlIndex < mtlTableCount; ++builtInMtlIndex)
     {
         iassert(!*mtlTable[builtInMtlIndex].material);
-        *mtlTable[builtInMtlIndex].material = Material_Register((char *)mtlTable[builtInMtlIndex].name, 0);
+        *mtlTable[builtInMtlIndex].material = Material_Register((char *)mtlTable[builtInMtlIndex].name, IMAGE_TRACK_MISC);
         if (!*mtlTable[builtInMtlIndex].material)
             Com_Error(ERR_FATAL, "Could not find material '%s'", mtlTable[builtInMtlIndex].name);
     }

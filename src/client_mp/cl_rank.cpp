@@ -77,7 +77,7 @@ void __cdecl CL_GetRankIcon(int rank, int prestige, Material **handle)
 
   Com_sprintf(id, 4u, "%i", rank);
   rankIconName = StringTable_Lookup(table, 0, id, prestige + 1);
-  *handle = Material_RegisterHandle((char *)rankIconName, 7);
+  *handle = Material_RegisterHandle((char *)rankIconName, IMAGE_TRACK_HUD);
   if ( Material_IsDefault(*handle) )
     *handle = 0;
 }

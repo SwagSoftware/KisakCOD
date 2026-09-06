@@ -241,7 +241,7 @@ static Material *Register_WorldMaterial( const char *name, RadiantMaterialInfo *
 {
     char full[256];
     Com_sprintf( full, sizeof( full ), "wc/%s", name );
-    Material *mtl = Material_RegisterHandle( full, 0 );
+    Material *mtl = Material_RegisterHandle( full, IMAGE_TRACK_MISC );
     MaterialInfo runtimeInfo;
     // IDA 0x45a7b0 never falls back to the base "<name>" material here.
     Material_GetInfo( mtl, &runtimeInfo );
@@ -256,7 +256,7 @@ static Material *Register_WorldMaterial( const char *name, RadiantMaterialInfo *
 
         char editorFull[256];
         Com_sprintf( editorFull, sizeof( editorFull ), "wc/%s", editorName );
-        Material *editorMtl = Material_RegisterHandle( editorFull, 0 );
+        Material *editorMtl = Material_RegisterHandle( editorFull, IMAGE_TRACK_MISC );
         if ( !Material_IsDefault( editorMtl ) )
         {
             mtl = editorMtl;

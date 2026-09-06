@@ -609,7 +609,7 @@ double __cdecl CG_DrawScoreboard_ListBanner(
         displayString = (char *)"";
     }
     x = CG_BackdropLeft(localClientNum) + 3.0 + 2.0 + 4.0;
-    material = Material_RegisterHandle(shaderName, 7);
+    material = Material_RegisterHandle(shaderName, IMAGE_TRACK_HUD);
     if (!Material_IsDefault(material))
     {
         v16 = CG_BackdropLeft(localClientNum) + 3.0 + 2.0 + 4.0;
@@ -703,7 +703,7 @@ double __cdecl CG_DrawClientScore(
     x = CG_BackdropLeft(localClientNum) + 3.0 + 2.0 + 4.0;
     integer = (double)cg_scoreboardItemHeight->current.integer;
     h = CG_BannerScoreboardScaleMultiplier() * integer;
-    material = Material_RegisterHandle("white", 7);
+    material = Material_RegisterHandle("white", IMAGE_TRACK_HUD);
     backColor[0] = *color;
     backColor[1] = color[1];
     backColor[2] = color[2];
@@ -776,11 +776,11 @@ double __cdecl CG_DrawClientScore(
         case LCT_TALKING_ICON:
             if (CL_IsPlayerMuted(localClientNum, score->client))
             {
-                material = Material_RegisterHandle("voice_off", 7);
+                material = Material_RegisterHandle("voice_off", IMAGE_TRACK_HUD);
             }
             else if (CL_IsPlayerTalking(localClientNum, score->client))
             {
-                material = Material_RegisterHandle("voice_on", 7);
+                material = Material_RegisterHandle("voice_on", IMAGE_TRACK_HUD);
             }
             else
             {
@@ -948,7 +948,7 @@ void __cdecl CG_DrawClientPing(int32_t localClientNum, int32_t ping, float x, fl
     float xa; // [esp+A4h] [ebp+10h]
 
     scrPlace = &scrPlaceView[localClientNum];
-    materiala = Material_RegisterHandle("white", 7);
+    materiala = Material_RegisterHandle("white", IMAGE_TRACK_HUD);
     Dvar_GetUnpackedColorByName("cg_ScoresPing_BgColor", color);
     v9 = maxWidth + 2.0;
     v8 = x + 8.0 - 1.0;
@@ -957,7 +957,7 @@ void __cdecl CG_DrawClientPing(int32_t localClientNum, int32_t ping, float x, fl
     interval = Dvar_GetInt("cg_ScoresPing_Interval");
     if (interval <= 0)
         MyAssertHandler(".\\cgame_mp\\cg_scoreboard_mp.cpp", 757, 0, "%s\n\t(interval) = %i", "(interval > 0)", interval);
-    material = Material_RegisterHandle("white", 7);
+    material = Material_RegisterHandle("white", IMAGE_TRACK_HUD);
     if (maxBars - ping / interval < 1)
         v7 = 1;
     else
@@ -1019,7 +1019,7 @@ void __cdecl CG_DrawScrollbar(int32_t localClientNum, const float *color, float 
         barColor[0] = *color;
         barColor[1] = color[1];
         barColor[2] = color[2];
-        material = Material_RegisterHandle("black", 7);
+        material = Material_RegisterHandle("black", IMAGE_TRACK_HUD);
         barColor[3] = color[3] * 0.5;
         value = cg_scoreboardWidth->current.value;
         x = CG_BackdropLeft(localClientNum)
@@ -1043,13 +1043,13 @@ void __cdecl CG_DrawScrollbar(int32_t localClientNum, const float *color, float 
             y = (double)(cgameGlob->scoresTop - 1) / (double)totalLines * h + y;
             h = (double)(cgameGlob->scoresBottom - cgameGlob->scoresTop + 1) / (double)totalLines * h;
         }
-        materiala = Material_RegisterHandle("white", 7);
+        materiala = Material_RegisterHandle("white", IMAGE_TRACK_HUD);
         barColor[3] = color[3] * 0.25;
         UI_DrawHandlePic(scrPlace, x, y, w, h, 1, 0, barColor, materiala);
         barColor[3] = color[3];
         if (cgameGlob->scoresTop > 1)
         {
-            materialb = Material_RegisterHandle("hudscoreboardscroll_uparrow", 7);
+            materialb = Material_RegisterHandle("hudscoreboardscroll_uparrow", IMAGE_TRACK_HUD);
             v5 = cg_scoreboardWidth->current.value;
             x = CG_BackdropLeft(localClientNum)
                 + 3.0
@@ -1065,7 +1065,7 @@ void __cdecl CG_DrawScrollbar(int32_t localClientNum, const float *color, float 
             w = 16.0;
             h = 16.0;
             UI_DrawHandlePic(scrPlace, x, top, 16.0, 16.0, 1, 0, barColor, materialb);
-            materialc = Material_RegisterHandle("hudscoreboardscroll_upkey", 7);
+            materialc = Material_RegisterHandle("hudscoreboardscroll_upkey", IMAGE_TRACK_HUD);
             x = x - 0.0;
             y = y + 18.0;
             w = 16.0;
@@ -1074,7 +1074,7 @@ void __cdecl CG_DrawScrollbar(int32_t localClientNum, const float *color, float 
         }
         if (cgameGlob->scoresOffBottom)
         {
-            materiald = Material_RegisterHandle("hudscoreboardscroll_downarrow", 7);
+            materiald = Material_RegisterHandle("hudscoreboardscroll_downarrow", IMAGE_TRACK_HUD);
             v4 = cg_scoreboardWidth->current.value;
             x = CG_BackdropLeft(localClientNum)
                 + 3.0
@@ -1091,7 +1091,7 @@ void __cdecl CG_DrawScrollbar(int32_t localClientNum, const float *color, float 
             w = 16.0;
             h = 16.0;
             UI_DrawHandlePic(scrPlace, x, y, 16.0, 16.0, 1, 0, barColor, materiald);
-            materiale = Material_RegisterHandle("hudscoreboardscroll_downkey", 7);
+            materiale = Material_RegisterHandle("hudscoreboardscroll_downkey", IMAGE_TRACK_HUD);
             x = x - 0.0;
             y = y - 18.0;
             w = 16.0;
@@ -1301,18 +1301,18 @@ void __cdecl CG_RegisterScoreboardDvars()
 
 void __cdecl CG_RegisterScoreboardGraphics()
 {
-    Material_RegisterHandle("white", 7);
-    Material_RegisterHandle("white", 7);
-    Material_RegisterHandle("black", 7);
-    Material_RegisterHandle("white", 7);
-    Material_RegisterHandle("white", 7);
-    Material_RegisterHandle("black", 7);
-    Material_RegisterHandle("hudscoreboardscroll_uparrow", 7);
-    Material_RegisterHandle("hudscoreboardscroll_upkey", 7);
-    Material_RegisterHandle("hudscoreboardscroll_downarrow", 7);
-    Material_RegisterHandle("hudscoreboardscroll_downkey", 7);
-    Material_RegisterHandle("voice_on", 7);
-    Material_RegisterHandle("voice_off", 7);
+    Material_RegisterHandle("white", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("white", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("black", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("white", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("white", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("black", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("hudscoreboardscroll_uparrow", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("hudscoreboardscroll_upkey", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("hudscoreboardscroll_downarrow", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("hudscoreboardscroll_downkey", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("voice_on", IMAGE_TRACK_HUD);
+    Material_RegisterHandle("voice_off", IMAGE_TRACK_HUD);
 }
 
 bool __cdecl Scoreboard_HandleInput(int32_t localClientNum, int32_t key)

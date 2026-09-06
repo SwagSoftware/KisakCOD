@@ -551,7 +551,7 @@ void __cdecl CG_DrawVehicleTargets(int localClientNum, rectDef_s *rect, float *c
 
         material = defaultMaterial;
         if (materialIndex != -1 && CG_ServerMaterialName(localClientNum, materialIndex, materialName, sizeof(materialName)))
-            material = Material_RegisterHandle(materialName, 7);
+            material = Material_RegisterHandle(materialName, IMAGE_TRACK_HUD);
 
         halfSize = vehHudTargetSize->current.value * 0.5f;
         if (clip == CLIP_NONE || target->offscreenMaterialIndex == -1)

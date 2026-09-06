@@ -61,7 +61,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int32_t localClientNum, const centity_s
                     || cent->nextState.iHeadIconTeam == iClientTeam))
             {
                 pszIcon = CL_GetConfigString(localClientNum, cent->nextState.iHeadIcon + 2266);
-                hMaterial = Material_RegisterHandle(pszIcon, 7);
+                hMaterial = Material_RegisterHandle(pszIcon, IMAGE_TRACK_HUD);
                 if (hMaterial)
                 {
                     CG_AddPlayerSpriteDrawSurf(

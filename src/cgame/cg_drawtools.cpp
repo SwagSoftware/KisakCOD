@@ -317,7 +317,7 @@ void __cdecl CG_MiniMapChanged(int32_t localClientNum)
     string = CL_GetConfigString(localClientNum, CS_MINIMAP);
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
     material = (const char*)Com_Parse(&string);
-    cgameGlob->compassMapMaterial = Material_RegisterHandle((char*)material, 7);
+    cgameGlob->compassMapMaterial = Material_RegisterHandle((char*)material, IMAGE_TRACK_HUD);
     v1 = Com_Parse(&string);
     cgameGlob->compassMapUpperLeft[0] = atof(v1->token);
     v2 = Com_Parse(&string);

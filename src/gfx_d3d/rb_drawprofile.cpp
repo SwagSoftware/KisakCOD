@@ -765,7 +765,7 @@ void __cdecl RB_DrawProfileScript()
 
 void __cdecl RB_ProfileInit()
 {
-    drawProfGlob.font = R_RegisterFont("fonts/consoleFont", 3);
+    drawProfGlob.font = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_UI);
     drawProfGlob.fontWidth = (float)R_TextWidth("#", 1, drawProfGlob.font);
     drawProfGlob.fontHeight = (float)R_TextHeight(drawProfGlob.font);
     drawProfGlob.textColor.packed = -1;

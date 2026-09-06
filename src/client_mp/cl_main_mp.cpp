@@ -2306,9 +2306,9 @@ void __cdecl CL_InitRenderer()
     ScrPlace_SetupViewport(&scrPlaceFull, 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         ScrPlace_SetupViewport(&scrPlaceView[localClientNum], 0, 0, cls.vidConfig.displayWidth, cls.vidConfig.displayHeight);
-    cls.whiteMaterial = Material_RegisterHandle("white", 3);
-    cls.consoleMaterial = Material_RegisterHandle("console", 3);
-    cls.consoleFont = R_RegisterFont("fonts/consoleFont", 3);
+    cls.whiteMaterial = Material_RegisterHandle("white", IMAGE_TRACK_UI);
+    cls.consoleMaterial = Material_RegisterHandle("console", IMAGE_TRACK_UI);
+    cls.consoleFont = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_UI);
     g_console_field_width = cls.vidConfig.displayWidth - 48;
     g_consoleField.widthInPixels = cls.vidConfig.displayWidth - 48;
     g_consoleField.charHeight = g_console_char_height;
@@ -2594,9 +2594,9 @@ void __cdecl CL_PlayLogo_f()
     cls.logo.fadeout = (int)(v5 * 1000.0f);
     cls.logo.duration += cls.logo.fadeout + cls.logo.fadein;
     v3 = va("%s1", name);
-    cls.logo.material[0] = Material_RegisterHandle(v3, 3);
+    cls.logo.material[0] = Material_RegisterHandle(v3, IMAGE_TRACK_UI);
     v4 = va("%s2", name);
-    cls.logo.material[1] = Material_RegisterHandle(v4, 3);
+    cls.logo.material[1] = Material_RegisterHandle(v4, IMAGE_TRACK_UI);
     cls.logo.startTime = cls.realtime + 100;
 }
 

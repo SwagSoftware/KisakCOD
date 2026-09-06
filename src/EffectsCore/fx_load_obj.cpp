@@ -668,7 +668,7 @@ Material *__cdecl FX_RegisterMaterial(char *material)
 {
     if (!strcmp(material, "$default"))
         material = (char*)"$default3d";
-    return Material_RegisterHandle(material, 6);
+    return Material_RegisterHandle(material, IMAGE_TRACK_FX);
 }
 
 BOOL __cdecl FX_RegisterAsset_Material(char *name, FxElemVisuals *visuals)

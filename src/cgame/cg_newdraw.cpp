@@ -809,7 +809,7 @@ Material *__cdecl CG_ObjectiveIcon(int icon, unsigned int type)
             type,
             2);
     if (icon && CG_ServerMaterialName(0, icon, v5, 0x40u))
-        return Material_RegisterHandle(v5, 7);
+        return Material_RegisterHandle(v5, IMAGE_TRACK_HUD);
     else
         return cgMedia.objectiveMaterials[type];
 }
@@ -1417,7 +1417,7 @@ void __cdecl CG_DrawSaving(int localClientNum, const rectDef_s *rect, float *col
 		return;
 
 	if (!material)
-		material = Material_RegisterHandle("saving", 3);
+		material = Material_RegisterHandle("saving", IMAGE_TRACK_UI);
 
 	UI_DrawHandlePic(&scrPlaceView[localClientNum], rect->x, rect->y, rect->w, rect->h, rect->horzAlign, rect->vertAlign, color, material);
 }
@@ -2474,7 +2474,7 @@ void __cdecl CG_DrawPlayerWeaponNameBack(
     }
 
     if (!material)
-        material = Material_RegisterHandle("$default", 3);
+        material = Material_RegisterHandle("$default", IMAGE_TRACK_UI);
 
     const cg_s *cgameGlob;
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);

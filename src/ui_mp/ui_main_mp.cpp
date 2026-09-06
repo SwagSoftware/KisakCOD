@@ -1413,7 +1413,7 @@ void __cdecl UI_ParseMenuMaterial(const char *key, char *value)
     Material *material; // [esp+0h] [ebp-4Ch]
     char name[68]; // [esp+4h] [ebp-48h] BYREF
 
-    material = Material_RegisterHandle(value, 3);
+    material = Material_RegisterHandle(value, IMAGE_TRACK_UI);
     Com_sprintf(name, 0x40u, "$%s", key);
     I_strlwr(name);
     Material_Duplicate(material, name);
@@ -1920,7 +1920,7 @@ void __cdecl UI_DrawLocalTalking(int localClientNum, const rectDef_s *rect, cons
 
     if (sv_voice->current.enabled && cl_voice->current.enabled && IN_IsTalkKeyHeld())
     {
-        material = Material_RegisterHandle("voice_on", 7);
+        material = Material_RegisterHandle("voice_on", IMAGE_TRACK_HUD);
         UI_DrawHandlePic(
             &scrPlaceView[localClientNum],
             rect->x,
@@ -1955,7 +1955,7 @@ void __cdecl UI_DrawTalkerNum(
     {
         if (CL_GetClientName(localClientNum, client, name, 38))
         {
-            material = Material_RegisterHandle("voice_on", 7);
+            material = Material_RegisterHandle("voice_on", IMAGE_TRACK_HUD);
             textHeight = UI_TextHeight(font, textScale);
             UI_DrawHandlePic(
                 &scrPlaceView[localClientNum],
@@ -4242,7 +4242,7 @@ Material *__cdecl UI_GetLevelShot(int index)
     if (!sharedUiInfo.serverHardwareIconList[40 * index - 5082])
         sharedUiInfo.serverHardwareIconList[40 * index - 5082] = Material_RegisterHandle(
             (char *)sharedUiInfo.serverHardwareIconList[40 * index - 5118],
-            3);
+            IMAGE_TRACK_UI);
     return sharedUiInfo.serverHardwareIconList[40 * index - 5082];
 }
 
@@ -4711,12 +4711,12 @@ void __cdecl UI_Init(int localClientNum)
     }
     UI_AssetCache();
     Menus_CloseAll(&uiInfoArray.uiDC);
-    sharedUiInfo.serverHardwareIconList[0] = Material_RegisterHandle("server_hardware_unknown", 3);
-    sharedUiInfo.serverHardwareIconList[1] = Material_RegisterHandle("server_hardware_linux_dedicated", 3);
-    sharedUiInfo.serverHardwareIconList[2] = Material_RegisterHandle("server_hardware_win_dedicated", 3);
-    sharedUiInfo.serverHardwareIconList[3] = Material_RegisterHandle("server_hardware_mac_dedicated", 3);
-    sharedUiInfo.serverHardwareIconList[6] = Material_RegisterHandle("server_hardware_win_listen", 3);
-    sharedUiInfo.serverHardwareIconList[7] = Material_RegisterHandle("server_hardware_mac_listen", 3);
+    sharedUiInfo.serverHardwareIconList[0] = Material_RegisterHandle("server_hardware_unknown", IMAGE_TRACK_UI);
+    sharedUiInfo.serverHardwareIconList[1] = Material_RegisterHandle("server_hardware_linux_dedicated", IMAGE_TRACK_UI);
+    sharedUiInfo.serverHardwareIconList[2] = Material_RegisterHandle("server_hardware_win_dedicated", IMAGE_TRACK_UI);
+    sharedUiInfo.serverHardwareIconList[3] = Material_RegisterHandle("server_hardware_mac_dedicated", IMAGE_TRACK_UI);
+    sharedUiInfo.serverHardwareIconList[6] = Material_RegisterHandle("server_hardware_win_listen", IMAGE_TRACK_UI);
+    sharedUiInfo.serverHardwareIconList[7] = Material_RegisterHandle("server_hardware_mac_listen", IMAGE_TRACK_UI);
     LAN_LoadCachedServers(); // cl_ui_xenon_mp.obj
     UI_ServersSort(10, 0);
     Dvar_SetBoolByName("ui_mousePitch", Dvar_GetFloat("m_pitch") < 0.0);
@@ -4913,23 +4913,23 @@ void UI_RegisterDvars()
 
 void UI_AssetCache()
 {
-    sharedUiInfo.assets.whiteMaterial = Material_RegisterHandle("white", 3);
-    sharedUiInfo.assets.scrollBar = Material_RegisterHandle("ui_scrollbar", 3);
-    sharedUiInfo.assets.scrollBarArrowDown = Material_RegisterHandle("ui_scrollbar_arrow_dwn_a", 3);
-    sharedUiInfo.assets.scrollBarArrowUp = Material_RegisterHandle("ui_scrollbar_arrow_up_a", 3);
-    sharedUiInfo.assets.scrollBarArrowLeft = Material_RegisterHandle("ui_scrollbar_arrow_left", 3);
-    sharedUiInfo.assets.scrollBarArrowRight = Material_RegisterHandle("ui_scrollbar_arrow_right", 3);
-    sharedUiInfo.assets.scrollBarThumb = Material_RegisterHandle("ui_scrollbar_thumb", 3);
-    sharedUiInfo.assets.sliderBar = Material_RegisterHandle("ui_slider2", 3);
-    sharedUiInfo.assets.sliderThumb = Material_RegisterHandle("ui_sliderbutt_1", 3);
-    sharedUiInfo.assets.cursor = Material_RegisterHandle("ui_cursor", 0);
-    sharedUiInfo.assets.bigFont = CL_RegisterFont("fonts/bigfont", 0);
-    sharedUiInfo.assets.smallFont = CL_RegisterFont("fonts/smallfont", 0);
-    sharedUiInfo.assets.consoleFont = CL_RegisterFont("fonts/consolefont", 0);
-    sharedUiInfo.assets.boldFont = CL_RegisterFont("fonts/boldfont", 0);
-    sharedUiInfo.assets.textFont = CL_RegisterFont("fonts/normalfont", 0);
-    sharedUiInfo.assets.extraBigFont = CL_RegisterFont("fonts/extrabigfont", 0);
-    sharedUiInfo.assets.objectiveFont = CL_RegisterFont("fonts/objectivefont", 0);
+    sharedUiInfo.assets.whiteMaterial = Material_RegisterHandle("white", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.scrollBar = Material_RegisterHandle("ui_scrollbar", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.scrollBarArrowDown = Material_RegisterHandle("ui_scrollbar_arrow_dwn_a", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.scrollBarArrowUp = Material_RegisterHandle("ui_scrollbar_arrow_up_a", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.scrollBarArrowLeft = Material_RegisterHandle("ui_scrollbar_arrow_left", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.scrollBarArrowRight = Material_RegisterHandle("ui_scrollbar_arrow_right", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.scrollBarThumb = Material_RegisterHandle("ui_scrollbar_thumb", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.sliderBar = Material_RegisterHandle("ui_slider2", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.sliderThumb = Material_RegisterHandle("ui_sliderbutt_1", IMAGE_TRACK_UI);
+    sharedUiInfo.assets.cursor = Material_RegisterHandle("ui_cursor", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.bigFont = CL_RegisterFont("fonts/bigfont", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.smallFont = CL_RegisterFont("fonts/smallfont", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.consoleFont = CL_RegisterFont("fonts/consolefont", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.boldFont = CL_RegisterFont("fonts/boldfont", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.textFont = CL_RegisterFont("fonts/normalfont", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.extraBigFont = CL_RegisterFont("fonts/extrabigfont", IMAGE_TRACK_MISC);
+    sharedUiInfo.assets.objectiveFont = CL_RegisterFont("fonts/objectivefont", IMAGE_TRACK_MISC);
 }
 
 int bypassKeyClear;

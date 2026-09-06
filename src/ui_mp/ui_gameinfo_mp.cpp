@@ -97,7 +97,7 @@ void __cdecl UI_LoadArenas()
         sharedUiInfo.serverHardwareIconList[40 * sharedUiInfo.mapCount - 5118] = (Material *)String_Alloc(v2);
         sharedUiInfo.serverHardwareIconList[40 * sharedUiInfo.mapCount - 5082] = Material_RegisterHandle(
             (char *)sharedUiInfo.serverHardwareIconList[40 * sharedUiInfo.mapCount - 5118],
-            3);
+            IMAGE_TRACK_UI);
         pszGameTypes = Info_ValueForKey(ui_arenaInfos[n], "gametype");
         if (!pszGameTypes)
             goto LABEL_15;

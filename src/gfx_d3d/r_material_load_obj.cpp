@@ -4784,7 +4784,7 @@ Material *__cdecl R_GetBspMaterial(uint32_t materialIndex)
         Com_sprintf(materialName, 0x100u, "%s%s", "", name->material);
     else
         Com_sprintf(materialName, 0x100u, "%s%s", "wc/", name->material);
-    return Material_Register(materialName, 9);
+    return Material_Register(materialName, IMAGE_TRACK_WORLD);
 }
 
 bool __cdecl Material_HasNormalMap(const Material *mtl)

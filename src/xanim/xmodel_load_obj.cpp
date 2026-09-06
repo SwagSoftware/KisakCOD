@@ -1348,7 +1348,7 @@ XModel *__cdecl XModelLoadFile(char *name, void *(__cdecl *Alloc)(int), void *(_
                             v40 = "$default3d";
                         v29 = "mc/";
                         Com_sprintf(v31, 0x100u, "%s%s", "mc/", v40);
-                        v6 = Material_RegisterHandle(v31, 8);
+                        v6 = Material_RegisterHandle(v31, IMAGE_TRACK_MODEL);
                         model->materialHandles[surfIndex] = v6;
                         if (outModelSurfs.surfs[j].deformed)
                             model->lodRampType = 1;
@@ -1636,7 +1636,7 @@ static void __cdecl XModelMakeDefault(XModel *model)
     model->name = "DEFAULT";
     model->surfs = 0;
     model->materialHandles = g_materials;
-    g_materials[0] = Material_RegisterHandle("mc/$default", 8);
+    g_materials[0] = Material_RegisterHandle("mc/$default", IMAGE_TRACK_MODEL);
     g_default.boneInfo.bounds[0][0] = -16.0;
     g_default.boneInfo.bounds[0][1] = -16.0;
     g_default.boneInfo.bounds[0][2] = -16.0;

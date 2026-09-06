@@ -1267,9 +1267,9 @@ void __cdecl DrawHudElemClock(int32_t localClientNum, const hudelem_s *elem, con
     iassert(cghe->color[3]);
     if (CG_ServerMaterialName(localClientNum, elem->materialIndex, materialName, 0x3Au))
     {
-        faceMaterial = Material_RegisterHandle(materialName, 7);
+        faceMaterial = Material_RegisterHandle(materialName, IMAGE_TRACK_HUD);
         I_strncat(materialName, 64, "needle");
-        handMaterial = Material_RegisterHandle(materialName, 7);
+        handMaterial = Material_RegisterHandle(materialName, IMAGE_TRACK_HUD);
         time = GetHudElemTime(elem, cghe->timeNow);
         if (elem->duration)
         {
@@ -1310,7 +1310,7 @@ void __cdecl DrawHudElemMaterial(int32_t localClientNum, const hudelem_s *elem, 
     iassert(cghe->color[3]);
     if (CG_ServerMaterialName(localClientNum, elem->materialIndex, materialName, 0x40u))
     {
-        material = Material_RegisterHandle(materialName, 7);
+        material = Material_RegisterHandle(materialName, IMAGE_TRACK_HUD);
         width = HudElemMaterialWidth(&scrPlaceView[localClientNum], elem, cghe);
         height = HudElemMaterialHeight(&scrPlaceView[localClientNum], elem, cghe);
         offsetY = -(cghe->height - height);
@@ -1369,7 +1369,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem
         BG_LerpHudColors(elem, CG_GetLocalClientGlobals(localClientNum)->time, &toColor);
         if (toColor.a)
         {
-            material = Material_RegisterHandle(materialName, 7);
+            material = Material_RegisterHandle(materialName, IMAGE_TRACK_HUD);
             HudElemColorToVec4(&toColor, color);
             scrPlace = &scrPlaceView[localClientNum];
             scaleVirtualToRealAvg = (scrPlace->scaleVirtualToReal[0] + scrPlace->scaleVirtualToReal[1]) * 0.5;
@@ -1820,7 +1820,7 @@ void AddDrawSurfForHudElemWaypoint(int32_t localClientNum, const hudelem_s *elem
         {
             if (CG_ServerMaterialName(localClientNum, elem->materialIndex, v10, 0x40u))
             {
-                v9 = Material_RegisterHandle(v10, 7);
+                v9 = Material_RegisterHandle(v10, IMAGE_TRACK_HUD);
                 v8 = HudElemWaypointHeight(localClientNum, elem);
                 if (v8 != 0.0)
                 {

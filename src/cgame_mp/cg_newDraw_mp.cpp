@@ -221,7 +221,7 @@ Material *__cdecl CG_ObjectiveIcon(int32_t localClientNum, int32_t icon, int32_t
             "%s",
             "type >= 0 && static_cast<uint32_t>( type ) < ARRAY_COUNT( cgMedia.objectiveMaterials )");
     if (icon && CG_ServerMaterialName(localClientNum, icon, shaderName, 0x40u))
-        return Material_RegisterHandle(shaderName, 7);
+        return Material_RegisterHandle(shaderName, IMAGE_TRACK_HUD);
     else
         return cgMedia.objectiveMaterials[type];
 }
@@ -2336,11 +2336,11 @@ void __cdecl CG_DrawTalkerNum(
                     if (cgameGlob->nextSnap->ps.pm_type != PM_INTERMISSION && isEnemy && (cgameGlob->nextSnap->ps.perks & 0x200) != 0)
                     {
                         CG_RelativeTeamColor(client, "g_TeamColor", textColor, localClientNum);
-                        material = Material_RegisterHandle((const char*)perk_parabolicIcon->current.integer, 7);
+                        material = Material_RegisterHandle((const char*)perk_parabolicIcon->current.integer, IMAGE_TRACK_HUD);
                     }
                     else
                     {
-                        material = Material_RegisterHandle("voice_on", 7);
+                        material = Material_RegisterHandle("voice_on", IMAGE_TRACK_HUD);
                     }
                     textHeight = UI_TextHeight(font, textScale);
                     UI_DrawHandlePic(

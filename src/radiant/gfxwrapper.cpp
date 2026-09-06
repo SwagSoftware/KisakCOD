@@ -73,10 +73,10 @@ Material *R_BeginRegistrationInternal()
     extern char LayeredMaterialWnd_InitRenderer();   // layeredmaterialwnd.cpp 0x418580
     LayeredMaterialWnd_InitRenderer();
 
-    g_qeglobals.d_font_list = R_RegisterFont("fonts/qerfont", 7);
-    g_qeglobals.d_white     = Material_RegisterHandle("white_tools", 0);
-    g_qeglobals.d_opague    = Material_RegisterHandle("$opaque", 0);
-    g_qeglobals.d_additive  = Material_RegisterHandle("$additive", 0);
+    g_qeglobals.d_font_list = R_RegisterFont("fonts/qerfont", IMAGE_TRACK_HUD);
+    g_qeglobals.d_white     = Material_RegisterHandle("white_tools", IMAGE_TRACK_MISC);
+    g_qeglobals.d_opague    = Material_RegisterHandle("$opaque", IMAGE_TRACK_MISC);
+    g_qeglobals.d_additive  = Material_RegisterHandle("$additive", IMAGE_TRACK_MISC);
 
     R_Initiated = 1;
     return g_qeglobals.d_additive;

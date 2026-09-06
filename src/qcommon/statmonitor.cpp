@@ -33,7 +33,7 @@ void __cdecl StatMon_Warning(int type, int duration, const char *materialName)
         Sys_EnterCriticalSection(CRITSECT_STATMON);
         stats[type].endtime = duration + Sys_Milliseconds();
         if (!stats[type].material && cls.rendererStarted)
-            stats[type].material = Material_RegisterHandle(materialName, 1);
+            stats[type].material = Material_RegisterHandle(materialName, IMAGE_TRACK_DEBUG);
         if (type >= statCount)
             statCount = type + 1;
         Sys_LeaveCriticalSection(CRITSECT_STATMON);

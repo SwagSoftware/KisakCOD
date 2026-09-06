@@ -150,11 +150,11 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
         CG_PrecacheScriptMenu(localClientNum, i);
     for (ia = 2259; ia < 2267; ++ia)
     {
-        Material_RegisterHandle(CL_GetConfigString(localClientNum, ia), 7);
+        Material_RegisterHandle(CL_GetConfigString(localClientNum, ia), IMAGE_TRACK_HUD);
     }
     for (ib = 2267; ib < 2282; ++ib)
     {
-        Material_RegisterHandle(CL_GetConfigString(localClientNum, ib), 7);
+        Material_RegisterHandle(CL_GetConfigString(localClientNum, ib), IMAGE_TRACK_HUD);
     }
     for (ic = 2003; ic < 2258; ++ic)
         CG_RegisterServerMaterial(localClientNum, ic);
@@ -204,7 +204,7 @@ void __cdecl CG_RegisterServerMaterial(int32_t localClientNum, int32_t configStr
             configStringIndex);
     materialName = CL_GetConfigString(localClientNum, configStringIndex);
     if (*materialName)
-        Material_RegisterHandle(materialName, 7);
+        Material_RegisterHandle(materialName, IMAGE_TRACK_HUD);
 }
 
 void __cdecl CG_MapRestart(int32_t localClientNum, int32_t savepersist)
@@ -757,7 +757,7 @@ void __cdecl CG_ParseScores(int32_t localClientNum)
         if (statusIconIndex > 0 && statusIconIndex <= 8)
         {
             pszIcon = CL_GetConfigString(localClientNum, statusIconIndex + 2258);
-            cgameGlob->scores[i].hStatusIcon = Material_RegisterHandle(pszIcon, 7);
+            cgameGlob->scores[i].hStatusIcon = Material_RegisterHandle(pszIcon, IMAGE_TRACK_HUD);
         }
         cgameGlob->scores[i].rank = cgameGlob->bgs.clientinfo[clientNum].rank;
         CL_GetRankIcon(
@@ -922,7 +922,7 @@ void __cdecl CG_ConfigStringModified(int32_t localClientNum)
                             {
                                 if (num >= 2259 && num < 2267 || num >= 2267 && num < 2282)
                                 {
-                                    Material_RegisterHandle(CL_GetConfigString(localClientNum, num), 7);
+                                    Material_RegisterHandle(CL_GetConfigString(localClientNum, num), IMAGE_TRACK_HUD);
                                 }
                                 else if (num < 2002 || num >= 2258)
                                 {

@@ -1822,7 +1822,7 @@ void __cdecl R_SetDepthOfField(GfxViewInfo *viewInfo, const GfxSceneParms *scene
         viewInfo->needsFloatZ = 1;
         if (com_statmon->current.enabled)
         {
-            font = R_RegisterFont("fonts/consoleFont", 1);
+            font = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_DEBUG);
             R_AddCmdDrawText((char*)"DOF", 0x7FFFFFFF, font, 0.0, 320.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
         }
     }
@@ -1941,7 +1941,7 @@ void __cdecl R_SetGlowInfo(GfxViewInfo *viewInfo, const GfxSceneParms *sceneParm
     }
     if (R_UsingGlow(viewInfo) && com_statmon->current.enabled)
     {
-        font = R_RegisterFont("fonts/consoleFont", 1);
+        font = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_DEBUG);
         R_AddCmdDrawText((char*)"GLOW", 0x7FFFFFFF, font, 0.0, 340.0, 1.5, 2.0, 0.0, colorRedFaded, 0);
     }
 }
@@ -2166,7 +2166,7 @@ void R_DrawCineWarning()
     if (com_statmon->current.enabled && R_Cinematic_IsStarted())
     {
         msg = "CINE";
-        font = R_RegisterFont("fonts/consoleFont", 1);
+        font = R_RegisterFont("fonts/consoleFont", IMAGE_TRACK_DEBUG);
         if (R_Cinematic_IsUnderrun())
             msg = "CINE UNDERRUN!";
         R_AddCmdDrawText((char*)msg, 0x7FFFFFFF, font, 0.0, 360.0, 1.5, 2.0, 0.0, colorRedFaded, 0);

@@ -220,9 +220,9 @@ void __cdecl R_SetSunFromDvars(sunflare_t *sun)
 {
     iassert(sun);
 
-    sun->spriteMaterial = Material_RegisterHandle((char *)r_sunsprite_shader->current.integer, 6);
+    sun->spriteMaterial = Material_RegisterHandle((char *)r_sunsprite_shader->current.integer, IMAGE_TRACK_FX);
     sun->spriteSize = r_sunsprite_size->current.value;
-    sun->flareMaterial = Material_RegisterHandle((char *)r_sunflare_shader->current.integer, 6);
+    sun->flareMaterial = Material_RegisterHandle((char *)r_sunflare_shader->current.integer, IMAGE_TRACK_FX);
     sun->flareMinSize = r_sunflare_min_size->current.value * 0.5f;
     sun->flareMinDot = cos(DEG2RAD( r_sunflare_min_angle->current.value ));
     sun->flareMaxSize = r_sunflare_max_size->current.value * 0.5f;

@@ -38,7 +38,7 @@ static const char *g_imageProgNames[14] =
   "$model_lighting1"
 }; // idb
 
-static const char *imageTypeName[10] =
+static const char *imageTypeName[IMAGE_TRACK_COUNT] =
 {
     "misc",
     "debug",
@@ -208,7 +208,7 @@ GfxImage *__cdecl Image_AllocProg(int imageProgType, uint8_t category, uint8_t s
     iassert(category != IMG_CATEGORY_UNKNOWN);
     image->category = category;
     image->semantic = semantic;
-    image->track = 0;
+    image->track = IMAGE_TRACK_MISC;
     imageGlobals.imageHashTable[Image_GetAvailableHashLocation(name)] = image;
     return &g_imageProgs[imageProgType];
 }
@@ -793,24 +793,24 @@ void __cdecl R_InitImages()
 
 bool __cdecl Image_IsCodeImage(int track)
 {
-    return track >= 0 && (track <= 1 || track == 4);
+    return track >= IMAGE_TRACK_MISC && (track <= IMAGE_TRACK_DEBUG || track == IMAGE_TRACK_LIGHTMAP);
 }
 
 void R_InitCodeImages()
 {
-    rgp.whiteImage = Image_Register("$white", TS_FUNCTION, 0);
+    rgp.whiteImage = Image_Register("$white", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.whiteImage);
-    rgp.blackImage = Image_Register("$black", TS_FUNCTION, 0);
+    rgp.blackImage = Image_Register("$black", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.blackImage);
-    rgp.blackImage3D = Image_Register("$black_3d", TS_FUNCTION, 0);
+    rgp.blackImage3D = Image_Register("$black_3d", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.blackImage3D);
-    rgp.blackImageCube = Image_Register("$black_cube", TS_FUNCTION, 0);
+    rgp.blackImageCube = Image_Register("$black_cube", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.blackImageCube);
-    rgp.grayImage = Image_Register("$gray", TS_FUNCTION, 0);
+    rgp.grayImage = Image_Register("$gray", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.grayImage);
-    rgp.identityNormalMapImage = Image_Register("$identitynormalmap", TS_FUNCTION, 0);
+    rgp.identityNormalMapImage = Image_Register("$identitynormalmap", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.identityNormalMapImage);
-    rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", TS_FUNCTION, 0);
+    rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", TS_FUNCTION, IMAGE_TRACK_MISC);
     iassert(rgp.pixelCostColorCodeImage);
 }
 
@@ -847,7 +847,7 @@ void __cdecl R_LoadCaseTextures()
         GfxImage *image = Image_FindExisting(pi->token);
         if (!image)
         {
-            image = Image_Register(pi->token, TS_COLOR_MAP, 1);
+            image = Image_Register(pi->token, TS_COLOR_MAP, IMAGE_TRACK_DEBUG);
             // Image_Register already logs "ERROR: failed to load image" on miss.
         }
         rgp.caseTextures[rgp.caseTextures_count] = image;
@@ -1001,7 +1001,7 @@ void __cdecl R_ImageList_f()
         for (j = 0; j < 2; ++j)
             Com_Printf(CON_CHANNEL_GFX, "%s", g_platform_name[j]);
         Com_Printf(CON_CHANNEL_GFX, "\n");
-        for (i = 0; i < 0xA; ++i)
+        for (i = 0; i < IMAGE_TRACK_COUNT; ++i)
         {
             Com_Printf(CON_CHANNEL_GFX, "%s:", imageTypeName[i]);
             for (j = 0; j < 2; ++j)
