@@ -852,7 +852,7 @@ char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondarySt
             "(localClientNum == 0)",
             localClientNum);
     cursorHintIcon = cgArray[0].cursorHintIcon;
-    if (cgArray[0].cursorHintIcon < 5 || cgArray[0].cursorHintIcon > 132)
+    if (cgArray[0].cursorHintIcon < FIRST_WEAPON_HINT || cgArray[0].cursorHintIcon > LAST_WEAPON_HINT)
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_newDraw.cpp",
@@ -862,8 +862,8 @@ char *__cdecl CG_GetWeaponUseString(int localClientNum, const char **secondarySt
             "(cgameGlob->cursorHintIcon >= FIRST_WEAPON_HINT) && (cgameGlob->cursorHintIcon <= LAST_WEAPON_HINT)");
         cursorHintIcon = cgArray[0].cursorHintIcon;
     }
-    v5 = cursorHintIcon - 4;
-    WeaponDef = BG_GetWeaponDef(cursorHintIcon - 4);
+    v5 = cursorHintIcon - WEAPON_HINT_OFFSET;
+    WeaponDef = BG_GetWeaponDef(cursorHintIcon - WEAPON_HINT_OFFSET);
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_local.h",
@@ -1072,7 +1072,7 @@ void __cdecl CG_DrawCursorhint(
                 LocalClientGlobals->cursorHintFade,
                 100))
             {
-                LocalClientGlobals->cursorHintIcon = 0;
+                LocalClientGlobals->cursorHintIcon = HINT_NONE;
                 return;
             }
             displayString = 0;
@@ -1108,7 +1108,7 @@ void __cdecl CG_DrawCursorhint(
                 scale = 0.0;
             }
             cursorHintIcon = LocalClientGlobals->cursorHintIcon;
-            if (cursorHintIcon == 1)
+            if (cursorHintIcon == HINT_NOICON)
             {
                 if (LocalClientGlobals->cursorHintString >= 0)
                 {
@@ -1142,11 +1142,11 @@ void __cdecl CG_DrawCursorhint(
             }
             if (!cgMedia.hintMaterials[cursorHintIcon])
                 return;
-            if (cursorHintIcon < 5 || cursorHintIcon > 132)
+            if (cursorHintIcon < FIRST_WEAPON_HINT || cursorHintIcon > LAST_WEAPON_HINT)
             {
                 if (LocalClientGlobals->cursorHintString < 0)
                 {
-                    if (cursorHintIcon != 3)
+                    if (cursorHintIcon != HINT_HEALTH)
                     {
                     LABEL_39:
                         if (displayString && *displayString)
@@ -1251,8 +1251,8 @@ void __cdecl CG_DrawCursorhint(
             }
             else
             {
-                v40 = cursorHintIcon - 4;
-                weapDef = BG_GetWeaponDef(cursorHintIcon - 4);
+                v40 = cursorHintIcon - WEAPON_HINT_OFFSET;
+                weapDef = BG_GetWeaponDef(cursorHintIcon - WEAPON_HINT_OFFSET);
                 v42 = weapDef;
                 if (weapDef->hudIcon)
                 {

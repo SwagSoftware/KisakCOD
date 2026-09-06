@@ -26,7 +26,7 @@ void __cdecl CG_Respawn(int32_t localClientNum)
     cgameGlob->weaponSelect = cgameGlob->predictedPlayerState.weapon;
     cgameGlob->weaponSelectTime = cgameGlob->time;
     cgameGlob->equippedOffHand = cgameGlob->predictedPlayerState.offHandIndex;
-    cgameGlob->cursorHintIcon = 0;
+    cgameGlob->cursorHintIcon = HINT_NONE;
     cgameGlob->cursorHintTime = 0;
     cgameGlob->proneBlockedEndTime = 0;
     cgameGlob->swayViewAngles[0] = 0.0;

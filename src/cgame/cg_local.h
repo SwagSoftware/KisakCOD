@@ -19,11 +19,6 @@ struct ScreenPlacement;
 #define ACTIONSLOTS_NUM 3
 
 
-#define WEAPON_HINT_OFFSET 4
-
-#define FIRST_WEAPON_HINT 5
-#define LAST_WEAPON_HINT 132
-
 #define MYMODELCOUNT 4
 
 #define MAX_WEAPONS 128

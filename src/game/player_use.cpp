@@ -568,16 +568,16 @@ int __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_s *t
     weapType = weapDef->weapType;
     v9 = v7;
     if (weapType == WEAPTYPE_GRENADE || BG_PlayerHasWeapon(&client->ps, v5))
-        return 0;
+        return HINT_NONE;
     inventoryType = v9->inventoryType;
     if (inventoryType == WEAPINVENTORY_PRIMARY)
-        return v5 + 4;
+        return v5 + WEAPON_HINT_OFFSET;
     if (inventoryType == WEAPINVENTORY_ALTMODE)
-        return v5 + 4;
+        return v5 + WEAPON_HINT_OFFSET;
     v12 = BG_PlayerWeaponCountPrimaryTypes(&client->ps) >= 2;
-    result = 0;
+    result = HINT_NONE;
     if (!v12)
-        return v5 + 4;
+        return v5 + WEAPON_HINT_OFFSET;
     return result;
 }
 
@@ -599,7 +599,7 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
     if (*BG_GetWeaponDef(turret->s.weapon)->dropHintString)
     {
         client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
-        client->ps.cursorHint = turret->s.weapon + 4;
+        client->ps.cursorHint = turret->s.weapon + WEAPON_HINT_OFFSET;
         client->ps.cursorHintString = BG_GetWeaponDef(turret->s.weapon)->dropHintStringIndex;
     }
 }
@@ -632,7 +632,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     v3 = 0;
     scale = -1;
     cursorHintEntIndex = client->ps.cursorHintEntIndex;
-    client->ps.cursorHint = 0;
+    client->ps.cursorHint = HINT_NONE;
     client->ps.cursorHintString = -1;
     client->ps.cursorHintEntIndex = ENTITYNUM_NONE;
 
@@ -662,7 +662,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                         v10 = UseList;
                         if (UseList)
                         {
-                            v11 = 0;
+                            v11 = HINT_NONE;
                             if (UseList > 0)
                             {
                                 v12 = v20;
@@ -698,7 +698,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                             v17 = traceEnt->s.index.item;
                                             v18 = traceEnt->nextthink == level.time;
                                             client->ps.throwBackGrenadeTimeLeft = traceEnt->nextthink - level.time;
-                                            v11 = v17 - (v17 >> 7 << 7) + 4;
+                                            v11 = v17 - (v17 >> 7 << 7) + WEAPON_HINT_OFFSET;
                                             if (v18)
                                                 MyAssertHandler(
                                                     "c:\\trees\\cod3\\cod3src\\src\\game\\player_use.cpp",
@@ -712,13 +712,13 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                         if (!G_IsTurretUsable(traceEnt, ent))
                                             goto LABEL_30;
                                         weapon = traceEnt->s.weapon;
-                                        v11 = weapon + 4;
+                                        v11 = weapon + WEAPON_HINT_OFFSET;
                                         goto LABEL_45;
                                     case 0xBu:
                                         if (!G_IsVehicleUsable(traceEnt, ent))
                                             goto LABEL_30;
                                         weapon = traceEnt->s.weapon;
-                                        v11 = 1;
+                                        v11 = HINT_NOICON;
                                     LABEL_45:
                                         if (*BG_GetWeaponDef(weapon)->szUseHintString)
                                             scale = BG_GetWeaponDef(traceEnt->s.weapon)->iUseHintStringIndex;
@@ -742,7 +742,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                         return;
                                     case 0xEu:
                                         iassert(traceEnt->actor);
-                                        v11 = 1;
+                                        v11 = HINT_NOICON;
                                         if (traceEnt->actor->iUseHintString >= 0)
                                             scale = traceEnt->actor->iUseHintString;
                                         goto LABEL_47;

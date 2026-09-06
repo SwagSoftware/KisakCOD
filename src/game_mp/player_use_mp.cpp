@@ -180,7 +180,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
     if (!ent->client)
         MyAssertHandler(".\\game_mp\\player_use_mp.cpp", 525, 0, "%s", "ent->client");
     ps = &ent->client->ps;
-    ps->cursorHint = 0;
+    ps->cursorHint = HINT_NONE;
     if (!BG_ThrowingBackGrenade(ps))
         ps->throwBackGrenadeTimeLeft = 0;
     if (ent->health > 0)
@@ -207,7 +207,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                 v6 = Player_GetUseList(ent, useList, ps->cursorHintEntIndex);
                 if (v6)
                 {
-                    hintString = 0;
+                    hintString = HINT_NONE;
                     scale = -1;
                     v7 = 0;
                     while (2)
@@ -240,20 +240,20 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                                 hintString = ItemCursorHint;
                                 goto LABEL_49;
                             case ET_MISSILE:
-                                hintString = self->s.index.brushmodel % 128 + 4;
+                                hintString = self->s.index.brushmodel % 128 + WEAPON_HINT_OFFSET;
                                 ps->throwBackGrenadeTimeLeft = self->nextthink - level.time;
                                 goto LABEL_49;
                             case ET_MG42:
                                 if (!G_IsTurretUsable(self, ent))
                                     goto LABEL_21;
-                                hintString = self->s.weapon + 4;
+                                hintString = self->s.weapon + WEAPON_HINT_OFFSET;
                                 if (*BG_GetWeaponDef(self->s.weapon)->szUseHintString)
                                     scale = BG_GetWeaponDef(self->s.weapon)->iUseHintStringIndex;
                                 goto LABEL_49;
                             case ET_VEHICLE:
                                 if (!G_VehUsable(self, ent))
                                     goto LABEL_21;
-                                hintString = 1;
+                                hintString = HINT_NOICON;
                                 G_GetHintStringIndex(&piIndex, (char*)"MP_USEVEHICLE");
                                 if (*BG_GetWeaponDef(self->s.weapon)->szUseHintString)
                                     scale = BG_GetWeaponDef(self->s.weapon)->iUseHintStringIndex;
@@ -473,15 +473,15 @@ int32_t __cdecl Player_GetItemCursorHint(const gclient_s *client, const gentity_
     if (!client)
         MyAssertHandler("c:\\trees\\cod3\\src\\bgame\\../bgame/bg_weapons.h", 229, 0, "%s", "ps");
     if (Com_BitCheckAssert(client->ps.weapons, weapIndex, 16))
-        return 0;
+        return HINT_NONE;
     if (weapDefPlayer->inventoryType == WEAPINVENTORY_PRIMARY
         || weapDefPlayer->inventoryType == WEAPINVENTORY_ALTMODE
         || weapDefItem->inventoryType && weapDefItem->inventoryType != WEAPINVENTORY_ALTMODE
         || BG_PlayerWeaponCountPrimaryTypes(&client->ps) < 2)
     {
-        return weapIndex + 4;
+        return weapIndex + WEAPON_HINT_OFFSET;
     }
-    return 0;
+    return HINT_NONE;
 }
 
 void __cdecl Player_SetTurretDropHint(gentity_s *ent)
@@ -506,7 +506,7 @@ void __cdecl Player_SetTurretDropHint(gentity_s *ent)
     if (*BG_GetWeaponDef(turret->s.weapon)->dropHintString)
     {
         ps->ps.cursorHintEntIndex = ENTITYNUM_NONE;
-        ps->ps.cursorHint = turret->s.weapon + 4;
+        ps->ps.cursorHint = turret->s.weapon + WEAPON_HINT_OFFSET;
         ps->ps.cursorHintString = BG_GetWeaponDef(turret->s.weapon)->dropHintStringIndex;
     }
 }

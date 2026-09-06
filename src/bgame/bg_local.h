@@ -620,6 +620,20 @@ enum he_type_t : __int32
 };
 #endif
 
+enum hintType_t : __int32
+{
+    HINT_NONE = 0x0,
+    HINT_NOICON = 0x1,
+    HINT_ACTIVATE = 0x2,
+    HINT_HEALTH = 0x3,
+    HINT_FRIENDLY = 0x4,
+    FIRST_WEAPON_HINT = 0x5,
+    LAST_WEAPON_HINT = 0x84,
+    HINT_NUM_HINTS = 0x85,
+};
+
+#define WEAPON_HINT_OFFSET HINT_FRIENDLY
+
 #ifdef KISAK_MP
 struct hudelem_s // sizeof=0xA0
 {                                       // XREF: .data:g_dummyHudCurrent/r

@@ -222,7 +222,7 @@ void __cdecl CG_AddHudGrenade(const cg_s *cgameGlob, const centity_s *grenadeEnt
         {
             if (weapDef->projExplosion == WEAPPROJEXP_GRENADE || weapDef->projExplosion == WEAPPROJEXP_HEAVY)
             {
-                if (cgameGlob->nextSnap->ps.cursorHint >= 5
+                if (cgameGlob->nextSnap->ps.cursorHint >= FIRST_WEAPON_HINT
                     && cgameGlob->nextSnap->ps.cursorHintEntIndex == grenadeEnt->nextState.number)
                 {
                     material = cgMedia.grenadeIconThrowBack;

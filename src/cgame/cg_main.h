@@ -222,7 +222,7 @@ struct cgMedia_t
     Material *tracerMaterial;
     Material *laserMaterial;
     Material *laserLightMaterial;
-    Material *hintMaterials[133];
+    Material *hintMaterials[HINT_NUM_HINTS];
     Material *stanceMaterials[4];
     Material *objectiveMaterials[2];
     Material *damageMaterial;
