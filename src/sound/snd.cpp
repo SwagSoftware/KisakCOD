@@ -2622,7 +2622,7 @@ void __cdecl SND_SetEnvironmentEffects(
         }
         else
         {
-            for (i = priority + 1; i < 3; ++i)
+            for (i = priority + 1; i < SND_ENVEFFECTPRIO_COUNT; ++i)
             {
                 if (g_snd.envEffects[i].active)
                     return;
@@ -2645,7 +2645,7 @@ void __cdecl SND_DeactivateEnvironmentEffects(int priority, int fademsec)
     effect->active = 0;
     if (effect == g_snd.effect)
     {
-        for (i = priority - 1; i >= 0 && !g_snd.envEffects[i].active; --i)
+        for (i = priority - 1; i >= SND_ENVEFFECTPRIO_NONE && !g_snd.envEffects[i].active; --i)
             ;
 
         iassert(i >= SND_ENVEFFECTPRIO_NONE);
@@ -3188,7 +3188,7 @@ void __cdecl SND_StopSounds(snd_stopsounds_arg_t which)
 
         if ((which & 1) == 0)
         {
-            for (int i = 1; i < 3; ++i)
+            for (int i = SND_ENVEFFECTPRIO_LEVEL; i < SND_ENVEFFECTPRIO_COUNT; ++i)
                 SND_DeactivateEnvironmentEffects(i, 0);
         }
 
@@ -3281,8 +3281,8 @@ void __cdecl SND_Init()
         "Check whether stream sound files exist while loading");
 
     g_snd.effect = g_snd.envEffects;
-    g_snd.envEffects[0].roomtype = 0;
-    g_snd.envEffects[0].drylevel = 1.0f;
+    g_snd.envEffects[SND_ENVEFFECTPRIO_NONE].roomtype = 0;
+    g_snd.envEffects[SND_ENVEFFECTPRIO_NONE].drylevel = 1.0f;
     g_snd.effect->drygoal = 1.0f;
     g_snd.effect->dryrate = 0.0f;
     g_snd.effect->wetlevel = 0.0f;
@@ -3620,7 +3620,7 @@ void __cdecl SND_Save(MemoryFile *memFile)
     for (int i = 1; i < SND_CHANNELVOLPRIO_COUNT; ++i)
         MemFile_WriteData(memFile, 772, &g_snd.channelVolGroups[i]);
 
-    for (int i = 1; i < 3; ++i)
+    for (int i = SND_ENVEFFECTPRIO_LEVEL; i < SND_ENVEFFECTPRIO_COUNT; ++i)
         MemFile_WriteData(memFile, 32, &g_snd.envEffects[i]);
 
     SND_SaveEq(memFile);
@@ -3821,12 +3821,12 @@ void __cdecl SND_Restore(MemoryFile *memFile)
                 g_snd.channelvol = &g_snd.channelVolGroups[i];
         }
 
-        for (int i = 1; i < 3; ++i)
+        for (int i = SND_ENVEFFECTPRIO_LEVEL; i < SND_ENVEFFECTPRIO_COUNT; ++i)
             MemFile_ReadData(memFile, 32, (uint8_t *)&g_snd.envEffects[i]);
 
         SND_RestoreEq(memFile);
 
-        for (int i = 0; i < 3; ++i)
+        for (int i = SND_ENVEFFECTPRIO_NONE; i < SND_ENVEFFECTPRIO_COUNT; ++i)
         {
             if (g_snd.envEffects[i].active)
                 g_snd.effect = &g_snd.envEffects[i];

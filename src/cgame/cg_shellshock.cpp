@@ -338,7 +338,7 @@ void __cdecl EndShellShockSound(int32_t localClientNum)
     cg_s *cgameGlob;
 
     SND_DeactivateChannelVolumes(3, 0);
-    SND_DeactivateEnvironmentEffects(2, 0);
+    SND_DeactivateEnvironmentEffects(SND_ENVEFFECTPRIO_SHELLSHOCK, 0);
 
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
@@ -398,20 +398,25 @@ void __cdecl UpdateShellShockSound(int32_t localClientNum, const shellshock_parm
             {
                 if (dt >= 0 && dt < parms->sound.fadeOutTime)
                 {
-                    SND_DeactivateEnvironmentEffects(2, dt);
+                    SND_DeactivateEnvironmentEffects(SND_ENVEFFECTPRIO_SHELLSHOCK, dt);
                     SND_DeactivateChannelVolumes(3, dt);
                 }
             }
             else
             {
-                SND_SetEnvironmentEffects(2, parms->sound.roomtype, parms->sound.drylevel, parms->sound.wetlevel, 0);
+                SND_SetEnvironmentEffects(
+                    SND_ENVEFFECTPRIO_SHELLSHOCK,
+                    parms->sound.roomtype,
+                    parms->sound.drylevel,
+                    parms->sound.wetlevel,
+                    0);
                 SND_SetChannelVolumes(3, parms->sound.channelvolume, 0);
             }
         }
         else
         {
             SND_SetEnvironmentEffects(
-                2,
+                SND_ENVEFFECTPRIO_SHELLSHOCK,
                 parms->sound.roomtype,
                 parms->sound.drylevel,
                 parms->sound.wetlevel,
