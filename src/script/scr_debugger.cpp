@@ -937,13 +937,13 @@ int __cdecl CompareArrayIndices(uint32_t *arg1, uint32_t *arg2)
     }
     if (value[0].type != value[1].type)
         return value[0].type - value[1].type;
-    if (value[0].type == 2)
+    if (value[0].type == VAR_STRING)
     {
         return strcmp(SL_ConvertToString(value[0].u.stringValue), SL_ConvertToString(value[1].u.stringValue));
     }
     else
     {
-        if (value[0].type != 6)
+        if (value[0].type != VAR_INTEGER)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 5120, 0, "%s", "value[0].type == VAR_INTEGER");
         return value[0].u.intValue - value[1].u.intValue;
     }
@@ -1020,36 +1020,36 @@ void __cdecl Scr_PostSetText(Scr_WatchElement_s *element)
         MyAssertHandler(".\\script\\scr_debugger.cpp", 5179, 0, "%s", "!Sys_IsRemoteDebugClient()");
     if (element->threadList)
     {
-        type = 24;
+        type = VAR_THREAD_LIST;
     }
     else if (element->endonList)
     {
-        type = 25;
+        type = VAR_ENDON_LIST;
     }
     else
     {
         if (element->objectId)
             ObjectType = GetObjectType(element->objectId);
         else
-            ObjectType = 0;
+            ObjectType = VAR_UNDEFINED;
         type = ObjectType;
-        if (ObjectType >= 0xEu && ObjectType <= 0x11u)
-            type = Scr_IsEndonThread(element->objectId) ? 0 : 14;
+        if (ObjectType >= VAR_THREAD && ObjectType <= VAR_CHILD_THREAD)
+            type = Scr_IsEndonThread(element->objectId) ? VAR_UNDEFINED : VAR_THREAD;
     }
     directObject = 0;
     switch (type)
     {
-    case 0xEu:
+    case VAR_THREAD:
         v2 = strcmp(element->refText, element->valueText);
         directObject = v2 == 0;
         if (!v2)
             ReplaceString(&element->valueText, (char *)"");
         break;
-    case 0x12u:
-    case 0x13u:
+    case VAR_OBJECT:
+    case VAR_DEAD_ENTITY:
         directObject = strcmp(element->refText, element->valueText) == 0;
         break;
-    case 0x14u:
+    case VAR_ENTITY:
         v1 = strcmp(element->refText, element->valueText);
         directObject = v1 == 0;
         if (!v1)
@@ -1058,7 +1058,7 @@ void __cdecl Scr_PostSetText(Scr_WatchElement_s *element)
             ReplaceString(&element->valueText, valueText);
         }
         break;
-    case 0x15u:
+    case VAR_ARRAY:
         directObject = 1;
         break;
     default:
@@ -1068,7 +1068,9 @@ void __cdecl Scr_PostSetText(Scr_WatchElement_s *element)
     {
         element->objectType = type;
         element->directObject = directObject;
-        if ((type == 14 || type == 22) && element->oldObjectType != 14 && element->oldObjectType != 22)
+        if ((type == VAR_THREAD || type == VAR_DEAD_THREAD)
+            && element->oldObjectType != VAR_THREAD
+            && element->oldObjectType != VAR_DEAD_THREAD)
         {
             codePos = Scr_GetElementThreadPos(element);
             if (codePos)
@@ -1091,7 +1093,7 @@ const char *__cdecl Scr_GetElementThreadPos(Scr_WatchElement_s *element)
 {
     const char *codePos; // [esp+0h] [ebp-4h]
 
-    if (element->objectType == 14 && (codePos = Scr_GetThreadPos(element->objectId)) != 0)
+    if (element->objectType == VAR_THREAD && (codePos = Scr_GetThreadPos(element->objectId)) != 0)
         return codePos;
     else
         return element->deadCodePos;
@@ -1105,23 +1107,23 @@ void __cdecl Scr_SetElementRefText(Scr_WatchElement_s *element, char *fieldText)
     parentElement = element->parent;
     switch (parentElement->objectType)
     {
-    case 0xEu:
+    case VAR_THREAD:
         if (strcmp(parentElement->refText, "<locals>"))
             goto $LN7_47;
         goto LABEL_3;
-    case 0x12u:
-    case 0x13u:
-    case 0x14u:
+    case VAR_OBJECT:
+    case VAR_DEAD_ENTITY:
+    case VAR_ENTITY:
     $LN7_47:
         Com_sprintf(refText, 0x80u, "%s.%s", parentElement->refText, fieldText);
         ReplaceString(&element->refText, refText);
         break;
-    case 0x15u:
+    case VAR_ARRAY:
         Com_sprintf(refText, 0x80u, "%s[%s]", parentElement->refText, fieldText);
         ReplaceString(&element->refText, refText);
         break;
-    case 0x18u:
-    case 0x19u:
+    case VAR_THREAD_LIST:
+    case VAR_ENDON_LIST:
     LABEL_3:
         ReplaceString(&element->refText, fieldText);
         break;
@@ -2110,7 +2112,7 @@ bool __cdecl Scr_ConditionalExpression(Scr_WatchElement_s *element, uint32_t loc
         if (!conditionalElement->expr.exprHead)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 8734, 0, "%s", "expr->exprHead");
         Scr_EvalScriptExpression(&conditionalElement->expr, localId, &newValue, 0, 1);
-        if (newValue.type == 1)
+        if (newValue.type == VAR_POINTER)
             break;
         Scr_CastBool(&newValue);
         if (scrVarPub.error_message)
@@ -2118,7 +2120,7 @@ bool __cdecl Scr_ConditionalExpression(Scr_WatchElement_s *element, uint32_t loc
             Scr_ClearErrorMessage();
             return 0;
         }
-        if (newValue.type != 6)
+        if (newValue.type != VAR_INTEGER)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 8770, 0, "%s", "newValue.type == VAR_INTEGER");
         if (!newValue.u.intValue)
             return 0;
@@ -2128,16 +2130,16 @@ bool __cdecl Scr_ConditionalExpression(Scr_WatchElement_s *element, uint32_t loc
     RemoveRefToObject(newValue.u.stringValue);
     switch (GetObjectType(newValue.u.stringValue))
     {
-    case 0xEu:
-    case 0xFu:
-    case 0x10u:
-    case 0x11u:
+    case VAR_THREAD:
+    case VAR_NOTIFY_THREAD:
+    case VAR_TIME_THREAD:
+    case VAR_CHILD_THREAD:
         if (newValue.u.intValue == localId)
             goto LABEL_2;
         break;
-    case 0x12u:
-    case 0x13u:
-    case 0x14u:
+    case VAR_OBJECT:
+    case VAR_DEAD_ENTITY:
+    case VAR_ENTITY:
         if (localId)
         {
             Self = Scr_GetSelf(localId);
@@ -2936,7 +2938,9 @@ void __cdecl Scr_UpdateDebugger()
 retry_14:
     for (element = scrDebuggerGlob.scriptWatch.elementHead; element; element = element->next)
     {
-        if (element->breakpointType == 1 && element->objectType != 14 && element->objectType != 22)
+        if (element->breakpointType == 1
+            && element->objectType != VAR_THREAD
+            && element->objectType != VAR_DEAD_THREAD)
         {
             if (element->breakpoint)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 9498, 0, "%s", "!element->breakpoint");
@@ -3013,13 +3017,13 @@ char __cdecl Scr_WatchElementHasSameValue(Scr_WatchElement_s *element, VariableV
     }
     else
     {
-        if (oldValue.type != 6)
+        if (oldValue.type != VAR_INTEGER)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 9097, 0, "%s", "oldValue.type == VAR_INTEGER");
         if (oldValue.u.intValue)
         {
-            if (element->value.type != 1)
+            if (element->value.type != VAR_POINTER)
                 return 1;
-            if (newValue->type != 1)
+            if (newValue->type != VAR_POINTER)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 9102, 0, "%s", "newValue->type == VAR_POINTER");
             if (GetObjectType(newValue->u.intValue) == element->objectType)
                 return 1;
@@ -3073,8 +3077,8 @@ retry_15:
             if (!elementNode->element->breakpointType)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 9607, 0, "%s", "element->breakpointType != SCR_BREAKPOINT_NONE");
             if (element->breakpointType == 1
-                && element->objectType != 14
-                && element->objectType != 22
+                && element->objectType != VAR_THREAD
+                && element->objectType != VAR_DEAD_THREAD
                 && !element->expr.breakonExpr)
             {
                 if (element->breakpoint)
@@ -3189,7 +3193,7 @@ retry_15:
     case 74:
     case 75:
     case 89:
-        if (top->type == 1)
+        if (top->type == VAR_POINTER)
             v5.intValue = top->u.intValue;
         else
             v5.intValue = 0;

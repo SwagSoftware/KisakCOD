@@ -165,7 +165,7 @@ int __cdecl Scr_GetFunctionHandle(const char* filename, const char* name)
     nameId = FindVariable(id, str);
     if (!nameId)
         return 0;
-    if (GetValueType(nameId) != 1)
+    if (GetValueType(nameId) != VAR_POINTER)
         return 0;
     threadId = FindObject(nameId);
     if (!threadId)
@@ -174,7 +174,7 @@ int __cdecl Scr_GetFunctionHandle(const char* filename, const char* name)
     if (!posId)
         MyAssertHandler(".\\script\\scr_main.cpp", 95, 0, "%s", "posId");
     v3 = Scr_EvalVariable(posId);
-    if (v3.type != 7 && v3.type != 12)
+    if (v3.type != VAR_CODEPOS && v3.type != VAR_DEVELOPER_CODEPOS)
         MyAssertHandler(
             ".\\script\\scr_main.cpp",
             99,
@@ -367,7 +367,7 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
                 goto $LN54_3;
             case 'R':
             case 'V':
-                if (top->type != 1)
+                if (top->type != VAR_POINTER)
                     goto LABEL_19;
             $LN58_0:
                 if (scrVmPub.function_count >= 32)
@@ -377,10 +377,10 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
                 break;
             case 'S':
             case 'W':
-                if (top[-1].type != 1)
+                if (top[-1].type != VAR_POINTER)
                     goto LABEL_19;
             $LN54_3:
-                if (top->type != 9 || scrVmPub.function_count >= 32)
+                if (top->type != VAR_FUNCTION || scrVmPub.function_count >= 32)
                     goto LABEL_19;
                 *localId = 0;
                 result = (char*)top->u.intValue;
@@ -553,7 +553,7 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
                 pos += 2;
                 if (scrVarPub.error_message)
                     goto LABEL_67;
-                if (value.type != 6)
+                if (value.type != VAR_INTEGER)
                     MyAssertHandler(".\\script\\scr_vm.cpp", 2452, 0, "%s", "value.type == VAR_INTEGER");
                 if (value.u.intValue)
                     return (char*)pos;
@@ -570,7 +570,7 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
                 pos += 2;
                 if (scrVarPub.error_message)
                     goto LABEL_67;
-                if (value.type != 6)
+                if (value.type != VAR_INTEGER)
                     MyAssertHandler(".\\script\\scr_vm.cpp", 2468, 0, "%s", "value.type == VAR_INTEGER");
                 if (value.u.intValue)
                     return (char*)&pos[v13];
@@ -586,13 +586,13 @@ char* __cdecl Scr_GetNextCodepos(VariableValue* top, const char* pos, int opcode
                 posa = posb + 2;
                 caseCount = v12;
                 v9 = top->type;
-                if (v9 == 2)
+                if (v9 == VAR_STRING)
                 {
                     caseValue = top->u.intValue;
                 }
                 else
                 {
-                    if (v9 != 6)
+                    if (v9 != VAR_INTEGER)
                         return (char*)&posa[8 * v12];
                     if (!IsValidArrayIndex(top->u.intValue))
                         return (char*)&posa[8 * v12];
@@ -707,7 +707,7 @@ bool __cdecl Scr_IsEndonThread(uint32_t localId)
     uint32_t stackId; // [esp+0h] [ebp-8h]
     uint32_t type; // [esp+4h] [ebp-4h]
 
-    if (GetObjectType(localId) != 15)
+    if (GetObjectType(localId) != VAR_NOTIFY_THREAD)
         return 0;
     if (GetStartLocalId(localId) != localId)
         return 0;
@@ -715,10 +715,10 @@ bool __cdecl Scr_IsEndonThread(uint32_t localId)
     type = GetValueType(stackId);
     if (type)
     {
-        if (type != 10)
+        if (type != VAR_STACK)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3348, 0, "%s", "(type == VAR_UNDEFINED) || (type == VAR_STACK)");
     }
-    return type == 0;
+    return type == VAR_UNDEFINED;
 }
 
 uint32_t __cdecl Scr_GetWaittillThreadStackId(uint32_t localId, uint32_t startLocalId)
@@ -768,13 +768,13 @@ const char* __cdecl Scr_GetThreadPos(uint32_t localId)
     ObjectType = GetObjectType(startLocalId);
     switch (ObjectType)
     {
-    case 0xEu:
+    case VAR_THREAD:
         return Scr_GetRunningThreadPos(localId);
-    case 0xFu:
+    case VAR_NOTIFY_THREAD:
         stackId = Scr_GetWaittillThreadStackId(localId, startLocalId);
         if (!stackId)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3396, 0, "%s", "stackId");
-        if (GetValueType(stackId) != 10)
+        if (GetValueType(stackId) != VAR_STACK)
         {
             ValueType = GetValueType(stackId);
             MyAssertHandler(
@@ -786,11 +786,11 @@ const char* __cdecl Scr_GetThreadPos(uint32_t localId)
                 ValueType);
         }
         goto LABEL_21;
-    case 0x10u:
+    case VAR_TIME_THREAD:
         stackId = Scr_GetWaitThreadStackId(localId, startLocalId);
         if (!stackId)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3402, 0, "%s", "stackId");
-        if (GetValueType(stackId) != 10)
+        if (GetValueType(stackId) != VAR_STACK)
         {
             v3 = GetValueType(stackId);
             MyAssertHandler(
@@ -836,7 +836,7 @@ const char* __cdecl Scr_GetStackThreadPos(uint32_t endLocalId, VariableStackBuff
         u.intValue = *(int*)bufa;
         buf = bufa - 1;
         --size;
-        if (*buf == 7)
+        if (*buf == VAR_CODEPOS)
         {
             parentLocalId = GetParentLocalId(localId);
             if (localId == endLocalId)
@@ -1167,13 +1167,13 @@ void __cdecl Scr_TerminateThread(uint32_t localId)
     ObjectType = GetObjectType(startLocalId);
     switch (ObjectType)
     {
-    case 0xEu:
+    case VAR_THREAD:
         Scr_TerminateRunningThread(localId);
         break;
-    case 0xFu:
+    case VAR_NOTIFY_THREAD:
         Scr_TerminateWaittillThread(localId, startLocalId);
         break;
-    case 0x10u:
+    case VAR_TIME_THREAD:
         Scr_TerminateWaitThread(localId, startLocalId);
         break;
     default:
@@ -1235,7 +1235,7 @@ void __cdecl Scr_TerminateWaitThread(uint32_t localId, uint32_t startLocalId)
     stackId = FindObjectVariable(id, startLocalId);
     if (!stackId)
         MyAssertHandler(".\\script\\scr_vm.cpp", 3208, 0, "%s", "stackId");
-    if (GetValueType(stackId) != 10)
+    if (GetValueType(stackId) != VAR_STACK)
         MyAssertHandler(".\\script\\scr_vm.cpp", 3209, 0, "%s", "GetValueType( stackId ) == VAR_STACK");
     stackValue = GetVariableValueAddress(stackId)->u.stackValue;
     if (scrVarPub.developer)
@@ -1348,7 +1348,7 @@ void __cdecl Scr_TerminateWaittillThread(uint32_t localId, uint32_t startLocalId
         stackId = FindObjectVariable(notifyNameListId, startLocalId);
         if (!stackId)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3276, 0, "%s", "stackId");
-        if (GetValueType(stackId) != 10)
+        if (GetValueType(stackId) != VAR_STACK)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3277, 0, "%s", "GetValueType( stackId ) == VAR_STACK");
         stackValue = (VariableStackBuffer*)GetVariableValueAddress(stackId)->u.intValue;
         if (scrVarPub.developer)
@@ -1363,7 +1363,7 @@ void __cdecl Scr_TerminateWaittillThread(uint32_t localId, uint32_t startLocalId
         stackIda = FindVariable(startLocalId, 0x18001u);
         if (!stackIda)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3293, 0, "%s", "stackId");
-        if (GetValueType(stackIda) != 10)
+        if (GetValueType(stackIda) != VAR_STACK)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3294, 0, "%s", "GetValueType( stackId ) == VAR_STACK");
         stackValue = (VariableStackBuffer*)GetVariableValueAddress(stackIda)->u.intValue;
         if (scrVarPub.developer)
@@ -3854,7 +3854,7 @@ void __cdecl VM_TerminateTime(uint32_t timeId)
         startLocalId = GetVariableKeyObject(stackId);
         if (!startLocalId)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3803, 0, "%s", "startLocalId");
-        if (GetValueType(stackId) != 10)
+        if (GetValueType(stackId) != VAR_STACK)
             MyAssertHandler(".\\script\\scr_vm.cpp", 3805, 0, "%s", "GetValueType( stackId ) == VAR_STACK");
         stackValue = (VariableStackBuffer*)GetVariableValueAddress(stackId)->u.intValue;
         RemoveObjectVariable(timeId, startLocalId);
@@ -3906,7 +3906,7 @@ scr_anim_s __cdecl Scr_GetAnim(uint32_t index, XAnimTree_s* tree)
     if (index < scrVmPub.outparamcount)
     {
         value = &scrVmPub.top[-(int)index];
-        if (value->type == 11)
+        if (value->type == VAR_ANIMATION)
         {
             anim = (scr_anim_s)value->u.intValue;
             if (!tree)
@@ -3977,9 +3977,9 @@ float __cdecl Scr_GetFloat(uint32_t index)
     if (index < scrVmPub.outparamcount)
     {
         value = &scrVmPub.top[-(int)index];
-        if (value->type == 5)
+        if (value->type == VAR_FLOAT)
             return value->u.floatValue;
-        if (value->type == 6)
+        if (value->type == VAR_INTEGER)
             return (double)value->u.intValue;
         scrVarPub.error_index = index + 1;
         Scr_Error(va("type %s is not a float", var_typename[value->type]));
@@ -4125,7 +4125,7 @@ void __cdecl Scr_GetVector(uint32_t index, float* vectorValue)
     if (index < scrVmPub.outparamcount)
     {
         value = &scrVmPub.top[-(int)index];
-        if (value->type == 4)
+        if (value->type == VAR_VECTOR)
         {
             vecValue = value->u.vectorValue;
             vectorValue[0] = vecValue[0];
@@ -4295,15 +4295,15 @@ void __cdecl Scr_AddObject(uint32_t id)
 {
     if (!id)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4891, 0, "%s", "id");
-    if (GetObjectType(id) == 14)
+    if (GetObjectType(id) == VAR_THREAD)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4894, 0, "%s", "GetObjectType( id ) != VAR_THREAD");
-    if (GetObjectType(id) == 15)
+    if (GetObjectType(id) == VAR_NOTIFY_THREAD)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4895, 0, "%s", "GetObjectType( id ) != VAR_NOTIFY_THREAD");
-    if (GetObjectType(id) == 16)
+    if (GetObjectType(id) == VAR_TIME_THREAD)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4896, 0, "%s", "GetObjectType( id ) != VAR_TIME_THREAD");
-    if (GetObjectType(id) == 17)
+    if (GetObjectType(id) == VAR_CHILD_THREAD)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4897, 0, "%s", "GetObjectType( id ) != VAR_CHILD_THREAD");
-    if (GetObjectType(id) == 22)
+    if (GetObjectType(id) == VAR_DEAD_THREAD)
         MyAssertHandler(".\\script\\scr_vm.cpp", 4898, 0, "%s", "GetObjectType( id ) != VAR_DEAD_THREAD");
     IncInParam();
     scrVmPub.top->type = VAR_POINTER;
@@ -4402,7 +4402,7 @@ void __cdecl Scr_AddArrayStringIndexed(uint32_t stringValue)
         MyAssertHandler(".\\script\\scr_vm.cpp", 5019, 0, "%s", "scrVmPub.inparamcount");
     --scrVmPub.top;
     --scrVmPub.inparamcount;
-    if (scrVmPub.top->type != 1)
+    if (scrVmPub.top->type != VAR_POINTER)
         MyAssertHandler(".\\script\\scr_vm.cpp", 5022, 0, "%s", "scrVmPub.top->type == VAR_POINTER");
     id = GetNewVariable(scrVmPub.top->u.stringValue, stringValue);
     SetNewVariableValue(id, scrVmPub.top + 1);
@@ -4556,7 +4556,7 @@ void __cdecl Scr_SetDynamicEntityField(uint32_t entnum, uint32_t classnum, uint3
         MyAssertHandler(".\\script\\scr_vm.cpp", 5178, 0, "%s", "!scrVarPub.varUsagePos");
     scrVarPub.varUsagePos = "<radiant field variable>";
     entId = Scr_GetEntityId(entnum, classnum);
-    if (GetObjectType(entId) != 20)
+    if (GetObjectType(entId) != VAR_ENTITY)
         MyAssertHandler(".\\script\\scr_vm.cpp", 5183, 0, "%s", "GetObjectType( entId ) == VAR_ENTITY");
     scrVarPub.varUsagePos = 0;
     Scr_SetStructField(entId, index);
@@ -5095,7 +5095,7 @@ uint32_t Scr_GetFunc(uint32_t index)
     if (index < scrVmPub.outparamcount)
     {
         value = &scrVmPub.top[-index];
-        if (value->type == 9)
+        if (value->type == VAR_FUNCTION)
         {
             if (!Scr_IsInOpcodeMemory(value->u.codePosValue))
                 MyAssertHandler(
@@ -5150,7 +5150,7 @@ XAnim_s * Scr_GetAnimTree(uint32_t index)
     {
         v3 = &scrVmPub.top[-index];
         type = v3->type;
-        if (type == 6)
+        if (type == VAR_INTEGER)
         {
             if (v3->u.intValue <= scrAnimPub.xanim_num[1])
             {

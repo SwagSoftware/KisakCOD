@@ -31,7 +31,7 @@ bool __cdecl Scr_ElementChildrenExist(Scr_WatchElement_s *element)
 {
     if (element->threadList || element->endonList)
         return 1;
-    return element->childHead && element->expand && element->objectType && element->objectType < 0x16u;
+    return element->childHead && element->expand && element->objectType && element->objectType < VAR_DEAD_THREAD;
 }
 
 void __cdecl UI_Component::InitAssets()
@@ -334,11 +334,11 @@ void __cdecl Scr_PrintElementText(Scr_WatchElement_s *element, int bufLen, int d
         return;
     }
     objectType = element->objectType;
-    if (objectType == 14)
+    if (objectType == VAR_THREAD)
         goto LABEL_12;
-    if (objectType != 20)
+    if (objectType != VAR_ENTITY)
     {
-        if (objectType == 22)
+        if (objectType == VAR_DEAD_THREAD)
         {
         LABEL_12:
             I_strncpyz(&buf[depth + 1], element->refText, bufLen - (depth + 1));
@@ -543,7 +543,7 @@ void Scr_ScriptWatch::Draw_r(Scr_WatchElement_s *element,
                 lastHeight,
                 startLine,
                 depth + 1,
-                element->objectType == 21,
+                element->objectType == VAR_ARRAY,
                 currentLine,
                 currentY,
                 compX,
@@ -1196,7 +1196,8 @@ void __thiscall Scr_ScriptWatch::DisplayThreadPos(Scr_WatchElement_s *element)
 
     if (Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 7063, 0, "%s", "!Sys_IsRemoteDebugClient()");
-    if (scrVarPub.evaluate && (element->objectType == 22 || element->objectType == 14 && element->directObject))
+    if (scrVarPub.evaluate
+        && (element->objectType == VAR_DEAD_THREAD || element->objectType == VAR_THREAD && element->directObject))
     {
         codePos = Scr_GetElementThreadPos(element);
         if (codePos)
@@ -1275,7 +1276,7 @@ void Scr_ScriptWatch::UpdateBreakpoint(bool add)
             scrDebuggerGlob.currentElement = element;
             scrDebuggerGlob.removeId = 0;
             scrDebuggerGlob.add = add;
-            if (element->valueDefined && element->value.type == 1)
+            if (element->valueDefined && element->value.type == VAR_POINTER)
                 Scr_RefToVariable(element->value.u.stringValue, 1);
             Scr_RefScriptExpression(&element->expr);
         }
@@ -1507,7 +1508,7 @@ bool Scr_ScriptWatch::SetSelectedLineFocus(int newSelectedLine, bool user)
     if (!element)
         return 1;
 
-    if (element->objectType != 14 && element->objectType != 22)
+    if (element->objectType != VAR_THREAD && element->objectType != VAR_DEAD_THREAD)
         return 1;
 
     if (Sys_IsRemoteDebugClient())
@@ -2233,9 +2234,9 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
     {
         if (!scrVarPub.evaluate)
             MyAssertHandler(".\\script\\scr_debugger.cpp", 5780, 0, "%s", "scrVarPub.evaluate");
-        isArray = parentElement->objectType == 21;
+        isArray = parentElement->objectType == VAR_ARRAY;
         hardcodedCount = 0;
-        if (parentElement->objectType == 24)
+        if (parentElement->objectType == VAR_THREAD_LIST)
         {
             if (!parentElement->parent)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 5787, 0, "%s", "parentElement->parent");
@@ -2244,7 +2245,7 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 5789, 0, "%s", "objectId");
             count = Scr_FindAllThreads(objectId, 0, this->localId);
         }
-        else if (parentElement->objectType == 25)
+        else if (parentElement->objectType == VAR_ENDON_LIST)
         {
             if (!parentElement->parent)
                 MyAssertHandler(".\\script\\scr_debugger.cpp", 5795, 0, "%s", "parentElement->parent");
@@ -2261,10 +2262,10 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
             if (parentElement->directObject)
             {
                 objectType = parentElement->objectType;
-                if (objectType == 14)
+                if (objectType == VAR_THREAD)
                 {
                     threadId = GetSafeParentLocalId(parentElement->objectId);
-                    if (!threadId && GetObjectType(parentElement->objectId) == 14)
+                    if (!threadId && GetObjectType(parentElement->objectId) == VAR_THREAD)
                     {
                         for (function_count = scrVmPub.function_count; ; --function_count)
                         {
@@ -2280,7 +2281,7 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
                     if (threadId)
                         hardcodedNames[hardcodedCount++] = threadId + 5;
                 }
-                else if (objectType > 0x11u && objectType <= 0x14u)
+                else if (objectType > VAR_CHILD_THREAD && objectType <= VAR_ENTITY)
                 {
                     hardcodedNames[hardcodedCount++] = 4;
                 }
@@ -2290,12 +2291,12 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
                 hardcodedNames[hardcodedCount++] = 1;
             }
             v11 = parentElement->objectType;
-            if (v11 == 14)
+            if (v11 == VAR_THREAD)
             {
                 hardcodedNames[hardcodedCount++] = 2;
                 hardcodedNames[hardcodedCount++] = 3;
             }
-            else if (v11 == 21)
+            else if (v11 == VAR_ARRAY)
             {
                 hardcodedNames[hardcodedCount++] = 0;
             }
@@ -2308,12 +2309,12 @@ void Scr_ScriptWatch::EvaluateWatchChildren(Scr_WatchElement_s *parentElement)
         {
             names = Scr_AllocDebugMem(4 * count, "Scr_ScriptWatch::EvaluateWatchChildren");
             memcpy(names, hardcodedNames, 4 * hardcodedCount);
-            if (parentElement->objectType == 24)
+            if (parentElement->objectType == VAR_THREAD_LIST)
             {
                 Scr_FindAllThreads(objectId, names, this->localId);
                 compare = CompareThreadIndices;
             }
-            else if (parentElement->objectType == 25)
+            else if (parentElement->objectType == VAR_ENDON_LIST)
             {
                 Scr_FindAllEndons(objectId, names);
                 compare = CompareArrayIndices;
@@ -2566,7 +2567,7 @@ bool __thiscall Scr_ScriptWatch::PostEvaluateWatchElement(
     {
         Scr_GetValueString(this->localId, value, 257, valueText);
         ReplaceString(&element->valueText, valueText);
-        if (value->type == 1)
+        if (value->type == VAR_POINTER)
             intValue = value->u.intValue;
         else
             intValue = 0;
@@ -2826,7 +2827,7 @@ void Scr_ScriptWatch::UpdateBreakpoints(bool add)
             scrDebuggerGlob.currentElement = element;
             scrDebuggerGlob.removeId = 0;
             scrDebuggerGlob.add = add;
-            if (element->valueDefined && element->value.type == 1)
+            if (element->valueDefined && element->value.type == VAR_POINTER)
                 Scr_RefToVariable(element->value.u.stringValue, 1);
             Scr_RefScriptExpression(&element->expr);
         }
