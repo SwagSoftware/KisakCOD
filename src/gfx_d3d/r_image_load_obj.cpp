@@ -583,43 +583,43 @@ void __cdecl Image_LoadFromData(GfxImage *image, GfxImageFileHeader *fileHeader,
     image->texture.basemap = 0;
     switch (fileHeader->format)
     {
-    case 1u:
+    case IMG_FORMAT_BITMAP_RGBA:
         Image_LoadBitmap(image, fileHeader, srcData, D3DFMT_A8R8G8B8, 4);
         break;
-    case 2u:
+    case IMG_FORMAT_BITMAP_RGB:
         Image_LoadBitmap(image, fileHeader, srcData, D3DFMT_X8R8G8B8, 3);
         break;
-    case 3u:
+    case IMG_FORMAT_BITMAP_LUMINANCE_ALPHA:
         Image_LoadBitmap(image, fileHeader, srcData, D3DFMT_A8L8, 2);
         break;
-    case 4u:
+    case IMG_FORMAT_BITMAP_LUMINANCE:
         Image_LoadBitmap(image, fileHeader, srcData, D3DFMT_L8, 1);
         break;
-    case 5u:
+    case IMG_FORMAT_BITMAP_ALPHA:
         Image_LoadBitmap(image, fileHeader, srcData, D3DFMT_A8, 1);
         break;
-    case 6u:
+    case IMG_FORMAT_WAVELET_RGBA:
         Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_A8R8G8B8, 4);
         break;
-    case 7u:
+    case IMG_FORMAT_WAVELET_RGB:
         Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_X8R8G8B8, 3);
         break;
-    case 8u:
+    case IMG_FORMAT_WAVELET_LUMINANCE_ALPHA:
         Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_A8L8, 2);
         break;
-    case 9u:
+    case IMG_FORMAT_WAVELET_LUMINANCE:
         Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_L8, 1);
         break;
-    case 10u:
+    case IMG_FORMAT_WAVELET_ALPHA:
         Image_LoadWavelet(image, fileHeader, srcData, D3DFMT_A8, 1);
         break;
-    case 11u:
+    case IMG_FORMAT_DXT1:
         Image_LoadDxtc(image, fileHeader, srcData, D3DFMT_DXT1, 8);
         break;
-    case 12u:
+    case IMG_FORMAT_DXT3:
         Image_LoadDxtc(image, fileHeader, srcData, D3DFMT_DXT3, 16);
         break;
-    case 13u:
+    case IMG_FORMAT_DXT5:
         Image_LoadDxtc(image, fileHeader, srcData, D3DFMT_DXT5, 16);
         break;
     default:
