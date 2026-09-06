@@ -491,7 +491,7 @@ void __cdecl Phys_CreateJointForEachContact(
             0,
             "worldIndex doesn't index PHYS_WORLD_COUNT\n\t%i not in [0, %i)",
             worldIndex,
-            3);
+            PHYS_WORLD_COUNT);
     Phys_CheckOpposingNormals(body1, body2, contactList);
     useCentroids = physGlob.worldData[worldIndex].useContactCentroids;
     debug = 0;

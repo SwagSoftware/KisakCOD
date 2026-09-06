@@ -1089,7 +1089,7 @@ void __cdecl Phys_ObjSetCollisionFromXModel(const XModel *model, PhysWorld world
             {
                 Phys_ObjAddGeomBrush(worldIndex, physId, (const cbrush_t *)geom->brush, &geomList->mass);
             }
-            else if (geom->type == 1)
+            else if (geom->type == PHYS_GEOM_BOX)
             {
                 Phys_ObjAddGeomBoxRotated(worldIndex, physId, geom->offset, geom->halfLengths, geom->orientation);
             }
@@ -1220,14 +1220,14 @@ int __cdecl Phys_IndexFromODEWorld(dxWorld *world)
 {
     int worldIndex; // [esp+0h] [ebp-4h]
 
-    for (worldIndex = 0; worldIndex < 3; ++worldIndex)
+    for (worldIndex = PHYS_WORLD_DYNENT; worldIndex < PHYS_WORLD_COUNT; ++worldIndex)
     {
         if (world == physGlob.world[worldIndex])
             return worldIndex;
     }
     if (!alwaysfails)
         MyAssertHandler("c:\\trees\\cod3\\src\\physics\\phys_local.h", 269, 0, "Invalid ODE world");
-    return 3;
+    return PHYS_WORLD_COUNT;
 }
 
 void __cdecl Phys_ObjBulletImpact(
@@ -1577,7 +1577,7 @@ int __cdecl Phys_DoBodyOncePerFrame(uint32_t worldIndex, dxBody *body, float del
 
     if (!dBodyIsEnabled(body))
         return 0;
-    if (worldIndex == 2)
+    if (worldIndex == PHYS_WORLD_RAGDOLL)
     {
         Vec3Scale(body->info.avel, -0.0099999998f, angDamp);
         Vec3Add(angDamp, body->info.avel, body->info.avel);
@@ -2377,7 +2377,7 @@ void __cdecl Phys_Shutdown()
         ODE_LeakCheck();
         Cmd_RemoveCommand("phys_stop");
         Cmd_RemoveCommand("phys_go");
-        for (worldIndex = 0; worldIndex < 3; ++worldIndex)
+        for (worldIndex = PHYS_WORLD_DYNENT; worldIndex < PHYS_WORLD_COUNT; ++worldIndex)
         {
             if (physGlob.contactgroup[worldIndex])
             {
@@ -2677,7 +2677,7 @@ void __cdecl Phys_SetCollisionCallback(PhysWorld worldIndex, void(__cdecl *callb
             0,
             "worldIndex doesn't index PHYS_WORLD_COUNT\n\t%i not in [0, %i)",
             worldIndex,
-            3);
+            PHYS_WORLD_COUNT);
     physGlob.worldData[worldIndex].collisionCallback = callback;
 }
 
@@ -2703,7 +2703,7 @@ void __cdecl Phys_AddJitterRegion(
             0,
             "worldIndex doesn't index PHYS_WORLD_COUNT\n\t%i not in [0, %i)",
             worldIndex,
-            3);
+            PHYS_WORLD_COUNT);
     worldData = &physGlob.worldData[worldIndex];
     if (worldData->numJitterRegions < 5)
         jitter = &worldData->jitterRegions[worldData->numJitterRegions++];

@@ -356,7 +356,7 @@ char __cdecl IsBoxInBox(const float *boxCenter, const float *boxHalfLengths, con
     uint32_t sideIndex; // [esp+3Ch] [ebp-8h]
     float alignedBoxDist; // [esp+40h] [ebp-4h]
 
-    if (geom->type != 1)
+    if (geom->type != PHYS_GEOM_BOX)
         MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 594, 0, "%s", "geom->type == PHYS_GEOM_BOX");
     for (sideIndex = 0; sideIndex < 3; ++sideIndex)
     {
@@ -391,7 +391,7 @@ char __cdecl IsBoxInCylinder(const float *boxCenter, const float *boxHalfLengths
     uint32_t axis; // [esp+2Ch] [ebp-Ch]
     float cylOffset; // [esp+30h] [ebp-8h]
 
-    if (geom->type != 4)
+    if (geom->type != PHYS_GEOM_CYLINDER)
         MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 623, 0, "%s", "geom->type == PHYS_GEOM_CYLINDER");
     for (axis = 0; axis < 3; ++axis)
     {
@@ -431,12 +431,12 @@ bool __cdecl IsBoxInGeom(const float *boxCenter, const float *boxHalfLengths, co
         else
         {
             type = geomIter->type;
-            if (type == 1)
+            if (type == PHYS_GEOM_BOX)
             {
                 if (IsBoxInBox(boxCenter, boxHalfLengths, geomIter))
                     return 1;
             }
-            else if (type == 4)
+            else if (type == PHYS_GEOM_CYLINDER)
             {
                 if (IsBoxInCylinder(boxCenter, boxHalfLengths, geomIter))
                     return 1;
@@ -463,7 +463,7 @@ char __cdecl Xmodel_ParsePhysicsCylinder(const char **file, PhysGeomInfo *geom)
     token = Com_Parse(file)->token;
     if (*token == 123)
     {
-        geom->type = 4;
+        geom->type = PHYS_GEOM_CYLINDER;
         axis[0] = Com_ParseFloat(file);
         axis[1] = Com_ParseFloatOnLine(file);
         axis[2] = Com_ParseFloatOnLine(file);
@@ -496,7 +496,7 @@ bool __cdecl Xmodel_ParsePhysicsBox(const char **file, PhysGeomInfo *geom)
         MyAssertHandler(".\\xanim\\xmodel_load_phys_collmap.cpp", 445, 0, "%s", "geom");
     if (Com_Parse(file)->token[0] == 123)
     {
-        geom->type = 1;
+        geom->type = PHYS_GEOM_BOX;
         geom->orientation[0][0] = Com_ParseFloat(file);
         geom->orientation[0][1] = Com_ParseFloatOnLine(file);
         geom->orientation[0][2] = Com_ParseFloatOnLine(file);
@@ -1060,13 +1060,13 @@ void __cdecl GetGeomAABB(const PhysGeomInfo *geom, float *mins, float *maxs)
         range_4 = 0.0;
         range_8 = 0.0;
         type = geom->type;
-        if (type == 1)
+        if (type == PHYS_GEOM_BOX)
         {
             range = geom->halfLengths[0];
             range_4 = geom->halfLengths[1];
             range_8 = geom->halfLengths[2];
         }
-        else if (type == 4)
+        else if (type == PHYS_GEOM_CYLINDER)
         {
             range = geom->halfLengths[0];
             range_4 = geom->halfLengths[1];
