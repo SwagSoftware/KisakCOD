@@ -17,6 +17,7 @@
 #include <win32/win_net_debug.h>
 #include "scr_evaluate.h"
 #include <client/client.h>
+#include <ui/keycodes.h>
 #include <win32/win_input.h>
 #include <qcommon/threads.h>
 #include <gfx_d3d/r_rendercmds.h>
@@ -491,7 +492,7 @@ void __cdecl Scr_KeyEvent(int key)
             0,
             "%s",
             "Key_IsCatcherActive( ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT )");
-    if (!Key_IsDown(0, 158) && !Key_IsDown(0, 159) && !Key_IsDown(0, 160))
+    if (!Key_IsDown(0, K_ALT) && !Key_IsDown(0, K_CTRL) && !Key_IsDown(0, K_SHIFT))
     {
         switch (key)
         {
@@ -509,14 +510,14 @@ void __cdecl Scr_KeyEvent(int key)
         case 53:
             Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.openScriptList);
             return;
-        case 153:
+        case K_PAUSE:
             if (Sys_IsRemoteDebugClient())
             {
                 Sys_WriteDebugSocketMessageType(0x2Cu);
                 Sys_EndWriteDebugSocket();
             }
             return;
-        case 167:
+        case K_F1:
             //UI_LinesComponent::SetSelectedLineFocus(&scrDebuggerGlob.scriptList, 0, 0);
             scrDebuggerGlob.scriptList.SetSelectedLineFocus(0, 0);
             //UI_LinesComponent::ClearFocus(&scrDebuggerGlob.scriptList);
@@ -529,7 +530,7 @@ void __cdecl Scr_KeyEvent(int key)
                 scrDebuggerGlob.scriptScrollPane.comp->SetSelectedLineFocus(scrDebuggerGlob.scriptScrollPane.comp->selectedLine, 0);
             }
             break;
-        case 169:
+        case K_F3:
             Scr_SetSelectionComp(&scrDebuggerGlob.scriptScrollPane);
             if (scrDebuggerGlob.scriptScrollPane.comp)
             {
@@ -537,15 +538,15 @@ void __cdecl Scr_KeyEvent(int key)
                 ((Scr_ScriptWindow *)(scrDebuggerGlob.scriptScrollPane.comp))->FindNext();
             }
             break;
-        case 171:
+        case K_F5:
             scrDebuggerGlob.step_mode = 0;
             Scr_Step();
             break;
-        case 176:
+        case K_F10:
             scrDebuggerGlob.step_mode = 1;
             Scr_Step();
             break;
-        case 177:
+        case K_F11:
             scrDebuggerGlob.step_mode = 2;
             Scr_Step();
             break;
@@ -554,11 +555,11 @@ void __cdecl Scr_KeyEvent(int key)
         }
         return;
     }
-    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || !Key_IsDown(0, 160))
+    if (Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || !Key_IsDown(0, K_SHIFT))
     {
-        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        if (Key_IsDown(0, K_ALT) || !Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
         {
-            if (!Key_IsDown(0, 158) && Key_IsDown(0, 159) && Key_IsDown(0, 160) && key == 9)
+            if (!Key_IsDown(0, K_ALT) && Key_IsDown(0, K_CTRL) && Key_IsDown(0, K_SHIFT) && key == K_TAB)
             {
                 //UI_LinesComponent::IncSelectedLineFocus(&scrDebuggerGlob.openScriptList, 1);
                 scrDebuggerGlob.openScriptList.IncSelectedLineFocus(true);
@@ -567,7 +568,7 @@ void __cdecl Scr_KeyEvent(int key)
         }
         else
         {
-            if (key == 9)
+            if (key == K_TAB)
             {
                 //UI_LinesComponent::DecSelectedLineFocus(&scrDebuggerGlob.openScriptList, 1);
                 scrDebuggerGlob.openScriptList.DecSelectedLineFocus(true);
@@ -582,9 +583,9 @@ void __cdecl Scr_KeyEvent(int key)
         }
         goto LABEL_50;
     }
-    if (key != 169)
+    if (key != K_F3)
     {
-        if (key == 177)
+        if (key == K_F11)
         {
             scrDebuggerGlob.step_mode = 3;
             Scr_Step();
@@ -593,7 +594,7 @@ void __cdecl Scr_KeyEvent(int key)
     LABEL_50:
         point[0] = UI_Component::g.cursorPos[0];
         point[1] = UI_Component::g.cursorPos[1];
-        if (key == 200)
+        if (key == K_MOUSE1)
         {
             if (!UI_Component::g.hideCursor)
             {
@@ -603,7 +604,7 @@ void __cdecl Scr_KeyEvent(int key)
                 {
                     if (comp->selectionParent)
                         Scr_SetSelectionComp(comp->selectionParent);
-                    if (comp->KeyEvent(point, 200))
+                    if (comp->KeyEvent(point, K_MOUSE1))
                     {
                         scrDebuggerGlob.prevMouseTime = 0;
                     }
@@ -620,7 +621,7 @@ void __cdecl Scr_KeyEvent(int key)
                         }
                         else
                         {
-                            comp->KeyEvent(point, 223);
+                            comp->KeyEvent(point, K_LAST_KEY);
                             scrDebuggerGlob.prevMouseTime = 0;
                         }
                     }

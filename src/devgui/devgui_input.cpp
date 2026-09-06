@@ -1,5 +1,6 @@
 #include <universal/q_shared.h>
 #include "devgui.h"
+#include <ui/keycodes.h>
 #include <qcommon/cmd.h>
 #include <client/client.h>
 
@@ -9,7 +10,7 @@
 #include <client/cl_input.h>
 #endif
 
-int32_t s_butMapsKey[11] = { 154, 155, 156, 157, 13, 27, 9, 32, 161, 162, 171 }; // idb
+int32_t s_butMapsKey[11] = { K_UPARROW, K_DOWNARROW, K_LEFTARROW, K_RIGHTARROW, K_ENTER, K_ESCAPE, K_TAB, K_SPACE, K_INS, K_DEL, K_F5 }; // idb
 
 DevGuiInput s_input;
 
@@ -85,7 +86,7 @@ void __cdecl DevGui_UpdateScrollInputs(int32_t localClientNum)
     else
         v1 = 0.0;
     down = v1;
-    if (Key_IsDown(localClientNum, 200))
+    if (Key_IsDown(localClientNum, K_MOUSE1))
     {
         lx = s_input.mousePos[0];
         ly = -s_input.mousePos[1];

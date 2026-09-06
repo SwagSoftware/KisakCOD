@@ -1352,11 +1352,11 @@ bool Scr_ScriptWatch::KeyEvent(float *point, int key)
     Scr_WatchElement_s *SelectedElement; // eax
     Scr_WatchElement_s *v8; // eax
 
-    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    if (Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
     {
-        if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || !Key_IsDown(0, 160))
+        if (Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || !Key_IsDown(0, K_SHIFT))
         {
-            if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+            if (Key_IsDown(0, K_ALT) || !Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
             {
                 return UI_LinesComponent::KeyEvent(point, key);
             }
@@ -1365,7 +1365,7 @@ bool Scr_ScriptWatch::KeyEvent(float *point, int key)
                 switch (key)
                 {
                 case 99:
-                case 161:
+                case K_INS:
                     //Scr_ScriptWatch::CopyElement(this);
                     this->CopyElement();
                     result = 1;
@@ -1384,14 +1384,14 @@ bool Scr_ScriptWatch::KeyEvent(float *point, int key)
                     this->DeleteElement();
                     result = 1;
                     break;
-                case 173:
+                case K_F7:
                     //SelectedElement = Scr_ScriptWatch::GetSelectedElement(this);
                     SelectedElement = this->GetSelectedElement();
                     //Scr_ScriptWatch::ToggleBreakpoint(this, SelectedElement, 7u);
                     this->ToggleBreakpoint(SelectedElement, 7);
                     result = 1;
                     break;
-                case 175:
+                case K_F9:
                     //v8 = Scr_ScriptWatch::GetSelectedElement(this);
                     v8 = this->GetSelectedElement();
                     //Scr_ScriptWatch::ToggleBreakpoint(this, v8, 3u);
@@ -1413,9 +1413,9 @@ bool Scr_ScriptWatch::KeyEvent(float *point, int key)
                 this->EditElement(SCR_CONSOLE_INPUT_OUTPUT);
                 result = 1;
                 break;
-            case 161:
+            case K_INS:
                 goto $LN12_30;
-            case 162:
+            case K_DEL:
                 goto $LN11_27;
             default:
                 return UI_LinesComponent::KeyEvent(point, key);
@@ -1426,9 +1426,9 @@ bool Scr_ScriptWatch::KeyEvent(float *point, int key)
     {
         switch (key)
         {
-        case 13:
-        case 191:
-        case 223:
+        case K_ENTER:
+        case K_KP_ENTER:
+        case K_LAST_KEY:
             //Scr_ScriptWatch::CloneSelectedElement(this);
             this->CloneSelectedElement();
             result = 1;
@@ -1439,53 +1439,53 @@ bool Scr_ScriptWatch::KeyEvent(float *point, int key)
             this->EditElement(SCR_CONSOLE_INPUT_ONLY);
             result = 1;
             break;
-        case 127:
+        case K_BACKSPACE:
             //Scr_ScriptWatch::BackspaceElement(this);
             this->BackspaceElement();
             result = 1;
             break;
-        case 156:
+        case K_LEFTARROW:
             //Scr_ScriptWatch::ExpandSelectedElement(this, 0);
             this->ExpandSelectedElement(false);
             result = 1;
             break;
-        case 157:
+        case K_RIGHTARROW:
             //Scr_ScriptWatch::ExpandSelectedElement(this, 1);
             this->ExpandSelectedElement(true);
             result = 1;
             break;
-        case 161:
+        case K_INS:
             //Scr_ScriptWatch::InsertElement(this);
             this->InsertElement();
             result = 1;
             break;
-        case 162:
+        case K_DEL:
             //Scr_ScriptWatch::DeleteElement(this);
             this->DeleteElement();
             result = 1;
             break;
-        case 173:
+        case K_F7:
             //v4 = Scr_ScriptWatch::GetSelectedElement(this);
             v4 = this->GetSelectedElement();
             //Scr_ScriptWatch::ToggleBreakpoint(this, v4, 6u);
             this->ToggleBreakpoint(v4, 6);
             result = 1;
             break;
-        case 174:
+        case K_F8:
             //v5 = Scr_ScriptWatch::GetSelectedElement(this);
             v5 = this->GetSelectedElement();
             //Scr_ScriptWatch::ToggleBreakpoint(this, v5, 2u);
             this->ToggleBreakpoint(v5, 2);
             result = 1;
             break;
-        case 175:
+        case K_F9:
             //v6 = Scr_ScriptWatch::GetSelectedElement(this);
             v6 = this->GetSelectedElement();
             //Scr_ScriptWatch::ToggleBreakpoint(this, v6, 1u);
             this->ToggleBreakpoint(v6, 1);
             result = 1;
             break;
-        case 200:
+        case K_MOUSE1:
             //result = Scr_ScriptWatch::LeftMouseEvent(this, point);
             result = this->LeftMouseEvent(point);
             break;
@@ -3390,7 +3390,7 @@ void UI_ScrollPane::CheckMouseScroll(int index, float *thumbPos, float *thumbSiz
 {
     float *pos; // eax
 
-    if (Key_IsDown(0, 200))
+    if (Key_IsDown(0, K_MOUSE1))
     {
         if (this->mouseHeldScale[index] == 0.0)
         {
@@ -3711,14 +3711,14 @@ UI_Component *UI_VerticalDivider::GetCompAtLocation(float *point)
 
 bool UI_VerticalDivider::KeyEvent(float *point, int key)
 {
-    if (!Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    if (!Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
         return 0;
-    if (key == 154)
+    if (key == K_UPARROW)
     {
         this->posY = this->posY - UI_Component::g.charHeight;
         return 1;
     }
-    if (key != 155)
+    if (key != K_DOWNARROW)
         return 0;
     this->posY = this->posY + UI_Component::g.charHeight;
     return 1;
@@ -3735,12 +3735,12 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
 
     if (!this->comp)
         return 0;
-    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    if (Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
     {
-        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        if (Key_IsDown(0, K_ALT) || !Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
         {
         LABEL_23:
-            if (key != 200
+            if (key != K_MOUSE1
                 || (vec2_origin[0] = 0.0,
                     vec2_origin[1] = 0.0,
                     UI_ScrollPane::GetInnerSize(innerSize),
@@ -3760,44 +3760,44 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
         {
             switch (key)
             {
-            case 154:
+            case K_UPARROW:
                 this->comp->pos[1] = this->comp->pos[1] - UI_Component::g.charHeight;
                 UI_ScrollPane::SetPos();
                 result = 1;
                 break;
-            case 155:
+            case K_DOWNARROW:
                 this->comp->pos[1] = this->comp->pos[1] + UI_Component::g.charHeight;
                 UI_ScrollPane::SetPos();
                 result = 1;
                 break;
-            case 156:
+            case K_LEFTARROW:
                 this->comp->pos[0] = this->comp->pos[0] - UI_Component::g.charWidth;
                 UI_ScrollPane::SetPos();
                 result = 1;
                 break;
-            case 157:
+            case K_RIGHTARROW:
                 this->comp->pos[0] = this->comp->pos[0] + UI_Component::g.charWidth;
                 UI_ScrollPane::SetPos();
                 result = 1;
                 break;
-            case 163:
+            case K_PGDN:
                 this->comp->selectedLine = 0x7FFFFFFF;
                 UI_ScrollPane::DisplaySelectedLine();
                 result = 1;
                 break;
-            case 164:
+            case K_PGUP:
                 this->comp->selectedLine = 0;
                 UI_ScrollPane::DisplaySelectedLine();
                 result = 1;
                 break;
-            case 165:
+            case K_HOME:
                 this->comp->pos[1] = 0.0;
                 this->comp->selectedLine = 0;
                 UI_ScrollPane::SetPos();
                 UI_ScrollPane::DisplaySelectedLine();
                 result = 1;
                 break;
-            case 166:
+            case K_END:
                 this->comp->pos[1] = FLT_MAX;
                 this->comp->selectedLine = 0x7FFFFFFF;
                 UI_ScrollPane::SetPos();
@@ -3813,7 +3813,7 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
     {
         switch (key)
         {
-        case 163:
+        case K_PGDN:
             linesCount = UI_ScrollPane::GetInnerLinesCount();
             this->comp->pos[1] = linesCount * UI_Component::g.charHeight + this->comp->pos[1];
             this->comp->selectedLine += linesCount;
@@ -3821,7 +3821,7 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
             UI_ScrollPane::DisplaySelectedLine();
             result = 1;
             break;
-        case 164:
+        case K_PGUP:
             linesCount = UI_ScrollPane::GetInnerLinesCount();
             this->comp->pos[1] = this->comp->pos[1] - linesCount * UI_Component::g.charHeight;
             this->comp->selectedLine -= linesCount;
@@ -3829,12 +3829,12 @@ bool UI_ScrollPane::KeyEvent(float *point, int key)
             UI_ScrollPane::DisplaySelectedLine();
             result = 1;
             break;
-        case 205:
+        case K_MWHEELDOWN:
             this->comp->pos[1] = UI_Component::g.charHeight * 3.0 + this->comp->pos[1];
             UI_ScrollPane::SetPos();
             result = 1;
             break;
-        case 206:
+        case K_MWHEELUP:
             this->comp->pos[1] = this->comp->pos[1] - UI_Component::g.charHeight * 3.0;
             UI_ScrollPane::SetPos();
             result = 1;
@@ -4332,9 +4332,9 @@ bool Scr_ScriptWindow::KeyEvent(float *point, int key)
     Scr_WatchElement_s *SelectedNonConditionalElement; // eax
     Scr_WatchElement_s *v7; // eax
 
-    if (Key_IsDown(0, 158) || Key_IsDown(0, 159) || Key_IsDown(0, 160))
+    if (Key_IsDown(0, K_ALT) || Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
     {
-        if (Key_IsDown(0, 158) || !Key_IsDown(0, 159) || Key_IsDown(0, 160))
+        if (Key_IsDown(0, K_ALT) || !Key_IsDown(0, K_CTRL) || Key_IsDown(0, K_SHIFT))
         {
             return UI_LinesComponent::KeyEvent(point, key);
         }
@@ -4343,23 +4343,23 @@ bool Scr_ScriptWindow::KeyEvent(float *point, int key)
             switch (key)
             {
             case 99:
-            case 161:
+            case K_INS:
                 Scr_ScriptWindow::CopySelectedText();
                 result = 1;
                 break;
-            case 173:
+            case K_F7:
                 //SelectedNonConditionalElement = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
                 SelectedNonConditionalElement = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
                 Scr_ScriptWindow::ToggleBreakpoint(SelectedNonConditionalElement, 0, 0, 7u, 1);
                 result = 1;
                 break;
-            case 175:
+            case K_F9:
                 //v7 = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
                 v7 = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
                 Scr_ScriptWindow::ToggleBreakpoint(v7, 0, 0, 4u, 1);
                 result = 1;
                 break;
-            case 176:
+            case K_F10:
                 Scr_ScriptWindow::RunToCursor();
                 result = 1;
                 break;
@@ -4372,19 +4372,19 @@ bool Scr_ScriptWindow::KeyEvent(float *point, int key)
     {
         switch (key)
         {
-        case 13:
-        case 191:
-        case 223:
+        case K_ENTER:
+        case K_KP_ENTER:
+        case K_LAST_KEY:
             Scr_ScriptWindow::EnterCall();
             result = 1;
             break;
-        case 173:
+        case K_F7:
             //v4 = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
             v4 = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
             Scr_ScriptWindow::ToggleBreakpoint(v4, 0, 0, 6u, 1);
             result = 1;
             break;
-        case 175:
+        case K_F9:
             //v5 = Scr_ScriptWatch::GetSelectedNonConditionalElement(&scrDebuggerGlob.scriptWatch);
             v5 = scrDebuggerGlob.scriptWatch.GetSelectedNonConditionalElement();
             Scr_ScriptWindow::ToggleBreakpoint(v5, 0, 0, 5u, 1);
