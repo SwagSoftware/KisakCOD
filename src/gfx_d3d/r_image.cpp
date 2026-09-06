@@ -351,7 +351,7 @@ void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
             }
             iassert(data == &loadDef->data[loadDef->resourceSize]);
         }
-        else if (image->category == 5)
+        else if (image->category == IMG_CATEGORY_WATER)
         {
             image->delayLoadPixels = 0;
             if (loadDef->dimensions[0] >> r_picmip_water->current.integer < 4)
@@ -573,7 +573,7 @@ GfxImage *__cdecl Image_LoadBuiltin(char *name, uint8_t semantic, uint8_t imageT
             break;
     }
 
-    image = Image_Alloc(name, 1u, semantic, imageTrack);
+    image = Image_Alloc(name, IMG_CATEGORY_AUTO_GENERATED, semantic, imageTrack);
     iassert(image);
     constructorTable[tableIndex].LoadCallback(image);
     return image;
@@ -768,7 +768,7 @@ void __cdecl R_SetPicmip()
 
 void R_InitRawImage()
 {
-    rgp.rawImage = Image_AllocProg(11, 4u, TS_2D);
+    rgp.rawImage = Image_AllocProg(11, IMG_CATEGORY_RAW, TS_2D);
     iassert(rgp.rawImage);
 }
 
@@ -1027,7 +1027,7 @@ void __cdecl R_FreeLostImage(XAssetHeader header)
     iassert( image );
     iassert( image->category != IMG_CATEGORY_UNKNOWN );
 
-    if (image->category >= 5)
+    if (image->category >= IMG_CATEGORY_FIRST_UNMANAGED)
         Image_Release(header.image);
 }
 
@@ -1082,11 +1082,11 @@ void __cdecl Image_Rebuild(GfxImage *image)
     iassert( image->category >= IMG_CATEGORY_FIRST_UNMANAGED );
     iassert( !image->texture.basemap );
     category = image->category;
-    if (category == 5)
+    if (category == IMG_CATEGORY_WATER)
     {
         Image_BuildWaterMap(image);
     }
-    else if (category == 6)
+    else if (category == IMG_CATEGORY_RENDERTARGET)
     {
         if (!alwaysfails)
             MyAssertHandler(".\\r_image.cpp", 905, 1, "non-prog image cannot be a render target");
@@ -1107,9 +1107,9 @@ void __cdecl R_RebuildLostImage(XAssetHeader header)
 
     if (!image->texture.basemap)
     {
-        if (image->category < 5)
+        if (image->category < IMG_CATEGORY_FIRST_UNMANAGED)
         {
-            if (image->category == 3)
+            if (image->category == IMG_CATEGORY_LOAD_FROM_FILE)
             {
                 if (!image->delayLoadPixels && !Image_ReloadFromFile(image) && !Image_AssignDefaultTexture(image))
                     Com_Error(ERR_DROP, "Couldn't load image '%s' to recover from a lost device", image->name);
@@ -1311,7 +1311,7 @@ void __cdecl Image_UpdatePicmip(GfxImage *image)
     Picmip picmip; // [esp+0h] [ebp-4h] BYREF
 
     iassert( image );
-    if (image->category == 3 && !image->noPicmip)
+    if (image->category == IMG_CATEGORY_LOAD_FROM_FILE && !image->noPicmip)
     {
         Image_GetPicmip(image, &picmip);
         if (image->picmip.platform[0] != picmip.platform[0])
@@ -1443,7 +1443,7 @@ void __cdecl R_UpdateMipMap()
 }
 
 // idb R_ReloadImages @ 0x513D70.  The binary iterates a flat imageGlobals[32768]
-// GfxImage* array and reloads every loose-file (category==3) image from disk.  Kisak's
+// GfxImage* array and reloads every loose-file (IMG_CATEGORY_LOAD_FROM_FILE) image from disk.  Kisak's
 // imageGlobals.imageHashTable[IMAGE_HASH_TABLE_SIZE] (IMAGE_HASH_TABLE_SIZE==0x8000 in
 // the editor build) IS that same 32768-slot GfxImage* array — the "flat array vs struct"
 // divergence was illusory (the struct's first member is the 32768-entry table).  So the

@@ -407,7 +407,7 @@ static GfxImage *__cdecl Image_Load(char *name, uint8_t semantic, uint8_t imageT
 
     if (*name == 36)
         return Image_LoadBuiltin(name, semantic, imageTrack);
-    image = Image_Alloc(name, 3u, semantic, imageTrack);
+    image = Image_Alloc(name, IMG_CATEGORY_LOAD_FROM_FILE, semantic, imageTrack);
     iassert( image );
     iassert( image->texture.basemap == NULL );
     if (Image_LoadFromFile(image))

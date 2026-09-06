@@ -900,14 +900,14 @@ void __cdecl R_LoadLightmaps(GfxBspLoad *load)
             defCopyCfg.zoom = groupInfo[newLmapIndex].wideCount;
             R_EnumLightDefs((void(*)(GfxLightDef*, void*))R_CopyLightDefAttenuationImage, &defCopyCfg);
             v1 = va("*lightmap%i_primary", newLmapIndex);
-            v2 = Image_Alloc(v1, 2u, TS_FUNCTION, 4u);
+            v2 = Image_Alloc(v1, IMG_CATEGORY_LIGHTMAP, TS_FUNCTION, 4u);
             s_world.lightmaps[newLmapIndex].primary = v2;
             iassert( s_world.lightmaps[newLmapIndex].primary );
             width = groupInfo[newLmapIndex].wideCount << 10;
             height = groupInfo[newLmapIndex].highCount << 10;
             Image_Generate2D(s_world.lightmaps[newLmapIndex].primary, primaryImage, width, height, D3DFMT_L8);
             v3 = va("*lightmap%i_secondary", newLmapIndex);
-            v4 = Image_Alloc(v3, 2u, TS_FUNCTION, 4u);
+            v4 = Image_Alloc(v3, IMG_CATEGORY_LIGHTMAP, TS_FUNCTION, 4u);
             s_world.lightmaps[newLmapIndex].secondary = v4;
             iassert( s_world.lightmaps[newLmapIndex].secondary );
             width = groupInfo[newLmapIndex].wideCount << 9;
