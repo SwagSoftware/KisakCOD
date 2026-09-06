@@ -496,18 +496,18 @@ void __cdecl Scr_KeyEvent(int key)
     {
         switch (key)
         {
-        case 49:
+        case '1':
             goto $LN41_4;
-        case 50:
+        case '2':
             Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.scriptWatch);
             return;
-        case 51:
+        case '3':
             Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.scriptList);
             return;
-        case 52:
+        case '4':
             Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.scriptCallStack);
             return;
-        case 53:
+        case '5':
             Scr_SetMiscScrollPaneComp(&scrDebuggerGlob.openScriptList);
             return;
         case K_PAUSE:
@@ -574,7 +574,7 @@ void __cdecl Scr_KeyEvent(int key)
                 scrDebuggerGlob.openScriptList.DecSelectedLineFocus(true);
                 return;
             }
-            if (key == 102)
+            if (key == 'f')
             {
                 UI_Component::g.consoleReason = 1;
                 Con_OpenConsole(0);

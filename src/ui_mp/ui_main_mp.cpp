@@ -2071,10 +2071,10 @@ int __cdecl UI_GameType_HandleKey(int flags, float *special, int key, int resetM
     int oldCount; // [esp+0h] [ebp-8h]
     int nextGameType; // [esp+4h] [ebp-4h]
 
-    if (key != 200 && key != 201 && key != 13 && key != 191)
+    if (key != K_MOUSE1 && key != K_MOUSE2 && key != K_ENTER && key != K_KP_ENTER)
         return 0;
     oldCount = UI_MapCountByGameType();
-    if (key != 201)
+    if (key != K_MOUSE2)
     {
         nextGameType = ui_gametype->current.integer + 1;
         if (nextGameType >= sharedUiInfo.numGameTypes)
@@ -2108,9 +2108,9 @@ int __cdecl UI_NetSource_HandleKey(int flags, float *special, int key)
     int integer; // [esp+0h] [ebp-Ch]
     int nextNetSource; // [esp+8h] [ebp-4h]
 
-    if (key != 200 && key != 201 && key != 13 && key != 191)
+    if (key != K_MOUSE1 && key != K_MOUSE2 && key != K_ENTER && key != K_KP_ENTER)
         return 0;
-    if (key == 201)
+    if (key == K_MOUSE2)
     {
         if (ui_netSource->current.integer)
             integer = ui_netSource->current.integer;
@@ -2133,9 +2133,9 @@ int __cdecl UI_NetSource_HandleKey(int flags, float *special, int key)
 
 int __cdecl UI_NetFilter_HandleKey(int flags, float *special, int key)
 {
-    if (key != 200 && key != 201 && key != 13 && key != 191)
+    if (key != K_MOUSE1 && key != K_MOUSE2 && key != K_ENTER && key != K_KP_ENTER)
         return 0;
-    if (key == 201)
+    if (key == K_MOUSE2)
         --ui_serverFilterType;
     else
         ++ui_serverFilterType;
@@ -2228,9 +2228,9 @@ int __cdecl UI_NetGameType_HandleKey(int flags, float *special, int key)
     int integer; // [esp+0h] [ebp-8h]
     int nextNetGameType; // [esp+4h] [ebp-4h]
 
-    if (key != 200 && key != 201 && key != 13 && key != 191)
+    if (key != K_MOUSE1 && key != K_MOUSE2 && key != K_ENTER && key != K_KP_ENTER)
         return 0;
-    if (key == 201)
+    if (key == K_MOUSE2)
     {
         if (ui_netGameType->current.integer)
             integer = ui_netGameType->current.integer;
@@ -2261,9 +2261,9 @@ int __cdecl UI_JoinGameType_HandleKey(int flags, float *special, int key)
     int integer; // [esp+0h] [ebp-8h]
     int nextJoinGameType; // [esp+4h] [ebp-4h]
 
-    if (key != 200 && key != 201 && key != 13 && key != 191)
+    if (key != K_MOUSE1 && key != K_MOUSE2 && key != K_ENTER && key != K_KP_ENTER)
         return 0;
-    if (key == 201)
+    if (key == K_MOUSE2)
     {
         if (ui_joinGameType->current.integer)
             integer = ui_joinGameType->current.integer;
@@ -4952,7 +4952,7 @@ void __cdecl UI_KeyEvent(int localClientNum, int key, int down)
             goto LABEL_25;
         if (Dvar_GetBool("cl_bypassMouseInput") || UI_GetActiveMenu(localClientNum) == UIMENU_SCOREBOARD)
             bypassKeyClear = 1;
-        if (key == 27 && down && !Menus_AnyFullScreenVisible(&uiInfoArray.uiDC) && !menu->onESC)
+        if (key == K_ESCAPE && down && !Menus_AnyFullScreenVisible(&uiInfoArray.uiDC) && !menu->onESC)
             Menus_CloseAll(&uiInfoArray.uiDC);
         if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, 16))
             Menu_HandleKey(&uiInfoArray.uiDC, menu, key, down);

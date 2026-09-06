@@ -7,6 +7,7 @@
 #include "cg_public_mp.h"
 #include <client_mp/client_mp.h>
 #include <database/database.h>
+#include <ui/keycodes.h>
 #include <ui_mp/ui_mp.h>
 #include <stringed/stringed_hooks.h>
 #include <client/client.h>
@@ -1323,15 +1324,15 @@ bool __cdecl Scoreboard_HandleInput(int32_t localClientNum, int32_t key)
     
     switch (key)
     {
-    case 163:
-    case 190:
-    case 205:
+    case K_PGDN:
+    case K_KP_PGDN:
+    case K_MWHEELDOWN:
         CG_ScrollScoreboardDown(cgameGlob);
         result = 1;
         break;
-    case 164:
-    case 184:
-    case 206:
+    case K_PGUP:
+    case K_KP_PGUP:
+    case K_MWHEELUP:
         CG_ScrollScoreboardUp(cgameGlob);
         result = 1;
         break;

@@ -3,6 +3,7 @@
 #include <qcommon/mem_track.h>
 #include <qcommon/qcommon.h>
 #include <qcommon/cmd.h>
+#include <ui/keycodes.h>
 #include <client/client.h>
 #include <cgame/cg_local.h>
 
@@ -1343,9 +1344,9 @@ void __cdecl DevGui_KeyPressed(int32_t key)
     if (devguiGlob.bindNextKey)
     {
         devguiGlob.bindNextKey = 0;
-        if (key != 27)
+        if (key != K_ESCAPE)
         {
-            if (key == 9 || key == 167)
+            if (key == K_TAB || key == K_F1)
             {
                 Com_Printf(CON_CHANNEL_DEVGUI, "Can't rebind 'tab' or 'F1'\n");
             }

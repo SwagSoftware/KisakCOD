@@ -2642,7 +2642,7 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
         inHandler = 0;
         return;
     }
-    if (key == 200 || key == 201 || key == 202)
+    if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3)
     {
         g_editingField = 0;
         g_editItem = 0;
@@ -2651,7 +2651,7 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
         if (menu)
         {
             if (down
-                && (key & 0x400) == 0
+                && (key & K_CHAR_FLAG) == 0
                 && menu->allowedBinding
                 && (binding = Key_GetBinding(dc->localClientNum, key)) != 0
                 && !I_stricmp(binding, menu->allowedBinding))
@@ -2664,7 +2664,7 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
                 || menu->fullScreen
                 || Rect_ContainsPoint(dc->localClientNum, &menu->window.rect, dc->cursor.x, dc->cursor.y)
                 || inHandleKey
-                || key != 200 && key != 201 && key != 202)
+                || key != K_MOUSE1 && key != K_MOUSE2 && key != K_MOUSE3)
             {
                 for (i = 0; i < menu->itemCount; ++i)
                 {
@@ -2674,7 +2674,7 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
                             item = menu->items[i];
                     }
                 }
-                if (key != 205 && key != 206 || item && item->type == 6)
+                if (key != K_MWHEELDOWN && key != K_MWHEELUP || item && item->type == 6)
                 {
                     if (item && Item_HandleKey(dc, item, key, down))
                     {
@@ -2687,16 +2687,16 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
                         {
                             switch (key)
                             {
-                            case 9:
-                            case 155:
-                            case 157:
-                            case 189:
-                            case 205:
+                            case K_TAB:
+                            case K_DOWNARROW:
+                            case K_RIGHTARROW:
+                            case K_KP_DOWNARROW:
+                            case K_MWHEELDOWN:
                                 Menu_SetNextCursorItem(dc, menu);
                                 break;
-                            case 13:
-                            case 191:
-                            case 202:
+                            case K_ENTER:
+                            case K_KP_ENTER:
+                            case K_MOUSE3:
                                 if (item)
                                 {
                                     if (Item_IsTextField(item))
@@ -2712,29 +2712,29 @@ void __cdecl Menu_HandleKey(UiContext *dc, menuDef_t *menu, int key, int down)
                                     }
                                 }
                                 break;
-                            case 27:
+                            case K_ESCAPE:
                                 if (!g_waitingForKey && menu->onESC)
                                 {
                                     it.parent = menu;
                                     Item_RunScript(dc, &it, (char*)menu->onESC);
                                 }
                                 break;
-                            case 154:
-                            case 156:
-                            case 183:
-                            case 206:
+                            case K_UPARROW:
+                            case K_LEFTARROW:
+                            case K_KP_UPARROW:
+                            case K_MWHEELUP:
                                 Menu_SetPrevCursorItem(dc, menu);
                                 break;
-                            case 177:
+                            case K_F11:
                                 if (Dvar_GetInt("developer"))
                                     g_debugMode ^= 1u;
                                 break;
-                            case 178:
+                            case K_F12:
                                 if (Dvar_GetInt("developer"))
                                     Cbuf_AddText(dc->localClientNum, "screenshot\n");
                                 break;
-                            case 200:
-                            case 201:
+                            case K_MOUSE1:
+                            case K_MOUSE2:
                                 if (item)
                                 {
                                     if (item->type)
@@ -2822,10 +2822,10 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                 item->cursorPos[dc->localClientNum] = editPtr->maxChars;
         }
     }
-    if ((key & 0x400) != 0)
+    if ((key & K_CHAR_FLAG) != 0)
     {
-        key &= ~0x400u;
-        if (key == 8)
+        key &= ~K_CHAR_FLAG;
+        if (key == '\b')
         {
             if (item->cursorPos[dc->localClientNum] > 0)
             {
@@ -2850,9 +2850,9 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
         }
         if (item->type == 16 && !I_isforfilename(key))
             return 1;
-        if (key < 32 || !item->dvar)
+        if (key < K_SPACE || !item->dvar)
             return 1;
-        if (key == 64)
+        if (key == '@')
             return 1;
         if (item->type == 9 && !I_isdigit(key))
             return 0;
@@ -2911,7 +2911,7 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                 }
             }
         LABEL_84:
-            if (key == 9 || key == 155 || key == 189)
+            if (key == K_TAB || key == K_DOWNARROW || key == K_KP_DOWNARROW)
             {
                 newItemb = Menu_SetNextCursorItem(dc, item->parent);
                 if (newItemb)
@@ -2920,7 +2920,7 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                         g_editItem = newItemb;
                 }
             }
-            if (key == 154 || key == 183)
+            if (key == K_UPARROW || key == K_KP_UPARROW)
             {
                 newItemc = Menu_SetPrevCursorItem(dc, item->parent);
                 if (newItemc)
@@ -2929,9 +2929,9 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
                         g_editItem = newItemc;
                 }
             }
-            if ((key == 13 || key == 191) && item->onAccept)
+            if ((key == K_ENTER || key == K_KP_ENTER) && item->onAccept)
                 Item_RunScript(dc, item, (char*)item->onAccept);
-            return key != 13 && key != 191 && key != 27;
+            return key != K_ENTER && key != K_KP_ENTER && key != K_ESCAPE;
         }
         if (editPtr->maxCharsGotoNext)
         {
@@ -2946,32 +2946,32 @@ bool __cdecl Item_TextField_HandleKey(UiContext *dc, itemDef_s *item, int key)
     }
     else
     {
-        if (key != 162 && key != 193)
+        if (key != K_DEL && key != K_KP_DEL)
         {
             switch (key)
             {
-            case 157:
-            case 187:
+            case K_RIGHTARROW:
+            case K_KP_RIGHTARROW:
                 item->cursorPos[dc->localClientNum] = Item_GetCursorPosOffset(dc->localClientNum, item, buff, 1);
                 Item_TextField_EnsureCursorVisible(dc->localClientNum, item, buff);
                 return 1;
-            case 156:
-            case 185:
+            case K_LEFTARROW:
+            case K_KP_LEFTARROW:
                 item->cursorPos[dc->localClientNum] = Item_GetCursorPosOffset(dc->localClientNum, item, buff, -1);
                 Item_TextField_EnsureCursorVisible(dc->localClientNum, item, buff);
                 return 1;
-            case 165:
-            case 182:
+            case K_HOME:
+            case K_KP_HOME:
                 item->cursorPos[dc->localClientNum] = 0;
                 editPtr->paintOffset = 0;
                 return 1;
-            case 166:
-            case 188:
+            case K_END:
+            case K_KP_END:
                 item->cursorPos[dc->localClientNum] = len;
                 Item_TextField_EnsureCursorVisible(dc->localClientNum, item, buff);
                 return 1;
-            case 161:
-            case 192:
+            case K_INS:
+            case K_KP_INS:
                 OverstrikeMode = Key_GetOverstrikeMode(dc->localClientNum);
                 Key_SetOverstrikeMode(dc->localClientNum, OverstrikeMode == 0);
                 return 1;
@@ -3214,7 +3214,7 @@ int Item_HandleKey(UiContext *dc, itemDef_s *item, int key, int down)
     {
         if (!down)
             return 0;
-        if (key == 200 || key == 201 || key == 202)
+        if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3)
             Item_StartCapture(dc, item, key);
     }
     if (!down)
@@ -3305,7 +3305,7 @@ int __cdecl Item_ListBox_HandleKey(UiContext *dc, itemDef_s *item, int key, int 
         MyAssertHandler("c:\\trees\\cod3\\src\\ui\\../ui/ui_utils.h", 53, 0, "%s", "w");
     if ((item->window.staticFlags & 0x200000) != 0)
     {
-        if (key == 156 || key == 185)
+        if (key == K_LEFTARROW || key == K_KP_LEFTARROW)
         {
             if (listPtr->notselectable)
             {
@@ -3325,7 +3325,7 @@ int __cdecl Item_ListBox_HandleKey(UiContext *dc, itemDef_s *item, int key, int 
             }
             return 1;
         }
-        if (key == 157 || key == 187)
+        if (key == K_RIGHTARROW || key == K_KP_RIGHTARROW)
         {
             if (listPtr->notselectable)
             {
@@ -3348,8 +3348,8 @@ int __cdecl Item_ListBox_HandleKey(UiContext *dc, itemDef_s *item, int key, int 
     LABEL_48:
         switch (key)
         {
-        case 200:
-        case 201:
+        case K_MOUSE1:
+        case K_MOUSE2:
             if ((flags & 0x100) != 0)
             {
                 if (listPtr->startPos[dc->localClientNum] - 1 > 0)
@@ -3411,20 +3411,20 @@ int __cdecl Item_ListBox_HandleKey(UiContext *dc, itemDef_s *item, int key, int 
                 }
             }
             return 1;
-        case 165:
-        case 182:
+        case K_HOME:
+        case K_KP_HOME:
             Script_FeederTop(dc, item);
             return 1;
-        case 166:
-        case 188:
+        case K_END:
+        case K_KP_END:
             Script_FeederBottom(dc, item);
             return 1;
-        case 164:
-        case 184:
+        case K_PGUP:
+        case K_KP_PGUP:
             Item_ListBox_Page(dc->localClientNum, item, v12, max, viewmax, -viewmax);
             return 1;
-        case 163:
-        case 190:
+        case K_PGDN:
+        case K_KP_PGDN:
             Item_ListBox_Page(dc->localClientNum, item, v12, max, viewmax, viewmax);
             return 1;
         }
@@ -3440,15 +3440,15 @@ int __cdecl Item_ListBox_HandleKey(UiContext *dc, itemDef_s *item, int key, int 
     }
     switch (key)
     {
-    case 154:
-    case 183:
-    case 206:
+    case K_UPARROW:
+    case K_KP_UPARROW:
+    case K_MWHEELUP:
         Item_ListBox_Scroll(dc->localClientNum, item, v12, max, viewmax, -1);
         result = 1;
         break;
-    case 155:
-    case 189:
-    case 205:
+    case K_DOWNARROW:
+    case K_KP_DOWNARROW:
+    case K_MWHEELDOWN:
         Item_ListBox_Scroll(dc->localClientNum, item, v12, max, viewmax, 1);
         result = 1;
         break;
@@ -3538,13 +3538,13 @@ int __cdecl Item_YesNo_HandleKey(UiContext *dc, itemDef_s *item, int key)
         return 0;
     if (!Item_ShouldHandleKey(dc, item, key))
         return 0;
-    if (key == 200 || key == 201 || key == 202)
+    if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3)
     {
         v8 = 1;
     }
     else
     {
-        v7 = key == 13 || key == 156 || key == 157 || key == 164 || key == 163;
+        v7 = key == K_ENTER || key == K_LEFTARROW || key == K_RIGHTARROW || key == K_PGUP || key == K_PGDN;
         v8 = v7;
     }
     if (!v8)
@@ -3570,7 +3570,7 @@ bool __cdecl Item_ShouldHandleKey(UiContext *dc, itemDef_s *item, int key)
 {
     if (!Window_HasFocus(dc->localClientNum, &item->window))
         return 0;
-    return key != 200 && key != 201 && key != 202 || Item_ContainsMouse(dc, item);
+    return key != K_MOUSE1 && key != K_MOUSE2 && key != K_MOUSE3 || Item_ContainsMouse(dc, item);
 }
 
 int __cdecl Item_Multi_HandleKey(UiContext *dc, itemDef_s *item, int key)
@@ -3673,24 +3673,24 @@ int __cdecl Item_List_NextEntryForKey(int key, int current, int count)
             current);
     if (!count)
         return 0;
-    if (key == 200 || key == 202)
+    if (key == K_MOUSE1 || key == K_MOUSE3)
     {
         v7 = 1;
     }
     else
     {
-        v5 = key == 13 || key == 163 || key == 157;
+        v5 = key == K_ENTER || key == K_PGDN || key == K_RIGHTARROW;
         v7 = v5;
     }
     if (v7)
         return (current + 1) % count;
-    if (key == 201)
+    if (key == K_MOUSE2)
     {
         v6 = 1;
     }
     else
     {
-        v4 = key == 164 || key == 156;
+        v4 = key == K_PGUP || key == K_LEFTARROW;
         v6 = v4;
     }
     if (v6)
@@ -3950,7 +3950,7 @@ int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item, int key, int d
         return 0;
     if (!Item_ShouldHandleKey(dc, item, key))
         return 0;
-    if (key == 200 || key == 201 || key == 202)
+    if (key == K_MOUSE1 || key == K_MOUSE2 || key == K_MOUSE3)
     {
         Scroll_Slider_SetThumbPos(dc, item);
         return 1;
@@ -3963,7 +3963,7 @@ int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item, int key, int d
             step = (editDef->maxVal - editDef->minVal) * 0.05000000074505806;
             VariantString = Dvar_GetVariantString(item->dvar);
             value = atof(VariantString);
-            if (key == 156 || key == 164)
+            if (key == K_LEFTARROW || key == K_PGUP)
             {
                 v16 = value - step;
                 minVal = editDef->minVal;
@@ -3976,7 +3976,7 @@ int __cdecl Item_Slider_HandleKey(UiContext *dc, itemDef_s *item, int key, int d
                 Dvar_SetFromStringByName(item->dvar, v6);
                 return 1;
             }
-            else if (key == 157 || key == 163)
+            else if (key == K_RIGHTARROW || key == K_PGDN)
             {
                 v14 = step + value;
                 maxVal = editDef->maxVal;
@@ -4519,28 +4519,28 @@ int __cdecl Item_Bind_HandleKey(UiContext *dc, itemDef_s *item, int key, int dow
     {
         if (g_bindItem)
         {
-            if ((key & 0x400) != 0)
+            if ((key & K_CHAR_FLAG) != 0)
             {
                 return 1;
             }
-            else if (key == 27)
+            else if (key == K_ESCAPE)
             {
                 g_waitingForKey = 0;
                 return 1;
             }
-            else if (key == 96)
+            else if (key == '`')
             {
                 return 1;
             }
             else
             {
                 bindCount = Key_GetCommandAssignment(dc->localClientNum, item->dvar, boundKeys);
-                if (key == 127 || bindCount == 2)
+                if (key == K_BACKSPACE || bindCount == 2)
                 {
                     Key_SetBinding(dc->localClientNum, boundKeys[0], (char *)"");
                     Key_SetBinding(dc->localClientNum, boundKeys[1], (char *)"");
                 }
-                if (key != 127)
+                if (key != K_BACKSPACE)
                     Key_SetBinding(dc->localClientNum, key, (char *)item->dvar);
                 g_waitingForKey = 0;
                 return 1;
@@ -4551,7 +4551,7 @@ int __cdecl Item_Bind_HandleKey(UiContext *dc, itemDef_s *item, int key, int dow
             return 0;
         }
     }
-    else if (down && (key != 200 || !Item_ContainsMouse(dc, item) ? (v5 = key == 13) : (v5 = 1), v5))
+    else if (down && (key != K_MOUSE1 || !Item_ContainsMouse(dc, item) ? (v5 = key == K_ENTER) : (v5 = 1), v5))
     {
         g_waitingForKey = 1;
         g_bindItem = item;
