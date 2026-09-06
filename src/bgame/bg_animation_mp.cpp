@@ -883,67 +883,67 @@ const char *__cdecl GetMoveTypeName(int32_t type)
 
     switch (type)
     {
-    case 0:
+    case ANIM_MT_UNUSED:
         result = "ANIM_MT_UNUSED";
         break;
-    case 1:
+    case ANIM_MT_IDLE:
         result = "Idle";
         break;
-    case 2:
+    case ANIM_MT_IDLECR:
         result = "Crouching Idle";
         break;
-    case 3:
+    case ANIM_MT_IDLEPRONE:
         result = "Prone Idle";
         break;
-    case 4:
+    case ANIM_MT_WALK:
         result = "Walk";
         break;
-    case 5:
+    case ANIM_MT_WALKBK:
         result = "Walk Backward";
         break;
-    case 6:
+    case ANIM_MT_WALKCR:
         result = "Crouching Walk";
         break;
-    case 7:
+    case ANIM_MT_WALKCRBK:
         result = "Crouching Walk Backward";
         break;
-    case 8:
+    case ANIM_MT_WALKPRONE:
         result = "Prone Crawl";
         break;
-    case 9:
+    case ANIM_MT_WALKPRONEBK:
         result = "Prone Crawl Backward";
         break;
-    case 10:
+    case ANIM_MT_RUN:
         result = "Run";
         break;
-    case 11:
+    case ANIM_MT_RUNBK:
         result = "Run Backward";
         break;
-    case 12:
+    case ANIM_MT_RUNCR:
         result = "Crouching Run";
         break;
-    case 13:
+    case ANIM_MT_RUNCRBK:
         result = "Crouching Run Backward";
         break;
-    case 14:
+    case ANIM_MT_TURNRIGHT:
         result = "Turning Right";
         break;
-    case 15:
+    case ANIM_MT_TURNLEFT:
         result = "Turning Left";
         break;
-    case 16:
+    case ANIM_MT_TURNRIGHTCR:
         result = "Turning Right Crouching";
         break;
-    case 17:
+    case ANIM_MT_TURNLEFTCR:
         result = "Turning Left Crouching";
         break;
-    case 18:
+    case ANIM_MT_CLIMBUP:
         result = "Climbing Up";
         break;
-    case 19:
+    case ANIM_MT_CLIMBDOWN:
         result = "Climbing Down";
         break;
-    case 20:
+    case ANIM_MT_SPRINT:
         result = "Sprinting";
         break;
     default:
