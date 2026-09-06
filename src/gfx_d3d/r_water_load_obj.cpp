@@ -133,7 +133,7 @@ GfxImage *__cdecl R_CreateWaterMap(char *name, uint16_t imageWidth, uint16_t ima
 {
     GfxImage *image; // [esp+0h] [ebp-4h]
 
-    image = Image_Alloc(name, 5u, 0xBu, 9u);
+    image = Image_Alloc(name, 5u, TS_WATER_MAP, 9u);
     iassert( image );
     image->width = imageWidth;
     image->height = imageHeight;

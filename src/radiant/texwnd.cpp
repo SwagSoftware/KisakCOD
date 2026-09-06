@@ -27,6 +27,7 @@
 #include "qe3.h"
 #include "prefs.h"                  // g_PrefsDlg->m_nTextureWindowScale / m_bTextureScrollbar
 
+#include <gfx_d3d/r_image.h>
 #include <gfx_d3d/r_material.h>
 #include <gfx_d3d/r_gfx.h>
 #include <gfx_d3d/r_font.h>         // Font_s::pixelHeight (TexWnd_SetupIter)
@@ -142,7 +143,7 @@ static void Radiant_MaterialTexScale( Material *mtl, int *outW, int *outH )
     // often starts with normalMap/specularMap.
     for ( int i = 0; i < mtl->textureCount; ++i )
     {
-        if ( mtl->textureTable[i].semantic != 2 )
+        if ( mtl->textureTable[i].semantic != TS_COLOR_MAP )
             continue;
         GfxImage *img = mtl->textureTable[i].u.image;
         if ( img && img->width && img->height )
@@ -155,7 +156,7 @@ static void Radiant_MaterialTexScale( Material *mtl, int *outW, int *outH )
 
     for ( int i = 0; i < mtl->textureCount; ++i )
     {
-        if ( mtl->textureTable[i].semantic == 11 )
+        if ( mtl->textureTable[i].semantic == TS_WATER_MAP )
             continue;
         GfxImage *img = mtl->textureTable[i].u.image;
         if ( img && img->width && img->height )

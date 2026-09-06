@@ -67,7 +67,7 @@ void __cdecl R_RegisterOutdoorImage(GfxWorld *world, const float *outdoorMin, co
     Outdoor_ApplyBoundingBox(outdoorMin, outdoorMax);
     Outdoor_UpdateTransforms();
     Outdoor_SetRendererOutdoorLookupMatrix(world);
-    world->outdoorImage = Image_Register("$outdoor", 1u, 0);
+    world->outdoorImage = Image_Register("$outdoor", TS_FUNCTION, 0);
     iassert( world->outdoorImage );
 }
 

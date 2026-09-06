@@ -768,7 +768,7 @@ void __cdecl R_SetPicmip()
 
 void R_InitRawImage()
 {
-    rgp.rawImage = Image_AllocProg(11, 4u, 0);
+    rgp.rawImage = Image_AllocProg(11, 4u, TS_2D);
     iassert(rgp.rawImage);
 }
 
@@ -798,19 +798,19 @@ bool __cdecl Image_IsCodeImage(int track)
 
 void R_InitCodeImages()
 {
-    rgp.whiteImage = Image_Register("$white", 1u, 0);
+    rgp.whiteImage = Image_Register("$white", TS_FUNCTION, 0);
     iassert(rgp.whiteImage);
-    rgp.blackImage = Image_Register("$black", 1u, 0);
+    rgp.blackImage = Image_Register("$black", TS_FUNCTION, 0);
     iassert(rgp.blackImage);
-    rgp.blackImage3D = Image_Register("$black_3d", 1u, 0);
+    rgp.blackImage3D = Image_Register("$black_3d", TS_FUNCTION, 0);
     iassert(rgp.blackImage3D);
-    rgp.blackImageCube = Image_Register("$black_cube", 1u, 0);
+    rgp.blackImageCube = Image_Register("$black_cube", TS_FUNCTION, 0);
     iassert(rgp.blackImageCube);
-    rgp.grayImage = Image_Register("$gray", 1u, 0);
+    rgp.grayImage = Image_Register("$gray", TS_FUNCTION, 0);
     iassert(rgp.grayImage);
-    rgp.identityNormalMapImage = Image_Register("$identitynormalmap", 1u, 0);
+    rgp.identityNormalMapImage = Image_Register("$identitynormalmap", TS_FUNCTION, 0);
     iassert(rgp.identityNormalMapImage);
-    rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", 1u, 0);
+    rgp.pixelCostColorCodeImage = Image_Register("$pixelcostcolorcode", TS_FUNCTION, 0);
     iassert(rgp.pixelCostColorCodeImage);
 }
 
@@ -847,7 +847,7 @@ void __cdecl R_LoadCaseTextures()
         GfxImage *image = Image_FindExisting(pi->token);
         if (!image)
         {
-            image = Image_Register(pi->token, 2u, 1);
+            image = Image_Register(pi->token, TS_COLOR_MAP, 1);
             // Image_Register already logs "ERROR: failed to load image" on miss.
         }
         rgp.caseTextures[rgp.caseTextures_count] = image;
@@ -1065,9 +1065,9 @@ char __cdecl Image_AssignDefaultTexture(GfxImage *image)
 #endif
     if (image->mapType != MAPTYPE_2D)
         return 0;
-    if (image->semantic == 5)
+    if (image->semantic == TS_NORMAL_MAP)
         return R_DuplicateTexture(image, rgp.identityNormalMapImage);
-    if (image->semantic == 8)
+    if (image->semantic == TS_SPECULAR_MAP)
         return R_DuplicateTexture(image, rgp.blackImage);
     return R_DuplicateTexture(image, rgp.whiteImage);
 }

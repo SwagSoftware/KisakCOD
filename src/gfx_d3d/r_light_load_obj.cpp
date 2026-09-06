@@ -873,7 +873,7 @@ uint8_t *__cdecl R_LoadLightImage(uint8_t *readPos, GfxLightImage *lightImage)
     readPosa = readPos + 1;
     v3 = strlen((const char *)readPosa);
     if (v3)
-        lightImage->image = Image_Register((char *)readPosa, 1u, 5);
+        lightImage->image = Image_Register((char *)readPosa, TS_FUNCTION, 5);
     else
         lightImage->image = 0;
     return &readPosa[v3 + 1];

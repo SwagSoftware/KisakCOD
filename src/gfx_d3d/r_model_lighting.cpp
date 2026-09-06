@@ -631,11 +631,11 @@ void __cdecl R_InitModelLightingImage()
     iassert(modelLightGlob.totalEntryLimit);
 
     useAltUpdate = Dvar_GetBool("r_altModelLightingUpdate");
-    modelLightGlob.lightImages[0] = Image_AllocProg(12, 4u, 1u);
+    modelLightGlob.lightImages[0] = Image_AllocProg(12, 4u, TS_FUNCTION);
     if (useAltUpdate)
     {
         Image_SetupAndLoad(modelLightGlob.lightImages[0], 256, modelLightGlob.imageHeight, 4, IMG_FLAG_NOMIPMAPS | IMG_FLAG_VOLMAP | IMG_FLAG_DYNAMIC, D3DFMT_A8R8G8B8);
-        modelLightGlob.lightImages[1] = Image_AllocProg(13, 4u, 1u);
+        modelLightGlob.lightImages[1] = Image_AllocProg(13, 4u, TS_FUNCTION);
         Image_SetupAndLoad(modelLightGlob.lightImages[1], 256, modelLightGlob.imageHeight, 4, IMG_FLAG_NOMIPMAPS | IMG_FLAG_VOLMAP | IMG_FLAG_SYSTEMMEM, D3DFMT_A8R8G8B8);
     }
     else

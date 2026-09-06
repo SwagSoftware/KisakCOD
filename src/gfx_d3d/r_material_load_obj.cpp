@@ -4803,7 +4803,7 @@ bool __cdecl Material_HasNormalMap(const Material *mtl)
     }
     iassert( mtl->textureTable[texIndex].nameStart == 'n' );
     iassert( mtl->textureTable[texIndex].nameEnd == 'p' );
-    if (mtl->textureTable[texIndex].semantic != 5)
+    if (mtl->textureTable[texIndex].semantic != TS_NORMAL_MAP)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             6404,
@@ -5221,7 +5221,7 @@ Material *__cdecl Material_CreateLayered(
             newTexEntry->samplerState= v5->samplerState;
             newTexEntry->semantic= v5->semantic;
             newTexEntry->u.image = v5->u.image;
-            if ((newTexEntry->samplerState & 0x18) == 8 && (newTexEntry->semantic == 2 || newTexEntry->semantic == 5))
+            if ((newTexEntry->samplerState & 0x18) == 8 && (newTexEntry->semantic == TS_COLOR_MAP || newTexEntry->semantic == TS_NORMAL_MAP))
             {
                 newTexEntry->samplerState &= 0xE7u;
                 newTexEntry->samplerState |= 0x10u;
@@ -5573,7 +5573,7 @@ BOOL __cdecl Material_FinishLoadingTexdef(
     if (material->info.sortKey == 4
         && R_IsWorldMaterialType(materialType)
         && (texdef->samplerState & 0x18) == 8
-        && (texdef->semantic == 2 || texdef->semantic == 5))
+        && (texdef->semantic == TS_COLOR_MAP || texdef->semantic == TS_NORMAL_MAP))
     {
         texdef->samplerState &= 0xE7u;
         texdef->samplerState |= 0x10u;
@@ -5581,7 +5581,7 @@ BOOL __cdecl Material_FinishLoadingTexdef(
 #ifdef KISAK_RADIANT
     texdef->samplerState &= 0x1Fu;
 #endif
-    if (texdef->semantic == 11)
+    if (texdef->semantic == TS_WATER_MAP)
         // BYTE offset into the material raw blob — disasm 0x51b057 is `add eax, edi` (offset + the
         // MaterialRaw base, raw byte add), exactly like the image path's `add esi, edi`. `material`
         // is a MaterialRaw*, so `material + offset` would scale by sizeof(MaterialRaw) → a wildly
@@ -6042,7 +6042,7 @@ Material *__cdecl Material_LoadRaw(const MaterialRaw *mtlRaw, uint32_t materialT
                     "%s",
                     "material->textureTable[texIndex].samplerState & SAMPLER_FILTER_MASK");
             material->textureTable[texIndex].semantic = textureTableRaw[texIndex].semantic;
-            if (material->textureTable[texIndex].semantic == 11)
+            if (material->textureTable[texIndex].semantic == TS_WATER_MAP)
                 // BYTE offset (cast mtlRaw to char*) — same fix as Material_FinishLoadingTexdef; the
                 // Image_Register path just below already does (const char*)mtlRaw + offset. Without the
                 // cast, MaterialRaw* arithmetic scales by sizeof(MaterialRaw) → out-of-bounds → AV.

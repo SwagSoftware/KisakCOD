@@ -282,7 +282,7 @@ void __cdecl R_InitRenderTargetImage(
             "renderTargetId doesn't index R_RENDERTARGET_COUNT\n\t%i not in [0, %i)",
             renderTargetId,
             15);
-    renderTarget->image = Image_AllocProg(imageProgType, 6u, 0);
+    renderTarget->image = Image_AllocProg(imageProgType, 6u, TS_2D);
     iassert( renderTarget->image );
     Image_SetupRenderTarget(renderTarget->image, width, height, format);
     if (usage)
