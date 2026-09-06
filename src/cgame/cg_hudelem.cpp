@@ -380,7 +380,7 @@ void __cdecl DirectiveFakeIntroSeconds(int32_t localClientNum, const char *arg0,
     {
         fakeSeconds = 0;
         Com_PrintWarning(
-            1,
+            CON_CHANNEL_ERROR,
             "Argument \"%s\" given for FAKE_INTRO_SECONDS is outside the acceptible range of (%d,%d).\n",
             arg0,
             0,
@@ -1461,7 +1461,7 @@ void __cdecl DrawOffscreenViewableWaypoint(int32_t localClientNum, const hudelem
                 if (!cent->nextValid)
                 {
                     Com_PrintWarning(
-                        1,
+                        CON_CHANNEL_ERROR,
                         "DrawOffscreenViewableWaypoint(): targetEnt %i not in snapshot, may not be a network-broadcasting entity.\n",
                         elem->targetEntNum);
                     return;

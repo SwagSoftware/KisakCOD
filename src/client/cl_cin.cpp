@@ -42,7 +42,7 @@ void __cdecl CL_PlayCinematic_f()
     if (!arg1 || *arg1)
         CIN_PlayCinematic(0, arg1);
     else
-        Com_Printf(0, "No cinematic file specified: cinematic filename [1/2/3]\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "No cinematic file specified: cinematic filename [1/2/3]\n");
 }
 
 void __cdecl CL_PlayUnskippableCinematic_f()

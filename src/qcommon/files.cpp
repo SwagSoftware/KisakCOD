@@ -170,7 +170,7 @@ int __cdecl FS_CompareIwds(char *needediwds, int len, int dlstring)
     }
     if (!*needediwds)
         return 0;
-    Com_Printf(10, "Need iwds: %s\n", needediwds);
+    Com_Printf(CON_CHANNEL_FILES, "Need iwds: %s\n", needediwds);
     return 1;
 }
 
@@ -239,7 +239,7 @@ int __cdecl FS_CompareFFs(char *neededFFs, int len, int dlstring)
     }
     if (!*neededFFs)
         return 0;
-    Com_Printf(10, "Need FFs: %s\n", neededFFs);
+    Com_Printf(CON_CHANNEL_FILES, "Need FFs: %s\n", neededFFs);
     return 1;
 }
 
@@ -426,7 +426,7 @@ void __cdecl FS_PureServerSetLoadedIwds(char *iwdSums, char *iwdNames)
     fs_numServerIwds = v7;
     if (v7)
     {
-        Com_DPrintf(10, "Connected to a pure server.\n");
+        Com_DPrintf(CON_CHANNEL_FILES, "Connected to a pure server.\n");
         Com_Memcpy(fs_serverIwds, src, 4 * fs_numServerIwds);
         Com_Memcpy(fs_serverIwdNames, s0, 4 * fs_numServerIwds);
         fs_fakeChkSum = 0;

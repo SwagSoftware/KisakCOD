@@ -31,12 +31,12 @@ int __cdecl UI_ParseInfos(const char *buf, int max, char **infos)
             return count;
         if (strcmp(token, "{"))
         {
-            Com_Printf(13, "Missing { in info file\n");
+            Com_Printf(CON_CHANNEL_UI, "Missing { in info file\n");
             return count;
         }
         if (count == max)
         {
-            Com_Printf(13, "Max infos exceeded\n");
+            Com_Printf(CON_CHANNEL_UI, "Max infos exceeded\n");
             return count;
         }
         info[0] = 0;
@@ -53,7 +53,7 @@ int __cdecl UI_ParseInfos(const char *buf, int max, char **infos)
                 token = "<NULL>";
             Info_SetValueForKey(info, key, token);
         }
-        Com_Printf(13, "Unexpected end of info file\n");
+        Com_Printf(CON_CHANNEL_UI, "Unexpected end of info file\n");
     LABEL_14:
         v8 = strlen(va("%d", 64));
         v3 = UI_Alloc(strlen(info) + v8 + 6, 1);
@@ -165,13 +165,13 @@ const char *UI_LoadArenasFromFile_LoadObj()
             }
             else
             {
-                Com_PrintError(13, "file too large: %s is %i, max allowed is %i", string, len, 0x2000);
+                Com_PrintError(CON_CHANNEL_UI, "file too large: %s is %i, max allowed is %i", string, len, 0x2000);
                 FS_FCloseFile(f);
             }
         }
         else
         {
-            Com_PrintError(13, "file not found: %s\n", string);
+            Com_PrintError(CON_CHANNEL_UI, "file not found: %s\n", string);
         }
         ++v8;
         result = &v3[v9 + 1];
@@ -196,6 +196,6 @@ void UI_LoadArenasFromFile_FastFile()
     if (rawfile)
         ui_numArenas = UI_ParseInfos(rawfile->buffer, 64 - ui_numArenas, &ui_arenaInfos[ui_numArenas]);
     else
-        Com_PrintError(13, "file not found: %s\n", "mp/cod2maps.arena");
+        Com_PrintError(CON_CHANNEL_UI, "file not found: %s\n", "mp/cod2maps.arena");
 }
 

@@ -378,7 +378,7 @@ void G_SaveError(errorParm_t code, SaveErrorType errorType, const char *fmt, ...
         errMsg = "PLATFORM_UNABLE_TO_READ_FROM_DEVICE";
     }
 
-    Com_PrintError(10, "%s", buf);
+    Com_PrintError(CON_CHANNEL_FILES, "%s", buf);
     Com_Error(code, errMsg);
 }
 
@@ -1828,7 +1828,7 @@ void __cdecl G_CheckEntityDefaultModel(gentity_s *e)
             {
                 v4 = G_ModelName(e->model);
                 v5 = SL_ConvertToString(v4);
-                Com_PrintWarning(10, "WARNING: actor model '%s' couldn't be found! switching to default actor model.\n", v5);
+                Com_PrintWarning(CON_CHANNEL_FILES, "WARNING: actor model '%s' couldn't be found! switching to default actor model.\n", v5);
                 G_OverrideModel(e->model, "defaultactor");
             }
         }
@@ -2163,7 +2163,7 @@ int __cdecl G_WriteGame(const PendingSave *pendingSave, int checksum, SaveGame *
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2433, 0, "%s", "pendingSave->filename");
     if (pendingSave == (const PendingSave *)-320)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2434, 0, "%s", "pendingSave->screenShotName");
-    Com_Printf(10, "G_WriteGame '%s' '%s'\n", pendingSave->filename, pendingSave->description);
+    Com_Printf(CON_CHANNEL_FILES, "G_WriteGame '%s' '%s'\n", pendingSave->filename, pendingSave->description);
     if (!save)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\g_save.cpp", 2438, 0, "%s", "save");
     SaveMemory_InitializeGameSave(save);
@@ -2416,7 +2416,7 @@ int __cdecl G_LoadWeapons(SaveGame *save)
         if (++v2 >= v6[0])
             return 1;
     }
-    Com_Printf(10, "Weapon index mismatch for '%s'\n", v7);
+    Com_Printf(CON_CHANNEL_FILES, "Weapon index mismatch for '%s'\n", v7);
     return 0;
 }
 
@@ -2639,7 +2639,7 @@ void __cdecl G_LoadMainState(SaveGame *save)
                         v20 = G_ModelName(v18->model);
                         v21 = SL_ConvertToString(v20);
                         Com_PrintWarning(
-                            10,
+                            CON_CHANNEL_FILES,
                             "WARNING: actor model '%s' couldn't be found! switching to default actor model.\n",
                             v21);
                         G_OverrideModel(v18->model, "defaultactor");
@@ -2689,7 +2689,7 @@ void __cdecl G_LoadGame(int /*checksum*/, SaveGame *save)
     unsigned int RandomSeed; // [sp+70h] [-40h] BYREF
     unsigned int checksums[3]; // [sp+78h] [-38h] BYREF
 
-    Com_Printf(10, "=== G_LoadGame ===\n");
+    Com_Printf(CON_CHANNEL_FILES, "=== G_LoadGame ===\n");
     //Profile_Begin(244);
     R_Cinematic_UnsetNextPlayback();
     iassert(save);

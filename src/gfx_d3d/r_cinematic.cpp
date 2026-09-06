@@ -510,7 +510,7 @@ char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, uint32_t playba
     cinematicGlob.timeInMsec = 0;
     errText[0] = 0;
     if (R_Cinematic_BinkOpen(filename, playbackFlags, errText, 0x80u)
-        || (Com_PrintWarning(8, "R_Cinematic_BinkOpen '%s' failed: %s; trying default.\n", filename, errText),
+        || (Com_PrintWarning(CON_CHANNEL_GFX, "R_Cinematic_BinkOpen '%s' failed: %s; trying default.\n", filename, errText),
             CinematicHunk_Reset(&cinematicGlob.binkHunk),
             errText[0] = 0,
             R_Cinematic_BinkOpen("default", playbackFlags, errText, 0x80u)))
@@ -529,7 +529,7 @@ char __cdecl R_Cinematic_StartPlayback_Now(const char *filename, uint32_t playba
     }
     else
     {
-        Com_PrintWarning(8, "R_Cinematic_BinkOpen '%s' failed: %s; not playing movie.\n", "default", errText);
+        Com_PrintWarning(CON_CHANNEL_GFX, "R_Cinematic_BinkOpen '%s' failed: %s; not playing movie.\n", "default", errText);
 
         iassert(cinematicGlob.activeImageFrame == CINEMATIC_INVALID_IMAGE_FRAME);
 
@@ -1211,7 +1211,7 @@ void __cdecl R_Cinematic_ClearTexture(IDirect3DTexture9 *texture, int width, int
     else
     {
         v4 = DXGetErrorDescription9A(hr);
-        Com_PrintError(8, "LockRect failed with error 0x%08x - %s", hr, v4);
+        Com_PrintError(CON_CHANNEL_GFX, "LockRect failed with error 0x%08x - %s", hr, v4);
     }
 }
 

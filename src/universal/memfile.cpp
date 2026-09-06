@@ -207,7 +207,7 @@ void MemFile_StartSegment(MemoryFile* memFile, int index)
             if (memFile->errorOnOverflow)
                 Com_Error(ERR_DROP, "MemFile_StartSegment: Out of memory");
 
-            Com_Printf(10, "MemFile_StartSegment: Out of memory\n");
+            Com_Printf(CON_CHANNEL_FILES, "MemFile_StartSegment: Out of memory\n");
             memFile->memoryOverflow = 1;
         }
     }
@@ -302,7 +302,7 @@ void __cdecl MemFile_EndSegment(MemoryFile* memFile)
             MemFile_deflateEnd(memFile->compress);
             if (memFile->errorOnOverflow)
                 Com_Error(ERR_DROP, "MemFile_EndSegment: Out of memory");
-            Com_Printf(10, "MemFile_EndSegment: Out of memory");
+            Com_Printf(CON_CHANNEL_FILES, "MemFile_EndSegment: Out of memory");
             memFile->memoryOverflow = 1;
         }
     }
@@ -423,7 +423,7 @@ void __cdecl MemFile_WriteError(MemoryFile* memFile)
     MemFile_deflateEnd(memFile->compress);
     if (memFile->errorOnOverflow)
         Com_Error(ERR_DROP, "MemFile_EndSegment: Out of memory");
-    Com_Printf(10, "MemFile_EndSegment: Out of memory");
+    Com_Printf(CON_CHANNEL_FILES, "MemFile_EndSegment: Out of memory");
     memFile->memoryOverflow = 1;
 }
 
@@ -945,7 +945,7 @@ uint8_t __cdecl MemFile_ReadByteInternal(MemoryFile* memFile)
     }
     if (memFile->errorOnOverflow)
         Com_Error(ERR_DROP, "Trying to read corrupted file");
-    Com_Printf(10, "Trying to read corrupted file");
+    Com_Printf(CON_CHANNEL_FILES, "Trying to read corrupted file");
     memFile->memoryOverflow = 1;
     return 0;
 }

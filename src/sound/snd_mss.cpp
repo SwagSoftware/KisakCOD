@@ -75,7 +75,7 @@ _DIG_DRIVER *__cdecl MSS_open_digital_driver(int hertz, int bits, int channels)
 void MSS_InitFailed()
 {
   if ( Dvar_GetInt("r_vc_compile") != 2 )
-    Com_Printf(9, "Miles sound system initialization failed\n");
+    Com_Printf(CON_CHANNEL_SOUND, "Miles sound system initialization failed\n");
 }
 
 MSS_MC_SPEC mss_spec[5] =
@@ -107,13 +107,13 @@ char __cdecl MSS_Init()
         hertz = 44100;
         goto LABEL_8;
       }
-      Com_Printf(9, "invalid value %i for snd_khz, using 22 khz instead\n", snd_khz->current.integer);
+      Com_Printf(CON_CHANNEL_SOUND, "invalid value %i for snd_khz, using 22 khz instead\n", snd_khz->current.integer);
     }
     hertz = 22050;
   }
 LABEL_8:
   Com_Printf(
-    9,
+    CON_CHANNEL_SOUND,
     "Attempting %i kHz %i bit [%s] sound\n",
     hertz / 1000,
     16,
@@ -139,7 +139,7 @@ LABEL_8:
   else
   {
     error = (const char *)AIL_last_error();
-    Com_PrintError(9, "ERROR: Couldn't initialize digital driver: %s\n", error);
+    Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Couldn't initialize digital driver: %s\n", error);
     return 0;
   }
 }
@@ -185,7 +185,7 @@ void MSS_InitEq()
   int filterCount = 0;
   while (AIL_enumerate_filters(&itr, &provider, &filterName))
   {
-      Com_Printf(19, "[%d]Found filter (%s)\n", filterCount, filterName);
+      Com_Printf(CON_CHANNEL_ANIM, "[%d]Found filter (%s)\n", filterCount, filterName);
       filterCount++;
   }
   // LWSS END
@@ -197,7 +197,7 @@ void MSS_InitEq()
   else
   {
     milesGlob.eqFilter = 0;
-    Com_PrintError(9, "ERROR: unable to load eq filter.\n");
+    Com_PrintError(CON_CHANNEL_SOUND, "ERROR: unable to load eq filter.\n");
   }
 }
 

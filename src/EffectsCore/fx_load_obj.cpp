@@ -90,11 +90,11 @@ char __cdecl FX_ParseSingleFlag(const char *token, FxFlagOutputSet *flagOutputSe
             return 1;
         }
     }
-    Com_Printf(21, "Valid flags:\n");
+    Com_Printf(CON_CHANNEL_FX, "Valid flags:\n");
     for (flagDefa = s_allFlagDefs; flagDefa->name; ++flagDefa)
     {
         if (flagOutputSet->flags[flagDefa->flagType])
-            Com_Printf(21, "  %s\n", flagDefa->name);
+            Com_Printf(CON_CHANNEL_FX, "  %s\n", flagDefa->name);
     }
     Com_ScriptError("Unknown flag '%s'\n", token);
     return 0;
@@ -939,9 +939,9 @@ bool __cdecl FX_ParseEditorElemField(const char **parse, FxEditorElemDef *edElem
         if (!strcmp(token, s_elemFields[fieldIndex].keyName))
             return s_elemFields[fieldIndex].handler(parse, edElemDef) && Com_MatchToken(parse, ";", 1) != 0;
     }
-    Com_Printf(21, "Valid effects element fields:\n");
+    Com_Printf(CON_CHANNEL_FX, "Valid effects element fields:\n");
     for (fieldIndexa = 0; fieldIndexa < 0x45; ++fieldIndexa)
-        Com_Printf(21, "  %s\n", s_elemFields[fieldIndexa].keyName);
+        Com_Printf(CON_CHANNEL_FX, "  %s\n", s_elemFields[fieldIndexa].keyName);
     Com_ScriptError("unkown field '%s'\n", token);
     return 0;
 }
@@ -1071,7 +1071,7 @@ bool __cdecl FX_LoadEditorEffect(const char *name, FxEditorEffectDef *edEffectDe
     }
     else
     {
-        Com_PrintError(21, "%s not found\n", filename);
+        Com_PrintError(CON_CHANNEL_FX, "%s not found\n", filename);
         return 0;
     }
 }

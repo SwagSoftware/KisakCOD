@@ -1238,7 +1238,7 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 			}
 			if (total)
 			{
-				Com_Printf(0, "num vars:          %d\n", num);
+				Com_Printf(CON_CHANNEL_DONT_FILTER, "num vars:          %d\n", num);
 				Z_VirtualFree(infoArray);
 			}
 			else
@@ -1272,20 +1272,20 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 					qsort(infoArray, num, 0x10u, (int(*)(const void *, const void *))VariableInfoFileLineCompare);
 				else
 					qsort(infoArray, num, 0x10u, (int(*)(const void *, const void *))VariableInfoCountCompare);
-				Com_Printf(23, "********************************\n");
+				Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 				if (spreadsheet)
 				{
 					if (summary)
 					{
-						Com_Printf(0, "count\tfile\n");
+						Com_Printf(CON_CHANNEL_DONT_FILTER, "count\tfile\n");
 					}
 					else if (functionSummary)
 					{
-						Com_Printf(0, "count\tfile\tfunction\n");
+						Com_Printf(CON_CHANNEL_DONT_FILTER, "count\tfile\tfunction\n");
 					}
 					else
 					{
-						Com_Printf(0, "count\tfile\tline\tsource\tcol\n");
+						Com_Printf(CON_CHANNEL_DONT_FILTER, "count\tfile\tline\tsource\tcol\n");
 					}
 				}
 				count = 0;
@@ -1301,32 +1301,32 @@ void  Scr_DumpScriptVariables(bool spreadsheet,
 							filteredCount += pInfob->varUsage;
 							if (spreadsheet)
 							{
-								Com_Printf(0, "%d\t", pInfob->varUsage);
-								Scr_PrintPrevCodePosSpreadSheet(0, (char *)pInfob->pos, summary, functionSummary);
+								Com_Printf(CON_CHANNEL_DONT_FILTER, "%d\t", pInfob->varUsage);
+								Scr_PrintPrevCodePosSpreadSheet(CON_CHANNEL_DONT_FILTER, (char *)pInfob->pos, summary, functionSummary);
 							}
 							else
 							{
 								if (summary)
 									MyAssertHandler(".\\script\\scr_variable.cpp", 746, 0, "%s", "!summary");
-								Com_Printf(0, "count: %d\n", pInfob->varUsage);
-								Scr_PrintPrevCodePos(0, (char*)pInfob->pos, 0);
+								Com_Printf(CON_CHANNEL_DONT_FILTER, "count: %d\n", pInfob->varUsage);
+								Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)pInfob->pos, 0);
 							}
 						}
 					}
 				}
 				if (num != count)
 					MyAssertHandler(".\\script\\scr_variable.cpp", 753, 0, "%s", "num == count");
-				Com_Printf(0, "********************************\n");
-				Com_Printf(0, "num vars:          %d\n", filteredCount);
+				Com_Printf(CON_CHANNEL_DONT_FILTER, "********************************\n");
+				Com_Printf(CON_CHANNEL_DONT_FILTER, "num vars:          %d\n", filteredCount);
 				NumScriptVars = Scr_GetNumScriptVars();
-				Com_Printf(0, "num unlisted vars: %d\n", NumScriptVars - filteredCount);
-				Com_Printf(0, "********************************\n");
+				Com_Printf(CON_CHANNEL_DONT_FILTER, "num unlisted vars: %d\n", NumScriptVars - filteredCount);
+				Com_Printf(CON_CHANNEL_DONT_FILTER, "********************************\n");
 				Z_VirtualFree(infoArray);
 			}
 		}
 		else
 		{
-			Com_Printf(23, "Cannot dump script variables: out of memory\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Cannot dump script variables: out of memory\n");
 		}
 	}
 }
@@ -2426,7 +2426,7 @@ void Scr_DumpScriptThreads(void)
 				}
 			}
 			qsort(infoArray, num, 0x8Cu, (int(*)(const void*, const void*))ThreadInfoCompare);
-			Com_Printf(23, "********************************\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 			varUsage = 0.0;
 			endonUsage = 0.0;
 			i = 0;
@@ -2444,18 +2444,18 @@ void Scr_DumpScriptThreads(void)
 				} while (i < num && !ThreadInfoCompare((uint32*)pInfo, (uint32*)&infoArray[i]));
 				varUsage = varUsage + info.varUsage;
 				endonUsage = endonUsage + info.endonUsage;
-				Com_Printf(23, "count: %d, var usage: %d, endon usage: %d\n", count, (int)info.varUsage, (int)info.endonUsage);
-				Scr_PrintPrevCodePos(23, (char*)pInfo->pos[0], 0);
+				Com_Printf(CON_CHANNEL_PARSERSCRIPT, "count: %d, var usage: %d, endon usage: %d\n", count, (int)info.varUsage, (int)info.endonUsage);
+				Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, (char*)pInfo->pos[0], 0);
 				for (ja = 1; ja < pInfo->posSize; ++ja)
 				{
-					Com_Printf(23, "called from:\n");
-					Scr_PrintPrevCodePos(23, (char*)pInfo->pos[ja], 0);
+					Com_Printf(CON_CHANNEL_PARSERSCRIPT, "called from:\n");
+					Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, (char*)pInfo->pos[ja], 0);
 				}
 			}
 			Z_VirtualFree(infoArray);
-			Com_Printf(23, "********************************\n");
-			Com_Printf(23, "var usage: %d, endon usage: %d\n", (int)varUsage, (int)endonUsage);
-			Com_Printf(23, "\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "var usage: %d, endon usage: %d\n", (int)varUsage, (int)endonUsage);
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "\n");
 			for (classnum = 0; classnum < CLASS_NUM_COUNT; ++classnum)
 			{
 				if (g_classMap[classnum].entArrayId)
@@ -2472,23 +2472,23 @@ void Scr_DumpScriptThreads(void)
 						}
 					}
 					Com_Printf(
-						23,
+						CON_CHANNEL_PARSERSCRIPT,
 						"ent type '%s'... count: %d, var usage: %d\n",
 						g_classMap[classnum].name,
 						count,
 						(int)info.varUsage);
 				}
 			}
-			Com_Printf(23, "********************************\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 			NumScriptVars = Scr_GetNumScriptVars();
-			Com_Printf(23, "num vars:    %d\n", NumScriptVars);
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "num vars:    %d\n", NumScriptVars);
 			NumScriptThreads = Scr_GetNumScriptThreads();
-			Com_Printf(23, "num threads: %d\n", NumScriptThreads);
-			Com_Printf(23, "********************************\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "num threads: %d\n", NumScriptThreads);
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 		}
 		else
 		{
-			Com_Printf(23, "Cannot dump script threads: out of memory\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Cannot dump script threads: out of memory\n");
 		}
 	}
 }
@@ -3196,24 +3196,24 @@ void  Scr_CheckLeakRange(uint32_t begin, uint32_t end)
 		{
 		case ' ':
 			Com_Printf(
-				23,
+				CON_CHANNEL_PARSERSCRIPT,
 				"move: %d -> %d\n",
 				begin + entry->id,
 				begin + scrVarGlob.variableList[begin + value->v.next].hash.id);
 		LABEL_11:
-			Com_Printf(23, "%d -> %d\n", begin + entry->id, scrVarGlob.variableList[begin + value->nextSibling].hash.id);
-			Com_Printf(23, "%d <- %d\n", begin + entry->id, scrVarGlob.variableList[begin + entry->u.prev].hash.id);
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%d -> %d\n", begin + entry->id, scrVarGlob.variableList[begin + value->nextSibling].hash.id);
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%d <- %d\n", begin + entry->id, scrVarGlob.variableList[begin + entry->u.prev].hash.id);
 			continue;
 		case '@':
 			Com_Printf(
-				23,
+				CON_CHANNEL_PARSERSCRIPT,
 				"head: %d -> %d\n",
 				begin + entry->id,
 				begin + scrVarGlob.variableList[begin + value->v.next].hash.id);
 			goto LABEL_11;
 		case '`':
 			Com_Printf(
-				23,
+				CON_CHANNEL_PARSERSCRIPT,
 				"ext: %d %d\n",
 				begin + entry->id,
 				begin + scrVarGlob.variableList[begin + value->v.next].hash.id);
@@ -3246,13 +3246,13 @@ void  Scr_CheckLeaks(void)
 		}
 		if (bLeak)
 		{
-			Com_Printf(23, "leak:\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "leak:\n");
 			for (ida = 0; ida < 0x18000; ++ida)
 			{
 				if (scrVarDebugPub->leakCount[ida])
-					Com_Printf(23, "%d, %d\n", ida, scrVarDebugPub->leakCount[ida]);
+					Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%d, %d\n", ida, scrVarDebugPub->leakCount[ida]);
 			}
-			Com_Printf(23, "\n");
+			Com_Printf(CON_CHANNEL_PARSERSCRIPT, "\n");
 			if ((!scrStringDebugGlob || !scrStringDebugGlob->ignoreLeaks) && !alwaysfails)
 				MyAssertHandler(".\\script\\scr_variable.cpp", 182, 0, "leak");
 		}

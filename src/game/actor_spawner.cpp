@@ -88,7 +88,7 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
 
     if (ai_disableSpawn->current.enabled)
     {
-        Com_DPrintf(18, "Attempted spawn prevented by ai_disableSpawn.\n");
+        Com_DPrintf(CON_CHANNEL_AI, "Attempted spawn prevented by ai_disableSpawn.\n");
         return 0;
     }
     if (!ent->count)
@@ -98,7 +98,7 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
             v9 = SL_ConvertToString(v8);
         else
             v9 = "<unnamed>";
-        Com_DPrintf(18, "^3Warning: SpawnActor( %s ) failed due to 0 count.\n", v9);
+        Com_DPrintf(CON_CHANNEL_AI, "^3Warning: SpawnActor( %s ) failed due to 0 count.\n", v9);
         return 0;
     }
     if (forceSpawn)
@@ -109,7 +109,7 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
             v10 = SL_ConvertToString(ent->targetname);
         else
             v10 = "<unnamed>";
-        Com_DPrintf(18, "^3couldn't spawn from %s because spawnpoint would telefrag\n", v10);
+        Com_DPrintf(CON_CHANNEL_AI, "^3couldn't spawn from %s because spawnpoint would telefrag\n", v10);
         return 0;
     }
     if (level.loading)
@@ -167,7 +167,7 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
                 v14 = SL_ConvertToString(ent->targetname);
             else
                 v14 = "<unnamed>";
-            Com_DPrintf(18, "^3couldn't spawn from %s because there are no free actors\n", v14);
+            Com_DPrintf(CON_CHANNEL_AI, "^3couldn't spawn from %s because there are no free actors\n", v14);
             return 0;
         }
     }
@@ -177,7 +177,7 @@ gentity_s *__cdecl SpawnActor(gentity_s *ent, unsigned int targetname, enumForce
             v12 = SL_ConvertToString(ent->targetname);
         else
             v12 = "<unnamed>";
-        Com_DPrintf(18, "^3couldn't spawn from %s because player can see spawnpoint\n", v12);
+        Com_DPrintf(CON_CHANNEL_AI, "^3couldn't spawn from %s because player can see spawnpoint\n", v12);
         return 0;
     }
 }
@@ -211,7 +211,7 @@ void __cdecl G_DropActorSpawnersToFloor()
                 float origZ = ent->r.currentOrigin[2];
                 if (Actor_droptofloor(ent))
                 {
-                    Com_Printf(18, "^3Spawner at (%g %g %g) is in solid\n", origX, origY, origZ);
+                    Com_Printf(CON_CHANNEL_AI, "^3Spawner at (%g %g %g) is in solid\n", origX, origY, origZ);
                     ent->r.svFlags &= ~1u;
                 }
             }

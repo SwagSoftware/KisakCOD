@@ -44,13 +44,13 @@ LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, const char *soundName)
         }
         else
         {
-            Com_PrintError(1, "ERROR: Sound file '%s' is zero length, invalid\n", soundName);
+            Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Sound file '%s' is zero length, invalid\n", soundName);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(1, "ERROR: Sound file '%s' is in an invalid or corrupted format\n", soundName);
+        Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Sound file '%s' is in an invalid or corrupted format\n", soundName);
         return 0;
     }
 }
@@ -66,14 +66,14 @@ LoadedSound *__cdecl SND_LoadFromBuffer(void *buffer, uint32_t bufferSize, const
     drwav wav;
     if (!drwav_init_memory(&wav, buffer, bufferSize, NULL))
     {
-        Com_PrintError(1, "ERROR: Sound file '%s' is in an invalid or corrupted format\n", soundName);
+        Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Sound file '%s' is in an invalid or corrupted format\n", soundName);
         return 0;
     }
 
     if (wav.totalPCMFrameCount == 0)
     {
         drwav_uninit(&wav);
-        Com_PrintError(1, "ERROR: Sound file '%s' is zero length, invalid\n", soundName);
+        Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Sound file '%s' is zero length, invalid\n", soundName);
         return 0;
     }
 
@@ -136,7 +136,7 @@ LoadedSound *__cdecl SND_LoadSoundFile(const char *name)
     }
     else
     {
-        Com_PrintError(1, "ERROR: Sound file '%s' not found\n", realname);
+        Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Sound file '%s' not found\n", realname);
         return 0;
     }
 }

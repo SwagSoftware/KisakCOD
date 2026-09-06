@@ -18,7 +18,7 @@ void __cdecl CG_LoadingString(int32_t localClientNum, const char *s)
     CG_GetLocalClientGlobals(localClientNum)->isLoading = *s != 0;
     if (s && *s)
     {
-        Com_Printf(14, va("LOADING... %s\n", s));
+        Com_Printf(CON_CHANNEL_CLIENT, va("LOADING... %s\n", s));
     }
     SCR_UpdateLoadScreen();
 }

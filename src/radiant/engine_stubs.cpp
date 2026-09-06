@@ -87,7 +87,7 @@ DObjAnimMat *__cdecl CG_DObjCalcPose(const cpose_t *pose, const DObj_s *obj, int
         const long offset = InterlockedExchangeAdd(&s_radiantSkelMemoryPos, size);
         if (offset < 0 || offset + size > RADIANT_SKEL_MEMORY_SIZE)
         {
-            Com_PrintWarning(14, "Radiant skeleton memory exhausted\n");
+            Com_PrintWarning(CON_CHANNEL_CLIENT, "Radiant skeleton memory exhausted\n");
             return nullptr;
         }
 

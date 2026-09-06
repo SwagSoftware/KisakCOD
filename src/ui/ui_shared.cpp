@@ -231,7 +231,7 @@ void Script_DisplaySaveMessage(UiContext *dc, itemDef_s *item, const char **args
     ui_saveTimeGlob.saveTime = Sys_Milliseconds();
     ui_saveTimeGlob.hasfirstFrameShown = 0;
     ui_saveTimeGlob.saveMenuName = item->parent->window.name;
-    Com_Printf(13, "Save message opened: %i\n", ui_saveTimeGlob.saveTime);
+    Com_Printf(CON_CHANNEL_UI, "Save message opened: %i\n", ui_saveTimeGlob.saveTime);
 }
 
 void Script_WriteSave(UiContext *dc, itemDef_s *item, const char **args)
@@ -395,7 +395,7 @@ void __cdecl Script_StatClearPerkNew(UiContext *dc, itemDef_s *item, const char 
     }
     else
     {
-        Com_PrintWarning(13, "You can only do table lookups when using fastfiles.\n");
+        Com_PrintWarning(CON_CHANNEL_UI, "You can only do table lookups when using fastfiles.\n");
     }
 }
 
@@ -483,7 +483,7 @@ int __cdecl String_Parse(const char **p, char *out, int len)
             if (Dvar_GetBool("loc_warningsAsErrors"))
                 Com_Error(ERR_LOCALIZATION, "Could not translate menu string reference %s", token->token);
             else
-                Com_PrintWarning(13, "WARNING: Could not translate menu string reference %s\n", token->token);
+                Com_PrintWarning(CON_CHANNEL_UI, "WARNING: Could not translate menu string reference %s\n", token->token);
         }
     }
     I_strncpyz(out, token->token, len);
@@ -765,9 +765,9 @@ void __cdecl Menus_Close(UiContext *dc, menuDef_t *menu)
             {
                 if (!menu->window.name)
                     MyAssertHandler(".\\ui\\ui_shared.cpp", 976, 0, "%s", "menu->window.name");
-                Com_PrintWarning(13, "WARNING: No menu has focus after closing %s.\n Active menus: \n", menu->window.name);
+                Com_PrintWarning(CON_CHANNEL_UI, "WARNING: No menu has focus after closing %s.\n Active menus: \n", menu->window.name);
                 for (menuNumb = 0; menuNumb < dc->openMenuCount; ++menuNumb)
-                    Com_PrintWarning(13, "  %d:  %s\n", menuNumb, dc->menuStack[menuNumb]->window.name);
+                    Com_PrintWarning(CON_CHANNEL_UI, "  %d:  %s\n", menuNumb, dc->menuStack[menuNumb]->window.name);
             }
         }
     }
@@ -1095,7 +1095,7 @@ void __cdecl Script_StatSetUsingStatsTable(UiContext *dc, itemDef_s *item, const
     }
     else
     {
-        Com_PrintWarning(13, "You can only do table lookups when using fastfiles.\n");
+        Com_PrintWarning(CON_CHANNEL_UI, "You can only do table lookups when using fastfiles.\n");
     }
 }
 
@@ -1184,7 +1184,7 @@ void __cdecl Script_FocusFirstInMenu(UiContext *dc, itemDef_s *item, const char*
     }
     else if (item->parent->window.name)
     {
-        Com_Printf(13, "focusFirst: no itemDefs in %s were selectable\n", item->parent->window.name);
+        Com_Printf(CON_CHANNEL_UI, "focusFirst: no itemDefs in %s were selectable\n", item->parent->window.name);
     }
     else
     {
@@ -1192,7 +1192,7 @@ void __cdecl Script_FocusFirstInMenu(UiContext *dc, itemDef_s *item, const char*
             name = item->window.name;
         else
             name = "itemDef's unnamed menu";
-        Com_Printf(13, "focusFirst: no itemDefs in %s were selectable\n", name);
+        Com_Printf(CON_CHANNEL_UI, "focusFirst: no itemDefs in %s were selectable\n", name);
     }
 }
 
@@ -1647,12 +1647,12 @@ void __cdecl Script_SetFocus(UiContext *dc, itemDef_s *item, const char **args)
             }
             else
             {
-                Com_PrintError(13, "setFocus: error focusing widget '%s' (widget was found but could not accept focus)\n", name);
+                Com_PrintError(CON_CHANNEL_UI, "setFocus: error focusing widget '%s' (widget was found but could not accept focus)\n", name);
             }
         }
         else
         {
-            Com_Printf(13, "setFocus: could not find widget named '%s'\n", name);
+            Com_Printf(CON_CHANNEL_UI, "setFocus: could not find widget named '%s'\n", name);
         }
     }
 }
@@ -2573,7 +2573,7 @@ int __cdecl Menus_OpenByName(UiContext *dc, const char *p)
     }
     else
     {
-        Com_PrintWarning(13, "Could not find menu '%s'\n", p);
+        Com_PrintWarning(CON_CHANNEL_UI, "Could not find menu '%s'\n", p);
         return 0;
     }
 }
@@ -2582,10 +2582,10 @@ void __cdecl Menus_PrintAllLoadedMenus(UiContext *dc)
 {
     int i; // [esp+0h] [ebp-4h]
 
-    Com_Printf(16, "Currently loaded UI menus (CG menus not included):\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "Currently loaded UI menus (CG menus not included):\n");
     for (i = 0; i < dc->menuCount; ++i)
-        Com_Printf(16, "%i. %s\n", i, dc->Menus[i]->window.name);
-    Com_Printf(16, "\n%i menus total\n", dc->menuCount);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%i. %s\n", i, dc->Menus[i]->window.name);
+    Com_Printf(CON_CHANNEL_SYSTEM, "\n%i menus total\n", dc->menuCount);
 }
 
 int __cdecl Display_MouseMove(UiContext *dc)
@@ -4667,9 +4667,9 @@ char __cdecl Menu_IsVisible(UiContext *dc, menuDef_t *menu)
     if (uiscript_debug->current.integer)
     {
         if (menu->window.name)
-            Com_Printf(13, "hiding the %s menu becuase the 'visible when' expression was false\n", menu->window.name);
+            Com_Printf(CON_CHANNEL_UI, "hiding the %s menu becuase the 'visible when' expression was false\n", menu->window.name);
         else
-            Com_Printf(13, "hiding the %s menu becuase the 'visible when' expression was false\n", "unnamed");
+            Com_Printf(CON_CHANNEL_UI, "hiding the %s menu becuase the 'visible when' expression was false\n", "unnamed");
     }
     return 0;
 }

@@ -855,21 +855,21 @@ void __cdecl FX_UpdateEffectPartialForClass(
         {
             if (elemHandle == 0xFFFF)
             {
-                Com_Printf(0, "---- EFFECT ABOUT TO ASSERT ----\n");
-                Com_Printf(0, "effect '%s' spawned at %i pass %i\n", effect->def->name, effect->msecBegin, passCount);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "---- EFFECT ABOUT TO ASSERT ----\n");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "effect '%s' spawned at %i pass %i\n", effect->def->name, effect->msecBegin, passCount);
                 Com_Printf(
-                    0,
+                    CON_CHANNEL_DONT_FILTER,
                     "looping from %i to %i, first existing is %i\n",
                     elemHandleStart,
                     elemHandleStop,
                     elemHandleFirstExisting);
                 v7 = msecUpdateEnd - msecUpdateBegin;
                 Com_Printf(
-                    0,
+                    CON_CHANNEL_DONT_FILTER,
                     "update period is from %d to %d (%d ms)\n", // change from lg to d
                     msecUpdateEnd, msecUpdateBegin,
                     v7);
-                Com_Printf(0, "here's the active elem list:\n");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "here's the active elem list:\n");
                 for (elemHandle = effect->firstElemHandle[elemClass];
                     elemHandle != 0xFFFF;
                     elemHandle = elem->item.nextElemHandleInEffect)
@@ -884,7 +884,7 @@ void __cdecl FX_UpdateEffectPartialForClass(
                     lifeSpan = *(_DWORD*)unk2
                         + (((*(_DWORD*)(unk2 + 4) + 1) * LOWORD(fx_randomTable[unk1 + 17])) >> 16);
                     Com_Printf(
-                        0,
+                        CON_CHANNEL_DONT_FILTER,
                         "  elem %i def %i seq %i spawn %i die %i\n",
                         elemHandle,
                         elem->item.defIndex,

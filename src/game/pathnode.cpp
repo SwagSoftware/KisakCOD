@@ -329,7 +329,7 @@ void __cdecl node_droptofloor(pathnode_t *node)
     if (tr.startsolid || tr.allsolid)
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "ERROR: Pathnode (%s) at (%g %g %g) is in solid\n",
             nodeStringTable[node->constant.type],
             node->constant.vOrigin[0],
@@ -351,7 +351,7 @@ void __cdecl node_droptofloor(pathnode_t *node)
             return;
         }
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "ERROR: Pathnode (%s) at (%g %g %g) is in solid\n",
             nodeStringTable[node->constant.type],
             node->constant.vOrigin[0],
@@ -363,7 +363,7 @@ void __cdecl node_droptofloor(pathnode_t *node)
     }
 
     Com_PrintError(
-        1,
+        CON_CHANNEL_ERROR,
         "ERROR: Pathnode (%s) at (%g %g %g) is floating\n",
         nodeStringTable[node->constant.type],
         node->constant.vOrigin[0],
@@ -379,13 +379,13 @@ void __cdecl G_UpdateTrackExtraNodes()
 
     if (g_path.originErrors)
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "There are %d path node origins that don't match.  If this number is higher than expected then you may want to reco"
             "mpile the map before using MyMapEnts..\n",
             g_path.originErrors);
     if (g_path.extraNodes)
         Com_PrintError(
-            18,
+            CON_CHANNEL_AI,
             "There are %d extra path nodes in the entity string.  Ignoring extra path nodes, and some of the key value pairs ar"
             "e likely mapped to the wrong nodes.\n",
             g_path.extraNodes);
@@ -393,7 +393,7 @@ void __cdecl G_UpdateTrackExtraNodes()
     if (g_path.actualNodeCount < gameWorldSp.path.nodeCount)
     {
         Com_PrintError(
-            18,
+            CON_CHANNEL_AI,
             "There %d less path nodes in the entity string than in the compiled map.  Some of the key value pairs are likely ma"
             "pped to the wrong nodes.\n",
             gameWorldSp.path.nodeCount - g_path.actualNodeCount);
@@ -1184,7 +1184,7 @@ void __cdecl Path_DrawDebugFindPath(float *vOrigin)
     {
         Dvar_SetInt(ai_debugFindPath, 0);
         Com_Printf(
-            18,
+            CON_CHANNEL_AI,
             "^51 continuously copies your position to path start\n"
             "2 continuously copies your position to path goal\n"
             "3 doesn't change path start or path goal, but will still find a path\n"
@@ -3580,7 +3580,7 @@ void __cdecl G_SpawnPathnodeDynamic()
         else
         {
             v0 = ++overCount + g_path.actualNodeCount;
-            Com_Printf(18, "PATH_MAX_NODES (%i) exceeded.  Nodecount: %d\n", 0x2000, v0);
+            Com_Printf(CON_CHANNEL_AI, "PATH_MAX_NODES (%i) exceeded.  Nodecount: %d\n", 0x2000, v0);
         }
     }
 }

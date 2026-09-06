@@ -97,9 +97,9 @@ int __cdecl Item_IsVisible(int localClientNum, itemDef_s *item)
     if (uiscript_debug->current.integer)
     {
         if (item->window.name)
-            Com_Printf(13, "Item %s is hidden because its 'visible when' expression is false\n", item->window.name);
+            Com_Printf(CON_CHANNEL_UI, "Item %s is hidden because its 'visible when' expression is false\n", item->window.name);
         else
-            Com_Printf(13, "Item %s is hidden because its 'visible when' expression is false\n", "unnamed");
+            Com_Printf(CON_CHANNEL_UI, "Item %s is hidden because its 'visible when' expression is false\n", "unnamed");
     }
     return 0;
 }
@@ -323,7 +323,7 @@ listBoxDef_s *__cdecl Item_GetListBoxDef(itemDef_s *item)
 {
     if (item->dataType == 6)
         return item->typeData.listBox;
-    Com_PrintError(13, "Menu Error: Expecting type: ITEM_TYPE_LISTBOX\n");
+    Com_PrintError(CON_CHANNEL_UI, "Menu Error: Expecting type: ITEM_TYPE_LISTBOX\n");
     return 0;
 }
 
@@ -332,7 +332,7 @@ editFieldDef_s *__cdecl Item_GetEditFieldDef(itemDef_s *item)
     if (Item_IsEditFieldDef(item))
         return item->typeData.editField;
     Com_PrintError(
-        13,
+        CON_CHANNEL_UI,
         "Menu Error: Expecting type: ITEM_TYPE_EDITFIELD, ITEM_TYPE_NUMERICFIELD, ITEM_TYPE_DECIMALFIELD, ITEM_TYPE_VALIDFILE"
         "FIELD, ITEM_TYPE_UPREDITFIELD, ITEM_TYPE_YESNO, ITEM_TYPE_BIND, ITEM_TYPE_SLIDER, or ITEM_TYPE_TEXT\n");
     return 0;

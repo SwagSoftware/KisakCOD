@@ -540,19 +540,19 @@ int __cdecl Record_QueueAudioDataForEncoding(audioSample_t *sample)
                 }
                 else
                 {
-                    Com_Printf(9, "Invalid sample offset of %i\n", sample->sampleOffset);
+                    Com_Printf(CON_CHANNEL_SOUND, "Invalid sample offset of %i\n", sample->sampleOffset);
                     return 0;
                 }
             }
             else
             {
-                Com_Printf(9, "Invalid sample length of %i samples\n", sample->lengthInSamples);
+                Com_Printf(CON_CHANNEL_SOUND, "Invalid sample length of %i samples\n", sample->lengthInSamples);
                 return 0;
             }
         }
         else
         {
-            Com_Printf(9, "Invalid encode frame size of %i\n", FrameSize);
+            Com_Printf(CON_CHANNEL_SOUND, "Invalid encode frame size of %i\n", FrameSize);
             return 0;
         }
     }

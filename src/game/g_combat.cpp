@@ -726,7 +726,7 @@ void __cdecl G_Damage(
                 v55 = v54;
                 damage -= v54;
                 if (g_debugDamage->current.enabled)
-                    Com_Printf(15, "client:%i health:%i damage:%i armor:%i\n", targ->s.number, targ->health, damage, v54);
+                    Com_Printf(CON_CHANNEL_SERVER, "client:%i health:%i damage:%i armor:%i\n", targ->s.number, targ->health, damage, v54);
                 if (v55)
                     G_DamageNotify(
                         scr_const.damage_notdone,
@@ -1247,7 +1247,7 @@ void __cdecl AddScrTeamName(team_t team)
         Scr_AddConstString(scr_const.dead);
         break;
     default:
-        Com_PrintWarning(15, "AddScrTeamName(): Unhandled team name %i.\n", team);
+        Com_PrintWarning(CON_CHANNEL_SERVER, "AddScrTeamName(): Unhandled team name %i.\n", team);
         Scr_AddUndefined();
         break;
     }

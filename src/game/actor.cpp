@@ -246,7 +246,7 @@ XAnimTree_s *__cdecl G_AllocAnimClientTree()
             break;
         if ((unsigned int)++v0 >= 0x40)
         {
-            Com_Printf(18, "G_AllocAnimClientTree: failed allocation\n");
+            Com_Printf(CON_CHANNEL_AI, "G_AllocAnimClientTree: failed allocation\n");
             return 0;
         }
     }
@@ -1196,7 +1196,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
         {
             if (ai_badPathSpam->current.enabled)
                 Com_Printf(
-                    18,
+                    CON_CHANNEL_AI,
                     "AI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal. Maybe suppressed.\n",
                     self->ent->s.number,
                     self->ent->r.currentOrigin[0],
@@ -1206,7 +1206,7 @@ void __cdecl Actor_HandleInvalidPath(actor_s *self)
         else
         {
             Com_Printf(
-                18,
+                CON_CHANNEL_AI,
                 "%sAI (entity %d, origin %.1f %.1f %.1f) couldn't find path to goal.\n",
                 "^1",
                 self->ent->s.number,
@@ -1516,7 +1516,7 @@ void __cdecl Actor_GetAnimDeltas(actor_s *self, float *rotation, float *translat
 
     if (ai_debugAnimDeltas->current.integer == self->ent->s.number)
         Com_Printf(
-            18,
+            CON_CHANNEL_AI,
             "deltas = %g %g %g\n",
             translation[0],
             translation[1],
@@ -2570,7 +2570,7 @@ actor_s *__cdecl Actor_Alloc()
         ++actors;
         if (v1 >= 32)
         {
-            Com_DPrintf(18, "Actor allocation failed\n");
+            Com_DPrintf(CON_CHANNEL_AI, "Actor allocation failed\n");
             return 0;
         }
     }
@@ -2683,7 +2683,7 @@ void __cdecl Actor_FreeExpendable()
     float eyePos[3]; // [sp+50h] [-80h] BYREF // v15
     float forward[3]; // [sp+60h] [-70h] BYREF // v18
 
-    Com_Printf(18, "^3trying to delete somebody to make room for spawned AI (time %d)\n", level.time);
+    Com_Printf(CON_CHANNEL_AI, "^3trying to delete somebody to make room for spawned AI (time %d)\n", level.time);
     if (level.loading)
         Com_Error(ERR_DROP, "too many actors in BSP file");
 
@@ -2816,7 +2816,7 @@ void __cdecl Actor_FreeExpendable()
             }
         }
     }
-    Com_Printf(18, "^3deleting entity %i\n", v1->ent->s.number);
+    Com_Printf(CON_CHANNEL_AI, "^3deleting entity %i\n", v1->ent->s.number);
     v13 = v1->ent;
     sentient = v1->sentient;
     if (v1->Path.wPathLen)
@@ -4542,7 +4542,7 @@ void __cdecl Actor_UpdateAnglesAndDelta(actor_s *self)
         yawChange = 0.0;
     LABEL_33:
         if (ai_debugAnimDeltas->current.integer == ent->s.number)
-            Com_Printf(18, "yawChange = %g\n", yawChange);
+            Com_Printf(CON_CHANNEL_AI, "yawChange = %g\n", yawChange);
         if (yawChange != 0.0)
             Actor_ChangeAngles(self, 0.0, yawChange);
         Actor_DecideOrientation(self);
@@ -5010,7 +5010,7 @@ void __cdecl Actor_Think(gentity_s *self)
         }
         else
         {
-            Com_Printf(18, "^3Deleting AI without a model.\n");
+            Com_Printf(CON_CHANNEL_AI, "^3Deleting AI without a model.\n");
             G_FreeEntity(self);
         }
     }

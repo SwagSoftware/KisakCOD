@@ -60,7 +60,7 @@ void __cdecl CG_LoadClientEffects_LoadObj(int32_t localClientNum, const char *fi
     }
     else
     {
-        Com_PrintError(1, "file not found: %s\n", filename);
+        Com_PrintError(CON_CHANNEL_ERROR, "file not found: %s\n", filename);
     }
 }
 
@@ -102,7 +102,7 @@ void __cdecl CG_ParseClientEffects(int32_t localClientNum, char *buffer)
                         {
                             I_strncpyz(errorText, (char *)line, 128);
                             Com_PrintError(
-                                1,
+                                CON_CHANNEL_ERROR,
                                 "Expected 'ent = maps\\mp\\_createfx::createLoopSound();' or 'ent = maps\\mp\\_utility::createOneshotEffe"
                                 "ct' instead of '%s' in map's effect file\n",
                                 errorText);
@@ -119,7 +119,7 @@ void __cdecl CG_ParseClientEffects(int32_t localClientNum, char *buffer)
                     if (*line)
                     {
                         I_strncpyz(errorText, (char *)line, 128);
-                        Com_PrintError(1, "Unexpected data after parsing '%s' map's effect file\n", errorText);
+                        Com_PrintError(CON_CHANNEL_ERROR, "Unexpected data after parsing '%s' map's effect file\n", errorText);
                     }
                 }
             }
@@ -154,7 +154,7 @@ char *__cdecl CG_SkipText(char *line, const char *skipText)
     if (!I_strncmp(skipText, line, lineLength))
         return &line[lineLength];
     I_strncpyz(errorText, line, 128);
-    Com_PrintError(1, "Unexpected text '%s' when trying to find '%s' in map's effect file\n", errorText, skipText);
+    Com_PrintError(CON_CHANNEL_ERROR, "Unexpected text '%s' when trying to find '%s' in map's effect file\n", errorText, skipText);
     return 0;
 }
 
@@ -226,7 +226,7 @@ void __cdecl CG_AddClientEntSound(const float *origin, const char *soundalias)
 
     if (g_clientEntSoundCount == 128)
     {
-        Com_PrintError(1, "Too many client ent sounds.  Increase MAX_CLIENT_ENT_SOUNDS.\n");
+        Com_PrintError(CON_CHANNEL_ERROR, "Too many client ent sounds.  Increase MAX_CLIENT_ENT_SOUNDS.\n");
     }
     else
     {
@@ -245,7 +245,7 @@ const char *__cdecl CG_ParseVec3Finish(char *line, float *origin)
     if (sscanf(line, "%f, %f, %f", origin, origin + 1, origin + 2) == 3)
         return CG_SkipRestOfLine(line);
     I_strncpyz(errorText, line, 128);
-    Com_PrintError(1, "Expected 3 floats instead of '%s'\n", errorText);
+    Com_PrintError(CON_CHANNEL_ERROR, "Expected 3 floats instead of '%s'\n", errorText);
     return 0;
 }
 
@@ -268,14 +268,14 @@ char *__cdecl CG_ParseString(char *line, char *text, uint32_t bufferSize)
     if (*line != 34)
     {
         I_strncpyz(errorText, line, 128);
-        Com_PrintError(1, "Expected a quoted string instead of '%s'\n", errorText);
+        Com_PrintError(CON_CHANNEL_ERROR, "Expected a quoted string instead of '%s'\n", errorText);
     }
     for (charCount = 0; line[charCount + 1] != 34 && line[charCount + 1] && charCount < bufferSize; ++charCount)
         text[charCount] = line[charCount + 1];
     if (charCount == bufferSize)
     {
         I_strncpyz(errorText, line, 128);
-        Com_PrintError(1, "String was longer than expected '%s'\n", errorText);
+        Com_PrintError(CON_CHANNEL_ERROR, "String was longer than expected '%s'\n", errorText);
         return 0;
     }
     else
@@ -360,7 +360,7 @@ const char *__cdecl CG_ParseFloatFinish(char *line, float *value)
     if (sscanf(line, "%f", value) == 1)
         return CG_SkipRestOfLine(line);
     I_strncpyz(errorText, line, 128);
-    Com_PrintError(1, "Expected a float instead of '%s'\n", errorText);
+    Com_PrintError(CON_CHANNEL_ERROR, "Expected a float instead of '%s'\n", errorText);
     return 0;
 }
 
@@ -376,7 +376,7 @@ char __cdecl CG_FindFileName(const char *name, char *filename, int32_t size)
             return 1;
         }
     }
-    Com_PrintError(1, "Couldn't find '%s' in _fx.gsc map.\n", name);
+    Com_PrintError(CON_CHANNEL_ERROR, "Couldn't find '%s' in _fx.gsc map.\n", name);
     return 0;
 }
 
@@ -388,7 +388,7 @@ void __cdecl CG_LoadClientEffects_FastFile(int32_t localClientNum, const char *f
     if (rawfile)
         CG_ParseClientEffects(localClientNum, (char *)rawfile->buffer);
     else
-        Com_PrintError(1, "file not found: %s\n", filename);
+        Com_PrintError(CON_CHANNEL_ERROR, "file not found: %s\n", filename);
 }
 
 void __cdecl CG_LoadClientEffectMapping_LoadObj(const char *filename)
@@ -404,7 +404,7 @@ void __cdecl CG_LoadClientEffectMapping_LoadObj(const char *filename)
     }
     else
     {
-        Com_PrintError(1, "file not found: %s\n", filename);
+        Com_PrintError(CON_CHANNEL_ERROR, "file not found: %s\n", filename);
     }
 }
 
@@ -474,7 +474,7 @@ void __cdecl CG_AddPairToMap(char *name, char *filename)
         {
             if (I_strcmp(g_effectDefMap[i].filename, filename))
                 Com_PrintError(
-                    1,
+                    CON_CHANNEL_ERROR,
                     "Tried to remap '%s' to '%s' previously mapped to '%s'\n",
                     g_effectDefMap[i].name,
                     g_effectDefMap[i].filename,
@@ -484,7 +484,7 @@ void __cdecl CG_AddPairToMap(char *name, char *filename)
     }
     if (g_effectDefMapEntries == 32)
     {
-        Com_PrintError(1, "Failed to added mapping from '%s' to '%s'.  Increase MAX_CLIENT_EFFECT_DEFS.\n", name, filename);
+        Com_PrintError(CON_CHANNEL_ERROR, "Failed to added mapping from '%s' to '%s'.  Increase MAX_CLIENT_EFFECT_DEFS.\n", name, filename);
     }
     else
     {
@@ -502,7 +502,7 @@ void __cdecl CG_LoadClientEffectMapping_FastFile(const char *filename)
     if (rawfile)
         CG_ParseClientEffectMapping(rawfile->buffer);
     else
-        Com_PrintError(1, "file not found: %s\n", filename);
+        Com_PrintError(CON_CHANNEL_ERROR, "file not found: %s\n", filename);
 }
 
 void __cdecl CG_ClientSideEffectsRegisterDvars()

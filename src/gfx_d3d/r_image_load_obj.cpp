@@ -418,7 +418,7 @@ static GfxImage *__cdecl Image_Load(char *name, uint8_t semantic, uint8_t imageT
 
 static void __cdecl Image_PrintTruncatedFileError(const char *filepath)
 {
-    Com_PrintError(8, "ERROR: image '%s' is truncated.  Delete the file and run converter to fix.\n", filepath);
+    Com_PrintError(CON_CHANNEL_GFX, "ERROR: image '%s' is truncated.  Delete the file and run converter to fix.\n", filepath);
 }
 
 char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFileRead)(const char *, int *))
@@ -502,13 +502,13 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
         }
         else
         {
-            Com_PrintError(8, "ERROR: image '%s' is missing\n", filepath);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: image '%s' is missing\n", filepath);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(8, "ERROR: filename '%s' too long\n", filepath);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: filename '%s' too long\n", filepath);
         return 0;
     }
 }
@@ -646,6 +646,6 @@ GfxImage *__cdecl Image_Register_LoadObj(char *imageName, uint8_t semantic, uint
     }
 
     if (!image)
-        Com_PrintError(8, "ERROR: failed to load image '%s'\n", imageName);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: failed to load image '%s'\n", imageName);
     return image;
 }

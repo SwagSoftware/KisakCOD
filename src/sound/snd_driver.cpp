@@ -811,7 +811,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
                 }
                 else
                 {
-                    Com_PrintError(1, "ERROR: Sound file '%s' is zero length, invalid\n", realname);
+                    Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Sound file '%s' is zero length, invalid\n", realname);
                     return SND_SetPlaybackIdNotPlayed(index);
                 }
             }
@@ -824,7 +824,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
         {
             error = (const char *)AIL_last_error();
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "Couldn't play stream '%s' from alias '%s' - %s\n",
                 realname,
                 startAliasInfo->alias0->aliasName,
@@ -836,7 +836,7 @@ int __cdecl SND_StartAliasStreamOnChannel(SndStartAliasInfo *startAliasInfo, int
     {
         Com_GetSoundFileName(startAliasInfo->alias0, filename, 128);
         Com_DPrintf(
-            9,
+            CON_CHANNEL_SOUND,
             "Tried to play streamed sound '%s' from alias '%s', but it was not found at load time.\n",
             filename,
             startAliasInfo->alias0->aliasName);
@@ -1007,18 +1007,18 @@ void __cdecl SND_PrintEqParams()
     int entchannel; // [esp+20h] [ebp-1Ch]
     int eqIndex; // [esp+24h] [ebp-18h]
 
-    Com_Printf(9, "Current EQ Settings\n---------------\n");
+    Com_Printf(CON_CHANNEL_SOUND, "Current EQ Settings\n---------------\n");
     for (entchannel = 0; entchannel < g_snd.entchannel_count; ++entchannel)
     {
         channelName = SND_GetEntChannelName(entchannel);
-        Com_Printf(9, "+ %s\n", channelName->name);
+        Com_Printf(CON_CHANNEL_SOUND, "+ %s\n", channelName->name);
         for (eqIndex = 0; eqIndex < 2; ++eqIndex)
         {
             for (band = 0; band < 3; ++band)
             {
                 v0 = (float *)&milesGlob.eq[eqIndex].params[band][entchannel];
                 if ((uint8_t)*((uint32_t *)v0 + 4))
-                    Com_Printf(9, "\t%i %s %f Hz %f dB %f q\n", band, snd_eqTypeStrings[*(uint32_t *)v0], v0[2], v0[1], v0[3]);
+                    Com_Printf(CON_CHANNEL_SOUND, "\t%i %s %f Hz %f dB %f q\n", band, snd_eqTypeStrings[*(uint32_t *)v0], v0[2], v0[1], v0[3]);
             }
         }
     }

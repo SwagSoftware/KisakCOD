@@ -1302,7 +1302,7 @@ LABEL_39:
         if (start)
         {
             v5 = g_assetNames[type];
-            Com_Printf(10, "Waited %i msec for asset '%s' of type '%s'.\n", Sys_Milliseconds() - start, name, v5);
+            Com_Printf(CON_CHANNEL_FILES, "Waited %i msec for asset '%s' of type '%s'.\n", Sys_Milliseconds() - start, name, v5);
             ProfLoad_End();
         }
         return assetEntry->asset.header;
@@ -1680,7 +1680,7 @@ XAssetHeader __cdecl DB_AllocXAssetHeader(XAssetType type)
     if (!header.data)
     {
         Sys_UnlockWrite(&db_hashCritSect);
-        Com_PrintError(1, "Exceeded limit of %d '%s' assets.\n", g_poolSize[type], g_assetNames[type]);
+        Com_PrintError(CON_CHANNEL_ERROR, "Exceeded limit of %d '%s' assets.\n", g_poolSize[type], g_assetNames[type]);
         DB_EnumXAssets(type, (void(__cdecl *)(XAssetHeader, void *))DB_PrintAssetName, &type, 1);
         Com_Error(ERR_DROP, "Exceeded limit of %d '%s' assets.\n", g_poolSize[type], g_assetNames[type]);
     }
@@ -1692,7 +1692,7 @@ void __cdecl DB_PrintAssetName(XAssetHeader header, int32_t *data)
     const char *XAssetHeaderName; // eax
 
     XAssetHeaderName = DB_GetXAssetHeaderName(*data, &header);
-    Com_Printf(0, "%s\n", XAssetHeaderName);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", XAssetHeaderName);
 }
 
 void __cdecl DB_CloneXAssetInternal(const XAsset *from, XAsset *to)
@@ -1741,9 +1741,9 @@ void __cdecl PrintWaitedError(XAssetType type, const char *name, int32_t waitedM
     if (waitedMsec > 100)
     {
         if (type == ASSET_TYPE_SOUND)
-            Com_Printf(10, "Waited %i msec for missing asset \"%s\".\n", waitedMsec, name);
+            Com_Printf(CON_CHANNEL_FILES, "Waited %i msec for missing asset \"%s\".\n", waitedMsec, name);
         else
-            Com_PrintError(1, "Waited %i msec for missing asset \"%s\".\n", waitedMsec, name);
+            Com_PrintError(CON_CHANNEL_ERROR, "Waited %i msec for missing asset \"%s\".\n", waitedMsec, name);
     }
     if (type != ASSET_TYPE_SOUND)
     {
@@ -1754,10 +1754,10 @@ void __cdecl PrintWaitedError(XAssetType type, const char *name, int32_t waitedM
                 if (loc_warningsAsErrors->current.enabled)
                 {
                 LABEL_15:
-                    Com_PrintError(1, "Could not load %s \"%s\".\n", g_assetNames[type], name);
+                    Com_PrintError(CON_CHANNEL_ERROR, "Could not load %s \"%s\".\n", g_assetNames[type], name);
                     return;
                 }
-                Com_PrintWarning(10, "Could not load %s \"%s\".\n", g_assetNames[type], name);
+                Com_PrintWarning(CON_CHANNEL_FILES, "Could not load %s \"%s\".\n", g_assetNames[type], name);
             }
         }
         else if (type != ASSET_TYPE_RAWFILE || !IsConfigFile(name))
@@ -2107,12 +2107,12 @@ void __cdecl DB_DelayedCloneXAsset(XAssetEntry *newEntry)
     {
         if (g_copyInfoCount >= 0x800)
         {
-            Com_Printf(0, "g_copyInfo exceeded\n"); // LWSS: if this hits, it means that PostLoadXZone isn't setting back to zero (prob not being called)
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "g_copyInfo exceeded\n"); // LWSS: if this hits, it means that PostLoadXZone isn't setting back to zero (prob not being called)
             for (i = 0; i < 0x800; ++i)
             {
                 XAssetName = DB_GetXAssetName(&g_copyInfo[i]->asset);
                 XAssetTypeName = DB_GetXAssetTypeName(g_copyInfo[i]->asset.type);
-                Com_Printf(0, "%s: %s\n", XAssetTypeName, XAssetName);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s: %s\n", XAssetTypeName, XAssetName);
             }
             Sys_Error("g_copyInfo exceeded");
         }
@@ -2337,7 +2337,7 @@ void __cdecl DB_LoadXZone(XZoneInfo *zoneInfo, uint32_t zoneCount)
             if (zoneInfoCount >= 8)
                 MyAssertHandler(".\\database\\db_registry.cpp", 3249, 0, "%s", "zoneInfoCount < ARRAY_COUNT( g_zoneInfo )");
             I_strncpyz(g_zoneInfo[zoneInfoCount].name, zoneName, 64);
-            Com_Printf(16, "Loading fastfile %s\n", g_zoneInfo[zoneInfoCount].name);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Loading fastfile %s\n", g_zoneInfo[zoneInfoCount].name);
             g_zoneInfo[zoneInfoCount++].flags = zoneInfo[j].allocFlags;
             if (zoneInfoCount)
             {
@@ -2652,7 +2652,7 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
     uint32_t i; // [esp+114h] [ebp-8h]
     void *zoneFile; // [esp+118h] [ebp-4h]
 
-    Com_Printf(0, "Trying to load file %s with flags %x\n", zoneName, zoneFlags);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Trying to load file %s with flags %x\n", zoneName, zoneFlags);
 
     modZone = 0;
     iassert(!g_zoneInfoCount);
@@ -2679,12 +2679,12 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
         zoneFile = CreateFileA("update:\\mp_patch.ff", 0x80000000, 0, 0, 3u, 0x60000000u, 0);
         if (zoneFile == (void *)-1)
         {
-            Com_Printf(16, "Loading mp_patch.ff from disc, not from the update drive\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Loading mp_patch.ff from disc, not from the update drive\n");
             DB_BuildOSPath(zoneName, 256, filename);
             zoneFile = CreateFileA(filename, 0x80000000, 0, 0, 3u, 0x60000000u, 0);
             if (zoneFile == (void *)-1)
             {
-                Com_PrintWarning(10, "WARNING: Could not find zone '%s'\n", filename);
+                Com_PrintWarning(CON_CHANNEL_FILES, "WARNING: Could not find zone '%s'\n", filename);
                 return 0;
             }
         }
@@ -2694,7 +2694,7 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
         v3 = strstr(filename, "_load");
         if (v3)
         {
-            Com_PrintWarning(10, "WARNING: Could not find zone '%s'\n", filename);
+            Com_PrintWarning(CON_CHANNEL_FILES, "WARNING: Could not find zone '%s'\n", filename);
         }
         else
         {
@@ -2759,11 +2759,11 @@ int32_t __cdecl DB_TryLoadXFileInternal(char *zoneName, int32_t zoneFlags)
         if (g_zoneAllocType == 1 && g_initializing)
         {
             startWaitingTime = Sys_Milliseconds();
-            Com_Printf(0, "Waiting for $init to finish.  There may be assets missing from code_post_gfx.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Waiting for $init to finish.  There may be assets missing from code_post_gfx.\n");
             while (g_initializing)
                 DB_Sleep(1);
             v4 = Sys_Milliseconds();
-            Com_Printf(16, "Waited %d ms for $init to finish.\n", v4 - startWaitingTime);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Waited %d ms for $init to finish.\n", v4 - startWaitingTime);
         }
         PMem_BeginAlloc(zone->name, g_zoneAllocType);
         zone->allocType = g_zoneAllocType;
@@ -2827,16 +2827,16 @@ void __cdecl DB_UnloadXZone(uint32_t zoneIndex, bool createDefault)
 
     // KISAKTODO: would be nice
 #if 0
-    //Com_Printf(16, "Unloading assets from fastfile '%s' ", g_zoneNames[zoneIndex]) // KISAKTODO: would be nice
-    Com_Printf(16, "Unloading assets from fastfile '%i' ", zoneIndex);
+    //Com_Printf(CON_CHANNEL_SYSTEM, "Unloading assets from fastfile '%s' ", g_zoneNames[zoneIndex]) // KISAKTODO: would be nice
+    Com_Printf(CON_CHANNEL_SYSTEM, "Unloading assets from fastfile '%i' ", zoneIndex);
     
     if (createDefault)
     {
-        Com_Printf(16, "and creating default assets stubs\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "and creating default assets stubs\n");
     }
     else
     {
-        Com_Printf(16, "and deleting all assets\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "and deleting all assets\n");
     }
 #endif
 
@@ -3020,7 +3020,7 @@ void __cdecl DB_FreeXZoneMemory(XZoneMemory *zoneMem)
 void __cdecl DB_UnloadXZoneMemory(XZone *zone)
 {
     DB_FreeXZoneMemory(&zone->mem);
-    Com_Printf(16, "Unloaded fastfile %s\n", zone->name);
+    Com_Printf(CON_CHANNEL_SYSTEM, "Unloaded fastfile %s\n", zone->name);
     PMem_Free(zone->name, zone->allocType);
     zone->name[0] = 0;
 }

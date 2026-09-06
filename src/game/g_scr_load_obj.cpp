@@ -20,14 +20,14 @@ int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, Scr
 
     if (functions->count >= functions->maxSize)
     {
-        Com_PrintError(15, "CODE ERROR: GScr_LoadScriptAndLabel: functions->maxSize exceeded\n");
+        Com_PrintError(CON_CHANNEL_SERVER, "CODE ERROR: GScr_LoadScriptAndLabel: functions->maxSize exceeded\n");
         return 0;
     }
 
     if (!Scr_LoadScript(filename))
     {
         functions->address[functions->count++] = 0;
-        Com_Printf(15, "Could not find script '%s'\n", filename);
+        Com_Printf(CON_CHANNEL_SERVER, "Could not find script '%s'\n", filename);
         return 0;
     }
 
@@ -37,7 +37,7 @@ int __cdecl GScr_LoadScriptAndLabel(const char *filename, const char *label, Scr
     if (FunctionHandle)
         return 1;
 
-    Com_Printf(15, "Could not find label '%s' in script '%s'\n", label, filename);
+    Com_Printf(CON_CHANNEL_SERVER, "Could not find label '%s' in script '%s'\n", label, filename);
     return 0;
 }
 
@@ -128,7 +128,7 @@ void __cdecl GScr_LoadScriptsForPathNode(pathnode_t *loadNode, void *data)
             else
             {
                 Com_PrintError(
-                    1,
+                    CON_CHANNEL_ERROR,
                     "ERROR: Pathnode (Begin) at (%g %g %g) has no animscript specified\n",
                     loadNode->constant.vOrigin[0],
                     loadNode->constant.vOrigin[1],
@@ -221,12 +221,12 @@ void __cdecl GScr_LoadScriptsForEntities(ScriptFunctions *functions)
                 }
                 else
                 {
-                    Com_PrintError(23, "ERROR: weapClass in weapon info '%s' for %s must be 'turret'\n", weapName, classname);
+                    Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "ERROR: weapClass in weapon info '%s' for %s must be 'turret'\n", weapName, classname);
                 }
             }
             else
             {
-                Com_PrintError(23, "ERROR: could not find weapon info '%s' for %s\n", weapName, classname);
+                Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "ERROR: could not find weapon info '%s' for %s\n", weapName, classname);
             }
         }
     }

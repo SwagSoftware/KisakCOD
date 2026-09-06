@@ -44,9 +44,9 @@ void __cdecl Com_BeginParseSession(const char *filename)
     parse = Com_GetParseThreadInfo();
     if (parse->parseInfoNum == 15)
     {
-        Com_Printf(23, "Already parsing:\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Already parsing:\n");
         for (i = 0; i < parse->parseInfoNum; ++i)
-            Com_Printf(23, "%i. %s\n", i, parse->parseInfo[i].parseFile);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%i. %s\n", i, parse->parseInfo[i].parseFile);
         Com_Error(ERR_FATAL, "Com_BeginParseSession: session overflow trying to parse %s", filename);
     }
     pi = &parse->parseInfo[++parse->parseInfoNum];
@@ -183,9 +183,9 @@ void Com_ScriptError(const char *msg, ...)
     _vsnprintf(string, 0x1000u, msg, va);
     ap = 0;
     if (ParseThreadInfo->parseInfoNum)
-        Com_PrintError(23, "%sFile %s, line %i: %s", v3->warningPrefix, v3->parseFile, v3->lines, string);
+        Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%sFile %s, line %i: %s", v3->warningPrefix, v3->parseFile, v3->lines, string);
     else
-        Com_PrintError(23, "%s", string);
+        Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s", string);
 }
 
 void __cdecl Com_UngetToken()

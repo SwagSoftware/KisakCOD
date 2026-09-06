@@ -122,7 +122,7 @@ void __cdecl GetTagMatrix(
         }
         else
         {
-            Com_PrintWarning(14, "GetTagMatrix() unable to get vehicle DObj.\n");
+            Com_PrintWarning(CON_CHANNEL_CLIENT, "GetTagMatrix() unable to get vehicle DObj.\n");
             MatrixIdentity33(resultTagMat);
             *resultOrigin = 0.0;
             resultOrigin[1] = 0.0;
@@ -131,7 +131,7 @@ void __cdecl GetTagMatrix(
     }
     else
     {
-        Com_PrintWarning(14, "Vehicle being used by a player was not included in latest snapshot.\n");
+        Com_PrintWarning(CON_CHANNEL_CLIENT, "Vehicle being used by a player was not included in latest snapshot.\n");
         MatrixIdentity33(resultTagMat);
         *resultOrigin = 0.0;
         resultOrigin[1] = 0.0;

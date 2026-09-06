@@ -41,7 +41,7 @@ bool __cdecl Encode_Init(int32_t bandwidthEnum)
         {
             if (bandwidthEnum != 2)
             {
-                Com_Printf(9, "Unknown bandwidth mode %i\n", bandwidthEnum);
+                Com_Printf(CON_CHANNEL_SOUND, "Unknown bandwidth mode %i\n", bandwidthEnum);
                 return 0;
             }
             v1 = speex_encoder_init(&speex_uwb_mode);

@@ -1048,8 +1048,8 @@ void __cdecl G_PrintFastFileErrors(const char *fastfile)
 
     if (rawfile->len)
     {
-        Com_PrintError(1, "There were errors when building fast file '%s'\n", fastfile);
-        Com_PrintError(1, rawfile->buffer);
+        Com_PrintError(CON_CHANNEL_ERROR, "There were errors when building fast file '%s'\n", fastfile);
+        Com_PrintError(CON_CHANNEL_ERROR, rawfile->buffer);
     }
 }
 
@@ -1276,12 +1276,12 @@ void __cdecl G_ShutdownGame(int clearScripts)
     unsigned __int8 v2; // r11
 
     SV_ResetDemo();
-    Com_DPrintf(15, "ShutdownGame:\n");
-    Com_DPrintf(15, "------------------------------------------------------------\n");
+    Com_DPrintf(CON_CHANNEL_SERVER, "ShutdownGame:\n");
+    Com_DPrintf(CON_CHANNEL_SERVER, "------------------------------------------------------------\n");
     Cmd_UnregisterAllNotifications();
     if (G_LoadErrorCleanup())
     {
-        Com_Printf(15, "G_ShutdownGame: save game failed to load\n");
+        Com_Printf(CON_CHANNEL_SERVER, "G_ShutdownGame: save game failed to load\n");
     }
     else
     {
@@ -2578,7 +2578,7 @@ int __cdecl G_RunFrame(ServerFrameExtent extent, int timeCap)
         for (v39 = 0; v39 < MAX_GENTITIES; ++v39)
         {
             v41 = SL_ConvertToString(g_entities[v39].classname);
-            Com_Printf(15, "%4i: %s\n", v39, v41);
+            Com_Printf(CON_CHANNEL_SERVER, "%4i: %s\n", v39, v41);
         }
         Dvar_SetBool(g_listEntity, 0);
     }

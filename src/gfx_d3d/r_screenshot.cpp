@@ -883,7 +883,7 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
         monitorInfo.cbSize = 40;
         if (!GetMonitorInfoA(monitor, &monitorInfo))
         {
-            Com_PrintError(8, "ERROR: cannot take screenshot: couldn't get screen dimensions\n");
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: couldn't get screen dimensions\n");
             return 0;
         }
         ClientToScreen(dx.windows[0].hwnd, &pt);
@@ -892,7 +892,7 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
             || width + pt.x > monitorInfo.rcMonitor.right
             || height + pt.y > monitorInfo.rcMonitor.bottom)
         {
-            Com_PrintError(8, "ERROR: cannot take screenshot: game window is partially off-screen\n");
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: game window is partially off-screen\n");
             return 0;
         }
         surfWidth = monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
@@ -933,7 +933,7 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
     LABEL_12:
         v9 = hr;
         v7 = R_ErrorDescription(hr);
-        Com_PrintError(8, "ERROR: cannot take screenshot: couldn't create the off-screen surface: %s (0x%08x)\n", v7, v9);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: couldn't create the off-screen surface: %s (0x%08x)\n", v7, v9);
         return 0;
     }
     sourceRect.left = pt.x;
@@ -999,7 +999,7 @@ char __cdecl R_GetFrontBufferData(int x, int y, int width, int height, int bytes
         } while (alwaysfails);
         v10 = hr;
         v8 = R_ErrorDescription(hr);
-        Com_PrintError(8, "ERROR: cannot take screenshot: LockRect failed: %s (0x%08x)\n", v8, v10);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: LockRect failed: %s (0x%08x)\n", v8, v10);
         return 0;
     }
 }
@@ -1222,9 +1222,9 @@ void __cdecl R_LevelShot()
         buffer[14] = 0x80;
         buffer[16] = 24;
 		if (FS_WriteFile(checkname, (char *)buffer, 0xC012u))
-			Com_Printf(8, "Wrote %s\n", checkname);
+			Com_Printf(CON_CHANNEL_GFX, "Wrote %s\n", checkname);
 		else
-			Com_Printf(8, "ScreenShot: Couldn't create a file\n");
+			Com_Printf(CON_CHANNEL_GFX, "ScreenShot: Couldn't create a file\n");
 		
         Z_Free((char *)buffer, 22);
     }
@@ -1552,7 +1552,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
                     else
                     {
                         v11 = R_ErrorDescription(hrd);
-                        Com_PrintError(8, "ERROR: cannot take screenshot: LockRect failed: %s (0x%08x)\n", v11, hrd);
+                        Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: LockRect failed: %s (0x%08x)\n", v11, hrd);
                         do
                         {
                             if (r_logFile)
@@ -1570,7 +1570,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
                 else
                 {
                     v10 = R_ErrorDescription(hrc);
-                    Com_PrintError(8, "ERROR: cannot take screenshot: GetRenderTargetData failed: %s (0x%08x)\n", v10, hrc);
+                    Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: GetRenderTargetData failed: %s (0x%08x)\n", v10, hrc);
                     surfaceBackBuffer->Release();
                     return 0;
                 }
@@ -1579,7 +1579,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
             {
                 v9 = R_ErrorDescription(hrb);
                 Com_PrintError(
-                    8,
+                    CON_CHANNEL_GFX,
                     "ERROR: cannot take screenshot: couldn't create the off-screen surface: %s (0x%08x)\n",
                     v9,
                     hrb);
@@ -1590,7 +1590,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
         else
         {
             v8 = R_ErrorDescription(hra);
-            Com_PrintError(8, "ERROR: cannot take screenshot: couldn't get desc: %s (0x%08x)\n", v8, hra);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: couldn't get desc: %s (0x%08x)\n", v8, hra);
             surfaceBackBuffer->Release();
             return 0;
         }
@@ -1598,7 +1598,7 @@ char __cdecl R_GetBackBufferData(int x, int y, int width, int height, int bytesP
     else
     {
         v6 = R_ErrorDescription(hr);
-        Com_PrintError(8, "ERROR: cannot take screenshot: couldn't get back buffer surface: %s (0x%08x)\n", v6, hr);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: cannot take screenshot: couldn't get back buffer surface: %s (0x%08x)\n", v6, hr);
         surfaceBackBuffer->Release();
         return 0;
     }
@@ -2060,7 +2060,7 @@ void __cdecl R_ScreenshotCommand(GfxScreenshotType type)
         }
         if (lastNumber >= 9999)
         {
-            Com_Printf(8, "ScreenShot: Couldn't create a file\n");
+            Com_Printf(CON_CHANNEL_GFX, "ScreenShot: Couldn't create a file\n");
             return;
         }
     }
@@ -2079,10 +2079,10 @@ void __cdecl R_ScreenshotCommand(GfxScreenshotType type)
 		if (autoNumbered)
 			++lastNumber;
 		if (!silent)
-			Com_Printf(8, "Wrote %s\n", filename);
+			Com_Printf(CON_CHANNEL_GFX, "Wrote %s\n", filename);
 	}
 	else if (!silent)
 	{
-		Com_Printf(8, "ScreenShot: Couldn't create a file\n");
+		Com_Printf(CON_CHANNEL_GFX, "ScreenShot: Couldn't create a file\n");
 	}
 }

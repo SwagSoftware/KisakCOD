@@ -460,7 +460,7 @@ void __cdecl Console_Key(int32_t localClientNum, int32_t key)
     {
         if (Con_CommitToAutoComplete())
             return;
-        Com_Printf(0, "]%s\n", g_consoleField.buffer);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "]%s\n", g_consoleField.buffer);
         if (Key_IsCatcherActive(localClientNum, 2))
         {
             Scr_AddDebugText(g_consoleField.buffer);
@@ -865,7 +865,7 @@ void CompleteCommand()
                 }
                 else if (Con_HasTooManyMatchesToShow())
                 {
-                    Com_Printf(0, "]%s\n", g_consoleField.buffer);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "]%s\n", g_consoleField.buffer);
                     Cmd_ForEach(PrintMatches);
                     Dvar_ForEachName(PrintMatches);
                 }
@@ -890,7 +890,7 @@ void __cdecl PrintMatches(const char *s)
         || !I_strnicmp(s, s_shortestMatch, strlen(s_shortestMatch)))
     {
         if (I_stristr(s, s_shortestMatch))
-            Com_Printf(0, "    %s\n", s);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "    %s\n", s);
     }
 }
 
@@ -1235,7 +1235,7 @@ void __cdecl Key_Unbind_f()
         if (b == -1)
         {
             v1 = Cmd_Argv(1);
-            Com_Printf(0, "\"%s\" isn't a valid key\n", v1);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "\"%s\" isn't a valid key\n", v1);
         }
         else
         {
@@ -1244,7 +1244,7 @@ void __cdecl Key_Unbind_f()
     }
     else
     {
-        Com_Printf(0, "unbind <key> : remove commands from a key\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "unbind <key> : remove commands from a key\n");
     }
 }
 
@@ -1336,7 +1336,7 @@ void __cdecl Key_Bind_f()
         if (keynum == -1)
         {
             v1 = Cmd_Argv(1);
-            Com_Printf(0, "\"%s\" isn't a valid key\n", v1);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "\"%s\" isn't a valid key\n", v1);
         }
         else
         {
@@ -1347,12 +1347,12 @@ void __cdecl Key_Bind_f()
                 if (binding)
                 {
                     v2 = Cmd_Argv(1);
-                    Com_Printf(0, "\"%s\" = \"%s\"\n", v2, binding);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "\"%s\" = \"%s\"\n", v2, binding);
                 }
                 else
                 {
                     v3 = Cmd_Argv(1);
-                    Com_Printf(0, "\"%s\" is not bound\n", v3);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "\"%s\" is not bound\n", v3);
                 }
             }
             else
@@ -1382,7 +1382,7 @@ void __cdecl Key_Bind_f()
     }
     else
     {
-        Com_Printf(0, "bind <key> [command] : attach a command to a key\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "bind <key> [command] : attach a command to a key\n");
     }
 }
 
@@ -1446,7 +1446,7 @@ void __cdecl Key_Bindlist_f()
             if (*binding)
             {
                 v0 = Key_KeynumToString(keynum, 0);
-                Com_Printf(0, "%s \"%s\"\n", v0, binding);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s \"%s\"\n", v0, binding);
             }
         }
     }
@@ -1706,7 +1706,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 else if (key >= 207)
                 {
                     v4 = Key_KeynumToString(key, 0);
-                    Com_Printf(14, "%s is unbound, use controls menu to set.\n", v4);
+                    Com_Printf(CON_CHANNEL_CLIENT, "%s is unbound, use controls menu to set.\n", v4);
                 }
                 return;
             }
@@ -1974,7 +1974,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 else if (key >= 207)
                 {
                     v4 = Key_KeynumToString(key, 0);
-                    Com_Printf(14, "%s is unbound, use controls menu to set.\n", v4);
+                    Com_Printf(CON_CHANNEL_CLIENT, "%s is unbound, use controls menu to set.\n", v4);
                 }
                 return;
             }

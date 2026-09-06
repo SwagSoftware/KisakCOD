@@ -685,7 +685,7 @@ void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, void *data)
                 if (!loadNode->constant.animscriptfunc)
                 {
                     Com_PrintError(
-                        1,
+                        CON_CHANNEL_ERROR,
                         "ERROR: Pathnode (%s) at (%g %g %g) cannot find animscript '%s'\n",
                         nodeStringTable[loadNode->constant.type],
                         loadNode->constant.vOrigin[0],
@@ -699,7 +699,7 @@ void __cdecl GScr_SetScriptsForPathNode(pathnode_t *loadNode, void *data)
             else
             {
                 Com_PrintError(
-                    1,
+                    CON_CHANNEL_ERROR,
                     "ERROR: Pathnode (%s) at (%g %g %g) has no animscript specified\n",
                     nodeStringTable[NODE_NEGOTIATION_BEGIN],
                     loadNode->constant.vOrigin[0],
@@ -1024,7 +1024,7 @@ int __cdecl Scr_ValidateNonLocalizedStringRef(
             return 0;
         }
         Com_PrintWarning(
-            23,
+            CON_CHANNEL_PARSERSCRIPT,
             "WARNING: Non-localized %s string is not allowed to have letters in it. Must be changed over to a localized string: \"%s\"\n",
             errorContext,
             token);
@@ -1920,7 +1920,7 @@ void Scr_GetWeaponModel()
             if (I_stricmp(String, "none"))
             {
                 v3 = va("unknown weapon '%s' in getWeaponModel\n", String);
-                Com_Printf(23, v3);
+                Com_Printf(CON_CHANNEL_PARSERSCRIPT, v3);
             }
         }
         Scr_AddString("");
@@ -1951,7 +1951,7 @@ void Scr_GetWeaponClipModel()
     else if (*String && I_stricmp(String, "none"))
     {
         v3 = va("unknown weapon '%s' in getWeaponClipModel\n", String);
-        Com_Printf(23, v3);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, v3);
     }
     Name = "";
 LABEL_6:
@@ -2199,7 +2199,7 @@ void __cdecl ScrCmd_detach(scr_entref_t entref)
         ConstLowercaseString = Scr_GetConstLowercaseString(1);
     if (!G_EntDetach(Entity, String, ConstLowercaseString))
     {
-        Com_Printf(23, "Current attachments:\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Current attachments:\n");
         attachModelNames = Entity->attachModelNames;
         v5 = 31;
         do
@@ -2211,7 +2211,7 @@ void __cdecl ScrCmd_detach(scr_entref_t entref)
                     v6 = SL_ConvertToString(attachModelNames[31]);
                     v7 = G_ModelName(*attachModelNames);
                     v8 = SL_ConvertToString(v7);
-                    Com_Printf(23, "model: '%s', tag: '%s'\n", v8, v6);
+                    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "model: '%s', tag: '%s'\n", v8, v6);
                 }
             }
             --v5;
@@ -3096,7 +3096,7 @@ void __cdecl ScrCmd_MagicGrenade(scr_entref_t entref)
         else
         {
             Com_DPrintf(
-                23,
+                CON_CHANNEL_PARSERSCRIPT,
                 "MagicGrenade: None of the methods worked (probably distance or blocked)...need a good failsafe or remove this print?\n");
         }
     }
@@ -3693,7 +3693,7 @@ void __cdecl ScrCmd_SetModel(scr_entref_t entref)
     G_SetModel(Entity, String);
     if (Entity->model && G_XModelBad(Entity->model) && Entity->actor)
     {
-        Com_PrintWarning(23, "WARNING: actor model '%s' couldn't be found! switching to default actor model.\n", String);
+        Com_PrintWarning(CON_CHANNEL_PARSERSCRIPT, "WARNING: actor model '%s' couldn't be found! switching to default actor model.\n", String);
         G_OverrideModel(Entity->model, "defaultactor");
     }
     G_DObjUpdate(Entity);
@@ -3772,7 +3772,7 @@ void __cdecl ScrCmd_GetNormalHealth(scr_entref_t entref)
         else
         {
             Scr_AddFloat(0.0);
-            Com_PrintWarning(23, "WARNING: GetNormalHealth called on entity with 0 maxHealth.\n");
+            Com_PrintWarning(CON_CHANNEL_PARSERSCRIPT, "WARNING: GetNormalHealth called on entity with 0 maxHealth.\n");
         }
     }
 }
@@ -3813,7 +3813,7 @@ void __cdecl ScrCmd_SetNormalHealth(scr_entref_t entref)
                 ? SL_ConvertToString(Entity->targetname)
                 : "<not set>";
             Com_DPrintf(
-                23,
+                CON_CHANNEL_PARSERSCRIPT,
                 "^2Cannot setNormalHealth on dead entities (health %i, max %i, ent %i, name %s)\n",
                 Entity->health,
                 Entity->maxHealth,
@@ -4485,7 +4485,7 @@ void __cdecl GScr_MakeTurretUnusable(scr_entref_t entref)
 
 void __cdecl GScr_SetTurretAccuracy(scr_entref_t entref)
 {
-    Com_PrintWarning(23, "WARNING: Turret Accuracy no longer has any effect\n");
+    Com_PrintWarning(CON_CHANNEL_PARSERSCRIPT, "WARNING: Turret Accuracy no longer has any effect\n");
 }
 
 void __cdecl GScr_GetTurretTarget(scr_entref_t entref)
@@ -4550,16 +4550,16 @@ void __cdecl GScr_SetCursorHint(scr_entref_t entref)
             ++v6;
             ++v5;
         } while ((uintptr_t)v6 < (uintptr_t)&hintStrings[4]);
-        Com_Printf(23, "List of valid hint type strings\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "List of valid hint type strings\n");
         v7 = ent->classname;
         if (v7 == scr_const.trigger_use || v7 == scr_const.trigger_use_touch)
-            Com_Printf(23, "HINT_INHERIT (for trigger_use or trigger_use_touch entities only)\n");
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "HINT_INHERIT (for trigger_use or trigger_use_touch entities only)\n");
         v8 = &hintStrings[1];
         do
         {
             if (!*v8)
                 break;
-            Com_Printf(23, "%s\n", *v8++);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%s\n", *v8++);
         //} while ((int)v8 < (int)&functions[9].actionFunc);
         } while ((int)v8 < (uintptr_t)&hintStrings[4]);
         v9 = va("%s is not a valid hint type. See above for list of valid hint types\n", v4);
@@ -5474,7 +5474,7 @@ void Scr_RandomInt()
     }
     else
     {
-        Com_Printf(23, "RandomInt parm: %d  ", Int);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "RandomInt parm: %d  ", Int);
         Scr_Error("RandomInt parm must be positive integer.\n");
     }
 }
@@ -5501,7 +5501,7 @@ void Scr_RandomIntRange()
     v2 = v1;
     if (v1 <= Int)
     {
-        Com_Printf(23, "RandomIntRange parms: %d %d ", Int, v1);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "RandomIntRange parms: %d %d ", Int, v1);
         Scr_Error("RandomIntRange's second parameter must be greater than the first.\n");
     }
     v3 = G_irand(Int, v2);
@@ -5518,7 +5518,7 @@ void Scr_RandomFloatRange()
     v1 = Scr_GetFloat(1);
     if (v1 <= Float)
     {
-        Com_Printf(23, "Scr_RandomFloatRange parms: %d %d ", LODWORD(Float), LODWORD(v1));
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Scr_RandomFloatRange parms: %d %d ", LODWORD(Float), LODWORD(v1));
         Scr_Error("Scr_RandomFloatRange's second parameter must be greater than the first.\n");
     }
     v2 = G_flrand(Float, v1);
@@ -6458,7 +6458,7 @@ void GScr_PrecacheLocationSelector()
         SV_GetConfigstring(i + CS_LOC_SEL_MTLS, v4, 1024);
         if (!I_stricmp(v4, String))
         {
-            Com_DPrintf(23, "Script tried to precache the location selector '%s' more than once\n", String);
+            Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "Script tried to precache the location selector '%s' more than once\n", String);
             return;
         }
     }
@@ -7019,7 +7019,7 @@ void __cdecl GScr_SetMissionDvar()
             Int = Scr_GetInt(1);
             Dvar_SetIntByName(String, Int);
             VariantString = Dvar_GetVariantString(String);
-            Com_Printf(16, " * SetMissionDvar(): \"%s\" set to \"%s\".\n", String, VariantString);
+            Com_Printf(CON_CHANNEL_SYSTEM, " * SetMissionDvar(): \"%s\" set to \"%s\".\n", String, VariantString);
             return;
         }
         if (type == 7)
@@ -7033,7 +7033,7 @@ void __cdecl GScr_SetMissionDvar()
     v12 = Scr_GetString(1);
     Dvar_SetStringByName(String, v12);
     v13 = Dvar_GetVariantString(String);
-    Com_Printf(16, " * SetMissionDvar(): \"%s\" set to \"%s\".\n", String, v13);
+    Com_Printf(CON_CHANNEL_SYSTEM, " * SetMissionDvar(): \"%s\" set to \"%s\".\n", String, v13);
 }
 
 void GScr_Cinematic()
@@ -8499,7 +8499,7 @@ void __cdecl DumpAnimCommand(
 
     Scr_GetLastScriptPlace(&lineNum, &filename);
     Com_Printf(
-        19,
+        CON_CHANNEL_ANIM,
         "^3%s  ^7weight=^5%.2f ^7time=^5%.2f ^7rate=^5%.2f   ^7level time:%d  %s:%d   %s\n",
         XAnimGetAnimDebugName(XAnimGetAnims(tree), anim),
         weight,
@@ -9933,7 +9933,7 @@ void GScr_PrecacheMenu()
         SV_GetConfigstring(CS_SCRIPT_MENUS + i, v4, 1024);
         if (!I_stricmp(v4, String))
         {
-            Com_DPrintf(23, "Script tried to precache the menu '%s' more than once\n", String);
+            Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "Script tried to precache the menu '%s' more than once\n", String);
             return;
         }
     }
@@ -10034,7 +10034,7 @@ void GScr_OpenFile()
         if (!v5)
         {
         LABEL_7:
-            Com_Printf(23, "OpenFile failed.  %i files already open\n", 1);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "OpenFile failed.  %i files already open\n", 1);
             Scr_AddInt(-1);
             return;
         }
@@ -10093,7 +10093,7 @@ void GScr_OpenFile()
             } while (!v21);
             if (v21)
             {
-                Com_Printf(23, "Valid openfile modes are 'write', 'read', and 'append'\n");
+                Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Valid openfile modes are 'write', 'read', and 'append'\n");
             }
             else
             {
@@ -10132,7 +10132,7 @@ void GScr_CloseFile()
         v1 = Int;
         if (Int > 1)
         {
-            Com_Printf(23, "CloseFile failed, invalid file number %i\n", Int);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "CloseFile failed, invalid file number %i\n", Int);
         }
         else
         {
@@ -10163,7 +10163,7 @@ void GScr_CloseFile()
                 Scr_AddInt(1);
                 return;
             }
-            Com_Printf(23, "CloseFile failed, file number %i was not open\n", v1);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "CloseFile failed, file number %i was not open\n", v1);
         }
         Scr_AddInt(-1);
     }
@@ -10180,20 +10180,20 @@ void __cdecl Scr_FPrint_internal(bool commaBetweenFields)
 
     if (Scr_GetNumParam() <= 1)
     {
-        Com_Printf(23, "fprintln requires at least 2 parameters (file, output)\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "fprintln requires at least 2 parameters (file, output)\n");
         Scr_AddInt(-1);
         return;
     }
     Int = Scr_GetInt(0);
     if (Int > 1)
     {
-        Com_Printf(23, "FPrintln failed, invalid file number %i\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "FPrintln failed, invalid file number %i\n");
         goto LABEL_14;
     }
     v3 = Int;
     if (!level.openScriptIOFileHandles[Int])
     {
-        Com_Printf(23, "FPrintln failed, file number %i was not open for writing\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "FPrintln failed, file number %i was not open for writing\n");
     LABEL_14:
         Scr_AddInt(-1);
         return;
@@ -10235,7 +10235,7 @@ void GScr_FReadLn()
 
     if (!Scr_GetNumParam())
     {
-        Com_Printf(23, "freadln requires a parameter - the file to read from\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadln requires a parameter - the file to read from\n");
     LABEL_11:
         ArgCountOnLine = -1;
         goto LABEL_12;
@@ -10243,12 +10243,12 @@ void GScr_FReadLn()
     Int = Scr_GetInt(0);
     if (Int > 1)
     {
-        Com_Printf(23, "freadln failed, invalid file number %i\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadln failed, invalid file number %i\n");
         goto LABEL_11;
     }
     if (!level.openScriptIOFileBuffers[Int])
     {
-        Com_Printf(23, "freadln failed, file number %i was not open for reading\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadln failed, file number %i was not open for reading\n");
         goto LABEL_11;
     }
     v6[0] = (const char*)level.openScriptIOFileBuffers[Int];
@@ -10286,7 +10286,7 @@ void GScr_FGetArg()
 
     if (Scr_GetNumParam() <= 1)
     {
-        Com_Printf(23, "freadline requires at least 2 parameters (file, string)\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadline requires at least 2 parameters (file, string)\n");
         Scr_AddString("");
         return;
     }
@@ -10295,19 +10295,19 @@ void GScr_FGetArg()
     v2 = v1;
     if (Int > 1)
     {
-        Com_Printf(23, "freadline failed, invalid file number %i\n", Int);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadline failed, invalid file number %i\n", Int);
         goto LABEL_14;
     }
     if (v1 < 0)
     {
-        Com_Printf(23, "freadline failed, invalid argument number %i\n", v1);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadline failed, invalid argument number %i\n", v1);
     LABEL_14:
         Scr_AddString("");
         return;
     }
     if (!level.openScriptIOFileBuffers[Int])
     {
-        Com_Printf(23, "freadline failed, file number %i was not open for reading\n", Int);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "freadline failed, file number %i was not open for reading\n", Int);
         goto LABEL_14;
     }
     v5[0] = (const char*)level.openScriptIOFileBuffers[Int];
@@ -10330,7 +10330,7 @@ void GScr_FGetArg()
                 goto LABEL_11;
         }
         Com_Printf(
-            23,
+            CON_CHANNEL_PARSERSCRIPT,
             "freadline failed, there aren't %i arguments on this line, there are only %i arguments\n",
             v2 + 1,
             v4);
@@ -11094,7 +11094,7 @@ void __cdecl Scr_SetHealth(gentity_s *ent, int offset)
         else
             v6 = "<not set>";
         Com_DPrintf(
-            23,
+            CON_CHANNEL_PARSERSCRIPT,
             "^2Cannot set health on dead entities (health %i, max %i, ent %i, name %s)\n",
             ent->health,
             ent->maxHealth,

@@ -187,7 +187,7 @@ BOOL __cdecl R_ChooseTrisContextType()
 
 void __cdecl R_LoadStep(const char *description)
 {
-    Com_Printf(8, "Loading %s...\n", description);
+    Com_Printf(CON_CHANNEL_GFX, "Loading %s...\n", description);
 #ifndef KISAK_RADIANT
     SCR_UpdateLoadScreen();
 #endif
@@ -302,7 +302,7 @@ char *__cdecl R_ParseSunLight(SunLightParseParams *params, char *text)
                 if (params->ambientScale > 2.0)
                 {
                     Com_PrintWarning(
-                        8,
+                        CON_CHANNEL_GFX,
                         "WARNING: ambient too big, assuming it uses the old 0-255 scale instead of the proper 0-1 scale (value = '%s')\n",
                         nptr);
                     params->ambientScale = params->ambientScale * 0.01568627543747425;
@@ -690,7 +690,7 @@ int __cdecl R_BuildLightmapMergability(GfxBspLoad *load, r_lightmapGroup_t *grou
         groupInfo[newLmapCount].wideCount = wideCount;
         groupInfo[newLmapCount++].highCount = highCount;
     }
-    Com_Printf(8, "%i merged lightmaps from %i original lightmaps\n", newLmapCount, origLmapCount);
+    Com_Printf(CON_CHANNEL_GFX, "%i merged lightmaps from %i original lightmaps\n", newLmapCount, origLmapCount);
     return origLmapCount;
 }
 
@@ -1346,7 +1346,7 @@ void __cdecl R_LoadSurfaces(GfxBspLoad *load)
 
     iassert( load );
     if (load->bspVersion < 0x16)
-        Com_PrintWarning(8, "Bsp compiled with old version of cod2map.\n");
+        Com_PrintWarning(CON_CHANNEL_GFX, "Bsp compiled with old version of cod2map.\n");
     R_LoadTriangleSurfaces(load->bspVersion, load->trisType, &diskSurfaces, &surfCount);
     if (!surfCount)
         Com_Error(ERR_DROP, "LoadMap: no surfaces in %s", s_world.name);
@@ -2456,7 +2456,7 @@ static void __cdecl R_CheckValidStaticModel(char *(*spawnVars)[2], int spawnVarC
     if (v4)
     {
         Com_PrintError(
-            8,
+            CON_CHANNEL_GFX,
             "bad static model '%s' at (%.0f %.0f %.0f)\n",
             modelName,
             tempOrigin[0],

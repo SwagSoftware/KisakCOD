@@ -2381,14 +2381,14 @@ bool __cdecl PM_DoPlayerInertia(const playerState_s *ps, float accelspeed, const
     if (inertiaDebug->current.enabled)
     {
         Com_Printf(
-            17,
+            CON_CHANNEL_PLAYERWEAP,
             "angle is %f (oldVel is (%f,%f), vel is (%f, %f))\n",
             scaledDotAngle / v5,
             oldVelocity,
             oldVelocity_4,
             velocity,
             velocity_4);
-        Com_Printf(17, "clamping acceleration from %f to %f\n", accelspeed, inertiaMax->current.value);
+        Com_Printf(CON_CHANNEL_PLAYERWEAP, "clamping acceleration from %f to %f\n", accelspeed, inertiaMax->current.value);
     }
 
     return true;
@@ -3181,7 +3181,7 @@ void __cdecl PM_CrashLand(playerState_s *ps, pml_t *pml)
         }
         else
         {
-            Com_Printf(17, "bg_fallDamageMaxHeight must be greater than bg_fallDamageMinHeight\n");
+            Com_Printf(CON_CHANNEL_PLAYERWEAP, "bg_fallDamageMaxHeight must be greater than bg_fallDamageMinHeight\n");
             damage = 0;
         }
 
@@ -4278,7 +4278,7 @@ void __cdecl PM_Footsteps_NotMoving(pmove_t *pm, int32_t stance)
 
             ci->turnAnimEndTime = ps->legsAnimDuration + bgs->time;
             if (xanim_debug->current.enabled)
-                Com_Printf(17, "[%i] turn anim should end at %i\n", bgs->time, ps->legsAnimDuration + bgs->time);
+                Com_Printf(CON_CHANNEL_PLAYERWEAP, "[%i] turn anim should end at %i\n", bgs->time, ps->legsAnimDuration + bgs->time);
         }
     }
     else
@@ -4323,7 +4323,7 @@ int32_t __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci)
 
     turnAdjust = 0;
     if (ci->turnAnimType && ci->turnAnimEndTime)
-        Com_DPrintf(17, "turn anim end time is %i, time is %i\n", ci->turnAnimEndTime, bgs->time);
+        Com_DPrintf(CON_CHANNEL_PLAYERWEAP, "turn anim end time is %i, time is %i\n", ci->turnAnimEndTime, bgs->time);
     if (ci->legs.yawing)
     {
         if (ci->torso.yawAngle >= (double)ci->legs.yawAngle)
@@ -4335,7 +4335,7 @@ int32_t __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci)
         if (ci->turnAnimEndTime < bgs->time)
         {
             if (xanim_debug->current.enabled)
-                Com_Printf(17, "Restarting turn animation because it is done playing\n");
+                Com_Printf(CON_CHANNEL_PLAYERWEAP, "Restarting turn animation because it is done playing\n");
             ci->turnAnimEndTime = 0;
         }
     }
@@ -4351,7 +4351,7 @@ int32_t __cdecl PM_Footsteps_TurnAnim(clientInfo_t *ci)
             ci->turnAnimEndTime = 0;
             ci->legs.yawAngle = ci->torso.yawAngle;
             if (xanim_debug->current.enabled)
-                Com_Printf(17, "[%i] playing idle anim after turn anim\n", bgs->time);
+                Com_Printf(CON_CHANNEL_PLAYERWEAP, "[%i] playing idle anim after turn anim\n", bgs->time);
         }
     }
     return turnAdjust;
@@ -4627,7 +4627,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
         {
             ps->legsTimer = 0;
             if (G_IsServerGameSystem(ps->clientNum))
-                Com_Printf(19, "end legs\n");
+                Com_Printf(CON_CHANNEL_ANIM, "end legs\n");
         }
     }
     if (ps->torsoTimer > 0)
@@ -4637,7 +4637,7 @@ void __cdecl PM_DropTimers(playerState_s *ps, pml_t *pml)
         {
             ps->torsoTimer = 0;
             if (G_IsServerGameSystem(ps->clientNum))
-                Com_Printf(19, "end torso\n");
+                Com_Printf(CON_CHANNEL_ANIM, "end torso\n");
         }
     }
 #endif

@@ -42,7 +42,7 @@ void __cdecl G_DumpConfigStrings(int start, int max)
         {
             ConfigstringConst = SV_GetConfigstringConst(v4 + start);
             v6 = SL_ConvertToString(ConfigstringConst);
-            Com_Printf(24, "G_FindConfigstringIndex: overflow (%d) [%d] %s\n", start, v4, v6);
+            Com_Printf(CON_CHANNEL_SCRIPT, "G_FindConfigstringIndex: overflow (%d) [%d] %s\n", start, v4, v6);
         }
     }
 }
@@ -197,7 +197,7 @@ LABEL_24:
     LABEL_34:
         //Profile_EndInternal(0);
         if (i)
-            Com_PrintWarning(24, "WARNING: %s \"%s\" not precached\n", origErrorMsg, string);
+            Com_PrintWarning(CON_CHANNEL_SCRIPT, "WARNING: %s \"%s\" not precached\n", origErrorMsg, string);
         return i;
     }
     //Profile_EndInternal(0);
@@ -1708,7 +1708,7 @@ void __cdecl G_PrintEntities()
                     v6 = SL_ConvertToStringSafe(p_model[2]);
                     EntityTypeName = BG_GetEntityTypeName(*((unsigned __int8 *)p_model - 280));
                     Com_Printf(
-                        15,
+                        CON_CHANNEL_SERVER,
                         "%4i: Type: %s, Class: %s, model '%s', origin: %6.1f %6.1f %6.1f\n",
                         v0,
                         EntityTypeName,
@@ -1726,7 +1726,7 @@ void __cdecl G_PrintEntities()
                     v10 = *((float *)p_model - 14);
                     v11 = BG_GetEntityTypeName(*((unsigned __int8 *)p_model - 280));
                     Com_Printf(
-                        15,
+                        CON_CHANNEL_SERVER,
                         "%4i: Type: %s, Class: %s, origin: %6.1f %6.1f %6.1f\n",
                         v0,
                         v11,

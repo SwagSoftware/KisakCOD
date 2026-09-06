@@ -36,7 +36,7 @@ void __cdecl DSOUNDRecord_UpdateSample(dsound_sample_t *pRecSample)
     if (g_recording_initialized)
     {
         if (pRecSample->DSCB->GetCurrentPosition(&dwCapturePos, &dwReadPos) < 0)
-            Com_PrintError(9, "Error: Failed to get cursor positions \n");
+            Com_PrintError(CON_CHANNEL_SOUND, "Error: Failed to get cursor positions \n");
         if (dwReadPos >= pRecSample->dwCaptureOffset)
             lLockSize = dwReadPos - pRecSample->dwCaptureOffset;
         else
@@ -85,28 +85,28 @@ void __cdecl DSOUNDRecord_UpdateSample(dsound_sample_t *pRecSample)
                 {
                     if (hra == -2147024809)
                     {
-                        Com_Printf(9, "DSERR_INVALIDPARAM\n");
-                        Com_Printf(9, " Offset : %i\n", pRecSample->dwCaptureOffset);
+                        Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDPARAM\n");
+                        Com_Printf(CON_CHANNEL_SOUND, " Offset : %i\n", pRecSample->dwCaptureOffset);
                     }
                     else if (hra == -2005401550)
                     {
-                        Com_Printf(9, "DSERR_INVALIDCALL\n");
+                        Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDCALL\n");
                     }
-                    Com_PrintError(9, "Error trying to unlock sample!\n");
+                    Com_PrintError(CON_CHANNEL_SOUND, "Error trying to unlock sample!\n");
                 }
             }
             else
             {
                 if (hr == -2147024809)
                 {
-                    Com_Printf(9, "DSERR_INVALIDPARAM\n");
-                    Com_Printf(9, " Offset : %i, length: %i\n", pRecSample->dwCaptureOffset, lLockSizea);
+                    Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDPARAM\n");
+                    Com_Printf(CON_CHANNEL_SOUND, " Offset : %i, length: %i\n", pRecSample->dwCaptureOffset, lLockSizea);
                 }
                 else if (hr == -2005401550)
                 {
-                    Com_Printf(9, "DSERR_INVALIDCALL\n");
+                    Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDCALL\n");
                 }
-                Com_PrintError(9, "Error trying to lock sample!\n");
+                Com_PrintError(CON_CHANNEL_SOUND, "Error trying to lock sample!\n");
             }
         }
     }
@@ -190,7 +190,7 @@ HRESULT __cdecl DSOUNDRecord_Start(dsound_sample_t *pRecSample)
         hra = pRecSample->DSCB->Start(1);
         if (hra < 0)
         {
-            Com_PrintError(9, "error: Unable to Read to Buffer\n");
+            Com_PrintError(CON_CHANNEL_SOUND, "error: Unable to Read to Buffer\n");
             return -1;
         }
         else
@@ -206,11 +206,11 @@ HRESULT __cdecl DSOUNDRecord_Start(dsound_sample_t *pRecSample)
         {
             if (hr == -2005401480)
             {
-                Com_Printf(9, "NODRIVER \n");
+                Com_Printf(CON_CHANNEL_SOUND, "NODRIVER \n");
             }
             else if (hr == -2005401430)
             {
-                Com_Printf(9, "UNINITIALIZED \n");
+                Com_Printf(CON_CHANNEL_SOUND, "UNINITIALIZED \n");
             }
         }
         else
@@ -218,20 +218,20 @@ HRESULT __cdecl DSOUNDRecord_Start(dsound_sample_t *pRecSample)
             switch (hr)
             {
             case -2005401500:
-                Com_Printf(9, "BADFORMAT\n");
+                Com_Printf(CON_CHANNEL_SOUND, "BADFORMAT\n");
                 break;
             case -2147467259:
-                Com_Printf(9, "GENERIC\n");
+                Com_Printf(CON_CHANNEL_SOUND, "GENERIC\n");
                 break;
             case -2147024882:
-                Com_Printf(9, "OUTOFMEMORY \n");
+                Com_Printf(CON_CHANNEL_SOUND, "OUTOFMEMORY \n");
                 break;
             case -2147024809:
-                Com_Printf(9, "INVALIDPARAM\n");
+                Com_Printf(CON_CHANNEL_SOUND, "INVALIDPARAM\n");
                 break;
             }
         }
-        Com_PrintError(9, "error: Failed to allocate Capture Buffer \n");
+        Com_PrintError(CON_CHANNEL_SOUND, "error: Failed to allocate Capture Buffer \n");
         return -1;
     }
 }
@@ -246,7 +246,7 @@ HRESULT __cdecl DSOUNDRecord_Stop(dsound_sample_t *pRecSample)
         return -1;
     if (pRecSample->DSCB->Stop() < 0)
     {
-        Com_PrintError(9, "Error stopping recording buffer\n");
+        Com_PrintError(CON_CHANNEL_SOUND, "Error stopping recording buffer\n");
     }
     else
     {
@@ -255,7 +255,7 @@ HRESULT __cdecl DSOUNDRecord_Stop(dsound_sample_t *pRecSample)
     }
     hr = pRecSample->DSCB->Release();
     if (hr < 0)
-        Com_PrintError(9, "Error releasing recording buffer\n");
+        Com_PrintError(CON_CHANNEL_SOUND, "Error releasing recording buffer\n");
     else
         pRecSample->DSCB = 0;
     return hr;
@@ -269,7 +269,7 @@ int __cdecl DSOUNDRecord_Init(bool bCallDsoundInit)
     g_recording_initialized = 0;
     if (bCallDsoundInit && (hr = DirectSoundCaptureCreate(0, &g_pDSCaptureInstance, 0), hr < 0))
     {
-        Com_PrintError(9, "Error initializing direct sound instance!  0x%x\n", hr);
+        Com_PrintError(CON_CHANNEL_SOUND, "Error initializing direct sound instance!  0x%x\n", hr);
         return 0;
     }
     else
@@ -288,7 +288,7 @@ void __cdecl DSOUNDRecord_Shutdown()
         hr = g_pDSCaptureInstance->Release();
     g_pDSCaptureInstance = 0;
     if (hr < 0)
-        Com_PrintError(9, "Error releasing direct sound instance!  %s\n", hr);
+        Com_PrintError(CON_CHANNEL_SOUND, "Error releasing direct sound instance!  %s\n", hr);
 }
 
 void __cdecl Record_SetRecordingCallback(int32_t(__cdecl *new_audioCallback)(audioSample_t *))

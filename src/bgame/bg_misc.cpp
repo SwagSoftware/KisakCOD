@@ -1578,7 +1578,7 @@ void __cdecl BG_AddPredictableEventToPlayerstate(entity_event_t newEvent, uint32
 
         if (Dvar_GetBool("showevents"))
             Com_Printf(
-                17,
+                CON_CHANNEL_PLAYERWEAP,
                 "event svt %5d -> %5d: num = %20s parm %d\n",
                 ps->commandTime,
                 ps->eventSequence,
@@ -2188,7 +2188,7 @@ int __cdecl BG_LoadShellShockDvars(const char *name)
     Com_sprintf(fullpath, 0x40u, "shock/%s.shock", name);
     filebuf = Com_LoadRawTextFile(fullpath);
     if (filebuf
-        || (Com_PrintError(17, "couldn't open '%s'.\n", fullpath),
+        || (Com_PrintError(CON_CHANNEL_PLAYERWEAP, "couldn't open '%s'.\n", fullpath),
             (filebuf = Com_LoadRawTextFile("shock/default.shock")) != 0))
     {
         for (i = 0; i < 27; ++i)
@@ -2202,7 +2202,7 @@ int __cdecl BG_LoadShellShockDvars(const char *name)
     }
     else
     {
-        Com_PrintError(17, "couldn't open 'shock/default.shock'. This is a default shock file that you should have.\n");
+        Com_PrintError(CON_CHANNEL_PLAYERWEAP, "couldn't open 'shock/default.shock'. This is a default shock file that you should have.\n");
         return 0;
     }
 }

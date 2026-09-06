@@ -784,7 +784,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
         if (scrVarPub.error_message)
         {
             if (*text)
-                Com_PrintError(23, "%s\n", scrVarPub.error_message);
+                Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s\n", scrVarPub.error_message);
             Scr_ClearErrorMessage();
             scriptExpr->parseData = debugger_node0(ENUM_bad_expression);
             SL_ShutdownSystem(2);
@@ -815,7 +815,7 @@ void __cdecl Scr_CompileTextInternal(const char *text, ScriptExpression_t *scrip
                 Scr_CompileStatement(scriptExpr->parseData);
                 if (scrVarPub.error_message)
                 {
-                    Com_PrintError(23, "%s\n", scrVarPub.error_message);
+                    Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s\n", scrVarPub.error_message);
                     Scr_ClearErrorMessage();
                     scriptExpr->parseData = debugger_node0(ENUM_bad_statement);
                     SL_ShutdownSystem(2);

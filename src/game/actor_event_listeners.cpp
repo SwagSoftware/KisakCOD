@@ -284,8 +284,8 @@ void __cdecl Actor_DumpEventListners()
     unsigned int events; // r23
     const char *EntityTypeName; // r3
 
-    Com_Printf(18, "AIEventListners: %d, level time: %d\n", g_listenerCount, level.time);
-    Com_Printf(18, "==================\n", g_listenerCount);
+    Com_Printf(CON_CHANNEL_AI, "AIEventListners: %d, level time: %d\n", g_listenerCount, level.time);
+    Com_Printf(CON_CHANNEL_AI, "==================\n", g_listenerCount);
     v0 = 0;
     if (g_listenerCount > 0)
     {
@@ -301,7 +301,7 @@ void __cdecl Actor_DumpEventListners()
                     "g_AIEVlisteners[i].entIndex < MAX_GENTITIES");
             events = v1->events;
             EntityTypeName = G_GetEntityTypeName(&g_entities[v1->entIndex]);
-            Com_Printf(18, "%d entity: %04d (%s), events: %x\n", v0++, v1->entIndex, EntityTypeName, events);
+            Com_Printf(CON_CHANNEL_AI, "%d entity: %04d (%s), events: %x\n", v0++, v1->entIndex, EntityTypeName, events);
             ++v1;
         } while (v0 < g_listenerCount);
     }

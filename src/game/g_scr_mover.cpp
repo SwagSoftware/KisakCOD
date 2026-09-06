@@ -188,7 +188,7 @@ void __cdecl SP_script_brushmodel(gentity_s *self)
     else
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Killing script_brushmodel at (%f %f %f) because the brush model is invalid.\n",
             self->s.lerp.pos.trBase[0],
             self->s.lerp.pos.trBase[1],
@@ -1195,7 +1195,7 @@ void __cdecl ScriptEntCmd_Solid(scr_entref_t entref)
     }
     if (pSelf->classname == scr_const.script_origin)
     {
-        Com_DPrintf(23, "cannot use the solid/notsolid commands on a script_origin entity( number %i )\n", pSelf->s.number);
+        Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "cannot use the solid/notsolid commands on a script_origin entity( number %i )\n", pSelf->s.number);
     }
     else
     {
@@ -1237,7 +1237,7 @@ void __cdecl ScriptEntCmd_NotSolid(scr_entref_t entref)
     }
     if (pSelf->classname == scr_const.script_origin)
     {
-        Com_DPrintf(23, "cannot use the solid/notsolid commands on a script_origin entity( number %i )\n", pSelf->s.number);
+        Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "cannot use the solid/notsolid commands on a script_origin entity( number %i )\n", pSelf->s.number);
     }
     else
     {

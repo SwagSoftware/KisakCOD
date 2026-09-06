@@ -426,13 +426,13 @@ void __cdecl Phys_GetWindingForBrushFace2(
                 //    || (v10 = pt[2], (LODWORD(v10) & 0x7F800000) == 0x7F800000))
                 if (IS_NAN(pt[0]) || IS_NAN(pt[1]) || IS_NAN(pt[2]))
                 {
-                    Com_PrintError(20, "Bad intersection of three planes:\n");
-                    Com_PrintError(20, "Resulting point: (%f, %f, %f)\n", *pt, pt[1], pt[2]);
-                    Com_PrintError(20, "plane 0: (%f, %f, %f, %f)\n", planes[0][0], planes[0][1], planes[0][2], planes[0][3]);
-                    Com_PrintError(20, "plane 1: (%f, %f, %f, %f)\n", planes[1][0], planes[1][1], planes[1][2], planes[1][3]);
-                    Com_PrintError(20, "plane 2: (%f, %f, %f, %f)\n", planes[2][0], planes[2][1], planes[2][2], planes[2][3]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "Bad intersection of three planes:\n");
+                    Com_PrintError(CON_CHANNEL_PHYS, "Resulting point: (%f, %f, %f)\n", *pt, pt[1], pt[2]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "plane 0: (%f, %f, %f, %f)\n", planes[0][0], planes[0][1], planes[0][2], planes[0][3]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "plane 1: (%f, %f, %f, %f)\n", planes[1][0], planes[1][1], planes[1][2], planes[1][3]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "plane 2: (%f, %f, %f, %f)\n", planes[2][0], planes[2][1], planes[2][2], planes[2][3]);
                     Com_PrintError(
-                        20,
+                        CON_CHANNEL_PHYS,
                         "brush mins/maxs: (%f, %f, %f) (%f, %f, %f)\n",
                         brush->mins[0],
                         brush->mins[1],
@@ -440,8 +440,8 @@ void __cdecl Phys_GetWindingForBrushFace2(
                         brush->maxs[0],
                         brush->maxs[1],
                         brush->maxs[2]);
-                    Com_PrintError(20, "brush numsides: %i\n", brush->numsides);
-                    Com_PrintError(20, "brushside: %i\n", brushSide);
+                    Com_PrintError(CON_CHANNEL_PHYS, "brush numsides: %i\n", brush->numsides);
+                    Com_PrintError(CON_CHANNEL_PHYS, "brushside: %i\n", brushSide);
                     if (!alwaysfails)
                         MyAssertHandler(
                             ".\\physics\\phys_coll_boxbrush.cpp",
@@ -1704,13 +1704,13 @@ void __cdecl Phys_GetWindingForBrushFace(
                     || (v11 = pt[1], (LODWORD(v11) & 0x7F800000) == 0x7F800000)
                     || (v10 = pt[2], (LODWORD(v10) & 0x7F800000) == 0x7F800000))
                 {
-                    Com_PrintError(20, "Bad intersection of three planes:\n");
-                    Com_PrintError(20, "Resulting point: (%f, %f, %f)\n", *pt, pt[1], pt[2]);
-                    Com_PrintError(20, "plane 0: (%f, %f, %f, %f)\n", planes[0][0], planes[0][1], planes[0][2], planes[0][3]);
-                    Com_PrintError(20, "plane 1: (%f, %f, %f, %f)\n", planes[1][0], planes[1][1], planes[1][2], planes[1][3]);
-                    Com_PrintError(20, "plane 2: (%f, %f, %f, %f)\n", planes[2][0], planes[2][1], planes[2][2], planes[2][3]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "Bad intersection of three planes:\n");
+                    Com_PrintError(CON_CHANNEL_PHYS, "Resulting point: (%f, %f, %f)\n", *pt, pt[1], pt[2]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "plane 0: (%f, %f, %f, %f)\n", planes[0][0], planes[0][1], planes[0][2], planes[0][3]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "plane 1: (%f, %f, %f, %f)\n", planes[1][0], planes[1][1], planes[1][2], planes[1][3]);
+                    Com_PrintError(CON_CHANNEL_PHYS, "plane 2: (%f, %f, %f, %f)\n", planes[2][0], planes[2][1], planes[2][2], planes[2][3]);
                     Com_PrintError(
-                        20,
+                        CON_CHANNEL_PHYS,
                         "brush mins/maxs: (%f, %f, %f) (%f, %f, %f)\n",
                         brush->mins[0],
                         brush->mins[1],
@@ -1718,8 +1718,8 @@ void __cdecl Phys_GetWindingForBrushFace(
                         brush->maxs[0],
                         brush->maxs[1],
                         brush->maxs[2]);
-                    Com_PrintError(20, "brush numsides: %i\n", brush->numsides);
-                    Com_PrintError(20, "brushside: %i\n", brushSide);
+                    Com_PrintError(CON_CHANNEL_PHYS, "brush numsides: %i\n", brush->numsides);
+                    Com_PrintError(CON_CHANNEL_PHYS, "brushside: %i\n", brushSide);
                     if (!alwaysfails)
                         MyAssertHandler(
                             ".\\physics\\phys_coll_boxbrush.cpp",
@@ -2816,9 +2816,9 @@ int __cdecl Phys_ClipPolyAgainstPlane(
     {
         if (enterPair == -1)
         {
-            Com_PrintError(20, "Physics poly-clipping bug!!\n");
+            Com_PrintError(CON_CHANNEL_PHYS, "Physics poly-clipping bug!!\n");
             v5 = va("    polyCount: %i. poly points:\n", polyCount);
-            Com_PrintError(20, v5);
+            Com_PrintError(CON_CHANNEL_PHYS, v5);
             for (ptIndexa = 0; ptIndexa < polyCount; ++ptIndexa)
             {
                 v6 = va(
@@ -2827,7 +2827,7 @@ int __cdecl Phys_ClipPolyAgainstPlane(
                     (*poly)[3 * ptIndexa],
                     (*poly)[3 * ptIndexa + 1],
                     (*poly)[3 * ptIndexa + 2]);
-                Com_PrintError(20, v6);
+                Com_PrintError(CON_CHANNEL_PHYS, v6);
             }
             v7 = va(
                 " choppingPlane: (0x%x, 0x%x, 0x%x), 0x%x\n",
@@ -2835,7 +2835,7 @@ int __cdecl Phys_ClipPolyAgainstPlane(
                 *((_DWORD *)choppingPlane + 1),
                 *((_DWORD *)choppingPlane + 2),
                 *((_DWORD *)choppingPlane + 3));
-            Com_PrintError(20, v7);
+            Com_PrintError(CON_CHANNEL_PHYS, v7);
             if (!alwaysfails)
                 MyAssertHandler(".\\physics\\phys_coll_boxbrush.cpp", 319, 0, "Physics poly-clipping assert");
         }

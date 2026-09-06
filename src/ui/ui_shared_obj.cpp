@@ -169,7 +169,7 @@ void __cdecl PrintSourceStack(const script_s *scriptstack)
     script_s *scriptstacka; // [esp+8h] [ebp+8h]
 
     for (scriptstacka = scriptstack->next; scriptstacka; scriptstacka = scriptstacka->next)
-        Com_PrintWarning(23, "  From file %s, line %d\n", scriptstacka->filename, scriptstacka->line);
+        Com_PrintWarning(CON_CHANNEL_PARSERSCRIPT, "  From file %s, line %d\n", scriptstacka->filename, scriptstacka->line);
 }
 
 void SourceError(source_s *source, const char *str, ...)
@@ -179,7 +179,7 @@ void SourceError(source_s *source, const char *str, ...)
 
     va_start(va, str);
     _vsnprintf(text, 0x400u, str, va);
-    Com_PrintError(23, "Error: file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
+    Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "Error: file %s, line %d: %s\n", source->scriptstack->filename, source->scriptstack->line, text);
     PrintSourceStack(source->scriptstack);
 }
 
@@ -298,7 +298,7 @@ void ScriptError(script_s *script, const char *str, ...)
     if ((script->flags & 1) == 0)
     {
         _vsnprintf(text, 0x400u, str, va);
-        Com_PrintError(23, "Error: file %s, line %d: %s\n", script->filename, script->line, text);
+        Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "Error: file %s, line %d: %s\n", script->filename, script->line, text);
     }
 }
 
@@ -311,7 +311,7 @@ void ScriptWarning(script_s *script, const char *str, ...)
     if ((script->flags & 2) == 0)
     {
         _vsnprintf(text, 0x400u, str, va);
-        Com_PrintWarning(23, "Warning: file %s, line %d: %s\n", script->filename, script->line, text);
+        Com_PrintWarning(CON_CHANNEL_PARSERSCRIPT, "Warning: file %s, line %d: %s\n", script->filename, script->line, text);
     }
 }
 
@@ -806,7 +806,7 @@ void SourceWarning(source_s *source, const char *str, ...)
     va_start(va, str);
     _vsnprintf(text, 0x400u, str, va);
     Com_PrintWarning(
-        23,
+        CON_CHANNEL_PARSERSCRIPT,
         "Warning: file %s, line %d: %s\n",
         source->scriptstack->filename,
         source->scriptstack->line,
@@ -3310,7 +3310,7 @@ void PC_SourceError(int handle, char *format, ...)
     filename[0] = 0;
     line = 0;
     PC_SourceFileAndLine(handle, filename, &line);
-    Com_PrintError(13, "Menu load error: %s, line %d: %s\n", filename, line, string_3);
+    Com_PrintError(CON_CHANNEL_UI, "Menu load error: %s, line %d: %s\n", filename, line, string_3);
 }
 
 bool __cdecl Eval_CanPushValue(const Eval *eval)
@@ -4375,7 +4375,7 @@ int __cdecl PC_Script_Parse(int handle, const char **out)
             break;
         I_strncat(dst, 5120, " ");
     }
-    Com_PrintError(16, "action block too long that starts with: %s\n", dst);
+    Com_PrintError(CON_CHANNEL_SYSTEM, "action block too long that starts with: %s\n", dst);
     return 0;
 }
 
@@ -4560,7 +4560,7 @@ char __cdecl parse_expression_internal(int handle, statement_s *statement, int m
         if (statement->numEntries == maxEntries)
         {
             Com_PrintError(
-                16,
+                CON_CHANNEL_SYSTEM,
                 "Need to increment MAX_TOKENS_PER_STATEMENT - this statement has more than %i tokens\n",
                 maxEntries);
             free_expression(statement);
@@ -4579,7 +4579,7 @@ char __cdecl parse_expression_internal(int handle, statement_s *statement, int m
                     if (--numOpenLeftParens < 0)
                     {
                         Com_PrintError(
-                            16,
+                            CON_CHANNEL_SYSTEM,
                             "UI Expression error: Found a right parenthesis that doesn't match any left parenthesis\n");
                         return 1;
                     }
@@ -4602,7 +4602,7 @@ char __cdecl parse_expression_internal(int handle, statement_s *statement, int m
                     lastOperand.internals = v5;
                     //ValueAsString = GetValueAsString((Operand)__PAIR64__(v5.intVal, lastOperand.dataType));
                     ValueAsString = GetValueAsString(lastOperand);
-                    Com_PrintError(16, "Probably UI Expression error: %s(...\n", ValueAsString);
+                    Com_PrintError(CON_CHANNEL_SYSTEM, "Probably UI Expression error: %s(...\n", ValueAsString);
                 }
                 goto LABEL_28;
             }
@@ -4628,7 +4628,7 @@ char __cdecl parse_expression_internal(int handle, statement_s *statement, int m
                 Statement_AddStringOperand(statement, token.string);
                 break;
             default:
-                Com_PrintError(16, "ERROR: Unknown token '%s'\n", token.string);
+                Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: Unknown token '%s'\n", token.string);
                 free_expression(statement);
                 return 0;
             }
@@ -4695,14 +4695,14 @@ int __cdecl MenuParse_execExp(menuDef_t *menu, int handle)
         {
             if (!PC_ReadTokenHandle(handle, &token))
             {
-                Com_PrintError(16, "ERROR: line ended early after \"exp rect\"\n");
+                Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: line ended early after \"exp rect\"\n");
                 return 0;
             }
             if (I_stricmp(token.string, "X"))
             {
                 if (I_stricmp(token.string, "Y"))
                 {
-                    Com_PrintError(16, "ERROR: Expected 'X' or 'Y' after \"exp rect\" but found \"%s\"\n", token.string);
+                    Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: Expected 'X' or 'Y' after \"exp rect\" but found \"%s\"\n", token.string);
                     return 0;
                 }
                 menu->rectYExp.entries = (expressionEntry **)Z_Malloc(2400, "MenuParse_execExp", 34);
@@ -4721,12 +4721,12 @@ int __cdecl MenuParse_execExp(menuDef_t *menu, int handle)
     {
         if (!PC_ReadTokenHandle(handle, &token))
         {
-            Com_PrintError(16, "ERROR: line ended early after \"visible\"\n");
+            Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: line ended early after \"visible\"\n");
             return 0;
         }
         if (I_stricmp(token.string, "when"))
         {
-            Com_PrintError(16, "ERROR: Expected 'when' after \"visible\" but found \"%s\"\n", token.string);
+            Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: Expected 'when' after \"visible\" but found \"%s\"\n", token.string);
             return 0;
         }
         flags = menu->window.dynamicFlags[0];
@@ -5105,7 +5105,7 @@ char *__cdecl UI_FileText(char *fileName)
     else
     {
         FS_FCloseFile(f);
-        Com_PrintError(16, "Menu file %s is larger than the %i byte buffer used to parse menu files\n", fileName, 4096);
+        Com_PrintError(CON_CHANNEL_SYSTEM, "Menu file %s is larger than the %i byte buffer used to parse menu files\n", fileName, 4096);
         return 0;
     }
 }
@@ -5810,12 +5810,12 @@ int __cdecl ItemParse_execExp(itemDef_s *item, int handle)
                     {
                         if (!PC_String_Parse(handle, &expressionType))
                         {
-                            Com_PrintError(16, "ERROR: line ended early after \"exp forecolor\"\n");
+                            Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: line ended early after \"exp forecolor\"\n");
                             return 0;
                         }
                         if (I_stricmp(expressionType, "A"))
                         {
-                            Com_PrintError(16, "ERROR: Expected 'A' after \"exp forecolor\" but found \"%s\"\n", expressionType);
+                            Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: Expected 'A' after \"exp forecolor\" but found \"%s\"\n", expressionType);
                             return 0;
                         }
                         item->forecolorAExp.entries = (expressionEntry **)Z_Malloc(2400, "ItemParse_execExp", 34);
@@ -5827,7 +5827,7 @@ int __cdecl ItemParse_execExp(itemDef_s *item, int handle)
                 {
                     if (!PC_String_Parse(handle, &expressionType))
                     {
-                        Com_PrintError(16, "ERROR: line ended early after \"exp rect\"\n");
+                        Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: line ended early after \"exp rect\"\n");
                         return 0;
                     }
                     if (I_stricmp(expressionType, "X"))
@@ -5850,7 +5850,7 @@ int __cdecl ItemParse_execExp(itemDef_s *item, int handle)
                         if (I_stricmp(expressionType, "H"))
                         {
                             Com_PrintError(
-                                16,
+                                CON_CHANNEL_SYSTEM,
                                 "ERROR: Expected 'X', 'Y', 'W', or 'H' after \"exp rect\" but found \"%s\"\n",
                                 expressionType);
                             return 0;
@@ -6406,7 +6406,7 @@ char __cdecl UI_ParseMenuInternal(char *menuFile, int imageTrack)
 
     builtinDefines[0] = "PC";
     builtinDefines[1] = 0;
-    Com_Printf(13, "\tLoading '%s'...\n", menuFile);
+    Com_Printf(CON_CHANNEL_UI, "\tLoading '%s'...\n", menuFile);
     handle = PC_LoadSourceHandle(menuFile, builtinDefines);
     if (handle)
     {
@@ -6439,7 +6439,7 @@ char __cdecl UI_ParseMenuInternal(char *menuFile, int imageTrack)
     }
     else
     {
-        Com_PrintError(13, "Couldn't find menu file '%s'\n", menuFile);
+        Com_PrintError(CON_CHANNEL_UI, "Couldn't find menu file '%s'\n", menuFile);
         return 0;
     }
 }
@@ -6450,7 +6450,7 @@ MenuList *__cdecl UI_LoadMenu_LoadObj(char *menuFile, int imageTrack)
     g_load_0.menuList.menus = g_load_0.menus;
     if (!UI_ParseMenuInternal(menuFile, imageTrack))
     {
-        Com_PrintWarning(13, "WARNING: menu file not found: %s\n", menuFile);
+        Com_PrintWarning(CON_CHANNEL_UI, "WARNING: menu file not found: %s\n", menuFile);
         if (!UI_ParseMenuInternal((char*)"ui/default.menu", imageTrack))
             Com_Error(ERR_DROP, "default.menu file not found. This is a default menu that you should have.");
     }
@@ -6488,7 +6488,7 @@ MenuList *__cdecl UI_LoadMenus_LoadObj(char *menuFile, int imageTrack)
     len = FS_FOpenFileByMode(menuFile, &f, FS_READ);
     if (!f)
     {
-        Com_Printf(13, "^3WARNING: menu file not found: %s\n", menuFile);
+        Com_Printf(CON_CHANNEL_UI, "^3WARNING: menu file not found: %s\n", menuFile);
         len = FS_FOpenFileByMode((char*)"ui/default.menu", &f, FS_READ);
         if (!f)
             Com_Error(ERR_DROP, "default.menu file not found. This is a default menu that you should have.");

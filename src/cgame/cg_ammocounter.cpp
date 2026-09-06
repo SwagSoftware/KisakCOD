@@ -223,7 +223,7 @@ uint32_t __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *weapD
         if (weapDefAlt->ammoCounterClip == AMMO_COUNTER_CLIP_ALTWEAPON)
         {
             Com_PrintWarning(
-                17,
+                CON_CHANNEL_PLAYERWEAP,
                 "Weapon \"%s\" and it's altweapon \"%s\" both have their ammoCounterClip property set to \"AltWeapon\".\n",
                 weapDef->szInternalName,
                 weapDefAlt->szInternalName);
@@ -237,7 +237,7 @@ uint32_t __cdecl GetWeaponAltIndex(const cg_s *cgameGlob, const WeaponDef *weapD
     else
     {
         Com_PrintWarning(
-            17,
+            CON_CHANNEL_PLAYERWEAP,
             "Weapon \"%s\" ammoCounterClip property is set to \"AltWeapon\", but it has no alternate weapon.\n",
             weapDef->szInternalName);
         return 0;
@@ -519,7 +519,7 @@ void __cdecl CG_DrawPlayerActionSlot(
                             colorMod,
                             cgMedia.hudIconNVG);
                     else
-                        Com_PrintWarning(14, "CG_DrawNightVisionOverlay(): Nightvision Assets not Precached.\n");
+                        Com_PrintWarning(CON_CHANNEL_CLIENT, "CG_DrawNightVisionOverlay(): Nightvision Assets not Precached.\n");
                 }
                 else if (ps->actionSlotType[slotIdx])
                 {                    

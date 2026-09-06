@@ -688,7 +688,7 @@ void __cdecl Actor_Shoot(actor_s *self, float accuracyMod, float (*posOverride)[
 
     if (self->lastShotTime == level.time)
     {
-        Com_PrintError(18, "ERROR: Attempt for same actor (entnum %d) to shoot/melee more than once in a frame.\n", ent->s.number);
+        Com_PrintError(CON_CHANNEL_AI, "ERROR: Attempt for same actor (entnum %d) to shoot/melee more than once in a frame.\n", ent->s.number);
         return;
     }
 
@@ -786,7 +786,7 @@ void __cdecl Actor_ShootBlank(actor_s *self)
     if (self->lastShotTime == level.time)
     {
         Com_PrintError(
-            18,
+            CON_CHANNEL_AI,
             "ERROR: Attempt for same actor (entnum %d) to shoot/melee more than once in a frame.\n",
             self->ent->s.number);
     }
@@ -852,7 +852,7 @@ gentity_s *__cdecl Actor_Melee(actor_s *self, const float *direction)
     if (self->lastShotTime == level.time)
     {
         Com_PrintError(
-            18,
+            CON_CHANNEL_AI,
             "ERROR: Attempt for same actor (entnum %d) to shoot/melee more than once in a frame.\n",
             ent->s.number);
         return 0;
@@ -1078,11 +1078,11 @@ void __cdecl Actor_AccuracyGraphSaveToFile(
         //    RemotePCPath = FS_GetRemotePCPath(0);
         //else
             RemotePCPath = Sys_DefaultInstallPath();
-        Com_Printf(18, "^7Successfully saved accuracy file [%s\\%s].\n", RemotePCPath, v14);
+        Com_Printf(CON_CHANNEL_AI, "^7Successfully saved accuracy file [%s\\%s].\n", RemotePCPath, v14);
     }
     else
     {
-        Com_PrintError(18, "Could not save accuracy file [%s].\n", weaponDef->accuracyGraphName[accuracyType]);
+        Com_PrintError(CON_CHANNEL_AI, "Could not save accuracy file [%s].\n", weaponDef->accuracyGraphName[accuracyType]);
     }
 }
 
@@ -1140,7 +1140,7 @@ void __cdecl Actor_CommonAccuracyGraphEventCallback(
                 ++v8;
             } while (v7 < *graph->knotCount);
         }
-        Com_Printf(18, "^6%s", (const char *)v15);
+        Com_Printf(CON_CHANNEL_AI, "^6%s", (const char *)v15);
     }
     else if (event == EVENT_SAVE)
     {

@@ -180,7 +180,7 @@ XAnimParts *__cdecl XAnimPrecache(const char *name, void *(__cdecl *Alloc)(int))
         parts = XAnimLoadFile((char*)name, Alloc);
         if (!parts)
         {
-            Com_PrintWarning(19, "WARNING: Couldn't find xanim '%s', using default xanim '%s' instead\n", name, "void");
+            Com_PrintWarning(CON_CHANNEL_ANIM, "WARNING: Couldn't find xanim '%s', using default xanim '%s' instead\n", name, "void");
             if (IsFastFileLoad())
                 Data_FastFile = XAnimFindData_FastFile("void");
             else
@@ -2425,7 +2425,7 @@ void __cdecl DObjDisplayAnim(const DObj_s* obj, const char* header)
 
     iassert(header);
     DObjDisplayAnimToBuffer(obj, header, buffer, 2048);
-    Com_Printf(19, buffer);
+    Com_Printf(CON_CHANNEL_ANIM, buffer);
 }
 
 void __cdecl XAnimCalcDelta(DObj_s* obj, uint32_t animIndex, float* rot, float* trans, bool bUseGoalWeight)

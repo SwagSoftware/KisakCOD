@@ -303,7 +303,7 @@ char __cdecl G_GetAnimDeltaForCorpse(gentity_s *ent, float *originChange)
         return 0;
     XAnimCalcDelta(obj, 0, rot, originChange, 1);
     if (anim_deltas_debug->current.enabled && *originChange != 0.0)
-        Com_Printf(19, "got anim delta for this frame of ( %f, %f, %f )\n", *originChange, originChange[1], originChange[2]);
+        Com_Printf(CON_CHANNEL_ANIM, "got anim delta for this frame of ( %f, %f, %f )\n", *originChange, originChange[1], originChange[2]);
     return 1;
 }
 

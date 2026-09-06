@@ -41,7 +41,7 @@ void __cdecl TRACK_cl_parse()
 void __cdecl SHOWNET(msg_t *msg, const char *s)
 {
     if (cl_shownet->current.integer >= 2)
-        Com_Printf(14, "%3i:%s\n", msg->readcount - 1, s);
+        Com_Printf(CON_CHANNEL_CLIENT, "%3i:%s\n", msg->readcount - 1, s);
 }
 
 void __cdecl CL_SavePredictedOriginForServerTime(
@@ -113,7 +113,7 @@ bool __cdecl CL_GetPredictedOriginForServerTime(
         {
             if (cl->clientArchive[index].serverTime != serverTime)
             {
-                Com_Printf(14, "Couldn't find exact match for servertime %i, using servertime %i\n", serverTime, cl->clientArchive[index].serverTime);
+                Com_Printf(CON_CHANNEL_CLIENT, "Couldn't find exact match for servertime %i, using servertime %i\n", serverTime, cl->clientArchive[index].serverTime);
             }
                 
             predictedOrigin[0] = cl->clientArchive[index].origin[0];
@@ -134,13 +134,13 @@ bool __cdecl CL_GetPredictedOriginForServerTime(
         }
     }
 
-    Com_PrintError(14, "Unable to find predicted origin for server time %i.  Here's what we have:\n", serverTime);
+    Com_PrintError(CON_CHANNEL_CLIENT, "Unable to find predicted origin for server time %i.  Here's what we have:\n", serverTime);
 
     for (int cmd = 0; cmd < CLIENT_ARCHIVE_SIZE; ++cmd)
     {
         int index = (cl->clientArchiveIndex + CLIENT_ARCHIVE_SIZE - cmd - 1) % CLIENT_ARCHIVE_SIZE;
         bcassert(index, CLIENT_ARCHIVE_SIZE);
-        Com_PrintError(14, "%i: %i\n", index, cl->clientArchive[index].serverTime);
+        Com_PrintError(CON_CHANNEL_CLIENT, "%i: %i\n", index, cl->clientArchive[index].serverTime);
     }
 
     return false;
@@ -277,7 +277,7 @@ void __cdecl CL_ParseWWWDownload(int localClientNum, msg_t *msg)
     else
     {
         legacyHacks.cl_downloadSize = cls.downloadSize;
-        Com_DPrintf(14, "Server redirected download: %s\n", cls.downloadName);
+        Com_DPrintf(CON_CHANNEL_CLIENT, "Server redirected download: %s\n", cls.downloadName);
         cls.wwwDlInProgress = 1;
         CL_AddReliableCommand(localClientNum, "wwwdl ack");
         FS_BuildOSPath(fs_homepath, cls.downloadTempName, (char *)"", toOSPath);
@@ -288,7 +288,7 @@ void __cdecl CL_ParseWWWDownload(int localClientNum, msg_t *msg)
             CL_AddReliableCommand(localClientNum, "wwwdl fail");
             DL_CancelDownload();
             cls.wwwDlInProgress = 0;
-            Com_Printf(14, "Failed to initialize download for '%s'\n", cls.downloadName);
+            Com_Printf(CON_CHANNEL_CLIENT, "Failed to initialize download for '%s'\n", cls.downloadName);
         }
         if ((cls.downloadFlags & 1) != 0)
         {
@@ -303,7 +303,7 @@ void __cdecl CL_BeginDownload(char *localName, char *remoteName)
     const char *v2; // eax
 
     Com_DPrintf(
-        14,
+        CON_CHANNEL_CLIENT,
         "***** CL_BeginDownload *****\nLocalname: %s\nRemotename: %s\n****************************\n",
         localName,
         remoteName);
@@ -418,7 +418,7 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
                 goto LABEL_19;
             if (!cls.downloadTempName[0])
             {
-                Com_Printf(14, "Server sending download, but no download was requested\n");
+                Com_Printf(CON_CHANNEL_CLIENT, "Server sending download, but no download was requested\n");
                 CL_AddReliableCommand(localClientNum, "stopdl");
                 return;
             }
@@ -450,17 +450,17 @@ void __cdecl CL_ParseDownload(int localClientNum, msg_t *msg)
             }
             else
             {
-                Com_Printf(14, "Could not create %s\n", cls.downloadTempName);
+                Com_Printf(CON_CHANNEL_CLIENT, "Could not create %s\n", cls.downloadTempName);
                 CL_AddReliableCommand(localClientNum, "stopdl");
                 CL_NextDownload(localClientNum);
             }
         }
         else
         {
-            Com_DPrintf(14, "CL_ParseDownload: Expected block %d, got %d\n", cls.downloadBlock, block);
+            Com_DPrintf(CON_CHANNEL_CLIENT, "CL_ParseDownload: Expected block %d, got %d\n", cls.downloadBlock, block);
             if (block > cls.downloadBlock)
             {
-                Com_DPrintf(14, "CL_ParseDownload: Sending retransmit request to get the missed block\n");
+                Com_DPrintf(CON_CHANNEL_CLIENT, "CL_ParseDownload: Sending retransmit request to get the missed block\n");
                 CL_AddReliableCommand(localClientNum, va("retransdl %d", cls.downloadBlock));
             }
         }
@@ -472,11 +472,11 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
 {
     if (cl_shownet->current.integer == 1)
     {
-        Com_Printf(14, "%i ", msg->cursize);
+        Com_Printf(CON_CHANNEL_CLIENT, "%i ", msg->cursize);
     }
     else if (cl_shownet->current.integer >= 2)
     {
-        Com_Printf(14, "------------------\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "------------------\n");
     }
 
     msg_t msgCompressed;
@@ -521,7 +521,7 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
             if (svc_strings[cmd])
                 SHOWNET(&msgCompressed, svc_strings[cmd]);
             else
-                Com_Printf(14, "%3i:BAD CMD %i\n", msgCompressed.readcount - 1, cmd);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:BAD CMD %i\n", msgCompressed.readcount - 1, cmd);
         }
 
         switch (cmd)
@@ -543,7 +543,7 @@ void __cdecl CL_ParseServerMessage(int localClientNum, msg_t *msg)
             default:
             {
                 BADPACKET(msg->data, msg->cursize);
-                Com_PrintError(1, "CL_ParseServerMessage: Illegible server message %d\n", cmd);
+                Com_PrintError(CON_CHANNEL_ERROR, "CL_ParseServerMessage: Illegible server message %d\n", cmd);
                 MSG_Discard(msg);
                 break;
             }
@@ -582,25 +582,25 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
         old = &LocalClientGlobals->snapshots[newSnap.deltaNum & 0x1F];
         if (!old->valid)
         {
-            Com_PrintError(14, "Delta from invalid frame (not supposed to happen!).\n");
+            Com_PrintError(CON_CHANNEL_CLIENT, "Delta from invalid frame (not supposed to happen!).\n");
             MSG_Discard(msg);
             return;
         }
         if (LocalClientGlobals->snapshots[newSnap.deltaNum & 0x1F].messageNum != newSnap.deltaNum)
         {
-            Com_DPrintf(14, "Delta frame too old.\n");
+            Com_DPrintf(CON_CHANNEL_CLIENT, "Delta frame too old.\n");
             MSG_Discard(msg);
             return;
         }
         if (LocalClientGlobals->parseEntitiesNum - LocalClientGlobals->snapshots[newSnap.deltaNum & 0x1F].parseEntitiesNum > 1920)
         {
-            Com_DPrintf(14, "Delta parseEntitiesNum too old.\n");
+            Com_DPrintf(CON_CHANNEL_CLIENT, "Delta parseEntitiesNum too old.\n");
             MSG_Discard(msg);
             return;
         }
         if (LocalClientGlobals->parseClientsNum - LocalClientGlobals->snapshots[newSnap.deltaNum & 0x1F].parseClientsNum > 1920)
         {
-            Com_DPrintf(14, "Delta parseClientsNum too old.\n");
+            Com_DPrintf(CON_CHANNEL_CLIENT, "Delta parseClientsNum too old.\n");
             MSG_Discard(msg);
             return;
         }
@@ -661,7 +661,7 @@ void __cdecl CL_ParseSnapshot(int localClientNum, msg_t *msg)
             sizeof(LocalClientGlobals->snapshots[LocalClientGlobals->snap.messageNum & 0x1F]));
         if (cl_shownet->current.integer == 3)
             Com_Printf(
-                14,
+                CON_CHANNEL_CLIENT,
                 "   snapshot:%i  delta:%i  ping:%i\n",
                 LocalClientGlobals->snap.messageNum,
                 LocalClientGlobals->snap.deltaNum,
@@ -728,7 +728,7 @@ void __cdecl CL_ParsePacketEntities(
         {
             // one or more entities from the old packet are unchanged
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
             CL_CopyOldEntity(cl, newframe, oldstate);
 
             oldindex++;
@@ -746,7 +746,7 @@ void __cdecl CL_ParsePacketEntities(
             if (msg_dumpEnts->current.enabled)
             {
                 EntityTypeName = BG_GetEntityTypeName(oldstate->eType);
-                Com_Printf(14, "%3i: unchanged ent, eType %s\n", oldnum, EntityTypeName);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i: unchanged ent, eType %s\n", oldnum, EntityTypeName);
             }
         }
 
@@ -754,7 +754,7 @@ void __cdecl CL_ParsePacketEntities(
         {
             // delta from previous state
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  delta: %i\n", msg->readcount, newnum);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:  delta: %i\n", msg->readcount, newnum);
             CL_DeltaEntity(cl, msg, time, newframe, newnum, oldstate);
 
             oldindex++;
@@ -779,7 +779,7 @@ void __cdecl CL_ParsePacketEntities(
 
             // delta from baseline
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  baseline: %i\n", msg->readcount, newnum);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:  baseline: %i\n", msg->readcount, newnum);
             CL_DeltaEntity(cl, msg, time, newframe, newnum, &cl->entityBaselines[newnum]);
 
             continue;
@@ -791,7 +791,7 @@ void __cdecl CL_ParsePacketEntities(
     {
         // one or more entities from the old packet are unchanged
         if (cl_shownet->current.integer == 3)
-            Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
+            Com_Printf(CON_CHANNEL_CLIENT, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
         CL_CopyOldEntity(cl, newframe, oldstate);
         
         oldindex++;
@@ -812,11 +812,11 @@ void __cdecl CL_ParsePacketEntities(
             v8 = oldstate->lerp.pos.trBase[1];
             v7 = oldstate->lerp.pos.trBase[0];
             v6 = BG_GetEntityTypeName(oldstate->eType);
-            Com_Printf(14, "%3i: unchanged ent, eType %s at %f, %f, %f\n", oldnum, v6, v7, v8, v9);
+            Com_Printf(CON_CHANNEL_CLIENT, "%3i: unchanged ent, eType %s at %f, %f, %f\n", oldnum, v6, v7, v8, v9);
         }
     }
     if (cl_shownuments->current.enabled || msg_dumpEnts->current.enabled)
-        Com_Printf(14, "Entities in packet: %i\n", newframe->numEntities);
+        Com_Printf(CON_CHANNEL_CLIENT, "Entities in packet: %i\n", newframe->numEntities);
 }
 
 void __cdecl CL_DeltaEntity(
@@ -894,7 +894,7 @@ void __cdecl CL_ParsePacketClients(
         {
             // one or more clients from the old packet are unchanged
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
             CL_DeltaClient(cl, msg, time, newframe, oldnum, oldstate, 1);
 
             oldindex++;
@@ -914,7 +914,7 @@ void __cdecl CL_ParsePacketClients(
         {
             // delta from previous state
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  delta: %i\n", msg->readcount, newnum);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:  delta: %i\n", msg->readcount, newnum);
             CL_DeltaClient(cl, msg, time, newframe, newnum, oldstate, 0);
 
             oldindex++;
@@ -934,7 +934,7 @@ void __cdecl CL_ParsePacketClients(
             // delta from baseline
             iassert(oldnum > newnum);
             if (cl_shownet->current.integer == 3)
-                Com_Printf(14, "%3i:  baseline: %i\n", msg->readcount, newnum);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:  baseline: %i\n", msg->readcount, newnum);
             memset(&dummy, 0, sizeof(dummy));
             CL_DeltaClient(cl, msg, time, newframe, newnum, &dummy, 0);
         }
@@ -944,7 +944,7 @@ void __cdecl CL_ParsePacketClients(
     while (oldnum != 99999 && !msg->overflowed)
     {
         if (cl_shownet->current.integer == 3)
-            Com_Printf(14, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
+            Com_Printf(CON_CHANNEL_CLIENT, "%3i:  unchanged: %i\n", msg->readcount, oldnum);
         CL_DeltaClient(cl, msg, time, newframe, oldnum, oldstate, 1);
         
         oldindex++;
@@ -961,7 +961,7 @@ void __cdecl CL_ParsePacketClients(
     }
 
     if (cl_shownuments->current.enabled)
-        Com_Printf(14, "Clients in packet: %i\n", newframe->numClients);
+        Com_Printf(CON_CHANNEL_CLIENT, "Clients in packet: %i\n", newframe->numClients);
 }
 
 void __cdecl CL_InitDownloads(int localClientNum)
@@ -997,7 +997,7 @@ void __cdecl CL_InitDownloads(int localClientNum)
             compareResulta = FS_CompareWithServerFiles(cls.downloadList, 1024, 1);
             if (compareResulta == NEED_DOWNLOAD)
             {
-                Com_Printf(14, "Need files: %s\n", cls.downloadList);
+                Com_Printf(CON_CHANNEL_CLIENT, "Need files: %s\n", cls.downloadList);
                 if (cls.downloadList[0])
                 {
                     clientUIActives[localClientNum].connectionState = CA_CONNECTED;
@@ -1132,7 +1132,7 @@ void __cdecl CL_ParseGamestate(int localClientNum, msg_t *msg)
             default:
             {
                 BADPACKET(msg->data, msg->cursize);
-                Com_PrintError(1, "CL_ParseGamestate: bad command byte %d\n", cmd);
+                Com_PrintError(CON_CHANNEL_ERROR, "CL_ParseGamestate: bad command byte %d\n", cmd);
                 MSG_Discard(msg);
                 return;
             }
@@ -1146,7 +1146,7 @@ END_LOOP:
     // LWSS ADD: This is some sort of exploit fix they added in later COD
     if (clc->clientNum >= 64)// KISAKTODO: should probably be com_maxclients instead?
     {
-        Com_PrintError(1, "CL_ParseGamestate: bad clientNum %i\n", clc->clientNum);
+        Com_PrintError(CON_CHANNEL_ERROR, "CL_ParseGamestate: bad clientNum %i\n", clc->clientNum);
         clc->clientNum = 0;
         MSG_Discard(msg);
     }

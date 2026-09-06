@@ -125,7 +125,7 @@ badplace_t *__cdecl Path_AllocBadPlace(unsigned int name, int duration)
     {
         if (duration < 250)
         {
-            Com_PrintWarning(18,
+            Com_PrintWarning(CON_CHANNEL_AI,
                 "WARNING: A badplace was created with duration [%.2f second], which is less than the ping time [%.2f second]\n",
                 duration * 0.001f, 0.25);
         }

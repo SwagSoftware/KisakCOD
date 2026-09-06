@@ -82,7 +82,7 @@ void __cdecl ProfLoad_Activate()
     mapLoadProfile.isLoading = 1;
     mapLoadProfile.ticksStart = __rdtsc();
     mapLoadProfile.ticksFinish = mapLoadProfile.ticksStart;
-    Com_Printf(12, "^6Activating map load profiler\n");
+    Com_Printf(CON_CHANNEL_PROFILE, "^6Activating map load profiler\n");
 }
 
 void __cdecl ProfLoad_Deactivate()
@@ -106,33 +106,33 @@ void ProfLoad_Print()
     fileSeekCount = mapLoadProfile.elementAccessCount[1];
     fileReadCount = mapLoadProfile.elementAccessCount[2];
     Com_Printf(
-        12,
+        CON_CHANNEL_PROFILE,
         "^6Total Load Time: %5.4f\n",
         (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart)
             * msecPerRawTimerTick
             * EQUAL_EPSILON));
     Com_Printf(
-        12,
+        CON_CHANNEL_PROFILE,
         "^6Profiled Time: %5.4f\n",
         (double)((double)mapLoadProfile.ticksProfiled * msecPerRawTimerTick * EQUAL_EPSILON));
     Com_Printf(
-        12,
+        CON_CHANNEL_PROFILE,
         "^6Unprofiled Time: %5.4f\n",
         (double)((double)(mapLoadProfile.ticksFinish - mapLoadProfile.ticksStart - mapLoadProfile.ticksProfiled)
             * msecPerRawTimerTick
             * EQUAL_EPSILON));
     Com_Printf(
-        12,
+        CON_CHANNEL_PROFILE,
         "^6File Open Time: %5.4f, Accessed %d times\n",
         (double)((double)mapLoadProfile.elements[0].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
         fileOpenCount);
     Com_Printf(
-        12,
+        CON_CHANNEL_PROFILE,
         "^6File Seek Time: %5.4f, Accessed %d times\n",
         (double)((double)mapLoadProfile.elements[1].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
         fileSeekCount);
     Com_Printf(
-        12,
+        CON_CHANNEL_PROFILE,
         "^6File Read Time: %5.4f, Accessed %d times\n",
         (double)((double)mapLoadProfile.elements[2].ticksTotal * msecPerRawTimerTick * EQUAL_EPSILON),
         fileReadCount);
@@ -185,7 +185,7 @@ int ProfLoad_PrintTree()
     {
         entry = &mapLoadProfile.profileEntries[profileIndex];
         ProfLoad_GetEntryRowText(entry, rowText, 256);
-        Com_Printf(12, "^6%*c %s\n", 2 * entry->indent + 1, 32, rowText);
+        Com_Printf(CON_CHANNEL_PROFILE, "^6%*c %s\n", 2 * entry->indent + 1, 32, rowText);
         result = profileIndex + 1;
     }
     return result;
@@ -284,7 +284,7 @@ void ProfLoad_PrintHotSpots()
     //    24 * v14 / 24,
     //    ProfLoad_CompareHotSpotTicks);
     std::sort(&v11[0], &v11[v14], ProfLoad_CompareHotSpotTicks);
-    Com_Printf(12, "\n\n^6---------- Load time hot spots ----------\n");
+    Com_Printf(CON_CHANNEL_PROFILE, "\n\n^6---------- Load time hot spots ----------\n");
     if (v14 > 16)
         v10 = 16;
     else
@@ -299,14 +299,14 @@ void ProfLoad_PrintHotSpots()
         v15 = v15 + v18;
         v16 = v16 + v17;
         Com_Printf(
-            12,
+            CON_CHANNEL_PROFILE,
             "^6%s: %5.3f self, %5.3f file, %i hits\n",
             v11[j].label,
             (double)v18,
             (double)v17,
             v11[j].accessCount);
     }
-    Com_Printf(12, "\n^6Hot spot total time: %5.3f self, %5.3f file\n\n", (double)v15, (double)v16);
+    Com_Printf(CON_CHANNEL_PROFILE, "\n^6Hot spot total time: %5.3f self, %5.3f file\n\n", (double)v15, (double)v16);
 }
 
 bool __cdecl ProfLoad_CompareHotSpotNames(const MapProfileHotSpot &hotSpot0, const MapProfileHotSpot &hotSpot1)

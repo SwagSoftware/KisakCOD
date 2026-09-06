@@ -911,13 +911,13 @@ void __cdecl MSG_WriteReliableCommandToBuffer(const char *pszCommand, char *pszB
     iCommandLength = v3;
     if (v3 >= iBufferSize)
         Com_PrintWarning(
-            16,
+            CON_CHANNEL_SYSTEM,
             "WARNING: Reliable command is too long (%i/%i) and will be truncated: '%s'\n",
             v3,
             iBufferSize,
             pszCommand);
     if (!iCommandLength)
-        Com_PrintWarning(16, "WARNING: Empty reliable command\n");
+        Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Empty reliable command\n");
     v4 = pszBuffer;
     for (i = 0; i < iBufferSize && pszCommand[i]; ++i)
     {
@@ -937,14 +937,14 @@ void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int inde
     iassert( !msg->readOnly );
 
     if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
-        Com_Printf(15, "Writing entity num %i\n", index);
+        Com_Printf(CON_CHANNEL_SERVER, "Writing entity num %i\n", index);
 
     iassert(index - msg->lastEntityRef > 0);
 
     if (index - msg->lastEntityRef == 1)
     {
         if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
-            Com_Printf(16, "Wrote entity num: 1 bit (inc)\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Wrote entity num: 1 bit (inc)\n");
         MSG_WriteBit1(msg);
     }
     else
@@ -953,7 +953,7 @@ void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int inde
         if (indexBits == 10 && index - msg->lastEntityRef < 16)
         {
             if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
-                Com_Printf(16, "Wrote entity num: %i bits (delta)\n", 6);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Wrote entity num: %i bits (delta)\n", 6);
             
             iassert(index - msg->lastEntityRef > 0);
 
@@ -963,7 +963,7 @@ void __cdecl MSG_WriteEntityIndex(SnapshotInfo_s *snapInfo, msg_t *msg, int inde
         else
         {
             if (msg_printEntityNums->current.enabled && SV_IsPacketDataNetworkData())
-                Com_Printf(16, "Wrote entity num: %i bits (full)\n", indexBits + 2);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Wrote entity num: %i bits (full)\n", indexBits + 2);
 
             if (indexBits == 10)
                 MSG_WriteBit1(msg);
@@ -1377,7 +1377,7 @@ void __cdecl MSG_WriteEntity(
         if (sv_debugPacketContents->current.enabled)
         {
             EntityTypeName = BG_GetEntityTypeName(from->eType);
-            Com_Printf(15, "Removing entity %i - object is type %i (%s)\n", from->number, from->eType, EntityTypeName);
+            Com_Printf(CON_CHANNEL_SERVER, "Removing entity %i - object is type %i (%s)\n", from->number, from->eType, EntityTypeName);
         }
         snapInfo->packetEntityType = MSG_GetPacketEntityTypeForEType(from->eType);
         MSG_WriteEntityRemoval(snapInfo, msg, (uint8_t *)from, 10, 0);
@@ -1394,9 +1394,9 @@ void __cdecl MSG_WriteEntityRemoval(
     iassert( from );
     iassert( !msg->readOnly );
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
-        Com_Printf(16, "W|%3i: #%-3i remove\n", msg->cursize, *(uint32_t *)from);
+        Com_Printf(CON_CHANNEL_SYSTEM, "W|%3i: #%-3i remove\n", msg->cursize, *(uint32_t *)from);
     if (sv_debugPacketContents->current.enabled)
-        Com_Printf(16, "Entity was removed\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "Entity was removed\n");
     SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
     if (changeBit)
         MSG_WriteBit1(msg);
@@ -1440,7 +1440,7 @@ void __cdecl MSG_WriteEntityDeltaForEType(
         {
             EntityTypeName = BG_GetEntityTypeName(to->eType);
             Com_Printf(
-                15,
+                CON_CHANNEL_SERVER,
                 "^^ Entity delta entnum %i - object is type %i (%s) - took %i bits\n",
                 to->number,
                 to->eType,
@@ -1505,18 +1505,18 @@ int __cdecl MSG_WriteEntityDelta(
     if (lc)
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Entity had a delta\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity had a delta\n");
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing index number %i\n", *(uint32_t *)to);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing index number %i\n", *(uint32_t *)to);
         SV_PacketDataIsEntityNum(snapInfo->clientNum, msg);
         MSG_WriteEntityIndex(snapInfo, msg, *(uint32_t *)to, indexBits);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing 0,1 to say it's not removed and we have a delta\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing 0,1 to say it's not removed and we have a delta\n");
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
         MSG_WriteBit0(msg);
         MSG_WriteBit1(msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing byte for how many fields changed (%i)\n", lc);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing byte for how many fields changed (%i)\n", lc);
         SV_PacketDataIsLastFieldChanged(snapInfo->clientNum, msg);
         MSG_WriteLastChangedField(msg, lc, numFields);
         ia = 0;
@@ -1525,7 +1525,7 @@ int __cdecl MSG_WriteEntityDelta(
         {
             SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Writing delta for field %i (%s)\n", ia, fielda->name);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Writing delta for field %i (%s)\n", ia, fielda->name);
             MSG_WriteDeltaField(snapInfo, msg, time, from, to, fielda++, ia++, 0);
         }
         SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
@@ -1534,7 +1534,7 @@ int __cdecl MSG_WriteEntityDelta(
     else if (force)
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Entity did not change, but we're forcing a send to say this\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity did not change, but we're forcing a send to say this\n");
         SV_PacketDataIsEntityNum(snapInfo->clientNum, msg);
         MSG_WriteEntityIndex(snapInfo, msg, *(uint32_t *)to, indexBits);
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
@@ -1604,7 +1604,7 @@ void __cdecl MSG_WriteDeltaField(
         {
             EntityTypeString = SV_GetEntityTypeString(snapInfo->packetEntityType);
             Com_PrintError(
-                15,
+                CON_CHANNEL_SERVER,
                 "Field %s changed for eType %s when we thought it never would\n",
                 field->name,
                 EntityTypeString);
@@ -1711,7 +1711,7 @@ void __cdecl MSG_WriteDeltaField(
             if (!MSG_CheckWritingEnoughBits(trunc, 5u))
             {
                 LODWORD(f) = *toF;
-                Com_PrintError(15, "Not enough bits written for fontScale %f\n", f);
+                Com_PrintError(CON_CHANNEL_SERVER, "Not enough bits written for fontScale %f\n", f);
             }
             MSG_WriteBits(msg, trunc, 5u);
             goto LABEL_103;
@@ -1755,7 +1755,7 @@ void __cdecl MSG_WriteDeltaField(
             case 0xFFFFFFA1:
                 value = *toF;
                 if (sv_debugPacketContents->current.enabled)
-                    Com_Printf(16, "Sending %i as playerstate timer value (%ims granularity)\n", value, 100);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "Sending %i as playerstate timer value (%ims granularity)\n", value, 100);
                 MSG_WriteBits(msg, value / 100, 7u);
                 break;
             default:
@@ -1772,7 +1772,7 @@ void __cdecl MSG_WriteDeltaField(
                     value = *toF;
                     value ^= *fromF;
                     if (!MSG_CheckWritingEnoughBits(value, bits))
-                        Com_PrintError(1, "Not enough bits written: %d for %s (%d)\n", value, field->name, bits);
+                        Com_PrintError(CON_CHANNEL_ERROR, "Not enough bits written: %d for %s (%d)\n", value, field->name, bits);
                     partialBits = bits & 7;
                     SV_PacketDataIsData(snapInfo->clientNum, msg);
                     if (partialBits)
@@ -2083,24 +2083,24 @@ int __cdecl MSG_WriteDeltaStruct(
     {
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Entity had a delta\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity had a delta\n");
         if (bChangeBit)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Writing 1 for bChangeBit\n");
+                Com_Printf(CON_CHANNEL_SYSTEM, "Writing 1 for bChangeBit\n");
             MSG_WriteBit1(msg);
         }
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing index number %i\n", *(uint32_t *)to);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing index number %i\n", *(uint32_t *)to);
         SV_PacketDataIsEntityNum(snapInfo->clientNum, msg);
         MSG_WriteEntityIndex(snapInfo, msg, *(uint32_t *)to, indexBits);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing 0,1 to say it's not removed and we have a delta\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing 0,1 to say it's not removed and we have a delta\n");
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
         MSG_WriteBit0(msg);
         MSG_WriteBit1(msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing byte for how many fields changed (%i)\n", lc);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing byte for how many fields changed (%i)\n", lc);
         SV_PacketDataIsLastFieldChanged(snapInfo->clientNum, msg);
         MSG_WriteLastChangedField(msg, lc, numFields);
         ia = 0;
@@ -2109,7 +2109,7 @@ int __cdecl MSG_WriteDeltaStruct(
         {
             SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Writing delta for field %i (%s)\n", ia, fielda->name);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Writing delta for field %i (%s)\n", ia, fielda->name);
             MSG_WriteDeltaField(snapInfo, msg, time, from, to, fielda++, ia++, 0);
         }
         SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
@@ -2118,7 +2118,7 @@ int __cdecl MSG_WriteDeltaStruct(
     else if (force)
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Entity %u did not change, but we're forcing a send to say this\n", *(uint32_t *)to);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity %u did not change, but we're forcing a send to say this\n", *(uint32_t *)to);
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
         if (bChangeBit)
             MSG_WriteBit1(msg);
@@ -2172,7 +2172,7 @@ void __cdecl MSG_WriteDeltaClient(
         if (bits)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(15, "^^ client state delta for client %i - %i bits\n", to->clientIndex, bits);
+                Com_Printf(CON_CHANNEL_SERVER, "^^ client state delta for client %i - %i bits\n", to->clientIndex, bits);
         }
     }
     else
@@ -2216,7 +2216,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
 
     UsedBitCount = MSG_GetUsedBitCount(msg);
     if (sv_debugPacketContents->current.enabled)
-        Com_Printf(16, "Writing playerstate for client #%i\n", snapInfo->clientNum);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Writing playerstate for client #%i\n", snapInfo->clientNum);
     snapInfo->packetEntityType = ANALYZE_DATATYPE_ENTITYTYPE_PLAYERSTATE;
     if (!from)
     {
@@ -2268,7 +2268,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
             if (sv_debugPlayerstate->current.enabled && !snapInfo->archived)
             {
                 if (I_strcmp(field->name, "commandTime"))
-                    Com_Printf(16, "PS field %s changed\n", field->name);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "PS field %s changed\n", field->name);
             }
             lastChangedFieldNum = fieldNum + 1;
         }
@@ -2278,7 +2278,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     snapInfo->fieldChanges = orderInfo.playerState;
     SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
     if (sv_debugPacketContents->current.enabled)
-        Com_Printf(16, "Writing byte for number of fields changed (%i)\n", lastChangedFieldNum);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Writing byte for number of fields changed (%i)\n", lastChangedFieldNum);
     MSG_WriteLastChangedField(msg, lastChangedFieldNum, numFields);
     fieldNum = 0;
     field = (NetField *)playerStateFields;
@@ -2328,45 +2328,45 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     if (value)
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Sending player stats changes - bit 1 to say it changed, %i bits for which changed\n", MAX_STATS);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Sending player stats changes - bit 1 to say it changed, %i bits for which changed\n", MAX_STATS);
         MSG_WriteBit1(msg);
         MSG_WriteBits(msg, value, MAX_STATS);
         SV_PacketDataIsData(snapInfo->clientNum, msg);
         if ((value & (1 << STAT_HEALTH)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player health stat (value is %i)\n", to->stats[STAT_HEALTH]);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Sending player health stat (value is %i)\n", to->stats[STAT_HEALTH]);
             MSG_WriteShort(msg, to->stats[STAT_HEALTH]);
         }
         if ((value & (1 << STAT_DEAD_YAW)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player dead yaw stat (value is %i)\n", to->stats[STAT_DEAD_YAW]);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Sending player dead yaw stat (value is %i)\n", to->stats[STAT_DEAD_YAW]);
             MSG_WriteShort(msg, to->stats[STAT_DEAD_YAW]);
         }
         if ((value & (1 << STAT_MAX_HEALTH)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player maximum health stat (value is %i)\n", to->stats[STAT_MAX_HEALTH]);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Sending player maximum health stat (value is %i)\n", to->stats[STAT_MAX_HEALTH]);
             MSG_WriteShort(msg, to->stats[STAT_MAX_HEALTH]);
         }
         if ((value & (1 << STAT_IDENT_CLIENT_NUM)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player crosshair client stat (value is %i)\n", to->stats[STAT_IDENT_CLIENT_NUM]);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Sending player crosshair client stat (value is %i)\n", to->stats[STAT_IDENT_CLIENT_NUM]);
             MSG_WriteBits(msg, to->stats[STAT_IDENT_CLIENT_NUM], 6u);
         }
         if ((value & (1 << STAT_SPAWN_COUNT)) != 0)
         {
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "Sending player spawn count stat (value is %i)\n", to->stats[STAT_SPAWN_COUNT]);
+                Com_Printf(CON_CHANNEL_SYSTEM, "Sending player spawn count stat (value is %i)\n", to->stats[STAT_SPAWN_COUNT]);
             MSG_WriteByte(msg, to->stats[STAT_SPAWN_COUNT]);
         }
     }
     else
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Writing 0 to say no player stats changed\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Writing 0 to say no player stats changed\n");
         MSG_WriteBit0(msg);
     }
     v10 = MSG_GetUsedBitCount(msg);
@@ -2384,7 +2384,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     {
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "Player ammo bits changed\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Player ammo bits changed\n");
         MSG_WriteBit1(msg);
         for (i = 0; i < 4; ++i)
         {
@@ -2394,7 +2394,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
                 SV_PacketDataIsData(snapInfo->clientNum, msg);
                 if (sv_debugPacketContents->current.enabled)
                     Com_Printf(
-                        16,
+                        CON_CHANNEL_SYSTEM,
                         "ammobits[%i] changed, sending bits as short (value is %i) followed by the ammo values as shorts\n",
                         i,
                         c[i]);
@@ -2409,7 +2409,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
             {
                 SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
                 if (sv_debugPacketContents->current.enabled)
-                    Com_Printf(16, "ammobits[%i] did not change\n", i);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "ammobits[%i] did not change\n", i);
                 MSG_WriteBit0(msg);
             }
         }
@@ -2418,7 +2418,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     {
         SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "ammobits did not change\n", i);
+            Com_Printf(CON_CHANNEL_SYSTEM, "ammobits did not change\n", i);
         MSG_WriteBit0(msg);
     }
     for (i = 0; i < 8; ++i)
@@ -2433,7 +2433,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
         {
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "sending clip ammo\n", i);
+                Com_Printf(CON_CHANNEL_SYSTEM, "sending clip ammo\n", i);
             MSG_WriteBit1(msg);
             SV_PacketDataIsData(snapInfo->clientNum, msg);
             MSG_WriteShort(msg, v19);
@@ -2447,7 +2447,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
         {
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "clip ammo did not change\n", i);
+                Com_Printf(CON_CHANNEL_SYSTEM, "clip ammo did not change\n", i);
             MSG_WriteBit0(msg);
         }
     }
@@ -2455,7 +2455,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     SV_TrackPSAmmoBits(v21 - v10);
     SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
     if (sv_debugPacketContents->current.enabled)
-        Com_Printf(16, "sending objectives\n", i);
+        Com_Printf(CON_CHANNEL_SYSTEM, "sending objectives\n", i);
     if (!memcmp(from->objective, to->objective, sizeof(playerState_s::objective)))
     {
         MSG_WriteBit0(msg);
@@ -2467,7 +2467,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
         {
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
             if (sv_debugPacketContents->current.enabled)
-                Com_Printf(16, "sending objective %i\n", fieldNum);
+                Com_Printf(CON_CHANNEL_SYSTEM, "sending objective %i\n", fieldNum);
             MSG_WriteBits(msg, to->objective[fieldNum].state, 3u);
             snapInfo->fieldChanges = orderInfo.objective;
             MSG_WriteDeltaFields(
@@ -2487,21 +2487,21 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     if (!memcmp(&from->hud, &to->hud, sizeof(playerState_s_hud)))
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "no hudelems changed\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "no hudelems changed\n");
         MSG_WriteBit0(msg);
     }
     else
     {
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "hudelems changed\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "hudelems changed\n");
         MSG_WriteBit1(msg);
         SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "sending archived hudelems\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "sending archived hudelems\n");
         MSG_WriteDeltaHudElems(snapInfo, msg, time, from->hud.archival, to->hud.archival, 0x1Fu);
         SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "sending current hudelems\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "sending current hudelems\n");
         MSG_WriteDeltaHudElems(snapInfo, msg, time, from->hud.current, to->hud.current, 0x1Fu);
         SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
     }
@@ -2511,14 +2511,14 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     {
         MSG_WriteBit0(msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "no weaponmodels changed\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "no weaponmodels changed\n");
     }
     else
     {
         MSG_WriteBit1(msg);
         SV_PacketDataIsUnknown(snapInfo->clientNum, msg);
         if (sv_debugPacketContents->current.enabled)
-            Com_Printf(16, "%s", "sending weaponmodels\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s", "sending weaponmodels\n");
         for (fieldNum = 0; fieldNum < 128; ++fieldNum)
             MSG_WriteByte(msg, to->weaponmodels[fieldNum]);
     }
@@ -2705,7 +2705,7 @@ void __cdecl MSG_WriteDeltaHudElems(
                     bits = MSG_GetBitCount(hudElemFields[j].bits, &est, *fromF, *toF);
                     if (est)
                         Com_Printf(
-                            15,
+                            CON_CHANNEL_SERVER,
                             "Hudelem #%i field '%s' changed from %i to %i, which will take %i bits%s\n",
                             i,
                             hudElemFields[j].name,
@@ -2715,7 +2715,7 @@ void __cdecl MSG_WriteDeltaHudElems(
                             "(est)");
                     else
                         Com_Printf(
-                            15,
+                            CON_CHANNEL_SERVER,
                             "Hudelem #%i field '%s' changed from %i to %i, which will take %i bits%s\n",
                             i,
                             hudElemFields[j].name,

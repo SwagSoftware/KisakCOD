@@ -80,7 +80,7 @@ int32_t __cdecl G_CallSpawnEntity(gentity_s *ent)
 
     if (!ent->classname)
     {
-        Com_Printf(15, "G_CallSpawnEntity: NULL classname\n");
+        Com_Printf(CON_CHANNEL_SERVER, "G_CallSpawnEntity: NULL classname\n");
         return 0;
     }
 
@@ -96,7 +96,7 @@ int32_t __cdecl G_CallSpawnEntity(gentity_s *ent)
 
     if (!spawnFunc)
     {
-        Com_Printf(15, "%s cannot be spawned dynamically\n", classname);
+        Com_Printf(CON_CHANNEL_SERVER, "%s cannot be spawned dynamically\n", classname);
         return 0;
     }
 
@@ -720,7 +720,7 @@ void G_CallSpawn()
     }
     else
     {
-        Com_Printf(15, "G_CallSpawn: NULL classname\n");
+        Com_Printf(CON_CHANNEL_SERVER, "G_CallSpawn: NULL classname\n");
     }
 }
 

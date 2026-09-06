@@ -174,7 +174,7 @@ BOOL __cdecl Com_IsValidName(
     else
     {
         Com_PrintError(
-            9,
+            CON_CHANNEL_SOUND,
             "ERROR: Sound alias file %s: %s '%s' is longer than %i characters\n",
             sourceFile,
             g_pszSndAliasKeyNames[field],
@@ -224,7 +224,7 @@ double __cdecl Com_ParseFloatInRange(
     if (min > val || max < val)
     {
         Com_PrintError(
-            9,
+            CON_CHANNEL_SOUND,
             "ERROR: Sound alias file %s: %s '%f' is not within the range of '%f'-'%f'.\n",
             sourceFile,
             g_pszSndAliasKeyNames[field],
@@ -296,7 +296,7 @@ void __cdecl Com_SoundAliasChannelForName(char *name, const char *sourceFile, sn
             v3 += sprintf(&string[v3], ", ");
         }
     }
-    Com_PrintError(9, "ERROR: Sound alias file %s: Unknown sound channel '%s'; should be %s\n", sourceFile, name, string);
+    Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Sound alias file %s: Unknown sound channel '%s'; should be %s\n", sourceFile, name, string);
     alias->error = 1;
 }
 
@@ -313,7 +313,7 @@ void __cdecl Com_SoundAliasTypeForName(const char *name, const char *sourceFile,
         if (I_stricmp(name, "loaded"))
         {
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "ERROR: Sound alias file %s: Unknown sound type '%s'; should be primed, streamed or loaded\n",
                 sourceFile,
                 name);
@@ -345,7 +345,7 @@ void __cdecl Com_SoundAliasLoop(const char *token, const char *sourceFile, snd_a
             if (I_stricmp(token, "nonlooping"))
             {
                 Com_PrintError(
-                    9,
+                    CON_CHANNEL_SOUND,
                     "ERROR: Sound alias file %s: Unknown sound looping type '%s'; valid values are 'looping, rlooping, nonlooping'.\n",
                     sourceFile,
                     token);
@@ -416,7 +416,7 @@ char __cdecl Com_SoundAliasLoadSpec(
             break;
         if (*parsePos == 33)
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "ERROR: Sound alias file %s: '!' can only be the very first character in a loadspec: %s\n",
                 sourceFile,
                 loadlist);
@@ -425,13 +425,13 @@ char __cdecl Com_SoundAliasLoadSpec(
         {
             if (*parsePos == 33)
                 Com_PrintError(
-                    9,
+                    CON_CHANNEL_SOUND,
                     "ERROR: Sound alias file %s: '!' can only be the very first character in a loadspec: %s\n",
                     sourceFile,
                     loadlist);
             token[tokenLen++] = tolower(*parsePos);
             if (tokenLen == 256)
-                Com_PrintError(9, "ERROR: Sound alias file %s: Load spec token too long: %s\n", sourceFile, loadlist);
+                Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Sound alias file %s: Load spec token too long: %s\n", sourceFile, loadlist);
             ++parsePos;
         }
         token[tokenLen] = 0;
@@ -459,14 +459,14 @@ char __cdecl Com_SoundAliasLoadSpec(
     }
     if (hasLoadSpecAllSp && hasLoadSpecAllMp)
         Com_PrintError(
-            9,
+            CON_CHANNEL_SOUND,
             "ERROR: Sound alias file %s: 'all_sp' and 'all_mp' load specs are mutually exclusive: %s\n",
             sourceFile,
             loadlist);
     if (hasLoadSpecMenu)
     {
         if (hasLoadSpecAllSp || hasLoadSpecAllMp || hasLoadSpecLevel)
-            Com_PrintError(9, "ERROR: Sound alias file %s: 'menu' load spec must be by itself: %s\n", sourceFile, loadlist);
+            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Sound alias file %s: 'menu' load spec must be by itself: %s\n", sourceFile, loadlist);
         if (didMatchLevel || !*loadspecLevel)
             return keepIfMatchLevel;
         else
@@ -519,7 +519,7 @@ void __cdecl Com_SoundAliasMasterSlave(const char *token, const char *sourceFile
         if (alias->slavePercentage < 0.0 || alias->slavePercentage > 1.0)
         {
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "ERROR: Sound alias file %s: SlavePercentage'%f' is not within the range of '%f'-'%f'.\n",
                 sourceFile,
                 alias->slavePercentage,
@@ -595,14 +595,14 @@ char __cdecl Com_FinishBuildingSoundAlias(snd_alias_build_s *build)
                 }
                 else
                 {
-                    Com_PrintError(9, "ERROR: sound alias '%s' has dist_min %g <= 0\n", build->aliasName, build->distMin);
+                    Com_PrintError(CON_CHANNEL_SOUND, "ERROR: sound alias '%s' has dist_min %g <= 0\n", build->aliasName, build->distMin);
                     return 0;
                 }
             }
             else
             {
                 Com_PrintError(
-                    9,
+                    CON_CHANNEL_SOUND,
                     "ERROR: sound alias '%s' has dist_min %g >= dist_max %g\n",
                     build->aliasName,
                     build->distMin,
@@ -612,13 +612,13 @@ char __cdecl Com_FinishBuildingSoundAlias(snd_alias_build_s *build)
         }
         else
         {
-            Com_PrintError(9, "ERROR: sound alias '%s' has vol_min %g < 0\n", build->aliasName, build->volMin);
+            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: sound alias '%s' has vol_min %g < 0\n", build->aliasName, build->volMin);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(9, "ERROR: sound alias '%s' has pitch_min %g <= 0\n", build->aliasName, build->pitchMin);
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: sound alias '%s' has pitch_min %g <= 0\n", build->aliasName, build->pitchMin);
         return 0;
     }
 }
@@ -703,7 +703,7 @@ void __cdecl Com_LoadSoundAliasField(
         if (isFieldSet[field])
         {
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "ERROR: Sound alias file %s: Duplicate entries for the '%s' column\n",
                 sourceFile,
                 g_pszSndAliasKeyNames[field]);
@@ -751,7 +751,7 @@ void __cdecl Com_LoadSoundAliasField(
                     if (token[i] < 0)
                     {
                         Com_PrintError(
-                            9,
+                            CON_CHANNEL_SOUND,
                             "ERROR: Sound alias file %s: Subtitle '%s' has invalid character '%c' ascii %i\n",
                             sourceFile,
                             token,
@@ -944,7 +944,7 @@ void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCu
                     {
                         if (saLoadObjGlob.tempAliases)
                             Com_PrintError(
-                                9,
+                                CON_CHANNEL_SOUND,
                                 "ERROR: Sound alias file '%s': alias entry missing name and/or file. Error details:\n"
                                 "\talias name: '%s', sound file: '%s', previous alias in file: '%s'\n",
                                 sourceFile,
@@ -953,7 +953,7 @@ void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCu
                                 saLoadObjGlob.tempAliases->aliasName);
                         else
                             Com_PrintError(
-                                9,
+                                CON_CHANNEL_SOUND,
                                 "ERROR: Sound alias file '%s': alias entry missing name and/or file. Error details:\n"
                                 "\talias name: '%s', sound file: '%s', previous alias in file: '%s'\n",
                                 sourceFile,
@@ -999,7 +999,7 @@ void __cdecl Com_LoadSoundAliasFile(const char *loadspec, const char *loadspecCu
                     }
                     if (!bHasName || !bHasFile)
                     {
-                        Com_PrintError(9, "ERROR: Sound alias file %s: missing 'name' and/or 'file' columns\n", sourceFile);
+                        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Sound alias file %s: missing 'name' and/or 'file' columns\n", sourceFile);
                         Com_EndParseSession();
                         return;
                     }
@@ -1045,7 +1045,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
                 {
                     Com_EndParseSession();
                     Com_PrintError(
-                        9,
+                        CON_CHANNEL_SOUND,
                         "ERROR: sndcurve parse failure on file \"%s\": knots parsed (%d) is greater than or equal to maxKnots (%d)\n",
                         fileName,
                         knotCountIndex,
@@ -1058,7 +1058,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
                 {
                     Com_EndParseSession();
                     Com_PrintError(
-                        9,
+                        CON_CHANNEL_SOUND,
                         "ERROR: sndcurve parse failure on file \"%s\": knot x-coord '%f' is not in the range 0-1.\n",
                         fileName,
                         curve->knots[knotCountIndex][0]);
@@ -1073,7 +1073,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
                 {
                     Com_EndParseSession();
                     Com_PrintError(
-                        9,
+                        CON_CHANNEL_SOUND,
                         "ERROR: sndcurve parse failure on file \"%s\": knot x-coord '%f' is not in the range 0-1.\n",
                         fileName,
                         curve->knots[knotCountIndex][1]);
@@ -1094,7 +1094,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
                     curve->knots[knotCountIndexa][0] = 1.0;
                     curve->knots[knotCountIndexa][1] = 0.0;
                     Com_PrintWarning(
-                        9,
+                        CON_CHANNEL_SOUND,
                         "WARNING^7: sndcurve parse on file \"%s\": the first point must be '0.0000 1.0000' and the last point must be"
                         " '1.0000 0.0000'.\n"
                         "adjusting sndcurve endpoints.\n",
@@ -1105,7 +1105,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
             else
             {
                 Com_PrintError(
-                    9,
+                    CON_CHANNEL_SOUND,
                     "ERROR: sndcurve parse failure on file \"%s\": knot count (%d) does not match knots parsed (%d).\n",
                     fileName,
                     curve->knotCount,
@@ -1117,7 +1117,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
         {
             Com_EndParseSession();
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "ERROR: sndcurve parse failure on file \"%s\": knot count (%d) is greater than maxKnots (%d)\n",
                 fileName,
                 curve->knotCount,
@@ -1129,7 +1129,7 @@ bool __cdecl Com_ParseSndCurveFile(const char *buffer, const char *fileName, Snd
     {
         Com_EndParseSession();
         Com_PrintError(
-            9,
+            CON_CHANNEL_SOUND,
             "ERROR: sndcurve parse failure on file \"%s\": knot count (%d) is less than 2\n",
             fileName,
             curve->knotCount);
@@ -1214,7 +1214,7 @@ snd_alias_build_s *__cdecl Com_SortTempSoundAliases_r(
                 else
                 {
                     Com_PrintError(
-                        9,
+                        CON_CHANNEL_SOUND,
                         "ERROR: sound alias file %s: duplicate alias '%s'\n",
                         pFrontList->szSourceFile,
                         pFrontList->aliasName);
@@ -1275,7 +1275,7 @@ void __cdecl Com_SameFileWarning(snd_alias_build_s *alias1, snd_alias_build_s *a
         alias1TypeString = "loaded";
     if (alias2->eType == SAT_STREAMED)
         Com_PrintWarning(
-            9,
+            CON_CHANNEL_SOUND,
             "WARNING: sound file '%s' used as %s in alias '%s' and %s in alias '%s'\n",
             alias1->soundFile,
             alias1TypeString,
@@ -1284,7 +1284,7 @@ void __cdecl Com_SameFileWarning(snd_alias_build_s *alias1, snd_alias_build_s *a
             alias2->aliasName);
     else
         Com_PrintWarning(
-            9,
+            CON_CHANNEL_SOUND,
             "WARNING: sound file '%s' used as %s in alias '%s' and %s in alias '%s'\n",
             alias1->soundFile,
             alias1TypeString,
@@ -1582,7 +1582,7 @@ void __cdecl Com_MakeSoundAliasesPermanent(snd_alias_list_t *aliasInfo, SoundFil
                             if (!Com_AddAliasList(currentNameb, aliasList))
                             {
                                 aliasList = 0;
-                                Com_PrintError(9, "ERROR: alias '%s' already added - ignoring\n", currentNameb);
+                                Com_PrintError(CON_CHANNEL_SOUND, "ERROR: alias '%s' already added - ignoring\n", currentNameb);
                                 continue;
                             }
                             aliasList->aliasName = currentNameb;
@@ -1669,7 +1669,7 @@ int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo)
                 soundFile->exists = v1;
                 ProfLoad_End();
                 if (!soundFile->exists)
-                    Com_PrintError(9, "ERROR: Streamed sound file '%s' not found\n", filepath);
+                    Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Streamed sound file '%s' not found\n", filepath);
             }
         }
     }
@@ -1816,19 +1816,19 @@ char __cdecl Com_LoadSpkrMapParseBuffer(char *fileName, char *buffer)
             }
             else
             {
-                Com_PrintError(9, "ERROR: \"%s\" Is too long of a spkrmap file to parse\n", fileName);
+                Com_PrintError(CON_CHANNEL_SOUND, "ERROR: \"%s\" Is too long of a spkrmap file to parse\n", fileName);
                 return 0;
             }
         }
         else
         {
-            Com_PrintError(9, "ERROR: \"%s\" does not appear to be a spkrmap file\n", fileName);
+            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: \"%s\" does not appear to be a spkrmap file\n", fileName);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(9, "ERROR: Could not load spkrmap file '%s'\n", fileName);
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Could not load spkrmap file '%s'\n", fileName);
         return 0;
     }
 }
@@ -1871,7 +1871,7 @@ char __cdecl Com_ParseChannelMapEntry(
     if (I_stricmp(token->token, sa_spkrMapIdentifierStrings[inputChannel]))
     {
         Com_PrintError(
-            9,
+            CON_CHANNEL_SOUND,
             "ERROR: spkrMap parse failure on file \"%s\": got token '%s', expected '%s'.\n",
             fileName,
             token->token,
@@ -1884,7 +1884,7 @@ char __cdecl Com_ParseChannelMapEntry(
         if (I_stricmp(tokena->token, sa_spkrMapIdentifierStrings[outputChannel]))
         {
             Com_PrintError(
-                9,
+                CON_CHANNEL_SOUND,
                 "ERROR: spkrMap parse failure on file \"%s\": got token '%s', expected '%s'.\n",
                 fileName,
                 tokena->token,
@@ -1909,7 +1909,7 @@ char __cdecl Com_ParseChannelMapEntry(
                 else
                 {
                     Com_PrintError(
-                        9,
+                        CON_CHANNEL_SOUND,
                         "ERROR: spkrMap parse failure on file \"%s\": volume '%f' is not in the range 0-1.",
                         fileName,
                         volume);
@@ -1919,7 +1919,7 @@ char __cdecl Com_ParseChannelMapEntry(
             else
             {
                 Com_PrintError(
-                    9,
+                    CON_CHANNEL_SOUND,
                     "ERROR: spkrMap parse failure on file \"%s\": token '%s' is not a float value in the range 0-1.\n",
                     fileName,
                     tokenb->token);

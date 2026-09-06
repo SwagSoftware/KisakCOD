@@ -84,7 +84,7 @@ void __cdecl SV_AuthorizeRequest(netadr_t from, int challenge, const char *cdkey
             } while (v5);
         }
         v3 = NET_AdrToString(from);
-        Com_DPrintf(15, "sending getIpAuthorize for %s\n", v3);
+        Com_DPrintf(CON_CHANNEL_SERVER, "sending getIpAuthorize for %s\n", v3);
         allowAnonymous = Dvar_GetBool("sv_allowAnonymous");
         if (*cdkeyHash)
             v4 = va(
@@ -184,7 +184,7 @@ void __cdecl SV_GetChallenge(netadr_t from)
     //if (SV_IsBannedGuid(cdkeyHash))
     if (SV_IsBannedGuid(clientSteamID64))
     {
-        Com_Printf(15, "rejected connection from permanently banned GUID \"%s\"\n", clientSteamID64);
+        Com_Printf(CON_CHANNEL_SERVER, "rejected connection from permanently banned GUID \"%s\"\n", clientSteamID64);
         NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15You are permanently banned from this server");
         memset(&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
@@ -192,7 +192,7 @@ void __cdecl SV_GetChallenge(netadr_t from)
     //if (SV_IsTempBannedGuid(cdkeyHash))
     if (SV_IsTempBannedGuid(clientSteamID64))
     {
-        Com_Printf(15, "rejected connection from temporarily banned GUID \"%s\"\n", clientSteamID64);
+        Com_Printf(CON_CHANNEL_SERVER, "rejected connection from temporarily banned GUID \"%s\"\n", clientSteamID64);
         NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15You are temporarily banned from this server");
         memset(&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
@@ -213,7 +213,7 @@ void __cdecl SV_GetChallenge(netadr_t from)
     }
     else
     {
-        Com_Printf(15, "rejected connection from invalid Steam GUID \"%s\"\n", clientSteamID64);
+        Com_Printf(CON_CHANNEL_SERVER, "rejected connection from invalid Steam GUID \"%s\"\n", clientSteamID64);
         NET_OutOfBandPrint(NS_SERVER, svs.challenges[i].adr, "error\xA\x15Your Steam Client Ticket was Invalid");
         memset(&svs.challenges[i], 0, sizeof(svs.challenges[i]));
         return;
@@ -221,10 +221,10 @@ void __cdecl SV_GetChallenge(netadr_t from)
 
     //if (!svs.authorizeAddress.ip[0] && svs.authorizeAddress.type != NA_BAD)
     //{
-    //    Com_Printf(15, "Resolving %s\n", com_authServerName->current.string);
+    //    Com_Printf(CON_CHANNEL_SERVER, "Resolving %s\n", com_authServerName->current.string);
     //    if (!NET_StringToAdr((char *)com_authServerName->current.integer, &svs.authorizeAddress))
     //    {
-    //        Com_Printf(15, "Couldn't resolve address\n");
+    //        Com_Printf(CON_CHANNEL_SERVER, "Couldn't resolve address\n");
     //        return;
     //    }
     //    svs.authorizeAddress.port = BigShort(com_authPort->current.integer);
@@ -248,7 +248,7 @@ void __cdecl SV_GetChallenge(netadr_t from)
     //}
     //else
     //{
-    //    Com_DPrintf(15, "authorize server timed out\n");
+    //    Com_DPrintf(CON_CHANNEL_SERVER, "authorize server timed out\n");
     //    challenge->pingTime = svs.time;
     //    v4 = va("challengeResponse %i", challenge->challenge);
     //    NET_OutOfBandPrint(NS_SERVER, challenge->adr, v4);
@@ -301,7 +301,7 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
         packetNum = MSG_ReadByte(msg);
         if (packetNum < 7)
         {
-            Com_Printf(15, "Received packet %i of stats data\n", packetNum);
+            Com_Printf(CON_CHANNEL_SERVER, "Received packet %i of stats data\n", packetNum);
             start = 1240 * packetNum;
             if ((int)(0x2000 - 1240 * packetNum) > 1240)
                 v4 = 1240;
@@ -323,7 +323,7 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
             MSG_ReadData(msg, &ClientByAddress->stats[start], v4);
             if (msg->overflowed)
             {
-                Com_PrintWarning(15, "Truncated stat packet %i from client\n", packetNum);
+                Com_PrintWarning(CON_CHANNEL_SERVER, "Truncated stat packet %i from client\n", packetNum);
                 return;
             }
             ClientByAddress->statPacketsReceived |= 1 << packetNum;
@@ -333,13 +333,13 @@ void __cdecl SV_ReceiveStats(netadr_t from, msg_t *msg)
         }
         else
         {
-            Com_PrintWarning(15, "Invalid stat packet %i of stats data\n", packetNum);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "Invalid stat packet %i of stats data\n", packetNum);
         }
     }
     else
     {
         Com_PrintWarning(
-            15,
+            CON_CHANNEL_SERVER,
             "Received stats packet from unknown remote client %u.%u.%u.%u\n",
             from.ip[0],
             from.ip[1],
@@ -466,7 +466,7 @@ void __cdecl SV_BanClient(client_t *cl)
     {
         if (SV_IsBannedGuid(cl->cdkeyHash))
         {
-            Com_Printf(15, "This GUID (%s) is already banned\n", cl->cdkeyHash);
+            Com_Printf(CON_CHANNEL_SERVER, "This GUID (%s) is already banned\n", cl->cdkeyHash);
         }
         else if ((FS_FOpenFileByMode((char*)"ban.txt", &file, FS_APPEND) & 0x80000000) == 0)
         {
@@ -480,7 +480,7 @@ void __cdecl SV_BanClient(client_t *cl)
     }
     else
     {
-        Com_Printf(15, "Can't ban user, GUID is unknown\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Can't ban user, GUID is unknown\n");
     }
 }
 
@@ -527,9 +527,9 @@ void __cdecl SV_UnbanClient(char *name)
         FS_WriteFile((char*)"ban.txt", file, fileSize);
         FS_FreeFile(file);
         if (found)
-            Com_Printf(15, "unbanned %i user(s) named %s\n", found, cleanName);
+            Com_Printf(CON_CHANNEL_SERVER, "unbanned %i user(s) named %s\n", found, cleanName);
         else
-            Com_Printf(15, "no banned user has name %s\n", cleanName);
+            Com_Printf(CON_CHANNEL_SERVER, "no banned user has name %s\n", cleanName);
     }
 }
 
@@ -605,13 +605,13 @@ void __cdecl SV_DirectConnect(netadr_t from)
     int count; // [esp+47Ch] [ebp-Ch]
     int qport; // [esp+480h] [ebp-8h]
 
-    Com_DPrintf(15, "SV_DirectConnect()\n");
+    Com_DPrintf(CON_CHANNEL_SERVER, "SV_DirectConnect()\n");
     I_strncpyz(userinfo, SV_Cmd_Argv(1), 1024);
     version = atoi(Info_ValueForKey(userinfo, "protocol"));
     if (version != 1)
     {
         NET_OutOfBandPrint(NS_SERVER, from, va("EXE_SERVER_IS_DIFFERENT_VER %s", "1.0"));
-        Com_DPrintf(15, "    rejected connect from protocol version %i (should be %i)\n", version, 1);
+        Com_DPrintf(CON_CHANNEL_SERVER, "    rejected connect from protocol version %i (should be %i)\n", version, 1);
         return;
     }
     challenge = atoi(Info_ValueForKey(userinfo, "challenge"));
@@ -626,7 +626,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
             if (svs.time - clients->lastConnectTime < 1000 * sv_reconnectlimit->current.integer)
             {
                 v6 = NET_AdrToString(from);
-                Com_DPrintf(15, "%s:reconnect rejected : too soon\n", v6);
+                Com_DPrintf(CON_CHANNEL_SERVER, "%s:reconnect rejected : too soon\n", v6);
                 return;
             }
             break;
@@ -661,7 +661,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
             svs.challenges[i].firstPing = ping;
         }
 
-        Com_Printf(15, "Client %i connecting with %i challenge ping from %s\n", i, ping, NET_AdrToString(from));
+        Com_Printf(CON_CHANNEL_SERVER, "Client %i connecting with %i challenge ping from %s\n", i, ping, NET_AdrToString(from));
         svs.challenges[i].connected = 1;
 
         if (!Sys_IsLANAddress(from))
@@ -669,14 +669,14 @@ void __cdecl SV_DirectConnect(netadr_t from)
             if (sv_minPing->current.integer && ping < sv_minPing->current.integer)
             {
                 NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_ERR_HIGH_PING_ONLY");
-                Com_DPrintf(15, "Client %i rejected on a too low ping\n", i);
+                Com_DPrintf(CON_CHANNEL_SERVER, "Client %i rejected on a too low ping\n", i);
                 return;
             }
 
             if (sv_maxPing->current.integer && ping > sv_maxPing->current.integer)
             {
                 NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_ERR_LOW_PING_ONLY");
-                Com_DPrintf(15, "Client %i rejected on a too high ping: %i\n", i, ping);
+                Com_DPrintf(CON_CHANNEL_SERVER, "Client %i rejected on a too high ping: %i\n", i, ping);
                 return;
             }
         }
@@ -714,7 +714,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
                 v16 = from.port == clients->header.netchan.remoteAddress.port;
                 v15 = clients->header.netchan.qport == qport;
                 v10 = NET_AdrToString(from);
-                Com_Printf(15, "%s:reconnect. same qport: %i, same port: %i\n", v10, v15, v16);
+                Com_Printf(CON_CHANNEL_SERVER, "%s:reconnect. same qport: %i, same port: %i\n", v10, v15, v16);
                 if (clients->header.state >= CS_CONNECTED)
                 {
                     if (!cdkeyHash[0] && clients->cdkeyHash[0] && !alwaysfails)
@@ -749,7 +749,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
         if (!newcl)
         {
             NET_OutOfBandPrint(NS_SERVER, from, "error\nEXE_SERVERISFULL");
-            Com_DPrintf(15, "Rejected a connection.\n");
+            Com_DPrintf(CON_CHANNEL_SERVER, "Rejected a connection.\n");
             return;
         }
         clients->reliableAcknowledge = 0;
@@ -770,10 +770,10 @@ void __cdecl SV_DirectConnect(netadr_t from)
                 "%s",
                 "scriptId == static_cast<unsigned short>( scriptId )");
         newcl->scriptId = scriptId;
-        Com_Printf(15, "SV_DirectConnect: %d, 0 -> %d\n", newcl - svs.clients, newcl->scriptId);
+        Com_Printf(CON_CHANNEL_SERVER, "SV_DirectConnect: %d, 0 -> %d\n", newcl - svs.clients, newcl->scriptId);
         newcl->challenge = challenge;
         if (!cdkeyHash[0])
-            Com_Printf(15, "Connecting player #%i has an unknown GUID\n", clientNum);
+            Com_Printf(CON_CHANNEL_SERVER, "Connecting player #%i has an unknown GUID\n", clientNum);
         v11 = newcl->cdkeyHash;
         memcpy(newcl->cdkeyHash, cdkeyHash, 0x20u);
         v11[32] = cdkeyHash[32];
@@ -794,13 +794,13 @@ void __cdecl SV_DirectConnect(netadr_t from)
         {
             v12 = va("error\n%s", denied);
             NET_OutOfBandPrint(NS_SERVER, from, v12);
-            Com_DPrintf(15, "Game rejected a connection: %s.\n", denied);
+            Com_DPrintf(CON_CHANNEL_SERVER, "Game rejected a connection: %s.\n", denied);
             SV_FreeClientScriptId(newcl);
         }
         else
         {
             Com_Printf(
-                15,
+                CON_CHANNEL_SERVER,
                 "Going from CS_FREE to CS_CONNECTED for %s (num %i guid \"%s\")\n",
                 newcl->name,
                 clientNum,
@@ -855,7 +855,7 @@ void __cdecl SV_FreeClientScriptPers()
                     "%s",
                     "scriptId == static_cast<unsigned short>( scriptId )");
             clients->scriptId = scriptId;
-            Com_Printf(15, "SV_FreeClientScriptPers: %d, 0 -> %d\n", clients - svs.clients, clients->scriptId);
+            Com_Printf(CON_CHANNEL_SERVER, "SV_FreeClientScriptPers: %d, 0 -> %d\n", clients - svs.clients, clients->scriptId);
         }
         ++i;
         ++clients;
@@ -945,7 +945,7 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
             v3 = *name;
             *v4++ = *name++;
         } while (v3);
-        Com_DPrintf(15, "Going to CS_ZOMBIE from %i for %s\n", dropState, droppedClientName);
+        Com_DPrintf(CON_CHANNEL_SERVER, "Going to CS_ZOMBIE from %i for %s\n", dropState, droppedClientName);
         SV_FreeClient(drop);
         drop->header.state = CS_ZOMBIE;
         if (!drop->gentity)
@@ -979,7 +979,7 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
         {
             SV_SendServerCommand(0, SV_CMD_CAN_IGNORE, "%c %s^7 %s%s", 101, droppedClientName, "", "EXE_LEFTGAME");
         }
-        Com_Printf(15, "%i:%s %s\n", drop - svs.clients, droppedClientName, reason);
+        Com_Printf(CON_CHANNEL_SERVER, "%i:%s %s\n", drop - svs.clients, droppedClientName, reason);
         SV_SendServerCommand(0, SV_CMD_RELIABLE, "%c %d", 75, drop - svs.clients);
         if (tellThem)
             SV_SendDisconnect(drop, dropState, reason, translationForReason, droppedClientName);
@@ -1048,8 +1048,8 @@ void __cdecl SV_SendClientGameState(client_t *client)
         return;
     }
     SV_SetServerStaticHeader();
-    Com_DPrintf(15, "SV_SendClientGameState() for %s\n", client->name);
-    Com_DPrintf(15, "Going from CS_CONNECTED to CS_CLIENTLOADING for %s\n", client->name);
+    Com_DPrintf(CON_CHANNEL_SERVER, "SV_SendClientGameState() for %s\n", client->name);
+    Com_DPrintf(CON_CHANNEL_SERVER, "Going from CS_CONNECTED to CS_CLIENTLOADING for %s\n", client->name);
     client->header.state = CS_CLIENTLOADING;
     client->pureAuthentic = 0;
     client->gamestateMessageNum = client->header.netchan.outgoingSequence;
@@ -1059,7 +1059,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
     MSG_WriteLong(&msg, client->lastClientCommand);
     dataStart = msg.cursize;
     SV_UpdateServerCommandsToClient(client, &msg);
-    Com_Printf(15, "Gamestate has %i bytes of server commands\n", msg.cursize - dataStart);
+    Com_Printf(CON_CHANNEL_SERVER, "Gamestate has %i bytes of server commands\n", msg.cursize - dataStart);
     SV_PacketDataIsHeader(client - svs.clients, &msg);
     MSG_WriteByte(&msg, 1u);
     MSG_WriteLong(&msg, client->reliableSequence);
@@ -1145,12 +1145,12 @@ void __cdecl SV_SendClientGameState(client_t *client)
     if (configStringCount)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1599, 0, "%s", "configStringCount == 0");
     Com_Printf(
-        15,
+        CON_CHANNEL_SERVER,
         "Gamestate has %i bytes of config strings (%i total config strings)\n",
         msg.cursize - dataStart,
         numWritten);
-    Com_Printf(15, "   Largest config string was %i bytes\n", largestString);
-    Com_Printf(15, "   Average config string was %i bytes\n", totalStringSize / numWritten);
+    Com_Printf(CON_CHANNEL_SERVER, "   Largest config string was %i bytes\n", largestString);
+    Com_Printf(CON_CHANNEL_SERVER, "   Average config string was %i bytes\n", totalStringSize / numWritten);
     dataStart = msg.cursize;
     numWritten = 0;
     clientNum = client - svs.clients;
@@ -1179,10 +1179,10 @@ void __cdecl SV_SendClientGameState(client_t *client)
             snapInfo.fromBaseline = 0;
         }
     }
-    Com_Printf(15, "Gamestate has %i bytes of svc_baselines\n", numWritten);
-    Com_Printf(15, "Gamestate has %i bytes of gentity numbers\n", 10 * numWritten / 8);
+    Com_Printf(CON_CHANNEL_SERVER, "Gamestate has %i bytes of svc_baselines\n", numWritten);
+    Com_Printf(CON_CHANNEL_SERVER, "Gamestate has %i bytes of gentity numbers\n", 10 * numWritten / 8);
     Com_Printf(
-        15,
+        CON_CHANNEL_SERVER,
         "Gamestate has %i bytes of entity deltas\n",
         msg.cursize - dataStart - numWritten - 10 * numWritten / 8);
     SV_PacketDataIsHeader(client - svs.clients, &msg);
@@ -1195,13 +1195,13 @@ void __cdecl SV_SendClientGameState(client_t *client)
     // is exactly what overflows the Huffman stage in SV_SendMessageToClient).
     if (msg.overflowed)
     {
-        Com_PrintError(15, "SV_SendClientGameState: gamestate overflowed for client %i\n", client - svs.clients);
+        Com_PrintError(CON_CHANNEL_SERVER, "SV_SendClientGameState: gamestate overflowed for client %i\n", client - svs.clients);
         SV_DropClient(client, "EXE_SERVERMESSAGEOVERFLOW", 1);
         SV_GetServerStaticHeader();
         return;
     }
     
-    Com_DPrintf(15, "Sending %i bytes in gamestate to client: %i\n", msg.cursize, client - svs.clients);
+    Com_DPrintf(CON_CHANNEL_SERVER, "Sending %i bytes in gamestate to client: %i\n", msg.cursize, client - svs.clients);
     SV_SendMessageToClient(&msg, client);
     SV_GetServerStaticHeader();
 }
@@ -1210,7 +1210,7 @@ void __cdecl SV_ClientEnterWorld(client_t *client, usercmd_s *cmd)
 {
     gentity_s *v2; // eax
 
-    Com_DPrintf(15, "Going from CS_CLIENTLOADING to CS_ACTIVE for %s\n", client->name);
+    Com_DPrintf(CON_CHANNEL_SERVER, "Going from CS_CLIENTLOADING to CS_ACTIVE for %s\n", client->name);
     client->header.state = CS_ACTIVE;
     v2 = SV_GentityNum(client - svs.clients);
     v2->s.number = client - svs.clients;
@@ -1328,7 +1328,7 @@ void __cdecl SV_ClientThink(client_t *cl, usercmd_s *cmd)
     else
     {
         v2 = va("Invalid command time %i from client %s, current server time is %i", cmd->serverTime, cl->name, svs.time);
-        Com_PrintError(15, v2);
+        Com_PrintError(CON_CHANNEL_SERVER, v2);
     }
 }
 
@@ -1374,7 +1374,7 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
                     v8 = cl->reliableAcknowledge & 0x7F;
                     v4 = Com_HashKey(v10->cmd, 32);
                     Com_Printf(
-                        15,
+                        CON_CHANNEL_SERVER,
                         "key:%i, checksumFeed:%i, messageAcknowledge:%i, Com_HashKey:%i, servercommand(%i):'%s', len:%i\n",
                         key,
                         sv.checksumFeed,
@@ -1416,90 +1416,90 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
                         cmd->offHandIndex = ps->offHandIndex;
                     if (!BG_ValidateWeaponNumber(cmd->weapon) || !BG_ValidateWeaponNumber(cmd->offHandIndex))
                     {
-                        Com_Printf(15, "###!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!###\n");
+                        Com_Printf(CON_CHANNEL_SERVER, "###!#!#!#!#!#!#!#!#!#!#!#!#!#!#!#!###\n");
                         Com_Printf(
-                            15,
+                            CON_CHANNEL_SERVER,
                             "Encountered corrupt user command. This means the client's write key and the server read key for the net me"
                             "ssage were different\n");
-                        Com_Printf(15, "Problem occured with client #%i:'%s'\n", cl - svs.clients, cl->name);
-                        Com_Printf(15, "Server game time: %i\n", svs.time);
-                        Com_Printf(15, "---- Corrupt user command data:\n");
-                        Com_Printf(15, "Command was %i of %i in the packet.\n", i, cmdCount);
-                        Com_Printf(15, "serverTime = %i\n", cmd->serverTime);
-                        Com_Printf(15, "angles[0] = %i(%f)\n", cmd->angles[0], (double)cmd->angles[0] * 0.0054931640625);
-                        Com_Printf(15, "angles[1] = %i(%f)\n", cmd->angles[1], (double)cmd->angles[1] * 0.0054931640625);
-                        Com_Printf(15, "angles[2] = %i(%f)\n", cmd->angles[2], (double)cmd->angles[2] * 0.0054931640625);
-                        Com_Printf(15, "forwardmove = %i\n", cmd->forwardmove);
-                        Com_Printf(15, "rightmove = %i\n", cmd->rightmove);
-                        Com_Printf(15, "buttons = %i\n", cmd->buttons);
-                        Com_Printf(15, "weapon = %i\n", cmd->weapon);
-                        Com_Printf(15, "---- %i Client Info\n", cl - svs.clients);
+                        Com_Printf(CON_CHANNEL_SERVER, "Problem occured with client #%i:'%s'\n", cl - svs.clients, cl->name);
+                        Com_Printf(CON_CHANNEL_SERVER, "Server game time: %i\n", svs.time);
+                        Com_Printf(CON_CHANNEL_SERVER, "---- Corrupt user command data:\n");
+                        Com_Printf(CON_CHANNEL_SERVER, "Command was %i of %i in the packet.\n", i, cmdCount);
+                        Com_Printf(CON_CHANNEL_SERVER, "serverTime = %i\n", cmd->serverTime);
+                        Com_Printf(CON_CHANNEL_SERVER, "angles[0] = %i(%f)\n", cmd->angles[0], (double)cmd->angles[0] * 0.0054931640625);
+                        Com_Printf(CON_CHANNEL_SERVER, "angles[1] = %i(%f)\n", cmd->angles[1], (double)cmd->angles[1] * 0.0054931640625);
+                        Com_Printf(CON_CHANNEL_SERVER, "angles[2] = %i(%f)\n", cmd->angles[2], (double)cmd->angles[2] * 0.0054931640625);
+                        Com_Printf(CON_CHANNEL_SERVER, "forwardmove = %i\n", cmd->forwardmove);
+                        Com_Printf(CON_CHANNEL_SERVER, "rightmove = %i\n", cmd->rightmove);
+                        Com_Printf(CON_CHANNEL_SERVER, "buttons = %i\n", cmd->buttons);
+                        Com_Printf(CON_CHANNEL_SERVER, "weapon = %i\n", cmd->weapon);
+                        Com_Printf(CON_CHANNEL_SERVER, "---- %i Client Info\n", cl - svs.clients);
                         switch (cl->header.state)
                         {
                         case CS_FREE:
-                            Com_Printf(15, "state: %s\n", "free");
+                            Com_Printf(CON_CHANNEL_SERVER, "state: %s\n", "free");
                             break;
                         case CS_ZOMBIE:
-                            Com_Printf(15, "state: %s\n", "zombie");
+                            Com_Printf(CON_CHANNEL_SERVER, "state: %s\n", "zombie");
                             break;
                         case CS_CONNECTED:
-                            Com_Printf(15, "state: %s\n", "connected");
+                            Com_Printf(CON_CHANNEL_SERVER, "state: %s\n", "connected");
                             break;
                         case CS_CLIENTLOADING:
-                            Com_Printf(15, "state: %s\n", "clientloading");
+                            Com_Printf(CON_CHANNEL_SERVER, "state: %s\n", "clientloading");
                             break;
                         case CS_ACTIVE:
-                            Com_Printf(15, "state: %s\n", "active");
+                            Com_Printf(CON_CHANNEL_SERVER, "state: %s\n", "active");
                             break;
                         default:
                             pszString = va("unknown(%i)", cl->header.state);
-                            Com_Printf(15, "state: %s\n", pszString);
+                            Com_Printf(CON_CHANNEL_SERVER, "state: %s\n", pszString);
                             break;
                         }
-                        Com_Printf(15, "userinfo: '%s'\n", cl->userinfo);
-                        Com_Printf(15, "reliableSequence: %i\n", cl->reliableSequence);
-                        Com_Printf(15, "reliableAcknowledge: %i\n", cl->reliableAcknowledge);
-                        Com_Printf(15, "reliableSent: %i\n", cl->reliableSent);
-                        Com_Printf(15, "messageAcknowledge: %i\n", cl->messageAcknowledge);
-                        Com_Printf(15, "gamestateMessageNum: %i\n", cl->gamestateMessageNum);
-                        Com_Printf(15, "challenge: %i\n", cl->challenge);
-                        Com_Printf(15, "lastClientCommand: %i\n", cl->lastClientCommand);
-                        Com_Printf(15, "deltaMessage: %i\n", cl->header.deltaMessage);
-                        Com_Printf(15, "nextReliableTime: %i\n", cl->nextReliableTime);
-                        Com_Printf(15, "lastPacketTime: %i\n", cl->lastPacketTime);
-                        Com_Printf(15, "lastConnectTime: %i\n", cl->lastConnectTime);
-                        Com_Printf(15, "nextSnapshotTime: %i\n", cl->nextSnapshotTime);
-                        Com_Printf(15, "rateDelayed: %i\n", cl->header.rateDelayed);
-                        Com_Printf(15, "timeoutCount: %i\n", cl->timeoutCount);
-                        Com_Printf(15, "ping: %i\n", cl->ping);
-                        Com_Printf(15, "rate: %i\n", cl->rate);
-                        Com_Printf(15, "snapshotMsec: %i\n", cl->snapshotMsec);
-                        Com_Printf(15, "pureAuthentic: %i\n", cl->pureAuthentic);
-                        Com_Printf(15, "---- Misc Messaging Info\n");
-                        Com_Printf(15, "sv.checksumFeed: %i\n", sv.checksumFeed);
-                        Com_Printf(15, "cl->messageAcknowledge: %i\n", cl->messageAcknowledge);
-                        Com_Printf(15, "cl->reliableAcknowledge: %i\n", cl->reliableAcknowledge);
-                        Com_Printf(15, "cl->reliableAcknowledge&(MAX_RELIABLE_COMMANDS-1): %i\n", cl->reliableAcknowledge & 0x7F);
+                        Com_Printf(CON_CHANNEL_SERVER, "userinfo: '%s'\n", cl->userinfo);
+                        Com_Printf(CON_CHANNEL_SERVER, "reliableSequence: %i\n", cl->reliableSequence);
+                        Com_Printf(CON_CHANNEL_SERVER, "reliableAcknowledge: %i\n", cl->reliableAcknowledge);
+                        Com_Printf(CON_CHANNEL_SERVER, "reliableSent: %i\n", cl->reliableSent);
+                        Com_Printf(CON_CHANNEL_SERVER, "messageAcknowledge: %i\n", cl->messageAcknowledge);
+                        Com_Printf(CON_CHANNEL_SERVER, "gamestateMessageNum: %i\n", cl->gamestateMessageNum);
+                        Com_Printf(CON_CHANNEL_SERVER, "challenge: %i\n", cl->challenge);
+                        Com_Printf(CON_CHANNEL_SERVER, "lastClientCommand: %i\n", cl->lastClientCommand);
+                        Com_Printf(CON_CHANNEL_SERVER, "deltaMessage: %i\n", cl->header.deltaMessage);
+                        Com_Printf(CON_CHANNEL_SERVER, "nextReliableTime: %i\n", cl->nextReliableTime);
+                        Com_Printf(CON_CHANNEL_SERVER, "lastPacketTime: %i\n", cl->lastPacketTime);
+                        Com_Printf(CON_CHANNEL_SERVER, "lastConnectTime: %i\n", cl->lastConnectTime);
+                        Com_Printf(CON_CHANNEL_SERVER, "nextSnapshotTime: %i\n", cl->nextSnapshotTime);
+                        Com_Printf(CON_CHANNEL_SERVER, "rateDelayed: %i\n", cl->header.rateDelayed);
+                        Com_Printf(CON_CHANNEL_SERVER, "timeoutCount: %i\n", cl->timeoutCount);
+                        Com_Printf(CON_CHANNEL_SERVER, "ping: %i\n", cl->ping);
+                        Com_Printf(CON_CHANNEL_SERVER, "rate: %i\n", cl->rate);
+                        Com_Printf(CON_CHANNEL_SERVER, "snapshotMsec: %i\n", cl->snapshotMsec);
+                        Com_Printf(CON_CHANNEL_SERVER, "pureAuthentic: %i\n", cl->pureAuthentic);
+                        Com_Printf(CON_CHANNEL_SERVER, "---- Misc Messaging Info\n");
+                        Com_Printf(CON_CHANNEL_SERVER, "sv.checksumFeed: %i\n", sv.checksumFeed);
+                        Com_Printf(CON_CHANNEL_SERVER, "cl->messageAcknowledge: %i\n", cl->messageAcknowledge);
+                        Com_Printf(CON_CHANNEL_SERVER, "cl->reliableAcknowledge: %i\n", cl->reliableAcknowledge);
+                        Com_Printf(CON_CHANNEL_SERVER, "cl->reliableAcknowledge&(MAX_RELIABLE_COMMANDS-1): %i\n", cl->reliableAcknowledge & 0x7F);
                         Com_Printf(
-                            15,
+                            CON_CHANNEL_SERVER,
                             "cl->reliableCommandInfo[cl->reliableAcknowledge&(MAX_RELIABLE_COMMANDS-1)].cmd: '%s'\n",
                             cl->reliableCommandInfo[cl->reliableAcknowledge & 0x7F].cmd);
                         v5 = Com_HashKey(cl->reliableCommandInfo[cl->reliableAcknowledge & 0x7F].cmd, 32);
                         Com_Printf(
-                            15,
+                            CON_CHANNEL_SERVER,
                             "Com_HashKey(cl->reliableCommandInfo[cl->reliableAcknowledge&(MAX_RELIABLE_COMMANDS-1)].cmd,32): %i\n",
                             v5);
-                        Com_Printf(15, "key = sv.checksumFeed: %i\n", sv.checksumFeed);
-                        Com_Printf(15, "key ^= cl->messageAcknowledge: %i\n", cl->messageAcknowledge ^ sv.checksumFeed);
+                        Com_Printf(CON_CHANNEL_SERVER, "key = sv.checksumFeed: %i\n", sv.checksumFeed);
+                        Com_Printf(CON_CHANNEL_SERVER, "key ^= cl->messageAcknowledge: %i\n", cl->messageAcknowledge ^ sv.checksumFeed);
                         v6 = cl->messageAcknowledge ^ sv.checksumFeed;
                         v7 = Com_HashKey(cl->reliableCommandInfo[cl->reliableAcknowledge & 0x7F].cmd, 32);
                         Com_Printf(
-                            15,
+                            CON_CHANNEL_SERVER,
                             "key ^= Com_HashKey(cl->reliableCommandInfo[cl->reliableAcknowledge&(MAX_RELIABLE_COMMANDS-1)].cmd,32): %i\n",
                             v7 ^ v6);
-                        Com_Printf(15, "key: %i\n", key);
-                        Com_Printf(15, "key ^= cmd->serverTime: %i\n", cmd->serverTime ^ key);
-                        Com_Printf(15, "########################################\n");
+                        Com_Printf(CON_CHANNEL_SERVER, "key: %i\n", key);
+                        Com_Printf(CON_CHANNEL_SERVER, "key ^= cmd->serverTime: %i\n", cmd->serverTime ^ key);
+                        Com_Printf(CON_CHANNEL_SERVER, "########################################\n");
                         SV_DropClient(cl, "Corrupted network messaging detected", 1);
                     }
                     oldcmd = cmd;
@@ -1545,14 +1545,14 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
             {
                 if (!alwaysfails)
                     MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 2991, 0, "cmdCount > MAX_PACKET_USERCMDS");
-                Com_Printf(15, "cmdCount > MAX_PACKET_USERCMDS\n");
+                Com_Printf(CON_CHANNEL_SERVER, "cmdCount > MAX_PACKET_USERCMDS\n");
             }
         }
         else
         {
             if (!alwaysfails)
                 MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 2984, 0, "cmdCount < 1");
-            Com_Printf(15, "cmdCount < 1\n");
+            Com_Printf(CON_CHANNEL_SERVER, "cmdCount < 1\n");
         }
     }
     else if (!alwaysfails)
@@ -1632,7 +1632,7 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
                     }
                     else if (c != 3)
                     {
-                        Com_PrintWarning(15, "WARNING: bad command byte %i for client %i\n", c, cl - svs.clients);
+                        Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: bad command byte %i for client %i\n", c, cl - svs.clients);
                     }
                 }
                 else
@@ -1652,7 +1652,7 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
     {
         if (cl->messageAcknowledge > cl->gamestateMessageNum)
         {
-            Com_DPrintf(15, "%s : dropped gamestate, resending\n", cl->name);
+            Com_DPrintf(CON_CHANNEL_SERVER, "%s : dropped gamestate, resending\n", cl->name);
             SV_SendClientGameState(cl);
             if (SV_ShouldAuthorizeAddress(cl->header.netchan.remoteAddress))
                 SV_AuthorizeRequest(cl->header.netchan.remoteAddress, cl->challenge, cl->cdkeyHash);
@@ -1674,7 +1674,7 @@ int __cdecl SV_ClientCommand(client_t *cl, msg_t *msg, int fromOldServer)
     if (cl->lastClientCommand >= seq)
         return 1;
     if (sv_showCommands->current.enabled)
-        Com_Printf(15, "clientCommand: %i : %s\n", seq, s);
+        Com_Printf(CON_CHANNEL_SERVER, "clientCommand: %i : %s\n", seq, s);
     if (seq <= cl->lastClientCommand + 1)
     {
         if (!I_strncmp("team ", s, 5) || !I_strncmp("score ", s, 6) || !I_strncmp("mr ", s, 3))
@@ -1687,7 +1687,7 @@ int __cdecl SV_ClientCommand(client_t *cl, msg_t *msg, int fromOldServer)
             && floodprotect)
         {
             clientOk = 0;
-            Com_DPrintf(15, "client text ignored for %s: %s\n", cl->name, s);
+            Com_DPrintf(CON_CHANNEL_SERVER, "client text ignored for %s: %s\n", cl->name, s);
         }
         if (floodprotect)
             cl->nextReliableTime = svs.time + 800;
@@ -1698,7 +1698,7 @@ int __cdecl SV_ClientCommand(client_t *cl, msg_t *msg, int fromOldServer)
     }
     else
     {
-        Com_Printf(15, "Client %s lost %i clientCommands\n", cl->name, seq - cl->lastClientCommand + 1);
+        Com_Printf(CON_CHANNEL_SERVER, "Client %s lost %i clientCommands\n", cl->name, seq - cl->lastClientCommand + 1);
         SV_DropClient(cl, "EXE_LOSTRELIABLECOMMANDS", 1);
         return 0;
     }

@@ -39,7 +39,7 @@ BOOL CRadiantApp::InitInstance()
 {
     // Gate P2 smoke test: verify the engine subset links and basic printing works
     // before any real init. Com_Printf is safe pre-init (falls through to stderr).
-    Com_Printf(0, "[Radiant] Gate P2 smoke: engine subset initialized, InitInstance reached\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "[Radiant] Gate P2 smoke: engine subset initialized, InitInstance reached\n");
 
     // Register the common-control window classes the editor's child controls need (the
     // inspector tab strip uses SysTabControl32 — ICC_TAB_CLASSES).  Idempotent.

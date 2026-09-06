@@ -109,7 +109,7 @@ void __cdecl Actor_CreateThreatBiasGroup(unsigned int name)
     else
     {
         v2 = SL_ConvertToString(name);
-        Com_PrintWarning(18, "Too many threat groups, can't create '%s'\n", v2);
+        Com_PrintWarning(CON_CHANNEL_AI, "Too many threat groups, can't create '%s'\n", v2);
     }
 }
 

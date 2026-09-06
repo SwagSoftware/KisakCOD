@@ -471,7 +471,7 @@ void __cdecl G_PlayerTurretPositionAndBlend(gentity_s *ent, gentity_s *pTurretEn
         }
         else
         {
-            Com_PrintWarning(17, "WARNING: aborting player positioning on turret since 'tag_weapon' does not exist\n");
+            Com_PrintWarning(CON_CHANNEL_PLAYERWEAP, "WARNING: aborting player positioning on turret since 'tag_weapon' does not exist\n");
         }
     }
 }

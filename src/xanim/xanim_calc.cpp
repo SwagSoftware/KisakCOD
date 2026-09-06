@@ -1193,7 +1193,7 @@ DObjAnimMat *__cdecl XAnimGetCalcBuffer(XAnimCalcAnimInfo *info, const DObj_s *o
     }
     else
     {
-        Com_PrintWarning(19, "max calculation buffer exceeded\n");
+        Com_PrintWarning(CON_CHANNEL_ANIM, "max calculation buffer exceeded\n");
         DObjDisplayAnim(obj, "");
         return 0;
     }

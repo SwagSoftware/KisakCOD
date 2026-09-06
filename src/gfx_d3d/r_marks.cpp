@@ -1128,7 +1128,7 @@ void __cdecl R_MarkFragments_Go(
     }
     if (error)
         Com_Printf(
-            14,
+            CON_CHANNEL_CLIENT,
             "R_MarkFragments: Too many triangles to mark, max %d radius %.2f at %.2f %.2f %.2f\n",
             markInfo->maxTris,
             markInfo->radius,

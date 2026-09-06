@@ -217,7 +217,7 @@ int32_t __cdecl G_IsServerGameSystem(int32_t clientNum)
         return 0;
     if (bgs != &level_bgs)
         return 0;
-    Com_Printf(19, "(%i) ", level.time);
+    Com_Printf(CON_CHANNEL_ANIM, "(%i) ", level.time);
     return 1;
 }
 
@@ -231,9 +231,9 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
 
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 992, 0, "%s", "Sys_IsMainThread()");
-    Com_Printf(15, "------- Game Initialization -------\n");
-    Com_Printf(15, "gamename: %s\n", "KisakCoD4");
-    Com_Printf(15, "gamedate: %s\n", __DATE__);
+    Com_Printf(CON_CHANNEL_SERVER, "------- Game Initialization -------\n");
+    Com_Printf(CON_CHANNEL_SERVER, "gamename: %s\n", "KisakCoD4");
+    Com_Printf(CON_CHANNEL_SERVER, "gamedate: %s\n", __DATE__);
     Swap_Init();
     EntHandle::Init();
     memset((uint8_t *)&level, 0, sizeof(level));
@@ -272,12 +272,12 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
         }
         else
         {
-            Com_PrintWarning(15, "WARNING: Couldn't open logfile: %s\n", g_log->current.string);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: Couldn't open logfile: %s\n", g_log->current.string);
         }
     }
     else
     {
-        Com_Printf(15, "Not logging to disk.\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Not logging to disk.\n");
     }
     for (file = 0; file < 1; ++file)
     {
@@ -332,7 +332,7 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
     G_InitObjectives();
     Missile_InitAttractors();
     Scr_FreeEntityList();
-    Com_Printf(15, "-----------------------------------\n");
+    Com_Printf(CON_CHANNEL_SERVER, "-----------------------------------\n");
     Scr_InitSystem(1);
     Scr_SetLoading(1);
     Scr_AllocGameVariable();
@@ -809,8 +809,8 @@ void __cdecl G_PrintFastFileErrors(const char *fastfile)
         MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 960, 1, "%s", "rawfile");
     if (rawfile->len)
     {
-        Com_PrintError(1, "There were errors when building fast file '%s'\n", fastfile);
-        Com_PrintError(1, (char *)rawfile->buffer);
+        Com_PrintError(CON_CHANNEL_ERROR, "There were errors when building fast file '%s'\n", fastfile);
+        Com_PrintError(CON_CHANNEL_ERROR, (char *)rawfile->buffer);
     }
 }
 
@@ -818,7 +818,7 @@ void __cdecl G_ShutdownGame(int32_t freeScripts)
 {
     int32_t file; // [esp+0h] [ebp-4h]
 
-    Com_Printf(15, "==== ShutdownGame (%d) ====\n", freeScripts);
+    Com_Printf(CON_CHANNEL_SERVER, "==== ShutdownGame (%d) ====\n", freeScripts);
     if (level.logFile)
     {
         G_LogPrintf("ShutdownGame:\n");
@@ -1336,7 +1336,7 @@ void __cdecl G_RunFrame(int32_t levelTime)
     {
         for (i = 0; i < 1024; ++i)
         {
-            Com_Printf(15, "%4i: %s\n", i, SL_ConvertToString(g_entities[i].classname));
+            Com_Printf(CON_CHANNEL_SERVER, "%4i: %s\n", i, SL_ConvertToString(g_entities[i].classname));
         }
         Dvar_SetBool((dvar_s *)g_listEntity, 0);
     }

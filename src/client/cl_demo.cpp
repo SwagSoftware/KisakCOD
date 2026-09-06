@@ -416,11 +416,11 @@ void __cdecl CL_StopRecord_f()
         }
         Z_VirtualFree(demobuf);
         cls.demobuf = 0;
-        Com_Printf(0, "Stopped demo.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Stopped demo.\n");
     }
     else
     {
-        Com_Printf(0, "Not recording a demo.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Not recording a demo.\n");
     }
 }
 
@@ -459,7 +459,7 @@ void __cdecl CL_Record_f()
     {
         if (cls.demorecording)
         {
-            Com_Printf(0, "Already recording.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Already recording.\n");
         }
         else if (clientUIActives[0].connectionState == CA_ACTIVE)
         {
@@ -480,7 +480,7 @@ void __cdecl CL_Record_f()
                         break;
                 }
             }
-            Com_Printf(0, "recording to %s.\n", v15);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "recording to %s.\n", v15);
             cls.demofile = FS_FOpenFileWrite(v15);
             if (cls.demofile)
             {
@@ -522,17 +522,17 @@ void __cdecl CL_Record_f()
             }
             else
             {
-                Com_PrintError(0, "ERROR: couldn't open.\n");
+                Com_PrintError(CON_CHANNEL_DONT_FILTER, "ERROR: couldn't open.\n");
             }
         }
         else
         {
-            Com_Printf(0, "You must be in a level to record.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "You must be in a level to record.\n");
         }
     }
     else
     {
-        Com_Printf(0, "record <demoname>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "record <demoname>\n");
     }
 }
 
@@ -614,7 +614,7 @@ void __cdecl CL_PlayDemo_f()
     {
         if (com_sv_running->current.enabled)
         {
-            Com_Printf(0, "listen server cannot play a demo.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "listen server cannot play a demo.\n");
         }
         else
         {
@@ -631,7 +631,7 @@ void __cdecl CL_PlayDemo_f()
     else
     {
         v1 = Cmd_Argv(0);
-        Com_Printf(0, "%s <demoname>\n", v1);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s <demoname>\n", v1);
     }
 }
 
@@ -660,7 +660,7 @@ void __cdecl CL_NextDemo()
     int v1; // r3
 
     String = Dvar_GetString("nextdemo");
-    Com_DPrintf(14, "CL_NextDemo: %s\n", String);
+    Com_DPrintf(CON_CHANNEL_CLIENT, "CL_NextDemo: %s\n", String);
     if (*String)
     {
         Cbuf_AddText(0, String);
@@ -719,7 +719,7 @@ void CL_DemoCompleted()
         {
             timeElapsedMS = timeMS - cls.timeDemoStart;
             Com_Printf(
-                14,
+                CON_CHANNEL_CLIENT,
                 "%i frames, %3.1f seconds: %3.1f fps\n",
                 cls.timeDemoFrames,
                 timeElapsedMS * 0.001f,
@@ -769,7 +769,7 @@ int __cdecl CL_GetDemoMessage(msg_t *buf, unsigned __int8 *bufData, int bufDataS
         Com_Error(ERR_DROP, "CL_GetDemoMessage: demoMsglen > MAX_MSGLEN");
     if (FS_Read(buf->data, *p_cursize, cls.demofile) != *p_cursize)
     {
-        Com_Printf(14, "Demo file was truncated.\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "Demo file was truncated.\n");
     LABEL_17:
         CL_DemoCompleted();
         return 0;

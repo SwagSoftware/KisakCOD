@@ -196,7 +196,7 @@ char __cdecl R_VerifyFieldNames(const char **buf, const char *filename)
         token = Com_Parse(buf);
         if (I_stricmp(fields_2[fieldIndex], token->token))
         {
-            Com_PrintError(1, "R_VerifyFieldNames: file %s column header %d was %s instead of %s", filename, fieldIndex, token, fields_2[fieldIndex]);
+            Com_PrintError(CON_CHANNEL_ERROR, "R_VerifyFieldNames: file %s column header %d was %s instead of %s", filename, fieldIndex, token, fields_2[fieldIndex]);
             return 0;
         }
     }
@@ -219,13 +219,13 @@ void __cdecl R_ParseColorCorrectionData(const char *buf, const char *filename)
                 break;
             if (s_numColorCorrectionDataEntries == 1024)
             {
-                Com_PrintError(1, "R_ParseColorCorrectionData: file %s max color correction entries [%d] exceeded. Ignoring the rest of the file", filename, 1024, filename);
+                Com_PrintError(CON_CHANNEL_ERROR, "R_ParseColorCorrectionData: file %s max color correction entries [%d] exceeded. Ignoring the rest of the file", filename, 1024, filename);
                 return;
             }
             ccd = &s_colorCorrectionDataEntries[s_numColorCorrectionDataEntries++];
             iassert( token );
             if (strlen(token->token) >= 0x40)
-                Com_PrintError(1, "R_ParseColorCorrectionData: file %s truncating name because %s is too longer than %d", filename, token, 64);
+                Com_PrintError(CON_CHANNEL_ERROR, "R_ParseColorCorrectionData: file %s truncating name because %s is too longer than %d", filename, token, 64);
             I_strncpyz(ccd->name, token->token, 64);
             ccd->black_level = Com_ParseFloatOnLine(&buf);
             ccd->white_level = Com_ParseFloatOnLine(&buf);
@@ -259,7 +259,7 @@ void R_LoadColorCorrectionData()
     }
     else
     {
-        Com_PrintError(1, "R_LoadColorCorrectionData: failed to open %s", "reflections/reflections.csv");
+        Com_PrintError(CON_CHANNEL_ERROR, "R_LoadColorCorrectionData: failed to open %s", "reflections/reflections.csv");
     }
 }
 
@@ -292,7 +292,7 @@ const ColorCorrectionData *__cdecl R_FindColorCorrectionData(const char *name)
         if (!I_stricmp(s_colorCorrectionDataEntries[i].name, name))
             return &s_colorCorrectionDataEntries[i];
     }
-    Com_PrintError(1, "R_FindColorCorrectionData: failed to find color correction entry %s. Using %s instead.", name, s_colorCorrectionDataEntries);
+    Com_PrintError(CON_CHANNEL_ERROR, "R_FindColorCorrectionData: failed to find color correction entry %s. Using %s instead.", name, s_colorCorrectionDataEntries);
     return s_colorCorrectionDataEntries;
 }
 

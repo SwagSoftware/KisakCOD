@@ -816,9 +816,9 @@ void __cdecl Scr_SaveShutdown(bool savegame)
                     if (!v2)
                     {
                         v2 = 1;
-                        Com_Printf(23, "\n****script variable cyclic leak*****\n");
+                        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "\n****script variable cyclic leak*****\n");
                     }
-                    Scr_PrintPrevCodePos(23, (char*)v7, 0);
+                    Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, (char*)v7, 0);
                 }
             }
             --v6;
@@ -830,11 +830,11 @@ void __cdecl Scr_SaveShutdown(bool savegame)
     Scr_AddDebuggerRefs();
     if (v2)
     {
-        Com_Printf(23, "************************************\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "************************************\n");
         if (savegame)
             Com_Error(ERR_DROP, "Script variable leak due to cyclic usage (see console for details)");
         else
-            Com_Printf(23, "script variable leak due to cyclic usage\n");
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "script variable leak due to cyclic usage\n");
     }
 }
 

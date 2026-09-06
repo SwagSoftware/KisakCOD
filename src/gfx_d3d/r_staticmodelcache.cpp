@@ -569,9 +569,9 @@ void __cdecl R_StaticModelCacheStats_f()
                 }
             }
         }
-        Com_Printf(8, "%.2f%% of cache is currently allocated.\n", (double)allocCount * 100.0 / 262144.0);
+        Com_Printf(CON_CHANNEL_GFX, "%.2f%% of cache is currently allocated.\n", (double)allocCount * 100.0 / 262144.0);
         if (allocCount)
-            Com_Printf(8, "%.2f%% allocated cache vertices are used.\n", (double)usedCount * 100.0 / (double)allocCount);
+            Com_Printf(CON_CHANNEL_GFX, "%.2f%% allocated cache vertices are used.\n", (double)usedCount * 100.0 / (double)allocCount);
     }
 }
 

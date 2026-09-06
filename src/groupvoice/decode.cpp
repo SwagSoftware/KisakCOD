@@ -27,7 +27,7 @@ char __cdecl Decode_Init(int32_t bandwidthEnum)
         {
             if (bandwidthEnum != 2)
             {
-                Com_Printf(9, "Unknown bandwidth mode %i\n", bandwidthEnum);
+                Com_Printf(CON_CHANNEL_SOUND, "Unknown bandwidth mode %i\n", bandwidthEnum);
                 return 0;
             }
             mode = &speex_uwb_mode;

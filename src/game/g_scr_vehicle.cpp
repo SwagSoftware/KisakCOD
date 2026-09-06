@@ -2161,7 +2161,7 @@ void __cdecl CMD_VEH_Script_SetSpeed(gentity_s *ent)
         veh->manualAccel = Scr_GetFloat(1) * MPH_TO_INCHES_PER_SEC;
     if (info->type == 5 && veh->speed < veh->manualSpeed && veh->manualAccel > veh->manualSpeed)
     {
-        Com_PrintWarning(15, "WARNING: capping acceleration to speed / sec for vehicle '%d'\n", ent->s.number);
+        Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: capping acceleration to speed / sec for vehicle '%d'\n", ent->s.number);
         veh->manualAccel = veh->manualSpeed;
     }
     if (Scr_GetNumParam() <= 2)
@@ -3371,7 +3371,7 @@ void __cdecl VEH_InitModelAndValidateTags(gentity_s *ent, int32_t *infoIdx)
         if (isDefault)
             Com_Error(ERR_DROP, "ERROR: default vehicle is missing a required tag!");
         Com_PrintWarning(
-            15,
+            CON_CHANNEL_SERVER,
             "WARNING: vehicle '%s' is missing a required tag! switching to default vehicle model and info.\n",
             SL_ConvertToString(G_ModelName(ent->model)));
         G_SetModel(ent, (char *)DEFAULT_VEHICLE_NAME);
@@ -3396,7 +3396,7 @@ int32_t __cdecl VEH_GetVehicleInfoFromName(const char *name)
     i = G_LoadVehicle(name);
     if (i >= 0)
         return i;
-    Com_PrintWarning(15, "WARNING: couldn't find vehicle info for '%s', attempting to use 'defaultvehicle'.\n", name);
+    Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: couldn't find vehicle info for '%s', attempting to use 'defaultvehicle'.\n", name);
     for (i = 0; i < s_numVehicleInfos; ++i)
     {
         if (!I_stricmp(DEFAULT_VEHICLE_NAME, s_vehicleInfos[i].name))
@@ -4013,7 +4013,7 @@ void VEH_SetupCollmap(gentity_s *ent)
         }
         else
         {
-            Com_PrintWarning(15, "WARNING: Cannot use empty vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: Cannot use empty vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
         }
     }
 }
@@ -5093,7 +5093,7 @@ void CMD_VEH_AddVehicleToCompass(scr_entref_t entref)
     }
     if (!Scr_GetNumParam())
     {
-        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".\n");
+        Com_PrintWarning(CON_CHANNEL_SCRIPT, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".\n");
         Vehicle->s.un1.scale = 1;
         return;
     }
@@ -5120,7 +5120,7 @@ void CMD_VEH_AddVehicleToCompass(scr_entref_t entref)
     }
     if (!*String)
     {
-        Com_PrintWarning(24, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".\n");
+        Com_PrintWarning(CON_CHANNEL_SCRIPT, "Script AddVehicleToCompass(); Was not passed a compassIconType, defaulting to \"tank\".\n");
     LABEL_15:
         scr_vehicle = Vehicle->scr_vehicle;
         Vehicle->s.un1.scale = 1;
@@ -5776,7 +5776,7 @@ static void VEH_UnlinkPlayer(gentity_s *player)
     }
     else
     {
-        Com_PrintWarning(15, "VEH_UnlinkPlayer: Warning - no [tag_detach] on vehicle\n");
+        Com_PrintWarning(CON_CHANNEL_SERVER, "VEH_UnlinkPlayer: Warning - no [tag_detach] on vehicle\n");
         v21[0] = v10->r.currentOrigin[0];
         v21[1] = v10->r.currentOrigin[1];
         v21[2] = scr_vehicle->phys.maxs[2] + v10->r.currentOrigin[2];

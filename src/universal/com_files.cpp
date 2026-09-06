@@ -303,7 +303,7 @@ int __cdecl FS_OpenFileOverwrite(char *qpath)
     if (FS_GetFileOsPath(qpath, ospath) >= 0)
     {
         if (fs_debug->current.integer)
-            Com_Printf(10, "FS_FOpenFileOverWrite: %s\n", ospath);
+            Com_Printf(CON_CHANNEL_FILES, "FS_FOpenFileOverWrite: %s\n", ospath);
         oldAttributes = GetFileAttributesA(ospath);
         attributes = oldAttributes & 0xFFFFFFFE;
         if ((oldAttributes & 0xFFFFFFFE) != oldAttributes)
@@ -455,7 +455,7 @@ int __cdecl FS_CreatePath(char *OSPath)
     v1 = strstr(OSPath, "..");
     if (v1 || (strstr(OSPath, "::")))
     {
-        Com_PrintWarning(10, "WARNING: refusing to create relative path \"%s\"\n", OSPath);
+        Com_PrintWarning(CON_CHANNEL_FILES, "WARNING: refusing to create relative path \"%s\"\n", OSPath);
         return 1;
     }
     else
@@ -571,11 +571,11 @@ int __cdecl FS_HandleForFile(FsThread thread)
     if (thread == FS_THREAD_MAIN)
     {
         for (ia = 1; ia < 65; ++ia)
-            Com_Printf(10, "FILE %2i: '%s' 0x%x\n", ia, fsh[ia].name, fsh[ia].handleFiles.file.o);
+            Com_Printf(CON_CHANNEL_FILES, "FILE %2i: '%s' 0x%x\n", ia, fsh[ia].name, fsh[ia].handleFiles.file.o);
         Com_Error(ERR_DROP, "FS_HandleForFile: none free");
     }
-    Com_PrintWarning(10, "FILE %2i: '%s' 0x%x\n", first, fsh[first].name, fsh[first].handleFiles.file.o);
-    Com_PrintWarning(10, "FS_HandleForFile: none free (%d)\n", thread);
+    Com_PrintWarning(CON_CHANNEL_FILES, "FILE %2i: '%s' 0x%x\n", first, fsh[first].name, fsh[first].handleFiles.file.o);
+    Com_PrintWarning(CON_CHANNEL_FILES, "FS_HandleForFile: none free (%d)\n", thread);
     return 0;
 }
 
@@ -590,7 +590,7 @@ int __cdecl FS_FOpenTextFileWrite(const char *filename)
     fsh[h].zipFile = 0;
     FS_BuildOSPath((char *)fs_homepath->current.integer, fs_gamedir, filename, ospath);
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_FOpenFileWrite: %s\n", ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_FOpenFileWrite: %s\n", ospath);
     if (FS_CreatePath(ospath))
         return 0;
     f = FS_FileOpenWriteText(ospath);
@@ -618,7 +618,7 @@ int __cdecl FS_FOpenFileAppend(const char *filename)
     I_strncpyz(fsh[h].name, filename, 256);
     FS_BuildOSPath((char *)fs_homepath->current.integer, fs_gamedir, filename, ospath);
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_FOpenFileAppend: %s\n", ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_FOpenFileAppend: %s\n", ospath);
     if (FS_CreatePath(ospath))
         return 0;
     f = FS_FileOpenAppendText(ospath);
@@ -818,7 +818,7 @@ uint32_t __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsTh
         if (!search)
         {
             if (fs_debug->current.integer && thread == FS_THREAD_MAIN)
-                Com_Printf(10, "Can't find %s\n", filename);
+                Com_Printf(CON_CHANNEL_FILES, "Can't find %s\n", filename);
             *file = 0;
             if (impureIwd)
             {
@@ -830,9 +830,9 @@ uint32_t __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsTh
             if (!wasSkipped)
                 return -1;
             if (fs_numServerIwds || fs_restrict->current.enabled)
-                Com_Printf(10, "Error: %s must be in an IWD\n", filename);
+                Com_Printf(CON_CHANNEL_FILES, "Error: %s must be in an IWD\n", filename);
             else
-                Com_Printf(10, "Error: %s must be in an IWD or not in the main directory\n", filename);
+                Com_Printf(CON_CHANNEL_FILES, "Error: %s must be in an IWD or not in the main directory\n", filename);
             return -2;
         }
         if (FS_UseSearchPath(search))
@@ -863,7 +863,7 @@ uint32_t __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsTh
                     I_strncpyz(fsh[*file].name, sanitizedName, 256);
                     fsh[*file].zipFile = 0;
                     if (fs_debug->current.integer && thread == FS_THREAD_MAIN)
-                        Com_Printf(10, "FS_FOpenFileRead: %s (found in '%s/%s')\n", sanitizedName, dir->path, dir->gamedir);
+                        Com_Printf(CON_CHANNEL_FILES, "FS_FOpenFileRead: %s (found in '%s/%s')\n", sanitizedName, dir->path, dir->gamedir);
                     if (fs_copyfiles->current.enabled && !I_stricmp(dir->path, fs_cdpath->current.string))
                     {
                         FS_BuildOSPathForThread((char*)fs_basepath->current.integer, dir->gamedir, sanitizedName, copypath, thread);
@@ -932,7 +932,7 @@ uint32_t __cdecl FS_FOpenFileReadForThread(const char *filename, int *file, FsTh
     unzOpenCurrentFile(fsh[*file].handleFiles.file.z);
     fsh[*file].zipFilePos = iwdFile->pos;
     if (fs_debug->current.integer && thread == FS_THREAD_MAIN)
-        Com_Printf(10, "FS_FOpenFileRead: %s (found in '%s')\n", sanitizedName, iwd->iwdFilename);
+        Com_Printf(CON_CHANNEL_FILES, "FS_FOpenFileRead: %s (found in '%s')\n", sanitizedName, iwd->iwdFilename);
     return zfi->cur_file_info.uncompressed_size;
 }
 
@@ -1218,7 +1218,7 @@ int __cdecl FS_WriteFile(char *filename, char *buffer, uint32_t size)
     }
     else
     {
-        Com_Printf(10, "Failed to open %s\n", filename);
+        Com_Printf(CON_CHANNEL_FILES, "Failed to open %s\n", filename);
         return 0;
     }
 }
@@ -1521,7 +1521,7 @@ void __cdecl FS_AddIwdFilesForGameDirectory(char *path, char *pszGameFolder)
     if (numfiles > 1024)
     {
         Com_PrintWarning(
-            10,
+            CON_CHANNEL_FILES,
             "WARNING: Exceeded max number of iwd files in %s/%s (%1/%1)\n",
             path,
             pszGameFolder,
@@ -1556,7 +1556,7 @@ void __cdecl FS_AddIwdFilesForGameDirectory(char *path, char *pszGameFolder)
             if (!*pszLanguageName)
             {
                 Com_PrintWarning(
-                    10,
+                    CON_CHANNEL_FILES,
                     "WARNING: Localized assets iwd file %s/%s/%s has invalid name (no language specified). Proper naming convention"
                     " is: localized_[language]_iwd#.iwd\n",
                     path,
@@ -1567,7 +1567,7 @@ void __cdecl FS_AddIwdFilesForGameDirectory(char *path, char *pszGameFolder)
             if (!SEH_GetLanguageIndexForName(pszLanguageName, &piLanguageIndex))
             {
                 Com_PrintWarning(
-                    10,
+                    CON_CHANNEL_FILES,
                     "WARNING: Localized assets iwd file %s/%s/%s has invalid name (bad language name specified). Proper naming conv"
                     "ention is: localized_[language]_iwd#.iwd\n",
                     path,
@@ -1575,11 +1575,11 @@ void __cdecl FS_AddIwdFilesForGameDirectory(char *path, char *pszGameFolder)
                     s0[i]);
                 if (!bLanguagesListed)
                 {
-                    Com_Printf(10, "Supported languages are:\n");
+                    Com_Printf(CON_CHANNEL_FILES, "Supported languages are:\n");
                     for (j = 0; j < 15; ++j)
                     {
                         LanguageName = SEH_GetLanguageName(j);
-                        Com_Printf(10, "    %s\n", LanguageName);
+                        Com_Printf(CON_CHANNEL_FILES, "    %s\n", LanguageName);
                     }
                     bLanguagesListed = 1;
                 }
@@ -1663,7 +1663,7 @@ void __cdecl FS_AddGameDirectory(char *path, char *dir, int bLanguageDirectory, 
                 else
                     v6 = "non-localized";
                 Com_PrintWarning(
-                    10,
+                    CON_CHANNEL_FILES,
                     "WARNING: game folder %s/%s added as both localized & non-localized. Using folder as %s\n",
                     path,
                     szGameFolder,
@@ -1673,7 +1673,7 @@ void __cdecl FS_AddGameDirectory(char *path, char *dir, int bLanguageDirectory, 
             {
                 if (i->language != iLanguage)
                     Com_PrintWarning(
-                        10,
+                        CON_CHANNEL_FILES,
                         "WARNING: game folder %s/%s re-added as localized folder with different language\n",
                         path,
                         szGameFolder);
@@ -1773,46 +1773,46 @@ void __cdecl FS_DisplayPath(int bLanguageCull)
 
     iLanguage = SEH_GetCurrentLanguage();
     pszLanguageName = SEH_GetLanguageName(iLanguage);
-    Com_Printf(10, "Current language: %s\n", pszLanguageName);
+    Com_Printf(CON_CHANNEL_FILES, "Current language: %s\n", pszLanguageName);
     if (fs_ignoreLocalized->current.enabled)
-        Com_Printf(10, "    localized assets are being ignored\n");
-    Com_Printf(10, "Current search path:\n");
+        Com_Printf(CON_CHANNEL_FILES, "    localized assets are being ignored\n");
+    Com_Printf(CON_CHANNEL_FILES, "Current search path:\n");
     for (s = fs_searchpaths; s; s = s->next)
     {
         if (!bLanguageCull || FS_UseSearchPath(s))
         {
             if (s->iwd)
             {
-                Com_Printf(10, "%s (%i files)\n", s->iwd->iwdFilename, s->iwd->numfiles);
+                Com_Printf(CON_CHANNEL_FILES, "%s (%i files)\n", s->iwd->iwdFilename, s->iwd->numfiles);
                 if (s->bLocalized)
                 {
                     LanguageName = SEH_GetLanguageName(s->language);
-                    Com_Printf(10, "    localized assets iwd file for %s\n", LanguageName);
+                    Com_Printf(CON_CHANNEL_FILES, "    localized assets iwd file for %s\n", LanguageName);
                 }
                 if (fs_numServerIwds)
                 {
                     if (FS_IwdIsPure(s->iwd))
-                        Com_Printf(10, "    on the pure list\n");
+                        Com_Printf(CON_CHANNEL_FILES, "    on the pure list\n");
                     else
-                        Com_Printf(10, "    not on the pure list\n");
+                        Com_Printf(CON_CHANNEL_FILES, "    not on the pure list\n");
                 }
             }
             else
             {
-                Com_Printf(10, "%s/%s\n", s->dir->path, s->dir->gamedir);
+                Com_Printf(CON_CHANNEL_FILES, "%s/%s\n", s->dir->path, s->dir->gamedir);
                 if (s->bLocalized)
                 {
                     v2 = SEH_GetLanguageName(s->language);
-                    Com_Printf(10, "    localized assets game folder for %s\n", v2);
+                    Com_Printf(CON_CHANNEL_FILES, "    localized assets game folder for %s\n", v2);
                 }
             }
         }
     }
-    Com_Printf(10, "\nFile Handles:\n");
+    Com_Printf(CON_CHANNEL_FILES, "\nFile Handles:\n");
     for (i = 1; i < 65; ++i)
     {
         if (fsh[i].handleFiles.file.o)
-            Com_Printf(10, "handle %i: %s\n", i, fsh[i].name);
+            Com_Printf(CON_CHANNEL_FILES, "handle %i: %s\n", i, fsh[i].name);
     }
 }
 
@@ -1839,23 +1839,23 @@ void __cdecl FS_Dir_f()
         {
             path = Cmd_Argv(1);
             extension = "";
-            Com_Printf(0, "Directory of %s %s\n", path, "");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Directory of %s %s\n", path, "");
         }
         else
         {
             path = Cmd_Argv(1);
             extension = Cmd_Argv(2);
-            Com_Printf(0, "Directory of %s %s\n", path, extension);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Directory of %s %s\n", path, extension);
         }
-        Com_Printf(0, "---------------\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "---------------\n");
         dirnames = FS_ListFiles(path, extension, FS_LIST_PURE_ONLY, &ndirs);
         for (i = 0; i < ndirs; ++i)
-            Com_Printf(0, "%s\n", dirnames[i]);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", dirnames[i]);
         FS_FreeFileList(dirnames);
     }
     else
     {
-        Com_Printf(0, "usage: dir <directory> [extension]\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "usage: dir <directory> [extension]\n");
     }
 }
 
@@ -1893,21 +1893,21 @@ void __cdecl FS_NewDir_f()
     if (Cmd_Argc() >= 2)
     {
         filter = Cmd_Argv(1);
-        Com_Printf(0, "---------------\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "---------------\n");
         dirnames = FS_ListFilteredFiles(fs_searchpaths, "", "", filter, FS_LIST_PURE_ONLY, &ndirs);
         FS_SortFileList(dirnames, ndirs);
         for (i = 0; i < ndirs; ++i)
         {
             FS_ConvertPath((char*)dirnames[i]);
-            Com_Printf(0, "%s\n", dirnames[i]);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", dirnames[i]);
         }
-        Com_Printf(0, "%d files listed\n", ndirs);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%d files listed\n", ndirs);
         FS_FreeFileList(dirnames);
     }
     else
     {
-        Com_Printf(0, "usage: fdir <filter>\n");
-        Com_Printf(0, "example: fdir *q3dm*.bsp\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "usage: fdir <filter>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "example: fdir *q3dm*.bsp\n");
     }
 }
 
@@ -1933,7 +1933,7 @@ void __cdecl FS_TouchFile_f()
     }
     else
     {
-        Com_Printf(0, "Usage: touchFile <file>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: touchFile <file>\n");
     }
 }
 
@@ -1956,7 +1956,7 @@ void __cdecl FS_Startup(char *gameName)
     char *v2; // eax
     char *v3; // eax
 
-    Com_Printf(10, "----- FS_Startup -----\n");
+    Com_Printf(CON_CHANNEL_FILES, "----- FS_Startup -----\n");
     FS_RegisterDvars();
     if (*(_BYTE *)fs_basepath->current.integer)
     {
@@ -2019,8 +2019,8 @@ void __cdecl FS_Startup(char *gameName)
     FS_AddCommands();
     FS_Path_f();
     Dvar_ClearModified((dvar_s*)fs_gameDirVar);
-    Com_Printf(10, "----------------------\n");
-    Com_Printf(10, "%d files in iwd files\n", fs_iwdFileCount);
+    Com_Printf(CON_CHANNEL_FILES, "----------------------\n");
+    Com_Printf(CON_CHANNEL_FILES, "%d files in iwd files\n", fs_iwdFileCount);
 }
 
 void __cdecl FS_SetRestrictions()
@@ -2030,7 +2030,7 @@ void __cdecl FS_SetRestrictions()
     if (fs_restrict->current.enabled)
     {
         Dvar_SetBool((dvar_s*)fs_restrict, 1);
-        Com_Printf(10, "\nRunning in restricted demo mode.\n\n");
+        Com_Printf(CON_CHANNEL_FILES, "\nRunning in restricted demo mode.\n\n");
         FS_Shutdown();
         FS_Startup((char*)"demomain");
         for (path = fs_searchpaths; path; path = path->next)
@@ -2637,7 +2637,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
     v6 += strlen(v6) + 1;
     ospath[v6 - &ospath[1] - 1] = 0;
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_SV_FOpenFileRead (fs_homepath): %s\n", ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_SV_FOpenFileRead (fs_homepath): %s\n", ospath);
     Binary = FS_FileOpenReadBinary(ospath);
     fsh[f].handleFiles.file.o = Binary;
     fsh[f].handleSync = 0;
@@ -2646,7 +2646,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
         FS_BuildOSPath(fs_basepath->current.string, filename, "", ospath);
         ospath[&ospath[strlen(ospath) + 1] - &ospath[1] - 1] = 0;
         if (fs_debug->current.integer)
-            Com_Printf(10, "FS_SV_FOpenFileRead (fs_basepath): %s\n", ospath);
+            Com_Printf(CON_CHANNEL_FILES, "FS_SV_FOpenFileRead (fs_basepath): %s\n", ospath);
         v3 = FS_FileOpenReadBinary(ospath);
         fsh[f].handleFiles.file.o = v3;
         fsh[f].handleSync = 0;
@@ -2658,7 +2658,7 @@ int __cdecl FS_SV_FOpenFileRead(const char *filename, int *fp)
         FS_BuildOSPath(fs_cdpath->current.string, filename, "", ospath);
         ospath[&ospath[strlen(ospath) + 1] - &ospath[1] - 1] = 0;
         if (fs_debug->current.integer)
-            Com_Printf(10, "FS_SV_FOpenFileRead (fs_cdpath) : %s\n", ospath);
+            Com_Printf(CON_CHANNEL_FILES, "FS_SV_FOpenFileRead (fs_cdpath) : %s\n", ospath);
         v4 = FS_FileOpenReadBinary(ospath);
         fsh[f].handleFiles.file.o = v4;
         fsh[f].handleSync = 0;
@@ -2687,10 +2687,10 @@ int __cdecl FS_SV_FOpenFileWrite(const char *filename)
     f = FS_HandleForFile(FS_THREAD_MAIN);
     fsh[f].zipFile = 0;
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_SV_FOpenFileWrite: %s\n", ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_SV_FOpenFileWrite: %s\n", ospath);
     if (FS_CreatePath(ospath))
         return 0;
-    Com_DPrintf(10, "writing to: %s\n", ospath);
+    Com_DPrintf(CON_CHANNEL_FILES, "writing to: %s\n", ospath);
     v2 = FS_FileOpenWriteBinary(ospath);
     fsh[f].handleFiles.file.o = v2;
     I_strncpyz(fsh[f].name, (char *)filename, 256);
@@ -2746,7 +2746,7 @@ void __cdecl FS_SV_Rename(char *from, char *to)
     from_ospath[strlen(from_ospath) - 1] = 0;
     to_ospath[strlen(to_ospath) - 1] = 0;
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_SV_Rename: %s --> %s\n", from_ospath, to_ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_SV_Rename: %s --> %s\n", from_ospath, to_ospath);
     if (rename(from_ospath, to_ospath))
     {
         FS_CopyFile(from_ospath, to_ospath);
@@ -2864,7 +2864,7 @@ int __cdecl FS_FOpenFileWriteToDirForThread(const char *filename, const char *di
     FS_CheckFileSystemStarted();
     FS_BuildOSPath((char *)fs_homepath->current.integer, dir, filename, ospath);
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_FOpenFileWrite: %s\n", ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_FOpenFileWrite: %s\n", ospath);
     if (FS_CreatePath(ospath))
         return 0;
     else
@@ -2898,7 +2898,7 @@ int __cdecl FS_WriteFileToDir(const char *filename, const char *path, char *buff
     }
     else
     {
-        Com_Printf(10, "Failed to open %s\n", filename);
+        Com_Printf(CON_CHANNEL_FILES, "Failed to open %s\n", filename);
         return 0;
     }
 }
@@ -2969,7 +2969,7 @@ void __cdecl FS_Rename(char *from, char *fromDir, char *to, char *toDir)
     FS_BuildOSPath(fs_homepath->current.string, fromDir, from, from_ospath);
     FS_BuildOSPath(fs_homepath->current.string, toDir, to, to_ospath);
     if (fs_debug->current.integer)
-        Com_Printf(10, "FS_Rename: %s --> %s\n", from_ospath, to_ospath);
+        Com_Printf(CON_CHANNEL_FILES, "FS_Rename: %s --> %s\n", from_ospath, to_ospath);
     if (rename(from_ospath, to_ospath))
     {
         FS_Remove(to_ospath);

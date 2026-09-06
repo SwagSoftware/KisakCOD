@@ -66,7 +66,7 @@ static void PrintWorkingDir()
 	char cwd[260];
 
 	_getcwd(cwd, 256);
-	Com_Printf(16, "Working directory: %s\n", cwd);
+	Com_Printf(CON_CHANNEL_SYSTEM, "Working directory: %s\n", cwd);
 }
 
 static void Win_RegisterClass()
@@ -193,7 +193,7 @@ void __cdecl Sys_OutOfMemErrorInternal(const char* filename, int line)
 	char* v4; // [esp-8h] [ebp-8h]
 
 	Sys_EnterCriticalSection(CRITSECT_FATAL_ERROR);
-	Com_Printf(16, "Out of memory: filename '%s', line %d\n", filename, line);
+	Com_Printf(CON_CHANNEL_SYSTEM, "Out of memory: filename '%s', line %d\n", filename, line);
 	v4 = Win_LocalizeRef("WIN_OUT_OF_MEM_TITLE");
 	v3 = Win_LocalizeRef("WIN_OUT_OF_MEM_BODY");
 	ActiveWindow = GetActiveWindow();
@@ -489,7 +489,7 @@ void __cdecl Sys_QueEvent(uint32_t time, sysEventType_t type, int value, int val
 	ev = &eventQue[(unsigned __int8)eventHead];
 	if (eventHead - eventTail >= 256)
 	{
-		Com_Printf(16, "Sys_QueEvent: overflow\n");
+		Com_Printf(CON_CHANNEL_SYSTEM, "Sys_QueEvent: overflow\n");
 		if (ev->evPtr)
 			Z_Free((char *)ev->evPtr, 10);
 		++eventTail;
@@ -566,25 +566,25 @@ void __cdecl Sys_Init()
 	// if (!osversion.dwPlatformId)
 	// 	Sys_Error("Call of Duty 4 Multiplayer doesn't run on Win32s");
 	
-	Com_Printf(16, "CPU vendor is \"%s\"\n", sys_info.cpuVendor);
-	Com_Printf(16, "CPU name is \"%s\"\n", sys_info.cpuName);
+	Com_Printf(CON_CHANNEL_SYSTEM, "CPU vendor is \"%s\"\n", sys_info.cpuVendor);
+	Com_Printf(CON_CHANNEL_SYSTEM, "CPU name is \"%s\"\n", sys_info.cpuName);
 	if (sys_info.logicalCpuCount == 1)
-		Com_Printf(16, "%i logical CPU%s reported\n", 1, "");
+		Com_Printf(CON_CHANNEL_SYSTEM, "%i logical CPU%s reported\n", 1, "");
 	else
-		Com_Printf(16, "%i logical CPU%s reported\n", sys_info.logicalCpuCount, "s");
+		Com_Printf(CON_CHANNEL_SYSTEM, "%i logical CPU%s reported\n", sys_info.logicalCpuCount, "s");
 	if (sys_info.physicalCpuCount == 1)
-		Com_Printf(16, "%i physical CPU%s detected\n", 1, "");
+		Com_Printf(CON_CHANNEL_SYSTEM, "%i physical CPU%s detected\n", 1, "");
 	else
-		Com_Printf(16, "%i physical CPU%s detected\n", sys_info.physicalCpuCount, "s");
-	Com_Printf(16, "Measured CPU speed is %.2lf GHz\n", sys_info.cpuGHz);
-	Com_Printf(16, "Total CPU performance is estimated as %.2lf GHz\n", sys_info.configureGHz);
-	Com_Printf(16, "System memory is %i MB (capped at 1 GB)\n", sys_info.sysMB);
-	Com_Printf(16, "Video card is \"%s\"\n", sys_info.gpuDescription);
+		Com_Printf(CON_CHANNEL_SYSTEM, "%i physical CPU%s detected\n", sys_info.physicalCpuCount, "s");
+	Com_Printf(CON_CHANNEL_SYSTEM, "Measured CPU speed is %.2lf GHz\n", sys_info.cpuGHz);
+	Com_Printf(CON_CHANNEL_SYSTEM, "Total CPU performance is estimated as %.2lf GHz\n", sys_info.configureGHz);
+	Com_Printf(CON_CHANNEL_SYSTEM, "System memory is %i MB (capped at 1 GB)\n", sys_info.sysMB);
+	Com_Printf(CON_CHANNEL_SYSTEM, "Video card is \"%s\"\n", sys_info.gpuDescription);
 	if (sys_info.SSE)
-		Com_Printf(16, "Streaming SIMD Extensions (SSE) %ssupported\n", "");
+		Com_Printf(CON_CHANNEL_SYSTEM, "Streaming SIMD Extensions (SSE) %ssupported\n", "");
 	else
-		Com_Printf(16, "Streaming SIMD Extensions (SSE) %ssupported\n", "not ");
-	Com_Printf(16, "\n");
+		Com_Printf(CON_CHANNEL_SYSTEM, "Streaming SIMD Extensions (SSE) %ssupported\n", "not ");
+	Com_Printf(CON_CHANNEL_SYSTEM, "\n");
 	IN_Init();
 }
 
@@ -825,7 +825,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			//	Com_SetErrorMessage("MPUI_NOPUNKBUSTER");
 			//if (!PbServerInitialize())
 			//{
-			//	Com_PrintError(16, "Unable to initialize punkbuster.  Punkbuster is disabled\n");
+			//	Com_PrintError(CON_CHANNEL_SYSTEM, "Unable to initialize punkbuster.  Punkbuster is disabled\n");
 			//	Com_SetErrorMessage("MPUI_NOPUNKBUSTER");
 			//}
 

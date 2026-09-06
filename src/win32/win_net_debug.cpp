@@ -86,7 +86,7 @@ void NET_RestartDebug()
 void Sys_DebugSocketError(const char* message)
 {
 	NET_RestartDebug();
-	Com_Printf(16, "%s\n", message);
+	Com_Printf(CON_CHANNEL_SYSTEM, "%s\n", message);
 }
 
 void __cdecl Sys_Listen_f()

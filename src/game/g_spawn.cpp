@@ -296,7 +296,7 @@ void __cdecl G_PrintBadModelMessage(gentity_s *ent)
         const char *modelName = SL_ConvertToString(G_ModelName(ent->model));
         const char *className = SL_ConvertToString(ent->classname);
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Error: '%s' at ( %.0f %.0f %.0f ) uses missing model '%s'\n",
             className,
             ent->r.currentOrigin[0],
@@ -317,7 +317,7 @@ int __cdecl G_CallSpawnEntity(gentity_s *ent)
 
     if (!ent->classname)
     {
-        Com_Printf(15, "G_CallSpawnEntity: NULL classname\n");
+        Com_Printf(CON_CHANNEL_SERVER, "G_CallSpawnEntity: NULL classname\n");
         return 0;
     }
 
@@ -339,7 +339,7 @@ int __cdecl G_CallSpawnEntity(gentity_s *ent)
 
     if (!spawnFunc)
     {
-        Com_Printf(15, "%s cannot be spawned dynamically\n", classname);
+        Com_Printf(CON_CHANNEL_SERVER, "%s cannot be spawned dynamically\n", classname);
         return 0;
     }
 
@@ -806,12 +806,12 @@ void __cdecl SP_worldspawn()
     sscanf(sunColor, "%g %g %g", &color[0], &color[1], &color[2]);
     ColorNormalize(color, color);
 
-    Com_Printf(15, "SP_worldspawn: sunlight=%g ambient=%g diffuse=%g\n", sunlight, ambient, diffuse);
+    Com_Printf(CON_CHANNEL_SERVER, "SP_worldspawn: sunlight=%g ambient=%g diffuse=%g\n", sunlight, ambient, diffuse);
     float scale = (sunlight - ambient) * (1.0f - diffuse);
-    Com_Printf(15, "SP_worldspawn: raw scale=%g\n", scale);
+    Com_Printf(CON_CHANNEL_SERVER, "SP_worldspawn: raw scale=%g\n", scale);
     if (scale <= 0.0f)
         scale = 0.0f;
-    Com_Printf(15, "SP_worldspawn: final scale=%g sunColor=(%g %g %g) -> mapSunColor=(%g %g %g)\n",
+    Com_Printf(CON_CHANNEL_SERVER, "SP_worldspawn: final scale=%g sunColor=(%g %g %g) -> mapSunColor=(%g %g %g)\n",
         scale, color[0], color[1], color[2],
         color[0] * scale, color[1] * scale, color[2] * scale);
 
@@ -1019,7 +1019,7 @@ void G_CallSpawn()
 
                 if (!spawnFunc)
                 {
-                    Com_Printf(15, "%s doesn't have a spawn function\n", classname);
+                    Com_Printf(CON_CHANNEL_SERVER, "%s doesn't have a spawn function\n", classname);
                     return;
                 }
                 ent = G_Spawn();
@@ -1032,7 +1032,7 @@ void G_CallSpawn()
     }
     else
     {
-        Com_Printf(15, "G_CallSpawn: NULL classname\n");
+        Com_Printf(CON_CHANNEL_SERVER, "G_CallSpawn: NULL classname\n");
     }
 }
 

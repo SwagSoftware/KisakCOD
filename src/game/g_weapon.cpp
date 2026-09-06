@@ -702,8 +702,8 @@ int __cdecl G_GivePlayerWeapon(playerState_s *pPS, int iWeaponIndex, uint8_t alt
 
 void __cdecl G_SetupWeaponDef()
 {
-    Com_DPrintf(17, "----------------------\n");
-    Com_DPrintf(17, "Game: G_SetupWeaponDef\n");
+    Com_DPrintf(CON_CHANNEL_PLAYERWEAP, "----------------------\n");
+    Com_DPrintf(CON_CHANNEL_PLAYERWEAP, "Game: G_SetupWeaponDef\n");
     if (!bg_lastParsedWeaponIndex)
     {
         Com_SetWeaponInfoMemory(1);
@@ -718,7 +718,7 @@ void __cdecl G_SetupWeaponDef()
             BG_FindWeaponIndexForName("defaultweapon");
 #endif
     }
-    Com_DPrintf(17, "----------------------\n");
+    Com_DPrintf(CON_CHANNEL_PLAYERWEAP, "----------------------\n");
 }
 
 uint32_t __cdecl G_GetWeaponIndexForName(const char *name)

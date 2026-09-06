@@ -188,17 +188,17 @@ void EntHandle::Shutdown()
 
     if (g_usedEntHandle)
     {
-        Com_Printf(1, "EntHandle BEGIN\n");
+        Com_Printf(CON_CHANNEL_ERROR, "EntHandle BEGIN\n");
         usedEntHandle = 0;
         for (i = 1; i < 0x1000; ++i)
         {
             if (g_entHandleInfoArray[i].handle)
             {
-                Com_Printf(1, "%p\n", &g_entHandleInfoArray[i]);
+                Com_Printf(CON_CHANNEL_ERROR, "%p\n", &g_entHandleInfoArray[i]);
                 ++usedEntHandle;
             }
         }
-        Com_Printf(1, "EntHandle END\n");
+        Com_Printf(CON_CHANNEL_ERROR, "EntHandle END\n");
         if (usedEntHandle != g_usedEntHandle)
         {
             v0 = va("%d %d", usedEntHandle, g_usedEntHandle);

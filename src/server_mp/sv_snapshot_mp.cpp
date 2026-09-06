@@ -77,7 +77,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
             if (oldframe->first_entity < svsHeader.nextSnapshotEntities - svsHeader.numSnapshotEntities)
             {
                 Com_PrintWarning(
-                    15,
+                    CON_CHANNEL_SERVER,
                     "%s: Delta request from out of date entities - delta against entity %i, oldest is %i, current is %i.  Their old"
                     " snapshot had %i entities in it\n",
                     client->name,
@@ -92,7 +92,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
             if (oldframe && oldframe->first_client < svsHeader.nextSnapshotClients - svsHeader.numSnapshotClients)
             {
                 Com_PrintWarning(
-                    15,
+                    CON_CHANNEL_SERVER,
                     "%s: Delta request from out of date clients - delta against client %i, oldest is %i, current is %i.  Their old "
                     "snapshot had %i clients in it\n",
                     client->name,
@@ -107,7 +107,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
         }
         else
         {
-            Com_DPrintf(15, "%s: Delta request from out of date packet.\n", client->name);
+            Com_DPrintf(CON_CHANNEL_SERVER, "%s: Delta request from out of date packet.\n", client->name);
             oldframe = 0;
             lastframe = 0;
             lastServerTime = 0;
@@ -424,17 +424,17 @@ void __cdecl SV_EmitPacketClients(
                     MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 435, 0, "%s", "oldclient");
                 if (oldclient->clientIndex <= msg->lastEntityRef)
                 {
-                    Com_Printf(15, "** Client index LE msg->lastEntityRef:\n");
-                    Com_Printf(15, "**   lastEntityRef is %d  clientIndex is %d\n", msg->lastEntityRef, oldclient->clientIndex);
+                    Com_Printf(CON_CHANNEL_SERVER, "** Client index LE msg->lastEntityRef:\n");
+                    Com_Printf(CON_CHANNEL_SERVER, "**   lastEntityRef is %d  clientIndex is %d\n", msg->lastEntityRef, oldclient->clientIndex);
                     Com_Printf(
-                        15,
+                        CON_CHANNEL_SERVER,
                         "**   newnum %d  oldnum %d  from_num_clients %d  to_num_clients %d\n",
                         newnumb,
                         oldnumb,
                         from_num_clients,
                         to_num_clients);
                     Com_Printf(
-                        15,
+                        CON_CHANNEL_SERVER,
                         "**   from_first_client %d  to_first_client %d  numSnapshotClients %d\n",
                         from_first_client,
                         to_first_client,
@@ -482,7 +482,7 @@ void __cdecl SV_UpdateServerCommandsToClient(client_t *client, msg_t *msg)
     int i; // [esp+4h] [ebp-4h]
 
     if (client->reliableAcknowledge + 1 < client->reliableSequence && sv_debugReliableCmds->current.enabled)
-        Com_Printf(15, "Client %s has the following un-ack'd reliable commands:\n", client->name);
+        Com_Printf(CON_CHANNEL_SERVER, "Client %s has the following un-ack'd reliable commands:\n", client->name);
     bitsUsed = MSG_GetUsedBitCount(msg);
     for (i = client->reliableAcknowledge + 1; i <= client->reliableSequence; ++i)
     {
@@ -492,7 +492,7 @@ void __cdecl SV_UpdateServerCommandsToClient(client_t *client, msg_t *msg)
         SV_PacketDataIsReliableData(client - svs.clients, msg);
         MSG_WriteString(msg, client->reliableCommandInfo[i & 0x7F].cmd);
         if (sv_debugReliableCmds->current.enabled)
-            Com_Printf(15, "%i: %s\n", i - (client->reliableAcknowledge + 1), client->reliableCommandInfo[i & 0x7F].cmd);
+            Com_Printf(CON_CHANNEL_SERVER, "%i: %s\n", i - (client->reliableAcknowledge + 1), client->reliableCommandInfo[i & 0x7F].cmd);
     }
     SV_TrackPacketData(client - svs.clients, ANALYZE_SNAPSHOT_SERVERCMDS, 0, 0, bitsUsed, msg);
     client->reliableSent = client->reliableSequence;
@@ -1334,7 +1334,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
         
     if (compressedSize < 4)
     {
-        Com_PrintError(15, "SV_SendMessageToClient: compressed message overflow for client %i\n", client - svs.clients);
+        Com_PrintError(CON_CHANNEL_SERVER, "SV_SendMessageToClient: compressed message overflow for client %i\n", client - svs.clients);
         SV_DropClient(client, "EXE_SERVERMESSAGEOVERFLOW", 1);
         return;
     }
@@ -1411,7 +1411,7 @@ int __cdecl SV_RateMsec(client_t *client, int messageSize)
     }
     if (sv_debugRate->current.enabled)
         Com_Printf(
-            15,
+            CON_CHANNEL_SERVER,
             "It would take %ims to send %i bytes to client %s (rate %i)\n",
             1000 * (messageSize + 48) / rate,
             messageSize,
@@ -1433,7 +1433,7 @@ void __cdecl SV_BeginClientSnapshot(client_t *client, msg_t *msg)
         Dvar_SetBool((dvar_s *)sv_debugPacketContents, 1);
     }
     if (sv_debugPacketContents->current.enabled)
-        Com_Printf(15, "Starting snapshot for %s\n", client->name);
+        Com_Printf(CON_CHANNEL_SERVER, "Starting snapshot for %s\n", client->name);
     clientNum = client - svs.clients;
     if (clientNum >= 0x40)
         MyAssertHandler(
@@ -1488,7 +1488,7 @@ int __cdecl SV_WWWRedirectClient(client_t *cl, msg_t *msg)
         FS_FCloseFile(handle);
         v2 = va("%s/%s", sv_wwwBaseURL->current.string, cl->downloadName);
         I_strncpyz(cl->downloadURL, v2, 256);
-        Com_Printf(15, "Redirecting client '%s' to %s\n", cl->name, cl->downloadURL);
+        Com_Printf(CON_CHANNEL_SERVER, "Redirecting client '%s' to %s\n", cl->name, cl->downloadURL);
         cl->downloadingWWW = 1;
         MSG_WriteByte(msg, 5u);
         MSG_WriteLong(msg, -1);
@@ -1502,7 +1502,7 @@ int __cdecl SV_WWWRedirectClient(client_t *cl, msg_t *msg)
     }
     else
     {
-        Com_Printf(15, "ERROR: Client '%s': couldn't extract file size for %s\n", cl->downloadName, handle);
+        Com_Printf(CON_CHANNEL_SERVER, "ERROR: Client '%s': couldn't extract file size for %s\n", cl->downloadName, handle);
         return 0;
     }
 }
@@ -1574,7 +1574,7 @@ void __cdecl SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
                 MSG_WriteShort(msg, cl->downloadBlockSize[curindex]);
                 if (cl->downloadBlockSize[curindex])
                     MSG_WriteData(msg, cl->downloadBlocks[curindex], cl->downloadBlockSize[curindex]);
-                Com_DPrintf(15, "clientDownload: %d : writing block %d\n", cl - svs.clients, cl->downloadXmitBlock);
+                Com_DPrintf(CON_CHANNEL_SERVER, "clientDownload: %d : writing block %d\n", cl - svs.clients, cl->downloadXmitBlock);
                 ++cl->downloadXmitBlock;
                 cl->downloadSendTime = svs.time;
             }
@@ -1586,7 +1586,7 @@ void __cdecl SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
                 if (FS_iwIwd(cl->downloadName, (char*)"main"))
                 {
                     Com_Printf(
-                        15,
+                        CON_CHANNEL_SERVER,
                         "clientDownload: %d : \"%s\" cannot download IW iwd files\n",
                         cl - svs.clients,
                         cl->downloadName);
@@ -1594,11 +1594,11 @@ void __cdecl SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
                     SV_WriteDownloadErrorMessage(cl, msg, errorMessage);
                     return;
                 }
-                Com_Printf(15, "clientDownload: %d : beginning \"%s\"\n", cl - svs.clients, cl->downloadName);
+                Com_Printf(CON_CHANNEL_SERVER, "clientDownload: %d : beginning \"%s\"\n", cl - svs.clients, cl->downloadName);
                 cl->downloadSize = FS_SV_FOpenFileRead(cl->downloadName, &cl->download);
                 if (cl->downloadSize <= 0)
                 {
-                    Com_Printf(15, "clientDownload: %d : \"%s\" file not found on server\n", cl - svs.clients, cl->downloadName);
+                    Com_Printf(CON_CHANNEL_SERVER, "clientDownload: %d : \"%s\" file not found on server\n", cl - svs.clients, cl->downloadName);
                     Com_sprintf(errorMessage, 0x400u, "EXE_AUTODL_FILENOTONSERVER %s", cl->downloadName);
                     SV_WriteDownloadErrorMessage(cl, msg, errorMessage);
                     return;
@@ -1621,7 +1621,7 @@ void __cdecl SV_WriteDownloadToClient(client_t *cl, msg_t *msg)
                 cl->downloadEOF = 0;
                 goto LABEL_20;
             }
-            Com_Printf(15, "clientDownload: %d : \"%s\" download disabled", cl - svs.clients, cl->downloadName);
+            Com_Printf(CON_CHANNEL_SERVER, "clientDownload: %d : \"%s\" download disabled", cl - svs.clients, cl->downloadName);
             if (sv_pure->current.enabled)
                 Com_sprintf(errorMessage, 0x400u, "EXE_AUTODL_SERVERDISABLED_PURE %s", cl->downloadName);
             else
@@ -1651,7 +1651,7 @@ void __cdecl SV_EndClientSnapshot(client_t *client, msg_t *msg)
     MSG_WriteByte(msg, 7u);
     if (msg->overflowed)
     {
-        Com_PrintWarning(15, "WARNING: msg overflowed for %s, trying to recover\n", client->name);
+        Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: msg overflowed for %s, trying to recover\n", client->name);
         if (client->header.state == CS_ACTIVE || client->header.state == CS_ZOMBIE)
         {
             SV_PrintServerCommandsForClient(client);
@@ -1662,13 +1662,13 @@ void __cdecl SV_EndClientSnapshot(client_t *client, msg_t *msg)
         }
         if (msg->overflowed)
         {
-            Com_PrintWarning(15, "WARNING: client disconnected for msg overflow: %s\n", client->name);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: client disconnected for msg overflow: %s\n", client->name);
             NET_OutOfBandPrint(NS_SERVER, client->header.netchan.remoteAddress, "disconnect");
             SV_DropClient(client, "EXE_SERVERMESSAGEOVERFLOW", 1);
         }
     }
     if (sv_debugPacketContents->current.enabled)
-        Com_Printf(15, "Snapshot finished for %s\n", client->name);
+        Com_Printf(CON_CHANNEL_SERVER, "Snapshot finished for %s\n", client->name);
 
     if (client->tempPacketDebugging)
         Dvar_SetBool((dvar_s *)sv_debugPacketContents, 0);
@@ -1686,15 +1686,15 @@ void __cdecl SV_PrintServerCommandsForClient(client_t *client)
 {
     int i; // [esp+0h] [ebp-4h]
 
-    Com_Printf(15, "-- Unacknowledged Server Commands for client %i:%s --\n", client - svs.clients, client->name);
+    Com_Printf(CON_CHANNEL_SERVER, "-- Unacknowledged Server Commands for client %i:%s --\n", client - svs.clients, client->name);
     for (i = client->reliableAcknowledge + 1; i <= client->reliableSequence; ++i)
         Com_Printf(
-            15,
+            CON_CHANNEL_SERVER,
             "cmd %5d: %8d: %s\n",
             i,
             client->reliableCommandInfo[i & 0x7F].time,
             client->reliableCommandInfo[i & 0x7F].cmd);
-    Com_Printf(15, "----------");
+    Com_Printf(CON_CHANNEL_SERVER, "----------");
 }
 
 void __cdecl SV_SetServerStaticHeader()
@@ -1881,7 +1881,7 @@ void __cdecl SV_SendClientVoiceData(client_t *client)
         SV_WriteVoiceDataToClient(client, &msg);
         if (msg.overflowed)
         {
-            Com_PrintWarning(15, "WARNING: voice msg overflowed for %s\n", client->name);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: voice msg overflowed for %s\n", client->name);
         }
         else
         {
@@ -1991,7 +1991,7 @@ void __cdecl SV_SendClientMessages()
             comp_ratio = (1.0 - aveb / uaveb) * 100.0;
             sv.ucompAve = sv.ucompAve + comp_ratio;
             Com_DPrintf(
-                15,
+                CON_CHANNEL_SERVER,
                 "bpspc(%2.0f) bps(%2.0f) pk(%i) ubps(%2.0f) upk(%i) cr(%2.2f) acr(%2.2f)\n",
                 aveb / (double)numclients,
                 aveb,
@@ -2014,7 +2014,7 @@ void __cdecl SV_SendClientMessages()
     {
         if (g_archiveMsg.overflowed)
         {
-            Com_DPrintf(15, "SV_ArchiveSnapshot: ignoring snapshot because it overflowed.\n");
+            Com_DPrintf(CON_CHANNEL_SERVER, "SV_ArchiveSnapshot: ignoring snapshot because it overflowed.\n");
         }
         else
         {

@@ -312,7 +312,7 @@ void __cdecl IN_StartupMouse()
 	}
 	else
 	{
-		Com_Printf(16, "Mouse control not active.\n");
+		Com_Printf(CON_CHANNEL_SYSTEM, "Mouse control not active.\n");
 	}
 }
 

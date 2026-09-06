@@ -403,7 +403,7 @@ void __cdecl G_ExplodeMissile(gentity_s *ent)
                 eventEnt->handler = ENT_HANDLER_TIMED_OBJECT;
                 eventEnt->nextthink = level.time + 1;
                 Com_Printf(
-                    15,
+                    CON_CHANNEL_SERVER,
                     "Sending smoke grenade that starts at %i and is at ( %f, %f, %f )\n",
                     level.time,
                     eventEnt->s.lerp.pos.trBase[0],
@@ -2391,7 +2391,7 @@ void __cdecl JavelinSteering(gentity_s *ent, WeaponDef *weapDef)
         if (level.time - ent->s.lerp.u.missile.launchTime < weapDef->projIgnitionDelay)
         {
             if (missileDebugText->current.enabled)
-                Com_Printf(15, "Javelin: softlaunch\n");
+                Com_Printf(CON_CHANNEL_SERVER, "Javelin: softlaunch\n");
             return;
         }
         ent->missile.stage = MISSILESTAGE_ASCENT;
@@ -2424,7 +2424,7 @@ void __cdecl JavelinSteering(gentity_s *ent, WeaponDef *weapDef)
             v2 = "A";
         else
             v2 = "D";
-        Com_Printf(15, "Jav:%s h:%.0f/%.0f dist 2d:%.0f 3d:%.0f\n", v2, height, limit, distance2D, distance3D);
+        Com_Printf(CON_CHANNEL_SERVER, "Jav:%s h:%.0f/%.0f dist 2d:%.0f 3d:%.0f\n", v2, height, limit, distance2D, distance3D);
     }
 }
 
@@ -2521,7 +2521,7 @@ double __cdecl JavelinRotateDir(gentity_s *ent, const float *currentDir, const f
         {
             frac = maxDPS / targetDPS;
             if (missileDebugText->current.enabled)
-                Com_Printf(15, "dot:%.2f frac:%.2f =%.0f/%.0f ", dot, frac, maxDPS, targetDPS);
+                Com_Printf(CON_CHANNEL_SERVER, "dot:%.2f frac:%.2f =%.0f/%.0f ", dot, frac, maxDPS, targetDPS);
             VecToQuat(currentDir, currentQuat);
             VecToQuat(targetDir, targetQuat);
             QuatSlerp(currentQuat, targetQuat, frac, resultQuat);
@@ -2544,7 +2544,7 @@ double __cdecl JavelinRotateDir(gentity_s *ent, const float *currentDir, const f
             resultDir[1] = targetDir[1];
             resultDir[2] = targetDir[2];
             if (missileDebugText->current.enabled)
-                Com_Printf(15, "dot:%.2f (%.0f > %.0f) ", dot, maxDPS, targetDPS);
+                Com_Printf(CON_CHANNEL_SERVER, "dot:%.2f (%.0f > %.0f) ", dot, maxDPS, targetDPS);
             return 0.0;
         }
     }
@@ -2554,7 +2554,7 @@ double __cdecl JavelinRotateDir(gentity_s *ent, const float *currentDir, const f
         resultDir[1] = targetDir[1];
         resultDir[2] = targetDir[2];
         if (missileDebugText->current.enabled)
-            Com_Printf(15, "dot:%.2f ", dot);
+            Com_Printf(CON_CHANNEL_SERVER, "dot:%.2f ", dot);
         return 0.0;
     }
 }
@@ -2640,7 +2640,7 @@ char __cdecl JavelinClimbExceededAngle(gentity_s *ent, const float *targetPos)
     if (limit <= (double)v3)
         return 0;
     if (missileDebugText->current.enabled)
-        Com_Printf(15, "Javelin: *** Exceeded climb angle ***\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Javelin: *** Exceeded climb angle ***\n");
     return 1;
 }
 
@@ -2656,7 +2656,7 @@ char __cdecl JavelinClimbWithinDistance(gentity_s *ent, const float *targetPos)
     if (distance >= 400.0)
         return 0;
     if (missileDebugText->current.enabled)
-        Com_Printf(15, "Javelin: *** Exceeded climb distance ***\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Javelin: *** Exceeded climb distance ***\n");
     return 1;
 }
 

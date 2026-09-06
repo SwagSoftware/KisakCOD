@@ -64,9 +64,9 @@ GfxLightDef *__cdecl R_RegisterLightDef_LoadObj(const char *name)
     }
     if (lightGlob.defCount == 64)
     {
-        Com_Printf(8, "Loaded light defs:\n");
+        Com_Printf(CON_CHANNEL_GFX, "Loaded light defs:\n");
         for (defIndexa = 0; defIndexa < lightGlob.defCount; ++defIndexa)
-            Com_Printf(8, "  %s\n", lightGlob.defs[defIndexa]->name);
+            Com_Printf(CON_CHANNEL_GFX, "  %s\n", lightGlob.defs[defIndexa]->name);
         Com_Error(
             ERR_DROP,
             "Can't load light def %s; %i unique light defs already loaded",

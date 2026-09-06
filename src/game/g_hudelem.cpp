@@ -754,7 +754,7 @@ void __cdecl HECmd_SetTargetEnt(scr_entref_t entref)
     ent = Scr_GetEntity(0);
     hud->elem.targetEntNum = ent->s.number;
     if ((ent->r.svFlags & 0x10) == 0)
-        Com_PrintWarning(15, "SetTargetEnt() called on a non-broadcasting entity, may not show in client snapshots.\n");
+        Com_PrintWarning(CON_CHANNEL_SERVER, "SetTargetEnt() called on a non-broadcasting entity, may not show in client snapshots.\n");
 }
 
 void __cdecl HECmd_ClearTargetEnt(scr_entref_t entref)
@@ -1048,12 +1048,12 @@ void __cdecl HECmd_SetPlayerNameString(scr_entref_t entref)
         }
         else
         {
-            Com_Printf(23, "Invalid entity passed to hudelem setplayernamestring(), entity is not a client\n");
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Invalid entity passed to hudelem setplayernamestring(), entity is not a client\n");
         }
     }
     else
     {
-        Com_Printf(23, "Invalid entity passed to hudelem setplayernamestring()\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Invalid entity passed to hudelem setplayernamestring()\n");
     }
 }
 
@@ -1075,12 +1075,12 @@ void __cdecl HECmd_SetGameTypeString(scr_entref_t entref)
         }
         else
         {
-            Com_Printf(23, "Invalid gametype '%s'\n", gametype);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Invalid gametype '%s'\n", gametype);
         }
     }
     else
     {
-        Com_Printf(23, "Invalid entity passed to hudelem setgametypestring()\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Invalid entity passed to hudelem setgametypestring()\n");
     }
 }
 
@@ -1101,12 +1101,12 @@ void __cdecl HECmd_SetMapNameString(scr_entref_t entref)
         }
         else
         {
-            Com_Printf(23, "Invalid map name passed to hudelem setmapnamestring(), map not found\n");
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Invalid map name passed to hudelem setmapnamestring(), map not found\n");
         }
     }
     else
     {
-        Com_Printf(23, "Invalid mapname passed to hudelem setmapnamestring()\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Invalid mapname passed to hudelem setmapnamestring()\n");
     }
 }
 #endif

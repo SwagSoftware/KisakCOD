@@ -1465,7 +1465,7 @@ int32_t __cdecl G_UpdateClientInfo(gentity_s *ent)
         }
         else
         {
-            Com_PrintWarning(16, "G_UpdateClientInfo(): Veh attached, but no ownerNum\n");
+            Com_PrintWarning(CON_CHANNEL_SYSTEM, "G_UpdateClientInfo(): Veh attached, but no ownerNum\n");
             client->sess.cs.attachedVehEntNum = ENTITYNUM_NONE;
             client->sess.cs.attachedVehSlotIndex = 0;
         }

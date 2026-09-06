@@ -59,7 +59,7 @@ void __cdecl CL_WriteVoicePacket(int localClientNum)
         }
         NET_OutOfBandVoiceData(clc->netchan.sock, clc->serverAddress, msg.data, msg.cursize);
         if (cl_showSend->current.enabled)
-            Com_Printf(14, "voice: %i\n", msg.cursize);
+            Com_Printf(CON_CHANNEL_CLIENT, "voice: %i\n", msg.cursize);
     }
 }
 
@@ -78,13 +78,13 @@ void __cdecl CL_VoicePacket(int localClientNum, msg_t *msg)
             voicePacket.dataSize = MSG_ReadByte(msg);
             if (voicePacket.dataSize <= 0 || voicePacket.dataSize > 256)
             {
-                Com_Printf(14, "Invalid server voice packet of %i bytes\n", voicePacket.dataSize);
+                Com_Printf(CON_CHANNEL_CLIENT, "Invalid server voice packet of %i bytes\n", voicePacket.dataSize);
                 return;
             }
             MSG_ReadData(msg, voicePacket.data, voicePacket.dataSize);
             if (voicePacket.talker >= 0x40u)
             {
-                Com_Printf(14, "Invalid voice packet - talker was %i\n", voicePacket.talker);
+                Com_Printf(CON_CHANNEL_CLIENT, "Invalid voice packet - talker was %i\n", voicePacket.talker);
                 return;
             }
             if (!CL_IsPlayerMuted(localClientNum, voicePacket.talker) && cl_voice->current.enabled)

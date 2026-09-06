@@ -188,7 +188,7 @@ void __cdecl RB_Stats_f()
         {
         LABEL_2:
             v0 = Cmd_Argv(0);
-            Com_Printf(8, "USAGE: %s [cur|max]\n", v0);
+            Com_Printf(CON_CHANNEL_GFX, "USAGE: %s [cur|max]\n", v0);
             return;
         }
     }
@@ -202,17 +202,17 @@ void __cdecl RB_Stats_Display(const GfxFrameStats *frameStats)
 
     RB_Stats_Summarize("Visible", frameStats->viewStats);
     RB_Stats_Summarize("Shadow", &frameStats->viewStats[1]);
-    Com_Printf(8, "SUMMARY:\n");
+    Com_Printf(CON_CHANNEL_GFX, "SUMMARY:\n");
     Com_Printf(
-        8,
+        CON_CHANNEL_GFX,
         "%i raw tris (%i geo, %i fx)\n",
         frameStats->fxIndexCount / 3 + frameStats->geoIndexCount / 3,
         frameStats->geoIndexCount / 3,
         frameStats->fxIndexCount / 3);
     v1 = RB_Stats_TotalIndexCount();
-    Com_Printf(8, "%i total tris\n", v1 / 3);
+    Com_Printf(CON_CHANNEL_GFX, "%i total tris\n", v1 / 3);
     v2 = RB_Stats_TotalPrimCount();
-    Com_Printf(8, "%i total prims\n", v2);
+    Com_Printf(CON_CHANNEL_GFX, "%i total prims\n", v2);
 }
 
 void __cdecl RB_Stats_Summarize(const char *label, const GfxViewStats *viewStats)
@@ -225,10 +225,10 @@ void __cdecl RB_Stats_Summarize(const char *label, const GfxViewStats *viewStats
     int primIndex; // [esp+30h] [ebp-8h]
     int histogramIndex; // [esp+34h] [ebp-4h]
 
-    Com_Printf(8, "\n=== %s Geometry (%i drawsurfs) ===\n", label, viewStats->drawSurfCount);
-    Com_Printf(8, "+--------------+-----+-------+-------+-------+-------+-------+\n");
-    Com_Printf(8, "|geometry type |prims|   tris|s indxs|s verts|d indxs|d verts|\n");
-    Com_Printf(8, "+--------------+-----+-------+-------+-------+-------+-------+\n");
+    Com_Printf(CON_CHANNEL_GFX, "\n=== %s Geometry (%i drawsurfs) ===\n", label, viewStats->drawSurfCount);
+    Com_Printf(CON_CHANNEL_GFX, "+--------------+-----+-------+-------+-------+-------+-------+\n");
+    Com_Printf(CON_CHANNEL_GFX, "|geometry type |prims|   tris|s indxs|s verts|d indxs|d verts|\n");
+    Com_Printf(CON_CHANNEL_GFX, "+--------------+-----+-------+-------+-------+-------+-------+\n");
     memset(&total, 0, sizeof(total));
     for (primIndex = 0; primIndex < 10; ++primIndex)
     {
@@ -236,9 +236,9 @@ void __cdecl RB_Stats_Summarize(const char *label, const GfxViewStats *viewStats
         RB_Stats_SummarizePrimStats(primStatsLabel[primIndex], primStats);
         RB_Stats_AccumulatePrimStats(primStats, &total);
     }
-    Com_Printf(8, "+--------------+-----+-------+-------+-------+-------+-------+\n");
+    Com_Printf(CON_CHANNEL_GFX, "+--------------+-----+-------+-------+-------+-------+-------+\n");
     RB_Stats_SummarizePrimStats("total", &total);
-    Com_Printf(8, "+--------------+-----+-------+-------+-------+-------+-------+\n");
+    Com_Printf(CON_CHANNEL_GFX, "+--------------+-----+-------+-------+-------+-------+-------+\n");
     maxPrimsInHistogram = 0;
     for (histogramIndex = 0; histogramIndex < 16; ++histogramIndex)
     {
@@ -247,22 +247,22 @@ void __cdecl RB_Stats_Summarize(const char *label, const GfxViewStats *viewStats
     }
     if (maxPrimsInHistogram)
     {
-        Com_Printf(8, "\nTriangles Per Primitive Histogram:\n");
+        Com_Printf(CON_CHANNEL_GFX, "\nTriangles Per Primitive Histogram:\n");
         for (histogramIndex = 0; histogramIndex < 16; ++histogramIndex)
         {
             if (histogramIndex >= 15)
-                Com_Printf(8, " > %4i: ", s_stencilFuncTable_52[histogramIndex + 7]);
+                Com_Printf(CON_CHANNEL_GFX, " > %4i: ", s_stencilFuncTable_52[histogramIndex + 7]);
             else
-                Com_Printf(8, "<= %4i: ", drawPrimHistogramLimit[histogramIndex]);
+                Com_Printf(CON_CHANNEL_GFX, "<= %4i: ", drawPrimHistogramLimit[histogramIndex]);
             Com_Printf(
-                8,
+                CON_CHANNEL_GFX,
                 "%3i (%4.1f%%) ",
                 viewStats->drawPrimHistogram[histogramIndex],
                 (double)viewStats->drawPrimHistogram[histogramIndex] * 100.0 / (double)total.primCount);
             barBlocks = (40 * viewStats->drawPrimHistogram[histogramIndex] + maxPrimsInHistogram / 2) / maxPrimsInHistogram;
             for (barIndex = 0; barIndex < barBlocks; ++barIndex)
-                Com_Printf(8, "#");
-            Com_Printf(8, "\n");
+                Com_Printf(CON_CHANNEL_GFX, "#");
+            Com_Printf(CON_CHANNEL_GFX, "\n");
         }
     }
 }
@@ -287,66 +287,66 @@ void __cdecl RB_Stats_SummarizePrimStats(const char *label, const GfxPrimStats *
     char *v7; // [esp+14h] [ebp-28h]
     char text[32]; // [esp+18h] [ebp-24h] BYREF
 
-    Com_Printf(8, "|%-14s", label);
+    Com_Printf(CON_CHANNEL_GFX, "|%-14s", label);
     if (primStats->primCount)
     {
         //v7 = itoa(primStats->primCount, text, 0xAu);
         v7 = _itoa(primStats->primCount, text, 0xAu);
-        Com_Printf(8, "|%5s", v7);
+        Com_Printf(CON_CHANNEL_GFX, "|%5s", v7);
     }
     else
     {
-        Com_Printf(8, "|%5s", "");
+        Com_Printf(CON_CHANNEL_GFX, "|%5s", "");
     }
     if (primStats->triCount)
     {
         //v6 = itoa(primStats->triCount, text, 0xAu);
         v6 = _itoa(primStats->triCount, text, 0xAu);
-        Com_Printf(8, "|%7s", v6);
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", v6);
     }
     else
     {
-        Com_Printf(8, "|%7s", "");
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", "");
     }
     if (primStats->staticIndexCount)
     {
         //v5 = itoa(primStats->staticIndexCount, text, 0xAu);
         v5 = _itoa(primStats->staticIndexCount, text, 0xAu);
-        Com_Printf(8, "|%7s", v5);
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", v5);
     }
     else
     {
-        Com_Printf(8, "|%7s", "");
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", "");
     }
     if (primStats->staticVertexCount)
     {
         //v4 = itoa(primStats->staticVertexCount, text, 0xAu);
         v4 = _itoa(primStats->staticVertexCount, text, 0xAu);
-        Com_Printf(8, "|%7s", v4);
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", v4);
     }
     else
     {
-        Com_Printf(8, "|%7s", "");
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", "");
     }
     if (primStats->dynamicIndexCount)
     {
         //v3 = itoa(primStats->dynamicIndexCount, text, 0xAu);
         v3 = _itoa(primStats->dynamicIndexCount, text, 0xAu);
-        Com_Printf(8, "|%7s", v3);
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", v3);
     }
     else
     {
-        Com_Printf(8, "|%7s", "");
+        Com_Printf(CON_CHANNEL_GFX, "|%7s", "");
     }
     if (primStats->dynamicVertexCount)
     {
         //v2 = itoa(primStats->dynamicVertexCount, text, 0xAu);
         v2 = _itoa(primStats->dynamicVertexCount, text, 0xAu);
-        Com_Printf(8, "|%7s|\n", v2);
+        Com_Printf(CON_CHANNEL_GFX, "|%7s|\n", v2);
     }
     else
     {
-        Com_Printf(8, "|%7s|\n", "");
+        Com_Printf(CON_CHANNEL_GFX, "|%7s|\n", "");
     }
 }
 

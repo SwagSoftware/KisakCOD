@@ -17,7 +17,7 @@
 void MSS_InitFailed()
 {
     if (Dvar_GetInt("r_vc_compile") != 2)
-        Com_Printf(9, "OpenAL sound system initialization failed\n");
+        Com_Printf(CON_CHANNEL_SOUND, "OpenAL sound system initialization failed\n");
 }
 
 // Mirrors MSS_Init + MSS_open_digital_driver in snd_mss.cpp. Unlike Miles (which opens a
@@ -39,12 +39,12 @@ char __cdecl MSS_Init()
     else
     {
         if (integer != 22)
-            Com_Printf(9, "invalid value %i for snd_khz, using 22 khz instead\n", snd_khz->current.integer);
+            Com_Printf(CON_CHANNEL_SOUND, "invalid value %i for snd_khz, using 22 khz instead\n", snd_khz->current.integer);
         hertz = 22050;
     }
 
     Com_Printf(
-        9,
+        CON_CHANNEL_SOUND,
         "Attempting %i kHz %i bit [%s] sound\n",
         hertz / 1000,
         16,
@@ -53,7 +53,7 @@ char __cdecl MSS_Init()
     alGlob.device = alcOpenDevice(NULL);
     if (!alGlob.device)
     {
-        Com_PrintError(9, "ERROR: Couldn't open OpenAL device\n");
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Couldn't open OpenAL device\n");
         return 0;
     }
 
@@ -61,7 +61,7 @@ char __cdecl MSS_Init()
     alGlob.context = alcCreateContext(alGlob.device, attrs);
     if (!alGlob.context || !alcMakeContextCurrent(alGlob.context))
     {
-        Com_PrintError(9, "ERROR: Couldn't create OpenAL context\n");
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Couldn't create OpenAL context\n");
         if (alGlob.context)
             alcDestroyContext(alGlob.context);
         alcCloseDevice(alGlob.device);

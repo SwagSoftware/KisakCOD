@@ -115,7 +115,7 @@ void DebugDrawNodePicking(const char *msg, actor_s *self, const pathnode_t *node
         {
             if (debugNodeIndex >= 512)
             {
-                Com_PrintWarning(18, "DebugDrawNodePicking: Hit max [%d] debug nodes\n", 512);
+                Com_PrintWarning(CON_CHANNEL_AI, "DebugDrawNodePicking: Hit max [%d] debug nodes\n", 512);
                 return;
             }
         }

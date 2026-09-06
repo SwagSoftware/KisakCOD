@@ -127,7 +127,7 @@ int __cdecl CL_GetSnapshot(int localClientNum, snapshot_s *snapshot)
         if (com_statmon->current.enabled)
             StatMon_Warning(4, 3000, "code_warning_snapshotents");
         else
-            Com_DPrintf(14, "CL_GetSnapshot: truncated %i entities to %i\n", clients[0].snapshots[0].numEntities, 2048);
+            Com_DPrintf(CON_CHANNEL_CLIENT, "CL_GetSnapshot: truncated %i entities to %i\n", clients[0].snapshots[0].numEntities, 2048);
         numEntities = 2048;
     }
     v4 = 0;
@@ -575,7 +575,7 @@ int __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int boneIndex)
         if (warnCount != SkelTimeStamp)
         {
             warnCount = SkelTimeStamp;
-            Com_PrintWarning(14, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
+            Com_PrintWarning(CON_CHANNEL_CLIENT, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
         }
         return 1;
     }
@@ -603,7 +603,7 @@ void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration
                 if (loc_warningsAsErrors->current.enabled)
                     Com_Error(ERR_LOCALIZATION, "Could not translate subtitle text: \"%s\"", text);
                 else
-                    Com_PrintWarning(14, "WARNING: Could not translate subtitle text: \"%s\"\n", text);
+                    Com_PrintWarning(CON_CHANNEL_CLIENT, "WARNING: Could not translate subtitle text: \"%s\"\n", text);
                 String = va("^1UNLOCALIZED(^7%s^1)^7", text);
             }
             else
@@ -611,7 +611,7 @@ void __cdecl CL_SubtitlePrint(int localClientNum, const char *text, int duration
                 String = text;
             }
         }
-        CL_ConsolePrint(localClientNum, 4, String, duration, pixelWidth, 32);
+        CL_ConsolePrint(localClientNum, CON_CHANNEL_SUBTITLE, String, duration, pixelWidth, 32);
     }
 }
 
@@ -947,7 +947,7 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
     clientUIActives[0].cgameInitCalled = 1;
     CG_Init(localClientNum, savegame);
     Com_Printf(
-        14,
+        CON_CHANNEL_CLIENT,
         "CL_InitCGame: %5.2f seconds\n",
         (double)(Sys_Milliseconds() - startTime) / 1000.0
     );
@@ -1047,7 +1047,7 @@ void CL_UpdateTimeDemo()
     v5 = 50 * ++cls.timeDemoFrames;
     cls.timeDemoPrev = v4;
     clients[0].serverTime = v5 + cls.timeDemoBaseTime;
-    Com_Printf(14, "time %i (UpdateTimeDemo)\n", v5 + cls.timeDemoBaseTime);
+    Com_Printf(CON_CHANNEL_CLIENT, "time %i (UpdateTimeDemo)\n", v5 + cls.timeDemoBaseTime);
 }
 
 void __cdecl CL_SetCGameTime(int localClientNum)

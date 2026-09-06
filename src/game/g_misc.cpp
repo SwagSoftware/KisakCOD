@@ -42,7 +42,7 @@ void __cdecl SP_light(gentity_s *self)
             light = Com_GetPrimaryLight(primaryLightIndex);
             if (!VecNCompareCustomEpsilon(light->origin, self->r.currentOrigin, 1.0, 3))
                 Com_PrintError(
-                    1,
+                    CON_CHANNEL_ERROR,
                     "No primary light was found at (%.0f %.0f %.0f).  You may have added, deleted, or moved a primary light since the last full map compile.  You should recompile the map before using MyMapEnts to avoid issues with primary lights.\n",
                     self->r.currentOrigin[0],
                     self->r.currentOrigin[1],
@@ -103,7 +103,7 @@ void __cdecl SP_info_volume(gentity_s *self)
     else
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Killing info_volume at (%f %f %f) because the brush model is invalid.\n",
             self->s.lerp.pos.trBase[0],
             self->s.lerp.pos.trBase[1],

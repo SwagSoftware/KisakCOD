@@ -422,7 +422,7 @@ void __cdecl FX_AddVisBlocker(FxSystem *system, const float *posWorld, float rad
     else if (warnCount_1 != system->frameCount)
     {
         warnCount_1 = system->frameCount;
-        Com_PrintWarning(21, "More than %i visibility blocking particles exist concurrently\n", 256);
+        Com_PrintWarning(CON_CHANNEL_FX, "More than %i visibility blocking particles exist concurrently\n", 256);
     }
 }
 

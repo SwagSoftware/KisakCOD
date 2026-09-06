@@ -1078,13 +1078,13 @@ void __cdecl ActorCmd_Teleport(scr_entref_t entref)
         Sentient_GetEyePosition(player->sentient, vEyePos);
         if (PointCouldSeeSpawn(vEyePos, vSpawnPos, player->s.number, entref.entnum))
         {
-            Com_DPrintf(18, "Teleport (of actor %i) failed because player could see goal pos.\n", ent->s.number);
+            Com_DPrintf(CON_CHANNEL_AI, "Teleport (of actor %i) failed because player could see goal pos.\n", ent->s.number);
             Scr_AddInt(0);
             return;
         }
         if (PointCouldSeeSpawn(vEyePos, ent->r.currentOrigin, player->s.number, entref.entnum))
         {
-            Com_DPrintf(18, "Teleport failed because player could see actor (%i).\n", ent->s.number);
+            Com_DPrintf(CON_CHANNEL_AI, "Teleport failed because player could see actor (%i).\n", ent->s.number);
             Scr_AddInt(0);
             return;
         }
@@ -1094,7 +1094,7 @@ void __cdecl ActorCmd_Teleport(scr_entref_t entref)
     }
     if (Actor_HasPath(self) && self->Path.iPathEndTime)
     {
-        Com_DPrintf(18, "Teleport failed because actor (%i) in mid-stopping.\n", ent->s.number);
+        Com_DPrintf(CON_CHANNEL_AI, "Teleport failed because actor (%i) in mid-stopping.\n", ent->s.number);
         Scr_AddInt(0);
         return;
     }
@@ -1365,7 +1365,7 @@ void __cdecl ActorCmd_CheckGrenadeThrowPos(scr_entref_t entref)
         G_TraceCapsule(v33, vTargetPos, vec3_origin, vec3_origin, v32, ENTITYNUM_NONE, 2065);
 
         if (v33[0].fraction > 0.5)
-            Com_Printf(18, "targetPos for checkGrenadeThrowPos not at ground level\n");
+            Com_Printf(CON_CHANNEL_AI, "targetPos for checkGrenadeThrowPos not at ground level\n");
 
         self->vGrenadeTargetPos[0] = vTargetPos[0];
         self->vGrenadeTargetPos[1] = vTargetPos[1];
@@ -2364,7 +2364,7 @@ void __cdecl ActorCmd_SetGoalNode(scr_entref_t entref)
     if (!Pathnode->constant.totalLinkCount && (Pathnode->constant.spawnflags & 1) == 0)
     {
         Com_PrintError(
-            18,
+            CON_CHANNEL_AI,
             "AI %d's goal node at (%0.f, %0.f, %0.f) does not have any path links\n",
             self->ent->s.number,
             Pathnode->constant.vOrigin[0],

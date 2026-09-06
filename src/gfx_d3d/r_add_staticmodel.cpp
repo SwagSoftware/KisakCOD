@@ -165,7 +165,7 @@ void __cdecl R_EndDumpStaticModelLodInfo()
         {
             FS_FCloseFile(g_dumpStaticModelFileHandle);
             basePath = Sys_DefaultInstallPath();
-            Com_Printf(18, "^7Successfully wrote static model info [%s\\%s].\n", basePath, g_dumpStaticModelFilePath);
+            Com_Printf(CON_CHANNEL_AI, "^7Successfully wrote static model info [%s\\%s].\n", basePath, g_dumpStaticModelFilePath);
         }
     }
 }
@@ -518,7 +518,7 @@ void __cdecl R_DumpStaticModelLodInfo(const GfxStaticModelDrawInst *smodelDrawIn
         else
         {
             g_dumpStaticModelFileHandle = -1;
-            Com_PrintError(1, "Could not dump model info.\n");
+            Com_PrintError(CON_CHANNEL_ERROR, "Could not dump model info.\n");
         }
     }
 }

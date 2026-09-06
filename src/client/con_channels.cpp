@@ -91,16 +91,16 @@ bool __cdecl Con_IsChannelVisible(print_msg_dest_t dest, uint32_t channel, int32
         return 0;
     if (dest == CON_DEST_MINICON)
     {
-        if (channel == 2 || channel == 3 || channel == 4)
+        if (Con_IsNotifyChannel(channel))
             return 0;
         dest = CON_DEST_CONSOLE;
     }
-    if (dest == CON_DEST_CONSOLE && !channel)
+    if (dest == CON_DEST_CONSOLE && channel == CON_CHANNEL_DONT_FILTER)
         return 1;
     if (Com_BitCheckAssert(pcGlob.filters[dest], channel, 32))
         return 1;
     error = (errorflags >> 5) & 0x1F;
-    return (error == 3 || error == 2) && Com_BitCheckAssert(pcGlob.filters[dest], 1, 32);
+    return (error == 3 || error == 2) && Com_BitCheckAssert(pcGlob.filters[dest], CON_CHANNEL_ERROR, 32);
 }
 
 void __cdecl Con_WriteFilterConfigString(int32_t f)
@@ -220,20 +220,20 @@ void __cdecl Con_FilterShowChannel(print_msg_dest_t dest, const char *channelNam
                 if (!Com_BitCheckAssert(pcGlob.filters[dest], channel, 32))
                 {
                     Com_BitSetAssert(pcGlob.filters[dest], channel, 32);
-                    Com_Printf(0, "Adding channel: %s\n", pcGlob.openChannels[channel].name);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "Adding channel: %s\n", pcGlob.openChannels[channel].name);
                     ++count;
                 }
             }
             else if (Com_BitCheckAssert(pcGlob.filters[dest], channel, 32))
             {
                 Com_BitClearAssert(pcGlob.filters[dest], channel, 32);
-                Com_Printf(0, "Hiding channel: %s\n", pcGlob.openChannels[channel].name);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "Hiding channel: %s\n", pcGlob.openChannels[channel].name);
                 ++count;
             }
         }
     }
     if (!count)
-        Com_Printf(0, "No channels added or hidden\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "No channels added or hidden\n");
 }
 
 const char *builtinChannels[25] =
@@ -304,7 +304,7 @@ void __cdecl Con_ChannelList_f()
         if (channel)
         {
             if (pcGlob.openChannels[channel].name[0])
-                Com_Printf(0, "%s\n", pcGlob.openChannels[channel].name);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", pcGlob.openChannels[channel].name);
         }
     }
 }
@@ -334,7 +334,7 @@ void __cdecl Con_FilterAdd(bool show)
     else
     {
         v1 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s <channel>\n<channel> may include wildcards */?\n", v1);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s <channel>\n<channel> may include wildcards */?\n", v1);
     }
 }
 
@@ -352,7 +352,7 @@ void __cdecl Con_FilterList_f()
         if (channel)
         {
             if (Con_IsChannelVisible(CON_DEST_CONSOLE, channel, 0))
-                Com_Printf(0, "%s\n", pcGlob.openChannels[channel].name);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", pcGlob.openChannels[channel].name);
         }
     }
 }

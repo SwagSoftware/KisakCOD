@@ -14,7 +14,7 @@ void __cdecl SV_DirectConnect()
 {
     client_t *clients; // r31
 
-    Com_DPrintf(15, "SVC_DirectConnect ()\n");
+    Com_DPrintf(CON_CHANNEL_SERVER, "SVC_DirectConnect ()\n");
     clients = svs.clients;
     memset(svs.clients, 0, sizeof(client_t));
     clients->gentity = SV_GentityNum(0);

@@ -197,7 +197,7 @@ char __cdecl Com_NewPlayerProfile(const char *profileName)
 
     if (Com_IsValidPlayerProfileDir(profileName))
     {
-        Com_Printf(16, "Profile '%s' already exists\n", profileName);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Profile '%s' already exists\n", profileName);
         return 0;
     }
     else
@@ -206,7 +206,7 @@ char __cdecl Com_NewPlayerProfile(const char *profileName)
         FS_BuildOSPath((char *)fs_basepath->current.integer, (char*)"players", profilePath, osPath);
         if (FS_CreatePath(osPath))
         {
-            Com_Printf(16, "Unable to create new profile path: %s\n", osPath);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Unable to create new profile path: %s\n", osPath);
             return 0;
         }
         else
@@ -346,7 +346,7 @@ char __cdecl Com_SetRecommendedCpu(int localClientNum, const SysInfo *info, char
     }
     if (!v8)
         return 0;
-    Com_Printf(16, "configure_mp.csv: using CPU configuration %.0f GHz %i MB\n", v7[0], LODWORD(v7[3]));
+    Com_Printf(CON_CHANNEL_SYSTEM, "configure_mp.csv: using CPU configuration %.0f GHz %i MB\n", v7[0], LODWORD(v7[3]));
     Cbuf_AddText(localClientNum, "exec configure_mp.cfg");
     Cbuf_Execute(localClientNum, 0);
     Com_SetConfigureDvars(dvarCount, dvarNames, dvarValues);
@@ -454,7 +454,7 @@ char __cdecl Com_SetRecommendedGpu(const SysInfo *info, char **text)
                 }
                 else
                 {
-                    Com_Printf(16, "configure_mp.csv: using GPU configuration \"%s\"\n", s0);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "configure_mp.csv: using GPU configuration \"%s\"\n", s0);
                     Com_GetConfigureDvarValues(dvarCount, (const char **)text, dvarValues);
                     Com_SetConfigureDvars(dvarCount, dvarNames, dvarValues);
                     v6 = 1;
@@ -525,7 +525,7 @@ void __cdecl Com_SetRecommended(int localClientNum, int restart)
     char *csv; // [esp+278h] [ebp-8h] BYREF
     char *text; // [esp+27Ch] [ebp-4h] BYREF
 
-    Com_Printf(16, "========= autoconfigure\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "========= autoconfigure\n");
     Sys_GetInfo(&info);
     info.configureGHz = info.configureGHz * 1.02;
     if (info.sysMB >= 128)

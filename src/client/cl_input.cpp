@@ -121,7 +121,7 @@ void __cdecl IN_KeyDown(kbutton_t *b)
         {
             if (b->down[1])
             {
-                Com_Printf(14, "Three keys down for a button!\n");
+                Com_Printf(CON_CHANNEL_CLIENT, "Three keys down for a button!\n");
                 return;
             }
             b->down[1] = k;
@@ -561,7 +561,7 @@ void __cdecl IN_RemoteKeyboard()
     }
     else
     {
-        Com_Printf(0, "USAGE: remoteKey <value> <value> <value>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: remoteKey <value> <value> <value>\n");
     }
 }
 
@@ -585,12 +585,12 @@ void __cdecl IN_RemoteMouseMove()
         }
         else
         {
-            Com_Printf(0, "USAGE: mouseMove <value> <value>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: mouseMove <value> <value>\n");
         }
     }
     else
     {
-        Com_Printf(0, " Invalid State for using remote Mouse input : Must be in God Mode, UFO, or NOCLIP\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, " Invalid State for using remote Mouse input : Must be in God Mode, UFO, or NOCLIP\n");
     }
 }
 
@@ -1164,7 +1164,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
         if ((float)((float)v14 / (float)oldAngles) != 0.0 && cl_showMouseRate->current.enabled)
         {
             v16 = (float)((float)v14 / (float)oldAngles);
-            Com_Printf(14, (const char *)HIDWORD(v16), LODWORD(v16), LODWORD(v15));
+            Com_Printf(CON_CHANNEL_CLIENT, (const char *)HIDWORD(v16), LODWORD(v16), LODWORD(v15));
             HIDWORD(forward) = frame_msec;
         }
         if ((clients[0].snap.ps.pm_flags & 0x800) == 0)
@@ -1260,7 +1260,7 @@ void __cdecl CL_MouseMove(usercmd_s *cmd)
         accelSensitivity = rate * cl_mouseAccel->current.value + cl_sensitivity->current.value;
         accelSensitivity = accelSensitivity * clients[0].cgameFOVSensitivityScale;
         if (rate != 0.0 && cl_showMouseRate->current.enabled)
-            Com_Printf(14, "%f : %f\n", rate, accelSensitivity);
+            Com_Printf(CON_CHANNEL_CLIENT, "%f : %f\n", rate, accelSensitivity);
         if ((clients[0].snap.ps.pm_flags & 0x800) == 0)
         {
             mx = mx * accelSensitivity;
@@ -1686,7 +1686,7 @@ void __cdecl CL_WritePacket()
     if (clients[0].cmdNumber - clients[0].cmdNumberAcknowledge > 32)
     {
         v4 = 32;
-        Com_Printf(14, "MAX_PACKET_USERCMDS\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "MAX_PACKET_USERCMDS\n");
     }
     Sys_LeaveCriticalSection(CRITSECT_CLIENT_CMD);
     if (v4 > 0)

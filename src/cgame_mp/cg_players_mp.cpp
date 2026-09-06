@@ -433,7 +433,7 @@ void __cdecl CG_PlayerTurretPositionAndBlend(int32_t localClientNum, centity_s *
                                     else
                                     {
                                         Com_PrintWarning(
-                                            17,
+                                            CON_CHANNEL_PLAYERWEAP,
                                             "WARNING: aborting player positioning on turret since 'tag_weapon' does not exist\n");
                                     }
                                 }
@@ -568,7 +568,7 @@ void __cdecl CG_ResetPlayerEntity(int32_t localClientNum, cg_s *cgameGlob, centi
     }
     if (cg_debugPosition->current.enabled)
         Com_Printf(
-            17,
+            CON_CHANNEL_PLAYERWEAP,
             "%i ResetPlayerEntity yaw=%i\n",
             cent->nextState.number,
             (uint32_t)(ci->torso.yawAngle));

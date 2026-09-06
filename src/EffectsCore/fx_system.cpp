@@ -1919,7 +1919,7 @@ void __cdecl FX_SpawnSound(
     }
     else
     {
-        Com_PrintWarning(21, "Failed to find sound alias '%s'\n", visuals.effectDef.name);
+        Com_PrintWarning(CON_CHANNEL_FX, "Failed to find sound alias '%s'\n", visuals.effectDef.name);
     }
 }
 

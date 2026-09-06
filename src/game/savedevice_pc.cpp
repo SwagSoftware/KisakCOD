@@ -49,7 +49,7 @@ void __cdecl SaveDevice_Init(void)
 
 void __cdecl SV_DisplaySaveErrorUI(void)
 {
-	Com_PrintError(10, "SV_DisplaySaveErrorUI: a save operation failed\n");
+	Com_PrintError(CON_CHANNEL_FILES, "SV_DisplaySaveErrorUI: a save operation failed\n");
 }
 
 bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathSize, char const *filename, enum SaveType saveType)
@@ -81,7 +81,7 @@ bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathS
 
 	if (len >= cleanSavePathSize || len >= 0x40u)
 	{
-		Com_Printf(10, "filename '%s' is too long.\n", filename);
+		Com_Printf(CON_CHANNEL_FILES, "filename '%s' is too long.\n", filename);
 		return false;
 	}
 
@@ -104,7 +104,7 @@ bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathS
 				if (!I_isforfilename(ch))
 				{
 					Com_Printf(
-						10,
+						CON_CHANNEL_FILES,
 						"filename '%s' has invalid character (%c) in filename.  Must use alphanumeric characters only.\n",
 						filename,
 						filename[i]);
@@ -124,7 +124,7 @@ bool __cdecl BuildCleanSavePath(char *cleanSavePath, unsigned int cleanSavePathS
 	if (Com_BuildPlayerProfilePath(cleanSavePath, (int)cleanSavePathSize, "save/%s.svg", buf) < 0
 		|| (unsigned int)Com_BuildPlayerProfilePath(cleanSavePath, (int)cleanSavePathSize, "save/%s.svg", buf) >= cleanSavePathSize)
 	{
-		Com_Printf(10, "filename '%s' is too long.\n", filename);
+		Com_Printf(CON_CHANNEL_FILES, "filename '%s' is too long.\n", filename);
 		return false;
 	}
 	return true;
@@ -232,7 +232,7 @@ int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *save
 #endif
 	if (!handle)
 	{
-		Com_PrintError(10, "WriteSaveToDevice: failed to open '%s' for writing\n", saveHeader->filename);
+		Com_PrintError(CON_CHANNEL_FILES, "WriteSaveToDevice: failed to open '%s' for writing\n", saveHeader->filename);
 		g_saveDevice_lastSaveSucceeded = false;
 		return -1;
 	}
@@ -260,7 +260,7 @@ int __cdecl WriteSaveToDevice(unsigned char *data, struct SaveHeader const *save
 	{
 		FS_DeleteInDir((char*)"save/temp.svg", fs_gamedir);
 		g_saveDevice_lastSaveSucceeded = false;
-		Com_PrintError(10,
+		Com_PrintError(CON_CHANNEL_FILES,
 			"WriteSaveToDevice: short write to '%s' (header %u/%u, body %u/%u)\n",
 			saveHeader->filename,
 			wroteHeader, headerSize,
@@ -288,7 +288,7 @@ int __cdecl WriteSaveToDeviceInternal(struct SaveHeader const *saveHeader)
 	if (!saveHeader)
 		return -1;
 
-	Com_PrintError(10, "WriteSaveToDeviceInternal: not used on PC port\n");
+	Com_PrintError(CON_CHANNEL_FILES, "WriteSaveToDeviceInternal: not used on PC port\n");
 	return -1;
 }
 

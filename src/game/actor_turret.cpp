@@ -244,7 +244,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     DObjAnimMat *tagWeaponMtx = G_DObjGetLocalTagMatrix(pTurret, scr_const.tag_weapon);
     if (!tagWeaponMtx)
     {
-        Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_weapon' does not exist\n");
+        Com_PrintWarning(CON_CHANNEL_AI, "WARNING: aborting turret behavior since 'tag_weapon' does not exist\n");
         Actor_StopUseTurret(self);
         Actor_SetState(self, AIS_EXPOSED);
         return ACTOR_THINK_REPEAT;
@@ -253,7 +253,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
     iassert(self->eAnimMode != AI_ANIM_UNKNOWN);
     if (!self->turretAnimSet)
     {
-        Com_PrintWarning(18, "WARNING: aborting turret behavior since no turret animation specified\n");
+        Com_PrintWarning(CON_CHANNEL_AI, "WARNING: aborting turret behavior since no turret animation specified\n");
         Actor_StopUseTurret(self);
         Actor_SetState(self, AIS_EXPOSED);
         return ACTOR_THINK_REPEAT;
@@ -402,7 +402,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
         DObjAnimMat *tagAimMtx = G_DObjGetLocalTagMatrix(pTurret, scr_const.tag_aim);
         if (!tagAimMtx)
         {
-            Com_PrintWarning(18, "WARNING: aborting turret behavior since 'tag_aim' does not exist\n");
+            Com_PrintWarning(CON_CHANNEL_AI, "WARNING: aborting turret behavior since 'tag_aim' does not exist\n");
             Actor_StopUseTurret(self);
             Actor_SetState(self, AIS_EXPOSED);
             return ACTOR_THINK_REPEAT;
@@ -591,7 +591,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
             pTurretInfo->arcmin[1] += 1.0f;
             if (pTurretInfo->arcmin[1] <= 0.0f)
             {
-                Com_PrintWarning(18, "WARNING: capping rightarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
+                Com_PrintWarning(CON_CHANNEL_AI, "WARNING: capping rightarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
                     pTurret->r.currentOrigin[0], pTurret->r.currentOrigin[1], pTurret->r.currentOrigin[2],
                     -pTurretInfo->arcmin[1]);
                 Vec3Clear(self->Physics.vVelocity);
@@ -605,7 +605,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
             pTurretInfo->arcmax[1] -= 1.0f;
             if (pTurretInfo->arcmax[1] >= 0.0f)
             {
-                Com_PrintWarning(18, "WARNING: capping leftarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
+                Com_PrintWarning(CON_CHANNEL_AI, "WARNING: capping leftarc of turret at (%.2f, %.2f, %.2f) to %.2f\n",
                     pTurret->r.currentOrigin[0], pTurret->r.currentOrigin[1], pTurret->r.currentOrigin[2],
                     pTurretInfo->arcmax[1]);
                 Vec3Clear(self->Physics.vVelocity);
@@ -615,7 +615,7 @@ actor_think_result_t __cdecl Actor_Turret_PostThink(actor_s *self)
             pTurretInfo->arcmax[1] = 0.0f;
         }
 
-        Com_PrintWarning(18,
+        Com_PrintWarning(CON_CHANNEL_AI,
             "WARNING: AI %d at (%.2f, %.2f, %.2f) with turret angles (%.2f, %.2f) detaching from turret due to obstruction\n",
             self->ent->s.number,
             self->ent->r.currentOrigin[0], self->ent->r.currentOrigin[1], self->ent->r.currentOrigin[2],

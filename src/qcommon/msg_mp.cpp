@@ -348,7 +348,7 @@ void __cdecl MSG_WriteString(msg_t *sb, const char *s)
     }
     else
     {
-        Com_Printf(16, "MSG_WriteString: MAX_STRING_CHARS");
+        Com_Printf(CON_CHANNEL_SYSTEM, "MSG_WriteString: MAX_STRING_CHARS");
         MSG_WriteData(sb, (uint8_t *)"", 1u);
     }
 }
@@ -375,7 +375,7 @@ void __cdecl MSG_WriteBigString(msg_t *sb, char *s)
     }
     else
     {
-        Com_Printf(16, "MSG_WriteString: BIG_INFO_STRING");
+        Com_Printf(CON_CHANNEL_SYSTEM, "MSG_WriteString: BIG_INFO_STRING");
         MSG_WriteData(sb, (uint8_t *)"", 1u);
     }
 }
@@ -871,17 +871,17 @@ void __cdecl MSG_ReadDeltaUsercmdKey(msg_t *msg, int key, const usercmd_s *from,
             }
             if (to->buttons >= (1 << BUTTON_BIT_COUNT))
             {
-                Com_PrintError(15, "client sent an invalid buttons value %i\n", to->buttons);
+                Com_PrintError(CON_CHANNEL_SERVER, "client sent an invalid buttons value %i\n", to->buttons);
                 to->buttons = from->buttons;
             }
             if (to->weapon >= 0x80u)
             {
-                Com_PrintError(15, "client sent an invalid weapon number %i\n", to->weapon);
+                Com_PrintError(CON_CHANNEL_SERVER, "client sent an invalid weapon number %i\n", to->weapon);
                 to->weapon = from->weapon;
             }
             if (to->offHandIndex >= 0x80u)
             {
-                Com_PrintError(15, "client sent an invalid offhand index %i\n", to->offHandIndex);
+                Com_PrintError(CON_CHANNEL_SERVER, "client sent an invalid offhand index %i\n", to->offHandIndex);
                 to->offHandIndex = from->offHandIndex;
             }
         }
@@ -908,23 +908,23 @@ int __cdecl MSG_ReadEntityIndex(msg_t *msg, uint32_t indexBits)
     if (MSG_ReadBit(msg))
     {
         if (msg_printEntityNums->current.enabled)
-            Com_Printf(16, "Entity num: 1 bit (inc)\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity num: 1 bit (inc)\n");
         ++msg->lastEntityRef;
     }
     else if (indexBits != 10 || MSG_ReadBit(msg))
     {
         if (msg_printEntityNums->current.enabled)
-            Com_Printf(16, "Entity num: %i bits (full)\n", indexBits + 2);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity num: %i bits (full)\n", indexBits + 2);
         msg->lastEntityRef = MSG_ReadBits(msg, indexBits);
     }
     else
     {
         if (msg_printEntityNums->current.enabled)
-            Com_Printf(16, "Entity num: %i bits (delta)\n", 6);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Entity num: %i bits (delta)\n", 6);
         msg->lastEntityRef += MSG_ReadBits(msg, 4u);
     }
     if (msg_printEntityNums->current.enabled)
-        Com_Printf(16, "Read entity num %i\n", msg->lastEntityRef);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Read entity num %i\n", msg->lastEntityRef);
     if (msg->lastEntityRef < 0)
         MyAssertHandler(
             ".\\qcommon\\msg_mp.cpp",
@@ -1003,7 +1003,7 @@ void __cdecl MSG_ReadDeltaField(
                 *toF = Long;
                 *toF ^= *fromF;
                 if (print)
-                    Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)toF);
             }
             else
             {
@@ -1014,7 +1014,7 @@ void __cdecl MSG_ReadDeltaField(
                 trunc -= 4096;
                 *(float *)toF = (float)trunc;
                 if (print)
-                    Com_Printf(16, "%s:%i ", field->name, trunc);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", field->name, trunc);
             }
         }
         else
@@ -1031,7 +1031,7 @@ void __cdecl MSG_ReadDeltaField(
             *toF = v11;
             *toF ^= *fromF;
             if (print)
-                Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)toF);
         }
         else
         {
@@ -1042,7 +1042,7 @@ void __cdecl MSG_ReadDeltaField(
             trunc -= 4096;
             *(float *)toF = (float)trunc;
             if (print)
-                Com_Printf(16, "%s:%i ", field->name, trunc);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", field->name, trunc);
         }
         return;
     case 0xFFFFFFA8:
@@ -1050,7 +1050,7 @@ void __cdecl MSG_ReadDeltaField(
         *toF = v12;
         *toF ^= *fromF;
         if (print)
-            Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)toF);
         return;
     case 0xFFFFFF9D:
         if (MSG_ReadBit(msg))
@@ -1061,7 +1061,7 @@ void __cdecl MSG_ReadDeltaField(
                 value ^= *fromF;
                 *toF = value;
                 if (print)
-                    Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)toF);
             }
             else
             {
@@ -1072,7 +1072,7 @@ void __cdecl MSG_ReadDeltaField(
                 trunc -= 2048;
                 *(float *)toF = (float)trunc;
                 if (print)
-                    Com_Printf(16, "%s:%i ", field->name, trunc);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", field->name, trunc);
             }
         }
         else
@@ -1115,13 +1115,13 @@ void __cdecl MSG_ReadDeltaField(
         OriginFloat = MSG_ReadOriginFloat(field->bits, msg, *(float *)fromF);
         *(float *)toF = OriginFloat;
         if (print)
-            Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)toF);
         return;
     case 0xFFFFFFA6:
         OriginZFloat = MSG_ReadOriginZFloat(msg, *(float *)fromF);
         *(float *)toF = OriginZFloat;
         if (print)
-            Com_Printf(16, "%s:%f ", field->name, *(float *)toF);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)toF);
         return;
     case 0xFFFFFF9C:
         if (!MSG_ReadBit(msg))
@@ -1188,7 +1188,7 @@ void __cdecl MSG_ReadDeltaField(
             if (sgn && (value & (1 << (bits - 1))) != 0)
                 value |= ~mask;
             if (print)
-                Com_Printf(16, "%s:%i ", field->name, *toF);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", field->name, *toF);
             *toF = value;
         }
         else
@@ -1317,7 +1317,7 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
     if (MSG_ReadBit(msg) == 1)
     {
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
-            Com_Printf(16, "%3i: #%-3i remove\n", msg->readcount, number);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%3i: #%-3i remove\n", msg->readcount, number);
         return 1;
     }
     else if (MSG_ReadBit(msg))
@@ -1326,7 +1326,7 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
         {
             print = 1;
-            Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(uint32_t *)to);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%3i: #%-3i ", msg->readcount, *(uint32_t *)to);
         }
         else
         {
@@ -1343,7 +1343,7 @@ int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to
             if (msg_dumpEnts->current.enabled)
             {
                 EntityTypeName = BG_GetEntityTypeName(*((uint32_t *)to + 1));
-                Com_Printf(14, "%3i: changed ent, eType %s\n", number, EntityTypeName);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i: changed ent, eType %s\n", number, EntityTypeName);
             }
             if (strcmp(stateFields->name, "eType"))
                 MyAssertHandler(".\\qcommon\\msg_mp.cpp", 1782, 0, "%s", "strcmp( stateFields[0].name, \"eType\" ) == 0");
@@ -1445,7 +1445,7 @@ int __cdecl MSG_ReadDeltaStruct(
     if (MSG_ReadBit(msg) == 1)
     {
         if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
-            Com_Printf(16, "%3i: #%-3i remove\n", msg->readcount, number);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%3i: #%-3i remove\n", msg->readcount, number);
         return 1;
     }
     else if (MSG_ReadBit(msg))
@@ -1457,7 +1457,7 @@ int __cdecl MSG_ReadDeltaStruct(
             if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -1))
             {
                 print = 1;
-                Com_Printf(16, "%3i: #%-3i ", msg->readcount, *(uint32_t *)to);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%3i: #%-3i ", msg->readcount, *(uint32_t *)to);
             }
             else
             {
@@ -1626,7 +1626,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -2))
     {
         print = 1;
-        Com_Printf(16, "%3i: playerstate ", msg->readcount);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%3i: playerstate ", msg->readcount);
     }
     else
     {
@@ -1683,7 +1683,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             &to->bobCycle,
             &to->movementDir))
         {
-            Com_PrintError(14, "Unable to find the origin we sent, delta is not going to work");
+            Com_PrintError(CON_CHANNEL_CLIENT, "Unable to find the origin we sent, delta is not going to work");
             // LWSS: if the above function returns false, there is no data set in `to`. 
             // The below copy code is redundant via the memcpy at the top (#36)
             //to->origin[0] = from->origin[0];
@@ -1703,7 +1703,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     if (MSG_ReadBit(msg))
     {
         if (cl_shownet && cl_shownet->current.integer == 4)
-            Com_Printf(16, "%s ", "PS_STATS");
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s ", "PS_STATS");
         int Bits = MSG_ReadBits(msg, MAX_STATS);
         if ((Bits & (1 << STAT_HEALTH)) != 0)
             to->stats[STAT_HEALTH] = MSG_ReadShort(msg);
@@ -1724,7 +1724,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
             if (MSG_ReadBit(msg))
             {
                 if (cl_shownet && cl_shownet->current.integer == 4)
-                    Com_Printf(16, "%s ", "PS_AMMO");
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s ", "PS_AMMO");
                 int Bits = MSG_ReadShort(msg);
                 for (int j = 0; j < 16; ++j)
                 {
@@ -1742,7 +1742,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
         if (MSG_ReadBit(msg))
         {
             if (cl_shownet && cl_shownet->current.integer == 4)
-                Com_Printf(16, "%s ", "PS_AMMOCLIP");
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s ", "PS_AMMOCLIP");
             int Bits = MSG_ReadShort(msg);
             for (int j = 0; j < 16; ++j)
             {
@@ -2061,7 +2061,7 @@ void MSG_initHuffmanInternal()
     time = Sys_Milliseconds();
     Huff_BuildFromData(&msgHuff.compressDecompress, msg_hData);
     time2 = Sys_Milliseconds();
-    Com_Printf(16, "Huffman Took %d Milliseconds\n", time2 - time);
+    Com_Printf(CON_CHANNEL_SYSTEM, "Huffman Took %d Milliseconds\n", time2 - time);
 }
 
 void __cdecl MSG_DumpNetFieldChanges_f()
@@ -2092,22 +2092,22 @@ void __cdecl MSG_DumpNetFieldChanges_f()
     arrayNames[3] = "Player State";
     arrayNames[4] = "Objective";
     arrayNames[5] = "HUD Elem";
-    Com_Printf(0, "========================================\n");
-    Com_Printf(0, "NetField changes. format: field# : #changes\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "========================================\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "NetField changes. format: field# : #changes\n");
     for (iArrayNum = 0; iArrayNum < 6; ++iArrayNum)
     {
-        Com_Printf(0, "========================================\n");
-        Com_Printf(0, "    %s\n", arrayNames[iArrayNum]);
-        Com_Printf(0, "--------------------\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "========================================\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "    %s\n", arrayNames[iArrayNum]);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "--------------------\n");
         array = changeArray[iArrayNum];
         iSize = arraySize[iArrayNum];
         for (i = 0; i < iSize; ++i)
         {
             if (array[i])
-                Com_Printf(0, "%3i :%8i\n", i, array[i]);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%3i :%8i\n", i, array[i]);
         }
     }
-    Com_Printf(0, "========================================\n");
-    Com_Printf(0, "========================================\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "========================================\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "========================================\n");
 }
 

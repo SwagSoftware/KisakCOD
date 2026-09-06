@@ -16,7 +16,7 @@ char __cdecl FX_ValidateFlags(const FxEditorEffectDef *editorEffect, const FxEdi
     if ((edElemDef->flags & 0xF0) != 0xC0)
         return 1;
     Com_PrintError(
-        21,
+        CON_CHANNEL_FX,
         "effect '%s' segment '%s'\nVelocity is 'relative to offset', but generation offset is 'none'\n",
         editorEffect->name,
         edElemDef->name);
@@ -40,7 +40,7 @@ char __cdecl FX_ValidateAtlasSettings(const FxEditorEffectDef *editorEffect, con
         || ((mtlInfoRef.textureAtlasColumnCount - 1) & mtlInfoRef.textureAtlasColumnCount) != 0)
     {
         Com_PrintError(
-            21,
+            CON_CHANNEL_FX,
             "effect '%s' segment '%s':\nmaterial %s is a %i x %i atlas, which is not a power of 2 on both axes\n",
             editorEffect->name,
             edElemDef->name,
@@ -58,7 +58,7 @@ char __cdecl FX_ValidateAtlasSettings(const FxEditorEffectDef *editorEffect, con
                 || mtlInfo.textureAtlasColumnCount != mtlInfoRef.textureAtlasColumnCount)
             {
                 Com_PrintError(
-                    21,
+                    CON_CHANNEL_FX,
                     "effect '%s' segment '%s':\nmaterial %s is a %i x %i atlas, but material %s is a %i x %i atlas\n",
                     editorEffect->name,
                     edElemDef->name,
@@ -82,7 +82,7 @@ char __cdecl FX_ValidateColor(const FxEditorEffectDef *editorEffect, const FxEdi
         if (edElemDef->lightingFrac != 0.0)
         {
             Com_PrintError(
-                21,
+                CON_CHANNEL_FX,
                 "effect '%s' segment '%s'\nDecals cannot have a non-zero lighting fraction.\n",
                 editorEffect->name,
                 edElemDef->name);
@@ -93,13 +93,13 @@ char __cdecl FX_ValidateColor(const FxEditorEffectDef *editorEffect, const FxEdi
     {
         if (edElemDef->lightingFrac < 0.0)
         {
-            Com_PrintError(21, "effect '%s' segment '%s'\nNegative lighting fraction.\n", editorEffect->name, edElemDef->name);
+            Com_PrintError(CON_CHANNEL_FX, "effect '%s' segment '%s'\nNegative lighting fraction.\n", editorEffect->name, edElemDef->name);
             return 0;
         }
         if (edElemDef->lightingFrac > 1.0)
         {
             Com_PrintError(
-                21,
+                CON_CHANNEL_FX,
                 "effect '%s' segment '%s'\nLighting fraction larger than 1.0.\n",
                 editorEffect->name,
                 edElemDef->name);
@@ -116,7 +116,7 @@ char __cdecl FX_ValidateVisuals(const FxEditorEffectDef *editorEffect, const FxE
     if ((edElemDef->elemType == 9 || edElemDef->elemType == 10) && !edElemDef->visualCount)
     {
         Com_PrintError(
-            21,
+            CON_CHANNEL_FX,
             "effect '%s' segment '%s'\nThis type of segment must have at least one visual specified.\n",
             editorEffect->name,
             edElemDef->name);
@@ -127,7 +127,7 @@ char __cdecl FX_ValidateVisuals(const FxEditorEffectDef *editorEffect, const FxE
     if (!edElemDef->trailDef.indCount || !edElemDef->trailDef.vertCount)
     {
         Com_PrintError(
-            21,
+            CON_CHANNEL_FX,
             "effect '%s' segment '%s'\nTrail cross-section cannot be empty.\n",
             editorEffect->name,
             edElemDef->name);
@@ -138,7 +138,7 @@ char __cdecl FX_ValidateVisuals(const FxEditorEffectDef *editorEffect, const FxE
         if (edElemDef->trailDef.inds[indIter] >= edElemDef->trailDef.vertCount)
         {
             Com_PrintError(
-                21,
+                CON_CHANNEL_FX,
                 "effect '%s' segment '%s'\nIndex references out of range vertex '%i'.\n",
                 editorEffect->name,
                 edElemDef->name,
@@ -148,18 +148,18 @@ char __cdecl FX_ValidateVisuals(const FxEditorEffectDef *editorEffect, const FxE
     }
     if (edElemDef->trailRepeatDist <= 0)
     {
-        Com_PrintError(21, "effect '%s' segment '%s'\nTrail repeat dist <= 0.\n", editorEffect->name, edElemDef->name);
+        Com_PrintError(CON_CHANNEL_FX, "effect '%s' segment '%s'\nTrail repeat dist <= 0.\n", editorEffect->name, edElemDef->name);
         return 0;
     }
     if (edElemDef->trailSplitDist <= 0)
     {
-        Com_PrintError(21, "effect '%s' segment '%s'\nTrail split dist <= 0.\n", editorEffect->name, edElemDef->name);
+        Com_PrintError(CON_CHANNEL_FX, "effect '%s' segment '%s'\nTrail split dist <= 0.\n", editorEffect->name, edElemDef->name);
         return 0;
     }
     if ((int)((double)edElemDef->trailRepeatDist * 1000.0) > 0)
         return 1;
     Com_PrintError(
-        21,
+        CON_CHANNEL_FX,
         "effect '%s' segment '%s'\nTrail texture repeat dist too close to, or below 0.\n",
         editorEffect->name,
         edElemDef->name);
@@ -196,7 +196,7 @@ char __cdecl FX_ValidatePhysics(const FxEditorEffectDef *editorEffect, const FxE
     if (elasticityMin >= -EQUAL_EPSILON && elasticityMax <= (1.0f + EQUAL_EPSILON))
         return 1;
     Com_PrintError(
-        21,
+        CON_CHANNEL_FX,
         "effect '%s' segment '%s'\nElasticity %g to %g can go outside the range 0 to 1.\n",
         editorEffect->name,
         edElemDef->name,
@@ -1620,7 +1620,7 @@ const FxEffectDef *__cdecl FX_Convert(const FxEditorEffectDef *editorEffect, voi
                         v2 = FX_RegisterPhysPreset("default");
                         *((_DWORD *)elemVisual->anonymous + 53) = (_DWORD)v2;
                         Com_PrintError(
-                            20,
+                            CON_CHANNEL_PHYS,
                             "ERROR: no physics preset specified for the FX model [%s]\n",
                             *(const char **)elemVisual->anonymous);
                     }

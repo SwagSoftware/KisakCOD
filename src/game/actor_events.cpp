@@ -107,7 +107,7 @@ void __cdecl Actor_DumpEvents(actor_s *self, ai_event_t event, gentity_s *origin
         else
             v7 = -1;
         Com_Printf(
-            18,
+            CON_CHANNEL_AI,
             "%d ^3 %s^7:  from entity^5 %d ^7at time^5 %d\n",
             number,
             g_ai_event_info[event].name,

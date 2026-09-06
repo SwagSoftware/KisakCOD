@@ -98,18 +98,18 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
             }
             if (ic == max)
             {
-                Com_PrintWarning(14, "Warning: abandoning const config string model slot for string %s\n", name);
+                Com_PrintWarning(CON_CHANNEL_CLIENT, "Warning: abandoning const config string model slot for string %s\n", name);
                 for (ic = 1; ic < max && SV_GetConfigstringConst(ic + start) != scr_const._; ++ic)
                     ;
             }
             if (ic == max)
             {
-                Com_Printf(15, "G_FindConfigstringIndex: overflow...\n");
-                Com_Printf(15, "Dumping these %i Config Strings:\n", max);
+                Com_Printf(CON_CHANNEL_SERVER, "G_FindConfigstringIndex: overflow...\n");
+                Com_Printf(CON_CHANNEL_SERVER, "Dumping these %i Config Strings:\n", max);
                 for (ic = 1; ic < max; ++ic)
                 {
                     ConfigstringConst = SV_GetConfigstringConst(ic + start);
-                    Com_Printf(15, "%i: %s\n", ic, SL_ConvertToString(ConfigstringConst));
+                    Com_Printf(CON_CHANNEL_SERVER, "%i: %s\n", ic, SL_ConvertToString(ConfigstringConst));
                 }
                 v9 = va("G_FindConfigstringIndex: overflow (%d): %s", start, name);
                 Com_Error(ERR_DROP, v9);
@@ -162,7 +162,7 @@ LABEL_11:
     {
         configStringIndex = G_FindConfigstringIndex(string, 309, 512, 1, origErrorMsg);
         if (configStringIndex)
-            Com_PrintWarning(24, "WARNING: %s \"%s\" not precached\n", origErrorMsg, string);
+            Com_PrintWarning(CON_CHANNEL_SCRIPT, "WARNING: %s \"%s\" not precached\n", origErrorMsg, string);
     }
     return configStringIndex;
 }
@@ -233,7 +233,7 @@ int __cdecl G_ModelIndex(const char *name)
             }
             if (i == MAX_MODELS)
             {
-                Com_PrintWarning(14, "Warning: abandoning const config string model slot for string %s\n", name);
+                Com_PrintWarning(CON_CHANNEL_CLIENT, "Warning: abandoning const config string model slot for string %s\n", name);
                 for (i = 1; i < MAX_MODELS && SV_GetConfigstringConst(i + 830) != scr_const._; ++i)
                     ;
             }
@@ -1145,7 +1145,7 @@ void __cdecl G_PrintEntities()
         else
             v0 = (char *)"";
         Com_Printf(
-            15,
+            CON_CHANNEL_SERVER,
             "%4i: '%s', origin: %f %f %f\n",
             entityIndex,
             v0,

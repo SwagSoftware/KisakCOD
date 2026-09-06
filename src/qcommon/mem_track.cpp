@@ -970,7 +970,7 @@ void __cdecl track_PrintInfo()
             {
                 iassert( mem_track->name[0] );
                 Com_Printf(
-                    0,
+                    CON_CHANNEL_DONT_FILTER,
                     "%s %s %7i  %-24s %s\n",
                     typeName[type],
                     usageTypeName[mem_trackc->usageType],
@@ -979,38 +979,38 @@ void __cdecl track_PrintInfo()
                     mem_trackc->filename);
             }
         }
-        Com_Printf(0, "\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "\n");
         v7 = XAnimGetTreeMaxMemUsage() / 1024;
         v6 = XAnimGetTreeHighMemUsage() / 1024;
         TreeMemUsage = XAnimGetTreeMemUsage();
-        Com_Printf(0, "anim tree      %7i (high: %7i, max: %7i)\n", TreeMemUsage / 1024, v6, v7);
-        Com_Printf(0, "\ntotals:\n");
-        Com_Printf(0, "-type-             -MB--\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "anim tree      %7i (high: %7i, max: %7i)\n", TreeMemUsage / 1024, v6, v7);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "\ntotals:\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "-type-             -MB--\n");
         addedLine = 0;
         for (i = 0; i < 37; ++i)
         {
             if (info.typeTotal[i] < 0)
             {
                 if (addedLine)
-                    Com_Printf(0, "------------------------\n");
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "------------------------\n");
             }
             else if (info.typeTotal[i] > 51200)
             {
                 v3 = ConvertToMB(info.typeTotal[i]);
-                Com_Printf(0, "%s %5.1f\n", typeName[i], v3);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s %5.1f\n", typeName[i], v3);
                 addedLine = 1;
             }
         }
         v4 = ConvertToMB(info.nonSwapTotal);
-        Com_Printf(0, "current total      %5.1f\n", v4);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "current total      %5.1f\n", v4);
         v5 = ConvertToMB(info.nonSwapMinSpecTotal);
-        Com_Printf(0, "min pc total       %5.1f\n", v5);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "min pc total       %5.1f\n", v5);
         free(sorted_mem_track);
         LeaveCriticalSection(&g_crit);
     }
     else
     {
-        Com_Printf(0, "track_PrintInfo: out of memory\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "track_PrintInfo: out of memory\n");
         LeaveCriticalSection(&g_crit);
     }
 #endif

@@ -146,7 +146,7 @@ uint32_t __cdecl R_AvailableTextureMemory()
 
     currentTexMem = R_DetectCurrentTextureMemory();
     if (s_maxReportedTexMem >= currentTexMem)
-        Com_Printf(8, "Using previously reported texture memory size of %i MB.\n", s_maxReportedTexMem);
+        Com_Printf(CON_CHANNEL_GFX, "Using previously reported texture memory size of %i MB.\n", s_maxReportedTexMem);
     else
         s_maxReportedTexMem = currentTexMem;
     return s_maxReportedTexMem;
@@ -163,7 +163,7 @@ uint32_t __cdecl R_DetectCurrentTextureMemory()
     if (vidMemInMegs)
     {
         Com_Printf(
-            8,
+            CON_CHANNEL_GFX,
             "DirectX reports %i MB of video memory and %i MB of available texture memory.\n",
             vidMemInMegs,
             texMemInMegs);
@@ -173,14 +173,14 @@ uint32_t __cdecl R_DetectCurrentTextureMemory()
         }
         else
         {
-            Com_Printf(8, "Using video memory size to cap used texture memory at %i MB.\n", vidMemInMegs - 16);
+            Com_Printf(CON_CHANNEL_GFX, "Using video memory size to cap used texture memory at %i MB.\n", vidMemInMegs - 16);
             return vidMemInMegs - 16;
         }
     }
     else
     {
         Com_Printf(
-            8,
+            CON_CHANNEL_GFX,
             "DirectX reports %i MB of available texture memory, but wouldn't tell available video memory.\n",
             texMemInMegs);
         return texMemInMegs;

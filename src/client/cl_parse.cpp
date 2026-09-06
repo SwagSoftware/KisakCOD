@@ -282,7 +282,7 @@ void __cdecl TRACK_cl_parse()
 void __cdecl SHOWNET(msg_t *msg, char *s)
 {
     if (cl_shownet->current.integer >= 2)
-        Com_Printf(14, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, s);
+        Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, s);
 }
 
 void __cdecl CL_ParsePacketEntities(clientActive_t *cl, msg_t *msg, clSnapshot_t *newframe)
@@ -321,16 +321,16 @@ void __cdecl CL_ParseSnapshot(msg_t *msg)
     clients[0].snap.snapFlags = MSG_ReadByte(msg);
     clients[0].snap.valid = 1;
     if (cl_shownet->current.integer >= 2)
-        Com_Printf(14, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "playerstate");
+        Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "playerstate");
     MSG_ReadDeltaPlayerstate(msg, &clients[0].snap.ps);
     if (cl_shownet->current.integer >= 2)
-        Com_Printf(14, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "packet entities");
+        Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "packet entities");
     CL_ParsePacketEntities(clients, msg, &clients[0].snap);
     if (!clients[0].snap.valid)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_parse.cpp", 128, 0, "%s", "cl->snap.valid");
     memcpy(clients[0].snapshots, clients, sizeof(clients[0].snapshots));
     if (cl_shownet->current.integer == 3)
-        Com_Printf(14, "   snapshot:%i\n", clients[0].snap.messageNum);
+        Com_Printf(CON_CHANNEL_CLIENT, "   snapshot:%i\n", clients[0].snap.messageNum);
 }
 
 void __cdecl CL_ParseGamestate(char *configstrings)
@@ -469,11 +469,11 @@ void __cdecl CL_ParseServerMessage(msg_t *msg)
     integer = cl_shownet->current.integer;
     if (integer == 1)
     {
-        Com_Printf(14, "%i ", msg->cursize);
+        Com_Printf(CON_CHANNEL_CLIENT, "%i ", msg->cursize);
     }
     else if (integer >= 2)
     {
-        Com_Printf(14, "------------------\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "------------------\n");
     }
     v3 = 0;
     while (1)
@@ -489,9 +489,9 @@ void __cdecl CL_ParseServerMessage(msg_t *msg)
             v6 = svc_strings[Byte];
             v7 = msg->readcount - 1;
             if (v6)
-                Com_Printf(14, "%3i %3i:%s\n", v7, msg->cursize, v6);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", v7, msg->cursize, v6);
             else
-                Com_Printf(14, "%3i:BAD CMD %i\n", v7, Byte);
+                Com_Printf(CON_CHANNEL_CLIENT, "%3i:BAD CMD %i\n", v7, Byte);
         }
         if (Byte == 2)
         {
@@ -517,6 +517,6 @@ void __cdecl CL_ParseServerMessage(msg_t *msg)
         }
     }
     if (v5 >= 2)
-        Com_Printf(14, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "END OF MESSAGE");
+        Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "END OF MESSAGE");
 }
 

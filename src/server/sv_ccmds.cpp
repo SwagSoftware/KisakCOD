@@ -286,13 +286,13 @@ int __cdecl ReadSaveHeader(const char *filename, SaveHeader *header)
         {
             if (header->saveVersion == 287)
                 return 1;
-            Com_Printf(15, "Bad save version %d, expecting %d\n", header->saveVersion, 287);
+            Com_Printf(CON_CHANNEL_SERVER, "Bad save version %d, expecting %d\n", header->saveVersion, 287);
             return 0;
         }
-        Com_Printf(15, "Bad save read.\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Bad save read.\n");
         return 0;
     }
-    Com_Printf(15, "Can't find savegame %s\n", filename);
+    Com_Printf(CON_CHANNEL_SERVER, "Can't find savegame %s\n", filename);
     return 0;
 }
 
@@ -407,7 +407,7 @@ void __cdecl SV_MapRestart(int savegame, int loadScripts)
     }
     else
     {
-        Com_Printf(15, "Game is not running.\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Game is not running.\n");
     }
 }
 
@@ -578,7 +578,7 @@ void __cdecl SV_LoadGame_f()
         v1 = (char *)*((unsigned int *)sv_cmd_args.argv[nesting] + 1);
     if (!*v1)
     {
-        Com_Printf(0, "You must specify a savegame to load\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "You must specify a savegame to load\n");
         return;
     }
     if (!I_strncmp(v1, "save", 4) && ((v2 = v1[4], v2 == 47) || v2 == 92))
@@ -594,7 +594,7 @@ void __cdecl SV_LoadGame_f()
         v5 = Com_sprintf(v7, 64, "save/%s", v1);
         if (v5 >= 0x40)
         {
-            Com_Printf(0, "filename 'save/%s' is too long", v1);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "filename 'save/%s' is too long", v1);
             return;
         }
     }
@@ -610,7 +610,7 @@ void __cdecl SV_LoadGame_f()
 
     if (Com_BuildPlayerProfilePath(sv_save_filename, 64, v7) < 0)
     {
-        Com_Printf(0, "filename '%s' is too long", v7);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "filename '%s' is too long", v7);
         sv_save_filename[0] = 0;
     }
     if (!com_sv_running->current.enabled)
@@ -629,7 +629,7 @@ void __cdecl SV_SelectSaveDevice_f()
     Dvar_SetBool(sv_saveGameAvailable, 0);
     if (CL_IsLocalClientInGame(0))
     {
-        Com_Printf(0,
+        Com_Printf(CON_CHANNEL_DONT_FILTER,
             "select_save_device is not available while a game is running - use force_select_save_device instead\n");
         return;
     }
@@ -694,17 +694,17 @@ void __cdecl SV_ScriptUsage_f()
 void SV_ScriptVarUsage_f_usage()
 {
     Com_Printf(
-        1,
+        CON_CHANNEL_ERROR,
         "usage: scriptVarUsage [-spreadsheet] [-summary] [-functionSummary] [-total] [-filename name]  [-function name] [-lin"
         "enumber number] [-minCount number] [-lineSort]\n");
-    Com_Printf(1, "    -spreadsheet     - tab delimited with one entry per line\n");
-    Com_Printf(1, "    -summary         - display totals per file\n");
-    Com_Printf(1, "    -functionSummary - display totals per function\n");
-    Com_Printf(1, "    -total           - display grand total only\n");
-    Com_Printf(1, "    -filename        - filter files based on the specified string\n");
-    Com_Printf(1, "    -function        - filter lines based on the function name\n");
-    Com_Printf(1, "    -minCount        - only show variables used more often than this count\n");
-    Com_Printf(1, "    -lineSort        - sort by line number instead of number of variables\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -spreadsheet     - tab delimited with one entry per line\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -summary         - display totals per file\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -functionSummary - display totals per function\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -total           - display grand total only\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -filename        - filter files based on the specified string\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -function        - filter lines based on the function name\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -minCount        - only show variables used more often than this count\n");
+    Com_Printf(CON_CHANNEL_ERROR, "    -lineSort        - sort by line number instead of number of variables\n");
 }
 
 void SV_ScriptVarUsage_f()
@@ -978,7 +978,7 @@ void SV_SaveGame_f()
         {
             if (Dvar_GetInt("g_reloading"))
             {
-                Com_Printf(0, "savegame request ignored\n");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "savegame request ignored\n");
             }
             else
             {
@@ -988,7 +988,7 @@ void SV_SaveGame_f()
                     ;
                 if (cmd - sv.cmd == 1)
                 {
-                    Com_Printf(0, "syntax: devsave <name>\n");
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "syntax: devsave <name>\n");
                 }
                 else
                 {
@@ -1005,12 +1005,12 @@ void SV_SaveGame_f()
         }
         else
         {
-            Com_Printf(0, "Saving games from the console is cheat protected.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Saving games from the console is cheat protected.\n");
         }
     }
     else
     {
-        Com_Printf(0, "Game is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Game is not running.\n");
     }
 }
 

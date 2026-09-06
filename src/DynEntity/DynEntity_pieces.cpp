@@ -117,7 +117,7 @@ bool __cdecl DynEntPieces_SpawnPhysicsModel(
     XModelGetBounds(model, mins, maxs);
     if (maxs[0] == mins[0] || maxs[1] == mins[1] || maxs[2] == mins[2])
     {
-        Com_PrintWarning(1, "Failed to spawn pieces model '%s'.  No bounds.\n", model->name);
+        Com_PrintWarning(CON_CHANNEL_ERROR, "Failed to spawn pieces model '%s'.  No bounds.\n", model->name);
         return 0;
     }
     else
@@ -190,13 +190,13 @@ dxBody *__cdecl DynEntPieces_SpawnPhysObj(
         }
         else
         {
-            Com_PrintWarning(1, "Failed to create physics object for '%s'.\n", modelName);
+            Com_PrintWarning(CON_CHANNEL_ERROR, "Failed to create physics object for '%s'.\n", modelName);
             return 0;
         }
     }
     else
     {
-        Com_PrintWarning(1, "Failed to spawn pieces model '%s'.  It is missing physics preset.\n", modelName);
+        Com_PrintWarning(CON_CHANNEL_ERROR, "Failed to spawn pieces model '%s'.  It is missing physics preset.\n", modelName);
         return 0;
     }
 }

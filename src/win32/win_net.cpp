@@ -279,7 +279,7 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 				err = WSAGetLastError();
 				if (err != 10035 && err != 10054)
 				{
-					Com_PrintError(16, "NET_GetPacket: %s\n", NET_ErrorString());
+					Com_PrintError(CON_CHANNEL_SYSTEM, "NET_GetPacket: %s\n", NET_ErrorString());
 				}
 			}
 			else
@@ -314,7 +314,7 @@ int __cdecl Sys_GetPacket(netadr_t *net_from, msg_t *net_message)
 					net_message->cursize = ret;
 					return 1;
 				}
-				Com_Printf(16, "Oversize packet from %s\n", NET_AdrToString(*net_from));
+				Com_Printf(CON_CHANNEL_SYSTEM, "Oversize packet from %s\n", NET_AdrToString(*net_from));
 			}
 		}
 	}
@@ -434,7 +434,7 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 		// KISAK: OOB packets can be far larger than the SOCKS staging buffer
 		if (length < 0 || length + 10 > (int)sizeof(socksBuf))
 		{
-			Com_PrintError(16, "Sys_SendPacket: %i byte packet too large for SOCKS buffer\n", length);
+			Com_PrintError(CON_CHANNEL_SYSTEM, "Sys_SendPacket: %i byte packet too large for SOCKS buffer\n", length);
 			return 0;
 		}
 		
@@ -454,7 +454,7 @@ char __cdecl Sys_SendPacket(int length, unsigned __int8 *data, netadr_t to)
 	if (err == 10049 && (to.type == NA_BROADCAST))
 		return 1;
 	v4 = NET_ErrorString();
-	Com_PrintError(16, "Sys_SendPacket: %s\n", v4);
+	Com_PrintError(CON_CHANNEL_SYSTEM, "Sys_SendPacket: %s\n", v4);
 	return 0;
 }
 
@@ -515,7 +515,7 @@ void Sys_ShowIP(void) {
 	int i;
 
 	for (i = 0; i < numIP; i++) {
-		Com_Printf( 16, "IP: %i.%i.%i.%i\n", localIP[i][0], localIP[i][1], localIP[i][2], localIP[i][3] );
+		Com_Printf( CON_CHANNEL_SYSTEM, "IP: %i.%i.%i.%i\n", localIP[i][0], localIP[i][1], localIP[i][2], localIP[i][3] );
 	}
 }
 
@@ -542,29 +542,29 @@ uint32_t __cdecl NET_IPSocket(const char *net_interface, int port)
 	_true = 1;
 	i = 1;
 	if (net_interface)
-		Com_Printf(16, "Opening IP socket: %s:%i\n", net_interface, port);
+		Com_Printf(CON_CHANNEL_SYSTEM, "Opening IP socket: %s:%i\n", net_interface, port);
 	else
-		Com_Printf(16, "Opening IP socket: localhost:%i\n", port);
+		Com_Printf(CON_CHANNEL_SYSTEM, "Opening IP socket: localhost:%i\n", port);
 	newsocket = socket(2, 2, 17);
 	if (newsocket == -1)
 	{
 		if (WSAGetLastError() != 10047)
 		{
 			v2 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: UDP_OpenSocket: socket: %s\n", v2);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: UDP_OpenSocket: socket: %s\n", v2);
 		}
 		return 0;
 	}
 	else if (ioctlsocket(newsocket, 0x8004667E, (unsigned long*)&_true) == -1)
 	{
 		v4 = NET_ErrorString();
-		Com_PrintWarning(16, "WARNING: UDP_OpenSocket: ioctl FIONBIO: %s\n", v4);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: UDP_OpenSocket: ioctl FIONBIO: %s\n", v4);
 		return 0;
 	}
 	else if (setsockopt(newsocket, 0xFFFF, 32, (const char*)&i, 4) == -1)
 	{
 		v5 = NET_ErrorString();
-		Com_PrintWarning(16, "WARNING: UDP_OpenSocket: setsockopt SO_BROADCAST: %s\n", v5);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: UDP_OpenSocket: setsockopt SO_BROADCAST: %s\n", v5);
 		return 0;
 	}
 	else
@@ -581,7 +581,7 @@ uint32_t __cdecl NET_IPSocket(const char *net_interface, int port)
 		if (bind(newsocket, &address, 16) == -1)
 		{
 			v6 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: UDP_OpenSocket: bind: %s\n", v6);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: UDP_OpenSocket: bind: %s\n", v6);
 			closesocket(newsocket);
 			return 0;
 		}
@@ -615,13 +615,13 @@ void __cdecl NET_OpenSocks(u_short port)
 	int rfc1929; // [esp+88h] [ebp-4h]
 
 	usingSocks = 0;
-	Com_Printf(16, "Opening connection to SOCKS server.\n");
+	Com_Printf(CON_CHANNEL_SYSTEM, "Opening connection to SOCKS server.\n");
 	socks_socket = socket(2, 1, 6);
 	if (socks_socket == -1)
 	{
 		WSAGetLastError();
 		v1 = NET_ErrorString();
-		Com_PrintWarning(16, "WARNING: NET_OpenSocks: socket: %s\n", v1);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_OpenSocks: socket: %s\n", v1);
 		return;
 	}
 	h = gethostbyname(net_socksServer->current.string);
@@ -629,12 +629,12 @@ void __cdecl NET_OpenSocks(u_short port)
 	{
 		WSAGetLastError();
 		v2 = NET_ErrorString();
-		Com_PrintWarning(16, "WARNING: NET_OpenSocks: gethostbyname: %s\n", v2);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_OpenSocks: gethostbyname: %s\n", v2);
 		return;
 	}
 	if (h->h_addrtype != 2)
 	{
-		Com_PrintWarning(16, "WARNING: NET_OpenSocks: gethostbyname: address type was not AF_INET\n");
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_OpenSocks: gethostbyname: address type was not AF_INET\n");
 		return;
 	}
 	address.sa_family = 2;
@@ -644,7 +644,7 @@ void __cdecl NET_OpenSocks(u_short port)
 	{
 		WSAGetLastError();
 		v3 = NET_ErrorString();
-		Com_PrintError(16, "NET_OpenSocks: connect: %s\n", v3);
+		Com_PrintError(CON_CHANNEL_SYSTEM, "NET_OpenSocks: connect: %s\n", v3);
 		return;
 	}
 	rfc1929 = net_socksUsername->current.integer || net_socksPassword->current.integer;
@@ -671,7 +671,7 @@ void __cdecl NET_OpenSocks(u_short port)
 		goto LABEL_46;
 	if (buf[1] && buf[1] != 2)
 	{
-		Com_Printf(16, "NET_OpenSocks: request denied\n");
+		Com_Printf(CON_CHANNEL_SYSTEM, "NET_OpenSocks: request denied\n");
 		return;
 	}
 	if (buf[1] == 2)
@@ -690,7 +690,7 @@ void __cdecl NET_OpenSocks(u_short port)
 		LABEL_19:
 			WSAGetLastError();
 			v4 = NET_ErrorString();
-			Com_PrintError(16, "NET_OpenSocks: send: %s\n", v4);
+			Com_PrintError(CON_CHANNEL_SYSTEM, "NET_OpenSocks: send: %s\n", v4);
 			return;
 		}
 		len = recv(socks_socket, (char*)buf, 64, 0);
@@ -699,12 +699,12 @@ void __cdecl NET_OpenSocks(u_short port)
 		if (len != 2 || buf[0] != 1)
 		{
 		LABEL_46:
-			Com_Printf(16, "NET_OpenSocks: bad response\n");
+			Com_Printf(CON_CHANNEL_SYSTEM, "NET_OpenSocks: bad response\n");
 			return;
 		}
 		if (buf[1])
 		{
-			Com_Printf(16, "NET_OpenSocks: authentication failed\n");
+			Com_Printf(CON_CHANNEL_SYSTEM, "NET_OpenSocks: authentication failed\n");
 			return;
 		}
 	}
@@ -718,7 +718,7 @@ void __cdecl NET_OpenSocks(u_short port)
 	{
 		WSAGetLastError();
 		v5 = NET_ErrorString();
-		Com_PrintError(16, "NET_OpenSocks: send: %s\n", v5);
+		Com_PrintError(CON_CHANNEL_SYSTEM, "NET_OpenSocks: send: %s\n", v5);
 	}
 	len = recv(socks_socket, (char*)buf, 64, 0);
 	if (len == -1)
@@ -726,14 +726,14 @@ void __cdecl NET_OpenSocks(u_short port)
 	LABEL_43:
 		WSAGetLastError();
 		v6 = NET_ErrorString();
-		Com_PrintError(16, "NET_OpenSocks: recv: %s\n", v6);
+		Com_PrintError(CON_CHANNEL_SYSTEM, "NET_OpenSocks: recv: %s\n", v6);
 		return;
 	}
 	if (len < 2 || buf[0] != 5)
 		goto LABEL_46;
 	if (buf[1])
 	{
-		Com_Printf(16, "NET_OpenSocks: request denied: %i\n", buf[1]);
+		Com_Printf(CON_CHANNEL_SYSTEM, "NET_OpenSocks: request denied: %i\n", buf[1]);
 	}
 	else if (buf[3] == 1)
 	{
@@ -746,7 +746,7 @@ void __cdecl NET_OpenSocks(u_short port)
 	}
 	else
 	{
-		Com_Printf(16, "NET_OpenSocks: relay address is not IPV4: %i\n", buf[3]);
+		Com_Printf(CON_CHANNEL_SYSTEM, "NET_OpenSocks: relay address is not IPV4: %i\n", buf[3]);
 	}
 }
 
@@ -773,14 +773,14 @@ int NET_GetLocalAddress()
 	hostInfo = gethostbyname(hostname);
 	if (!hostInfo)
 		return WSAGetLastError();
-	Com_Printf(16, "Hostname: %s\n", hostInfo->h_name);
+	Com_Printf(CON_CHANNEL_SYSTEM, "Hostname: %s\n", hostInfo->h_name);
 	n = 0;
 	while (1)
 	{
 		p = hostInfo->h_aliases[n++];
 		if (!p)
 			break;
-		Com_Printf(16, "Alias: %s\n", p);
+		Com_Printf(CON_CHANNEL_SYSTEM, "Alias: %s\n", p);
 	}
 	result = hostInfo->h_addrtype;
 	if (result == 2)
@@ -796,7 +796,7 @@ int NET_GetLocalAddress()
 			localIP[numIP][1] = p[1];
 			localIP[numIP][2] = p[2];
 			localIP[numIP][3] = p[3];
-			Com_Printf(16, "IP: %i.%i.%i.%i\n", HIBYTE(v1), BYTE2(v1), BYTE1(v1), (unsigned __int8)v1);
+			Com_Printf(CON_CHANNEL_SYSTEM, "IP: %i.%i.%i.%i\n", HIBYTE(v1), BYTE2(v1), BYTE1(v1), (unsigned __int8)v1);
 		}
 	}
 	return result;
@@ -852,7 +852,7 @@ void __cdecl NET_OpenIP()
 	{
 		if (i >= 10)
 		{
-			Com_PrintWarning(16, "WARNING: Couldn't allocate IP port\n");
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Couldn't allocate IP port\n");
 			return;
 		}
 		ip_socket = NET_IPSocket(v0->current.string, i + port->current.integer);
@@ -889,20 +889,20 @@ uint32_t __cdecl NET_IPXSocket(int port)
 		if (WSAGetLastError() != 10047)
 		{
 			v1 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: IPX_Socket: socket: %s\n", v1);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: IPX_Socket: socket: %s\n", v1);
 		}
 		return 0;
 	}
 	else if (ioctlsocket(newsocket, -2147195266, (unsigned long*)&_true) == -1)
 	{
 		v3 = NET_ErrorString();
-		Com_PrintWarning(16, "WARNING: IPX_Socket: ioctl FIONBIO: %s\n", v3);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: IPX_Socket: ioctl FIONBIO: %s\n", v3);
 		return 0;
 	}
 	else if (setsockopt(newsocket, 0xFFFF, 32, (char*)&_true, 4) == -1)
 	{
 		v4 = NET_ErrorString();
-		Com_PrintWarning(16, "WARNING: IPX_Socket: setsockopt SO_BROADCAST: %s\n", v4);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: IPX_Socket: setsockopt SO_BROADCAST: %s\n", v4);
 		return 0;
 	}
 	else
@@ -916,7 +916,7 @@ uint32_t __cdecl NET_IPXSocket(int port)
 		if (bind(newsocket, &address, 14) == -1)
 		{
 			v5 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: IPX_Socket: bind: %s\n", v5);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: IPX_Socket: bind: %s\n", v5);
 			closesocket(newsocket);
 			return 0;
 		}
@@ -1058,12 +1058,12 @@ void __cdecl NET_Init()
 	r = WSAStartup(0x101u, &winsockdata);
 	if (r)
 	{
-		Com_PrintWarning(16, "WARNING: Winsock initialization failed, returned %d\n", r);
+		Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Winsock initialization failed, returned %d\n", r);
 	}
 	else
 	{
 		winsockInitialized = 1;
-		Com_Printf(16, "Winsock Initialized\n");
+		Com_Printf(CON_CHANNEL_SYSTEM, "Winsock Initialized\n");
 		NET_GetDvars();
 		NET_Config(1);
 		NET_InitDebug();
@@ -1136,7 +1136,7 @@ int __cdecl NET_Select(uint32_t socket)
 		if (err == -1)
 		{
 			v2 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: NET_Select: connect: %s\n", v2);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_Select: connect: %s\n", v2);
 			return 0;
 		}
 		else
@@ -1146,7 +1146,7 @@ int __cdecl NET_Select(uint32_t socket)
 	}
 	else
 	{
-		Com_Printf(16, "NET_Select: NET_Select: timeout\n");
+		Com_Printf(CON_CHANNEL_SYSTEM, "NET_Select: NET_Select: timeout\n");
 		return 0;
 	}
 }
@@ -1164,16 +1164,16 @@ uint32_t __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
 
 	_true = 1;
 	if (net_interface)
-		Com_Printf(16, "Opening IP socket: %s:%i\n", net_interface, port);
+		Com_Printf(CON_CHANNEL_SYSTEM, "Opening IP socket: %s:%i\n", net_interface, port);
 	else
-		Com_Printf(16, "Opening IP socket: localhost:%i\n", port);
+		Com_Printf(CON_CHANNEL_SYSTEM, "Opening IP socket: localhost:%i\n", port);
 	newsocket = socket(2, 1, 6);
 	if (newsocket == -1)
 	{
 		if (WSAGetLastError() != 10047)
 		{
 			v3 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: socket: %s\n", v3);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_TCPIPSocket: socket: %s\n", v3);
 		}
 		return 0;
 	}
@@ -1182,7 +1182,7 @@ uint32_t __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
 		if (ioctlsocket(newsocket, 0x8004667E, (u_long*)&_true) == -1)
 		{
 			v5 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: ioctl FIONBIO: %s\n", v5);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_TCPIPSocket: ioctl FIONBIO: %s\n", v5);
 			return 0;
 		}
 		if (net_interface && *net_interface && I_stricmp(net_interface, "localhost"))
@@ -1202,13 +1202,13 @@ uint32_t __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
 				if (err != 10035)
 				{
 					v7 = NET_ErrorString();
-					Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: connect: %s\n", v7);
+					Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_TCPIPSocket: connect: %s\n", v7);
 					closesocket(newsocket);
 					return 0;
 				}
 				if (!NET_Select(newsocket))
 				{
-					Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: connect failed\n");
+					Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_TCPIPSocket: connect failed\n");
 					closesocket(newsocket);
 					return 0;
 				}
@@ -1217,7 +1217,7 @@ uint32_t __cdecl NET_TCPIPSocket(const char* net_interface, int port, int type)
 		else if (bind(newsocket, (const struct sockaddr*)&address, 16) == -1)
 		{
 			v6 = NET_ErrorString();
-			Com_PrintWarning(16, "WARNING: NET_TCPIPSocket: bind: %s\n", v6);
+			Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: NET_TCPIPSocket: bind: %s\n", v6);
 			closesocket(newsocket);
 			return 0;
 		}

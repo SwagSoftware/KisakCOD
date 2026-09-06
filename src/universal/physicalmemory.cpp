@@ -37,19 +37,19 @@ void __cdecl PMem_DumpMemStats()
         else
             bottom = g_mem.prim[1].allocList[i + 1].pos;
         v0 = ConvertToMB(g_mem.prim[1].allocList[i].pos - bottom);
-        Com_Printf(16, "%-18.18s %5.1f\n", g_mem.prim[1].allocList[i].name, v0);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%-18.18s %5.1f\n", g_mem.prim[1].allocList[i].name, v0);
     }
     FreeAmount = PMem_GetFreeAmount();
     v2 = ConvertToMB(FreeAmount);
-    Com_Printf(16, "free physical      %5.1f\n", v2);
+    Com_Printf(CON_CHANNEL_SYSTEM, "free physical      %5.1f\n", v2);
     top = g_mem.prim[0].pos;
     for (j = g_mem.prim[0].allocListCount - 1; j >= 0; --j)
     {
         v3 = ConvertToMB(top - g_mem.prim[0].allocList[j].pos);
-        Com_Printf(16, "%-18.18s %5.1f\n", g_mem.prim[0].allocList[j].name, v3);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%-18.18s %5.1f\n", g_mem.prim[0].allocList[j].name, v3);
         top = g_mem.prim[0].allocList[j].pos;
     }
-    Com_Printf(16, "------------------------\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "------------------------\n");
 }
 
 void __cdecl PMem_InitPhysicalMemory(PhysicalMemory *pmem, uint8_t *memory, uint32_t memorySize)
@@ -225,7 +225,7 @@ uint8_t *__cdecl PMem_Alloc(
         g_overAllocatedSize = size + lowPos - g_mem.prim[1].pos;
         if (g_overAllocatedSize > 0)
         {
-            Com_PrintError(16, "Need %i more bytes of ram for alloc to succeed\n", g_overAllocatedSize);
+            Com_PrintError(CON_CHANNEL_SYSTEM, "Need %i more bytes of ram for alloc to succeed\n", g_overAllocatedSize);
             Sys_OutOfMemErrorInternal(".\\universal\\physicalmemory.cpp", 608);
         }
         g_mem.prim[allocType].pos = size + lowPos;

@@ -942,7 +942,7 @@ void __cdecl DynEntCl_AreaEntities_r(
                 {
                     if (areaParms->count == areaParms->maxCount)
                     {
-                        Com_PrintWarning(16, "DynEntCl_AreaEntities_r: Hit max count!\n");
+                        Com_PrintWarning(CON_CHANNEL_SYSTEM, "DynEntCl_AreaEntities_r: Hit max count!\n");
                         return;
                     }
                     areaParms->list[areaParms->count++] = listIndex - 1;
@@ -1238,7 +1238,7 @@ dxBody *__cdecl DynEntCl_CreatePhysObj(const DynEntityDef *dynEntDef, const GfxP
     }
     else
     {
-        Com_PrintWarning(1, "DynEntCl_CreatePhysObj: Unable to create physic object.\n");
+        Com_PrintWarning(CON_CHANNEL_ERROR, "DynEntCl_CreatePhysObj: Unable to create physic object.\n");
         return 0;
     }
 }

@@ -185,7 +185,7 @@ water_t *__cdecl R_LoadWaterSetup(const water_t *water)
     }
     if (waterMapSetupIndex == 16)
     {
-        Com_PrintError(8, "ERROR: map uses more than %i waterMap textures\n", 16);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: map uses more than %i waterMap textures\n", 16);
         return 0;
     }
     else

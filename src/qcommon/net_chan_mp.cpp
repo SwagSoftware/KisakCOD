@@ -89,14 +89,14 @@ void __cdecl NetProf_PrepProfiling(netProfileInfo_t *prof)
                 net_iProfilingOn = 1;
             else
                 net_iProfilingOn = 2;
-            Com_Printf(16, "Net Profiling turned on: %s\n", WeaponStateNames[net_iProfilingOn + 26]);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Net Profiling turned on: %s\n", WeaponStateNames[net_iProfilingOn + 26]);
             memset((uint8_t *)prof, 0, sizeof(netProfileInfo_t));
         }
     }
     else if (net_iProfilingOn)
     {
         net_iProfilingOn = 0;
-        Com_Printf(16, "Net Profiling turned off\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "Net Profiling turned off\n");
         memset((uint8_t *)prof, 0, sizeof(netProfileInfo_t));
     }
 }
@@ -121,9 +121,9 @@ void __cdecl NetProf_NewSendPacket(netchan_t *pChan, int iSize, int bFragment)
         if ((net_showprofile->current.integer & 2) != 0)
         {
             if (bFragment)
-                Com_Printf(16, "[%s] send%s: %i\n", netsrcString[pChan->sock], " fragment", iSize);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%s] send%s: %i\n", netsrcString[pChan->sock], " fragment", iSize);
             else
-                Com_Printf(16, "[%s] send%s: %i\n", netsrcString[pChan->sock], "", iSize);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%s] send%s: %i\n", netsrcString[pChan->sock], "", iSize);
         }
     }
 }
@@ -136,9 +136,9 @@ void __cdecl NetProf_NewRecievePacket(netchan_t *pChan, int iSize, int bFragment
         if ((net_showprofile->current.integer & 2) != 0)
         {
             if (bFragment)
-                Com_Printf(16, "[%s] recieve%s: %i\n", netsrcString[pChan->sock], " fragment", iSize);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%s] recieve%s: %i\n", netsrcString[pChan->sock], " fragment", iSize);
             else
-                Com_Printf(16, "[%s] recieve%s: %i\n", netsrcString[pChan->sock], "", iSize);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%s] recieve%s: %i\n", netsrcString[pChan->sock], "", iSize);
         }
     }
 }
@@ -302,7 +302,7 @@ uint32_t __cdecl FakeLag_GetFreeSlot()
             oldestTime = laggedPackets[packeta].startTime;
         }
     }
-    Com_Printf(16, "fake lag buffer is full, you should increase FAKELATENCY_MAX_PACKETS_HELD or reduce your latency\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "fake lag buffer is full, you should increase FAKELATENCY_MAX_PACKETS_HELD or reduce your latency\n");
     if (laggedPackets[oldest].outbound)
         FakeLag_SendPacket_Real(oldest);
     else
@@ -378,9 +378,9 @@ uint32_t __cdecl FakeLag_SendPacket(netsrc_t sock, int length, uint8_t *data, ne
                 v7 = v6;
             }
             if (laggedPackets[slot].loopback)
-                Com_Printf(16, "[%i] adding outbound %s packet for %s\n", now, "loopback", v7);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%i] adding outbound %s packet for %s\n", now, "loopback", v7);
             else
-                Com_Printf(16, "[%i] adding outbound %s packet for %s\n", now, "network", v7);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%i] adding outbound %s packet for %s\n", now, "network", v7);
         }
         lastCall = now;
         return slot;
@@ -457,9 +457,9 @@ uint32_t __cdecl FakeLag_QueueIncomingPacket(bool loopback, netsrc_t sock, netad
             v7 = v6;
         }
         if (loopback)
-            Com_Printf(16, "[%i] adding incoming %s packet for %s\n", now, "loopback", v7);
+            Com_Printf(CON_CHANNEL_SYSTEM, "[%i] adding incoming %s packet for %s\n", now, "loopback", v7);
         else
-            Com_Printf(16, "[%i] adding incoming %s packet for %s\n", now, "network", v7);
+            Com_Printf(CON_CHANNEL_SYSTEM, "[%i] adding incoming %s packet for %s\n", now, "network", v7);
     }
     lastCall_0 = now;
     return slot;
@@ -510,7 +510,7 @@ int __cdecl FakeLag_GetPacket(bool loopback, netsrc_t sock, netadr_t *net_from, 
     }
     if (showpackets->current.integer && (showpackets->current.integer > 1 || !laggedPackets[packet].loopback))
         Com_Printf(
-            16,
+            CON_CHANNEL_SYSTEM,
             "[%i] delivering incoming packet from %i (time: %i) (%ims latency)\n",
             now,
             laggedPackets[packet].startTime,
@@ -599,7 +599,7 @@ int __cdecl FakeLag_SendLaggedPackets()
                 v3 = Sys_Milliseconds() - laggedPackets[packet].startTime;
                 startTime = laggedPackets[packet].startTime;
                 v1 = Sys_Milliseconds();
-                Com_Printf(16, "[%i] delivering outbound %s packet for %s (from %i) (%ims delay)\n", v1, v4, v6, startTime, v3);
+                Com_Printf(CON_CHANNEL_SYSTEM, "[%i] delivering outbound %s packet for %s (from %i) (%ims delay)\n", v1, v4, v6, startTime, v3);
             }
             FakeLag_SendPacket_Real(packet);
             ++numSent;
@@ -636,14 +636,14 @@ void __cdecl Net_SetQPort_f()
     const char *v0; // eax
 
     if (Cmd_Argc() < 1)
-        Com_PrintError(16, "setqport usage: setqport <qport>\n");
+        Com_PrintError(CON_CHANNEL_SYSTEM, "setqport usage: setqport <qport>\n");
     v0 = Cmd_Argv(1);
     g_qport = (__int16)atoi(v0);
 }
 
 void __cdecl Net_GetQPort_f()
 {
-    Com_Printf(16, "qport = %i\n", g_qport);
+    Com_Printf(CON_CHANNEL_SYSTEM, "qport = %i\n", g_qport);
 }
 
 cmd_function_s Net_DumpProfile_f_VAR;
@@ -720,7 +720,7 @@ void __cdecl Net_DumpProfile_f()
   }
   else
   {
-    Com_Printf(0, "Network profiling is not on. Set net_profile to turn on network profiling\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Network profiling is not on. Set net_profile to turn on network profiling\n");
   }
 }
 
@@ -772,7 +772,7 @@ bool __cdecl Netchan_TransmitNextFragment(netchan_t *chan)
     NetProf_NewSendPacket(chan, send.cursize, 1);
     if (showpackets->current.integer && (showpackets->current.integer > 1 || chan->remoteAddress.type != NA_LOOPBACK))
         Com_Printf(
-            16,
+            CON_CHANNEL_SYSTEM,
             "[%s] send %4i : s=%i fragment=%i,%i\n",
             netsrcString[chan->sock],
             send.cursize,
@@ -826,15 +826,15 @@ bool __cdecl Netchan_Transmit(netchan_t *chan, int length, char *data)
         if (chan->sock < NS_SERVER)
             MSG_WriteShort(&send, chan->qport);
         if (packetDebug->current.enabled)
-            Com_Printf(16, "Adding %i byte payload to packet\n", length);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Adding %i byte payload to packet\n", length);
         MSG_WriteData(&send, (uint8_t *)data, length);
         if (packetDebug->current.enabled)
-            Com_Printf(16, "Sending %i byte packet\n", send.cursize);
+            Com_Printf(CON_CHANNEL_SYSTEM, "Sending %i byte packet\n", send.cursize);
         res = (int)FakeLag_SendPacket(chan->sock, send.cursize, send.data, chan->remoteAddress) >= -1;
         NetProf_NewSendPacket(chan, send.cursize, 0);
         if (showpackets->current.integer && (showpackets->current.integer > 1 || chan->remoteAddress.type != NA_LOOPBACK))
             Com_Printf(
-                16,
+                CON_CHANNEL_SYSTEM,
                 "[%s] send->%u.%u.%u.%u (%4i bytes) : s=%i ack=%i\n",
                 netsrcString[chan->sock],
                 chan->remoteAddress.ip[0],
@@ -903,7 +903,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
     {
         if (fragmented)
             Com_Printf(
-                16,
+                CON_CHANNEL_SYSTEM,
                 "[%s] recv %4i : s=%i fragment=%i,%i\n",
                 netsrcString[chan->sock],
                 msg->cursize,
@@ -911,7 +911,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
                 fragmentStart,
                 fragmentLength);
         else
-            Com_Printf(16, "[%s] recv %4i : s=%i\n", netsrcString[chan->sock], msg->cursize, sequence);
+            Com_Printf(CON_CHANNEL_SYSTEM, "[%s] recv %4i : s=%i\n", netsrcString[chan->sock], msg->cursize, sequence);
     }
     if (sequence <= chan->incomingSequence)
     {
@@ -921,7 +921,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
             incomingSequence = chan->incomingSequence;
             v2 = NET_AdrToString(chan->remoteAddress);
             Com_Printf(
-                16,
+                CON_CHANNEL_SYSTEM,
                 "[%s] %s: Out of order packet %i at %i\n",
                 netsrcString[chan->sock],
                 v2,
@@ -937,7 +937,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
     {
         dropped = chan->dropped;
         v4 = NET_AdrToString(chan->remoteAddress);
-        Com_Printf(16, "[%s] %s: Dropped %i packets at %i\n", netsrcString[chan->sock], v4, dropped, sequence);
+        Com_Printf(CON_CHANNEL_SYSTEM, "[%s] %s: Dropped %i packets at %i\n", netsrcString[chan->sock], v4, dropped, sequence);
     }
     if (!fragmented)
     {
@@ -956,7 +956,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
             || showpackets->current.integer && (showpackets->current.integer > 1 || chan->remoteAddress.type != NA_LOOPBACK))
         {
             v5 = NET_AdrToString(chan->remoteAddress);
-            Com_Printf(16, "%s:Dropped a message fragment\n", v5);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s:Dropped a message fragment\n", v5);
         }
         return 0;
     }
@@ -975,7 +975,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
         {
             v10 = chan->fragmentLength;
             v7 = NET_AdrToString(chan->remoteAddress);
-            Com_Printf(16, "%s:fragmentLength %i > msg->maxsize\n", v7, v10);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s:fragmentLength %i > msg->maxsize\n", v7, v10);
             return 0;
         }
         *(uint32_t *)msg->data = sequence;
@@ -990,7 +990,7 @@ int __cdecl Netchan_Process(netchan_t *chan, msg_t *msg)
         || showpackets->current.integer && (showpackets->current.integer > 1 || chan->remoteAddress.type != NA_LOOPBACK))
     {
         v6 = NET_AdrToString(chan->remoteAddress);
-        Com_Printf(16, "%s:illegal fragment length\n", v6);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%s:illegal fragment length\n", v6);
     }
     return 0;
 }
@@ -1010,7 +1010,7 @@ int __cdecl NET_CompareBaseAdrSigned(netadr_t *a, netadr_t *b)
     case NA_IPX:
         return memcmp((const char *)a->ipx, (const char *)b->ipx, 10);
     }
-    Com_Printf(16, "NET_CompareBaseAdrSigned: bad address type\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "NET_CompareBaseAdrSigned: bad address type\n");
     return 0;
 }
 
@@ -1038,7 +1038,7 @@ int __cdecl NET_CompareAdrSigned(netadr_t *a, netadr_t *b)
         else
             return a->port - b->port;
     default:
-        Com_Printf(16, "NET_CompareAdrSigned: bad address type\n");
+        Com_Printf(CON_CHANNEL_SYSTEM, "NET_CompareAdrSigned: bad address type\n");
         return 0;
     }
 }
@@ -1121,7 +1121,7 @@ void __cdecl NET_SendLoopPacket(netsrc_t sock, uint32_t length, uint8_t *data, n
     // KISAK: OOB voice/print packets can exceed the loopback slot size
     if (length > sizeof(loop->msgs[i].data))
     {
-        Com_PrintWarning(16, "NET_SendLoopPacket: dropping %u byte packet (slot is %u bytes)\n", length, (uint32_t)sizeof(loop->msgs[i].data));
+        Com_PrintWarning(CON_CHANNEL_SYSTEM, "NET_SendLoopPacket: dropping %u byte packet (slot is %u bytes)\n", length, (uint32_t)sizeof(loop->msgs[i].data));
         return;
     }
     memcpy(loop->msgs[i].data, data, length);
@@ -1135,7 +1135,7 @@ char __cdecl NET_SendPacket(netsrc_t sock, int length, uint8_t *data, netadr_t t
     netadr_t v5; // [esp-14h] [ebp-18h]
 
     if (showpackets->current.integer && *(uint32_t *)data == -1)
-        Com_Printf(16, "[%s] send packet %4i\n", netsrcString[sock], length);
+        Com_Printf(CON_CHANNEL_SYSTEM, "[%s] send packet %4i\n", netsrcString[sock], length);
     if (to.type == NA_LOOPBACK)
     {
         //*(_QWORD *)&v5.type = __PAIR64__(*(uint32_t *)to.ip, 2);
@@ -1176,7 +1176,7 @@ bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data)
     if (showpackets->current.integer && (showpackets->current.integer > 1 || adr.type != NA_LOOPBACK))
     {
         v3 = NET_AdrToString(adr);
-        Com_DPrintf(16, "OOB Print->%s: %s\n", v3, data);
+        Com_DPrintf(CON_CHANNEL_SYSTEM, "OOB Print->%s: %s\n", v3, data);
     }
     if (strlen(data) + 1 <= 0x1FFFC)
     {
@@ -1192,7 +1192,7 @@ bool __cdecl NET_OutOfBandPrint(netsrc_t sock, netadr_t adr, const char *data)
     }
     else
     {
-        Com_DPrintf(16, "OOB Packet is %i bytes - too large to send\n", strlen(data));
+        Com_DPrintf(CON_CHANNEL_SYSTEM, "OOB Packet is %i bytes - too large to send\n", strlen(data));
         if (!alwaysfails)
         {
             v4 = va("OOB Packet is %i bytes - too large to send\n", strlen(data));
@@ -1214,14 +1214,14 @@ bool __cdecl NET_OutOfBandData(netsrc_t sock, netadr_t adr, const uint8_t *forma
     tempNetchanPacketBuf[3] = -1;
     if (len < 0 || len + 4 > (int)sizeof(tempNetchanPacketBuf))
     {
-        Com_PrintError(16, "NET_OutOfBandData: %i bytes is too large to send\n", len);
+        Com_PrintError(CON_CHANNEL_SYSTEM, "NET_OutOfBandData: %i bytes is too large to send\n", len);
         return 0;
     }
     for (i = 0; i < len; ++i)
         tempNetchanPacketBuf[i + 4] = format[i];
     mbuf_20 = len + 4;
     if (showpackets->current.integer && (showpackets->current.integer > 1 || adr.type != NA_LOOPBACK))
-        Com_DPrintf(16, "OOB Data->%u.%u.%u.%u: %i bytes\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3], mbuf_20);
+        Com_DPrintf(CON_CHANNEL_SYSTEM, "OOB Data->%u.%u.%u.%u: %i bytes\n", adr.ip[0], adr.ip[1], adr.ip[2], adr.ip[3], mbuf_20);
     res = (int)FakeLag_SendPacket(sock, mbuf_20, tempNetchanPacketBuf, adr) >= -1;
 
     if (sock == NS_SERVER)
@@ -1242,7 +1242,7 @@ bool __cdecl NET_OutOfBandVoiceData(netsrc_t sock, netadr_t adr, uint8_t *format
     tempNetchanPacketBuf[3] = -1;
     if (len + 4 > sizeof(tempNetchanPacketBuf))
     {
-        Com_PrintError(16, "NET_OutOfBandVoiceData: %u bytes is too large to send\n", len);
+        Com_PrintError(CON_CHANNEL_SYSTEM, "NET_OutOfBandVoiceData: %u bytes is too large to send\n", len);
         return 0;
     }
     memcpy(&tempNetchanPacketBuf[4], format, len);

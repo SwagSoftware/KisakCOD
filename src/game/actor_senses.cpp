@@ -288,7 +288,7 @@ void __cdecl Actor_UpdateEyeInformation(actor_s *self)
         }
         else
         {
-            Com_Printf(18, "Actor_UpdateEyeInformation: Actor dobj doesn't have TAG_EYE.\n");
+            Com_Printf(CON_CHANNEL_AI, "Actor_UpdateEyeInformation: Actor dobj doesn't have TAG_EYE.\n");
 
             self->eyeInfo.pos[0] = self->ent->r.currentOrigin[0];
             self->eyeInfo.pos[1] = self->ent->r.currentOrigin[1];
@@ -515,7 +515,7 @@ void __cdecl Actor_UpdateVisCache(actor_s *self, const gentity_s *ent, sentient_
         {
             number = self->ent->s.number;
             if (g_dumpAIEvents->current.integer == number)
-                Com_Printf(18, "%d ^3 visible^7:  entity^5 %d ^7at time^5 %d\n", number, ent->s.number, level.time);
+                Com_Printf(CON_CHANNEL_AI, "%d ^3 visible^7:  entity^5 %d ^7at time^5 %d\n", number, ent->s.number, level.time);
             if (ent == Actor_GetTargetEntity(self))
                 Scr_Notify(self->ent, scr_const.enemy_visible, 0);
         }

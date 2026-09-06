@@ -1331,8 +1331,8 @@ char __cdecl Scr_AllowBreakpoint(char *pos)
         return 1;
     if (pos)
     {
-        Com_PrintWarning(23, "script runtime warning: ignored breakpoint.\n");
-        Scr_PrintPrevCodePos(23, pos, 0);
+        Com_PrintWarning(CON_CHANNEL_PARSERSCRIPT, "script runtime warning: ignored breakpoint.\n");
+        Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, pos, 0);
     }
     return 0;
 }
@@ -2899,7 +2899,7 @@ void __cdecl Sys_ConsolePrintRemote(int localClientNum)
     char *msg; // [esp+0h] [ebp-4h]
 
     msg = Sys_ReadDebugSocketString();
-    CL_ConsolePrint(localClientNum, 23, msg, 0, 0, 0);
+    CL_ConsolePrint(localClientNum, CON_CHANNEL_PARSERSCRIPT, msg, 0, 0, 0);
     FreeString(msg);
 }
 

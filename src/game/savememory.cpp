@@ -539,7 +539,7 @@ void *__cdecl SaveMemory_ReadLoadFromDevice(
     }
     const dvar_s *uiCampaign = Dvar_RegisterString("ui_campaign", "american", 0x1000u, "The current campaign");
     Dvar_SetString(uiCampaign, header.campaign);
-    Com_Printf(10, "Save game build number: %s\n", header.buildNumber);
+    Com_Printf(CON_CHANNEL_FILES, "Save game build number: %s\n", header.buildNumber);
     if (header.gameCheckSum != checksum)
     {
         CloseDevice(fileHandle);
@@ -634,7 +634,7 @@ int __cdecl SaveMemory_CommitSave(SaveGame *save, int saveId)
     }
     else
     {
-        Com_Printf(10, "Attempting to commit an invalid save buffer\n");
+        Com_Printf(CON_CHANNEL_FILES, "Attempting to commit an invalid save buffer\n");
         return 0;
     }
 }
@@ -684,11 +684,11 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
         if (!save->memFile.buffer)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\game\\savememory.cpp", 896, 0, "%s", "save->memFile.buffer");
         if (save->isWrittenToDevice)
-            Com_Printf(10, "** Save was already written to a device; it is being saved again.  This is not an error.\n");
+            Com_Printf(CON_CHANNEL_FILES, "** Save was already written to a device; it is being saved again.  This is not an error.\n");
         int t0 = Sys_Milliseconds();
         int writeResult = WriteSaveToDevice(save->memFile.buffer, &save->header, save->suppressPlayerNotify);
         int t1 = Sys_Milliseconds();
-        Com_Printf(10, "time to write: %i  ms\n", t1 - t0);
+        Com_Printf(CON_CHANNEL_FILES, "time to write: %i  ms\n", t1 - t0);
         if (!writeResult)
 		{
             save->isWrittenToDevice = 1;
@@ -700,7 +700,7 @@ int __cdecl SaveMemory_WriteSaveToDevice(SaveGame *save)
     }
     else
     {
-        Com_Printf(10, "Attempting to write an invalid save buffer\n");
+        Com_Printf(CON_CHANNEL_FILES, "Attempting to write an invalid save buffer\n");
         return 0;
     }
 }

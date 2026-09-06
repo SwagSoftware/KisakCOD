@@ -57,7 +57,7 @@ int __cdecl InitTrigger(gentity_s *self)
     else
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Killing trigger at (%f %f %f) because the brush model is invalid.\n",
             self->s.lerp.pos.trBase[0],
             self->s.lerp.pos.trBase[1],
@@ -629,7 +629,7 @@ void __cdecl SP_trigger_lookat(gentity_s *self)
     else
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Killing trigger_lookat at (%f %f %f) because the brush model is invalid.\n",
             self->s.lerp.pos.trBase[0],
             self->s.lerp.pos.trBase[1],

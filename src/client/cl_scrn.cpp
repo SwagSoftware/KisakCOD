@@ -287,17 +287,17 @@ void __cdecl SCR_UpdateLoadScreen()
 
 void CL_CubemapShotUsage()
 {
-    Com_Printf(0, "Syntax: cubemapShot size basefilename [lighting r g b | fresnel n0 n1]\n");
-    Com_Printf(0, "* size must be a power of 2 that is at least 4 and not more than 1024.\n");
-    Com_Printf(0, "* screenshots will be written to 'env/basefilename_*.tga'\n");
-    Com_Printf(0, "* basefilename must not exceed %i chars\n", 40);
-    Com_Printf(0, "* If 'lighting' is specified, a diffuse environment-based lighting cubemap is generated.\n");
-    Com_Printf(0, "  This takes exponentially longer to make larger image sizes.\n");
-    Com_Printf(0, "  16 is a good iteration size.  32 is a good final image size.\n");
-    Com_Printf(0, "* If 'fresnel' is specified, the alpha channel of the cubemap contains the reflection factor.\n");
-    Com_Printf(0, "  n0 and n1 are the index of refraction of the 'air' and 'water' surfaces, respectively.\n");
-    Com_Printf(0, "  The index of refraction must always be 1 or greater.\n");
-    Com_Printf(0, "  This is always calculated, and defaults to air-water interface (n0 = 1, n1 = 1.333).\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Syntax: cubemapShot size basefilename [lighting r g b | fresnel n0 n1]\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "* size must be a power of 2 that is at least 4 and not more than 1024.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "* screenshots will be written to 'env/basefilename_*.tga'\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "* basefilename must not exceed %i chars\n", 40);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "* If 'lighting' is specified, a diffuse environment-based lighting cubemap is generated.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "  This takes exponentially longer to make larger image sizes.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "  16 is a good iteration size.  32 is a good final image size.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "* If 'fresnel' is specified, the alpha channel of the cubemap contains the reflection factor.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "  n0 and n1 are the index of refraction of the 'air' and 'water' surfaces, respectively.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "  The index of refraction must always be 1 or greater.\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "  This is always calculated, and defaults to air-water interface (n0 = 1, n1 = 1.333).\n");
 }
 
 void __cdecl CL_CubemapShot_f()
@@ -338,7 +338,7 @@ void __cdecl CL_CubemapShot_f()
 
     if (!CL_IsCgameInitialized(0))
     {
-        Com_Printf(0, "must be in a map to use this command\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "must be in a map to use this command\n");
         return;
     }
     if (Cmd_Argc() < 3)
@@ -440,7 +440,7 @@ LABEL_20:
     else
     {
         Com_Printf(
-            0,
+            CON_CHANNEL_DONT_FILTER,
             "The cubemapshot size may not exceed %i for this resolution.  Try reducing the cubemapshot size or increasing your "
             "screen resolution.\n",
             displayWidth - 2);

@@ -68,11 +68,11 @@ int __cdecl Dvar_Command()
     {
         v5 = Dvar_DisplayableResetValue(dvar);
         v2 = Dvar_DisplayableValue(dvar);
-        Com_Printf(0, "\"%s\" is: \"%s^7\" default: \"%s^7\"\n", dvar->name, v2, v5);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "\"%s\" is: \"%s^7\" default: \"%s^7\"\n", dvar->name, v2, v5);
         if (Dvar_HasLatchedValue(dvar))
         {
             v3 = Dvar_DisplayableLatchedValue(dvar);
-            Com_Printf(0, "latched: \"%s\"\n", v3);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "latched: \"%s\"\n", v3);
         }
         Dvar_PrintDomain(dvar->type, dvar->domain);
         return 1;
@@ -730,9 +730,9 @@ void __cdecl Dvar_PrintDomain(uint8_t type, DvarLimits domain)
     //HIDWORD(v3) = 1024;
     //LODWORD(v3) = domainBuffer;
     //v2 = Dvar_DomainToString(type, domain, v3);
-    //Com_Printf(16, "  %s\n", v2);
+    //Com_Printf(CON_CHANNEL_SYSTEM, "  %s\n", v2);
     char domainBuffer[1024];
-    Com_Printf(16, "  %s\n", Dvar_DomainToString(type, &domain, domainBuffer, sizeof(domainBuffer)));
+    Com_Printf(CON_CHANNEL_SYSTEM, "  %s\n", Dvar_DomainToString(type, &domain, domainBuffer, sizeof(domainBuffer)));
 }
 
 bool __cdecl Dvar_HasLatchedValue(const dvar_s *dvar)
@@ -1336,13 +1336,13 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
     if (Com_LogFileOpen())
     {
         v4 = va("      dvar set %s %s\n", dvar->name, Dvar_ValueToString(dvar, value));
-        //Com_PrintMessage(6, v4, 0);
+        //Com_PrintMessage(CON_CHANNEL_LOGFILEONLY, v4, 0);
     }
     if (!Dvar_ValueInDomain(dvar->type, value, dvar->domain))
     {
         name = dvar->name;
         v5 = Dvar_ValueToString(dvar, value);
-        Com_Printf(16, "'%s' is not a valid value for dvar '%s'\n", v5, name);
+        Com_Printf(CON_CHANNEL_SYSTEM, "'%s' is not a valid value for dvar '%s'\n", v5, name);
         Dvar_PrintDomain(dvar->type, dvar->domain);
         if (dvar->type == DVAR_TYPE_ENUM)
         {
@@ -1368,31 +1368,31 @@ void __cdecl Dvar_SetVariant(dvar_s *dvar, DvarValue value, DvarSetSource source
     {
         v8 = dvar->name;
         v6 = Dvar_ValueToString(dvar, value);
-        Com_Printf(16, "'%s' is not a valid value for dvar '%s'\n\n", v6, v8);
+        Com_Printf(CON_CHANNEL_SYSTEM, "'%s' is not a valid value for dvar '%s'\n\n", v6, v8);
         return;
     }
     if (source == DVAR_SOURCE_EXTERNAL || source == DVAR_SOURCE_SCRIPT)
     {
         if ((dvar->flags & 0x40) != 0)
         {
-            Com_Printf(16, "%s is read only.\n", dvar->name);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s is read only.\n", dvar->name);
             return;
         }
         if ((dvar->flags & 0x10) != 0)
         {
-            Com_Printf(16, "%s is write protected.\n", dvar->name);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s is write protected.\n", dvar->name);
             return;
         }
         if (source == DVAR_SOURCE_EXTERNAL && (dvar->flags & 0x80) != 0 && !dvar_cheats->current.enabled)
         {
-            Com_Printf(16, "%s is cheat protected.\n", dvar->name);
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s is cheat protected.\n", dvar->name);
             return;
         }
         if ((dvar->flags & 0x20) != 0)
         {
             Dvar_SetLatchedValue(dvar, value);
             if (!Dvar_ValuesEqual(dvar->type, dvar->latched, dvar->current))
-                Com_Printf(16, "%s will be changed upon restarting.\n", dvar->name);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s will be changed upon restarting.\n", dvar->name);
             return;
         }
     }
@@ -2588,7 +2588,7 @@ void __cdecl Dvar_SetFromStringFromSource(dvar_s *dvar, char *string, DvarSetSou
     newValue = v4;
     if (dvar->type == DVAR_TYPE_ENUM && newValue.integer == -1337)
     {
-        Com_Printf(16, "'%s' is not a valid value for dvar '%s'\n", buf, dvar->name);
+        Com_Printf(CON_CHANNEL_SYSTEM, "'%s' is not a valid value for dvar '%s'\n", buf, dvar->name);
         Dvar_PrintDomain(dvar->type, dvar->domain);
         newValue = dvar->reset;
     }
@@ -2726,7 +2726,7 @@ void __cdecl Dvar_SetDomainFunc(dvar_s *dvar, bool(__cdecl *customFunc)(dvar_s *
         {
             name = dvar->name;
             v2 = Dvar_ValueToString(dvar, dvar->current);
-            Com_Printf(16, "'%s' is not a valid value for dvar '%s'\n\n", v2, name);
+            Com_Printf(CON_CHANNEL_SYSTEM, "'%s' is not a valid value for dvar '%s'\n\n", v2, name);
             Dvar_Reset(dvar, DVAR_SOURCE_INTERNAL);
         }
     }
@@ -2914,7 +2914,7 @@ int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, uint32_t numDvars, c
         {
             if (i >= numDvars)
             {
-                Com_PrintWarning(16, "WARNING: unknown dvar '%s' in file '%s'\n", s0, filename);
+                Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: unknown dvar '%s' in file '%s'\n", s0, filename);
                 goto next_dvar;
             }
             if (!I_stricmp(s0, dvarnames[i]))
@@ -2936,11 +2936,11 @@ int __cdecl Com_LoadDvarsFromBuffer(const char **dvarnames, uint32_t numDvars, c
     Com_EndParseSession();
     if (v10 == numDvars)
         return 1;
-    Com_PrintError(16, "ERROR: the following dvars were not specified in file '%s'\n", filename);
+    Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: the following dvars were not specified in file '%s'\n", filename);
     for (i = 0; i < numDvars; ++i)
     {
         if (!dst[i])
-            Com_PrintError(16, "  %s\n", dvarnames[i]);
+            Com_PrintError(CON_CHANNEL_SYSTEM, "  %s\n", dvarnames[i]);
     }
     return 0;
 }
@@ -2969,7 +2969,7 @@ void Dvar_SaveDvars(MemoryFile *memFile, uint16_t filter)
             int nameLen = (int)(namePtr - var->name - 1);
             if (nameLen >= 1024)
             {
-                Com_PrintError(16, "ERROR: Truncating dvar name '%s' in save game\n", var->name);
+                Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: Truncating dvar name '%s' in save game\n", var->name);
                 nameLen = 1023;
             }
             writeBuf = nameLen;
@@ -2984,7 +2984,7 @@ void Dvar_SaveDvars(MemoryFile *memFile, uint16_t filter)
             int valueLen = (int)(valuePtr - stringValue - 1);
             if (valueLen >= 1024)
             {
-                Com_PrintError(16, "ERROR: Truncating dvar value '%s' for dvar '%s' in save game\n", stringValue, var->name);
+                Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: Truncating dvar value '%s' for dvar '%s' in save game\n", stringValue, var->name);
                 valueLen = 1023;
             }
             writeBuf = valueLen;

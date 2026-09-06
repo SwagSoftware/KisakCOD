@@ -36,7 +36,7 @@ const char *__cdecl StringTable_Lookup(
     }
     else
     {
-        Com_PrintError(13, "Unable to find the lookup table in the fastfile, aborting lookup\n");
+        Com_PrintError(CON_CHANNEL_UI, "Unable to find the lookup table in the fastfile, aborting lookup\n");
         return "";
     }
 }

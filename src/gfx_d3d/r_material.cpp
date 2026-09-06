@@ -527,7 +527,7 @@ Material *__cdecl Material_MakeDefault(char *name)
             MyAssertHandler(".\\r_material.cpp", 1162, 0, "%s", "!strcmp( name, MATERIAL_DEFAULT_NAME )");
         Com_Error(ERR_FATAL, "couldn't load material '$default'");
     }
-    Com_PrintWarning(8, "WARNING: Could not find material '%s'\n", name);
+    Com_PrintWarning(CON_CHANNEL_GFX, "WARNING: Could not find material '%s'\n", name);
     return Material_Duplicate(rgp.defaultMaterial, name);
 }
 
@@ -612,7 +612,7 @@ void __cdecl R_MaterialList_f()
     float v7; // [esp+4154h] [ebp-4h]
 
     v3 = 0;
-    Com_Printf(8, "-----------------------\n");
+    Com_Printf(CON_CHANNEL_GFX, "-----------------------\n");
     inData = 0;
     DB_EnumXAssets(ASSET_TYPE_MATERIAL, (void(__cdecl *)(XAssetHeader, void*))R_GetMaterialList, &inData, 0);
     // std::_Sort<ShadowCandidate *, int, bool(__cdecl *)(ShadowCandidate const &, ShadowCandidate const &)>(
@@ -621,7 +621,7 @@ void __cdecl R_MaterialList_f()
     //     (int)(8 * inData) >> 3,
     //     R_MaterialCompare);
     std::sort(&v6[0], &v6[inData], R_MaterialCompare);
-    Com_Printf(8, "geo KB   name\n");
+    Com_Printf(CON_CHANNEL_GFX, "geo KB   name\n");
     for (i = 0; i < inData; ++i)
     {
         v4 = &v6[i];
@@ -633,13 +633,13 @@ void __cdecl R_MaterialList_f()
             fmt = "%6.0f";
         else
             fmt = "%6.1f";
-        Com_Printf(8, fmt, v7);
-        Com_Printf(8, "   %s\n", material->info.name);
+        Com_Printf(CON_CHANNEL_GFX, fmt, v7);
+        Com_Printf(CON_CHANNEL_GFX, "   %s\n", material->info.name);
     }
-    Com_Printf(8, "-----------------------\n");
-    Com_Printf(8, "current total  %5.1f MB\n", (double)v3 / 1048576.0);
-    Com_Printf(8, "%i total geometry materials\n", inData);
-    Com_Printf(8, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
+    Com_Printf(CON_CHANNEL_GFX, "-----------------------\n");
+    Com_Printf(CON_CHANNEL_GFX, "current total  %5.1f MB\n", (double)v3 / 1048576.0);
+    Com_Printf(CON_CHANNEL_GFX, "%i total geometry materials\n", inData);
+    Com_Printf(CON_CHANNEL_GFX, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
 }
 
 void __cdecl R_GetMaterialList(XAssetHeader header, char *data)
@@ -1022,12 +1022,12 @@ void __cdecl R_Cmd_ReloadMaterialTextures()
         else
         {
             v0 = va("ReloadMaterialTextures: Material '%s' is not currently loaded.\n", name);
-            Com_Printf(8, v0);
+            Com_Printf(CON_CHANNEL_GFX, v0);
         }
     }
     else
     {
-        Com_Printf(8, "Usage: reloadmaterialtextures <materialname>\n");
+        Com_Printf(CON_CHANNEL_GFX, "Usage: reloadmaterialtextures <materialname>\n");
     }
 }
 

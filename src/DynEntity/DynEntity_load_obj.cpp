@@ -204,7 +204,7 @@ char __cdecl DynEnt_Create(DynEntityDef *dynEntDef, const DynEntityCreateParams 
                     dynEntDef->physPreset = DynEnt_PhysPresetPrecache("default");
                     if (dynEntDef->xModel)
                         Com_PrintError(
-                            20,
+                            CON_CHANNEL_PHYS,
                             "ERROR: no physics preset specified for the DynEntity at [%.1f,%.1f,%.1f] with xModel [%s]\n",
                             params->origin[0],
                             params->origin[1],
@@ -212,7 +212,7 @@ char __cdecl DynEnt_Create(DynEntityDef *dynEntDef, const DynEntityCreateParams 
                             params->modelName);
                     else
                         Com_PrintError(
-                            20,
+                            CON_CHANNEL_PHYS,
                             "ERROR: no physics preset specified for the DynEntity at [%.1f,%.1f,%.1f]\n",
                             params->origin[0],
                             params->origin[1],

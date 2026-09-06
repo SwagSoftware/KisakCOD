@@ -89,7 +89,7 @@ void __cdecl CG_FxSetTestPosition()
     {
         Vec3Mad(cgArray[0].refdef.vieworg, 100.0, cgArray[0].refdef.viewaxis[0], s_testEffect[0].pos);
         Com_Printf(
-            21,
+            CON_CHANNEL_FX,
             "\n\nFX Testing position set to: (%f, %f, %f)\n\n",
             s_testEffect[0].pos[0],
             s_testEffect[0].pos[1],
@@ -114,12 +114,12 @@ void __cdecl CG_FxTest()
     if (cgArray[0].nextSnap)
     {
         if (Cmd_Argc() < 2)
-            Com_Printf(21, "Must supply filename from base path.  Optional restart time.\n");
+            Com_Printf(CON_CHANNEL_FX, "Must supply filename from base path.  Optional restart time.\n");
         v0 = Cmd_Argv(1);
         I_strncpyz(s_testEffect[0].name, v0, 64);
         if (I_strncmp(s_testEffect[0].name, "fx/", 3))
         {
-            Com_Printf(21, "Spawning Fx %s\n", s_testEffect[0].name);
+            Com_Printf(CON_CHANNEL_FX, "Spawning Fx %s\n", s_testEffect[0].name);
             CG_PlayTestFx(0);
             if (Cmd_Argc() == 3)
             {
@@ -134,7 +134,7 @@ void __cdecl CG_FxTest()
         }
         else
         {
-            Com_PrintError(1, "Fx path [%s] must not inclue \"fx/\" \n", s_testEffect[0].name);
+            Com_PrintError(CON_CHANNEL_ERROR, "Fx path [%s] must not inclue \"fx/\" \n", s_testEffect[0].name);
         }
     }
 }

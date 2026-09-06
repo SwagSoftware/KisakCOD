@@ -175,10 +175,10 @@ void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
     }
     if (ia == max)
     {
-        Com_Printf(15, "Overflow at config string start value of %i: key values printed below\n", start);
+        Com_Printf(CON_CHANNEL_SERVER, "Overflow at config string start value of %i: key values printed below\n", start);
         for (ia = 0; ia < max; ++ia)
         {
-            Com_Printf(15, "%i: %i ( %s )\n", ia + start, sv.configstrings[ia + start], SL_ConvertToString(sv.configstrings[ia + start]));
+            Com_Printf(CON_CHANNEL_SERVER, "%i: %i ( %s )\n", ia + start, sv.configstrings[ia + start], SL_ConvertToString(sv.configstrings[ia + start]));
         }
         Com_Error(ERR_DROP, "SV_SetConfigValueForKey: overflow'");
     }
@@ -466,8 +466,8 @@ void __cdecl SV_SpawnServer(char *mapname)
         }
 
         SV_ShutdownGameProgs();
-        Com_Printf(15, "------ Server Initialization ------\n");
-        Com_Printf(15, "Server: %s\n", mapname);
+        Com_Printf(CON_CHANNEL_SERVER, "------ Server Initialization ------\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Server: %s\n", mapname);
         SV_ClearServer();
     }
 
@@ -611,7 +611,7 @@ void __cdecl SV_SpawnServer(char *mapname)
         p = FS_LoadedIwdChecksums();
         Dvar_SetString((dvar_s *)sv_iwds, (char *)p);
         if (!strlen(p))
-            Com_PrintWarning(15, "WARNING: sv_pure set but no IWD files loaded\n");
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: sv_pure set but no IWD files loaded\n");
         p = FS_LoadedIwdNames();
         Dvar_SetString((dvar_s *)sv_iwdNames, (char *)p);
     }
@@ -632,7 +632,7 @@ void __cdecl SV_SpawnServer(char *mapname)
     sv.state = SS_GAME;
     SV_Heartbeat_f();
     ProfLoad_Deactivate();
-    Com_Printf(15, "-----------------------------------\n");
+    Com_Printf(CON_CHANNEL_SERVER, "-----------------------------------\n");
     // LWSS: Remove punkbuster junk
     //if (Dvar_GetBool("sv_punkbuster"))
     //    EnablePbSv();
@@ -854,7 +854,7 @@ void __cdecl SV_Shutdown(const char *finalmsg)
     if (com_sv_running && com_sv_running->current.enabled)
     {
         Com_SyncThreads();
-        Com_Printf(15, "----- Server Shutdown -----\n");
+        Com_Printf(CON_CHANNEL_SERVER, "----- Server Shutdown -----\n");
         SV_FinalMessage(finalmsg);
         KISAK_NULLSUB();
         SV_MasterShutdown();
@@ -871,7 +871,7 @@ void __cdecl SV_Shutdown(const char *finalmsg)
         }
         memset(&svs, 0, sizeof(svs));
         bgs = 0;
-        Com_Printf(15, "---------------------------\n");
+        Com_Printf(CON_CHANNEL_SERVER, "---------------------------\n");
     }
 }
 

@@ -2371,7 +2371,7 @@ void __cdecl CG_DrawTalkerNum(
             }
             else
             {
-                Com_PrintWarning(13, "client %i has invalid info but they are talking\n", client);
+                Com_PrintWarning(CON_CHANNEL_UI, "client %i has invalid info but they are talking\n", client);
             }
         }
     }

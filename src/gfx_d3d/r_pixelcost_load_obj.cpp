@@ -26,13 +26,13 @@ void __cdecl R_PixelCost_PrintColorCodeKey()
     float percentage; // [esp+10h] [ebp-8h]
     uint32_t codeIndex; // [esp+14h] [ebp-4h]
 
-    Com_Printf(8, "\n---- PIXEL COST KEY ----\n");
+    Com_Printf(CON_CHANNEL_GFX, "\n---- PIXEL COST KEY ----\n");
     for (codeIndex = 0; codeIndex < 6; ++codeIndex)
     {
         percentage = (double)s_pixelCostColorCodeTable[codeIndex].count * 1.5625;
-        Com_Printf(8, "  %3.0f%%: %s\n", percentage, s_pixelCostColorCodeTable[codeIndex].colorName);
+        Com_Printf(CON_CHANNEL_GFX, "  %3.0f%%: %s\n", percentage, s_pixelCostColorCodeTable[codeIndex].colorName);
     }
-    Com_Printf(8, "----------------------\n\n");
+    Com_Printf(CON_CHANNEL_GFX, "----------------------\n\n");
 }
 
 void __cdecl RB_PixelCost_BuildColorCodeMap(uint8_t (*pixels)[4], int pixelCount)

@@ -445,13 +445,13 @@ char __cdecl Image_ValidateHeader(GfxImageFileHeader *imageFile, const char *fil
         }
         else
         {
-            Com_PrintError(8, "ERROR: image '%s' is version %i but should be version %i\n", filepath, imageFile->version, 6);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: image '%s' is version %i but should be version %i\n", filepath, imageFile->version, 6);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(8, "ERROR: image '%s' is not an IW image\n", filepath);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: image '%s' is not an IW image\n", filepath);
         return 0;
     }
 }
@@ -566,7 +566,7 @@ GfxImage *__cdecl Image_LoadBuiltin(char *name, uint8_t semantic, uint8_t imageT
     {
         if (tableIndex >= 8)
         {
-            Com_PrintError(8, "ERROR: Unknown built-in image '%s'", name);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: Unknown built-in image '%s'", name);
             return 0;
         }
         if (!strcmp(constructorTable[tableIndex].name, name))
@@ -686,7 +686,7 @@ void __cdecl R_SetPicmip()
     iassert( r_reflectionProbeGenerate );
     if (r_reflectionProbeGenerate->current.enabled)
     {
-        Com_Printf(8, "Picmip is set to lowest quality for generating reflections.\n");
+        Com_Printf(CON_CHANNEL_GFX, "Picmip is set to lowest quality for generating reflections.\n");
         imageGlobals.picmip = 2;
         imageGlobals.picmipBump = 2;
         imageGlobals.picmipSpec = 2;
@@ -695,14 +695,14 @@ void __cdecl R_SetPicmip()
     {
         if (r_picmip_manual->current.enabled)
         {
-            Com_Printf(8, "Picmip is set manually.\n");
+            Com_Printf(CON_CHANNEL_GFX, "Picmip is set manually.\n");
             imageGlobals.picmip = r_picmip->current.integer;
             imageGlobals.picmipBump = r_picmip_bump->current.integer;
             imageGlobals.picmipSpec = r_picmip_spec->current.integer;
         }
         else
         {
-            Com_Printf(8, "Texture detail is set automatically.\n");
+            Com_Printf(CON_CHANNEL_GFX, "Texture detail is set automatically.\n");
             if (texMemInMegs < 0x1C2)
             {
                 if (texMemInMegs < 0x12C)
@@ -747,7 +747,7 @@ void __cdecl R_SetPicmip()
                 }
                 if (cappedPicmip)
                     Com_Printf(
-                        8,
+                        CON_CHANNEL_GFX,
                         "Reducing texture detail based on total system memory of %i MB to improve load times.\n",
                         sysMemInMegs);
             }
@@ -758,7 +758,7 @@ void __cdecl R_SetPicmip()
         if (!r_specular->current.enabled || !r_rendererInUse->current.integer)
             imageGlobals.picmipSpec = 3;
         Com_Printf(
-            8,
+            CON_CHANNEL_GFX,
             "Using picmip %i on most textures, %i on normal maps, and %i on specular maps\n",
             imageGlobals.picmip,
             imageGlobals.picmipBump,
@@ -903,14 +903,14 @@ void __cdecl R_ImageList_f()
     //    (signed int)(4 * imageList.count) >> 2,
     //    imagecompare);
     std::sort(&imageList.image[0], &imageList.image[imageList.count], imagecompare);
-    Com_Printf(8, "\n-fmt- -dimension-");
+    Com_Printf(CON_CHANNEL_GFX, "\n-fmt- -dimension-");
     for (j = 0; j < 2; ++j)
-        Com_Printf(8, "%s", g_platform_name[j]);
-    Com_Printf(8, "  --name-------\n");
+        Com_Printf(CON_CHANNEL_GFX, "%s", g_platform_name[j]);
+    Com_Printf(CON_CHANNEL_GFX, "  --name-------\n");
     for (i = 0; i < imageList.count; ++i)
     {
         image = imageList.image[i];
-        Com_Printf(8, "%4i x %-4i ", image->width, image->height);
+        Com_Printf(CON_CHANNEL_GFX, "%4i x %-4i ", image->width, image->height);
         v1 = R_ImagePixelFormat(image);
         v9 = v1;
         if (v1 > D3DFMT_A8L8)
@@ -919,7 +919,7 @@ void __cdecl R_ImageList_f()
             {
                 if (v1 == D3DFMT_DXT5)
                 {
-                    Com_Printf(8, "DXT5  ");
+                    Com_Printf(CON_CHANNEL_GFX, "DXT5  ");
                     goto LABEL_36;
                 }
             }
@@ -928,13 +928,13 @@ void __cdecl R_ImageList_f()
                 switch (v1)
                 {
                 case D3DFMT_DXT3:
-                    Com_Printf(8, "DXT3  ");
+                    Com_Printf(CON_CHANNEL_GFX, "DXT3  ");
                     goto LABEL_36;
                 case D3DFMT_R32F:
-                    Com_Printf(8, "R32F  ");
+                    Com_Printf(CON_CHANNEL_GFX, "R32F  ");
                     goto LABEL_36;
                 case D3DFMT_DXT1:
-                    Com_Printf(8, "DXT1  ");
+                    Com_Printf(CON_CHANNEL_GFX, "DXT1  ");
                     goto LABEL_36;
                 }
             }
@@ -947,30 +947,30 @@ void __cdecl R_ImageList_f()
         }
         else if (v1 == D3DFMT_A8L8)
         {
-            Com_Printf(8, "AL16  ");
+            Com_Printf(CON_CHANNEL_GFX, "AL16  ");
         }
         else
         {
             switch (v1)
             {
             case D3DFMT_A8R8G8B8:
-                Com_Printf(8, "RGBA32");
+                Com_Printf(CON_CHANNEL_GFX, "RGBA32");
                 break;
             case D3DFMT_X8R8G8B8:
-                Com_Printf(8, "RGB32 ");
+                Com_Printf(CON_CHANNEL_GFX, "RGB32 ");
                 break;
             case D3DFMT_A8:
-                Com_Printf(8, "A8    ");
+                Com_Printf(CON_CHANNEL_GFX, "A8    ");
                 break;
             case D3DFMT_L8:
-                Com_Printf(8, "L8    ");
+                Com_Printf(CON_CHANNEL_GFX, "L8    ");
                 break;
             default:
                 goto LABEL_34;
             }
         }
     LABEL_36:
-        Com_Printf(8, "  %s", imageTypeName[image->track]);
+        Com_Printf(CON_CHANNEL_GFX, "  %s", imageTypeName[image->track]);
         for (j = 0; j < 2; ++j)
         {
             v13 = (double)image->cardMemory.platform[j] / 1024.0;
@@ -978,7 +978,7 @@ void __cdecl R_ImageList_f()
                 fmt = "%7.0fk";
             else
                 fmt = "%7.1fk";
-            Com_Printf(8, fmt, v13);
+            Com_Printf(CON_CHANNEL_GFX, fmt, v13);
             v5 = image->cardMemory.platform[j];
             if (!IsFastFileLoad())
             {
@@ -988,28 +988,28 @@ void __cdecl R_ImageList_f()
             }
             v8[j] += v5;
         }
-        Com_Printf(8, "  %s\n", image->name);
+        Com_Printf(CON_CHANNEL_GFX, "  %s\n", image->name);
     }
-    Com_Printf(8, " ---------\n");
-    Com_Printf(8, " %i total images\n", imageList.count);
+    Com_Printf(CON_CHANNEL_GFX, " ---------\n");
+    Com_Printf(CON_CHANNEL_GFX, " %i total images\n", imageList.count);
     for (j = 0; j < 2; ++j)
-        Com_Printf(8, " %5.1f MB %s total image size\n", (double)(int)v8[j] / 1048576.0, g_platform_name[j]);
+        Com_Printf(CON_CHANNEL_GFX, " %5.1f MB %s total image size\n", (double)(int)v8[j] / 1048576.0, g_platform_name[j]);
     if (!IsFastFileLoad())
     {
-        Com_Printf(8, "\n");
-        Com_Printf(8, "       ");
+        Com_Printf(CON_CHANNEL_GFX, "\n");
+        Com_Printf(CON_CHANNEL_GFX, "       ");
         for (j = 0; j < 2; ++j)
-            Com_Printf(8, "%s", g_platform_name[j]);
-        Com_Printf(8, "\n");
+            Com_Printf(CON_CHANNEL_GFX, "%s", g_platform_name[j]);
+        Com_Printf(CON_CHANNEL_GFX, "\n");
         for (i = 0; i < 0xA; ++i)
         {
-            Com_Printf(8, "%s:", imageTypeName[i]);
+            Com_Printf(CON_CHANNEL_GFX, "%s:", imageTypeName[i]);
             for (j = 0; j < 2; ++j)
-                Com_Printf(8, "  %5.1f", (double)*(int *)&dst[8 * i + 4 * j] / 1048576.0);
-            Com_Printf(8, "  MB\n");
+                Com_Printf(CON_CHANNEL_GFX, "  %5.1f", (double)*(int *)&dst[8 * i + 4 * j] / 1048576.0);
+            Com_Printf(CON_CHANNEL_GFX, "  MB\n");
         }
     }
-    Com_Printf(8, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
+    Com_Printf(CON_CHANNEL_GFX, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
 }
 
 bool __cdecl imagecompare(GfxImage *image1, GfxImage *image2)

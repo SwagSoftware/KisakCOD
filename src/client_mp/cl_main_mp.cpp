@@ -527,7 +527,7 @@ void __cdecl CL_ForwardCommandToServer(int32_t localClientNum, const char *strin
                 localClientNum);
         if (clientUIActives[0].connectionState < 5 || *cmd == '+' || CL_GetLocalClientConnection(localClientNum)->demoplaying)
         {
-            Com_Printf(14, "Unknown command \"%s\"\n", cmd);
+            Com_Printf(CON_CHANNEL_CLIENT, "Unknown command \"%s\"\n", cmd);
         }
         else if (Cmd_Argc() <= 1)
         {
@@ -560,10 +560,10 @@ void __cdecl CL_RequestAuthorization(int localClientNum)
     //}
     //if (!cls.authorizeServer.port)
     //{
-    //    Com_Printf(14, "Resolving %s\n", com_authServerName->current.string);
+    //    Com_Printf(CON_CHANNEL_CLIENT, "Resolving %s\n", com_authServerName->current.string);
     //    if (!NET_StringToAdr((char *)com_authServerName->current.integer, &cls.authorizeServer))
     //    {
-    //        Com_Printf(14, "Couldn't resolve address\n");
+    //        Com_Printf(CON_CHANNEL_CLIENT, "Couldn't resolve address\n");
     //        return;
     //    }
     //    cls.authorizeServer.port = BigShort(com_authPort->current.integer);
@@ -614,7 +614,7 @@ void __cdecl CL_ForwardToServer_f()
 
     if (CL_GetLocalClientConnection(0)->demoplaying || clientUIActives[0].connectionState != 9)
     {
-        Com_Printf(0, "Not connected to a server.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Not connected to a server.\n");
     }
     else if (Cmd_Argc() > 1)
     {
@@ -645,12 +645,12 @@ void __cdecl CL_Setenv_f()
             if (env)
             {
                 v3 = Cmd_Argv(1);
-                Com_Printf(0, "%s=%s\n", v3, env);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s=%s\n", v3, env);
             }
             else
             {
                 v4 = Cmd_Argv(1);
-                Com_Printf(0, "%s undefined\n", v4);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s undefined\n", v4);
             }
         }
     }
@@ -702,7 +702,7 @@ void __cdecl CL_Reconnect_f()
     }
     else
     {
-        Com_Printf(0, "Can't reconnect to localhost.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Can't reconnect to localhost.\n");
     }
 }
 
@@ -748,7 +748,7 @@ void __cdecl CL_Vid_Restart_f()
 
     if (com_sv_running->current.enabled)
     {
-        Com_Printf(0, "Listen server cannot video restart.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Listen server cannot video restart.\n");
     }
     else
     {
@@ -828,7 +828,7 @@ void __cdecl CL_Snd_Restart_f()
 
     if (com_sv_running->current.enabled)
     {
-        Com_Printf(0, "Listen server cannot sound restart.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Listen server cannot sound restart.\n");
     }
     else
     {
@@ -866,12 +866,12 @@ void __cdecl CL_Configstrings_f()
         {
             ofs = LocalClientGlobals->gameState.stringOffsets[i];
             if (ofs)
-                Com_Printf(0, "%4i: %s\n", i, &LocalClientGlobals->gameState.stringData[ofs]);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%4i: %s\n", i, &LocalClientGlobals->gameState.stringData[ofs]);
         }
     }
     else
     {
-        Com_Printf(0, "Not connected to a server.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Not connected to a server.\n");
     }
 }
 
@@ -879,13 +879,13 @@ void __cdecl CL_Clientinfo_f()
 {
     char *v0; // eax
 
-    Com_Printf(0, "--------- Client Information ---------\n");
-    Com_Printf(0, "state: %i\n", clientUIActives[0].connectionState);
-    Com_Printf(0, "Server: %s\n", cls.servername);
-    Com_Printf(0, "User info settings:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "--------- Client Information ---------\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "state: %i\n", clientUIActives[0].connectionState);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Server: %s\n", cls.servername);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "User info settings:\n");
     v0 = Dvar_InfoString(0, 2);
     Info_Print(v0);
-    Com_Printf(0, "--------------------------------------\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "--------------------------------------\n");
 }
 
 bool __cdecl CL_WasMapAlreadyLoaded()
@@ -952,7 +952,7 @@ void __cdecl CL_DownloadsComplete(int32_t localClientNum)
     if (cls.wwwDlDisconnected)
         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 2604, 0, "%s", "!cls.wwwDlDisconnected");
     clientUIActives[localClientNum].connectionState = CA_LOADING;
-    Com_Printf(14, "Setting state to CA_LOADING in CL_DownloadsComplete\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "Setting state to CA_LOADING in CL_DownloadsComplete\n");
     if (!CL_WasMapAlreadyLoaded())
     {
         info = CL_GetConfigString(localClientNum, 0);
@@ -1193,7 +1193,7 @@ char __cdecl CL_ConnectionlessPacket(int localClientNum, netadr_t from, msg_t *m
         if (showpackets->current.integer)
         {
             v5 = NET_AdrToString(from);
-            Com_Printf(16, "recv: %s->'%s'\n", v5, s);
+            Com_Printf(CON_CHANNEL_SYSTEM, "recv: %s->'%s'\n", v5, s);
         }
         Cmd_TokenizeString(s);
         success = CL_DispatchConnectionlessPacket(localClientNum, from, msg, time);
@@ -1213,13 +1213,13 @@ void __cdecl CL_UpdateInfoPacket(netadr_t from)
 
     if (cls.autoupdateServer.type == NA_BAD)
     {
-        Com_DPrintf(14, "CL_UpdateInfoPacket:  Auto-Updater has bad address\n");
+        Com_DPrintf(CON_CHANNEL_CLIENT, "CL_UpdateInfoPacket:  Auto-Updater has bad address\n");
     }
     else
     {
         v1 = BigShort(cls.autoupdateServer.port);
         Com_DPrintf(
-            14,
+            CON_CHANNEL_CLIENT,
             "Auto-Updater resolved to %i.%i.%i.%i:%i\n",
             cls.autoupdateServer.ip[0],
             cls.autoupdateServer.ip[1],
@@ -1244,7 +1244,7 @@ void __cdecl CL_UpdateInfoPacket(netadr_t from)
         {
             v2 = BigShort(from.port);
             Com_DPrintf(
-                14,
+                CON_CHANNEL_CLIENT,
                 "CL_UpdateInfoPacket:  Received packet from %i.%i.%i.%i:%i\n",
                 from.ip[0],
                 from.ip[1],
@@ -1336,7 +1336,7 @@ void __cdecl CL_ServersResponsePacket(netadr_t from, msg_t *msg)
     int32_t count; // [esp+61Ch] [ebp-1Ch]
     netadr_t adr; // [esp+620h] [ebp-18h]
 
-    Com_Printf(14, "CL_ServersResponsePacket\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "CL_ServersResponsePacket\n");
     cls.waitglobalserverresponse = 0;
     numservers = 0;
     buffptr = msg->data;
@@ -1360,7 +1360,7 @@ void __cdecl CL_ServersResponsePacket(netadr_t from, msg_t *msg)
         if (*buffptr != 92)
             break;
         Com_DPrintf(
-            14,
+            CON_CHANNEL_CLIENT,
             "server: %d ip: %d.%d.%d.%d:%d\n",
             numservers,
             addresses[numservers].ip[0],
@@ -1391,7 +1391,7 @@ void __cdecl CL_ServersResponsePacket(netadr_t from, msg_t *msg)
     }
     cls.numglobalservers = count;
     CL_SortGlobalServers();
-    Com_Printf(14, "%d servers parsed (total %d)\n", numservers, count);
+    Com_Printf(CON_CHANNEL_CLIENT, "%d servers parsed (total %d)\n", numservers, count);
 }
 
 char printBuf[2048];
@@ -1468,7 +1468,7 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                         s = MSG_ReadBigString(msg);
                         I_strncpyz(clcd->serverMessage, s, 256);
                         Com_sprintf(printBuf, 0x800u, "%s", s);
-                        Com_PrintMessage(14, printBuf, 0);
+                        Com_PrintMessage(CON_CHANNEL_CLIENT, printBuf, 0);
                         return 1;
                     }
                     if (I_stricmp(c, "error"))
@@ -1488,7 +1488,7 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                             clce = CL_GetLocalClientConnection(localClientNum);
                             I_strncpyz(clce->serverMessage, "EXE_AWAITINGCDKEYAUTH", 256);
                             SEH_LocalizeTextMessage("EXE_AWAITINGCDKEYAUTH", "need cd key message", LOCMSG_SAFE);
-                            Com_Printf(14, "%s\n", clce->serverMessage);
+                            Com_Printf(CON_CHANNEL_CLIENT, "%s\n", clce->serverMessage);
                             CL_RequestAuthorization(localClientNum);
                             return 1;
                         }
@@ -1626,13 +1626,13 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                 }
                 else
                 {
-                    Com_Printf(14, "statResponse packet while not syncing stats.  Ignored.\n");
+                    Com_Printf(CON_CHANNEL_CLIENT, "statResponse packet while not syncing stats.  Ignored.\n");
                     return 0;
                 }
             }
             else
             {
-                Com_Printf(14, "Dup statResponse received.  Ignored.\n");
+                Com_Printf(CON_CHANNEL_CLIENT, "Dup statResponse received.  Ignored.\n");
                 return 0;
             }
         }
@@ -1687,22 +1687,22 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                 }
                 else
                 {
-                    Com_Printf(14, "connectResponse from a different address.  Ignored.\n");
+                    Com_Printf(CON_CHANNEL_CLIENT, "connectResponse from a different address.  Ignored.\n");
                     v16 = NET_AdrToString(clc->serverAddress);
                     v6 = NET_AdrToString(from);
-                    Com_Printf(14, "%s should have been %s\n", v6, v16);
+                    Com_Printf(CON_CHANNEL_CLIENT, "%s should have been %s\n", v6, v16);
                     return 0;
                 }
             }
             else
             {
-                Com_Printf(14, "connectResponse packet while not connecting.  Ignored.\n");
+                Com_Printf(CON_CHANNEL_CLIENT, "connectResponse packet while not connecting.  Ignored.\n");
                 return 0;
             }
         }
         else
         {
-            Com_Printf(14, "Dup connect received.  Ignored.\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "Dup connect received.  Ignored.\n");
             return 0;
         }
     }
@@ -1715,12 +1715,12 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
         clcc->connectPacketCount = 0;
         clcc->connectTime = -99999;
         clcc->serverAddress = from;
-        Com_DPrintf(14, "challenge: %d\n", clcc->challenge);
+        Com_DPrintf(CON_CHANNEL_CLIENT, "challenge: %d\n", clcc->challenge);
         return 1;
     }
     else
     {
-        Com_Printf(14, "Unwanted challenge response received.  Ignored.\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "Unwanted challenge response received.  Ignored.\n");
         return 0;
     }
 }
@@ -1867,7 +1867,7 @@ char __cdecl CL_PacketEvent(int localClientNum, netadr_t from, msg_t *msg, int32
                         CL_ParseServerMessage(localClientNum, msg);
                         if (msg->overflowed)
                         {
-                            Com_DPrintf(14, "ignoring illegible message");
+                            Com_DPrintf(CON_CHANNEL_CLIENT, "ignoring illegible message");
                             clc->serverMessageSequence = savedServerMessageSequence;
                             clc->reliableAcknowledge = savedReliableAcknowledge;
                             return 0;
@@ -1898,19 +1898,19 @@ char __cdecl CL_PacketEvent(int localClientNum, netadr_t from, msg_t *msg, int32
             }
             else
             {
-                Com_DPrintf(14, "%s:sequenced packet without connection\n", NET_AdrToString(from));
+                Com_DPrintf(CON_CHANNEL_CLIENT, "%s:sequenced packet without connection\n", NET_AdrToString(from));
                 return 0;
             }
         }
         else
         {
-            Com_Printf(14, "%s: Runt packet\n", NET_AdrToString(from));
+            Com_Printf(CON_CHANNEL_CLIENT, "%s: Runt packet\n", NET_AdrToString(from));
             return 1;
         }
     }
     else
     {
-        Com_DPrintf(14, "%s: Got msg sequence %i but connstate (%i) is < CA_CONNECTED\n", NET_AdrToString(from), *(uint32_t *)msg->data, connstate);
+        Com_DPrintf(CON_CHANNEL_CLIENT, "%s: Got msg sequence %i but connstate (%i) is < CA_CONNECTED\n", NET_AdrToString(from), *(uint32_t *)msg->data, connstate);
         return 0;
     }
 }
@@ -2033,7 +2033,7 @@ void __cdecl CL_WWWDownload()
         }
         else
         {
-            Com_Printf(14, "Download failure while getting %s", cls.downloadName);
+            Com_Printf(CON_CHANNEL_CLIENT, "Download failure while getting %s", cls.downloadName);
             CL_AddReliableCommand(0, "wwwdl fail");
             cls.wwwDlInProgress = 0;
         }
@@ -2389,13 +2389,13 @@ void __cdecl CL_DevGuiDvar_f()
         else
         {
             v2 = Cmd_Argv(2);
-            Com_Printf(11, "dvar '%s' doesn't exist\n", v2);
+            Com_Printf(CON_CHANNEL_DEVGUI, "dvar '%s' doesn't exist\n", v2);
         }
     }
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s \"devgui path\" dvarName\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s \"devgui path\" dvarName\n", v0);
     }
 }
 
@@ -2414,7 +2414,7 @@ void __cdecl CL_DevGuiCmd_f()
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s \"devgui path\" \"command text\"\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s \"devgui path\" \"command text\"\n", v0);
     }
 }
 
@@ -2431,7 +2431,7 @@ void __cdecl CL_DevGuiOpen_f()
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s \"devgui path\"\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s \"devgui path\"\n", v0);
     }
 }
 
@@ -2470,7 +2470,7 @@ void CL_InitRef()
 {
     GfxConfiguration config; // [esp+0h] [ebp-30h] BYREF
 
-    Com_Printf(14, "----- Initializing Renderer ----\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "----- Initializing Renderer ----\n");
     SetupGfxConfig(&config);
     CL_SetFastFileNames(&config, 0);
     R_ConfigureRenderer(&config);
@@ -2561,10 +2561,10 @@ void __cdecl CL_PlayLogo_f()
 
     if (Cmd_Argc() != 5)
     {
-        Com_Printf(0, "USAGE: logo <image name> <fadein seconds> <full duration seconds> <fadeout seconds>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: logo <image name> <fadein seconds> <full duration seconds> <fadeout seconds>\n");
         return;
     }
-    Com_DPrintf(0, "CL_PlayLogo_f\n");
+    Com_DPrintf(CON_CHANNEL_DONT_FILTER, "CL_PlayLogo_f\n");
     if (clientUIActives[0].connectionState == CA_CINEMATIC)
     {
         SCR_StopCinematic(0);
@@ -2769,7 +2769,7 @@ void __cdecl CL_Record_f()
         connstate = clientUIActives[0].connectionState;
         if (clc->demorecording)
         {
-            Com_Printf(0, "Already recording.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Already recording.\n");
         }
         else if (connstate == CA_ACTIVE)
         {
@@ -2789,7 +2789,7 @@ void __cdecl CL_Record_f()
                         break;
                 }
             }
-            Com_Printf(0, "recording to %s.\n", name);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "recording to %s.\n", name);
             v0 = FS_FOpenFileWrite(name);
             clc->demofile = v0;
             if (clc->demofile)
@@ -2863,17 +2863,17 @@ void __cdecl CL_Record_f()
             }
             else
             {
-                Com_PrintError(0, "ERROR: couldn't open.\n");
+                Com_PrintError(CON_CHANNEL_DONT_FILTER, "ERROR: couldn't open.\n");
             }
         }
         else
         {
-            Com_Printf(0, "You must be in a level to record.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "You must be in a level to record.\n");
         }
     }
     else
     {
-        Com_Printf(0, "record <demoname>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "record <demoname>\n");
     }
 }
 
@@ -2894,11 +2894,11 @@ void __cdecl CL_StopRecord_f()
         FS_FCloseFile(clc->demofile);
         clc->demofile = 0;
         clc->demorecording = 0;
-        Com_Printf(0, "Stopped demo.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Stopped demo.\n");
     }
     else
     {
-        Com_Printf(0, "Not recording a demo.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Not recording a demo.\n");
     }
 }
 
@@ -2920,7 +2920,7 @@ void __cdecl CL_PlayDemo_f()
     {
         if (com_sv_running->current.enabled)
         {
-            Com_Printf(14, "listen server cannot play a demo.\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "listen server cannot play a demo.\n");
         }
         else
         {
@@ -2968,7 +2968,7 @@ void __cdecl CL_PlayDemo_f()
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(14, "%s <demoname>\n", v0);
+        Com_Printf(CON_CHANNEL_CLIENT, "%s <demoname>\n", v0);
     }
 }
 
@@ -2988,11 +2988,11 @@ void CL_RconLogin()
         if (strlen(password) < 24)
             memcpy(&rconGlob, password, strlen(password));
         else
-            Com_Printf(14, "rcon password must be %i characters or less\n", 24);
+            Com_Printf(CON_CHANNEL_CLIENT, "rcon password must be %i characters or less\n", 24);
     }
     else
     {
-        Com_Printf(14, "USAGE: rcon login <password>\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "USAGE: rcon login <password>\n");
     }
 }
 
@@ -3001,7 +3001,7 @@ void CL_RconLogout()
     if (rconGlob.password[0])
         rconGlob.password[0] = 0;
     else
-        Com_Printf(14, "Not logged in\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "Not logged in\n");
 }
 
 ping_t *__cdecl CL_GetFreePing()
@@ -3072,7 +3072,7 @@ void __cdecl CL_Ping_f()
     }
     else
     {
-        Com_Printf(0, "usage: ping [server]\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "usage: ping [server]\n");
     }
 }
 
@@ -3092,7 +3092,7 @@ void CL_RconHost()
         }
         else
         {
-            Com_Printf(14, "bad host address\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "bad host address\n");
             if (rconGlob.host.type != NA_BAD)
                 MyAssertHandler(
                     ".\\client_mp\\cl_main_pc_mp.cpp",
@@ -3105,7 +3105,7 @@ void CL_RconHost()
     }
     else
     {
-        Com_Printf(14, "USAGE: rcon host <address>\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "USAGE: rcon host <address>\n");
     }
 }
 
@@ -3125,7 +3125,7 @@ void __cdecl CL_Rcon_f()
 
     if (Cmd_Argc() < 2)
     {
-        Com_Printf(0, "USAGE: rcon <command> <options...>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: rcon <command> <options...>\n");
         return;
     }
     cmd = Cmd_Argv(1);
@@ -3146,7 +3146,7 @@ void __cdecl CL_Rcon_f()
     }
     if (!rconGlob.password[0])
     {
-        Com_Printf(0, "You need to log in with 'rcon login <password>' before using rcon.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "You need to log in with 'rcon login <password>' before using rcon.\n");
         return;
     }
     maxlen = 1024;
@@ -3162,7 +3162,7 @@ void __cdecl CL_Rcon_f()
     }
     if (len == maxlen)
     {
-        Com_Printf(0, "rcon commands are limited to %i characters\n", maxlen - 1);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "rcon commands are limited to %i characters\n", maxlen - 1);
         return;
     }
     message[len] = 0;
@@ -3172,9 +3172,9 @@ void __cdecl CL_Rcon_f()
     {
         if (rconGlob.host.type == NA_BAD)
         {
-            Com_Printf(0, "Can't determine rcon target.  You can fix this by either:\n");
-            Com_Printf(0, "1) Joining the server as a player.\n");
-            Com_Printf(0, "2) Setting the host server with 'rcon host <address>'.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Can't determine rcon target.  You can fix this by either:\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "1) Joining the server as a player.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "2) Setting the host server with 'rcon host <address>'.\n");
             return;
         }
         to = rconGlob.host;
@@ -3191,7 +3191,7 @@ void __cdecl CL_OpenedIWDList_f()
     char *v0; // eax
 
     v0 = FS_LoadedIwdNames();
-    Com_Printf(0, "Opened IWD Names: %s\n", v0);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Opened IWD Names: %s\n", v0);
 }
 
 void __cdecl CL_ReferencedIWDList_f()
@@ -3199,7 +3199,7 @@ void __cdecl CL_ReferencedIWDList_f()
     char *v0; // eax
 
     v0 = FS_ReferencedIwdNames();
-    Com_Printf(0, "Referenced IWD Names: %s\n", v0);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Referenced IWD Names: %s\n", v0);
 }
 
 void __cdecl CL_UpdateLevelHunkUsage()
@@ -3337,8 +3337,8 @@ void __cdecl CL_OpenScriptMenu_f()
     }
     else
     {
-        Com_Printf(0, "USAGE: openscriptmenu <parent menu name> <script menu response>\n");
-        Com_Printf(0, "EXAMPLE: openscriptmenu ingame changeweapon\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: openscriptmenu <parent menu name> <script menu response>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "EXAMPLE: openscriptmenu ingame changeweapon\n");
     }
 }
 
@@ -3398,8 +3398,8 @@ void __cdecl Com_WriteLocalizedSoundAliasFiles()
         FS_CopyFile(stringEdExternalFileName, stringEdFileName);
         if (FS_FileExists((char*)"soundaliases/subtitle.st"))
         {
-            Com_Printf(9, "Localizing sound alias subtitle text...\n");
-            Com_Printf(9, "Writing to StringEd file %s\n", stringEdExternalFileName);
+            Com_Printf(CON_CHANNEL_SOUND, "Localizing sound alias subtitle text...\n");
+            Com_Printf(CON_CHANNEL_SOUND, "Writing to StringEd file %s\n", stringEdExternalFileName);
             fileNames = FS_ListFiles("soundaliases", "csv", FS_LIST_PURE_ONLY, &fileCount);
             if (fileCount)
             {
@@ -3413,21 +3413,21 @@ void __cdecl Com_WriteLocalizedSoundAliasFiles()
                 FS_FreeFileList(fileNames);
                 COM_WriteFinalStringEdFile(stringEdFileName, stringEdExternalFileName);
                 FS_Remove(stringEdFileName);
-                Com_Printf(9, "done\n");
+                Com_Printf(CON_CHANNEL_SOUND, "done\n");
             }
             else
             {
-                Com_PrintWarning(9, "WARNING: can't find any sound alias files (soundaliases/*.csv)\n");
+                Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: can't find any sound alias files (soundaliases/*.csv)\n");
             }
         }
         else
         {
-            Com_PrintWarning(9, "WARNING: Could not make local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+            Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not make local copy of StringEd file %s\n", "soundaliases/subtitle.st");
         }
     }
     else
     {
-        Com_PrintWarning(9, "WARNING: Can not write to StringEd file %s\n", stringEdExternalFileName);
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Can not write to StringEd file %s\n", stringEdExternalFileName);
     }
 }
 
@@ -3455,16 +3455,16 @@ void __cdecl CL_CheckAutoUpdate()
         {
             rnd = rand() % validServerNum;
             servername = pszGoodServers[rnd];
-            Com_DPrintf(14, "Resolving AutoUpdate Server... ");
+            Com_DPrintf(CON_CHANNEL_CLIENT, "Resolving AutoUpdate Server... ");
             if (NET_StringToAdr((char*)servername, &cls.autoupdateServer))
                 goto LABEL_17;
-            Com_DPrintf(14, "\nCouldn't resolve first address, trying others... ");
+            Com_DPrintf(CON_CHANNEL_CLIENT, "\nCouldn't resolve first address, trying others... ");
             for (i = 1; i < validServerNum; ++i)
             {
                 servername = pszGoodServers[(i + rnd) % validServerNum];
                 if (NET_StringToAdr((char *)servername, &cls.autoupdateServer))
                 {
-                    Com_DPrintf(14, "\nAlternate server address resolved... ");
+                    Com_DPrintf(CON_CHANNEL_CLIENT, "\nAlternate server address resolved... ");
                     break;
                 }
             }
@@ -3474,7 +3474,7 @@ void __cdecl CL_CheckAutoUpdate()
                 cls.autoupdateServer.port = BigShort(28960);
                 v0 = BigShort(cls.autoupdateServer.port);
                 Com_DPrintf(
-                    14,
+                    CON_CHANNEL_CLIENT,
                     "%i.%i.%i.%i:%i\n",
                     cls.autoupdateServer.ip[0],
                     cls.autoupdateServer.ip[1],
@@ -3487,13 +3487,13 @@ void __cdecl CL_CheckAutoUpdate()
             }
             else
             {
-                Com_DPrintf(14, "\nFailed to resolve any Auto-update servers.\n");
+                Com_DPrintf(CON_CHANNEL_CLIENT, "\nFailed to resolve any Auto-update servers.\n");
                 autoupdateChecked = 1;
             }
         }
         else
         {
-            Com_DPrintf(14, "Couldn't resolve an AutoUpdate Server address.\n");
+            Com_DPrintf(CON_CHANNEL_CLIENT, "Couldn't resolve an AutoUpdate Server address.\n");
             autoupdateChecked = 1;
         }
     }
@@ -3552,8 +3552,8 @@ void __cdecl CL_ServerStatus_f()
         clc = CL_GetLocalClientConnection(0);
         if (connstate != CA_ACTIVE || clc->demoplaying)
         {
-            Com_Printf(0, "Not connected to a server.\n");
-            Com_Printf(0, "Usage: serverstatus [server]\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Not connected to a server.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: serverstatus [server]\n");
             return;
         }
         server = cls.servername;
@@ -3825,7 +3825,7 @@ void __cdecl CL_Init(int32_t localClientNum)
 {
     int32_t v1; // eax
 
-    Com_Printf(14, "----- Client Initialization -----\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "----- Client Initialization -----\n");
     CL_ClearState(localClientNum);
     // LWSS: functionality unknown! 
     //if (CountBitsEnabled(0xFFFFFFFF) != 32)
@@ -3854,7 +3854,7 @@ void __cdecl CL_Init(int32_t localClientNum)
     v1 = CL_ControllerIndexFromClientNum(localClientNum);
     Cbuf_Execute(localClientNum, v1);
     clientUIActives[0].isRunning = 1;
-    Com_Printf(14, "----- Client Initialization Complete -----\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "----- Client Initialization Complete -----\n");
 }
 
 // LWSS: I dont see the point of this function?
@@ -3876,7 +3876,7 @@ void __cdecl CL_Shutdown(int32_t localClientNum)
     if (!Sys_IsMainThread())
         MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5246, 0, "%s", "Sys_IsMainThread()");
     Com_SyncThreads();
-    Com_Printf(14, "----- CL_Shutdown -----\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "----- CL_Shutdown -----\n");
     if (recursive)
     {
         printf("recursive shutdown\n");
@@ -3929,7 +3929,7 @@ void __cdecl CL_Shutdown(int32_t localClientNum)
         }
         clientUIActives[localClientNum].isRunning = 0;
         recursive = 0;
-        Com_Printf(14, "-----------------------\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "-----------------------\n");
     }
 }
 
@@ -3941,7 +3941,7 @@ void __cdecl CL_LocalServers_f()
     int32_t ia; // [esp+20h] [ebp-1Ch]
     netadr_t to; // [esp+24h] [ebp-18h] BYREF
 
-    Com_Printf(0, "Scanning for servers on the local network...\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Scanning for servers on the local network...\n");
     cls.numlocalservers = 0;
     cls.pingUpdateSource = 0;
     for (i = 0; i < 128; ++i)
@@ -4123,7 +4123,7 @@ void __cdecl CL_SetupForNewServerMap(char *pszMapName, char *pszGametype)
 {
     int32_t localClientNum; // [esp+0h] [ebp-4h]
 
-    Com_Printf(14, "Server changing map %s, gametype %s\n", pszMapName, pszGametype);
+    Com_Printf(CON_CHANNEL_CLIENT, "Server changing map %s, gametype %s\n", pszMapName, pszGametype);
     if (!com_sv_running->current.enabled)
         Cbuf_ExecuteBuffer(0, 0, "selectStringTableEntryInDvar mp/didyouknow.csv 0 didyouknow");
     if (!*pszMapName || !*pszGametype)

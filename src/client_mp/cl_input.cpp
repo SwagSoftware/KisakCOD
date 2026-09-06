@@ -206,12 +206,12 @@ void __cdecl CL_WritePacket(int localClientNum)
         if (count > 32)
         {
             count = 32;
-            Com_Printf(14, "MAX_PACKET_USERCMDS\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "MAX_PACKET_USERCMDS\n");
         }
         if (count >= 1)
         {
             if (cl_showSend->current.enabled)
-                Com_Printf(14, "(%i)", count);
+                Com_Printf(CON_CHANNEL_CLIENT, "(%i)", count);
             if (!clc->demowaiting
                 && !cl_nodelta->current.enabled
                 && LocalClientGlobals->snap.valid
@@ -235,7 +235,7 @@ void __cdecl CL_WritePacket(int localClientNum)
                 v6 = clc->serverCommandSequence & 0x7F;
                 v2 = Com_HashKey(v8, 32);
                 Com_Printf(
-                    14,
+                    CON_CHANNEL_CLIENT,
                     "key:%i, checksumFeed:%i, messageAcknowledge:%i, Com_HashKey:%i, servercommand(%i):'%s', len:%i\n",
                     key,
                     clc->checksumFeed,
@@ -297,7 +297,7 @@ void __cdecl CL_WritePacket(int localClientNum)
         if (cl_showSend->current.enabled)
         {
             v5 = NET_AdrToString(clc->netchan.remoteAddress);
-            Com_Printf(14, "%i to %s\n", compressedSize, v5);
+            Com_Printf(CON_CHANNEL_CLIENT, "%i to %s\n", compressedSize, v5);
         }
         CL_Netchan_Transmit(&clc->netchan, (uint8_t *)compressedBuf, compressedSize);
         while (clc->netchan.unsentFragments)
@@ -653,7 +653,7 @@ void __cdecl CL_MouseMove(int localClientNum, usercmd_s *cmd)
         accelSensitivity = rate * cl_mouseAccel->current.value + cl_sensitivity->current.value;
         accelSensitivity = accelSensitivity * LocalClientGlobals->cgameFOVSensitivityScale;
         if (rate != 0.0 && cl_showMouseRate->current.enabled)
-            Com_Printf(14, "%f : %f\n", rate, accelSensitivity);
+            Com_Printf(CON_CHANNEL_CLIENT, "%f : %f\n", rate, accelSensitivity);
         if ((LocalClientGlobals->snap.ps.pm_flags & PMF_FROZEN) == 0)
         {
             mx = mx * accelSensitivity;
@@ -1159,7 +1159,7 @@ void __cdecl IN_KeyDown(kbutton_t *b)
         {
             if (b->down[1])
             {
-                Com_Printf(14, "Three keys down for a button!\n");
+                Com_Printf(CON_CHANNEL_CLIENT, "Three keys down for a button!\n");
                 return;
             }
             b->down[1] = k;

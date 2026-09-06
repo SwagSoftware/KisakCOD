@@ -589,7 +589,7 @@ void Scr_ScriptWatch::AddElement(Scr_WatchElement_s *element, char *text)
             {
                 if (!Sys_IsRemoteDebugClient())
                 {
-                    Com_Printf(23, "Cannot change child element\n");
+                    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Cannot change child element\n");
                     Scr_FreeDebugExpr(&scriptExpr);
                 }
             }

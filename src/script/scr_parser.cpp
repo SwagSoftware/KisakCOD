@@ -1325,7 +1325,7 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
         //    24 * profileCount / 24,
         //    (bool(__cdecl *)(const MapProfileHotSpot *, const MapProfileHotSpot *))Scr_CompareProfileTimes);
         std::sort(sortedOpcodeLookup + 0, sortedOpcodeLookup + profileCount, Scr_CompareProfileTimes);
-        Com_Printf(23, "\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "\n");
         profile = Profile_GetScript();
             maxNameLength = 0;
         for (profileIndexa = 0; profileIndexa < 40; ++profileIndexa)
@@ -1343,24 +1343,24 @@ char __cdecl Scr_PrintProfileTimes(float minTime)
             {
                 strlen(name);
                 v8 = *((float *)Sys_GetValue(0) + 20782);
-                Com_Printf(23, "%-*s %6.2f\n", maxNameLength, name, (double)profile->write[profileIndexb].totalTime * v8);
+                Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%-*s %6.2f\n", maxNameLength, name, (double)profile->write[profileIndexb].totalTime * v8);
             }
         }
-        Com_Printf(23, "\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "\n");
         for (profileIndexc = 0; profileIndexc < profileCount; ++profileIndexc)
         {
             opcodeLookup = (OpcodeLookup *)&sortedOpcodeLookup[24 * profileIndexc];
             v7 = *((float *)Sys_GetValue(0) + 20782);
             v6 = *((float *)Sys_GetValue(0) + 20782);
             Com_Printf(
-                23,
+                CON_CHANNEL_PARSERSCRIPT,
                 "time: %f, builtin: %f, usage: %d\n",
                 (double)opcodeLookup->profileTime * v6,
                 (double)opcodeLookup->profileBuiltInTime * v7,
                 opcodeLookup->profileUsage);
-            Scr_PrintPrevCodePos(23, (char *)opcodeLookup->codePos + 1, 1u);
+            Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, (char *)opcodeLookup->codePos + 1, 1u);
         }
-        Com_Printf(23, "\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "\n");
         Z_VirtualFree(sortedOpcodeLookup);
         return 1;
     }
@@ -1399,22 +1399,22 @@ void CompileError(uint32_t sourcePos, const char *msg, ...)
     {
         Scr_IgnoreLeaks();
         Scr_ShutdownAllocNode();
-        Com_PrintError(23, "\n");
-        Com_PrintError(23, "******* script compile error *******\n");
+        Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "\n");
+        Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "******* script compile error *******\n");
         if (scrVarPub.developer)
         {
             if (!scrParserPub.sourceBuf)
                 MyAssertHandler(".\\script\\scr_parser.cpp", 1578, 0, "%s", "scrParserPub.sourceBuf");
-            Com_PrintError(23, "%s: ", text);
-            Scr_PrintSourcePos(23, scrParserPub.scriptfilename, scrParserPub.sourceBuf, sourcePos);
+            Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s: ", text);
+            Scr_PrintSourcePos(CON_CHANNEL_PARSERSCRIPT, scrParserPub.scriptfilename, scrParserPub.sourceBuf, sourcePos);
             Scr_GetLineInfo(scrParserPub.sourceBuf, sourcePos, &col, line);
         }
         else
         {
-            Com_PrintError(23, "%s\n", text);
+            Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s\n", text);
             line[0] = 0;
         }
-        Com_Printf(23, "************************************\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "************************************\n");
         Com_Error(ERR_SCRIPT_DROP, "script compile error %s %s", text, line);
     }
 }
@@ -1444,12 +1444,12 @@ void CompileError2(char *codePos, const char *msg, ...)
     if (!Scr_IsInOpcodeMemory(codePos))
         MyAssertHandler(".\\script\\scr_parser.cpp", 1596, 0, "%s", "Scr_IsInOpcodeMemory( codePos )");
     Scr_IgnoreLeaks();
-    Com_PrintError(23, "\n");
-    Com_PrintError(23, "******* script compile error *******\n");
+    Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "\n");
+    Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "******* script compile error *******\n");
     _vsnprintf(text, 0x400u, msg, va);
-    Com_PrintError(23, "%s: ", text);
-    Scr_PrintPrevCodePos(23, codePos, 0);
-    Com_Printf(23, "************************************\n");
+    Com_PrintError(CON_CHANNEL_PARSERSCRIPT, "%s: ", text);
+    Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, codePos, 0);
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "************************************\n");
     Scr_GetTextSourcePos(scrParserPub.sourceBuf, codePos, line);
     Com_Error(ERR_SCRIPT_DROP, "script compile error %s %s", text, line);
 }
@@ -1491,7 +1491,7 @@ void __cdecl RuntimeError(char *codePos, uint32_t index, const char *msg, const 
     LABEL_5:
         if (scrVmPub.debugCode)
         {
-            Com_Printf(23, "%s\n", msg);
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%s\n", msg);
             if (!scrVmPub.terminal_error)
                 return;
             goto error;
@@ -1534,12 +1534,12 @@ void __cdecl RuntimeErrorInternal(int channel, char *codePos, uint32_t index, co
         {
             Com_PrintError(channel, "called from:\n");
             Scr_PrintPrevCodePos(
-                0,
+                CON_CHANNEL_DONT_FILTER,
                 (char *)scrVmPub.stack[3 * i - 96].u.intValue,
                 scrVmPub.function_frame_start[i].fs.localId == 0);
         }
         Com_PrintError(channel, "started from:\n");
-        Scr_PrintPrevCodePos(0, (char *)scrVmPub.function_frame_start[0].fs.pos, 1u);
+        Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char *)scrVmPub.function_frame_start[0].fs.pos, 1u);
     }
     Com_PrintError(channel, "************************************\n");
 }

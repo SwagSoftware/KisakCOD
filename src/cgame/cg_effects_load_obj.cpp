@@ -146,7 +146,7 @@ int __cdecl CG_RegisterImpactEffects_Generic_29_char_const_____cdecl_int__(
         else
         {
             v5 = typeToNameFunc(i);
-            Com_Printf(21, "no entry for effect type '%s' on surface/flesh type '%s'\n", pszTypeName, v5);
+            Com_Printf(CON_CHANNEL_FX, "no entry for effect type '%s' on surface/flesh type '%s'\n", pszTypeName, v5);
             ++iBadCount;
             fx[i] = 0;
         }
@@ -209,7 +209,7 @@ void __cdecl CG_RegisterImpactEffectsForDir(char *dir, EffectFile *effectFile, c
                 if (v7)
                 {
                     iassert(0); // lwss add
-                    Com_PrintError(21, "ERROR: %s", v7);
+                    Com_PrintError(CON_CHANNEL_FX, "ERROR: %s", v7);
                     return;
                 }
             }
@@ -247,7 +247,7 @@ int __cdecl CG_RegisterImpactEffects_Generic_4_char_const_____cdecl_int__(
         else
         {
             v5 = typeToNameFunc(i);
-            Com_Printf(21, "no entry for effect type '%s' on surface/flesh type '%s'\n", pszTypeName, v5);
+            Com_Printf(CON_CHANNEL_FX, "no entry for effect type '%s' on surface/flesh type '%s'\n", pszTypeName, v5);
             ++iBadCount;
             fx[i] = 0;
         }
@@ -314,7 +314,7 @@ FxImpactTable *__cdecl CG_RegisterImpactEffects_LoadObj(const char *mapname)
     }
     if (iBadCount)
     {
-        Com_PrintError(21, "ERROR: %i missing entries in effect CSV files (see console for details)", iBadCount);
+        Com_PrintError(CON_CHANNEL_FX, "ERROR: %i missing entries in effect CSV files (see console for details)", iBadCount);
         Hunk_ClearTempMemory();
         return 0;
     }

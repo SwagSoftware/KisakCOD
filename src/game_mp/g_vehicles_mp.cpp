@@ -345,12 +345,12 @@ void __cdecl SetupCollisionMap(gentity_s *ent)
         }
         else
         {
-            Com_PrintWarning(15, "WARNING: Cannot use empty vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: Cannot use empty vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
         }
     }
     else
     {
-        Com_PrintWarning(15, "WARNING: Cannot find vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
+        Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: Cannot find vehicle collmap for [%s]\n", SL_ConvertToString(G_ModelName(ent->model)));
     }
 }
 
@@ -922,7 +922,7 @@ void __cdecl InflictDamage(gentity_s *vehEnt, gentity_s *target, float *dir, int
     if (vehDebugServer->current.enabled)
     {
         float dmg = (float)damage;
-        Com_Printf(16, "Vehicle damage to ent #%i: %.2f\n", target->s.number, dmg);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Vehicle damage to ent #%i: %.2f\n", target->s.number, dmg);
     }
     G_Damage(
         target,

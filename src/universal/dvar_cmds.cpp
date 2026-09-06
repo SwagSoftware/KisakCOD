@@ -99,7 +99,7 @@ bool __cdecl Dvar_ToggleInternal()
         }
         else
         {
-            Com_Printf(0, "toggle failed: dvar '%s' not found.\n", dvarName);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "toggle failed: dvar '%s' not found.\n", dvarName);
             return 0;
         }
     }
@@ -108,7 +108,7 @@ bool __cdecl Dvar_ToggleInternal()
         if (!Cmd_Argv(0))
             MyAssertHandler(".\\qcommon\\dvar_cmds.cpp", 212, 0, "%s", "Cmd_Argv( 0 )");
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s <variable> <optional value sequence>\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s <variable> <optional value sequence>\n", v0);
         return 0;
     }
 }
@@ -149,7 +149,7 @@ bool __cdecl Dvar_ToggleSimple(dvar_s *dvar)
     case 4u:
     case 7u:
     case 8u:
-        Com_Printf(0, "'toggle' with no arguments makes no sense for dvar '%s'\n", dvar->name);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "'toggle' with no arguments makes no sense for dvar '%s'\n", dvar->name);
         result = 0;
         break;
     case 5u:
@@ -213,7 +213,7 @@ void __cdecl Dvar_TogglePrint_f()
         string = Dvar_DisplayableValue(dvar);
         if (!string)
             MyAssertHandler(".\\qcommon\\dvar_cmds.cpp", 298, 1, "%s", "string");
-        Com_Printf(0, "%s toggled to %s\n", dvarName, string);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s toggled to %s\n", dvarName, string);
     }
 }
 
@@ -236,12 +236,12 @@ void __cdecl Dvar_Set_f()
         else
         {
             v0 = Cmd_Argv(1);
-            Com_Printf(0, "invalid variable name: %s\n", v0);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "invalid variable name: %s\n", v0);
         }
     }
     else
     {
-        Com_Printf(0, "USAGE: set <variable> <value>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: set <variable> <value>\n");
     }
 }
 
@@ -260,7 +260,7 @@ void __cdecl Dvar_SetU_f()
     }
     else
     {
-        Com_Printf(0, "USAGE: setu <variable> <value>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: setu <variable> <value>\n");
     }
 }
 
@@ -279,7 +279,7 @@ void __cdecl Dvar_SetS_f()
     }
     else
     {
-        Com_Printf(0, "USAGE: sets <variable> <value>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: sets <variable> <value>\n");
     }
 }
 
@@ -298,7 +298,7 @@ void __cdecl Dvar_SetA_f()
     }
     else
     {
-        Com_Printf(0, "USAGE: seta <variable> <value>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: seta <variable> <value>\n");
     }
 }
 
@@ -323,12 +323,12 @@ void __cdecl Dvar_SetFromDvar_f()
         else
         {
             v1 = Cmd_Argv(2);
-            Com_Printf(0, "dvar '%s' doesn't exist\n", v1);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "dvar '%s' doesn't exist\n", v1);
         }
     }
     else
     {
-        Com_Printf(0, "USAGE: setfromdvar <dest_dvar> <source_dvar>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: setfromdvar <dest_dvar> <source_dvar>\n");
     }
 }
 
@@ -346,7 +346,7 @@ void __cdecl Dvar_Reset_f()
     }
     else
     {
-        Com_Printf(0, "USAGE: reset <variable>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: reset <variable>\n");
     }
 }
 
@@ -363,7 +363,7 @@ void __cdecl Dvar_List_f()
         match = (char *)Cmd_Argv(1);
         Dvar_ForEach((void(__cdecl *)(const dvar_s *, void *))Dvar_ListSingle, match);
     }
-    Com_Printf(0, "\n%i total dvars\n", dvarCount);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\n%i total dvars\n", dvarCount);
 }
 
 void __cdecl Dvar_ListSingle(const dvar_s *dvar, const char *userData)
@@ -373,35 +373,35 @@ void __cdecl Dvar_ListSingle(const dvar_s *dvar, const char *userData)
     if (!userData || Com_Filter(userData, (char *)dvar->name, 0))
     {
         if ((dvar->flags & 0x404) != 0)
-            Com_Printf(0, "S");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "S");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         if ((dvar->flags & 2) != 0)
-            Com_Printf(0, "U");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "U");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         if ((dvar->flags & 0x40) != 0)
-            Com_Printf(0, "R");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "R");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         if ((dvar->flags & 0x10) != 0)
-            Com_Printf(0, "I");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "I");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         if ((dvar->flags & 1) != 0)
-            Com_Printf(0, "A");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "A");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         if ((dvar->flags & 0x20) != 0)
-            Com_Printf(0, "L");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "L");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         if ((dvar->flags & 0x80) != 0)
-            Com_Printf(0, "C");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "C");
         else
-            Com_Printf(0, " ");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
         v2 = Dvar_DisplayableValue(dvar);
-        Com_Printf(0, " %s \"%s\"\n", dvar->name, v2);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, " %s \"%s\"\n", dvar->name, v2);
     }
 }
 
@@ -410,7 +410,7 @@ void __cdecl Com_DvarDump(int channel, const char *match)
     DvarDumpInfo dumpInfo; // [esp+0h] [ebp-94h] BYREF
     char summary[132]; // [esp+Ch] [ebp-88h] BYREF
 
-    if (channel != 6 || com_logfile && com_logfile->current.integer)
+    if (channel != CON_CHANNEL_LOGFILEONLY || com_logfile && com_logfile->current.integer)
     {
 #ifndef KISAK_RADIANT
         Com_PrintMessage(channel, "=============================== DVAR DUMP ========================================\n", 0);
@@ -470,12 +470,12 @@ void __cdecl Dvar_Dump_f()
 
     if (Cmd_Argc() <= 1)
     {
-        Com_DvarDump(0, 0);
+        Com_DvarDump(CON_CHANNEL_DONT_FILTER, 0);
     }
     else
     {
         match = Cmd_Argv(1);
-        Com_DvarDump(0, match);
+        Com_DvarDump(CON_CHANNEL_DONT_FILTER, match);
     }
 }
 
@@ -557,13 +557,13 @@ void __cdecl Dvar_RegisterBool_f()
         }
         else if (dvar->type != DVAR_TYPE_BOOL)
         {
-            Com_Printf(0, "dvar '%s' is not a boolean dvar\n", dvar->name);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "dvar '%s' is not a boolean dvar\n", dvar->name);
         }
     }
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s <name> <default>\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s <name> <default>\n", v0);
     }
 }
 
@@ -600,18 +600,18 @@ void __cdecl Dvar_RegisterInt_f()
             }
             else if (dvar->type != DVAR_TYPE_INT && dvar->type != DVAR_TYPE_ENUM)
             {
-                Com_Printf(0, "dvar '%s' is not an integer dvar\n", dvar->name);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "dvar '%s' is not an integer dvar\n", dvar->name);
             }
         }
         else
         {
-            Com_Printf(0, "dvar %s: min %i should not be greater than max %i\n", dvarName, min, max);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "dvar %s: min %i should not be greater than max %i\n", dvarName, min, max);
         }
     }
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s <name> <default> <min> <max>\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s <name> <default> <min> <max>\n", v0);
     }
 }
 
@@ -648,18 +648,18 @@ void __cdecl Dvar_RegisterFloat_f()
             }
             else if (dvar->type != DVAR_TYPE_FLOAT)
             {
-                Com_Printf(0, "dvar '%s' is not an integer dvar\n", dvar->name);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "dvar '%s' is not an integer dvar\n", dvar->name);
             }
         }
         else
         {
-            Com_Printf(0, "dvar %s: min %g should not be greater than max %g\n", dvarName, min, max);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "dvar %s: min %g should not be greater than max %g\n", dvarName, min, max);
         }
     }
     else
     {
         v0 = Cmd_Argv(0);
-        Com_Printf(0, "USAGE: %s <name> <default> <min> <max>\n", v0);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: %s <name> <default> <min> <max>\n", v0);
     }
 }
 
@@ -693,12 +693,12 @@ void __cdecl Dvar_SetFromLocalizedStr_f()
         else
         {
             v0 = Cmd_Argv(1);
-            Com_Printf(0, "invalid variable name: %s\n", v0);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "invalid variable name: %s\n", v0);
         }
     }
     else
     {
-        Com_Printf(0, "USAGE: setFromLocalizedString <variable> <string>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: setFromLocalizedString <variable> <string>\n");
     }
 }
 
@@ -723,12 +723,12 @@ void __cdecl Dvar_SetToTime_f()
         else
         {
             v0 = Cmd_Argv(1);
-            Com_Printf(0, "invalid variable name: %s\n", v0);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "invalid variable name: %s\n", v0);
         }
     }
     else
     {
-        Com_Printf(0, "USAGE: set <variable>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: set <variable>\n");
     }
 }
 

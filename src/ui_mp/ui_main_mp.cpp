@@ -1203,14 +1203,14 @@ char *__cdecl GetMenuBuffer_LoadObj(char *filename)
         }
         else
         {
-            Com_PrintError(13, "menu file too large: %s is %i, max allowed is %i", filename, len, 0x8000);
+            Com_PrintError(CON_CHANNEL_UI, "menu file too large: %s is %i, max allowed is %i", filename, len, 0x8000);
             FS_FCloseFile(f);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(13, "menu file not found: %s, using default\n", filename);
+        Com_PrintError(CON_CHANNEL_UI, "menu file not found: %s, using default\n", filename);
         return 0;
     }
 }
@@ -1230,7 +1230,7 @@ XModelPiece *__cdecl GetMenuBuffer_FastFile(const char *filename)
     rawfile = DB_FindXAssetHeader(ASSET_TYPE_RAWFILE, filename).rawfile;
     if (rawfile)
         return (XModelPiece *)rawfile->buffer;
-    Com_PrintError(13, "menu file not found: %s, using default\n", filename);
+    Com_PrintError(CON_CHANNEL_UI, "menu file not found: %s, using default\n", filename);
     return 0;
 }
 
@@ -1461,7 +1461,7 @@ void __cdecl UI_MapLoadInfo(const char *filename)
         }
         else
         {
-            Com_PrintWarning(13, "WARNING: Could not find '%s'.\n", filename);
+            Com_PrintWarning(CON_CHANNEL_UI, "WARNING: Could not find '%s'.\n", filename);
         }
     }
 }
@@ -1984,7 +1984,7 @@ void __cdecl UI_DrawTalkerNum(
         }
         else
         {
-            Com_PrintWarning(13, "Unable to find client %i but they are talking\n", client);
+            Com_PrintWarning(CON_CHANNEL_UI, "Unable to find client %i but they are talking\n", client);
         }
     }
 }
@@ -2456,41 +2456,41 @@ void __cdecl UI_AddServerToFavoritesList(char *pszName, char *pszAddress)
                 if (res == -1)
                 {
                     v5 = UI_SafeTranslateString("EXE_FAVORITELISTFULL");
-                    Com_Printf(13, "%s\n", v5);
+                    Com_Printf(CON_CHANNEL_UI, "%s\n", v5);
                     Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITELISTFULL");
                 }
                 else if (res == -2)
                 {
                     v6 = UI_SafeTranslateString("EXE_BADSERVERADDRESS");
-                    Com_Printf(13, "%s\n", v6);
+                    Com_Printf(CON_CHANNEL_UI, "%s\n", v6);
                     Dvar_SetStringByName("ui_favorite_message", "@EXE_BADSERVERADDRESS");
                 }
                 else
                 {
                     v7 = UI_SafeTranslateString("EXE_FAVORITEADDED");
                     v8 = va("%s\n", v7);
-                    Com_Printf(13, v8, pszAddress);
+                    Com_Printf(CON_CHANNEL_UI, v8, pszAddress);
                     Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITEADDED");
                 }
             }
             else
             {
                 v4 = UI_SafeTranslateString("EXE_FAVORITEINLIST");
-                Com_Printf(13, "%s\n", v4);
+                Com_Printf(CON_CHANNEL_UI, "%s\n", v4);
                 Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITEINLIST");
             }
         }
         else
         {
             v3 = UI_SafeTranslateString("EXE_FAVORITEADDRESSEMPTY");
-            Com_Printf(13, "%s\n", v3);
+            Com_Printf(CON_CHANNEL_UI, "%s\n", v3);
             Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITEADDRESSEMPTY");
         }
     }
     else
     {
         v2 = UI_SafeTranslateString("EXE_FAVORITENAMEEMPTY");
-        Com_Printf(13, "%s\n", v2);
+        Com_Printf(CON_CHANNEL_UI, "%s\n", v2);
         Dvar_SetStringByName("ui_favorite_message", "@EXE_FAVORITENAMEEMPTY");
     }
 }
@@ -2897,7 +2897,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                                                                                                                                                                 "clearLoadErrorsSummary"))
                                                                                                                                                                                             {
                                                                                                                                                                                                 Com_Printf(
-                                                                                                                                                                                                    13,
+                                                                                                                                                                                                    CON_CHANNEL_UI,
                                                                                                                                                                                                     "unknown UI script %s in block:\n%s\n",
                                                                                                                                                                                                     out,
                                                                                                                                                                                                     actualScript);
@@ -3469,19 +3469,19 @@ char __cdecl UI_GetOpenOrCloseMenuOnDvarArgs(
             }
             else
             {
-                Com_Printf(13, "%s: invalid menu name.\n", cmd);
+                Com_Printf(CON_CHANNEL_UI, "%s: invalid menu name.\n", cmd);
                 return 0;
             }
         }
         else
         {
-            Com_Printf(13, "%s: invalid test value.\n", cmd);
+            Com_Printf(CON_CHANNEL_UI, "%s: invalid test value.\n", cmd);
             return 0;
         }
     }
     else
     {
-        Com_Printf(13, "%s: invalid dvar name.\n", cmd);
+        Com_Printf(CON_CHANNEL_UI, "%s: invalid dvar name.\n", cmd);
         return 0;
     }
 }
@@ -3529,7 +3529,7 @@ bool __cdecl UI_DvarValueTest(const char *cmd, const char *dvarName, const char 
     }
     else
     {
-        Com_Printf(13, "%s: cannot find dvar %s\n", cmd, dvarName);
+        Com_Printf(CON_CHANNEL_UI, "%s: cannot find dvar %s\n", cmd, dvarName);
         return 0;
     }
 }
@@ -4455,7 +4455,7 @@ void UI_GetGameTypesList_LoadObj()
                 p[v1 - 4] = 0;
             if (sharedUiInfo.numGameTypes == 32 || sharedUiInfo.numJoinGameTypes == 32)
             {
-                Com_Printf(13, "Too many game type scripts found! Only loading the first %i\n", 31);
+                Com_Printf(CON_CHANNEL_UI, "Too many game type scripts found! Only loading the first %i\n", 31);
                 return;
             }
             sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameType = String_Alloc(p);
@@ -4514,7 +4514,7 @@ void UI_GetGameTypesList_FastFile()
                 break;
             if (sharedUiInfo.numGameTypes == 32 || sharedUiInfo.numJoinGameTypes == 32)
             {
-                Com_Printf(13, "Too many game type scripts found! Only loading the first %i\n", 31);
+                Com_Printf(CON_CHANNEL_UI, "Too many game type scripts found! Only loading the first %i\n", 31);
                 return;
             }
             sharedUiInfo.gameTypes[sharedUiInfo.numGameTypes].gameType = String_Alloc(pszFileName->token);
@@ -4595,7 +4595,7 @@ void __cdecl CL_SelectStringTableEntryInDvar_f()
         }
         else
         {
-            Com_Printf(16, "usage: selectStringTableEntryInDvar <tableFileName> <columnNum> <dvarName>");
+            Com_Printf(CON_CHANNEL_SYSTEM, "usage: selectStringTableEntryInDvar <tableFileName> <columnNum> <dvarName>");
         }
     }
 #endif
@@ -5655,14 +5655,14 @@ void UI_StopServerRefresh()
     {
         *(uint32_t *)&sharedUiInfo.serverStatus.string[1124] = 0;
         Com_Printf(
-            13,
+            CON_CHANNEL_UI,
             "%d servers listed in browser with %d players.\n",
             *(uint32_t *)&sharedUiInfo.gap8EB4[72900],
             *(uint32_t *)&sharedUiInfo.gap8EB4[72908]);
         count = LAN_GetServerCount(ui_netSource->current.integer);
         if (count - *(uint32_t *)&sharedUiInfo.gap8EB4[72900] > 0)
             Com_Printf(
-                13,
+                CON_CHANNEL_UI,
                 "%d servers not listed (filtered out by game browser settings)\n",
                 count - *(uint32_t *)&sharedUiInfo.gap8EB4[72900]);
     }
@@ -5798,7 +5798,7 @@ char *__cdecl UI_SafeTranslateString(const char *reference)
             if (loc_warningsAsErrors->current.enabled)
                 Com_Error(ERR_LOCALIZATION, "Could not translate string \"%s\"", reference);
             else
-                Com_PrintWarning(13, "WARNING: Could not translate string \"%s\"\n", reference);
+                Com_PrintWarning(CON_CHANNEL_UI, "WARNING: Could not translate string \"%s\"\n", reference);
             strcpy(errorString, "^1UNLOCALIZED(^7");
             I_strncat(errorString, 1024, reference);
             I_strncat(errorString, 1024, "^1)^7");

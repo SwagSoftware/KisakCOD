@@ -50,27 +50,27 @@ char __cdecl Com_LoadVolumeFalloffCurve(const char *name, SndCurve *curve)
                 else
                 {
                     FS_FCloseFile(file);
-                    Com_PrintError(9, "ERROR: \"%s\" Is too long of a sndcurve file to parse\n", dest);
+                    Com_PrintError(CON_CHANNEL_SOUND, "ERROR: \"%s\" Is too long of a sndcurve file to parse\n", dest);
                     return 0;
                 }
             }
             else
             {
                 FS_FCloseFile(file);
-                Com_PrintError(9, "ERROR: \"%s\" does not appear to be a sndcurve file\n", dest);
+                Com_PrintError(CON_CHANNEL_SOUND, "ERROR: \"%s\" does not appear to be a sndcurve file\n", dest);
                 return 0;
             }
         }
         else
         {
             FS_FCloseFile(file);
-            Com_PrintError(9, "ERROR: sndcurve file '%s' is empty\n", dest);
+            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: sndcurve file '%s' is empty\n", dest);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(9, "ERROR: Could not load sndcurve file '%s'\n", dest);
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: Could not load sndcurve file '%s'\n", dest);
         return 0;
     }
 }
@@ -142,7 +142,7 @@ void __cdecl Com_VolumeFalloffCurveGraphEventCallback(const DevGraph *graph, Dev
             Com_sprintf(dest, 0x20u, "%.4f %.4f\n", graph->knots[i][0], graph->knots[i][1]);
             I_strncat(string, 0x2000, dest);
         }
-        Com_Printf(9, "^6%s", string);
+        Com_Printf(CON_CHANNEL_SOUND, "^6%s", string);
     }
 }
 
@@ -238,7 +238,7 @@ snd_alias_list_t *__cdecl Com_FindSoundAlias_LoadObj(const char *name)
         if (!I_stricmp(name, g_sa.hash[hashIndex]->aliasName))
             return g_sa.hash[hashIndex];
     }
-    Com_PrintError(10, "Missing soundalias \"%s\".\n", name);
+    Com_PrintError(CON_CHANNEL_FILES, "Missing soundalias \"%s\".\n", name);
     return 0;
 }
 
@@ -286,7 +286,7 @@ snd_alias_list_t *__cdecl Com_FindSoundAlias_FastFile(const char *name)
     aliasList = DB_FindXAssetHeader(ASSET_TYPE_SOUND, name).sound;
     if (!DB_IsXAssetDefault(ASSET_TYPE_SOUND, name))
         return aliasList;
-    Com_PrintError(10, "Missing soundalias \"%s\".\n", name);
+    Com_PrintError(CON_CHANNEL_FILES, "Missing soundalias \"%s\".\n", name);
     return 0;
 }
 
@@ -425,7 +425,7 @@ snd_alias_t *__cdecl Com_PickSoundAliasFromList(snd_alias_list_t *aliasList)
     }
     else
     {
-        Com_PrintWarning(9, "Sound not loaded: \"%s\"\n", aliasList->aliasName);
+        Com_PrintWarning(CON_CHANNEL_SOUND, "Sound not loaded: \"%s\"\n", aliasList->aliasName);
         return 0;
     }
 }
@@ -467,9 +467,9 @@ void __cdecl Com_StreamedSoundList(snd_alias_system_t system)
                 }
                 Com_GetSoundFileName(&aliases[i], filename, 128);
                 if (aliases[i].soundFile->exists)
-                    Com_Printf(9, "%-64s\n", filename);
+                    Com_Printf(CON_CHANNEL_SOUND, "%-64s\n", filename);
                 else
-                    Com_Printf(9, "%-64s FILE NOT FOUND\n", filename);
+                    Com_Printf(CON_CHANNEL_SOUND, "%-64s FILE NOT FOUND\n", filename);
             }
         LABEL_3:
             ;
@@ -504,17 +504,17 @@ void __cdecl Com_LoadedSoundList(snd_alias_system_t system)
                 {
                     fileMem = SND_GetSoundFileSize((uint32_t*)&aliases[i].soundFile->u.loadSnd->sound.info.format);
                     totalMem += fileMem;
-                    Com_Printf(9, "%-64s %7.1f KB\n", filename, fileMem * (1.0f / 1024.0f));
+                    Com_Printf(CON_CHANNEL_SOUND, "%-64s %7.1f KB\n", filename, fileMem * (1.0f / 1024.0f));
                 }
                 else
                 {
-                    Com_Printf(9, "%-64s FAILED TO LOAD\n", filename);
+                    Com_Printf(CON_CHANNEL_SOUND, "%-64s FAILED TO LOAD\n", filename);
                 }
             }
         LABEL_3:
             ;
         }
-        Com_Printf(9, "\ntotal usage %7.3f MB\n", totalMem * 0.00000095367431640625);
+        Com_Printf(CON_CHANNEL_SOUND, "\ntotal usage %7.3f MB\n", totalMem * 0.00000095367431640625);
     }
 }
 
@@ -541,15 +541,15 @@ char __cdecl Com_AddAliasList(const char *name, snd_alias_list_t *aliasList)
 
 void __cdecl Com_SoundList_f()
 {
-    Com_Printf(0, "\n________________________________________\ncurrently streamed menu sounds:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\n________________________________________\ncurrently streamed menu sounds:\n");
     Com_StreamedSoundList(SASYS_UI);
-    Com_Printf(0, "\n________________________________________\ncurrently streamed in-game sounds:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\n________________________________________\ncurrently streamed in-game sounds:\n");
     Com_StreamedSoundList(SASYS_CGAME);
-    Com_Printf(0, "________________________________________\ncurrently loaded menu sounds:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "________________________________________\ncurrently loaded menu sounds:\n");
     Com_LoadedSoundList(SASYS_UI);
-    Com_Printf(0, "\n________________________________________\ncurrently loaded in-game sounds:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\n________________________________________\ncurrently loaded in-game sounds:\n");
     Com_LoadedSoundList(SASYS_CGAME);
-    Com_Printf(0, "\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\n");
 }
 
 cmd_function_s Com_SoundList_f_VAR;
@@ -609,7 +609,7 @@ void __cdecl Com_LoadSoundAliases(const char *loadspec, const char *loadspecCurG
         ProfLoad_End();
         if (!fileCount)
         {
-            Com_PrintWarning(9, "WARNING: can't find any sound alias files (soundaliases/*.csv)\n");
+            Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: can't find any sound alias files (soundaliases/*.csv)\n");
             return;
         }
         ProfLoad_Begin("Load sound alias files");
@@ -812,7 +812,7 @@ int __cdecl Com_StringEdReferenceExists(const char *pszReference)
     }
     else
     {
-        Com_PrintWarning(9, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
         return 0;
     }
 }
@@ -867,7 +867,7 @@ char *__cdecl Com_GetSubtitleStringEdReference(const char *subtitle)
     }
     else
     {
-        Com_PrintWarning(9, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
         return 0;
     }
 }
@@ -960,13 +960,13 @@ void __cdecl Com_SetStringEdReference(const char *pszReference, char *subtitle)
         }
         else
         {
-            Com_PrintWarning(9, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
+            Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not read local copy of StringEd file %s\n", "soundaliases/subtitle.st");
             FS_FCloseFile(hOutFile);
         }
     }
     else
     {
-        Com_PrintWarning(9, "WARNING: Could not open output file %s for writing\n", "soundaliases/temp.st");
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not open output file %s for writing\n", "soundaliases/temp.st");
     }
 }
 
@@ -1014,23 +1014,23 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     filename = "soundaliases/temp.csv";
     Com_sprintf(dest, 0x100u, "soundaliases/%s", sourceFile);
     FS_BuildOSPath((char*)fs_basepath->current.integer, fs_gamedir, dest, ospath);
-    Com_Printf(9, "Processing sound alias file %s..\n", ospath);
+    Com_Printf(CON_CHANNEL_SOUND, "Processing sound alias file %s..\n", ospath);
     stream = fopen(ospath, "r+");
     if (!stream)
     {
-        Com_PrintWarning(9, "WARNING: Can not write to sound alias file %s\n", ospath);
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Can not write to sound alias file %s\n", ospath);
         return;
     }
     fclose(stream);
     if (FS_ReadFile(dest, &buffer) < 0)
     {
-        Com_PrintWarning(9, "WARNING: Could not read sound alias file %s\n", dest);
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not read sound alias file %s\n", dest);
         return;
     }
     h = FS_FOpenFileWrite((char*)filename);
     if (!h)
     {
-        Com_PrintWarning(9, "WARNING: Could not open output file %s for writing\n", filename);
+        Com_PrintWarning(CON_CHANNEL_SOUND, "WARNING: Could not open output file %s for writing\n", filename);
         return;
     }
     Com_BeginParseSession(dest);
@@ -1231,7 +1231,7 @@ void __cdecl Com_ProcessSoundAliasFileLocalization(char *sourceFile, char *loads
     if (v37)
         FS_CopyFile(fromOSPath, toOSPath);
     FS_Remove(fromOSPath);
-    Com_Printf(9, "Localized %i sound alias subtitles\n", v37);
+    Com_Printf(CON_CHANNEL_SOUND, "Localized %i sound alias subtitles\n", v37);
 }
 
 void __cdecl Com_InitSoundAliasHash(uint32_t aliasCount)

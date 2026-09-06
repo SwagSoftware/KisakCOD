@@ -365,7 +365,7 @@ char __cdecl SV_CheckMapExists(const char *map)
     Com_GetBspFilename(expanded, 0x40u, map);
     if (FS_ReadFile(expanded, 0) != -1)
         return 1;
-    Com_PrintError(1, "Can't find map %s\n", expanded);
+    Com_PrintError(CON_CHANNEL_ERROR, "Can't find map %s\n", expanded);
     return 0;
 }
 
@@ -410,7 +410,7 @@ void __cdecl SV_Map_f()
                 MyAssertHandler(".\\server_mp\\sv_ccmds_mp.cpp", 239, 0, "%s", "fs_gameDirVar");
             if (!DB_FileSize(mapname, 0) && (!*(_BYTE *)fs_gameDirVar->current.integer || !DB_FileSize(mapname, 1)))
             {
-                Com_PrintError(1, "Can't find map \"%s\".\n", mapname);
+                Com_PrintError(CON_CHANNEL_ERROR, "Can't find map \"%s\".\n", mapname);
                 return;
             }
         }
@@ -434,9 +434,9 @@ void __cdecl ShowLoadErrorsSummary(const char *mapName, uint32_t count)
         if (com_dedicated->current.enabled)
         {
             if (count == 1)
-                Com_PrintError(16, (char *)ERRMSG_SINGLE, mapName, com_errorPrintsCount);
+                Com_PrintError(CON_CHANNEL_SYSTEM, (char *)ERRMSG_SINGLE, mapName, com_errorPrintsCount);
             else
-                Com_PrintError(16, (char *)ERRMSG_PLURAL, mapName, com_errorPrintsCount);
+                Com_PrintError(CON_CHANNEL_SYSTEM, (char *)ERRMSG_PLURAL, mapName, com_errorPrintsCount);
         }
         else if (count == 1)
         {
@@ -516,7 +516,7 @@ void __cdecl SV_MapRestart(int fast_restart)
                     if (denied)
                     {
                         SV_DropClient(clienta, denied, 1);
-                        Com_Printf(0, "SV_MapRestart_f: dropped client %i - denied!\n", ib);
+                        Com_Printf(CON_CHANNEL_DONT_FILTER, "SV_MapRestart_f: dropped client %i - denied!\n", ib);
                     }
                     else if (clienta->header.state == CS_ACTIVE)
                     {
@@ -530,7 +530,7 @@ void __cdecl SV_MapRestart(int fast_restart)
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 
@@ -565,9 +565,9 @@ void __cdecl SV_MapRotate_f()
     parseInfo_t *tokena; // [esp+0h] [ebp-4h]
     parseInfo_t *tokenb; // [esp+0h] [ebp-4h]
 
-    Com_Printf(0, "map_rotate...\n\n");
-    Com_Printf(0, "\"sv_mapRotation\" is:\"%s\"\n\n", sv_mapRotation->current.string);
-    Com_Printf(0, "\"sv_mapRotationCurrent\" is:\"%s\"\n\n", sv_mapRotationCurrent->current.string);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "map_rotate...\n\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\"sv_mapRotation\" is:\"%s\"\n\n", sv_mapRotation->current.string);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "\"sv_mapRotationCurrent\" is:\"%s\"\n\n", sv_mapRotationCurrent->current.string);
     if (!*(_BYTE *)sv_mapRotationCurrent->current.integer)
         Dvar_SetString((dvar_s *)sv_mapRotationCurrent, (char *)sv_mapRotation->current.integer);
     token = SV_GetMapRotationToken();
@@ -580,7 +580,7 @@ void __cdecl SV_MapRotate_f()
     {
         if (!token)
         {
-            Com_Printf(0, "No map specified in sv_mapRotation - forcing map_restart.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "No map specified in sv_mapRotation - forcing map_restart.\n");
             SV_FastRestart_f();
             return;
         }
@@ -589,11 +589,11 @@ void __cdecl SV_MapRotate_f()
         tokena = SV_GetMapRotationToken();
         if (!tokena)
         {
-            Com_Printf(0, "No gametype specified after 'gametype' keyword in sv_mapRotation - forcing map_restart.\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "No gametype specified after 'gametype' keyword in sv_mapRotation - forcing map_restart.\n");
             SV_FastRestart_f();
             return;
         }
-        Com_Printf(0, "Setting g_gametype: %s.\n", tokena->token);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Setting g_gametype: %s.\n", tokena->token);
         if (com_sv_running->current.enabled)
         {
             if (I_stricmp(sv_gametype->current.string, tokena->token))
@@ -605,19 +605,19 @@ void __cdecl SV_MapRotate_f()
     }
     if (I_stricmp(token->token, "map"))
     {
-        Com_Printf(0, "Unknown keyword '%s' in sv_mapRotation.\n", token->token);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Unknown keyword '%s' in sv_mapRotation.\n", token->token);
         goto LABEL_19;
     }
     tokenb = SV_GetMapRotationToken();
     if (tokenb)
     {
-        Com_Printf(0, "Setting map: %s.\n", tokenb->token);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Setting map: %s.\n", tokenb->token);
         v0 = va("map %s\n", tokenb->token);
         Cmd_ExecuteSingleCommand(0, 0, v0);
     }
     else
     {
-        Com_Printf(0, "No map specified after 'map' keyword in sv_mapRotation - forcing map_restart.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "No map specified after 'map' keyword in sv_mapRotation - forcing map_restart.\n");
         SV_FastRestart_f();
     }
 }
@@ -629,7 +629,7 @@ void __cdecl SV_TempBan_f()
 
     if (SV_KickUser_f(playerName, 64, cdkeyHash))
     {
-        Com_Printf(0, "%s (guid \"%s\") was kicked for cheating\n", playerName, cdkeyHash);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s (guid \"%s\") was kicked for cheating\n", playerName, cdkeyHash);
         SV_BanGuidBriefly(cdkeyHash);
     }
 }
@@ -672,13 +672,13 @@ int __cdecl SV_KickUser_f(char *playerName, int maxPlayerNameLen, char *cdkeyHas
         else
         {
             cmdName = SV_Cmd_Argv(0);
-            Com_Printf(0, "Usage: %s <player name>\n%s all = kick everyone\n", cmdName, cmdName);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: %s <player name>\n%s all = kick everyone\n", cmdName, cmdName);
             return 0;
         }
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
         return 0;
     }
 }
@@ -711,12 +711,12 @@ client_t *__cdecl SV_GetPlayerByName()
             ++i;
             ++clients;
         }
-        Com_Printf(0, "Player %s is not on the server\n", s);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Player %s is not on the server\n", s);
         return 0;
     }
     else
     {
-        Com_Printf(0, "No player specified.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "No player specified.\n");
         return 0;
     }
 }
@@ -758,12 +758,12 @@ void __cdecl SV_Ban_f()
         }
         else
         {
-            Com_Printf(0, "Usage: banUser <player name>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: banUser <player name>\n");
         }
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 
@@ -781,12 +781,12 @@ void __cdecl SV_BanNum_f()
         }
         else
         {
-            Com_Printf(0, "Usage: banClient <client number>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: banClient <client number>\n");
         }
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 
@@ -805,7 +805,7 @@ client_t *__cdecl SV_GetPlayerByNum()
         {
             if (s[i] < 48 || s[i] > 57)
             {
-                Com_Printf(0, "Bad slot number: %s\n", s);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "Bad slot number: %s\n", s);
                 return 0;
             }
         }
@@ -818,19 +818,19 @@ client_t *__cdecl SV_GetPlayerByNum()
             }
             else
             {
-                Com_Printf(0, "Client %i is not active\n", idnum);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "Client %i is not active\n", idnum);
                 return 0;
             }
         }
         else
         {
-            Com_Printf(0, "Bad client slot: %i\n", idnum);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Bad client slot: %i\n", idnum);
             return 0;
         }
     }
     else
     {
-        Com_Printf(0, "No player specified.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "No player specified.\n");
         return 0;
     }
 }
@@ -846,7 +846,7 @@ void __cdecl SV_Unban_f()
     }
     else
     {
-        Com_Printf(0, "Usage: unban <client name>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: unban <client name>\n");
     }
 }
 
@@ -882,13 +882,13 @@ int __cdecl SV_KickClient_f(char *playerName, int maxPlayerNameLen, char *cdkeyH
         else
         {
             v4 = SV_Cmd_Argv(0);
-            Com_Printf(0, "Usage: %s <client number>\n", v4);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: %s <client number>\n", v4);
             return 0;
         }
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
         return 0;
     }
 }
@@ -900,7 +900,7 @@ void __cdecl SV_TempBanNum_f()
 
     if (SV_KickClient_f(playerName, 64, cdkeyHash))
     {
-        Com_Printf(0, "%s (guid \"%s\") was kicked for cheating\n", playerName, cdkeyHash);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s (guid \"%s\") was kicked for cheating\n", playerName, cdkeyHash);
         SV_BanGuidBriefly(cdkeyHash);
     }
 }
@@ -918,12 +918,12 @@ void __cdecl SV_Status_f()
 
     if (com_sv_running->current.enabled)
     {
-        Com_Printf(0, "map: %s\n", sv_mapname->current.string);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "map: %s\n", sv_mapname->current.string);
         Com_Printf(
-            0,
+            CON_CHANNEL_DONT_FILTER,
             "num score ping guid                             name            lastmsg address               qport rate\n");
         Com_Printf(
-            0,
+            CON_CHANNEL_DONT_FILTER,
             "--- ----- ---- -------------------------------- --------------- ------- --------------------- ----- -----\n");
         i = 0;
         clients = svs.clients;
@@ -931,49 +931,49 @@ void __cdecl SV_Status_f()
         {
             if (clients->header.state)
             {
-                Com_Printf(0, "%3i ", i);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%3i ", i);
                 SV_GameClientNum(i);
                 ClientScore = G_GetClientScore(clients - svs.clients);
-                Com_Printf(0, "%5i ", ClientScore);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%5i ", ClientScore);
                 if (clients->header.state == CS_CONNECTED)
                 {
-                    Com_Printf(0, "CNCT ");
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "CNCT ");
                 }
                 else if (clients->header.state == CS_ZOMBIE)
                 {
-                    Com_Printf(0, "ZMBI ");
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "ZMBI ");
                 }
                 else if (clients->ping >= 9999)
                 {
-                    Com_Printf(0, "%4i ", 9999);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "%4i ", 9999);
                 }
                 else
                 {
-                    Com_Printf(0, "%4i ", clients->ping);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "%4i ", clients->ping);
                 }
-                Com_Printf(0, "%32s ", clients->cdkeyHash);
-                Com_Printf(0, "%s^7", clients->name);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%32s ", clients->cdkeyHash);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s^7", clients->name);
                 l = 16 - I_DrawStrlen(clients->name);
                 for (j = 0; j < l; ++j)
-                    Com_Printf(0, " ");
-                Com_Printf(0, "%7i ", svs.time - clients->lastPacketTime);
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%7i ", svs.time - clients->lastPacketTime);
                 s = NET_AdrToString(clients->header.netchan.remoteAddress);
-                Com_Printf(0, "%s", s);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%s", s);
                 v1 = strlen(s);
                 for (ja = 0; ja < (int)(22 - v1); ++ja)
-                    Com_Printf(0, " ");
-                Com_Printf(0, "%5i", clients->header.netchan.qport);
-                Com_Printf(0, " %5i", clients->rate);
-                Com_Printf(0, "\n");
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, " ");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "%5i", clients->header.netchan.qport);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, " %5i", clients->rate);
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "\n");
             }
             ++i;
             ++clients;
         }
-        Com_Printf(0, "\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "\n");
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 
@@ -981,7 +981,7 @@ void __cdecl SV_Serverinfo_f()
 {
     char *v0; // eax
 
-    Com_Printf(0, "Server info settings:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "Server info settings:\n");
     v0 = Dvar_InfoString(0, 4);
     Info_Print(v0);
 }
@@ -990,7 +990,7 @@ void __cdecl SV_Systeminfo_f()
 {
     char *v0; // eax
 
-    Com_Printf(0, "System info settings:\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "System info settings:\n");
     v0 = Dvar_InfoString(0, 8);
     Info_Print(v0);
 }
@@ -1006,19 +1006,19 @@ void __cdecl SV_DumpUser_f()
             PlayerByName = SV_GetPlayerByName();
             if (PlayerByName)
             {
-                Com_Printf(0, "userinfo\n");
-                Com_Printf(0, "--------\n");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "userinfo\n");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "--------\n");
                 Info_Print(PlayerByName->userinfo);
             }
         }
         else
         {
-            Com_Printf(0, "Usage: info <userid>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: info <userid>\n");
         }
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 
@@ -1097,7 +1097,7 @@ void __cdecl SV_SetPerk_f()
         }
         else
         {
-            Com_DPrintf(0, "Unknown perk: %s\n", perkName);
+            Com_DPrintf(CON_CHANNEL_DONT_FILTER, "Unknown perk: %s\n", perkName);
         }
     }
 }
@@ -1131,7 +1131,7 @@ void __cdecl SV_ConSay_f()
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 
@@ -1176,7 +1176,7 @@ void __cdecl SV_ConTell_f()
     }
     else
     {
-        Com_Printf(0, "Server is not running.\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
     }
 }
 

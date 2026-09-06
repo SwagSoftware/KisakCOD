@@ -1434,7 +1434,7 @@ void __cdecl PlayerCmd_finishPlayerDamage(scr_entref_t entref)
                 Scr_AddInt(damage);
                 Scr_Notify(pSelf, scr_const.damage, 2u);
                 if (!entityHandlers[pSelf->handler].die)
-                    Com_Printf(1, "No die handler for player entity type %i", pSelf->handler);
+                    Com_Printf(CON_CHANNEL_ERROR, "No die handler for player entity type %i", pSelf->handler);
                 if (pSelf->health > 0)
                 {
                     pain = entityHandlers[pSelf->handler].pain;

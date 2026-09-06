@@ -175,7 +175,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 
 	if (rd_buffer)
 	{
-		if (channel != 6)
+		if (channel != CON_CHANNEL_LOGFILEONLY)
 		{
 #ifdef KISAK_MP
 			Sys_EnterCriticalSection(CRITSECT_RD_BUFFER);
@@ -191,7 +191,7 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 	}
 	else
 	{
-		if (channel != 6 
+		if (channel != CON_CHANNEL_LOGFILEONLY
 #ifdef KISAK_MP
             && com_dedicated && !com_dedicated->current.integer
 #endif
@@ -202,13 +202,13 @@ void QDECL Com_PrintMessage(int channel, const char* msg, int error)
 		}
 		if (*msg == 94 && msg[1])
 			msg += 2;
-		if (channel != 6
+		if (channel != CON_CHANNEL_LOGFILEONLY
 			&& (!com_filter_output || !com_filter_output->current.enabled
 				|| Con_IsChannelVisible(CON_DEST_CONSOLE, channel, 3)))
 		{
 			Sys_Print(msg);
 		}
-		if (channel != 7 && com_logfile && com_logfile->current.integer)
+		if (channel != CON_CHANNEL_CONSOLEONLY && com_logfile && com_logfile->current.integer)
 			Com_LogPrintMessage(channel, msg);
 	}
 
@@ -455,7 +455,7 @@ void Com_OpenLogFile()
         com_consoleLogOpenFailed = logfile == 0;
         v1 = asctime(newtime);
         BuildNumber = getBuildNumber();
-        Com_Printf(16, "Build %s\nlogfile opened on %s\n", BuildNumber, v1);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Build %s\nlogfile opened on %s\n", BuildNumber, v1);
         opening_qconsole = 0;
     }
 }
@@ -643,9 +643,9 @@ void __cdecl Com_PrintStackTrace()
 {
     // KISAKTODO
    //DoStackTrace(g_stackTrace, 1);
-   //Com_Printf(16, "STACKBEGIN -------------------------------------------------------------------\n");
-   //Com_Printf(16, g_stackTrace);
-   //Com_Printf(16, "STACKEND ---------------------------------------------------------------------\n");
+   //Com_Printf(CON_CHANNEL_SYSTEM, "STACKBEGIN -------------------------------------------------------------------\n");
+   //Com_Printf(CON_CHANNEL_SYSTEM, g_stackTrace);
+   //Com_Printf(CON_CHANNEL_SYSTEM, "STACKEND ---------------------------------------------------------------------\n");
 }
 
 void __cdecl  Com_ErrorAbort()
@@ -736,7 +736,7 @@ void __cdecl  Com_Quit_f()
 {
     int localClientNum; // [esp+0h] [ebp-4h]
 
-    Com_Printf(0, "quitting...\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "quitting...\n");
     R_PopRemoteScreenUpdate();
     Com_SyncThreads();
     Scr_Cleanup();
@@ -872,10 +872,10 @@ void __cdecl Info_Print(const char* s)
             memset(o, 0x20u, 20 - (o - (uint8_t*)key));
             key[20] = 0;
         }
-        Com_Printf(0, "%s", key);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s", key);
         if (!*s)
         {
-            Com_Printf(16, "MISSING VALUE\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "MISSING VALUE\n");
             return;
         }
         oa = value;
@@ -885,7 +885,7 @@ void __cdecl Info_Print(const char* s)
         *oa = 0;
         if (*s)
             ++s;
-        Com_Printf(0, "%s\n", value);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", value);
     }
 }
 
@@ -1216,13 +1216,13 @@ void Com_ErrorCleanup()
                 errorcode);
         if (errorcode == ERR_DROP)
         {
-            Com_PrintError(16, "********************\nERROR: %s\n********************\n", com_errorMessage);
+            Com_PrintError(CON_CHANNEL_SYSTEM, "********************\nERROR: %s\n********************\n", com_errorMessage);
             if (cls.uiStarted && !com_fixedConsolePosition)
                 CL_ConsoleFixPosition();
         }
         else
         {
-            Com_Printf(16, "********************\nDisconnecting: %s\n********************\n", com_errorMessage);
+            Com_Printf(CON_CHANNEL_SYSTEM, "********************\nDisconnecting: %s\n********************\n", com_errorMessage);
         }
         Com_ShutdownInternal(finalmsg);
         if (errorcode == ERR_DROP && QuitOnError())
@@ -1269,7 +1269,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     char* s; // [esp+14h] [ebp-8h]
     uint32_t initStartTime; // [esp+18h] [ebp-4h]
 
-    Com_Printf(16, "%s %s build %s %s\n", "KisakCoD4", "1.0", CPUSTRING, __DATE__);
+    Com_Printf(CON_CHANNEL_SYSTEM, "%s %s build %s %s\n", "KisakCoD4", "1.0", CPUSTRING, __DATE__);
     Com_ParseCommandLine(commandLine);
     SL_Init();
     Swap_Init();
@@ -1283,7 +1283,7 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     {
         PMem_Init();
         DB_SetInitializing(1);
-        Com_Printf(7, "begin $init\n");
+        Com_Printf(CON_CHANNEL_CONSOLEONLY, "begin $init\n");
         initStartTime = Sys_Milliseconds();
         PMem_BeginAlloc(comInitAllocName, 1u);
     }
@@ -1416,11 +1416,11 @@ void __cdecl Com_Init_Try_Block_Function(char* commandLine)
     {
         PMem_EndAlloc(comInitAllocName, 1u);
         DB_SetInitializing(0);
-        Com_Printf(16, "end $init %d ms\n", Sys_Milliseconds() - initStartTime);
+        Com_Printf(CON_CHANNEL_SYSTEM, "end $init %d ms\n", Sys_Milliseconds() - initStartTime);
     }
     com_fullyInitialized = 1;
-    Com_Printf(16, "--- Common Initialization Complete ---\n");
-    Com_DvarDump(6, 0);
+    Com_Printf(CON_CHANNEL_SYSTEM, "--- Common Initialization Complete ---\n");
+    Com_DvarDump(CON_CHANNEL_LOGFILEONLY, 0);
 }
 
 void __cdecl Com_Error_f()
@@ -1447,7 +1447,7 @@ void __cdecl Com_Freeze_f()
     }
     else
     {
-        Com_Printf(0, "freeze <seconds>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "freeze <seconds>\n");
     }
 }
 
@@ -1621,7 +1621,7 @@ void __cdecl Com_WriteDefaultsToFile(char* filename)
     }
     else
     {
-        Com_Printf(16, "Couldn't write %s.\n", filename);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Couldn't write %s.\n", filename);
     }
 }
 
@@ -1635,12 +1635,12 @@ void __cdecl Com_WriteConfig_f()
         v0 = (char*)Cmd_Argv(1);
         I_strncpyz(filename, v0, 64);
         Com_DefaultExtension(filename, 0x40u, ".cfg");
-        Com_Printf(0, "Writing %s.\n", filename);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Writing %s.\n", filename);
         Com_WriteConfigToFile(0, filename);
     }
     else
     {
-        Com_Printf(0, "Usage: writeconfig <filename>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: writeconfig <filename>\n");
     }
 }
 
@@ -1658,7 +1658,7 @@ void __cdecl Com_WriteConfigToFile(int localClientNum, char* filename)
     }
     else
     {
-        Com_Printf(16, "Couldn't write %s.\n", filename);
+        Com_Printf(CON_CHANNEL_SYSTEM, "Couldn't write %s.\n", filename);
     }
 }
 
@@ -1672,12 +1672,12 @@ void __cdecl Com_WriteDefaults_f()
         v0 = (char*)Cmd_Argv(1);
         I_strncpyz(filename, v0, 64);
         Com_DefaultExtension(filename, 0x40u, ".cfg");
-        Com_Printf(0, "Writing %s.\n", filename);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Writing %s.\n", filename);
         Com_WriteDefaultsToFile(filename);
     }
     else
     {
-        Com_Printf(0, "Usage: writedefaults <filename>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: writedefaults <filename>\n");
     }
 }
 
@@ -2028,7 +2028,7 @@ int __cdecl Com_ModifyMsec(int msec)
     if (com_dedicated->current.integer)
     {
         if (msec > 500 && msec < 500000)
-            Com_PrintWarning(16, "Hitch warning: %i msec frame time\n", msec);
+            Com_PrintWarning(CON_CHANNEL_SYSTEM, "Hitch warning: %i msec frame time\n", msec);
         clampTime = 5000;
     }
     else if (com_sv_running->current.enabled)

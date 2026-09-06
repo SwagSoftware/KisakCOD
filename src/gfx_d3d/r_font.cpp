@@ -123,16 +123,16 @@ Font_s *__cdecl R_LoadFont(const char *fontName, int imageTrack)
         else
         {
             FS_FCloseFile(file);
-            Com_PrintError(8, "ERROR: Font file '%s' too small\n", fontName);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: Font file '%s' too small\n", fontName);
             return 0;
         }
     }
     else
     {
         if (fileLen == -2)
-            Com_PrintError(8, "ERROR: Couldn't find font in iwd files or localized directories '%s'\n", fontName);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: Couldn't find font in iwd files or localized directories '%s'\n", fontName);
         else
-            Com_PrintError(8, "ERROR: Couldn't find font '%s'\n", fontName);
+            Com_PrintError(CON_CHANNEL_GFX, "ERROR: Couldn't find font '%s'\n", fontName);
         return 0;
     }
 }

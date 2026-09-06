@@ -220,7 +220,7 @@ void __cdecl Mantle_DebugPrint(const char *msg)
 #ifdef _DEBUG
     iassert(msg);
     if (mantle_debug->current.enabled)
-        Com_Printf(17, "%s\n", msg);
+        Com_Printf(CON_CHANNEL_PLAYERWEAP, "%s\n", msg);
 #endif
 }
 

@@ -653,7 +653,7 @@ void __cdecl trigger_use_shared(gentity_s *self)
     else
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Killing trigger_use_shared at (%f %f %f) because the brush model is invalid.\n",
             self->s.lerp.pos.trBase[0],
             self->s.lerp.pos.trBase[1],
@@ -749,7 +749,7 @@ void trigger_use_shared(gentity_s *self)
     else
     {
         Com_PrintError(
-            1,
+            CON_CHANNEL_ERROR,
             "Killing trigger_use_shared at (%f %f %f) because the brush model is invalid.\n",
             self->s.lerp.pos.trBase[0],
             self->s.lerp.pos.trBase[1],

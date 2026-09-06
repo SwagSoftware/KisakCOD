@@ -695,7 +695,7 @@ snapshot_s *__cdecl CG_ReadNextSnapshot(int localClientNum)
 
     if (cgameGlob->latestSnapshotNum > cgs->processedSnapshotNum + 1000)
         Com_PrintWarning(
-            14,
+            CON_CHANNEL_CLIENT,
             "WARNING: CG_ReadNextSnapshot: way out of range, %i > %i\n",
             cgameGlob->latestSnapshotNum,
             cgs->processedSnapshotNum);

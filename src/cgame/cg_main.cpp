@@ -824,7 +824,7 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
     }
     else
     {
-        Com_DPrintf(9, "WARNING: no alias prefix defined, using default\n");
+        Com_DPrintf(CON_CHANNEL_SOUND, "WARNING: no alias prefix defined, using default\n");
         defaultAliasList = Com_FindSoundAliasNoErrors("collision_default");
         for (int i = 0; i < 29; ++i)
             sound[i] = defaultAliasList;

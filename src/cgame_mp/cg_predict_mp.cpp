@@ -238,14 +238,14 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
                             if (cg_showmiss->current.integer)
                             {
                                 if (adjusted[0] != oldOrigin[0] || adjusted[1] != oldOrigin[1] || adjusted[2] != oldOrigin[2])
-                                    Com_PrintError(17, "prediction error\n");
+                                    Com_PrintError(CON_CHANNEL_PLAYERWEAP, "prediction error\n");
                             }
                             Vec3Sub(oldOrigin, adjusted, delta);
                             len = Vec3Length(delta);
                             if (len > 0.1000000014901161)
                             {
                                 if (cg_showmiss->current.integer)
-                                    Com_Printf(17, "Prediction miss: %f\n", len);
+                                    Com_Printf(CON_CHANNEL_PLAYERWEAP, "Prediction miss: %f\n", len);
                                 if (cg_errorDecay->current.value == 0.0)
                                 {
                                     predictedError = cgameGlob->predictedError;
@@ -260,7 +260,7 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
                                     if (f < 0.0)
                                         f = 0.0;
                                     if (f > 0.0 && cg_showmiss->current.integer)
-                                        Com_Printf(17, "Double prediction decay: %f\n", f);
+                                        Com_Printf(CON_CHANNEL_PLAYERWEAP, "Double prediction decay: %f\n", f);
                                     Vec3Scale(cgameGlob->predictedError, f, cgameGlob->predictedError);
                                 }
                                 Vec3Add(delta, cgameGlob->predictedError, cgameGlob->predictedError);
@@ -277,9 +277,9 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
                 }
             }
             if (cg_showmiss->current.integer > 1)
-                Com_Printf(17, "[%i : %i] ", cg_pmove[localClientNum].cmd.serverTime, cgameGlob->time);
+                Com_Printf(CON_CHANNEL_PLAYERWEAP, "[%i : %i] ", cg_pmove[localClientNum].cmd.serverTime, cgameGlob->time);
             if (!bPredictionRun && cg_showmiss->current.integer)
-                Com_Printf(17, "no prediction run\n");
+                Com_Printf(CON_CHANNEL_PLAYERWEAP, "no prediction run\n");
             CG_TransitionPlayerState(localClientNum, &cgameGlob->predictedPlayerState, &oldTransPlayerState);
             if ((cgameGlob->predictedPlayerState.pm_flags & PMF_RESPAWNED) != 0)
                 CL_SetStance(localClientNum, CL_STANCE_STAND);
@@ -347,7 +347,7 @@ void __cdecl CG_PredictPlayerState_Internal(int32_t localClientNum)
         else
         {
             if (cg_showmiss->current.integer)
-                Com_Printf(17, "exceeded PACKET_BACKUP on commands\n");
+                Com_Printf(CON_CHANNEL_PLAYERWEAP, "exceeded PACKET_BACKUP on commands\n");
         }
     }
 }

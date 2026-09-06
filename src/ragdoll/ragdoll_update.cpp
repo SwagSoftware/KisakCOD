@@ -499,14 +499,14 @@ char __cdecl Ragdoll_CreatePhysObj(RagdollBody *body, BoneDef *boneDef, Bone *bo
             Phys_ObjAddGeomCapsule(PHYS_WORLD_RAGDOLL, (dxBody *)bone->rigidBody, 0, boneDef->radius, v4, bone->center);
             break;
         default:
-            Com_PrintWarning(14, "Ragdoll: Unknown bone geom type %d\n", boneDef->geomType);
+            Com_PrintWarning(CON_CHANNEL_CLIENT, "Ragdoll: Unknown bone geom type %d\n", boneDef->geomType);
             break;
         }
         return 1;
     }
     else
     {
-        Com_PrintWarning(14, "Ragdoll: Failed to create rigid body\n");
+        Com_PrintWarning(CON_CHANNEL_CLIENT, "Ragdoll: Failed to create rigid body\n");
         return 0;
     }
 }
@@ -1485,7 +1485,7 @@ void __cdecl Ragdoll_PrintTunnelFail(RagdollBody *body)
         iassert( pose );
         iassert( obj );
         Com_Printf(
-            20,
+            CON_CHANNEL_PHYS,
             "Ragdoll initial state in solid, using regular anim. Pos (%0.f %0.f %0.f)\n",
             pose->origin[0],
             pose->origin[1],
@@ -1761,9 +1761,9 @@ void __cdecl Ragdoll_UpdateDObjWait(RagdollBody *body)
     else
     {
         if (body->obj)
-            Com_PrintWarning(20, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->dobj);
+            Com_PrintWarning(CON_CHANNEL_PHYS, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->dobj);
         else
-            Com_PrintWarning(20, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->obj);
+            Com_PrintWarning(CON_CHANNEL_PHYS, "Ragdoll activation timed out waiting for dobj 0x%x\n", body->obj);
         Ragdoll_BodyNewState(body, BodyState_t::BS_DEAD);
     }
 }

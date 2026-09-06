@@ -684,7 +684,7 @@ void __cdecl pr_0(const char *msg, int indent)
 		v2 = v3;
 	else
 		v2 = 0;
-	Com_Printf(20, "%s%s", &spaces[40 - v2], msg);
+	Com_Printf(CON_CHANNEL_PHYS, "%s%s", &spaces[40 - v2], msg);
 }
 
 const char *__cdecl jointKind(const dxJoint *joint)

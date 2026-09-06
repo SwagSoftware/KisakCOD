@@ -13,7 +13,7 @@ int __cdecl DL_VPrintf(const char *fmt, char *argptr)
     char msg[1028]; // [esp+10h] [ebp-408h] BYREF
 
     _vsnprintf(msg, 0x400u, fmt, argptr);
-    Com_Printf(0, "%s", msg);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "%s", msg);
     return &msg[strlen(msg) + 1] - &msg[1];
 }
 
@@ -72,7 +72,7 @@ void DL_CancelDownload()
 //        {
 //            if (!HTNet_rawBytesCount(request->net))
 //            {
-//                Com_DPrintf(0, "Force raw byte count on request->net %p\n", request->net);
+//                Com_DPrintf(CON_CHANNEL_DONT_FILTER, "Force raw byte count on request->net %p\n", request->net);
 //                HTFTP_setRawBytesCount(request);
 //            }
 //            legacyHacks.cl_downloadCount = HTFTP_getDNetRawBytesCount((int)request);
@@ -102,7 +102,7 @@ void __cdecl DL_InitDownload()
         HTAlert_add(HTAlertCallback_progress, 0xFFFF);
         HTAlert_add(HTAlertCallback_confirm, 0x20000);
         HTAlert_add(HTAlertCallback_prompt, 1835008);
-        Com_Printf(0, "Client download subsystem initialized\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Client download subsystem initialized\n");
         dl_initialized = 1;
     }
 #endif
@@ -172,7 +172,7 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
             HTBasic_delete((void **)&basic->uid);
             url = (char *)HTMemory_malloc(strlen(ptr + 1) + strlen(path) + 8);
             sprintf(url, "http://%s%s", ptr + 1, path);
-            Com_DPrintf(0, "HTTP Basic Auth - %s %s %s\n", login, passwd, url);
+            Com_DPrintf(CON_CHANNEL_DONT_FILTER, "HTTP Basic Auth - %s %s %s\n", login, passwd, url);
             HTMemory_free(login);
             login = 0;
             HTMemory_free(path);
@@ -212,7 +212,7 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
         }
         else
         {
-            Com_DPrintf(0, "HTLoadToFile failed\n");
+            Com_DPrintf(CON_CHANNEL_DONT_FILTER, "HTLoadToFile failed\n");
             HTMemory_free(url);
             url = 0;
             HTProfile_delete();
@@ -221,7 +221,7 @@ int __cdecl DL_BeginDownload(char *localName, char *remoteName)
     }
     else
     {
-        Com_DPrintf(0, "Empty download URL or empty local file name\n");
+        Com_DPrintf(CON_CHANNEL_DONT_FILTER, "Empty download URL or empty local file name\n");
         return 0;
     }
 #endif
@@ -242,7 +242,7 @@ int __cdecl DL_DownloadLoop()
     dl_running = 0;
     if (terminate_status >= 0)
         return 1;
-    Com_Printf(0, "DL_DownloadLoop: request terminated with failure status %d\n", terminate_status);
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "DL_DownloadLoop: request terminated with failure status %d\n", terminate_status);
     return 2;
 #endif
 }

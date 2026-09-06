@@ -530,14 +530,14 @@ int32_t __cdecl BG_PlayAnim(
                     {
                         if (bodyPart == ANIM_BP_BOTH)
                             Com_Printf(
-                                19,
+                                CON_CHANNEL_ANIM,
                                 "Playing (client %i) %s on %s\n",
                                 ps->clientNum,
                                 globalScriptData->animations[animNum].name,
                                 "body");
                         else
                             Com_Printf(
-                                19,
+                                CON_CHANNEL_ANIM,
                                 "Playing (client %i) %s on %s\n",
                                 ps->clientNum,
                                 globalScriptData->animations[animNum].name,
@@ -560,12 +560,12 @@ int32_t __cdecl BG_PlayAnim(
             }
             else if (xanim_debug->current.enabled && (ps->legsAnim & 0xFFFFFDFF) != animNum)
             {
-                Com_Printf(19, "anim failed because");
+                Com_Printf(CON_CHANNEL_ANIM, "anim failed because");
                 if ((ps->legsAnim & 0xFFFFFDFF) == animNum)
                 {
-                    Com_Printf(19, ", isContinue is true");
+                    Com_Printf(CON_CHANNEL_ANIM, ", isContinue is true");
                     Com_Printf(
-                        19,
+                        CON_CHANNEL_ANIM,
                         ", legsAnim is %s, asking to play %s",
                         globalScriptData->animations[ps->legsAnim].name,
                         globalScriptData->animations[animNum].name);
@@ -573,13 +573,13 @@ int32_t __cdecl BG_PlayAnim(
                 if (setTimer)
                 {
                     if ((globalScriptData->animations[animNum].flags & 0x80) == 0)
-                        Com_Printf(19, ", on a non-looped anim");
+                        Com_Printf(CON_CHANNEL_ANIM, ", on a non-looped anim");
                 }
                 else
                 {
-                    Com_Printf(19, ", setTimer is false");
+                    Com_Printf(CON_CHANNEL_ANIM, ", setTimer is false");
                 }
-                Com_Printf(19, "\n");
+                Com_Printf(CON_CHANNEL_ANIM, "\n");
             }
         }
         else
@@ -593,14 +593,14 @@ int32_t __cdecl BG_PlayAnim(
             {
                 if (bodyPart == ANIM_BP_BOTH)
                     Com_Printf(
-                        19,
+                        CON_CHANNEL_ANIM,
                         "Playing (client %i) %s on %s\n",
                         ps->clientNum,
                         globalScriptData->animations[animNum].name,
                         "body");
                 else
                     Com_Printf(
-                        19,
+                        CON_CHANNEL_ANIM,
                         "Playing (client %i) %s on %s\n",
                         ps->clientNum,
                         globalScriptData->animations[animNum].name,
@@ -739,14 +739,14 @@ int32_t __cdecl BG_AnimScriptAnimation(playerState_s *ps, aistateEnum_t state, s
         else
         {
             if (xanim_debug->current.enabled)
-                Com_Printf(19, "Animation has no commands associated, finding new animation\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Animation has no commands associated, finding new animation\n");
             return -1;
         }
     }
     else
     {
         if (xanim_debug->current.enabled)
-            Com_Printf(19, "Failed playing animation, finding new animation\n");
+            Com_Printf(CON_CHANNEL_ANIM, "Failed playing animation, finding new animation\n");
         return -1;
     }
 }
@@ -766,19 +766,19 @@ animScriptItem_t *__cdecl BG_FirstValidItem(uint32_t client, animScript_t *scrip
     {
         if (animscript_debug->current.enabled)
         {
-            Com_Printf(19, "Evaluating whether to play: ");
+            Com_Printf(CON_CHANNEL_ANIM, "Evaluating whether to play: ");
             for (command = 0; command < (*ppScriptItem)->numCommands; ++command)
             {
                 const char* BodyPart = GetBodyPart((*ppScriptItem)->commands[command].bodyPart[0]); // eax
                 Com_Printf(
-                    19,
+                    CON_CHANNEL_ANIM,
                     "%s on %s",
                     globalScriptData->animations[(*ppScriptItem)->commands[command].animIndex[0]].name,
                     BodyPart);
                 if (command > 0)
-                    Com_Printf(19, ", ");
+                    Com_Printf(CON_CHANNEL_ANIM, ", ");
             }
-            Com_Printf(19, "\n");
+            Com_Printf(CON_CHANNEL_ANIM, "\n");
         }
         
         bcassert(client, MAX_CLIENTS);
@@ -818,35 +818,35 @@ int32_t __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *script
             {
             case 0:
                 index = GetValueForBitfield(scriptItem->conditions[i].value[0]);
-                Com_Printf(19, "Checking to see if weapon animtype is %i...\n", index);
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if weapon animtype is %i...\n", index);
                 break;
             case 1:
                 ValueForBitfield = GetValueForBitfield(scriptItem->conditions[i].value[0]);
                 WeaponTypeName = GetWeaponTypeName(ValueForBitfield);
-                Com_Printf(19, "Checking to see if weapon type is %s...\n", WeaponTypeName);
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if weapon type is %s...\n", WeaponTypeName);
                 break;
             case 2:
-                Com_Printf(19, "Checking to see if player is mounted...\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if player is mounted...\n");
                 break;
             case 3:
                 v4 = GetValueForBitfield(scriptItem->conditions[i].value[0]);
                 MoveTypeName = GetMoveTypeName(v4);
-                Com_Printf(19, "Checking to see if movetype is %s...\n", MoveTypeName);
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if movetype is %s...\n", MoveTypeName);
                 break;
             case 4:
-                Com_Printf(19, "Checking to see if player using underhand...\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if player using underhand...\n");
                 break;
             case 5:
-                Com_Printf(19, "Checking to see if player is crouching...\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if player is crouching...\n");
                 break;
             case 6:
-                Com_Printf(19, "Checking to see if player is firing...\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if player is firing...\n");
                 break;
             case 7:
-                Com_Printf(19, "Checking weapon position...\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Checking weapon position...\n");
                 break;
             case 8:
-                Com_Printf(19, "Checking to see if player is strafing...\n");
+                Com_Printf(CON_CHANNEL_ANIM, "Checking to see if player is strafing...\n");
                 break;
             default:
                 break;
@@ -858,7 +858,7 @@ int32_t __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *script
             if (type == ANIM_CONDTYPE_VALUE && ci->clientConditions[cond->index][0] != cond->value[0])
             {
                 if (animscript_debug->current.enabled)
-                    Com_Printf(19, "failed\n");
+                    Com_Printf(CON_CHANNEL_ANIM, "failed\n");
                 return 0;
             }
         }
@@ -866,14 +866,14 @@ int32_t __cdecl BG_EvaluateConditions(clientInfo_t *ci, animScriptItem_t *script
             && (cond->value[1] & ci->clientConditions[cond->index][1]) == 0)
         {
             if (animscript_debug->current.enabled)
-                Com_Printf(19, "failed\n");
+                Com_Printf(CON_CHANNEL_ANIM, "failed\n");
             return 0;
         }
         ++i;
         ++cond;
     }
     if (animscript_debug->current.enabled)
-        Com_Printf(19, "Success\n");
+        Com_Printf(CON_CHANNEL_ANIM, "Success\n");
     return 1;
 }
 
@@ -1013,7 +1013,7 @@ int32_t __cdecl BG_AnimScriptEvent(playerState_s *ps, scriptAnimEventTypes_t eve
         return -1;
 
     if (G_IsServerGameSystem(ps->clientNum))
-        Com_Printf(19, "event: %s\n", animEventTypesStr[event].string);
+        Com_Printf(CON_CHANNEL_ANIM, "event: %s\n", animEventTypesStr[event].string);
 
     if (!globalScriptData->scriptEvents[event].numItems)
         return -1;
@@ -1051,7 +1051,7 @@ void __cdecl BG_SetConditionValue(uint32_t client, uint32_t condition, uint64_t 
 
         ConditionBit = BG_GetConditionBit(&bgs->clientinfo[client], condition);
         ConditionString = BG_GetConditionString(condition, ConditionBit);
-        Com_Printf(19, "condition: %s: %s\n", animConditionsStr[condition].string, ConditionString);
+        Com_Printf(CON_CHANNEL_ANIM, "condition: %s: %s\n", animConditionsStr[condition].string, ConditionString);
     }
 }
 
@@ -1120,7 +1120,7 @@ void __cdecl BG_SetConditionBit(uint32_t client, int32_t condition, int32_t valu
         && G_IsServerGameSystem(client))
     {
         ConditionString = BG_GetConditionString(condition, value);
-        Com_Printf(19, "condition: %s: %s\n", animConditionsStr[condition].string, ConditionString);
+        Com_Printf(CON_CHANNEL_ANIM, "condition: %s: %s\n", animConditionsStr[condition].string, ConditionString);
     }
 
     bgs->clientinfo[client].clientConditions[condition][0] = 0;
@@ -2266,7 +2266,7 @@ void BG_FinalizePlayerAnims()
                         if (pCurrAnim->moveSpeed <= 1.0)
                         {
                             v7 = Vec3Length(vDelta);
-                            Com_Printf(19, "Anim '%s' moves %f units over %fms\n", pCurrAnim->name, v7, duration);
+                            Com_Printf(CON_CHANNEL_ANIM, "Anim '%s' moves %f units over %fms\n", pCurrAnim->name, v7, duration);
                         }
                         else
                         {
@@ -2312,7 +2312,7 @@ void BG_FinalizePlayerAnims()
                             moveSpeed = pCurrAnim->moveSpeed;
                             v6 = Vec3Length(vDelta);
                             Com_Printf(
-                                19,
+                                CON_CHANNEL_ANIM,
                                 "Anim '%s' moves %f units over %fms (%f units/s), will play back at %.1f%% speed when player moves at ful"
                                 "l %s speed (%.0f units/sec)\n",
                                 pCurrAnim->name,

@@ -34,7 +34,7 @@ sentient_s *__cdecl Sentient_Alloc()
         }
     }
 
-    Com_DPrintf(15, "Sentient allocation failed\n");
+    Com_DPrintf(CON_CHANNEL_SERVER, "Sentient allocation failed\n");
     return 0;
 }
 

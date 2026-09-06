@@ -1361,7 +1361,7 @@ void __cdecl MSG_ReadDeltaField(msg_t *msg, unsigned __int8 *to, const netField_
             *(unsigned int *)&to[offset] = Bits;
         LABEL_12:
             if (print)
-                Com_Printf(16, "%s:%i ", field->name, Bits);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", field->name, Bits);
             return;
         }
     LABEL_10:
@@ -1381,7 +1381,7 @@ void __cdecl MSG_ReadDeltaField(msg_t *msg, unsigned __int8 *to, const netField_
     }
     *(unsigned int *)&to[offset] = MSG_ReadBits(msg, 0x20u);
     if (print)
-        Com_Printf(16, "%s:%f ", field->name, *(float *)&to[offset]);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", field->name, *(float *)&to[offset]);
 }
 
 void __cdecl MSG_WriteDeltaHudElems(msg_t *msg, hudelem_s *to, int count)
@@ -1636,7 +1636,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
     if (cl_shownet && ((integer = cl_shownet->current.integer, integer >= 2) || integer == -2))
     {
         v8 = 1;
-        Com_Printf(16, "W|%3i: playerstate ", cursize);
+        Com_Printf(CON_CHANNEL_SYSTEM, "W|%3i: playerstate ", cursize);
     }
     else
     {
@@ -1685,7 +1685,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
             {
                 v15 = *(int *)((char *)&to->commandTime + v11);
             LABEL_30:
-                Com_Printf(16, "%s:%i ", (const char *)*(p_bits - 2), v15);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", (const char *)*(p_bits - 2), v15);
             }
         }
         else
@@ -1704,7 +1704,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
             MSG_WriteBits(msg, 1, 1u);
             MSG_WriteBits(msg, *(int *)((char *)&to->commandTime + v11), 0x20u);
             if (v8)
-                Com_Printf(16, "%s:%f ", (const char *)*(p_bits - 2), *(float *)((char *)&to->commandTime + v11));
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", (const char *)*(p_bits - 2), *(float *)((char *)&to->commandTime + v11));
         }
     LABEL_31:
         --v9;
@@ -2070,7 +2070,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(msg_t *msg, playerState_s *to)
             v62 = v61 + v60 - 20;
         else
             v62 = v61 - 12;
-        Com_Printf(16, " (%i bits)\n", v62 - v6);
+        Com_Printf(CON_CHANNEL_SYSTEM, " (%i bits)\n", v62 - v6);
     }
 }
 
@@ -2178,7 +2178,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
     if (cl_shownet && ((integer = cl_shownet->current.integer, integer >= 2) || integer == -2))
     {
         print = 1;
-        Com_Printf(16, "%3i: playerstate ", readcount);
+        Com_Printf(CON_CHANNEL_SYSTEM, "%3i: playerstate ", readcount);
     }
     else
     {
@@ -2241,12 +2241,12 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
             *(float *)((char *)&to->commandTime + v11) = (float)Bits;
         LABEL_32:
             if (print)
-                Com_Printf(16, "%s:%i ", (const char *)*(p_bits - 2), Bits);
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s:%i ", (const char *)*(p_bits - 2), Bits);
             goto LABEL_34;
         }
         *(int *)((char *)&to->commandTime + v11) = MSG_ReadBits(msg, 0x20u);
         if (print)
-            Com_Printf(16, "%s:%f ", (const char *)*(p_bits - 2), *(float *)((char *)&to->commandTime + v11));
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s:%f ", (const char *)*(p_bits - 2), *(float *)((char *)&to->commandTime + v11));
     LABEL_34:
         --v9;
         p_bits += 3;
@@ -2254,7 +2254,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
     if (MSG_ReadBits(msg, 1u))
     {
         if (cl_shownet && cl_shownet->current.integer == 4)
-            Com_Printf(16, "%s ", "PS_STATS");
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s ", "PS_STATS");
         v23 = msg->readcount;
         v24 = v23 + 2;
         if (v23 + 2 > msg->cursize)
@@ -2355,7 +2355,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
             if (MSG_ReadBits(msg, 1u))
             {
                 if (cl_shownet && cl_shownet->current.integer == 4)
-                    Com_Printf(16, "%s ", "PS_AMMO");
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s ", "PS_AMMO");
                 v42 = msg->readcount;
                 v43 = v42 + 2;
                 if (v42 + 2 > msg->cursize)
@@ -2452,7 +2452,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
         if (MSG_ReadBits(msg, 1u))
         {
             if (cl_shownet && cl_shownet->current.integer == 4)
-                Com_Printf(16, "%s ", "PS_AMMOCLIP");
+                Com_Printf(CON_CHANNEL_SYSTEM, "%s ", "PS_AMMOCLIP");
             v60 = msg->readcount;
             v61 = v60 + 2;
             if (v60 + 2 > msg->cursize)
@@ -2611,7 +2611,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(msg_t *msg, playerState_s *to)
             v93 = v92 + v91 - 20;
         else
             v93 = v92 - 12;
-        Com_Printf(16, " (%i bits)\n", v93 - v6);
+        Com_Printf(CON_CHANNEL_SYSTEM, " (%i bits)\n", v93 - v6);
     }
 }
 

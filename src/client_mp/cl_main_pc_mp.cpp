@@ -227,7 +227,7 @@ void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time)
             {
                 cl_pinglist[i].time = time - cl_pinglist[i].start + 1;
                 v4 = NET_AdrToString(from);
-                Com_DPrintf(14, "ping time %dms from %s\n", cl_pinglist[i].time, v4);
+                Com_DPrintf(CON_CHANNEL_CLIENT, "ping time %dms from %s\n", cl_pinglist[i].time, v4);
                 I_strncpyz(cl_pinglist[i].info, infoString, 1024);
                 switch (from.type)
                 {
@@ -258,7 +258,7 @@ void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time)
             }
             if (i == 128)
             {
-                Com_DPrintf(14, "MAX_OTHER_SERVERS hit, dropping infoResponse\n");
+                Com_DPrintf(CON_CHANNEL_CLIENT, "MAX_OTHER_SERVERS hit, dropping infoResponse\n");
             }
             else
             {
@@ -283,14 +283,14 @@ void __cdecl CL_ServerInfoPacket(netadr_t from, msg_t *msg, int time)
                     if (info[&info[strlen(info) + 1] - &info[1] - 1] != 10)
                         strncat(info, "\n", 0x400u);
                     v7 = NET_AdrToString(from);
-                    Com_Printf(14, "%s: %s", v7, info);
+                    Com_Printf(CON_CHANNEL_CLIENT, "%s: %s", v7, info);
                 }
             }
         }
     }
     else
     {
-        Com_DPrintf(14, "Different protocol info packet: %s\n", infoString);
+        Com_DPrintf(CON_CHANNEL_CLIENT, "Different protocol info packet: %s\n", infoString);
     }
 }
 
@@ -325,7 +325,7 @@ void __cdecl CL_Connect_f()
                     clc->serverAddress.port = BigShort(28960);
                 v1 = BigShort(clc->serverAddress.port);
                 Com_Printf(
-                    0,
+                    CON_CHANNEL_DONT_FILTER,
                     "%s resolved to %i.%i.%i.%i:%i\n",
                     cls.servername,
                     clc->serverAddress.ip[0],
@@ -368,18 +368,18 @@ void __cdecl CL_Connect_f()
             }
             else
             {
-                Com_Printf(0, "Bad server address\n");
+                Com_Printf(CON_CHANNEL_DONT_FILTER, "Bad server address\n");
                 clientUIActives[0].connectionState = CA_DISCONNECTED;
             }
         }
         else
         {
-            Com_Printf(0, "Already connected to a server. Disconnect first\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Already connected to a server. Disconnect first\n");
         }
     }
     else
     {
-        Com_Printf(0, "usage: connect [server]\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "usage: connect [server]\n");
     }
 }
 
@@ -438,7 +438,7 @@ void __cdecl CL_GlobalServers_f()
             if (!++server->requestCount)
                 --server->requestCount;
         }
-        Com_Printf(0, "Requesting servers from the master...\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Requesting servers from the master...\n");
         NET_StringToAdr((char *)com_masterServerName->current.integer, &to);
         cls.waitglobalserverresponse = 1;
         cls.pingUpdateSource = 1;
@@ -459,7 +459,7 @@ void __cdecl CL_GlobalServers_f()
     }
     else
     {
-        Com_Printf(0, "usage: globalservers <master# 0-1> <protocol> [keywords]\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "usage: globalservers <master# 0-1> <protocol> [keywords]\n");
     }
 }
 
@@ -491,7 +491,7 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
         Com_sprintf(serverStatus->string, 0x2000u, "%s", s);
         if (serverStatus->print)
         {
-            Com_Printf(14, "Server settings:\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "Server settings:\n");
             while (*s)
             {
                 for (i = 0; i < 2 && *s; ++i)
@@ -510,9 +510,9 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
                     } while (*s != 92);
                     info[l] = 0;
                     if (i)
-                        Com_Printf(14, "%s\n", info);
+                        Com_Printf(CON_CHANNEL_CLIENT, "%s\n", info);
                     else
-                        Com_Printf(14, "%-24s", info);
+                        Com_Printf(CON_CHANNEL_CLIENT, "%-24s", info);
                 }
             }
         }
@@ -520,8 +520,8 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
         Com_sprintf(&serverStatus->string[len], 0x2000 - len, "\\");
         if (serverStatus->print)
         {
-            Com_Printf(14, "\nPlayers:\n");
-            Com_Printf(14, "num: score: ping: name:\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "\nPlayers:\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "num: score: ping: name:\n");
         }
         i = 0;
         s = MSG_ReadStringLine(msg);
@@ -543,7 +543,7 @@ void __cdecl CL_ServerStatusResponse(netadr_t from, msg_t *msg)
                     ++s;
                 else
                     s = "unknown";
-                Com_Printf(14, "%-2d   %-3d    %-3d   %s\n", i, score, ping, s);
+                Com_Printf(CON_CHANNEL_CLIENT, "%-2d   %-3d    %-3d   %s\n", i, score, ping, s);
             }
             s = MSG_ReadStringLine(msg);
             ++i;
@@ -562,7 +562,7 @@ void __cdecl CL_ResetPlayerMuting(uint32_t muteClientIndex)
 {
     if (muteClientIndex >= MAX_CLIENTS)
     {
-        Com_PrintError(14, "CL_ResetPlayerMuting: bad client index %u\n", muteClientIndex);
+        Com_PrintError(CON_CHANNEL_CLIENT, "CL_ResetPlayerMuting: bad client index %u\n", muteClientIndex);
         return;
     }
     s_playerMute[muteClientIndex] = 0;

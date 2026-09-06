@@ -742,7 +742,7 @@ char __cdecl G_ParseAIWeaponAccurayGraphFile(
         (*knots)[2 * knotCountIndex++ + 1] = v6;
         if (knotCountIndex >= 16)
         {
-            Com_PrintWarning(15, "WARNING: \"%s\" has too many graph knots\n", fileName);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: \"%s\" has too many graph knots\n", fileName);
             Com_EndParseSession();
             return 0;
         }
@@ -756,13 +756,13 @@ char __cdecl G_ParseAIWeaponAccurayGraphFile(
         }
         else
         {
-            Com_PrintError(15, "ERROR: \"%s\" Range must be 0.0 to 1.0\n", fileName);
+            Com_PrintError(CON_CHANNEL_SERVER, "ERROR: \"%s\" Range must be 0.0 to 1.0\n", fileName);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(15, "ERROR: \"%s\" Error in parsing an ai weapon accuracy file\n", fileName);
+        Com_PrintError(CON_CHANNEL_SERVER, "ERROR: \"%s\" Error in parsing an ai weapon accuracy file\n", fileName);
         return 0;
     }
 }
@@ -823,21 +823,21 @@ char __cdecl G_ParseWeaponAccurayGraphInternal(
             }
             else
             {
-                Com_PrintWarning(15, "WARNING: \"%s\" Is too long of an ai weapon accuracy file to parse\n", string);
+                Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: \"%s\" Is too long of an ai weapon accuracy file to parse\n", string);
                 FS_FCloseFile(f);
                 return 0;
             }
         }
         else
         {
-            Com_PrintWarning(15, "WARNING: \"%s\" does not appear to be an ai weapon accuracy file\n", string);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: \"%s\" does not appear to be an ai weapon accuracy file\n", string);
             FS_FCloseFile(f);
             return 0;
         }
     }
     else
     {
-        Com_PrintWarning(15, "WARNING: Could not load ai weapon accuracy file '%s'\n", string);
+        Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: Could not load ai weapon accuracy file '%s'\n", string);
         return 0;
     }
 }
@@ -1164,7 +1164,7 @@ int __cdecl BG_ParseWeaponDefSpecificFieldType(uint8_t *pStruct, const char *pVa
         }
         if (keyName[0])
             Com_PrintWarning(
-                0,
+                CON_CHANNEL_DONT_FILTER,
                 "Notetrack-to-Sound: Weapon '%s' has bad entry; notetrack '%s' doesn't have a corresponding sound.\n",
                 weapDef->szInternalName,
                 keyName);
@@ -1320,14 +1320,14 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
                 }
                 else
                 {
-                    Com_PrintWarning(17, "WARNING: \"%s\" is not a valid weapon file\n", dest);
+                    Com_PrintWarning(CON_CHANNEL_PLAYERWEAP, "WARNING: \"%s\" is not a valid weapon file\n", dest);
                     return 0;
                 }
             }
             else
             {
                 Com_PrintWarning(
-                    17,
+                    CON_CHANNEL_PLAYERWEAP,
                     "WARNING: \"%s\" Is too long of a weapon file to parse (fileLength = %d identifierLength = %d)\n",
                     dest,
                     v11,
@@ -1338,14 +1338,14 @@ WeaponDef *__cdecl BG_LoadWeaponDefInternal(const char *one, const char *two)
         }
         else
         {
-            Com_PrintWarning(17, "WARNING: \"%s\" does not appear to be a weapon file\n", dest);
+            Com_PrintWarning(CON_CHANNEL_PLAYERWEAP, "WARNING: \"%s\" does not appear to be a weapon file\n", dest);
             FS_FCloseFile(f);
             return 0;
         }
     }
     else
     {
-        Com_PrintWarning(17, "WARNING: Could not load weapon file '%s'\n", dest);
+        Com_PrintWarning(CON_CHANNEL_PLAYERWEAP, "WARNING: Could not load weapon file '%s'\n", dest);
         return 0;
     }
 }

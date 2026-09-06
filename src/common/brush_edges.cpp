@@ -90,7 +90,7 @@ adjacencyWinding_t *__cdecl BuildBrushdAdjacencyWindingForSide(
         winding = optionalOutWinding;
         if (optionalOutWindingCount < (int)cycleCount[0])
         {
-            Com_PrintError(1, (char *)"Brush face has too many edges");
+            Com_PrintError(CON_CHANNEL_ERROR, (char *)"Brush face has too many edges");
             return 0;
         }
     }

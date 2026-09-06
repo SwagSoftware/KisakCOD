@@ -1220,7 +1220,7 @@ void __cdecl CG_ModPrvAnimRecentAccept(const dvar_s *dvar, int *currentIndex)
                 "%s\n\t(dvar->name) = %s",
                 "(dvar == modPrvFromAnimMru || dvar == modPrvFromAnimMru)",
                 dvar->name);
-        Com_Printf(14, "Model previewer could not load <%s> because it does not exist.\n ", v5);
+        Com_Printf(CON_CHANNEL_CLIENT, "Model previewer could not load <%s> because it does not exist.\n ", v5);
         CG_ModPrvRemoveMruEntry(g_mdlprv.anim.mruNames, g_mdlprv.anim.mruNameTable, modPrvFromAnimMru);
         Dvar_UpdateEnumDomain((dvar_s*)modPrvToAnimMru, g_mdlprv.anim.mruNameTable);
     }
@@ -3332,7 +3332,7 @@ void __cdecl CG_ModPrvModelRecentAccepted(const cg_s *cgameGlob)
     if (g_mdlprv.system.modelCount <= 0)
     {
     LABEL_8:
-        Com_Printf(14, "Model previewer could not load <%s> because it does not exist.\n ", v2);
+        Com_Printf(CON_CHANNEL_CLIENT, "Model previewer could not load <%s> because it does not exist.\n ", v2);
         CG_ModPrvRemoveMruEntry(g_mdlprv.model.mruNames, g_mdlprv.model.mruNameTable, modPrvModelMru);
     }
     else

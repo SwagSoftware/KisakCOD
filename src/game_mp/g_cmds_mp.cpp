@@ -67,8 +67,8 @@ void __cdecl SendScoreboard(gentity_s *ent)
         entryLen = v1;
         if (v1 < 0 || entryLen + msgLen > 1400)
         {
-            Com_PrintError(15, "Scoreboard message too large: %i\n", entryLen + msgLen);
-            Com_DPrintf(6, "%s\n%s\n", entry, msg);
+            Com_PrintError(CON_CHANNEL_SERVER, "Scoreboard message too large: %i\n", entryLen + msgLen);
+            Com_DPrintf(CON_CHANNEL_LOGFILEONLY, "%s\n%s\n", entry, msg);
             break;
         }
         I_strncpyz(&msg[msgLen], entry, 1400 - msgLen);
@@ -97,8 +97,8 @@ void __cdecl SendScoreboard(gentity_s *ent)
     }
     else
     {
-        Com_PrintError(15, "Scoreboard message too large > %i.  Message not sent.\n", 1432);
-        Com_DPrintf(6, "%c %i %i %i %i%s", 98, i, level.teamScores[1], level.teamScores[2], scoreLimit, msg);
+        Com_PrintError(CON_CHANNEL_SERVER, "Scoreboard message too large > %i.  Message not sent.\n", 1432);
+        Com_DPrintf(CON_CHANNEL_LOGFILEONLY, "%c %i %i %i %i%s", 98, i, level.teamScores[1], level.teamScores[2], scoreLimit, msg);
     }
 }
 
@@ -695,7 +695,7 @@ void __cdecl G_Say(gentity_s *ent, gentity_s *target, int32_t mode, char *chatTe
     else
     {
         if (g_dedicated->current.integer)
-            Com_Printf(15, "%s%s\n", cleanname, text);
+            Com_Printf(CON_CHANNEL_SERVER, "%s%s\n", cleanname, text);
         for (j = 0; j < level.maxclients; ++j)
         {
             other = &g_entities[j];
@@ -1130,7 +1130,7 @@ void __cdecl Cmd_SetViewpos_f(gentity_s *ent)
 void __cdecl Cmd_EntityCount_f()
 {
     if (g_cheats->current.enabled)
-        Com_Printf(0, "entity count = %i\n", level.num_entities);
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "entity count = %i\n", level.num_entities);
 }
 
 void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
@@ -1378,7 +1378,7 @@ void Cmd_VisionSetNaked_f()
         SV_SetConfigstring(824, v2);
         return;
     }
-    Com_Printf(0, "USAGE: visionSetNaked <name> <duration>\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: visionSetNaked <name> <duration>\n");
 }
 
 void Cmd_VisionSetNight_f()
@@ -1404,6 +1404,6 @@ void Cmd_VisionSetNight_f()
         SV_SetConfigstring(825, v2);
         return;
     }
-    Com_Printf(0, "USAGE: visionSetNight <name> <duration>\n");
+    Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: visionSetNight <name> <duration>\n");
 }
 

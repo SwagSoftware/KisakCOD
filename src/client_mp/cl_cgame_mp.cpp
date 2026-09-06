@@ -127,7 +127,7 @@ int32_t __cdecl CL_GetSnapshot(int32_t localClientNum, int32_t snapshotNumber, s
         if (com_statmon->current.enabled)
             StatMon_Warning(4, 3000, "code_warning_snapshotents");
         else
-            Com_DPrintf(14, "CL_GetSnapshot: truncated %i entities to %i\n", count, 512);
+            Com_DPrintf(CON_CHANNEL_CLIENT, "CL_GetSnapshot: truncated %i entities to %i\n", count, 512);
         count = 512;
     }
     snapshot->numEntities = count;
@@ -231,7 +231,7 @@ void __cdecl CL_DumpReliableCommands(int32_t localClientNum)
 
     clc = CL_GetLocalClientConnection(localClientNum);
     for (i = 0; i < 128; ++i)
-        Com_PrintError(1, "cmd %5d: '%s'\n", i, clc->serverCommands[i]);
+        Com_PrintError(CON_CHANNEL_ERROR, "cmd %5d: '%s'\n", i, clc->serverCommands[i]);
 }
 
 int32_t __cdecl CL_CGameNeedsServerCommand(int32_t localClientNum, int32_t serverCommandNumber)
@@ -258,8 +258,8 @@ int32_t __cdecl CL_CGameNeedsServerCommand(int32_t localClientNum, int32_t serve
     {
         if (clc->demoplaying)
             return 0;
-        Com_Printf(14, "===== CL_CGameNeedsServerCommand =====\n");
-        Com_Printf(14, "serverCommandNumber: %d\n", serverCommandNumber & 0x7F);
+        Com_Printf(CON_CHANNEL_CLIENT, "===== CL_CGameNeedsServerCommand =====\n");
+        Com_Printf(CON_CHANNEL_CLIENT, "serverCommandNumber: %d\n", serverCommandNumber & 0x7F);
         CL_DumpReliableCommands(localClientNum);
         Com_Error(ERR_DROP, "CL_CGameNeedsServerCommand: EXE_ERR_RELIABLE_CYCLED_OUT");
     }
@@ -268,7 +268,7 @@ int32_t __cdecl CL_CGameNeedsServerCommand(int32_t localClientNum, int32_t serve
     s = clc->serverCommands[serverCommandNumber & 0x7F];
     clc->lastExecutedServerCommand = serverCommandNumber;
     if (cl_showServerCommands->current.enabled)
-        Com_DPrintf(14, "serverCommand: %i : %s\n", serverCommandNumber, s);
+        Com_DPrintf(CON_CHANNEL_CLIENT, "serverCommand: %i : %s\n", serverCommandNumber, s);
     while (2)
     {
         Cmd_TokenizeString(s);
@@ -459,7 +459,7 @@ bool __cdecl CL_DObjCreateSkelForBone(DObj_s *obj, int32_t boneIndex)
         if (warnCount != timeStamp)
         {
             warnCount = timeStamp;
-            Com_PrintWarning(14, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
+            Com_PrintWarning(CON_CHANNEL_CLIENT, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
         }
         return 1;
     }
@@ -477,15 +477,15 @@ void __cdecl CL_SubtitlePrint(int32_t localClientNum, const char *text, int32_t 
     {
         translation = text;
     LABEL_8:
-        CL_ConsolePrint(localClientNum, 4, translation, duration, lineWidth, 0);
+        CL_ConsolePrint(localClientNum, CON_CHANNEL_SUBTITLE, translation, duration, lineWidth, 0);
         return;
     }
     if (loc_warningsAsErrors->current.enabled)
         Com_Error(ERR_LOCALIZATION, "Could not translate subtitle text: \"%s\"", text);
     else
-        Com_PrintWarning(14, "WARNING: Could not translate subtitle text: \"%s\"\n", text);
+        Com_PrintWarning(CON_CHANNEL_CLIENT, "WARNING: Could not translate subtitle text: \"%s\"\n", text);
     translationa = va("^1UNLOCALIZED(^7%s^1)^7", text);
-    CL_ConsolePrint(localClientNum, 4, translationa, duration, lineWidth, 0);
+    CL_ConsolePrint(localClientNum, CON_CHANNEL_SUBTITLE, translationa, duration, lineWidth, 0);
 }
 
 const char *__cdecl CL_GetConfigString(int32_t localClientNum, uint32_t configStringIndex)
@@ -776,7 +776,7 @@ void __cdecl CL_InitCGame(int32_t localClientNum)
             localClientNum,
             1);
     clientUIActives[localClientNum].connectionState = CA_LOADING;
-    Com_Printf(14, "Setting state to CA_LOADING in CL_InitCGame\n");
+    Com_Printf(CON_CHANNEL_CLIENT, "Setting state to CA_LOADING in CL_InitCGame\n");
     clientUIActive->cgameInitCalled = 1;
     cl_serverLoadingMap = 0;
     clc = CL_GetLocalClientConnection(localClientNum);
@@ -793,7 +793,7 @@ void __cdecl CL_InitCGame(int32_t localClientNum)
             1);
     clientUIActives[localClientNum].connectionState = CA_PRIMED;
     t2 = Sys_Milliseconds();
-    Com_Printf(14, "CL_InitCGame: %5.2f seconds\n", (double)(t2 - t1) / 1000.0);
+    Com_Printf(CON_CHANNEL_CLIENT, "CL_InitCGame: %5.2f seconds\n", (double)(t2 - t1) / 1000.0);
     R_EndRegistration();
     Com_TouchMemory();
     Con_ClearNotify(localClientNum);
@@ -910,7 +910,7 @@ void __cdecl CL_NextDemo(int32_t localClientNum)
     char v[1028]; // [esp+0h] [ebp-408h] BYREF
 
     I_strncpyz(v, (char *)nextdemo->current.integer, 1024);
-    Com_DPrintf(14, "CL_NextDemo: %s\n", v);
+    Com_DPrintf(CON_CHANNEL_CLIENT, "CL_NextDemo: %s\n", v);
     if (v[0])
     {
         Dvar_SetString((dvar_s *)nextdemo, (char *)"");
@@ -935,7 +935,7 @@ void __cdecl CL_DemoCompleted(int32_t localClientNum)
         time = Sys_Milliseconds() - clc->timeDemoStart;
         if (time > 0)
             Com_Printf(
-                14,
+                CON_CHANNEL_CLIENT,
                 "%i frames, %3.1f seconds: %3.1f fps\n",
                 clc->timeDemoFrames,
                 (double)time / 1000.0,
@@ -974,7 +974,7 @@ void __cdecl CL_ReadDemoClientArchive(int32_t localClientNum)
         }
         else
         {
-            Com_Printf(14, "Demo file was corrupt.\n");
+            Com_Printf(CON_CHANNEL_CLIENT, "Demo file was corrupt.\n");
             CL_DemoCompleted(localClientNum);
         }
     }
@@ -1024,7 +1024,7 @@ void __cdecl CL_ReadDemoNetworkPacket(int32_t localClientNum)
             }
             else
             {
-                Com_Printf(14, "Demo file was truncated.\n");
+                Com_Printf(CON_CHANNEL_CLIENT, "Demo file was truncated.\n");
                 CL_DemoCompleted(localClientNum);
             }
         }
@@ -1106,7 +1106,7 @@ void __cdecl CL_SetCGameTime(int localClientNum)
                 {
                     LocalClientGlobals->extrapolatedSnapshot = 1;
                     if (cl_showTimeDelta->current.enabled)
-                        Com_Printf(14, "Extrapolating snapshot!\n");
+                        Com_Printf(CON_CHANNEL_CLIENT, "Extrapolating snapshot!\n");
                 }
             }
             if (LocalClientGlobals->newSnapshots)
@@ -1214,14 +1214,14 @@ void __cdecl CL_AdjustTimeDelta(int32_t localClientNum)
             else
             {
                 if (cl_showTimeDelta->current.enabled)
-                    Com_Printf(14, "<FAST> ");
+                    Com_Printf(CON_CHANNEL_CLIENT, "<FAST> ");
                 LocalClientGlobals->serverTimeDelta = (idealDelta + LocalClientGlobals->serverTimeDelta) >> 1;
             }
         }
         else
         {
             Com_PrintWarning(
-                14,
+                CON_CHANNEL_CLIENT,
                 "Cl_AdjustTimeDelta RESET: snap is %i, last snap was %i, walltime is %i, current delta is %i, old server time was"
                 " %i, server time is %i\n",
                 LocalClientGlobals->snap.serverTime,
@@ -1234,18 +1234,18 @@ void __cdecl CL_AdjustTimeDelta(int32_t localClientNum)
             LocalClientGlobals->oldServerTime = LocalClientGlobals->snap.serverTime;
             LocalClientGlobals->serverTime = LocalClientGlobals->snap.serverTime;
             if (cl_showTimeDelta->current.enabled)
-                Com_Printf(14, "<RESET> ");
+                Com_Printf(CON_CHANNEL_CLIENT, "<RESET> ");
         }
         if (LocalClientGlobals->serverTimeDelta != oldDelta)
             Con_TimeNudged(localClientNum, LocalClientGlobals->serverTimeDelta - oldDelta);
         if (cl_showTimeDelta->current.enabled)
         {
             Com_Printf(
-                14,
+                CON_CHANNEL_CLIENT,
                 "client time: %i, server time: %i\n",
                 LocalClientGlobals->serverTimeDelta + cls.realtime,
                 LocalClientGlobals->snap.serverTime);
-            Com_Printf(14, "ideal delta: %i, current delta: %i\n", idealDelta, LocalClientGlobals->serverTimeDelta);
+            Com_Printf(CON_CHANNEL_CLIENT, "ideal delta: %i, current delta: %i\n", idealDelta, LocalClientGlobals->serverTimeDelta);
         }
     }
 }

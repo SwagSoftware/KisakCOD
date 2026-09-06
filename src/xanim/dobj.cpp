@@ -55,39 +55,39 @@ void __cdecl DObjDumpInfo(const DObj_s *obj)
 
     if (obj)
     {
-        Com_Printf(19, "\nModels:\n");
+        Com_Printf(CON_CHANNEL_ANIM, "\nModels:\n");
         numModels = obj->numModels;
         boneIndex = 0;
         models = obj->models;
         for (j = 0; j < numModels; ++j)
         {
             model = models[j];
-            Com_Printf(19, "%d: '%s'\n", boneIndex, model->name);
+            Com_Printf(CON_CHANNEL_ANIM, "%d: '%s'\n", boneIndex, model->name);
             boneIndex += XModelNumBones(model);
         }
-        Com_Printf(19, "\nBones:\n");
+        Com_Printf(CON_CHANNEL_ANIM, "\nBones:\n");
         numBones = obj->numBones;
         for (i = 0; i < numBones; ++i)
         {
-            Com_Printf(19, "Bone %d: '%s'\n", i, DObjGetBoneName(obj, i));
+            Com_Printf(CON_CHANNEL_ANIM, "Bone %d: '%s'\n", i, DObjGetBoneName(obj, i));
         }
         if (obj->duplicateParts)
         {
-            Com_Printf(19, "\nPart duplicates:\n");
+            Com_Printf(CON_CHANNEL_ANIM, "\nPart duplicates:\n");
             for (pos = (const unsigned __int8 *)(SL_ConvertToString(obj->duplicateParts) + 16); *pos; pos += 2)
             {
-                Com_Printf(19, "%d ('%s') -> %d ('%s')\n", *pos - 1, DObjGetBoneName(obj, *pos - 1), pos[1] - 1, DObjGetBoneName(obj, pos[1] - 1));
+                Com_Printf(CON_CHANNEL_ANIM, "%d ('%s') -> %d ('%s')\n", *pos - 1, DObjGetBoneName(obj, *pos - 1), pos[1] - 1, DObjGetBoneName(obj, pos[1] - 1));
             }
         }
         else
         {
-            Com_Printf(19, "\nNo part duplicates.\n");
+            Com_Printf(CON_CHANNEL_ANIM, "\nNo part duplicates.\n");
         }
-        Com_Printf(19, "\n");
+        Com_Printf(CON_CHANNEL_ANIM, "\n");
     }
     else
     {
-        Com_Printf(19, "No Dobj\n");
+        Com_Printf(CON_CHANNEL_ANIM, "No Dobj\n");
     }
 }
 
@@ -283,7 +283,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, uint
                         goto LABEL_2;
                 }
                 iassert(currNumModels);
-                Com_PrintWarning(19, "WARNING: Part '%s' not found in model '%s' or any of its descendants\n", SL_ConvertToString(name), models[0]->name);
+                Com_PrintWarning(CON_CHANNEL_ANIM, "WARNING: Part '%s' not found in model '%s' or any of its descendants\n", SL_ConvertToString(name), models[0]->name);
                 iassert(modelParents[currNumModels] == NO_BONEINDEX);
             }
             else
@@ -321,7 +321,7 @@ void __cdecl DObjCreateDuplicateParts(DObj_s *obj, DObjModel_s *dobjModels, uint
                 {
                     iassert(currNumModels);
                     Com_PrintWarning(
-                        19,
+                        CON_CHANNEL_ANIM,
                         "WARNING: Attempting to meld model, but root part '%s' of model '%s' not found in model '%s' or any of its descendants\n",
                         SL_ConvertToString(*boneNames),
                         model->name,
@@ -373,11 +373,11 @@ void __cdecl DObjDumpCreationInfo(DObjModel_s *dobjModels, uint32_t numModels)
     {
         model = dobjModels[j].model;
         Name = XModelGetName(model);
-        Com_Printf(19, "Model '%s':\n", Name);
+        Com_Printf(CON_CHANNEL_ANIM, "Model '%s':\n", Name);
         numBones = XModelNumBones(model);
         for (i = 0; i < numBones; ++i)
         {
-            Com_Printf(19, "Bone %d: '%s'\n", boneIndex++, SL_ConvertToString(model->boneNames[i]));
+            Com_Printf(CON_CHANNEL_ANIM, "Bone %d: '%s'\n", boneIndex++, SL_ConvertToString(model->boneNames[i]));
         }
     }
 }

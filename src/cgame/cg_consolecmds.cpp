@@ -18,7 +18,7 @@ int __cdecl CG_CheatsOK(const char *cmdName)
 {
     if (sv_cheats->current.enabled)
         return 1;
-    Com_Printf(16, "%s is cheat protected.\n", cmdName);
+    Com_Printf(CON_CHANNEL_SYSTEM, "%s is cheat protected.\n", cmdName);
     return 0;
 }
 
@@ -35,7 +35,7 @@ void CG_Viewpos_f()
                 cmd_args.nesting,
                 8);
         Com_Printf(
-            0,
+            CON_CHANNEL_DONT_FILTER,
             "(%.0f %.0f %.0f) : %.0f %.0f\n",
             cgArray[0].refdef.vieworg[0],
             cgArray[0].refdef.vieworg[1],
@@ -111,7 +111,7 @@ void CG_ShellShock_f()
             goto LABEL_6;
         if (v0 != 3)
         {
-            Com_Printf(0, "USAGE: cg_shellshock <duration> <filename?>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_shellshock <duration> <filename?>\n");
             return;
         }
         v1 = Cmd_Argv(2);
@@ -152,7 +152,7 @@ void CG_ShellShock_Load_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_shellshock_load <name>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_shellshock_load <name>\n");
         }
     }
 }
@@ -170,7 +170,7 @@ void CG_ShellShock_Save_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_shellshock_save <name>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_shellshock_save <name>\n");
         }
     }
 }
@@ -196,7 +196,7 @@ void CG_ModelPreviewerStepAnim_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_mpstepanim <deltaTime> : default = 1/30.0 second \n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_mpstepanim <deltaTime> : default = 1/30.0 second \n");
         }
     }
 }
@@ -223,7 +223,7 @@ void CG_Noclip_f()
         }
         else
         {
-            Com_Printf(16, "%s is cheat protected.\n", "cg_noclip");
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s is cheat protected.\n", "cg_noclip");
             v0 = 0;
         }
         if (v0)
@@ -246,7 +246,7 @@ void CG_Noclip_f()
             }
             Dvar_SetInt(v1, v2);
             v4 = SEH_LocalizeTextMessage(v3, "noclip print", LOCMSG_SAFE);
-            Com_Printf(0, "%s\n", v4);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", v4);
         }
     }
 }
@@ -267,7 +267,7 @@ void CG_UFO_f()
         }
         else
         {
-            Com_Printf(16, "%s is cheat protected.\n", "cg_ufo");
+            Com_Printf(CON_CHANNEL_SYSTEM, "%s is cheat protected.\n", "cg_ufo");
             v0 = 0;
         }
         if (v0)
@@ -290,7 +290,7 @@ void CG_UFO_f()
             }
             Dvar_SetInt(v1, v2);
             v4 = SEH_LocalizeTextMessage(v3, "ufo print", LOCMSG_SAFE);
-            Com_Printf(0, "%s\n", v4);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", v4);
         }
     }
 }
@@ -321,7 +321,7 @@ void __cdecl CG_SetViewPos_f()
                 8);
         if (!cgArray[0].predictedPlayerState.pm_type)
             Com_Printf(
-                0,
+                CON_CHANNEL_DONT_FILTER,
                 "\"cg_setviewpos\" isn't very useful when server controlled.  Use cg_ufo/cg_noclip or use \"setviewpos\"\n");
         if (Cmd_Argc() == 4 || Cmd_Argc() == 6)
         {
@@ -388,7 +388,7 @@ void __cdecl CG_SetViewPos_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_setviewpos x y z [yaw pitch]\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_setviewpos x y z [yaw pitch]\n");
         }
     }
 }
@@ -465,7 +465,7 @@ void __cdecl CG_SetViewOrbit_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_setViewOrbit focusX focusY focusZ dist degUp degAround\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_setViewOrbit focusX focusY focusZ dist degUp degAround\n");
         }
     }
 }
@@ -485,7 +485,7 @@ void CG_PlayRumble_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: playrumble <rumblename>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: playrumble <rumblename>\n");
         }
     }
 }

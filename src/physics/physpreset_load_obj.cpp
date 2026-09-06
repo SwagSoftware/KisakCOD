@@ -124,33 +124,33 @@ PhysPreset *__cdecl PhysPresetLoadFile(const char *name, void *(__cdecl *Alloc)(
                     }
                     else
                     {
-                        Com_PrintError(20, "ERROR: physics preset file [%s] is not valid\n", name);
+                        Com_PrintError(CON_CHANNEL_PHYS, "ERROR: physics preset file [%s] is not valid\n", name);
                         return 0;
                     }
                 }
                 else
                 {
-                    Com_PrintError(20, "ERROR: physics preset file [%s] is to big\n", name);
+                    Com_PrintError(CON_CHANNEL_PHYS, "ERROR: physics preset file [%s] is to big\n", name);
                     FS_FCloseFile(f);
                     return 0;
                 }
             }
             else
             {
-                Com_PrintError(20, "ERROR: file [%s] is not a physics preset file\n", name);
+                Com_PrintError(CON_CHANNEL_PHYS, "ERROR: file [%s] is not a physics preset file\n", name);
                 FS_FCloseFile(f);
                 return 0;
             }
         }
         else
         {
-            Com_PrintError(20, "ERROR: physics preset '%s' not found\n", name);
+            Com_PrintError(CON_CHANNEL_PHYS, "ERROR: physics preset '%s' not found\n", name);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(20, "ERROR: filename '%s' too long\n", dest);
+        Com_PrintError(CON_CHANNEL_PHYS, "ERROR: filename '%s' too long\n", dest);
         return 0;
     }
 }
@@ -175,7 +175,7 @@ PhysPreset *__cdecl PhysPresetPrecache(const char *name, void *(__cdecl *Alloc)(
     }
     else
     {
-        Com_PrintError(20, "ERROR: Cannot find physics preset '%s'.\n", name);
+        Com_PrintError(CON_CHANNEL_PHYS, "ERROR: Cannot find physics preset '%s'.\n", name);
         return 0;
     }
 }

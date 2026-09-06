@@ -33,7 +33,7 @@ void __cdecl R_AddDynamicShadowableLight(GfxViewInfo *viewInfo, const GfxLight *
 {
     if (viewInfo->shadowableLightCount == 255)
     {
-        Com_PrintError(1, "Too many total shadowable lights (%d)\n", viewInfo->shadowableLightCount);
+        Com_PrintError(CON_CHANNEL_ERROR, "Too many total shadowable lights (%d)\n", viewInfo->shadowableLightCount);
     }
     else
     {

@@ -118,12 +118,12 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
 #endif
 
         if (cg_debugEvents->current.enabled)
-            Com_Printf(21, "ent:%3i  event:%3i ", ent->number, event);
+            Com_Printf(CON_CHANNEL_FX, "ent:%3i  event:%3i ", ent->number, event);
 
         iassert(event > 0 && event < EV_MAX_EVENTS);
 
         if (cg_debugEvents->current.enabled)
-            Com_Printf(21, "CG_EntityEvent:%s\n", eventnames[event]);
+            Com_Printf(CON_CHANNEL_FX, "CG_EntityEvent:%s\n", eventnames[event]);
 
         if (isPlayerView)
             weaponIdx = cgameGlob->predictedPlayerState.weapon;
@@ -437,7 +437,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 else
                 {
                 LABEL_216:
-                    Com_DPrintf(21, "Event %s just for client %i was sent to other clients\n", eventnames[event], clientNum);
+                    Com_DPrintf(CON_CHANNEL_FX, "Event %s just for client %i was sent to other clients\n", eventnames[event], clientNum);
                 }
                 return;
             case EV_FIRE_WEAPON_MG42:
@@ -662,7 +662,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
                 if (weaponDef->projExplosionEffect)
                 {
                     Com_Printf(
-                        14,
+                        CON_CHANNEL_CLIENT,
                         "Playing smoke grenade at %i at ( %f, %f, %f )\n",
                         ent->lerp.u.customExplode.startTime,
                         ent->lerp.pos.trBase[0],
@@ -968,7 +968,7 @@ void __cdecl CG_EntityEvent(int32_t localClientNum, centity_s *cent, int32_t eve
     }
     else if (cg_debugEvents->current.enabled)
     {
-        Com_Printf(21, "CG_EntityEvent:ZERO EVENT\n");
+        Com_Printf(CON_CHANNEL_FX, "CG_EntityEvent:ZERO EVENT\n");
     }
 }
 
@@ -1279,7 +1279,7 @@ void __cdecl CG_PlayFx(int32_t localClientNum, centity_s *cent, const float *ang
     }
     else
     {
-        Com_PrintError(21, "ERROR: CG_PlayFx called with invalid effect id %i\n", fxId);
+        Com_PrintError(CON_CHANNEL_FX, "ERROR: CG_PlayFx called with invalid effect id %i\n", fxId);
     }
 }
 

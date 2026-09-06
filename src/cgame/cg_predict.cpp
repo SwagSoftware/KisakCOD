@@ -533,7 +533,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
                     cgArray[0].predictedPlayerState.delta_angles[1] = cgArray[0].predictedPlayerState.delta_angles[1] + deltaAngles[1];
                     if (cg_showmiss->current.integer && (Buf->origin[0] != adjusted[0] || Buf->origin[1] != adjusted[1]|| Buf->origin[2] != adjusted[2]))
                     {
-                        Com_PrintError(17, "prediction error\n");
+                        Com_PrintError(CON_CHANNEL_PLAYERWEAP, "prediction error\n");
                     }
                     v9 = (float)(Buf->origin[1] - adjusted[1]);
                     v10 = (float)(Buf->origin[2] - adjusted[2]);
@@ -545,7 +545,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
                     {
                         if (cg_showmiss->current.integer)
                         {
-                            Com_Printf(17, "Prediction miss: %f\n", len);
+                            Com_Printf(CON_CHANNEL_PLAYERWEAP, "Prediction miss: %f\n", len);
                         }
                         if (cg_errorDecay->current.value == 0.0)
                         {
@@ -562,7 +562,7 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
                             {
                                 if (f > 0.0 && cg_showmiss->current.integer)
                                 {
-                                    Com_Printf(17, "Double prediction decay: %f\n", f);
+                                    Com_Printf(CON_CHANNEL_PLAYERWEAP, "Double prediction decay: %f\n", f);
                                 }
                             }
                             else
@@ -587,10 +587,10 @@ void __cdecl CG_PredictPlayerState_Internal(int localClientNum) // KISAKTODO: us
         }
         if (cg_showmiss->current.integer > 1)
         {
-            Com_Printf(17, "[%i : %i] ", cg_pmove.cmd.serverTime, cgArray[0].time);
+            Com_Printf(CON_CHANNEL_PLAYERWEAP, "[%i : %i] ", cg_pmove.cmd.serverTime, cgArray[0].time);
         }
         if (!i && cg_showmiss->current.integer)
-            Com_Printf(17, "no prediction run\n");
+            Com_Printf(CON_CHANNEL_PLAYERWEAP, "no prediction run\n");
         CG_TransitionPlayerState(localClientNum, &cgArray[0].predictedPlayerState, Buf);
         if ((cgArray[0].predictedPlayerState.pm_flags & 0x400) != 0)
             CL_SetStance(localClientNum, CL_STANCE_STAND);

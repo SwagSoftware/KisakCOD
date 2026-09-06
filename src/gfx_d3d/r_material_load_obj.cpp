@@ -1620,7 +1620,7 @@ uint32_t __cdecl Material_GenerateShaderString(
     }
     else
     {
-        Com_PrintWarning(8, "Couldn't read shader '%s'\n", filepath);
+        Com_PrintWarning(CON_CHANNEL_GFX, "Couldn't read shader '%s'\n", filepath);
         return 0;
     }
 }
@@ -1645,7 +1645,7 @@ void __cdecl Material_DeleteDirectory(const char *dirname)
                 if (!DeleteFileA(fullfilename))
                 {
                     errorCode = GetLastError();
-                    Com_PrintError(1, "ERROR: Failed to delete %s errorCode %d\n", fullfilename, errorCode);
+                    Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Failed to delete %s errorCode %d\n", fullfilename, errorCode);
                 }
             }
         } while (FindNextFileA(handle, &findData));
@@ -1701,7 +1701,7 @@ void __cdecl Material_DeleteOldFilesInDirectory(const char *dirname, uint16_t da
                 if (!DeleteFileA(fullfilename))
                 {
                     errorCode = GetLastError();
-                    Com_PrintError(1, "ERROR: Failed to delete %s errorCode %d\n", fullfilename, errorCode);
+                    Com_PrintError(CON_CHANNEL_ERROR, "ERROR: Failed to delete %s errorCode %d\n", fullfilename, errorCode);
                 }
             }
         } while (FindNextFileA(handle, &findData));
@@ -1828,7 +1828,7 @@ static bool Material_CopyTextToDXBuffer2(uint32_t shaderHash, ID3DXBuffer **shad
 
     if (hr < 0)
     {
-        Com_PrintError(8, "ERROR: Material_CopyTextToDXBuffer: D3DXCreateBuffer(%d) failed: %s (0x%08x)\n", shaderLen, R_ErrorDescription(hr), hr);
+        Com_PrintError(CON_CHANNEL_GFX, "ERROR: Material_CopyTextToDXBuffer: D3DXCreateBuffer(%d) failed: %s (0x%08x)\n", shaderLen, R_ErrorDescription(hr), hr);
         free(cachedShader);
         return false;
     }
@@ -1856,7 +1856,7 @@ char __cdecl Material_CopyTextToDXBuffer(uint8_t *cachedShader, uint32_t shaderL
     {
         v3 = R_ErrorDescription(hr);
         Com_PrintError(
-            8,
+            CON_CHANNEL_GFX,
             "ERROR: Material_CopyTextToDXBuffer: D3DXCreateBuffer(%d) failed: %s (0x%08x)\n",
             shaderLen,
             v3,
@@ -1959,7 +1959,7 @@ void __cdecl Material_CacheShader(
     }
     else
     {
-        Com_PrintWarning(10, "Material_CacheShader: Failed to open '%s'\n", filename);
+        Com_PrintWarning(CON_CHANNEL_FILES, "Material_CacheShader: Failed to open '%s'\n", filename);
     }
 }
 
@@ -3605,13 +3605,13 @@ char __cdecl Material_ParseShaderArguments(
     }
     if (usedCount == paramCount)
         return Material_SetShaderArguments(usedCount, localArgs, argLimit, argCount, args);
-    Com_PrintWarning(8, "Undefined shader parameter(s) in %s\n", shaderName);
+    Com_PrintWarning(CON_CHANNEL_GFX, "Undefined shader parameter(s) in %s\n", shaderName);
     for (paramIndex = 0; paramIndex < paramCount; ++paramIndex)
     {
         if (!paramTable[paramIndex].isAssigned)
-            Com_PrintWarning(8, "  %s\n", paramTable[paramIndex].name);
+            Com_PrintWarning(CON_CHANNEL_GFX, "  %s\n", paramTable[paramIndex].name);
     }
-    Com_PrintWarning(8, "%i parameter(s) were undefined\n", paramCount - usedCount);
+    Com_PrintWarning(CON_CHANNEL_GFX, "%i parameter(s) were undefined\n", paramCount - usedCount);
     return 0;
 }
 
@@ -4504,7 +4504,7 @@ MaterialTechniqueSet *__cdecl Material_LoadTechniqueSet(char *name, GfxRenderer 
     }
     else
     {
-        Com_PrintError(8, "^1ERROR: Couldn't open techniqueSet '%s'\n", filename);
+        Com_PrintError(CON_CHANNEL_GFX, "^1ERROR: Couldn't open techniqueSet '%s'\n", filename);
         return 0;
     }
 }
@@ -4901,7 +4901,7 @@ MaterialTechniqueSet *__cdecl Material_RegisterLayeredTechniqueSet(const Materia
         if (!lyrTechSetName)
         {
             Com_PrintWarning(
-                8,
+                CON_CHANNEL_GFX,
                 "Material '%s' uses technique set '%s' which cannot be used in a layered material; using default instead.  Recomp"
                 "ile the bsp to fix.\n",
                 mtl[layerIndex]->info.name,
@@ -5348,13 +5348,13 @@ Material *__cdecl Material_LoadLayered(char *assetName)
         {
             if (expectNormal)
                 Com_PrintError(
-                    1,
+                    CON_CHANNEL_ERROR,
                     "In layered material, expected material '%s' %s; using default instead.  Recompile the bsp to fix.\n",
                     mtl[layerCount]->info.name,
                     "without a normal map to have one");
             else
                 Com_PrintError(
-                    1,
+                    CON_CHANNEL_ERROR,
                     "In layered material, expected material '%s' %s; using default instead.  Recompile the bsp to fix.\n",
                     mtl[layerCount]->info.name,
                     "with a normal map to not have one");
@@ -5434,7 +5434,7 @@ char __cdecl Material_ValidatePassArguments(
             {
                 argNamea = Material_StringFromHash(args[argIndex].u.codeSampler);
                 Com_PrintError(
-                    8,
+                    CON_CHANNEL_GFX,
                     "material '%s' using technique '%s' from techniqueSet '%s' doesn't expose a '%s' texture\n",
                     mtl->info.name,
                     techniqueName,
@@ -5447,7 +5447,7 @@ char __cdecl Material_ValidatePassArguments(
         {
             argName = Material_StringFromHash(args[argIndex].u.codeSampler);
             Com_PrintError(
-                8,
+                CON_CHANNEL_GFX,
                 "material '%s' using technique '%s' from techniqueSet '%s' doesn't expose a '%s' constant\n",
                 mtl->info.name,
                 techniqueName,
@@ -6129,14 +6129,14 @@ Material *__cdecl Material_Load(char *assetName, int imageTrack)
         else
         {
             FS_FCloseFile(fileHandle);
-            Com_PrintError(8, "^1ERROR: material '%s' has zero length\n", assetName);
+            Com_PrintError(CON_CHANNEL_GFX, "^1ERROR: material '%s' has zero length\n", assetName);
             return 0;
         }
     }
     else
     {
         if (*assetName != 36)
-            Com_PrintError(8, "^1ERROR: Couldn't find material '%s'\n", assetName);
+            Com_PrintError(CON_CHANNEL_GFX, "^1ERROR: Couldn't find material '%s'\n", assetName);
         return 0;
     }
 }

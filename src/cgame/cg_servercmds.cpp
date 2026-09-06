@@ -343,13 +343,13 @@ void __cdecl CG_OpenScriptMenu(int localClientNum)
     v5 = v4;
     if (v4 > 0x1F)
     {
-        Com_Printf(14, "Server tried to open a bad script menu index: %i\n", v4);
+        Com_Printf(CON_CHANNEL_CLIENT, "Server tried to open a bad script menu index: %i\n", v4);
         goto LABEL_23;
     }
     ConfigString = CL_GetConfigString(localClientNum, v4 + CS_SCRIPT_MENUS); // PC SP 2519 (was Xbox 2551)
     if (!*ConfigString)
     {
-        Com_Printf(14, "Server tried to open a non-loaded script menu index: %i\n", v5);
+        Com_Printf(CON_CHANNEL_CLIENT, "Server tried to open a non-loaded script menu index: %i\n", v5);
     LABEL_23:
         v11 = va("cmd mr %i bad\n", v5);
         Cbuf_AddText(localClientNum, v11);
@@ -542,7 +542,7 @@ void CG_EqCommand()
     }
     else
     {
-        Com_PrintError(14, "ERROR: CG_EqCommand called with %i args (should be 8)\n", Cmd_Argc());
+        Com_PrintError(CON_CHANNEL_CLIENT, "ERROR: CG_EqCommand called with %i args (should be 8)\n", Cmd_Argc());
     }
 }
 
@@ -573,7 +573,7 @@ void CG_DeactivateEqCmd()
     v1 = cmd_args.argc[nesting];
     if ((unsigned int)(v1 - 2) > 2)
     {
-        Com_PrintError(14, "ERROR: CG_DeactivateEqCmd called with %i args (should >= 2 and <= 4)\n", v1);
+        Com_PrintError(CON_CHANNEL_CLIENT, "ERROR: CG_DeactivateEqCmd called with %i args (should >= 2 and <= 4)\n", v1);
     }
     else
     {
@@ -630,7 +630,7 @@ void CG_ReverbCmd()
     }
     else
     {
-        Com_PrintError(14, "ERROR: CG_ReverbCmd called with %i args (should be 6)\n", argc);
+        Com_PrintError(CON_CHANNEL_CLIENT, "ERROR: CG_ReverbCmd called with %i args (should be 6)\n", argc);
     }
 }
 
@@ -673,7 +673,7 @@ void CG_DeactivateReverbCmd()
     }
     else
     {
-        Com_PrintError(14, "ERROR: CG_DeactivateReverbCmd called with %i args (should be 3)\n", v1);
+        Com_PrintError(CON_CHANNEL_CLIENT, "ERROR: CG_DeactivateReverbCmd called with %i args (should be 3)\n", v1);
     }
 }
 
@@ -732,7 +732,7 @@ void __cdecl CG_SetChannelVolCmd(int localClientNum)
     }
     else
     {
-        Com_PrintError(14, "ERROR: CG_SetChannelVolCmd called with %i args (should be 4)\n", v3);
+        Com_PrintError(CON_CHANNEL_CLIENT, "ERROR: CG_SetChannelVolCmd called with %i args (should be 4)\n", v3);
     }
 }
 
@@ -775,7 +775,7 @@ void CG_DeactivateChannelVolCmd()
     }
     else
     {
-        Com_PrintError(9, "ERROR: CG_DeactivateChannelVolCmd called with %i args (should be 3)\n", v1);
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: CG_DeactivateChannelVolCmd called with %i args (should be 3)\n", v1);
     }
 }
 
@@ -809,7 +809,7 @@ void __cdecl LocalSound(int localClientNum)
         v5 = atol(v4);
         if ((unsigned int)(v5 - 1) > 0x1FF)
         {
-            Com_PrintError(9, "ERROR: LocalSound() called with index %i (should be in range[1,%i])\n", v5, 512);
+            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: LocalSound() called with index %i (should be in range[1,%i])\n", v5, 512);
         }
         else
         {
@@ -825,7 +825,7 @@ void __cdecl LocalSound(int localClientNum)
     }
     else
     {
-        Com_PrintError(9, "ERROR: LocalSound() called with %i args (should be >= 2)\n", v3);
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: LocalSound() called with %i args (should be >= 2)\n", v3);
     }
 }
 
@@ -854,7 +854,7 @@ void __cdecl LocalSoundStop(int localClientNum)
         v4 = atol(v3);
         if ((unsigned int)(v4 - 1) > 0x1FF)
         {
-            Com_PrintError(9, "ERROR: LocalSoundStop() called with index %i (should be in range[1,%i])\n", v4, 512);
+            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: LocalSoundStop() called with index %i (should be in range[1,%i])\n", v4, 512);
         }
         else
         {
@@ -864,7 +864,7 @@ void __cdecl LocalSoundStop(int localClientNum)
     }
     else
     {
-        Com_PrintError(9, "ERROR: LocalSoundStop(), should be called with 2 arguments.\n");
+        Com_PrintError(CON_CHANNEL_SOUND, "ERROR: LocalSoundStop(), should be called with 2 arguments.\n");
     }
 }
 
@@ -1025,31 +1025,31 @@ void CG_ParseAmp()
                         if (v20 >= 0.0)
                             SND_Amplify(v21, v9, v11, v14, v17, v20);
                         else
-                            Com_PrintError(14, (const char *)HIDWORD(v20), LODWORD(v20));
+                            Com_PrintError(CON_CHANNEL_CLIENT, (const char *)HIDWORD(v20), LODWORD(v20));
                     }
                     else
                     {
-                        Com_PrintError(14, (const char *)HIDWORD(v17), LODWORD(v17), LODWORD(v14));
+                        Com_PrintError(CON_CHANNEL_CLIENT, (const char *)HIDWORD(v17), LODWORD(v17), LODWORD(v14));
                     }
                 }
                 else
                 {
-                    Com_PrintError(14, (const char *)HIDWORD(v14), LODWORD(v14));
+                    Com_PrintError(CON_CHANNEL_CLIENT, (const char *)HIDWORD(v14), LODWORD(v14));
                 }
             }
             else
             {
-                Com_PrintError(14, "amplify(): max_range (%i) must be >= min_range %i)", v11, v9);
+                Com_PrintError(CON_CHANNEL_CLIENT, "amplify(): max_range (%i) must be >= min_range %i)", v11, v9);
             }
         }
         else
         {
-            Com_PrintError(14, "amplify(): min_range (%i) must be >= 0\n", v9);
+            Com_PrintError(CON_CHANNEL_CLIENT, "amplify(): min_range (%i) must be >= 0\n", v9);
         }
     }
     else
     {
-        Com_PrintError(14, "amplify called with %i arguments, should be 8\n", v1);
+        Com_PrintError(CON_CHANNEL_CLIENT, "amplify called with %i arguments, should be 8\n", v1);
     }
 }
 
@@ -1075,7 +1075,7 @@ void __cdecl CG_ParsePhysGravityDir(int localClientNum)
     }
     else
     {
-        Com_PrintError(14, "phys_grav called with %i arguments, should be 3\n", Cmd_Argc());
+        Com_PrintError(CON_CHANNEL_CLIENT, "phys_grav called with %i arguments, should be 3\n", Cmd_Argc());
     }
 }
 
@@ -1838,7 +1838,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                                                                                                                                                                                     if (v199)
                                                                                                                                                                                     {
                                                                                                                                                                                         Com_Printf(
-                                                                                                                                                                                            14,
+                                                                                                                                                                                            CON_CHANNEL_CLIENT,
                                                                                                                                                                                             "Unknown client game command: %s\n",
                                                                                                                                                                                             v3);
                                                                                                                                                                                     }
@@ -2126,7 +2126,7 @@ void __cdecl CG_DispatchServerCommand(int localClientNum)
                     {
                         v19 = Cmd_Argv(1);
                         v20 = SEH_LocalizeTextMessage(v19, "server print", LOCMSG_SAFE);
-                        Com_Printf(0, "%s\n", v20);
+                        Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", v20);
                     }
                 }
                 else

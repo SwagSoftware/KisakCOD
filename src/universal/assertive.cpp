@@ -664,9 +664,9 @@ void MyAssertHandler(const char *filename, int line, int type, const char *fmt, 
         if (isHandlingAssert == 1)
         {
             isHandlingAssert = 2;
-            Com_Printf(16, "ASSERTBEGIN - ( Recursive assert )---------------------------------------------\n");
-            Com_Printf(16, assertMessage);
-            Com_Printf(16, "ASSERTEND - ( Recursive assert ) ----------------------------------------------\n\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, "ASSERTBEGIN - ( Recursive assert )---------------------------------------------\n");
+            Com_Printf(CON_CHANNEL_SYSTEM, assertMessage);
+            Com_Printf(CON_CHANNEL_SYSTEM, "ASSERTEND - ( Recursive assert ) ----------------------------------------------\n\n");
         }
         exit(-1);
     }
@@ -674,9 +674,9 @@ void MyAssertHandler(const char *filename, int line, int type, const char *fmt, 
     isHandlingAssert = 1;
     FixWindowsDesktop();
     BuildAssertMessage(message, filename, line, type, 1, assertMessage);
-    Com_Printf(16, "ASSERTBEGIN -------------------------------------------------------------------\n");
-    Com_Printf(16, "%s", assertMessage);
-    Com_Printf(16, "ASSERTEND ---------------------------------------------------------------------\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "ASSERTBEGIN -------------------------------------------------------------------\n");
+    Com_Printf(CON_CHANNEL_SYSTEM, "%s", assertMessage);
+    Com_Printf(CON_CHANNEL_SYSTEM, "ASSERTEND ---------------------------------------------------------------------\n");
     if (QuitOnError())
         ExitProcess(0xFFFFFFFF);
     CopyMessageToClipboard();

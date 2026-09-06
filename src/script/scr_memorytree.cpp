@@ -471,7 +471,7 @@ void MT_AddMemoryNode(int newNode, int size)
 void MT_Error(const char* funcName, int numBytes)
 {
     MT_DumpTree();
-    Com_Printf(23, "%s: failed memory allocation of %d bytes for script usage\n", funcName, numBytes);
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%s: failed memory allocation of %d bytes for script usage\n", funcName, numBytes);
     Com_Error(ERR_FATAL, "MT_Error (KISAK)\n");
     //Scr_TerminalError("failed memory allocation for script usage");
 }
@@ -482,7 +482,7 @@ void MT_DumpTree()
 
     memset(mt_type_usage, 0, sizeof(mt_type_usage));
 
-    Com_Printf(23, "********************************\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 
     int totalAlloc = 0;
     int totalAllocBuckets = 0;
@@ -493,7 +493,7 @@ void MT_DumpTree()
         int type = scrMemTreeDebugGlob.mt_usage[nodeNum];
         if (type)
         {
-            Com_Printf(23, "%s\n", MT_NodeInfoString(nodeNum));
+            Com_Printf(CON_CHANNEL_PARSERSCRIPT, "%s\n", MT_NodeInfoString(nodeNum));
             ++totalAlloc;
             totalAllocBuckets += 1 << scrMemTreeDebugGlob.mt_usage_size[nodeNum];
             mt_type_usage[type] += 1 << scrMemTreeDebugGlob.mt_usage_size[nodeNum];
@@ -503,7 +503,7 @@ void MT_DumpTree()
     iassert(scrMemTreeGlob.totalAlloc == totalAlloc);
     iassert(scrMemTreeGlob.totalAllocBuckets == totalAllocBuckets);
 
-    Com_Printf(23, "********************************\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 
     totalBuckets = scrMemTreeGlob.totalAllocBuckets;
 
@@ -512,7 +512,7 @@ void MT_DumpTree()
         int subTreeSize = MT_GetSubTreeSize(scrMemTreeGlob.head[size]);
         totalBuckets += subTreeSize * (1 << size);
         Com_Printf(
-            23,
+            CON_CHANNEL_PARSERSCRIPT,
             "%d subtree has %d * %d = %d free buckets\n",
             size,
             subTreeSize,
@@ -520,17 +520,17 @@ void MT_DumpTree()
             subTreeSize * (1 << size));
     }
 
-    Com_Printf(23, "********************************\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
     for (int type = 1; type < 22; ++type)
-        Com_Printf(23, "'%s' allocated: %d\n", mt_type_names[type], mt_type_usage[type]);
-    Com_Printf(23, "********************************\n");
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "'%s' allocated: %d\n", mt_type_names[type], mt_type_usage[type]);
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
     Com_Printf(
-        23,
+        CON_CHANNEL_PARSERSCRIPT,
         "total memory alloc buckets: %d (%d instances)\n",
         scrMemTreeGlob.totalAllocBuckets,
         scrMemTreeGlob.totalAlloc);
-    Com_Printf(23, "total memory free buckets: %d\n", 0xFFFF - scrMemTreeGlob.totalAllocBuckets);
-    Com_Printf(23, "********************************\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "total memory free buckets: %d\n", 0xFFFF - scrMemTreeGlob.totalAllocBuckets);
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 
     iassert(totalBuckets == (1 << MEMORY_NODE_BITS) - 1);
 }

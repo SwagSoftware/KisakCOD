@@ -94,10 +94,10 @@ void __cdecl SV_DumpServerCommands(client_t *client)
 {
     int i; // r31
 
-    Com_Printf(15, "===== pending server commands =====\n");
+    Com_Printf(CON_CHANNEL_SERVER, "===== pending server commands =====\n");
     for (i = client->reliableCommands.header.sent + 1; i <= client->reliableCommands.header.sequence; ++i)
         Com_Printf(
-            15,
+            CON_CHANNEL_SERVER,
             "cmd %5d: %s\n",
             i,
             &client->reliableCommands.buf[client->reliableCommands.commands[(unsigned __int8)i]]);
@@ -109,12 +109,12 @@ void __cdecl AppendCommandsForInternalSave(const char *filename)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 191, 0, "%s", "filename");
 	if (!strcmp(filename, "internal/vid_restart"))
 	{
-		Com_Printf(15, "Game saved for vid_restart\n");
+		Com_Printf(CON_CHANNEL_SERVER, "Game saved for vid_restart\n");
 		Cbuf_InsertText(0, "disconnect;vid_restart;loadgame internal/vid_restart\n");
 	}
 	else if (!strcmp(filename, "internal/snd_restart"))
 	{
-		Com_Printf(15, "Game saved for snd_restart\n");
+		Com_Printf(CON_CHANNEL_SERVER, "Game saved for snd_restart\n");
 		Cbuf_InsertText(0, "disconnect;snd_restart;loadgame internal/snd_restart\n");
 	}
 }
@@ -171,14 +171,14 @@ int __cdecl SV_AddPendingSave(
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\server\\sv_main.cpp", 244, 0, "%s", "screenshot");
     if (Dvar_GetInt("g_reloading"))
     {
-        Com_Printf(15, "savegame request ignored\n");
+        Com_Printf(CON_CHANNEL_SERVER, "savegame request ignored\n");
         return -1;
     }
     if (saveType == SAVE_TYPE_AUTOSAVE)
     {
         if (pendingSaveGlob.isAutoSaving)
         {
-            Com_PrintWarning(15, "Warning: Multiple Autosaves attempted in same frame. Save %s ignored\n", filename);
+            Com_PrintWarning(CON_CHANNEL_SERVER, "Warning: Multiple Autosaves attempted in same frame. Save %s ignored\n", filename);
             return -2;
         }
         pendingSaveGlob.isAutoSaving = 1;
@@ -199,7 +199,7 @@ int __cdecl SV_AddPendingSave(
     }
     else
     {
-        Com_PrintWarning(15, "Warning: Pending Saves limit exceeded. Save %s ignored\n", filename);
+        Com_PrintWarning(CON_CHANNEL_SERVER, "Warning: Pending Saves limit exceeded. Save %s ignored\n", filename);
         return -3;
     }
 }
@@ -230,7 +230,7 @@ int __cdecl SV_ProcessPendingSaves()
 
 	if (Dvar_GetInt("g_reloading"))
 	{
-		Com_Printf(15, "savegame request ignored\n");
+		Com_Printf(CON_CHANNEL_SERVER, "savegame request ignored\n");
 		return 0;
 	}
 
@@ -621,7 +621,7 @@ void __cdecl SV_ExitAfterTime()
     {
         if (1000 * integer < sv.levelTime)
         {
-            Com_Printf(15, "ALLGOOD - quit after good run of %d time.\n", sv.levelTime);
+            Com_Printf(CON_CHANNEL_SERVER, "ALLGOOD - quit after good run of %d time.\n", sv.levelTime);
             Com_Quit_f();
         }
     }
@@ -1096,7 +1096,7 @@ int __cdecl SV_ForwardFrame()
     v6 = levelTime - v5;
     sv.partialFrametime = 0;
     Com_Printf(
-        15,
+        CON_CHANNEL_SERVER,
         "\n=== Replay moved forward %d msec from time %g. ===\n\n",
         v6,
         v1 * 0.001f);

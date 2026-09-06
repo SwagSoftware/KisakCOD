@@ -387,7 +387,7 @@ void __cdecl Actor_SimplifyStateTransitions(actor_s *self)
             }
             return;
         }
-        Com_PrintWarning(18, "WARNING: ignoring AI state transition on entnum %d (actor is dead)\n", self->ent->s.number);
+        Com_PrintWarning(CON_CHANNEL_AI, "WARNING: ignoring AI state transition on entnum %d (actor is dead)\n", self->ent->s.number);
         self->transitionCount = 1;
     }
 }

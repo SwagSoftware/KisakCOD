@@ -1111,7 +1111,7 @@ void __cdecl CG_CreatePhysicsObject(int32_t localClientNum, centity_s *cent)
         else
         {
             Name = DObjGetName(obj);
-            Com_PrintWarning(1, "Failed to create physics object for '%s'.\n", Name);
+            Com_PrintWarning(CON_CHANNEL_ERROR, "Failed to create physics object for '%s'.\n", Name);
             cent->pose.physObjId = -1;
             Sys_LeaveCriticalSection(CRITSECT_PHYSICS);
         }
@@ -1120,7 +1120,7 @@ void __cdecl CG_CreatePhysicsObject(int32_t localClientNum, centity_s *cent)
     {
         cent->pose.physObjId = -1;
         v2 = DObjGetName(obj);
-        Com_PrintWarning(1, "Failed to create physics object for '%s'.  No physics preset.\n", v2);
+        Com_PrintWarning(CON_CHANNEL_ERROR, "Failed to create physics object for '%s'.  No physics preset.\n", v2);
     }
 }
 

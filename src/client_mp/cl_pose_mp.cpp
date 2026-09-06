@@ -68,7 +68,7 @@ int __cdecl CL_DObjCreateSkelForBones(const DObj_s *obj, int *partBits, DObjAnim
             if (warnCount_0 != timeStamp)
             {
                 warnCount_0 = timeStamp;
-                Com_PrintWarning(14, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
+                Com_PrintWarning(CON_CHANNEL_CLIENT, "WARNING: CL_SKEL_MEMORY_SIZE exceeded - not calculating skeleton\n");
             }
             return 1;
         }

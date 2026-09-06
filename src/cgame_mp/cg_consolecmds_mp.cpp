@@ -123,7 +123,7 @@ void __cdecl CG_Viewpos_f()
 
     if (cgameGlob->nextSnap)
         Com_Printf(
-            0,
+            CON_CHANNEL_DONT_FILTER,
             "(%.0f %.0f %.0f) : %.0f %.0f\n",
             cgameGlob->refdef.vieworg[0],
             cgameGlob->refdef.vieworg[1],
@@ -215,7 +215,7 @@ void __cdecl CG_ShellShock_f()
                 return;
             goto LABEL_5;
         }
-        Com_Printf(0, "USAGE: cg_shellshock <duration> <filename?>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_shellshock <duration> <filename?>\n");
     }
 }
 
@@ -236,7 +236,7 @@ void __cdecl CG_ShellShock_Load_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_shellshock_load <name>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_shellshock_load <name>\n");
         }
     }
 }
@@ -258,7 +258,7 @@ void __cdecl CG_ShellShock_Save_f()
         }
         else
         {
-            Com_Printf(0, "USAGE: cg_shellshock_save <name>\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: cg_shellshock_save <name>\n");
         }
     }
 }
@@ -297,7 +297,7 @@ void __cdecl CG_VoiceChat_f()
         else
         {
             v0 = UI_SafeTranslateString((char*)"CGAME_NOSPECTATORVOICECHAT");
-            Com_Printf(0, "%s\n", v0);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", v0);
         }
     }
 }
@@ -323,7 +323,7 @@ void __cdecl CG_TeamVoiceChat_f()
         else
         {
             v0 = UI_SafeTranslateString((char*)"CGAME_NOSPECTATORVOICECHAT");
-            Com_Printf(0, "%s\n", v0);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%s\n", v0);
         }
     }
 }

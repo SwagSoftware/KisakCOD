@@ -1567,7 +1567,7 @@ void __cdecl VP_DrawPath(const vehicle_pathpos_t *vpp)
         if (v2)
             goto LABEL_11;
     }
-    Com_PrintWarning(16, "WARNING: Invalid vehicle path.  Possible infinite loop\n");
+    Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Invalid vehicle path.  Possible infinite loop\n");
 LABEL_11:
     v7 = 0;
     v8 = vpp->nodeIdx;

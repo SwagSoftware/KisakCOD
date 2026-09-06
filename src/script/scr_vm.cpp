@@ -1513,8 +1513,8 @@ void VM_PrintJumpHistory()
     const char *pos; // [esp+0h] [ebp-8h]
     int index; // [esp+4h] [ebp-4h]
 
-    Com_Printf(23, "********************************\n");
-    Com_Printf(23, "Recent loop history (from most recent) :\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "Recent loop history (from most recent) :\n");
     index = scrVmDebugPub.jumpbackHistoryIndex;
     do
     {
@@ -1523,9 +1523,9 @@ void VM_PrintJumpHistory()
         pos = scrVmDebugPub.jumpbackHistory[--index];
         if (!pos)
             break;
-        Scr_PrintPrevCodePos(23, (char *)pos, 0);
+        Scr_PrintPrevCodePos(CON_CHANNEL_PARSERSCRIPT, (char *)pos, 0);
     } while (index != scrVmDebugPub.jumpbackHistoryIndex);
-    Com_Printf(23, "********************************\n");
+    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "********************************\n");
 }
 
 VariableStackBuffer *__cdecl VM_ArchiveStack()
@@ -3038,7 +3038,7 @@ function_call:
                 iassert(logScriptTimes);
                 if (logScriptTimes->current.enabled)
                 {
-                    Com_Printf(23, "EXCEED TIME: %d\n", Sys_Milliseconds());
+                    Com_Printf(CON_CHANNEL_PARSERSCRIPT, "EXCEED TIME: %d\n", Sys_Milliseconds());
                 }
                 if (!scrVmGlob.loading)
                 {
@@ -3052,7 +3052,7 @@ function_call:
                     }
                     if (!scrVmPub.abort_on_error)
                     {
-                        Com_Printf(1, "script runtime error: potential infinite loop in script - killing thread.\n");
+                        Com_Printf(CON_CHANNEL_ERROR, "script runtime error: potential infinite loop in script - killing thread.\n");
                         Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0);
                         Scr_ResetTimeout();
                         while (1)
@@ -3085,7 +3085,7 @@ function_call:
                     }
                     Scr_TerminalError("potential infinite loop in script");
                 }
-                Com_Printf(1, "script runtime warning: potential infinite loop in script.\n");
+                Com_Printf(CON_CHANNEL_ERROR, "script runtime warning: potential infinite loop in script.\n");
                 Scr_PrintPrevCodePos(CON_CHANNEL_DONT_FILTER, (char*)fs.pos, 0);
                 jumpOffset = Scr_ReadUnsignedShort(&fs.pos);
                 fs.pos -= jumpOffset;
@@ -3952,9 +3952,9 @@ BOOL Scr_ErrorInternal()
     {
         if (scrVmPub.function_count || scrVmPub.debugCode)
         {
-            Com_PrintMessage(6, "throwing script exception: ", 0);
-            Com_PrintMessage(6, (char*)scrVarPub.error_message, 0);
-            Com_PrintMessage(6, "\n", 0);
+            Com_PrintMessage(CON_CHANNEL_LOGFILEONLY, "throwing script exception: ", 0);
+            Com_PrintMessage(CON_CHANNEL_LOGFILEONLY, (char*)scrVarPub.error_message, 0);
+            Com_PrintMessage(CON_CHANNEL_LOGFILEONLY, "\n", 0);
 
             bcassert(g_script_error_level, ARRAY_COUNT(g_script_error));
 
@@ -4602,7 +4602,7 @@ void VM_SetTime()
             iassert(logScriptTimes);
             if (logScriptTimes->current.enabled)
             {
-                Com_Printf(23, "SET TIME: %d\n", Sys_Milliseconds());
+                Com_Printf(CON_CHANNEL_PARSERSCRIPT, "SET TIME: %d\n", Sys_Milliseconds());
             }
             Object = FindObject(id);
             VM_Resume(Object);
@@ -4864,7 +4864,7 @@ void __cdecl Scr_ResetTimeout()
     if (logScriptTimes->current.enabled)
     {
         v0 = Sys_Milliseconds();
-        Com_Printf(23, "RESET TIME: %d\n", v0);
+        Com_Printf(CON_CHANNEL_PARSERSCRIPT, "RESET TIME: %d\n", v0);
     }
     memset(scrVmDebugPub.jumpbackHistory, 0, sizeof(scrVmDebugPub.jumpbackHistory));
 }
@@ -4984,7 +4984,7 @@ char __cdecl Scr_PrintProfileBuiltinTimes(float minTime)
             {
                 v2 = *((float*)Sys_GetValue(0) + 20782);
                 Com_Printf(
-                    23,
+                    CON_CHANNEL_PARSERSCRIPT,
                     "time: %f, usage: %d, %s\n",
                     (double)scrVmDebugPub.func_table[j].prof * v2,
                     scrVmDebugPub.func_table[j].usage,

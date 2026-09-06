@@ -1322,7 +1322,7 @@ void __cdecl CG_RegisterSurfaceTypeSounds(const char *pszType, snd_alias_list_t 
     }
     else
     {
-        Com_DPrintf(9, "WARNING: no alias prefix defined, using default\n");
+        Com_DPrintf(CON_CHANNEL_SOUND, "WARNING: no alias prefix defined, using default\n");
         defaultAliasList = Com_FindSoundAliasNoErrors("collision_default");
         for (int i = 0; i < 29; ++i)
             sound[i] = defaultAliasList;
@@ -1354,7 +1354,7 @@ void CG_RegisterPhysicsSounds_LoadObj()
     }
     else
     {
-        Com_PrintError(20, "ERROR: exceeded 'audio class' max %d > %d\n", physPresetCount, 50);
+        Com_PrintError(CON_CHANNEL_PHYS, "ERROR: exceeded 'audio class' max %d > %d\n", physPresetCount, 50);
     }
 }
 
@@ -1590,7 +1590,7 @@ void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
 
     if (cgs->smokeGrenadeFx)
     {
-        Com_Printf(14, "Playing smoke grenades at time %i\n", cgameGlob->time);
+        Com_Printf(CON_CHANNEL_CLIENT, "Playing smoke grenades at time %i\n", cgameGlob->time);
         FX_KillEffectDef(localClientNum, cgs->smokeGrenadeFx);
         FX_RewindTo(localClientNum, cgameGlob->time);
         nextSnap = cgameGlob->nextSnap;
@@ -1622,7 +1622,7 @@ void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
                 ByteToDir(*(_DWORD *)(v3 + 4 * eventIndex + 180), axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 Com_Printf(
-                    14,
+                    CON_CHANNEL_CLIENT,
                     "Restarting smoke grenade at time %i at ( %f, %f, %f )\n",
                     nextSnap->entities[i].lerp.u.customExplode.startTime,
                     nextSnap->entities[i].lerp.pos.trBase[0],

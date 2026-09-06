@@ -66,7 +66,7 @@ void R_WarnOncePerFrame(GfxWarningType warnType, ...)
         va_copy(vargs, va);
         _vsnprintf(message, 0x400u, s_warnFormat[warnType], va);
         vargs = 0;
-        Com_PrintWarning(8, "%s\n", message);
+        Com_PrintWarning(CON_CHANNEL_GFX, "%s\n", message);
     }
 }
 

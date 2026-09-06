@@ -94,13 +94,13 @@ uint32_t __cdecl DSound_UpdateSample(dsound_sample_t *sample, char *data, int32_
         {
             if (hra == -2147024809)
             {
-                Com_Printf(9, "DSERR_INVALIDPARAM\n");
+                Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDPARAM\n");
             }
             else if (hra == -2005401550)
             {
-                Com_Printf(9, "DSERR_INVALIDCALL\n");
+                Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDCALL\n");
             }
-            Com_Printf(9, "Error trying to unlock sample!\n");
+            Com_Printf(CON_CHANNEL_SOUND, "Error trying to unlock sample!\n");
             return -1;
         }
     }
@@ -109,25 +109,25 @@ uint32_t __cdecl DSound_UpdateSample(dsound_sample_t *sample, char *data, int32_
         if (hr > -2005401530)
         {
             if (hr == -2005401450)
-                Com_Printf(9, "DSERR_BUFFERLOST\n");
+                Com_Printf(CON_CHANNEL_SOUND, "DSERR_BUFFERLOST\n");
         }
         else
         {
             switch (hr)
             {
             case -2005401530:
-                Com_Printf(9, "DSERR_PRIOLEVELNEEDED\n");
+                Com_Printf(CON_CHANNEL_SOUND, "DSERR_PRIOLEVELNEEDED\n");
                 break;
             case -2147024809:
-                Com_Printf(9, "DSERR_INVALIDPARAM\n");
-                Com_Printf(9, " Offset : %i, length: %i\n", sample->currentOffset, v4);
+                Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDPARAM\n");
+                Com_Printf(CON_CHANNEL_SOUND, " Offset : %i, length: %i\n", sample->currentOffset, v4);
                 break;
             case -2005401550:
-                Com_Printf(9, "DSERR_INVALIDCALL\n");
+                Com_Printf(CON_CHANNEL_SOUND, "DSERR_INVALIDCALL\n");
                 break;
             }
         }
-        Com_Printf(9, "Error trying to lock sample!\n");
+        Com_Printf(CON_CHANNEL_SOUND, "Error trying to lock sample!\n");
         return -1;
     }
 }
@@ -208,12 +208,12 @@ void __cdecl DSound_SampleFrame(dsound_sample_t *sample)
         hr = sample->DSB->Play(0, 0, 1u);
         if (hr < 0)
         {
-            Com_Printf(9, "Error: Failed to play DirectSound play buffer (%i)!\n", hr);
+            Com_Printf(CON_CHANNEL_SOUND, "Error: Failed to play DirectSound play buffer (%i)!\n", hr);
             return;
         }
         hr = sample->DSB->SetCurrentPosition(sample->lastPlayPos);
         if (hr < 0)
-            Com_Printf(9, "Error: Failed to set current position to %i when playing sound buffer!\n", sample->lastOffset);
+            Com_Printf(CON_CHANNEL_SOUND, "Error: Failed to set current position to %i when playing sound buffer!\n", sample->lastOffset);
         sample->playing = 1;
         sample->playMode = 2;
     }
@@ -221,7 +221,7 @@ void __cdecl DSound_SampleFrame(dsound_sample_t *sample)
     {
         hr = sample->DSB->GetCurrentPosition(&dwPlayPos, &dwWritePos);
         if (hr < 0)
-            Com_Printf(9, "Error: Failed to get cursor positions \n");
+            Com_Printf(CON_CHANNEL_SOUND, "Error: Failed to get cursor positions \n");
         dwWritePos = sample->currentOffset;
         if (sample->stopPosition < 0)
         {
@@ -282,7 +282,7 @@ HRESULT __cdecl CreateBasicBuffer(
     dsbdesc.lpwfxFormat = &wfx;
     hr = (lpds->CreateSoundBuffer)(&dsbdesc, ppDsb, 0);
     if (hr < 0)
-        Com_Printf(9, "Failed to create sound buffer!\n");
+        Com_Printf(CON_CHANNEL_SOUND, "Failed to create sound buffer!\n");
     return hr;
 }
 
@@ -301,7 +301,7 @@ dsound_sample_t *__cdecl DSound_NewSample()
     if (CreateBasicBuffer(lpds, &sample->DSB, sample->frequency, sample->channels, g_sound_playBufferSize) >= 0)
         return sample;
 
-    Com_Printf(9, "Error: Failed to create DirectSound play buffer\n");
+    Com_Printf(CON_CHANNEL_SOUND, "Error: Failed to create DirectSound play buffer\n");
     sample->DSB->Release();
     sample->DSB = 0;
 
@@ -320,7 +320,7 @@ char __cdecl DSound_StopSample(dsound_sample_t *sample)
     sample->channel = -1;
     sample->playing = 0;
     if (sample->DSB->SetCurrentPosition(0) < 0)
-        Com_Printf(9, "Error: Failed to set current position to %i when playing sound buffer!\n", sample->lastOffset);
+        Com_Printf(CON_CHANNEL_SOUND, "Error: Failed to set current position to %i when playing sound buffer!\n", sample->lastOffset);
     return 1;
 }
 
@@ -337,13 +337,13 @@ int32_t __cdecl DSound_Init(bool callDsoundInit, HWND__ *handle)
         }
         else
         {
-            Com_Printf(9, "Error: [play] failure when calling SetCooperativeLevel()\n");
+            Com_Printf(CON_CHANNEL_SOUND, "Error: [play] failure when calling SetCooperativeLevel()\n");
             return 0;
         }
     }
     else
     {
-        Com_Printf(9, "ERROR: [play] failed to initialize DirectSound\n");
+        Com_Printf(CON_CHANNEL_SOUND, "ERROR: [play] failed to initialize DirectSound\n");
         return 0;
     }
 }

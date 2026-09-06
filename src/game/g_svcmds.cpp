@@ -47,7 +47,7 @@ void __cdecl AddIP(char *str)
     {
         if (numIPFilters == 1024)
         {
-            Com_Printf(15, "IP filter list is full\n");
+            Com_Printf(CON_CHANNEL_SERVER, "IP filter list is full\n");
             return;
         }
         ++numIPFilters;
@@ -76,7 +76,7 @@ int __cdecl StringToFilter(char *s, ipFilter_s *f)
     {
         if (*s < 48 || *s > 57)
         {
-            Com_Printf(15, "Bad filter address: %s\n", s);
+            Com_Printf(CON_CHANNEL_SERVER, "Bad filter address: %s\n", s);
             return 0;
         }
         j = 0;
@@ -133,7 +133,7 @@ void __cdecl Svcmd_AddIP_f()
     }
     else
     {
-        Com_Printf(0, "Usage:  addip <ip-mask>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage:  addip <ip-mask>\n");
     }
 }
 
@@ -153,17 +153,17 @@ void __cdecl Svcmd_RemoveIP_f()
                 if (ipFilters[i].mask == f.mask && ipFilters[i].compare == f.compare)
                 {
                     ipFilters[i].compare = -1;
-                    Com_Printf(0, "Removed.\n");
+                    Com_Printf(CON_CHANNEL_DONT_FILTER, "Removed.\n");
                     UpdateIPBans();
                     return;
                 }
             }
-            Com_Printf(0, "Didn't find %s.\n", str);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "Didn't find %s.\n", str);
         }
     }
     else
     {
-        Com_Printf(0, "Usage:  sv removeip <ip-mask>\n");
+        Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage:  sv removeip <ip-mask>\n");
     }
 }
 
@@ -180,14 +180,14 @@ void __cdecl Svcmd_EntityList_f()
     {
         if (check->r.inuse)
         {
-            Com_Printf(0, "%3i: ", e);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "%3i: ", e);
             EntityTypeName = G_GetEntityTypeName(check);
-            Com_Printf(0, "'%s'", EntityTypeName);
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "'%s'", EntityTypeName);
             if (check->classname)
             {
-                Com_Printf(0, ", '%s'", SL_ConvertToString(check->classname));
+                Com_Printf(CON_CHANNEL_DONT_FILTER, ", '%s'", SL_ConvertToString(check->classname));
             }
-            Com_Printf(0, "\n");
+            Com_Printf(CON_CHANNEL_DONT_FILTER, "\n");
         }
         ++check;
     }

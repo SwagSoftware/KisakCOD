@@ -104,7 +104,7 @@ void SteamCallbackHandler::Callback_BeginAuthResponse(ValidateAuthTicketResponse
 	}
 	else
 	{
-		Com_Printf(0, "[Kisak] Player %lld passed Steam Auth Check", id64);
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "[Kisak] Player %lld passed Steam Auth Check", id64);
 	}
 }
 
@@ -147,7 +147,7 @@ void Steam_CheckClients()
 // callback hook for debug text emitted from the Steam API
 extern "C" void __cdecl SteamAPIDebugTextHook(int nSeverity, const char *pchDebugText)
 {
-	Com_Printf(0, pchDebugText);
+	Com_Printf(CON_CHANNEL_DONT_FILTER, pchDebugText);
 }
 
 // This Creates a "steam_appid.txt" next to the executable for the Steam API to read
@@ -163,7 +163,7 @@ static void CreateAppIdFile()
 	FILE *fp = fopen("steam_appid.txt", "w");
 	if (!fp)
 	{
-		Com_Printf(0, "[Kisak] Error opening 'steam_appid.txt'.");
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "[Kisak] Error opening 'steam_appid.txt'.");
 		return;
 	}
 
@@ -180,13 +180,13 @@ void Steam_Init()
 
 	if (!SteamAPI_Init())
 	{
-		Com_Printf(0, "[Kisak] SteamAPI_Init() failed. Is the Steam Client Running? Do you own COD4?");
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "[Kisak] SteamAPI_Init() failed. Is the Steam Client Running? Do you own COD4?");
 		return;
 	}
 
 	if (!SteamUser()->BLoggedOn())
 	{
-		Com_Printf(0, "[Kisak] Steam User isn't Logged On.");
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "[Kisak] Steam User isn't Logged On.");
 		return;
 	}
 
@@ -238,7 +238,7 @@ bool Steam_CheckClientTicket(const void* pAuthTicket, uint32 authTicketLen, uint
 
 	if (!g_steamInitialized)
 	{
-		Com_Printf(0, "[Kisak] Steam_CheckClientTicket() - Steam is not Initialized! Returning False");
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "[Kisak] Steam_CheckClientTicket() - Steam is not Initialized! Returning False");
 		return false;
 	}
 
@@ -269,13 +269,13 @@ static void Steam_SV_TestKick()
 {
 	if (!com_sv_running->current.enabled)
 	{
-		Com_Printf(0, "Server is not running.\n");
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "Server is not running.\n");
 		return;
 	}
 	if (SV_Cmd_Argc() != 2)
 	{
 		const char *cmdName = SV_Cmd_Argv(0);
-		Com_Printf(0, "Usage: %s <SteamID64>\n", cmdName);
+		Com_Printf(CON_CHANNEL_DONT_FILTER, "Usage: %s <SteamID64>\n", cmdName);
 		return;
 	}
 

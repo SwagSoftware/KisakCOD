@@ -261,7 +261,7 @@ void __cdecl SV_Shutdown(const char *finalmsg)
     {
         //LSP_LogStringEvenIfControllerIsInactive("server shutdown");
         //LSP_ForceSendPacket();
-        Com_Printf(15, "----- Server Shutdown -----\n");
+        Com_Printf(CON_CHANNEL_SERVER, "----- Server Shutdown -----\n");
         SV_RemoveOperatorCommands();
         SV_ShutdownGameProgs();
         SaveMemory_CleanupSaveMemory();
@@ -277,7 +277,7 @@ void __cdecl SV_Shutdown(const char *finalmsg)
         } while (v2);
         Dvar_SetBool(com_sv_running, 0);
         Dvar_SetFloat(com_timescale, 1.0);
-        Com_Printf(15, "---------------------------\n");
+        Com_Printf(CON_CHANNEL_SERVER, "---------------------------\n");
         CL_Disconnect(0);
     }
 }
@@ -481,8 +481,8 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
         SV_ShutdownGameProgs();
         SaveMemory_CleanupSaveMemory();
         SaveMemory_ShutdownSaveSystem();
-        Com_Printf(15, "------ Server Initialization ------\n");
-        Com_Printf(15, "Server: %s\n", mapname);
+        Com_Printf(CON_CHANNEL_SERVER, "------ Server Initialization ------\n");
+        Com_Printf(CON_CHANNEL_SERVER, "Server: %s\n", mapname);
         SV_ClearServer();
     }
 
@@ -594,7 +594,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
         SV_SaveSystemInfo();
     }
 
-    Com_Printf(15, "-----------------------------------\n");
+    Com_Printf(CON_CHANNEL_SERVER, "-----------------------------------\n");
 
     SCR_UpdateLoadScreen();
     {
@@ -664,7 +664,7 @@ void __cdecl SV_SpawnServer(const char *mapname, int savegame)
         SV_DisplaySaveErrorUI();
 
     CL_SetActive();
-    Com_Printf(15, "Load time: %d msec\n", Sys_Milliseconds() - startTime);
+    Com_Printf(CON_CHANNEL_SERVER, "Load time: %d msec\n", Sys_Milliseconds() - startTime);
     Com_ResetFrametime();
 
     Sys_EndLoadThreadPriorities();

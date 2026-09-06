@@ -304,7 +304,7 @@ void __cdecl DB_LoadXFileInternal()
     Load_DelayStream();
     DB_LoadDelayedImages();
     iassert(g_load.compressBufferStart);
-    Com_Printf(10, "Loaded zone '%s'\n", g_load.filename);
+    Com_Printf(CON_CHANNEL_FILES, "Loaded zone '%s'\n", g_load.filename);
 #ifdef KISAK_MP
     if (!g_minimumFastFileLoaded)
         g_minimumFastFileLoaded = I_stricmp("localized_code_post_gfx_mp", g_load.filename) == 0;

@@ -116,7 +116,7 @@ char *__cdecl SEH_SafeTranslateString(char *pszReference)
             if (loc_warningsAsErrors->current.enabled)
                 Com_Error(ERR_LOCALIZATION, "Could not translate exe string \"%s\"", pszReference);
             else
-                Com_PrintWarning(16, "WARNING: Could not translate exe string \"%s\"\n", pszReference);
+                Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Could not translate exe string \"%s\"\n", pszReference);
             strcpy(szErrorString, "^1UNLOCALIZED(^7");
             I_strncat(szErrorString, 1024, pszReference);
             I_strncat(szErrorString, 1024, "^1)^7");
@@ -197,7 +197,7 @@ char *__cdecl SEH_LocalizeTextMessage(const char *pszInputBuffer, const char *ps
                     {
                         Com_Error(ERR_DROP, "%s too long when translated: \"%s\"", pszMessageType, pszInputBuffer);
                     }
-                    Com_Printf(16, "%s too long when translated: \"%s\"\n", pszMessageType, pszInputBuffer);
+                    Com_Printf(CON_CHANNEL_SYSTEM, "%s too long when translated: \"%s\"\n", pszMessageType, pszInputBuffer);
                 }
                 for (i = 0; i < iTokenLen - 2; ++i)
                 {
@@ -232,7 +232,7 @@ char *__cdecl SEH_LocalizeTextMessage(const char *pszInputBuffer, const char *ps
                         {
                             digit = pszString[i + 2] - 48;
                             if (!digit)
-                                Com_Printf(16, "%s cannot have &&0 as conversion format: \"%s\"\n", pszMessageType, pszInputBuffer);
+                                Com_Printf(CON_CHANNEL_SYSTEM, "%s cannot have &&0 as conversion format: \"%s\"\n", pszMessageType, pszInputBuffer);
                             if (digit == insertIndex)
                             {
                                 v15 = &pszString[i + 3];
@@ -319,7 +319,7 @@ int __cdecl SEH_GetLocalizedTokenReference(
             if (loc_warningsAsErrors && loc_warningsAsErrors->current.enabled && errType != LOCMSG_NOERR)
                 Com_Error(ERR_LOCALIZATION, "Could not translate part of %s: \"%s\"", messageType, reference);
             else
-                Com_PrintWarning(16, "WARNING: Could not translate part of %s: \"%s\"\n", messageType, reference);
+                Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Could not translate part of %s: \"%s\"\n", messageType, reference);
             translation = va("^1UNLOCALIZED(^7%s^1)^7", reference);
         }
         else
@@ -549,7 +549,7 @@ int __cdecl SEH_StringEd_SetLanguageStrings(uint32_t iLanguage)
         else
         {
             v3 = SEH_GetLanguageName(iLanguage);
-            Com_PrintWarning(16, "WARNING: Could not load localization strings for %s: %s\n", v3, pszError);
+            Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Could not load localization strings for %s: %s\n", v3, pszError);
         }
     }
     return 1;
@@ -580,7 +580,7 @@ void __cdecl SEH_UpdateLanguageInfo()
         }
     }
     if (iNumLanguages < 1)
-        Com_PrintError(16, "ERROR: No languages available because no localized assets were found\n");
+        Com_PrintError(CON_CHANNEL_SYSTEM, "ERROR: No languages available because no localized assets were found\n");
     if (!SEH_StringEd_SetLanguageStrings(loc_language->current.unsignedInt))
     {
         for (ia = 0; ia < 15; ++ia)

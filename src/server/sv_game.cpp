@@ -196,7 +196,7 @@ void __cdecl SV_DObjDumpInfo(gentity_s *ent)
         if (obj)
             DObjDumpInfo(obj);
         else
-            Com_Printf(15, "no model.\n");
+            Com_Printf(CON_CHANNEL_SERVER, "no model.\n");
     }
 }
 
@@ -241,7 +241,7 @@ char *__cdecl SV_AllocSkelMemory(uint32_t size)
         if (warnCount_2 != sv.skelTimeStamp)
         {
             warnCount_2 = sv.skelTimeStamp;
-            Com_PrintWarning(15, "WARNING: SV_SKEL_MEMORY_SIZE exceeded\n");
+            Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: SV_SKEL_MEMORY_SIZE exceeded\n");
         }
         SV_ResetSkeletonCache();
     }
@@ -837,7 +837,7 @@ void __cdecl SV_SetGametype()
         *s = tolower(*s);
     if (!Scr_IsValidGameType(gametype))
     {
-        Com_Printf(15, "g_gametype %s is not a valid gametype, defaulting to dm\n", gametype);
+        Com_Printf(CON_CHANNEL_SERVER, "g_gametype %s is not a valid gametype, defaulting to dm\n", gametype);
         strcpy(gametype, "dm");
     }
     Dvar_SetString((dvar_s *)sv_gametype, gametype);

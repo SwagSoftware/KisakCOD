@@ -46,7 +46,7 @@ void __cdecl G_FinishSetupSpawnPoint(gentity_s *ent)
 
     if (trace.allsolid)
         Com_PrintWarning(
-            15,
+            CON_CHANNEL_SERVER,
             "WARNING: Spawn point entity %i is in solid at (%i, %i, %i)\n",
             ent->s.number,
             (int)ent->r.currentOrigin[0],

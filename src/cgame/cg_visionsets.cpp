@@ -342,12 +342,12 @@ char *__cdecl RawBufferOpen(const char *name, const char *formatFullPath)
     filebuf = Com_LoadRawTextFile(fullpath);
     if (filebuf)
         return filebuf;
-    Com_PrintError(17, "couldn't open '%s'.\n", fullpath);
+    Com_PrintError(CON_CHANNEL_PLAYERWEAP, "couldn't open '%s'.\n", fullpath);
     Com_sprintf(fullpath, 0x40u, formatFullPath, "default");
     filebuf = Com_LoadRawTextFile(fullpath);
     if (filebuf)
         return filebuf;
-    Com_PrintError(17, "couldn't open '%s'. This is a default file that you should have.\n", fullpath);
+    Com_PrintError(CON_CHANNEL_PLAYERWEAP, "couldn't open '%s'. This is a default file that you should have.\n", fullpath);
     return 0;
 }
 
@@ -369,7 +369,7 @@ char __cdecl LoadVisionSettingsFromBuffer(const char *buffer, const char *filena
         {
             if (fieldNum >= 16)
             {
-                Com_PrintWarning(16, "WARNING: unknown dvar '%s' in file '%s'\n", token, filename);
+                Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: unknown dvar '%s' in file '%s'\n", token, filename);
                 goto next_var;
             }
             if (!wasRead[fieldNum] && !I_stricmp(token, visionDefFields[fieldNum].name))
@@ -379,7 +379,7 @@ char __cdecl LoadVisionSettingsFromBuffer(const char *buffer, const char *filena
         if (ApplyTokenToField(fieldNum, token, settings))
             wasRead[fieldNum] = 1;
         else
-            Com_PrintWarning(16, "WARNING: malformed dvar '%s' in file '%s'\n", token, filename);
+            Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: malformed dvar '%s' in file '%s'\n", token, filename);
     next_var:
         Com_SkipRestOfLine(&buffer);
     }
@@ -557,7 +557,7 @@ void __cdecl CG_VisionSetUpdateTweaksFromFile_Glow()
     }
     else
     {
-        Com_PrintWarning(16, "WARNING: Couldn't update glow tweak vars from file.  Vision file is likely not in use.\n");
+        Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Couldn't update glow tweak vars from file.  Vision file is likely not in use.\n");
     }
 }
 
@@ -595,7 +595,7 @@ void __cdecl CG_VisionSetUpdateTweaksFromFile_Film()
     }
     else
     {
-        Com_PrintWarning(16, "WARNING: Couldn't update film tweak vars from file.  Vision file is likely not in use.\n");
+        Com_PrintWarning(CON_CHANNEL_SYSTEM, "WARNING: Couldn't update film tweak vars from file.  Vision file is likely not in use.\n");
     }
 }
 

@@ -138,7 +138,7 @@ char __cdecl SkipEpair(char *token, const char **file)
 
     if (token[strlen(token) - 2] == 92)
     {
-        Com_PrintError(19, "SkipEpair: key '%s' ends with a '\\'\n", token);
+        Com_PrintError(CON_CHANNEL_ANIM, "SkipEpair: key '%s' ends with a '\\'\n", token);
         return 0;
     }
     else
@@ -146,7 +146,7 @@ char __cdecl SkipEpair(char *token, const char **file)
         v3 = strchr(token, 0xAu);
         if (v3 || (strchr(token, 0xDu)))
         {
-            Com_PrintError(19, "SkipEpair: key '%s' contains a newline character\n", token);
+            Com_PrintError(CON_CHANNEL_ANIM, "SkipEpair: key '%s' contains a newline character\n", token);
             return 0;
         }
         else
@@ -154,7 +154,7 @@ char __cdecl SkipEpair(char *token, const char **file)
             v5 = strchr(token, 0x22u);
             if (v5)
             {
-                Com_PrintError(19, "SkipEpair: key '%s' contains a \" character, will cause parsing errors\n", token);
+                Com_PrintError(CON_CHANNEL_ANIM, "SkipEpair: key '%s' contains a \" character, will cause parsing errors\n", token);
                 return 0;
             }
             else
@@ -162,7 +162,7 @@ char __cdecl SkipEpair(char *token, const char **file)
                 tokena = Com_ParseOnLine(file);
                 if (tokena->token[strlen(tokena->token) - 2] == 92)
                 {
-                    Com_PrintError(19, "SkipEpair: value '%s' ends with a '\\'\n", tokena->token);
+                    Com_PrintError(CON_CHANNEL_ANIM, "SkipEpair: value '%s' ends with a '\\'\n", tokena->token);
                     return 0;
                 }
                 else
@@ -170,7 +170,7 @@ char __cdecl SkipEpair(char *token, const char **file)
                     if (strchr(tokena->token, 0xAu) || (strchr(tokena->token, 0xDu)))
                     {
                         Com_PrintError(
-                            19,
+                            CON_CHANNEL_ANIM,
                             "SkipEpair: value '%s' contains a newline character (use of '\\' at end of value?)\n",
                             tokena->token);
                         return 0;
@@ -180,7 +180,7 @@ char __cdecl SkipEpair(char *token, const char **file)
                         if (strchr(tokena->token, 0x22u))
                         {
                             Com_PrintError(
-                                19,
+                                CON_CHANNEL_ANIM,
                                 "SkipEpair: value '%s' contains a \" character, will cause parsing errors\n",
                                 tokena->token);
                             return 0;
@@ -227,7 +227,7 @@ uint32_t __cdecl Xmodel_CountPhysicsCollMapGeoms(const char **file, const char *
                     tokenb = Com_Parse(file);
                     if (!tokenb->token[0])
                     {
-                        Com_PrintError(19, "ERROR: ParsePhysicsCollMap: EOF without closing brace");
+                        Com_PrintError(CON_CHANNEL_ANIM, "ERROR: ParsePhysicsCollMap: EOF without closing brace");
                         return 0;
                     }
                     if (!strcmp(tokenb->token, "}"))
@@ -239,12 +239,12 @@ uint32_t __cdecl Xmodel_CountPhysicsCollMapGeoms(const char **file, const char *
                             return brushCount;
                         if (!strcmp(tokenc->token, "curve"))
                         {
-                            Com_PrintError(19, "ERROR: cannot have curves in collision maps");
+                            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: cannot have curves in collision maps");
                             return 0;
                         }
                         if (!strcmp(tokenc->token, "mesh"))
                         {
-                            Com_PrintError(19, "ERROR: cannot have patch terrain in collision maps");
+                            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: cannot have patch terrain in collision maps");
                             return 0;
                         }
                         if (!strcmp(tokenc->token, "physics_cylinder"))
@@ -282,7 +282,7 @@ uint32_t __cdecl Xmodel_CountPhysicsCollMapGeoms(const char **file, const char *
             {
                 CurrentParseLine = Com_GetCurrentParseLine();
                 Com_PrintError(
-                    19,
+                    CON_CHANNEL_ANIM,
                     "ERROR: ParsePhysicsCollMap: { not found, found %s on line %d",
                     tokena->token,
                     CurrentParseLine);
@@ -291,13 +291,13 @@ uint32_t __cdecl Xmodel_CountPhysicsCollMapGeoms(const char **file, const char *
         }
         else
         {
-            Com_PrintError(19, "ERROR: '%s' is version '%s'; should be version '%i'\n", name, token->token, 4);
+            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: '%s' is version '%s'; should be version '%i'\n", name, token->token, 4);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(19, "ERROR: '%s' is missing 'iwmap' version specification\n", name);
+        Com_PrintError(CON_CHANNEL_ANIM, "ERROR: '%s' is missing 'iwmap' version specification\n", name);
         return 0;
     }
 }
@@ -485,7 +485,7 @@ char __cdecl Xmodel_ParsePhysicsCylinder(const char **file, PhysGeomInfo *geom)
     }
     else
     {
-        Com_PrintError(19, "Expecting '{' while parsing physics cylinder");
+        Com_PrintError(CON_CHANNEL_ANIM, "Expecting '{' while parsing physics cylinder");
         return 0;
     }
 }
@@ -516,7 +516,7 @@ bool __cdecl Xmodel_ParsePhysicsBox(const char **file, PhysGeomInfo *geom)
     }
     else
     {
-        Com_PrintError(19, "Expecting '{' while parsing physics cylinder");
+        Com_PrintError(CON_CHANNEL_ANIM, "Expecting '{' while parsing physics cylinder");
         return 0;
     }
 }
@@ -555,7 +555,7 @@ char __cdecl AddBrushBevels(
             {
                 if (*sideCount == maxCount)
                 {
-                    Com_PrintError(19, "ERROR: MAX_BUILD_SIDES for physics collmap %s, Brush %i\n", mapname, brushnum);
+                    Com_PrintError(CON_CHANNEL_ANIM, "ERROR: MAX_BUILD_SIDES for physics collmap %s, Brush %i\n", mapname, brushnum);
                     return 0;
                 }
                 v9 = (uint32*)&(*planes)[4 * *sideCount];
@@ -615,7 +615,7 @@ char __cdecl Map_SkipNamedFlags(const char **file, const char *key)
             token = Com_ParseOnLine(file);
             if (!token->token[0])
             {
-                Com_PrintError(19, "missing token for '%s'", key);
+                Com_PrintError(CON_CHANNEL_ANIM, "missing token for '%s'", key);
                 return 0;
             }
         } while (token->token[0] != 59);
@@ -729,14 +729,14 @@ char __cdecl RemoveDuplicateBrushPlanes(
                 if (VecNCompareCustomEpsilon(&(*planes)[4 * sideIndexI], negatedNormal, 0.001f, 3)
                     && (*planes)[4 * sideIndexI + 3] <= -(*planes)[4 * sideIndexJ + 3])
                 {
-                    Com_PrintWarning(19, "Map %s, Brush %i: mirrored plane\n", mapname, brushnum);
+                    Com_PrintWarning(CON_CHANNEL_ANIM, "Map %s, Brush %i: mirrored plane\n", mapname, brushnum);
                     return 0;
                 }
             }
         }
         else
         {
-            Com_PrintWarning(19, "Collmap for %s, Brush %i: degenerate plane\n", mapname, brushnum);
+            Com_PrintWarning(CON_CHANNEL_ANIM, "Collmap for %s, Brush %i: degenerate plane\n", mapname, brushnum);
             for (sideIndexK = sideIndexI + 1; sideIndexK < *sideCount; ++sideIndexK)
             {
                 v7 = &(*planes)[4 * sideIndexK - 4];
@@ -789,7 +789,7 @@ int __cdecl AddSimplePoint(
     else
     {
         Com_PrintError(
-            19,
+            CON_CHANNEL_ANIM,
             "More than %i points from plane intersections on %i-sided brush.  Simplify the collision geometry.\n",
             ptCount,
             planeCount);
@@ -887,7 +887,7 @@ char __cdecl Xmodel_ParsePhysicsBrush(
 
         if (sideCount == 32)
         {
-            Com_PrintError(19, "ERROR: MAX_BUILD_SIDES (%i) -- brush too many sides.  Simplify the collision geometry.", 32);
+            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: MAX_BUILD_SIDES (%i) -- brush too many sides.  Simplify the collision geometry.", 32);
             return 0;
         }
 
@@ -1147,7 +1147,7 @@ PhysGeomList *__cdecl Xmodel_ParsePhysicsCollMap(
                     token = Com_Parse(file)->token;
                     if (!*token)
                     {
-                        Com_PrintError(19, "ERROR: ParsePhysicsCollMap: EOF without closing brace");
+                        Com_PrintError(CON_CHANNEL_ANIM, "ERROR: ParsePhysicsCollMap: EOF without closing brace");
                         return 0;
                     }
                     if (!strcmp(token, "}"))
@@ -1159,12 +1159,12 @@ PhysGeomList *__cdecl Xmodel_ParsePhysicsCollMap(
                             break;
                         if (!strcmp(token, "curve"))
                         {
-                            Com_PrintError(19, "ERROR: cannot have curves in collision maps");
+                            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: cannot have curves in collision maps");
                             return 0;
                         }
                         if (!strcmp(token, "mesh"))
                         {
-                            Com_PrintError(19, "ERROR: cannot have patch terrain in collision maps");
+                            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: cannot have patch terrain in collision maps");
                             return 0;
                         }
                         if (!strcmp(token, "physics_cylinder"))
@@ -1276,19 +1276,19 @@ PhysGeomList *__cdecl Xmodel_ParsePhysicsCollMap(
             else
             {
                 CurrentParseLine = Com_GetCurrentParseLine();
-                Com_PrintError(19, "ERROR: ParsePhysicsCollMap: { not found, found %s on line %d", token, CurrentParseLine);
+                Com_PrintError(CON_CHANNEL_ANIM, "ERROR: ParsePhysicsCollMap: { not found, found %s on line %d", token, CurrentParseLine);
                 return 0;
             }
         }
         else
         {
-            Com_PrintError(19, "ERROR: '%s' is version '%s'; should be version '%i'\n", name, token, 4);
+            Com_PrintError(CON_CHANNEL_ANIM, "ERROR: '%s' is version '%s'; should be version '%i'\n", name, token, 4);
             return 0;
         }
     }
     else
     {
-        Com_PrintError(19, "ERROR: '%s' is missing 'iwmap' version specification\n", name);
+        Com_PrintError(CON_CHANNEL_ANIM, "ERROR: '%s' is missing 'iwmap' version specification\n", name);
         return 0;
     }
 }
@@ -1329,7 +1329,7 @@ PhysGeomList *__cdecl XModel_LoadPhysicsCollMap(const char *name, void *(__cdecl
             }
             else
             {
-                Com_PrintError(19, "ERROR: physics collmap '%s' has 0 length\n", name);
+                Com_PrintError(CON_CHANNEL_ANIM, "ERROR: physics collmap '%s' has 0 length\n", name);
                 FS_FreeFile((char*)file);
                 return 0;
             }
@@ -1343,7 +1343,7 @@ PhysGeomList *__cdecl XModel_LoadPhysicsCollMap(const char *name, void *(__cdecl
     }
     else
     {
-        Com_PrintError(19, "ERROR: filename '%s' too long\n", filename);
+        Com_PrintError(CON_CHANNEL_ANIM, "ERROR: filename '%s' too long\n", filename);
         return 0;
     }
 }

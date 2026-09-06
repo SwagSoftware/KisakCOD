@@ -549,11 +549,11 @@ _D3DFORMAT __cdecl R_InitFrameBufferRenderTarget()
     R_InitFrameBufferRenderTarget_Win32(&gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER]);
     R_ShareRenderTarget(R_RENDERTARGET_FRAME_BUFFER, R_RENDERTARGET_SCENE);
     v0 = R_DescribeFormat(D3DFMT_A8R8G8B8);
-    Com_Printf(8, "Requested frame buffer to be %s\n", v0);
+    Com_Printf(CON_CHANNEL_GFX, "Requested frame buffer to be %s\n", v0);
     gfxRenderTargets[R_RENDERTARGET_FRAME_BUFFER].surface.color->GetDesc(&surfaceDesc);
     iassert( surfaceDesc.Format != D3DFMT_UNKNOWN );
     v1 = R_DescribeFormat(surfaceDesc.Format);
-    Com_Printf(8, "DirectX returned a frame buffer that is %s\n", v1);
+    Com_Printf(CON_CHANNEL_GFX, "DirectX returned a frame buffer that is %s\n", v1);
     if (!g_allocateMinimalResources)
         R_InitFullscreenRenderTargetImage(
             9,

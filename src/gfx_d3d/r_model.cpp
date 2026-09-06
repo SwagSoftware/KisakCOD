@@ -95,11 +95,11 @@ void __cdecl R_ModelList_f()
     DB_EnumXAssets(ASSET_TYPE_XMODEL, (void(__cdecl *)(XAssetHeader, void *))R_GetModelList, &inData, 1);
     //std::_Sort<XModel **, int, bool(__cdecl *)(XModel *&, XModel *&)>(v4, &v4[inData], (4 * inData) >> 2, R_ModelSort);
     std::sort(&v4[0], &v4[inData], R_ModelSort);
-    Com_Printf(8, "---------------------------\n");
-    Com_Printf(8, "SM# is the number of static model instances\n");
-    Com_Printf(8, "instKB is static model instance usage\n");
-    Com_Printf(8, "DE# is the number of dyn entity instances\n");
-    Com_Printf(8, "   SM#  instKB   DE#   geoKB  name\n");
+    Com_Printf(CON_CHANNEL_GFX, "---------------------------\n");
+    Com_Printf(CON_CHANNEL_GFX, "SM# is the number of static model instances\n");
+    Com_Printf(CON_CHANNEL_GFX, "instKB is static model instance usage\n");
+    Com_Printf(CON_CHANNEL_GFX, "DE# is the number of dyn entity instances\n");
+    Com_Printf(CON_CHANNEL_GFX, "   SM#  instKB   DE#   geoKB  name\n");
     for (i = 0; i < inData; ++i)
     {
         model = v4[i];
@@ -110,36 +110,36 @@ void __cdecl R_ModelList_f()
         {
             v6 += MemoryUsage;
             v12 = (double)MemoryUsage / 1024.0;
-            Com_Printf(8, "  %4i  ", modelCount);
+            Com_Printf(CON_CHANNEL_GFX, "  %4i  ", modelCount);
             if (v12 >= 10.0)
                 fmt = "%6.0f";
             else
                 fmt = "%6.1f";
-            Com_Printf(8, fmt, v12);
+            Com_Printf(CON_CHANNEL_GFX, fmt, v12);
         }
         else
         {
-            Com_Printf(8, "              ");
+            Com_Printf(CON_CHANNEL_GFX, "              ");
         }
         XModelUsageCount = DynEnt_GetXModelUsageCount(model);
         if (XModelUsageCount)
-            Com_Printf(8, "  %4i  ", XModelUsageCount);
+            Com_Printf(CON_CHANNEL_GFX, "  %4i  ", XModelUsageCount);
         else
-            Com_Printf(8, "        ");
+            Com_Printf(CON_CHANNEL_GFX, "        ");
         v12 = (double)MemUsage / 1024.0;
         if (v12 >= 10.0)
             v1 = "%6.0f";
         else
             v1 = "%6.1f";
-        Com_Printf(8, v1, v12);
+        Com_Printf(CON_CHANNEL_GFX, v1, v12);
         Name = XModelGetName(model);
-        Com_Printf(8, "  %s\n", Name);
+        Com_Printf(CON_CHANNEL_GFX, "  %s\n", Name);
     }
-    Com_Printf(8, "---------------------------\n");
-    Com_Printf(8, "current inst total  %4.1f MB\n", (double)v6 / 1048576.0);
-    Com_Printf(8, "current geo total   %4.1f MB\n", (double)v7 / 1048576.0);
-    Com_Printf(8, "current total       %4.1f MB\n", (double)(v7 + v6) / 1048576.0);
-    Com_Printf(8, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
+    Com_Printf(CON_CHANNEL_GFX, "---------------------------\n");
+    Com_Printf(CON_CHANNEL_GFX, "current inst total  %4.1f MB\n", (double)v6 / 1048576.0);
+    Com_Printf(CON_CHANNEL_GFX, "current geo total   %4.1f MB\n", (double)v7 / 1048576.0);
+    Com_Printf(CON_CHANNEL_GFX, "current total       %4.1f MB\n", (double)(v7 + v6) / 1048576.0);
+    Com_Printf(CON_CHANNEL_GFX, "Related commands: meminfo, imagelist, gfx_world, gfx_model, cg_drawfps, com_statmon, tempmeminfo\n");
 }
 
 void __cdecl R_GetModelList(XAssetHeader header, XAssetHeader *data)
