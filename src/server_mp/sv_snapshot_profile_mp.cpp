@@ -494,7 +494,7 @@ void __cdecl SV_AnalyzePacketData(int clientNum, const msg_t *msg)
     const char *type; // [esp+20h] [ebp-4h]
 
     if (sv_debugPacketContents->current.enabled
-        || msg->cursize > largestSize && svs.clients[clientNum].ping < 999 && svs.clients[clientNum].header.state == 4)
+        || msg->cursize > largestSize && svs.clients[clientNum].ping < 999 && svs.clients[clientNum].header.state == CS_ACTIVE)
     {
         largestSize = msg->cursize;
         Com_Printf(15, "Client %s's snapshot\n", svs.clients[clientNum].name);

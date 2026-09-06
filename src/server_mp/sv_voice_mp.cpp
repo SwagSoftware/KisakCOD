@@ -176,7 +176,7 @@ void __cdecl SV_PreGameUserVoice(client_t *cl, msg_t *msg)
             for (otherPlayer = 0; otherPlayer < 64; ++otherPlayer)
             {
                 if (otherPlayer != talker
-                    && svs.clients[otherPlayer].header.state >= 2
+                    && svs.clients[otherPlayer].header.state >= CS_CONNECTED
                     && !SV_ClientHasClientMuted(otherPlayer, talker)
                     && SV_ClientWantsVoiceData(otherPlayer))
                 {

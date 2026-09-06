@@ -64,7 +64,7 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
     frame = remoteFrame;
     if (!remoteFrame)
         MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 523, 0, "%s", "frame");
-    if (client->header.deltaMessage > 0 && client->header.state == 4)
+    if (client->header.deltaMessage > 0 && client->header.state == CS_ACTIVE)
     {
         if (client->header.netchan.outgoingSequence - client->header.deltaMessage < 29)
         {
@@ -128,11 +128,11 @@ void __cdecl SV_WriteSnapshotToClient(client_t *client, msg_t *msg)
     if (client->header.rateDelayed)
         snapFlags |= 1u;
     sendAsActive = client->header.sendAsActive;
-    if (client->header.state == 4)
+    if (client->header.state == CS_ACTIVE)
     {
         sendAsActive = 1;
     }
-    else if (client->header.state != 1)
+    else if (client->header.state != CS_ZOMBIE)
     {
         sendAsActive = 0;
     }
@@ -979,7 +979,7 @@ cachedSnapshot_t *__cdecl SV_GetCachedSnapshotInternal(int archivedFrame)
 
 int __cdecl SV_GetCurrentClientInfo(int clientNum, playerState_s *ps, clientState_s *cs)
 {
-    if (svs.clients[clientNum].header.state != 4)
+    if (svs.clients[clientNum].header.state != CS_ACTIVE)
         return 0;
     if (!GetFollowPlayerState(clientNum, ps))
         return 0;
@@ -1015,7 +1015,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
     v5->num_clients = 0;
     if (client->gentity)
     {
-        if (client->header.state != 1)
+        if (client->header.state != CS_ZOMBIE)
         {
             v5->first_entity = svs.nextSnapshotEntities;
             v5->first_client = svs.nextSnapshotClients;
@@ -1120,7 +1120,7 @@ void __cdecl SV_BuildClientSnapshot(client_t *client)
                     clients = svs.clients;
                     while (i < sv_maxclients->current.integer)
                     {
-                        if (clients->header.state >= 2)
+                        if (clients->header.state >= CS_CONNECTED)
                         {
                             v9 = &svs.snapshotClients[svs.nextSnapshotClients % svs.numSnapshotClients];
                             ClientState = G_GetClientState(i);
@@ -1325,7 +1325,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
         MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1916, 0, "%s", "msg->cursize >= SV_ENCODE_START");
     *(uint32_t *)svCompressedBuf = *(uint32_t *)msg->data;
     compressedSize = MSG_WriteBitsCompress(
-        client->header.state == 4,
+        client->header.state == CS_ACTIVE,
         (const uint8_t *)msg->data + 4,
         svCompressedBuf + 4,
         msg->cursize - 4,
@@ -1346,7 +1346,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
         SV_DropClient(client, client->dropReason, 1);
         if (client->dropReason)
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1926, 0, "%s", "!client->dropReason");
-        if (client->header.state != 1)
+        if (client->header.state != CS_ZOMBIE)
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1927, 0, "%s", "client->header.state == CS_ZOMBIE");
     }
     client->frames[client->header.netchan.outgoingSequence & 0x1F].messageSize = compressedSize;
@@ -1354,7 +1354,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
     client->frames[client->header.netchan.outgoingSequence & 0x1F].messageAcked = -1;
     lastFrame = client->header.netchan.outgoingSequence - client->header.deltaMessage;
     SV_Netchan_Transmit(client, svCompressedBuf, compressedSize);
-    if (client->header.state == 4 && client->header.deltaMessage >= 0 && lastFrame >= 29)
+    if (client->header.state == CS_ACTIVE && client->header.deltaMessage >= 0 && lastFrame >= 29)
     {
         if (client->snapshotBackoffCount < 0)
             MyAssertHandler(".\\server_mp\\sv_snapshot_mp.cpp", 1951, 0, "%s", "client->snapshotBackoffCount >= 0");
@@ -1388,7 +1388,7 @@ void __cdecl SV_SendMessageToClient(msg_t *msg, client_t *client)
                 client->header.rateDelayed = 0;
             }
             client->nextSnapshotTime = rateMsec + svs.time;
-            if (client->header.state != 4 && !client->downloadName[0] && client->nextSnapshotTime < svs.time + 1000)
+            if (client->header.state != CS_ACTIVE && !client->downloadName[0] && client->nextSnapshotTime < svs.time + 1000)
                 client->nextSnapshotTime = svs.time + 1000;
             sv.bpsTotalBytes += compressedSize;
         }
@@ -1448,7 +1448,7 @@ void __cdecl SV_BeginClientSnapshot(client_t *client, msg_t *msg)
     SV_ResetPacketData(clientNum, msg);
     SV_PacketDataIsHeader(clientNum, msg);
     MSG_WriteLong(msg, client->lastClientCommand);
-    if (client->header.state == 4 || client->header.state == 1)
+    if (client->header.state == CS_ACTIVE || client->header.state == CS_ZOMBIE)
     {
         SV_PacketDataIsReliableData(clientNum, msg);
         SV_UpdateServerCommandsToClient(client, msg);
@@ -1645,14 +1645,14 @@ void __cdecl SV_EndClientSnapshot(client_t *client, msg_t *msg)
             "(clientNum >= 0 && clientNum < 64)",
             clientNum);
     SV_PacketDataIsUnknown(clientNum, msg);
-    if (client->header.state != 1)
+    if (client->header.state != CS_ZOMBIE)
         SV_WriteDownloadToClient(client, msg);
     SV_PacketDataIsHeader(clientNum, msg);
     MSG_WriteByte(msg, 7u);
     if (msg->overflowed)
     {
         Com_PrintWarning(15, "WARNING: msg overflowed for %s, trying to recover\n", client->name);
-        if (client->header.state == 4 || client->header.state == 1)
+        if (client->header.state == CS_ACTIVE || client->header.state == CS_ZOMBIE)
         {
             SV_PrintServerCommandsForClient(client);
             MSG_Init(msg, tempSnapshotMsgBuf, 0x20000);
@@ -1870,7 +1870,7 @@ void __cdecl SV_SendClientVoiceData(client_t *client)
     msg_buf = msg_buf_large_local.GetBuf();
     if (client->voicePacketCount < 0)
         MyAssertHandler(".\\server_mp\\sv_voice_mp.cpp", 66, 0, "%s", "client->voicePacketCount >= 0");
-    if (client->header.state == 4 && client->voicePacketCount)
+    if (client->header.state == CS_ACTIVE && client->voicePacketCount)
     {
         MSG_Init(&msg, msg_buf, 0x20000);
         if (msg.cursize)
@@ -1935,7 +1935,7 @@ void __cdecl SV_SendClientMessages()
             else
             {
                 valid[i] = 1;
-                if (c->header.state == 4 || c->header.state == 1)
+                if (c->header.state == CS_ACTIVE || c->header.state == CS_ZOMBIE)
                 {
                     PROF_SCOPED("SV_BuildClientSnapshot");
                     SV_BuildClientSnapshot(c);
@@ -1955,7 +1955,7 @@ void __cdecl SV_SendClientMessages()
             {
                 PROF_SCOPED("SV_SendClientSnapshot");
                 SV_BeginClientSnapshot(ca, &msg);
-                if (ca->header.state == 4 || ca->header.state == 1)
+                if (ca->header.state == CS_ACTIVE || ca->header.state == CS_ZOMBIE)
                     SV_WriteSnapshotToClient(ca, &msg);
                 SV_EndClientSnapshot(ca, &msg);
             }

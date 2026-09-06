@@ -360,7 +360,7 @@ void __cdecl SV_SetClientStat(int clientNum, int index, uint32_t value)
             0,
             "%s",
             "svs.clients[clientNum].statPacketsReceived == ( 1 << MAX_STATPACKETS ) - 1");
-    if (svs.clients[clientNum].header.state < 2)
+    if (svs.clients[clientNum].header.state < CS_CONNECTED)
         MyAssertHandler(
             ".\\server_mp\\sv_client_mp.cpp",
             336,
@@ -407,7 +407,7 @@ int __cdecl SV_GetClientStat(int clientNum, int index)
             0,
             "%s",
             "svs.clients[clientNum].statPacketsReceived == ( 1 << MAX_STATPACKETS ) - 1");
-    if (svs.clients[clientNum].header.state < 2)
+    if (svs.clients[clientNum].header.state < CS_CONNECTED)
         MyAssertHandler(
             ".\\server_mp\\sv_client_mp.cpp",
             370,
@@ -553,7 +553,7 @@ void __cdecl SV_CloseDownload(client_t *cl)
 
 void __cdecl SV_FreeClient(client_t *cl)
 {
-    if (cl->header.state < 2)
+    if (cl->header.state < CS_CONNECTED)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 686, 0, "%s", "cl->header.state >= CS_CONNECTED");
     SV_CloseDownload(cl);
     if (SV_Loaded())
@@ -571,7 +571,7 @@ void __cdecl SV_FreeClients()
     clients = svs.clients;
     while (i < sv_maxclients->current.integer)
     {
-        if (clients->header.state >= 2)
+        if (clients->header.state >= CS_CONNECTED)
             SV_FreeClient(clients);
         ++i;
         ++clients;
@@ -707,7 +707,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
         clients = svs.clients;
         while (i < sv_maxclients->current.integer)
         {
-            if (clients->header.state
+            if (clients->header.state != CS_FREE
                 && NET_CompareBaseAdr(from, clients->header.netchan.remoteAddress)
                 && (clients->header.netchan.qport == qport || from.port == clients->header.netchan.remoteAddress.port))
             {
@@ -740,7 +740,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
         for (i = startIndex; i < sv_maxclients->current.integer; ++i)
         {
             clients = &svs.clients[i];
-            if (!clients->header.state)
+            if (clients->header.state == CS_FREE)
             {
                 newcl = clients;
                 break;
@@ -805,7 +805,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
                 newcl->name,
                 clientNum,
                 newcl->cdkeyHash);
-            newcl->header.state = 2;
+            newcl->header.state = CS_CONNECTED;
             newcl->nextSnapshotTime = svs.time;
             newcl->lastPacketTime = svs.time;
             newcl->lastConnectTime = svs.time;
@@ -822,7 +822,7 @@ void __cdecl SV_DirectConnect(netadr_t from)
             clients = svs.clients;
             while (i < sv_maxclients->current.integer)
             {
-                if (svs.clients[i].header.state >= 2)
+                if (svs.clients[i].header.state >= CS_CONNECTED)
                     ++count;
                 ++i;
                 ++clients;
@@ -843,7 +843,7 @@ void __cdecl SV_FreeClientScriptPers()
     clients = svs.clients;
     while (i < sv_maxclients->current.integer)
     {
-        if (clients->header.state >= 2)
+        if (clients->header.state >= CS_CONNECTED)
         {
             SV_FreeClientScriptId(clients);
             scriptId = Scr_AllocArray();
@@ -873,11 +873,11 @@ void __cdecl SV_SendDisconnect(
 
     if (!client)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1221, 0, "%s", "client");
-    if (state < 2)
+    if (state < CS_CONNECTED)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1222, 0, "%s\n\t(state) = %i", "(state >= CS_CONNECTED)", state);
     if (!reason)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1223, 0, "%s", "reason");
-    if (state == 4)
+    if (state == CS_ACTIVE)
     {
         if (translationForReason)
             SV_SendServerCommand(client, SV_CMD_RELIABLE, "%c \"%s\"", 119, reason);
@@ -886,7 +886,7 @@ void __cdecl SV_SendDisconnect(
     }
     else
     {
-        if (state != 2 && state != 3)
+        if (state != CS_CONNECTED && state != CS_CLIENTLOADING)
             MyAssertHandler(
                 ".\\server_mp\\sv_client_mp.cpp",
                 1242,
@@ -919,10 +919,10 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
     }
     // LWSS END
 
-    if (!drop->header.state)
+    if (drop->header.state == CS_FREE)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1267, 0, "%s", "drop->header.state != CS_FREE");
     dropState = drop->header.state;
-    if (drop->header.state == 1)
+    if (drop->header.state == CS_ZOMBIE)
     {
         if (drop->dropReason)
             MyAssertHandler(
@@ -936,7 +936,7 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
     else
     {
         drop->dropReason = 0;
-        if (dropState < 2)
+        if (dropState < CS_CONNECTED)
             MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1276, 0, "%s", "dropState >= CS_CONNECTED");
         name = drop->name;
         v4 = droppedClientName;
@@ -947,7 +947,7 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
         } while (v3);
         Com_DPrintf(15, "Going to CS_ZOMBIE from %i for %s\n", dropState, droppedClientName);
         SV_FreeClient(drop);
-        drop->header.state = 1;
+        drop->header.state = CS_ZOMBIE;
         if (!drop->gentity)
         {
             challenge = svs.challenges;
@@ -983,7 +983,7 @@ void __cdecl SV_DropClient(client_t *drop, const char *reason, bool tellThem)
         SV_SendServerCommand(0, SV_CMD_RELIABLE, "%c %d", 75, drop - svs.clients);
         if (tellThem)
             SV_SendDisconnect(drop, dropState, reason, translationForReason, droppedClientName);
-        for (i = 0; i < sv_maxclients->current.integer && svs.clients[i].header.state < 2; ++i)
+        for (i = 0; i < sv_maxclients->current.integer && svs.clients[i].header.state < CS_CONNECTED; ++i)
             ;
         if (i == sv_maxclients->current.integer)
             SV_Heartbeat_f();
@@ -996,9 +996,9 @@ void __cdecl SV_DelayDropClient(client_t *drop, const char *reason)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1356, 0, "%s", "drop");
     if (!reason)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1357, 0, "%s", "reason");
-    if (!drop->header.state)
+    if (drop->header.state == CS_FREE)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 1359, 0, "%s", "drop->header.state != CS_FREE");
-    if (drop->header.state == 1)
+    if (drop->header.state == CS_ZOMBIE)
     {
         if (drop->dropReason)
             MyAssertHandler(
@@ -1034,7 +1034,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
     int clientNum; // [esp+19Ch] [ebp-8h]
     int totalStringSize; // [esp+1A0h] [ebp-4h]
 
-    while (client->header.state && client->header.netchan.unsentFragments)
+    while (client->header.state != CS_FREE && client->header.netchan.unsentFragments)
         SV_Netchan_TransmitNextFragment(client, &client->header.netchan);
     if (client->bIsTestClient)
     {
@@ -1050,7 +1050,7 @@ void __cdecl SV_SendClientGameState(client_t *client)
     SV_SetServerStaticHeader();
     Com_DPrintf(15, "SV_SendClientGameState() for %s\n", client->name);
     Com_DPrintf(15, "Going from CS_CONNECTED to CS_CLIENTLOADING for %s\n", client->name);
-    client->header.state = 3;
+    client->header.state = CS_CLIENTLOADING;
     client->pureAuthentic = 0;
     client->gamestateMessageNum = client->header.netchan.outgoingSequence;
     MSG_Init(&msg, msgBuffer_0, 0x20000);
@@ -1211,7 +1211,7 @@ void __cdecl SV_ClientEnterWorld(client_t *client, usercmd_s *cmd)
     gentity_s *v2; // eax
 
     Com_DPrintf(15, "Going from CS_CLIENTLOADING to CS_ACTIVE for %s\n", client->name);
-    client->header.state = 4;
+    client->header.state = CS_ACTIVE;
     v2 = SV_GentityNum(client - svs.clients);
     v2->s.number = client - svs.clients;
     client->gentity = v2;
@@ -1311,7 +1311,7 @@ void __cdecl SV_ClientThink(client_t *cl, usercmd_s *cmd)
     if (cmd->serverTime - svs.time <= 20000)
     {
         memcpy(&cl->lastUsercmd, cmd, sizeof(cl->lastUsercmd));
-        if (cl->header.state == 4)
+        if (cl->header.state == CS_ACTIVE)
         {
             if ((uint32_t)(cl - svs.clients) >= 0x40)
                 MyAssertHandler(
@@ -1436,19 +1436,19 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
                         Com_Printf(15, "---- %i Client Info\n", cl - svs.clients);
                         switch (cl->header.state)
                         {
-                        case 0:
+                        case CS_FREE:
                             Com_Printf(15, "state: %s\n", "free");
                             break;
-                        case 1:
+                        case CS_ZOMBIE:
                             Com_Printf(15, "state: %s\n", "zombie");
                             break;
-                        case 2:
+                        case CS_CONNECTED:
                             Com_Printf(15, "state: %s\n", "connected");
                             break;
-                        case 3:
+                        case CS_CLIENTLOADING:
                             Com_Printf(15, "state: %s\n", "clientloading");
                             break;
-                        case 4:
+                        case CS_ACTIVE:
                             Com_Printf(15, "state: %s\n", "active");
                             break;
                         default:
@@ -1516,11 +1516,11 @@ void __cdecl SV_UserMove(client_t *cl, msg_t *msg, int delta)
                 }
                 if (cl->frames[cl->messageAcknowledge & 0x1F].messageAcked <= 0)
                     cl->frames[cl->messageAcknowledge & 0x1F].messageAcked = Sys_Milliseconds();
-                if (cl->header.state == 3)
+                if (cl->header.state == CS_CLIENTLOADING)
                     SV_ClientEnterWorld(cl, cmds);
                 if (!sv_pure->current.enabled || cl->pureAuthentic)
                 {
-                    if (cl->header.state == 4)
+                    if (cl->header.state == CS_ACTIVE)
                     {
                         for (i = 0; i < cmdCount; ++i)
                         {
@@ -1577,7 +1577,7 @@ int __cdecl SV_ProcessClientCommands(client_t *cl, msg_t *msg, int fromOldServer
             return 1;
         if (!SV_ClientCommand(cl, msg, fromOldServer))
             return 0;
-    } while (cl->header.state != 1);
+    } while (cl->header.state != CS_ZOMBIE);
     return 0;
 }
 
@@ -1603,23 +1603,23 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
     {
         if (SV_ProcessClientCommands(cl, &msgCompressed, 0, &c))
         {
-            if (sv_pure->current.enabled && cl->pureAuthentic == 2 && cl->header.state >= 4)
+            if (sv_pure->current.enabled && cl->pureAuthentic == 2 && cl->header.state >= CS_ACTIVE)
             {
                 cl->nextSnapshotTime = -1;
                 SV_DropClient(cl, "EXE_UNPURECLIENTDETECTED", 1);
-                cl->header.state = 4;
-                if (cl->header.state == 4 || cl->header.state == 1)
+                cl->header.state = CS_ACTIVE;
+                if (cl->header.state == CS_ACTIVE || cl->header.state == CS_ZOMBIE)
                 {
                     PROF_SCOPED("SV_BuildClientSnapshot");
                     SV_BuildClientSnapshot(cl);
                 }
                 SV_SetServerStaticHeader();
                 SV_BeginClientSnapshot(cl, &v2);
-                if (cl->header.state == 4 || cl->header.state == 1)
+                if (cl->header.state == CS_ACTIVE || cl->header.state == CS_ZOMBIE)
                     SV_WriteSnapshotToClient(cl, &v2);
                 SV_EndClientSnapshot(cl, &v2);
                 SV_GetServerStaticHeader();
-                cl->header.state = 1;
+                cl->header.state = CS_ZOMBIE;
             }
             iassert(bgs == 0);
             {
@@ -1645,7 +1645,7 @@ void __cdecl SV_ExecuteClientMessage(client_t *cl, msg_t *msg)
     }
     else if ((cl->serverId & 0xF0) == (sv_serverId_value & 0xF0))
     {
-        if (cl->header.state == 3)
+        if (cl->header.state == CS_CLIENTLOADING)
             SV_ClientEnterWorld(cl, &cl->lastUsercmd);
     }
     else if (SV_ProcessClientCommands(cl, &msgCompressed, 1, &c))
@@ -1680,7 +1680,7 @@ int __cdecl SV_ClientCommand(client_t *cl, msg_t *msg, int fromOldServer)
         if (!I_strncmp("team ", s, 5) || !I_strncmp("score ", s, 6) || !I_strncmp("mr ", s, 3))
             floodprotect = 0;
         if (fromOldServer
-            || cl->header.state >= 4
+            || cl->header.state >= CS_ACTIVE
             && cl->header.netchan.remoteAddress.type != NA_LOOPBACK
             && sv_floodProtect->current.enabled
             && svs.time < cl->nextReliableTime
@@ -1736,7 +1736,7 @@ gentity_s *__cdecl SV_AddTestClient()
     if (!com_sv_running->current.enabled)
         MyAssertHandler(".\\server_mp\\sv_client_mp.cpp", 3344, 0, "%s", "com_sv_running->current.enabled");
     i = 0;
-    for (client = svs.clients; i < sv_maxclients->current.integer && client->header.state; ++client)
+    for (client = svs.clients; i < sv_maxclients->current.integer && client->header.state != CS_FREE; ++client)
         ++i;
     if (i == sv_maxclients->current.integer)
         return 0;
@@ -1761,7 +1761,7 @@ gentity_s *__cdecl SV_AddTestClient()
     i = 0;
     for (clienta = svs.clients;
         i < sv_maxclients->current.integer
-        && (!clienta->header.state || !NET_CompareBaseAdr(a, clienta->header.netchan.remoteAddress));
+        && (clienta->header.state == CS_FREE || !NET_CompareBaseAdr(a, clienta->header.netchan.remoteAddress));
         ++clienta)
     {
         ++i;

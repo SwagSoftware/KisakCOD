@@ -319,10 +319,10 @@ void __cdecl SV_VoicePacket(netadr_t from, msg_t *msg)
 
     qport = MSG_ReadShort(msg);
     ClientByAddress = SV_FindClientByAddress(from, qport);
-    if (ClientByAddress && ClientByAddress->header.state != 1)
+    if (ClientByAddress && ClientByAddress->header.state != CS_ZOMBIE)
     {
         ClientByAddress->lastPacketTime = svs.time;
-        if (ClientByAddress->header.state >= 4)
+        if (ClientByAddress->header.state >= CS_ACTIVE)
         {
             if (!ClientByAddress->gentity)
                 MyAssertHandler(".\\server_mp\\sv_main_mp.cpp", 534, 0, "%s", "cl->gentity");

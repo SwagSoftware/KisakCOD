@@ -85,7 +85,7 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
                 MSG_ClearLastReferencedEntity(msg);
                 while (v18 < maxclients || v21 < num_clients)
                 {
-                    if (v18 >= maxclients || svsHeader.clients[v18].header.state >= 2)
+                    if (v18 >= maxclients || svsHeader.clients[v18].header.state >= CS_CONNECTED)
                     {
                         if (v21 < num_clients)
                         {
@@ -225,7 +225,7 @@ void __cdecl SV_ArchiveSnapshot(msg_t *msg)
     clients = svsHeader.clients;
     while (i < svsHeader.maxclients)
     {
-        if (clients->header.state >= 2)
+        if (clients->header.state >= CS_CONNECTED)
         {
             v37 = &svsHeader.cachedSnapshotClients[svsHeader.nextCachedSnapshotClients % 4096];
             v6 = G_GetClientStateLocal(i);

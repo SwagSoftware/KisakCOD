@@ -119,7 +119,7 @@ void __cdecl SV_AddServerCommand(client_t *client, svscmd_type type, char *cmd)
 
     if (!client->bIsTestClient)
     {
-        if (client->reliableSequence - client->reliableAcknowledge < 64 && client->header.state == 4
+        if (client->reliableSequence - client->reliableAcknowledge < 64 && client->header.state == CS_ACTIVE
             || (SV_CullIgnorableServerCommands(client), type))
         {
             to = SV_CanReplaceServerCommand(client, cmd);
@@ -274,7 +274,7 @@ void SV_SendServerCommand(client_t *cl, svscmd_type type, const char *fmt, ...)
         client = svs.clients;
         while (j < sv_maxclients->current.integer)
         {
-            if (client->header.state >= 3)
+            if (client->header.state >= CS_CLIENTLOADING)
                 SV_AddServerCommand(client, type, (char *)tempServerCommandBuf);
             ++j;
             ++client;
@@ -358,7 +358,7 @@ void __cdecl SVC_Status(netadr_t from)
     for (num = 0; num < sv_maxclients->current.integer; ++num)
     {
         v13 = &svs.clients[num];
-        if (v13->header.state >= 2)
+        if (v13->header.state >= CS_CONNECTED)
         {
             v23 = SV_GameClientNum(num);
             if (gameInitialized)
@@ -461,7 +461,7 @@ void __cdecl SVC_GameCompleteStatus(netadr_t from)
     for (i = 0; i < sv_maxclients->current.integer; ++i)
     {
         v14 = &svs.clients[i];
-        if (v14->header.state >= 2)
+        if (v14->header.state >= CS_CONNECTED)
         {
             ps = SV_GameClientNum(i);
             name = v14->name;
@@ -521,13 +521,13 @@ void __cdecl SVC_Info(netadr_t from)
     privateClientCount = 0;
     for (i = 0; i < sv_privateClients->current.integer; ++i)
     {
-        if (svs.clients[i].header.state >= 2)
+        if (svs.clients[i].header.state >= CS_CONNECTED)
             ++privateClientCount;
     }
     clientCount = privateClientCount;
     for (i = sv_privateClients->current.integer; i < sv_maxclients->current.integer; ++i)
     {
-        if (svs.clients[i].header.state >= 2)
+        if (svs.clients[i].header.state >= CS_CONNECTED)
             ++clientCount;
     }
     infostring[0] = 0;
@@ -768,7 +768,7 @@ void __cdecl SV_PacketEvent(netadr_t from, msg_t *msg)
                     if (reliableDelta >= 0 && reliableDelta < MAX_RELIABLE_COMMANDS)
                     {
                         SV_Netchan_Decode(client, &msg->data[msg->readcount], msg->cursize - msg->readcount);
-                        if (client->header.state != 1)
+                        if (client->header.state != CS_ZOMBIE)
                         {
                             iassert(bgs == 0);
                             client->lastPacketTime = svs.time;
@@ -814,7 +814,7 @@ void __cdecl SV_CalcPings()
     for (i = 0; i < sv_maxclients->current.integer; ++i)
     {
         v1 = &svs.clients[i];
-        if (v1->header.state == 4)
+        if (v1->header.state == CS_ACTIVE)
         {
             if (v1->gentity)
             {
@@ -885,18 +885,18 @@ void __cdecl SV_CheckTimeouts()
             drop->lastPacketTime = svs.time;
         if (!drop->bIsTestClient)
         {
-            if (drop->header.state == 1 && drop->lastPacketTime < zombiepoint)
+            if (drop->header.state == CS_ZOMBIE && drop->lastPacketTime < zombiepoint)
             {
                 Com_DPrintf(15, "Going from CS_ZOMBIE to CS_FREE for client #%i\n", clientNum);
-                drop->header.state = 0;
+                drop->header.state = CS_FREE;
                 drop->lastPacketTime = 0;
             }
-            else if (drop->header.state == 4 && drop->lastPacketTime < droppoint)
+            else if (drop->header.state == CS_ACTIVE && drop->lastPacketTime < droppoint)
             {
                 if (++drop->timeoutCount > 5)
                     SV_DropClient(drop, "EXE_TIMEDOUT", 1);
             }
-            else if (drop->header.state < 2 || drop->lastPacketTime >= connectdroppoint)
+            else if (drop->header.state < CS_CONNECTED || drop->lastPacketTime >= connectdroppoint)
             {
                 drop->timeoutCount = 0;
             }
@@ -923,7 +923,7 @@ int __cdecl SV_CheckPaused()
     clients = svs.clients;
     while (i < sv_maxclients->current.integer)
     {
-        if (clients->header.state >= 2)
+        if (clients->header.state >= CS_CONNECTED)
             ++count;
         ++i;
         ++clients;

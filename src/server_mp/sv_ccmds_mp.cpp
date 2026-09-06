@@ -487,7 +487,7 @@ void __cdecl SV_MapRestart(int fast_restart)
             for (i = 0; i < sv_maxclients->current.integer; ++i)
             {
                 client = &svs.clients[i];
-                if (client->header.state >= 2)
+                if (client->header.state >= CS_CONNECTED)
                     NET_OutOfBandPrint(NS_SERVER, client->header.netchan.remoteAddress, "fastrestart");
             }
             SV_InitDvar();
@@ -508,7 +508,7 @@ void __cdecl SV_MapRestart(int fast_restart)
             for (ib = 0; ib < sv_maxclients->current.integer; ++ib)
             {
                 clienta = &svs.clients[ib];
-                if (clienta->header.state >= 2)
+                if (clienta->header.state >= CS_CONNECTED)
                 {
                     v2 = va("%c", savepersist != 0 ? 110 : 66);
                     SV_AddServerCommand(clienta, SV_CMD_RELIABLE, v2);
@@ -518,7 +518,7 @@ void __cdecl SV_MapRestart(int fast_restart)
                         SV_DropClient(clienta, denied, 1);
                         Com_Printf(0, "SV_MapRestart_f: dropped client %i - denied!\n", ib);
                     }
-                    else if (clienta->header.state == 4)
+                    else if (clienta->header.state == CS_ACTIVE)
                     {
                         SV_ClientEnterWorld(clienta, &clienta->lastUsercmd);
                     }
@@ -935,11 +935,11 @@ void __cdecl SV_Status_f()
                 SV_GameClientNum(i);
                 ClientScore = G_GetClientScore(clients - svs.clients);
                 Com_Printf(0, "%5i ", ClientScore);
-                if (clients->header.state == 2)
+                if (clients->header.state == CS_CONNECTED)
                 {
                     Com_Printf(0, "CNCT ");
                 }
-                else if (clients->header.state == 1)
+                else if (clients->header.state == CS_ZOMBIE)
                 {
                     Com_Printf(0, "ZMBI ");
                 }
@@ -1167,7 +1167,7 @@ void __cdecl SV_ConTell_f()
         {
             v0 = SV_Cmd_Argv(1);
             clientNum = atoi(v0);
-            if (clientNum >= 0 && clientNum < sv_maxclients->current.integer && svs.clients[clientNum].header.state == 4)
+            if (clientNum >= 0 && clientNum < sv_maxclients->current.integer && svs.clients[clientNum].header.state == CS_ACTIVE)
             {
                 SV_AssembleConSayMessage(2, text, 1024);
                 SV_SendServerCommand(&svs.clients[clientNum], SV_CMD_CAN_IGNORE, aC_5, 104, text);
