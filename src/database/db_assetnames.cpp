@@ -270,7 +270,7 @@ int32_t __cdecl DB_GetXAssetTypeSize(int32_t type)
 
 const char *__cdecl DB_GetXAssetTypeName(uint32_t type)
 {
-    if (type > 0x20)
+    if (type >= ASSET_TYPE_COUNT)
         MyAssertHandler(".\\database\\db_assetnames.cpp", 621, 0, "%s", "type >= 0 && type < ASSET_TYPE_COUNT");
     return g_assetNames[type];
 }

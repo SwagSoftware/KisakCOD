@@ -229,7 +229,7 @@ void __cdecl Load_XAsset(bool atStreamStart);
 void __cdecl Mark_XAsset();
 void __cdecl DB_LoadDObjs();
 
-extern const char *g_assetNames[33];
+extern const char *g_assetNames[ASSET_TYPE_COUNT];
 
 extern XAssetEntry *g_copyInfo[0x800];
 extern uint32_t g_copyInfoCount;

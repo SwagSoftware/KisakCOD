@@ -1410,7 +1410,7 @@ void DB_SetReorderIncludeSequence()
     for (entryIter = 0; entryIter < s_dbReorder.entryCount; ++entryIter)
     {
         entry = &s_dbReorder.entries[entryIter];
-        if (entry->type == 33 && !I_strnicmp(entry->typeString, "include", 7))
+        if (entry->type == ASSET_TYPE_STRING && !I_strnicmp(entry->typeString, "include", 7))
             entry->sequence = s_dbReorder.sequenceForIncludes;
     }
 }
@@ -1421,28 +1421,28 @@ bool __cdecl DB_CompareReorderEntries(const DBReorderAssetEntry& e0, const DBReo
 
     if (e0.sequence != e1.sequence)
         return e0.sequence < e1.sequence;
-    if (e0.type == 33)
+    if (e0.type == ASSET_TYPE_STRING)
     {
-        if (e1.type != 33)
+        if (e1.type != ASSET_TYPE_STRING)
             return 1;
         comparison = _stricmp(e0.typeString, e1.typeString);
         if (comparison)
             return comparison < 0;
         return _stricmp(e0.assetName, e1.assetName) < 0;
     }
-    if (e1.type == 33)
+    if (e1.type == ASSET_TYPE_STRING)
         return 0;
     if (e0.type == e1.type)
         return _stricmp(e0.assetName, e1.assetName) < 0;
     if (e0.sequence != -1)
         return e0.type < e1.type;
-    if (e0.type == 7)
+    if (e0.type == ASSET_TYPE_SOUND)
         return 1;
-    if (e1.type == 7)
+    if (e1.type == ASSET_TYPE_SOUND)
         return 0;
-    if (e0.type == 22)
+    if (e0.type == ASSET_TYPE_LOCALIZE_ENTRY)
         return 1;
-    return e1.type != 22 && e0.type < e1.type;
+    return e1.type != ASSET_TYPE_LOCALIZE_ENTRY && e0.type < e1.type;
 }
 
 void DB_EndReorderZone()
@@ -1483,11 +1483,11 @@ void DB_EndReorderZone()
                 {
                     switch (entry->type)
                     {
-                    case 7:
-                    case 0xA:
-                    case 0xB:
-                    case 0x16:
-                    case 0x21:
+                    case ASSET_TYPE_SOUND:
+                    case ASSET_TYPE_CLIPMAP:
+                    case ASSET_TYPE_CLIPMAP_PVS:
+                    case ASSET_TYPE_LOCALIZE_ENTRY:
+                    case ASSET_TYPE_STRING:
                         break;
                     default:
                         wroteBlank = 1;
@@ -1495,14 +1495,14 @@ void DB_EndReorderZone()
                         break;
                     }
                 }
-                if (entry->type == 23)
+                if (entry->type == ASSET_TYPE_WEAPON)
                 {
                     bytesa = Com_sprintf(line, 0x200u, "%s,%s%s\r\n", entry->typeString, "mp/", entry->assetName);
                     WriteFile(file, line, bytesa, &written, 0);
                 }
                 else
                 {
-                    if (entry->type == 7)
+                    if (entry->type == ASSET_TYPE_SOUND)
                         bytes = Com_sprintf(
                             line,
                             0x200u,
@@ -1552,15 +1552,15 @@ void __cdecl DB_RegisteredReorderAsset(int32_t type, const char *assetName, XAss
 
     if (s_dbReorder.entryCount)
     {
-        if (type == 22)
+        if (type == ASSET_TYPE_LOCALIZE_ENTRY)
         {
             if (!s_dbReorder.loadedLocalization)
-                s_dbReorder.loadedLocalization = DB_RegisterAllReorderAssetsOfType(22, assetEntry) != 0;
+                s_dbReorder.loadedLocalization = DB_RegisterAllReorderAssetsOfType(ASSET_TYPE_LOCALIZE_ENTRY, assetEntry) != 0;
         }
-        else if (type == 7)
+        else if (type == ASSET_TYPE_SOUND)
         {
             if (!s_dbReorder.loadedSound)
-                s_dbReorder.loadedSound = DB_RegisterAllReorderAssetsOfType(7, assetEntry) != 0;
+                s_dbReorder.loadedSound = DB_RegisterAllReorderAssetsOfType(ASSET_TYPE_SOUND, assetEntry) != 0;
         }
         else if (!s_dbReorder.lastEntry
             || s_dbReorder.lastEntry->type != type
@@ -1577,7 +1577,7 @@ void __cdecl DB_RegisteredReorderAsset(int32_t type, const char *assetName, XAss
                     if (entry->sequence == -1)
                     {
                         entry->sequence = s_dbReorder.sequence;
-                        if (entry->type == 31)
+                        if (entry->type == ASSET_TYPE_RAWFILE)
                         {
                             extension = Com_GetExtensionSubString(assetName);
                             if (!I_stricmp(extension, ".gsc"))
@@ -2481,9 +2481,9 @@ void __cdecl DB_AddReorderAsset(const char *typeString, const char *assetName)
     int32_t type; // [esp+8h] [ebp-8h]
     uint32_t entryIter; // [esp+Ch] [ebp-4h]
 
-    for (type = 0; type < 33 && _stricmp(typeString, g_assetNames[type]); ++type)
+    for (type = ASSET_TYPE_XMODELPIECES; type < ASSET_TYPE_COUNT && _stricmp(typeString, g_assetNames[type]); ++type)
         ;
-    if (type == 23)
+    if (type == ASSET_TYPE_WEAPON)
     {
         //if (strnicmp(assetName, "mp/", 3u))
         if (_strnicmp(assetName, "mp/", 3u))
@@ -2503,15 +2503,15 @@ void __cdecl DB_AddReorderAsset(const char *typeString, const char *assetName)
     }
     entrya = &s_dbReorder.entries[s_dbReorder.entryCount++];
     entrya->type = type;
-    if (type >= 33)
+    if (type >= ASSET_TYPE_COUNT)
         v2 = _strdup(typeString);
     else
         v2 = (char *)g_assetNames[type];
     entrya->typeString = v2;
     entrya->assetName = _strdup(assetName);
-    if (entrya->type != 33 || I_stricmp(typeString, "ignore"))
+    if (entrya->type != ASSET_TYPE_STRING || I_stricmp(typeString, "ignore"))
     {
-        if (entrya->type == 10 || entrya->type == 11)
+        if (entrya->type == ASSET_TYPE_CLIPMAP || entrya->type == ASSET_TYPE_CLIPMAP_PVS)
             entrya->sequence = 1;
         else
             entrya->sequence = -1;
@@ -2545,7 +2545,7 @@ void __cdecl DB_BeginReorderZone(const char *zoneName)
     {
         entry = &s_dbReorder.entries[entryIter];
         free((void *)entry->assetName);
-        if (entry->type == 33)
+        if (entry->type == ASSET_TYPE_STRING)
             free((void *)entry->typeString);
     }
     s_dbReorder.entryCount = 0;
