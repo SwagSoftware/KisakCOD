@@ -274,7 +274,7 @@ void __cdecl R_AddOmniLightToScene(const float *org, float radius, float r, floa
                 dst = &scene.addedLight[scene.addedLightCount++];
                 memset(&dst->type, 0, sizeof(GfxLight));
                 dst->def = rgp.dlightDef;
-                dst->type = 3;
+                dst->type = GFX_LIGHT_TYPE_OMNI;
                 dst->origin[0] = *org;
                 dst->origin[1] = org[1];
                 dst->origin[2] = org[2];
@@ -332,7 +332,7 @@ void __cdecl R_AddSpotLightToScene(const float *org, const float *dir, float rad
                 spotLightOffset = r_spotLightStartRadius->current.value / v8;
                 memset(&dst->type, 0, sizeof(GfxLight));
                 dst->def = rgp.dlightDef;
-                dst->type = 2;
+                dst->type = GFX_LIGHT_TYPE_SPOT;
                 dst->origin[0] = *org;
                 dst->origin[1] = org[1];
                 dst->origin[2] = org[2];

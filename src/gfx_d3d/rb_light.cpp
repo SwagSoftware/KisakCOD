@@ -1097,7 +1097,7 @@ char __cdecl R_CanLightInfluenceLightGridCorner(
 {
     float gridPos[3]; // [esp+2Ch] [ebp-Ch] BYREF
 
-    if (light->type == 1)
+    if (light->type == GFX_LIGHT_TYPE_DIR)
         return 1;
 
     gridPos[0] = floor(samplePos[0] * 0.03125f) * 32.0f;
@@ -1399,7 +1399,7 @@ uint32_t __cdecl R_GetPrimaryLightForModelVertex(
         if (checkLight[primaryLightIter])
         {
             light = Com_GetPrimaryLight(primaryLightIter);
-            if (light->type != 3 && light->type != 2)
+            if (light->type != GFX_LIGHT_TYPE_OMNI && light->type != GFX_LIGHT_TYPE_SPOT)
                 MyAssertHandler(
                     ".\\rb_light.cpp",
                     1273,
@@ -1412,7 +1412,7 @@ uint32_t __cdecl R_GetPrimaryLightForModelVertex(
             v5 = light->radius * light->radius;
             if (lenSq <= v5)
             {
-                if (light->type == 2)
+                if (light->type == GFX_LIGHT_TYPE_SPOT)
                 {
                     cosHalfFov = light->cosHalfFovExpanded;
                     dot = Vec3Dot(relPoint, light->dir);
@@ -1479,7 +1479,7 @@ uint8_t __cdecl R_GetPrimaryLightForModel(
     for (primaryLightIter = 0; primaryLightIter < primaryLightCount; ++primaryLightIter)
     {
         light = Com_GetPrimaryLight(primaryLightIter);
-        if (light->type && light->type != 1 && !Com_CullBoxFromPrimaryLight(light, boxMidPoint, boxHalfSize))
+        if (light->type != GFX_LIGHT_TYPE_NONE && light->type != GFX_LIGHT_TYPE_DIR && !Com_CullBoxFromPrimaryLight(light, boxMidPoint, boxHalfSize))
         {
             checkLight[primaryLightIter] = 1;
             ++checkCount;

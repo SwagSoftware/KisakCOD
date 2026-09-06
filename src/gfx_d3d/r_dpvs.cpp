@@ -2614,7 +2614,7 @@ bool __cdecl R_CullDynamicSpotLightInCameraView()
 {
     if (!scene.addedLightCount)
         return 1;
-    if (scene.addedLight[0].type != 2)
+    if (scene.addedLight[0].type != GFX_LIGHT_TYPE_SPOT)
         return 1;
     scene.isAddedLightCulled[0] = R_CullPointAndRadius(
         scene.addedLight[0].origin,
@@ -2636,7 +2636,7 @@ void __cdecl R_CullDynamicPointLightsInCameraView()
     for (lightIndex = 0; lightIndex < scene.addedLightCount; ++lightIndex)
     {
         dl = &scene.addedLight[lightIndex];
-        if (dl->type != 2 || lightIndex)
+        if (dl->type != GFX_LIGHT_TYPE_SPOT || lightIndex)
         {
             iassert( dl->type == GFX_LIGHT_TYPE_OMNI );
             scene.isAddedLightCulled[lightIndex] = R_CullPointAndRadius(dl->origin, dl->radius, planes, planeCount);

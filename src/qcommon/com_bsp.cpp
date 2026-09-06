@@ -13,7 +13,7 @@ char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const 
     float distSq; // [esp+2Ch] [ebp-4h]
 
     iassert( light );
-    if (light->type != 2 && light->type != 3)
+    if (light->type != GFX_LIGHT_TYPE_SPOT && light->type != GFX_LIGHT_TYPE_OMNI)
         MyAssertHandler(
             ".\\qcommon\\com_bsp.cpp",
             25,
@@ -27,7 +27,7 @@ char __cdecl Com_CanPrimaryLightAffectPoint(const ComPrimaryLight *light, const 
     v3 = light->radius * light->radius;
     if (distSq >= (double)v3)
         return 0;
-    if (light->type == 3 || light->rotationLimit <= -light->cosHalfFovOuter)
+    if (light->type == GFX_LIGHT_TYPE_OMNI || light->rotationLimit <= -light->cosHalfFovOuter)
         return 1;
     spotDotTimesDist = Vec3Dot(deltaToLight, light->dir);
     if (light->rotationLimit == 1.0)

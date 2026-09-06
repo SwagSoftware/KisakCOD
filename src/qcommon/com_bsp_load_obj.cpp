@@ -269,7 +269,7 @@ ComPrimaryLight *Com_LoadPrimaryLights_Version14()
 
     comWorld.primaryLightCount = 2;
     comWorld.primaryLights = (ComPrimaryLight *)Hunk_Alloc(0x88u, "Com_LoadPrimaryLights", 12);
-    if (comWorld.primaryLights->type)
+    if (comWorld.primaryLights->type != GFX_LIGHT_TYPE_NONE)
         MyAssertHandler(
             ".\\qcommon\\com_bsp_load_obj.cpp",
             508,
@@ -277,7 +277,7 @@ ComPrimaryLight *Com_LoadPrimaryLights_Version14()
             "%s",
             "comWorld.primaryLights[0].type == GFX_LIGHT_TYPE_NONE");
     result = comWorld.primaryLights;
-    comWorld.primaryLights[1].type = 1;
+    comWorld.primaryLights[1].type = GFX_LIGHT_TYPE_DIR;
     return result;
 }
 
@@ -335,7 +335,7 @@ const DiskPrimaryLight_Version16 *Com_LoadPrimaryLights_Version16()
         out->cosHalfFovExpanded = out->cosHalfFovOuter;
         out->rotationLimit = 1.0;
         out->translationLimit = 0.0;
-        if (in->type && in->type != 1)
+        if (in->type != GFX_LIGHT_TYPE_NONE && in->type != GFX_LIGHT_TYPE_DIR)
             out->defName = Com_GetLightDefName((char*)in->defName, comWorld.primaryLights, lightIndex);
         else
             out->defName = 0;
@@ -403,7 +403,7 @@ ComPrimaryLight *Com_LoadPrimaryLights()
         out->cosHalfFovInner = in->cosHalfFovInner;
         out->rotationLimit = in->rotationLimit;
         out->translationLimit = in->translationLimit;
-        if (in->type && in->type != 1)
+        if (in->type != GFX_LIGHT_TYPE_NONE && in->type != GFX_LIGHT_TYPE_DIR)
         {
             out->defName = Com_GetLightDefName((char*)in->defName, comWorld.primaryLights, lightIndex);
             if (out->cosHalfFovOuter >= (double)out->cosHalfFovInner)

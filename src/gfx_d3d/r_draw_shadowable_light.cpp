@@ -57,7 +57,7 @@ void __cdecl R_SetLightProperties(
     source->input.consts[3][3] = 0.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPOTDIR);
 
-    if (light->type == 2 || hasShadowMap == LIGHT_HAS_SHADOWMAP)
+    if (light->type == GFX_LIGHT_TYPE_SPOT || hasShadowMap == LIGHT_HAS_SHADOWMAP)
     {
         iassert(light->cosHalfFovInner > light->cosHalfFovOuter);
         spotDotScale = 1.0 / (light->cosHalfFovInner - light->cosHalfFovOuter);
@@ -113,7 +113,7 @@ void __cdecl R_SetShadowableLight(
                     "shadowableLightIndex doesn't index viewInfo->shadowableLightCount\n\t%i not in [0, %i)",
                     shadowableLightIndex,
                     viewInfo->shadowableLightCount);
-            if (viewInfo->shadowableLights[shadowableLightIndex].type == 1)
+            if (viewInfo->shadowableLights[shadowableLightIndex].type == GFX_LIGHT_TYPE_DIR)
             {
                 if (source->shadowableLightForShadowLookupMatrix != shadowableLightIndex)
                 {

@@ -51,7 +51,7 @@ void __cdecl R_SetUpSunLight(const float *sunColor, const float *sunDirection, G
 {
     iassert( light );
     memset(&light->type, 0, sizeof(GfxLight));
-    light->type = 1;
+    light->type = GFX_LIGHT_TYPE_DIR;
     light->dir[0] = *sunDirection;
     light->dir[1] = sunDirection[1];
     light->dir[2] = sunDirection[2];
@@ -333,7 +333,7 @@ void __cdecl R_LoadPrimaryLights(uint32_t bspVersion)
     {
         iassert( comWorld.isInUse );
         s_world.primaryLightCount = comWorld.primaryLightCount;
-        s_world.sunPrimaryLightIndex = comWorld.primaryLightCount > 1 && Com_GetPrimaryLight(1)->type == 1;
+        s_world.sunPrimaryLightIndex = comWorld.primaryLightCount > 1 && Com_GetPrimaryLight(1)->type == GFX_LIGHT_TYPE_DIR;
         for (lightIndex = 0; lightIndex < s_world.primaryLightCount; ++lightIndex)
         {
             primaryLight = Com_GetPrimaryLight(lightIndex);
