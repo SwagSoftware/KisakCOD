@@ -146,7 +146,7 @@ void __cdecl R_ForceLitTechType(MaterialTechniqueType litTechType)
     uint32_t surfType; // [esp+0h] [ebp-8h]
     uint32_t lightType; // [esp+4h] [ebp-4h]
 
-    for (surfType = 0; surfType < 13; ++surfType)
+    for (surfType = SF_TRIANGLES; surfType < SF_NUM_SURFACE_TYPES; ++surfType)
     {
         for (lightType = 0; lightType < 7; ++lightType)
             gfxDrawMethod.litTechType[surfType][lightType] = litTechType;
@@ -166,7 +166,7 @@ void __cdecl R_UpdateDrawMethod(GfxBackEndData *data, const GfxViewInfo *viewInf
     {
         lightTypea = viewInfo->shadowableLights[primaryLightIndex].type;
         lightType = lightTypea + (Com_BitCheckAssert(data->shadowableLightHasShadowMap, primaryLightIndex, 32) ? 3 : 0);
-        for (surfType = 0; surfType < 13; ++surfType)
+        for (surfType = SF_TRIANGLES; surfType < SF_NUM_SURFACE_TYPES; ++surfType)
             data->primaryLightTechType[surfType][primaryLightIndex] = gfxDrawMethod.litTechType[surfType][lightType];
     }
 }

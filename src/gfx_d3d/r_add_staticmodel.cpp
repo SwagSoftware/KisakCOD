@@ -295,8 +295,8 @@ void __cdecl R_AddAllStaticModelSurfacesCamera()
                 allocatedLighting = 1;
                 lodData[(uint32_t)smodelIndex >> 4] |= lod << (2 * (smodelIndex & 0xF));
                 StaticModelId = R_GetStaticModelId(smodelIndex, lod);
-                count = &staticModelLodCount[StaticModelId.surfType - 2][lod];
-                list = staticModelLodList[StaticModelId.surfType - 2][lod];
+                count = &staticModelLodCount[StaticModelId.surfType - SF_BEGIN_STATICMODEL][lod];
+                list = staticModelLodList[StaticModelId.surfType - SF_BEGIN_STATICMODEL][lod];
                 entryCount = *count;
                 list[entryCount++] = StaticModelId.objectId;
                 if (entryCount >= 128)
@@ -413,13 +413,13 @@ void __cdecl R_SkinStaticModelsCamera(
 {
     uint32_t surfTypeIndex; // [esp+0h] [ebp-4h]
 
-    for (surfTypeIndex = 0; surfTypeIndex < 4; ++surfTypeIndex)
+    for (surfTypeIndex = 0; surfTypeIndex < SF_END_STATICMODEL - SF_BEGIN_STATICMODEL; ++surfTypeIndex)
         R_SkinStaticModelsCameraForSurface(
             model,
             primaryLightIndex,
             (uint16_t (*)[128])(*staticModelLodList)[4 * surfTypeIndex],
             &(*staticModelLodCount)[4 * surfTypeIndex],
-            surfTypeIndex + 2,
+            surfTypeIndex + SF_BEGIN_STATICMODEL,
             surfData);
 }
 
@@ -695,9 +695,9 @@ void __cdecl R_AddAllStaticModelSurfacesRangeSunShadow(uint32_t partitionIndex, 
         {
             allocatedLighting = 1;
             StaticModelId = R_GetStaticModelId(i, lod);
-            iassert(StaticModelId.surfType >= 2 && StaticModelId.surfType < 6); // lwss add
-            count = &staticModelLodCount[StaticModelId.surfType - 2][lod];
-            list = staticModelLodList[StaticModelId.surfType - 2][lod];
+            iassert(StaticModelId.surfType >= SF_BEGIN_STATICMODEL && StaticModelId.surfType < SF_END_STATICMODEL); // lwss add
+            count = &staticModelLodCount[StaticModelId.surfType - SF_BEGIN_STATICMODEL][lod];
+            list = staticModelLodList[StaticModelId.surfType - SF_BEGIN_STATICMODEL][lod];
             entryCount = *count;
             list[entryCount++] = StaticModelId.objectId;
 
@@ -815,12 +815,12 @@ void __cdecl R_SkinStaticModelsShadow(
 {
     uint32_t surfTypeIndex; // [esp+0h] [ebp-4h]
 
-    for (surfTypeIndex = 0; surfTypeIndex < 4; ++surfTypeIndex)
+    for (surfTypeIndex = 0; surfTypeIndex < SF_END_STATICMODEL - SF_BEGIN_STATICMODEL; ++surfTypeIndex)
         R_SkinStaticModelsShadowForSurface(
             model,
             (uint16_t (*)[128])(*staticModelLodList)[4 * surfTypeIndex],
             &(*staticModelLodCount)[4 * surfTypeIndex],
-            surfTypeIndex + 2,
+            surfTypeIndex + SF_BEGIN_STATICMODEL,
             surfData);
 }
 
@@ -923,8 +923,8 @@ void __cdecl R_AddAllStaticModelSurfacesSpotShadow(uint32_t spotShadowIndex, uin
                         }
                         StaticModelId = R_GetStaticModelId(v28, lod);
                         v17 = StaticModelId;
-                        v23 = &staticModelLodCount[StaticModelId.surfType - 2][lod];
-                        list = staticModelLodList[StaticModelId.surfType - 2][lod];
+                        v23 = &staticModelLodCount[StaticModelId.surfType - SF_BEGIN_STATICMODEL][lod];
+                        list = staticModelLodList[StaticModelId.surfType - SF_BEGIN_STATICMODEL][lod];
                         v27 = (uint16_t)*v23;
                         list[v27++] = StaticModelId.objectId;
                         if (v27 >= 0x80)

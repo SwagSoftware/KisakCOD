@@ -710,12 +710,12 @@ GfxDrawSurf *__cdecl R_AddXModelSurfaces(
                 }
                 if (skinnedCachedOffset == -2)
                 {
-                    surfType = 7;
+                    surfType = SF_XMODEL_RIGID;
                 }
                 else
                 {
                     iassert(skinnedCachedOffset == -1);
-                    surfType = 8;
+                    surfType = SF_XMODEL_RIGID_SKINNED;
                 }
 
                 bcassert(surfId, (1 << MTL_SORT_OBJECT_ID_BITS));
@@ -954,7 +954,7 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                 continue;
             if (*(uint32_t *)modelSurf == -2)
             {
-                surfType = 7;
+                surfType = SF_XMODEL_RIGID;
                 surfSize = 56;
             }
             else
@@ -968,7 +968,7 @@ GfxDrawSurf *__cdecl R_AddDObjSurfaces(
                     modelSurf += surfSize;
                     goto LABEL_18;
                 }
-                surfType = 9;
+                surfType = SF_XMODEL_SKINNED;
                 surfSize = 24;
             }
             iassert(*material);
