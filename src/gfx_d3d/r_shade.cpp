@@ -622,7 +622,7 @@ void __cdecl R_SetPassShaderPrimArguments(
     uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
-    while (arg->type == 3)
+    while (arg->type == MTL_ARG_CODE_VERTEX_CONST)
     {
         R_SetVertexShaderConstantFromCode(context, arg++);
         if (!--argCount)
@@ -735,13 +735,13 @@ void __cdecl R_SetPassPixelShaderStableArguments(
     const MaterialConstantDef *constDef; // [esp+10h] [ebp-4h]
 
     material = context.state->material;
-    while (arg->type < 5u)
+    while (arg->type < MTL_ARG_CODE_PIXEL_CONST)
     {
         ++arg;
         if (!--argCount)
             return;
     }
-    while (arg->type == 5)
+    while (arg->type == MTL_ARG_CODE_PIXEL_CONST)
     {
         if (!R_IsPixelShaderConstantUpToDate(context, arg))
             R_SetPixelShaderConstantFromCode(context, arg);
@@ -750,7 +750,7 @@ void __cdecl R_SetPassPixelShaderStableArguments(
             return;
     }
     constDef = material->constantTable;
-    while (arg->type == 6)
+    while (arg->type == MTL_ARG_MATERIAL_PIXEL_CONST)
     {
         while (constDef->nameHash != arg->u.codeSampler)
         {
@@ -771,7 +771,7 @@ void __cdecl R_SetPassPixelShaderStableArguments(
         if (!--argCount)
             return;
     }
-    while (arg->type == 7)
+    while (arg->type == MTL_ARG_LITERAL_PIXEL_CONST)
     {
         R_SetPixelShaderConstantFromLiteral(context.state, arg->dest, arg->u.literalConst);
         ++arg;
@@ -787,7 +787,7 @@ void __cdecl R_SetPassVertexShaderStableArguments(
     uint32_t argCount,
     const MaterialShaderArgument *arg)
 {
-    while (arg->type < 3u)
+    while (arg->type < MTL_ARG_CODE_PRIM_BEGIN)
     {
         ++arg;
         if (!--argCount)
@@ -795,7 +795,7 @@ void __cdecl R_SetPassVertexShaderStableArguments(
     }
     do
     {
-        if (arg->type != 3)
+        if (arg->type != MTL_ARG_CODE_VERTEX_CONST)
             break;
         R_SetVertexShaderConstantFromCode(context, arg++);
         --argCount;
@@ -816,7 +816,7 @@ void __cdecl R_SetPassShaderStableArguments(
 
     material = context.state->material;
     constDef = material->constantTable;
-    while (!arg->type)
+    while (arg->type == MTL_ARG_MATERIAL_VERTEX_CONST)
     {
         while (constDef->nameHash != arg->u.codeSampler)
         {
@@ -837,7 +837,7 @@ void __cdecl R_SetPassShaderStableArguments(
         if (!--argCount)
             return;
     }
-    while (arg->type == 1)
+    while (arg->type == MTL_ARG_LITERAL_VERTEX_CONST)
     {
         R_SetVertexShaderConstantFromLiteral(context.state, arg->dest, arg->u.literalConst);
         ++arg;
@@ -845,13 +845,13 @@ void __cdecl R_SetPassShaderStableArguments(
             return;
     }
     texDef = material->textureTable;
-    while (arg->type == 2)
+    while (arg->type == MTL_ARG_MATERIAL_PIXEL_SAMPLER)
     {
         texDef = R_SetPixelSamplerFromMaterial(context, arg++, texDef);
         if (!--argCount)
             return;
     }
-    while (arg->type == 3)
+    while (arg->type == MTL_ARG_CODE_VERTEX_CONST)
     {
         R_SetVertexShaderConstantFromCode(context, arg++);
         if (!--argCount)
@@ -859,7 +859,7 @@ void __cdecl R_SetPassShaderStableArguments(
     }
     do
     {
-        if (arg->type != 4)
+        if (arg->type != MTL_ARG_CODE_PIXEL_SAMPLER)
             break;
         image = R_GetTextureFromCode(context.source, arg->u.codeSampler, &samplerState);
         if (!image)

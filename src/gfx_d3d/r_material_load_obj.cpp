@@ -2453,8 +2453,8 @@ int __cdecl Material_CompareShaderArgumentsForCombining(uint16_t *e0, uint16_t *
     int v3; // [esp+0h] [ebp-18h]
     int v4; // [esp+4h] [ebp-14h]
 
-    v4 = *e0 == 4 || *e0 == 2;
-    v3 = *e1 == 4 || *e1 == 2;
+    v4 = *e0 == MTL_ARG_CODE_PIXEL_SAMPLER || *e0 == MTL_ARG_MATERIAL_PIXEL_SAMPLER;
+    v3 = *e1 == MTL_ARG_CODE_PIXEL_SAMPLER || *e1 == MTL_ARG_MATERIAL_PIXEL_SAMPLER;
     if (v4 == v3)
         return e0[1] - e1[1];
     else
@@ -2465,7 +2465,7 @@ char __cdecl Material_AttemptCombineShaderArguments(MaterialShaderArgument *arg0
 {
     if (arg0->type != arg1->type)
         return 0;
-    if (arg0->type != 3 && arg0->type != 5)
+    if (arg0->type != MTL_ARG_CODE_VERTEX_CONST && arg0->type != MTL_ARG_CODE_PIXEL_CONST)
         return 0;
     if (arg0->u.codeConst.rowCount + arg0->dest != arg1->dest)
         return 0;
@@ -2602,9 +2602,9 @@ char __cdecl Material_DefaultConstantSourceFromTable(
                 break;
         }
     }
-    argSource->type = 2 * (shaderType != MTL_VERTEX_SHADER) + 3;
+    argSource->type = shaderType == MTL_VERTEX_SHADER ? MTL_ARG_CODE_VERTEX_CONST : MTL_ARG_CODE_PIXEL_CONST;
     argSource->u.codeIndex = sourceTable[sourceIndex].source;
-    if (argSource->type != 3 && !s_codeConstUpdateFreq[argSource->u.codeIndex])
+    if (argSource->type != MTL_ARG_CODE_VERTEX_CONST && !s_codeConstUpdateFreq[argSource->u.codeIndex])
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             2777,
@@ -2644,7 +2644,7 @@ char __cdecl Material_DefaultSamplerSourceFromTable(
             && !strcmp(constantName, sourceTable[sourceIndex].name)
             && Material_DefaultIndexRange(indexRange, sourceTable[sourceIndex].arrayCount, &argSource->indexRange))
         {
-            argSource->type = 4;
+            argSource->type = MTL_ARG_CODE_PIXEL_SAMPLER;
             argSource->u.codeIndex = sourceTable[sourceIndex].source;
             return 1;
         }
@@ -2711,7 +2711,7 @@ char __cdecl MaterialAddShaderArgument(
     MaterialShaderArgument *arg,
     char (*registerUsage)[64])
 {
-    if (arg->type > 1u && arg->type != 3)
+    if (arg->type > MTL_ARG_LITERAL_VERTEX_CONST && arg->type != MTL_ARG_CODE_VERTEX_CONST)
         return 1;
     if (arg->dest < 0x20u)
     {
@@ -2750,7 +2750,7 @@ char __cdecl Material_AddShaderArgumentFromMaterial(
     Material_RegisterString(name);
     arg->type = type;
     arg->dest = dest->resourceDest;
-    if (type == 6 && arg->dest >= 0x100u)
+    if (type == MTL_ARG_MATERIAL_PIXEL_CONST && arg->dest >= 0x100u)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             3141,
@@ -2773,7 +2773,7 @@ char __cdecl Material_AddShaderArgumentFromLiteral(
 {
     arg->type = type;
     arg->dest = dest->resourceDest;
-    if (type == 7 && arg->dest >= 0x100u)
+    if (type == MTL_ARG_LITERAL_PIXEL_CONST && arg->dest >= 0x100u)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             3082,
@@ -2808,7 +2808,7 @@ char __cdecl Material_AddShaderArgumentFromCodeConst(
 {
     arg->type = type;
     arg->dest = dest->resourceDest;
-    if (type == 5 && arg->dest >= 0x100u)
+    if (type == MTL_ARG_CODE_PIXEL_CONST && arg->dest >= 0x100u)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             3100,
@@ -3218,9 +3218,9 @@ bool __cdecl Material_ParseCodeConstantSource_r(
     }
     if (sourceTable[sourceIndex].subtable)
         return Material_ParseCodeConstantSource_r(shaderType, text, offset, sourceTable[sourceIndex].subtable, argSource);
-    argSource->type = 2 * (shaderType != MTL_VERTEX_SHADER) + 3;
+    argSource->type = shaderType == MTL_VERTEX_SHADER ? MTL_ARG_CODE_VERTEX_CONST : MTL_ARG_CODE_PIXEL_CONST;
     argSource->u.codeIndex = offset + sourceTable[sourceIndex].source;
-    if (argSource->type != 3 && !s_codeConstUpdateFreq[argSource->u.codeIndex])
+    if (argSource->type != MTL_ARG_CODE_VERTEX_CONST && !s_codeConstUpdateFreq[argSource->u.codeIndex])
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             2691,
@@ -3534,7 +3534,7 @@ char __cdecl Material_ParseShaderArguments(
                 localArgs,
                 registerUsage))
                 return 0;
-            if (argSource.type == 4)
+            if (argSource.type == MTL_ARG_CODE_PIXEL_SAMPLER)
             {
                 switch (argSource.u.codeIndex)
                 {
@@ -3579,12 +3579,12 @@ char __cdecl Material_ParseShaderArguments(
                 &argDest.indexRange,
                 &argSource))
             {
-                if (argSource.type == 5)
+                if (argSource.type == MTL_ARG_CODE_PIXEL_CONST)
                 {
                     if (argSource.u.codeIndex == 4)
                         *techFlags |= 0x10u;
                 }
-                else if (argSource.type == 4
+                else if (argSource.type == MTL_ARG_CODE_PIXEL_SAMPLER
                     && (argSource.u.codeIndex == 18 || argSource.u.codeIndex == 19 || argSource.u.codeIndex == 20))
                 {
                     *techFlags |= 0x20u;
@@ -3793,7 +3793,8 @@ int __cdecl Material_CompareShaderArgumentsForRuntime(
         return updateFreq - updateFreq_4;
     if (e0->type != e1->type)
         return e0->type - e1->type;
-    if (!e0->type || e0->type == 6 || e0->type == 2)
+    if (e0->type == MTL_ARG_MATERIAL_VERTEX_CONST || e0->type == MTL_ARG_MATERIAL_PIXEL_CONST
+        || e0->type == MTL_ARG_MATERIAL_PIXEL_SAMPLER)
         return e0->u.codeSampler < e1->u.codeSampler ? -1 : 1;
     return e0->dest - e1->dest;
 }
@@ -5428,9 +5429,11 @@ char __cdecl Material_ValidatePassArguments(
 
     for (argIndex = 0; argIndex < argCount; ++argIndex)
     {
-        if (args[argIndex].type && args[argIndex].type != 6)
+        if (args[argIndex].type != MTL_ARG_MATERIAL_VERTEX_CONST
+            && args[argIndex].type != MTL_ARG_MATERIAL_PIXEL_CONST)
         {
-            if (args[argIndex].type == 2 && !Material_HasTexture(mtl, args[argIndex].u.codeSampler))
+            if (args[argIndex].type == MTL_ARG_MATERIAL_PIXEL_SAMPLER
+                && !Material_HasTexture(mtl, args[argIndex].u.codeSampler))
             {
                 argNamea = Material_StringFromHash(args[argIndex].u.codeSampler);
                 Com_PrintError(
@@ -6328,13 +6331,15 @@ void __cdecl R_GetPixelLiteralConsts(
     argCount = pass->stableArgCount;
     if (pass->stableArgCount)
     {
-        for (arg = &pass->args[pass->perPrimArgCount + pass->perObjArgCount]; arg->type < 6u; ++arg)
+        for (arg = &pass->args[pass->perPrimArgCount + pass->perObjArgCount];
+             arg->type < MTL_ARG_MATERIAL_PIXEL_CONST;
+             ++arg)
         {
             if (!--argCount)
                 return;
         }
         constDef = mtl->constantTable;
-        while (arg->type == 6)
+        while (arg->type == MTL_ARG_MATERIAL_PIXEL_CONST)
         {
             while (constDef->nameHash != arg->u.codeSampler)
             {
@@ -6357,7 +6362,7 @@ void __cdecl R_GetPixelLiteralConsts(
         }
         do
         {
-            if (arg->type != 7)
+            if (arg->type != MTL_ARG_LITERAL_PIXEL_CONST)
                 break;
             R_RegisterShaderConst(arg->dest, arg->u.literalConst, pixelLiteralConsts);
             ++arg;
@@ -6386,13 +6391,13 @@ int __cdecl R_ComparePixelConsts(const Material **material, const MaterialPass *
         argCount = pass[i]->stableArgCount;
         if (argCount)
         {
-            while (arg->type < 5u)
+            while (arg->type < MTL_ARG_CODE_PIXEL_CONST)
             {
                 ++arg;
                 if (!--argCount)
                     goto done_2;
             }
-            while (arg->type == 5)
+            while (arg->type == MTL_ARG_CODE_PIXEL_CONST)
             {
                 if (pixelConstsCount[i] >= 0x100)
                     MyAssertHandler(
