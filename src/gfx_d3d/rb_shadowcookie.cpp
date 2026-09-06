@@ -17,10 +17,10 @@ void __cdecl RB_ClearShadowCookieBufferIfNeeded(int firstTime, const float *cook
 void __cdecl RB_SetShadowCookie(const GfxMatrix *lookupMatrix, float fade)
 {
     R_SetShadowLookupMatrix(&gfxCmdBufSourceState, lookupMatrix);
-    gfxCmdBufSourceState.input.consts[8][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[8][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[8][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[8][3] = fade;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_SHADOW_PARMS][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_SHADOW_PARMS][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_SHADOW_PARMS][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_SHADOW_PARMS][3] = fade;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_SHADOW_PARMS);
 }
 

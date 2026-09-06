@@ -33,28 +33,28 @@ void __cdecl R_SetLightProperties(
     Vec3Scale(light->color, r_diffuseColorScale->current.value, diffuseColor);
     Vec3Scale(light->color, r_specularColorScale->current.value, specularColor);
 
-    source->input.consts[0][0] = lightOrigin[0];
-    source->input.consts[0][1] = lightOrigin[1];
-    source->input.consts[0][2] = lightOrigin[2];
-    source->input.consts[0][3] = 1.0 / light->radius;
+    source->input.consts[CONST_SRC_CODE_LIGHT_POSITION][0] = lightOrigin[0];
+    source->input.consts[CONST_SRC_CODE_LIGHT_POSITION][1] = lightOrigin[1];
+    source->input.consts[CONST_SRC_CODE_LIGHT_POSITION][2] = lightOrigin[2];
+    source->input.consts[CONST_SRC_CODE_LIGHT_POSITION][3] = 1.0 / light->radius;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_POSITION);
 
-    source->input.consts[1][0] = diffuseColor[0];
-    source->input.consts[1][1] = diffuseColor[1];
-    source->input.consts[1][2] = diffuseColor[2];
-    source->input.consts[1][3] = 1.0;
+    source->input.consts[CONST_SRC_CODE_LIGHT_DIFFUSE][0] = diffuseColor[0];
+    source->input.consts[CONST_SRC_CODE_LIGHT_DIFFUSE][1] = diffuseColor[1];
+    source->input.consts[CONST_SRC_CODE_LIGHT_DIFFUSE][2] = diffuseColor[2];
+    source->input.consts[CONST_SRC_CODE_LIGHT_DIFFUSE][3] = 1.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_DIFFUSE);
 
-    source->input.consts[2][0] = specularColor[0];
-    source->input.consts[2][1] = specularColor[1];
-    source->input.consts[2][2] = specularColor[2];
-    source->input.consts[2][3] = 1.0;
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPECULAR][0] = specularColor[0];
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPECULAR][1] = specularColor[1];
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPECULAR][2] = specularColor[2];
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPECULAR][3] = 1.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPECULAR);
 
-    source->input.consts[3][0] = light->dir[0];
-    source->input.consts[3][1] = light->dir[1];
-    source->input.consts[3][2] = light->dir[2];
-    source->input.consts[3][3] = 0.0;
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPOTDIR][0] = light->dir[0];
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPOTDIR][1] = light->dir[1];
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPOTDIR][2] = light->dir[2];
+    source->input.consts[CONST_SRC_CODE_LIGHT_SPOTDIR][3] = 0.0;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPOTDIR);
 
     if (light->type == GFX_LIGHT_TYPE_SPOT || hasShadowMap == LIGHT_HAS_SHADOWMAP)
@@ -63,7 +63,7 @@ void __cdecl R_SetLightProperties(
         spotDotScale = 1.0 / (light->cosHalfFovInner - light->cosHalfFovOuter);
         spotDotBias = -spotDotScale * light->cosHalfFovOuter;
         spotExponent = (float)light->exponent;
-        Vec4Set(source->input.consts[4], spotDotScale, spotDotBias, spotExponent, spotShadowFade);
+        Vec4Set(source->input.consts[CONST_SRC_CODE_LIGHT_SPOTFACTORS], spotDotScale, spotDotBias, spotExponent, spotShadowFade);
         R_DirtyCodeConstant(source, CONST_SRC_CODE_LIGHT_SPOTFACTORS);
     }
 }
@@ -149,7 +149,7 @@ void __cdecl R_SetShadowableLight(
                     hasShadowMap = LIGHT_HAS_SHADOWMAP;
                     spotShadowFade = spotShadow->fade;
                     R_SetCodeImageTexture(source, TEXTURE_SRC_CODE_SHADOWMAP_SPOT, spotShadow->image);
-                    if (!Vec4Compare(source->input.consts[50], spotShadow->pixelAdjust))
+                    if (!Vec4Compare(source->input.consts[CONST_SRC_CODE_SPOT_SHADOWMAP_PIXEL_ADJUST], spotShadow->pixelAdjust))
                         R_SetCodeConstantFromVec4(source, CONST_SRC_CODE_SPOT_SHADOWMAP_PIXEL_ADJUST, (float*)spotShadow->pixelAdjust);
                 }
                 R_SetLightProperties(

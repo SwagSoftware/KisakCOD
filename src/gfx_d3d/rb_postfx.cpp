@@ -202,13 +202,13 @@ void __cdecl RB_ApplyMergedPostEffects(const GfxViewInfo *viewInfo)
             viewInfo->dof.farEnd,
             dofEquation,
             viewInfo->viewParms.zNear);
-        if (!Vec4Compare(gfxCmdBufSourceState.input.consts[13], dofEquation))
+        if (!Vec4Compare(gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_DOF_EQUATION_SCENE], dofEquation))
             R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_EQUATION_SCENE, dofEquation);
         RB_GetViewModelDepthOfFieldEquation(viewInfo->dof.viewModelStart, viewInfo->dof.viewModelEnd, dofEquation);
         v11 = viewInfo->dof.farBlur / viewInfo->dof.nearBlur;
         v10 = pow(v11, r_dof_bias->current.value);
         dofEquation[3] = v10;
-        if (!Vec4Compare(gfxCmdBufSourceState.input.consts[12], dofEquation))
+        if (!Vec4Compare(gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_DOF_EQUATION_VIEWMODEL_AND_FAR_BLUR], dofEquation))
             R_SetCodeConstantFromVec4(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_EQUATION_VIEWMODEL_AND_FAR_BLUR, dofEquation);
         v9 = 1.0f / (float)vidConfig.sceneHeight;
         R_UpdateCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_DOF_ROW_DELTA, 0.0, v9, 0.0f, 0.0f);

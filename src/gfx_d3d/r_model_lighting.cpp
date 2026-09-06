@@ -487,13 +487,13 @@ void __cdecl R_SetModelGroundLighting(uint32_t entryIndex, const uint8_t *ground
 
 void __cdecl R_SetModelLightingCoordsForSource(uint16_t handle, GfxCmdBufSourceState *source)
 {
-    R_SetModelLightingCoords(handle, source->input.consts[57]);
+    R_SetModelLightingCoords(handle, source->input.consts[CONST_SRC_CODE_BASE_LIGHTING_COORDS]);
     R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 
 void __cdecl R_SetStaticModelLightingCoordsForSource(uint32_t smodelIndex, GfxCmdBufSourceState *source)
 {
-    R_SetModelLightingCoords(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle, source->input.consts[57]);
+    R_SetModelLightingCoords(rgp.world->dpvs.smodelDrawInsts[smodelIndex].lightingHandle, source->input.consts[CONST_SRC_CODE_BASE_LIGHTING_COORDS]);
     R_DirtyCodeConstant(source, CONST_SRC_CODE_BASE_LIGHTING_COORDS);
 }
 

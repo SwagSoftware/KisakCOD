@@ -63,10 +63,10 @@ void __cdecl R_SetGameTime(GfxCmdBufSourceState *source, float gameTime)
     v3 = fracPartOfGameTime * 6.283185482025146;
     cosOfFracPartOfGameTime = cos(v3);
     sinOfFracPartOfGameTime = sin(v3);
-    source->input.consts[18][0] = sinOfFracPartOfGameTime;
-    source->input.consts[18][1] = cosOfFracPartOfGameTime;
-    source->input.consts[18][2] = fracPartOfGameTime;
-    source->input.consts[18][3] = gameTime;
+    source->input.consts[CONST_SRC_CODE_GAMETIME][0] = sinOfFracPartOfGameTime;
+    source->input.consts[CONST_SRC_CODE_GAMETIME][1] = cosOfFracPartOfGameTime;
+    source->input.consts[CONST_SRC_CODE_GAMETIME][2] = fracPartOfGameTime;
+    source->input.consts[CONST_SRC_CODE_GAMETIME][3] = gameTime;
     R_DirtyCodeConstant(source, CONST_SRC_CODE_GAMETIME);
 }
 

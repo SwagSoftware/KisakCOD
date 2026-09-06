@@ -932,20 +932,20 @@ void RB_ShowFbColorDebug_Feedback()
     R_SetRenderTargetSize(&gfxCmdBufSourceState, R_RENDERTARGET_FRAME_BUFFER);
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
     R_Set2D(&gfxCmdBufSourceState);
-    gfxCmdBufSourceState.input.consts[29][0] = 1.0;
-    gfxCmdBufSourceState.input.consts[29][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][0] = 1.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
-    gfxCmdBufSourceState.input.consts[30][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
-    gfxCmdBufSourceState.input.consts[31][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
@@ -960,20 +960,20 @@ void RB_ShowFbColorDebug_Feedback()
         0xFFFFFFFF,
         GFX_PRIM_STATS_CODE);
     RB_EndTessSurface();
-    gfxCmdBufSourceState.input.consts[29][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
-    gfxCmdBufSourceState.input.consts[30][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][1] = 1.0;
-    gfxCmdBufSourceState.input.consts[30][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][1] = 1.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
-    gfxCmdBufSourceState.input.consts[31][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
@@ -988,11 +988,11 @@ void RB_ShowFbColorDebug_Feedback()
         0xFFFFFFFF,
         GFX_PRIM_STATS_CODE);
     RB_EndTessSurface();
-    Vec4Set(gfxCmdBufSourceState.input.consts[29], 0.0, 0.0, 0.0, 0.0);
+    Vec4Set(gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R], 0.0, 0.0, 0.0, 0.0);
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
-    Vec4Set(gfxCmdBufSourceState.input.consts[30], 0.0, 0.0, 0.0, 0.0);
+    Vec4Set(gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G], 0.0, 0.0, 0.0, 0.0);
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
-    Vec4Set(gfxCmdBufSourceState.input.consts[31], 0.0, 0.0, 1.0, 0.0);
+    Vec4Set(gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B], 0.0, 0.0, 1.0, 0.0);
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
@@ -1074,20 +1074,20 @@ void RB_ShowShadowsDebug()
     R_SetRenderTarget(gfxCmdBufContext, R_RENDERTARGET_FRAME_BUFFER);
     R_Set2D(&gfxCmdBufSourceState);
     R_SetCodeImageTexture(&gfxCmdBufSourceState, TEXTURE_SRC_CODE_FEEDBACK, gfxRenderTargets[R_RENDERTARGET_DYNAMICSHADOWS].image);
-    gfxCmdBufSourceState.input.consts[29][0] = 1.0;
-    gfxCmdBufSourceState.input.consts[29][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[29][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][0] = 1.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_R][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_R);
-    gfxCmdBufSourceState.input.consts[30][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][1] = 1.0;
-    gfxCmdBufSourceState.input.consts[30][2] = 0.0;
-    gfxCmdBufSourceState.input.consts[30][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][1] = 1.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][2] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_G][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_G);
-    gfxCmdBufSourceState.input.consts[31][0] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][1] = 0.0;
-    gfxCmdBufSourceState.input.consts[31][2] = 1.0;
-    gfxCmdBufSourceState.input.consts[31][3] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][0] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][1] = 0.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][2] = 1.0;
+    gfxCmdBufSourceState.input.consts[CONST_SRC_CODE_COLOR_MATRIX_B][3] = 0.0;
     R_DirtyCodeConstant(&gfxCmdBufSourceState, CONST_SRC_CODE_COLOR_MATRIX_B);
     RB_DrawStretchPic(
         rgp.colorChannelMixerMaterial,
