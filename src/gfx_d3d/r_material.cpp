@@ -800,7 +800,7 @@ void __cdecl Material_ReleaseTechniqueSetResources(MaterialTechniqueSet *techniq
     int techType; // [esp+14h] [ebp-8h]
     int passIndex; // [esp+18h] [ebp-4h]
 
-    for (techType = 0; techType < 34; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         technique = techniqueSet->techniques[techType];
         if (technique)
@@ -833,7 +833,7 @@ void __cdecl Material_ReloadTechniqueSetResources(MaterialTechniqueSet *techniqu
     int techType; // [esp+4h] [ebp-8h]
     int passIndex; // [esp+8h] [ebp-4h]
 
-    for (techType = 0; techType < 34; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         technique = techniqueSet->techniques[techType];
         if (technique)

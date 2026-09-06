@@ -657,49 +657,49 @@ bool __cdecl Material_MatchToken(const char **text, const char *match)
 
 int __cdecl Material_TechniqueTypeForName(const char *name)
 {
-    const char *techniqueNames[34]; // [esp+14h] [ebp-90h]
+    const char *techniqueNames[TECHNIQUE_COUNT]; // [esp+14h] [ebp-90h]
     int techniqueIndex; // [esp+A0h] [ebp-4h]
 
-    techniqueNames[0] = "\"depth prepass\"";
-    techniqueNames[1] = "\"build floatz\"";
-    techniqueNames[2] = "\"build shadowmap depth\"";
-    techniqueNames[3] = "\"build shadowmap color\"";
-    techniqueNames[4] = "\"unlit\"";
-    techniqueNames[5] = "\"emissive\"";
-    techniqueNames[6] = "\"emissive shadow\"";
-    techniqueNames[7] = "\"lit\"";
-    techniqueNames[8] = "\"lit sun\"";
-    techniqueNames[9] = "\"lit sun shadow\"";
-    techniqueNames[10] = "\"lit spot\"";
-    techniqueNames[11] = "\"lit spot shadow\"";
-    techniqueNames[12] = "\"lit omni\"";
-    techniqueNames[13] = "\"lit omni shadow\"";
-    techniqueNames[14] = "\"lit instanced\"";
-    techniqueNames[15] = "\"lit instanced sun\"";
-    techniqueNames[16] = "\"lit instanced sun shadow\"";
-    techniqueNames[17] = "\"lit instanced spot\"";
-    techniqueNames[18] = "\"lit instanced spot shadow\"";
-    techniqueNames[19] = "\"lit instanced omni\"";
-    techniqueNames[20] = "\"lit instanced omni shadow\"";
-    techniqueNames[21] = "\"light spot\"";
-    techniqueNames[22] = "\"light omni\"";
-    techniqueNames[23] = "\"light spot shadow\"";
-    techniqueNames[24] = "\"fakelight normal\"";
-    techniqueNames[25] = "\"fakelight view\"";
-    techniqueNames[26] = "\"sunlight preview\"";
-    techniqueNames[27] = "\"case texture\"";
-    techniqueNames[28] = "\"solid wireframe\"";
-    techniqueNames[29] = "\"shaded wireframe\"";
-    techniqueNames[30] = "\"shadowcookie caster\"";
-    techniqueNames[31] = "\"shadowcookie receiver\"";
-    techniqueNames[32] = "\"debug bumpmap\"";
-    techniqueNames[33] = "\"debug bumpmap instanced\"";
-    for (techniqueIndex = 0; techniqueIndex < 0x22; ++techniqueIndex)
+    techniqueNames[TECHNIQUE_DEPTH_PREPASS] = "\"depth prepass\"";
+    techniqueNames[TECHNIQUE_BUILD_FLOAT_Z] = "\"build floatz\"";
+    techniqueNames[TECHNIQUE_BUILD_SHADOWMAP_DEPTH] = "\"build shadowmap depth\"";
+    techniqueNames[TECHNIQUE_BUILD_SHADOWMAP_COLOR] = "\"build shadowmap color\"";
+    techniqueNames[TECHNIQUE_UNLIT] = "\"unlit\"";
+    techniqueNames[TECHNIQUE_EMISSIVE] = "\"emissive\"";
+    techniqueNames[TECHNIQUE_EMISSIVE_SHADOW] = "\"emissive shadow\"";
+    techniqueNames[TECHNIQUE_LIT] = "\"lit\"";
+    techniqueNames[TECHNIQUE_LIT_SUN] = "\"lit sun\"";
+    techniqueNames[TECHNIQUE_LIT_SUN_SHADOW] = "\"lit sun shadow\"";
+    techniqueNames[TECHNIQUE_LIT_SPOT] = "\"lit spot\"";
+    techniqueNames[TECHNIQUE_LIT_SPOT_SHADOW] = "\"lit spot shadow\"";
+    techniqueNames[TECHNIQUE_LIT_OMNI] = "\"lit omni\"";
+    techniqueNames[TECHNIQUE_LIT_OMNI_SHADOW] = "\"lit omni shadow\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED] = "\"lit instanced\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED_SUN] = "\"lit instanced sun\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED_SUN_SHADOW] = "\"lit instanced sun shadow\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED_SPOT] = "\"lit instanced spot\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED_SPOT_SHADOW] = "\"lit instanced spot shadow\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED_OMNI] = "\"lit instanced omni\"";
+    techniqueNames[TECHNIQUE_LIT_INSTANCED_OMNI_SHADOW] = "\"lit instanced omni shadow\"";
+    techniqueNames[TECHNIQUE_LIGHT_SPOT] = "\"light spot\"";
+    techniqueNames[TECHNIQUE_LIGHT_OMNI] = "\"light omni\"";
+    techniqueNames[TECHNIQUE_LIGHT_SPOT_SHADOW] = "\"light spot shadow\"";
+    techniqueNames[TECHNIQUE_FAKELIGHT_NORMAL] = "\"fakelight normal\"";
+    techniqueNames[TECHNIQUE_FAKELIGHT_VIEW] = "\"fakelight view\"";
+    techniqueNames[TECHNIQUE_SUNLIGHT_PREVIEW] = "\"sunlight preview\"";
+    techniqueNames[TECHNIQUE_CASE_TEXTURE] = "\"case texture\"";
+    techniqueNames[TECHNIQUE_WIREFRAME_SOLID] = "\"solid wireframe\"";
+    techniqueNames[TECHNIQUE_WIREFRAME_SHADED] = "\"shaded wireframe\"";
+    techniqueNames[TECHNIQUE_SHADOWCOOKIE_CASTER] = "\"shadowcookie caster\"";
+    techniqueNames[TECHNIQUE_SHADOWCOOKIE_RECEIVER] = "\"shadowcookie receiver\"";
+    techniqueNames[TECHNIQUE_DEBUG_BUMPMAP] = "\"debug bumpmap\"";
+    techniqueNames[TECHNIQUE_DEBUG_BUMPMAP_INSTANCED] = "\"debug bumpmap instanced\"";
+    for (techniqueIndex = TECHNIQUE_DEPTH_PREPASS; techniqueIndex < TECHNIQUE_COUNT; ++techniqueIndex)
     {
         if (!strcmp(name, techniqueNames[techniqueIndex]))
             return techniqueIndex;
     }
-    return 34;
+    return TECHNIQUE_COUNT;
 }
 
 // g_useTechnique gates which technique types Material_LoadTechniqueSet will actually
@@ -719,7 +719,7 @@ int __cdecl Material_TechniqueTypeForName(const char *name)
 #else
  #define KR_EDTECH false
 #endif
-const bool g_useTechnique[34] =
+const bool g_useTechnique[TECHNIQUE_COUNT] =
 {
   true,   // 0  DEPTH_PREPASS
   true,   // 1  BUILD_FLOAT_Z
@@ -773,14 +773,14 @@ const bool g_useTechnique[34] =
 #undef KR_EDTECH
 bool __cdecl Material_UsingTechnique(uint32_t techType)
 {
-    if (techType >= 0x22)
+    if (techType >= TECHNIQUE_COUNT)
         MyAssertHandler(
             ".\\r_material_load_obj.cpp",
             1824,
             0,
             "techType doesn't index TECHNIQUE_COUNT\n\t%i not in [0, %i)",
             techType,
-            34);
+            TECHNIQUE_COUNT);
     return g_useTechnique[techType];
 }
 
@@ -4413,7 +4413,7 @@ MaterialTechniqueSet *__cdecl Material_LoadTechniqueSet(char *name, GfxRenderer 
     int techTypeCount; // [esp+14h] [ebp-1B8h]
     char filename[256]; // [esp+1Ch] [ebp-1B0h] BYREF
     int techTypeIndex; // [esp+120h] [ebp-ACh]
-    _DWORD techType[35]; // [esp+124h] [ebp-A8h]
+    _DWORD techType[TECHNIQUE_TOTAL_COUNT]; // [esp+124h] [ebp-A8h]
     bool usingTechnique; // [esp+1B3h] [ebp-19h]
     int nameSize; // [esp+1B4h] [ebp-18h]
     int fileSize; // [esp+1B8h] [ebp-14h]
@@ -4448,14 +4448,14 @@ MaterialTechniqueSet *__cdecl Material_LoadTechniqueSet(char *name, GfxRenderer 
                 break;
             if (*token == 34)
             {
-                if (techTypeCount == 34)
+                if (techTypeCount == TECHNIQUE_COUNT)
                 {
                     Com_ScriptError("Too many labels in technique set\n");
                     techniqueSet = 0;
                     break;
                 }
                 techType[techTypeCount] = Material_TechniqueTypeForName(token);
-                if (techType[techTypeCount] == 34)
+                if (techType[techTypeCount] == TECHNIQUE_COUNT)
                 {
                 LABEL_9:
                     Com_ScriptError("Unknown technique type '%s'\n", token);
@@ -5060,7 +5060,7 @@ uint32_t __cdecl Material_CreateLayeredStateBitsTable(
     uint32_t stateBitsCount; // [esp+Ch] [ebp-4h] BYREF
 
     stateBitsCount = 0;
-    for (techType = 0; techType < 0x22; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         if (techSet->techniques[techType])
         {
@@ -5142,14 +5142,14 @@ Material *__cdecl Material_CreateLayered(
     uint32_t constTableSize; // [esp+44h] [ebp-174h]
     MaterialTextureDef *newTexEntry; // [esp+48h] [ebp-170h]
     uint8_t oredGameFlags; // [esp+4Fh] [ebp-169h]
-    uint32_t stateBitsTable[34][2]; // [esp+50h] [ebp-168h] BYREF
+    uint32_t stateBitsTable[TECHNIQUE_COUNT][2]; // [esp+50h] [ebp-168h] BYREF
     const MaterialConstantDef *oldConstTable; // [esp+164h] [ebp-54h]
     uint32_t tintConstNameHash; // [esp+168h] [ebp-50h]
     MaterialConstantDef *newConstEntry; // [esp+16Ch] [ebp-4Ch]
     bool isTintSpecified; // [esp+172h] [ebp-46h]
     uint8_t constantCount; // [esp+173h] [ebp-45h]
     const MaterialTextureDef *oldTexTable; // [esp+174h] [ebp-44h]
-    uint8_t stateBitsEntry[34]; // [esp+178h] [ebp-40h] BYREF
+    uint8_t stateBitsEntry[TECHNIQUE_COUNT]; // [esp+178h] [ebp-40h] BYREF
     Material *newMtl; // [esp+1A0h] [ebp-18h]
     uint32_t layerIndex; // [esp+1A4h] [ebp-14h]
     uint32_t constIndex; // [esp+1A8h] [ebp-10h]
@@ -5484,7 +5484,7 @@ char __cdecl Material_Validate(const Material *material)
 {
     int techType; // [esp+0h] [ebp-4h]
 
-    for (techType = 0; techType < 34; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         if (material->techniqueSet->techniques[techType]
             && !Material_ValidateTechnique(material, material->techniqueSet->techniques[techType]))
@@ -5702,7 +5702,7 @@ uint32_t __cdecl Material_GetCullFlags(Material *material)
     cullFlags = -1;
     techniqueSet = material->techniqueSet;
     iassert( techniqueSet );
-    for (techType = 7; techType < 0x15; ++techType)
+    for (techType = TECHNIQUE_LIT_BEGIN; techType < TECHNIQUE_LIT_END; ++techType)
     {
         if (techniqueSet->techniques[techType])
         {
@@ -5793,7 +5793,7 @@ uint32_t __cdecl Material_GetUsesDepthBufferFlags(const Material *mtl)
 
     techniqueSet = mtl->techniqueSet;
     iassert( techniqueSet );
-    for (techType = 0; techType < 0x22; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         technique = techniqueSet->techniques[techType];
         if (technique)
@@ -5820,7 +5820,7 @@ uint32_t __cdecl Material_GetUsesStencilBufferFlags(const Material *mtl)
 
     techniqueSet = mtl->techniqueSet;
     iassert( techniqueSet );
-    for (techType = 0; techType < 0x22; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         technique = techniqueSet->techniques[techType];
         if (technique)
@@ -5878,7 +5878,7 @@ void __cdecl Material_BuildStateBitsTable(Material *material, __int16 toolFlags,
     uint32_t passIndex; // [esp+470h] [ebp-4h]
 
     stateBitsCount = 0;
-    for (techType = 0; techType < 0x22; ++techType)
+    for (techType = TECHNIQUE_DEPTH_PREPASS; techType < TECHNIQUE_COUNT; ++techType)
     {
         technique = material->techniqueSet->techniques[techType];
         if (technique)
