@@ -813,9 +813,9 @@ void __cdecl PM_UpdateAimDownSightFlag(pmove_t *pm, pml_t *pml)
     }
 #ifdef KISAK_MP
     if ((ps->pm_flags & PMF_SIGHT_AIMING) != 0)
-        BG_SetConditionValue(ps->clientNum, 7u, 1u);
+        BG_SetConditionValue(ps->clientNum, ANIM_COND_WEAPON_POSITION, ANIM_WP_ADS);
     else
-        BG_SetConditionValue(ps->clientNum, 7u, 0);
+        BG_SetConditionValue(ps->clientNum, ANIM_COND_WEAPON_POSITION, ANIM_WP_HIP);
 #endif
 }
 
@@ -1775,8 +1775,8 @@ void __cdecl PM_Weapon_FinishWeaponChange(pmove_t *pm, bool quick)
         PM_Weapon_BeginWeaponRaise(ps, anim, weapontime, aimspread, altswitch);
 #ifdef KISAK_MP
         iassert(weapDef);
-        BG_SetConditionBit(ps->clientNum, 0, weapDef[74]);
-        BG_SetConditionBit(ps->clientNum, 1, weapDef[76]);
+        BG_SetConditionBit(ps->clientNum, ANIM_COND_PLAYERANIMTYPE, weapDef[74]);
+        BG_SetConditionBit(ps->clientNum, ANIM_COND_WEAPONCLASS, weapDef[76]);
 #endif
         BG_TakeClipOnlyWeaponIfEmpty(ps, oldweapon);
     }

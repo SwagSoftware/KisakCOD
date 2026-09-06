@@ -1059,9 +1059,32 @@ extern const dvar_t *jump_spreadAdd;
 extern uint32_t bg_lastParsedWeaponIndex;
 extern struct WeaponDef *bg_weaponDefs[128];
 
-// https://github.com/id-Software/RTCW-SP/blob/master/src/game/bg_public.h#L1573
-typedef enum // Kisak: This is a new struct based on idtech
+enum scriptAnimConditions_t : __int32
 {
+    ANIM_COND_PLAYERANIMTYPE = 0x0,
+    ANIM_COND_WEAPONCLASS = 0x1,
+    ANIM_COND_MOUNTED = 0x2,
     ANIM_COND_MOVETYPE = 0x3,
-    NUM_ANIM_CONDITIONS = 0xA
-} scriptAnimConditions_t;
+    ANIM_COND_UNDERHAND = 0x4,
+    ANIM_COND_CROUCHING = 0x5,
+    ANIM_COND_FIRING = 0x6,
+    ANIM_COND_WEAPON_POSITION = 0x7,
+    ANIM_COND_STRAFING = 0x8,
+    ANIM_COND_PERK = 0x9,
+    NUM_ANIM_CONDITIONS = 0xA,
+};
+
+enum scriptAnimPerkStates_t : __int32
+{
+    ANIM_PERK_UNUSED = 0x0,
+    ANIM_PERK_LASTSTAND = 0x1,
+    ANIM_PERK_GRENADEDEATH = 0x2,
+    NUM_ANIM_PERKSTATES = 0x3,
+};
+
+enum scriptAnimWeaponPositions_t : __int32
+{
+    ANIM_WP_HIP = 0x0,
+    ANIM_WP_ADS = 0x1,
+    NUM_ANIM_WEAPONPOSITIONS = 0x2,
+};

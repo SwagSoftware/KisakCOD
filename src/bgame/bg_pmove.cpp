@@ -4500,7 +4500,7 @@ void __cdecl PM_SetStrafeCondition(pmove_t *pm)
         strafeState = ANIM_STRAFE_NOT;
     }
 
-    BG_SetConditionValue(pm->ps->clientNum, 8u, strafeState);
+    BG_SetConditionValue(pm->ps->clientNum, ANIM_COND_STRAFING, strafeState);
 }
 
 void __cdecl PM_Footstep_NotTryingToMove(pmove_t *pm)
