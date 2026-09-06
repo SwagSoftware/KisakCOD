@@ -349,41 +349,41 @@ void __cdecl RB_LogStencilState(int stateBits1, int changedBits1, const StencilL
     int passShift; // [esp-Ch] [ebp-8Ch]
     int failShift; // [esp-Ch] [ebp-8Ch]
     int zfailShift; // [esp-Ch] [ebp-8Ch]
-    StateBitsTable stencilFuncNames[8]; // [esp+0h] [ebp-80h] BYREF
-    StateBitsTable stencilOpNames[8]; // [esp+40h] [ebp-40h] BYREF
+    StateBitsTable stencilFuncNames[GFXS_STENCILFUNC_COUNT]; // [esp+0h] [ebp-80h] BYREF
+    StateBitsTable stencilOpNames[GFXS_STENCILOP_COUNT]; // [esp+40h] [ebp-40h] BYREF
 
-    stencilFuncNames[0].stateBits = 0;
-    stencilFuncNames[0].name = "Never";
-    stencilFuncNames[1].stateBits = 1;
-    stencilFuncNames[1].name = "Less";
-    stencilFuncNames[2].stateBits = 2;
-    stencilFuncNames[2].name = "Equal";
-    stencilFuncNames[3].stateBits = 3;
-    stencilFuncNames[3].name = "LessEqual";
-    stencilFuncNames[4].stateBits = 4;
-    stencilFuncNames[4].name = "Greater";
-    stencilFuncNames[5].stateBits = 5;
-    stencilFuncNames[5].name = "NotEqual";
-    stencilFuncNames[6].stateBits = 6;
-    stencilFuncNames[6].name = "GreaterEqual";
-    stencilFuncNames[7].stateBits = 7;
-    stencilFuncNames[7].name = "Always";
-    stencilOpNames[0].stateBits = 0;
-    stencilOpNames[0].name = "Keep";
-    stencilOpNames[1].stateBits = 1;
-    stencilOpNames[1].name = "Zero";
-    stencilOpNames[2].stateBits = 2;
-    stencilOpNames[2].name = "Replace";
-    stencilOpNames[3].stateBits = 3;
-    stencilOpNames[3].name = "IncrSat";
-    stencilOpNames[4].stateBits = 4;
-    stencilOpNames[4].name = "DecrSat";
-    stencilOpNames[5].stateBits = 5;
-    stencilOpNames[5].name = "Invert";
-    stencilOpNames[6].stateBits = 6;
-    stencilOpNames[6].name = "Incr";
-    stencilOpNames[7].stateBits = 7;
-    stencilOpNames[7].name = "Decr";
+    stencilFuncNames[GFXS_STENCILFUNC_NEVER].stateBits = GFXS_STENCILFUNC_NEVER;
+    stencilFuncNames[GFXS_STENCILFUNC_NEVER].name = "Never";
+    stencilFuncNames[GFXS_STENCILFUNC_LESS].stateBits = GFXS_STENCILFUNC_LESS;
+    stencilFuncNames[GFXS_STENCILFUNC_LESS].name = "Less";
+    stencilFuncNames[GFXS_STENCILFUNC_EQUAL].stateBits = GFXS_STENCILFUNC_EQUAL;
+    stencilFuncNames[GFXS_STENCILFUNC_EQUAL].name = "Equal";
+    stencilFuncNames[GFXS_STENCILFUNC_LESSEQUAL].stateBits = GFXS_STENCILFUNC_LESSEQUAL;
+    stencilFuncNames[GFXS_STENCILFUNC_LESSEQUAL].name = "LessEqual";
+    stencilFuncNames[GFXS_STENCILFUNC_GREATER].stateBits = GFXS_STENCILFUNC_GREATER;
+    stencilFuncNames[GFXS_STENCILFUNC_GREATER].name = "Greater";
+    stencilFuncNames[GFXS_STENCILFUNC_NOTEQUAL].stateBits = GFXS_STENCILFUNC_NOTEQUAL;
+    stencilFuncNames[GFXS_STENCILFUNC_NOTEQUAL].name = "NotEqual";
+    stencilFuncNames[GFXS_STENCILFUNC_GREATEREQUAL].stateBits = GFXS_STENCILFUNC_GREATEREQUAL;
+    stencilFuncNames[GFXS_STENCILFUNC_GREATEREQUAL].name = "GreaterEqual";
+    stencilFuncNames[GFXS_STENCILFUNC_ALWAYS].stateBits = GFXS_STENCILFUNC_ALWAYS;
+    stencilFuncNames[GFXS_STENCILFUNC_ALWAYS].name = "Always";
+    stencilOpNames[GFXS_STENCILOP_KEEP].stateBits = GFXS_STENCILOP_KEEP;
+    stencilOpNames[GFXS_STENCILOP_KEEP].name = "Keep";
+    stencilOpNames[GFXS_STENCILOP_ZERO].stateBits = GFXS_STENCILOP_ZERO;
+    stencilOpNames[GFXS_STENCILOP_ZERO].name = "Zero";
+    stencilOpNames[GFXS_STENCILOP_REPLACE].stateBits = GFXS_STENCILOP_REPLACE;
+    stencilOpNames[GFXS_STENCILOP_REPLACE].name = "Replace";
+    stencilOpNames[GFXS_STENCILOP_INCRSAT].stateBits = GFXS_STENCILOP_INCRSAT;
+    stencilOpNames[GFXS_STENCILOP_INCRSAT].name = "IncrSat";
+    stencilOpNames[GFXS_STENCILOP_DECRSAT].stateBits = GFXS_STENCILOP_DECRSAT;
+    stencilOpNames[GFXS_STENCILOP_DECRSAT].name = "DecrSat";
+    stencilOpNames[GFXS_STENCILOP_INVERT].stateBits = GFXS_STENCILOP_INVERT;
+    stencilOpNames[GFXS_STENCILOP_INVERT].name = "Invert";
+    stencilOpNames[GFXS_STENCILOP_INCR].stateBits = GFXS_STENCILOP_INCR;
+    stencilOpNames[GFXS_STENCILOP_INCR].name = "Incr";
+    stencilOpNames[GFXS_STENCILOP_DECR].stateBits = GFXS_STENCILOP_DECR;
+    stencilOpNames[GFXS_STENCILOP_DECR].name = "Decr";
     enableMask = desc->enableMask;
     v3 = va("Stencil %s", desc->description);
     RB_LogBool(v3, stateBits1, changedBits1, enableMask, "Enabled", "Disabled");
@@ -391,16 +391,44 @@ void __cdecl RB_LogStencilState(int stateBits1, int changedBits1, const StencilL
     {
         funcShift = desc->funcShift;
         v4 = va("%s Func", desc->description);
-        RB_LogFromTable(v4, stateBits1, changedBits1, 7 << funcShift, funcShift, stencilFuncNames, 8);
+        RB_LogFromTable(
+            v4,
+            stateBits1,
+            changedBits1,
+            (GFXS_STENCILFUNC_COUNT - 1) << funcShift,
+            funcShift,
+            stencilFuncNames,
+            GFXS_STENCILFUNC_COUNT);
         passShift = desc->passShift;
         v5 = va("%s Pass", desc->description);
-        RB_LogFromTable(v5, stateBits1, changedBits1, 7 << passShift, passShift, stencilOpNames, 8);
+        RB_LogFromTable(
+            v5,
+            stateBits1,
+            changedBits1,
+            (GFXS_STENCILOP_COUNT - 1) << passShift,
+            passShift,
+            stencilOpNames,
+            GFXS_STENCILOP_COUNT);
         failShift = desc->failShift;
         v6 = va("%s Fail", desc->description);
-        RB_LogFromTable(v6, stateBits1, changedBits1, 7 << failShift, failShift, stencilOpNames, 8);
+        RB_LogFromTable(
+            v6,
+            stateBits1,
+            changedBits1,
+            (GFXS_STENCILOP_COUNT - 1) << failShift,
+            failShift,
+            stencilOpNames,
+            GFXS_STENCILOP_COUNT);
         zfailShift = desc->zfailShift;
         v7 = va("%s ZFail", desc->description);
-        RB_LogFromTable(v7, stateBits1, changedBits1, 7 << zfailShift, zfailShift, stencilOpNames, 8);
+        RB_LogFromTable(
+            v7,
+            stateBits1,
+            changedBits1,
+            (GFXS_STENCILOP_COUNT - 1) << zfailShift,
+            zfailShift,
+            stencilOpNames,
+            GFXS_STENCILOP_COUNT);
     }
 }
 
