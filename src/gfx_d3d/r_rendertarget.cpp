@@ -382,7 +382,7 @@ void __cdecl R_InitAndTrackRenderTargetImage(
     GfxRenderTarget *renderTarget)
 {
     R_InitRenderTargetImage(imageProgType, width, height, format, usage, renderTarget);
-    Image_TrackTexture(renderTarget->image, 3, format, width, height, 1);
+    Image_TrackTexture(renderTarget->image, IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS, format, width, height, 1);
 }
 
 void __cdecl R_InitShadowCookieBlurRenderTarget(GfxRenderTarget *renderTarget)

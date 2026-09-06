@@ -626,7 +626,7 @@ IDirect3DTexture9 *__cdecl R_Cinematic_MakeBinkTexture_PC(
     uint32_t height,
     int baseImageFlags)
 {
-    Image_Setup(image, width, height, 1, baseImageFlags | 3, D3DFMT_L8);
+    Image_Setup(image, width, height, 1, baseImageFlags | IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS, D3DFMT_L8);
     return image->texture.map;
 }
 

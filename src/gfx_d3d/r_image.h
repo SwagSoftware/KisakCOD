@@ -259,14 +259,14 @@ void __cdecl R_DownsampleMipMapBilinear(
 
 inline uint32_t __cdecl Image_GetUsage(int imageFlags, _D3DFORMAT imageFormat)
 {
-    if ((imageFlags & 0x20000) != 0)
+    if ((imageFlags & IMG_FLAG_RENDER_TARGET) != 0)
     {
         if (imageFormat == D3DFMT_D24S8 || imageFormat == D3DFMT_D24X8 || imageFormat == D3DFMT_D16)
             return 2;
         else
             return 1;
     }
-    else if ((imageFlags & 0x10000) != 0)
+    else if ((imageFlags & IMG_FLAG_DYNAMIC) != 0)
     {
         return 512;
     }

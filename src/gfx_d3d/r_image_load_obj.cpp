@@ -56,7 +56,7 @@ void __cdecl Image_Generate2D(GfxImage *image, uint8_t *pixels, int width, int h
             "%s\n\t(height) = %i",
             "(height > 0 && (((height) & ((height) - 1)) == 0))",
             height);
-    Image_Setup(image, width, height, 1, 3, imageFormat);
+    Image_Setup(image, width, height, 1, IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS, imageFormat);
     iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
     Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
 }
@@ -147,7 +147,7 @@ uint32_t __cdecl Image_GetCardMemoryAmount(
     uint32_t memory; // [esp+18h] [ebp-4h]
 
     memory = Image_GetCardMemoryAmountForMipLevel(format, width, height, depth);
-    if ((imageFlags & 2) == 0)
+    if ((imageFlags & IMG_FLAG_NOMIPMAPS) == 0)
     {
         while (depth + height + width > 3)
         {
@@ -169,7 +169,7 @@ uint32_t __cdecl Image_GetCardMemoryAmount(
             memory += Image_GetCardMemoryAmountForMipLevel(format, v8, v7, v6);
         }
     }
-    if ((imageFlags & 4) != 0)
+    if ((imageFlags & IMG_FLAG_CUBEMAP) != 0)
         memory *= 6;
     return memory;
 }
@@ -191,7 +191,7 @@ void __cdecl Image_TrackTexture(GfxImage *image, char imageFlags, _D3DFORMAT for
 
     for (platform = 0; platform < 2; ++platform)
     {
-        if ((imageFlags & 1) != 0)
+        if ((imageFlags & IMG_FLAG_NOPICMIP) != 0)
         {
             CardMemoryAmount = Image_GetCardMemoryAmount(imageFlags, format, width, height, depth);
         }
@@ -307,7 +307,7 @@ void __cdecl Image_Generate3D(
             "%s\n\t(depth) = %i",
             "(depth > 0 && (((depth) & ((depth) - 1)) == 0))",
             depth);
-    Image_Setup(image, width, height, depth, 11, imageFormat);
+    Image_Setup(image, width, height, depth, IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS | IMG_FLAG_VOLMAP, imageFormat);
     iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
     Image_UploadData(image, imageFormat, D3DCUBEMAP_FACE_POSITIVE_X, 0, pixels);
 }
@@ -328,9 +328,9 @@ void __cdecl Image_GenerateCube(
     iassert( edgeLen > 0 );
     iassert( IsPowerOf2( edgeLen ) );
     iassert( mipCount <= 15 );
-    imageFlags = 5;
+    imageFlags = IMG_FLAG_NOPICMIP | IMG_FLAG_CUBEMAP;
     if (mipCount == 1)
-        imageFlags = 7;
+        imageFlags = IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS | IMG_FLAG_CUBEMAP;
     Image_Setup(image, edgeLen, edgeLen, 1, imageFlags, imageFormat);
     iassert( image->cardMemory.platform[PICMIP_PLATFORM_USED] > 0 );
     for (faceIndex = 0; faceIndex < 6; ++faceIndex)
@@ -344,7 +344,7 @@ void __cdecl Image_GenerateCube(
 void __cdecl Image_BuildWaterMap(GfxImage *image)
 {
     iassert( image );
-    Image_SetupAndLoad(image, image->width, image->height, 1, 65537, D3DFMT_L8);
+    Image_SetupAndLoad(image, image->width, image->height, 1, IMG_FLAG_NOPICMIP | IMG_FLAG_DYNAMIC, D3DFMT_L8);
 }
 
 void __cdecl Image_LoadDxtc(
@@ -452,7 +452,7 @@ char __cdecl Image_LoadFromFileWithReader(GfxImage *image, int(__cdecl *OpenFile
             {
                 if (Image_ValidateHeader(&fileHeader, filepath))
                 {
-                    if ((fileHeader.flags & 3) != 0
+                    if ((fileHeader.flags & (IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS)) != 0
                         || (fileHeader.dimensions[1] < fileHeader.dimensions[0]
                             ? (v4 = fileHeader.dimensions[1])
                             : (v4 = fileHeader.dimensions[0]),

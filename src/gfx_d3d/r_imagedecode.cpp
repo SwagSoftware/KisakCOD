@@ -103,7 +103,7 @@ void __cdecl Image_DecodeBitmap(
 
     iassert( image );
     iassert( imageFile );
-    if ((imageFile->flags & 4) != 0)
+    if ((imageFile->flags & IMG_FLAG_CUBEMAP) != 0)
         faceCount = 6;
     else
         faceCount = 1;
@@ -328,7 +328,7 @@ void __cdecl Image_DecodeDxtc(
             0,
             "%s",
             "bytesPerBlock == (imageFile->format == IMG_FORMAT_DXT1 ? 8 : 16)");
-    if ((imageFile->flags & 4) != 0)
+    if ((imageFile->flags & IMG_FLAG_CUBEMAP) != 0)
         faceCount = 6;
     else
         faceCount = 1;
@@ -437,7 +437,7 @@ int __cdecl Image_CountMipmapsForFile(GfxImageFileHeader *imageFile)
     int width; // [esp+14h] [ebp-8h]
     int height; // [esp+18h] [ebp-4h]
 
-    if ((imageFile->flags & 2) != 0)
+    if ((imageFile->flags & IMG_FLAG_NOMIPMAPS) != 0)
         return 1;
     mipCount = 1;
     width = imageFile->dimensions[0];
@@ -468,7 +468,7 @@ int __cdecl Image_CountMipmapsForFile_0(GfxImageFileHeader *imageFile)
     int width; // [esp+14h] [ebp-8h]
     int height; // [esp+18h] [ebp-4h]
 
-    if ((imageFile->flags & 2) != 0)
+    if ((imageFile->flags & IMG_FLAG_NOMIPMAPS) != 0)
         return 1;
     mipCount = 1;
     width = imageFile->dimensions[0];
@@ -521,7 +521,7 @@ void __cdecl Image_DecodeWavelet(
     decode.channels = bytesPerPixel;
     decode.bpp = bytesPerPixel;
     decode.dataInitialized = 0;
-    if ((imageFile->flags & 4) != 0)
+    if ((imageFile->flags & IMG_FLAG_CUBEMAP) != 0)
         faceCount = 6;
     else
         faceCount = 1;

@@ -442,7 +442,7 @@ void __cdecl Image_TrackFullscreenTexture(
         platformWidth = Image_GetPlatformScreenWidth(platform, fullscreenWidth);
         platformHeight = Image_GetPlatformScreenHeight(platform, fullscreenHeight);
         Image_GetMipmapResolution(platformWidth, platformHeight, picmip, &width, &height);
-        memory = Image_GetCardMemoryAmount(3, format, width, height, 1u);
+        memory = Image_GetCardMemoryAmount(IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS, format, width, height, 1u);
         if (!IsFastFileLoad())
             Image_TrackTotalMemory(image, platform, memory);
         image->cardMemory.platform[platform] = memory;

@@ -264,7 +264,7 @@ void __cdecl Image_SetupRenderTarget(
 {
     iassert(image);
     iassert(image->semantic == TS_2D);
-    Image_SetupAndLoad(image, width, height, 1, 131075, imageFormat);
+    Image_SetupAndLoad(image, width, height, 1, IMG_FLAG_NOPICMIP | IMG_FLAG_NOMIPMAPS | IMG_FLAG_RENDER_TARGET, imageFormat);
 }
 
 void __cdecl Load_Texture(GfxTexture *remoteLoadDef, GfxImage *image)
@@ -461,7 +461,7 @@ uint32_t __cdecl Image_CountMipmaps(char imageFlags, uint32_t width, uint32_t he
     uint32_t mipRes; // [esp+0h] [ebp-8h]
     uint32_t mipCount; // [esp+4h] [ebp-4h]
 
-    if ((imageFlags & 2) != 0)
+    if ((imageFlags & IMG_FLAG_NOMIPMAPS) != 0)
         return 1;
     mipCount = 1;
     for (mipRes = 1; mipRes < width || mipRes < height || mipRes < depth; mipRes *= 2)
@@ -1247,7 +1247,7 @@ void __cdecl Image_Create3DTexture_PC(
     image->depth = depth;
     image->mapType = MAPTYPE_3D;
     usage = Image_GetUsage(imageFlags, imageFormat);
-    if ((imageFlags & 0x40000) != 0)
+    if ((imageFlags & IMG_FLAG_SYSTEMMEM) != 0)
     {
         v7 = dx.device->CreateVolumeTexture(width, height, depth, mipmapCount, 0, imageFormat, D3DPOOL_SYSTEMMEM, (IDirect3DVolumeTexture9 **)&image->texture, 0);
     }
@@ -1341,7 +1341,7 @@ void __cdecl Image_Create2DTexture_PC(
     image->depth = 1;
     image->mapType = MAPTYPE_2D;
     usage = Image_GetUsage(imageFlags, imageFormat);
-    if ((imageFlags & 0x40000) != 0)
+    if ((imageFlags & IMG_FLAG_SYSTEMMEM) != 0)
         v6 = dx.device->CreateTexture(
             width,
             height,
