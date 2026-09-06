@@ -179,7 +179,7 @@ int32_t __cdecl G_VehPlayerRideSlot(gentity_s *vehicle, int32_t playerEntNum)
 {
     iassert(vehicle->scr_vehicle);
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < VEHICLE_RIDESLOTS_COUNT; ++i)
     {
         if (vehicle->scr_vehicle->boneIndex.riderSlots[i].entNum == playerEntNum)
             return i;
@@ -264,7 +264,7 @@ void __cdecl VehicleClearRideSlotForPlayer(gentity_s *ent, int32_t playerEntNum)
 
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 306, 0, "%s", "ent->scr_vehicle");
-    for (i = 0; i < 3; ++i)
+    for (i = 0; i < VEHICLE_RIDESLOTS_COUNT; ++i)
     {
         if (ent->scr_vehicle->boneIndex.riderSlots[i].entNum == playerEntNum)
         {
@@ -423,7 +423,7 @@ void __cdecl InitVehicleTags(gentity_s *ent)
     iassert(ent->scr_vehicle);
     scr_vehicle_s *veh = ent->scr_vehicle;
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < VEHICLE_RIDESLOTS_COUNT; ++i)
     {
         ridetag = &veh->boneIndex.riderSlots[i];
         ridetag->tagName = BG_VehiclesGetSlotTagName(i);
@@ -557,7 +557,7 @@ char __cdecl VehicleHasSeatFree(gentity_s *ent)
 
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 266, 0, "%s", "ent->scr_vehicle");
-    for (i = 0; i < 3; ++i)
+    for (i = 0; i < VEHICLE_RIDESLOTS_COUNT; ++i)
     {
         if (ent->scr_vehicle->boneIndex.riderSlots[i].boneIdx != -1
             && ent->scr_vehicle->boneIndex.riderSlots[i].entNum == ENTITYNUM_NONE)
@@ -822,8 +822,9 @@ void __cdecl G_VehEntHandler_Think(gentity_s *pSelf)
         memset((uint8_t *)&s_phys, 0, sizeof(s_phys));
         for (rideTag = RideTagFirst(pSelf); rideTag; rideTag = RideTagNext(pSelf, rideTag->riderSlots))
         {
-            if (rideTag->riderSlots[0].entNum != ENTITYNUM_NONE && g_entities[rideTag->riderSlots[0].entNum].health <= 0)
-                G_EntUnlink(&g_entities[rideTag->riderSlots[0].entNum]);
+            if (rideTag->riderSlots[VEHICLE_RIDESLOT_DRIVER].entNum != ENTITYNUM_NONE
+                && g_entities[rideTag->riderSlots[VEHICLE_RIDESLOT_DRIVER].entNum].health <= 0)
+                G_EntUnlink(&g_entities[rideTag->riderSlots[VEHICLE_RIDESLOT_DRIVER].entNum]);
         }
         VEH_UpdateClients(pSelf);
         UpdateSimulation(pSelf);
@@ -869,12 +870,12 @@ VehicleTags *__cdecl RideTagNext(gentity_s *ent, VehicleRideSlot_t *inTag)
     veh = ent->scr_vehicle;
     if (!veh)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 239, 0, "%s", "veh");
-    for (i = 0; i < 3; ++i)
+    for (i = 0; i < VEHICLE_RIDESLOTS_COUNT; ++i)
     {
         if (&veh->boneIndex.riderSlots[i] == inTag)
         {
             ia = i + 1;
-            if (ia == 3)
+            if (ia == VEHICLE_RIDESLOTS_COUNT)
                 return 0;
             else
                 return (VehicleTags *)((char *)&veh->boneIndex + 12 * ia);
@@ -944,7 +945,7 @@ int32_t __cdecl VehicleEntDriver(gentity_s *ent)
 {
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 282, 0, "%s", "ent->scr_vehicle");
-    return ent->scr_vehicle->boneIndex.riderSlots[0].entNum;
+    return ent->scr_vehicle->boneIndex.riderSlots[VEHICLE_RIDESLOT_DRIVER].entNum;
 }
 
 void __cdecl UpdateTurret(gentity_s *ent)
@@ -971,7 +972,7 @@ void __cdecl UpdateTurret(gentity_s *ent)
 int32_t __cdecl VehicleEntGunner(gentity_s *ent)
 {
     iassert(ent->scr_vehicle);
-    return ent->scr_vehicle->boneIndex.riderSlots[2].entNum;
+    return ent->scr_vehicle->boneIndex.riderSlots[VEHICLE_RIDESLOT_GUNNER].entNum;
 }
 
 void __cdecl FireTurret(gentity_s *ent, gentity_s *player)
@@ -1043,7 +1044,7 @@ int32_t __cdecl VehicleEntPassenger(gentity_s *ent)
 {
     if (!ent->scr_vehicle)
         MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 289, 0, "%s", "ent->scr_vehicle");
-    return ent->scr_vehicle->boneIndex.riderSlots[1].entNum;
+    return ent->scr_vehicle->boneIndex.riderSlots[VEHICLE_RIDESLOT_PASSENGER].entNum;
 }
 
 void __cdecl VEH_UpdateClientGunner(gentity_s *ent)
@@ -1566,7 +1567,7 @@ void __cdecl LinkPlayerToVehicle(gentity_s *ent, gentity_s *player)
         Com_Error(ERR_DROP, "LinkPlayerToVehicle: Vehicle has all seats filled");
     bestRiderTag = 0;
     bestRiderDist = 999999.0f;
-    for (i = 0; i < 3; ++i)
+    for (i = 0; i < VEHICLE_RIDESLOTS_COUNT; ++i)
     {
         rideTag = &veh->boneIndex.riderSlots[i];
         if (veh->boneIndex.riderSlots[i].boneIdx != -1 && rideTag->entNum == ENTITYNUM_NONE)
@@ -1623,8 +1624,8 @@ void __cdecl G_VehEntHandler_Die(
 
     for (rideTag = RideTagFirst(pSelf); rideTag; rideTag = RideTagNext(pSelf, rideTag->riderSlots))
     {
-        if (rideTag->riderSlots[0].entNum != ENTITYNUM_NONE)
-            G_EntUnlink(&g_entities[rideTag->riderSlots[0].entNum]);
+        if (rideTag->riderSlots[VEHICLE_RIDESLOT_DRIVER].entNum != ENTITYNUM_NONE)
+            G_EntUnlink(&g_entities[rideTag->riderSlots[VEHICLE_RIDESLOT_DRIVER].entNum]);
     }
     if (pAttacker)
     {

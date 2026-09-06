@@ -1281,6 +1281,14 @@ struct turretInfo_s // sizeof=0x48
 static_assert(sizeof(turretInfo_s) == 0x48);
 
 #ifdef KISAK_MP
+enum vehicleRideSlots_t : __int32
+{
+    VEHICLE_RIDESLOT_DRIVER = 0x0,
+    VEHICLE_RIDESLOT_PASSENGER = 0x1,
+    VEHICLE_RIDESLOT_GUNNER = 0x2,
+    VEHICLE_RIDESLOTS_COUNT = 0x3,
+};
+
 struct VehicleRideSlot_t // sizeof=0xC
 {                                       // ...
     uint32_t tagName;
@@ -1388,7 +1396,7 @@ struct vehicle_physic_t
 #ifdef KISAK_MP
 struct VehicleTags // sizeof=0x60
 {                                       // ...
-    VehicleRideSlot_t riderSlots[3];
+    VehicleRideSlot_t riderSlots[VEHICLE_RIDESLOTS_COUNT];
     int32_t detach;
     int32_t popout;
     int32_t body;
@@ -2363,14 +2371,6 @@ int BG_ValidateWeaponNumberOffhand(uint32_t weaponIndex);
 
 #ifdef KISAK_MP
 // bg_vehicles_mp
-enum vehicleRideSlots_t : __int32
-{
-    VEHICLE_RIDESLOT_DRIVER = 0x0,
-    VEHICLE_RIDESLOT_PASSENGER = 0x1,
-    VEHICLE_RIDESLOT_GUNNER = 0x2,
-    VEHICLE_RIDESLOTS_COUNT = 0x3,
-};
-
 uint16 BG_VehiclesGetSlotTagName(int slotIndex);
 #endif
 

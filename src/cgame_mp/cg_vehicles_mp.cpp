@@ -158,7 +158,7 @@ bool __cdecl CG_VehLocalClientDriving(int32_t localClientNum)
     
     iassert(ci);
 
-    return ci->attachedVehEntNum != ENTITYNUM_NONE && ci->attachedVehSlotIndex == 0;
+    return ci->attachedVehEntNum != ENTITYNUM_NONE && ci->attachedVehSlotIndex == VEHICLE_RIDESLOT_DRIVER;
 }
 
 bool __cdecl CG_VehEntityUsingVehicle(int32_t localClientNum, uint32_t entNum)
@@ -261,7 +261,7 @@ void __cdecl SeatTransformForSlot(
         *resultOrigin = tagOrigin[0];
         resultOrigin[1] = tagOrigin[1];
         resultOrigin[2] = tagOrigin[2];
-        if (vehSlotIdx <= 1)
+        if (vehSlotIdx <= VEHICLE_RIDESLOT_PASSENGER)
             resultOrigin[2] = resultOrigin[2] + -35.0;
     }
 }

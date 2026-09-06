@@ -13,9 +13,9 @@
 
 uint16 BG_VehiclesGetSlotTagName(int32_t slotIndex)
 {
-    if (!slotIndex)
+    if (slotIndex == VEHICLE_RIDESLOT_DRIVER)
         return scr_const.tag_driver;
-    if (slotIndex == 1)
+    if (slotIndex == VEHICLE_RIDESLOT_PASSENGER)
         return scr_const.tag_passenger;
     iassert(slotIndex == VEHICLE_RIDESLOT_GUNNER);
     return scr_const.tag_gunner;

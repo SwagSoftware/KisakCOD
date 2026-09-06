@@ -1033,9 +1033,9 @@ void __cdecl CalcViewValuesVehicle(int32_t localClientNum)
     if (!CG_VehLocalClientUsingVehicle(localClientNum))
         MyAssertHandler(".\\cgame_mp\\cg_view_mp.cpp", 852, 0, "%s", "CG_VehLocalClientUsingVehicle( localClientNum )");
     slot = CG_VehLocalClientVehicleSlot(localClientNum);
-    if (slot)
+    if (slot != VEHICLE_RIDESLOT_DRIVER)
     {
-        if (slot == 1)
+        if (slot == VEHICLE_RIDESLOT_PASSENGER)
         {
             CalcViewValuesVehiclePassenger(localClientNum);
         }
