@@ -688,7 +688,7 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
         VEH_UnlinkPlayer(pSelf->r.ownerNum.ent());
 #endif
 
-    if (info->type != 4)
+    if (info->type != VEH_ARTILLERY)
     {
 #ifdef KISAK_SP
         if ((veh->flags & 8) != 0)
@@ -701,7 +701,7 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
         {
             VEH_UpdateAIMove(pSelf);
         }
-        else if (info->type == 5)
+        else if (info->type == VEH_HELICOPTER)
         {
             VEH_UpdateClientChopper(pSelf);
         }
@@ -716,7 +716,7 @@ void __cdecl Scr_Vehicle_Think(gentity_s *pSelf)
     VEH_SetPosition(pSelf, veh->phys.origin, veh->phys.vel, veh->phys.angles);
 
 #ifdef KISAK_SP
-    if (info->type != 4 && (veh->flags & 8) != 0)
+    if (info->type != VEH_ARTILLERY && (veh->flags & 8) != 0)
         VEH_VerifyPosition(pSelf);
 #endif
 
@@ -1105,7 +1105,7 @@ void __cdecl VEH_UpdateAim(gentity_s *ent)
                 if (!player->client)
                     MyAssertHandler(".\\game\\g_scr_vehicle.cpp", 2081, 0, "%s", "player->client");
 
-                if ((player->client->ps.eFlags & 0x40000) == 0 && info->type != 5)
+                if ((player->client->ps.eFlags & 0x40000) == 0 && info->type != VEH_HELICOPTER)
                     angles[1] = player->client->ps.viewangles[1];
                 Vec3Sub(veh->targetOrigin, barrelPos, tgtDir);
                 Vec3Normalize(tgtDir);
@@ -2159,7 +2159,7 @@ void __cdecl CMD_VEH_Script_SetSpeed(gentity_s *ent)
     }
     if (Scr_GetNumParam() > 1)
         veh->manualAccel = Scr_GetFloat(1) * MPH_TO_INCHES_PER_SEC;
-    if (info->type == 5 && veh->speed < veh->manualSpeed && veh->manualAccel > veh->manualSpeed)
+    if (info->type == VEH_HELICOPTER && veh->speed < veh->manualSpeed && veh->manualAccel > veh->manualSpeed)
     {
         Com_PrintWarning(CON_CHANNEL_SERVER, "WARNING: capping acceleration to speed / sec for vehicle '%d'\n", ent->s.number);
         veh->manualAccel = veh->manualSpeed;
@@ -2494,9 +2494,9 @@ void __cdecl CMD_VEH_SetWeapon(scr_entref_t entref)
 char __cdecl VEH_DObjHasRequiredTags(gentity_s *ent, int32_t infoIdx)
 {
     vehicle_info_t *info = &s_vehicleInfos[infoIdx];
-    if (!info->type || info->type == 1)
+    if (info->type == VEH_WHEELS_4 || info->type == VEH_TANK)
     {
-        int numWheels = info->type != 0 ? 6 : 4;
+        int numWheels = info->type != VEH_WHEELS_4 ? 6 : 4;
         for (int i = 0; i < numWheels; ++i)
         {
             if (SV_DObjGetBoneIndex(ent, *s_wheelTags[i]) < 0)
@@ -2561,7 +2561,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
         v4 = va("Vehicles only support bullet and projectile weapons\n");
         Scr_Error(v4);
     }
-    if (info->type != 2 && info->type != 5)
+    if (info->type != VEH_PLANE && info->type != VEH_HELICOPTER)
     {
         if (veh->boneIndex.barrel < 0)
         {
@@ -2604,7 +2604,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
 
             if (barrel == 0
                 && vehHelicopterHeadSwayDontSwayTheTurret->current.enabled
-                && info->type == 5
+                && info->type == VEH_HELICOPTER
                 && (player->client->ps.eFlags & 0x40000) != 0)
             {
                 AngleVectors(ent->r.currentAngles, wp.gunForward, 0, 0);
@@ -3024,7 +3024,7 @@ static void VEH_GroundPlantInternal(gentity_s *ent, vehicle_physic_t *phys, int3
     info = &s_vehicleInfos[veh->infoIdx];
     iassert((info->type == VEH_WHEELS_4) || (info->type == VEH_TANK));
 
-    if (info->type)
+    if (info->type != VEH_WHEELS_4)
         numWheels = 6;
     else
         numWheels = 4;
@@ -3768,8 +3768,8 @@ void __cdecl VEH_UpdateClient(gentity_s *ent)
             VEH_AirMove(ent, 1);
     }
 
-    // Land vehicles (type 0 / 1): keep planted on the ground.
-    if (info->type == 0 || info->type == 1)
+    // Land vehicles (VEH_WHEELS_4 / VEH_TANK): keep planted on the ground.
+    if (info->type == VEH_WHEELS_4 || info->type == VEH_TANK)
         VEH_GroundPlant(ent, 1, 0.05f);
 
     MatrixTransposeTransformVector43(veh->phys.vel, axis, veh->phys.bodyVel); // world→body
@@ -3904,7 +3904,7 @@ void __cdecl VEH_UpdatePath(gentity_s *ent)
     veh->phys.angles[1] = DiffTrackAngle(veh->phys.angles[1], veh->phys.prevAngles[1], 4.0f, 0.05f);
     veh->phys.angles[2] = DiffTrackAngle(veh->phys.angles[2], veh->phys.prevAngles[2], 6.0f, 0.05f);
 
-    if (info->type == 0 || info->type == 1)
+    if (info->type == VEH_WHEELS_4 || info->type == VEH_TANK)
         VEH_GroundPlant(ent, 1, 0.05f);
 
     if (g_vehicleDebug->current.enabled)
@@ -4396,7 +4396,7 @@ void CMD_VEH_AttachPath(scr_entref_t entref)
     scr_vehicle->phys.prevAngles[1] = scr_vehicle->phys.angles[1];
     scr_vehicle->phys.prevAngles[2] = scr_vehicle->phys.angles[2];
     VEH_ResetWheels(Vehicle, &scr_vehicle->phys);
-    if (!v4->type || v4->type == 1)
+    if (v4->type == VEH_WHEELS_4 || v4->type == VEH_TANK)
         VEH_GroundPlant(Vehicle, 0, 0.05f);
     VEH_SetPosition(Vehicle, scr_vehicle->phys.origin, scr_vehicle->phys.vel, scr_vehicle->phys.angles);
     scr_vehicle->phys.prevOrigin[0] = scr_vehicle->phys.origin[0];
@@ -4438,7 +4438,7 @@ void CMD_VEH_GetAttachPos(scr_entref_t entref)
     v6.angles[1] = v7.angles[1];
     v6.angles[2] = v7.angles[2];
     VEH_ResetWheels(Vehicle, &v6);
-    if (!v4->type || v4->type == 1)
+    if (v4->type == VEH_WHEELS_4 || v4->type == VEH_TANK)
         VEH_GroundPlantInternal(Vehicle, &v6, 0, 0.05f);
     Scr_MakeArray();
     Scr_AddVector(v6.origin);
@@ -4838,7 +4838,7 @@ void CMD_VEH_GetWheelSurface(scr_entref_t entref)
     v3 = &s_vehicleInfos[scr_vehicle->infoIdx];
     ConstString = Scr_GetConstString(0);
     v5 = 0;
-    if (v3->type != 1 && v3->type)
+    if (v3->type != VEH_TANK && v3->type != VEH_WHEELS_4)
     {
         v6 = va("Vehicle type [%s] has no wheels\n", v3->name);
         Scr_Error(v6);
@@ -4873,7 +4873,7 @@ void CMD_VEH_GetWheelSurface(scr_entref_t entref)
             0,
             "Valid wheel names are: [front_left, front_right, back_left, back_right, middle_left, middle_right]\n");
     }
-    if (!v3->type && v5 > 3)
+    if (v3->type == VEH_WHEELS_4 && v5 > 3)
         Scr_ParamError(0, "Vehicle has no middle wheels\n");
     v7 = scr_vehicle->phys.wheelSurfType[v5];
     if (v7)
@@ -5461,7 +5461,7 @@ void Scr_Vehicle_Init(gentity_s *pSelf)
     info = &s_vehicleInfos[veh->infoIdx];
     type = info->type;
 
-    if (!info->type || type == 1)
+    if (info->type == VEH_WHEELS_4 || type == VEH_TANK)
     {
         radius = 0.0;
 
@@ -5541,7 +5541,7 @@ void Scr_Vehicle_Init(gentity_s *pSelf)
         veh->turret.barrelOffset = Vec3Distance(pos, wheelOrigin);
     }
 
-    if (!info->type || info->type == 1)
+    if (info->type == VEH_WHEELS_4 || info->type == VEH_TANK)
         VEH_GroundPlant(pSelf, 0, 0.05f);
 
     VEH_SetPosition(pSelf, veh->phys.origin, veh->phys.vel, veh->phys.angles);
@@ -6117,7 +6117,7 @@ void __cdecl VEH_UpdateWeapon(gentity_s *ent)
     G_GetPlayerViewOrigin(ps, viewOrigin);
 
     if (vehHelicopterHeadSwayDontSwayTheTurret->current.enabled
-        && info->type == 5
+        && info->type == VEH_HELICOPTER
         && (player->client->ps.eFlags & 0x40000) != 0)
     {
         AngleVectors(ent->r.currentAngles, forward, 0, 0);

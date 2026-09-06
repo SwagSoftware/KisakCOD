@@ -1418,11 +1418,11 @@ void __cdecl InitFirstThink(gentity_s *pSelf)
     veh = pSelf->scr_vehicle;
     phys = &veh->phys;
     info = &s_vehicleInfos[veh->infoIdx];
-    if (!info->type || info->type == 1)
+    if (info->type == VEH_WHEELS_4 || info->type == VEH_TANK)
     {
         if (!alwaysfails)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3077, 0, "Initializing a driveable vehicle!");
-        if (info->type)
+        if (info->type != VEH_WHEELS_4)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 3081, 0, "%s", "info->type == VEH_WHEELS_4");
         VEH_GetWheelOrigin(pSelf, 0, wheelLeft);
         VEH_GetWheelOrigin(pSelf, 1, wheelRight);
