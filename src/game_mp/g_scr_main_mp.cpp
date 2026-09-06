@@ -1180,14 +1180,14 @@ void GScr_SpawnPlane()
     currentOrigin[2] = origin[2];
     ent->spawnflags = iSpawnFlags;
     team = owner->client->sess.cs.team;
-    if ((uint32_t )team >= 4)
+    if ((uint32_t )team >= TEAM_NUM_TEAMS)
         MyAssertHandler(
             ".\\game_mp\\g_scr_main_mp.cpp",
             964,
             0,
             "team doesn't index (1 << 2)\n\t%i not in [0, %i)",
             team,
-            4);
+            TEAM_NUM_TEAMS);
     ownerIndex = owner->client - level.clients;
     if (G_CallSpawnEntity(ent))
     {

@@ -839,7 +839,7 @@ void __cdecl CG_SortSingleClientScore(cg_s *cgameGlob, int32_t scoreIndex)
 
 bool __cdecl CG_ClientScoreIsBetter(score_t *scoreA, score_t *scoreB)
 {
-    if (scoreA->team != scoreB->team && (scoreA->team == 3 || scoreB->team == 3))
+    if (scoreA->team != scoreB->team && (scoreA->team == TEAM_SPECTATOR || scoreB->team == TEAM_SPECTATOR))
         return 0;
     if (scoreA->score > scoreB->score)
         return 1;
