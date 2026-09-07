@@ -64,10 +64,17 @@ typedef DWORD FOURCC;
 #define SND_FIRST_STREAM_CHANNEL     40
 #define SND_MAX_CHANNELS             53
 #define SND_LENGTHNOTIFY_COUNT       4
-#define SND_TRACK_AMBIENT_PRIMARY_0  1
-#define SND_TRACK_AMBIENT_PRIMARY_1  3
-#define SND_TRACK_COUNT              5
 #define SND_MAX_PHYSICS              32
+
+enum : __int32
+{
+    SND_TRACK_MUSIC = 0x0,
+    SND_TRACK_AMBIENT_PRIMARY_0 = 0x1,
+    SND_TRACK_AMBIENT_SECONDARY_0 = 0x2,
+    SND_TRACK_AMBIENT_PRIMARY_1 = 0x3,
+    SND_TRACK_AMBIENT_SECONDARY_1 = 0x4,
+    SND_TRACK_COUNT = 0x5,
+};
 
 enum SND_ENVEFFECTPRIO : __int32
 {
@@ -452,7 +459,7 @@ struct snd_local_t // sizeof=0x7EF8
     snd_volume_info_t mastervol;        // ...
     snd_channelvolgroup channelVolGroups[SND_CHANNELVOLPRIO_COUNT];
     snd_channelvolgroup *channelvol;    // ...
-    snd_background_info_t background[5]; // ...
+    snd_background_info_t background[SND_TRACK_COUNT]; // ...
     int ambient_track;                  // ...
     float slaveLerp;                    // ...
     snd_enveffect envEffects[SND_ENVEFFECTPRIO_COUNT]; // ...

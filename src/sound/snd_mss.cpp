@@ -154,7 +154,7 @@ void MSS_InitChannels()
     //AIL_init_sample(milesGlob.handle_sample[i], 1, 0);
     AIL_init_sample(milesGlob.handle_sample[i], 1);
   }
-  g_snd.ambient_track = 1;
+  g_snd.ambient_track = SND_TRACK_AMBIENT_PRIMARY_0;
 }
 
 void MSS_InitEq()

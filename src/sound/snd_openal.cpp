@@ -127,7 +127,7 @@ void MSS_InitChannels()
     for (int i = 0; i < totalChannels; ++i)
         alFilteri(alGlob.sendFilter[i], AL_FILTER_TYPE, AL_FILTER_LOWPASS);
 
-    g_snd.ambient_track = 1;
+    g_snd.ambient_track = SND_TRACK_AMBIENT_PRIMARY_0;
 }
 
 // Mirrors MSS_InitEq. Only the shared EQ *data* (alGlob.eq[][]) gets initialized here -
