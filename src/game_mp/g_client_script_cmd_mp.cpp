@@ -2782,7 +2782,7 @@ void __cdecl PlayerCmd_SetSpreadOverride(scr_entref_t entref)
             if (value < 64)
             {
                 pSelf->client->ps.spreadOverride = value;
-                pSelf->client->ps.spreadOverrideState = 2;
+                pSelf->client->ps.spreadOverrideState = PSOS_ENABLED;
             }
             else
             {
@@ -2822,7 +2822,7 @@ void __cdecl PlayerCmd_ResetSpreadOverride(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    pSelf->client->ps.spreadOverrideState = 1;
+    pSelf->client->ps.spreadOverrideState = PSOS_RESETTING;
     pSelf->client->ps.aimSpreadScale = 255.0;
     if (Scr_GetNumParam())
         Scr_Error("USAGE: <player> resetspreadoverride()\n");

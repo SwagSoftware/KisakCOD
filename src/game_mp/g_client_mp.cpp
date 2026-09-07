@@ -392,7 +392,7 @@ void __cdecl ClientSpawn(gentity_s *ent, const float *spawn_origin, const float 
     client->ps.dofNearBlur = 6.0f;
     client->ps.dofFarBlur = 1.8f;
     client->ps.spreadOverride = 0;
-    client->ps.spreadOverrideState = 0;
+    client->ps.spreadOverrideState = PSOS_DISABLED;
     client->ps.throwBackGrenadeTimeLeft = 0;
     client->ps.throwBackGrenadeOwner = ENTITYNUM_NONE;
     G_SetOrigin(ent, spawn_origin);

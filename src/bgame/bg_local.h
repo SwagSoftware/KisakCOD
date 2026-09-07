@@ -737,6 +737,13 @@ struct MantleState // sizeof=0x10
 };
 static_assert(sizeof(MantleState) == 0x10);
 
+enum PlayerSpreadOverrideState : __int32
+{
+    PSOS_DISABLED = 0x0,
+    PSOS_RESETTING = 0x1,
+    PSOS_ENABLED = 0x2,
+};
+
 #ifdef KISAK_MP
 struct playerState_s_hud // sizeof=0x26C0
 {                                       // XREF: playerState_s/r

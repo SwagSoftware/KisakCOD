@@ -596,7 +596,7 @@ void __cdecl ClientSpawn(gentity_s *ent)
     client->ps.viewHeightLerpTime = 0;
     client->ps.dofFarBlur = 1.8;
     client->ps.spreadOverride = 0;
-    client->ps.spreadOverrideState = 0;
+    client->ps.spreadOverrideState = PSOS_DISABLED;
     client->ps.throwBackGrenadeTimeLeft = 0;
     client->ps.throwBackGrenadeOwner = ENTITYNUM_NONE;
     client->ps.stats[STAT_HEALTH] = v7;
