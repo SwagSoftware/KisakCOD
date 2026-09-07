@@ -737,6 +737,28 @@ struct MantleState // sizeof=0x10
 };
 static_assert(sizeof(MantleState) == 0x10);
 
+enum MantleAnims : __int32
+{
+    MANTLE_ROOT = 0x0,
+    MANTLE_UP_57 = 0x1,
+    MANTLE_UP_51 = 0x2,
+    MANTLE_UP_45 = 0x3,
+    MANTLE_UP_39 = 0x4,
+    MANTLE_UP_33 = 0x5,
+    MANTLE_UP_27 = 0x6,
+    MANTLE_UP_21 = 0x7,
+    MANTLE_OVER_HIGH = 0x8,
+    MANTLE_OVER_MID = 0x9,
+    MANTLE_OVER_LOW = 0xA,
+    MANTLE_ANIM_COUNT = 0xB,
+    MANTLE_UP_FIRST = 0x1,
+    MANTLE_UP_LAST = 0x7,
+    MANTLE_UP_COUNT = 0x7,
+    MANTLE_OVER_FIRST = 0x8,
+    MANTLE_OVER_LAST = 0xA,
+    MANTLE_OVER_COUNT = 0x3,
+};
+
 enum PlayerSpreadOverrideState : __int32
 {
     PSOS_DISABLED = 0x0,

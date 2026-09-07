@@ -16,7 +16,7 @@ const dvar_t *mantle_view_yawcap = nullptr;
 XAnim_s *s_mantleAnims = nullptr;
 
 #ifdef KISAK_MP
-const char *s_mantleAnimNames[11] =
+const char *s_mantleAnimNames[MANTLE_ANIM_COUNT] =
 {
     "mp_mantle_root",
     "mp_mantle_up_57",
@@ -32,7 +32,7 @@ const char *s_mantleAnimNames[11] =
     "player_mantle_over_low"
 };
 #elif KISAK_SP
-const char *s_mantleAnimNames[11] =
+const char *s_mantleAnimNames[MANTLE_ANIM_COUNT] =
 {
   "player_mantle_root",
   "player_mantle_up_57",
@@ -48,15 +48,15 @@ const char *s_mantleAnimNames[11] =
 };
 #endif
 
-const MantleAnimTransition s_mantleTrans[7] = // SP/MP Same
+const MantleAnimTransition s_mantleTrans[MANTLE_UP_COUNT] = // SP/MP Same
 {
-    {1, 8, 57.0f},
-    {2, 8, 51.0f},
-    {3, 9, 45.0f},
-    {4, 9, 39.0f},
-    {5, 9, 33.0f},
-    {6, 10, 27.0f},
-    {7, 10, 21.0f}
+    {MANTLE_UP_57, MANTLE_OVER_HIGH, 57.0f},
+    {MANTLE_UP_51, MANTLE_OVER_HIGH, 51.0f},
+    {MANTLE_UP_45, MANTLE_OVER_MID, 45.0f},
+    {MANTLE_UP_39, MANTLE_OVER_MID, 39.0f},
+    {MANTLE_UP_33, MANTLE_OVER_MID, 33.0f},
+    {MANTLE_UP_27, MANTLE_OVER_LOW, 27.0f},
+    {MANTLE_UP_21, MANTLE_OVER_LOW, 21.0f}
 };
 
 void __cdecl Mantle_RegisterDvars()
@@ -121,12 +121,12 @@ void __cdecl Mantle_CreateAnims(void *(__cdecl *xanimAlloc)(int32_t))
 
     if (!s_mantleAnims)
     {
-        s_mantleAnims = XAnimCreateAnims("PLAYER_MANTLE", 0xBu, xanimAlloc);
+        s_mantleAnims = XAnimCreateAnims("PLAYER_MANTLE", MANTLE_ANIM_COUNT, xanimAlloc);
         iassert(s_mantleAnims);
-        XAnimBlend(s_mantleAnims, 0, s_mantleAnimNames[0], 1, 0xAu, 0);
-        for (animIndex = 1; animIndex < 11; ++animIndex)
+        XAnimBlend(s_mantleAnims, MANTLE_ROOT, s_mantleAnimNames[MANTLE_ROOT], MANTLE_UP_FIRST, MANTLE_ANIM_COUNT - MANTLE_UP_FIRST, 0);
+        for (animIndex = MANTLE_UP_FIRST; animIndex < MANTLE_ANIM_COUNT; ++animIndex)
             BG_CreateXAnim(s_mantleAnims, animIndex, (char*)s_mantleAnimNames[animIndex]);
-        for (transIndex = 0; transIndex < 7; ++transIndex)
+        for (transIndex = 0; transIndex < MANTLE_UP_COUNT; ++transIndex)
         {
             animIndex = s_mantleTrans[transIndex].upAnimIndex;
             XAnimGetAbsDelta(s_mantleAnims, animIndex, rot, delta, 1.0);
@@ -483,7 +483,7 @@ int __cdecl Mantle_FindTransition(float curHeight, float goalHeight)
     v6 = s_mantleTrans[0].height - height;
     v4 = I_fabs(v6);
     bestDiff = v4;
-    for (transIndex = 1; transIndex < 7; ++transIndex)
+    for (transIndex = 1; transIndex < MANTLE_UP_COUNT; ++transIndex)
     {
         v5 = s_mantleTrans[transIndex].height - height;
         v3 = I_fabs(v5);
@@ -693,7 +693,7 @@ bool __cdecl Mantle_IsWeaponInactive(playerState_s *ps)
         return 0;
 
     if ((ps->pm_flags & PMF_MANTLE) != 0)
-        return s_mantleTrans[ps->mantleState.transIndex].overAnimIndex != 10;
+        return s_mantleTrans[ps->mantleState.transIndex].overAnimIndex != MANTLE_OVER_LOW;
 
     return 0;
 }
