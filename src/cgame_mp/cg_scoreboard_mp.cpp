@@ -573,7 +573,7 @@ double __cdecl CG_DrawScoreboard_ListBanner(
     scrPlace = &scrPlaceView[localClientNum];
     v17 = CG_BannerScoreboardScaleMultiplier() * 0.3499999940395355;
     bannerFont = UI_GetFontHandle(scrPlace, cg_scoreboardFont->current.integer, v17);
-    if (team)
+    if (team != TEAM_FREE)
     {
         if (team == TEAM_AXIS)
         {

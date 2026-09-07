@@ -1674,7 +1674,7 @@ bool __cdecl OnSameTeam(struct gentity_s *ent1, struct gentity_s *ent2)
 {
     if (!ent1->client || !ent2->client)
         return 0;
-    if (ent1->client->sess.cs.team)
+    if (ent1->client->sess.cs.team != TEAM_FREE)
         return ent1->client->sess.cs.team == ent2->client->sess.cs.team;
     return 0;
 }

@@ -224,7 +224,7 @@ void __cdecl Player_UpdateCursorHints(gentity_s *ent)
                             case ET_GENERAL:
                                 if (self->classname != scr_const.trigger_use && self->classname != scr_const.trigger_use_touch)
                                     goto LABEL_49;
-                                if (self->team && self->team != ent->client->sess.cs.team
+                                if (self->team != TEAM_FREE && self->team != ent->client->sess.cs.team
                                     || self->item[1].ammoCount != ENTITYNUM_NONE && self->item[1].ammoCount != ent->client->ps.clientNum)
                                 {
                                     goto LABEL_21;
