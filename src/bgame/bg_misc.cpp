@@ -1721,7 +1721,7 @@ void __cdecl BG_PlayerToEntitySetPitchAngles(playerState_s *ps, entityState_s *s
     float v9; // [esp+30h] [ebp-Ch]
     float fLerpFrac; // [esp+38h] [ebp-4h]
 
-    if (PM_GetEffectiveStance(ps) == 1)
+    if (PM_GetEffectiveStance(ps) == PM_STANCE_PRONE)
     {
         if (ps->viewHeightLerpTime)
         {
