@@ -1156,7 +1156,7 @@ void __cdecl CG_RemoveChatEscapeChar(char *text)
 
 void __cdecl CG_SetTeamScore(int32_t localClientNum, uint32_t team, int32_t score)
 {
-    iassert(team >= 0 && team < TEAM_NUM_TEAMS);
+    iassert(team >= TEAM_FREE && team < TEAM_NUM_TEAMS);
     CG_GetLocalClientGlobals(localClientNum)->teamScores[team] = score;
 }
 
