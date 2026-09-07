@@ -366,7 +366,7 @@ void __cdecl Com_GetSoundFileName(const snd_alias_t *alias, char *filename, int 
     if (!alias->soundFile)
         MyAssertHandler(".\\universal\\com_sndalias.cpp", 802, 0, "%s", "alias->soundFile");
     soundFile = alias->soundFile;
-    if (soundFile->type == 1)
+    if (soundFile->type == SAT_LOADED)
         I_strncpyz(filename, (char *)soundFile->u.loadSnd->name, size);
     else
         StreamFileNameGetName((const StreamFileName *)&soundFile->u, filename, size);

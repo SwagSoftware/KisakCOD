@@ -3877,7 +3877,7 @@ char __cdecl SND_Restore3DChannel(MemoryFile *memFile)
 
     if (alias0->soundFile == alias1->soundFile
         && alias0->soundFile->exists
-        && alias0->soundFile->type == 1
+        && alias0->soundFile->type == SAT_LOADED
         && SND_ValidateSoundAliasBlend(alias0, alias1, 0))
     {
         if (!SND_AnyActiveListeners())
@@ -4032,7 +4032,7 @@ char __cdecl SND_Restore2DChannel(MemoryFile *memFile)
 
     if (alias0->soundFile == alias1->soundFile
         && alias0->soundFile->exists
-        && alias0->soundFile->type == 1
+        && alias0->soundFile->type == SAT_LOADED
         && SND_ValidateSoundAliasBlend(alias0, alias1, 0))
     {
         if (!snd_enable2D->current.enabled)

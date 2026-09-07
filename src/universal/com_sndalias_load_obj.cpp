@@ -1637,7 +1637,7 @@ int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo)
     for (soundIndex = 0; soundIndex < soundFileInfo->count; ++soundIndex)
     {
         soundFile = &soundFileInfo->files[soundIndex];
-        if (soundFile->type == 1)
+        if (soundFile->type == SAT_LOADED)
         {
             if (!soundFile->u.loadSnd)
                 MyAssertHandler(".\\universal\\com_sndalias_load_obj.cpp", 2067, 0, "%s", "soundFile->u.loadSnd");
@@ -1646,7 +1646,7 @@ int __cdecl Com_LoadSoundAliasSounds(SoundFileInfo *soundFileInfo)
         }
         else
         {
-            if (soundFile->type != 2)
+            if (soundFile->type != SAT_STREAMED)
                 MyAssertHandler(
                     ".\\universal\\com_sndalias_load_obj.cpp",
                     2073,
