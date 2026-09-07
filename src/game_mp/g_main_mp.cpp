@@ -967,8 +967,8 @@ void __cdecl ExitLevel()
     int32_t ia; // [esp+4h] [ebp-4h]
 
     Cbuf_AddText(0, "map_rotate\n");
-    level.teamScores[1] = 0;
-    level.teamScores[2] = 0;
+    level.teamScores[TEAM_AXIS] = 0;
+    level.teamScores[TEAM_ALLIES] = 0;
     for (i = 0; i < g_maxclients->current.integer; ++i)
     {
         if (level.clients[i].sess.connected == CON_CONNECTED)

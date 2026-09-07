@@ -135,8 +135,8 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
 
     CL_ParseMapCenter(localClientNum);
     ConfigString = CL_GetConfigString(localClientNum, 4u);
-    cgameGlob->teamScores[1] = atoi(ConfigString);
-    cgameGlob->teamScores[2] = atoi(CL_GetConfigString(localClientNum, 5));
+    cgameGlob->teamScores[TEAM_AXIS] = atoi(ConfigString);
+    cgameGlob->teamScores[TEAM_ALLIES] = atoi(CL_GetConfigString(localClientNum, 5));
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -252,10 +252,10 @@ void __cdecl CG_MapRestart(int32_t localClientNum, int32_t savepersist)
         CG_CloseScriptMenu(localClientNum, 0);
         UI_CloseAllMenus(localClientNum);
         memset((uint8_t *)cgameGlob->scores, 0, sizeof(cgameGlob->scores));
-        cgameGlob->teamScores[0] = 0;
-        cgameGlob->teamScores[1] = 0;
-        cgameGlob->teamScores[2] = 0;
-        cgameGlob->teamScores[3] = 0;
+        cgameGlob->teamScores[TEAM_FREE] = 0;
+        cgameGlob->teamScores[TEAM_AXIS] = 0;
+        cgameGlob->teamScores[TEAM_ALLIES] = 0;
+        cgameGlob->teamScores[TEAM_SPECTATOR] = 0;
     }
     CG_ScoresUp(localClientNum);
     cgameGlob->objectiveText[0] = 0;
@@ -714,25 +714,25 @@ void __cdecl CG_ParseScores(int32_t localClientNum)
     cgameGlob->numScores = atoi(v1);
     if (cgameGlob->numScores > 64)
         cgameGlob->numScores = 64;
-    cgameGlob->teamScores[0] = 0;
-    cgameGlob->teamScores[1] = 0;
-    cgameGlob->teamScores[2] = 0;
-    cgameGlob->teamScores[3] = 0;
+    cgameGlob->teamScores[TEAM_FREE] = 0;
+    cgameGlob->teamScores[TEAM_AXIS] = 0;
+    cgameGlob->teamScores[TEAM_ALLIES] = 0;
+    cgameGlob->teamScores[TEAM_SPECTATOR] = 0;
     v2 = Cmd_Argv(2);
-    cgameGlob->teamScores[1] = atoi(v2);
+    cgameGlob->teamScores[TEAM_AXIS] = atoi(v2);
     v3 = Cmd_Argv(3);
-    cgameGlob->teamScores[2] = atoi(v3);
+    cgameGlob->teamScores[TEAM_ALLIES] = atoi(v3);
     v4 = Cmd_Argv(4);
     cgameGlob->scoreLimit = atoi(v4);
     memset((uint8_t *)cgameGlob->scores, 0, sizeof(cgameGlob->scores));
-    cgameGlob->teamPings[0] = 0;
-    cgameGlob->teamPings[1] = 0;
-    cgameGlob->teamPings[2] = 0;
-    cgameGlob->teamPings[3] = 0;
-    cgameGlob->teamPlayers[0] = 0;
-    cgameGlob->teamPlayers[1] = 0;
-    cgameGlob->teamPlayers[2] = 0;
-    cgameGlob->teamPlayers[3] = 0;
+    cgameGlob->teamPings[TEAM_FREE] = 0;
+    cgameGlob->teamPings[TEAM_AXIS] = 0;
+    cgameGlob->teamPings[TEAM_ALLIES] = 0;
+    cgameGlob->teamPings[TEAM_SPECTATOR] = 0;
+    cgameGlob->teamPlayers[TEAM_FREE] = 0;
+    cgameGlob->teamPlayers[TEAM_AXIS] = 0;
+    cgameGlob->teamPlayers[TEAM_ALLIES] = 0;
+    cgameGlob->teamPlayers[TEAM_SPECTATOR] = 0;
     for (i = 0; i < cgameGlob->numScores; ++i)
     {
         v5 = Cmd_Argv(7 * i + 5);
@@ -884,10 +884,10 @@ void __cdecl CG_ConfigStringModified(int32_t localClientNum)
                 switch (num)
                 {
                 case 4:
-                    cgameGlob->teamScores[1] = atoi(str);
+                    cgameGlob->teamScores[TEAM_AXIS] = atoi(str);
                     break;
                 case 5:
-                    cgameGlob->teamScores[2] = atoi(str);
+                    cgameGlob->teamScores[TEAM_ALLIES] = atoi(str);
                     break;
                 case 13:
                     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);

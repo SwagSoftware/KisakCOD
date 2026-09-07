@@ -106,9 +106,9 @@ struct cg_s // sizeof=0xFF580
     // padding byte
     int32_t scoresRequestTime;
     int32_t numScores;
-    int32_t teamScores[4];
-    int32_t teamPings[4];
-    int32_t teamPlayers[4];
+    int32_t teamScores[TEAM_NUM_TEAMS];
+    int32_t teamPings[TEAM_NUM_TEAMS];
+    int32_t teamPlayers[TEAM_NUM_TEAMS];
     score_t scores[64];
     int32_t scoreLimit;
     int32_t showScores;

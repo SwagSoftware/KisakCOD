@@ -340,27 +340,27 @@ void __cdecl CG_DrawScoreboard_ScoresList(int32_t localClientNum, float alpha)
         }
         color[4] = y;
         drawLine = 1;
-        if (cgameGlob->teamPlayers[1] || cgameGlob->teamPlayers[2])
+        if (cgameGlob->teamPlayers[TEAM_AXIS] || cgameGlob->teamPlayers[TEAM_ALLIES])
         {
             team = cgameGlob->bgs.clientinfo[cgameGlob->clientNum].team;
             if (team != TEAM_AXIS && team != TEAM_ALLIES)
                 team = TEAM_ALLIES;
             ya = CG_DrawTeamOfClientScore(localClientNum, color, y, team, listWidth, &drawLine);
             if (team == TEAM_AXIS)
-                teama = 2;
+                teama = TEAM_ALLIES;
             else
-                teama = 1;
+                teama = TEAM_AXIS;
             yd = ya + 4.0;
             ye = CG_DrawTeamOfClientScore(localClientNum, color, yd, teama, listWidth, &drawLine);
             y = ye + 4.0;
         }
-        if (cgameGlob->teamPlayers[0])
+        if (cgameGlob->teamPlayers[TEAM_FREE])
         {
-            yf = CG_DrawTeamOfClientScore(localClientNum, color, y, 0, listWidth, &drawLine);
+            yf = CG_DrawTeamOfClientScore(localClientNum, color, y, TEAM_FREE, listWidth, &drawLine);
             y = yf + 4.0;
         }
-        if (cgameGlob->teamPlayers[3])
-            CG_DrawTeamOfClientScore(localClientNum, color, y, 3, listWidth, &drawLine);
+        if (cgameGlob->teamPlayers[TEAM_SPECTATOR])
+            CG_DrawTeamOfClientScore(localClientNum, color, y, TEAM_SPECTATOR, listWidth, &drawLine);
         cgameGlob->scoresBottom = drawLine - 1;
         CG_DrawScrollbar(localClientNum, color, scrollbarTop);
     }
@@ -433,13 +433,13 @@ int32_t __cdecl CG_ScoreboardTotalLines(int32_t localClientNum)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     total = cgameGlob->numScores;
-    if (cgameGlob->teamPlayers[0])
+    if (cgameGlob->teamPlayers[TEAM_FREE])
         ++total;
-    if (cgameGlob->teamPlayers[1])
+    if (cgameGlob->teamPlayers[TEAM_AXIS])
         ++total;
-    if (cgameGlob->teamPlayers[2])
+    if (cgameGlob->teamPlayers[TEAM_ALLIES])
         ++total;
-    if (cgameGlob->teamPlayers[3])
+    if (cgameGlob->teamPlayers[TEAM_SPECTATOR])
         ++total;
     return total;
 }

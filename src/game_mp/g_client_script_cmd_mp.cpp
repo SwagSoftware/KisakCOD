@@ -3383,10 +3383,10 @@ void __cdecl PlayerCmd_UpdateScores(scr_entref_t entref)
             Scr_ObjectError(v1);
         }
     }
-    _snprintf(svcmd, 0x40u, "%c %i", 72, level.teamScores[2]);
+    _snprintf(svcmd, 0x40u, "%c %i", 72, level.teamScores[TEAM_ALLIES]);
     svcmd[63] = 0;
     SV_GameSendServerCommand(pSelf - g_entities, SV_CMD_CAN_IGNORE, svcmd);
-    _snprintf(svcmd, 0x40u, "%c %i", 71, level.teamScores[1]);
+    _snprintf(svcmd, 0x40u, "%c %i", 71, level.teamScores[TEAM_AXIS]);
     svcmd[63] = 0;
     SV_GameSendServerCommand(pSelf - g_entities, SV_CMD_CAN_IGNORE, svcmd);
 }
