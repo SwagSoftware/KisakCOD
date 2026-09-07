@@ -169,7 +169,7 @@ void __cdecl RB_UploadShaderStep()
         while (mtlUploadGlob.get != mtlUploadGlob.put && !uploadCount)
         {
             techSet = mtlUploadGlob.techSet[mtlUploadGlob.get % 0x400];
-            if (mtlUploadGlob.techTypeIter)
+            if (mtlUploadGlob.techTypeIter != TECHNIQUE_DEPTH_PREPASS)
             {
                 while (1)
                 {
@@ -188,12 +188,12 @@ void __cdecl RB_UploadShaderStep()
                             }
                         }
                     }
-                    if (++mtlUploadGlob.techTypeIter == 30)
+                    if (++mtlUploadGlob.techTypeIter == TECHNIQUE_SHADOWCOOKIE_CASTER)
                         break;
                     if (uploadCount)
                         return;
                 }
-                mtlUploadGlob.techTypeIter = 0;
+                mtlUploadGlob.techTypeIter = TECHNIQUE_DEPTH_PREPASS;
             }
             else if (!techSet->hasBeenUploaded && !Material_WouldTechniqueSetBeOverridden(techSet))
             {

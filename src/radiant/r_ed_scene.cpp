@@ -109,14 +109,14 @@ static void Editor_InitFaceIndices()
 void __cdecl Editor_AddMeshCmd(Material *handle, int techType, int sortKey,
                                int vertCount, int vbIndexAndOffs, int indexCount, int indexTable)
 {
-    iassert(techType >= 0);                               // 0x4fda66 (level 0)
+    iassert(techType >= TECHNIQUE_DEPTH_PREPASS);         // 0x4fda66 (level 0)
     const Material *material = Material_FromHandle(handle);
     iassert( material );   // r_ed_scene.cpp:219
 
     // Skip if the material lacks the requested technique. The IDB uses
     // techniques[techType+1] (its MaterialTechniqueSet reserves slot 0); kisak's
     // MaterialTechniqueSet is indexed directly by techType (r_material.cpp:753).
-    if (techType < 34 && !material->techniqueSet->techniques[techType])
+    if (techType < TECHNIQUE_COUNT && !material->techniqueSet->techniques[techType])
         return;
 
     if (edSceneGlobals.sceneMeshCount == ED_SCENE_MAX_MESHES) {
@@ -436,12 +436,12 @@ void __cdecl Editor_AddSurfCmd(int drawFlags, Material *material, model_inst *in
     iassert(material);
 
     // IDA gate (0x4fdff3): queue the surf ONLY when the material carries the requested
-    // technique (or techType >= 34); a surf whose material lacks the tech is DROPPED and the
+    // technique (or techType >= TECHNIQUE_COUNT); a surf whose material lacks the tech is DROPPED and the
     // requested techType is stored unchanged.  techniqueSet is dereferenced unconditionally
     // (kisak techniques[techType], no +1 — the IDB pseudocode's +1 is its narrower
     // MaterialTechniqueSet).  CONSEQUENCE: a 2D-view model whose material lacks tech 29 is
     // dropped, exactly as the binary behaves.
-    if (techType >= 34 || material->techniqueSet->techniques[techType]) {
+    if (techType >= TECHNIQUE_COUNT || material->techniqueSet->techniques[techType]) {
         if (radiant_surfCount == ED_SCENE_MAX_MODELSURFS) {
             R_WarnOncePerFrame((GfxWarningType)35, ED_SCENE_MAX_MODELSURFS);
         } else if (Editor_SurfFilter(drawFlags, material)) {

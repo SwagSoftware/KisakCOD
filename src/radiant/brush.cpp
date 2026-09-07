@@ -5992,7 +5992,7 @@ void DrawGeo( GfxColor *col, Material *mtlOverride, selbrush_t *b,
         if ( MtlDef_IsFaceFiltered( mtldef ) || !MaterialDef_15_Drawflag_Multiply( drawFlags, mtldef ) )
             continue;
 
-        if ( technique == 29 /*TECHNIQUE_WIREFRAME_SHADED*/ )
+        if ( technique == TECHNIQUE_WIREFRAME_SHADED )
         {
             // (binary also gates the wireframe on vis->visCount @0x47ada6 — see the
             // header note on the headless identity-faceVis divergence.)
@@ -6036,7 +6036,7 @@ void DrawGeo( GfxColor *col, Material *mtlOverride, selbrush_t *b,
                 // Reproduce the binary's technique-gate RESULT: don't emit the $opaque tool
                 // material at a LIT camera technique.  Tech 29 (wireframe, 2D) is unaffected;
                 // non-tool world/model materials (real colorMap) are unaffected.
-                if ( ( technique == 24 || technique == 25 ) && Material_IsToolOpaque( mtl ) )
+                if ( ( technique == TECHNIQUE_FAKELIGHT_NORMAL || technique == TECHNIQUE_FAKELIGHT_VIEW ) && Material_IsToolOpaque( mtl ) )
                     continue;
                 if ( sortKey < 0 )
                     sortKey = Editor_MaterialSortKey( mtl );
@@ -7181,7 +7181,7 @@ void DrawBrush( selbrush_t *b, const orientation_t *orient, int viewType,
     // takes DrawPatches and emits through the editor surf cache.
     if ( b->patch )
     {
-        if ( technique == 29 )
+        if ( technique == TECHNIQUE_WIREFRAME_SHADED )
         {
             // 0x47B025: view types 0..2 use the 2D grid; the camera uses 0x4415D0.
             if ( (unsigned)viewType <= 2 )
@@ -7265,7 +7265,7 @@ void DrawBrush( selbrush_t *b, const orientation_t *orient, int viewType,
                 // draw_meth1 role (0x47b11a): View→Entities-as-wireframe (show-state bit 0)
                 // forces the content GEOMETRY to 29; the xmodel mesh keeps `technique`
                 // (the draw_meth2 role — SkinModelInst @0x479735 uses draw_meth2).
-                int contentTech = ( g_PrefsDlg->m_nEntityShowState & 1 ) ? 29 : technique;
+                int contentTech = ( g_PrefsDlg->m_nEntityShowState & 1 ) ? TECHNIQUE_WIREFRAME_SHADED : technique;
                 DrawBrush_PrefabContents( b, eDef, orient, viewType, contentTech, col,
                                           width, contentFlags, layerPrefix );
             }

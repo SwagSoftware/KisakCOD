@@ -224,7 +224,7 @@ void __cdecl AssertValidRemappedTechniqueSet(MaterialTechniqueSet *techSet)
     iassert( techSet->remappedTechniqueSet );
     if (techSet->remappedTechniqueSet != techSet)
     {
-        for (techTypeIter = 0; techTypeIter < 0x22; ++techTypeIter)
+        for (techTypeIter = TECHNIQUE_DEPTH_PREPASS; techTypeIter < TECHNIQUE_COUNT; ++techTypeIter)
         {
             if (!techSet->techniques[techTypeIter] && techSet->remappedTechniqueSet->techniques[techTypeIter])
             {
@@ -329,7 +329,7 @@ void __cdecl Material_ClearShaderUploadList()
 {
     mtlUploadGlob.get = 0;
     mtlUploadGlob.put = 0;
-    mtlUploadGlob.techTypeIter = 0;
+    mtlUploadGlob.techTypeIter = TECHNIQUE_DEPTH_PREPASS;
 }
 
 bool __cdecl Material_WouldTechniqueSetBeOverridden(const MaterialTechniqueSet *techSet)

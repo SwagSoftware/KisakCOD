@@ -2547,7 +2547,7 @@ void __cdecl Load_MaterialTechniqueSet(bool atStreamStart)
     varXString = &varMaterialTechniqueSet->name;
     Load_XString(0);
     varMaterialTechniquePtr = varMaterialTechniqueSet->techniques;
-    Load_MaterialTechniquePtrArray(0, 34);
+    Load_MaterialTechniquePtrArray(0, TECHNIQUE_COUNT);
     DB_PopStreamPos();
 }
 

@@ -55,8 +55,8 @@ const Material *__cdecl R_PixelCost_GetAccumulationMaterial(const Material *mate
         return rgp.pixelCostAddDepthDisableMaterial;
     if (pixelCostMode == GFX_PIXEL_COST_MODE_ADD_PASSES_IGNORE_DEPTH)
         return rgp.pixelCostAddDepthDisableMaterial;
-    if (material->techniqueSet->techniques[4])
-        v3 = material->stateBitsEntry[4];
+    if (material->techniqueSet->techniques[TECHNIQUE_UNLIT])
+        v3 = material->stateBitsEntry[TECHNIQUE_UNLIT];
     else
         v3 = 0;
     switch (material->stateBitsTable[v3].loadBits[1] & 0xF)

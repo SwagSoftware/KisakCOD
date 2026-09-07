@@ -710,7 +710,7 @@ char __cdecl Material_GetConstantValue(Material *material, const char *name, flo
 // (2) the relevant GfxStateBits entry has the cull/blend pattern (loadBits[0] & 0x7000F00)
 // == 0x800 and (loadBits[1] & 1), and (3) its unlit/depth technique [1] matches the
 // shadow-caster reference material's technique [1].  The state-bits entry index uses
-// stateBitsEntry[4] only when technique [5] is present (else 0).  surfaceFlags is read
+// stateBitsEntry[TECHNIQUE_UNLIT] only when TECHNIQUE_EMISSIVE is present (else 0).  surfaceFlags is read
 // from the KISAK_RADIANT trailing Material field (CoD4 stores it in the 56B MaterialInfo
 // at info+0x2C; kisak's 24B MaterialInfo lacks it — see r_material.h / Material_LoadRaw).
 // Only consumer is MaterialDef_10_LayeredMatHandle (radiant/materialdef.cpp).
@@ -720,14 +720,14 @@ bool __cdecl Material_CastsStencilShadow(Material *handle)
     if ((m->surfaceFlags & SURF_NOCASTSHADOW) != 0)
         return false;
     const MaterialTechniqueSet *techniqueSet = m->techniqueSet;
-    int idx = techniqueSet->techniques[5] ? (uint8_t)m->stateBitsEntry[4] : 0;
+    int idx = techniqueSet->techniques[TECHNIQUE_EMISSIVE] ? (uint8_t)m->stateBitsEntry[TECHNIQUE_UNLIT] : 0;
     const GfxStateBits *sb = &m->stateBitsTable[idx];
     if ((sb->loadBits[0] & 0x7000F00) != 0x800)
         return false;
     if ((sb->loadBits[1] & 1) == 0)
         return false;
-    return techniqueSet->techniques[1]
-        == rgp.shadowCasterMaterial->techniqueSet->techniques[1];
+    return techniqueSet->techniques[TECHNIQUE_BUILD_FLOAT_Z]
+        == rgp.shadowCasterMaterial->techniqueSet->techniques[TECHNIQUE_BUILD_FLOAT_Z];
 }
 #endif // KISAK_RADIANT
 

@@ -414,7 +414,7 @@ void __cdecl R_AddBModelSurfacesCamera(
             0,
             "gfxDrawMethod.emissiveTechType doesn't index TECHNIQUE_COUNT\n\t%i not in [0, %i)",
             gfxDrawMethod.emissiveTechType,
-            34);
+            TECHNIQUE_COUNT);
     if (r_drawDecals->current.enabled)
         surfaceCount = bmodel->surfaceCount;
     else

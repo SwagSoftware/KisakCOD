@@ -981,7 +981,7 @@ void XY_DrawBrushes(const XYViewState *v)
 
         GfxColor col;
         XY_BrushColor( b, &col );
-        DrawBrush( b, ident, v->viewType, /*technique=wireframe*/ 29, &col, /*width*/ 1, /*drawFlags*/ 0,
+        DrawBrush( b, ident, v->viewType, /*technique=wireframe*/ TECHNIQUE_WIREFRAME_SHADED, &col, /*width*/ 1, /*drawFlags*/ 0,
                    /*layerPrefix (binary `zero`)*/ "" );
 
         // entity-name label (binary's DrawBrushEntityName at 0x46d0fe, right after DrawBrush);
@@ -1055,7 +1055,7 @@ void XY_DrawBrushes(const XYViewState *v)
             bool culled = ( xmax < def->mins[nDim1] || ymax < def->mins[nDim2] ||
                             xmin > def->maxs[nDim1] || ymin > def->maxs[nDim2] );
             if ( !culled && !FilterBrush( b, 0 ) )
-                DrawBrush( b, ident, v->viewType, 29, &selCol, 2, 0,
+                DrawBrush( b, ident, v->viewType, TECHNIQUE_WIREFRAME_SHADED, &selCol, 2, 0,
                            /*layerPrefix (binary `zero`)*/ "" );
 
             // entity-name label (binary's DrawBrushEntityName at 0x46d2c9, in the SELECTED

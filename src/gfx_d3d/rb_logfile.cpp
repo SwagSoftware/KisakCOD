@@ -107,7 +107,7 @@ const char *__cdecl RB_LogTechniqueType(MaterialTechniqueType techType)
             178,
             0,
             "%s\n\t(techType) = %i",
-            "(techType >= 0 && techType < TECHNIQUE_TOTAL_COUNT)",
+            "(techType >= TECHNIQUE_DEPTH_PREPASS && techType < TECHNIQUE_TOTAL_COUNT)",
             techType);
     return techniqueNames[techType];
 }

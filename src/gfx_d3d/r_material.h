@@ -10,6 +10,58 @@
 
 #define MTL_LAYER_LIMIT 5
 
+enum MaterialTechniqueType : __int32
+{                                       // ...
+    TECHNIQUE_DEPTH_PREPASS = 0x0,
+    TECHNIQUE_BUILD_FLOAT_Z = 0x1,
+    TECHNIQUE_BUILD_SHADOWMAP_DEPTH = 0x2,
+    TECHNIQUE_BUILD_SHADOWMAP_COLOR = 0x3,
+    TECHNIQUE_UNLIT = 0x4,
+    TECHNIQUE_EMISSIVE = 0x5,
+    TECHNIQUE_EMISSIVE_SHADOW = 0x6,
+    TECHNIQUE_LIT_BEGIN = 0x7,
+    TECHNIQUE_LIT = 0x7,
+    TECHNIQUE_LIT_SUN = 0x8,
+    TECHNIQUE_LIT_SUN_SHADOW = 0x9,
+    TECHNIQUE_LIT_SPOT = 0xA,
+    TECHNIQUE_LIT_SPOT_SHADOW = 0xB,
+    TECHNIQUE_LIT_OMNI = 0xC,
+    TECHNIQUE_LIT_OMNI_SHADOW = 0xD,
+    TECHNIQUE_LIT_INSTANCED = 0xE,
+    TECHNIQUE_LIT_INSTANCED_SUN = 0xF,
+    TECHNIQUE_LIT_INSTANCED_SUN_SHADOW = 0x10,
+    TECHNIQUE_LIT_INSTANCED_SPOT = 0x11,
+    TECHNIQUE_LIT_INSTANCED_SPOT_SHADOW = 0x12,
+    TECHNIQUE_LIT_INSTANCED_OMNI = 0x13,
+    TECHNIQUE_LIT_INSTANCED_OMNI_SHADOW = 0x14,
+    TECHNIQUE_LIT_END = 0x15,
+    TECHNIQUE_LIGHT_SPOT = 0x15,
+    TECHNIQUE_LIGHT_OMNI = 0x16,
+    TECHNIQUE_LIGHT_SPOT_SHADOW = 0x17,
+    TECHNIQUE_FAKELIGHT_NORMAL = 0x18,
+    TECHNIQUE_FAKELIGHT_VIEW = 0x19,
+    TECHNIQUE_SUNLIGHT_PREVIEW = 0x1A,
+    TECHNIQUE_CASE_TEXTURE = 0x1B,
+    TECHNIQUE_WIREFRAME_SOLID = 0x1C,
+    TECHNIQUE_WIREFRAME_SHADED = 0x1D,
+    TECHNIQUE_SHADOWCOOKIE_CASTER = 0x1E,
+    TECHNIQUE_SHADOWCOOKIE_RECEIVER = 0x1F,
+    TECHNIQUE_DEBUG_BUMPMAP = 0x20,
+    TECHNIQUE_DEBUG_BUMPMAP_INSTANCED = 0x21,
+    TECHNIQUE_COUNT = 0x22,
+    TECHNIQUE_TOTAL_COUNT = 0x23,
+    TECHNIQUE_NONE = 0x24,
+};
+inline MaterialTechniqueType &operator++(MaterialTechniqueType &e) {
+    e = static_cast<MaterialTechniqueType>(static_cast<int>(e) + 1);
+    return e;
+}
+inline MaterialTechniqueType &operator++(MaterialTechniqueType &e, int i)
+{
+    ++e;
+    return e;
+}
+
 enum $74254F2FBB58A9D84A85080F50CF363D : __int32
 {
     MTL_ARG_MATERIAL_VERTEX_CONST = 0x0,
@@ -453,14 +505,14 @@ struct MaterialTechniqueSet // sizeof=0x94
     uint8_t unused[1];
     // padding byte
     MaterialTechniqueSet *remappedTechniqueSet;
-    MaterialTechnique *techniques[34];
+    MaterialTechnique *techniques[TECHNIQUE_COUNT];
 };
 static_assert(sizeof(MaterialTechniqueSet) == 148);
 
 struct Material // sizeof=0x50
 {                                       // ...
     MaterialInfo info;
-    uint8_t stateBitsEntry[34];
+    uint8_t stateBitsEntry[TECHNIQUE_COUNT];
     uint8_t textureCount;
     uint8_t constantCount;
     uint8_t stateBitsCount;
