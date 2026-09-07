@@ -1572,7 +1572,7 @@ void __cdecl Load_StreamedSound(bool atStreamStart)
 
 void __cdecl Load_SoundFileRef(bool atStreamStart)
 {
-    if (varSoundFile->type == 1)
+    if (varSoundFile->type == SAT_LOADED)
     {
         varLoadedSoundPtr = &varSoundFileRef->loadSnd;
         Load_LoadedSoundPtr(atStreamStart);
@@ -1791,7 +1791,7 @@ void __cdecl Mark_LoadedSoundPtr()
 
 void __cdecl Mark_SoundFileRef()
 {
-    if (varSoundFile->type == 1)
+    if (varSoundFile->type == SAT_LOADED)
     {
         varLoadedSoundPtr = &varSoundFileRef->loadSnd;
         Mark_LoadedSoundPtr();

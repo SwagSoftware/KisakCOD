@@ -163,17 +163,17 @@ int __cdecl SND_GetEntChannelFromName(const char *channelName)
 
 char __cdecl SND_ValidateEnvEffectsPriorityValue(const char *priorityName, int *priority)
 {
-    const char *priorityStrings[3]; // [esp+0h] [ebp-10h]
+    const char *priorityStrings[SND_ENVEFFECTPRIO_COUNT]; // [esp+0h] [ebp-10h]
     int stringIndex; // [esp+Ch] [ebp-4h]
 
-    priorityStrings[0] = "none";
-    priorityStrings[1] = "level";
-    priorityStrings[2] = "shellshock";
+    priorityStrings[SND_ENVEFFECTPRIO_NONE] = "none";
+    priorityStrings[SND_ENVEFFECTPRIO_LEVEL] = "level";
+    priorityStrings[SND_ENVEFFECTPRIO_SHELLSHOCK] = "shellshock";
 
     iassert(priorityName);
     iassert(priority);
 
-    for (stringIndex = 1; stringIndex < 3; ++stringIndex)
+    for (stringIndex = SND_ENVEFFECTPRIO_LEVEL; stringIndex < SND_ENVEFFECTPRIO_COUNT; ++stringIndex)
     {
         if (!I_stricmp(priorityName, priorityStrings[stringIndex]))
         {
@@ -183,7 +183,7 @@ char __cdecl SND_ValidateEnvEffectsPriorityValue(const char *priorityName, int *
     }
 
     Com_Printf(CON_CHANNEL_SOUND, "invalid priority string '%s', it must be one of the following strings:\n", priorityName);
-    for (stringIndex = 1; stringIndex < 3; ++stringIndex)
+    for (stringIndex = SND_ENVEFFECTPRIO_LEVEL; stringIndex < SND_ENVEFFECTPRIO_COUNT; ++stringIndex)
         Com_Printf(CON_CHANNEL_SOUND, "  %s\n", priorityStrings[stringIndex]);
     return 0;
 }
