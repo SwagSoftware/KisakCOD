@@ -305,9 +305,9 @@ void __cdecl G_InitGame(int32_t levelTime, int32_t randomSeed, int32_t restart, 
         G_LoadAnimTreeInstances();
     }
 
-    SV_GetConfigstring(0x13u, buffer, 1024);
+    SV_GetConfigstring(CS_MULTI_MAPWINNER, buffer, 1024);
     Info_SetValueForKey(buffer, "winner", "0");
-    SV_SetConfigstring(19, buffer);
+    SV_SetConfigstring(CS_MULTI_MAPWINNER, buffer);
 
     memset(g_entities, 0, sizeof(g_entities));
     level.gentities = g_entities;
@@ -1035,7 +1035,7 @@ void __cdecl CheckVote()
             level.voteExecuteTime = level.time + 3000;
         LABEL_13:
             level.voteTime = 0;
-            SV_SetConfigstring(13, (char *)"");
+            SV_SetConfigstring(CS_VOTE_TIME, (char *)"");
             return;
         }
         passCount = level.numVotingClients / 2 + 1;

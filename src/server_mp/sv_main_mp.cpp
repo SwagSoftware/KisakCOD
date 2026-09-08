@@ -1168,7 +1168,7 @@ void __cdecl SV_PreFrame()
         SV_SetSystemInfoConfig();
     if ((dvar_modifiedFlags & 0x100) != 0)
     {
-        SV_SetConfig(20, 128, 256);
+        SV_SetConfig(CS_CODINFO, CS_CODINFO_LAST - CS_CODINFO + 1, 256);
         dvar_modifiedFlags &= ~0x100u;
     }
 }

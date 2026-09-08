@@ -1559,7 +1559,7 @@ void __cdecl CG_AddEntityLoopSound(int32_t localClientNum, const centity_s *cent
         bmodel = R_GetBrushModel(cent->nextState.index.brushmodel);
         Vec3Avg(bmodel->bounds[0], bmodel->bounds[1], midpoint);
         Vec3Add(cent->pose.origin, midpoint, origin);
-        ConfigString = CL_GetConfigString(localClientNum, cent->nextState.loopSound + 1342);
+        ConfigString = CL_GetConfigString(localClientNum, cent->nextState.loopSound + CS_SOUNDALIASES);
         CG_PlaySoundAliasByName(localClientNum, cent->nextState.number, origin, ConfigString);
     }
     else
@@ -1567,7 +1567,7 @@ void __cdecl CG_AddEntityLoopSound(int32_t localClientNum, const centity_s *cent
         CG_PlaySoundAliasByName(localClientNum,
             cent->nextState.number, 
             cent->pose.origin, 
-            CL_GetConfigString(localClientNum, cent->nextState.loopSound + 1342)
+            CL_GetConfigString(localClientNum, cent->nextState.loopSound + CS_SOUNDALIASES)
         );
     }
 }
@@ -1707,12 +1707,12 @@ void __cdecl CG_SoundBlend(int32_t localClientNum, centity_s *cent)
     {
         if (cent->nextState.eventParms[1])
         {
-            CL_GetConfigString(localClientNum, cent->nextState.eventParms[0] + 1342);
+            CL_GetConfigString(localClientNum, cent->nextState.eventParms[0] + CS_SOUNDALIASES);
             if (CG_ShouldPlaySoundOnLocalClient())
             {
-                ConfigString = CL_GetConfigString(localClientNum, cent->nextState.eventParms[0] + 1342);
+                ConfigString = CL_GetConfigString(localClientNum, cent->nextState.eventParms[0] + CS_SOUNDALIASES);
                 alias0 = CL_PickSoundAlias(ConfigString);
-                alias1 = CL_PickSoundAlias(CL_GetConfigString(localClientNum, cent->nextState.eventParms[1] + 1342));
+                alias1 = CL_PickSoundAlias(CL_GetConfigString(localClientNum, cent->nextState.eventParms[1] + CS_SOUNDALIASES));
                 if (alias0)
                 {
                     if (alias1)

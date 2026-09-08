@@ -175,7 +175,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
                 }
                 I_strncpyz(ci->name, clientState->name, 16);
             }
-            modelName = CL_GetConfigString(localClientNum, clientState->modelindex + 830);
+            modelName = CL_GetConfigString(localClientNum, clientState->modelindex + CS_MODELS);
             if (strcmp(ci->model, modelName))
             {
                 I_strncpyz(ci->model, (char *)modelName, 64);
@@ -183,13 +183,13 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
             }
             for (i = 0; i < 6; ++i)
             {
-                modelName = CL_GetConfigString(localClientNum, clientState->attachModelIndex[i] + 830);
+                modelName = CL_GetConfigString(localClientNum, clientState->attachModelIndex[i] + CS_MODELS);
                 if (strcmp(ci->attachModelNames[i], modelName))
                 {
                     I_strncpyz(ci->attachModelNames[i], (char *)modelName, 64);
                     ci->dobjDirty = 1;
                 }
-                tagName = CL_GetConfigString(localClientNum, clientState->attachTagIndex[i] + 2282);
+                tagName = CL_GetConfigString(localClientNum, clientState->attachTagIndex[i] + CS_TAGS);
                 if (strcmp(ci->attachTagNames[i], tagName))
                 {
                     I_strncpyz(ci->attachTagNames[i], (char *)tagName, 64);
@@ -323,7 +323,7 @@ void __cdecl CG_SetNextSnap(int localClientNum, snapshot_s *snap)
         CG_UpdateWeaponViewmodels(localClientNum);
         if (snap->ps.viewmodelIndex > 0)
         {
-            modelName = CL_GetConfigString(localClientNum, snap->ps.viewmodelIndex + 830);
+            modelName = CL_GetConfigString(localClientNum, snap->ps.viewmodelIndex + CS_MODELS);
             if (!modelName || !*modelName)
                 MyAssertHandler(".\\cgame_mp\\cg_snapshot_mp.cpp", 672, 0, "%s", "modelName && modelName[0]");
             v5 = R_RegisterModel(modelName);

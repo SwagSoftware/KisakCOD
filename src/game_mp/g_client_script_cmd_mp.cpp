@@ -2472,7 +2472,12 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
         }
         fadetime = Scr_GetFloat(2);
     }
-    shockIndex = G_FindConfigstringIndex((char*)Scr_GetString(1), 1954, 16, 0, 0);
+    shockIndex = G_FindConfigstringIndex(
+        (char*)Scr_GetString(1),
+        CS_SHELLSHOCKS,
+        CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1,
+        0,
+        0);
     prio_name = Scr_GetConstString(0);
     prio = 1;
     if (prio_name == scr_const.snd_channelvolprio_holdbreath)

@@ -195,7 +195,7 @@ int32_t __cdecl CG_ServerMaterialName(int32_t localClientNum, int32_t index, cha
 
     if (index <= 0 || index >= 256)
         return 0;
-    string = CL_GetConfigString(localClientNum, index + 2002);
+    string = CL_GetConfigString(localClientNum, index + CS_SERVER_MATERIALS);
     if (!*string)
         return 0;
     if (strlen(string) >= maxLen)
@@ -2085,7 +2085,7 @@ char *__cdecl CG_GetUseString(int32_t localClientNum)
 
     iassert(cgameGlob->cursorHintString >= 0);
 
-    displayString = CL_GetConfigString(localClientNum, cgameGlob->cursorHintString + 277);
+    displayString = CL_GetConfigString(localClientNum, cgameGlob->cursorHintString + CS_USE_TRIG_STRINGS);
     if (!displayString || !*displayString)
         return 0;
 

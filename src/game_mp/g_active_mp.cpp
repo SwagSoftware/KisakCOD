@@ -890,9 +890,9 @@ void __cdecl IntermissionClientEndFrame(gentity_s *ent)
     client->ps.viewmodelIndex = 0;
     ent->s.eType = ET_INVISIBLE;
     v1 = va("%i", level.teamScores[TEAM_AXIS]);
-    SV_SetConfigstring(4, v1);
+    SV_SetConfigstring(CS_SCORES1, v1);
     v2 = va("%i", level.teamScores[TEAM_ALLIES]);
-    SV_SetConfigstring(5, v2);
+    SV_SetConfigstring(CS_SCORES2, v2);
 }
 
 void __cdecl SpectatorClientEndFrame(gentity_s *ent)

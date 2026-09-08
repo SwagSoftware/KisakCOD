@@ -3320,7 +3320,7 @@ void __cdecl CL_OpenScriptMenu_f()
                     {
                         for (menuIndex = 0; menuIndex < 32; ++menuIndex)
                         {
-                            menuName = CL_GetConfigString(0, menuIndex + 1970);
+                            menuName = CL_GetConfigString(0, menuIndex + CS_SCRIPT_MENUS);
                             if (*menuName)
                             {
                                 if (!I_stricmp(parentMenuName, menuName))

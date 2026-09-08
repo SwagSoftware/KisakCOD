@@ -61,12 +61,12 @@ void __cdecl CG_ParseCodInfo(int32_t localClientNum)
     
     if (!cgs->localServer)
     {
-        for (i = 0; i < 128; ++i)
+        for (i = 0; i < CS_CODINFO_LAST - CS_CODINFO + 1; ++i)
         {
-            key = CL_GetConfigString(localClientNum, i + 20);
+            key = CL_GetConfigString(localClientNum, i + CS_CODINFO);
             if (!*key)
                 break;
-            value = CL_GetConfigString(localClientNum, i + 148);
+            value = CL_GetConfigString(localClientNum, i + CS_CODINFO_VALUE);
             Dvar_SetFromStringByName(key, value);
         }
     }
@@ -95,7 +95,7 @@ void __cdecl CG_ParseFog(int32_t localClientNum)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     time = cgameGlob->time;
-    info = CL_GetConfigString(localClientNum, 9u);
+    info = CL_GetConfigString(localClientNum, CS_FOGVARS);
     token = (const char *)Com_Parse(&info);
     start = atof(token);
     token = (const char *)Com_Parse(&info);
@@ -134,9 +134,9 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     CL_ParseMapCenter(localClientNum);
-    ConfigString = CL_GetConfigString(localClientNum, 4u);
+    ConfigString = CL_GetConfigString(localClientNum, CS_SCORES1);
     cgameGlob->teamScores[TEAM_AXIS] = atoi(ConfigString);
-    cgameGlob->teamScores[TEAM_ALLIES] = atoi(CL_GetConfigString(localClientNum, 5));
+    cgameGlob->teamScores[TEAM_ALLIES] = atoi(CL_GetConfigString(localClientNum, CS_SCORES2));
     if (localClientNum)
         MyAssertHandler(
             "c:\\trees\\cod3\\src\\cgame_mp\\cg_local_mp.h",
@@ -146,17 +146,17 @@ void __cdecl CG_SetConfigValues(int32_t localClientNum)
             "(localClientNum == 0)",
             localClientNum);
     R_SwitchFog(0, cgameGlob->time, 0);
-    for (i = 1970; i < 2002; ++i)
+    for (i = CS_SCRIPT_MENUS; i <= CS_SCRIPT_MENUS_LAST; ++i)
         CG_PrecacheScriptMenu(localClientNum, i);
-    for (ia = 2259; ia < 2267; ++ia)
+    for (ia = CS_STATUS_ICONS; ia <= CS_STATUS_ICONS_LAST; ++ia)
     {
         Material_RegisterHandle(CL_GetConfigString(localClientNum, ia), IMAGE_TRACK_HUD);
     }
-    for (ib = 2267; ib < 2282; ++ib)
+    for (ib = CS_HEAD_ICONS; ib <= CS_HEAD_ICONS_LAST; ++ib)
     {
         Material_RegisterHandle(CL_GetConfigString(localClientNum, ib), IMAGE_TRACK_HUD);
     }
-    for (ic = 2003; ic < 2258; ++ic)
+    for (ic = CS_SERVER_MATERIALS + 1; ic <= CS_SERVER_MATERIALS_LAST; ++ic)
         CG_RegisterServerMaterial(localClientNum, ic);
     CG_ParseGameEndTime(localClientNum);
     CG_VisionSetConfigString_Naked(localClientNum);
@@ -167,7 +167,7 @@ void __cdecl CG_ParseGameEndTime(int32_t localClientNum)
 {
     const char *ConfigString; // eax
 
-    ConfigString = CL_GetConfigString(localClientNum, 0xBu);
+    ConfigString = CL_GetConfigString(localClientNum, CS_GAMEENDTIME);
     CG_GetLocalClientStaticGlobals(localClientNum)->gameEndTime = atoi(ConfigString);
 }
 
@@ -175,13 +175,13 @@ void __cdecl CG_PrecacheScriptMenu(int32_t localClientNum, int32_t configStringI
 {
     const char *configString; // [esp+0h] [ebp-4h]
 
-    if (configStringIndex < 1970 || configStringIndex >= 2002)
+    if (configStringIndex < CS_SCRIPT_MENUS || configStringIndex > CS_SCRIPT_MENUS_LAST)
         MyAssertHandler(
             ".\\cgame_mp\\cg_servercmds_mp.cpp",
             591,
             0,
             "%s",
-            "(configStringIndex >= CS_SCRIPT_MENUS) && (configStringIndex < CS_SCRIPT_MENUS + MAX_SCRIPT_MENUS)");
+            "(configStringIndex >= CS_SCRIPT_MENUS) && (configStringIndex <= CS_SCRIPT_MENUS_LAST)");
     configString = CL_GetConfigString(localClientNum, configStringIndex);
     if (*configString)
     {
@@ -194,13 +194,13 @@ void __cdecl CG_RegisterServerMaterial(int32_t localClientNum, int32_t configStr
 {
     const char *materialName; // [esp+0h] [ebp-4h]
 
-    if (configStringIndex < 2002 || configStringIndex >= 2258)
+    if (configStringIndex < CS_SERVER_MATERIALS || configStringIndex > CS_SERVER_MATERIALS_LAST)
         MyAssertHandler(
             ".\\cgame_mp\\cg_servercmds_mp.cpp",
             606,
             0,
             "%s\n\t(configStringIndex) = %i",
-            "(configStringIndex >= CS_SERVER_MATERIALS && configStringIndex < CS_SERVER_MATERIALS + 256)",
+            "(configStringIndex >= CS_SERVER_MATERIALS && configStringIndex <= CS_SERVER_MATERIALS_LAST)",
             configStringIndex);
     materialName = CL_GetConfigString(localClientNum, configStringIndex);
     if (*materialName)
@@ -754,9 +754,9 @@ void __cdecl CG_ParseScores(int32_t localClientNum)
         clientNum = cgameGlob->scores[i].client;
         if (!cgameGlob->bgs.clientinfo[clientNum].infoValid)
             Com_PrintError(CON_CHANNEL_CLIENT, "Invalid score client %i, bad scoreboard message\n", cgameGlob->scores[i].client);
-        if (statusIconIndex > 0 && statusIconIndex <= 8)
+        if (statusIconIndex > 0 && statusIconIndex <= CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1)
         {
-            pszIcon = CL_GetConfigString(localClientNum, statusIconIndex + 2258);
+            pszIcon = CL_GetConfigString(localClientNum, statusIconIndex + CS_STATUS_ICONS - 1);
             cgameGlob->scores[i].hStatusIcon = Material_RegisterHandle(pszIcon, IMAGE_TRACK_HUD);
         }
         cgameGlob->scores[i].rank = cgameGlob->bgs.clientinfo[clientNum].rank;
@@ -867,77 +867,77 @@ void __cdecl CG_ConfigStringModified(int32_t localClientNum)
     str = CL_GetConfigString(localClientNum, num);
     switch (num)
     {
-    case 2258:
+    case CS_WEAPONFILES:
         CG_SetupWeaponDef(localClientNum);
         break;
-    case 2314:
+    case CS_ITEMS:
         CG_RegisterItems(localClientNum);
         break;
-    case 821:
+    case CS_AMBIENT:
         CG_StartAmbient(localClientNum);
         break;
     default:
         if (num)
         {
-            if (num < 20 || num >= 276)
+            if (num < CS_CODINFO || num > CS_CODINFO_VALUE_LAST)
             {
                 switch (num)
                 {
-                case 4:
+                case CS_SCORES1:
                     cgameGlob->teamScores[TEAM_AXIS] = atoi(str);
                     break;
-                case 5:
+                case CS_SCORES2:
                     cgameGlob->teamScores[TEAM_ALLIES] = atoi(str);
                     break;
-                case 13:
+                case CS_VOTE_TIME:
                     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
                     cgs->voteTime = 0;
                     if (sscanf(str, "%d %d", &time, &serverId) == 2 && serverId == LocalClientGlobals->serverId)
                         cgs->voteTime = time;
                     break;
-                case 15:
+                case CS_VOTE_YES:
                     cgs->voteYes = atoi(str);
                     break;
-                case 16:
+                case CS_VOTE_NO:
                     cgs->voteNo = atoi(str);
                     break;
-                case 14:
+                case CS_VOTE_STRING:
                     CG_UpdateVoteString(localClientNum, str);
                     break;
-                case 12:
+                case CS_MAPCENTER:
                     CL_ParseMapCenter(localClientNum);
                     break;
-                case 11:
+                case CS_GAMEENDTIME:
                     CG_ParseGameEndTime(localClientNum);
                     break;
-                case 9:
+                case CS_FOGVARS:
                     CG_ParseFog(localClientNum);
                     break;
                 default:
-                    if (num < 830 || num >= 1342)
+                    if (num < CS_MODELS || num > CS_MODELS_LAST)
                     {
-                        if (num < 1598 || num >= 1698)
+                        if (num < CS_EFFECT_NAMES || num > CS_EFFECT_NAMES_LAST)
                         {
-                            if (num < 1954 || num >= 1970)
+                            if (num < CS_SHELLSHOCKS || num > CS_SHELLSHOCKS_LAST)
                             {
-                                if (num >= 2259 && num < 2267 || num >= 2267 && num < 2282)
+                                if (num >= CS_STATUS_ICONS && num <= CS_HEAD_ICONS_LAST)
                                 {
                                     Material_RegisterHandle(CL_GetConfigString(localClientNum, num), IMAGE_TRACK_HUD);
                                 }
-                                else if (num < 2002 || num >= 2258)
+                                else if (num < CS_SERVER_MATERIALS || num > CS_SERVER_MATERIALS_LAST)
                                 {
                                     switch (num)
                                     {
-                                    case 822:
+                                    case CS_NORTHYAW:
                                         CG_NorthDirectionChanged(localClientNum);
                                         break;
-                                    case 823:
+                                    case CS_MINIMAP:
                                         CG_MiniMapChanged(localClientNum);
                                         break;
-                                    case 824:
+                                    case CS_VISIONSET_NAKED:
                                         CG_VisionSetConfigString_Naked(localClientNum);
                                         break;
-                                    case 825:
+                                    case CS_VISIONSET_NIGHT:
                                         CG_VisionSetConfigString_Night(localClientNum);
                                         break;
                                     }
@@ -949,7 +949,7 @@ void __cdecl CG_ConfigStringModified(int32_t localClientNum)
                             }
                             else if (*str && BG_LoadShellShockDvars(str))
                             {
-                                ShellshockParms = BG_GetShellshockParms(num - 1954);
+                                ShellshockParms = BG_GetShellshockParms(num - CS_SHELLSHOCKS);
                                 BG_SetShellShockParmsFromDvars(ShellshockParms);
                             }
                         }
@@ -1092,13 +1092,13 @@ void __cdecl CG_OpenScriptMenu(int32_t localClientNum)
     bool useMouse; // [esp+1Bh] [ebp-5h]
 
     menuIndex = atoi(Cmd_Argv(1));
-    if (menuIndex >= 0x20)
+    if (menuIndex >= CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1)
     {
         Com_Printf(CON_CHANNEL_CLIENT, "Server tried to open a bad script menu index: %i\n", menuIndex);
         Cbuf_AddText(localClientNum, va("cmd mr %i bad\n", menuIndex));
         return;
     }
-    menuName = CL_GetConfigString(localClientNum, menuIndex + 1970);
+    menuName = CL_GetConfigString(localClientNum, menuIndex + CS_SCRIPT_MENUS);
     if (!*menuName)
     {
         Com_Printf(CON_CHANNEL_CLIENT, "Server tried to open a non-loaded script menu index: %i\n", menuIndex);
@@ -1242,7 +1242,7 @@ void __cdecl CG_SetChannelVolCmd(int32_t localClientNum)
         v2 = Cmd_Argv(2);
         shockIndex = atoi(v2);
         
-        if (shockIndex >= 16)
+        if (shockIndex >= CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1)
         {
             Com_PrintError(CON_CHANNEL_CLIENT, "CG_SetChannelVolCmd: bad shellshock index %u\n", shockIndex);
             return;
@@ -1309,15 +1309,19 @@ char __cdecl LocalSound(int32_t localClientNum)
     if (argc == 2)
     {
         index = atoi(Cmd_Argv(1));
-        if (index > 0 && index <= 256)
+        if (index > 0 && index <= CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1)
         {
-            aliasName = CL_GetConfigString(localClientNum, index + 1342);
+            aliasName = CL_GetConfigString(localClientNum, index + CS_SOUNDALIASES);
             CG_PlayClientSoundAliasByName(localClientNum, aliasName);
             return 1;
         }
         else
         {
-            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: LocalSound() called with index %i (should be in range[1,%i])\n", index, 256);
+            Com_PrintError(
+                CON_CHANNEL_SOUND,
+                "ERROR: LocalSound() called with index %i (should be in range[1,%i])\n",
+                index,
+                CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1);
             return 0;
         }
     }
@@ -1336,14 +1340,18 @@ void __cdecl LocalSoundStop(int32_t localClientNum)
     if (Cmd_Argc() == 2)
     {
         index = atoi(Cmd_Argv(1));
-        if (index > 0 && index <= 256)
+        if (index > 0 && index <= CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1)
         {
-            aliasName = CL_GetConfigString(localClientNum, index + 1342);
+            aliasName = CL_GetConfigString(localClientNum, index + CS_SOUNDALIASES);
             CG_StopClientSoundAliasByName(localClientNum, aliasName);
         }
         else
         {
-            Com_PrintError(CON_CHANNEL_SOUND, "ERROR: LocalSoundStop() called with index %i (should be in range[1,%i])\n", index, 256);
+            Com_PrintError(
+                CON_CHANNEL_SOUND,
+                "ERROR: LocalSoundStop() called with index %i (should be in range[1,%i])\n",
+                index,
+                CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1);
         }
     }
     else

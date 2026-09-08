@@ -167,7 +167,7 @@ void __cdecl G_setfog(const char *fogstring)
     float fNear; // [esp+14h] [ebp-8h] BYREF
     int32_t time; // [esp+18h] [ebp-4h] BYREF
 
-    SV_SetConfigstring(9, (char*)fogstring);
+    SV_SetConfigstring(CS_FOGVARS, (char*)fogstring);
     level.fFogOpaqueDist = FLT_MAX;
     level.fFogOpaqueDistSqrd = FLT_MAX;
     if (sscanf(fogstring, "%f %f %f %f %f %f %i", &fNear, &fFar, &fDensity, clr, &clr[1], &clr[2], &time) == 7
@@ -952,12 +952,12 @@ void __cdecl Cmd_CallVote_f(gentity_s *ent)
         ent->client->ps.eFlags |= 0x100000u;
         Int = Dvar_GetInt("sv_serverId");
         v22 = va("%i %i", level.voteTime, Int);
-        SV_SetConfigstring(13, v22);
-        SV_SetConfigstring(14, level.voteDisplayString);
+        SV_SetConfigstring(CS_VOTE_TIME, v22);
+        SV_SetConfigstring(CS_VOTE_STRING, level.voteDisplayString);
         v23 = va("%i", level.voteYes);
-        SV_SetConfigstring(15, v23);
+        SV_SetConfigstring(CS_VOTE_YES, v23);
         v24 = va("%i", level.voteNo);
-        SV_SetConfigstring(16, v24);
+        SV_SetConfigstring(CS_VOTE_NO, v24);
         return;
     }
     if (!I_stricmp(arg1, "map"))
@@ -1063,7 +1063,7 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
         if (g_oldVoting->current.enabled)
         {
             v5 = va("%i", ++level.voteYes);
-            SV_SetConfigstring(15, v5);
+            SV_SetConfigstring(CS_VOTE_YES, v5);
         }
         else
         {
@@ -1073,7 +1073,7 @@ void __cdecl Cmd_Vote_f(gentity_s *ent)
     else if (g_oldVoting->current.enabled)
     {
         v6 = va("%i", ++level.voteNo);
-        SV_SetConfigstring(16, v6);
+        SV_SetConfigstring(CS_VOTE_NO, v6);
     }
     else
     {
@@ -1151,7 +1151,7 @@ void __cdecl Cmd_MenuResponse_f(gentity_s *pEnt)
         SV_Cmd_ArgvBuffer(2, szMenuName, 1024);
         iMenuIndex = atoi(szMenuName);
         if ((uint32_t)iMenuIndex < 0x20)
-            SV_GetConfigstring(iMenuIndex + 1970, szMenuName, 1024);
+            SV_GetConfigstring(iMenuIndex + CS_SCRIPT_MENUS, szMenuName, 1024);
         SV_Cmd_ArgvBuffer(3, szResponse, 1024);
     }
     else
@@ -1375,7 +1375,7 @@ void Cmd_VisionSetNaked_f()
         duration = SnapFloatToInt(v3 * 1000.0f);    LABEL_4:
         v1 = SV_Cmd_Argv(1);
         v2 = va("\"%s\" %i", v1, duration);
-        SV_SetConfigstring(824, v2);
+        SV_SetConfigstring(CS_VISIONSET_NAKED, v2);
         return;
     }
     Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: visionSetNaked <name> <duration>\n");
@@ -1401,7 +1401,7 @@ void Cmd_VisionSetNight_f()
         duration = SnapFloatToInt(v3 * 1000.0f);    LABEL_4:
         v1 = SV_Cmd_Argv(1);
         v2 = va("\"%s\" %i", v1, duration);
-        SV_SetConfigstring(825, v2);
+        SV_SetConfigstring(CS_VISIONSET_NIGHT, v2);
         return;
     }
     Com_Printf(CON_CHANNEL_DONT_FILTER, "USAGE: visionSetNight <name> <duration>\n");
