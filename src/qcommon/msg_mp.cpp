@@ -1497,12 +1497,10 @@ int __cdecl MSG_ReadDeltaStruct(
 
 int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, const clientState_s *from, clientState_s *to, uint32_t number)
 {
-    clientState_s dummy; // [esp+4h] [ebp-70h] BYREF
-
+    static constexpr clientState_s dummy{};
     if (!from)
     {
         from = &dummy;
-        memset((uint8_t *)&dummy, 0, sizeof(dummy));
     }
     return MSG_ReadDeltaStruct(
         msg,
@@ -1610,18 +1608,16 @@ void __cdecl MSG_ReadDeltaPlayerstate(
     playerState_s *to,
     bool predictedFieldsIgnoreXor)
 {
-    int print;
-
-    uint8_t dst[sizeof(playerState_s) + 8]; // [esp+38h] [ebp-2F80h] BYREF
-
+    static constexpr playerState_s dummy{};
     if (!from)
     {
-        from = (playerState_s *)dst;
-        memset(dst, 0, sizeof(playerState_s));
+        from = &dummy;
     }
 
     // Copy entire `from` into `to`
     memcpy(to, from, sizeof(playerState_s));
+
+    int print;
 
     if (cl_shownet && (cl_shownet->current.integer >= 2 || cl_shownet->current.integer == -2))
     {

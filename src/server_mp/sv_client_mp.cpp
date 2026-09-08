@@ -1019,7 +1019,6 @@ uint8_t msgBuffer_0[131072];
 void __cdecl SV_SendClientGameState(client_t *client)
 {
     int configStringCount; // [esp+38h] [ebp-16Ch]
-    entityState_s nullstate; // [esp+3Ch] [ebp-168h] BYREF
     int numWritten; // [esp+138h] [ebp-6Ch]
     int start; // [esp+13Ch] [ebp-68h]
     SnapshotInfo_s snapInfo; // [esp+140h] [ebp-64h] BYREF
@@ -1162,7 +1161,6 @@ void __cdecl SV_SendClientGameState(client_t *client)
             "%s\n\t(clientNum) = %i",
             "(clientNum >= 0 && clientNum < 64)",
             clientNum);
-    memset((uint8_t *)&nullstate, 0, sizeof(nullstate));
     for (start = 0; start < 1024; ++start)
     {
         base = &sv.svEntities[start].baseline.s;
@@ -1174,7 +1172,9 @@ void __cdecl SV_SendClientGameState(client_t *client)
             snapInfo.snapshotDeltaTime = -1;
             snapInfo.fromBaseline = 1;
             snapInfo.packetEntityType = ANALYZE_DATATYPE_ENTITYTYPE_BASELINE;
-            MSG_WriteEntity(&snapInfo, &msg, 0, &nullstate, base, 1);
+
+            static constexpr entityState_s dummy{};
+            MSG_WriteEntity(&snapInfo, &msg, 0, &dummy, base, 1);
             ++numWritten;
             snapInfo.fromBaseline = 0;
         }

@@ -852,7 +852,6 @@ void __cdecl CL_ParsePacketClients(
 {
     clientState_s *oldstate; // [esp+0h] [ebp-80h]
     signed int newnum; // [esp+4h] [ebp-7Ch]
-    clientState_s dummy; // [esp+8h] [ebp-78h] BYREF
     int oldindex; // [esp+78h] [ebp-8h]
     int oldnum; // [esp+7Ch] [ebp-4h]
 
@@ -935,7 +934,8 @@ void __cdecl CL_ParsePacketClients(
             iassert(oldnum > newnum);
             if (cl_shownet->current.integer == 3)
                 Com_Printf(CON_CHANNEL_CLIENT, "%3i:  baseline: %i\n", msg->readcount, newnum);
-            memset(&dummy, 0, sizeof(dummy));
+
+            static constexpr clientState_s dummy{};
             CL_DeltaClient(cl, msg, time, newframe, newnum, &dummy, 0);
         }
     }
@@ -1122,10 +1122,10 @@ void __cdecl CL_ParseGamestate(int localClientNum, msg_t *msg)
                 if (newnum >= MAX_BASELINES)
                     Com_Error(ERR_DROP, "Baseline number out of range: %i", newnum);
 
-                entityState_s nullstate;
-                memset(&nullstate, 0, sizeof(nullstate));
                 entityState_s *to = &cl->entityBaselines[newnum];
-                MSG_ReadDeltaEntity(msg, 0, &nullstate, to, newnum);
+
+                static constexpr entityState_s dummy{};
+                MSG_ReadDeltaEntity(msg, 0, &dummy, to, newnum);
                 break;
             }
 

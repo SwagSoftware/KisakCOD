@@ -2732,7 +2732,6 @@ void __cdecl CL_Record_f()
     connstate_t connstate; // [esp+1Ch] [ebp-2B0h]
     uint8_t (*bufData)[131072]; // [esp+20h] [ebp-2ACh]
     char demoName[64]; // [esp+24h] [ebp-2A8h] BYREF
-    entityState_s nullstate; // [esp+64h] [ebp-268h] BYREF
     uint8_t (*compressedBuf)[131072]; // [esp+15Ch] [ebp-170h]
     int32_t localClientNum; // [esp+160h] [ebp-16Ch]
     msg_t buf; // [esp+164h] [ebp-168h] BYREF
@@ -2825,14 +2824,15 @@ void __cdecl CL_Record_f()
                 svsHeader.mapCenter[1] = cls.mapCenter[1];
                 svsHeader.mapCenter[2] = cls.mapCenter[2];
                 memset(&snapInfo, 0, sizeof(snapInfo));
-                memset((uint8_t *)&nullstate, 0, sizeof(nullstate));
                 for (i = 0; i < 1024; ++i)
                 {
                     ent = &LocalClientGlobals->entityBaselines[i];
                     if (ent->number)
                     {
                         MSG_WriteByte(&buf, 3u);
-                        MSG_WriteEntity(&snapInfo, &buf, -90000, &nullstate, ent, 1);
+
+                        static constexpr entityState_s dummy{};
+                        MSG_WriteEntity(&snapInfo, &buf, -90000, &dummy, ent, 1);
                     }
                 }
                 MSG_WriteByte(&buf, 7u);

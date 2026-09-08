@@ -2145,14 +2145,14 @@ void __cdecl MSG_WriteDeltaClient(
     const clientState_s *to,
     int force)
 {
-    clientState_s dummy; // [esp+4h] [ebp-70h] BYREF
     int bits; // [esp+70h] [ebp-4h]
 
     iassert( !msg->readOnly );
+
+    static constexpr clientState_s dummy{};
     if (!from)
     {
         from = &dummy;
-        memset((uint8_t *)&dummy, 0, sizeof(dummy));
     }
     if (to)
     {
@@ -2200,7 +2200,6 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     float v13; // [esp+60h] [ebp-2FA4h]
     int lastChangedFieldNum; // [esp+64h] [ebp-2FA0h]
     int v15; // [esp+68h] [ebp-2F9Ch]
-    uint8_t dst[sizeof(playerState_s)]; // [esp+6Ch] [ebp-2F98h] BYREF
     int value; // [esp+2FD8h] [ebp-2Ch]
     int c[4]; // [esp+2FDCh] [ebp-28h]
     int v19; // [esp+2FECh] [ebp-18h]
@@ -2218,10 +2217,11 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     if (sv_debugPacketContents->current.enabled)
         Com_Printf(CON_CHANNEL_SYSTEM, "Writing playerstate for client #%i\n", snapInfo->clientNum);
     snapInfo->packetEntityType = ANALYZE_DATATYPE_ENTITYTYPE_PLAYERSTATE;
+
+    static constexpr playerState_s dummy{};
     if (!from)
     {
-        from = (const playerState_s *)dst;
-        memset(dst, 0, sizeof(playerState_s));
+        from = &dummy;
     }
     if (snapInfo->archived)
     {
