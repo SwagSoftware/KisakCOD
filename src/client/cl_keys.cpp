@@ -1457,8 +1457,18 @@ cmd_function_s Key_Bind_f_VAR;
 cmd_function_s Key_Unbind_f_VAR;
 cmd_function_s Key_Unbindall_f_VAR;
 cmd_function_s Key_Bindlist_f_VAR;
+cmd_function_s CL_ToggleConsole_f_VAR;
+
+// The stock config binds the console key to "toggleconsole", which was never
+// registered, so that bind did nothing.
+void __cdecl CL_ToggleConsole_f()
+{
+    Con_ToggleConsole();
+}
+
 void __cdecl CL_InitKeyCommands()
 {
+    Cmd_AddCommandInternal("toggleconsole", CL_ToggleConsole_f, &CL_ToggleConsole_f_VAR);
     Cmd_AddCommandInternal("bind", Key_Bind_f, &Key_Bind_f_VAR);
     Cmd_AddCommandInternal("unbind", Key_Unbind_f, &Key_Unbind_f_VAR);
     Cmd_AddCommandInternal("unbindall", Key_Unbindall_f, &Key_Unbindall_f_VAR);
@@ -1533,7 +1543,10 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
     if (!down || keys[key].repeats <= 1)
     {
     LABEL_38:
-        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0)
+        // Let the console key through while the UI has the keyboard, so it also
+        // opens from the main menu. Inner branches unchanged.
+        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0
+            || CL_IsConsoleKey(key))
         {
             if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
             {
@@ -1819,7 +1832,10 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
     if (!down || keys[key].repeats <= 1)
     {
     LABEL_38:
-        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0)
+        // Let the console key through while the UI has the keyboard, so it also
+        // opens from the main menu. Inner branches unchanged.
+        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0
+            || CL_IsConsoleKey(key))
         {
             if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
             {

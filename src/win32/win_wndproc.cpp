@@ -216,12 +216,19 @@ static uint32_t AdustKeyForNumericKeypad(uint32_t key, uint32_t wParam, uint32_t
 	return !IsNumLockAffectedVK(wParam) ? key : 0;
 }
 
+// Scancode of the key left of '1'. A position, not a character: that key prints
+// grave on US, section on Nordic, caron on Baltic, and is a dead key on several,
+// but it is the console key on all of them.
+#define SCANCODE_CONSOLE 0x29
+
 static unsigned char MapKey(int key, uint32_t wParam)
 {
 	uint32_t result;
 	int i;
 
-	if (((key >> 8) & 0xFF)/*BYTE2*/ == ')')
+	// lParam bits 16-23 are the scancode; this read bits 8-15 (the repeat count),
+	// so it never matched on any layout.
+	if (((key >> 16) & 0xFF) == SCANCODE_CONSOLE)
 		return '~';
 
 	result = 0;

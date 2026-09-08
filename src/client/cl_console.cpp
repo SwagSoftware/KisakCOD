@@ -343,7 +343,10 @@ void __cdecl Con_Init()
 {
     int32_t i; // [esp+0h] [ebp-4h]
 
-    con_restricted = Dvar_RegisterBool("monkeytoy", 1, DVAR_ARCHIVE, "Restrict console access"); // KISAK: just enable console by default
+    // Was 1, which contradicted the comment: CL_KeyEvent only acts on the console
+    // key when con_restricted is off or the console is already open, so with it on
+    // the console could never be opened.
+    con_restricted = Dvar_RegisterBool("monkeytoy", 0, DVAR_ARCHIVE, "Restrict console access");
     con_matchPrefixOnly = Dvar_RegisterBool(
         "con_matchPrefixOnly",
         1,
