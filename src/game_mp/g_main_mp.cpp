@@ -1072,7 +1072,7 @@ void __cdecl G_UpdateObjectiveToClients()
             for (objNum = 0; objNum < 16; ++objNum)
             {
                 obj = &level.objectives[objNum];
-                if (obj->state && (!obj->teamNum || obj->teamNum == team))
+                if (obj->state && (obj->teamNum == TEAM_FREE || obj->teamNum == team))
                     memcpy(&ps->objective[objNum], obj, sizeof(ps->objective[objNum]));
                 else
                     ps->objective[objNum].state = OBJST_EMPTY;

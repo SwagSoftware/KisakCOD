@@ -56,7 +56,7 @@ void __cdecl CG_AddPlayerSpriteDrawSurfs(int32_t localClientNum, const centity_s
             iClientTeam = cgameGlob->bgs.clientinfo[ps->clientNum].team;
             secondaryHeight = 0;
             if (cent->nextState.iHeadIcon
-                && (!cent->nextState.iHeadIconTeam
+                && (cent->nextState.iHeadIconTeam == TEAM_FREE
                     || iClientTeam == TEAM_SPECTATOR
                     || cent->nextState.iHeadIconTeam == iClientTeam))
             {

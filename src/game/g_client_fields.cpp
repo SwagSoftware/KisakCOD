@@ -239,19 +239,19 @@ void __cdecl ClientScr_SetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     sTeam = Scr_GetConstString(0);
     if (sTeam == scr_const.none)
     {
-        pEnt->s.iHeadIconTeam = 0;
+        pEnt->s.iHeadIconTeam = TEAM_FREE;
     }
     else if (sTeam == scr_const.axis)
     {
-        pEnt->s.iHeadIconTeam = 1;
+        pEnt->s.iHeadIconTeam = TEAM_AXIS;
     }
     else if (sTeam == scr_const.allies)
     {
-        pEnt->s.iHeadIconTeam = 2;
+        pEnt->s.iHeadIconTeam = TEAM_ALLIES;
     }
     else if (sTeam == scr_const.spectator)
     {
-        pEnt->s.iHeadIconTeam = 3;
+        pEnt->s.iHeadIconTeam = TEAM_SPECTATOR;
     }
     else
     {
@@ -268,13 +268,13 @@ void __cdecl ClientScr_GetHeadIconTeam(gclient_s *pSelf, const client_fields_s *
     iHeadIconTeam = g_entities[pSelf - level.clients].s.iHeadIconTeam;
     switch (iHeadIconTeam)
     {
-    case 1:
+    case TEAM_AXIS:
         Scr_AddConstString(scr_const.axis);
         break;
-    case 2:
+    case TEAM_ALLIES:
         Scr_AddConstString(scr_const.allies);
         break;
-    case 3:
+    case TEAM_SPECTATOR:
         Scr_AddConstString(scr_const.spectator);
         break;
     default:

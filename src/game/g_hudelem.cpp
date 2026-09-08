@@ -628,15 +628,15 @@ void __cdecl GScr_NewTeamHudElem()
     teamName = Scr_GetConstString(0);
     if (teamName == scr_const.allies)
     {
-        v0 = HudElem_Alloc(1023, 2);
+        v0 = HudElem_Alloc(1023, TEAM_ALLIES);
     }
     else if (teamName == scr_const.axis)
     {
-        v0 = HudElem_Alloc(1023, 1);
+        v0 = HudElem_Alloc(1023, TEAM_AXIS);
     }
     else if (teamName == scr_const.spectator)
     {
-        v0 = HudElem_Alloc(1023, 3);
+        v0 = HudElem_Alloc(1023, TEAM_SPECTATOR);
     }
     else
     {
@@ -1298,7 +1298,7 @@ void __cdecl HudElem_UpdateClient(gclient_s *client, int32_t clientNum, hudelem_
     for (i = 0; i < MAX_HUDELEMS_TOTAL; ++i)
     {
         if (hud->elem.type
-            && (!hud->team || hud->team == client->sess.cs.team)
+            && (hud->team == TEAM_FREE || hud->team == client->sess.cs.team)
             && (hud->clientNum == ENTITYNUM_NONE || hud->clientNum == clientNum))
         {
             if (hud->archived)
