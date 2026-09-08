@@ -653,9 +653,9 @@ char __cdecl Field_KeyDownEvent(int32_t localClientNum, const ScreenPlacement *s
                 ++edit->cursor;
             if (isCtrlDown)
             {
-                while (edit->cursor < len && isalnum(edit->buffer[edit->cursor]))
+                while (edit->cursor < len && isalnum((unsigned char)edit->buffer[edit->cursor]))
                     ++edit->cursor;
-                while (edit->cursor < len && !isalnum(edit->buffer[edit->cursor]))
+                while (edit->cursor < len && !isalnum((unsigned char)edit->buffer[edit->cursor]))
                     ++edit->cursor;
             }
             break;
@@ -664,7 +664,7 @@ char __cdecl Field_KeyDownEvent(int32_t localClientNum, const ScreenPlacement *s
                 --edit->cursor;
             if (isCtrlDown)
             {
-                while (edit->cursor > 0 && isalnum(*((char *)&edit->fixedSize + edit->cursor + 3)))
+                while (edit->cursor > 0 && isalnum((unsigned char)*((char *)&edit->fixedSize + edit->cursor + 3)))
                     --edit->cursor;
             }
             if (edit->cursor < edit->scroll)
@@ -973,7 +973,7 @@ void __cdecl ReplaceConsoleInputArgument(int32_t replaceCount, char *replacement
     if (*replacement)
     {
         //for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(*(char *)(cmdLineLen + 11748111)); --cmdLineLen);
-        for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace(g_consoleField.buffer[cmdLineLen]); --cmdLineLen);
+        for (cmdLineLen = strlen(g_consoleField.buffer); cmdLineLen && isspace((unsigned char)g_consoleField.buffer[cmdLineLen]); --cmdLineLen);
 
         if (replaceCount >= cmdLineLen)
         {
@@ -1059,8 +1059,8 @@ void __cdecl FindMatches(char *s)
             {
                 for (i = 0; s[i]; ++i)
                 {
-                    v1 = tolower(s_shortestMatch[i]);
-                    if (v1 != tolower(s[i]))
+                    v1 = tolower((unsigned char)s_shortestMatch[i]);
+                    if (v1 != tolower((unsigned char)s[i]))
                         break;
                 }
                 v2 = !s[i] || s_hasExactMatch && !s_shortestMatch[i];

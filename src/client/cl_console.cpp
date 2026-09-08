@@ -1560,7 +1560,7 @@ const char *__cdecl Con_TokenizeInput()
     cmd = Cmd_Argv(0);
     if (*cmd == 92 || *cmd == 47)
         ++cmd;
-    while (isspace(*cmd))
+    while (isspace((unsigned char)*cmd))
         ++cmd;
     return cmd;
 }
@@ -1569,11 +1569,11 @@ char __cdecl Con_AnySpaceAfterCommand()
 {
     int32_t charIndex; // [esp+0h] [ebp-4h]
 
-    for (charIndex = 0; isspace(g_consoleField.buffer[charIndex]); ++charIndex)
+    for (charIndex = 0; isspace((unsigned char)g_consoleField.buffer[charIndex]); ++charIndex)
         ;
     while (g_consoleField.buffer[charIndex])
     {
-        if (isspace(g_consoleField.buffer[charIndex]))
+        if (isspace((unsigned char)g_consoleField.buffer[charIndex]))
             return 1;
         ++charIndex;
     }
@@ -1592,21 +1592,21 @@ bool __cdecl Con_IsAutoCompleteMatch(const char *query, const char *matchToText,
     if (!con_ignoreMatchPrefixOnly && con_matchPrefixOnly->current.enabled)
         return I_strnicmp(query, matchToText, matchTextLen) == 0;
     matchTextPos = 0;
-    matchLetter = tolower(*matchToText);
+    matchLetter = tolower((unsigned char)*matchToText);
     for (queryPos = query; *queryPos; ++queryPos)
     {
-        if (tolower(*queryPos) == matchLetter)
+        if (tolower((unsigned char)*queryPos) == matchLetter)
         {
             if (++matchTextPos == matchTextLen)
                 return 1;
-            matchLetter = tolower(matchToText[matchTextPos]);
+            matchLetter = tolower((unsigned char)matchToText[matchTextPos]);
         }
         else if (con_matchPrefixOnly->current.enabled)
         {
             if (matchTextPos)
             {
                 matchTextPos = 0;
-                matchLetter = tolower(*matchToText);
+                matchLetter = tolower((unsigned char)*matchToText);
             }
         }
     }
@@ -2747,11 +2747,11 @@ int32_t __cdecl ConDrawInput_TextFieldFirstArgChar()
 {
     int32_t charIndex; // [esp+0h] [ebp-4h]
 
-    for (charIndex = 0; isspace(g_consoleField.buffer[charIndex]); ++charIndex)
+    for (charIndex = 0; isspace((unsigned char)g_consoleField.buffer[charIndex]); ++charIndex)
         ;
-    while (!isspace(g_consoleField.buffer[charIndex]))
+    while (!isspace((unsigned char)g_consoleField.buffer[charIndex]))
         ++charIndex;
-    while (isspace(g_consoleField.buffer[charIndex]))
+    while (isspace((unsigned char)g_consoleField.buffer[charIndex]))
         ++charIndex;
     return charIndex;
 }
@@ -2880,13 +2880,13 @@ int32_t __cdecl Con_GetAutoCompleteColorCodedStringDiscontiguous(
     wasMatching = 0;
     matchTextPos = 0;
     colorCodedPos = 0;
-    matchLetter = tolower(*matchToText);
+    matchLetter = tolower((unsigned char)*matchToText);
     for (queryPos = query; *queryPos; ++queryPos)
     {
-        v4 = tolower(*queryPos);
+        v4 = tolower((unsigned char)*queryPos);
         isMatching = v4 == matchLetter;
         if (v4 == matchLetter)
-            matchLetter = tolower(matchToText[++matchTextPos]);
+            matchLetter = tolower((unsigned char)matchToText[++matchTextPos]);
         if (isMatching != wasMatching)
         {
             wasMatching = isMatching;
