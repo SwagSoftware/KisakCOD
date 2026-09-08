@@ -1354,7 +1354,7 @@ void __cdecl MSG_WriteEntity(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    entityState_s *from,
+    const entityState_s *from,
     const entityState_s *to,
     int force)
 {
@@ -1380,14 +1380,14 @@ void __cdecl MSG_WriteEntity(
             Com_Printf(CON_CHANNEL_SERVER, "Removing entity %i - object is type %i (%s)\n", from->number, from->eType, EntityTypeName);
         }
         snapInfo->packetEntityType = MSG_GetPacketEntityTypeForEType(from->eType);
-        MSG_WriteEntityRemoval(snapInfo, msg, (uint8_t *)from, 10, 0);
+        MSG_WriteEntityRemoval(snapInfo, msg, (const uint8_t *)from, 10, 0);
     }
 }
 
 void __cdecl MSG_WriteEntityRemoval(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
-    uint8_t *from,
+    const uint8_t *from,
     int indexBits,
     bool changeBit)
 {
@@ -2011,8 +2011,8 @@ void __cdecl MSG_WriteDeltaArchivedEntity(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    archivedEntity_s *from,
-    archivedEntity_s *to,
+    const archivedEntity_s *from,
+    const archivedEntity_s *to,
     int force)
 {
     iassert( !msg->readOnly );
@@ -2022,8 +2022,8 @@ void __cdecl MSG_WriteDeltaArchivedEntity(
         snapInfo,
         msg,
         time,
-        (uint8_t *)from,
-        (uint8_t *)to,
+        (const uint8_t *)from,
+        (const uint8_t *)to,
         force,
         69,
         10,
@@ -2035,8 +2035,8 @@ int __cdecl MSG_WriteDeltaStruct(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    uint8_t *from,
-    uint8_t *to,
+    const uint8_t *from,
+    const uint8_t *to,
     int force,
     int numFields,
     int indexBits,
@@ -2141,8 +2141,8 @@ void __cdecl MSG_WriteDeltaClient(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    clientState_s *from,
-    clientState_s *to,
+    const clientState_s *from,
+    const clientState_s *to,
     int force)
 {
     clientState_s dummy; // [esp+4h] [ebp-70h] BYREF
@@ -2162,8 +2162,8 @@ void __cdecl MSG_WriteDeltaClient(
             snapInfo,
             msg,
             time,
-            (uint8_t *)from,
-            (uint8_t *)to,
+            (const uint8_t *)from,
+            (const uint8_t *)to,
             force,
             24,
             6,
@@ -2178,7 +2178,7 @@ void __cdecl MSG_WriteDeltaClient(
     else
     {
         snapInfo->packetEntityType = ANALYZE_DATATYPE_ENTITYTYPE_CLIENTSTATE;
-        MSG_WriteEntityRemoval(snapInfo, msg, (uint8_t *)from, 6, 1);
+        MSG_WriteEntityRemoval(snapInfo, msg, (const uint8_t *)from, 6, 1);
     }
 }
 
@@ -2569,8 +2569,8 @@ void __cdecl MSG_WriteDeltaFields(
     SnapshotInfo_s *snapInfo,
     msg_t *msg,
     int time,
-    uint8_t *from,
-    uint8_t *to,
+    const uint8_t *from,
+    const uint8_t *to,
     int force,
     int numFields,
     const NetField *stateFields)

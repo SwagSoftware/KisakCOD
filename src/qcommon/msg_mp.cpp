@@ -1296,12 +1296,12 @@ double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue)
     }
 }
 
-int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, uint32_t number)
+int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, const entityState_s *from, entityState_s *to, uint32_t number)
 {
-    return MSG_ReadDeltaEntityStruct(msg, time, (char *)from, (char *)to, number);
+    return MSG_ReadDeltaEntityStruct(msg, time, (const char *)from, (char *)to, number);
 }
 
-int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, uint32_t number)
+int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, const char *from, char *to, uint32_t number)
 {
     char *EntityTypeName; // eax
     const NetFieldList *stateFieldList; // [esp+38h] [ebp-20h]
@@ -1407,14 +1407,14 @@ const int numHudElemFields = 40;
 int __cdecl MSG_ReadDeltaArchivedEntity(
     msg_t *msg,
     int time,
-    archivedEntity_s *from,
+    const archivedEntity_s *from,
     archivedEntity_s *to,
     uint32_t number)
 {
     return MSG_ReadDeltaStruct(
         msg,
         time,
-        (char *)from,
+        (const char *)from,
         (char *)to,
         number,
         numArchivedEntityFields,
@@ -1426,7 +1426,7 @@ int __cdecl MSG_ReadDeltaArchivedEntity(
 int __cdecl MSG_ReadDeltaStruct(
     msg_t *msg,
     int time,
-    char *from,
+    const char *from,
     char *to,
     uint32_t number,
     int numFields,
@@ -1490,12 +1490,12 @@ int __cdecl MSG_ReadDeltaStruct(
     }
     else
     {
-        memcpy((uint8_t *)to, (uint8_t *)from, 4 * numFields + 4);
+        memcpy((uint8_t *)to, (const uint8_t *)from, 4 * numFields + 4);
         return 0;
     }
 }
 
-int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clientState_s *to, uint32_t number)
+int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, const clientState_s *from, clientState_s *to, uint32_t number)
 {
     clientState_s dummy; // [esp+4h] [ebp-70h] BYREF
 
@@ -1507,7 +1507,7 @@ int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clien
     return MSG_ReadDeltaStruct(
         msg,
         time,
-        (char *)from,
+        (const char *)from,
         (char *)to,
         number,
         numClientStateFields,

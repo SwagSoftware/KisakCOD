@@ -152,7 +152,7 @@ void __cdecl CL_DeltaClient(
     int time,
     clSnapshot_t *frame,
     uint32_t newnum,
-    clientState_s *old,
+    const clientState_s *old,
     int unchanged)
 {
     clientState_s *state; // [esp+8h] [ebp-4h]
@@ -825,7 +825,7 @@ void __cdecl CL_DeltaEntity(
     int time,
     clSnapshot_t *frame,
     uint32_t newnum,
-    entityState_s *old)
+    const entityState_s *old)
 {
     if (!MSG_ReadDeltaEntity(msg, time, old, &cl->parseEntities[cl->parseEntitiesNum & 0x7FF], newnum))
     {
@@ -834,7 +834,7 @@ void __cdecl CL_DeltaEntity(
     }
 }
 
-void __cdecl CL_CopyOldEntity(clientActive_t *cl, clSnapshot_t *frame, entityState_s *old)
+void __cdecl CL_CopyOldEntity(clientActive_t *cl, clSnapshot_t *frame, const entityState_s *old)
 {
     memcpy(
         &cl->parseEntities[cl->parseEntitiesNum++ & 0x7FF],

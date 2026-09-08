@@ -114,13 +114,13 @@ void __cdecl MSG_WriteEntity(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    entityState_s* from,
+    const entityState_s* from,
     const entityState_s* to,
     int force);
 void __cdecl MSG_WriteEntityRemoval(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
-    uint8_t* from,
+    const uint8_t* from,
     int indexBits,
     bool changeBit);
 void __cdecl MSG_WriteEntityDeltaForEType(
@@ -158,15 +158,15 @@ void __cdecl MSG_WriteDeltaArchivedEntity(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    archivedEntity_s* from,
-    archivedEntity_s* to,
+    const archivedEntity_s* from,
+    const archivedEntity_s* to,
     int force);
 int __cdecl MSG_WriteDeltaStruct(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    uint8_t* from,
-    uint8_t* to,
+    const uint8_t* from,
+    const uint8_t* to,
     int force,
     int numFields,
     int indexBits,
@@ -176,8 +176,8 @@ void __cdecl MSG_WriteDeltaClient(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    clientState_s* from,
-    clientState_s* to,
+    const clientState_s* from,
+    const clientState_s* to,
     int force);
 void __cdecl MSG_WriteDeltaPlayerstate(
     SnapshotInfo_s* snapInfo,
@@ -195,8 +195,8 @@ void __cdecl MSG_WriteDeltaFields(
     SnapshotInfo_s* snapInfo,
     msg_t* msg,
     int time,
-    uint8_t* from,
-    uint8_t* to,
+    const uint8_t* from,
+    const uint8_t* to,
     int force,
     int numFields,
     const NetField* stateFields);

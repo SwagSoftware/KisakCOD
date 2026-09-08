@@ -139,26 +139,26 @@ int __cdecl MSG_ReadDeltaEventParamField(msg_t *msg);
 int __cdecl MSG_Read24BitFlag(msg_t *msg, int oldFlags);
 double __cdecl MSG_ReadOriginFloat(int bits, msg_t *msg, float oldValue);
 double __cdecl MSG_ReadOriginZFloat(msg_t *msg, float oldValue);
-int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, entityState_s *from, entityState_s *to, uint32_t number);
-int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, char *from, char *to, uint32_t number);
+int __cdecl MSG_ReadDeltaEntity(msg_t *msg, int time, const entityState_s *from, entityState_s *to, uint32_t number);
+int __cdecl MSG_ReadDeltaEntityStruct(msg_t *msg, int time, const char *from, char *to, uint32_t number);
 uint MSG_ReadLastChangedField(msg_t *msg, int totalFields);
 int __cdecl MSG_ReadDeltaArchivedEntity(
     msg_t *msg,
     int time,
-    archivedEntity_s *from,
+    const archivedEntity_s *from,
     archivedEntity_s *to,
     uint32_t number);
 int __cdecl MSG_ReadDeltaStruct(
     msg_t *msg,
     int time,
-    char *from,
+    const char *from,
     char *to,
     uint32_t number,
     int numFields,
     char indexBits,
     const NetField *stateFields,
     int totalFields);
-int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, clientState_s *from, clientState_s *to, uint32_t number);
+int __cdecl MSG_ReadDeltaClient(msg_t *msg, int time, const clientState_s *from, clientState_s *to, uint32_t number);
 void __cdecl MSG_ReadDeltaPlayerstate(
     int localClientNum,
     msg_t *msg,
