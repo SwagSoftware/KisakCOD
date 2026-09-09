@@ -1074,12 +1074,12 @@ void __cdecl SV_SendClientGameState(client_t *client)
         if (constantConfigStrings[nextConstConfigString].configStringNum == start)
         {
             configString = SL_ConvertToString(sv.configstrings[start]);
-            if (constantConfigStrings[nextConstConfigString].configStringNum >= 821
+            if (constantConfigStrings[nextConstConfigString].configStringNum >= CS_CASE_INSENSITIVE_BEGIN
                 && I_stricmp(constantConfigStrings[nextConstConfigString].configString, configString))
             {
                 ++configStringCount;
             }
-            else if (constantConfigStrings[nextConstConfigString].configStringNum < 821
+            else if (constantConfigStrings[nextConstConfigString].configStringNum < CS_CASE_INSENSITIVE_BEGIN
                 && strcmp(constantConfigStrings[nextConstConfigString].configString, configString))
             {
                 ++configStringCount;
@@ -1100,8 +1100,10 @@ void __cdecl SV_SendClientGameState(client_t *client)
         {
             ++nextConstConfigString;
             configString = SL_ConvertToString(sv.configstrings[start]);
-            if (start >= 821 && !I_stricmp(constantConfigStrings[nextConstConfigString - 1].configString, configString)
-                || start < 821 && !strcmp(constantConfigStrings[nextConstConfigString - 1].configString, configString))
+            if (start >= CS_CASE_INSENSITIVE_BEGIN
+                    && !I_stricmp(constantConfigStrings[nextConstConfigString - 1].configString, configString)
+                || start < CS_CASE_INSENSITIVE_BEGIN
+                    && !strcmp(constantConfigStrings[nextConstConfigString - 1].configString, configString))
             {
                 continue;
             }

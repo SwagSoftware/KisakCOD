@@ -441,7 +441,7 @@ void __cdecl DamageNotify(
     {
         if (!targ->attachModelNames[modelIndex + 18])
             MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 515, 0, "%s", "targ->attachTagNames[modelIndex - 1]");
-        modelName = SV_GetConfigstringConst(*((uint16_t *)&targ->tagChildren + modelIndex + 1) + 830);
+        modelName = SV_GetConfigstringConst(*((uint16_t *)&targ->tagChildren + modelIndex + 1) + CS_MODELS);
         if (!modelName)
             MyAssertHandler(".\\game_mp\\g_combat_mp.cpp", 518, 1, "%s", "modelName");
         Scr_AddConstString(targ->attachModelNames[modelIndex + 18]);

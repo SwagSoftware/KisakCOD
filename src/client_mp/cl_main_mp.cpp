@@ -790,7 +790,7 @@ void __cdecl CL_Vid_Restart_f()
         CL_StartHunkUsers();
         if (connstate > CA_CONNECTED)
         {
-            info = CL_GetConfigString(localClientNum, 0);
+            info = CL_GetConfigString(localClientNum, CS_SERVERINFO);
             v1 = Info_ValueForKey(info, "mapname");
             I_strncpyz(mapname, v1, 64);
             DB_ResetZoneSize(0);
@@ -955,7 +955,7 @@ void __cdecl CL_DownloadsComplete(int32_t localClientNum)
     Com_Printf(CON_CHANNEL_CLIENT, "Setting state to CA_LOADING in CL_DownloadsComplete\n");
     if (!CL_WasMapAlreadyLoaded())
     {
-        info = CL_GetConfigString(localClientNum, 0);
+        info = CL_GetConfigString(localClientNum, CS_SERVERINFO);
         v2 = Info_ValueForKey(info, "mapname");
         I_strncpyz(mapname, v2, 64);
         v3 = Info_ValueForKey(info, "g_gametype");
@@ -3320,7 +3320,7 @@ void __cdecl CL_OpenScriptMenu_f()
                     {
                         for (menuIndex = 0; menuIndex < 32; ++menuIndex)
                         {
-                            menuName = CL_GetConfigString(0, menuIndex + 1970);
+                            menuName = CL_GetConfigString(0, menuIndex + CS_SCRIPT_MENUS);
                             if (*menuName)
                             {
                                 if (!I_stricmp(parentMenuName, menuName))

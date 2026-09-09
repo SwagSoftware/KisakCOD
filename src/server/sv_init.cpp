@@ -368,8 +368,8 @@ void SV_SaveSystemInfo()
 
     I_strncpyz(str, Dvar_InfoString_Big(8), 0x2000);
     dvar_modifiedFlags &= ~8u;
-    SV_SetConfigstring(1, str);
-    SV_SetConfigstring(0, Dvar_InfoString(0, 4));
+    SV_SetConfigstring(CS_SYSTEMINFO, str);
+    SV_SetConfigstring(CS_SERVERINFO, Dvar_InfoString(0, 4));
     dvar_modifiedFlags &= ~4u;
 }
 

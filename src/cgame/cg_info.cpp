@@ -61,7 +61,7 @@ void __cdecl CG_DrawInformation(int32_t localClientNum)
     {
         CL_SetWaitingOnServerToLoadMap(localClientNum, 0);
     }
-    CL_GetConfigString(localClientNum, 0);
+    CL_GetConfigString(localClientNum, CS_SERVERINFO);
     UI_DrawMapLevelshot(localClientNum);
     if (IsFastFileLoad())
         v2 = (uint8_t (*)(void))CG_IsShowingProgress_FastFile;

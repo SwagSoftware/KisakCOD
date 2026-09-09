@@ -1412,7 +1412,7 @@ void __cdecl CG_StartAmbient(int32_t localClientNum)
     snd_alias_t *alias; // [esp+24h] [ebp-4h]
     const cg_s *cgameGlob;
 
-    pszInfoString = CL_GetConfigString(localClientNum, 0x335u);
+    pszInfoString = CL_GetConfigString(localClientNum, CS_AMBIENT);
     aliasName = Info_ValueForKey(pszInfoString, "n");
     pszFadeTime = Info_ValueForKey(pszInfoString, "t");
     cgameGlob = CG_GetLocalClientGlobals(localClientNum);
@@ -1650,12 +1650,15 @@ void __cdecl CG_InitVote(int32_t localClientNum)
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     cgs->voteTime = 0;
-    ConfigString = CL_GetConfigString(localClientNum, 0xDu);
+    ConfigString = CL_GetConfigString(localClientNum, CS_VOTE_TIME);
     if (sscanf(ConfigString, "%d %d", &time, &serverId) == 2 && serverId == LocalClientGlobals->serverId)
         cgs->voteTime = time;
-    cgs->voteYes = atoi(CL_GetConfigString(localClientNum, 0xF));
-    cgs->voteNo = atoi(CL_GetConfigString(localClientNum, 0x10));
-    I_strncpyz(cgs->voteString, SEH_LocalizeTextMessage(CL_GetConfigString(localClientNum, 0xE), "vote string", LOCMSG_SAFE), 256);
+    cgs->voteYes = atoi(CL_GetConfigString(localClientNum, CS_VOTE_YES));
+    cgs->voteNo = atoi(CL_GetConfigString(localClientNum, CS_VOTE_NO));
+    I_strncpyz(
+        cgs->voteString,
+        SEH_LocalizeTextMessage(CL_GetConfigString(localClientNum, CS_VOTE_STRING), "vote string", LOCMSG_SAFE),
+        256);
 }
 
 uint16_t __cdecl CG_GetWeaponAttachBone(clientInfo_t *ci, weapType_t weapType)
@@ -1760,7 +1763,7 @@ void __cdecl CG_Init(int32_t localClientNum, int32_t serverMessageNum, int32_t s
     CG_AntiBurnInHUD_RegisterDvars();
     CG_InitConsoleCommands();
     CG_InitViewDimensions(localClientNum);
-    s = CL_GetConfigString(localClientNum, 2);
+    s = CL_GetConfigString(localClientNum, CS_GAME_VERSION);
     if (strcmp(s, "cod"))
         Com_Error(ERR_DROP, "Client/Server game mismatch: %s/%s", "cod", s);
     SCR_UpdateLoadScreen();
@@ -1919,18 +1922,18 @@ void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     
     CG_LoadingString(localClientNum, " - server models");
-    for (i = 1; i < 512; ++i)
+    for (i = 1; i < CS_MODELS_COUNT; ++i)
     {
-        modelName = CL_GetConfigString(localClientNum, i + 830);
+        modelName = CL_GetConfigString(localClientNum, i + CS_MODELS);
         if (*modelName)
         {
             SCR_UpdateLoadScreen();
             cgs->gameModels[i] = R_RegisterModel(modelName);
         }
     }
-    for (i = 1; i < 100; ++i)
+    for (i = 1; i < CS_EFFECT_NAMES_COUNT; ++i)
     {
-        effectname = CL_GetConfigString(localClientNum, i + 1598);
+        effectname = CL_GetConfigString(localClientNum, i + CS_EFFECT_NAMES);
         if (*effectname)
         {
             cgs->fxs[i] = FX_Register(effectname);
@@ -1939,9 +1942,9 @@ void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
     }
     cgs->smokeGrenadeFx = FX_Register("props/american_smoke_grenade_mp");
     iassert(cgs->smokeGrenadeFx);
-    for (ib = 1; ib < 16; ++ib)
+    for (ib = 1; ib < CS_SHELLSHOCKS_COUNT; ++ib)
     {
-        shellshock = CL_GetConfigString(localClientNum, ib + 1954);
+        shellshock = CL_GetConfigString(localClientNum, ib + CS_SHELLSHOCKS);
         if (*shellshock)
         {
             if (!BG_LoadShellShockDvars(shellshock))

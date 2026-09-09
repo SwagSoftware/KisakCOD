@@ -69,8 +69,10 @@ void __cdecl SV_SetConfigstring(int index, const char *val)
         if (strcmp(val, SL_ConvertToString(sv.configstrings[index])))
         {
             SL_RemoveRefToString(sv.configstrings[index]);
-            caseSensitive = index < 821;
-            v2 = index < 821 ? SL_GetString_(val, 0, MT_TYPE_CONFIG_STRING) : SL_GetLowercaseString_(val, 0, MT_TYPE_CONFIG_STRING);
+            caseSensitive = index < CS_CASE_INSENSITIVE_BEGIN;
+            v2 = index < CS_CASE_INSENSITIVE_BEGIN
+                ? SL_GetString_(val, 0, MT_TYPE_CONFIG_STRING)
+                : SL_GetLowercaseString_(val, 0, MT_TYPE_CONFIG_STRING);
             sv.configstrings[index] = v2;
             if (SV_Loaded() || sv.restarting)
             {
@@ -148,7 +150,7 @@ void __cdecl SV_SetConfigValueForKey(int start, int max, char *key, char *value)
     signed int i; // [esp+10h] [ebp-4h]
     int ia; // [esp+10h] [ebp-4h]
 
-    if (start < 821)
+    if (start < CS_CASE_INSENSITIVE_BEGIN)
         string = SL_FindString(key);
     else
         string = SL_FindLowercaseString(key);
@@ -648,9 +650,9 @@ void SV_SaveSystemInfo()
 
     SV_SetSystemInfoConfig();
     v0 = Dvar_InfoString(0, 4);
-    SV_SetConfigstring(0, v0);
+    SV_SetConfigstring(CS_SERVERINFO, v0);
     dvar_modifiedFlags &= 0xFFFFFBFB;
-    SV_SetConfig(20, 128, 256);
+    SV_SetConfig(CS_CODINFO, CS_CODINFO_COUNT, 256);
     dvar_modifiedFlags &= ~0x100u;
 }
 

@@ -38,7 +38,7 @@ void __cdecl CG_ParseServerInfo(int localClientNum)
     const char *ConfigString; // r3
     const char *v3; // r30
 
-    ConfigString = CL_GetConfigString(localClientNum, 0);
+    ConfigString = CL_GetConfigString(localClientNum, CS_SERVERINFO);
     v3 = Info_ValueForKey(ConfigString, "mapname");
     if (localClientNum)
         MyAssertHandler(

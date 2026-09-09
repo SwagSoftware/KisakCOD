@@ -2031,12 +2031,12 @@ int32_t __cdecl G_GetHintStringIndex(int32_t *piIndex, char *pszString)
     char szConfigString[1024]; // [esp+14h] [ebp-408h] BYREF
     int32_t i; // [esp+418h] [ebp-4h]
 
-    for (i = 0; i < 32; ++i)
+    for (i = 0; i < CS_USE_TRIG_STRINGS_COUNT; ++i)
     {
-        SV_GetConfigstring(i + 277, szConfigString, 1024);
+        SV_GetConfigstring(i + CS_USE_TRIG_STRINGS, szConfigString, 1024);
         if (!szConfigString[0])
         {
-            SV_SetConfigstring(i + 277, pszString);
+            SV_SetConfigstring(i + CS_USE_TRIG_STRINGS, pszString);
             *piIndex = i;
             return 1;
         }
@@ -2544,26 +2544,26 @@ void GScr_PrecacheMenu()
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
 
     pszNewMenu = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < 32; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_SCRIPT_MENUS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 1970, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_SCRIPT_MENUS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewMenu))
         {
             Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "Script tried to precache the menu '%s' more than once\n", pszNewMenu);
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < 32; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_SCRIPT_MENUS_COUNT; ++iConfigNuma)
     {
-        SV_GetConfigstring(iConfigNuma + 1970, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNuma + CS_SCRIPT_MENUS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == 32)
+    if (iConfigNuma == CS_SCRIPT_MENUS_COUNT)
     {
-        Scr_Error(va("Too many menus precached. Max allowed menus is %i", 32));
+        Scr_Error(va("Too many menus precached. Max allowed menus is %i", CS_SCRIPT_MENUS_COUNT));
     }
-    SV_SetConfigstring(iConfigNuma + 1970, pszNewMenu);
+    SV_SetConfigstring(iConfigNuma + CS_SCRIPT_MENUS, pszNewMenu);
 }
 
 int32_t __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
@@ -2572,9 +2572,9 @@ int32_t __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
     int32_t iConfigNum; // [esp+0h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+4h] [ebp-408h] BYREF
 
-    for (iConfigNum = 0; iConfigNum < 32; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_SCRIPT_MENUS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 1970, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_SCRIPT_MENUS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszMenu))
             return iConfigNum;
     }
@@ -2591,26 +2591,26 @@ void GScr_PrecacheStatusIcon()
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
 
     pszNewIcon = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < 8; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_STATUS_ICONS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 2259, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_STATUS_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewIcon))
         {
             Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "Script tried to precache the player status icon '%s' more than once\n", pszNewIcon);
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < 8; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_STATUS_ICONS_COUNT; ++iConfigNuma)
     {
-        SV_GetConfigstring(iConfigNuma + 2259, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNuma + CS_STATUS_ICONS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == 8)
+    if (iConfigNuma == CS_STATUS_ICONS_COUNT)
     {
-        Scr_Error(va("Too many player status icons precached. Max allowed is %i", 8));
+        Scr_Error(va("Too many player status icons precached. Max allowed is %i", CS_STATUS_ICONS_COUNT));
     }
-    SV_SetConfigstring(iConfigNuma + 2259, pszNewIcon);
+    SV_SetConfigstring(iConfigNuma + CS_STATUS_ICONS, pszNewIcon);
 }
 
 int32_t __cdecl GScr_GetStatusIconIndex(const char *pszIcon)
@@ -2621,9 +2621,9 @@ int32_t __cdecl GScr_GetStatusIconIndex(const char *pszIcon)
     if (!*pszIcon)
         return 0;
 
-    for (iConfigNum = 0; iConfigNum < 8; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_STATUS_ICONS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 2259, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_STATUS_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszIcon))
             return iConfigNum + 1;
     }
@@ -2640,26 +2640,26 @@ void GScr_PrecacheHeadIcon()
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
 
     pszNewIcon = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < 15; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_HEAD_ICONS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 2267, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_HEAD_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewIcon))
         {
             Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "Script tried to precache the player head icon '%s' more than once\n", pszNewIcon);
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < 15; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_HEAD_ICONS_COUNT; ++iConfigNuma)
     {
-        SV_GetConfigstring(iConfigNuma + 2267, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNuma + CS_HEAD_ICONS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == 15)
+    if (iConfigNuma == CS_HEAD_ICONS_COUNT)
     {
-        Scr_Error(va("Too many player head icons precached. Max allowed is %i", 15));
+        Scr_Error(va("Too many player head icons precached. Max allowed is %i", CS_HEAD_ICONS_COUNT));
     }
-    SV_SetConfigstring(iConfigNuma + 2267, pszNewIcon);
+    SV_SetConfigstring(iConfigNuma + CS_HEAD_ICONS, pszNewIcon);
 }
 
 int32_t __cdecl GScr_GetHeadIconIndex(const char *pszIcon)
@@ -2670,9 +2670,9 @@ int32_t __cdecl GScr_GetHeadIconIndex(const char *pszIcon)
     if (!*pszIcon)
         return 0;
 
-    for (iConfigNum = 0; iConfigNum < 15; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_HEAD_ICONS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 2267, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_HEAD_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszIcon))
             return iConfigNum + 1;
     }
@@ -2887,27 +2887,27 @@ void GScr_PrecacheLocationSelector()
     const char *pszNewMtl; // [esp+408h] [ebp-4h]
 
     pszNewMtl = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < 3; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_LOC_SEL_MTLS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 827, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_LOC_SEL_MTLS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewMtl))
         {
             Com_DPrintf(CON_CHANNEL_PARSERSCRIPT, "Script tried to precache the location selector '%s' more than once\n", pszNewMtl);
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < 3; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_LOC_SEL_MTLS_COUNT; ++iConfigNuma)
     {
-        SV_GetConfigstring(iConfigNuma + 827, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNuma + CS_LOC_SEL_MTLS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == 3)
+    if (iConfigNuma == CS_LOC_SEL_MTLS_COUNT)
     {
-        v0 = va("Too many location selectors precached. Max allowed is %i", 3);
+        v0 = va("Too many location selectors precached. Max allowed is %i", CS_LOC_SEL_MTLS_COUNT);
         Scr_Error(v0);
     }
-    SV_SetConfigstring(iConfigNuma + 827, (char *)pszNewMtl);
+    SV_SetConfigstring(iConfigNuma + CS_LOC_SEL_MTLS, (char *)pszNewMtl);
 }
 
 int32_t __cdecl GScr_GetLocSelIndex(const char *mtlName)
@@ -2920,9 +2920,9 @@ int32_t __cdecl GScr_GetLocSelIndex(const char *mtlName)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 3095, 0, "%s", "mtlName");
     if (!*mtlName)
         return 0;
-    for (iConfigNum = 0; iConfigNum < 3; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_LOC_SEL_MTLS_COUNT; ++iConfigNum)
     {
-        SV_GetConfigstring(iConfigNum + 827, szConfigString, 1024);
+        SV_GetConfigstring(iConfigNum + CS_LOC_SEL_MTLS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, mtlName))
             return iConfigNum + 1;
     }
@@ -3839,7 +3839,7 @@ void Scr_AmbientPlay()
     {
         Scr_Error(va("ambientPlay: fade time must be >= 0\n"));
     }
-    SV_SetConfigstring(821, va("n\\%s\\t\\%i", pszAliasName, iFadeTime + level.time));
+    SV_SetConfigstring(CS_AMBIENT, va("n\\%s\\t\\%i", pszAliasName, iFadeTime + level.time));
 }
 
 void Scr_AmbientStop()
@@ -3871,7 +3871,7 @@ void Scr_AmbientStop()
         Scr_Error(v1);
     }
     v2 = va("t\\%i", iFadeTime + level.time);
-    SV_SetConfigstring(821, v2);
+    SV_SetConfigstring(CS_AMBIENT, v2);
 }
 
 void Scr_GrenadeExplosionEffect()
@@ -4087,7 +4087,7 @@ void GScr_GetNorthYaw()
 {
     char northYawString[32]; // [esp+8h] [ebp-24h] BYREF
 
-    SV_GetConfigstring(0x336u, northYawString, 32);
+    SV_GetConfigstring(CS_NORTHYAW, northYawString, 32);
     Scr_AddFloat(atof(northYawString));
 }
 
@@ -4211,7 +4211,7 @@ void __cdecl Scr_FxParamError(uint32_t  paramIndex, const char *errorString, int
     if (!errorString)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4328, 0, "%s", "errorString");
     if (fxId)
-        SV_GetConfigstring(fxId + 1598, fxName, 1024);
+        SV_GetConfigstring(fxId + CS_EFFECT_NAMES, fxName, 1024);
     else
         strcpy(fxName, "not successfully loaded");
     v3 = va("%s (effect = %s)\n", errorString, fxName);
@@ -4243,8 +4243,13 @@ void Scr_PlayFXOnTag()
         SV_DObjDumpInfo(ent);
         Scr_ParamError(2u, va("tag '%s' does not exist on entity with model '%s'", SL_ConvertToString(tag), SL_ConvertToString(G_ModelName(ent->model))));
     }
-    csIndex = G_FindConfigstringIndex(va("%02d%s", fxId, SL_ConvertToString(tag)), 1698, 256, 1, 0);
-    if (csIndex <= 0 || csIndex >= 256)
+    csIndex = G_FindConfigstringIndex(
+        va("%02d%s", fxId, SL_ConvertToString(tag)),
+        CS_EFFECT_TAGS,
+        CS_EFFECT_TAGS_COUNT,
+        1,
+        0);
+    if (csIndex <= 0 || csIndex >= CS_EFFECT_TAGS_COUNT)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4421, 0, "%s", "csIndex > 0 && csIndex < MAX_EFFECT_TAGS");
     G_AddEvent(ent, EV_PLAY_FX_ON_TAG, csIndex);
 }
@@ -4550,7 +4555,7 @@ void Scr_VisionSetNaked()
         duration = SnapFloatToInt(Scr_GetFloat(1) * 1000.0f);
     LABEL_4:
         name = Scr_GetString(0);
-        SV_SetConfigstring(824, va("\"%s\" %i", name, duration));
+        SV_SetConfigstring(CS_VISIONSET_NAKED, va("\"%s\" %i", name, duration));
         return;
     }
     Scr_Error("USAGE: VisionSetNaked( <visionset name>, <transition time> )\n");
@@ -4571,7 +4576,7 @@ void Scr_VisionSetNight()
         duration = SnapFloatToInt(Scr_GetFloat(1) * 1000.0f);
     LABEL_4:
         name = Scr_GetString(0);
-        SV_SetConfigstring(825, va("\"%s\" %i", name, duration));
+        SV_SetConfigstring(CS_VISIONSET_NIGHT, va("\"%s\" %i", name, duration));
         return;
     }
     Scr_Error("USAGE: VisionSetNight( <visionset name>, <transition time> )\n");
@@ -4667,13 +4672,13 @@ void GScr_SetWinningPlayer()
 
     pEnt = Scr_GetEntity(0);
     iWinner = pEnt->s.number + 1;
-    SV_GetConfigstring(0x13u, buffer, 1024);
+    SV_GetConfigstring(CS_MULTI_MAPWINNER, buffer, 1024);
     pszWinner = va("%i", iWinner);
     v0 = Info_ValueForKey(buffer, "winner");
     if (I_stricmp(v0, pszWinner))
     {
         Info_SetValueForKey(buffer, "winner", pszWinner);
-        SV_SetConfigstring(19, buffer);
+        SV_SetConfigstring(CS_MULTI_MAPWINNER, buffer);
     }
 }
 
@@ -4702,12 +4707,12 @@ void GScr_SetWinningTeam()
         }
         iWinner = 0;
     }
-    SV_GetConfigstring(0x13u, buffer, 1024);
+    SV_GetConfigstring(CS_MULTI_MAPWINNER, buffer, 1024);
     pszWinner = va("%i", iWinner);
     if (I_stricmp(Info_ValueForKey(buffer, "winner"), pszWinner))
     {
         Info_SetValueForKey(buffer, "winner", pszWinner);
-        SV_SetConfigstring(19, buffer);
+        SV_SetConfigstring(CS_MULTI_MAPWINNER, buffer);
     }
 }
 
@@ -4922,12 +4927,12 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     shock = Scr_GetString(0);
     for (id = 1; ; ++id)
     {
-        if (id >= 16)
+        if (id >= CS_SHELLSHOCKS_COUNT)
         {
             Scr_Error(va("shellshock '%s' was not precached\n", shock));
             return;
         }
-        SV_GetConfigstring(id + 1954, s, 1024);
+        SV_GetConfigstring(id + CS_SHELLSHOCKS, s, 1024);
         if (!I_stricmp(s, shock))
             break;
     }
@@ -5405,10 +5410,10 @@ void GScr_SetVoteString()
 {
     if (Scr_GetNumParam())
     {
-        SV_SetConfigstring(14, Scr_GetString(0));
-        SV_SetConfigstring(13, va("%i %i", level.voteTime, Dvar_GetInt("sv_serverId")));
-        SV_SetConfigstring(15, va("%i", level.voteYes));
-        SV_SetConfigstring(16, va("%i", level.voteNo));
+        SV_SetConfigstring(CS_VOTE_STRING, Scr_GetString(0));
+        SV_SetConfigstring(CS_VOTE_TIME, va("%i %i", level.voteTime, Dvar_GetInt("sv_serverId")));
+        SV_SetConfigstring(CS_VOTE_YES, va("%i", level.voteYes));
+        SV_SetConfigstring(CS_VOTE_NO, va("%i", level.voteNo));
     }
 }
 
@@ -5419,9 +5424,9 @@ void GScr_SetVoteTime()
     if (Scr_GetNumParam())
     {
         time = Scr_GetInt(0);
-        SV_SetConfigstring(13, va("%i %i", time, Dvar_GetInt("sv_serverId")));
-        SV_SetConfigstring(15, va("%i", level.voteYes));
-        SV_SetConfigstring(16, va("%i", level.voteNo));
+        SV_SetConfigstring(CS_VOTE_TIME, va("%i %i", time, Dvar_GetInt("sv_serverId")));
+        SV_SetConfigstring(CS_VOTE_YES, va("%i", level.voteYes));
+        SV_SetConfigstring(CS_VOTE_NO, va("%i", level.voteNo));
     }
 }
 
@@ -5432,8 +5437,8 @@ void GScr_SetVoteYesCount()
     if (Scr_GetNumParam())
     {
         yes = Scr_GetInt(0);
-        SV_SetConfigstring(15, va("%i", yes));
-        SV_SetConfigstring(16, va("%i", level.voteNo));
+        SV_SetConfigstring(CS_VOTE_YES, va("%i", yes));
+        SV_SetConfigstring(CS_VOTE_NO, va("%i", level.voteNo));
     }
 }
 
@@ -5444,7 +5449,7 @@ void GScr_SetVoteNoCount()
     if (Scr_GetNumParam())
     {
         no = Scr_GetInt(0);
-        SV_SetConfigstring(16, va("%i", no));
+        SV_SetConfigstring(CS_VOTE_NO, va("%i", no));
     }
 }
 
@@ -5954,7 +5959,7 @@ void GScr_SetMiniMap()
     upperLeft_4 = Scr_GetFloat(2);
     lowerRight[0] = Scr_GetFloat(3);
     lowerRight[1] = Scr_GetFloat(4);
-    SV_GetConfigstring(0x336u, northYawString, 32);
+    SV_GetConfigstring(CS_NORTHYAW, northYawString, 32);
     v1 = atof(northYawString);
     v2 = DEG2RAD( v1 );
     north[0] = cos(v2);
@@ -5968,7 +5973,7 @@ void GScr_SetMiniMap()
             "lower-right X and Y coordinates must be both south and east of upper-left X and Y coordinates in terms of the northyaw");
     level.compassMapUpperLeft[0] = upperLeft;
     level.compassMapUpperLeft[1] = upperLeft_4;
-    SV_SetConfigstring(823, va("\"%s\" %f %f %f %f", material, upperLeft, upperLeft_4, lowerRight[0], lowerRight[1]));
+    SV_SetConfigstring(CS_MINIMAP, va("\"%s\" %f %f %f %f", material, upperLeft, upperLeft_4, lowerRight[0], lowerRight[1]));
 }
 
 bool GScr_SetTeamRadar()

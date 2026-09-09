@@ -120,6 +120,152 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
+#if KISAK_MP
+//enum $C2D64A5C68CD67A3D33FF78F5B5E7685 : __int32
+enum ConstStringOffsets // not a real name
+{
+    CS_SERVERINFO             = 0,
+    CS_SYSTEMINFO             = 1,
+    CS_GAME_VERSION           = 2,
+    CS_MESSAGE                = 3,
+    CS_SCORES1                = 4,
+    CS_SCORES2                = 5,
+    CS_CULLDIST               = 6,
+    CS_SUNLIGHT               = 7,
+    CS_SUNDIR                 = 8,
+    CS_FOGVARS                = 9,
+    CS_MOTD                   = 10,
+    CS_GAMEENDTIME            = 11,
+    CS_MAPCENTER              = 12,
+    CS_VOTE_TIME              = 13,
+    CS_VOTE_STRING            = 14,
+    CS_VOTE_YES               = 15,
+    CS_VOTE_NO                = 16,
+    CS_VOTE_MAPNAME           = 17,
+    CS_VOTE_GAMETYPE          = 18,
+    CS_MULTI_MAPWINNER        = 19,
+    CS_CODINFO                = 20,
+    CS_CODINFO_LAST           = 147,
+    CS_CODINFO_COUNT          = CS_CODINFO_LAST - CS_CODINFO + 1,
+    CS_CODINFO_VALUE          = 148,
+    CS_CODINFO_VALUE_LAST     = 275,
+    CS_CODINFO_VALUE_COUNT    = CS_CODINFO_VALUE_LAST - CS_CODINFO_VALUE + 1,
+    CS_ENEMY_CROSSHAIR        = 276,
+    CS_USE_TRIG_STRINGS       = 277,
+    CS_USE_TRIG_STRINGS_LAST  = 308,
+    CS_USE_TRIG_STRINGS_COUNT = CS_USE_TRIG_STRINGS_LAST - CS_USE_TRIG_STRINGS + 1,
+    CS_LOCALIZED_STRINGS      = 309,
+    CS_LOCALIZED_STRINGS_LAST = 820,
+    CS_LOCALIZED_STRINGS_COUNT = CS_LOCALIZED_STRINGS_LAST - CS_LOCALIZED_STRINGS + 1,
+    CS_CASE_INSENSITIVE_BEGIN = 821,
+    CS_AMBIENT                = 821,
+    CS_NORTHYAW               = 822,
+    CS_MINIMAP                = 823,
+    CS_VISIONSET_NAKED        = 824,
+    CS_VISIONSET_NIGHT        = 825,
+    CS_NIGHTVISION            = 826,
+    CS_LOC_SEL_MTLS           = 827,
+    CS_LOC_SEL_MTLS_LAST      = 829,
+    CS_LOC_SEL_MTLS_COUNT     = CS_LOC_SEL_MTLS_LAST - CS_LOC_SEL_MTLS + 1,
+    CS_MODELS                 = 830,
+    CS_MODELS_LAST            = 1341,
+    CS_MODELS_COUNT           = CS_MODELS_LAST - CS_MODELS + 1,
+    CS_SOUNDALIASES           = 1342,
+    CS_SOUNDALIASES_LAST      = 1597,
+    CS_SOUNDALIASES_COUNT     = CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1,
+    CS_EFFECT_NAMES           = 1598,
+    CS_EFFECT_NAMES_LAST      = 1697,
+    CS_EFFECT_NAMES_COUNT     = CS_EFFECT_NAMES_LAST - CS_EFFECT_NAMES + 1,
+    CS_EFFECT_TAGS            = 1698,
+    CS_EFFECT_TAGS_LAST       = 1953,
+    CS_EFFECT_TAGS_COUNT      = CS_EFFECT_TAGS_LAST - CS_EFFECT_TAGS + 1,
+    CS_SHELLSHOCKS            = 1954,
+    CS_SHELLSHOCKS_LAST       = 1969,
+    CS_SHELLSHOCKS_COUNT      = CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1,
+    CS_SCRIPT_MENUS           = 1970,
+    CS_SCRIPT_MENUS_LAST      = 2001,
+    CS_SCRIPT_MENUS_COUNT     = CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1,
+    CS_SERVER_MATERIALS       = 2002,
+    CS_SERVER_MATERIALS_LAST  = 2257,
+    CS_SERVER_MATERIALS_COUNT = CS_SERVER_MATERIALS_LAST - CS_SERVER_MATERIALS + 1,
+    CS_WEAPONFILES            = 2258,
+    CS_STATUS_ICONS           = 2259,
+    CS_STATUS_ICONS_LAST      = 2266,
+    CS_STATUS_ICONS_COUNT     = CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1,
+    CS_HEAD_ICONS             = 2267,
+    CS_HEAD_ICONS_LAST        = 2281,
+    CS_HEAD_ICONS_COUNT       = CS_HEAD_ICONS_LAST - CS_HEAD_ICONS + 1,
+    CS_TAGS                   = 2282,
+    CS_TAGS_LAST              = 2313,
+    CS_TAGS_COUNT             = CS_TAGS_LAST - CS_TAGS + 1,
+    CS_ITEMS                  = 2314,
+    CS_MAX                    = 2315,
+};
+#elif KISAK_SP
+// PC SP configstring layout, derived from iw3sp_dump bootstrap (sub_4C4240) and
+// per-bucket xrefs (EV_SOUND_ALIAS @ 0x419e97 confirms CS_SOUNDALIASES = 1635).
+// Differs from Xbox CoD3-SP by removing CS_RUMBLES (32 entries) — every bucket
+// from CS_MODELS onward shifts down by 32 slots.
+enum ConstStringOffsets
+{
+    CS_SERVERINFO             = 0,
+    CS_SYSTEMINFO             = 1,
+    CS_GAME_VERSION           = 2,        // same as Xbox SP                  (0x2)
+    CS_MESSAGE                = 3,        // same                              (0x3)
+    CS_SCORES1                = 4,        // same                              (0x4)
+    CS_SCORES2                = 5,        // same                              (0x5)
+    CS_CULLDIST               = 6,        // confirmed (bootstrap)             (0x6)
+    CS_SUNLIGHT               = 7,        // confirmed                         (0x7)
+    CS_SUNDIR                 = 8,        // confirmed                         (0x8)
+    CS_FRIEND_OVERLAY         = 9,        // sub_437B20(10) used at 0x410E5E   (0x9)
+    CS_FRIEND_OVERLAY_LAST    = CS_FRIEND_OVERLAY + 1,     //                  (0xA)
+    CS_OBJECTIVES             = 11,       // same                              (0xB)
+    CS_OBJECTIVES_LAST        = CS_OBJECTIVES + 15,     //                     (0x1A)
+    CS_TARGETS                = 27,       // same                              (0x1B)
+    CS_TARGETS_LAST           = CS_TARGETS + 31,     //                        (0x3A)
+    CS_USE_TRIG_STRINGS       = 59,       // same                              (0x3B)
+    CS_USE_TRIG_STRINGS_LAST  = CS_USE_TRIG_STRINGS + 31,     //               (0x5A)
+    CS_LOCALIZED_STRINGS      = 91,       // confirmed (bootstrap)             (0x5B)
+    CS_LOCALIZED_STRINGS_LAST = CS_LOCALIZED_STRINGS + 1022,     //            (0x459)
+    CS_CASE_INSENSITIVE_BEGIN = 1114,     //                                   (0x45A)
+    CS_AMBIENT                = 1114,     // confirmed                         (0x45A)
+#ifdef KISAK_XBOX
+    CS_RUMBLES                = 1115,
+    CS_RUMBLES_LAST           = CS_RUMBLES + 31,
+    // CS_RUMBLES removed in PC SP - Xbox had 32 entries at 0x45B
+#endif
+    CS_NORTHYAW               = 1115,     // Xbox 1147 (-32)                   (0x45B)
+    CS_MINIMAP                = 1116,     // confirmed (bootstrap)             (0x45C)
+    CS_VISIONSET_NAKED        = 1117,     // confirmed                         (0x45D)
+    CS_VISIONSET_NIGHT        = 1118,     // confirmed                         (0x45E)
+    CS_NIGHTVISION            = 1119,     // confirmed                         (0x45F)
+    CS_LOC_SEL_MTLS           = 1120,     // Xbox 0x480 (-32)                  (0x460)
+    CS_LOC_SEL_MTLS_LAST      = CS_LOC_SEL_MTLS + 2,     //                    (0x462)
+    CS_MODELS                 = 1123,     // confirmed (bootstrap)             (0x463)
+    CS_MODELS_LAST            = CS_MODELS + 511,     //                        (0x662)
+    CS_SOUNDALIASES           = 1635,     // confirmed (EV_SOUND_ALIAS + boot) (0x663)
+    CS_SOUNDALIASES_LAST      = CS_SOUNDALIASES + 511,     //                  (0x862)
+    CS_EFFECT_NAMES           = 2147,     // confirmed (bootstrap)             (0x863)
+    CS_EFFECT_NAMES_LAST      = CS_EFFECT_NAMES + 99,     //                   (0x8C6)
+    CS_EFFECT_TAGS            = 2247,     // confirmed (bootstrap)             (0x8C7)
+    CS_EFFECT_TAGS_LAST       = CS_EFFECT_TAGS + 255,     //                  (0x9C6)
+    CS_SHELLSHOCKS            = 2503,     // Xbox 0x9E7 (-32), NOT in boot     (0x9C7)
+    CS_SHELLSHOCKS_LAST       = CS_SHELLSHOCKS + 15,     //                    (0x9D6)
+    CS_SCRIPT_MENUS           = 2519,     // Xbox 0x9F7 (-32)                  (0x9D7)
+    CS_SCRIPT_MENUS_LAST      = CS_SCRIPT_MENUS + 31,     //                   (0x9F6)
+    CS_SERVER_MATERIALS       = 2551,     // confirmed (bootstrap; Xbox 0xA17) (0x9F7)
+    CS_SERVER_MATERIALS_LAST  = CS_SERVER_MATERIALS + 127,     //              (0xA76)
+    CS_ITEMS                  = 2679,     // Xbox 0xA97 (-32)                  (0xA77)
+// KISAK: The PC Omits these rumble enums (gap above), but they're being re-added to fix the annoying script errors
+#ifndef KISAK_XBOX
+	CS_RUMBLES                = 2680,
+	CS_RUMBLES_LAST           = CS_RUMBLES + 31,
+#endif
+
+    CS_MAX                    //= 2680     // Xbox 0xA98 (-32)                  (0xA78)
+};
+#endif
+
 #define ptype_int intptr_t // LWSS: this type is used in cod4
 
 

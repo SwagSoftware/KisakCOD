@@ -629,21 +629,21 @@ void __cdecl SP_worldspawn()
     if (I_stricmp(s, "worldspawn"))
         Com_Error(ERR_DROP, "SP_worldspawn: The first entity isn't worldspawn");
 
-    SV_SetConfigstring(2, (char*)"cod");
+    SV_SetConfigstring(CS_GAME_VERSION, (char*)"cod");
     G_LevelSpawnString("ambienttrack", "", &s);
 
     if (*s)
     {
-        SV_SetConfigstring(821, va("n\\%s", s));
+        SV_SetConfigstring(CS_AMBIENT, va("n\\%s", s));
     }
     else
     {
-        SV_SetConfigstring(821, (char *)"");
+        SV_SetConfigstring(CS_AMBIENT, (char *)"");
     }
 
     G_LevelSpawnString("message", "", &s);
-    SV_SetConfigstring(3, (char *)s);
-    SV_SetConfigstring(10, (char *)g_motd->current.string);
+    SV_SetConfigstring(CS_MESSAGE, (char *)s);
+    SV_SetConfigstring(CS_MOTD, (char *)g_motd->current.string);
     G_LevelSpawnString("gravity", "800", &s);
 
     iassert(g_gravity);
@@ -652,14 +652,14 @@ void __cdecl SP_worldspawn()
     G_LevelSpawnString("northyaw", "", &s);
     if (*s)
     {
-        SV_SetConfigstring(822, (char *)s);
+        SV_SetConfigstring(CS_NORTHYAW, (char *)s);
         yaw = DEG2RAD(atof(s));
         level.compassNorth[0] = cos(yaw);
         level.compassNorth[1] = sin(yaw);
     }
     else
     {
-        SV_SetConfigstring(822, (char*)"0");
+        SV_SetConfigstring(CS_NORTHYAW, (char*)"0");
         level.compassNorth[0] = 1.0;
         level.compassNorth[1] = 0.0;
     }

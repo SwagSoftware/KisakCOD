@@ -58,7 +58,7 @@ int __cdecl G_FindConfigstringIndex(char *name, int start, int max, int create, 
 
     if (!name || !*name)
         return 0;
-    if (start < 821)
+    if (start < CS_CASE_INSENSITIVE_BEGIN)
         v10 = SL_FindString(name);
     else
         v10 = SL_FindLowercaseString(name);
@@ -149,18 +149,33 @@ int __cdecl G_LocalizedStringIndex(char *string)
         if (!loc_warnings->current.enabled)
         {
             allowCreate = 1;
-            v2 = G_FindConfigstringIndex(string, 309, 512, 1, origErrorMsg);
+            v2 = G_FindConfigstringIndex(
+                string,
+                CS_LOCALIZED_STRINGS,
+                CS_LOCALIZED_STRINGS_COUNT,
+                1,
+                origErrorMsg);
             goto LABEL_11;
         }
         if (!loc_warningsAsErrors->current.enabled)
             errormsg = 0;
     }
-    v2 = G_FindConfigstringIndex(string, 309, 512, level.initializing, errormsg);
+    v2 = G_FindConfigstringIndex(
+        string,
+        CS_LOCALIZED_STRINGS,
+        CS_LOCALIZED_STRINGS_COUNT,
+        level.initializing,
+        errormsg);
 LABEL_11:
     configStringIndex = v2;
     if (!v2 && !allowCreate && loc_warnings->current.enabled && !loc_warningsAsErrors->current.enabled)
     {
-        configStringIndex = G_FindConfigstringIndex(string, 309, 512, 1, origErrorMsg);
+        configStringIndex = G_FindConfigstringIndex(
+            string,
+            CS_LOCALIZED_STRINGS,
+            CS_LOCALIZED_STRINGS_COUNT,
+            1,
+            origErrorMsg);
         if (configStringIndex)
             Com_PrintWarning(CON_CHANNEL_SCRIPT, "WARNING: %s \"%s\" not precached\n", origErrorMsg, string);
     }
@@ -186,7 +201,12 @@ int __cdecl G_MaterialIndex(const char *name)
         *v3++ = *v4++;
     } while (v2);
     I_strlwr(shaderName);
-    return G_FindConfigstringIndex(shaderName, 2002, 256, level.initializing, "material");
+    return G_FindConfigstringIndex(
+        shaderName,
+        CS_SERVER_MATERIALS,
+        CS_SERVER_MATERIALS_COUNT,
+        level.initializing,
+        "material");
 }
 
 int __cdecl G_ModelIndex(const char *name)
@@ -208,12 +228,12 @@ int __cdecl G_ModelIndex(const char *name)
 
     if (!level.initializing
         || (constIndex = CCS_GetConstConfigStringIndex(name), constIndex < 0)
-        || (constIndexa = CCS_GetConfigStringNumForConstIndex(constIndex), constIndexa < 830)
-        || constIndexa >= 1342)
+        || (constIndexa = CCS_GetConfigStringNumForConstIndex(constIndex), constIndexa < CS_MODELS)
+        || constIndexa > CS_MODELS_LAST)
     {
         for (i = 1; i < MAX_MODELS; ++i)
         {
-            if (SV_GetConfigstringConst(i + 830) == nameString)
+            if (SV_GetConfigstringConst(i + CS_MODELS) == nameString)
             {
                 iassert(cached_models[i]);
                 return i;
@@ -226,7 +246,9 @@ int __cdecl G_ModelIndex(const char *name)
         if (level.initializing && i == MAX_MODELS)
         {
             for (i = 1;
-                i < MAX_MODELS && (SV_GetConfigstringConst(i + 830) != scr_const._ || CCS_IsConfigStringIndexConstant(i + 830));
+                i < MAX_MODELS
+                && (SV_GetConfigstringConst(i + CS_MODELS) != scr_const._
+                    || CCS_IsConfigStringIndexConstant(i + CS_MODELS));
                 ++i)
             {
                 ;
@@ -234,7 +256,7 @@ int __cdecl G_ModelIndex(const char *name)
             if (i == MAX_MODELS)
             {
                 Com_PrintWarning(CON_CHANNEL_CLIENT, "Warning: abandoning const config string model slot for string %s\n", name);
-                for (i = 1; i < MAX_MODELS && SV_GetConfigstringConst(i + 830) != scr_const._; ++i)
+                for (i = 1; i < MAX_MODELS && SV_GetConfigstringConst(i + CS_MODELS) != scr_const._; ++i)
                     ;
             }
         }
@@ -245,18 +267,18 @@ int __cdecl G_ModelIndex(const char *name)
     if (s != nameString)
     {
         iassert(s == scr_const._);
-        i = constIndexa - 830;
+        i = constIndexa - CS_MODELS;
         bcassert(i, MAX_MODELS);
     haveIndex:
         bcassert(i, MAX_MODELS);
         if (i == MAX_MODELS)
             Com_Error(ERR_DROP, "G_ModelIndex: overflow");
         cached_models[i] = SV_XModelGet((char*)name);
-        SV_SetConfigstring(i + 830, name);
+        SV_SetConfigstring(i + CS_MODELS, name);
         return i;
     }
 
-    i = constIndexa - 830;
+    i = constIndexa - CS_MODELS;
     bcassert(i, MAX_MODELS);
     iassert(cached_models[i]);
     return i;
@@ -301,35 +323,40 @@ uint32_t __cdecl G_ModelName(uint32_t index)
 {
     if (index >= 0x200)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 345, 0, "%s", "(unsigned)index < MAX_MODELS");
-    return SV_GetConfigstringConst(index + 830);
+    return SV_GetConfigstringConst(index + CS_MODELS);
 }
 
 int __cdecl G_TagIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 352, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, 2282, 32, 1, 0);
+    return G_FindConfigstringIndex(name, CS_TAGS, CS_TAGS_COUNT, 1, 0);
 }
 
 int __cdecl G_EffectIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 359, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, 1598, 100, level.initializing, "effect");
+    return G_FindConfigstringIndex(
+        name,
+        CS_EFFECT_NAMES,
+        CS_EFFECT_NAMES_COUNT,
+        level.initializing,
+        "effect");
 }
 
 int __cdecl G_ShellShockIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 366, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, 1954, 16, 1, 0);
+    return G_FindConfigstringIndex(name, CS_SHELLSHOCKS, CS_SHELLSHOCKS_COUNT, 1, 0);
 }
 
 int __cdecl G_SoundAliasIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 374, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, 1342, 256, 1, 0);
+    return G_FindConfigstringIndex(name, CS_SOUNDALIASES, CS_SOUNDALIASES_COUNT, 1, 0);
 }
 
 void __cdecl G_DObjUpdate(gentity_s *ent)
