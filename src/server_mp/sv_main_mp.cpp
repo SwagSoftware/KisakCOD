@@ -1147,7 +1147,7 @@ void __cdecl SV_SetSystemInfoConfig()
         else
             Com_Printf(CON_CHANNEL_SYSTEM, "Info string length exceeded key: fs_game Info string: %s", dest);
     }
-    SV_SetConfigstring(1, dest);
+    SV_SetConfigstring(CS_SYSTEMINFO, dest);
     dvar_modifiedFlags &= ~8u;
 }
 
@@ -1161,14 +1161,14 @@ void __cdecl SV_PreFrame()
     if ((dvar_modifiedFlags & 0x404) != 0)
     {
         v0 = Dvar_InfoString(0, 4);
-        SV_SetConfigstring(0, v0);
+        SV_SetConfigstring(CS_SERVERINFO, v0);
         dvar_modifiedFlags &= 0xFFFFFBFB;
     }
     if ((dvar_modifiedFlags & 8) != 0)
         SV_SetSystemInfoConfig();
     if ((dvar_modifiedFlags & 0x100) != 0)
     {
-        SV_SetConfig(CS_CODINFO, CS_CODINFO_LAST - CS_CODINFO + 1, 256);
+        SV_SetConfig(CS_CODINFO, CS_CODINFO_COUNT, 256);
         dvar_modifiedFlags &= ~0x100u;
     }
 }

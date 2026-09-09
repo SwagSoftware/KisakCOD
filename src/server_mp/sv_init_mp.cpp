@@ -650,9 +650,9 @@ void SV_SaveSystemInfo()
 
     SV_SetSystemInfoConfig();
     v0 = Dvar_InfoString(0, 4);
-    SV_SetConfigstring(0, v0);
+    SV_SetConfigstring(CS_SERVERINFO, v0);
     dvar_modifiedFlags &= 0xFFFFFBFB;
-    SV_SetConfig(CS_CODINFO, CS_CODINFO_LAST - CS_CODINFO + 1, 256);
+    SV_SetConfig(CS_CODINFO, CS_CODINFO_COUNT, 256);
     dvar_modifiedFlags &= ~0x100u;
 }
 

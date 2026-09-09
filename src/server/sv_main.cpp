@@ -377,14 +377,14 @@ void __cdecl SV_PreFrame()
     if ((dvar_modifiedFlags & 4) != 0)
     {
         v1 = Dvar_InfoString(0, 4);
-        SV_SetConfigstring(0, v1);
+        SV_SetConfigstring(CS_SERVERINFO, v1);
         v0 = dvar_modifiedFlags & 0xFB;
         dvar_modifiedFlags &= ~4u;
     }
     if ((v0 & 8) != 0)
     {
         v2 = Dvar_InfoString_Big(8);
-        SV_SetConfigstring(1u, v2);
+        SV_SetConfigstring(CS_SYSTEMINFO, v2);
         dvar_modifiedFlags &= ~8u;
     }
     CL_RecordServerDebugData();

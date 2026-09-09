@@ -152,7 +152,7 @@ int __cdecl G_LocalizedStringIndex(char *string)
             v2 = G_FindConfigstringIndex(
                 string,
                 CS_LOCALIZED_STRINGS,
-                CS_LOCALIZED_STRINGS_LAST - CS_LOCALIZED_STRINGS + 1,
+                CS_LOCALIZED_STRINGS_COUNT,
                 1,
                 origErrorMsg);
             goto LABEL_11;
@@ -163,7 +163,7 @@ int __cdecl G_LocalizedStringIndex(char *string)
     v2 = G_FindConfigstringIndex(
         string,
         CS_LOCALIZED_STRINGS,
-        CS_LOCALIZED_STRINGS_LAST - CS_LOCALIZED_STRINGS + 1,
+        CS_LOCALIZED_STRINGS_COUNT,
         level.initializing,
         errormsg);
 LABEL_11:
@@ -173,7 +173,7 @@ LABEL_11:
         configStringIndex = G_FindConfigstringIndex(
             string,
             CS_LOCALIZED_STRINGS,
-            CS_LOCALIZED_STRINGS_LAST - CS_LOCALIZED_STRINGS + 1,
+            CS_LOCALIZED_STRINGS_COUNT,
             1,
             origErrorMsg);
         if (configStringIndex)
@@ -204,7 +204,7 @@ int __cdecl G_MaterialIndex(const char *name)
     return G_FindConfigstringIndex(
         shaderName,
         CS_SERVER_MATERIALS,
-        CS_SERVER_MATERIALS_LAST - CS_SERVER_MATERIALS + 1,
+        CS_SERVER_MATERIALS_COUNT,
         level.initializing,
         "material");
 }
@@ -330,7 +330,7 @@ int __cdecl G_TagIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 352, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, CS_TAGS, CS_TAGS_LAST - CS_TAGS + 1, 1, 0);
+    return G_FindConfigstringIndex(name, CS_TAGS, CS_TAGS_COUNT, 1, 0);
 }
 
 int __cdecl G_EffectIndex(char *name)
@@ -340,7 +340,7 @@ int __cdecl G_EffectIndex(char *name)
     return G_FindConfigstringIndex(
         name,
         CS_EFFECT_NAMES,
-        CS_EFFECT_NAMES_LAST - CS_EFFECT_NAMES + 1,
+        CS_EFFECT_NAMES_COUNT,
         level.initializing,
         "effect");
 }
@@ -349,14 +349,14 @@ int __cdecl G_ShellShockIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 366, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, CS_SHELLSHOCKS, CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1, 1, 0);
+    return G_FindConfigstringIndex(name, CS_SHELLSHOCKS, CS_SHELLSHOCKS_COUNT, 1, 0);
 }
 
 int __cdecl G_SoundAliasIndex(char *name)
 {
     if (!name)
         MyAssertHandler(".\\game_mp\\g_utils_mp.cpp", 374, 0, "%s", "name");
-    return G_FindConfigstringIndex(name, CS_SOUNDALIASES, CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1, 1, 0);
+    return G_FindConfigstringIndex(name, CS_SOUNDALIASES, CS_SOUNDALIASES_COUNT, 1, 0);
 }
 
 void __cdecl G_DObjUpdate(gentity_s *ent)

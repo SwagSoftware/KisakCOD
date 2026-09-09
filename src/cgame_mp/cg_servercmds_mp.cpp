@@ -37,7 +37,7 @@ void __cdecl CG_ParseServerInfo(int32_t localClientNum)
     const char *info; // [esp+0h] [ebp-Ch]
     const char *mapname; // [esp+8h] [ebp-4h]
     cgs_t *cgs;
-    info = CL_GetConfigString(localClientNum, 0);
+    info = CL_GetConfigString(localClientNum, CS_SERVERINFO);
 
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     I_strncpyz(cgs->szHostName, Info_ValueForKey(info, "sv_hostname"), sizeof(cgs->szHostName));
@@ -61,7 +61,7 @@ void __cdecl CG_ParseCodInfo(int32_t localClientNum)
     
     if (!cgs->localServer)
     {
-        for (i = 0; i < CS_CODINFO_LAST - CS_CODINFO + 1; ++i)
+        for (i = 0; i < CS_CODINFO_COUNT; ++i)
         {
             key = CL_GetConfigString(localClientNum, i + CS_CODINFO);
             if (!*key)
@@ -754,7 +754,7 @@ void __cdecl CG_ParseScores(int32_t localClientNum)
         clientNum = cgameGlob->scores[i].client;
         if (!cgameGlob->bgs.clientinfo[clientNum].infoValid)
             Com_PrintError(CON_CHANNEL_CLIENT, "Invalid score client %i, bad scoreboard message\n", cgameGlob->scores[i].client);
-        if (statusIconIndex > 0 && statusIconIndex <= CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1)
+        if (statusIconIndex > 0 && statusIconIndex <= CS_STATUS_ICONS_COUNT)
         {
             pszIcon = CL_GetConfigString(localClientNum, statusIconIndex + CS_STATUS_ICONS - 1);
             cgameGlob->scores[i].hStatusIcon = Material_RegisterHandle(pszIcon, IMAGE_TRACK_HUD);
@@ -1092,7 +1092,7 @@ void __cdecl CG_OpenScriptMenu(int32_t localClientNum)
     bool useMouse; // [esp+1Bh] [ebp-5h]
 
     menuIndex = atoi(Cmd_Argv(1));
-    if (menuIndex >= CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1)
+    if (menuIndex >= CS_SCRIPT_MENUS_COUNT)
     {
         Com_Printf(CON_CHANNEL_CLIENT, "Server tried to open a bad script menu index: %i\n", menuIndex);
         Cbuf_AddText(localClientNum, va("cmd mr %i bad\n", menuIndex));
@@ -1242,7 +1242,7 @@ void __cdecl CG_SetChannelVolCmd(int32_t localClientNum)
         v2 = Cmd_Argv(2);
         shockIndex = atoi(v2);
         
-        if (shockIndex >= CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1)
+        if (shockIndex >= CS_SHELLSHOCKS_COUNT)
         {
             Com_PrintError(CON_CHANNEL_CLIENT, "CG_SetChannelVolCmd: bad shellshock index %u\n", shockIndex);
             return;
@@ -1309,7 +1309,7 @@ char __cdecl LocalSound(int32_t localClientNum)
     if (argc == 2)
     {
         index = atoi(Cmd_Argv(1));
-        if (index > 0 && index <= CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1)
+        if (index > 0 && index <= CS_SOUNDALIASES_COUNT)
         {
             aliasName = CL_GetConfigString(localClientNum, index + CS_SOUNDALIASES);
             CG_PlayClientSoundAliasByName(localClientNum, aliasName);
@@ -1321,7 +1321,7 @@ char __cdecl LocalSound(int32_t localClientNum)
                 CON_CHANNEL_SOUND,
                 "ERROR: LocalSound() called with index %i (should be in range[1,%i])\n",
                 index,
-                CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1);
+                CS_SOUNDALIASES_COUNT);
             return 0;
         }
     }
@@ -1340,7 +1340,7 @@ void __cdecl LocalSoundStop(int32_t localClientNum)
     if (Cmd_Argc() == 2)
     {
         index = atoi(Cmd_Argv(1));
-        if (index > 0 && index <= CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1)
+        if (index > 0 && index <= CS_SOUNDALIASES_COUNT)
         {
             aliasName = CL_GetConfigString(localClientNum, index + CS_SOUNDALIASES);
             CG_StopClientSoundAliasByName(localClientNum, aliasName);
@@ -1351,7 +1351,7 @@ void __cdecl LocalSoundStop(int32_t localClientNum)
                 CON_CHANNEL_SOUND,
                 "ERROR: LocalSoundStop() called with index %i (should be in range[1,%i])\n",
                 index,
-                CS_SOUNDALIASES_LAST - CS_SOUNDALIASES + 1);
+                CS_SOUNDALIASES_COUNT);
         }
     }
     else

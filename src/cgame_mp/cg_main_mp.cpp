@@ -1922,7 +1922,7 @@ void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
     cgs = CG_GetLocalClientStaticGlobals(localClientNum);
     
     CG_LoadingString(localClientNum, " - server models");
-    for (i = 1; i < CS_MODELS_LAST - CS_MODELS + 1; ++i)
+    for (i = 1; i < CS_MODELS_COUNT; ++i)
     {
         modelName = CL_GetConfigString(localClientNum, i + CS_MODELS);
         if (*modelName)
@@ -1931,7 +1931,7 @@ void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
             cgs->gameModels[i] = R_RegisterModel(modelName);
         }
     }
-    for (i = 1; i < CS_EFFECT_NAMES_LAST - CS_EFFECT_NAMES + 1; ++i)
+    for (i = 1; i < CS_EFFECT_NAMES_COUNT; ++i)
     {
         effectname = CL_GetConfigString(localClientNum, i + CS_EFFECT_NAMES);
         if (*effectname)
@@ -1942,7 +1942,7 @@ void __cdecl CG_RegisterGraphics(int32_t localClientNum, const char *mapname)
     }
     cgs->smokeGrenadeFx = FX_Register("props/american_smoke_grenade_mp");
     iassert(cgs->smokeGrenadeFx);
-    for (ib = 1; ib < CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1; ++ib)
+    for (ib = 1; ib < CS_SHELLSHOCKS_COUNT; ++ib)
     {
         shellshock = CL_GetConfigString(localClientNum, ib + CS_SHELLSHOCKS);
         if (*shellshock)

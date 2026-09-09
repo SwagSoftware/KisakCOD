@@ -500,7 +500,7 @@ void __cdecl CL_Record_f()
                     MSG_WriteString(&v13, (char*)v4);
                     ++configstrings;
                 } while ((int)configstrings < (int)clients[0].mapname);
-                v5 = SL_ConvertToString(clients[0].configstrings[0]);
+                v5 = SL_ConvertToString(clients[0].configstrings[CS_SERVERINFO]);
                 v6 = (char*)Info_ValueForKey(v5, "mapname");
                 v7 = v6;
                 while (*v7++)

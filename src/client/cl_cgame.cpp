@@ -881,8 +881,8 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
             "(localClientNum == 0)",
             localClientNum);
     }
-    v5 = clients[0].configstrings[0];
-    if (!clients[0].configstrings[0])
+    v5 = clients[0].configstrings[CS_SERVERINFO];
+    if (!clients[0].configstrings[CS_SERVERINFO])
     {
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\client\\cl_cgame.cpp",
@@ -890,7 +890,7 @@ void __cdecl CL_InitCGame(int localClientNum, int savegame)
             0,
             "%s",
             "cl->configstrings[CS_SERVERINFO]");
-        v5 = clients[0].configstrings[0];
+        v5 = clients[0].configstrings[CS_SERVERINFO];
     }
     info = SL_ConvertToString(v5);
     if (!info)

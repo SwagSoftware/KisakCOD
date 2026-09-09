@@ -2475,7 +2475,7 @@ void __cdecl PlayerCmd_SetChannelVolumes(scr_entref_t entref)
     shockIndex = G_FindConfigstringIndex(
         (char*)Scr_GetString(1),
         CS_SHELLSHOCKS,
-        CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1,
+        CS_SHELLSHOCKS_COUNT,
         0,
         0);
     prio_name = Scr_GetConstString(0);

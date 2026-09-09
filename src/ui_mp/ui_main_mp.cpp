@@ -2201,7 +2201,7 @@ void __cdecl UI_SelectCurrentMap(int localClientNum)
     CL_GetClientState(localClientNum, &cstate);
     if (cstate.connState == CA_ACTIVE)
     {
-        info = CL_GetConfigString(localClientNum, 0);
+        info = CL_GetConfigString(localClientNum, CS_SERVERINFO);
         if (*info)
         {
             v1 = Info_ValueForKey(info, "mapname");
@@ -4003,7 +4003,7 @@ void __cdecl UI_BuildPlayerList(int localClientNum)
     int count; // [esp+C40h] [ebp-4h]
 
     CL_GetClientState(localClientNum, &state);
-    info = CL_GetConfigString(localClientNum, 0);
+    info = CL_GetConfigString(localClientNum, CS_SERVERINFO);
     count = atoi(Info_ValueForKey(info, "sv_maxclients"));
     memset((uint8_t *)sharedUiInfo.playerClientNums, 0xFFu, sizeof(sharedUiInfo.playerClientNums));
     sharedUiInfo.playerCount = 0;

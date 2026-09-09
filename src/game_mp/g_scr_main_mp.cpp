@@ -2031,7 +2031,7 @@ int32_t __cdecl G_GetHintStringIndex(int32_t *piIndex, char *pszString)
     char szConfigString[1024]; // [esp+14h] [ebp-408h] BYREF
     int32_t i; // [esp+418h] [ebp-4h]
 
-    for (i = 0; i < CS_USE_TRIG_STRINGS_LAST - CS_USE_TRIG_STRINGS + 1; ++i)
+    for (i = 0; i < CS_USE_TRIG_STRINGS_COUNT; ++i)
     {
         SV_GetConfigstring(i + CS_USE_TRIG_STRINGS, szConfigString, 1024);
         if (!szConfigString[0])
@@ -2544,7 +2544,7 @@ void GScr_PrecacheMenu()
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
 
     pszNewMenu = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_SCRIPT_MENUS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_SCRIPT_MENUS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewMenu))
@@ -2553,15 +2553,15 @@ void GScr_PrecacheMenu()
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_SCRIPT_MENUS_COUNT; ++iConfigNuma)
     {
         SV_GetConfigstring(iConfigNuma + CS_SCRIPT_MENUS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1)
+    if (iConfigNuma == CS_SCRIPT_MENUS_COUNT)
     {
-        Scr_Error(va("Too many menus precached. Max allowed menus is %i", CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1));
+        Scr_Error(va("Too many menus precached. Max allowed menus is %i", CS_SCRIPT_MENUS_COUNT));
     }
     SV_SetConfigstring(iConfigNuma + CS_SCRIPT_MENUS, pszNewMenu);
 }
@@ -2572,7 +2572,7 @@ int32_t __cdecl GScr_GetScriptMenuIndex(const char *pszMenu)
     int32_t iConfigNum; // [esp+0h] [ebp-40Ch]
     char szConfigString[1028]; // [esp+4h] [ebp-408h] BYREF
 
-    for (iConfigNum = 0; iConfigNum < CS_SCRIPT_MENUS_LAST - CS_SCRIPT_MENUS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_SCRIPT_MENUS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_SCRIPT_MENUS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszMenu))
@@ -2591,7 +2591,7 @@ void GScr_PrecacheStatusIcon()
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
 
     pszNewIcon = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_STATUS_ICONS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_STATUS_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewIcon))
@@ -2600,15 +2600,15 @@ void GScr_PrecacheStatusIcon()
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_STATUS_ICONS_COUNT; ++iConfigNuma)
     {
         SV_GetConfigstring(iConfigNuma + CS_STATUS_ICONS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1)
+    if (iConfigNuma == CS_STATUS_ICONS_COUNT)
     {
-        Scr_Error(va("Too many player status icons precached. Max allowed is %i", CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1));
+        Scr_Error(va("Too many player status icons precached. Max allowed is %i", CS_STATUS_ICONS_COUNT));
     }
     SV_SetConfigstring(iConfigNuma + CS_STATUS_ICONS, pszNewIcon);
 }
@@ -2621,7 +2621,7 @@ int32_t __cdecl GScr_GetStatusIconIndex(const char *pszIcon)
     if (!*pszIcon)
         return 0;
 
-    for (iConfigNum = 0; iConfigNum < CS_STATUS_ICONS_LAST - CS_STATUS_ICONS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_STATUS_ICONS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_STATUS_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszIcon))
@@ -2640,7 +2640,7 @@ void GScr_PrecacheHeadIcon()
     char szConfigString[1028]; // [esp+8h] [ebp-408h] BYREF
 
     pszNewIcon = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < CS_HEAD_ICONS_LAST - CS_HEAD_ICONS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_HEAD_ICONS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_HEAD_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewIcon))
@@ -2649,15 +2649,15 @@ void GScr_PrecacheHeadIcon()
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < CS_HEAD_ICONS_LAST - CS_HEAD_ICONS + 1; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_HEAD_ICONS_COUNT; ++iConfigNuma)
     {
         SV_GetConfigstring(iConfigNuma + CS_HEAD_ICONS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == CS_HEAD_ICONS_LAST - CS_HEAD_ICONS + 1)
+    if (iConfigNuma == CS_HEAD_ICONS_COUNT)
     {
-        Scr_Error(va("Too many player head icons precached. Max allowed is %i", CS_HEAD_ICONS_LAST - CS_HEAD_ICONS + 1));
+        Scr_Error(va("Too many player head icons precached. Max allowed is %i", CS_HEAD_ICONS_COUNT));
     }
     SV_SetConfigstring(iConfigNuma + CS_HEAD_ICONS, pszNewIcon);
 }
@@ -2670,7 +2670,7 @@ int32_t __cdecl GScr_GetHeadIconIndex(const char *pszIcon)
     if (!*pszIcon)
         return 0;
 
-    for (iConfigNum = 0; iConfigNum < CS_HEAD_ICONS_LAST - CS_HEAD_ICONS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_HEAD_ICONS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_HEAD_ICONS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszIcon))
@@ -2887,7 +2887,7 @@ void GScr_PrecacheLocationSelector()
     const char *pszNewMtl; // [esp+408h] [ebp-4h]
 
     pszNewMtl = Scr_GetString(0);
-    for (iConfigNum = 0; iConfigNum < CS_LOC_SEL_MTLS_LAST - CS_LOC_SEL_MTLS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_LOC_SEL_MTLS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_LOC_SEL_MTLS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, pszNewMtl))
@@ -2896,15 +2896,15 @@ void GScr_PrecacheLocationSelector()
             return;
         }
     }
-    for (iConfigNuma = 0; iConfigNuma < CS_LOC_SEL_MTLS_LAST - CS_LOC_SEL_MTLS + 1; ++iConfigNuma)
+    for (iConfigNuma = 0; iConfigNuma < CS_LOC_SEL_MTLS_COUNT; ++iConfigNuma)
     {
         SV_GetConfigstring(iConfigNuma + CS_LOC_SEL_MTLS, szConfigString, 1024);
         if (!szConfigString[0])
             break;
     }
-    if (iConfigNuma == CS_LOC_SEL_MTLS_LAST - CS_LOC_SEL_MTLS + 1)
+    if (iConfigNuma == CS_LOC_SEL_MTLS_COUNT)
     {
-        v0 = va("Too many location selectors precached. Max allowed is %i", CS_LOC_SEL_MTLS_LAST - CS_LOC_SEL_MTLS + 1);
+        v0 = va("Too many location selectors precached. Max allowed is %i", CS_LOC_SEL_MTLS_COUNT);
         Scr_Error(v0);
     }
     SV_SetConfigstring(iConfigNuma + CS_LOC_SEL_MTLS, (char *)pszNewMtl);
@@ -2920,7 +2920,7 @@ int32_t __cdecl GScr_GetLocSelIndex(const char *mtlName)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 3095, 0, "%s", "mtlName");
     if (!*mtlName)
         return 0;
-    for (iConfigNum = 0; iConfigNum < CS_LOC_SEL_MTLS_LAST - CS_LOC_SEL_MTLS + 1; ++iConfigNum)
+    for (iConfigNum = 0; iConfigNum < CS_LOC_SEL_MTLS_COUNT; ++iConfigNum)
     {
         SV_GetConfigstring(iConfigNum + CS_LOC_SEL_MTLS, szConfigString, 1024);
         if (!I_stricmp(szConfigString, mtlName))
@@ -4246,10 +4246,10 @@ void Scr_PlayFXOnTag()
     csIndex = G_FindConfigstringIndex(
         va("%02d%s", fxId, SL_ConvertToString(tag)),
         CS_EFFECT_TAGS,
-        CS_EFFECT_TAGS_LAST - CS_EFFECT_TAGS + 1,
+        CS_EFFECT_TAGS_COUNT,
         1,
         0);
-    if (csIndex <= 0 || csIndex >= CS_EFFECT_TAGS_LAST - CS_EFFECT_TAGS + 1)
+    if (csIndex <= 0 || csIndex >= CS_EFFECT_TAGS_COUNT)
         MyAssertHandler(".\\game_mp\\g_scr_main_mp.cpp", 4421, 0, "%s", "csIndex > 0 && csIndex < MAX_EFFECT_TAGS");
     G_AddEvent(ent, EV_PLAY_FX_ON_TAG, csIndex);
 }
@@ -4927,7 +4927,7 @@ void __cdecl GScr_ShellShock(scr_entref_t entref)
     shock = Scr_GetString(0);
     for (id = 1; ; ++id)
     {
-        if (id >= CS_SHELLSHOCKS_LAST - CS_SHELLSHOCKS + 1)
+        if (id >= CS_SHELLSHOCKS_COUNT)
         {
             Scr_Error(va("shellshock '%s' was not precached\n", shock));
             return;
