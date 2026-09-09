@@ -1147,11 +1147,11 @@ void __cdecl UI_Pause(int localClientNum, int b)
     if (b)
     {
         Dvar_SetIntByName("cl_paused", 1);
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
     }
     else
     {
-        Key_RemoveCatcher(localClientNum, -17);
+        Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
         Key_ClearStates(localClientNum);
         Dvar_SetIntByName("cl_paused", 0);
     }
@@ -1323,7 +1323,7 @@ void __cdecl UI_KeyEvent(int localClientNum, int key, int down)
         if (!Menu_GetFocused(&uiInfo.uiDC))
         {
         LABEL_10:
-            Key_RemoveCatcher(localClientNum, -17);
+            Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
             Key_ClearStates(localClientNum);
             if (!CL_SkipRendering())
                 Dvar_SetIntByName("cl_paused", 0);
@@ -1358,13 +1358,13 @@ const char *__cdecl UI_GetTopActiveMenuName(int localClientNum)
 void __cdecl UI_ShowAcceptInviteWarning()
 {
     Dvar_SetIntByName("cl_paused", 1);
-    Key_SetCatcher(0, 16);
+    Key_SetCatcher(0, KEYCATCH_UI);
     Menus_OpenByName(&uiInfo.uiDC, "sp_acceptinvite_warning");
 }
 
 void __cdecl UI_ShowReadingSaveDevicePopup()
 {
-    Key_SetCatcher(0, 16);
+    Key_SetCatcher(0, KEYCATCH_UI);
     Menus_OpenByName(&uiInfo.uiDC, "readingsavedevice");
 }
 
@@ -1622,7 +1622,7 @@ int __cdecl UI_PopupScriptMenu(const char *menuName, bool useMouse)
             v6 = 479.0;
         }
         uiInfo.uiDC.cursor.y = v6;
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
         Menus_CloseAll(&uiInfo.uiDC);
         Menus_OpenByName(&uiInfo.uiDC, menuName);
     }
@@ -2402,7 +2402,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
 
     if (!I_stricmp(out, "closeingame"))
     {
-        Key_RemoveCatcher(localClientNum, -17);
+        Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
         Key_ClearStates(localClientNum);
         Dvar_SetIntByName("cl_paused", 0);
         Menus_CloseAll(&uiInfo.uiDC);
@@ -2502,7 +2502,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
     switch (menu)
     {
     case UIMENU_NONE:
-        Key_RemoveCatcher(0, -17);
+        Key_RemoveCatcher(0, ~KEYCATCH_UI);
         Key_ClearStates(0);
         Dvar_SetIntByName("cl_paused", 0);
         Menus_CloseAll(&uiInfo.uiDC);
@@ -2510,7 +2510,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
             MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\ui\\ui_main.cpp", 2429, 0, "%s", "!CL_SkipRendering()");
         goto LABEL_10;
     case UIMENU_MAIN:
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
         Menus_OpenByName(&uiInfo.uiDC, "main");
         String = Dvar_GetString("com_errorMessage");
         if (*String)
@@ -2529,7 +2529,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         else
         {
             Dvar_SetIntByName("cl_paused", 1);
-            Key_SetCatcher(0, 16);
+            Key_SetCatcher(0, KEYCATCH_UI);
             Menus_OpenByName(&uiInfo.uiDC, "pausedmenu");
             result = 1;
         }
@@ -2543,7 +2543,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         else
         {
             Dvar_SetIntByName("cl_paused", 1);
-            Key_SetCatcher(0, 16);
+            Key_SetCatcher(0, KEYCATCH_UI);
             Menus_CloseAll(&uiInfo.uiDC);
             if (*Dvar_GetString("com_errorMessage"))
                 Menus_OpenByName(&uiInfo.uiDC, "pregame_loaderror");
@@ -2553,7 +2553,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         }
         break;
     case UIMENU_POSTGAME:
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
         Menus_CloseAll(&uiInfo.uiDC);
         Menus_OpenByName(&uiInfo.uiDC, "endofgame");
         result = 1;
@@ -2566,7 +2566,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
     case UIMENU_VICTORYSCREEN:
         uiInfo.uiDC.cursor.x = 320.0;
         uiInfo.uiDC.cursor.y = 448.0;
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
         Menus_OpenByName(&uiInfo.uiDC, "victoryscreen");
         result = 1;
         break;
@@ -2574,7 +2574,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         uiInfo.uiDC.cursor.x = 320.0;
         uiInfo.uiDC.cursor.y = 448.0;
         Dvar_SetIntByName("cl_paused", 1);
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
         Menus_OpenByName(&uiInfo.uiDC, "savegame_error");
         result = 1;
         break;
@@ -2591,7 +2591,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         break;
     case UIMENU_CONTROLLERREMOVED:
         Dvar_SetIntByName("cl_paused", 1);
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
         if (!Menu_GetFocused(&uiInfo.uiDC) || g_currentMenuType == UIMENU_NONE)
             Menus_OpenByName(&uiInfo.uiDC, "pausedmenu");
         result = 1;
@@ -2711,7 +2711,7 @@ int __cdecl UI_Popup(int localClientNum, const char *menu)
         uiInfo.uiDC.cursor.x = 320.0;
         g_currentMenuType = UIMENU_VICTORYSCREEN;
         uiInfo.uiDC.cursor.y = 448.0;
-        Key_SetCatcher(0, 16);
+        Key_SetCatcher(0, KEYCATCH_UI);
     }
     else
     {

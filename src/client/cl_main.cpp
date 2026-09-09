@@ -619,7 +619,7 @@ void __cdecl CL_MapLoading(const char *mapname)
     if (!clientUIActives[0].isRunning)
         MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_main.cpp", 677, 0, "%s", "clUI->isRunning");
     Con_Close(0);
-    clientUIActives[0].keyCatchers = 0;
+    clientUIActives[0].keyCatchers = KEYCATCH_NONE;
     clientUIActives[0].displayHUDWithKeycatchUI = 0;
     I_strncpyz(cls.servername, "localhost", 256);
     
@@ -793,7 +793,7 @@ void __cdecl CheckForConsoleGuidePause(int localClientNum)
         && !cl_paused->current.integer
         && com_sv_running->current.enabled
         && (!R_Cinematic_IsStarted() && !R_Cinematic_IsPending() || !cg_cinematicFullscreen->current.enabled)
-        && !Key_IsCatcherActive(localClientNum, 16))
+        && !Key_IsCatcherActive(localClientNum, KEYCATCH_UI))
     {
         UI_SetActiveMenu(localClientNum, UIMENU_INGAME);
     }
@@ -836,7 +836,7 @@ void __cdecl CL_Frame(int localClientNum, int msec)
         }
 
         if (clientUIActives[0].connectionState == CA_DISCONNECTED
-            && (clientUIActives[0].keyCatchers & 0x10) == 0
+        && (clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0
             && !com_sv_running->current.enabled)
         {
             SND_StopSounds(SND_STOP_ALL);
@@ -869,7 +869,7 @@ void __cdecl CL_Frame(int localClientNum, int msec)
         }
         cls.realFrametime = v14;
         cls.realtime += cls.frametime;
-        if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
         {
             v24 = CL_ControllerIndexFromClientNum(localClientNum);
             //CL_GamepadRepeatScrollingButtons(localClientNum, v24); // KISAKTODO
@@ -885,7 +885,7 @@ bool __cdecl CL_IsLocalClientInGame(int localClientNum)
 
 bool __cdecl CL_IsUIActive(const int localClientNum)
 {
-    return (clientUIActives[0].keyCatchers & 0x10) != 0;
+    return (clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0;
 }
 
 void __cdecl CL_InitRenderer()
@@ -1358,7 +1358,7 @@ void CL_Pause_f()
             "cmd_args.nesting doesn't index CMD_MAX_NESTING\n\t%i not in [0, %i)",
             cmd_args.nesting,
             8);
-    if ((clientUIActives[0].keyCatchers & 0x10) == 0
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0
         || (ActiveMenu = UI_GetActiveMenu(0), v2 = 1, ActiveMenu != UIMENU_INGAME))
     {
         v2 = 0;

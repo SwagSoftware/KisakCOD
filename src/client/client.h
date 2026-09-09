@@ -492,6 +492,14 @@ void __cdecl Key_ClearStates(int32_t localClientNum);
 int32_t __cdecl CL_GetKeyBinding(int32_t localClientNum, const char *command, char (*keyNames)[128]);
 int32_t __cdecl CL_GetKeyBindingInternal(int32_t localClientNum, const char *command, char (*keyNames)[128]);
 void __cdecl Key_Shutdown();
+
+#define KEYCATCH_NONE               0x0000
+#define KEYCATCH_CONSOLE            0x0001
+#define KEYCATCH_SCRIPT             0x0002
+#define KEYCATCH_LOCATION_SELECTION 0x0008
+#define KEYCATCH_UI                 0x0010
+#define KEYCATCH_MESSAGE            0x0020
+
 bool __cdecl Key_IsCatcherActive(int32_t localClientNum, int32_t mask);
 void __cdecl Key_AddCatcher(int32_t localClientNum, int32_t orMask);
 void __cdecl Key_RemoveCatcher(int32_t localClientNum, int32_t andMask);

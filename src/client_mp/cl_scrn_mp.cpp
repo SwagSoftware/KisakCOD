@@ -56,7 +56,7 @@ static char __cdecl SCR_ShouldSkipUpdateScreen()
 
 float __cdecl CL_GetMenuBlurRadius(int localClientNum)
 {
-    if (Key_IsCatcherActive(localClientNum, 16) && cls.uiStarted)
+    if (Key_IsCatcherActive(localClientNum, KEYCATCH_UI) && cls.uiStarted)
         return UI_GetBlurRadius(localClientNum);
     else
         return 0.0f;
@@ -127,7 +127,7 @@ int __cdecl CL_CGameRendering(int localClientNum)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
         {
             UI_UpdateTime(localClientNum, cls.realtime);
             UI_Refresh(localClientNum);
@@ -253,7 +253,7 @@ void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI)
         Com_Error(ERR_FATAL, "SCR_DrawScreenField: bad clcState");
     }
 LABEL_26:
-    if (!refreshedUI && Key_IsCatcherActive(localClientNum, 16))
+    if (!refreshedUI && Key_IsCatcherActive(localClientNum, KEYCATCH_UI))
         UI_Refresh(localClientNum);
     if (net_showprofile->current.integer)
         Net_DisplayProfile(localClientNum);

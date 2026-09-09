@@ -485,7 +485,7 @@ void __cdecl Scr_KeyEvent(int key)
         return;
     if (UI_Component::g.hideCursor)
         IN_ActivateMouse(1);
-    if (!Key_IsCatcherActive(0, 2))
+    if (!Key_IsCatcherActive(0, KEYCATCH_SCRIPT))
         MyAssertHandler(
             ".\\script\\scr_debugger.cpp",
             7788,
@@ -1530,7 +1530,7 @@ void Scr_Step()
     }
     else
     {
-        clientUIActives[0].keyCatchers &= ~2u;
+        clientUIActives[0].keyCatchers &= ~KEYCATCH_SCRIPT;
         if (scrDebuggerGlob.step_mode && scrVmPub.function_count)
         {
             if (scrDebuggerGlob.step_mode == 3)
@@ -1736,9 +1736,9 @@ void __cdecl Scr_ShutdownDebuggerSystem(int restart)
 {
     if (scrVarPub.developer)
     {
-        if (!restart && Key_IsCatcherActive(0, 2))
+        if (!restart && Key_IsCatcherActive(0, KEYCATCH_SCRIPT))
         {
-            Key_RemoveCatcher(0, -3);
+            Key_RemoveCatcher(0, ~KEYCATCH_SCRIPT);
             IN_ActivateMouse(1);
         }
         if (scrDebuggerGlob.debugger_inited_system)
@@ -1786,7 +1786,7 @@ void __cdecl Scr_RunDebuggerRemote()
 {
     if (!Sys_IsRemoteDebugClient())
         MyAssertHandler(".\\script\\scr_debugger.cpp", 8623, 0, "%s", "Sys_IsRemoteDebugClient()");
-    if (Key_IsCatcherActive(0, 2))
+    if (Key_IsCatcherActive(0, KEYCATCH_SCRIPT))
         MyAssertHandler(
             ".\\script\\scr_debugger.cpp",
             8624,
@@ -1794,9 +1794,9 @@ void __cdecl Scr_RunDebuggerRemote()
             "%s",
             "!Key_IsCatcherActive( ONLY_LOCAL_CLIENT_NUM, KEYCATCH_SCRIPT )");
     Con_CloseConsole(0);
-    Key_AddCatcher(0, 2);
+    Key_AddCatcher(0, KEYCATCH_SCRIPT);
     IN_ActivateMouse(1);
-    while (Key_IsCatcherActive(0, 2))
+    while (Key_IsCatcherActive(0, KEYCATCH_SCRIPT))
         Debug_Frame(0);
     IN_ActivateMouse(1);
 }
@@ -1882,8 +1882,8 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
     if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
     {
         startTime = cls.realtime;
-        keyCatchers = clientUIActives[0].keyCatchers & 0xFFFFFFFC;
-        clientUIActives[0].keyCatchers &= 3u;
+        keyCatchers = clientUIActives[0].keyCatchers & ~(KEYCATCH_CONSOLE | KEYCATCH_SCRIPT);
+        clientUIActives[0].keyCatchers &= (KEYCATCH_CONSOLE | KEYCATCH_SCRIPT);
         IN_ActivateMouse(1);
         remoteScreenUpdateNesting = R_PopRemoteScreenUpdate();
 
@@ -1892,7 +1892,7 @@ Scr_WatchElement_s *Scr_DisplayDebugger()
 
         R_PushRemoteScreenUpdate(remoteScreenUpdateNesting);
         IN_ActivateMouse(1);
-        clientUIActives[0].keyCatchers = keyCatchers | clientUIActives[0].keyCatchers & 3;
+        clientUIActives[0].keyCatchers = keyCatchers | (clientUIActives[0].keyCatchers & (KEYCATCH_CONSOLE | KEYCATCH_SCRIPT));
         CL_EndScriptDebugger(cls.realtime - startTime);
     }
 

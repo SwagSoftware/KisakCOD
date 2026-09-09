@@ -25,7 +25,7 @@ int __cdecl CL_ShutdownUI()
     Com_UnloadSoundAliases(SASYS_UI);
     // MP END
 
-    Key_RemoveCatcher(0, -17);
+    Key_RemoveCatcher(0, ~KEYCATCH_UI);
     UI_Shutdown();
     cls.uiStarted = 0;
 

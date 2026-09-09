@@ -317,7 +317,7 @@ void __cdecl CL_MapLoading(const char *mapname)
         for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         {
             Con_Close(localClientNum);
-            clientUIActives[localClientNum].keyCatchers = 0;
+            clientUIActives[localClientNum].keyCatchers = KEYCATCH_NONE;
             clientUIActives[localClientNum].displayHUDWithKeycatchUI = 0;
         }
         LiveStorage_UploadStats();
@@ -493,7 +493,7 @@ void __cdecl CL_Disconnect(int32_t localClientNum)
         DynEntCl_Shutdown(localClientNum);
         SND_DisconnectListener(localClientNum);
         if (connstate >= CA_CONNECTING)
-            clientUIActives[0].keyCatchers &= 1u;
+            clientUIActives[0].keyCatchers &= KEYCATCH_CONSOLE;
         KISAK_NULLSUB();
         // LWSS ADD
         Steam_CancelClientTicket();
@@ -2638,7 +2638,7 @@ void __cdecl CL_ToggleMenu_f()
 
     clc = CL_GetLocalClientConnection(0);
     connstate = clientUIActives[0].connectionState;
-    if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
         ActiveMenu = UI_GetActiveMenu(0);
     else
         ActiveMenu = UIMENU_NONE;
@@ -2654,7 +2654,7 @@ void __cdecl CL_ToggleMenu_f()
             return;
         goto LABEL_13;
     }
-    if ((clientUIActives[0].keyCatchers & 0x10) != 0 && ActiveMenu == UIMENU_INGAME)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0 && ActiveMenu == UIMENU_INGAME)
     {
         UI_SetActiveMenu(0, UIMENU_NONE);
     }
@@ -4310,7 +4310,7 @@ bool __cdecl CL_ShouldDisplayHud(int32_t localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (clientUIActives[0].keyCatchers & 0x10) == 0 || clientUIActives[0].displayHUDWithKeycatchUI;
+    return (clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0 || clientUIActives[0].displayHUDWithKeycatchUI;
 }
 
 bool __cdecl CL_IsUIActive(int32_t localClientNum)
@@ -4323,7 +4323,7 @@ bool __cdecl CL_IsUIActive(int32_t localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    return (clientUIActives[0].keyCatchers & 0x10) != 0;
+    return (clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0;
 }
 
 Font_s *__cdecl CL_RegisterFont(const char *fontName, int32_t imageTrack)

@@ -1679,12 +1679,12 @@ int __cdecl CG_DrawActiveFrame(
     //CG_UpdateRumble(localClientNum); // KISAKTODO 
     if (!cgArray[0].predictedPlayerState.locationSelectionInfo)
     {
-        Key_RemoveCatcher(localClientNum, -9);
+        Key_RemoveCatcher(localClientNum, ~KEYCATCH_LOCATION_SELECTION);
         goto LABEL_29;
     }
-    if (!Key_IsCatcherActive(localClientNum, 8))
+    if (!Key_IsCatcherActive(localClientNum, KEYCATCH_LOCATION_SELECTION))
     {
-        Key_AddCatcher(localClientNum, 8);
+        Key_AddCatcher(localClientNum, KEYCATCH_LOCATION_SELECTION);
     LABEL_29:
         cgArray[0].selectedLocation[0] = 0.5;
         cgArray[0].selectedLocation[1] = 0.5;

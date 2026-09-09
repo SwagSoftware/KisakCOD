@@ -1130,8 +1130,8 @@ void __cdecl UI_Refresh(int localClientNum)
     }
     if (!Menu_GetFocused(&uiInfoArray.uiDC))
     {
-        if (Key_IsCatcherActive(localClientNum, 16))
-            Key_RemoveCatcher(localClientNum, -17);
+        if (Key_IsCatcherActive(localClientNum, KEYCATCH_UI))
+            Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
     }
 }
 
@@ -3066,7 +3066,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                                                                                             }
                                                                                                                             else
                                                                                                                             {
-                                                                                                                                Key_RemoveCatcher(localClientNum, -17);
+                                                                                                                                Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
                                                                                                                                 Key_ClearStates(localClientNum);
                                                                                                                                 Dvar_SetIntByName("cl_paused", 0);
                                                                                                                                 Menus_CloseAll(dc);
@@ -3082,7 +3082,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                                                                                     else
                                                                                                                     {
                                                                                                                         Cbuf_AddText(localClientNum, "disconnect\n");
-                                                                                                                        Key_SetCatcher(localClientNum, 16);
+                                                                                                                        Key_SetCatcher(localClientNum, KEYCATCH_UI);
                                                                                                                         Menus_CloseAll(dc);
                                                                                                                         Menus_OpenByName(dc, "main");
                                                                                                                     }
@@ -3090,7 +3090,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                                                                                 else
                                                                                                                 {
                                                                                                                     Dvar_SetIntByName("cl_paused", 1);
-                                                                                                                    Key_SetCatcher(localClientNum, 16);
+                                                                                                                    Key_SetCatcher(localClientNum, KEYCATCH_UI);
                                                                                                                     Menus_CloseAll(dc);
                                                                                                                     Menus_OpenByName(dc, "setup_menu2");
                                                                                                                 }
@@ -3268,7 +3268,7 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                                         "(localClientNum == 0)",
                                                         localClientNum);
                                                 if (clientUIActives[0].connectionState > CA_DISCONNECTED)
-                                                    Key_RemoveCatcher(localClientNum, -17);
+                                                    Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
                                             }
                                         }
                                         else
@@ -4541,11 +4541,11 @@ void __cdecl UI_Pause(int localClientNum, int b)
     if (b)
     {
         Dvar_SetIntByName("cl_paused", 1);
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
     }
     else
     {
-        Key_RemoveCatcher(localClientNum, -17);
+        Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
         Key_ClearStates(localClientNum);
         Dvar_SetIntByName("cl_paused", 0);
     }
@@ -4954,14 +4954,14 @@ void __cdecl UI_KeyEvent(int localClientNum, int key, int down)
             bypassKeyClear = 1;
         if (key == K_ESCAPE && down && !Menus_AnyFullScreenVisible(&uiInfoArray.uiDC) && !menu->onESC)
             Menus_CloseAll(&uiInfoArray.uiDC);
-        if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, 16))
+        if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, KEYCATCH_UI))
             Menu_HandleKey(&uiInfoArray.uiDC, menu, key, down);
         if (!Menu_GetFocused(&uiInfoArray.uiDC))
         {
         LABEL_25:
-            if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, 16))
+            if (Key_IsCatcherActive(uiInfoArray.uiDC.localClientNum, KEYCATCH_UI))
             {
-                Key_RemoveCatcher(localClientNum, -17);
+                Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
                 if (!bypassKeyClear)
                     Key_ClearStates(localClientNum);
                 bypassKeyClear = 0;
@@ -5028,7 +5028,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
     switch (menu)
     {
     case UIMENU_NONE:
-        Key_RemoveCatcher(localClientNum, -17);
+        Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
         Dvar_SetIntByName("cl_paused", 0);
         Menus_CloseAll(&uiInfoArray.uiDC);
         result = 1;
@@ -5042,7 +5042,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 localClientNum);
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_OpenByName(&uiInfoArray.uiDC, "main");
         buf = Dvar_GetString("com_errorMessage");
         if (strlen(buf))
@@ -5054,7 +5054,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         result = 1;
         break;
     case UIMENU_INGAME:
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_CloseAll(&uiInfoArray.uiDC);
         v3 = CG_ScriptMainMenu(uiInfoArray.uiDC.localClientNum);
         if (!Menus_OpenByName(&uiInfoArray.uiDC, v3))
@@ -5062,19 +5062,19 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         result = 1;
         break;
     case UIMENU_NEED_CD:
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_OpenByName(&uiInfoArray.uiDC, "needcd");
         result = 1;
         break;
     case UIMENU_BAD_CD_KEY:
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_OpenByName(&uiInfoArray.uiDC, "badcd");
         result = 1;
         break;
     case UIMENU_PREGAME:
         if (!*Dvar_GetString("com_errorMessage"))
             MyAssertHandler(".\\ui_mp\\ui_main_mp.cpp", 6577, 0, "%s", "buf[0]");
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_CloseAll(&uiInfoArray.uiDC);
         Menus_OpenByName(&uiInfoArray.uiDC, "pregame_loaderror_mp");
         result = 1;
@@ -5083,7 +5083,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         uiInfoArray.uiDC.cursor.x = 639.0;
         uiInfoArray.uiDC.cursor.y = 479.0;
         UI_SetSystemCursorPos(&uiInfoArray.uiDC, 639.0, 479.0);
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         CL_SetDisplayHUDWithKeycatchUI(uiInfoArray.uiDC.localClientNum, 1);
         Menus_CloseAll(&uiInfoArray.uiDC);
         Menus_OpenByName(&uiInfoArray.uiDC, "quickmessage");
@@ -5094,7 +5094,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         result = 1;
         break;
     case UIMENU_SCOREBOARD:
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_CloseAll(&uiInfoArray.uiDC);
         Menus_OpenByName(&uiInfoArray.uiDC, "scoreboard");
         bufa = Dvar_GetString("com_errorMessage");
@@ -5103,7 +5103,7 @@ int __cdecl UI_SetActiveMenu(int localClientNum, uiMenuCommand_t menu)
         result = 1;
         break;
     case UIMENU_ENDOFGAME:
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_CloseAll(&uiInfoArray.uiDC);
         Menus_OpenByName(&uiInfoArray.uiDC, "endofgame");
         bufb = Dvar_GetString("com_errorMessage");
@@ -5966,9 +5966,9 @@ void __cdecl UI_CloseFocusedMenu(int localClientNum)
             if (!Menus_AnyFullScreenVisible(&uiInfoArray.uiDC))
                 Menus_CloseAll(&uiInfoArray.uiDC);
         }
-        else if (Key_IsCatcherActive(localClientNum, 16))
+        else if (Key_IsCatcherActive(localClientNum, KEYCATCH_UI))
         {
-            Key_RemoveCatcher(localClientNum, -17);
+            Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
         }
     }
 }
@@ -6039,7 +6039,7 @@ int __cdecl UI_PopupScriptMenu(int localClientNum, const char *menuName, bool us
             uiInfoArray.uiDC.cursor.y = 479.0;
             UI_SetSystemCursorPos(&uiInfoArray.uiDC, 639.0, 479.0);
         }
-        Key_SetCatcher(localClientNum, 16);
+        Key_SetCatcher(localClientNum, KEYCATCH_UI);
         Menus_CloseAll(&uiInfoArray.uiDC);
         Menus_OpenByName(&uiInfoArray.uiDC, menuName);
     }

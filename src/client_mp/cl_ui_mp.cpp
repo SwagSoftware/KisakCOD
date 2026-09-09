@@ -501,7 +501,7 @@ int __cdecl CL_ShutdownUI()
     if (!cls.uiStarted)
         return 0;
     Com_UnloadSoundAliases(SASYS_UI);
-    Key_RemoveCatcher(0, -17);
+    Key_RemoveCatcher(0, ~KEYCATCH_UI);
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
         UI_Shutdown(localClientNum);
     cls.uiStarted = 0;
