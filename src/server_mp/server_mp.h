@@ -812,10 +812,6 @@ struct ServerProfileTimes // sizeof=0x8
     float wallClockTime;                // ...
 };
 
-#ifndef MAX_CONFIGSTRINGS
-#define MAX_CONFIGSTRINGS 2442
-#endif
-
 struct server_t // sizeof=0x5FC60
 {                                       // ...
     serverState_t state;                // ...

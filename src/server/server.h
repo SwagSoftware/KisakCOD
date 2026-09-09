@@ -350,7 +350,6 @@ struct snapshotEntityNumbers_t
     int snapshotEntities[2048];
 };
 
-#define MAX_CONFIGSTRINGS 2815
 struct server_t
 {
     serverState_t state;

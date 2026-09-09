@@ -12,12 +12,6 @@
 
 struct snd_alias_t;
 
-#ifdef KISAK_SP
-
-#define MAX_CONFIGSTRINGS 2815
-
-#endif
-
 enum msgwnd_mode_t : int32_t
 {                                       // ...
     MWM_BOTTOMUP_ALIGN_TOP = 0x0,

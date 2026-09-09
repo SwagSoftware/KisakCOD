@@ -60,19 +60,6 @@ struct clSnapshot_t // sizeof=0x2F94
     int32_t serverCommandNum;               // XREF: CL_ParseSnapshot+41/w
 };
 
-#define MAX_GAMESTATE_CHARS 0x20000
-
-#ifndef MAX_CONFIGSTRINGS // COMPILE HACK MP
-#define MAX_CONFIGSTRINGS 2442
-#endif
-
-struct gameState_t // sizeof=0x2262C
-{                                       // XREF: clientActive_t/r
-    int32_t stringOffsets[MAX_CONFIGSTRINGS];
-    char stringData[MAX_GAMESTATE_CHARS];
-    int32_t dataCount;
-};
-
 enum StanceState : __int32
 {                                       // XREF: ?CL_SetStance@@YAXHW4StanceState@@@Z/r
     CL_STANCE_STAND = 0x0,

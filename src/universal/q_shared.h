@@ -120,8 +120,13 @@ typedef int		sfxHandle_t;
 typedef int		fileHandle_t;
 typedef int		clipHandle_t;
 
+#ifdef KISAK_SP
+#define MAX_CONFIGSTRINGS 2815
+#else //  KISAK_MP + KISAK_RADIANT
+#define MAX_CONFIGSTRINGS 2442
+#endif
+
 #if KISAK_MP
-//enum $C2D64A5C68CD67A3D33FF78F5B5E7685 : __int32
 enum ConstStringOffsets // not a real name
 {
     CS_SERVERINFO             = 0,
@@ -266,8 +271,21 @@ enum ConstStringOffsets
 };
 #endif
 
-#define ptype_int intptr_t // LWSS: this type is used in cod4
+#if (CS_MAX) > MAX_CONFIGSTRINGS
+#error overflow: (CS_MAX) > MAX_CONFIGSTRINGS
+#endif
 
+#define MAX_GAMESTATE_CHARS 0x20000
+typedef struct
+{                                       // XREF: clientActive_t/r
+	int stringOffsets[MAX_CONFIGSTRINGS];
+	char stringData[MAX_GAMESTATE_CHARS];
+	int dataCount;
+} gameState_t;
+
+
+
+#define ptype_int intptr_t // LWSS: this type is used in cod4
 
 #ifndef NULL
 #define NULL ((void *)0)
