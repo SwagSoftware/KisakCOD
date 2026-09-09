@@ -1391,14 +1391,14 @@ int32_t __cdecl CG_DrawActiveFrame(
                 if (!cgameGlob->predictedPlayerState.locationSelectionInfo
                     || (cgameGlob->predictedPlayerState.otherFlags & 2) != 0)
                 {
-                    if (Key_IsCatcherActive(localClientNum, 8))
-                        Key_RemoveCatcher(localClientNum, -9);
+                    if (Key_IsCatcherActive(localClientNum, KEYCATCH_LOCATION_SELECTION))
+                        Key_RemoveCatcher(localClientNum, ~KEYCATCH_LOCATION_SELECTION);
                     cgameGlob->selectedLocation[0] = 0.5;
                     cgameGlob->selectedLocation[1] = 0.5;
                 }
-                else if (!Key_IsCatcherActive(localClientNum, 8))
+                else if (!Key_IsCatcherActive(localClientNum, KEYCATCH_LOCATION_SELECTION))
                 {
-                    Key_AddCatcher(localClientNum, 8);
+                    Key_AddCatcher(localClientNum, KEYCATCH_LOCATION_SELECTION);
                     cgameGlob->selectedLocation[0] = 0.5;
                     cgameGlob->selectedLocation[1] = 0.5;
                 }

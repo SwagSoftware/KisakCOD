@@ -110,24 +110,24 @@ void __cdecl Con_ToggleConsole()
     g_consoleField.fixedSize = 1;
     con.outputVisible = 0;
     for (localClientNum = 0; localClientNum < 1; ++localClientNum)
-        clientUIActives[localClientNum].keyCatchers ^= 1u;
+        clientUIActives[localClientNum].keyCatchers ^= KEYCATCH_CONSOLE;
 }
 
 void __cdecl Con_OpenConsole(int32_t localClientNum)
 {
-    if (!Key_IsCatcherActive(localClientNum, 1))
+    if (!Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         Con_ToggleConsole();
 }
 
 void __cdecl Con_OpenConsoleOutput(int32_t localClientNum)
 {
-    if (Key_IsCatcherActive(localClientNum, 1))
+    if (Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         con.outputVisible = 1;
 }
 
 void __cdecl Con_CloseConsole(int32_t localClientNum)
 {
-    if (Key_IsCatcherActive(localClientNum, 1))
+    if (Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         Con_ToggleConsole();
 }
 
@@ -382,7 +382,7 @@ void __cdecl SetupChatField(int32_t localClientNum, int32_t teamChat, int32_t wi
     else
         chatField->chatField.charHeight = 10.0;
     iassert(localClientNum == 0);
-    clientUIActives[0].keyCatchers ^= 0x20u;
+    clientUIActives[0].keyCatchers ^= KEYCATCH_MESSAGE;
 }
 
 void __cdecl Con_ChatModePublic_f()
@@ -2231,7 +2231,7 @@ bool __cdecl CL_ShouldntDrawMessageWindow(int32_t localClientNum)
     uint8_t v1; // r11
 
     iassert(localClientNum == 0);
-    if ((clientUIActives[0].keyCatchers & 0x10) == 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0)
         return 0;
     v1 = 1;
     if (clientUIActives[0].displayHUDWithKeycatchUI)
@@ -2325,7 +2325,7 @@ void __cdecl Con_DrawSay(int32_t localClientNum, int32_t x, int32_t y)
     float normalizedScale; // [esp+44h] [ebp-4h]
     float normalizedScalea; // [esp+44h] [ebp-4h]
 
-    if (Key_IsCatcherActive(localClientNum, 32))
+    if (Key_IsCatcherActive(localClientNum, KEYCATCH_MESSAGE))
     {
         if (playerKeys[localClientNum].chat_team)
             v3 = SEH_SafeTranslateString((char*)"EXE_SAYTEAM");
@@ -2363,7 +2363,7 @@ void __cdecl Con_ToggleConsoleOutput()
 void __cdecl Con_DrawConsole(int32_t localClientNum)
 {
     Con_CheckResize();
-    if (Key_IsCatcherActive(localClientNum, 1))
+    if (Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         Con_DrawSolidConsole(localClientNum);
 }
 
@@ -2373,7 +2373,7 @@ void __cdecl Con_DrawSolidConsole(int32_t localClientNum)
     if (con.lineOffset)
         Con_Linefeed(localClientNum, con.prevChannel, 0);
     Sys_LeaveCriticalSection(CRITSECT_CONSOLE);
-    if (!Key_IsCatcherActive(localClientNum, 1))
+    if (!Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         con.outputVisible = 0;
     if (con.outputVisible)
         Con_DrawOuputWindow();
@@ -2393,7 +2393,7 @@ void __cdecl Con_DrawInput(int32_t localClientNum)
 #ifndef KISAK_SP
     iassert(Sys_IsMainThread() || Sys_IsRenderThread());
 #endif
-    if (Key_IsCatcherActive(localClientNum, 1) && Sys_IsMainThread())
+    if (Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE) && Sys_IsMainThread())
     {
 #ifdef KISAK_MP
         promptString = va("%s: %s> ", "CoD4 MP", "1.0");
@@ -3159,13 +3159,13 @@ void __cdecl Con_Close(int32_t localClientNum)
         Con_ClearMiniConsole(localClientNum);
         Con_ClearErrors(localClientNum);
         for (int client = 0; client < 1; ++client)
-            clientUIActives[client].keyCatchers &= ~1u;
+            clientUIActives[client].keyCatchers &= ~KEYCATCH_CONSOLE;
     }
 }
 
 bool __cdecl Con_IsActive(int32_t localClientNum)
 {
-    return Key_IsCatcherActive(localClientNum, 1);
+    return Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE);
 }
 
 void __cdecl CL_PlayTextFXPulseSounds(

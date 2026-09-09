@@ -4153,7 +4153,7 @@ void Scr_ScriptWindow::RunToCursor()
     }
     else
     {
-        clientUIActives[0].keyCatchers &= ~2u;
+        clientUIActives[0].keyCatchers &= ~KEYCATCH_SCRIPT;
         if (scrVmPub.function_count)
         {
             codePos = Scr_ScriptWindow::GetBreakpointCodePos();

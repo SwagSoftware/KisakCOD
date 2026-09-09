@@ -4659,7 +4659,7 @@ char __cdecl Menu_IsVisible(UiContext *dc, menuDef_t *menu)
                 "%s\n\t(localClientNum) = %i",
                 "(localClientNum == 0)",
                 dc->localClientNum);
-        if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
             return 0;
     }
     if (!menu->visibleExp.numEntries || IsExpressionTrue(dc->localClientNum, &menu->visibleExp))

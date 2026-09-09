@@ -347,7 +347,7 @@ void __cdecl CL_Connect_f()
                         {
                             clientUIActives[0].connectionState = CA_CONNECTING;
                         }
-                        clientUIActives[0].keyCatchers = 0;
+                        clientUIActives[0].keyCatchers = KEYCATCH_NONE;
                         clientUIActives[0].displayHUDWithKeycatchUI = 0;
                         clc->connectTime = -99999;
                         clc->connectPacketCount = 0;

@@ -97,7 +97,7 @@ int __cdecl CL_CGameRendering()
     DemoType = CL_GetDemoType();
     if (!CG_DrawActiveFrame(0, clients[0].serverTime, DemoType, CUBEMAPSHOT_NONE, 0, animFrametime))
         return 0;
-    if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
         UI_Refresh();
     R_AddCmdEndOfList();
     return 1;
@@ -179,7 +179,7 @@ void __cdecl SCR_DrawScreenField(int refreshedUI)
             break;
         }
     LABEL_12:
-        if (!refreshedUI && Key_IsCatcherActive(0, 16))
+        if (!refreshedUI && Key_IsCatcherActive(0, KEYCATCH_UI))
             LABEL_14 :
             UI_Refresh();
     }
@@ -197,7 +197,7 @@ float __cdecl CL_GetMenuBlurRadius(int localClientNum)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (Key_IsCatcherActive(0, 16) && cls.uiStarted && clientUIActives[0].connectionState != CA_CINEMATIC)
+    if (Key_IsCatcherActive(0, KEYCATCH_UI) && cls.uiStarted && clientUIActives[0].connectionState != CA_CINEMATIC)
         BlurRadius = UI_GetBlurRadius();
     else
         BlurRadius = 0.0;

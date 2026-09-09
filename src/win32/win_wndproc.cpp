@@ -209,7 +209,7 @@ static bool IsNumLockAffectedVK(uint32_t wParam)
 
 static uint32_t AdustKeyForNumericKeypad(uint32_t key, uint32_t wParam, uint32_t extended)
 {
-	if ((clientUIActives[0].keyCatchers & 0x11) == 0)
+	if ((clientUIActives[0].keyCatchers & (KEYCATCH_CONSOLE | KEYCATCH_UI)) == 0)
 		return key;
 	if (extended)
 		return key;
@@ -410,7 +410,7 @@ LRESULT WINAPI MainWndProc(
 		}
 		break;
 	case WM_CLOSE:
-		Key_RemoveCatcher(0, -3);
+		Key_RemoveCatcher(0, ~KEYCATCH_SCRIPT);
 		Com_Quit_f();
 		break;
 	case WM_CREATE:

@@ -462,7 +462,7 @@ void __cdecl Console_Key(int32_t localClientNum, int32_t key)
         if (Con_CommitToAutoComplete())
             return;
         Com_Printf(CON_CHANNEL_DONT_FILTER, "]%s\n", g_consoleField.buffer);
-        if (Key_IsCatcherActive(localClientNum, 2))
+        if (Key_IsCatcherActive(localClientNum, KEYCATCH_SCRIPT))
         {
             Scr_AddDebugText(g_consoleField.buffer);
         }
@@ -498,7 +498,7 @@ void __cdecl Console_Key(int32_t localClientNum, int32_t key)
         {
             memcpy(&historyEditLines[nextHistoryLine % 32], &g_consoleField, sizeof(field_t));
             historyLine = ++nextHistoryLine;
-            if (Key_IsCatcherActive(localClientNum, 2))
+            if (Key_IsCatcherActive(localClientNum, KEYCATCH_SCRIPT))
                 Con_ToggleConsole();
         }
         Field_Clear(&g_consoleField);
@@ -508,7 +508,7 @@ void __cdecl Console_Key(int32_t localClientNum, int32_t key)
         if (Console_IsClientDisconnected())
             SCR_UpdateScreen();
     }
-    else if (Key_IsCatcherActive(localClientNum, 2) || key != K_TAB)
+    else if (Key_IsCatcherActive(localClientNum, KEYCATCH_SCRIPT) || key != K_TAB)
     {
         if (key == K_UPARROW && isCtrlDown)
         {
@@ -1507,7 +1507,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (CL_IsConsoleKey(key) || (clientUIActives[0].keyCatchers & 3) != 0)
+    if (CL_IsConsoleKey(key) || (clientUIActives[0].keyCatchers & (KEYCATCH_CONSOLE | KEYCATCH_SCRIPT)) != 0)
     {
         if (DevGui_IsActive())
             DevGui_Toggle();
@@ -1533,15 +1533,16 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
     if (!down || keys[key].repeats <= 1)
     {
     LABEL_38:
-        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0)
+        if (!Key_IsCatcherActive(localClientNum, KEYCATCH_SCRIPT)
+            || Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         {
-            if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
+            if (!con_restricted->current.enabled || Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
             {
                 if (CL_IsConsoleKey(key))
                 {
                     if (!down)
                         return;
-                    if ((clientUIActives[0].keyCatchers & 1) == 0
+                    if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) == 0
                         && !com_sv_running->current.enabled
                         && sv_disableClientConsole->current.enabled)
                     {
@@ -1568,7 +1569,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
             }
         }
         locSelInputState = &playerKeys[localClientNum].locSelInputState;
-        if ((clientUIActives[0].keyCatchers & 8) != 0 && down > 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_LOCATION_SELECTION) != 0 && down > 0)
         {
             if (key == K_ESCAPE)
             {
@@ -1603,17 +1604,17 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         }
         if (key == K_ESCAPE && down)
         {
-            if ((clientUIActives[0].keyCatchers & 2) != 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
             {
-                if ((clientUIActives[0].keyCatchers & 1) != 0)
+                if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) != 0)
                     Con_ToggleConsole();
                 return;
             }
-            if ((clientUIActives[0].keyCatchers & 0x20) == 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_MESSAGE) == 0)
             {
-                if ((clientUIActives[0].keyCatchers & 1) != 0)
+                if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) != 0)
                     Con_CancelAutoComplete();
-                if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+                if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
                 {
                     UI_KeyEvent(localClientNum, K_ESCAPE, down);
                 }
@@ -1665,24 +1666,24 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 Com_sprintf(cmd, 0x400u, "-%s %i %i\n", kba + 1, key, time);
                 Cbuf_AddText(localClientNum, cmd);
             }
-            if ((clientUIActives[0].keyCatchers & 0x10) != 0 && cls.uiStarted)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0 && cls.uiStarted)
                 UI_KeyEvent(localClientNum, key, 0);
             return;
         }
-        if ((clientUIActives[0].keyCatchers & 1) == 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) == 0)
         {
-            if ((clientUIActives[0].keyCatchers & 2) != 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
             {
                 Scr_KeyEvent(key);
                 return;
             }
-            if ((clientUIActives[0].keyCatchers & 0x10) != 0 && !CL_MouseInputShouldBypassMenus(localClientNum, key))
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0 && !CL_MouseInputShouldBypassMenus(localClientNum, key))
             {
                 if (cls.uiStarted)
                     UI_KeyEvent(localClientNum, key, down);
                 return;
             }
-            if ((clientUIActives[0].keyCatchers & 0x20) != 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_MESSAGE) != 0)
             {
             LABEL_91:
                 Message_Key(localClientNum, key);
@@ -1715,16 +1716,16 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         Console_Key(localClientNum, key);
         return;
     }
-    if ((clientUIActives[0].keyCatchers & 0x21) != 0)
+    if ((clientUIActives[0].keyCatchers & (KEYCATCH_CONSOLE | KEYCATCH_MESSAGE)) != 0)
     {
     LABEL_34:
         if (key == '`' || key == '~' || key == K_ESCAPE)
             return;
         goto LABEL_38;
     }
-    if ((clientUIActives[0].keyCatchers & 0x12) != 0)
+    if ((clientUIActives[0].keyCatchers & (KEYCATCH_SCRIPT | KEYCATCH_UI)) != 0)
     {
-        if ((clientUIActives[0].keyCatchers & 2) != 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
         {
             switch (key)
             {
@@ -1743,7 +1744,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         }
         else
         {
-            if ((clientUIActives[0].keyCatchers & 0x10) == 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0)
                 MyAssertHandler(".\\client\\cl_keys.cpp", 1942, 0, "%s", "cl->keyCatchers & KEYCATCH_UI");
             switch (key)
             {
@@ -1793,7 +1794,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if (CL_IsConsoleKey(key) || (clientUIActives[0].keyCatchers & 3) != 0)
+    if (CL_IsConsoleKey(key) || (clientUIActives[0].keyCatchers & (KEYCATCH_CONSOLE | KEYCATCH_SCRIPT)) != 0)
     {
         if (DevGui_IsActive())
             DevGui_Toggle();
@@ -1819,15 +1820,16 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
     if (!down || keys[key].repeats <= 1)
     {
     LABEL_38:
-        if ((clientUIActives[0].keyCatchers & 2) == 0 || (clientUIActives[0].keyCatchers & 1) != 0)
+        if (!Key_IsCatcherActive(localClientNum, KEYCATCH_SCRIPT)
+            || Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
         {
-            if (!con_restricted->current.enabled || (clientUIActives[0].keyCatchers & 1) != 0)
+            if (!con_restricted->current.enabled || Key_IsCatcherActive(localClientNum, KEYCATCH_CONSOLE))
             {
                 if (CL_IsConsoleKey(key))
                 {
                     if (!down)
                         return;
-                    //if ((clientUIActives[0].keyCatchers & 1) == 0
+                    //if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) == 0
                     //    && !com_sv_running->current.enabled)
                     //{
                     //    return;
@@ -1853,7 +1855,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
             }
         }
         locSelInputState = &playerKeys[localClientNum].locSelInputState;
-        if ((clientUIActives[0].keyCatchers & 8) != 0 && down > 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_LOCATION_SELECTION) != 0 && down > 0)
         {
             if (key == K_ESCAPE)
             {
@@ -1887,17 +1889,17 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         }
         if (key == K_ESCAPE && down)
         {
-            if ((clientUIActives[0].keyCatchers & 2) != 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
             {
-                if ((clientUIActives[0].keyCatchers & 1) != 0)
+                if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) != 0)
                     Con_ToggleConsole();
                 return;
             }
-            if ((clientUIActives[0].keyCatchers & 0x20) == 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_MESSAGE) == 0)
             {
-                if ((clientUIActives[0].keyCatchers & 1) != 0)
+                if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) != 0)
                     Con_CancelAutoComplete();
-                if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+                if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
                 {
                     UI_KeyEvent(localClientNum, K_ESCAPE, down);
                 }
@@ -1933,24 +1935,24 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
                 Com_sprintf(cmd, 0x400u, "-%s %i %i\n", kba + 1, key, time);
                 Cbuf_AddText(localClientNum, cmd);
             }
-            if ((clientUIActives[0].keyCatchers & 0x10) != 0 && cls.uiStarted)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0 && cls.uiStarted)
                 UI_KeyEvent(localClientNum, key, 0);
             return;
         }
-        if ((clientUIActives[0].keyCatchers & 1) == 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) == 0)
         {
-            if ((clientUIActives[0].keyCatchers & 2) != 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
             {
                 Scr_KeyEvent(key);
                 return;
             }
-            if ((clientUIActives[0].keyCatchers & 0x10) != 0 && !CL_MouseInputShouldBypassMenus(localClientNum, key))
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0 && !CL_MouseInputShouldBypassMenus(localClientNum, key))
             {
                 if (cls.uiStarted)
                     UI_KeyEvent(localClientNum, key, down);
                 return;
             }
-            if ((clientUIActives[0].keyCatchers & 0x20) != 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_MESSAGE) != 0)
             {
             LABEL_91:
                 Message_Key(localClientNum, key);
@@ -1983,16 +1985,16 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         Console_Key(localClientNum, key);
         return;
     }
-    if ((clientUIActives[0].keyCatchers & 0x21) != 0)
+    if ((clientUIActives[0].keyCatchers & (KEYCATCH_CONSOLE | KEYCATCH_MESSAGE)) != 0)
     {
     LABEL_34:
         if (key == '`' || key == '~' || key == K_ESCAPE)
             return;
         goto LABEL_38;
     }
-    if ((clientUIActives[0].keyCatchers & 0x12) != 0)
+    if ((clientUIActives[0].keyCatchers & (KEYCATCH_SCRIPT | KEYCATCH_UI)) != 0)
     {
-        if ((clientUIActives[0].keyCatchers & 2) != 0)
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_SCRIPT) != 0)
         {
             switch (key)
             {
@@ -2011,7 +2013,7 @@ void __cdecl CL_KeyEvent(int32_t localClientNum, int32_t key, int32_t down, uint
         }
         else
         {
-            if ((clientUIActives[0].keyCatchers & 0x10) == 0)
+            if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0)
                 MyAssertHandler(".\\client\\cl_keys.cpp", 1942, 0, "%s", "cl->keyCatchers & KEYCATCH_UI");
             switch (key)
             {
@@ -2045,7 +2047,7 @@ void __cdecl Message_Key(int32_t localClientNum, int32_t key)
             localClientNum);
     if (key == K_ESCAPE)
     {
-        clientUIActives[0].keyCatchers &= ~0x20u;
+        clientUIActives[0].keyCatchers &= ~KEYCATCH_MESSAGE;
         Field_Clear(chatField);
     }
     else if (key == K_ENTER || key == K_KP_ENTER)
@@ -2067,7 +2069,7 @@ void __cdecl Message_Key(int32_t localClientNum, int32_t key)
                 Com_sprintf(buffer, 0x400u, "say %s", chatField->buffer);
             CL_AddReliableCommand(localClientNum, buffer);
         }
-        clientUIActives[0].keyCatchers &= ~0x20u;
+        clientUIActives[0].keyCatchers &= ~KEYCATCH_MESSAGE;
         Field_Clear(chatField);
     }
     else
@@ -2105,7 +2107,7 @@ void __cdecl CL_CharEvent(int32_t localClientNum, int32_t key)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((clientUIActives[0].keyCatchers & 1) != 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) != 0)
     {
         if (key == '\b' && Con_CancelAutoComplete())
             return;
@@ -2113,12 +2115,12 @@ void __cdecl CL_CharEvent(int32_t localClientNum, int32_t key)
         CL_ConsoleCharEvent(localClientNum, key);
         return;
     }
-    if ((clientUIActives[0].keyCatchers & 0x20) != 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_MESSAGE) != 0)
     {
         Field_CharEvent(localClientNum, &scrPlaceView[localClientNum], &playerKeys[localClientNum].chatField, key);
         return;
     }
-    if ((clientUIActives[0].keyCatchers & 0x10) != 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
     {
         UI_KeyEvent(localClientNum, key | K_CHAR_FLAG, 1);
         return;
@@ -2234,7 +2236,7 @@ void __cdecl Key_RemoveCatcher(int32_t localClientNum, int32_t andMask)
             "(localClientNum == 0)",
             localClientNum);
     clientUIActives[0].keyCatchers &= andMask;
-    if ((clientUIActives[0].keyCatchers & 0x10) == 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0)
         clientUIActives[0].displayHUDWithKeycatchUI = 0;
 }
 
@@ -2248,11 +2250,11 @@ void __cdecl Key_SetCatcher(int32_t localClientNum, int32_t catcher)
             "%s\n\t(localClientNum) = %i",
             "(localClientNum == 0)",
             localClientNum);
-    if ((clientUIActives[0].keyCatchers & 1) != 0)
-        clientUIActives[0].keyCatchers = catcher | 1;
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_CONSOLE) != 0)
+        clientUIActives[0].keyCatchers = catcher | KEYCATCH_CONSOLE;
     else
         clientUIActives[0].keyCatchers = catcher;
-    if ((clientUIActives[0].keyCatchers & 0x10) == 0)
+    if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0)
         clientUIActives[0].displayHUDWithKeycatchUI = 0;
 }
 

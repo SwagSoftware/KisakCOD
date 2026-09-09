@@ -81,7 +81,7 @@ int __cdecl CL_MouseEvent(int x, int y, int dx, int dy)
         DevGui_MouseEvent(dx, dy);
         return 1;
     }
-    else if (Key_IsCatcherActive(0, 2))
+    else if (Key_IsCatcherActive(0, KEYCATCH_SCRIPT))
     {
         Scr_MouseEvent(x, y);
         CL_ShowSystemCursor(1);
@@ -90,7 +90,7 @@ int __cdecl CL_MouseEvent(int x, int y, int dx, int dy)
     else
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(0);
-        if ((clientUIActives[0].keyCatchers & 0x10) == 0
+        if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0
             || UI_GetActiveMenu(0) == UIMENU_SCOREBOARD
             || cl_bypassMouseInput->current.enabled)
         {
@@ -396,7 +396,7 @@ usercmd_s *__cdecl CL_CreateCmd(usercmd_s *result, int localClientNum)
     oldAngles = LocalClientGlobals->viewangles[0];
     CL_AdjustAngles(localClientNum);
     memset(&cmd, 0, sizeof(cmd));
-    if (!Key_IsCatcherActive(localClientNum, 8) || !CG_HandleLocationSelectionInput(localClientNum, &cmd))
+    if (!Key_IsCatcherActive(localClientNum, KEYCATCH_LOCATION_SELECTION) || !CG_HandleLocationSelectionInput(localClientNum, &cmd))
     {
         CL_CmdButtons(localClientNum, &cmd);
         CL_KeyMove(localClientNum, &cmd);
@@ -894,7 +894,7 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
     }
     else
     {
-        Key_RemoveCatcher(localClientNum, -9);
+        Key_RemoveCatcher(localClientNum, ~KEYCATCH_LOCATION_SELECTION);
         return 0;
     }
 }

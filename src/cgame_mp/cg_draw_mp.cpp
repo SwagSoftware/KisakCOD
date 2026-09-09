@@ -862,7 +862,7 @@ void __cdecl CG_DrawSpectatorMessage(int32_t localClientNum)
     followPrev[3] = "toggleads";
     followStop[0] = "+melee";
     followStop[1] = "+melee_breath";
-    if (cg_descriptiveText->current.enabled && !Key_IsCatcherActive(localClientNum, 16))
+    if (cg_descriptiveText->current.enabled && !Key_IsCatcherActive(localClientNum, KEYCATCH_UI))
     {
         cgameGlob = CG_GetLocalClientGlobals(localClientNum);
         iassert(cgameGlob->nextSnap);
