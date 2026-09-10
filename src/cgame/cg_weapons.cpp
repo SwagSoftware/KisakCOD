@@ -2847,7 +2847,7 @@ void __cdecl FireBulletPenetrate(
 
     weaponIndex = BG_GetWeaponIndex(weapDef);
     weapType = weapDef->weapType;
-    if (weapType)
+    if (weapType != WEAPTYPE_BULLET)
         drawTracer = 0;
 
     traceHit = BulletTrace(localClientNum, bp, weapDef, attacker, &br, 0);
@@ -2858,7 +2858,7 @@ void __cdecl FireBulletPenetrate(
         if (drawTracer)
             CG_SpawnTracer(localClientNum, tracerStart, br.hitPos);
 
-        if (!weapType)
+        if (weapType == WEAPTYPE_BULLET)
         {
             DynEntCl_EntityImpactEvent(&br.trace, localClientNum, attacker->nextState.number, bp->start, br.hitPos, 0);
             DynEntCl_DynEntImpactEvent(localClientNum, attacker->nextState.number, bp->start, br.hitPos, weapDef->damage, 0);
@@ -2967,7 +2967,7 @@ void __cdecl FireBulletPenetrate(
                     bp->damageMultiplier = bp->damageMultiplier - depth / maxDepth;
                     if (bp->damageMultiplier <= 0.0f)
                         return;
-                    if (!allSolid && !weapType)
+                    if (!allSolid && weapType == WEAPTYPE_BULLET)
                     {
                         Vec3Sub(revBr.hitPos, br.hitPos, v34);
                         v33 = Vec3LengthSq(v34);
@@ -3037,7 +3037,7 @@ void __cdecl FireBulletPenetrate(
                     if (v6 < (float)v20)
                     {
                         traceHitEntityId = Trace_GetEntityHitId(&br.trace);
-                        if (!weapType)
+                        if (weapType == WEAPTYPE_BULLET)
                         {
                             v15 = br.trace.contents;
                             v16 = weapDef->damage;

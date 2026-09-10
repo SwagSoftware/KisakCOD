@@ -986,7 +986,7 @@ void __cdecl FireTurret(gentity_s *ent, gentity_s *player)
         if (!veh)
             MyAssertHandler(".\\game_mp\\g_vehicles_mp.cpp", 1750, 0, "%s", "veh");
         FillWeaponParms(ent, player, &wp);
-        if (wp.weapDef->weapType)
+        if (wp.weapDef->weapType != WEAPTYPE_BULLET)
             Com_Error(ERR_DROP, "FireTurret(): WeapDef is not a bullet type.");
         else
             Bullet_Fire(player, wp.weapDef->fAdsSpread, &wp, ent, level.time);

@@ -229,7 +229,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator, int bUseAccuracy)
         }
     }
 
-    if (wp.weapDef->weapType)
+    if (wp.weapDef->weapType != WEAPTYPE_BULLET)
         Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0f, &wp, vec3_origin, NULL, NULL);
     else if (activator->client)
         Bullet_Fire(shooter, turretInfo->playerSpread, &wp, ent, level.time);

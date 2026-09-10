@@ -183,7 +183,7 @@ void __cdecl ActorCmd_ShootBlank(scr_entref_t entref)
     v2 = SL_ConvertToString(v1->weaponName);
     WeaponIndexForName = G_GetWeaponIndexForName(v2);
     WeaponDef = BG_GetWeaponDef(WeaponIndexForName);
-    if (WeaponDef->weapType)
+    if (WeaponDef->weapType != WEAPTYPE_BULLET)
     {
         v5 = va("ShootBlank() only works with bullet weapons.  Using weapon [%s]", WeaponDef->szInternalName);
         Scr_Error(v5);
