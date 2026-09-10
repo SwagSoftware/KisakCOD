@@ -518,15 +518,15 @@ void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
         obj->state = (objectiveState_t)atol(val);
     else
         obj->state = OBJST_EMPTY;
-    if ((int)obj->state < 0 || (int)obj->state > 5)
+    if ((int)obj->state < OBJST_EMPTY || (int)obj->state >= OBJST_NUMSTATES)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_scoreboard.cpp",
             439,
             0,
             "objectiveInfo->state not in [OBJST_EMPTY, OBJST_NUMSTATES - 1]\n\t%i not in [%i, %i]",
             obj->state,
-            0,
-            5);
+            OBJST_EMPTY,
+            OBJST_NUMSTATES - 1);
     if (oldState != OBJST_CURRENT && obj->state == OBJST_CURRENT)
         obj->ringTime = cgArray[0].time;
     if (obj->state == OBJST_EMPTY)
