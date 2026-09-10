@@ -790,7 +790,7 @@ char __cdecl G_ParseWeaponAccurayGraphInternal(
     iassert(knotCount);
     iassert(dirName);
 
-    if (weaponDef->weapType && weaponDef->weapType != WEAPTYPE_PROJECTILE)
+    if (weaponDef->weapType != WEAPTYPE_BULLET && weaponDef->weapType != WEAPTYPE_PROJECTILE)
         return 1;
 
     if (!*graphName)

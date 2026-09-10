@@ -265,7 +265,7 @@ double __cdecl G_GetWeaponHitLocationMultiplier(hitLocation_t hitLoc, uint32_t w
     if (!weapon)
         return g_fHitLocDamageMult[hitLoc];
     weapDef = BG_GetWeaponDef(weapon);
-    if (!weapDef || weapDef->weapType || weapDef->weapClass == WEAPCLASS_TURRET)
+    if (!weapDef || weapDef->weapType != WEAPTYPE_BULLET || weapDef->weapClass == WEAPCLASS_TURRET)
         return g_fHitLocDamageMult[hitLoc];
     else
         return weapDef->locationDamageMultipliers[hitLoc];

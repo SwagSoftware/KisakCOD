@@ -810,7 +810,7 @@ void __cdecl Actor_ShootBlank(actor_s *self)
                 0,
                 "%s",
                 "self->ent->s.weapon == weapIndex");
-        if (v6.weapDef->weapType)
+        if (v6.weapDef->weapType != WEAPTYPE_BULLET)
             MyAssertHandler(
                 "c:\\trees\\cod3\\cod3src\\src\\game\\actor_aim.cpp",
                 821,

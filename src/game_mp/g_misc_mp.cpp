@@ -579,7 +579,7 @@ void __cdecl Fire_Lead(gentity_s *ent, gentity_s *activator)
         v2 = activator;
     Turret_FillWeaponParms(ent, v2, &wp);
     wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
-    if (wp.weapDef->weapType)
+    if (wp.weapDef->weapType != WEAPTYPE_BULLET)
         Weapon_RocketLauncher_Fire(ent, ent->s.weapon, 0.0, &wp, vec3_origin, 0, 0);
     else
         Bullet_Fire(v2, ent->pTurretInfo->playerSpread, &wp, ent, level.time);

@@ -2556,7 +2556,7 @@ void __cdecl CMD_VEH_FireWeapon(scr_entref_t entref)
         Scr_Error(va("Invalid weapon specified for [%s]\n", SL_ConvertToString(ent->targetname)));
     }
     wp.weapDef = BG_GetWeaponDef(ent->s.weapon);
-    if (wp.weapDef->weapType && wp.weapDef->weapType != WEAPTYPE_PROJECTILE)
+    if (wp.weapDef->weapType != WEAPTYPE_BULLET && wp.weapDef->weapType != WEAPTYPE_PROJECTILE)
     {
         v4 = va("Vehicles only support bullet and projectile weapons\n");
         Scr_Error(v4);
@@ -2672,7 +2672,7 @@ forwardDone:
             wp.muzzleTrace[1] = flashMtx[3][1];
             wp.muzzleTrace[2] = flashMtx[3][2];
         }
-        if (wp.weapDef->weapType)
+        if (wp.weapDef->weapType != WEAPTYPE_BULLET)
         {
             if (Scr_GetNumParam() <= 1)
                 Entity = 0;
