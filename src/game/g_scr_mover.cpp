@@ -25,7 +25,7 @@ void __cdecl Reached_ScriptMover(gentity_s *pEnt)
     int bMoveFinished; // [esp+38h] [ebp-4h]
     int bMoveFinisheda; // [esp+38h] [ebp-4h]
 
-    if (pEnt->s.lerp.pos.trType)
+    if (pEnt->s.lerp.pos.trType != TR_STATIONARY)
     {
         if (pEnt->s.lerp.pos.trDuration + pEnt->s.lerp.pos.trTime <= level.time)
         {
@@ -44,7 +44,8 @@ void __cdecl Reached_ScriptMover(gentity_s *pEnt)
                 Scr_Notify(pEnt, scr_const.movedone, 0);
         }
     }
-    if (pEnt->s.lerp.apos.trType && pEnt->s.lerp.apos.trDuration + pEnt->s.lerp.apos.trTime <= level.time)
+    if (pEnt->s.lerp.apos.trType != TR_STATIONARY
+        && pEnt->s.lerp.apos.trDuration + pEnt->s.lerp.apos.trTime <= level.time)
     {
         bMoveFinisheda = ScriptMover_UpdateMove(
             &pEnt->s.lerp.apos,
@@ -339,7 +340,7 @@ void __cdecl ScriptMover_SetupMove(
     float vMove[3]; // [esp+6Ch] [ebp-Ch] BYREF
 
     Vec3Sub(vPos, vCurrPos, vMove);
-    if (pTr->trType)
+    if (pTr->trType != TR_STATIONARY)
         BG_EvaluateTrajectory(pTr, level.time, vCurrPos);
     if (fAccelTime == 0.0 && fDecelTime == 0.0f)
     {
@@ -926,7 +927,7 @@ void __cdecl ScriptMover_SetupMoveSpeed(
 {
     trajectory_t tr; // [esp+6Ch] [ebp-24h] BYREF
 
-    if (pTr->trType)
+    if (pTr->trType != TR_STATIONARY)
         BG_EvaluateTrajectory(pTr, level.time, vCurrPos);
     if (fAccelTime == 0.0f && fDecelTime == 0.0f)
     {
