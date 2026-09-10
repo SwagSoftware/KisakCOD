@@ -1646,7 +1646,7 @@ void __cdecl G_ClearAllConfigstrings()
 
     SV_SetConfigstring(CS_AMBIENT, "");
 
-    for (ii = 0; ii < 16; ++ii)
+    for (ii = 0; ii < MAX_OBJECTIVES; ++ii)
         SV_SetConfigstring(ii + CS_OBJECTIVES, "");
     SV_SetConfigstring(CS_CULLDIST, "");
     SV_SetConfigstring(CS_SUNLIGHT, "");

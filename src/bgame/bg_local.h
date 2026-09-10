@@ -1004,7 +1004,7 @@ struct playerState_s // sizeof=0x2F64
     float dofViewmodelStart;
     float dofViewmodelEnd;
     int32_t hudElemLastAssignedSoundID;
-    objective_t objective[16];          // XREF: _memmove+2E8/o
+    objective_t objective[MAX_OBJECTIVES]; // XREF: _memmove+2E8/o
     // _memcpy+2E8/o ...
     uint8_t weaponmodels[128];
     int32_t deltaTime;

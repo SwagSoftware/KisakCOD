@@ -2172,7 +2172,7 @@ void __cdecl G_InitObjectives()
 {
     int32_t i; // [esp+0h] [ebp-4h]
 
-    for (i = 0; i < 16; ++i)
+    for (i = 0; i < MAX_OBJECTIVES; ++i)
         ClearObjective(&level.objectives[i]);
 }
 
@@ -2227,9 +2227,9 @@ void Scr_Objective_Add()
         Scr_Error(
             "objective_add needs at least the first two parameters out of its parameter list of: index state [string] [position]\n");
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1));
     }
     obj = &level.objectives[objNum];
     ClearObjective_OnEntity(obj);
@@ -2292,9 +2292,9 @@ void Scr_Objective_Delete()
     int32_t objNum; // [esp+0h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1));
     }
 
     ClearObjective_OnEntity(&level.objectives[objNum]);
@@ -2309,9 +2309,9 @@ void Scr_Objective_State()
     int32_t objNum; // [esp+Ch] [ebp-4h]
 
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1));
     }
     obj = &level.objectives[objNum];
     stateName = Scr_GetConstString(1);
@@ -2329,9 +2329,9 @@ void Scr_Objective_Icon()
     int32_t objNum; // [esp+0h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1));
     }
     SetObjectiveIcon(&level.objectives[objNum], 1u);
 }
@@ -2343,9 +2343,9 @@ void Scr_Objective_Position()
     int32_t objNum; // [esp+10h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1));
     }
     obj = &level.objectives[objNum];
     ClearObjective_OnEntity(obj);
@@ -2364,9 +2364,9 @@ objective_t *Scr_Objective_OnEntity()
     int32_t objNum; // [esp+8h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
+        v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1);
         Scr_ParamError(0, v0);
     }
     ClearObjective_OnEntity(&level.objectives[objNum]);
@@ -2382,7 +2382,7 @@ void Scr_Objective_Current()
     const char *v0; // eax
     objective_t *obj; // [esp+0h] [ebp-50h]
     int32_t numParam; // [esp+4h] [ebp-4Ch]
-    int32_t makeCurrent[16]; // [esp+8h] [ebp-48h] BYREF
+    int32_t makeCurrent[MAX_OBJECTIVES]; // [esp+8h] [ebp-48h] BYREF
     int32_t i; // [esp+48h] [ebp-8h]
     int32_t objNum; // [esp+4Ch] [ebp-4h]
 
@@ -2391,14 +2391,14 @@ void Scr_Objective_Current()
     for (i = 0; i < numParam; ++i)
     {
         objNum = Scr_GetInt(i);
-        if ((uint32_t )objNum >= 0x10)
+        if ((uint32_t)objNum >= MAX_OBJECTIVES)
         {
-            v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15);
+            v0 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1);
             Scr_ParamError(i, v0);
         }
         makeCurrent[objNum] = 1;
     }
-    for (objNum = 0; objNum < 16; ++objNum)
+    for (objNum = 0; objNum < MAX_OBJECTIVES; ++objNum)
     {
         obj = &level.objectives[objNum];
         if (makeCurrent[objNum])
@@ -2419,9 +2419,9 @@ void GScr_Objective_Team()
     int32_t objNum; // [esp+8h] [ebp-4h]
 
     objNum = Scr_GetInt(0);
-    if ((uint32_t )objNum >= 0x10)
+    if ((uint32_t)objNum >= MAX_OBJECTIVES)
     {
-        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, 15));
+        Scr_ParamError(0, va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", objNum, MAX_OBJECTIVES - 1));
     }
     obj = &level.objectives[objNum];
     team = Scr_GetConstString(1);

@@ -2463,7 +2463,7 @@ void __cdecl MSG_WriteDeltaPlayerstate(
     else
     {
         MSG_WriteBit1(msg);
-        for (fieldNum = 0; fieldNum < 16; ++fieldNum)
+        for (fieldNum = 0; fieldNum < MAX_OBJECTIVES; ++fieldNum)
         {
             SV_PacketDataIsOverhead(snapInfo->clientNum, msg);
             if (sv_debugPacketContents->current.enabled)

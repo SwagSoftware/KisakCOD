@@ -126,6 +126,8 @@ typedef int		clipHandle_t;
 #define MAX_CONFIGSTRINGS 2442
 #endif
 
+#define MAX_OBJECTIVES 16
+
 #if KISAK_MP
 enum ConstStringOffsets // not a real name
 {
@@ -225,7 +227,7 @@ enum ConstStringOffsets
     CS_FRIEND_OVERLAY         = 9,        // sub_437B20(10) used at 0x410E5E   (0x9)
     CS_FRIEND_OVERLAY_LAST    = CS_FRIEND_OVERLAY + 1,     //                  (0xA)
     CS_OBJECTIVES             = 11,       // same                              (0xB)
-    CS_OBJECTIVES_LAST        = CS_OBJECTIVES + 15,     //                     (0x1A)
+    CS_OBJECTIVES_LAST        = CS_OBJECTIVES + MAX_OBJECTIVES - 1, //         (0x1A)
     CS_TARGETS                = 27,       // same                              (0x1B)
     CS_TARGETS_LAST           = CS_TARGETS + 31,     //                        (0x3A)
     CS_USE_TRIG_STRINGS       = 59,       // same                              (0x3B)
