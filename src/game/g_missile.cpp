@@ -3354,7 +3354,7 @@ int G_PredictMissile(gentity_s *ent, int duration, float *vLandPos, int allowBou
                     || (ent->s.lerp.eFlags & 0x1000000) == 0
                     || (PredictBounceMissile(ent, &pos, &tr, time, time + (int)(float)(50.0 * tr.fraction) - 50, org, endpos),
                         pos.trTime = time,
-                        !pos.trType))
+                        pos.trType == TR_STATIONARY))
                 {
                     *timeAtRest = time;
                     break;

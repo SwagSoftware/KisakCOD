@@ -1320,7 +1320,8 @@ void __cdecl G_RunItem(gentity_s *ent)
     //if (ent->s.eType == ET_PLAYER_CORPSE)
     //    MyAssertHandler(".\\game\\g_items.cpp", 1465, 0, "%s", "ent->s.eType != ET_PLAYER_CORPSE");
 
-    if ((ent->s.groundEntityNum == ENTITYNUM_NONE || level.gentities[ent->s.groundEntityNum].s.lerp.pos.trType)
+    if ((ent->s.groundEntityNum == ENTITYNUM_NONE
+            || level.gentities[ent->s.groundEntityNum].s.lerp.pos.trType != TR_STATIONARY)
         && ent->s.lerp.pos.trType != TR_GRAVITY
         && ent->s.lerp.pos.trType != TR_RAGDOLL_GRAVITY
         && (ent->spawnflags & 1) == 0)
@@ -1361,7 +1362,7 @@ void __cdecl G_RunItem(gentity_s *ent)
             "%s",
             "!IS_NAN((ent->s.lerp.pos.trDelta)[0]) && !IS_NAN((ent->s.lerp.pos.trDelta)[1]) && !IS_NAN((ent->s.lerp.pos.trDelta)[2])");
     }
-    if (ent->s.lerp.pos.trType && !ent->tagInfo)
+    if (ent->s.lerp.pos.trType != TR_STATIONARY && !ent->tagInfo)
     {
         BG_EvaluateTrajectory(&ent->s.lerp.pos, level.time + 50, origin);
         diff[5] = origin[0];

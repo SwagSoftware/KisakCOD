@@ -294,7 +294,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
                     }
                 }
 #endif
-                if (ent->s.lerp.pos.trType)
+                if (ent->s.lerp.pos.trType != TR_STATIONARY)
                 {
                     if (level.time >= ent->s.lerp.pos.trDuration + ent->s.lerp.pos.trTime)
                     {
@@ -303,7 +303,7 @@ void __cdecl G_MoverTeam(gentity_s *ent)
                             reached(ent);
                     }
                 }
-                if (ent->s.lerp.apos.trType)
+                if (ent->s.lerp.apos.trType != TR_STATIONARY)
                 {
                     if (level.time >= ent->s.lerp.apos.trDuration + ent->s.lerp.apos.trTime)
                     {
@@ -532,7 +532,7 @@ void __cdecl G_RunMover(gentity_s *ent)
     {
         G_GeneralLink(ent);
     }
-    else if (ent->s.lerp.pos.trType || ent->s.lerp.apos.trType)
+    else if (ent->s.lerp.pos.trType != TR_STATIONARY || ent->s.lerp.apos.trType != TR_STATIONARY)
     {
         G_MoverTeam(ent);
     }
