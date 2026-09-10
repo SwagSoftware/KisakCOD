@@ -250,7 +250,7 @@ void __cdecl CG_ConfigStringModifiedInternal(int localClientNum, unsigned int st
                 {
                     if (stringIndex - CS_SHELLSHOCKS > 0xF)
                     {
-                        if (stringIndex - CS_OBJECTIVES > 0xF)
+                        if (stringIndex - CS_OBJECTIVES >= MAX_OBJECTIVES)
                         {
                             if (stringIndex - CS_SERVER_MATERIALS > 0x7F)
                             {
@@ -2211,7 +2211,7 @@ void __cdecl CG_MapInit(int restart)
     R_SwitchFog(0, cgArray[0].time, 0);
     R_InitPrimaryLights(cgArray[0].refdef.primaryLights);
     R_ClearShadowedPrimaryLightHistory(0);
-    for (i = 11; i < 27; ++i)
+    for (i = CS_OBJECTIVES; i <= CS_OBJECTIVES_LAST; ++i)
         CG_ParseObjectiveChange(0, i);
     for (j = 27; j < 59; ++j)
         CG_TargetsChanged(0, j);

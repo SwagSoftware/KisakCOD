@@ -1752,7 +1752,7 @@ void __cdecl MSG_ReadDeltaPlayerstate(
 
     if (MSG_ReadBit(msg))
     {
-        for (int j = 0; j < 16; ++j)
+        for (int j = 0; j < MAX_OBJECTIVES; ++j)
         {
             to->objective[j].state = (objectiveState_t)MSG_ReadBits(msg, 3);
             MSG_ReadDeltaFields(

@@ -1780,7 +1780,7 @@ void __cdecl CG_CompassDrawTickertape(
             tapeAngleCenter = AngleNormalize360(angle);
             nearestDist = FLT_MAX;
             nearestDistHeightDelta = 0.0;
-            for (objIdx = 0; objIdx < 16; ++objIdx)
+            for (objIdx = 0; objIdx < MAX_OBJECTIVES; ++objIdx)
             {
 #ifdef KISAK_MP
                 objective = &cgameGlob->nextSnap->ps.objective[objIdx];
@@ -2045,7 +2045,7 @@ void __cdecl CG_CompassDrawPlayerPointers_MP(
         if (cgameGlob->bgs.clientinfo[ps->clientNum].infoValid)
         {
             CG_CompassUpYawVector(cgameGlob, yawVector);
-            for (objNum = 0; objNum < 16; ++objNum)
+            for (objNum = 0; objNum < MAX_OBJECTIVES; ++objNum)
             {
                 obj = &ps->objective[objNum];
                 if (obj->state == OBJST_CURRENT || obj->state == OBJST_ACTIVE)
@@ -2201,7 +2201,7 @@ void CG_CompassDrawPlayerPointers_SP(
     centerY = scaledRect.h * 0.5f + scaledRect.y;
     CG_CompassUpYawVector(cgameGlob, north);
 
-    for (objIdx = 0; objIdx < 16; ++objIdx)
+    for (objIdx = 0; objIdx < MAX_OBJECTIVES; ++objIdx)
     {
 		objective = &cgameGlob->objectives[objIdx];
         if (objective->state != OBJST_CURRENT)

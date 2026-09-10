@@ -183,7 +183,7 @@ struct cg_s
     int sprintFadeTime;
     int offhandFadeTime;
     int offhandFlashTime;
-    objectiveInfo_t objectives[16];
+    objectiveInfo_t objectives[MAX_OBJECTIVES];
     targetInfo_t targets[32];
     shellshock_t shellshock;
     cg_s_shock testShock;

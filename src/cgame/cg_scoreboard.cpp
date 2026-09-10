@@ -392,7 +392,7 @@ void __cdecl CG_DrawObjectiveList(
             }
             p_icon += 284;
 
-        } while (p_icon < (int *)(cgArray[0].objectives + 16));
+        } while (p_icon < (int *)(cgArray[0].objectives + MAX_OBJECTIVES));
         if (textY != 0.0)
         {
             height = textY - baselineY;
@@ -497,16 +497,16 @@ void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
             "(localClientNum == 0)",
             localClientNum);
     ConfigString = CL_GetConfigString(localClientNum, num);
-    if (num - 11 >= 0x10)
+    if (num - CS_OBJECTIVES >= MAX_OBJECTIVES)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_scoreboard.cpp",
             420,
             0,
             "objectiveIndex doesn't index MAX_OBJECTIVES\n\t%i not in [0, %i)",
-            num - 11,
-            16);
+            num - CS_OBJECTIVES,
+            MAX_OBJECTIVES);
 
-    obj = &cgArray[0].objectives[num - 11];
+    obj = &cgArray[0].objectives[num - CS_OBJECTIVES];
     if (!*ConfigString)
     {
         CG_ClearObjectiveInfo(obj);
@@ -518,15 +518,15 @@ void __cdecl CG_ParseObjectiveChange(int localClientNum, unsigned int num)
         obj->state = (objectiveState_t)atol(val);
     else
         obj->state = OBJST_EMPTY;
-    if ((int)obj->state < 0 || (int)obj->state > 5)
+    if ((int)obj->state < OBJST_EMPTY || (int)obj->state >= OBJST_NUMSTATES)
         MyAssertHandler(
             "c:\\trees\\cod3\\cod3src\\src\\cgame\\cg_scoreboard.cpp",
             439,
             0,
             "objectiveInfo->state not in [OBJST_EMPTY, OBJST_NUMSTATES - 1]\n\t%i not in [%i, %i]",
             obj->state,
-            0,
-            5);
+            OBJST_EMPTY,
+            OBJST_NUMSTATES - 1);
     if (oldState != OBJST_CURRENT && obj->state == OBJST_CURRENT)
         obj->ringTime = cgArray[0].time;
     if (obj->state == OBJST_EMPTY)

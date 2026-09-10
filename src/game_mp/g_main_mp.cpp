@@ -1069,10 +1069,10 @@ void __cdecl G_UpdateObjectiveToClients()
                 MyAssertHandler(".\\game_mp\\g_main_mp.cpp", 1544, 0, "%s", "ent->client");
             ps = &ent->client->ps;
             team = ent->client->sess.cs.team;
-            for (objNum = 0; objNum < 16; ++objNum)
+            for (objNum = 0; objNum < MAX_OBJECTIVES; ++objNum)
             {
                 obj = &level.objectives[objNum];
-                if (obj->state && (obj->teamNum == TEAM_FREE || obj->teamNum == team))
+                if (obj->state != OBJST_EMPTY && (obj->teamNum == TEAM_FREE || obj->teamNum == team))
                     memcpy(&ps->objective[objNum], obj, sizeof(ps->objective[objNum]));
                 else
                     ps->objective[objNum].state = OBJST_EMPTY;

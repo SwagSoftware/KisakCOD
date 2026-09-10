@@ -4675,7 +4675,7 @@ void __cdecl GScr_UseTriggerRequireLookAt(scr_entref_t entref)
 
 void __cdecl G_InitObjectives()
 {
-    for (int i = 0; i < 16; ++i)
+    for (int i = 0; i < MAX_OBJECTIVES; ++i)
         SV_SetConfigstring(CS_OBJECTIVES + i, 0);
 }
 
@@ -4817,13 +4817,13 @@ int Scr_Objective_Add()
         Scr_Error(
             "objective_add needs at least the first two parameters out of its parameter list of: index state [string] [position]\n");
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v2 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v2 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v2);
     }
-    v3 = Int + 11;
-    SV_GetConfigstring(Int + 11, v29, 1024);
+    v3 = Int + CS_OBJECTIVES;
+    SV_GetConfigstring(Int + CS_OBJECTIVES, v29, 1024);
     ConstString = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(&v27, ConstString))
     {
@@ -4922,12 +4922,12 @@ void Scr_Objective_Delete()
     char v3[16]; // [sp+50h] [-20h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v1);
     }
-    v2 = Int + 11;
+    v2 = Int + CS_OBJECTIVES;
     SV_GetConfigstring(v2, v3, 4);
     v3[0] = 0;
     SV_SetConfigstring(v2, v3);
@@ -4946,12 +4946,12 @@ int Scr_Objective_State()
     char v9[1032]; // [sp+60h] [-420h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v1);
     }
-    v2 = Int + 11;
+    v2 = Int + CS_OBJECTIVES;
     SV_GetConfigstring(v2, v9, 1024);
     ConstString = Scr_GetConstString(1);
     if (!ObjectiveStateIndexFromString(v8, ConstString))
@@ -4988,13 +4988,13 @@ void __cdecl Scr_Objective_String_Internal(int makeUpdateMessage)
     char v18[1072]; // [sp+450h] [-430h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v3 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v3 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v3);
     }
-    v4 = Int + 11;
-    SV_GetConfigstring(Int + 11, v18, 1024);
+    v4 = Int + CS_OBJECTIVES;
+    SV_GetConfigstring(Int + CS_OBJECTIVES, v18, 1024);
     NumParam = Scr_GetNumParam();
     Scr_ConstructMessageString(1, NumParam - 1, "Objective String", v17, 0x400u);
     v6 = v17;
@@ -5076,12 +5076,12 @@ void Scr_Objective_Icon()
     char v3[1024]; // [sp+50h] [-410h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_ParamError(0, v1);
     }
-    v2 = Int + 11;
+    v2 = Int + CS_OBJECTIVES;
     SV_GetConfigstring(v2, v3, 1024);
     SetObjectiveIconIntoConfigString(v3, 1u);
     SV_SetConfigstring(v2, v3);
@@ -5098,12 +5098,12 @@ void Scr_Objective_Position()
     char v6[1024]; // [sp+70h] [-410h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v1);
     }
-    v2 = Int + 11;
+    v2 = Int + CS_OBJECTIVES;
     SV_GetConfigstring(v2, v6, 1024);
     Scr_GetVector(1u, v5);
     v4 = (int)v5[0];
@@ -5126,9 +5126,9 @@ void Scr_Objective_AdditionalPosition()
     char v9[1032]; // [sp+70h] [-420h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v1);
     }
     v2 = Scr_GetInt(1);
@@ -5137,7 +5137,7 @@ void Scr_Objective_AdditionalPosition()
         v3 = va("index %i is an illegal position index. Valid indexes are 0 to %i\n", v2, 7);
         Scr_Error(v3);
     }
-    v4 = Int + 11;
+    v4 = Int + CS_OBJECTIVES;
     SV_GetConfigstring(v4, v9, 1024);
     Scr_GetVector(2u, v7);
     snprintf(v8, ARRAYSIZE(v8), "org%d", v2);
@@ -5165,7 +5165,7 @@ int Scr_Objective_Current()
     int v13; // r3
     int v14; // r4
     const char *v15; // r3
-    unsigned int v17[16]; // [sp+50h] [-470h] BYREF
+    unsigned int v17[MAX_OBJECTIVES]; // [sp+50h] [-470h] BYREF
     char v18[1072]; // [sp+90h] [-430h] BYREF
 
     NumParam = Scr_GetNumParam();
@@ -5178,18 +5178,18 @@ int Scr_Objective_Current()
         {
             Int = Scr_GetInt(v5);
             v7 = Int;
-            if (Int >= 0x10)
+            if (Int >= MAX_OBJECTIVES)
             {
-                v8 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+                v8 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
                 Scr_Error(v8);
             }
             ++v5;
             v17[v7] = 1;
         } while (v5 < v1);
     }
-    v9 = 11;
+    v9 = CS_OBJECTIVES;
     v10 = v17;
-    v11 = 16;
+    v11 = MAX_OBJECTIVES;
     do
     {
         SV_GetConfigstring(v9, v18, 1024);
@@ -5238,7 +5238,7 @@ int Scr_Objective_AdditionalCurrent()
     const char *v12; // r3
     int v13; // r3
     const char *v14; // r3
-    unsigned int v16[16]; // [sp+50h] [-470h] BYREF
+    unsigned int v16[MAX_OBJECTIVES]; // [sp+50h] [-470h] BYREF
     char v17[1072]; // [sp+90h] [-430h] BYREF
 
     NumParam = Scr_GetNumParam();
@@ -5251,18 +5251,18 @@ int Scr_Objective_AdditionalCurrent()
         {
             Int = Scr_GetInt(v5);
             v7 = Int;
-            if (Int >= 0x10)
+            if (Int >= MAX_OBJECTIVES)
             {
-                v8 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+                v8 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
                 Scr_Error(v8);
             }
             ++v5;
             v16[v7] = 1;
         } while (v5 < v1);
     }
-    v9 = 11;
+    v9 = CS_OBJECTIVES;
     v10 = v16;
-    v11 = 16;
+    v11 = MAX_OBJECTIVES;
     do
     {
         SV_GetConfigstring(v9, v17, 1024);
@@ -5295,12 +5295,12 @@ void Scr_Objective_Ring()
     char v6[1032]; // [sp+50h] [-420h] BYREF
 
     Int = Scr_GetInt(0);
-    if (Int >= 0x10)
+    if (Int >= MAX_OBJECTIVES)
     {
-        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, 15);
+        v1 = va("index %i is an illegal objective index. Valid indexes are 0 to %i\n", Int, MAX_OBJECTIVES - 1);
         Scr_Error(v1);
     }
-    v2 = Int + 11;
+    v2 = Int + CS_OBJECTIVES;
     SV_GetConfigstring(v2, v6, 1024);
     v3 = Info_ValueForKey(v6, "ring");
     if (*v3)
