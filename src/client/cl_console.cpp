@@ -1657,9 +1657,6 @@ bool __cdecl Con_HasActiveAutoComplete()
 
 char __cdecl Con_CommitToAutoComplete()
 {
-    char v1; // [esp+13h] [ebp-11h]
-    char *buffer; // [esp+18h] [ebp-Ch]
-    ConDrawInputGlob *v3; // [esp+1Ch] [ebp-8h]
     const char *originalCommand; // [esp+20h] [ebp-4h]
 
     if (!Con_HasActiveAutoComplete())
@@ -1671,15 +1668,7 @@ char __cdecl Con_CommitToAutoComplete()
     }
     else
     {
-        v3 = &conDrawInputGlob;
-        buffer = g_consoleField.buffer;
-        do
-        {
-            v1 = v3->autoCompleteChoice[0];
-            *buffer = v3->autoCompleteChoice[0];
-            v3 = (ConDrawInputGlob *)((char *)v3 + 1);
-            ++buffer;
-        } while (v1);
+        I_strncpyz(g_consoleField.buffer, conDrawInputGlob.autoCompleteChoice, sizeof(g_consoleField.buffer));
     }
     Cmd_EndTokenizedString();
     g_consoleField.cursor = strlen(g_consoleField.buffer);
@@ -2311,7 +2300,7 @@ bool __cdecl Con_IsValidGameMessageWindow(uint32_t windowIndex)
 bool __cdecl Con_IsGameMessageWindowActive(int32_t localClientNum, uint32_t windowIndex)
 {
     bcassert(windowIndex, GAMEMSG_WINDOW_COUNT); // 4
-    return SLODWORD(con.color[4630 * localClientNum - 2571 + 13 * windowIndex]) > 0;
+    return con.messageBuffer[localClientNum].gamemsgWindows[windowIndex].activeLineCount > 0;
 }
 
 void __cdecl Con_DrawSay(int32_t localClientNum, int32_t x, int32_t y)

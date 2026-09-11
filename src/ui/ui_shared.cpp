@@ -4651,15 +4651,9 @@ char __cdecl Menu_IsVisible(UiContext *dc, menuDef_t *menu)
     }
     if ((menu->window.staticFlags & 0x40000000) != 0)
     {
-        if (dc->localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-                1063,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                dc->localClientNum);
-        if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
+        clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(dc->localClientNum);
+
+        if ((clUI->keyCatchers & KEYCATCH_UI) != 0)
             return 0;
     }
     if (!menu->visibleExp.numEntries || IsExpressionTrue(dc->localClientNum, &menu->visibleExp))

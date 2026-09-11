@@ -1577,49 +1577,29 @@ int32_t __cdecl CG_PlaySoundAliasAsMasterByName(
 
 void __cdecl CG_RestartSmokeGrenades(int32_t localClientNum)
 {
-    int32_t eventIndex; // [esp+18h] [ebp-3Ch]
-    snapshot_s *nextSnap; // [esp+20h] [ebp-34h]
-    int32_t v3; // [esp+24h] [ebp-30h]
-    int32_t i; // [esp+2Ch] [ebp-28h]
     float axis[3][3]; // [esp+30h] [ebp-24h] BYREF
-    const cg_s *cgameGlob;
-    const cgs_t *cgs;
 
-    cgs = CG_GetLocalClientStaticGlobals(localClientNum);
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    const cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
+    const cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
     if (cgs->smokeGrenadeFx)
     {
         Com_Printf(CON_CHANNEL_CLIENT, "Playing smoke grenades at time %i\n", cgameGlob->time);
         FX_KillEffectDef(localClientNum, cgs->smokeGrenadeFx);
         FX_RewindTo(localClientNum, cgameGlob->time);
-        nextSnap = cgameGlob->nextSnap;
-        for (i = 0; i < nextSnap->numEntities; ++i)
+        snapshot_s *nextSnap = cgameGlob->nextSnap;
+        for (int i = 0; i < nextSnap->numEntities; ++i)
         {
-            v3 = (int)&nextSnap->entities[i];
             if ((nextSnap->entities[i].lerp.eFlags & 0x10000) != 0
                 && nextSnap->entities[i].time2 >= cgameGlob->time
                 && nextSnap->entities[i].lerp.u.customExplode.startTime <= cgameGlob->time)
             {
-                if (nextSnap->entities[i].eType != ET_GENERAL)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_main_mp.cpp",
-                        1584,
-                        0,
-                        "%s\n\t(es->eType) = %i",
-                        "(es->eType == ET_GENERAL)",
-                        nextSnap->entities[i].eType);
-                eventIndex = ((uint8_t)nextSnap->entities[i].eventSequence - 1) & 3;
-                if (*(int32_t *)(v3 + 4 * eventIndex + 164) < 45 || *(int32_t *)(v3 + 4 * eventIndex + 164) > 50)
-                    MyAssertHandler(
-                        ".\\cgame_mp\\cg_main_mp.cpp",
-                        1586,
-                        0,
-                        "es->events[eventIndex] not in [EV_GRENADE_EXPLODE, EV_CUSTOM_EXPLODE_NOMARKS]\n\t%i not in [%i, %i]",
-                        *(_DWORD *)(v3 + 4 * eventIndex + 164),
-                        45,
-                        50);
-                ByteToDir(*(_DWORD *)(v3 + 4 * eventIndex + 180), axis[0]);
+                entityState_s *es = &nextSnap->entities[i];
+                iassert(es->eType == ET_GENERAL);
+                int eventIndex = ((uint8_t)nextSnap->entities[i].eventSequence - 1) & 3;
+                rangeassert(es->events[eventIndex], EV_GRENADE_EXPLODE, EV_CUSTOM_EXPLODE_NOMARKS);
+
+                ByteToDir(es->eventParms[eventIndex], axis[0]);
                 Vec3Basis_RightHanded(axis[0], axis[1], axis[2]);
                 Com_Printf(
                     CON_CHANNEL_CLIENT,

@@ -1105,15 +1105,7 @@ void __cdecl UI_Refresh(int localClientNum)
         UI_BuildFindPlayerList();
         if (CL_AllLocalClientsDisconnected())
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\ui_mp\\../client_mp/client_mp.h",
-                    1112,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
-            if (clientUIActives[0].connectionState == CA_DISCONNECTED)
+            if (CL_GetLocalClientConnectionState(localClientNum) == CA_DISCONNECTED)
                 UI_DrawBuildNumber(localClientNum);
         }
         if (uiInfoArray.uiDC.isCursorVisible)
@@ -3259,15 +3251,8 @@ void __cdecl UI_RunMenuScript(int localClientNum, const char **args, const char 
                                             {
                                                 Dvar_SetStringByName("com_errorMessage", (char *)"");
                                                 Dvar_SetBoolByName("com_isNotice", 0);
-                                                if (localClientNum)
-                                                    MyAssertHandler(
-                                                        "c:\\trees\\cod3\\src\\ui_mp\\../client_mp/client_mp.h",
-                                                        1112,
-                                                        0,
-                                                        "%s\n\t(localClientNum) = %i",
-                                                        "(localClientNum == 0)",
-                                                        localClientNum);
-                                                if (clientUIActives[0].connectionState > CA_DISCONNECTED)
+
+                                                if (CL_GetLocalClientConnectionState(localClientNum) > CA_DISCONNECTED)
                                                     Key_RemoveCatcher(localClientNum, ~KEYCATCH_UI);
                                             }
                                         }

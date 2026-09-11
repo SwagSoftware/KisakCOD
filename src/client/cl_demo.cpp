@@ -804,13 +804,11 @@ void __cdecl CL_ReadDemoMessagesUntilNextSnap()
 
 void __cdecl CL_FinishLoadingDemo()
 {
-    int v0; // r30
+    int csIndex; // r30
     char *v1; // r31
     unsigned int ConfigstringConst; // r3
     const char *v3; // r3
     int v4; // r10
-    const char *v5; // r3
-    const char *v6; // r3
     msg_t v7; // [sp+50h] [-4470h] BYREF
     char v8[1024]; // [sp+80h] [-4440h] BYREF
     unsigned __int8 v9[64]; // [sp+480h] [-4040h] BYREF
@@ -824,17 +822,17 @@ void __cdecl CL_FinishLoadingDemo()
                 0,
                 "%s",
                 "clc->serverMessageSequence == 0");
-        v0 = 0;
+        csIndex = 0;
         clientConnections[0].serverCommands.header.sent = MSG_ReadLong(&v7);
         do
         {
             MSG_ReadString(&v7, v8, 1024);
-            if (v8[0] && (unsigned int)(v0 - CS_MODELS) <= 0x1FF)
-                G_SetModelIndex(v0 - CS_MODELS, v8);
+            if (v8[0] && (unsigned int)(csIndex - CS_MODELS) <= 0x1FF)
+                G_SetModelIndex(csIndex - CS_MODELS, v8);
             else
-                SV_SetConfigstring(v0, v8);
+                SV_SetConfigstring(csIndex, v8);
             v1 = v8;
-            ConfigstringConst = SV_GetConfigstringConst(v0);
+            ConfigstringConst = SV_GetConfigstringConst(csIndex);
             v3 = SL_ConvertToString(ConfigstringConst);
             do
             {
@@ -844,20 +842,19 @@ void __cdecl CL_FinishLoadingDemo()
                 ++v3;
                 ++v1;
             } while (!v4);
+
             if (v4)
             {
-                v5 = (const char *)SV_GetConfigstringConst(v0);
-                v6 = va("%s != %s", v5, v8);
                 MyAssertHandler(
                     "c:\\trees\\cod3\\cod3src\\src\\client\\cl_demo.cpp",
                     677,
                     0,
                     "%s\n\t%s",
                     "!strcmp( SL_ConvertToString( SV_GetConfigstringConst( csIndex ) ), cs )",
-                    v6);
+                    va("%s != %s", SL_ConvertToString(SV_GetConfigstringConst(csIndex)), v8));
             }
-            ++v0;
-        } while (v0 < MAX_CONFIGSTRINGS);
+            ++csIndex;
+        } while (csIndex < MAX_CONFIGSTRINGS);
         SV_SendGameState();
     }
 }

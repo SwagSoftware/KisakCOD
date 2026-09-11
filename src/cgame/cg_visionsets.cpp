@@ -604,17 +604,7 @@ char __cdecl CG_LookingThroughNightVision(int32_t localClientNum)
     int32_t weapIndex; // [esp+4h] [ebp-10h]
     WeaponDef *weapDef; // [esp+10h] [ebp-4h]
 
-    // idk what this is yet
-    //if (localClientNum)
-    //    MyAssertHandler(
-    //        "c:\\trees\\cod3\\src\\cgame\\../client_mp/client_mp.h",
-    //        1112,
-    //        0,
-    //        "%s\n\t(localClientNum) = %i",
-    //        "(localClientNum == 0)",
-    //        localClientNum);
-
-    if (clientUIActives[0].connectionState < CA_ACTIVE)
+    if (CL_GetLocalClientConnectionState(localClientNum) < CA_ACTIVE)
         return 0;
 
     if (nightVisionDisableEffects->current.enabled)

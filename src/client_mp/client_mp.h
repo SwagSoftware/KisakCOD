@@ -569,7 +569,7 @@ void __cdecl CL_CheckUserinfo(int32_t localClientNum);
 void __cdecl CL_UpdateInGameState(int32_t localClientNum);
 void __cdecl CL_VoiceFrame(int32_t localClientNum);
 bool __cdecl CL_IsLocalClientInGame(int32_t localClientNum);
-char __cdecl CL_IsClientLocal(int32_t clientNum);
+bool __cdecl CL_IsClientLocal(int32_t clientNum);
 void __cdecl CL_ParseBadPacket_f();
 void __cdecl CL_ShutdownRef();
 void __cdecl CL_InitRenderer();
@@ -787,6 +787,18 @@ inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int32_t localClientNum)
     return &clients[localClientNum];
 }
 
+inline clientUIActive_t *CL_GetLocalClientUIGlobals(int localClientNum) // line: 1063
+{
+    iassert(localClientNum == 0);
+    return &clientUIActives[localClientNum];
+}
+
+inline connstate_t __cdecl CL_GetLocalClientConnectionState(int localClientNum) // line: 1112
+{
+    iassert(localClientNum == 0);
+    return clientUIActives[localClientNum].connectionState;
+}
+
 // cl_cgame_mp
 struct snapshot_s;
 struct snd_alias_t;
@@ -915,7 +927,7 @@ void __cdecl CL_ArchiveClientState(int32_t localClientNum, MemoryFile *memFile);
 void __cdecl CL_LookupColor(int32_t localClientNum, uint8_t c, float *color);
 void __cdecl CL_UpdateColor(int32_t localClientNum);
 void __cdecl CL_UpdateColorInternal(const char *var_name, float *color);
-int32_t __cdecl CL_IsCgameInitialized(int32_t localClientNum);
+bool __cdecl CL_IsCgameInitialized(int32_t localClientNum);
 
 
 

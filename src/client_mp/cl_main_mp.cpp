@@ -425,28 +425,14 @@ void __cdecl CL_Disconnect(int32_t localClientNum)
     connstate_t connstate; // [esp+4h] [ebp-Ch]
     clientConnection_t *clc; // [esp+8h] [ebp-8h]
 
-    if (!Sys_IsMainThread())
-        MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 1596, 0, "%s", "Sys_IsMainThread()");
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].isRunning)
+    iassert(Sys_IsMainThread());
+    
+    clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+
+    if (clUI->isRunning)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                1112,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        connstate = clientUIActives[0].connectionState;
-        if (clientUIActives[0].connectionState < CA_CONNECTED)
+        connstate = CL_GetLocalClientConnectionState(localClientNum);
+        if (connstate < CA_CONNECTED)
             clc = 0;
         else
             clc = CL_GetLocalClientConnection(localClientNum);
@@ -486,14 +472,14 @@ void __cdecl CL_Disconnect(int32_t localClientNum)
         Ragdoll_Shutdown();
         CL_ClearMutedList();
         if (connstate >= CA_CONNECTED)
-            memset((uint8_t *)clc, 0, sizeof(clientConnection_t));
+            memset(clc, 0, sizeof(clientConnection_t));
         clientUIActives[localClientNum].connectionState = CA_DISCONNECTED;
         if (!cls.wwwDlDisconnected)
             CL_ClearStaticDownload();
         DynEntCl_Shutdown(localClientNum);
         SND_DisconnectListener(localClientNum);
         if (connstate >= CA_CONNECTING)
-            clientUIActives[0].keyCatchers &= KEYCATCH_CONSOLE;
+            clUI->keyCatchers &= KEYCATCH_CONSOLE;
         KISAK_NULLSUB();
         // LWSS ADD
         Steam_CancelClientTicket();
@@ -512,20 +498,10 @@ void __cdecl CL_Disconnect(int32_t localClientNum)
 
 void __cdecl CL_ForwardCommandToServer(int32_t localClientNum, const char *string)
 {
-    const char *cmd; // [esp+8h] [ebp-4h]
-
-    cmd = Cmd_Argv(0);
+    const char *cmd = Cmd_Argv(0);
     if (*cmd != '-')
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                1112,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (clientUIActives[0].connectionState < 5 || *cmd == '+' || CL_GetLocalClientConnection(localClientNum)->demoplaying)
+        if (CL_GetLocalClientConnectionState(localClientNum) < CA_CONNECTED || *cmd == '+' || CL_GetLocalClientConnection(localClientNum)->demoplaying)
         {
             Com_Printf(CON_CHANNEL_CLIENT, "Unknown command \"%s\"\n", cmd);
         }
@@ -612,7 +588,7 @@ void __cdecl CL_ForwardToServer_f()
 {
     char command[1028]; // [esp+Ch] [ebp-408h] BYREF
 
-    if (CL_GetLocalClientConnection(0)->demoplaying || clientUIActives[0].connectionState != 9)
+    if (CL_GetLocalClientConnection(0)->demoplaying || CL_GetLocalClientConnectionState(0) != CA_ACTIVE)
     {
         Com_Printf(CON_CHANNEL_DONT_FILTER, "Not connected to a server.\n");
     }
@@ -671,20 +647,12 @@ void __cdecl CL_Setenv_f()
 
 void __cdecl CL_DisconnectLocalClient(int32_t localClientNum)
 {
-    bool v1; // [esp+0h] [ebp-Ch]
+    bool disconnected; // [esp+0h] [ebp-Ch]
 
     SCR_StopCinematic(localClientNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    v1 = clientUIActives[0].connectionState > (uint32_t)CA_LOGO;
+    disconnected = CL_GetLocalClientConnectionState(localClientNum) > CA_LOGO;
     CL_Disconnect(localClientNum);
-    if (v1)
+    if (disconnected)
     {
         if (CL_AllLocalClientsDisconnected())
             Com_Error(ERR_DISCONNECT, "PLATFORM_DISCONNECTED_FROM_SERVER");
@@ -693,12 +661,9 @@ void __cdecl CL_DisconnectLocalClient(int32_t localClientNum)
 
 void __cdecl CL_Reconnect_f()
 {
-    const char *v0; // eax
-
     if (strlen(cls.servername) && strcmp(cls.servername, "localhost"))
     {
-        v0 = va("connect %s reconnect\n", cls.servername);
-        Cbuf_AddText(0, v0);
+        Cbuf_AddText(0, va("connect %s reconnect\n", cls.servername));
     }
     else
     {
@@ -756,7 +721,7 @@ void __cdecl CL_Vid_Restart_f()
         LocalClientGlobals = CL_GetLocalClientGlobals(0);
         clientUIActive = clientUIActives;
         clc = CL_GetLocalClientConnection(0);
-        connstate = clientUIActives[0].connectionState;
+        connstate = CL_GetLocalClientConnectionState(0);
         clientStateBuf = 0;
         clientStateBytes = 0;
         if (clientUIActives[0].cgameInitialized)
@@ -1498,15 +1463,8 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                             {
                                 if (cls.downloadName[0])
                                     return 1;
-                                if (localClientNum)
-                                    MyAssertHandler(
-                                        "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                                        1112,
-                                        0,
-                                        "%s\n\t(localClientNum) = %i",
-                                        "(localClientNum == 0)",
-                                        localClientNum);
-                                if (clientUIActives[0].connectionState != CA_SENDINGSTATS)
+         
+                                if (CL_GetLocalClientConnectionState(localClientNum) != CA_SENDINGSTATS)
                                 {
                                     if (localClientNum)
                                         MyAssertHandler(
@@ -1537,15 +1495,7 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
                             else
                             {
                                 clcb = CL_GetLocalClientConnection(localClientNum);
-                                if (localClientNum)
-                                    MyAssertHandler(
-                                        "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                                        1112,
-                                        0,
-                                        "%s\n\t(localClientNum) = %i",
-                                        "(localClientNum == 0)",
-                                        localClientNum);
-                                v17 = clientUIActives[0].connectionState == CA_ACTIVE && NET_CompareBaseAdr(from, clcb->serverAddress);
+                                v17 = CL_GetLocalClientConnectionState(localClientNum) == CA_ACTIVE && NET_CompareBaseAdr(from, clcb->serverAddress);
                                 clcb->isServerRestarting = v17;
                                 return 1;
                             }
@@ -1727,19 +1677,9 @@ char __cdecl CL_DispatchConnectionlessPacket(int localClientNum, netadr_t from, 
 
 void __cdecl CL_DisconnectPacket(int32_t localClientNum, netadr_t from, char *reason)
 {
-    clientConnection_t *clc; // [esp+4h] [ebp-8h]
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= 3)
+    if (CL_GetLocalClientConnectionState(localClientNum) >= CA_CONNECTING)
     {
-        clc = CL_GetLocalClientConnection(localClientNum);
+        clientConnection_t *clc = CL_GetLocalClientConnection(localClientNum);
         if (NET_CompareAdr(from, clc->netchan.remoteAddress))
         {
             if (cls.realtime - clc->lastPacketTime >= 3000)
@@ -1837,16 +1777,9 @@ char __cdecl CL_PacketEvent(int localClientNum, netadr_t from, msg_t *msg, int32
 
     if (msg->cursize >= 4 && *(uint32_t *)msg->data == -1)
         return CL_ConnectionlessPacket(localClientNum, from, msg, time);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    connstate = clientUIActives[0].connectionState;
-    if (clientUIActives[0].connectionState >= CA_CONNECTED)
+
+    connstate = CL_GetLocalClientConnectionState(localClientNum);
+    if (connstate >= CA_CONNECTED)
     {
         clc = CL_GetLocalClientConnection(localClientNum);
         if (msg->cursize >= 4)
@@ -2042,19 +1975,9 @@ void __cdecl CL_WWWDownload()
 
 void __cdecl CL_CheckForUpdateKeyAuth(int localClientNum)
 {
-    clientConnection_t *clc; // [esp+0h] [ebp-4h]
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState == CA_ACTIVE)
+    if (CL_GetLocalClientConnectionState(localClientNum) == CA_ACTIVE)
     {
-        clc = CL_GetLocalClientConnection(localClientNum);
+        clientConnection_t *clc = CL_GetLocalClientConnection(localClientNum);
         if (cls.realtime - lastUpdateKeyAuthTime > 300000)
         {
             if (net_lanauthorize->current.enabled || !Sys_IsLANAddress(clc->serverAddress))
@@ -2065,29 +1988,11 @@ void __cdecl CL_CheckForUpdateKeyAuth(int localClientNum)
 
 void __cdecl CL_Frame(int localClientNum)
 {
-    connstate_t connstate; // [esp+34h] [ebp-4h]
-
-    if (localClientNum)
-    {
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    }
-    connstate = clientUIActives[0].connectionState;
+    clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+    connstate_t connstate = CL_GetLocalClientConnectionState(localClientNum);
     Hunk_CheckTempMemoryClear();
     Hunk_CheckTempMemoryHighClear();
-    if (clientUIActives[0].isRunning)
+    if (clUI->isRunning)
     {
         CL_DevGuiFrame(localClientNum);
         {
@@ -2114,19 +2019,11 @@ void __cdecl CL_Frame(int localClientNum)
 void __cdecl CL_CheckTimeout(int32_t localClientNum)
 {
     clientActive_t *LocalClientGlobals; // [esp+8h] [ebp-Ch]
-    connstate_t connstate; // [esp+Ch] [ebp-8h]
     clientConnection_t *clc; // [esp+10h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    connstate = clientUIActives[0].connectionState;
-    if (clientUIActives[0].connectionState >= 3)
+    connstate_t connstate = CL_GetLocalClientConnectionState(localClientNum);
+
+    if (connstate >= CA_CONNECTING)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         clc = CL_GetLocalClientConnection(localClientNum);
@@ -2174,36 +2071,15 @@ void __cdecl CL_ServerTimedOut()
 
 void __cdecl CL_CheckUserinfo(int32_t localClientNum)
 {
-    char *v1; // eax
-    const char *v2; // eax
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= 4 && !cl_paused->current.integer && (dvar_modifiedFlags & 2) != 0)
+    if (CL_GetLocalClientConnectionState(localClientNum) >= CA_CHALLENGING && !cl_paused->current.integer && (dvar_modifiedFlags & 2) != 0)
     {
-        v1 = Dvar_InfoString(localClientNum, 2);
-        v2 = va("userinfo \"%s\"", v1);
-        CL_AddReliableCommand(localClientNum, v2);
+        CL_AddReliableCommand(localClientNum, va("userinfo \"%s\"", Dvar_InfoString(localClientNum, 2)));
     }
 }
 
 void __cdecl CL_UpdateInGameState(int32_t localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState == 9)
+    if (CL_GetLocalClientConnectionState(localClientNum) == CA_ACTIVE)
     {
         if (!cl_ingame->current.enabled)
             Dvar_SetBool((dvar_s *)cl_ingame, 1);
@@ -2230,35 +2106,17 @@ void __cdecl CL_VoiceFrame(int32_t localClientNum)
 
 bool __cdecl CL_IsLocalClientInGame(int32_t localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return clientUIActives[0].connectionState == 9;
+    return CL_GetLocalClientConnectionState(localClientNum) == CA_ACTIVE;
 }
 
-char __cdecl CL_IsClientLocal(int32_t clientNum)
+bool __cdecl CL_IsClientLocal(int32_t clientNum)
 {
-    int32_t client; // [esp+0h] [ebp-4h]
-
-    for (client = 0; client < 1; ++client)
+    for (int client = 0; client < STATIC_MAX_LOCAL_CLIENTS; ++client)
     {
-        if (client)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                1112,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                client);
-        if (clientUIActives[0].connectionState > 7 && CG_GetClientNum(client) == clientNum)
-            return 1;
+        if (CL_GetLocalClientConnectionState(client) > CA_LOADING && CG_GetClientNum(client) == clientNum)
+            return true;
     }
-    return 0;
+    return false;
 }
 
 void __cdecl CL_ParseBadPacket_f()
@@ -2493,21 +2351,8 @@ void __cdecl CL_DrawLogo(int32_t localClientNum)
     float color[4]; // [esp+54h] [ebp-14h] BYREF
     float w; // [esp+64h] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState != 2)
-        MyAssertHandler(
-            ".\\client_mp\\cl_main_mp.cpp",
-            4644,
-            0,
-            "%s",
-            "CL_GetLocalClientConnectionState( localClientNum ) == CA_LOGO");
+    iassert(CL_GetLocalClientConnectionState(localClientNum) == CA_LOGO);
+    
     time = cls.realtime - cls.logo.startTime;
     if (cls.realtime - cls.logo.startTime >= cls.logo.fadein)
     {
@@ -2602,25 +2447,14 @@ void __cdecl CL_PlayLogo_f()
 
 void __cdecl CL_StopLogoOrCinematic(int32_t localClientNum)
 {
-    connstate_t clcState; // [esp+0h] [ebp-4h]
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    clcState = clientUIActives[0].connectionState;
-    if (clientUIActives[0].connectionState == 1)
+    connstate_t clcState = CL_GetLocalClientConnectionState(localClientNum);
+    if (clientUIActives[0].connectionState == CA_CINEMATIC)
     {
         SCR_StopCinematic(localClientNum);
     }
     else
     {
-        if (clientUIActives[0].connectionState != 2)
-            MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 4744, 0, "%s", "clcState == CA_LOGO");
+        iassert(clcState == CA_LOGO);
         CL_StopLogo(localClientNum);
     }
     SND_StopSounds(SND_STOP_ALL);
@@ -2757,15 +2591,7 @@ void __cdecl CL_Record_f()
     {
         localClientNum = 0;
         clc = CL_GetLocalClientConnection(0);
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                1112,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        connstate = clientUIActives[0].connectionState;
+        connstate = CL_GetLocalClientConnectionState(localClientNum);
         if (clc->demorecording)
         {
             Com_Printf(CON_CHANNEL_DONT_FILTER, "Already recording.\n");
@@ -2932,14 +2758,14 @@ void __cdecl CL_PlayDemo_f()
                 Com_sprintf(name, 0x100u, "demos/%s.dm_%d", arg, 1);
             else
                 Com_sprintf(name, 0x100u, "demos/%s", arg);
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                    1112,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
+            //if (localClientNum)
+            //    MyAssertHandler(
+            //        "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
+            //        1112,
+            //        0,
+            //        "%s\n\t(localClientNum) = %i",
+            //        "(localClientNum == 0)",
+            //        localClientNum);
             clc = CL_GetLocalClientConnection(localClientNum);
             FS_FOpenFileRead(name, &clc->demofile);
             if (!clc->demofile)
@@ -3821,54 +3647,39 @@ void __cdecl CL_Disconnect_f()
     CL_DisconnectLocalClient(0);
 }
 
+int32_t __cdecl CountBitsEnabled(uint32_t num)
+{
+    num -= (num >> 1) & 0x55555555;
+    num = (num & 0x33333333) + ((num >> 2) & 0x33333333);
+    num = (num + (num >> 4)) & 0x0F0F0F0F;
+    num += num >> 8;
+    num += num >> 16;
+
+    return (int32_t)(num & 0x3F);
+}
+
 void __cdecl CL_Init(int32_t localClientNum)
 {
-    int32_t v1; // eax
-
     Com_Printf(CON_CHANNEL_CLIENT, "----- Client Initialization -----\n");
     CL_ClearState(localClientNum);
-    // LWSS: functionality unknown! 
-    //if (CountBitsEnabled(0xFFFFFFFF) != 32)
-    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5206, 0, "%s", "CountBitsEnabled( 0xffffffff ) == 32");
-    //if (CountBitsEnabled(0))
-    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5207, 0, "%s", "CountBitsEnabled( 0x00000000 ) == 0");
-    //if (CountBitsEnabled(0x11111111u) != 8)
-    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5208, 0, "%s", "CountBitsEnabled( 0x11111111 ) == 8");
-    //if (CountBitsEnabled(0x77777777u) != 24)
-    //    MyAssertHandler(".\\client_mp\\cl_main_mp.cpp", 5209, 0, "%s", "CountBitsEnabled( 0x77777777 ) == 24");
+
+    iassert(CountBitsEnabled(0xFFFFFFFF) == 32);
+    iassert(CountBitsEnabled(0x00000000) == 0);
+    iassert(CountBitsEnabled(0x11111111) == 8);
+    iassert(CountBitsEnabled(0x77777777) == 24);
+
     CL_ClearMutedList();
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    clientUIActives[0].connectionState = CA_DISCONNECTED;
+    clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+    clUI->connectionState = CA_DISCONNECTED;
     cls.realtime = 0;
-    clientUIActives[0].active = 1;
+    clUI->active = 1;
     cl_serverLoadingMap = 0;
     cl_waitingOnServerToLoadMap[localClientNum] = 0;
     g_waitingForServer = 0;
-    v1 = CL_ControllerIndexFromClientNum(localClientNum);
-    Cbuf_Execute(localClientNum, v1);
-    clientUIActives[0].isRunning = 1;
+    Cbuf_Execute(localClientNum, CL_ControllerIndexFromClientNum(localClientNum));
+    clUI->isRunning = 1;
     Com_Printf(CON_CHANNEL_CLIENT, "----- Client Initialization Complete -----\n");
 }
-
-// LWSS: I dont see the point of this function?
-//int32_t __cdecl CountBitsEnabled(uint32_t num)
-//{
-//    uint32_t numa; // [esp+1Ch] [ebp+8h]
-//    uint32_t numb; // [esp+1Ch] [ebp+8h]
-//
-//    numa = (((((num >> 1) & 0x55555555) + (num & 0x55555555)) >> 2) & 0x33333333)
-//        + ((((num >> 1) & 0x55555555) + (num & 0x55555555)) & 0x33333333);
-//    numb = (((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) >> 8) & 0xFF00FF)
-//        + ((((numa >> 4) & 0xF0F0F0F) + (numa & 0xF0F0F0F)) & 0xFF00FF);
-//    return HIWORD(numb) + numb;
-//}
 
 int32_t recursive;
 void __cdecl CL_Shutdown(int32_t localClientNum)
@@ -4031,16 +3842,10 @@ int32_t __cdecl CL_UpdateDirtyPings(int localClientNum, uint32_t source)
     int32_t pingTime; // [esp+420h] [ebp-4h] BYREF
 
     status = 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState)
+
+    if (CL_GetLocalClientConnectionState(localClientNum) != CA_DISCONNECTED)
         return 0;
+
     if (source > 2)
         return 0;
     cls.pingUpdateSource = source;
@@ -4301,29 +4106,18 @@ void __cdecl CL_DrawTextWithCursor(
 bool __cdecl CL_ShouldDisplayHud(int32_t localClientNum)
 {
     if (cl_hudDrawsBehindUI->current.enabled)
-        return 1;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return (clientUIActives[0].keyCatchers & KEYCATCH_UI) == 0 || clientUIActives[0].displayHUDWithKeycatchUI;
+        return true;
+
+    clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+
+    return (clUI->keyCatchers & KEYCATCH_UI) == 0 || clUI->displayHUDWithKeycatchUI;
 }
 
 bool __cdecl CL_IsUIActive(int32_t localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    return (clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0;
+    clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+
+    return (clUI->keyCatchers & KEYCATCH_UI) != 0;
 }
 
 Font_s *__cdecl CL_RegisterFont(const char *fontName, int32_t imageTrack)

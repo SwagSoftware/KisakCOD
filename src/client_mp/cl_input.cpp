@@ -170,15 +170,8 @@ void __cdecl CL_WritePacket(int localClientNum)
     //compressedBuf = (uint8_t (*)[2048])LargeLocal::GetBuf(&compressedBuf_large_local);
     compressedBuf = (uint8_t (*)[2048])compressedBuf_large_local.GetBuf();
     clc = CL_GetLocalClientConnection(localClientNum);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    connstate = clientUIActives[0].connectionState;
+
+    connstate = CL_GetLocalClientConnectionState(localClientNum);
     if (clc->demoplaying || connstate == CA_CINEMATIC || connstate == CA_LOGO || connstate == CA_SENDINGSTATS)
     {
         //LargeLocal::~LargeLocal(&compressedBuf_large_local);
@@ -321,20 +314,14 @@ bool __cdecl CL_ReadyToSendPacket(int localClientNum)
     clc = CL_GetLocalClientConnection(localClientNum);
     if (clc->demoplaying)
         return 0;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState == CA_CINEMATIC || clientUIActives[0].connectionState == CA_LOGO)
+    
+    connstate_t connstate = CL_GetLocalClientConnectionState(localClientNum);
+    if (connstate == CA_CINEMATIC || connstate == CA_LOGO)
         return 0;
     if (cls.downloadTempName[0] && cls.realtime - clc->lastPacketSentTime < 50)
         return 0;
-    if (clientUIActives[0].connectionState != CA_ACTIVE
-        && clientUIActives[0].connectionState != CA_PRIMED
+    if (connstate != CA_ACTIVE
+        && connstate != CA_PRIMED
         && !cls.downloadTempName[0]
         && cls.realtime - clc->lastPacketSentTime < 1000)
     {
@@ -350,15 +337,8 @@ bool __cdecl CL_ReadyToSendPacket(int localClientNum)
 
 void __cdecl CL_CreateCmdsDuringConnection(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= CA_CONNECTED && clientUIActives[0].connectionState != CA_ACTIVE)
+    connstate_t connstate = CL_GetLocalClientConnectionState(localClientNum);
+    if (connstate >= CA_CONNECTED && connstate != CA_ACTIVE)
         CL_CreateNewCommands(localClientNum);
 }
 
@@ -369,15 +349,7 @@ void __cdecl CL_CreateNewCommands(int localClientNum)
     clientActive_t *LocalClientGlobals; // [esp+48h] [ebp-8h]
     int cmdNum; // [esp+4Ch] [ebp-4h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= CA_PRIMED)
+    if (CL_GetLocalClientConnectionState(localClientNum) >= CA_PRIMED)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         cmdNum = ++LocalClientGlobals->cmdNumber & 0x7F;
@@ -778,7 +750,7 @@ void __cdecl CL_CmdButtons(int localClientNum, usercmd_s *cmd)
     if (clientUIActives[0].keyCatchers && !cl_bypassMouseInput->current.enabled && UI_GetActiveMenu(localClientNum) != UIMENU_SCOREBOARD)
         cmd->buttons |= BUTTON_LOC_SELECTING;
 
-    if (CG_GetLocalClientConnectionState(localClientNum) > CA_CONNECTED)
+    if (CL_GetLocalClientConnectionState(localClientNum) > CA_CONNECTED)
     {
         LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
         if (LocalClientGlobals->snap.ps.pm_type == PM_NOCLIP
@@ -901,15 +873,7 @@ char __cdecl CG_HandleLocationSelectionInput(int localClientNum, usercmd_s *cmd)
 
 void __cdecl CL_Input(int localClientNum)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState == CA_ACTIVE)
+    if (CL_GetLocalClientConnectionState(localClientNum) == CA_ACTIVE)
     {
         IN_Frame();
         CL_CreateNewCommands(localClientNum);

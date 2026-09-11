@@ -28,18 +28,14 @@ void __cdecl CL_WriteVoicePacket(int localClientNum)
             "localClientNum doesn't index 1\n\t%i not in [0, %i)",
             localClientNum,
             1);
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
     }
+
+    connstate_t connstate = CL_GetLocalClientConnectionState(localClientNum);
+
     if (!clc->demoplaying
-        && (clientUIActives[0].connectionState == CA_ACTIVE
-            || clientUIActives[0].connectionState == CA_LOADING
-            || clientUIActives[0].connectionState == CA_PRIMED))
+        && (connstate == CA_ACTIVE
+            || connstate == CA_LOADING
+            || connstate == CA_PRIMED))
     {
         MSG_Init(&msg, tempVoicePacketBuf, 2048);
         MSG_WriteString(&msg, "v");

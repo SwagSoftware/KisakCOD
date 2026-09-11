@@ -1236,10 +1236,16 @@ inline clientActive_t *__cdecl CL_GetLocalClientGlobals(int32_t localClientNum)
     return &clients[localClientNum];
 }
 
-inline connstate_t __cdecl CL_GetLocalClientConnectionState(int localClientNum)
+inline connstate_t __cdecl CL_GetLocalClientConnectionState(int localClientNum) // line: 1112
 {
     iassert(localClientNum == 0);
     return clientUIActives[localClientNum].connectionState;
+}
+
+inline clientUIActive_t *CL_GetLocalClientUIGlobals(int localClientNum)
+{
+    iassert(localClientNum == 0);
+    return &clientUIActives[localClientNum];
 }
 
 #endif // KISAK_SP

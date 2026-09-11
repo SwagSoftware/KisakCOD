@@ -205,15 +205,7 @@ void __cdecl CL_SystemInfoChanged(int localClientNum)
     {
         if (!com_sv_running->current.enabled)
         {
-            if (localClientNum)
-                MyAssertHandler(
-                    "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                    1112,
-                    0,
-                    "%s\n\t(localClientNum) = %i",
-                    "(localClientNum == 0)",
-                    localClientNum);
-            if (clientUIActives[0].connectionState < CA_ACTIVE)
+            if (CL_GetLocalClientConnectionState(localClientNum) < CA_ACTIVE)
             {
                 s = Info_ValueForKey(systemInfo, "sv_cheats");
                 if (!atoi(s))

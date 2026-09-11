@@ -1987,37 +1987,20 @@ void __cdecl BitShiftRight(int localClientNum, Operand *source, Operand *bitsSou
 void __cdecl GetAdsJavelin(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && CG_JavelinADS(localClientNum);
+    result->internals.intVal = CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING && CG_JavelinADS(localClientNum);
     if (uiscript_debug->current.integer)
         Com_Printf(CON_CHANNEL_UI, "adsjavelin() = %i\n", result->internals.intVal);
 }
 
 void __cdecl GetWeapLockBlink(int localClientNum, Operand *source, Operand *result)
 {
-    float bps; // [esp+Ch] [ebp-4h]
-
-    bps = GetSourceFloat(source);
+    float bps = GetSourceFloat(source);
     result->dataType = VAL_INT;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
+
 #ifdef KISAK_MP
-    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
+    result->internals.intVal = CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING && G_ExitAfterConnectPaths();
 #elif KISAK_SP
-	if (clientUIActives[0].connectionState >= CA_LOADING)
+	if (CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING)
 	{
 		cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 		playerState_s *ps = &cgameGlob->predictedPlayerState;
@@ -2041,18 +2024,10 @@ void __cdecl GetWeapLockBlink(int localClientNum, Operand *source, Operand *resu
 void __cdecl GetWeapAttackTop(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
 #ifdef KISAK_MP
-    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
+    result->internals.intVal = CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING && G_ExitAfterConnectPaths();
 #elif KISAK_SP
-	result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && (CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.weapLockFlags & 4) != 0;
+	result->internals.intVal = CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING && (CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.weapLockFlags & 4) != 0;
 #endif
     if (uiscript_debug->current.integer)
         Com_Printf(CON_CHANNEL_UI, "weapattacktop() = %i\n", result->internals.intVal);
@@ -2061,18 +2036,10 @@ void __cdecl GetWeapAttackTop(int localClientNum, Operand *result)
 void __cdecl GetWeapAttackDirect(int localClientNum, Operand *result)
 {
     result->dataType = VAL_INT;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
 #ifdef KISAK_MP
-    result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && G_ExitAfterConnectPaths();
+    result->internals.intVal = CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING && G_ExitAfterConnectPaths();
 #elif KISAK_SP
-	result->internals.intVal = clientUIActives[0].connectionState >= CA_LOADING && (CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.weapLockFlags & 8) != 0;
+	result->internals.intVal = CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING && (CG_GetLocalClientGlobals(localClientNum)->predictedPlayerState.weapLockFlags & 8) != 0;
 #endif
     if (uiscript_debug->current.integer)
         Com_Printf(CON_CHANNEL_UI, "weapattackdirect() = %i\n", result->internals.intVal);
@@ -2122,15 +2089,7 @@ void __cdecl GetTimeLeft(int localClientNum, Operand *result)
     cgs_t *cgs;
     cg_s *cgameGlob;
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState < CA_LOADING)
+    if (CL_GetLocalClientConnectionState(localClientNum) < CA_LOADING)
     {
         result->dataType = VAL_INT;
         result->internals.intVal = 0;
@@ -2153,15 +2112,8 @@ void __cdecl GetGametypeObjective(int localClientNum, Operand *result)
 {
 #ifdef KISAK_MP
     result->dataType = VAL_STRING;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= CA_LOADING)
+
+    if (CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING)
     {
         if (localClientNum)
             MyAssertHandler(
@@ -2191,15 +2143,8 @@ void __cdecl GetGametypeName(int localClientNum, Operand *result)
     cgs_t *cgs;
 
     result->dataType = VAL_STRING;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= CA_LOADING)
+
+    if (CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING)
     {
         cgs = CG_GetLocalClientStaticGlobals(localClientNum);
         result->internals.intVal = (int)UI_GetGameTypeDisplayName(cgs->gametype);
@@ -2227,15 +2172,8 @@ void __cdecl GetGametypeInternal(int localClientNum, Operand *result)
     cgs_t *cgs = CG_GetLocalClientStaticGlobals(localClientNum);
 
     result->dataType = VAL_STRING;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\ui\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState >= CA_LOADING)
+
+    if (CL_GetLocalClientConnectionState(localClientNum) >= CA_LOADING)
         result->internals.intVal = (int)cgs->gametype;
     else
         result->internals.intVal = g_gametype->current.integer;

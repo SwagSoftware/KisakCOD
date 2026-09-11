@@ -103,31 +103,18 @@ int __cdecl CL_CGameRendering(int localClientNum)
     BOOL v3; // [esp-4h] [ebp-Ch]
     clientActive_t *LocalClientGlobals; // [esp+0h] [ebp-8h]
 
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState != CA_ACTIVE)
+    if (CL_GetLocalClientConnectionState(localClientNum) != CA_ACTIVE)
         return 0;
+
     R_BeginClientCmdList2D();
     LocalClientGlobals = CL_GetLocalClientGlobals(localClientNum);
     v3 = UI_IsFullscreen(localClientNum) == 0;
     demType = CL_GetDemoType();
     if (CG_DrawActiveFrame(localClientNum, LocalClientGlobals->serverTime, (DemoType)demType, CUBEMAPSHOT_NONE, 0, v3))
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                1063,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if ((clientUIActives[0].keyCatchers & KEYCATCH_UI) != 0)
+        clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+
+        if ((clUI->keyCatchers & KEYCATCH_UI) != 0)
         {
             UI_UpdateTime(localClientNum, cls.realtime);
             UI_Refresh(localClientNum);
@@ -151,15 +138,7 @@ void __cdecl CL_DrawScreen(int localClientNum)
 {
     if (cls.rendererStarted)
     {
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-                1112,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (clientUIActives[0].connectionState == CA_ACTIVE)
+        if (CL_GetLocalClientConnectionState(localClientNum) == CA_ACTIVE)
         {
             PROF_SCOPED("DebugOverlays");
             CG_DrawFullScreenDebugOverlays(localClientNum);
@@ -183,15 +162,8 @@ void __cdecl SCR_DrawScreenField(int localClientNum, int refreshedUI)
         return;
     }
     UI_UpdateTime(localClientNum, cls.realtime);
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    clcState = clientUIActives[0].connectionState;
+
+    clcState = CL_GetLocalClientConnectionState(localClientNum);
     if (!UI_IsFullscreen(localClientNum))
     {
         switch (clcState)

@@ -5,6 +5,7 @@
 #include <qcommon/cmd.h>
 #ifdef KISAK_MP
 #include <client_mp/client_mp.h>
+#include <cgame_mp/cg_local_mp.h>
 #endif
 
 bool cin_skippable;
@@ -63,20 +64,11 @@ void __cdecl SCR_DrawCinematic(int32_t localClientNum)
 
 void __cdecl SCR_StopCinematic(int32_t localClientNum)
 {
-    const char *v1; // eax
-
     if (cin_skippable || R_Cinematic_IsFinished())
     {
         R_Cinematic_StopPlayback();
-        if (localClientNum)
-            MyAssertHandler(
-                "c:\\trees\\cod3\\src\\client\\../client_mp/client_mp.h",
-                1112,
-                0,
-                "%s\n\t(localClientNum) = %i",
-                "(localClientNum == 0)",
-                localClientNum);
-        if (clientUIActives[0].connectionState == CA_CINEMATIC)
+
+        if (CL_GetLocalClientConnectionState(localClientNum) == CA_CINEMATIC)
         {
             if (localClientNum)
                 MyAssertHandler(
@@ -89,8 +81,7 @@ void __cdecl SCR_StopCinematic(int32_t localClientNum)
             clientUIActives[localClientNum].connectionState = CA_DISCONNECTED;
             if (nextmap->current.integer)
             {
-                v1 = va("%s\n", nextmap->current.string);
-                Cbuf_AddText(0, v1);
+                Cbuf_AddText(0, va("%s\n", nextmap->current.string));
                 Dvar_SetString(nextmap, (char*)"");
             }
         }

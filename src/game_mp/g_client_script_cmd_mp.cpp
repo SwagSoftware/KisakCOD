@@ -2511,16 +2511,15 @@ void __cdecl PlayerCmd_DeactivateChannelVolumes(scr_entref_t e)
     double Float; // fp31
     uint32_t NumParam; // r3
     int32_t ConstString; // r10
-    const char *v6; // r3
 
-    v1 = HIWORD(entref);
-    if ((_WORD)entref)
+    v1 = e.entnum;
+    if (e.classnum)
     {
         v2 = "not an entity";
     }
     else
     {
-        if (g_entities[HIWORD(entref)].client)
+        if (g_entities[e.entnum].client)
             goto LABEL_6;
         v2 = va("entity %i is not a player", HIWORD(entref));
     }
@@ -2548,8 +2547,7 @@ LABEL_6:
         Scr_Error(
             "priority must be 'snd_channelvolprio_holdbreath', 'snd_channelvolprio_pain', or 'snd_channelvolprio_shellshock'\n");
     }
-    v6 = va("%c %i \"%s\" %g %g %g", 70, Float);
-    SV_GameSendServerCommand(v1, SV_CMD_RELIABLE, v6);
+    SV_GameSendServerCommand(v1, SV_CMD_RELIABLE, va("%c %i \"%s\" %g %g %g", 70, Float));
 }
 
 void __cdecl ScrCmd_PlayLocalSound(scr_entref_t entref)

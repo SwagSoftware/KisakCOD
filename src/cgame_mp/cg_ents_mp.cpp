@@ -46,11 +46,11 @@ void __cdecl CG_Player_PreControllers(DObj_s *obj, centity_s *cent)
         BG_Player_DoControllersSetup(&cent->nextState, ci, cgameGlob->frametime);
         for (i = 0; i < 6; ++i)
             DObjGetBoneIndex(obj, *controller_names[i], &cent->pose.player.tag[i]);
-        cent->pose.fx.triggerTime = (int)&ci->control;
+        cent->pose.player.control = &ci->control;
     }
     else
     {
-        cent->pose.fx.triggerTime = 0;
+        cent->pose.player.control = NULL;
     }
 }
 

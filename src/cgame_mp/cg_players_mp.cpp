@@ -636,19 +636,9 @@ const char *__cdecl CG_GetOpposingTeamName(team_t team)
 
 const char *__cdecl CG_GetPlayerTeamName(int32_t localClientNum)
 {
-    cg_s *cgameGlob;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState < CA_PRIMED)
+    if (CL_GetLocalClientConnectionState(localClientNum) < CA_PRIMED)
         return CG_GetTeamName(TEAM_FREE);
 
     bcassert(cgameGlob->clientNum, MAX_CLIENTS);
@@ -661,19 +651,9 @@ const char *__cdecl CG_GetPlayerTeamName(int32_t localClientNum)
 
 const char *__cdecl CG_GetPlayerOpposingTeamName(int32_t localClientNum)
 {
-    cg_s *cgameGlob;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState < CA_PRIMED)
+    if (CL_GetLocalClientConnectionState(localClientNum) < CA_PRIMED)
         return CG_GetOpposingTeamName(TEAM_FREE);
 
     bcassert(cgameGlob->clientNum, MAX_CLIENTS);
@@ -686,20 +666,10 @@ const char *__cdecl CG_GetPlayerOpposingTeamName(int32_t localClientNum)
 
 bool __cdecl CG_IsPlayerDead(int32_t localClientNum)
 {
-    cg_s *cgameGlob;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\cgame_mp\\../client_mp/client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    if (clientUIActives[0].connectionState < CA_PRIMED)
-        return 0;
+    if (CL_GetLocalClientConnectionState(localClientNum) < CA_PRIMED)
+        return false;
 
     bcassert(cgameGlob->clientNum, MAX_CLIENTS);
 
@@ -712,11 +682,8 @@ bool __cdecl CG_IsPlayerDead(int32_t localClientNum)
 
 int32_t __cdecl CG_GetPlayerClipAmmoCount(int32_t localClientNum)
 {
-    playerState_s *ps; // [esp+8h] [ebp-4h]
-    cg_s *cgameGlob;
-
-    cgameGlob = CG_GetLocalClientGlobals(localClientNum);
-    ps = &cgameGlob->nextSnap->ps;
+    cg_s *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+    playerState_s *ps = &cgameGlob->nextSnap->ps;
     return ps->ammoclip[BG_ClipForWeapon(cgameGlob->nextSnap->ps.weapon)];
 }
 

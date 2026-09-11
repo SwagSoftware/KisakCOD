@@ -12,20 +12,10 @@
 
 void __cdecl CL_GetClientState(int localClientNum, uiClientState_s *state)
 {
-    clientConnection_t *clc; // [esp+4h] [ebp-4h]
-
     CL_GetLocalClientGlobals(localClientNum);
-    clc = CL_GetLocalClientConnection(localClientNum);
+    clientConnection_t *clc = CL_GetLocalClientConnection(localClientNum);
     state->connectPacketCount = clc->connectPacketCount;
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    state->connState = clientUIActives[0].connectionState;
+    state->connState = CL_GetLocalClientConnectionState(localClientNum);
     I_strncpyz(state->servername, cls.servername, 1024);
     I_strncpyz(state->updateInfoString, cls.updateInfoString, 1024);
     I_strncpyz(state->messageString, clc->serverMessage, 1024);
@@ -33,30 +23,14 @@ void __cdecl CL_GetClientState(int localClientNum, uiClientState_s *state)
 
 void __cdecl CL_SetDisplayHUDWithKeycatchUI(int localClientNum, bool display)
 {
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1063,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    clientUIActives[0].displayHUDWithKeycatchUI = display;
+    clientUIActive_t *clUI = CL_GetLocalClientUIGlobals(localClientNum);
+
+    clUI->displayHUDWithKeycatchUI = display;
 }
 
 bool __cdecl CL_AllowPopup(int localClientNum)
 {
-    connstate_t connstate; // [esp+0h] [ebp-8h]
-
-    if (localClientNum)
-        MyAssertHandler(
-            "c:\\trees\\cod3\\src\\client_mp\\client_mp.h",
-            1112,
-            0,
-            "%s\n\t(localClientNum) = %i",
-            "(localClientNum == 0)",
-            localClientNum);
-    connstate = clientUIActives[0].connectionState;
+    connstate_t connstate = CL_GetLocalClientConnectionState(localClientNum);
     return !CL_GetLocalClientConnection(localClientNum)->demoplaying && connstate == CA_ACTIVE;
 }
 

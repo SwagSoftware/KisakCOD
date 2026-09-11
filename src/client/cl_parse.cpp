@@ -314,21 +314,21 @@ void __cdecl CL_ParsePacketEntities(clientActive_t *cl, msg_t *msg, clSnapshot_t
 
 void __cdecl CL_ParseSnapshot(msg_t *msg)
 {
-    memset(clients, 0, 0xB2F8u);
-    clients[0].snap.serverCommandNum = clientConnections[0].serverCommands.header.sequence;
-    clients[0].snap.serverTime = MSG_ReadLong(msg);
-    clients[0].snap.messageNum = clientConnections[0].serverMessageSequence;
-    clients[0].snap.snapFlags = MSG_ReadByte(msg);
-    clients[0].snap.valid = 1;
+    clientActive_t *cl = &clients[0];
+    memset(&cl->snap, 0, sizeof(clSnapshot_t));
+    cl->snap.serverCommandNum = clientConnections[0].serverCommands.header.sequence;
+    cl->snap.serverTime = MSG_ReadLong(msg);
+    cl->snap.messageNum = clientConnections[0].serverMessageSequence;
+    cl->snap.snapFlags = MSG_ReadByte(msg);
+    cl->snap.valid = 1;
     if (cl_shownet->current.integer >= 2)
         Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "playerstate");
-    MSG_ReadDeltaPlayerstate(msg, &clients[0].snap.ps);
+    MSG_ReadDeltaPlayerstate(msg, &cl->snap.ps);
     if (cl_shownet->current.integer >= 2)
         Com_Printf(CON_CHANNEL_CLIENT, "%3i %3i:%s\n", msg->readcount - 1, msg->cursize, "packet entities");
     CL_ParsePacketEntities(clients, msg, &clients[0].snap);
-    if (!clients[0].snap.valid)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_parse.cpp", 128, 0, "%s", "cl->snap.valid");
-    memcpy(clients[0].snapshots, clients, sizeof(clients[0].snapshots));
+    iassert(cl->snap.valid);
+    memcpy(cl->snapshots, clients, sizeof(clients[0].snapshots));
     if (cl_shownet->current.integer == 3)
         Com_Printf(CON_CHANNEL_CLIENT, "   snapshot:%i\n", clients[0].snap.messageNum);
 }
@@ -340,13 +340,16 @@ void __cdecl CL_ParseGamestate(char *configstrings)
     int v4; // r22
     unsigned int v5; // r30
 
-    if (!clientUIActives[0].isRunning)
-        MyAssertHandler("c:\\trees\\cod3\\cod3src\\src\\client\\cl_parse.cpp", 154, 0, "%s", "clUI->isRunning");
-    if (clientUIActives[0].cgameInitialized)
+    clientUIActive_t *clUI = &clientUIActives[0];
+
+    iassert(clUI->isRunning);
+
+    if (clUI->cgameInitialized)
     {
         CG_SetTime(com_time);
         CL_SetFrametime(0, 0);
     }
+
     v2 = 0;
     v3 = clients[0].configstrings;
     v4 = configstrings - (char *)clients[0].configstrings;

@@ -816,24 +816,21 @@ void __cdecl CG_SetSingleClientScore(int32_t localClientNum, int32_t clientIndex
 
 void __cdecl CG_SortSingleClientScore(cg_s *cgameGlob, int32_t scoreIndex)
 {
-    score_t temp; // [esp+8h] [ebp-28h] BYREF
-
     while (scoreIndex > 0
-        && CG_ClientScoreIsBetter(&cgameGlob->scores[scoreIndex], (score_t *)&cgameGlob->teamScores[10 * scoreIndex + 2]))
+        && CG_ClientScoreIsBetter(&cgameGlob->scores[scoreIndex], &cgameGlob->scores[scoreIndex - 1]))
     {
-        memcpy(&temp, &cgameGlob->teamScores[10 * scoreIndex + 2], sizeof(temp));
-        memcpy(&cgameGlob->teamScores[10 * scoreIndex + 2], &cgameGlob->scores[scoreIndex], 0x28u);
-        memcpy(&cgameGlob->scores[scoreIndex--], &temp, sizeof(cgameGlob->scores[scoreIndex--]));
+        score_t temp = cgameGlob->scores[scoreIndex - 1];
+        cgameGlob->scores[scoreIndex - 1] = cgameGlob->scores[scoreIndex];
+        cgameGlob->scores[scoreIndex] = temp;
+        --scoreIndex;
     }
     while (scoreIndex < cgameGlob->numScores - 1
         && CG_ClientScoreIsBetter(&cgameGlob->scores[scoreIndex + 1], &cgameGlob->scores[scoreIndex]))
     {
-        memcpy(&temp, &cgameGlob->scores[scoreIndex + 1], sizeof(temp));
-        memcpy(
-            &cgameGlob->scores[scoreIndex + 1],
-            &cgameGlob->scores[scoreIndex],
-            sizeof(cgameGlob->scores[scoreIndex + 1]));
-        memcpy(&cgameGlob->scores[scoreIndex++], &temp, sizeof(cgameGlob->scores[scoreIndex++]));
+        score_t temp = cgameGlob->scores[scoreIndex + 1];
+        cgameGlob->scores[scoreIndex + 1] = cgameGlob->scores[scoreIndex];
+        cgameGlob->scores[scoreIndex] = temp;
+        ++scoreIndex;
     }
 }
 
