@@ -290,7 +290,17 @@ void __cdecl R_GetBspOmniLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     maxs[1] = light->origin[1] + light->radius;
     maxs[2] = light->origin[2] + light->radius;
     drawSurfs = scene.visLight[lightIndex].drawSurfs;
+
+#ifdef _WIN64
+    // In the vanilla game, it re-uses the >512 portion of the buffer as scratch space.
+    // Can't do that in x64 while having the same # of elements
+    // Instead, use a temp stack buffer.
+    GfxSurface *surfaceScratch[0x400];
+    surfaces[0] = surfaceScratch;
+#else
     surfaces[0] = (GfxSurface **)&drawSurfs[512];
+#endif
+
     bspLightCallback.surfaceVisData = surfaceVisData;
     bspLightCallback.position[0] = light->origin[0];
     bspLightCallback.position[1] = light->origin[1];
@@ -376,9 +386,20 @@ void __cdecl R_GetBspSpotLightSurfs(const GfxLight *light, int lightIndex, GfxBs
     maxs[2] = light->origin[2] + light->radius;
 
     drawSurfs[0] = scene.visLight[lightIndex].drawSurfs;
-    surfaces[0] = (GfxSurface **)&drawSurfs[0][512];
     drawSurfs[1] = scene.visLightShadow[lightIndex].drawSurfs;
+
+#ifdef _WIN64
+    // In the vanilla game, it re-uses the >512 portion of the buffer as scratch space.
+    // Can't do that in x64 while having the same # of elements
+    // Instead, use a temp stack buffer.
+    GfxSurface *surfaceScratch[2][0x400];
+    surfaces[0] = surfaceScratch[0];
+    surfaces[1] = surfaceScratch[1];
+#else
+    surfaces[0] = (GfxSurface **)&drawSurfs[0][512];
     surfaces[1] = (GfxSurface **)&drawSurfs[1][512];
+#endif
+
     bspLightCallback.surfaceVisData = surfaceVisData;
     R_CalcSpotLightPlanes(light, bspLightCallback.planes);
     R_BoxSurfaces(mins, maxs, allowSurf_1, &bspLightCallback, surfaces, 0x400u, surfCounts, 2u);
@@ -726,12 +747,12 @@ void __cdecl R_GetStaticModelLightSurfs(const GfxLight **visibleLights, int visi
                     drawSurf = material->info.drawSurf;
                     //HIDWORD(drawSurf.packed) = ((staticModelId.surfType & 0xF) << 18) | HIDWORD(drawSurf.packed) & 0xFFC3FFFF;
                     drawSurf.fields.surfType = staticModelId.surfType;
-                    if (!R_AllocDrawSurf(&surfData.delayedCmdBuf, drawSurf, &surfData.drawSurfList, 3u))
+                    if (!R_AllocDrawSurf(&surfData.delayedCmdBuf, drawSurf, &surfData.drawSurfList, 2 + sizeof(XSurface *) / sizeof(uint32_t))) // x64: full pointer
                         break;
                     R_AddDelayedStaticModelDrawSurf(&surfData.delayedCmdBuf, &surfaces[surfaceIndex], (uint8_t*)list, 1u);
                     if (light->type == GFX_LIGHT_TYPE_SPOT && r_spotLightShadows->current.enabled && r_spotLightSModelShadows->current.enabled)
                     {
-                        if (!R_AllocDrawSurf(&shadowSurfData.delayedCmdBuf, drawSurf, &shadowSurfData.drawSurfList, 3u))
+                        if (!R_AllocDrawSurf(&shadowSurfData.delayedCmdBuf, drawSurf, &shadowSurfData.drawSurfList, 2 + sizeof(XSurface *) / sizeof(uint32_t)))
                             break;
                         R_AddDelayedStaticModelDrawSurf(
                             &shadowSurfData.delayedCmdBuf,

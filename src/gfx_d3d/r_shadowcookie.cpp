@@ -605,7 +605,15 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
         Vec3Mad(start, 10000.0, cookie->shadowViewParms->axis[0], end);
         radius = DObjGetRadius(sceneEnt->obj);
         drawSurfs = scene.cookie[cookieIndex].drawSurfs;
+#ifdef _WIN64
+        // In the vanilla game, it re-uses the >128 portion of the buffer as scratch space.
+        // Can't do that in x64 while having the same # of elements
+        // Instead, use a temp stack buffer.
+        GfxSurface *surfaceScratch[0x100];
+        surfaces = surfaceScratch;
+#else
         surfaces = (GfxSurface **)&drawSurfs[128];
+#endif
         cookieDrawSurfCount = R_CylinderSurfaces(
             start,
             end,
@@ -614,7 +622,7 @@ void __cdecl R_GenerateBspShadowReceivers(ShadowCookieList *shadowCookieList)
             5u,
             (int(__cdecl *)(int, void *))R_AllowBspShadowReceiver,
             &shadowReceiverCallback,
-            (GfxSurface **)&drawSurfs[128],
+            surfaces,
             0x100u);
         if (cookieDrawSurfCount)
         {

@@ -146,7 +146,8 @@ void __cdecl R_AddDelayedStaticModelDrawSurf(
     uint32_t count)
 {
     R_WritePrimDrawSurfInt(delayedCmdBuf, count);
-    R_WritePrimDrawSurfInt(delayedCmdBuf, (uint32_t)xsurf);
+    //R_WritePrimDrawSurfInt(delayedCmdBuf, (uint32_t)xsurf);
+    R_WritePrimDrawSurfData(delayedCmdBuf, (uint8_t *)&xsurf, sizeof(XSurface *) / sizeof(uint32_t)); // x64 gremlin
     R_WritePrimDrawSurfData(delayedCmdBuf, list, (count + 1) >> 1);
 }
 
@@ -395,7 +396,7 @@ void __cdecl R_SkinStaticModelsCameraForLod(
                         &surfData->drawSurf[region],
                         &surfData->delayedCmdBuf)))
             {
-                if (!R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurf[region], ((count + 1) >> 1) + 2))
+                if (!R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurf[region], ((count + 1) >> 1) + 1 + sizeof(XSurface *) / sizeof(uint32_t)))
                     return;
                 R_AddDelayedStaticModelDrawSurf(&surfData->delayedCmdBuf, &surfaces[surfaceIndex], list, count);
             }
@@ -798,7 +799,7 @@ void __cdecl R_SkinStaticModelsShadowForLod(
                         &surfData->drawSurfList,
                         &surfData->delayedCmdBuf)))
             {
-                if (!R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurfList, ((count + 1) >> 1) + 2))
+                if (!R_AllocDrawSurf(&surfData->delayedCmdBuf, drawSurf, &surfData->drawSurfList, ((count + 1) >> 1) + 1 + sizeof(XSurface *) / sizeof(uint32_t)))
                     return;
                 R_AddDelayedStaticModelDrawSurf(&surfData->delayedCmdBuf, &surfaces[0][surfaceIndex], list, count);
             }
