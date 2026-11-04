@@ -672,14 +672,55 @@ void __cdecl SP_worldspawn()
     iassert(!g_entities[ENTITYNUM_WORLD].r.ownerNum.isDefined());
 }
 
+// LWSS ADD: Check Spawner Angles, and warn if they're not in the proper granularity.
+// Spawners determine the exact starting viewangles of players.
+// Viewangles are stored as a float on the server, however they're sent in the snapshot as a 16-bit delta angle.
+// If the starting angle is not representable by the 16-bit delta (basically 360deg split into 65536 possible values), the Client and Server will have slightly different values. (Real example: 180.001f)
+// Viewangles affect the direction of all movement, with a small desync, the velocity will round slightly differently in some cases, causing prediction errors.
+// (Many of the original maps are not aligned, which is why this is a warning)
+static int32_t s_offGridSpawns;
+
+static void G_CheckSpawnAngles(const gentity_s *ent)
+{
+    const char *classname;
+    G_LevelSpawnString("classname", "", &classname);
+    if (strncmp(classname, "mp_", 3) && strcmp(classname, "info_player_start"))
+        return;
+    for (int32_t i = 0; i < 3; ++i)
+    {
+        const float a = ent->r.currentAngles[i];
+        if ((float)(floor((double)a * (65536.0 / 360.0) + 0.5) * (360.0 / 65536.0)) != a)
+        {
+            if (!s_offGridSpawns++)
+                Com_PrintWarning(CON_CHANNEL_SERVER, "%s at (%g %g %g) has angles (%.9g %.9g %.9g) off the 360/65536 network grid; players spawning there may mispredict\n",
+                                 classname, ent->r.currentOrigin[0], ent->r.currentOrigin[1], ent->r.currentOrigin[2],
+                                 ent->r.currentAngles[0], ent->r.currentAngles[1], ent->r.currentAngles[2]);
+            return;
+        }
+    }
+}
+// LWSS END
+
 void __cdecl G_SpawnEntitiesFromString()
 {
+	s_offGridSpawns = 0; // LWSS ADD
+	
     if (!G_ParseSpawnVars(&level.spawnVar))
         Com_Error(ERR_DROP, "SpawnEntities: no entities");
+
     SP_worldspawn();
+    
     while (G_ParseSpawnVars(&level.spawnVar))
         G_CallSpawn();
+        
     G_ResetEntityParsePoint();
+    
+    // LWSS ADD
+    #ifdef _DEBUG
+    if (s_offGridSpawns)
+        Com_PrintWarning(CON_CHANNEL_SERVER, "%i player spawns have angles off the 360/65536 network grid\n", s_offGridSpawns);
+    #endif
+    // LWSS END
 }
 
 void G_CallSpawn()
@@ -705,9 +746,9 @@ void G_CallSpawn()
             }
             else
             {
-                spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, 6);
+                spawnFunc = G_FindSpawnFunc(classname, s_bspOrDynamicSpawns, ARRAY_COUNT(s_bspOrDynamicSpawns));
                 if (!spawnFunc)
-                    spawnFunc = G_FindSpawnFunc(classname, s_bspOnlySpawns, 14);
+                    spawnFunc = G_FindSpawnFunc(classname, s_bspOnlySpawns, ARRAY_COUNT(s_bspOnlySpawns));
                 if (spawnFunc != G_FreeEntity)
                 {
                     ent = G_Spawn();
@@ -732,6 +773,11 @@ void __cdecl G_ParseEntityFields(gentity_s *ent)
         MyAssertHandler(".\\game_mp\\g_spawn_mp.cpp", 293, 0, "%s", "level.spawnVar.spawnVarsValid");
     for (i = 0; i < level.spawnVar.numSpawnVars; ++i)
         G_ParseEntityField(level.spawnVar.spawnVars[i][0], level.spawnVar.spawnVars[i][1], ent);
+    // LWSS ADD     
+#ifdef _DEBUG        
+    G_CheckSpawnAngles(ent);
+#endif
+	// LWSS END	
     G_SetOrigin(ent, ent->r.currentOrigin);
     G_SetAngle(ent, ent->r.currentAngles);
 }
